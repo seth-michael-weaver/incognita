@@ -319,9 +319,9 @@ def test_mass10_many_matches_the_scalar_mass10():
     ref = np.array([M._mass10(int(a), int(b)) for a, b in zip(nx, nz, strict=True)], M._F)
     assert got.dtype == ref.dtype
     # Vectorised float32 maths may use different SIMD/FMA paths than the scalar loop depending on the
-    # CPU (CI runners vary). ULP counts blow up for values near zero, so compare in absolute terms:
-    # 1 keV is far below any physical use of these masses.
-    bad = ~np.isclose(got, ref, rtol=1e-6, atol=1e-3)
+    # CPU (CI runners vary): ~1e-5 relative on far-off-stability cells (|M| ~ 1e3 MeV), sub-keV elsewhere.
+    # 1 keV / 2e-5 relative is far below any physical use of these masses.
+    bad = ~np.isclose(got, ref, rtol=2e-5, atol=1e-3)
     worst = np.argsort(-np.abs(got - ref))[:5]
     detail = "; ".join(f"N={nx[i]} Z={nz[i]} got={got[i]:.6g} ref={ref[i]:.6g}" for i in worst)
     assert not bad.any(), f"{int(bad.sum())} cells differ; worst: {detail}"
