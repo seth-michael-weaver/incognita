@@ -321,7 +321,10 @@ def test_mass10_many_matches_the_scalar_mass10():
     # Vectorised float32 maths may use different SIMD/FMA paths than the scalar loop depending on the
     # CPU (CI runners vary). ULP counts blow up for values near zero, so compare in absolute terms:
     # 1 keV is far below any physical use of these masses.
-    np.testing.assert_allclose(got, ref, rtol=1e-6, atol=1e-3)
+    bad = ~np.isclose(got, ref, rtol=1e-6, atol=1e-3)
+    worst = np.argsort(-np.abs(got - ref))[:5]
+    detail = "; ".join(f"N={nx[i]} Z={nz[i]} got={got[i]:.6g} ref={ref[i]:.6g}" for i in worst)
+    assert not bad.any(), f"{int(bad.sum())} cells differ; worst: {detail}"
 
 
 def _residual_exmax_loop(zcomp, ncomp, exmax0, exmax, sep_mev, parskip):
