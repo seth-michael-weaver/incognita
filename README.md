@@ -88,7 +88,7 @@ bash scripts/reproduce.sh            # writes out/reproduce/SUMMARY.md: IDENTICA
 | path | content |
 |---|---|
 | `library/v0.1/` | the predictions (CC-BY-4.0): capture σ(n,γ)(E), MACS at kT = 5–100 keV, stellar rates and REACLIB fits, (n,p)/(n,2n)/(n,α) no-data recipe curves, (n,p) with a learned correction and intervals |
-| `physics/` | the Hauser–Feshbach engine (a Python/C port of TALYS-2 physics; see Method) |
+| `physics/` | the Hauser–Feshbach engine (a Python/C re-implementation of TALYS-2 physics; see Method) |
 | `incognita/` | benchmark scorer and tracks, calibration report, curation-register builder, (n,p) correction, library reader |
 | `scripts/` | `reproduce.sh`, the scorers it calls, the registry scorers, the engine driver, native-kernel builds |
 | `docs/release/` | frozen exam inputs (`exam/`, `uq/`), expected tables (`expected/`), benchmark guide, curation rules, uncertainty evidence |
@@ -115,7 +115,7 @@ Only Z = 26–83 lies inside the range the benchmark tests (`in_validated_range`
 - **Physics.** Cross sections come from a Hauser–Feshbach, pre-equilibrium and direct-reaction engine that follows
   TALYS-2 (A. Koning, S. Hilaire, S. Goriely et al.) routine by routine, ported to Python with optional C and GPU kernels.
   Options that are not ported stop with a named error rather than silently substituting another model. Scored against
-  measured data, the port agrees with stock TALYS on total, elastic, (n,p) and (n,α) (table below).
+  measured data, the engine agrees with stock TALYS on total, elastic, (n,p) and (n,α) (table below).
 - **Documented modifications.**
   - *E1 width.* TALYS's default `globalwtable` constant is replaced by a single chart-wide E1-width constant, 1.0425,
     fitted to EXFOR capture data on the development folds (`physics/hf/gamma/e1_width.py`). The method (one global
@@ -248,7 +248,7 @@ their MIT notice ([`physics/hf/NOTICE-TALYS.md`](physics/hf/NOTICE-TALYS.md)).
 
 ## Acknowledgements
 
-The engine is a port of TALYS; we thank its authors, A. Koning, S. Hilaire and S. Goriely, and the authors of ECIS
+The engine re-implements TALYS-2 physics; we thank its authors, A. Koning, S. Hilaire and S. Goriely, and the authors of ECIS
 (J. Raynal). The work relies on the EXFOR library maintained by the IAEA Nuclear Data Section and the International
 Network of Nuclear Reaction Data Centres (NRDC), on the Reference Input Parameter Library (RIPL, IAEA), on the Atomic Mass
 Evaluation (AME2020) and on NUBASE2020.
