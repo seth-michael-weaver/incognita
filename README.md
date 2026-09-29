@@ -185,6 +185,22 @@ decimals on total (0.0730), elastic (0.0567), (n,p) (0.2412) and (n,α) (0.4516)
 CSV of predictions; [`docs/TESTING.md`](docs/TESTING.md) and [`docs/release/BENCHMARK.md`](docs/release/BENCHMARK.md) describe the
 tracks and the leaderboard.
 
+## Performance
+
+Measured against stock TALYS-2.25 (minimal default input, no dump keywords) on one pinned core of a 16-thread x86-64
+laptop that was running other jobs, 12 targets (spherical, vibrational, rotational, actinide) × 64 energies from 1 keV
+to 20 MeV, median CPU-seconds of three interleaved repeats:
+
+| | per-target compute | whole process (incl. Python start-up) |
+|---|---|---|
+| engine, no cache | 11.7x faster (8.6–13.0x by class) | 8.6x (3.4–10.9x by class) |
+| engine, warm coupled-channels cache | 32.2x | 16.2x |
+
+The warm-cache figure applies only when the same coupled-channels solutions recur (parameter sweeps, reruns); the
+no-cache figure is the one for a single fresh calculation. On the same runs the two codes agree on total, elastic,
+nonelastic and capture cross sections to a median of ≤7e-6 and at worst 1.2e-3 in |log10(engine/TALYS)|. Protocol,
+per-target table and the reproduce command: [`docs/performance.md`](docs/performance.md).
+
 ## Prospective registry
 
 `docs/registry/` holds predictions frozen before measurements exist, each with a SHA-256 manifest, an OpenTimestamps
