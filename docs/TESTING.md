@@ -24,7 +24,7 @@ the dependencies).
 bash scripts/reproduce.sh                        # every step whose inputs are present; the rest SKIPPED with the reason
 bash scripts/reproduce.sh capblind retro         # only these steps
 bash scripts/reproduce.sh --download             # also fetch what can be fetched (EXFOR master, benchmark repo)
-bash scripts/reproduce.sh --with-engine terra    # also run the TALYS port (~3 CPU-minutes)
+bash scripts/reproduce.sh --with-engine terra    # also run the engine (~3 CPU-minutes)
 ```
 
 Output goes to `$INCOGNITA_WORK` (default `out/reproduce`). `SUMMARY.md` lists every step as IDENTICAL, DIFFERS (with

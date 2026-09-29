@@ -50,7 +50,7 @@ Every library is scored only on EXFOR rows published and compiled after its rele
 data up to that year: `dated-2006` to `dated-2024`, 7 channels. Leaderboard: generated the same way (not distributed in this preview).
 The full write-up of the dated exam is not part of this preview. In short, the registered overall lines favour us
 by 0.1-0.3 dex, but that is a placement artifact below 100 keV. Libraries that fitted these rows score just as badly
-there. Above 100 keV, DEFD (default TALYS port + defect GP, trained on pre-release data) **ties every library**: every
+there. Above 100 keV, DEFD (default engine + defect GP, trained on pre-release data) **ties every library**: every
 95 % CI contains zero (e.g. vs ENDF/B-VII.1 −0.010 [−0.035, +0.015], 140 nuclei). JEFF-4.0 and TENDL-2025 have no
 post-release rows yet.
 
