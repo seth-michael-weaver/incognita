@@ -1,0 +1,580 @@
+{
+ "capture-heldout": {
+  "description": "capture sigma(E), 122 nuclei held out of our fit (DEV folds 0-5, Z <= 82; shipped library-free model), audited targets",
+  "rows": 1947,
+  "nuclei": 122,
+  "rows_sha256": "47a0a079f466598d40297b8208ee8ba555e2b72b686329b90be953ed1c203aec",
+  "reference": "entry:default TALYS = TENDL no-data recipe (our engine), D0 withheld",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 10000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA capture, D0 withheld (headline)",
+   "INCOGNITA capture, measured D0 used",
+   "default TALYS = TENDL no-data recipe (our engine), D0 withheld",
+   "default TALYS = TENDL no-data recipe (our engine), measured D0"
+  ],
+  "subsets": [
+   "well_measured (trust >= 1)",
+   "precision cut (>= 3 datasets within x1.3, E < 10 MeV, NON-SMOKER covers)"
+  ]
+ },
+ "capture-nostructure": {
+  "description": "capture sigma(E), held-out nuclei, DEV folds 0-5, model given no structure data",
+  "rows": 1966,
+  "nuclei": 126,
+  "rows_sha256": "f7deef9f3a2f458150a527bff1758912987a676e87b4166a346cffa3662399a9",
+  "reference": "entry:default TALYS = TENDL no-data recipe (our engine), no structure data",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 10000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA capture, no structure data (STRIP)",
+   "default TALYS = TENDL no-data recipe (our engine), no structure data"
+  ],
+  "subsets": []
+ },
+ "capture-retro": {
+  "description": "capture sigma(E) measured after year Y, predicted from data up to Y (Y = 2015-2023)",
+  "rows": 286,
+  "nuclei": 16,
+  "rows_sha256": "00e169f9cd10dd58e99877aa7211477d5289f1df0f90a791a46ae65e50cb4f2d",
+  "reference": "entry:default TALYS = TENDL no-data recipe (our engine)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260910,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA capture trained on data up to year Y",
+   "default TALYS = TENDL no-data recipe (our engine)"
+  ],
+  "subsets": []
+ },
+ "dated-2006": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2006; our arms trained on data up to 2006; libraries released <= 2006 are blind to these rows",
+  "rows": 4480,
+  "nuclei": 218,
+  "rows_sha256": "d4a309dcc63ba8b630846e4a240a78d4cef754536596cc76ef2f6620eca74481",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "dated-2010": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2010; our arms trained on data up to 2010; libraries released <= 2010 are blind to these rows",
+  "rows": 3545,
+  "nuclei": 195,
+  "rows_sha256": "7cb41c3c1de6c9eecb316e4d3eb600f0889f1394adfa1b07e4ca3ac2546cf5a9",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "dated-2011": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2011; our arms trained on data up to 2011; libraries released <= 2011 are blind to these rows",
+  "rows": 3287,
+  "nuclei": 192,
+  "rows_sha256": "2cc0aecb275617bb92476d0ba825e8fbe178c8d4107b48e9765b5b8a9bca2ffd",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "dated-2016": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2016; our arms trained on data up to 2016; libraries released <= 2016 are blind to these rows",
+  "rows": 2340,
+  "nuclei": 138,
+  "rows_sha256": "efe20fbe972049f1b44bcfd8390134c00593f4a3f9c354597131bd7515242b18",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "dated-2017": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2017; our arms trained on data up to 2017; libraries released <= 2017 are blind to these rows",
+  "rows": 2043,
+  "nuclei": 132,
+  "rows_sha256": "80eb44c389a2242fb91e55954f46e27cbcec8051f26dbdf17d18f53386a48b7f",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "dated-2019": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2019; our arms trained on data up to 2019; libraries released <= 2019 are blind to these rows",
+  "rows": 1582,
+  "nuclei": 117,
+  "rows_sha256": "683fdf5704828be5420e07fb236ec83bd4453254265f258eb8bbd2ec31dbbab8",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "dated-2020": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2020; our arms trained on data up to 2020; libraries released <= 2020 are blind to these rows",
+  "rows": 1343,
+  "nuclei": 100,
+  "rows_sha256": "7bcc82750675d289cc9707117287dfaafc919dd6e9cdc2b9e08c1fc8a9760396",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "dated-2021": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2021; our arms trained on data up to 2021; libraries released <= 2021 are blind to these rows",
+  "rows": 1180,
+  "nuclei": 88,
+  "rows_sha256": "1a901df4ce368a40d69ba363fae349e346e50954f554aea024c7d08132adf825",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "dated-2024": {
+  "description": "all 7 channels, EXFOR entries published AND compiled after 2024; our arms trained on data up to 2024; libraries released <= 2024 are blind to these rows",
+  "rows": 214,
+  "nuclei": 12,
+  "rows_sha256": "2f130a88e6aa69eb101413400cc656915548a8f030155987a43930c052fbc507",
+  "reference": "entry:default TALYS (our engine; the blind rival)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 5000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA DEFD (default TALYS port + defect GP from pre-Y EXFOR series)",
+   "INCOGNITA capture chart trained on data up to Y (capture only)",
+   "default TALYS (our engine; the blind rival)"
+  ],
+  "subsets": [
+   "capture",
+   "n2n",
+   "np",
+   "na",
+   "total",
+   "elastic",
+   "inelastic",
+   "< 10 keV",
+   "10-100 keV",
+   "0.1-1 MeV",
+   "1-10 MeV",
+   "> 10 MeV",
+   "E >= 100 keV (DATEDEXAM post-hoc subset)"
+  ]
+ },
+ "na-pickup": {
+  "description": "(n,a) isomer / ground-state / total production, 57 targets, registered before read",
+  "rows": 920,
+  "nuclei": 57,
+  "rows_sha256": "daddeaf0733917fb83ae820aaa80d71c583aa54e6f9fbe4422b0771e8c93aca6",
+  "reference": "entry:default TALYS = TENDL no-data recipe (our engine)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 10000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA (n,a) v1 recipe",
+   "default TALYS = TENDL no-data recipe (our engine)"
+  ],
+  "subsets": [
+   "(n,a) total only (the rows a library file can be scored on)"
+  ]
+ },
+ "na-heprod": {
+  "description": "He-4 production (n,xa), 52 targets incl. natural, registered before read",
+  "rows": 197,
+  "nuclei": 52,
+  "rows_sha256": "2a760854a66f0477d2be42cd656f5487020bd3a924da0b527488a569c6b2a18d",
+  "reference": "entry:default TALYS = TENDL no-data recipe (our engine)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 10000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA (n,a) v1 recipe",
+   "default TALYS = TENDL no-data recipe (our engine)"
+  ],
+  "subsets": [
+   "A > 70 (natural targets: Z > 30)"
+  ]
+ },
+ "na-neverread": {
+  "description": "(n,a) to isomers on 8 targets never read before the recipe froze",
+  "rows": 51,
+  "nuclei": 8,
+  "rows_sha256": "aeaef5907a2da192fc69ae8755560a2542e4e76c91122f3d424ffcf5080d3c83",
+  "reference": "entry:default TALYS = TENDL no-data recipe (our engine)",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260923,
+   "draws": 10000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA (n,a) v1 recipe",
+   "default TALYS = TENDL no-data recipe (our engine)"
+  ],
+  "subsets": []
+ },
+ "na-post2021": {
+  "description": "(n,a) measured 2021+ (after JENDL-5), 116 points / 12 nuclei; misses = 1 dex",
+  "rows": 116,
+  "nuclei": 12,
+  "rows_sha256": "1787126ffce6d4993869b826f209c8bf2cb2b73a587a6286552976b7e15bd3d0",
+  "reference": "lib:JENDL-5",
+  "weighting": "nucleus",
+  "miss_dex": 1.0,
+  "bootstrap": {
+   "seed": 0,
+   "draws": 10000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [
+   "INCOGNITA (n,a) v2 (frozen 2026-09-23 before this set was read)"
+  ],
+  "subsets": []
+ },
+ "ch-na": {
+  "description": "(n,a) and He production, EXFOR, all years (in-sample for every library)",
+  "rows": 1151,
+  "nuclei": 126,
+  "rows_sha256": "a3fa75c9918d1cb6ede897663c066229bb7d56bf5cc23d1b579f825c04c29566",
+  "reference": "lib:TENDL-2025",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260922,
+   "draws": 1000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [],
+  "subsets": []
+ },
+ "ch-n2n": {
+  "description": "(n,2n), EXFOR binned, all years (in-sample)",
+  "rows": 2477,
+  "nuclei": 150,
+  "rows_sha256": "793d678b7bdfa716fca29b31061a70707a9c8919cadd3f74ea6c90566290b070",
+  "reference": "lib:TENDL-2025",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260922,
+   "draws": 1000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [],
+  "subsets": []
+ },
+ "ch-np": {
+  "description": "(n,p), EXFOR binned, all years (in-sample)",
+  "rows": 1593,
+  "nuclei": 65,
+  "rows_sha256": "7dc47e081cf4bb7d885fc345983e812d790e392373135bf02f420d70bc06f74f",
+  "reference": "lib:TENDL-2025",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260922,
+   "draws": 1000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [],
+  "subsets": []
+ },
+ "ch-capture": {
+  "description": "capture above the resolved region, EXFOR, all years (in-sample)",
+  "rows": 7239,
+  "nuclei": 147,
+  "rows_sha256": "434bbd0953ea7e53976ab3138332941ae7019526f59ea23fae2c020e9c239a00",
+  "reference": "lib:TENDL-2025",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260922,
+   "draws": 1000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [],
+  "subsets": []
+ },
+ "ch-sacs": {
+  "description": "spectrum-averaged (U-235 / Cf-252) capture, (n,a), (n,2n), (n,p), non-suspect",
+  "rows": 400,
+  "nuclei": 87,
+  "rows_sha256": "86b6fbfd14e7d4412a9c56dbc9ef08a51908b23b53a71767879c9165e818879a",
+  "reference": "lib:TENDL-2025",
+  "weighting": "point",
+  "miss_dex": null,
+  "bootstrap": {
+   "seed": 20260922,
+   "draws": 1000
+  },
+  "retired_from_internal_selection": true,
+  "frozen_entries": [],
+  "subsets": [
+   "capture",
+   "na",
+   "n2n",
+   "np"
+  ]
+ },
+ "_sources": {
+  "capture_blind_cells": {
+   "path": "docs/release/exam/capture_blind_cells.parquet",
+   "sha256": "5617e404c08455976a7e3c5552f58b2d01474b25ebc041f950985f0a244b7af6"
+  },
+  "dated_rows": {
+   "path": "docs/release/exam/dated_rows.parquet",
+   "sha256": "c102bee1a5922d63d9007f7ede879a11fd75ba9f5d5de53101a0ef1505edc55e"
+  },
+  "dated_row_spans": {
+   "path": "docs/release/exam/dated_row_spans.parquet",
+   "sha256": "f55093143c230bb096273168a5ee556757d6081589287b9c7338782f9ea987f2"
+  },
+  "retro_rows": {
+   "path": "docs/release/exam/retro_rows.parquet",
+   "sha256": "78a6e30080200b5e8aa41062aee55f95e19ebe364fda267bd0e6663bc856a9ab"
+  },
+  "na_v1_rows": {
+   "path": "docs/release/exam/na_v1_rows.parquet",
+   "sha256": "a94267abd85f83c0959725f17a503373e7b03f19f4655de25833dd20a6bd7467"
+  },
+  "na_fresh": {
+   "path": "incognita/bench/data/na_fresh.parquet",
+   "sha256": "0e08a83a4ac57910553937b267dc80f974df56a4821e81027f3eb384f5a741cf"
+  },
+  "na_rows": {
+   "path": "incognita/bench/data/exam_rows/na_rows.parquet",
+   "sha256": "8ca93570a318d1f690f2b583cdbb7cdcb40a230e835867c309ad55a9b78588fd"
+  },
+  "n2n_rows": {
+   "path": "incognita/bench/data/exam_rows/n2n_rows.parquet",
+   "sha256": "a619d8836370f0f472d5a59158d8391928bf8a62d38cf62c6d54eea4b93fbe85"
+  },
+  "np_rows": {
+   "path": "incognita/bench/data/exam_rows/np_rows.parquet",
+   "sha256": "f71f661ee428158d2b47fb7de6ae475bbe82aa8d087f3ab418fbab21ef310541"
+  },
+  "capture_rows": {
+   "path": "incognita/bench/data/exam_rows/capture_rows.parquet",
+   "sha256": "5636685db41b6495a0a3f114c2f5e17b302b26daafc5dd020f0656c0d4eca7e5"
+  },
+  "sacs_rows": {
+   "path": "incognita/bench/data/exam_rows/sacs_rows.parquet",
+   "sha256": "fcb8a27f6dff9184e9ab25782fb8705ac8538227ed33fb702dd54c2c8d1f0f07"
+  }
+ }
+}

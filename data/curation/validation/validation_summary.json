@@ -1,0 +1,85 @@
+{
+ "v1_lines": 524,
+ "agree": 483,
+ "flips": 41,
+ "transitions": {
+  "downweight->downweight": 30,
+  "downweight->exclude": 5,
+  "downweight->keep": 2,
+  "exclude->downweight": 14,
+  "exclude->exclude": 446,
+  "exclude->keep": 20,
+  "renorm->renorm": 7
+ },
+ "by_v1_class": {
+  "L2": {
+   "n": 77,
+   "flips": 32
+  },
+  "L1": {
+   "n": 1,
+   "flips": 0
+  },
+  "L0": {
+   "n": 51,
+   "flips": 9
+  },
+  "none": {
+   "n": 395,
+   "flips": 0
+  }
+ },
+ "by_v1_rule": {
+  "?": {
+   "n": 17,
+   "flips": 2
+  },
+  "TWIN x:SPSDD": {
+   "n": 321,
+   "flips": 0
+  },
+  "TWIN d:ratio": {
+   "n": 14,
+   "flips": 0
+  },
+  "TWIN d:exact": {
+   "n": 42,
+   "flips": 0
+  },
+  "TWIN x:renorm": {
+   "n": 14,
+   "flips": 0
+  },
+  "c": {
+   "n": 67,
+   "flips": 30
+  },
+  "a": {
+   "n": 2,
+   "flips": 0
+  },
+  "b": {
+   "n": 3,
+   "flips": 0
+  },
+  "MACSCHECK": {
+   "n": 5,
+   "flips": 0
+  },
+  "MEVCHECK": {
+   "n": 39,
+   "flips": 9
+  }
+ },
+ "new_decision_cells": 237,
+ "new_decision_datasets": 128,
+ "new_by_decision": {
+  "exclude": 145,
+  "downweight": 92
+ },
+ "audit_pools": {
+  "a": 396,
+  "b": 187,
+  "c": 41
+ }
+}

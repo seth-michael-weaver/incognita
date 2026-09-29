@@ -1,0 +1,40 @@
+# header: 
+#   title: Fe57 Nuclear masses and levels
+#   source: TALYS-2.24
+#   user: Unknown User
+#   date: 2026-09-12
+#   format: YANDF-0.4
+# residual: 
+#   Z: 26
+#   A: 57
+#   nuclide: Fe57
+#   parameters: 
+#     nuclear mass [amu]:  5.693539E+01
+#     neutron separation energy [MeV]:  7.646171E+00
+#     proton separation energy [MeV]:  1.055925E+01
+#     alpha separation energy [MeV]:  7.319018E+00
+#     number of excited levels: 30
+#   quantity: 
+#     type: Nuclear masses and levels
+#   datablock: 
+#     columns: 11
+#     entries: 119
+##     Level         Energy          Spin          Parity      Num._Branches  Branch._level  Branch._ratio  Intern._conv     Half-life     Assignment        ENSDF
+##      []            [MeV]           []             []             []             []             [%]            []            [sec]           []             []
+     0            0.000000E+00        0.5             -              0                                                                                         1/2-*
+     1            1.441300E-02        1.5             -              1                                                      9.830000E-08                        3/2-
+                                                                           --->     0         100.0000       8.560000E+00                           
+     2            1.364740E-01        2.5             -              2                                                      8.700000E-09                        5/2-
+                                                                           --->     1          88.2400       2.400000E-02                           
+                                                                           --->     0          11.7600       1.370000E-01                           
+     3            3.667590E-01        1.5             -              3                                                      1.050000E-11                        3/2-
+                                                                           --->     2           7.2672       4.160000E-03                           
+                                                                           --->     1          78.7824       1.503000E-03                           
+                                                                           --->     0          13.9504       1.779000E-03                           
+     4            7.064160E-01        2.5             -              4                                                      4.100000E-12                        5/2-
+                                                                           --->     3           1.4379       1.660000E-03                           
+                                                                           --->     2           9.2915       5.100000E-04                           
+                                                                           --->     1          84.4558       3.650000E-04                           
+                                                                           --->     0           4.8148       4.990000E-04                           
+     5            1.007130E+00        3.5             -              3                                                      1.300000E-13                        7/2-
+                                                                           --->     3           3.0081       6.620000E-04                           

@@ -1,0 +1,68 @@
+{
+ "rule": "docs/release/CURATION_RULE_v2.md",
+ "cells": 33659,
+ "records": 590,
+ "decisions": {
+  "exclude": 479,
+  "downweight": 104,
+  "renorm": 7
+ },
+ "reason_codes": {
+  "R7_PHYSICS_BOUND": 2,
+  "R3_TWIN_SUPERSEDED": 396,
+  "R5D_INTER_DATASET_SCATTER": 51,
+  "R6D_SERIES_SYSTEMATIC": 12,
+  "R10X_ISOTOPIC_SYSTEMATIC": 4,
+  "R9_CROSS_NUCLIDE_14MEV_SYSTEMATIC": 8,
+  "R5X_INTER_DATASET_SCATTER": 52,
+  "R8_UNCORRECTED_LOW_ENERGY_BACKGROUND": 27,
+  "L2_DATA_PLUS_RECORD": 14,
+  "R2X_NOT_THE_SCORED_QUANTITY": 6,
+  "R11X_MACS_CONTRADICTS_SERIES": 1,
+  "R11D_MACS_CONTRADICTS_SERIES": 3,
+  "R1_RECORD_PROVEN_ERROR": 4,
+  "R4_RENORMALISED_TO_STANDARD": 7,
+  "R2D_PARTIAL_STATE_AS_TOTAL": 3
+ },
+ "scope": {
+  "cells": 73,
+  "dataset": 517
+ },
+ "cells_by_decision": {
+  "keep": 31936,
+  "exclude": 1510,
+  "downweight": 213
+ },
+ "cell_rules": {
+  "R3d": 612,
+  "R7": 3,
+  "R3": 1248,
+  "R5d": 81,
+  "R10d": 9,
+  "R10x": 36,
+  "R6d": 18,
+  "R9": 12,
+  "R5x": 86,
+  "R12": 80,
+  "R8": 57,
+  "R11d": 109,
+  "R2x": 7,
+  "R11x": 16,
+  "R1": 43,
+  "R2d": 14,
+  "R6x": 2
+ },
+ "untested_cells": {
+  "tested": 19177,
+  "partial or isomeric-state quantity": 2984,
+  "below statistical region": 8733,
+  "kind not comparable": 1092
+ },
+ "twins": 396,
+ "duplicate_candidates": 293,
+ "r11_testable": 261,
+ "r11_flagged": 5,
+ "record_findings": 51,
+ "legacy_lines": 590,
+ "datasets_with_record_but_no_cells": []
+}

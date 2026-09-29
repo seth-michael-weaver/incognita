@@ -1,0 +1,17 @@
+{
+ "s0": 0.04,
+ "q_lt100keV": [
+  2.1171589151844317,
+  4.326765398282762
+ ],
+ "q_ge100keV": [
+  2.2904346017404738,
+  5.231195187881606
+ ],
+ "d0_inflation": 1.1041038969113848,
+ "d0_inflation_hi": 1.202258999713547,
+ "rows": 4858,
+ "nuclides": 141,
+ "rms_nodata_dex": 0.16810129610130126,
+ "source": "LNO DEV folds 0-5, no-data engine vs measured y; a lab session 2026-09-22"
+}

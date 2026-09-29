@@ -1,0 +1,39 @@
+Incognita data licence
+======================
+
+The code in this repository is licensed under Apache-2.0 (LICENSE). The data listed below are the project's own work
+and are licensed under the Creative Commons Attribution 4.0 International licence (CC BY 4.0,
+https://creativecommons.org/licenses/by/4.0/). Cite Incognita (CITATION.cff) and, for EXFOR-derived content, the
+EXFOR library.
+
+Data covered by CC BY 4.0
+-------------------------
+- library/v0.1/                      predictions: capture curves, MACS, rates, channel tables, intervals
+- docs/registry/                     frozen prospective predictions and their manifests
+- docs/release/exam/, docs/release/uq/, docs/release/expected/, incognita/bench/tracks/, incognita/bench/data/
+                                     exam cells, frozen predictions, expected tables, benchmark tracks
+- docs/release/MEASURE_NEXT.csv      the measure-next ranking
+- data/curation/                     the curation register (decisions about EXFOR datasets)
+- models/data/kadonis_keep.csv       which compiled MACS entries rest on experimental data (flags only, no values)
+
+Third-party content inside those files, and its terms
+-----------------------------------------------------
+- EXFOR (IAEA Nuclear Data Section and the NRDC network). Exam targets and curation evidence are derived from EXFOR
+  points. The EXFOR Master File is distributed by the IAEA under CC BY 4.0. Cite: N. Otuka et al., Nucl. Data Sheets
+  120 (2014) 272.
+- RIPL (IAEA, RIPL-3 / RIPL-4): parsed parameters (for example physics/hf/gamma/ggnorm_ripl3.csv and the resonance
+  spacings D0 used by the model). IAEA-NDS terms: scientific reuse with attribution.
+- Nuclear masses: AME2020 (W.J. Huang et al., Chinese Phys. C 45 (2021) 030002; M. Wang et al., ibid. 030003) and
+  theory tables distributed through RIPL.
+- NUBASE2020 half-lives (measure-next ranking): F.G. Kondev et al., Chinese Phys. C 45 (2021) 030001.
+- TALYS (MIT licence, A. Koning et al.): the engine is a port; physics/hf/NOTICE-TALYS.md reproduces the licence. The
+  TALYS structure database is not redistributed; users download it.
+- Compiled measured MACS values: 21 nuclides of the ANCHORED tier are scaled to compiled measured 30 keV MACS values,
+  so their macs30_mb reproduces those values by construction. The compiled values themselves are not distributed as a
+  column.
+- The Atlas of Neutron Resonances (S.F. Mughabghab) was used during development for resonance counts that set the
+  resolved-resonance upper bound (column resolved_upper_ev of the capture table). No Atlas values are distributed.
+
+No evaluated nuclear-data library values (ENDF/B, JENDL, JEFF, TENDL, CENDL, BROND, FENDL, IRDFF, BRUSLIB cross
+sections) are distributed in this repository. Scripts that compare against them read files the user downloads.
+docs/data-licensing.md records each source, its version and its licence status.

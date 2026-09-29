@@ -1,0 +1,48 @@
+# header: 
+#   title: Fe56 neutron  transmission coefficients
+#   source: TALYS-2.24
+#   user: Unknown User
+#   date: 2026-09-12
+#   format: YANDF-0.4
+# residual: 
+#   Z: 26
+#   A: 56
+#   nuclide: Fe56
+# parameters: 
+#   particle: neutron
+#   number of energies: 56
+#   parameters: 
+#     energy [MeV]:  1.018033E-03
+#   quantity: 
+#     type: neutron  transmission coefficients
+#   datablock: 
+#     columns: 4
+#     entries: 1
+##       L         T(L-1/2,L)     T(L+1/2,L)        T(L))
+##      []             []             []             []
+     0            0.000000E+00   1.133237E-01   1.133237E-01
+     1            1.844819E-05   1.738566E-05   1.773983E-05
+#   parameters: 
+#     energy [MeV]:  2.036066E-03
+#   quantity: 
+#     type: neutron  transmission coefficients
+#   datablock: 
+#     columns: 4
+#     entries: 1
+##       L         T(L-1/2,L)     T(L+1/2,L)        T(L))
+##      []             []             []             []
+     0            0.000000E+00   1.564142E-01   1.564142E-01
+     1            5.211057E-05   4.912037E-05   5.011710E-05
+#   parameters: 
+#     energy [MeV]:  5.090164E-03
+#   quantity: 
+#     type: neutron  transmission coefficients
+#   datablock: 
+#     columns: 4
+#     entries: 2
+##       L         T(L-1/2,L)     T(L+1/2,L)        T(L))
+##      []             []             []             []
+     0            0.000000E+00   2.358052E-01   2.358052E-01
+     1            2.051708E-04   1.935250E-04   1.974069E-04
+     2            7.514656E-07   1.297302E-06   1.078968E-06
+#   parameters: 

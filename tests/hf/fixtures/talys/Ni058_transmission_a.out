@@ -1,0 +1,255 @@
+# header: 
+#   title: Fe55 alpha    transmission coefficients
+#   source: TALYS-2.24
+#   user: Unknown User
+#   date: 2026-09-12
+#   format: YANDF-0.4
+# residual: 
+#   Z: 26
+#   A: 55
+#   nuclide: Fe55
+# parameters: 
+#   particle: alpha
+#   number of energies: 63
+#   parameters: 
+#     energy [MeV]:  3.218569E-01
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  4.291425E-01
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  5.364282E-01
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  6.437138E-01
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  7.509995E-01
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  8.582851E-01
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  9.655707E-01
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.072856E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.180142E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.287428E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.394713E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.501999E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.609285E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.716570E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.823856E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  1.931142E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  2.038427E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  2.145713E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  2.360284E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  2.574856E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  2.789427E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  3.003998E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  3.218570E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  3.433141E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: -1
+##       L            T(L))
+##      []             []
+#   parameters: 
+#     energy [MeV]:  3.647712E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: 3
+##       L            T(L))
+##      []             []
+        0         3.240640E-08
+        1         7.158666E-08
+        2         1.243363E-08
+        3         1.231918E-08
+#   parameters: 
+#     energy [MeV]:  3.862283E+00
+#   quantity: 
+#     type: alpha    transmission coefficients
+#   datablock: 
+#     columns: 2
+#     entries: 3
+##       L            T(L))
+##      []             []
+        0         1.295781E-07
+        1         2.860137E-07
+        2         4.995664E-08
+        3         5.099483E-08

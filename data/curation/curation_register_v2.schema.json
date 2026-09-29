@@ -1,0 +1,181 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "Library-free EXFOR curation register, one decision",
+ "type": "object",
+ "required": [
+  "id",
+  "rule_version",
+  "dataset_key",
+  "entry",
+  "subentry",
+  "pointer",
+  "nuclide",
+  "kind",
+  "decision",
+  "scope",
+  "reason_code",
+  "rules_fired",
+  "cells",
+  "summary"
+ ],
+ "properties": {
+  "id": {
+   "type": "string",
+   "description": "stable id: CR2-<entry><subentry-suffix>-<pointer>-<scope hash>"
+  },
+  "rule_version": {
+   "const": "v2"
+  },
+  "dataset_key": {
+   "type": "string",
+   "description": "EXFOR entry/subentry/pointer"
+  },
+  "entry": {
+   "type": "string"
+  },
+  "subentry": {
+   "type": "string"
+  },
+  "pointer": {
+   "type": "string"
+  },
+  "nuclide": {
+   "type": "string",
+   "description": "target, Z###N###M0 (ground-state target)"
+  },
+  "z": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  },
+  "a": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  },
+  "kind": {
+   "type": "string",
+   "description": "EXFOR quantity class of the dataset (sig, av, mxw, ...)"
+  },
+  "first_author": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "year": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  },
+  "decision": {
+   "enum": [
+    "exclude",
+    "downweight",
+    "renorm"
+   ]
+  },
+  "factor": {
+   "type": [
+    "number",
+    "null"
+   ],
+   "description": "downweight: trust multiplier 0.25; renorm: value multiplier"
+  },
+  "scope": {
+   "enum": [
+    "dataset",
+    "cells"
+   ],
+   "description": "dataset: every cell of the dataset; cells: only the listed 0.1-dex energy cells"
+  },
+  "reason_code": {
+   "enum": [
+    "L2_DATA_PLUS_RECORD",
+    "R10D_ISOTOPIC_SYSTEMATIC",
+    "R10X_ISOTOPIC_SYSTEMATIC",
+    "R11D_MACS_CONTRADICTS_SERIES",
+    "R11X_MACS_CONTRADICTS_SERIES",
+    "R12_RECORD_QUALITY",
+    "R1_RECORD_PROVEN_ERROR",
+    "R2D_PARTIAL_STATE_AS_TOTAL",
+    "R2X_NOT_THE_SCORED_QUANTITY",
+    "R3D_DUPLICATE_REFERENCE_DROPPED",
+    "R3_TWIN_SUPERSEDED",
+    "R4_RENORMALISED_TO_STANDARD",
+    "R5D_INTER_DATASET_SCATTER",
+    "R5X_INTER_DATASET_SCATTER",
+    "R6D_SERIES_SYSTEMATIC",
+    "R6X_SERIES_SYSTEMATIC",
+    "R7_PHYSICS_BOUND",
+    "R8_UNCORRECTED_LOW_ENERGY_BACKGROUND",
+    "R9_CROSS_NUCLIDE_14MEV_SYSTEMATIC"
+   ]
+  },
+  "rules_fired": {
+   "type": "array",
+   "items": {
+    "enum": [
+     "R1",
+     "R10d",
+     "R10x",
+     "R11d",
+     "R11x",
+     "R12",
+     "R2d",
+     "R2x",
+     "R3",
+     "R3d",
+     "R4",
+     "R5d",
+     "R5x",
+     "R6d",
+     "R6x",
+     "R7",
+     "R8",
+     "R9"
+    ]
+   }
+  },
+  "cells": {
+   "type": "array",
+   "description": "cells covered, each with its own rules and evidence numbers",
+   "items": {
+    "type": "object",
+    "required": [
+     "bin",
+     "e_lo_ev",
+     "e_hi_ev",
+     "mean_b",
+     "rules"
+    ]
+   }
+  },
+  "evidence": {
+   "type": "object",
+   "description": "dataset-level evidence: twin partner, MACS groups, record findings with verbatim EXFOR quotes, flags"
+  },
+  "standard": {
+   "type": [
+    "object",
+    "null"
+   ],
+   "description": "R4: the standard, documented and reference values"
+  },
+  "flags": {
+   "type": "object",
+   "description": "EXFOR flags used: sf9, STATUS codes, no_uncertainty"
+  },
+  "v1": {
+   "type": "object",
+   "description": "link to the v1 register lines on the same dataset (validation only)"
+  },
+  "summary": {
+   "type": "string",
+   "description": "one-line human-readable reason generated from the codes"
+  }
+ }
+}

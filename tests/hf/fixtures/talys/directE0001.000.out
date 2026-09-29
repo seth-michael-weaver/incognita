@@ -1,0 +1,23 @@
+# header: 
+#   title: Fe56(n,n') direct inelastic cross sections at 1.000000E+00 MeV
+#   source: TALYS-2.24
+#   user: Unknown User
+#   date: 2026-09-12
+#   format: YANDF-0.4
+# target: 
+#   Z: 26
+#   A: 56
+#   nuclide: Fe56
+# reaction: 
+#   type: (n,n')
+#   E-incident [MeV]:  1.000000E+00
+#   total discrete direct inelastic cross section [mb]:  3.546720E+01
+#   collective continuum inelastic cross section [mb]:  0.000000E+00
+#   quantity: 
+#     type: direct inelastic cross sections
+#   datablock: 
+#     columns: 7
+#     entries: 1
+##     level         energy          E-out           J/P       cross section    def. type      def. par.
+##      []            [MeV]          [MeV]           []            [mb]            []             []
+        1         8.467780E-01   1.354992E-01       2.0 +       3.546720E+01      B           2.390000E-01

@@ -1,0 +1,214 @@
+{"cpu_s": 2.066343, "wall_s": 2.1413943767547607, "rc": 0, "maxrss_mb": 713.67578125, "err": "", "arm": "talys", "nuclide": "Fe-56", "rep": 0, "load": 1.39599609375}
+{"cpu_s": 1.8197789999999998, "wall_s": 2.2944886684417725, "rc": 0, "maxrss_mb": 785.921875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Fe-56", "rep": 0, "load": 1.44482421875}
+{"cpu_s": 1.5604909999999999, "wall_s": 1.6576142311096191, "rc": 0, "maxrss_mb": 794.36328125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Fe-56", "rep": 0, "load": 1.44482421875}
+{"cpu_s": 1.570718, "wall_s": 3.213299036026001, "rc": 0, "maxrss_mb": 820.12890625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Fe-56", "rep": 0, "load": 1.48974609375}
+{"cpu_s": 1.5410059999999999, "wall_s": 1.587902307510376, "rc": 0, "maxrss_mb": 794.484375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Fe-56", "rep": 0, "load": 1.53076171875}
+{"cpu_s": 2.416969, "wall_s": 1.723045825958252, "rc": 0, "maxrss_mb": 715.42578125, "err": "", "arm": "talys", "nuclide": "Ni-58", "rep": 0, "load": 1.53076171875}
+{"cpu_s": 1.794943, "wall_s": 1.8488686084747314, "rc": 0, "maxrss_mb": 794.984375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Ni-58", "rep": 0, "load": 1.53076171875}
+{"cpu_s": 1.59239, "wall_s": 1.6452219486236572, "rc": 0, "maxrss_mb": 812.72265625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Ni-58", "rep": 0, "load": 1.80859375}
+{"cpu_s": 1.63875, "wall_s": 1.8551394939422607, "rc": 0, "maxrss_mb": 829.890625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Ni-58", "rep": 0, "load": 1.80859375}
+{"cpu_s": 1.57288, "wall_s": 1.624039649963379, "rc": 0, "maxrss_mb": 814.515625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Ni-58", "rep": 0, "load": 1.904296875}
+{"cpu_s": 3.5057980000000004, "wall_s": 3.5757968425750732, "rc": 0, "maxrss_mb": 715.8046875, "err": "", "arm": "talys", "nuclide": "Cu-63", "rep": 0, "load": 1.904296875}
+{"cpu_s": 1.8393, "wall_s": 1.9230868816375732, "rc": 0, "maxrss_mb": 795.53125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Cu-63", "rep": 0, "load": 1.83154296875}
+{"cpu_s": 1.6137119999999998, "wall_s": 1.671311616897583, "rc": 0, "maxrss_mb": 810.85546875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Cu-63", "rep": 0, "load": 1.83154296875}
+{"cpu_s": 1.64553, "wall_s": 2.3146917819976807, "rc": 0, "maxrss_mb": 833.5546875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Cu-63", "rep": 0, "load": 1.7646484375}
+{"cpu_s": 1.624822, "wall_s": 1.676551342010498, "rc": 0, "maxrss_mb": 816.94140625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Cu-63", "rep": 0, "load": 1.7646484375}
+{"cpu_s": 2.542182, "wall_s": 2.6006691455841064, "rc": 0, "maxrss_mb": 712.921875, "err": "", "arm": "talys", "nuclide": "Zr-90", "rep": 0, "load": 1.703125}
+{"cpu_s": 1.768744, "wall_s": 1.8441565036773682, "rc": 0, "maxrss_mb": 792.5, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Zr-90", "rep": 0, "load": 1.703125}
+{"cpu_s": 1.5887, "wall_s": 1.6598286628723145, "rc": 0, "maxrss_mb": 815.71484375, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Zr-90", "rep": 0, "load": 1.646484375}
+{"cpu_s": 1.894685, "wall_s": 3.35210919380188, "rc": 0, "maxrss_mb": 780.16796875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Zr-90", "rep": 0, "load": 1.646484375}
+{"cpu_s": 1.559196, "wall_s": 1.6367814540863037, "rc": 0, "maxrss_mb": 814.7734375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Zr-90", "rep": 0, "load": 1.6748046875}
+{"cpu_s": 2.5257490000000002, "wall_s": 2.6129612922668457, "rc": 0, "maxrss_mb": 713.96484375, "err": "", "arm": "talys", "nuclide": "Mo-98", "rep": 0, "load": 1.62060546875}
+{"cpu_s": 1.827177, "wall_s": 1.9403691291809082, "rc": 0, "maxrss_mb": 773.1875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Mo-98", "rep": 0, "load": 1.62060546875}
+{"cpu_s": 1.588396, "wall_s": 1.6396939754486084, "rc": 0, "maxrss_mb": 811.51171875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Mo-98", "rep": 0, "load": 1.62060546875}
+{"cpu_s": 1.644939, "wall_s": 2.4370059967041016, "rc": 0, "maxrss_mb": 828.0859375, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Mo-98", "rep": 0, "load": 1.57080078125}
+{"cpu_s": 1.624325, "wall_s": 1.6856753826141357, "rc": 0, "maxrss_mb": 815.4765625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Mo-98", "rep": 0, "load": 1.57080078125}
+{"cpu_s": 2.61578, "wall_s": 2.681382417678833, "rc": 0, "maxrss_mb": 712.66015625, "err": "", "arm": "talys", "nuclide": "Sn-120", "rep": 0, "load": 1.52490234375}
+{"cpu_s": 1.802803, "wall_s": 1.8606986999511719, "rc": 0, "maxrss_mb": 801.30859375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Sn-120", "rep": 0, "load": 1.52490234375}
+{"cpu_s": 1.619781, "wall_s": 1.6879537105560303, "rc": 0, "maxrss_mb": 816.25, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Sn-120", "rep": 0, "load": 1.482421875}
+{"cpu_s": 1.6413220000000002, "wall_s": 3.256488561630249, "rc": 0, "maxrss_mb": 828.80078125, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Sn-120", "rep": 0, "load": 1.482421875}
+{"cpu_s": 1.6061709999999998, "wall_s": 1.6602232456207275, "rc": 0, "maxrss_mb": 815.875, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Sn-120", "rep": 0, "load": 1.443359375}
+{"cpu_s": 4.506600000000001, "wall_s": 4.066535711288452, "rc": 0, "maxrss_mb": 712.72265625, "err": "", "arm": "talys", "nuclide": "I-127", "rep": 0, "load": 1.568359375}
+{"cpu_s": 1.867948, "wall_s": 1.9529590606689453, "rc": 0, "maxrss_mb": 807.00390625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "I-127", "rep": 0, "load": 1.568359375}
+{"cpu_s": 1.630809, "wall_s": 1.7028162479400635, "rc": 0, "maxrss_mb": 841.73046875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "I-127", "rep": 0, "load": 1.60302734375}
+{"cpu_s": 1.693002, "wall_s": 2.380363702774048, "rc": 0, "maxrss_mb": 857.01953125, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "I-127", "rep": 0, "load": 1.60302734375}
+{"cpu_s": 1.675479, "wall_s": 1.730168104171753, "rc": 0, "maxrss_mb": 825.54296875, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "I-127", "rep": 0, "load": 1.5546875}
+{"cpu_s": 2.6132690000000003, "wall_s": 2.6686248779296875, "rc": 0, "maxrss_mb": 712.6484375, "err": "", "arm": "talys", "nuclide": "Ba-138", "rep": 0, "load": 1.5546875}
+{"cpu_s": 1.8254019999999997, "wall_s": 1.8867051601409912, "rc": 0, "maxrss_mb": 811.36328125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Ba-138", "rep": 0, "load": 1.51025390625}
+{"cpu_s": 1.6212520000000001, "wall_s": 1.6993415355682373, "rc": 0, "maxrss_mb": 825.72265625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Ba-138", "rep": 0, "load": 1.51025390625}
+{"cpu_s": 1.678231, "wall_s": 2.382394552230835, "rc": 0, "maxrss_mb": 841.80859375, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Ba-138", "rep": 0, "load": 1.46923828125}
+{"cpu_s": 1.606102, "wall_s": 1.6584811210632324, "rc": 0, "maxrss_mb": 817.8359375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Ba-138", "rep": 0, "load": 1.46923828125}
+{"cpu_s": 3.8348280000000003, "wall_s": 3.9193637371063232, "rc": 0, "maxrss_mb": 714.06640625, "err": "", "arm": "talys", "nuclide": "Nd-148", "rep": 0, "load": 1.431640625}
+{"cpu_s": 2.362854, "wall_s": 3.986943483352661, "rc": 0, "maxrss_mb": 790.140625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Nd-148", "rep": 0, "load": 1.4775390625}
+{"cpu_s": 1.8405909999999999, "wall_s": 1.435431957244873, "rc": 0, "maxrss_mb": 847.05078125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Nd-148", "rep": 0, "load": 1.4775390625}
+{"cpu_s": 1.93737, "wall_s": 2.6473960876464844, "rc": 0, "maxrss_mb": 1021.03515625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Nd-148", "rep": 0, "load": 1.599609375}
+{"cpu_s": 1.665793, "wall_s": 1.7607877254486084, "rc": 0, "maxrss_mb": 834.375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Nd-148", "rep": 0, "load": 1.599609375}
+{"cpu_s": 14.893529000000001, "wall_s": 15.180229663848877, "rc": 0, "maxrss_mb": 717.359375, "err": "", "arm": "talys", "nuclide": "Sm-154", "rep": 0, "load": 1.67626953125}
+{"cpu_s": 2.8697229999999996, "wall_s": 3.005627155303955, "rc": 0, "maxrss_mb": 839.95703125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Sm-154", "rep": 0, "load": 1.78271484375}
+{"cpu_s": 2.643494, "wall_s": 2.7284438610076904, "rc": 0, "maxrss_mb": 857.11328125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Sm-154", "rep": 0, "load": 1.7197265625}
+{"cpu_s": 2.211952, "wall_s": 3.6092989444732666, "rc": 0, "maxrss_mb": 1079.4765625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Sm-154", "rep": 0, "load": 1.7197265625}
+{"cpu_s": 1.676044, "wall_s": 1.7445008754730225, "rc": 0, "maxrss_mb": 841.8359375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Sm-154", "rep": 0, "load": 1.66162109375}
+{"cpu_s": 15.316779, "wall_s": 15.603057622909546, "rc": 0, "maxrss_mb": 717.31640625, "err": "", "arm": "talys", "nuclide": "Gd-158", "rep": 0, "load": 1.65673828125}
+{"cpu_s": 2.8731180000000003, "wall_s": 3.0011343955993652, "rc": 0, "maxrss_mb": 836.36328125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Gd-158", "rep": 0, "load": 1.60400390625}
+{"cpu_s": 2.70571, "wall_s": 2.7945172786712646, "rc": 0, "maxrss_mb": 847.90234375, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Gd-158", "rep": 0, "load": 1.55517578125}
+{"cpu_s": 2.226805, "wall_s": 3.6492631435394287, "rc": 0, "maxrss_mb": 1083.0546875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Gd-158", "rep": 0, "load": 1.55517578125}
+{"cpu_s": 2.006936, "wall_s": 3.0334973335266113, "rc": 0, "maxrss_mb": 804.21484375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Gd-158", "rep": 0, "load": 1.46923828125}
+{"cpu_s": 15.937809999999999, "wall_s": 16.242467403411865, "rc": 0, "maxrss_mb": 717.94921875, "err": "", "arm": "talys", "nuclide": "Er-166", "rep": 0, "load": 1.36474609375}
+{"cpu_s": 2.90714, "wall_s": 3.2069313526153564, "rc": 0, "maxrss_mb": 863.328125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Er-166", "rep": 0, "load": 1.36474609375}
+{"cpu_s": 2.687875, "wall_s": 2.773606300354004, "rc": 0, "maxrss_mb": 872.1171875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Er-166", "rep": 0, "load": 1.33544921875}
+{"cpu_s": 2.280338, "wall_s": 3.6963400840759277, "rc": 0, "maxrss_mb": 1101.109375, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Er-166", "rep": 0, "load": 1.548828125}
+{"cpu_s": 1.684083, "wall_s": 1.2147216796875, "rc": 0, "maxrss_mb": 861.06640625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Er-166", "rep": 0, "load": 1.5849609375}
+{"cpu_s": 15.704826, "wall_s": 16.01480507850647, "rc": 0, "maxrss_mb": 718.125, "err": "", "arm": "talys", "nuclide": "Hf-178", "rep": 0, "load": 1.603515625}
+{"cpu_s": 2.917126, "wall_s": 3.048133611679077, "rc": 0, "maxrss_mb": 850.796875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Hf-178", "rep": 0, "load": 1.603515625}
+{"cpu_s": 2.6985639999999997, "wall_s": 2.81290602684021, "rc": 0, "maxrss_mb": 877.51171875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Hf-178", "rep": 0, "load": 1.55517578125}
+{"cpu_s": 2.27581, "wall_s": 3.7612624168395996, "rc": 0, "maxrss_mb": 1103.07421875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Hf-178", "rep": 0, "load": 1.5908203125}
+{"cpu_s": 1.756808, "wall_s": 1.7023227214813232, "rc": 0, "maxrss_mb": 849.84375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Hf-178", "rep": 0, "load": 1.6240234375}
+{"cpu_s": 15.899529000000001, "wall_s": 16.185130834579468, "rc": 0, "maxrss_mb": 718.25390625, "err": "", "arm": "talys", "nuclide": "W-184", "rep": 0, "load": 1.6337890625}
+{"cpu_s": 2.8969229999999997, "wall_s": 3.0731911659240723, "rc": 0, "maxrss_mb": 847.42578125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "W-184", "rep": 0, "load": 1.66357421875}
+{"cpu_s": 2.722492, "wall_s": 2.798570156097412, "rc": 0, "maxrss_mb": 864.66015625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "W-184", "rep": 0, "load": 1.66357421875}
+{"cpu_s": 2.279932, "wall_s": 3.6920840740203857, "rc": 0, "maxrss_mb": 1101.3671875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "W-184", "rep": 0, "load": 1.6103515625}
+{"cpu_s": 1.693774, "wall_s": 1.7478435039520264, "rc": 0, "maxrss_mb": 848.9765625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "W-184", "rep": 0, "load": 1.56103515625}
+{"cpu_s": 14.325456, "wall_s": 14.087227582931519, "rc": 0, "maxrss_mb": 717.65625, "err": "", "arm": "talys", "nuclide": "Au-197", "rep": 0, "load": 1.43603515625}
+{"cpu_s": 3.195672, "wall_s": 3.3493857383728027, "rc": 0, "maxrss_mb": 851.21875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Au-197", "rep": 0, "load": 1.4814453125}
+{"cpu_s": 2.974294, "wall_s": 3.054131031036377, "rc": 0, "maxrss_mb": 869.71484375, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Au-197", "rep": 0, "load": 1.4814453125}
+{"cpu_s": 2.355128, "wall_s": 4.232720136642456, "rc": 0, "maxrss_mb": 1122.484375, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Au-197", "rep": 0, "load": 1.44287109375}
+{"cpu_s": 1.707888, "wall_s": 1.7607908248901367, "rc": 0, "maxrss_mb": 864.40234375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Au-197", "rep": 0, "load": 1.4072265625}
+{"cpu_s": 2.921499, "wall_s": 2.4470624923706055, "rc": 0, "maxrss_mb": 713.03125, "err": "", "arm": "talys", "nuclide": "Pb-208", "rep": 0, "load": 1.37451171875}
+{"cpu_s": 1.8595309999999998, "wall_s": 1.915025234222412, "rc": 0, "maxrss_mb": 825.4765625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Pb-208", "rep": 0, "load": 1.37451171875}
+{"cpu_s": 2.007721, "wall_s": 3.5040667057037354, "rc": 0, "maxrss_mb": 790.7265625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Pb-208", "rep": 0, "load": 1.34423828125}
+{"cpu_s": 1.65183, "wall_s": 2.332345724105835, "rc": 0, "maxrss_mb": 850.01171875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Pb-208", "rep": 0, "load": 1.34423828125}
+{"cpu_s": 1.609138, "wall_s": 1.6941652297973633, "rc": 0, "maxrss_mb": 836.24609375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Pb-208", "rep": 0, "load": 1.31640625}
+{"cpu_s": 20.227539, "wall_s": 20.701836585998535, "rc": 0, "maxrss_mb": 727.3125, "err": "", "arm": "talys", "nuclide": "Th-232", "rep": 0, "load": 1.3505859375}
+{"cpu_s": 3.397261, "wall_s": 2.922468900680542, "rc": 0, "maxrss_mb": 951.046875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Th-232", "rep": 0, "load": 1.40283203125}
+{"cpu_s": 3.170789, "wall_s": 3.288983106613159, "rc": 0, "maxrss_mb": 962.21484375, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Th-232", "rep": 0, "load": 1.40283203125}
+{"cpu_s": 2.740652, "wall_s": 4.3282270431518555, "rc": 0, "maxrss_mb": 1191.95703125, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Th-232", "rep": 0, "load": 1.3701171875}
+{"cpu_s": 2.2418, "wall_s": 2.3350305557250977, "rc": 0, "maxrss_mb": 954.75390625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Th-232", "rep": 0, "load": 1.34033203125}
+{"cpu_s": 40.255072999999996, "wall_s": 40.556469678878784, "rc": 0, "maxrss_mb": 730.953125, "err": "", "arm": "talys", "nuclide": "U-235", "rep": 0, "load": 1.28857421875}
+{"cpu_s": 5.499409, "wall_s": 6.470582008361816, "rc": 0, "maxrss_mb": 919.7109375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "U-235", "rep": 0, "load": 1.26513671875}
+{"cpu_s": 5.003907, "wall_s": 5.178613901138306, "rc": 0, "maxrss_mb": 981.8984375, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "U-235", "rep": 0, "load": 1.24365234375}
+{"cpu_s": 3.653631, "wall_s": 5.122195243835449, "rc": 0, "maxrss_mb": 1269.22265625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "U-235", "rep": 0, "load": 1.22412109375}
+{"cpu_s": 2.3066820000000003, "wall_s": 2.4256479740142822, "rc": 0, "maxrss_mb": 961.765625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "U-235", "rep": 0, "load": 1.189453125}
+{"cpu_s": 20.96638, "wall_s": 20.69149613380432, "rc": 0, "maxrss_mb": 727.6484375, "err": "", "arm": "talys", "nuclide": "U-238", "rep": 0, "load": 1.13427734375}
+{"cpu_s": 3.710975, "wall_s": 5.522507667541504, "rc": 0, "maxrss_mb": 910.39453125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "U-238", "rep": 0, "load": 1.123046875}
+{"cpu_s": 3.222617, "wall_s": 3.4269652366638184, "rc": 0, "maxrss_mb": 968.625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "U-238", "rep": 0, "load": 1.11279296875}
+{"cpu_s": 2.774295, "wall_s": 4.163317441940308, "rc": 0, "maxrss_mb": 1220.54296875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "U-238", "rep": 0, "load": 1.26416015625}
+{"cpu_s": 2.239988, "wall_s": 2.3240091800689697, "rc": 0, "maxrss_mb": 960.60546875, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "U-238", "rep": 0, "load": 1.24267578125}
+{"cpu_s": 14.222259, "wall_s": 13.769331216812134, "rc": 0, "maxrss_mb": 725.55078125, "err": "", "arm": "talys", "nuclide": "Pu-239", "rep": 0, "load": 1.1884765625}
+{"cpu_s": 3.003277, "wall_s": 3.18412446975708, "rc": 0, "maxrss_mb": 950.9375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Pu-239", "rep": 0, "load": 1.1884765625}
+{"cpu_s": 2.794796, "wall_s": 3.0103538036346436, "rc": 0, "maxrss_mb": 976.5, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Pu-239", "rep": 0, "load": 1.17333984375}
+{"cpu_s": 2.65361, "wall_s": 3.996345281600952, "rc": 0, "maxrss_mb": 1187.99609375, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Pu-239", "rep": 0, "load": 1.1591796875}
+{"cpu_s": 2.280201, "wall_s": 2.3494997024536133, "rc": 0, "maxrss_mb": 973.65234375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Pu-239", "rep": 0, "load": 1.14599609375}
+{"cpu_s": 1.5672540000000001, "wall_s": 1.6355321407318115, "rc": 0, "maxrss_mb": 804.05078125, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Fe-56", "rep": 1, "load": 1.14599609375}
+{"cpu_s": 1.5779679999999998, "wall_s": 1.7375941276550293, "rc": 0, "maxrss_mb": 820.859375, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Fe-56", "rep": 1, "load": 1.13427734375}
+{"cpu_s": 1.643089, "wall_s": 1.7172722816467285, "rc": 0, "maxrss_mb": 795.0703125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Fe-56", "rep": 1, "load": 1.13427734375}
+{"cpu_s": 1.749882, "wall_s": 1.813434362411499, "rc": 0, "maxrss_mb": 786.83203125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Fe-56", "rep": 1, "load": 1.13427734375}
+{"cpu_s": 2.25694, "wall_s": 2.324873208999634, "rc": 0, "maxrss_mb": 713.4296875, "err": "", "arm": "talys", "nuclide": "Fe-56", "rep": 1, "load": 1.123046875}
+{"cpu_s": 1.733717, "wall_s": 1.7974708080291748, "rc": 0, "maxrss_mb": 805.83984375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Ni-58", "rep": 1, "load": 1.11279296875}
+{"cpu_s": 1.697683, "wall_s": 2.5367252826690674, "rc": 0, "maxrss_mb": 832.22265625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Ni-58", "rep": 1, "load": 1.11279296875}
+{"cpu_s": 1.7399900000000001, "wall_s": 1.8122386932373047, "rc": 0, "maxrss_mb": 813.20703125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Ni-58", "rep": 1, "load": 1.66455078125}
+{"cpu_s": 1.8977789999999999, "wall_s": 2.041455030441284, "rc": 0, "maxrss_mb": 788.3515625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Ni-58", "rep": 1, "load": 1.66455078125}
+{"cpu_s": 2.4195249999999997, "wall_s": 2.4841699600219727, "rc": 0, "maxrss_mb": 715.37890625, "err": "", "arm": "talys", "nuclide": "Ni-58", "rep": 1, "load": 1.611328125}
+{"cpu_s": 1.646865, "wall_s": 1.7258973121643066, "rc": 0, "maxrss_mb": 817.7109375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Cu-63", "rep": 1, "load": 1.611328125}
+{"cpu_s": 1.669913, "wall_s": 2.3623485565185547, "rc": 0, "maxrss_mb": 823.7421875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Cu-63", "rep": 1, "load": 1.56201171875}
+{"cpu_s": 1.657862, "wall_s": 1.737706184387207, "rc": 0, "maxrss_mb": 818.08203125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Cu-63", "rep": 1, "load": 1.56201171875}
+{"cpu_s": 1.8759709999999998, "wall_s": 1.958669662475586, "rc": 0, "maxrss_mb": 796.0859375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Cu-63", "rep": 1, "load": 1.5166015625}
+{"cpu_s": 3.53408, "wall_s": 3.6234652996063232, "rc": 0, "maxrss_mb": 715.85546875, "err": "", "arm": "talys", "nuclide": "Cu-63", "rep": 1, "load": 1.5166015625}
+{"cpu_s": 1.5806090000000002, "wall_s": 1.0543081760406494, "rc": 0, "maxrss_mb": 816.90234375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Zr-90", "rep": 1, "load": 1.47509765625}
+{"cpu_s": 1.658323, "wall_s": 2.3446221351623535, "rc": 0, "maxrss_mb": 825.00390625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Zr-90", "rep": 1, "load": 1.47509765625}
+{"cpu_s": 1.586053, "wall_s": 1.6756150722503662, "rc": 0, "maxrss_mb": 808.296875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Zr-90", "rep": 1, "load": 1.43701171875}
+{"cpu_s": 1.8201379999999998, "wall_s": 1.902374267578125, "rc": 0, "maxrss_mb": 804.19921875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Zr-90", "rep": 1, "load": 1.43701171875}
+{"cpu_s": 2.548565, "wall_s": 2.618851900100708, "rc": 0, "maxrss_mb": 712.625, "err": "", "arm": "talys", "nuclide": "Zr-90", "rep": 1, "load": 1.40185546875}
+{"cpu_s": 1.6299029999999999, "wall_s": 1.7075510025024414, "rc": 0, "maxrss_mb": 812.35546875, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Mo-98", "rep": 1, "load": 1.40185546875}
+{"cpu_s": 2.957408, "wall_s": 3.4758968353271484, "rc": 0, "maxrss_mb": 829.25390625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Mo-98", "rep": 1, "load": 1.8505859375}
+{"cpu_s": 1.9496939999999998, "wall_s": 2.0417163372039795, "rc": 0, "maxrss_mb": 819.56640625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Mo-98", "rep": 1, "load": 1.8505859375}
+{"cpu_s": 2.190857, "wall_s": 2.2851462364196777, "rc": 0, "maxrss_mb": 774.1484375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Mo-98", "rep": 1, "load": 1.7822265625}
+{"cpu_s": 2.956086, "wall_s": 3.0247058868408203, "rc": 0, "maxrss_mb": 713.81640625, "err": "", "arm": "talys", "nuclide": "Mo-98", "rep": 1, "load": 1.71923828125}
+{"cpu_s": 1.963571, "wall_s": 2.053130865097046, "rc": 0, "maxrss_mb": 813.2421875, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Sn-120", "rep": 1, "load": 1.71923828125}
+{"cpu_s": 1.9632260000000001, "wall_s": 2.711508274078369, "rc": 0, "maxrss_mb": 831.10546875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Sn-120", "rep": 1, "load": 1.66162109375}
+{"cpu_s": 1.9410809999999998, "wall_s": 1.3726797103881836, "rc": 0, "maxrss_mb": 813.328125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Sn-120", "rep": 1, "load": 1.66162109375}
+{"cpu_s": 2.189819, "wall_s": 2.2846548557281494, "rc": 0, "maxrss_mb": 802.5703125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Sn-120", "rep": 1, "load": 1.76904296875}
+{"cpu_s": 3.028296, "wall_s": 3.113818883895874, "rc": 0, "maxrss_mb": 712.9140625, "err": "", "arm": "talys", "nuclide": "Sn-120", "rep": 1, "load": 1.76904296875}
+{"cpu_s": 2.052301, "wall_s": 2.328214168548584, "rc": 0, "maxrss_mb": 825.42578125, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "I-127", "rep": 1, "load": 1.7978515625}
+{"cpu_s": 2.0377680000000002, "wall_s": 2.7419793605804443, "rc": 0, "maxrss_mb": 856.11328125, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "I-127", "rep": 1, "load": 1.7978515625}
+{"cpu_s": 2.0723000000000003, "wall_s": 2.1716232299804688, "rc": 0, "maxrss_mb": 841.64453125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "I-127", "rep": 1, "load": 1.73388671875}
+{"cpu_s": 2.3570390000000003, "wall_s": 2.523831605911255, "rc": 0, "maxrss_mb": 827.61328125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "I-127", "rep": 1, "load": 1.73388671875}
+{"cpu_s": 5.449897, "wall_s": 5.625701189041138, "rc": 0, "maxrss_mb": 712.94140625, "err": "", "arm": "talys", "nuclide": "I-127", "rep": 1, "load": 1.6748046875}
+{"cpu_s": 1.929317, "wall_s": 2.0016260147094727, "rc": 0, "maxrss_mb": 825.484375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Ba-138", "rep": 1, "load": 1.62060546875}
+{"cpu_s": 1.942868, "wall_s": 2.1285181045532227, "rc": 0, "maxrss_mb": 835.7265625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Ba-138", "rep": 1, "load": 1.62060546875}
+{"cpu_s": 1.929763, "wall_s": 1.3508312702178955, "rc": 0, "maxrss_mb": 826.32421875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Ba-138", "rep": 1, "load": 1.57080078125}
+{"cpu_s": 2.190553, "wall_s": 2.2700116634368896, "rc": 0, "maxrss_mb": 808.9140625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Ba-138", "rep": 1, "load": 1.57080078125}
+{"cpu_s": 3.039091, "wall_s": 3.109964609146118, "rc": 0, "maxrss_mb": 712.9921875, "err": "", "arm": "talys", "nuclide": "Ba-138", "rep": 1, "load": 1.52490234375}
+{"cpu_s": 1.996093, "wall_s": 2.069765567779541, "rc": 0, "maxrss_mb": 836.08984375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Nd-148", "rep": 1, "load": 1.482421875}
+{"cpu_s": 2.3522179999999997, "wall_s": 3.186901092529297, "rc": 0, "maxrss_mb": 1013.9765625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Nd-148", "rep": 1, "load": 1.482421875}
+{"cpu_s": 2.239558, "wall_s": 2.319014549255371, "rc": 0, "maxrss_mb": 847.03125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Nd-148", "rep": 1, "load": 1.443359375}
+{"cpu_s": 2.480946, "wall_s": 2.6012134552001953, "rc": 0, "maxrss_mb": 828.85546875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Nd-148", "rep": 1, "load": 1.443359375}
+{"cpu_s": 4.26774, "wall_s": 4.36548376083374, "rc": 0, "maxrss_mb": 714.18359375, "err": "", "arm": "talys", "nuclide": "Nd-148", "rep": 1, "load": 1.40771484375}
+{"cpu_s": 2.020406, "wall_s": 2.0999886989593506, "rc": 0, "maxrss_mb": 840.453125, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Sm-154", "rep": 1, "load": 1.375}
+{"cpu_s": 2.550728, "wall_s": 3.361872434616089, "rc": 0, "maxrss_mb": 1078.01171875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Sm-154", "rep": 1, "load": 1.3447265625}
+{"cpu_s": 3.2167459999999997, "wall_s": 3.3160877227783203, "rc": 0, "maxrss_mb": 854.64453125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Sm-154", "rep": 1, "load": 1.31689453125}
+{"cpu_s": 3.46082, "wall_s": 3.6113169193267822, "rc": 0, "maxrss_mb": 839.08984375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Sm-154", "rep": 1, "load": 1.3720703125}
+{"cpu_s": 17.715811000000002, "wall_s": 18.158507347106934, "rc": 0, "maxrss_mb": 717.125, "err": "", "arm": "talys", "nuclide": "Sm-154", "rep": 1, "load": 1.28857421875}
+{"cpu_s": 2.033376, "wall_s": 1.4708423614501953, "rc": 0, "maxrss_mb": 845.1875, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Gd-158", "rep": 1, "load": 1.24365234375}
+{"cpu_s": 2.5503769999999997, "wall_s": 4.035784959793091, "rc": 0, "maxrss_mb": 1082.27734375, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Gd-158", "rep": 1, "load": 1.22412109375}
+{"cpu_s": 3.196373, "wall_s": 3.3152832984924316, "rc": 0, "maxrss_mb": 857.16015625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Gd-158", "rep": 1, "load": 1.22412109375}
+{"cpu_s": 3.478725, "wall_s": 3.700805425643921, "rc": 0, "maxrss_mb": 838.98828125, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Gd-158", "rep": 1, "load": 1.2060546875}
+{"cpu_s": 18.263852999999997, "wall_s": 18.671744108200073, "rc": 0, "maxrss_mb": 717.35546875, "err": "", "arm": "talys", "nuclide": "Gd-158", "rep": 1, "load": 1.146484375}
+{"cpu_s": 2.041533, "wall_s": 2.1176304817199707, "rc": 0, "maxrss_mb": 845.12890625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Er-166", "rep": 1, "load": 1.13427734375}
+{"cpu_s": 2.618718, "wall_s": 4.055145740509033, "rc": 0, "maxrss_mb": 1098.8046875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Er-166", "rep": 1, "load": 1.20361328125}
+{"cpu_s": 3.2321899999999997, "wall_s": 3.350954532623291, "rc": 0, "maxrss_mb": 876.5234375, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Er-166", "rep": 1, "load": 1.20361328125}
+{"cpu_s": 3.518965, "wall_s": 3.7144436836242676, "rc": 0, "maxrss_mb": 863.6640625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Er-166", "rep": 1, "load": 1.18701171875}
+{"cpu_s": 19.10258, "wall_s": 18.912662029266357, "rc": 0, "maxrss_mb": 718.25390625, "err": "", "arm": "talys", "nuclide": "Er-166", "rep": 1, "load": 1.201171875}
+{"cpu_s": 2.051199, "wall_s": 2.149242877960205, "rc": 0, "maxrss_mb": 852.8359375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Hf-178", "rep": 1, "load": 1.169921875}
+{"cpu_s": 2.641948, "wall_s": 4.12646746635437, "rc": 0, "maxrss_mb": 1106.7265625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Hf-178", "rep": 1, "load": 1.169921875}
+{"cpu_s": 3.2034119999999997, "wall_s": 3.324890613555908, "rc": 0, "maxrss_mb": 879.59765625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Hf-178", "rep": 1, "load": 1.15625}
+{"cpu_s": 3.488816, "wall_s": 3.727482795715332, "rc": 0, "maxrss_mb": 850.88671875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Hf-178", "rep": 1, "load": 1.1435546875}
+{"cpu_s": 18.531632000000002, "wall_s": 18.271276235580444, "rc": 0, "maxrss_mb": 718.17578125, "err": "", "arm": "talys", "nuclide": "Hf-178", "rep": 1, "load": 1.10205078125}
+{"cpu_s": 1.983783, "wall_s": 2.074678421020508, "rc": 0, "maxrss_mb": 860.25390625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "W-184", "rep": 1, "load": 1.09375}
+{"cpu_s": 2.90437, "wall_s": 4.408524036407471, "rc": 0, "maxrss_mb": 1050.97265625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "W-184", "rep": 1, "load": 1.24658203125}
+{"cpu_s": 3.353646, "wall_s": 3.8740153312683105, "rc": 0, "maxrss_mb": 861.55078125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "W-184", "rep": 1, "load": 1.24658203125}
+{"cpu_s": 3.517233, "wall_s": 3.7277112007141113, "rc": 0, "maxrss_mb": 845.859375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "W-184", "rep": 1, "load": 1.62744140625}
+{"cpu_s": 19.077226000000003, "wall_s": 18.850260496139526, "rc": 0, "maxrss_mb": 718.08203125, "err": "", "arm": "talys", "nuclide": "W-184", "rep": 1, "load": 1.44873046875}
+{"cpu_s": 2.046183, "wall_s": 2.1209347248077393, "rc": 0, "maxrss_mb": 863.80078125, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Au-197", "rep": 1, "load": 1.41259765625}
+{"cpu_s": 2.822585, "wall_s": 4.288914680480957, "rc": 0, "maxrss_mb": 1123.08203125, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Au-197", "rep": 1, "load": 1.37939453125}
+{"cpu_s": 3.590765, "wall_s": 3.7235517501831055, "rc": 0, "maxrss_mb": 864.0078125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Au-197", "rep": 1, "load": 1.3486328125}
+{"cpu_s": 3.7842860000000003, "wall_s": 3.9331560134887695, "rc": 0, "maxrss_mb": 850.12890625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Au-197", "rep": 1, "load": 1.3486328125}
+{"cpu_s": 17.087871, "wall_s": 16.789416074752808, "rc": 0, "maxrss_mb": 717.48046875, "err": "", "arm": "talys", "nuclide": "Au-197", "rep": 1, "load": 1.3291015625}
+{"cpu_s": 1.9342160000000002, "wall_s": 2.036740303039551, "rc": 0, "maxrss_mb": 831.34375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Pb-208", "rep": 1, "load": 1.302734375}
+{"cpu_s": 2.5323529999999996, "wall_s": 5.2987730503082275, "rc": 0, "maxrss_mb": 798.046875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Pb-208", "rep": 1, "load": 1.2783203125}
+{"cpu_s": 2.029465, "wall_s": 2.476790189743042, "rc": 0, "maxrss_mb": 833.9140625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Pb-208", "rep": 1, "load": 1.2783203125}
+{"cpu_s": 2.160121, "wall_s": 2.2993271350860596, "rc": 0, "maxrss_mb": 822.16796875, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Pb-208", "rep": 1, "load": 1.255859375}
+{"cpu_s": 3.437969, "wall_s": 2.876326084136963, "rc": 0, "maxrss_mb": 712.65234375, "err": "", "arm": "talys", "nuclide": "Pb-208", "rep": 1, "load": 1.2353515625}
+{"cpu_s": 2.632721, "wall_s": 2.7258808612823486, "rc": 0, "maxrss_mb": 952.265625, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Th-232", "rep": 1, "load": 1.21630859375}
+{"cpu_s": 3.355082, "wall_s": 4.911973476409912, "rc": 0, "maxrss_mb": 1192.9296875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Th-232", "rep": 1, "load": 1.19873046875}
+{"cpu_s": 3.75042, "wall_s": 3.896115779876709, "rc": 0, "maxrss_mb": 961.2421875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Th-232", "rep": 1, "load": 1.1826171875}
+{"cpu_s": 3.981776, "wall_s": 4.178584814071655, "rc": 0, "maxrss_mb": 948.9375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Th-232", "rep": 1, "load": 1.1826171875}
+{"cpu_s": 24.452741, "wall_s": 24.963124990463257, "rc": 0, "maxrss_mb": 727.34375, "err": "", "arm": "talys", "nuclide": "Th-232", "rep": 1, "load": 1.119140625}
+{"cpu_s": 2.824762, "wall_s": 3.4581127166748047, "rc": 0, "maxrss_mb": 964.35546875, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "U-235", "rep": 1, "load": 1.09228515625}
+{"cpu_s": 4.006063, "wall_s": 4.9599997997283936, "rc": 0, "maxrss_mb": 1268.30078125, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "U-235", "rep": 1, "load": 1.08447265625}
+{"cpu_s": 5.671967, "wall_s": 5.61320424079895, "rc": 0, "maxrss_mb": 980.921875, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "U-235", "rep": 1, "load": 1.07763671875}
+{"cpu_s": 6.002714999999999, "wall_s": 6.152776479721069, "rc": 0, "maxrss_mb": 959.4140625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "U-235", "rep": 1, "load": 1.0712890625}
+{"cpu_s": 46.855437, "wall_s": 47.00034976005554, "rc": 0, "maxrss_mb": 731.0703125, "err": "", "arm": "talys", "nuclide": "U-235", "rep": 1, "load": 1.0322265625}
+{"cpu_s": 2.489468, "wall_s": 2.529853582382202, "rc": 0, "maxrss_mb": 961.23046875, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "U-238", "rep": 1, "load": 1.267578125}
+{"cpu_s": 3.054149, "wall_s": 4.424145936965942, "rc": 0, "maxrss_mb": 1220.1875, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "U-238", "rep": 1, "load": 1.32666015625}
+{"cpu_s": 3.5568489999999997, "wall_s": 3.6104588508605957, "rc": 0, "maxrss_mb": 969.765625, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "U-238", "rep": 1, "load": 1.30029296875}
+{"cpu_s": 3.796615, "wall_s": 4.062371253967285, "rc": 0, "maxrss_mb": 952.37109375, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "U-238", "rep": 1, "load": 1.30029296875}
+{"cpu_s": 23.83837, "wall_s": 23.8740291595459, "rc": 0, "maxrss_mb": 727.63671875, "err": "", "arm": "talys", "nuclide": "U-238", "rep": 1, "load": 1.1962890625}
+{"cpu_s": 2.867804, "wall_s": 3.9340476989746094, "rc": 0, "maxrss_mb": 919.8984375, "err": "", "n_done": 1, "arm": "new_warm", "nuclide": "Pu-239", "rep": 1, "load": 1.16552734375}
+{"cpu_s": 3.2038900000000003, "wall_s": 5.2751548290252686, "rc": 0, "maxrss_mb": 1186.9140625, "err": "", "n_done": 1, "arm": "new_cold_fused", "nuclide": "Pu-239", "rep": 1, "load": 1.15185546875}
+{"cpu_s": 3.128537, "wall_s": 3.1875293254852295, "rc": 0, "maxrss_mb": 974.6328125, "err": "", "n_done": 1, "arm": "new_cold", "nuclide": "Pu-239", "rep": 1, "load": 1.15185546875}
+{"cpu_s": 3.3909380000000002, "wall_s": 3.5476109981536865, "rc": 0, "maxrss_mb": 949.50390625, "err": "", "n_done": 1, "arm": "base_cold", "nuclide": "Pu-239", "rep": 1, "load": 1.1396484375}
+{"cpu_s": 16.506388, "wall_s": 16.570271492004395, "rc": 0, "maxrss_mb": 725.5390625, "err": "", "arm": "talys", "nuclide": "Pu-239", "rep": 1, "load": 1.10791015625}
+{"cpu_s": 26.041349999999998, "wall_s": 26.969297409057617, "rc": 0, "maxrss_mb": 1648.3984375, "err": "", "n_done": 20, "arm": "base_batch", "rep": 0, "nuclide": "ALL", "load": 1.37939453125}
+{"cpu_s": 24.764531, "wall_s": 26.64468216896057, "rc": 0, "maxrss_mb": 1605.08984375, "err": "", "n_done": 20, "arm": "new_batch", "rep": 0, "nuclide": "ALL", "load": 1.24853515625}
+{"cpu_s": 21.387367, "wall_s": 24.331843852996826, "rc": 0, "maxrss_mb": 3235.96875, "err": "", "n_done": 20, "arm": "new_batch_gpu", "rep": 0, "nuclide": "ALL", "load": 1.28759765625}
+{"cpu_s": 15.59293, "wall_s": 17.53154230117798, "rc": 0, "maxrss_mb": 2337.77734375, "err": "", "n_done": 20, "arm": "new_batch_fused", "rep": 0, "nuclide": "ALL", "load": 1.4521484375}
+{"cpu_s": 10.854424999999999, "wall_s": 10.908004522323608, "rc": 0, "maxrss_mb": 1650.0859375, "err": "", "n_done": 20, "arm": "new_batch_warm", "rep": 0, "nuclide": "ALL", "load": 1.42138671875}
+{"cpu_s": 17.450363, "wall_s": 19.338056087493896, "rc": 0, "maxrss_mb": 2314.296875, "err": "", "n_done": 20, "arm": "b50b_batch_fused", "rep": 0, "nuclide": "ALL", "load": 1.431640625}
+{"cpu_s": 12.174788999999999, "wall_s": 14.709011793136597, "rc": 0, "maxrss_mb": 1600.5390625, "err": "", "n_done": 20, "arm": "b50b_batch_warm", "rep": 0, "nuclide": "ALL", "load": 1.33544921875}
+{"cpu_s": 11.619995, "wall_s": 11.69461703300476, "rc": 0, "maxrss_mb": 1624.234375, "err": "", "n_done": 20, "arm": "b50b_batch_warm", "rep": 1, "nuclide": "ALL", "load": 1.283203125}
+{"cpu_s": 17.4425, "wall_s": 19.161044120788574, "rc": 0, "maxrss_mb": 2312.140625, "err": "", "n_done": 20, "arm": "b50b_batch_fused", "rep": 1, "nuclide": "ALL", "load": 1.27001953125}
+{"cpu_s": 11.081332, "wall_s": 11.27767300605774, "rc": 0, "maxrss_mb": 1650.578125, "err": "", "n_done": 20, "arm": "new_batch_warm", "rep": 1, "nuclide": "ALL", "load": 1.744140625}
+{"cpu_s": 15.207352, "wall_s": 18.568400144577026, "rc": 0, "maxrss_mb": 2337.76171875, "err": "", "n_done": 20, "arm": "new_batch_fused", "rep": 1, "nuclide": "ALL", "load": 1.7421875}
+{"cpu_s": 20.996129, "wall_s": 22.881755113601685, "rc": 0, "maxrss_mb": 3241.2421875, "err": "", "n_done": 20, "arm": "new_batch_gpu", "rep": 1, "nuclide": "ALL", "load": 1.748046875}
+{"cpu_s": 24.619246, "wall_s": 26.16329789161682, "rc": 0, "maxrss_mb": 1611.953125, "err": "", "n_done": 20, "arm": "new_batch", "rep": 1, "nuclide": "ALL", "load": 1.45263671875}
+{"cpu_s": 26.025352, "wall_s": 27.90648341178894, "rc": 0, "maxrss_mb": 1633.171875, "err": "", "n_done": 20, "arm": "base_batch", "rep": 1, "nuclide": "ALL", "load": 1.365234375}

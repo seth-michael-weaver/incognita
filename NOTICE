@@ -1,0 +1,8 @@
+Incognita
+Copyright 2026 Incognita contributors
+
+This product includes software ported from TALYS-2 (https://github.com/arjankoning1/talys),
+Copyright (c) 2026 Arjan Koning, distributed under the MIT License. The notice is reproduced in
+physics/hf/NOTICE-TALYS.md. Routines ported from ECIS-06 (J. Raynal) and the RIPL optical-model
+retrieval code are distributed inside TALYS under the same licence and record their provenance in
+their own docstrings.

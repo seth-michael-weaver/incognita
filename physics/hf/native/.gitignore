@@ -1,0 +1,4 @@
+# build output of scripts/build_native.sh. It lives in `lib/`, which is deliberately NOT a
+# package: `pkgutil.walk_packages` reports any .so next to an __init__.py as an importable
+# module, and tests/hf/test_contract.py::test_module_imports then tries to import it.
+lib/

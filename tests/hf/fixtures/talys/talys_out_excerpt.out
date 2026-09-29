@@ -1,0 +1,66 @@
+
+ Photoabsorption cross sections
+
+file: cross_g.tot
+
+ ########## RESULTS FOR E=   0.00100 ##########
+
+ Energy dependent input flags
+
+ Width fluctuations (flagwidth)            : y
+ Unresolved resonance parameters (flagurr) : n
+ Preequilibrium (flagpreeq)                : n
+ Multiple preequilibrium (flagmulpre)      : n
+ Number of continuum excitation energy bins: 40
+
+ +++++++++ OPTICAL MODEL PARAMETERS FOR INCIDENT CHANNEL ++++++++++
+
+           neutron  on  90Zr
+
+  Energy     V     rv    av    W     rw    aw    Vd   rvd   avd    Wd   rwd   awd   Vso   rvso  avso  Wso   rwso  awso  rc     Ef
+
+    0.001  51.06 1.218 0.666  0.21 1.218 0.666  0.00 1.272 0.530  3.23 1.272 0.530  5.97 1.050 0.600 -0.01 1.050 0.600 0.000  -9.580
+file: omp.out
+
+ Optical model results
+
+ Total cross section   : 1.2005E+04 mb
+ Reaction cross section: 6.5007E+03 mb
+ Elastic cross section : 5.5046E+03 mb
+
+ S-wave and P-wave strength functions and potential scattering radius
+
+      A      Value
+
+ S0:  90  0.4667 .e-4
+ S1:  90  4.7900 .e-4
+ R :  90  6.6185 fm
+
+ Isospin factors to reduce emission 
+
+ gamma    -1.00000
+ neutron  -1.00000
+ proton   -1.00000
+ deuteron -1.00000
+ triton   -1.00000
+ helium-3 -1.00000
+ alpha    -1.00000
+
+ Transmission coefficients for incident channel
+
+file: transmission_inc.out
+
+ ++++++++++ DIRECT CROSS SECTIONS AND GIANT RESONANCES ++++++++++
+
+
+ ++++++++++ Normalization of reaction cross section ++++++++++
+
+ Reaction cross section          :     6500.66016 (A)
+ Sum over T(j,l)                 :     6500.61230 (B)
+ Compound nucleus formation c.s. :     6500.66016 (C)
+ Ratio C/B                       :        1.00000
+
+ ++++++++++ INITIAL COMPOUND NUCLEUS FORMATION +++++++++++++++++++++++++++++++
+
+
+ ++++++++++ CHECK OF FLUX CONSERVATION OF TRANSMISSION COEFFICIENTS ++++++++++

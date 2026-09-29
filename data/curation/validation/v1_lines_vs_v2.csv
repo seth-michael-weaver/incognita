@@ -1,0 +1,525 @@
+src_line,dataset_key,nuclide,v1_rule,v1_rules,v1_scope,v1_class,old,new,agree,n_cells,v2_rules,untested,d_dex,n_ref
+0,22360/22360031/2,Z072N104M0,,,dataset,L2,exclude,exclude,True,54,R10x,"below statistical region (1.2e+03 eV, D0 ripl)",;;;;;,;;;;;
+1,23181/23181002/,Z063N088M0,,,points,L2,exclude,exclude,True,2,R1+R7,,;,;
+2,32795/32795002/,Z072N108M0,,,dataset,L2,exclude,exclude,True,1,R8+R9,,,0
+3,32814/32814008/,Z040N056M0,,,dataset,L2,exclude,downweight,False,1,R8,,1.235739,1
+4,33113/33113002/,Z065N094M0,,,points,L2,exclude,downweight,False,1,R5d,,-1.097859,2
+5,23267/23267022/,Z076N114M0,,,dataset,L0,renorm,renorm,True,1,R3,,,
+6,23267/23267023/,Z076N116M0,,,dataset,L0,renorm,renorm,True,1,R3,,,
+7,10086/10086002/,Z092N146M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+8,10421/10421005/,Z092N146M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+9,11778/11778004/,Z047NAT,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+10,11778/11778007/,Z049NAT,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+11,11778/11778009/,Z051NAT,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+12,11778/11778011/,Z053N074M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+13,11778/11778014/,Z079N118M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+14,14407/14407005/,Z040N054M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+15,14407/14407008/,Z040N054M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+16,14407/14407017/,Z040N056M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+17,14714/14714003/2,Z037N048M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+18,14714/14714004/2,Z037N048M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+19,14714/14714011/2,Z038N050M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+20,14867/14867004/3,Z048N058M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+21,14867/14867018/3,Z048N066M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+22,14867/14867026/2,Z048N068M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+23,20077/20077004/2,Z048NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+24,20465/20465002/,Z092N146M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,14,R3,,;;;;;,;;;;;
+25,20820/20820002/,Z076N117M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+26,21619/21619003/,Z039N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+27,21619/21619004/,Z041N052M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+28,21619/21619011/1,Z064NAT,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,3,R3,,;;,;;
+29,21619/21619011/2,Z064NAT,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,3,R3,,;;,;;
+30,21619/21619016/1,Z074NAT,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,3,R3,,;;,;;
+31,21619/21619016/2,Z074NAT,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,3,R3,,;;,;;
+32,21647/21647002/,Z056N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+33,21647/21647003/,Z058N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+34,21647/21647005/,Z071N104M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+35,21647/21647006/,Z071N105M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+36,21647/21647007/,Z073N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+37,21647/21647008/,Z056N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+38,21647/21647009/,Z058N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+39,21647/21647011/,Z071N105M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+40,21647/21647012/,Z073N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+41,21768/21768004/,Z072N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+42,21913/21913007/,Z036N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,4,R3,,;;;,;;;
+43,22037/22037016/1,Z032N042M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+44,22037/22037016/2,Z032N042M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+45,22037/22037017/1,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+46,22037/22037017/2,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+47,22037/22037018/1,Z031N040M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+48,22037/22037018/2,Z031N040M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+49,22037/22037019/1,Z033N042M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+50,22037/22037019/2,Z033N042M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+51,22037/22037020/1,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+52,22037/22037020/2,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+53,22037/22037021/1,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+54,22037/22037021/2,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+55,22037/22037022/1,Z035N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+56,22037/22037022/2,Z035N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+57,22037/22037023/1,Z036N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+58,22037/22037023/2,Z036N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+59,22037/22037024/1,Z037N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+60,22037/22037024/2,Z037N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+61,22037/22037025/1,Z037N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+62,22037/22037025/2,Z037N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+63,22145/22145002/,Z036N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,2,R3,,;,;
+64,22145/22145005/,Z036N048M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+65,22145/22145006/,Z036N050M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+66,22174/22174002/,Z055N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+67,22177/22177002/1,Z039N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+68,22177/22177002/2,Z039N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+69,22177/22177003/1,Z038N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+70,22177/22177003/2,Z038N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+71,22177/22177004/,Z038N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+72,22182/22182002/,Z040N054M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+73,22182/22182003/,Z040N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+74,22182/22182004/,Z040N054M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+75,22182/22182005/,Z040N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+76,22285/22285015/,Z052N073M0,TWIN d:exact,,dataset,none,exclude,exclude,True,8,R3,,;;;;;,;;;;;
+77,22285/22285016/,Z052N074M0,TWIN d:exact,,dataset,none,exclude,exclude,True,8,R3,,;;;;;,;;;;;
+78,22305/22305002/1,Z060N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+79,22305/22305002/2,Z060N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+80,22305/22305003/1,Z060N088M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+81,22305/22305003/2,Z060N088M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+82,22305/22305004/1,Z060N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+83,22305/22305004/2,Z060N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+84,22305/22305005/,Z060N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+85,22305/22305006/,Z060N088M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+86,22305/22305007/,Z060N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+87,22306/22306002/,Z047N060M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+88,22306/22306003/,Z047N062M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+89,22375/22375002/,Z062N085M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,17,R3,,;;;;;,;;;;;
+90,22375/22375003/,Z062N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,17,R3,,;;;;;,;;;;;
+91,22375/22375004/,Z062N087M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,17,R3,,;;;;;,;;;;;
+92,22375/22375005/,Z062N088M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,17,R3,,;;;;;,;;;;;
+93,22375/22375006/,Z062N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,17,R3,,;;;;;,;;;;;
+94,22375/22375007/,Z062N085M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,8,R3,,;;;;;,;;;;;
+95,22375/22375008/,Z062N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,8,R3,,;;;;;,;;;;;
+96,22375/22375009/,Z062N087M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,8,R3,,;;;;;,;;;;;
+97,22375/22375010/,Z062N088M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,8,R3,,;;;;;,;;;;;
+98,22375/22375011/,Z062N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,8,R3,,;;;;;,;;;;;
+99,22376/22376002/,Z061N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+100,22376/22376003/,Z061N086M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+101,22376/22376004/,Z062N085M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+102,22448/22448002/,Z055N080M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+103,22450/22450038/1,Z068NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+104,22451/22451019/3,Z050NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+105,22451/22451019/4,Z050NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+106,22451/22451019/5,Z050NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+107,22451/22451021/,Z050NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+108,22454/22454002/,Z066N098M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+109,22454/22454003/,Z072N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+110,22459/22459002/,Z063N092M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+111,22459/22459005/,Z063N092M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+112,22603/22603002/1,Z062N090M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+113,22603/22603002/2,Z062N090M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+114,22603/22603003/1,Z063N088M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+115,22603/22603003/2,Z063N088M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+116,22603/22603004/1,Z064N088M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+117,22603/22603004/2,Z064N088M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+118,22603/22603005/1,Z064N094M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+119,22603/22603005/2,Z064N094M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+120,22632/22632002/,Z034N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+121,22632/22632003/,Z034N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+122,22632/22632006/,Z040N054M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+123,22632/22632008/,Z050N074M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+124,22638/22638003/,Z038N052M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+125,22638/22638004/,Z038N052M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+126,22670/22670002/,Z062N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+127,22670/22670003/,Z062N092M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+128,22670/22670004/,Z063N088M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+129,22670/22670005/,Z063N088M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+130,22670/22670006/,Z063N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+131,22670/22670007/,Z068N096M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+132,22670/22670008/,Z068N102M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+133,22670/22670009/,Z062N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+134,22670/22670010/,Z062N092M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+135,22670/22670011/,Z063N088M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+136,22670/22670012/,Z063N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+137,22670/22670013/,Z068N096M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+138,22670/22670014/,Z068N102M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+139,22677/22677002/,Z061N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+140,22683/22683002/,Z066N095M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,4,R3,,;;;,;;;
+141,22683/22683003/,Z066N096M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,4,R3,,;;;,;;;
+142,22683/22683004/,Z066N097M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+143,22683/22683006/,Z066N097M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+144,22685/22685002/,Z044N052M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+145,22685/22685003/,Z044N058M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+146,22685/22685004/,Z044N060M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+147,22685/22685005/,Z044N052M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+148,22685/22685006/,Z044N058M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+149,22685/22685007/,Z044N060M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+150,22777/22777002/,Z075N110M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+151,22808/22808002/,Z036N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+152,22808/22808013/,Z036N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+153,22829/22829005/,Z061N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+154,22829/22829006/,Z061N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+155,22829/22829007/,Z061N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+156,22829/22829008/,Z061N086M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+157,22834/22834005/,Z034N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+158,22841/22841002/,Z069N102M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+159,22846/22846002/,Z055N080M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+160,22852/22852002/,Z082N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,4,R3,,;;;,;;;
+161,22852/22852003/,Z082N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,2,R3,,;,;
+162,22879/22879002/,Z057N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+163,22879/22879003/,Z057N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+164,22879/22879004/,Z057N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,10,R3,,;;;;;,;;;;;
+165,22883/22883002/,Z082N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+166,22883/22883003/,Z082N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+167,22883/22883004/,Z082N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+168,22883/22883005/,Z082N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+169,22883/22883009/,Z082N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+170,22883/22883010/,Z083N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+171,22892/22892002/,Z034N040M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+172,22892/22892004/2,Z038N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+173,22892/22892005/,Z038N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+174,22892/22892008/1,Z038N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+175,22892/22892011/,Z034N040M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,12,R3,,;;;;;,;;;;;
+176,22892/22892013/,Z038N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,12,R3,,;;;;;,;;;;;
+177,22892/22892017/,Z038N046M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+178,22893/22893003/,Z062N089M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+179,22897/22897002/,Z040N051M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,4,R3,,;;;,;;;
+180,22897/22897003/,Z040N051M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+181,22897/22897004/,Z040N052M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,4,R3,,;;;,;;;
+182,22897/22897005/,Z040N052M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+183,22932/22932002/,Z064N091M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+184,22932/22932003/,Z064N093M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+185,22939/22939005/1,Z056N076M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+186,22939/22939006/,Z046N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+187,22939/22939007/,Z046N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+188,22939/22939008/,Z052N068M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+189,22939/22939009/,Z052N068M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+190,22939/22939010/,Z052N068M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+191,22939/22939011/,Z052N068M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+192,22939/22939012/,Z052N068M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+193,22939/22939013/,Z056N074M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+194,22939/22939014/,Z056N074M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+195,22939/22939015/,Z056N076M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+196,22939/22939016/,Z056N076M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+197,22939/22939017/,Z066N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+198,22939/22939018/,Z066N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+199,22939/22939019/1,Z046N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+200,22939/22939019/2,Z046N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+201,22939/22939019/3,Z046N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+202,22939/22939020/1,Z052N068M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+203,22939/22939020/2,Z052N068M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+204,22939/22939020/3,Z052N068M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+205,22939/22939021/1,Z056N074M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+206,22939/22939021/2,Z056N074M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+207,22939/22939021/3,Z056N074M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+208,22939/22939021/4,Z056N074M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+209,22939/22939022/1,Z056N076M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+210,22939/22939022/3,Z056N076M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+211,22939/22939023/2,Z066N090M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+212,22939/22939039/4,Z056N074M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+213,22941/22941008/,Z090N142M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+214,22941/22941009/,Z091N142M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+215,22941/22941010/,Z092N142M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+216,22941/22941011/,Z092N143M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+217,22959/22959002/,Z028N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+218,22963/22963002/,Z072N102M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+219,22963/22963003/,Z072N102M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+220,22963/22963004/,Z072N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+221,22963/22963005/,Z072N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+222,22963/22963008/,Z072N102M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+223,22963/22963009/,Z072N110M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+224,22971/22971002/,Z028N030M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+225,22971/22971003/,Z034N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+226,22978/22978004/,Z040N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+227,22978/22978005/,Z040N051M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+228,22978/22978007/,Z040N054M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+229,22978/22978008/,Z040N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+230,22978/22978009/,Z057N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+231,22996/22996007/,Z026N032M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+232,22996/22996008/,Z027N032M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+233,22996/22996009/,Z028N036M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+234,22996/22996010/,Z029N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+235,22996/22996011/,Z029N036M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+236,23035/23035002/,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+237,23035/23035003/,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+238,23035/23035004/,Z035N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+239,23035/23035007/,Z037N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+240,23035/23035008/,Z037N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+241,23035/23035009/,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+242,23035/23035010/,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+243,23035/23035011/,Z035N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+244,23035/23035012/,Z037N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+245,23035/23035013/,Z037N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+246,23035/23035014/,Z035N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+247,23035/23035015/,Z035N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+248,23035/23035016/,Z037N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+249,23035/23035017/,Z037N050M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+250,23043/23043002/,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+251,23043/23043003/,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+252,23047/23047003/,Z026N028M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+253,23051/23051002/,Z083N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+254,23051/23051003/,Z083N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+255,23051/23051004/,Z083N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+256,23051/23051005/,Z083N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+257,23051/23051006/,Z083N126M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+258,23062/23062002/,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+259,23062/23062003/,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+260,23062/23062004/1,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+261,23062/23062004/2,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+262,23064/23064002/,Z028N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+263,23064/23064003/,Z028N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+264,23064/23064004/,Z028N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+265,23065/23065002/,Z034N040M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+266,23065/23065006/,Z034N042M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+267,23065/23065007/,Z034N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+268,23065/23065008/,Z034N046M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,5,R3,,;;;;,;;;;
+269,23065/23065009/,Z034N048M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,6,R3,,;;;;;,;;;;;
+270,23086/23086002/,Z028N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+271,23092/23092007/,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+272,23094/23094002/,Z070N098M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,11,R3,,;;;;;,;;;;;
+273,23094/23094003/,Z074N106M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,11,R3,,;;;;;,;;;;;
+274,23094/23094004/,Z076N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,11,R3,,;;;;;,;;;;;
+275,23094/23094005/,Z078N112M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,11,R3,,;;;;;,;;;;;
+276,23094/23094006/,Z080N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,11,R3,,;;;;;,;;;;;
+277,23094/23094007/,Z080N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+278,23094/23094008/,Z070N098M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+279,23094/23094009/,Z074N106M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+280,23094/23094010/,Z076N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+281,23094/23094011/,Z078N112M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+282,23094/23094012/,Z080N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+283,23094/23094013/,Z080N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+284,23094/23094014/,Z070N098M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+285,23094/23094015/,Z074N106M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+286,23094/23094016/,Z076N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+287,23094/23094017/,Z078N112M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+288,23094/23094018/,Z080N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+289,23094/23094019/,Z080N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+290,23166/23166002/,Z030N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+291,23166/23166003/,Z030N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+292,23166/23166004/,Z030N038M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+293,23166/23166005/,Z030N038M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+294,23166/23166006/,Z030N040M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+295,23166/23166007/,Z030N040M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+296,23166/23166008/,Z030N040M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+297,23166/23166009/,Z030N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+298,23166/23166010/,Z030N040M0,TWIN x:renorm,,dataset,none,exclude,exclude,True,1,R3,,,
+299,23170/23170002/,Z092N143M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+300,23170/23170003/,Z092N146M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+301,23170/23170005/,Z092N143M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+302,23170/23170006/,Z092N146M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+303,23220/23220003/,Z054N078M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+304,23220/23220007/,Z054N078M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+305,23260/23260070/,Z038N046M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+306,23260/23260073/,Z038N046M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+307,23260/23260074/,Z038N048M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+308,23260/23260088/,Z046N064M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+309,23260/23260103/,Z050N066M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+310,23260/23260111/,Z056N078M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+311,23260/23260117/,Z064N088M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+312,23260/23260119/,Z064N094M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+313,23260/23260123/,Z069N100M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+314,23260/23260125/,Z070N098M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+315,23260/23260128/,Z070N104M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+316,23260/23260131/,Z072N102M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+317,23260/23260143/,Z090N142M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+318,23267/23267002/,Z070N104M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+319,23267/23267003/,Z070N106M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+320,23267/23267004/,Z076N114M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+321,23267/23267005/,Z076N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+322,23267/23267006/,Z078N118M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+323,23267/23267008/,Z078N118M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+324,23267/23267009/,Z078N120M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+325,23267/23267010/,Z080N122M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+326,23267/23267011/,Z080N124M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+327,23267/23267012/,Z070N104M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+328,23267/23267013/,Z070N106M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+329,23267/23267014/,Z076N114M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+330,23267/23267015/,Z076N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+331,23267/23267016/,Z078N118M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+332,23267/23267017/,Z078N120M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+333,23267/23267018/,Z080N122M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+334,23267/23267019/,Z080N124M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+335,23267/23267020/,Z070N104M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+336,23267/23267021/,Z070N106M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+337,23267/23267022/,Z076N114M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+338,23267/23267023/,Z076N116M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+339,23267/23267024/1,Z078N118M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+340,23267/23267024/2,Z078N118M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+341,23267/23267026/,Z078N120M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+342,23267/23267027/,Z080N122M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+343,23326/23326002/1,Z029N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+344,23326/23326002/2,Z029N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+345,23326/23326004/,Z029N034M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+346,23372/23372007/,Z030N037M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+347,23420/23420002/,Z058N078M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+348,23420/23420003/,Z058N078M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+349,23420/23420004/,Z058N080M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+350,23420/23420005/,Z058N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+351,23420/23420006/,Z058N084M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+352,23420/23420007/1,Z058N078M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+353,23420/23420007/2,Z058N078M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+354,23420/23420008/1,Z058N078M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+355,23420/23420008/2,Z058N078M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+356,23420/23420009/1,Z058N080M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+357,23420/23420009/2,Z058N080M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+358,23420/23420010/1,Z058N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+359,23420/23420010/2,Z058N082M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+360,23420/23420011/1,Z058N084M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+361,23420/23420011/2,Z058N084M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+362,23451/23451007/,Z032N041M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,9,R3,,;;;;;,;;;;;
+363,23520/23520005/,Z083N126M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+364,30079/30079011/,Z032N044M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+365,30357/30357004/,Z042N050M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+366,30357/30357007/,Z042N052M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+367,30357/30357010/,Z042N053M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+368,30357/30357013/,Z042N054M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+369,30357/30357016/,Z042N055M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+370,30357/30357019/,Z042N056M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+371,30357/30357022/,Z042N058M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+372,30357/30357023/,Z042NAT,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+373,30357/30357025/,Z042N054M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+374,30357/30357026/,Z042N055M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+375,30357/30357027/,Z042N056M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+376,30506/30506008/,Z056N080M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+377,30506/30506009/,Z048N062M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+378,30506/30506010/,Z042N054M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+379,30506/30506011/,Z042N052M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+380,31512/31512002/,Z044N052M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+381,31512/31512003/,Z044N058M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+382,31512/31512004/,Z044N060M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+383,32224/32224003/,Z073N108M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+384,32234/32234008/2,Z026N028M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+385,40059/40059006/,Z092N146M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,26,R3,,;;;;;,;;;;;
+386,40072/40072021/5,Z029NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+387,40072/40072031/3,Z074NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+388,40072/40072034/3,Z082NAT,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+389,40072/40072035/,Z083N126M0,TWIN d:exact,,dataset,none,exclude,exclude,True,1,R3,,,
+390,40222/40222003/,Z049NAT,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,13,R3,,;;;;;,;;;;;
+391,40431/40431002/,Z092N146M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,1,R3,,,
+392,40621/40621003/,Z066N095M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+393,40621/40621004/,Z066N096M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+394,40621/40621005/,Z066N097M0,TWIN d:ratio,,dataset,none,exclude,exclude,True,15,R3,,;;;;;,;;;;;
+395,40760/40760002/,Z042N058M0,TWIN x:SPSDD,,dataset,none,exclude,exclude,True,14,R3,,;;;;;,;;;;;
+396,41434/41434010/,Z072N106M2,TWIN d:ratio,,dataset,none,exclude,exclude,True,4,R3,,;;;,;;;
+397,41490/41490002/,Z090N142M0,TWIN d:exact,,dataset,none,exclude,exclude,True,8,R3,,;;;;;,;;;;;
+398,10298/10298003/,Z066N098M0,c,,points,L2,exclude,downweight,False,1,R5d,,0.472524,4
+399,10298/10298003/,Z066N098M0,c,,points,L2,exclude,keep,False,1,,,0.588869,1
+400,10298/10298003/,Z066N098M0,c,,points,L2,exclude,keep,False,1,,,0.252164,3
+401,10298/10298003/,Z066N098M0,c,,points,L2,exclude,downweight,False,1,R5d,,0.378742,3
+402,10298/10298003/,Z066N098M0,c,,points,L2,exclude,downweight,False,1,R5d,,0.41927,3
+403,10776/10776029/,Z033N042M0,c,,points,L2,exclude,downweight,False,1,R9,,0.965556,4
+404,11675/11675020/,Z060N090M0,c,,points,L2,exclude,keep,False,1,,,0.603013,1
+405,11675/11675020/,Z060N090M0,c,,points,L2,exclude,keep,False,1,,,0.417959,1
+406,11675/11675020/,Z060N090M0,c,,points,L2,exclude,exclude,True,1,R12+R5d,,0.529511,2
+407,11675/11675020/,Z060N090M0,c,,points,L2,exclude,keep,False,1,,,0.432903,2
+408,11675/11675023/,Z066N098M0,c,,points,L2,exclude,keep,False,1,,,0.26478,2
+409,11675/11675023/,Z066N098M0,c,,points,L2,exclude,keep,False,1,,,0.255071,2
+410,12115/12115002/,Z072N108M0,c,,points,L2,exclude,keep,False,1,,,0.418752,3
+411,20432/20432005/,Z067N098M0,c,,points,L2,exclude,exclude,True,1,R5x,,-1.060107,5
+412,20519/20519002/,Z055N078M0,c,,points,L2,exclude,keep,False,1,,,0.341403,2
+413,20899/20899008/,Z033N042M0,c,,points,L2,exclude,downweight,False,1,R9,,1.159621,4
+414,21187/21187002/,Z092N146M0,c,,points,L2,exclude,keep,False,1,,,0.386762,2
+415,21438/21438016/,Z044N060M0,c,,points,L2,exclude,downweight,False,1,R5d+R9,,0.96732,2
+416,21438/21438023/,Z064N096M0,c,,points,L2,exclude,downweight,False,1,R5d+R9,,1.028611,2
+417,21438/21438025/,Z074N112M0,c,,points,L2,exclude,keep,False,1,,,0.560667,3
+418,21438/21438030/,Z090N142M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.702607,4
+419,21999/21999025/,Z040N056M0,c,,points,L2,exclude,downweight,False,1,R9,,-1.235739,1
+420,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,0.99524,1
+421,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,0.943543,1
+422,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,0.956644,1
+423,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.145535,1
+424,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.031252,1
+425,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.012203,1
+426,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.235777,1
+427,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.111485,1
+428,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.374193,1
+429,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.141707,1
+430,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.109564,1
+431,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.206871,1
+432,22360/22360031/1,Z072N104M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.250656,1
+433,22360/22360032/1,Z072N106M0,c,,points,L2,exclude,keep,False,1,,,0.620534,1
+434,22360/22360032/1,Z072N106M0,c,,points,L2,exclude,keep,False,1,,,0.583177,1
+435,22360/22360032/2,Z072N106M0,c,,points,L2,exclude,keep,False,1,,,0.624259,1
+436,22360/22360033/1,Z072N108M0,c,,points,L2,exclude,keep,False,1,,,0.652549,3
+437,22360/22360033/1,Z072N108M0,c,,points,L2,exclude,keep,False,1,,,0.45462,3
+438,22360/22360033/1,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.519555,2
+439,22360/22360033/1,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.752201,4
+440,22360/22360033/1,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.881242,4
+441,22360/22360033/1,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.945444,5
+442,22360/22360033/1,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.973626,2
+443,22360/22360033/1,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.768137,2
+444,22360/22360033/2,Z072N108M0,c,,points,L2,exclude,keep,False,1,,,0.415488,3
+445,22360/22360033/2,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.52378,2
+446,22360/22360033/2,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.750167,4
+447,22360/22360033/2,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.912622,4
+448,22360/22360033/2,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.943436,5
+449,22360/22360033/2,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.99163,2
+450,22360/22360033/2,Z072N108M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.802153,2
+451,22580/22580015/,Z078N120M0,c,,points,L2,exclude,exclude,True,1,R10x,,1.22508,1
+452,22580/22580016/,Z079N118M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.704781,16
+453,22612/22612004/,Z066N098M0,c,,points,L2,exclude,keep,False,1,,,0.239807,2
+454,30066/30066004/,Z045N058M0,c,,points,L2,exclude,downweight,False,1,R9,,0.845098,3
+455,30067/30067021/,Z045N058M0,c,,points,L2,exclude,downweight,False,1,R9,,0.863323,3
+456,30282/30282003/,Z078N120M0,c,,points,L2,exclude,downweight,False,1,R9,,0.848732,1
+457,30493/30493008/,Z057N082M0,c,,points,L2,exclude,exclude,True,1,R12+R5x,,-0.585027,7
+458,30501/30501010/,Z064N096M0,c,,points,L2,exclude,exclude,True,1,R5x,,-1.05339,4
+459,30659/30659002/T,Z055N078M0,c,,points,L2,exclude,keep,False,1,,,0.325616,2
+460,31080/31080005/,Z053N074M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.793133,8
+461,40385/40385003/,Z092N143M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.597174,2
+462,40385/40385003/,Z092N143M0,c,,points,L2,exclude,exclude,True,1,R5x,,0.833187,3
+463,40385/40385003/,Z092N143M0,c,,points,L2,exclude,exclude,True,1,R5x,,1.091447,3
+464,40975/40975019/,Z058N084M0,c,,points,L2,exclude,exclude,True,1,R1,,,
+465,14557/14557002/,Z050N074M0,,,dataset,L2,exclude,exclude,True,1,R2x,,,
+466,14557/14557003/,Z050N076M0,,,dataset,L2,exclude,exclude,True,1,R2x,,,
+467,14557/14557004/,Z050N078M0,,,dataset,L2,exclude,exclude,True,1,R2x,,,
+468,14557/14557005/,Z050N080M0,,,dataset,L2,exclude,exclude,True,1,R2x,,,
+469,14557/14557006/,Z050N082M0,,,dataset,L2,exclude,exclude,True,1,R2x,,,
+470,22892/22892004/1,Z038N046M0,,,dataset,L0,renorm,renorm,True,1,,partial or isomeric-state quantity,,
+471,22939/22939002/1,Z052N068M0,,,dataset,L0,renorm,renorm,True,1,,partial or isomeric-state quantity,,
+472,22939/22939002/2,Z052N068M0,,,dataset,L0,renorm,renorm,True,1,,partial or isomeric-state quantity,,
+473,23267/23267007/,Z078N118M0,,,dataset,L0,renorm,renorm,True,1,,partial or isomeric-state quantity,,
+474,23267/23267025/,Z078N118M0,,,dataset,L0,renorm,renorm,True,1,,partial or isomeric-state quantity,,
+475,22541/22541002/,Z092N146M0,a,,points,L0,exclude,exclude,True,1,R1,,,
+476,22541/22541003/,Z092N146M0,a,,points,L0,exclude,exclude,True,1,R1,,,
+477,41426/41426012/,Z045N058M0,b,,points,L0,exclude,exclude,True,1,R12+R6d,,-0.410354,3
+478,41426/41426012/,Z045N058M0,b,,points,L0,exclude,exclude,True,1,R12+R5d+R6d,,-0.47709,2
+479,41426/41426012/,Z045N058M0,b,,points,L0,exclude,exclude,True,1,R12+R5d+R6d,,-0.466114,4
+480,21683/21683002/,Z036N048M0,MACSCHECK,,dataset,L1,exclude,exclude,True,16,R11x,"below statistical region (1.6e+05 eV, D0 ripl)",;;;;;,;;;;;
+481,14128/14128003/,Z069N102M0,MACSCHECK,,dataset,none,exclude,exclude,True,52,R11d+R12,"below statistical region (1e+03 eV, D0 parity-median of 6)",;;;;;,;;;;;
+482,21765/21765005/,Z062N087M0,MACSCHECK,,dataset,none,downweight,downweight,True,20,R11d,,0.219975;0.194879;0.193489;0.235135;0.188259;0.183771,2;2;2;2;2;3
+483,40520/40520009/,Z062N087M0,MACSCHECK,,dataset,none,downweight,downweight,True,19,R11d,,0.326172;0.222446;0.275917;0.204537;0.15385;0.048944,1;1;2;2;2;1
+484,40520/40520018/,Z060N086M0,MACSCHECK,,dataset,none,downweight,downweight,True,18,R11d,"below statistical region (1.36e+04 eV, D0 ripl)",;;;;;0.413982,;;;;;3
+485,30064/30064004/,Z049N066M0,MEVCHECK,a1,dataset,L0,exclude,exclude,True,2,R2x,,;,;
+486,40336/40336090/,Z046N064M0,MEVCHECK,a2+a3,dataset,L0,downweight,downweight,True,3,R2d,,;;,0;0;0
+487,40005/40005005/,Z051N072M0,MEVCHECK,a2+a3,dataset,L0,downweight,downweight,True,10,R2d,,-0.371371;;;;0.25656;0.252323,1;0;0;0;1;1
+488,40975/40975033/,Z051N072M0,MEVCHECK,a2+a3,dataset,L0,downweight,downweight,True,1,R2d,,0.022065,1
+489,40975/40975019/,Z058N084M0,MEVCHECK,c3,dataset,L0,exclude,exclude,True,1,R1,,,
+490,20092/20092012/,Z056N082M0,MEVCHECK,d+b,dataset,L0,exclude,exclude,True,1,R5d+R8,,0.420216,3
+491,40244/40244104/,Z092N146M0,MEVCHECK,d+b,points,L0,exclude,downweight,False,1,R8,,0.381818,6
+492,12450/12450002/,Z092N144M0,MEVCHECK,d,points,L0,exclude,keep,False,1,R3d,,0.336758,4
+493,40007/40007008/,Z076N116M0,MEVCHECK,d,points,L0,downweight,downweight,True,1,R5d,,-0.389964,2
+494,21187/21187002/,Z092N146M0,MEVCHECK,d,points,L0,downweight,keep,False,1,,,0.386762,2
+495,11675/11675019/,Z060N088M0,MEVCHECK,d,points,L0,downweight,exclude,False,3,R12+R5d,,0.293506;0.348947;0.33187,2;2;2
+496,11624/11624006/,Z042N056M0,MEVCHECK,d,points,L0,downweight,keep,False,1,,,0.268524,3
+497,11675/11675005/,Z029N036M0,MEVCHECK,b,points,L0,downweight,downweight,True,3,R8,,-0.220861;-0.177356;-0.266389,7;3;3
+498,11675/11675007/,Z033N042M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,,0
+499,11675/11675012/,Z042N058M0,MEVCHECK,b,points,L0,downweight,downweight,True,3,R8,,0.031049;-0.106927;-0.182017,2;2;2
+500,11675/11675015/,Z053N074M0,MEVCHECK,b,points,L0,downweight,exclude,False,3,R12+R5d+R5x+R8,,-0.30555;-0.36016;-0.703743,6;2;2
+501,11675/11675021/,Z062N092M0,MEVCHECK,b,points,L0,downweight,downweight,True,3,R8,,-0.392206;;,2;0;0
+502,11675/11675023/,Z066N098M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,,0
+503,11945/11945002/,Z047N060M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,-0.196506,1
+504,11945/11945004/,Z047N062M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,,0
+505,11945/11945008/,Z053N074M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,0.340353,2
+506,11945/11945013/,Z092N146M0,MEVCHECK,b,dataset,L0,downweight,exclude,False,1,R12+R5x+R8,,1.127906,3
+507,12115/12115002/,Z072N108M0,MEVCHECK,b,points,L0,downweight,downweight,True,2,R8,,-0.011083;-0.066759,2;1
+508,20092/20092007/,Z029N036M0,MEVCHECK,b,dataset,L0,downweight,downweight,True,1,R8,,0.149927,7
+509,20092/20092009/,Z033N042M0,MEVCHECK,b,dataset,L0,downweight,downweight,True,1,R3d+R8,,0.060484,2
+510,20092/20092011/,Z053N074M0,MEVCHECK,b,dataset,L0,downweight,downweight,True,1,R8,,0.150534,6
+511,21962/21962003/,Z079N118M0,MEVCHECK,b,points,L0,downweight,exclude,False,4,R5d+R8,,-0.120722;-0.145343;-0.402343;-0.843979,3;2;2;1
+512,30024/30024002/,Z073N108M0,MEVCHECK,b,points,L0,downweight,downweight,True,2,R8,,0.346074;,2;0
+513,30692/30692002/,Z064N096M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,-0.260963,2
+514,30928/30928002/,Z064N096M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,-0.238968,2
+515,40244/40244092/,Z028N036M0,MEVCHECK,b,dataset,L0,downweight,downweight,True,1,R8,,,0
+516,40244/40244093/,Z029N036M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,-0.094079,3
+517,40244/40244095/,Z035N044M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,,0
+518,40244/40244096/,Z035N046M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,,0
+519,40244/40244097/,Z042N058M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,0.006853,2
+520,40244/40244098/,Z047N060M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,0.196506,1
+521,40244/40244100/,Z056N082M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,0.022863,1
+522,40244/40244103/,Z082N126M0,MEVCHECK,b,points,L0,downweight,downweight,True,1,R8,,,0
+523,40244/40244104/,Z092N146M0,MEVCHECK,b,points,L0,downweight,exclude,False,1,R5x+R8,,0.645024,4

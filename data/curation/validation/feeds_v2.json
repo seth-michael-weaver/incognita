@@ -1,0 +1,78 @@
+{
+ "changed_cells": 317,
+ "changed_datasets": 153,
+ "transitions": {
+  "keep->exclude": 145,
+  "keep->downweight": 92,
+  "exclude->downweight": 14,
+  "exclude->keep": 57,
+  "downweight->keep": 3,
+  "downweight->exclude": 6
+ },
+ "membership": {
+  "grind_lso": 258,
+  "blind_post2012": 6,
+  "dev": 49,
+  "vault": 79,
+  "terra_capture": 207,
+  "t2_dev": 79,
+  "retro_primary-ctx": 0,
+  "retro_primary": 0,
+  "retro_s1": 0,
+  "retro_s2": 0,
+  "retro_s3comp": 1,
+  "retro_s3pub": 0,
+  "retro_s4": 2,
+  "retro_s6": 0
+ },
+ "blind_post2012_detail": [
+  {
+   "dataset_key": "30839/30839004/",
+   "nuclide": "Z070N098M0",
+   "e_ev": 0.0253,
+   "v1": "keep",
+   "v2": "exclude",
+   "rules": "R5x"
+  },
+  {
+   "dataset_key": "30858/30858003/",
+   "nuclide": "Z070N104M0",
+   "e_ev": 0.55,
+   "v1": "keep",
+   "v2": "exclude",
+   "rules": "R5x"
+  },
+  {
+   "dataset_key": "31869/31869003/1",
+   "nuclide": "Z074N112M0",
+   "e_ev": 0.55,
+   "v1": "keep",
+   "v2": "exclude",
+   "rules": "R5x"
+  },
+  {
+   "dataset_key": "31869/31869003/2",
+   "nuclide": "Z074N112M0",
+   "e_ev": 0.55,
+   "v1": "keep",
+   "v2": "exclude",
+   "rules": "R5x"
+  },
+  {
+   "dataset_key": "32814/32814008/",
+   "nuclide": "Z040N056M0",
+   "e_ev": 14135062.787267696,
+   "v1": "exclude",
+   "v2": "downweight",
+   "rules": "R8"
+  },
+  {
+   "dataset_key": "33113/33113002/",
+   "nuclide": "Z065N094M0",
+   "e_ev": 5080000.0,
+   "v1": "exclude",
+   "v2": "downweight",
+   "rules": "R5d"
+  }
+ ]
+}

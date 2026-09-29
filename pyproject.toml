@@ -1,0 +1,63 @@
+[project]
+name = "incognita"
+version = "0.1.0"
+description = "Open, calibrated predictions of neutron reaction cross sections across the chart of nuclides, with a public blind benchmark and a registry of predictions made before the data."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12,<3.13"
+authors = [{ name = "Incognita contributors" }]
+keywords = ["nuclear data", "neutron cross sections", "Hauser-Feshbach", "TALYS", "uncertainty quantification", "benchmark"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+  "numpy>=2.0",
+  "scipy>=1.14",
+  "pandas>=2.2",
+  "polars>=1.0",
+  "pyarrow>=17",
+  "pydantic>=2.8",
+  "omegaconf>=2.3",
+  "zarr>=2.18",
+  "scikit-learn>=1.5",
+  "endf-parserpy>=0.17.0",
+  "torch>=2.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.uv]
+package = false
+
+# CPU wheels of PyTorch on Linux and Windows keep the install small; for the optional GPU kernel install a CUDA build
+# of torch yourself (docs/TESTING.md). macOS uses the PyPI wheels.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["raw", "staging", "curated", "features", "out"]
+
+[tool.ruff.lint]
+# CI gate: errors that indicate real defects (syntax, undefined names, unused imports that shadow).
+select = ["E9", "F63", "F7", "F82"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+  "slow: long-running test",
+  "needs_data: needs staged external data (EXFOR, RIPL, TALYS structure database) and is skipped without it",
+  "needs_native: needs the compiled C kernels (make native)",
+  "needs_gpu: needs a CUDA device",
+]

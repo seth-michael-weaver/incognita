@@ -1,0 +1,37 @@
+# Python / tooling
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Build output of the native kernels (make native)
+*.so
+*.so.*
+*.o
+native/chart_main
+
+# Local data staged by the user (never committed): EXFOR, RIPL, TALYS structure, evaluated libraries
+raw/
+staging/
+curated/
+features/
+
+# Run output
+out/
+outputs/
+*.log
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+.env
+
+# Release notes kept out of the tree
+RELEASE_CHECK.md
+/output

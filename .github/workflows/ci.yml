@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OMP_NUM_THREADS: "1"
+      HF_NATIVE_QUIET: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - name: Install Python (version from pyproject.toml)
+        run: uv python install
+      - name: Install dependencies
+        run: uv sync --locked --extra dev
+      - name: Lint
+        run: uv run ruff check .
+      - name: Unit tests
+        run: uv run pytest -ra
+      - name: Reproduce the benchmark tables from the frozen exam files
+        run: bash scripts/reproduce.sh

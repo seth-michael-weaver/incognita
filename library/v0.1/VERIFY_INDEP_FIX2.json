@@ -1,0 +1,51 @@
+{
+ "tiers": {
+  "EXTRAPOLATED": 5611,
+  "INTERPOLATED": 316,
+  "MEASURED": 220,
+  "ANCHORED": 21
+ },
+ "floor_leak": 0,
+ "floor_in_rc": 653,
+ "floor_in_pre2": 647,
+ "extrap_gt0.3dex_vs_rc": 696,
+ "extrap_gt0.3dex_vs_rc_repaired": 66,
+ "extrap_gt0.3dex_pre2_vs_rc": 73,
+ "measured_bound0": 0,
+ "measured_bound0_pre2": 22,
+ "Z036N050M0_30keV_log10b": {
+  "final": -2.3601841566094253,
+  "pre2": -2.362458132268783,
+  "rc": -3.4836210645934362
+ },
+ "macs30_final_vs_pre2_dex": {
+  "EXTRAPOLATED": {
+   "n": 5611,
+   "median": 0.0,
+   "p95_abs": 4.3848452313149406e-08
+  },
+  "INTERPOLATED": {
+   "n": 316,
+   "median": -0.01176026119046917,
+   "p95_abs": 0.06513859236961646
+  },
+  "MEASURED": {
+   "n": 220,
+   "median": 0.004614519323574132,
+   "p95_abs": 0.0394245943289292
+  },
+  "ANCHORED": {
+   "n": 21,
+   "median": 9.64327466553287e-17,
+   "p95_abs": 1.9286549331065737e-16
+  }
+ },
+ "value_sources": {
+  "default TALYS recipe (method as TENDL: TALYS port, strength ": 5611,
+  "INCOGNITA INDEP blind model (library-value-free SPLICE_C rec": 316,
+  "INCOGNITA INDEP full-data model (SPLICE_C recipe, library-va": 220,
+  "INCOGNITA INDEP blind curve x 0.887 (measured MACS30 anchor)": 1,
+  "INCOGNITA INDEP blind curve x 0.748 (measured MACS30 anchor)": 1,
+  "INCOGNITA INDEP blind curve x 0.861 (measured MACS30 anchor)": 1
+ }
+}

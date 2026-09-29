@@ -1,0 +1,30 @@
+# header: 
+#   title: Fe56(n,bin) binary emission spectrum at 1.000000E+00 MeV
+#   source: TALYS-2.24
+#   user: Unknown User
+#   date: 2026-09-12
+#   format: YANDF-0.4
+# target: 
+#   Z: 26
+#   A: 56
+#   nuclide: Fe56
+# reaction: 
+#   type: (n,bin)
+#   parameters: 
+#     E-incident [MeV]:  1.000000E+00
+#   quantity: 
+#     type: population
+#     ejectile: gamma
+#     post-binary population [mb]:  3.050740E+00
+#     maximum excitation energy [MeV]:  8.628448E+00
+#     number of discrete levels: 30
+#     number of continuum bins: 40
+#     continuum bin size [MeV]:  1.482821E-01
+#   quantity: 
+#     type: population
+#   datablock: 
+#     columns: 85
+#     entries: 71
+##      bin            Ex         population      JP= 0.5-       JP= 0.5+       JP= 1.5-       JP= 1.5+       JP= 2.5-       JP= 2.5+       JP= 3.5-       JP= 3.5+       JP= 4.5-       JP= 4.5+       JP= 5.5-       JP= 5.5+       JP= 6.5-       JP= 6.5+       JP= 7.5-       JP= 7.5+       JP= 8.5-       JP= 8.5+       JP= 9.5-       JP= 9.5+       JP=10.5-       JP=10.5+       JP=11.5-       JP=11.5+       JP=12.5-       JP=12.5+       JP=13.5-       JP=13.5+       JP=14.5-       JP=14.5+       JP=15.5-       JP=15.5+       JP=16.5-       JP=16.5+       JP=17.5-       JP=17.5+       JP=18.5-       JP=18.5+       JP=19.5-       JP=19.5+       JP=20.5-       JP=20.5+       JP=21.5-       JP=21.5+       JP=22.5-       JP=22.5+       JP=23.5-       JP=23.5+       JP=24.5-       JP=24.5+       JP=25.5-       JP=25.5+       JP=26.5-       JP=26.5+       JP=27.5-       JP=27.5+       JP=28.5-       JP=28.5+       JP=29.5-       JP=29.5+       JP=30.5-       JP=30.5+       JP=31.5-       JP=31.5+       JP=32.5-       JP=32.5+       JP=33.5-       JP=33.5+       JP=34.5-       JP=34.5+       JP=35.5-       JP=35.5+       JP=36.5-       JP=36.5+       JP=37.5-       JP=37.5+       JP=38.5-       JP=38.5+       JP=39.5-       JP=39.5+       JP=40.5-       JP=40.5+
+##     [mb]            []            [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]           [mb]
+        0         0.000000E+00   1.625911E-01   1.625911E-01   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00
