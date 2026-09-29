@@ -62,3 +62,18 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo):
         rep.outcome = "skipped"
         rep.longrepr = (str(item.path), item.location[1] or 0, f"Skipped: {_TALYS_SKIP}")
 
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus, config) -> None:
+    """On GitHub Actions, turn each failure into an `::error::` annotation, so the failing test
+    and its message are visible from the run's public annotations, not only in the job log."""
+    import os
+
+    if not os.environ.get("GITHUB_ACTIONS"):
+        return
+    for rep in terminalreporter.stats.get("failed", []) + terminalreporter.stats.get("error", []):
+        msg = str(getattr(rep, "longreprtext", "") or rep.longrepr).strip().splitlines()
+        keep = [ln for ln in msg if ln.startswith("E ")][:4] + msg[-1:]
+        tail = " | ".join(keep).replace("%", "%25").replace("\r", "").replace("\n", " ")
+        title = rep.nodeid.replace("%", "%25").replace(":", "%3A").replace(",", "%2C")
+        terminalreporter.write_line(f"::error title={title}::{tail[:900]}")
