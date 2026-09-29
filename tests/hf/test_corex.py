@@ -319,8 +319,9 @@ def test_mass10_many_matches_the_scalar_mass10():
     ref = np.array([M._mass10(int(a), int(b)) for a, b in zip(nx, nz, strict=True)], M._F)
     assert got.dtype == ref.dtype
     # Vectorised float32 maths may use different SIMD/FMA paths than the scalar loop depending on the
-    # CPU (CI runners vary), so require agreement to 2 ulp rather than bit identity.
-    np.testing.assert_array_max_ulp(got, ref, maxulp=2)
+    # CPU (CI runners vary). ULP counts blow up for values near zero, so compare in absolute terms:
+    # 1 keV is far below any physical use of these masses.
+    np.testing.assert_allclose(got, ref, rtol=1e-6, atol=1e-3)
 
 
 def _residual_exmax_loop(zcomp, ncomp, exmax0, exmax, sep_mev, parskip):
