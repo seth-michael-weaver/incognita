@@ -73,3 +73,6 @@ Not blind for us (we have seen data): Tm-171 MACS, Nb-94 MACS, Sn-130.
 | O-17 | (n,a) | B55_ctrefit |
 | Mg-25 | (n,a) | B55_ctrefit |
 | Ta-180 | Oslo NLD/gSF Ta-180,181 | B55_ctrefit |
+
+## Timestamp
+`HASHES.txt.ots` is an OpenTimestamps proof (pending at commit time; Bitcoin-anchored within hours). Verify with `ots verify HASHES.txt.ots`. The git commit time on GitHub is a second, independent timestamp.
