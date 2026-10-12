@@ -30,6 +30,9 @@ from physics.hf.input import fitlib
 
 REPO = Path(__file__).resolve().parents[2]
 CURVES = REPO / "scripts" / "bestfit" / "engine_curves.py"
+TALYS_DIR = Path(os.environ.get("TALYS_DIR", Path.home() / "opt/talys-src"))
+needs_structure = pytest.mark.skipif(not (TALYS_DIR / "structure").is_dir(),
+                                     reason="TALYS structure/ not installed")
 GRID = [3.0e4, 1.0e6, 5.0e6, 1.4e7]  # eV: keV capture plus the MeV range where the p / 2n residuals open
 
 X = (26, 56)                      # n + Fe-56: compound Fe-57; residuals Fe-56 (n), Mn-56 (p), Fe-55 (2n), ...
@@ -78,6 +81,7 @@ def _curve(out: Path, t) -> np.ndarray:
     return np.load(out / f"{t[0]:03d}_{t[1]:03d}.npz")["capture_mb"]
 
 
+@needs_structure
 def test_target_curve_is_the_same_alone_and_in_any_chunk(tmp_path):
     """The invariant: X alone == X with Y == X with W, bit for bit, and the recipe does act on X."""
     T = table(None)
@@ -94,6 +98,7 @@ def test_target_curve_is_the_same_alone_and_in_any_chunk(tmp_path):
         np.testing.assert_array_equal(curves[nm], curves["alone"], err_msg=nm)
 
 
+@needs_structure
 def test_chunk_shared_per_nucleus_lines_are_refused(tmp_path):
     """The freezes' protocol (one per-nucleus line string for many targets) is exactly what leaked: the driver
     refuses it, and `--shared-lines` still runs it (to reproduce a pre-CHUNKFIX freeze in its exact chunks)."""

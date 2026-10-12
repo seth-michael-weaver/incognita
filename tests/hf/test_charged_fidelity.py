@@ -9,11 +9,16 @@ import dataclasses
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 import torch
 
 from physics.hf.input.defaults import default_options, default_params
+
+TALYS_DIR = Path(os.environ.get("TALYS_DIR", Path.home() / "opt/talys-src"))
+needs_structure = pytest.mark.skipif(not (TALYS_DIR / "structure").is_dir(),
+                                     reason="TALYS structure/ not installed")
 
 
 def _run(code: str, **env) -> str:
@@ -40,6 +45,7 @@ except SystemExit as e:
 """
 
 
+@needs_structure
 @pytest.mark.parametrize("cpinc,k0", [("", 1), ("p", 2), ("a", 6)])
 def test_inverse_channels_use_the_runs_projectile_as_ejectile_type0(cpinc, k0):
     """opticalnp.f90:175 `flagompejec .and. k == k0`: the projectile's own type takes the type-0
