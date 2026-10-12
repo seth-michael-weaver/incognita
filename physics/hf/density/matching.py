@@ -386,14 +386,27 @@ def _straight_through(value: float, t: Tensor) -> Tensor:
 
 
 def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = False,
-                 xacc: float = _XACC) -> LDNucleus:
+                 xacc: float = _XACC, ctwindow: bool = False, ctwindow2: bool = False) -> LDNucleus:
     """`ld` with T [MeV], E0 [MeV] and Exmatch [MeV] resolved for every barrier as
     densitymatch.f90 (CTM models only: skipped for ldmodel 2, 3 and for tabulated barriers),
     including the Tadjust/E0adjust second passes and the empirical fallbacks.
+    `ctwindow` (Incognita extension, default False): then re-anchor barrier 0's constant-temperature
+    part on the complete level window (`density.ctwindow.anchor`); False is TALYS's path unchanged.
+    `ctwindow2` (Incognita extension, CTKINK, default False): the same anchor with (T, E0, Ex) solved
+    jointly so the used density is continuous in value and slope at Ex (`density.ctwindow2.anchor`);
+    it supersedes `ctwindow` when both are set.
 
     TALYS: densitymatch.f90:1 (densitymatch)
-    Test: A-ld
+    Test: A-ld, tests/hf/test_ctwindow.py, tests/hf/test_ctwindow2.py
     """
+    if ctwindow2:
+        from physics.hf.density.ctwindow2 import anchor as anchor2
+
+        return anchor2(densitymatch(ld, flagldglobal, flagctmglob, xacc))
+    if ctwindow:
+        from physics.hf.density.ctwindow import anchor
+
+        return anchor(densitymatch(ld, flagldglobal, flagctmglob, xacc))
     from physics.hf.density.ld_ceng import densitymatch_fast
 
     got = densitymatch_fast(ld, flagldglobal, flagctmglob, xacc)  # CENGLD: barrier 0 in one C call

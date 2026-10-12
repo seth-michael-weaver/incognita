@@ -52,9 +52,13 @@ import numpy as np
 import torch
 
 from physics.hf.core.tensors import DTYPE
+from physics.hf import specout
+from physics.hf.emission import binspec
+from physics.hf.emission.binspec import binspec_ctx
 from physics.hf.emission.binary import BinaryInputs, BinaryState, binary
 from physics.hf.emission.channels import ExclusiveState, exclusive_channels
 from physics.hf.emission.dumps import ChannelInputs, load_binary_dump, load_channel_dump
+from physics.hf.emission.multiple import full_xsbinary
 from physics.hf.results import Results, level_key, residual_key
 
 PARSYM = "gnpdtha"
@@ -221,7 +225,6 @@ class ChainedFull:
         from physics.hf.compound.target import binary_cross_sections, compound_target_inputs
         from physics.hf.emission.feed_reference import etotal_of, pop_inputs_of
         from physics.hf.emission.feeding import Cascade
-        from physics.hf.emission.multiple import multiple_emission
         from physics.hf.fission.chain import fission_chain
         from physics.hf.preeq.chain import lend_cascade, set_energy_subset, target_tag
 
@@ -271,6 +274,8 @@ class ChainedFull:
         elif (int(cas.Zt), int(cas.At), float(cas.enincmax), tuple(cas.energies)) != (
                 self.Z, self.A, float(enincmax), tuple(declared)):
             raise ValueError("ChainedFull(cascade=...) was built for another run")
+        else:
+            cas.check_cards()  # SPEEDFIX: a handed-in Cascade must still match the run's cards
         if self.params and dumped:
             raise ValueError("ChainedFull(params=...) needs the dump-free chain (inject=())")
         cas.set_fit_params(self.params)
@@ -300,9 +305,12 @@ class ChainedFull:
             built = None if dumped else _BuiltInputs(cas, target, declared, add)
             out = []
             bstate = BinaryState()
+            specout.begin_run(cas)  # SPECOUT, output only
             for nin, (binp, cinp) in enumerate(pairs, start=1):
                 if not dumped:
                     binp, cinp = built.shell(nin, run_axis[nin - 1])
+                if keep[nin - 1]:
+                    specout.begin_energy(binp.e_inc_mev)  # SPECOUT, output only
                 etot = etotal_of(self.Z, self.A, enincmax, binp.e_inc_mev, binp.k0)
                 inc = cas.incident(binp.e_inc_mev)
                 st = cas.new_energy(etot, lmaxinc=int(inc.lmax[0]), e_inc_mev=binp.e_inc_mev)
@@ -314,6 +322,8 @@ class ChainedFull:
                                               fnorm=float(cas.fiso()[0]))
                 ci = compound_inputs(cas, st, binp, cinp, etot,
                                      add[round(binp.e_inc_mev, 6)], **fkw)
+                from physics.hf.compound import ewfc
+                ewfc.attach(ci, cas, binp.e_inc_mev)
                 pop = compound_target_inputs(ci)
                 xsb = binary_cross_sections(pop, [ci])[0]
                 p = pop.pop_mb[0]
@@ -336,9 +346,9 @@ class ChainedFull:
                         xsbinary[0] = pop.xs_fission_mb[0]
                 # an energy walked only for `sfactor` needs no pre-equilibrium population:
                 # binary.f90 overwrites `sfactor` from the compound population alone
-                prq = (population(pop_inputs_of(cas, binp, target, etot, add,
-                                                None if dumped else declared))
-                       if keep[nin - 1] else None)
+                pinp = (pop_inputs_of(cas, binp, target, etot, add, None if dumped else declared)
+                        if keep[nin - 1] else None)
+                prq = population(pinp) if pinp is not None else None
                 pex = {}
                 for t, g in binp.grids.items():
                     n = g.ex_mev.shape[0]
@@ -362,47 +372,30 @@ class ChainedFull:
                              xspreeqsum_mb=add[round(binp.e_inc_mev, 6)]["xspreeqsum_mb"],
                              xsgrsum_mb=add[round(binp.e_inc_mev, 6)]["xsgrsum_mb"])
                 b = binary(b2, bstate)
+                if binspec.enabled() and keep[nin - 1]:  # SPECOUT/XDHARD: binary emission spectra, output only
+                    binspec.record(binp.e_inc_mev, pinp, b2, b, binp.k0,
+                                   binspec_ctx(cas, target, None if dumped else declared))
+                if specout.active():  # SPECOUT: compound Legendre of the target levels, output only
+                    from physics.hf import specang
+
+                    specang.record_energy(cas, st, binp, cinp, etot, add[round(binp.e_inc_mev, 6)], fkw, ci, pop,
+                                          b2, b)
                 if not keep[nin - 1]:
                     continue
+                xsbinary = full_xsbinary(b2, xsbinary)  # TRITFID (OFF: unchanged)
                 seed = {t: (b.xspop_mb[t].detach().numpy(), b.xspopex_mb[t].detach().numpy(),
                             float(b.xspop_mb[t].sum())) for t in b.xspop_mb}
-                nuclei = cas.populations(st, cinp.maxz, cinp.maxn, seed)
-                for zc in range(cinp.maxz + 1):
-                    for nc in range(cinp.maxn + 1):
-                        if (zc, nc) in nuclei:
-                            cas.propagate_exmax(st, zc, nc)
-                nuclei = cas.populations(st, cinp.maxz, cinp.maxn, seed)
-                _seed_mulpre(nuclei, prq)
                 xsb_by_type = ({t - 1: float(v) for t, v in enumerate(xsbinary)}
                                if xsbinary is not None else {})
-                decay = _bin_decay(cas, st, nuclei, binp.popeps_mb,
-                                   fis if cinp.flagfission else None)
-                mpe_cb = None
-                if any(n.mulpre for n in nuclei.values()):
-                    def mpe_cb(zc, nc, nex, cas=cas, st=st, nuclei=nuclei, etot=etot):
-                        return cas.mpe(st, nuclei, zc, nc, nex, etotal_mev=etot)
-
-                    # NATIVEX: what `emission.multiple_native` needs to run multipreeq2 in C
-                    mpe_cb.context = (cas, st, nuclei, etot)
-                mres = multiple_emission(
-                    nuclei, decay,
-                    popeps_mb=binp.popeps_mb, maxz=cinp.maxz, maxn=cinp.maxn, k0=binp.k0,
-                    xsreacinc_mb=float(inc.sigma_reac_mb[0]), xsbinary_mb=xsb_by_type,
-                    feedbinary_mb=b.feedbinary_mb, flagfission=cinp.flagfission,
-                    mpe=mpe_cb)
+                st, mres = _py_cascade(cas, st, cinp, binp, b, seed, prq, xsb_by_type,
+                                       fis if cinp.flagfission else None,
+                                       float(inc.sigma_reac_mb[0]), etot)
+                specout.end_energy(pinp, binp.k0, b2)
                 if dumped:
                     out.append((b2, _with_computed_feeding(cinp, mres)))
                 else:
-                    ch_in = built.channels(cinp, st, mres, b, xsbinary)
-                    if os.environ.get("INCOGNITA_RP_ISOMERS") == "1":
-                        # multiple.f90 leaves an isomer's flux in its xspopex (the cascade skips
-                        # tau != 0 levels); residual.f90's xsbranch reads it from there
-                        for key, n in ch_in.nuclei.items():
-                            pn = nuclei.get(key)
-                            if pn is not None and n.nlast:
-                                v = pn.xspopex_mb.tolist()
-                                n.xspopex_mb = {k: float(v[k]) for k in range(min(len(v), n.nlast + 1))}
-                    out.append((b2, ch_in))
+                    out.append((b2, built.channels(cinp, st, mres, b, xsbinary)))
+            specout.end_run(cas)
             return out
         finally:
             if not dumped:
@@ -629,6 +622,8 @@ class _BuiltInputs:
                     n.feedexcl_mb = get[3](key, {})
                     n.fisfeedex_mb = get[4](key, {})
                     n.xsfeed_mb = get[5](key, {})
+                    if key in mres.xspopex_mb:  # RESISO (empty when off)
+                        n.xspopex_mb = mres.xspopex_mb[key]
                     out.nuclei[key] = n
             return out
         for zc in range(cinp.maxz + 1):
@@ -659,6 +654,8 @@ class _BuiltInputs:
                 n.feedexcl_mb = mres.feedexcl_mb.get((zc, nc), {})
                 n.fisfeedex_mb = mres.fisfeedex_mb.get((zc, nc), {})
                 n.xsfeed_mb = mres.xsfeed_mb.get((zc, nc), {})
+                if (zc, nc) in mres.xspopex_mb:  # RESISO (empty when off)
+                    n.xspopex_mb = mres.xspopex_mb[(zc, nc)]
                 out.nuclei[(zc, nc)] = n
         return out
 
@@ -726,7 +723,52 @@ def _seed_mulpre(nuclei: dict, prq) -> None:
         for nex in range(min(arr.shape[0], nuc.xspopex_mb.shape[0])):
             row = arr[nex]
             if float(row.sum()) != 0.0:
-                nuc.xspopph2_mb[nex] = torch.as_tensor(row, dtype=DTYPE)
+                # a copy: the cascade adds into it in place, and a regrown rerun starts again here
+                nuc.xspopph2_mb[nex] = torch.tensor(row, dtype=DTYPE)
+
+
+def _py_cascade(cas, st, cinp, binp, b, seed, prq, xsb_by_type, fis, xsreacinc_mb, etot,
+                propagated: set | None = None):
+    """The multiple-emission cascade of one energy on the Python path: `(state, MultipleResult)`.
+
+    The nucleus set is `populations`, `propagate_exmax` over it, `populations` again; then
+    `Cascade.regrow` runs exgrid for every mother that decayed without its daughters having an
+    Exmax, and the cascade is run again on the grown set until nothing is added (PYCDIFF;
+    multiple.f90:316). `propagated` is given when the C path has already built the set on `st`.
+
+    TALYS: multiple.f90:1 (multiple), exgrid.f90:1 (exgrid)
+    Test: tests/hf/test_engine_c.py
+    """
+    from physics.hf.emission.multiple import multiple_emission
+
+    if propagated is None:
+        nuclei = cas.populations(st, cinp.maxz, cinp.maxn, seed)
+        propagated = set(nuclei)
+        for zc in range(cinp.maxz + 1):
+            for nc in range(cinp.maxn + 1):
+                if (zc, nc) in nuclei:
+                    cas.propagate_exmax(st, zc, nc)
+    while True:
+        nuclei = cas.populations(st, cinp.maxz, cinp.maxn, seed)
+        _seed_mulpre(nuclei, prq)
+        decay = _bin_decay(cas, st, nuclei, binp.popeps_mb, fis)
+        mpe_cb = None
+        if any(n.mulpre for n in nuclei.values()):
+            def mpe_cb(zc, nc, nex, cas=cas, st=st, nuclei=nuclei, etot=etot):
+                return cas.mpe(st, nuclei, zc, nc, nex, etotal_mev=etot)
+
+            # NATIVEX: what `emission.multiple_native` needs to run multipreeq2 in C
+            mpe_cb.context = (cas, st, nuclei, etot)
+        mres = multiple_emission(
+            nuclei, decay,
+            popeps_mb=binp.popeps_mb, maxz=cinp.maxz, maxn=cinp.maxn, k0=binp.k0,
+            xsreacinc_mb=xsreacinc_mb, xsbinary_mb=xsb_by_type,
+            feedbinary_mb=b.feedbinary_mb, flagfission=cinp.flagfission,
+            mpe=mpe_cb)
+        grown = cas.regrow(st, propagated, mres.decayed, nuclei, cinp.maxz, cinp.maxn)
+        if grown is None:
+            return st, mres
+        st = grown
 
 
 def _with_computed_feeding(cinp: ChannelInputs, mres) -> ChannelInputs:
@@ -748,7 +790,28 @@ def _with_computed_feeding(cinp: ChannelInputs, mres) -> ChannelInputs:
         n.xsfeed_mb = mres.xsfeed_mb.get(k, {})
         if k in mres.xspopnuc_mb:
             n.xspopnuc_mb = mres.xspopnuc_mb[k]
+        if k in mres.xspopex_mb:  # RESISO (empty when off)
+            n.xspopex_mb = mres.xspopex_mb[k]
         out.nuclei[k] = n
+    return out
+
+
+def resiso_keys(residual_mb: dict, xsbranch: dict) -> dict:
+    """RESISO: `rpZZZAAA.LNN` = xsbranch(nex) x rpZZZAAA.tot for every residual with an isomer
+    (residual.f90:67, finalout.f90's isomer files; nex 0 is the ground state). Empty when the switch
+    is off (then every branch is 0 and nothing is written).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    from physics.hf.emission.multiple import isomer_files, resiso_enabled
+
+    out = {}
+    if not resiso_enabled():
+        return out
+    for (Z, A), br in xsbranch.items():
+        for num, v in isomer_files(Z, A, br, residual_mb.get((Z, A), 0.0)).items():
+            out[f"{residual_key(Z, A)}.L{num:02d}"] = v
     return out
 
 
@@ -785,13 +848,7 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
             for t, v in b.xsdisc_mb.items() for nex in range(v.shape[0])
         })
         resid.append({residual_key(Z, A): v for (Z, A), v in ch.residual_mb.items()})
-        if os.environ.get("INCOGNITA_RP_ISOMERS") == "1":
-            # residual.f90's isomeric production (rpZZZAAA.L00 ground, .Lnn each isomer), from
-            # the Python channel path only: the C engine does not carry xsbranch
-            for (Z, A), br in ch.xsbranch.items():
-                pop = ch.residual_mb.get((Z, A), 0.0)
-                for nex, f in br.items():
-                    resid[-1][f"{residual_key(Z, A)}.L{nex:02d}"] = pop * f
+        resid[-1].update(resiso_keys(ch.residual_mb, ch.xsbranch))
         totals.append({
             "elastic": float(b.xselastot_mb), "nonelastic": float(b.xsnonel_mb),
             # sigma_tot is the incident channel's (T5/A-inc); binary.f90 only forms it itself for
@@ -810,7 +867,11 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
     from physics.hf.direct.racapcalc import add_to_results
 
-    return add_to_results(res, injection)
+    res = add_to_results(res, injection)
+    # MACSCLOSED: few-resonance capture where HF is not valid, off unless INCOGNITA_FEWRES is set
+    from physics.hf import fewres
+
+    return fewres.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

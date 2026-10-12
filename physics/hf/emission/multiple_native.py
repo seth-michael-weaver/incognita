@@ -114,6 +114,10 @@ class _Walk:
         put(15, X)
         put(16, XE)
         put(17, _c(nuc.dex_mev.numpy()))
+        if getattr(nw, "sub", 1) > 1:  # BINQUAD sub-points: widths rows per mother bin
+            put(150, _c(nw.sub_cnt, _I64))
+            put(151, _c(nw.sub_off, _I64))
+            put(152, _c(nw.sub_w))  # BINQUAD2: each sub-point's share of its bin's population
         ip[:7] = (xrows, maxex, nuc.nlast, m, nj, int(d6 is not None), int(fis is not None))
         vmax, dpmax, nmax = 1, 1, 1
         self.tables = {}
@@ -191,8 +195,8 @@ class _Walk:
         False (nothing packed) where the compiled bin does not apply."""
         from physics.hf.compound.decay_fast import nexmax_rows
         from physics.hf.core.grids import emission_end
-        from physics.hf.density.particle_hole import EFERMI_MEV
-        from physics.hf.preeq.prepare import single_particle_densities
+        from physics.hf.density.particle_hole import EFERMI_MEV, phfast_tables
+        from physics.hf.preeq.prepare import exciton_densities
         from physics.hf.preeq.spin import preeq_spin_distribution
 
         cas, st, _nuclei, etot = context
@@ -206,7 +210,7 @@ class _Walk:
             return False
         P1 = next(iter(ph.values())).shape[0]
         P4 = P1 ** 4
-        tj = [cas.trans[t][0] for t in (1, 2)]
+        tj = [cas.trans_of(zc, nc)[t][0] for t in (1, 2)]  # SLFIRST: per emitting nucleus
         if any(isinstance(x, torch.Tensor) for x in tj):
             return False
         xrows = self.X.shape[0]
@@ -248,14 +252,15 @@ class _Walk:
             for nexout in range(nb):
                 mj = int(d.maxj[nexout]) if nexout <= d.maxex else 0
                 jw[di, nexout, : min(mj, NUMJ) + 1] = rnj[: min(mj, NUMJ) + 1]
-        _, gpc, gnc = single_particle_densities(sp.Z, sp.A - sp.Z, kph)
+        _, gpc, gnc = exciton_densities(sp.Z, sp.A - sp.Z, kph, cas.params, cas.options)
         c0 = cas.spec(st, 0, 0)
-        _, gp0, gn0 = single_particle_densities(c0.Z, c0.A - c0.Z, kph)
-        dg = [single_particle_densities(d.Z, d.A - d.Z, kph) for d in dsp]
+        _, gp0, gn0 = exciton_densities(c0.Z, c0.A - c0.Z, kph, cas.params, cas.options)
+        dg = [exciton_densities(d.Z, d.A - d.Z, kph, cas.params, cas.options) for d in dsp]
+        phz, pht = phfast_tables(cas.options, c0, sp, dsp)  # fast-phmodel: phmodel 2 tables for mpe_bin (None = analytic)
         rg = cas.rg
         mi = np.array([P1 - 1, nb, dsp[0].nlast_grid, dsp[1].nlast_grid, dsp[0].zix, dsp[1].zix,
                        dsp[0].nix, dsp[1].nix, dsp[0].maxex, dsp[1].maxex, rg.ebegin[1],
-                       rg.ebegin[2], eend[1], eend[2], rg.maxen, xrows], dtype=_I64)
+                       rg.ebegin[2], eend[1], eend[2], rg.maxen, xrows, int(phz is not None)], dtype=_I64)
         md = np.array([gpc, gnc, gp0, gn0, EFERMI_MEV, sp.sep_mev[1], sp.sep_mev[2], dg[0][1],
                        dg[1][1], dg[0][2], dg[1][2]], dtype=np.float64)
         acc, accf = [], []
@@ -271,7 +276,7 @@ class _Walk:
                 np.ascontiguousarray(np.asarray(tj[0])[:, 0, 2], dtype=np.float64),
                 np.ascontiguousarray(np.asarray(tj[1])[:, 0, 2], dtype=np.float64),
                 acc[0], acc[1], accf[0], accf[1], mul, np.zeros(2 * nb), np.zeros(2 * nb),
-                np.zeros(2 * nb * nj1), np.zeros(2 * nb)]
+                np.zeros(2 * nb * nj1), np.zeros(2 * nb), *pht]
         mp = np.array([0 if a is None else nativex.ptr(a) for a in arrs], dtype=np.uint64)
         block = np.array([nativex.ptr(mi), nativex.ptr(md), nativex.ptr(mp)], dtype=np.uint64)
         self.keep.extend([mi, md, mp, block, *[a for a in arrs if a is not None]])
@@ -357,14 +362,26 @@ def decay_nucleus(nuc, daughters: dict, decay, zc: int, nc: int, popepsA: float,
     if nw is None:
         return _cascade_only(nuc, zc, nc, popepsA, smin, popexcl, feedexcl, xspartial, records)
     w = _Walk(nuc, daughters, nw, zc, nc, popepsA, smin, feedexcl, records)
+    so_buf = None
+    if M._SO.active():  # SPECOUT: nx_walk's mcontrib/mpecontrib sink buffers (output only)
+        drows = {0: int(w.X.shape[0])}
+        drows.update({t: int(d.xspopex_mb.shape[0]) for t, d in daughters.items() if t >= 1})
+        so_buf = M._SO.c_buffers(int(w.X.shape[0]), drows)
+        w.keep.append(so_buf[0])
+        w.pp[153], w.pp[154], w.pp[155] = so_buf[1].ctypes.data, so_buf[2].ctypes.data, so_buf[3].ctypes.data
     for t, fe in w.tables.items():
         feedexcl[t] = fe
     w.load(daughters, xsfeed)
     mpe_bins = []
     native_mpe = False
     if mpe is not None and nuc.mulpre:
+        from physics.hf.density.particle_hole import phfast_on, phmicro_on
+
+        # PHMICRO: phmodel 2 tables go to the native walk's multipreeq2 (fast-phmodel); INCOGNITA_PHFAST=0 = per-bin Python callback
         context = getattr(mpe, "context", None) if os.environ.get("HF_NATIVEX_MPE", "1") != "0" \
             else None
+        if context is not None and phmicro_on(getattr(context[0], "options", None)) and not phfast_on():
+            context = None
         native_mpe = context is not None and w.attach_mpe(nuc, daughters, context, zc, nc)
         if not native_mpe:
             mpe_bins = sorted((k for k in nuc.xspopph2_mb if 1 <= k <= maxex), reverse=True)
@@ -402,6 +419,11 @@ def decay_nucleus(nuc, daughters: dict, decay, zc: int, nc: int, popepsA: float,
     for t, fe in w.tables.items():
         if not w.created[t] and not len(fe):
             del feedexcl[t]
+    if so_buf is not None:
+        for t, a in so_buf[4].items():
+            M._SO.acc_matrix(zc, nc, t, a, "mc")
+        for t, a in so_buf[5].items():
+            M._SO.acc_matrix(zc, nc, t, a, "mpe")
     return float(w.dpar[2])
 
 
@@ -427,6 +449,8 @@ def _cascade_only(nuc, zc, nc, popepsA, smin, popexcl, feedexcl, xspartial, reco
                 XE[k] += intens
                 XE[nex] -= intens
                 contrib[k] = intens
+                if M._SO.active():
+                    M._SO.acc_cell(zc, nc, 0, nex, k, intens)
             if contrib and records[0]:
                 fe = M._table(feedexcl, 0, nuc.maxex + 2, X.shape[0])
                 part = xspartial.setdefault(0, {})

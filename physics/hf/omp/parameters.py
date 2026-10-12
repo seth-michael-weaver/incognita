@@ -61,6 +61,7 @@ the actinide default `riplomp(1) = 2408` (targets Z 90-97, A 228-249) is retriev
 from __future__ import annotations
 
 import math
+import os
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from functools import cache
@@ -358,12 +359,47 @@ def riplomp_table(
 def _colltype(Z: int, A: int, options: Options, structure: Path | None = None) -> str:
     """Collective type of (Z, A) as deformpar reads it: the `.def` header letter (R, A, V; anything
     else and a missing entry give S), forced to S by `spherical y`. The automatic rotational
-    assignment (flagautorot, off by default) needs discrete levels and raises.
-    TODO(T2): replace with structure.deformation once it lands (deformpar.f90:115-263)."""
-    if options.flagautorot:
-        raise NotImplementedError("flagautorot needs discrete levels: pass colltype= (TODO(T2))")
+    assignment (`autorot y`, off by default; deformpar.f90:241-262) and COLLRULE (`collrule`, off by default) read the
+    discrete levels: the letter is R iff the ground band is complete up to maxrot, as `structure.deformation` decides it."""
+    from physics.hf.direct.dwbaunit import colltype_override
+
+    ct = colltype_override(Z, A, options)  # FIXDWBA (INCOGNITA_DWBAUNIT, default off)
+    if ct is not None:
+        return ct
     if options.flagspher or options.disctable == 3:
         return "S"
+    ct = _colltype_file(Z, A, structure)
+    from physics.hf.structure import collrule as _collrule
+
+    rule = _collrule.target_letter(Z, A, options)
+    if rule is not None and not (rule == "R" and ct in ("R", "A")):
+        return _realised(Z, A, options, rule, ct)
+    if options.flagautorot and ct == "S" and _collrule.autorot_region(Z, A):
+        return _realised(Z, A, options, "R", ct)
+    return ct
+
+
+def _realised(Z: int, A: int, options: Options, rule: str, ct: str) -> str:
+    """The letter `structure.deformation` ends with for a rule/autorot target: R only with a complete ground band, V only with a
+    2+ level (otherwise the file letter)."""
+    from physics.hf.structure import collrule as _collrule
+    from physics.hf.structure.levels import discrete_levels
+
+    if rule == "S":
+        return "S"
+    lev = discrete_levels(Z, A, options)
+    n = lev.nlevmax2
+    j, p = lev.all_spin.numpy()[: n + 1], lev.all_parity.numpy()[: n + 1]
+    if rule == "V":
+        return "V" if any(float(j[k]) == 2.0 and int(p[k]) == 1 for k in range(1, n + 1)) else ct
+    if rule == "W":  # WEAKCPL: V iff the weak-coupling multiplet search finds a member (as structure.deformation)
+        e = lev.all_e_mev.numpy()[: n + 1]
+        return "V" if _collrule.weak_block(Z, A, None, j, p, e, n) is not None else ct
+    return "R" if _collrule.band_complete(j, p, A, options.maxrot, n) else "S"
+
+
+def _colltype_file(Z: int, A: int, structure: Path | None = None) -> str:
+    """The `.def` header letter of (Z, A) (R, A, V; anything else and a missing entry give S)."""
     base = structure if structure is not None else talys_structure_path()
     f = base / "deformation" / f"{nuclide_symbol(Z)}.def"
     lines = _local_omp_file(str(f))
@@ -680,6 +716,8 @@ def soukhovitskii(
     """
     e = e_mev
     asym = (A - 2.0 * Z) / A
+    from physics.hf import engphys
+    eferm_mev = engphys.soukho_fermi(k, A, eferm_mev)  # ENGPHYS `efermi`, default: unchanged
     f = torch.clamp(e - eferm_mev, min=-20.0)
     cviso, v0r, var, vrdisp, v1r, v2r, lam = 10.5, -41.45, -0.06667, 92.44, 0.03, 2.05e-4, 3.9075e-3
     viso = 1.0 + ((-1.0) ** k) * cviso * asym / (v0r + var * (A - 232.0) + vrdisp)
@@ -722,6 +760,26 @@ class JoinValues:
     v0_mev: float = 0.0
     vjoin_mev: float = 0.0
     wjoin_mev: float = 0.0
+
+
+
+ENV_WDDECAY = "INCOGNITA_WDDECAY"
+
+
+def wddecay(options: "Options | None" = None) -> float:
+    """KDABS (Incognita extension, not TALYS): neutron KD03 surface absorption W_D(E) -> W_D(E) exp(-delta E), E the neutron
+    channel energy (MeV), so W_D at threshold (S0, S1, R') is untouched and the 8-20 MeV absorption decays faster.
+    Keyword `wddecay <delta>` (1/MeV; 0 = TALYS, the default) or env `INCOGNITA_WDDECAY` when the keyword is 0.
+    Fitted on EXFOR sigma_tot/sigma_nonel only (development notes, delta = 0.0075).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    v = float(getattr(options, "wddecay", 0.0) or 0.0)
+    if v == 0.0:
+        s = os.environ.get(ENV_WDDECAY, "").strip()
+        v = float(s) if s else 0.0
+    return v
 
 
 def opticalnp(
@@ -815,6 +873,10 @@ def opticalnp(
             "awso_fm": _t(F["Fawso"] * nuc.avso0_fm, e),
             "rc_fm": _t(rc, e),
         }
+        if k == 1:
+            delta = wddecay(options)
+            if delta != 0.0:
+                out["wd_mev"] = out["wd_mev"] * torch.exp(-delta * e)
     if table is not None:
         inside, tab = _interp_table(table, e, F)
         out = {c: torch.where(inside, _t(tab[c], e), _t(out[c], e)) for c in COLUMNS}
@@ -1164,6 +1226,11 @@ def opticalcomp(
         if k == 3 and options.deuteronomp >= 2:
             alt = opticaldeut(Z, A, e, options.deuteronomp, F, o)
             i = options.deuteronomp
+        if k == 6 and 3 <= options.alphaomp <= 5:
+            # charged-projectile fidelity: the folding potentials (foldalpha.f90) are not ported; this branch used to fall
+            # through to the Watanabe alpha (alphaomp 1) silently: a-Ho165 alphaomp 5 reaction
+            # cross section -0.15..-0.20 dex vs the stored TALYS-2.25 sample at 12-20 MeV.
+            opticalalpha(Z, A, e, options.alphaomp, F, o)  # raises NotImplementedError
         if k == 6 and (options.alphaomp == 2 or options.alphaomp >= 6):
             alt = opticalalpha(Z, A, e, options.alphaomp, F, o)
             i = options.alphaomp

@@ -39,6 +39,9 @@ enum {
     P_CTABLE,     /* ctable[0], ptable_mev[0] */
     P_PTABLE,
     P_PAIR,       /* pair_mev: the P of the Fermi-gas tables */
+    P_SQ_UC,      /* SPINQUENCH (density/spinquench.py): U_c (0 = off), q(U_m), top of the window */
+    P_SQ_QM,
+    P_SQ_XMAX,
     P_N
 };
 
@@ -159,11 +162,38 @@ static inline double match1(const double *logrho, const double *temprho, int64_t
     return x - temp * log(temp * rhof) - E0save;
 }
 
+/* SPINQUENCH: the spin-distribution sigma^2 at eex from the engine's sc, as spinquench.quench_np
+ * (Fermi-gas value x q(U), q = 1/2 + 1/2 min(1, U/U_c); CT interpolation re-anchored at q(U_m) s2m;
+ * floor sdisc; sc itself when off, at or below E_d, or above the window). */
+static inline double sq_quench(const double *p, double eex, double sc)
+{
+    double uc = p[P_SQ_UC];
+    if (!(uc > 0.0) || eex <= p[P_ED] || eex > p[P_SQ_XMAX])
+        return sc;
+    double Em = p[P_EM], Ed = p[P_ED], out;
+    if (eex <= Em) {
+        double f = Em != Ed ? (eex - Ed) / (Em - Ed) : 0.0;
+        out = sc - f * (1.0 - p[P_SQ_QM]) * p[P_S2M];
+    } else {
+        double U = eex - p[P_DELTA];
+        if (U > 0.0) {
+            double r = U / uc;
+            if (r > 1.0)
+                r = 1.0;
+            out = (0.5 + 0.5 * r) * sc;
+        } else {
+            out = sc;
+        }
+    }
+    return out < p[P_SDISC] ? p[P_SDISC] : out;
+}
+
 /* rho(J) for J = rodd + 0..numj at one energy (density.f90 for the analytical model) */
 static inline void rho_row(const double *p, double eex, double rodd, int64_t numj, double *r)
 {
     double sc;
     double dt = densitytot(p, eex, &sc);
+    sc = sq_quench(p, eex, sc);
     double sigma22 = 2.0 * sc;
     for (int64_t j = 0; j <= numj; j++) {
         double J = (double)j + rodd;

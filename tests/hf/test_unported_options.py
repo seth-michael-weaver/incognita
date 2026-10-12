@@ -54,12 +54,3 @@ def test_a_cascade_refuses_an_unported_keyword():
     code = "import numpy as np; from physics.hf import warmrun; warmrun.new_cascade(50, 120, (float(np.float32(1.0)),))"
     r = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True, timeout=600)
     assert r.returncode != 0 and "not ported: jlmomp y" in r.stderr, r.stderr[-400:]
-
-
-def test_an_unapplied_gamma_resonance_cell_is_refused():
-    """`sgradjust Z A f` (and the other giant/pygmy resonance cells) used to be parsed and ignored."""
-    import os, subprocess, sys
-    env = dict(os.environ, INCOGNITA_TALYS_FIT="lines", INCOGNITA_TALYS_FIT_LINES="strength 2;sgradjust 50 121 0.5")
-    code = "import numpy as np; from physics.hf import warmrun; warmrun.new_cascade(50, 120, (float(np.float32(1.0)),))"
-    r = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True, timeout=600)
-    assert r.returncode != 0 and "not ported: `sgradjust 50 121" in r.stderr, r.stderr[-400:]

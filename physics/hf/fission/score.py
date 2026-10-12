@@ -141,8 +141,13 @@ class _NucleusCache:
             ms = self.masses()
             lv = discrete_levels(Z, A, self.o, ms, self.p)
             bl = barrier_levels(self.fp(Z, A))
+            from physics.hf.density.ctwindow import enabled as _ctw
+            from physics.hf.density.ctwindow2 import enabled as _ctw2
+
             self._ld[(Z, A)] = densitymatch(
-                attach_tables(densitypar(Z, A, self.o, self.p, ms, lv, barriers=bl))
+                attach_tables(densitypar(Z, A, self.o, self.p, ms, lv, barriers=bl)),
+                ctwindow=_ctw(self.o),
+                ctwindow2=_ctw2(self.o),
             )
         return self._ld[(Z, A)]
 

@@ -18,9 +18,9 @@ comparisons, `where` and gathers in numpy (IEEE, the same values in the same ord
 transcendental function -- sqrt, log10, pow, exp -- through the very torch call the original makes,
 on an array of the same values. On x86 numpy's sqrt/exp/log10 can differ from torch's in the last
 bit; torch's are kept for exactly that reason. It covers the models the port's defaults use
-(`strength` 3, 4 or >= 6 with an E1 table or the standard Lorentzian, pygmy terms, the upbend) and
-returns None for anything else (strength 1, 2 or 5, a table for M1, parameters on a graph), in
-which case the caller uses `fstrength` itself.
+(`strength` 3, 4 or >= 6 with an E1 table or the standard Lorentzian, a tabulated M1 at strengthM1
+>= 8 (SPEEDFIX), pygmy terms, the upbend) and returns None for anything else (strength 1, 2 or 5,
+parameters on a graph), in which case the caller uses `fstrength` itself.
 """
 
 from __future__ import annotations
@@ -46,8 +46,6 @@ def _supported(gp) -> bool:
     if gp.strength in (1, 2, 5, 11) or gp.strengthM1 == 11:
         return False
     if not (gp.strength in (3, 4) or gp.strength >= 6):
-        return False
-    if (0, 1) in gp.tables and gp.strengthM1 >= 8:  # a tabulated M1: not covered
         return False
     for v in (gp.egr_mev, gp.ggr_mev, gp.sgr_mb, gp.epr_mev, gp.gpr_mev, gp.tpr_mb, gp.upbend,
               gp.etable_mev, gp.ftable, gp.wtable, gp.S_k0_mev, gp.delta_mev, gp.alev_per_mev,
@@ -181,7 +179,8 @@ def fstrength_np(gp, efs, e_gamma: np.ndarray, irad: int, l: int):  # noqa: E741
             d = egam2 - egr2
             denom = d * d + egam2 * ggr2
             out = out + np.where(pos, k * sgr1 * enum / denom, 0.0)
-        if gp.qrpaexist(1, 1) and flag_e1:  # assignment, not a sum (fstrength.f90:356)
+        # assignment, not a sum (fstrength.f90:356); SPEEDFIX: the tabulated M1 too (strengthM1 >= 8)
+        if (gp.qrpaexist(1, 1) and flag_e1) or (gp.qrpaexist(0, 1) and gp.strengthM1 >= 8 and flag_m1):
             out = _table_strength(gp, efs, e_gamma, irad, l)
     for i in (1, 2):
         tpr1 = _f(gp.tpr_mb[irad, l, i])

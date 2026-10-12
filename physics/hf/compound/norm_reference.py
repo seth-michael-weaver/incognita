@@ -44,12 +44,14 @@ from physics.hf.compound.prepare import load_cn_dump
 from physics.hf.core.constants import talys_constants
 from physics.hf.core.grids import incident_kinematics
 from physics.hf.core.tensors import DTYPE
+from physics.hf import stagetime
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT_JSON = ROOT / "docs" / "results" / "hf-compnorm-gate.json"
 TOL = 1.0e-2  # A-cn1
 
 
+@stagetime.timed("preeq")
 def addends(target: str, Zt: int, At: int, energies: list[float],
             declared: tuple[float, ...] | None = None, fit: tuple = ()) -> dict[float, dict]:
     """`xsdirdiscsum`, `xspreeqsum` and `xsgrsum` at every energy, from T8 and T12.
@@ -101,12 +103,23 @@ def chained_formation(cas, inp, add: dict):
         float(cas.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), cas.options.flagrel)
     lm = int(inc.lmax[0])
     tjl = _to_updown_axis(inc.tjl_inc[0], k0)[: lm + 1]
+    xscoupled = cas.xscoupled(inp.e_inc_mev)
+    from physics.hf.compound import wfcnorm
+
+    if xscoupled is not None and wfcnorm.enabled():
+        # FIXENG F15 B (INCOGNITA_WFCNORM, default OFF): pi/k^2 at the energy ECIS solved at
+        from physics.hf.omp.schrodinger import ecis_card_energy
+
+        e_card = float(ecis_card_energy(torch.tensor(float(inp.e_inc_mev), dtype=DTYPE)))
+        _, wavenum = incident_kinematics(
+            e_card, k0, float(cas.m.mass_amu[0, 1]),
+            float(cas.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
+            float(cas.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), cas.options.flagrel)
     # OPEN4: compnorm.f90:163-166 -- a coupled-channels target (colltype /= 'S', no `spherical y`)
     # takes the flux from its own sum over `Tjlinc` plus `xscoupled`, and does NOT renormalise
     # to `xsreacinc`. The two differ where ECIS solved at the card-rounded energy
     # (`schrodinger.ecis_card_energy`) while pi/k^2 is taken at `Einc`, which is what puts
-    # TALYS's keV nonelastic (`xsreacinc - xscompel`) below its own capture.
-    xscoupled = cas.xscoupled(inp.e_inc_mev)
+    # TALYS's keV nonelastic (`xsreacinc - xscompel`) below its own capture (INCOGNITA_WFCNORM: k at the card energy).
     # DIFFPARAM: `torch.tensor(float(...))` on sigma_reac would cut the optical parameters out
     # of the compound normalisation, which is the one place they enter it. `as_tensor` keeps the
     # graph when there is one and is the same object when there is not.

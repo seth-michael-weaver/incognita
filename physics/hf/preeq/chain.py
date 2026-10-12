@@ -353,7 +353,9 @@ def chained_photoabsorption(Zt: int, At: int, egrid: np.ndarray, nmax: int,
     from physics.hf.gamma.transmission import gammaxs
 
     # PARAMWIRE: the compound nucleus's `aadjust` (its `alev`) and E1 `ftable`/`wtable`
-    tok = gamma_token(fit, Zt, At + 1)
+    from physics.hf.projectile import compound_of
+
+    tok = gamma_token(fit, *compound_of(Zt, At))
     gp, _o = _gamma_parameters(Zt, At) if tok is None else _gamma_parameters(Zt, At, tok)
     e = torch.tensor(egrid[1 : nmax + 1], dtype=DTYPE)
     out = np.zeros((len(energies), nmax + 1))

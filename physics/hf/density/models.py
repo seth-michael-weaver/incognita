@@ -266,7 +266,10 @@ def density(
         # given ((X, 1) from the grid callers) and broadcast against J once, in spindis
         ald = ignatyuk(ld, eex, ibar)
         sc = spincut(ld, ald, eex, ibar)
-        out = densitytot(ld, eex, ibar, ldmod) * PARDIS * spindis(sc, J)
+        dt = densitytot(ld, eex, ibar, ldmod)
+        from physics.hf.density import spinquench as _sq  # SPINQUENCH: spin distribution only (OFF: sc)
+        sc = _sq.quench_t(ld, eex, sc, ibar)
+        out = dt * PARDIS * spindis(sc, J)
         out = torch.where(eex < 0.0, torch.zeros_like(out), out)
         return torch.clamp(out, min=1.0e-30)
     eex, J = torch.broadcast_tensors(eex, J)

@@ -144,6 +144,9 @@ def capture_xs(tg: CaptureTarget, e_inc_mev: float, differentiable: bool = False
     binp = SimpleNamespace(e_inc_mev=e, k0=k0, targetspin2=tg.targetspin2,
                            target_parity=tg.target_parity, ltarget=0, popeps_mb=tg.popeps_mb,
                            flagpreeq=False)
+    from physics.hf.compound import ewfc as _ewfc
+    if _ewfc.enabled(cas.options) and cas._coupled_band() is not None:
+        raise NotImplementedError("INCOGNITA_EWFC: this capture path is not wired (use the full engine, engine_c / engine.py)")
     ci = compound_inputs(cas, st, binp, SimpleNamespace(flagfission=False), etot, ZERO_ADDENDS)
     pop = compound_target_inputs(ci).pop_mb[0, 0]  # photon residual = the compound nucleus
     n = cas.spec(st, 0, 0).maxex + 1

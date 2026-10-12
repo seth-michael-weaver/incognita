@@ -126,15 +126,21 @@ def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
     use_wfc = inp.flagwidth and inp.wmode >= 1
     if use_wfc and inp.wmode not in (1, 2, 3):
         raise NotImplementedError(f"widthmode {inp.wmode} is not a TALYS option")
-    if not use_wfc or inp.wmode == 1:
+    ew = getattr(inp, "ew", None) if (not use_wfc or inp.wmode == 1) else None
+    if (not use_wfc or inp.wmode == 1) and ew is None:
         # SPEED0: without width fluctuations, or with Moldauer's, every (J, parity) at once
         from physics.hf.compound.target_batch import case_moldauer, case_nowfc
 
         got = (case_nowfc if not use_wfc else case_moldauer)(inp, device, nexmax)
         if got is not None:
-            return got
+            return _wfcnorm(inp, use_wfc, *got)
     x, wts = wfc.gauss_laguerre(device)
     cn = torch.as_tensor(inp.cnfactor_mb, dtype=DTYPE, device=device)
+    lmap = None
+    if ew is not None:
+        from physics.hf.compound import ewfc
+
+        lmap = ewfc.level_map(inp, ew)
     for parity in (-1, 1):
         for J2 in range(inp.j2beg, inp.j2end + 1, 2):
             s = exit_channel_sums(inp, J2, parity, device)
@@ -145,6 +151,14 @@ def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
             tinc = torch.as_tensor(tinc_np, dtype=DTYPE, device=device)
             feed = tinc.sum()
             blocks = s["blocks"]
+            if ew is not None and inp.k0 in blocks:
+                ewfc.STATS["blocks"] += 1
+                ewset = ewfc.coupled_set(inp, ew, J2, parity, chans, tinc, blocks[inp.k0], lmap)
+                if ewset is not None:
+                    ewfc.STATS["ew_blocks"] += 1
+                    xs_fis = xs_fis + _ew_block(inp, s, ewset, chans, tinc, x, wts, cn, J2, parity, pop, device,
+                                                use_wfc)
+                    continue
             ratio_h = None
             offs: dict[int, tuple[int, int]] = {}
             fis_off = (0, 0)
@@ -263,7 +277,105 @@ def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
                         xs_fis = xs_fis + pref * tf * (torch.where(live, gh * ratio_h, 0.0)).sum()
                 else:
                     xs_fis = xs_fis + pref * feed * tf
-    return pop, xs_fis
+    return _wfcnorm(inp, use_wfc, pop, xs_fis)
+
+
+def _wfcnorm(inp: CompoundInputs, use_wfc: bool, pop: Tensor, xs_fis: Tensor):
+    """FIXENG F15 (INCOGNITA_WFCNORM, default OFF): with width fluctuations on, scale the compound decays to the
+    formation cross section `xsflux` (`compound.wfcnorm`). OFF returns the arrays untouched."""
+    from physics.hf.compound import wfcnorm
+
+    if not (use_wfc and wfcnorm.enabled()) or float(inp.cnfactor_mb) == 0.0:
+        return pop, xs_fis
+    f = wfcnorm.factor(float(pop.detach().sum()), float(xs_fis.detach()), float(inp.xsflux_mb))
+    return pop * f, xs_fis * f
+
+
+def _ew_block(inp: CompoundInputs, s: dict, ewset: dict, chans, tinc: Tensor, x: Tensor, wts: Tensor,
+              cn: Tensor, J2: int, parity: int, pop: Tensor, device, use_wfc: bool = True) -> Tensor:
+    """EWCC: one (J, parity) of comptarget with Moldauer in the Engelbrecht-Weidenmueller eigen-channel
+    space of the coupled channels (`compound.ewfc`). Adds into `pop`, returns the fission addend.
+
+    The coupled cells (and every incident channel) are taken out of the k0 block and out of
+    Moldauer's product, enter as eigen-channels, and are transformed back; every other exit keeps
+    the engine's formula with the incident sum H_m replaced by the eigen-channel one.
+    """
+    from physics.hf.compound import ewfc
+
+    st = s["denom"] + ewset["dst"]
+    blocks = s["blocks"]
+    if not use_wfc:  # Hauser-Feshbach (comptarget above ewfc): W = 1, i.e. one node at x = 0
+        x = torch.zeros(1, dtype=DTYPE, device=device)
+        wts = torch.ones(1, dtype=DTYPE, device=device)
+    k0 = inp.k0
+    cells = ewset["cells"]
+    kb = blocks[k0]
+    tmask = kb.t.clone()
+    for lev, l, ud in cells:
+        if abs(float(kb.weight[lev, :, :, l, ud + 1].sum()) - 1.0) > 1.0e-12:
+            raise FloatingPointError(f"EWFC: coupled cell {(lev, l, ud)} has level weight != 1")
+        tmask[lev, l, ud + 1] = 0.0
+    # Moldauer's product over the non-transformed exits (fission hills included), as wfc.moldauer_product
+    t_list, r_list = [], []
+    for t, b in blocks.items():
+        if t == 0:
+            continue
+        tb = tmask if t == k0 else b.t
+        tt = torch.where(tb > 1.0e-30, tb, 0.0)
+        t_list.append(tt.reshape(-1))
+        r_list.append(b.weight.sum((1, 2)).reshape(-1))
+    ratio_h = th = None
+    if inp.flagfission and inp.nfisbar != 0:
+        ta = torch.as_tensor(inp.tfisA.get((J2, parity), [0.0] * (NUMHILL + 1)), dtype=DTYPE, device=device)
+        ra = torch.as_tensor(inp.rhofisA.get((J2, parity), [0.0] * (NUMHILL + 1)), dtype=DTYPE, device=device)
+        ratio_h = torch.where(ta[0] > 0, ta[1:] / torch.where(ta[0] > 0, ta[0], 1.0), 0.0)
+        tfh = ratio_h * s["fiswidth"]
+        rho_h = torch.clamp(ra[1:], min=1.0)
+        th = torch.where(tfh > 1.0e-30, tfh / rho_h, 0.0)
+        t_list.append(th)
+        r_list.append(rho_h)
+    t_exit, r_exit = torch.cat(t_list), torch.cat(r_list)
+    nu_exit = wfc.degrees_of_freedom(t_exit, st, inp.wfcfactor)
+    eps = 2.0 * t_exit[None, :] * x[:, None] / (st * nu_exit[None, :])
+    live = eps > 1.0e-30
+    logterm = torch.where(live, torch.log1p(torch.where(live, eps, 0.0)), 0.0)
+    rest = ((-nu_exit * 0.5 * r_exit)[None, :] * logterm).sum(1)
+    p, v = ewfc.eigen(ewset["pprime"], ewset["n_cc"])
+    if not use_wfc:
+        rest = torch.zeros_like(rest)
+    pm, hm, sig = ewfc.ew_populations(x, wts, st, rest, s["gamwidth"], p, v, ewset["inc"], tinc, inp.wfcfactor,
+                                      use_wfc)
+    if not use_wfc:
+        pm = torch.ones_like(pm)
+    ph = pm * hm
+    pref = cn * (J2 + 1.0) / st
+    for t, b in blocks.items():
+        if t == 0:
+            contrib = (b.weight * b.t[:, None, None, :, :]).sum((3, 4)) * ph.sum()
+        else:
+            tb = tmask if t == k0 else b.t
+            tt = torch.where(tb > 1.0e-30, tb, 0.0)
+            nu_b = wfc.degrees_of_freedom(tt, st, inp.wfcfactor)
+            fb = (2.0 * tt / (st * nu_b)).reshape(-1)
+            gb = (ph[:, None] / (1.0 + x[:, None] * fb[None, :])).sum(0).reshape(tt.shape)
+            contrib = (b.weight * (tt * gb)[:, None, None, :, :]).sum((3, 4))
+            if t == k0:
+                for i, (lev, l, ud) in enumerate(cells):
+                    contrib[lev] = contrib[lev] + b.weight[lev, :, :, l, ud + 1] * sig[i]
+        n = contrib.shape[0]
+        pop[t, :n] = pop[t, :n] + pref * contrib
+    xs = torch.zeros((), dtype=DTYPE, device=device)
+    if not use_wfc:
+        if inp.flagfission and inp.nfisbar != 0:
+            xs = pref * hm.sum() * s["fiswidth"]
+        return xs
+    if ratio_h is not None and float(torch.as_tensor(inp.tfisA.get((J2, parity), [0.0])[0])) > 0:
+        nu_h = wfc.degrees_of_freedom(th, st, inp.wfcfactor)
+        fh = 2.0 * th / (st * nu_h)
+        gh = (ph[:, None] / (1.0 + x[:, None] * fh[None, :])).sum(0)
+        livef = ratio_h != 0
+        xs = pref * s["fiswidth"] * (torch.where(livef, gh * ratio_h, 0.0)).sum()
+    return xs
 
 
 def compound_target_inputs(inp: CompoundInputs, device=None) -> BinaryPopulation:

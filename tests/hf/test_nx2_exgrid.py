@@ -72,8 +72,8 @@ def test_log_bins_fall_back_unless_eb_zero() -> None:
 def test_past_numex_falls_back() -> None:
     edis = np.linspace(0.0, 1.0, 120)
     assert exgrid_nx2.excitation_energies(edis, 119, 5.0, 40, 2, True, None, NUMEX) is None
-    with pytest.raises(ValueError):
-        _excitation_energies(edis, 119, 5.0, 40, 2, True, None)
+    # the Python grid is allocated past NUMEX (NUMEX_ALLOC), so the dispatcher's fallback returns it
+    _same(excitation_energies(edis, 119, 5.0, 40, 2, True, None), _excitation_energies(edis, 119, 5.0, 40, 2, True, None))
 
 
 def test_lever_off(monkeypatch) -> None:

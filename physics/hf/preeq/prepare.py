@@ -21,12 +21,14 @@ input is wrong".
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 
 import numpy as np
 import torch
 
 from physics.hf import reference as ref
+from physics.hf.projectile import compound_of
 from physics.hf.core.constants import NUC, talys_constants
 from physics.hf.core.grids import (
     charged_particle_begin,
@@ -45,8 +47,9 @@ from physics.hf.input.nuclides import coulomb_barriers
 from physics.hf.preeq.exciton import DiscreteInputs, PreeqInputs, esurf
 from physics.hf.structure.levels import discrete_levels
 from physics.hf.structure.masses import masses
+from physics.hf import stagetime
 
-NUMEN = 250  # A0_talys_mod.f90 numen
+NUMEN = int(__import__("os").environ.get("INCOGNITA_NUMEN", "250"))  # A0_talys_mod.f90 numen; INCOGNITA_NUMEN (PECOLLAPSE): reference runs only
 PARSYM = ("g", "n", "p", "d", "t", "h", "a")
 
 
@@ -126,6 +129,76 @@ def single_particle_densities(Z: int, N: int, kph: float = 15.0) -> tuple[float,
     return (Z + N) / kph, Z / kph, N / kph
 
 
+def pegq_on(options=None) -> bool:
+    """PEGQ (Incognita extension, default OFF): `pegq y` keyword, else `INCOGNITA_PEGQ=1`.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    if options is not None and bool(getattr(options, "pegq", False)):
+        return True
+    return os.environ.get("INCOGNITA_PEGQ", "0").strip().lower() in ("1", "y", "yes")
+
+
+def pegq_split(Z: int, N: int, kph: float = 15.0) -> tuple[float, float, float]:
+    """PEGQ: Fermi-gas isospin split of the single-particle densities. With a common radius
+    g_q(eps_F) = 3 N_q / (2 T_F,q), T_F,q ~ (N_q/V)^(2/3), so g_q ~ N_q^(1/3); the total g = A/Kph is kept:
+    gp = g Z^(1/3) / (Z^(1/3) + N^(1/3)), gn = g N^(1/3) / (Z^(1/3) + N^(1/3)). Equal to Z/Kph, N/Kph at N = Z.
+    NOT TALYS (densitypar.f90:538-539 uses the equal-Fermi-energy split Z/Kph, N/Kph).
+
+    Test: tests/hf/test_pegq.py
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    """
+    g = (Z + N) / kph
+    z3, n3 = max(float(Z), 0.0) ** (1.0 / 3.0), max(float(N), 0.0) ** (1.0 / 3.0)
+    if z3 + n3 <= 0.0:
+        return g, Z / kph, N / kph
+    return g, g * z3 / (z3 + n3), g * n3 / (z3 + n3)
+
+
+def pickup_densities(Z: int, N: int, kph: float = 15.0, options=None) -> tuple[float, float]:
+    """`gsp`, `gsn` of the Kalbach pickup residual (stripping.f90:175-176: Z/Kph, N/Kph, no g keywords);
+    PEGQ on: the same isospin split as the exciton states (pegq_split).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    if pegq_on(options):
+        _, gp, gn = pegq_split(Z, N, kph)
+        return gp, gn
+    return Z / kph, N / kph
+
+
+def exciton_densities(Z: int, N: int, kph: float, params=None, options=None) -> tuple[float, float, float]:
+    """`g`, `gp`, `gn` of nucleus (Z, N) as the exciton model reads them, with the run's per-nucleus
+    `g`/`gp`/`gn` keywords and `gadjust`/`gpadjust`/`gnadjust` (densitypar.f90:533-541):
+    g = gadjust * (g or A/Kph), gp = gadjust * gpadjust * (gp or Z/Kph), gn = gadjust * gnadjust * (gn or N/Kph).
+    PEGQ on: the defaults Z/Kph, N/Kph become pegq_split's (user gp/gn still win, adjusts still multiply).
+
+    KEYAUDIT (0939efc5, carried by PEGQ): before, every pre-equilibrium caller used `single_particle_densities`
+    and these six keywords were parsed but never reached the exciton model (preeq.f90, multipreeq2.f90:170-171/
+    240-241). With no user value, every adjust at 1 and PEGQ off the numbers are `single_particle_densities`' own.
+
+    TALYS: densitypar.f90:533-541
+    Test: tests/hf/test_keyaudit.py, tests/hf/test_pegq.py
+    """
+    g0, gp0, gn0 = pegq_split(Z, N, kph) if pegq_on(options) else single_particle_densities(Z, N, kph)
+    if params is None or options is None:
+        return g0, gp0, gn0
+    zix, nix = int(options.Zinit) - int(Z), int(options.Ninit) - int(N)
+    if not (0 <= zix <= 14 and 0 <= nix <= 34):
+        return g0, gp0, gn0
+    v = {k: float(params.at(k, zix, nix)) for k in ("g", "gp", "gn", "gadjust", "gpadjust", "gnadjust")}
+    if v["g"] == 0.0 and v["gp"] == 0.0 and v["gn"] == 0.0 and \
+            v["gadjust"] == 1.0 and v["gpadjust"] == 1.0 and v["gnadjust"] == 1.0:
+        return g0, gp0, gn0
+    g = v["gadjust"] * (v["g"] if v["g"] != 0.0 else g0)
+    gp = v["gadjust"] * v["gpadjust"] * (v["gp"] if v["gp"] != 0.0 else gp0)
+    gn = v["gadjust"] * v["gnadjust"] * (v["gn"] if v["gn"] != 0.0 else gn0)
+    return g, gp, gn
+
+
 def wfac(m, options, parskip=(False,) * 7) -> np.ndarray:
     """`wfac(type)` (excitoninit.f90:64-72): pi2h3c2 for photons, and
     amupi2h3c2 * (2s+1) * redumass for particles. Units mb^-1 MeV^-3 s^-1 / MeV^-2 s^-1.
@@ -158,14 +231,15 @@ def _gamma_parameters(target: str, variant: str):
     from physics.hf.gamma.parameters import gamma_parameters
 
     Z, A, options, _params, _m = _structure(target)
-    tag = f"{Z:03d}{A + 1:03d}"
+    Zc0, Ac0 = compound_of(Z, A)  # CPINC
+    tag = f"{Zc0:03d}{Ac0:03d}"
     md = _meta_of("level_density", target, f"ld{tag}.gs", variant)
     f = lambda k, d=0.0: float(str(md.get(k, d)).split()[0])  # noqa: E731
     mh = _meta_of("psf", target, f"psf{tag}.M1", variant)
-    beta2 = float(str(mh.get("pygmy tpr [mb]", 0.0)).split()[0]) / (1.0e-2 * (A + 1) ** 0.9)
+    beta2 = float(str(mh.get("pygmy tpr [mb]", 0.0)).split()[0]) / (1.0e-2 * Ac0 ** 0.9)
     return gamma_parameters(
-        Z,
-        A + 1,
+        Zc0,
+        Ac0,
         options,
         S_k0_mev=f("separation energy [MeV]"),
         delta_mev=f("pairing energy [MeV]"),
@@ -297,6 +371,7 @@ def _direct_discrete(target, variant, energies, k0, nlast):
     return out
 
 
+@stagetime.timed("preeq")
 def prepare(
     target: str,
     variant: str = "default",
@@ -380,10 +455,10 @@ def prepare(
     else:
         pparams = params
     for t in range(7):
-        Zr, Ar = Z - c["parZ"][t], A + 1 - c["parA"][t]
+        Zr, Ar = compound_of(Z, A)[0] - c["parZ"][t], compound_of(Z, A)[1] - c["parA"][t]
         pair[t] = (PC.chained_pairing(Zr, Ar, options, pparams, m) if chained
                    else _pairing_energy(target, variant, Zr, Ar, options, params, m))
-        _, gp_res[t], gn_res[t] = single_particle_densities(Zr, Ar - Zr, float(params.at("kph")))
+        _, gp_res[t], gn_res[t] = exciton_densities(Zr, Ar - Zr, float(params.at("kph")), params, options)
 
     ecomp = np.zeros(C)
     emask = np.zeros((C, 7, E), dtype=bool)
@@ -411,7 +486,7 @@ def prepare(
     # --- discrete levels of each residual, for preeqcorrect/preeqtotal
     lev = {}
     for t in range(7):
-        Zr, Ar = Z - c["parZ"][t], A + 1 - c["parA"][t]
+        Zr, Ar = compound_of(Z, A)[0] - c["parZ"][t], compound_of(Z, A)[1] - c["parA"][t]
         lev[t] = discrete_levels(Zr, Ar, options, m, params)
     nlast = tuple(int(lev[t].nlev) for t in range(7))
     edis = {t: lev[t].e_mev[: nlast[t] + 1].numpy().astype(float) for t in range(7)}
@@ -465,14 +540,15 @@ def prepare(
 
     t_ = lambda x: torch.tensor(np.asarray(x), dtype=DTYPE)  # noqa: E731
     einc = t_(energies)
-    _, gp_cn, gn_cn = single_particle_densities(Z, A + 1 - Z, float(params.at("kph")))
+    Zc0, Ac0 = compound_of(Z, A)  # CPINC
+    _, gp_cn, gn_cn = exciton_densities(Zc0, Ac0 - Zc0, float(params.at("kph")), params, options)
     inp = PreeqInputs(
         Z=Z,
         A=A,
         k0=k0,
         einc_mev=einc,
         ecomp_mev=t_(ecomp),
-        esurf_mev=esurf(options, params, k0, einc, A + 1),
+        esurf_mev=esurf(options, params, k0, einc, Ac0),
         egrid_mev=t_(eg[:E]).expand(C, E).contiguous(),
         deltae_mev=t_(de[:E]).expand(C, E).contiguous(),
         emask=torch.tensor(emask),
@@ -487,7 +563,7 @@ def prepare(
         pair_res_mev=t_(pair).expand(C, 7).contiguous(),
         xsflux_mb=t_(PC.chained_flux(Z, A, tuple(energies), grid=dgrid) if chained
                      else _flux(target, variant, energies)),
-        a_init=A + 1,
+        a_init=Ac0,
         nbins=number_of_bins(enincmax, options.nbins0),
         primary=True,
     )

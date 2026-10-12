@@ -286,7 +286,9 @@ def inverse_kept(Zt: int, At: int, e_grid: np.ndarray, maxen: int, options, para
     L1 = int(lcap) + 1
     out = np.zeros((1, 6, n_e, L1, 3))
     sig = np.zeros((1, 6, n_e))
-    zc, ac = int(Zt), int(At) + 1  # neutron projectile
+    from physics.hf.projectile import compound_of
+
+    zc, ac = compound_of(int(Zt), int(At))  # CPINC: (Zt, At + 1) for a neutron
     e_all = np.asarray(e_grid, dtype=np.float64)
     nen = np.arange(n_e)
     sel = (nen >= 1) & (nen <= maxen) & (e_all > 0)
@@ -469,6 +471,12 @@ def _opticalnp(xp, nuc, k: int, Z: int, A: int, e, fac, options, soukho: float |
     vso1, vso2 = F["Fvso1"] * nuc.vso1_mev, F["Fvso2"] * nuc.vso2_per_mev
     wso1, wso2 = F["Fwso1"] * nuc.wso1_mev, F["Fwso2"] * nuc.wso2_mev
     low = e <= ejoin
+    from physics.hf.omp.parameters import wddecay
+    wd = d1 * f2 * xp.exp(-d2 * f) / (f2 + d3 * d3)
+    if k == 1:
+        delta = wddecay(options)
+        if delta != 0.0:
+            wd = wd * xp.exp(-delta * e)
     return {
         "v_mev": xp.where(low, v_low, v_high),
         "rv_fm": F["Frv"] * nuc.rv0_fm,
@@ -479,7 +487,7 @@ def _opticalnp(xp, nuc, k: int, Z: int, A: int, e, fac, options, soukho: float |
         "vd_mev": 0.0,
         "rvd_fm": F["Frvd"] * nuc.rvd0_fm,
         "avd_fm": F["Favd"] * nuc.avd0_fm,
-        "wd_mev": d1 * f2 * xp.exp(-d2 * f) / (f2 + d3 * d3),
+        "wd_mev": wd,
         "rwd_fm": F["Frwd"] * nuc.rvd0_fm,
         "awd_fm": F["Fawd"] * nuc.avd0_fm,
         "vso_mev": vso1 * xp.exp(-vso2 * f),
@@ -494,6 +502,8 @@ def _opticalnp(xp, nuc, k: int, Z: int, A: int, e, fac, options, soukho: float |
 
 def _soukhovitskii(xp, k: int, Z: int, A: int, e, eferm: float, F):
     """`parameters.soukhovitskii` on floats."""
+    from physics.hf import engphys
+    eferm = engphys.soukho_fermi(k, A, eferm)  # ENGPHYS `efermi`, default: unchanged
     asym = (A - 2.0 * Z) / A
     f = xp.maximum(e - eferm, -20.0)
     f2 = f * f

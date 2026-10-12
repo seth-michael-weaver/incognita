@@ -59,10 +59,10 @@ J_ALL = NUMJ + 1
 
 
 def records_feedexcl(zc: int, nc: int, ty: int) -> bool:
-    """`emission.multiple._records_feedexcl`."""
-    if zc > 6 or nc > 10:
-        return False
-    return not (zc == 0 and nc == 0 and ty > 0)
+    """`emission.multiple._records_feedexcl` (including FIXENG's INCOGNITA_NGNEXCL)."""
+    from physics.hf.emission.multiple import _records_feedexcl
+
+    return _records_feedexcl(zc, nc, ty)
 
 
 @lru_cache(maxsize=512)
@@ -223,8 +223,10 @@ class Bucket:
         self.popeps_row = pe_run[self.n_run]
         zc, nc = self.n_int[:, 5], self.n_int[:, 6]
         tt = np.arange(7)
+        from physics.hf.emission.multiple import _ngnexcl  # FIXENG F15 INCOGNITA_NGNEXCL
+
         self.rec_row = (((zc <= 6) & (nc <= 10))[:, None]
-                        & ~(((zc == 0) & (nc == 0))[:, None] & (tt > 0)[None, :]))
+                        & ~(((zc == 0) & (nc == 0))[:, None] & (tt > 0)[None, :] & (not _ngnexcl())))
         brk = self.br_k
         later = np.zeros(brk.shape, dtype=bool)
         for q in range(brk.shape[2] - 1):

@@ -77,6 +77,7 @@ import torch
 from torch import Tensor
 
 from physics.hf.omp import regional  # OSENGINE: the one non-TALYS default (imports nothing back)
+from physics.hf import stagetime
 
 # ---------------------------------------------------------------------------------------------
 # TALYS dimensions and constants (A0_talys_mod.f90 parameters; constants.f90)
@@ -209,6 +210,8 @@ class Options:
     flagldglobal: bool = False  # input_densitymodel.f90:104
     flagasys: bool = False  # input_densitymodel.f90:105
     flagctmglob: bool = False  # input_densitymodel.f90:106
+    flagctwindow: bool = False  # Incognita extension (CTWFREEZE), not TALYS: CT anchored on the complete level window
+    flagctwindow2: bool = False  # Incognita extension (CTKINK), not TALYS: ctwindow with a value+slope-continuous join
     flagparity: bool = False  # input_densitypar.f90:176-180, true for ldmodelall >= 5
     flaggshell: bool = False  # input_preeqmodel.f90:62 (read with the density keywords)
     nlow_default: int = -1  # input_densitypar.f90:188 -- Nlow, resolved by T6
@@ -219,6 +222,8 @@ class Options:
     flagupbend: bool = True  # input_gammamodel.f90:64-68, true for k0 >= 1
     flagpsfglobal: bool = False  # input_gammamodel.f90:69
     flagglobalwtable: bool = True  # input_gammamodel.f90:70
+    m1share: str = "n"  # Incognita extension (M1SHARE), not TALYS: n = OFF; s = independent spin-flip SLO replaces the M1 table's spin-flip part, E1 table x m1kappa; t = s with kappa below E_GDR - Gamma_GDR only; p (E1M1NR) = non-rotors (|beta2| < 0.2) only: s-form M1, the same strength taken off E1 pointwise (f_E1 + f_M1 held); r (M1ROT) = rotors (|beta2| >= 0.2) only, as p with the spin-flip split by deformation (K=0/K=1); b = p on non-rotors + r on rotors
+    leeshell: str = "n"  # Incognita extension (LEESHELL), not TALYS: n = OFF; nm = M1 upbend C = 0 for a decaying nucleus with N in {28,50,82,126}; b = also N or Z in {20,28,50,82,126}
     flagstrengthjp: bool = False  # input_gammamodel.f90:71
     flaggnorm: bool = False  # input_gammamodel.f90:72
     ldmodelracap: int = 3  # input_gammamodel.f90:80
@@ -228,6 +233,30 @@ class Options:
     flagincadj: bool = True  # input_ompmodel.f90:97
     flagjlm: bool = False  # input_ompmodel.f90:98-102 (= flagmicro)
     pruitt: str = "n"  # input_ompmodel.f90:103
+    wddecay: float = 0.0  # Incognita extension (KDABS), not TALYS: neutron KD03 W_D(E) * exp(-wddecay * E), 1/MeV; 0 = TALYS
+    omprotor: str = "n"  # Incognita extension (OMPROTOR/COMBINE4), not TALYS: rotor CC diffuseness un-fold n|unf1|unfv (omp/omprotor.py)
+    collrule: str = "n"  # Incognita extension (COLLRULE), not TALYS: target coupling scheme from measured structure (n = TALYS; strict | trans | sv | y = strict)
+    binconv: str = "n"  # Incognita extension (BINCONV), not TALYS: graded residual continuum mesh (core/grids.binconv_edges); n = TALYS
+    binconvr: float = 8.0  # Incognita extension (BINCONV): finest width at a knot = base width / binconvr
+    binconvg: float = 0.3  # Incognita extension (BINCONV): width growth per MeV from the nearest knot
+    binconvc: float = 1.0  # Incognita extension (BINCONV): widest bin = binconvc * base width
+    binconvk: str = "btscf"  # Incognita extension (BINCONV): knots b (Ex(NL)), t (Exmax), s (S above) / S (both sides), c / C chain thresholds, f fission barriers
+    binconvt: float = 0.35  # Incognita extension (BINCONV): widest bin <= binconvt * Fermi-gas T(U) (a = A/8); 0 = no bound
+    binconvcn: float = 1.0  # Incognita extension (BINCONV): CN mesh only when Etotal - S_n(CN) >= binconvcn MeV
+    binquad: str = "n"  # Incognita extension (BINQUAD), not TALYS: population-weighted in-bin quadrature of the emission Tl (native/binquad.h); n = TALYS
+    binquadq: int = 3  # Incognita extension (BINQUAD): Gauss-Legendre nodes per smooth piece
+    binquadm: float = 1.0  # Incognita extension (BINQUAD): mother population tilt weight (0 = uniform)
+    binquadr: float = 1.0  # Incognita extension (BINQUAD): residual level-density tilt weight (0 = uniform)
+    binquadg: int = 0  # Incognita extension (BINQUAD): 1 = sub-points share the bin-centre photon widths
+    binquads: int = 1  # Incognita extension (BINQUAD): Gauss-Legendre sub-points per mother bin, each with its own branching (1 = off)
+    snbincn: int = 0  # Incognita extension (BINQUAD2): 1 = SNBIN edges in the compound nucleus's grid too (edges only)
+    binquadp: int = 0  # Incognita extension (BINQUAD2): GL nodes of the rho-tilted photon-exit quadrature over each residual continuum bin (0 = TALYS bin centre)
+    binquadc: int = 0  # Incognita extension (BINQUAD2): 1 = CN sub-points weighted by the primary-photon population shape rho(y) Tgamma(Etotal - y)
+    binquadk: int = 0  # Incognita extension (BINQUAD2): sub-points per smooth piece of the mother bin, pieces cut at knots (bitmask 1 own S, 2 chain S+S', 4 fission barriers; 0 = BINQUAD)
+    binquadw: int = 0  # Incognita extension (BINQUAD4): nodes of the WKB fission-penetrability table (wkb.f90 nbinswkb), decoupled from `bins` (0 = TALYS: nbins0)
+    snbinwmin: int = 24  # Incognita extension (SNBIN3), not TALYS: minimum continuum bins per open emission window under `snbin w`
+    snbin: str = "n"  # Incognita extension (SNBIN), not TALYS: continuum bin edges at every residual particle separation energy (core/grids.snbin_edges); n = TALYS
+    dwbaimag: str = "n"  # Incognita extension (VIBLEN), not TALYS: DWBA transition potential from the COMPLEX optical potential (ECIS lo(12)=T, as TALYS's own CC deck); n = TALYS (real only)
     flaglocalomp: bool = True  # input_ompmodel.f90:104
     flagglobaldisp: bool = False  # input_ompmodel.f90:105
     flagglobalfermi: bool = True  # input_ompmodel.f90:106
@@ -258,6 +287,7 @@ class Options:
     wmode: int = 1  # input_compoundmodel.f90:78-82; 1 (Moldauer) for neutrons, 2 (HRTW) otherwise
     WFCfactor: int = 1  # input_compoundmodel.f90:83
     ewfc_mev: float = -1.0  # input_compoundmodel.f90:84; sentinel -> S_k0(target), nuclides.f90:251
+    ewtransform: str = "n"  # Incognita extension (EWCC), not TALYS: Engelbrecht-Weidenmueller transform of the WFC for CC targets (compound/ewfc.py); n = TALYS
     reslib: str = "tendl.2025"  # input_compoundpar.f90:61
     eurr_mev: float = (
         -1.0
@@ -288,6 +318,7 @@ class Options:
     fismodel: int = 6  # input_fissionmodel.f90:85
     fismodelalt: int = 3  # input_fissionmodel.f90:86
     flaghbstate: bool = False  # input_fissionmodel.f90:87
+    flagfists2: bool = False  # Incognita extension (TS2FREEZE), not TALYS: ee saddle K-band transition states, continuum from 2 Delta_f
     flagclass2: bool = False  # input_fissionmodel.f90:88
     flagfispartdamp: bool = False  # input_fissionmodel.f90:89
     flagsffactor: bool = False  # input_fissionmodel.f90:90
@@ -316,6 +347,19 @@ class Options:
     epreeq_mev: float = (
         -1.0
     )  # input_preeqmodel.f90:84-92; sentinel -> last discrete level, nuclides.f90:259
+    pegammaramp: float = 0.0  # Incognita extension (PEGAMMA), not TALYS: MeV, 0 = OFF (TALYS's PE-gamma onset)
+    knockfix: bool = False  # Incognita extension (ALPHAHUMP), not TALYS: knockout sigav from the last computed inverse-xs bin
+    tlog: str = "n"  # Incognita extension (LOGTINT), not TALYS: c = charged-particle T_lj Lagrange in ln T in densprepare, n = OFF
+    tlogit: bool = False  # Incognita extension (TLOGIT), not TALYS: charged-particle T_lj Lagrange in logit T in densprepare
+    tlogref: bool = False  # Incognita extension (LOGTINT G0 reference), not TALYS: charged T from an 8x-refined OMP table
+    knockcb: bool = False  # Incognita extension (ALPHAHUMP), not TALYS: knockout Coulomb barrier with both radii
+    knockfix2: bool = False  # Incognita extension (ALPHAHUMP), not TALYS: knockfix + no zero sigav in the dE>2 branch
+    pecollapse: str = "n"  # Incognita extension (PECOLLAPSE), not TALYS: n = OFF = TALYS; c/c2 = flux-conserving PE->discrete collapse
+    pewindow: str = "n"  # Incognita extension (PEWINDOW), not TALYS: n = OFF = TALYS; a = exact window integral for levels 1..NL (+ peremove 1); l = NL only; p = a + exact spectrum between analytic Pauli onsets in endpoint segments (PEPAULI); q = a + 2 exact nodes per endpoint segment
+    peremove: str = "n"  # Incognita extension (PEREMOVE), not TALYS: n = OFF = TALYS; 1 = last discrete bin removed once; 2 = 1 + NL own two-point window
+    pegq: bool = False  # Incognita extension (PEGQ), not TALYS: y = exciton/pickup gp, gn ~ Z^(1/3), N^(1/3) at fixed g = A/Kph (also INCOGNITA_PEGQ=1)
+    peunits: bool = False  # Incognita extension (PEUNITS), not TALYS: n = OFF = TALYS; y = last discrete level gets xspreeq(nendisc)*frac (mb), not *Rboundary
+    sigavcont: bool = False  # Incognita extension (SIGAVCONT), not TALYS: knockout sigav = continuous window average
     msdbins: int = 6  # input_preeqpar.f90:89
     # --- bookkeeping ---
     explicit: frozenset[str] = field(default_factory=frozenset)  # keywords given, lowercase
@@ -462,6 +506,8 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "ldglobal": ("densitymodel", "flagldglobal", "yn"),
     "asys": ("densitymodel", "flagasys", "yn"),
     "ctmglobal": ("densitymodel", "flagctmglob", "yn"),
+    "ctwindow": ("densitymodel", "flagctwindow", "yn"),  # Incognita extension (CTWFREEZE), default n = OFF
+    "ctwindow2": ("densitymodel", "flagctwindow2", "yn"),  # Incognita extension (CTKINK), default n = OFF
     "parity": ("densitypar", "flagparity", "yn"),
     "gshell": ("preeqmodel", "flaggshell", "yn"),
     "strengthm1": ("gammamodel", "strengthM1", "int"),
@@ -469,6 +515,8 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "upbend": ("gammamodel", "flagupbend", "yn"),
     "psfglobal": ("gammamodel", "flagpsfglobal", "yn"),
     "globalwtable": ("gammamodel", "flagglobalwtable", "yn"),
+    "m1share": ("gammamodel", "m1share", "str"),  # Incognita extension (M1SHARE), n = OFF = TALYS
+    "leeshell": ("gammamodel", "leeshell", "str"),  # Incognita extension (LEESHELL), n = OFF = TALYS
     "strengthjp": ("gammamodel", "flagstrengthjp", "yn"),
     "gnorm": ("gammamodel", "flaggnorm", "yn"),
     "ldmodelracap": ("gammamodel", "ldmodelracap", "int"),
@@ -477,6 +525,31 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "incadjust": ("ompmodel", "flagincadj", "yn"),
     "jlmomp": ("ompmodel", "flagjlm", "yn"),
     "pruitt": ("ompmodel", "pruitt", "str"),
+    "wddecay": ("ompmodel", "wddecay", "float"),  # Incognita extension (KDABS), default 0 = OFF
+    "omprotor": ("ompmodel", "omprotor", "str"),  # Incognita extension (OMPROTOR/COMBINE4), default n = OFF
+    "ewtransform": ("compoundmodel", "ewtransform", "str"),  # Incognita extension (EWCC), default n = OFF
+    "collrule": ("ompmodel", "collrule", "str"),  # Incognita extension (COLLRULE), default n = OFF
+    "snbin": ("numerics", "snbin", "str"),  # Incognita extension (SNBIN), default n = OFF; w = SNBIN3 window bins
+    "snbinwmin": ("numerics", "snbinwmin", "int"),  # Incognita extension (SNBIN3), only read under `snbin w`
+    "binconv": ("numerics", "binconv", "str"),  # Incognita extension (BINCONV), default n = OFF
+    "binconvr": ("numerics", "binconvr", "float"),  # Incognita extension (BINCONV), only read under `binconv y`
+    "binconvg": ("numerics", "binconvg", "float"),  # Incognita extension (BINCONV), only read under `binconv y`
+    "binconvc": ("numerics", "binconvc", "float"),  # Incognita extension (BINCONV), only read under `binconv y`
+    "binconvk": ("numerics", "binconvk", "str"),  # Incognita extension (BINCONV), only read under `binconv y`
+    "binconvt": ("numerics", "binconvt", "float"),  # Incognita extension (BINCONV), only read under `binconv y`
+    "binquad": ("numerics", "binquad", "str"),  # Incognita extension (BINQUAD), default n = OFF
+    "binquadq": ("numerics", "binquadq", "int"),  # Incognita extension (BINQUAD), only read under `binquad y`
+    "binquadm": ("numerics", "binquadm", "float"),  # Incognita extension (BINQUAD), only read under `binquad y`
+    "binquadr": ("numerics", "binquadr", "float"),  # Incognita extension (BINQUAD), only read under `binquad y`
+    "binquadg": ("numerics", "binquadg", "int"),  # Incognita extension (BINQUAD), only read under `binquad y`
+    "binquads": ("numerics", "binquads", "int"),  # Incognita extension (BINQUAD), only read under `binquad y`
+    "snbincn": ("numerics", "snbincn", "int"),  # Incognita extension (BINQUAD2), only read under `snbin y|w`
+    "binquadp": ("numerics", "binquadp", "int"),  # Incognita extension (BINQUAD2), only read under `binquad y`
+    "binquadc": ("numerics", "binquadc", "int"),  # Incognita extension (BINQUAD2), only read under `binquad y` with binquads > 1
+    "binquadk": ("numerics", "binquadk", "int"),  # Incognita extension (BINQUAD2), only read under `binquad y` with binquads > 1
+    "binquadw": ("numerics", "binquadw", "int"),  # Incognita extension (BINQUAD4), only read under `binquad y`
+    "binconvcn": ("numerics", "binconvcn", "float"),  # Incognita extension (BINCONV), only read under `binconv y`  # Incognita extension (SNBIN3), only read under `snbin w`
+    "dwbaimag": ("ompmodel", "dwbaimag", "str"),  # Incognita extension (VIBLEN), default n = OFF
     "localomp": ("ompmodel", "flaglocalomp", "yn"),
     "globaldisp": ("ompmodel", "flagglobaldisp", "yn"),
     "globalfermi": ("ompmodel", "flagglobalfermi", "yn"),
@@ -520,6 +593,7 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "fismodel": ("fissionmodel", "fismodel", "int"),
     "fismodelalt": ("fissionmodel", "fismodelalt", "int"),
     "hbstate": ("fissionmodel", "flaghbstate", "yn"),
+    "fists2": ("fissionmodel", "flagfists2", "yn"),  # Incognita extension (TS2FREEZE), default n = OFF
     "class2": ("fissionmodel", "flagclass2", "yn"),
     "fispartdamp": ("fissionmodel", "flagfispartdamp", "yn"),
     "sffactor": ("fissionmodel", "flagsffactor", "yn"),
@@ -545,6 +619,19 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "preeqmode": ("preeqmodel", "preeqmode", "int"),
     "preequilibrium": ("preeqmodel", "epreeq_mev", "onset"),
     "multipreeq": ("preeqmodel", "emulpre_mev", "onset"),
+    "pegammaramp": ("preeqmodel", "pegammaramp", "float"),  # Incognita extension (PEGAMMA), 0 = OFF
+    "knockfix": ("preeqmodel", "knockfix", "yn"),  # Incognita extension (ALPHAHUMP), n = OFF = TALYS
+    "tlog": ("ompmodel", "tlog", "str"),  # Incognita extension (LOGTINT), n = OFF = TALYS
+    "tlogit": ("ompmodel", "tlogit", "yn"),  # Incognita extension (TLOGIT), n = OFF = TALYS
+    "tlogref": ("ompmodel", "tlogref", "yn"),  # Incognita extension (LOGTINT G0 reference), n = OFF
+    "knockcb": ("preeqmodel", "knockcb", "yn"),  # Incognita extension (ALPHAHUMP), n = OFF = TALYS
+    "knockfix2": ("preeqmodel", "knockfix2", "yn"),  # Incognita extension (ALPHAHUMP), n = OFF = TALYS
+    "pecollapse": ("preeqmodel", "pecollapse", "str"),  # Incognita extension (PECOLLAPSE), n = OFF = TALYS
+    "pewindow": ("preeqmodel", "pewindow", "str"),  # Incognita extension (PEWINDOW), n = OFF = TALYS
+    "peremove": ("preeqmodel", "peremove", "str"),  # Incognita extension (PEREMOVE), n = OFF = TALYS
+    "pegq": ("preeqmodel", "pegq", "yn"),  # Incognita extension (PEGQ), n = OFF = TALYS
+    "peunits": ("preeqmodel", "peunits", "yn"),  # Incognita extension (PEUNITS), n = OFF = TALYS
+    "sigavcont": ("preeqmodel", "sigavcont", "yn"),  # Incognita extension (SIGAVCONT), n = OFF = TALYS
     "msdbins": ("preeqpar", "msdbins", "int"),
     "production": ("medical", "flagprod", "yn"),
     "ngfit": ("fit", "flagngfit", "yn"),
@@ -634,7 +721,7 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
 
 
 def default_options(
-    Z: int, A: int, projectile: str = "n", overrides: Mapping[str, object] | None = None,
+    Z: int, A: int, projectile: str | None = None, overrides: Mapping[str, object] | None = None,
     _fit: bool = True,
 ) -> Options:
     """The TALYS defaults for this target and projectile, with optional explicit keywords.
@@ -657,6 +744,11 @@ def default_options(
     nuclides.f90:1 (nuclides)
     Test: tests/hf/test_defaults.py (talys.out "USER INPUT FILE + DEFAULTS" echo)
     """
+    if projectile is None:
+        # CPINC: the run's projectile (`physics.hf.projectile`), "n" unless INCOGNITA_CPINC is set
+        from physics.hf import projectile as _proj
+
+        projectile = _proj.symbol()
     if projectile not in PARSYM:
         raise ValueError(f"projectile {projectile!r} not one of {PARSYM}")
     ov = {str(k).lower(): v for k, v in (overrides or {}).items()}
@@ -1457,6 +1549,7 @@ def _set_cells(t: Tensor, rows: list[list[float]]) -> Tensor:
 TMC_OVERRIDES = None
 
 
+@stagetime.timed("setup.params")
 def default_params(
     Z: int,
     A: int,
@@ -1521,6 +1614,7 @@ def default_params(
     return Params(_default_params_build(Z, A, options, ov, device))
 
 
+@stagetime.timed("setup.params")
 def default_params_shared(Z: int, A: int, options: Options) -> Params:
     """`default_params(Z, A, options)` holding the cached tensors themselves, for a caller that
     only reads them and shares them onwards (NATIVEX2: `dens_reference._structure_of`, whose
@@ -1668,7 +1762,6 @@ def _default_params_build(Z, A, options, overrides, device) -> dict[str, Tensor]
     def _wtable(s):  # input_gammapar.f90:96, :113-138
         t = _fill(s, 1.0, device)
         if k0 <= 1 and options.flagglobalwtable and options.strength in (8, 9):
-            from physics.hf.gamma import e1_width as _e1w
             tab8 = {(1, True): 1.052, (1, False): 1.076, (2, True): 0.942, (2, False): 0.943,
                     (3, True): 0.905, (3, False): 0.911, 4: 0.918, 5: 1.017, 6: 0.942}  # fmt: skip
             tab9 = {(1, True): 1.048, (1, False): 1.081, (2, True): 0.911, (2, False): 0.934,
@@ -1680,7 +1773,7 @@ def _default_params_build(Z, A, options, overrides, device) -> dict[str, Tensor]
                 for nix in range(NUMN + 1):
                     ldm = options.ldmodel_of(zix, nix)
                     key = (ldm, options.flagcol_of(zix, nix)) if ldm <= 3 else ldm
-                    row.append(_e1w.constant(options.strength, tab[key]) if key in tab else 1.0)  # the fill above; INDEP_FIX: INCOGNITA_E1_WTABLE
+                    row.append(tab[key] if key in tab else 1.0)  # the fill above
                 rows.append(row)
             t[:, :, 1, 1] = torch.tensor(rows, dtype=DTYPE, device=t.device)
         return t

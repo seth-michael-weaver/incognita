@@ -161,6 +161,10 @@ def _mpe_walk(cas, st, nuclei: dict, etot: float, maxz: int, maxn: int) -> dict:
     TALYS: multipreeq2.f90:1 (multipreeq2), multiple.f90:549 (the call)
     Test: GPUFULL / tests/hf/test_gpu_full.py
     """
+    from physics.hf.density.particle_hole import phmicro_on
+
+    if phmicro_on(cas.options):  # PHMICRO: the GPU walk carries only the analytic p-h densities
+        raise NotImplementedError("PHMICRO: phmodel 2 is wired on the Python engine only")
     out = {}
     for zc in range(maxz + 1):
         for nc in range(maxn + 1):
@@ -241,7 +245,7 @@ def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> 
     TALYS: talysreaction.f90:1 (talysreaction)
     Test: GPUFULL / tests/hf/test_gpu_full.py
     """
-    from physics.hf.compound.chain import _NormView
+    from physics.hf.compound.chain import _NormView, _cnfactor
     from physics.hf.compound.dens_reference import _eendmax, _to_updown_axis
     from physics.hf.compound.norm_reference import addends, chained_formation
     from physics.hf.compound.population import population
@@ -266,6 +270,15 @@ def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> 
     built = _BuiltInputs(cas, target, declared, add)
     sc = built.sc
     o = cas.options
+    from physics.hf.core.grids import binquad_mode
+
+    if binquad_mode(o):  # BINQUAD: native CPU engine only (the GPU path would run the midpoint rule)
+        raise NotImplementedError("binquad: not wired on the GPU path; use the native engine")
+    if isinstance(cas.trans, dict) and (cas.trans.get("tlog", False) or "tlogref" in cas.trans):
+        raise NotImplementedError("LOGTINT (tlog c / tlogref) is not wired on the GPU full path; run the C or numpy engine")
+    if cas.trans_of(0, 0) is not cas.trans:
+        raise NotImplementedError("SLFIRST (INCOGNITA_SFUNC_SCOPE=first): one Tjl stack per run on the GPU full path; "
+                                  "run the C or numpy engine")
     tr = [cas.trans[t] for t in range(1, 7)]
     L = max(x[0].shape[1] for x in tr)
     maxen = int(cas.rg.maxen)
@@ -304,7 +317,7 @@ def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> 
         tjl_t = _to_updown_axis(inc.tjl_inc[0], cas.k0)[: lmaxinc + 1]
         rec = dict(
             e=float(binp.e_inc_mev), etot=float(etot), lmaxinc_st=int(st.lmaxinc),
-            lmaxinc=int(lmaxinc), tjlinc=_np(tjl_t).copy(), cnfactor=_f(cf.cn_factor_mb),
+            lmaxinc=int(lmaxinc), tjlinc=_np(tjl_t).copy(), cnfactor=_f(_cnfactor(cf, binp.xseps_mb)),  # ENGDEFECT: comptarget.f90:256
             j2beg=int(cf.j2beg), j2end=int(cf.j2end),
             flagwidth=bool(binp.e_inc_mev <= cas.ewfc_mev), first_energy=bool(st.first_energy),
             sigma_reac=float(inc.sigma_reac_mb[0]))

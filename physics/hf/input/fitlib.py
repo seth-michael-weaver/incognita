@@ -69,6 +69,10 @@ PARSYM = ("g", "n", "p", "d", "t", "h", "a")  # constants.f90:89
 ENV = "INCOGNITA_TALYS_FIT"
 #: ad-hoc keyword lines, ';' separated, applied as if they were the target's best file
 ENV_LINES = "INCOGNITA_TALYS_FIT_LINES"
+#: CHUNKFIX: a chart-wide recipe table (one keyword line per line, or ';' separated). Each run takes the table's
+#: global lines plus the per-nucleus lines of every nucleus in ITS OWN box, so a residual nucleus gets the same
+#: recipe value whichever targets share the process. ENV_LINES, if also set, goes on top (later line wins).
+ENV_LINES_FILE = "INCOGNITA_TALYS_FIT_LINES_FILE"
 #: TENDL-2025's own "Adjusted TALYS input parameters" block, parsed by NGFIT
 ENV_MF1 = "INCOGNITA_TALYS_FIT_MF1"
 #: v1 (n,a) recipe (BLIND_LOOKS 09-22 NA-PICKUP / NA-V1b / HEPROD): the emission-fitted alpha
@@ -126,7 +130,7 @@ def modes() -> frozenset[str]:
         toks.discard("tendl")
     if "nodata" in toks:
         toks = {"nodata", "s8"}
-    if os.environ.get(ENV_LINES):
+    if os.environ.get(ENV_LINES) or os.environ.get(ENV_LINES_FILE):
         toks = set(toks) | {"lines"}
     return frozenset(toks)
 
@@ -327,6 +331,16 @@ def _split(lines, want_options: bool) -> tuple[list, list, list, list, list]:
                 continue
             skipped.append((line, "per-nucleus form of an option keyword"))
             continue
+        if k in UPBEND_KEYS:  # LEESHELL fidelity fix: `upbendc Z A value [m1|e1]` (class 5, input_gammapar.f90:392-425)
+            try:
+                z, a, v = int(w[1]), int(w[2]), float(w[3])
+                rad = (w[4] if len(w) > 4 else "e1").lower()  # getvalues.f90:179-191: no type -> irad 1, l 1
+                irad = 0 if rad[:1] == "m" else 1
+                lval = int(rad[1:]) if rad[:1] in "em" and len(rad) > 1 and rad[1:].isdigit() else 1
+                cells.append((k, z, a, v, (irad, lval)))
+            except (ValueError, IndexError):
+                skipped.append((line, "could not be parsed"))
+            continue
         spec = PARAM_SPECS.get(k)
         if spec is None:
             skipped.append((line, "not a TALYS keyword the port knows"))
@@ -363,12 +377,14 @@ def _extra_index(k: str, dims, rest) -> tuple | None:
     n = len(dims) - 2
     if n == 0:
         return ()
-    if k in ("wtable", "ftable", "etable", "wtableadjust", "ftableadjust"):
-        # class 5: `wtable Z A value e1` -- radiation type and multipolarity (input_gammapar)
+    if k in _CLASS5:
+        # class 5: `wtable Z A value e1`, `egr Z A value e1 [igr]` -- radiation type, multipolarity
+        # and (GDR / pygmy-scissors keywords) the resonance number (getvalues.f90:179-191)
         rad = (rest[0] if rest else "e1").lower()
         irad = 1 if rad[:1] == "e" else 0
         lval = int(rad[1:]) if len(rad) > 1 and rad[1:].isdigit() else 1
-        return (irad, lval)[:n]
+        igr = int(rest[1]) if len(rest) > 1 else 1
+        return (irad, lval, igr)[:n]
     # class 3: one barrier index, 0 when absent (input_densitypar / input_fissionpar)
     ibar = int(float(rest[0])) if rest else (1 if dims[2][0] == 1 else 0)
     return (ibar,) + (0,) * (n - 1)
@@ -398,16 +414,86 @@ def _mf1_blocks() -> dict:
     return {k: tuple(v) for k, v in out.items()}
 
 
-@lru_cache(maxsize=256)
+#: projectile -> (Z, N) it adds to the target, to find the compound nucleus (constants.f90 parZ / parN)
+_PARZN = {"g": (0, 0), "n": (0, 1), "p": (1, 0), "d": (1, 1), "t": (1, 2), "h": (2, 1), "a": (2, 2)}
+
+
+@lru_cache(maxsize=8)
+def _lines_table(path: str, mtime_ns: int, size: int):
+    """CHUNKFIX: the recipe table `ENV_LINES_FILE`, parsed once per (path, mtime, size):
+    (global lines, {(Z, A): per-nucleus lines}, sha256). A per-nucleus line is one whose keyword has the (Zix, Nix)
+    leading axes, i.e. the `keyword Z A value ...` form `_split` reads as a cell."""
+    import hashlib
+
+    from physics.hf.input.defaults import PARAM_SPECS
+
+    raw = Path(path).read_bytes()
+    glob: list[str] = []
+    per: dict = {}
+    for x in raw.decode(errors="replace").replace(";", "\n").splitlines():
+        s = x.strip().lower()
+        if not s or s.startswith("#"):
+            continue
+        w = s.split()
+        spec = PARAM_SPECS.get(w[0])
+        if spec is not None and spec.dims and spec.dims[0] == (0, 14) and len(spec.dims) >= 2 and len(w) >= 4:
+            try:
+                per.setdefault((int(w[1]), int(w[2])), []).append(s)
+                continue
+            except ValueError:
+                pass
+        glob.append(s)
+    return tuple(glob), {k: tuple(v) for k, v in per.items()}, hashlib.sha256(raw).hexdigest()
+
+
+def table_lines(Z: int, A: int, projectile: str = "n") -> tuple[tuple[str, ...], str]:
+    """CHUNKFIX: the lines of the recipe table (`ENV_LINES_FILE`) that a run on target (Z, A) uses: the global lines
+    and the per-nucleus lines of every nucleus of its box, Zix = Zc - z in 0..14 and Nix = Nc - n in 0..34 below the
+    compound nucleus (Zc, Nc) (the (Zix, Nix) bounds of every per-nucleus keyword; `apply_params` would skip the
+    rest anyway). Returns (lines, "lines table <path> sha256 <hex>"); ((), "") when no table is set.
+
+    TALYS: getvalues (input_*par.f90) -- keywords in absolute coordinates, Zix = Zinit - Z
+    Test: tests/hf/test_chunkfix.py
+    """
+    p = os.environ.get(ENV_LINES_FILE, "").strip()
+    if not p:
+        return (), ""
+    st = os.stat(p)
+    glob, per, sha = _lines_table(os.path.abspath(p), st.st_mtime_ns, st.st_size)
+    dz, dn = _PARZN.get(projectile, (0, 1))
+    zc, nc = int(Z) + dz, int(A) - int(Z) + dn
+    out = list(glob)
+    for (z, a), ls in sorted(per.items()):
+        if 0 <= zc - z <= 14 and 0 <= nc - (a - z) <= 34:
+            out.extend(ls)
+    return tuple(out), f"lines table {os.path.abspath(p)} sha256 {sha}"
+
+
+def _lines_key() -> tuple:
+    """What the `lines` arm reads from the environment, so `cards` is never served from a stale cache entry."""
+    p = os.environ.get(ENV_LINES_FILE, "").strip()
+    st = os.stat(p) if p and os.path.exists(p) else None
+    return (os.environ.get(ENV_LINES, ""), p, st.st_mtime_ns if st else 0, st.st_size if st else 0,
+            os.environ.get("INCOGNITA_OMPROTOR", ""))
+
+
 def cards(Z: int, A: int, projectile: str = "n", Ltarget: int = 0,
           arms: frozenset = frozenset()) -> Cards:
+    """Everything `best y` and the fitted libraries put on a run for this target (cached per environment).
+
+    TALYS: initial_best.f90:1 (initial_best), input_fit.f90:1 (input_fit), xsfit.f90:1 (xsfit)
+    Test: tests/hf/test_fitlib.py, tests/hf/test_chunkfix.py
+    """
+    return _cards(int(Z), int(A), projectile, Ltarget, arms or modes(), _lines_key())
+
+
+@lru_cache(maxsize=256)
+def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key: tuple) -> Cards:
     """Everything `best y` and the fitted libraries put on a run for this target.
 
     TALYS: initial_best.f90:1 (initial_best), input_fit.f90:1 (input_fit), xsfit.f90:1 (xsfit)
     Test: tests/hf/test_fitlib.py
     """
-    Z, A = int(Z), int(A)
-    arms = arms or modes()
     src: list[str] = []
     bl: tuple[str, ...] = ()
     if "best" in arms:
@@ -427,6 +513,10 @@ def cards(Z: int, A: int, projectile: str = "n", Ltarget: int = 0,
         bl = bl + na_v1_lines(Z, A)
         src.append("NA_V1")
     if "lines" in arms:
+        tl, tsrc = table_lines(Z, A, projectile)
+        if tl:
+            bl = bl + tl
+            src.append(tsrc)
         extra = tuple(x.strip().lower() for x in os.environ.get(ENV_LINES, "").split(";")
                       if x.strip())
         if extra:
@@ -436,6 +526,16 @@ def cards(Z: int, A: int, projectile: str = "n", Ltarget: int = 0,
     if "s8" in arms and not any(k == "strength" for k, _ in opts):
         opts = [("strength", 8)] + opts
     o = _resolved(Z, A, projectile, dict(opts))
+    # OMPROTOR (COMBINE4, Incognita extension): the rotor CC diffuseness un-fold's per-particle cards, after the run's own lines
+    # (where OMPROTOR's runs carried them as extra lines); none for OFF or a non-member target (omp/omprotor.py)
+    from physics.hf.omp import omprotor
+
+    if projectile == "n":
+        rot = omprotor.lines(Z, A, omprotor.mode(o))
+        if rot:
+            _, c3, g3, p3, s3 = _split(rot, want_options=False)
+            cells, globs, parts, skipped = cells + c3, globs + g3, parts + p3, skipped + s3
+            src.append("omprotor " + omprotor.mode(o))
     # input_fit.f90:54-63: `fit y` turns on EVERY (n,x) fitted library, not only (n,g); xsfit.f90
     # then walks them in this order, so a later file's value wins. `ngfit y` on its own leaves
     # the others off (their defaults are read before the keyword loop, when flagfit is still n).
@@ -485,7 +585,7 @@ def active() -> Cards | None:
     return _ACTIVE
 
 
-def activate(Z: int, A: int, projectile: str = "n", Ltarget: int = 0) -> Cards | None:
+def activate(Z: int, A: int, projectile: str | None = None, Ltarget: int = 0) -> Cards | None:
     """Make (Z, A) the target whose `best`/fit keywords every `default_options` /
     `default_params` of this process applies. A no-op when the lever is off.
 
@@ -498,9 +598,13 @@ def activate(Z: int, A: int, projectile: str = "n", Ltarget: int = 0) -> Cards |
     global _ACTIVE
     if not enabled():
         return None
+    if projectile is None:  # CPINC: the run's projectile (neutron unless INCOGNITA_CPINC)
+        from physics.hf import projectile as _proj
+
+        projectile = _proj.symbol()
     c = cards(int(Z), int(A), projectile, Ltarget, modes())
     if _ACTIVE is not None and (_ACTIVE.Z, _ACTIVE.A, _ACTIVE.projectile) == (
-            int(Z), int(A), projectile):
+            int(Z), int(A), projectile) and (_ACTIVE is c or _ACTIVE == c):
         return _ACTIVE
     if _ACTIVE is not None:
         from physics.hf import chartrun
@@ -508,6 +612,24 @@ def activate(Z: int, A: int, projectile: str = "n", Ltarget: int = 0) -> Cards |
         chartrun.drop_target_caches()
     _ACTIVE = c
     return c
+
+
+def current(Z: int, A: int, projectile: str | None = None, Ltarget: int = 0) -> Cards | None:
+    """The cards the environment asks for NOW for (Z, A), or None when the lever is off.
+
+    SPEEDFIX (warmrun trap): a `Cascade` records `active()` when it is built; a run on it is
+    refused unless `active()` and `current(...)` are still those cards (`Cascade.check_cards`).
+
+    TALYS: initial_best.f90:1 (initial_best)
+    Test: tests/hf/test_warmguard.py
+    """
+    if not enabled():
+        return None
+    if projectile is None:  # CPINC
+        from physics.hf import projectile as _proj
+
+        projectile = _proj.symbol()
+    return cards(int(Z), int(A), projectile, Ltarget, modes())
 
 
 def deactivate() -> None:
@@ -536,12 +658,31 @@ def option_overrides() -> dict:
 
 
 #: keywords `gamma.parameters.gamma_parameters` owns (it builds them from the options, not from
-#: `Params`), so they reach it through its `overrides` dict instead -- see `gamma_overrides`
-GAMMA_KEYS = ("ftable", "etable", "wtable", "ftableadjust", "wtableadjust")
-#: Per-nucleus giant/pygmy resonance cells that nothing reads (gamma.parameters takes egr/ggr/sgr
-#: from its tables and only GAMMA_KEYS as overrides): refused by `apply_params` instead of ignored.
-UNAPPLIED_GAMMA_CELLS = frozenset({"egr", "ggr", "sgr", "epr", "gpr", "spr", "egradjust", "ggradjust",
-                                   "sgradjust", "epradjust", "gpradjust", "spradjust"})
+#: `Params`), so they reach it through its `overrides` dict instead -- see `gamma_overrides`.
+#: Value -> the `GammaParameters` field it fills (ETABLEFIX: `etable` used to arrive under its
+#: keyword name, which `gamma_parameters` never reads, and the GDR / pygmy-scissors keywords and
+#: every `*adjust` were not passed at all); the `*adjust` keys keep their keyword names and
+#: `gamma_parameters` applies them the way gammapar/fstrength do.
+GAMMA_FIELDS = {
+    "etable": "etable_mev", "ftable": "ftable", "wtable": "wtable",
+    "egr": "egr_mev", "ggr": "ggr_mev", "sgr": "sgr_mb",
+    "epr": "epr_mev", "gpr": "gpr_mev", "spr": "tpr_mb",
+    "etableadjust": "etableadjust", "ftableadjust": "ftableadjust", "wtableadjust": "wtableadjust",
+    "egradjust": "egradjust", "ggradjust": "ggradjust", "sgradjust": "sgradjust",
+    "epradjust": "epradjust", "gpradjust": "gpradjust", "spradjust": "spradjust",
+}
+#: LEESHELL fidelity fix: the per-nucleus upbend keywords (input_gammapar.f90:392-425) -> (field, last-axis slot).
+#: Before, they were not PARAM_SPECS keys and landed in `Cards.skipped` ("not a TALYS keyword the port knows").
+#: TALYS assigns them AFTER its defaults (a user 0 is kept), so they travel as NaN-masked arrays.
+UPBEND_KEYS = {
+    "upbendc": ("upbend_cards", 1), "upbende": ("upbend_cards", 2), "upbendf": ("upbend_cards", 3),
+    "upbendcadjust": ("upbendadjust_cards", 1), "upbendeadjust": ("upbendadjust_cards", 2),
+    "upbendfadjust": ("upbendadjust_cards", 3),
+    "m1kappa": ("m1kappa_cards", 0),  # M1SHARE (Incognita extension): `m1kappa Z A k`, read only by gamma_parameters
+}
+GAMMA_KEYS = tuple(GAMMA_FIELDS) + tuple(UPBEND_KEYS)
+#: the getvalues class-5 keywords among them: (irad, l) and, for the resonance ones, igr
+_CLASS5 = frozenset(GAMMA_FIELDS)
 
 
 def gamma_overrides(Z: int, A: int, gammax: int) -> dict | None:
@@ -556,16 +697,86 @@ def gamma_overrides(Z: int, A: int, gammax: int) -> dict | None:
         return None
     import numpy as np
 
+    from physics.hf.input.defaults import PARAM_SPECS
+
     out: dict = {}
     for k, z, a, v, idx in c.cells:
         if k not in GAMMA_KEYS or (int(z), int(a)) != (int(Z), int(A)):
             continue
-        irad, lval = (idx + (1, 1))[:2]
+        irad, lval, igr = (tuple(idx) + (1, 1, 1))[:3]
         if not (0 <= irad <= 1 and 1 <= lval <= int(gammax)):
             continue
-        arr = out.setdefault(k, np.zeros((2, int(gammax) + 1)))
-        arr[irad, lval] = float(v)
+        if k in UPBEND_KEYS:
+            fld, slot = UPBEND_KEYS[k]
+            arr = out.setdefault(fld, np.full((2, int(gammax) + 1, 4), np.nan))
+            arr[irad, lval, slot] = float(v)
+            continue
+        if len(PARAM_SPECS[k].dims) == 5:  # egr/ggr/sgr/epr/gpr/spr (+adjust): (2, gammax+1, 3)
+            if not 1 <= igr <= 2:
+                continue
+            arr = out.setdefault(GAMMA_FIELDS[k], np.zeros((2, int(gammax) + 1, 3)))
+            arr[irad, lval, igr] = float(v)
+        else:
+            arr = out.setdefault(GAMMA_FIELDS[k], np.zeros((2, int(gammax) + 1)))
+            arr[irad, lval] = float(v)
     return out or None
+
+
+_PLANS: dict = {}
+
+
+def _write_plan(c: Cards, zinit: int, ninit: int):
+    """SPEEDFIX lever 3: `apply_params`'s writes for cards `c` on a run with target (Zinit, Ninit), resolved once (it was
+    re-derived from all ~1,300 cells on each of ~20 calls per run). Cells: per keyword, the storage positions that land
+    in the run's box as index tensors and their values, a position written twice keeping its LAST value (the serial
+    loop's result); then the globals and the per-particle cells, in card order, as before.
+
+    TALYS: xsfit.f90:1 (xsfit)
+    Test: tests/hf/test_fitlib.py
+    """
+    import torch
+
+    from physics.hf.input.defaults import PARAM_SPECS
+
+    key = (id(c), zinit, ninit)
+    got = _PLANS.get(key)
+    if got is not None and got[0] is c:
+        return got[1]
+    per: dict[str, dict] = {}
+    for k, z, a, v, idx in c.cells:
+        if k in UPBEND_KEYS:  # LEESHELL: reach gamma_parameters only (gamma_overrides)
+            continue
+        spec = PARAM_SPECS[k]
+        offs = spec.offsets
+        zix, nix = zinit - int(z), ninit - (int(a) - int(z))
+        (zlo, zhi), (nlo, nhi) = spec.dims[0], spec.dims[1]
+        if not (zlo <= zix <= zhi and nlo <= nix <= nhi):
+            continue
+        pos = [zix + offs[0], nix + offs[1]]
+        ok = True
+        for i, (lo, hi), off in zip(idx, spec.dims[2:], offs[2:], strict=True):
+            if not lo <= i <= hi:
+                ok = False
+                break
+            pos.append(i + off)
+        if ok:
+            per.setdefault(k, {})[tuple(pos)] = float(v)
+    cells = []
+    for k, d in per.items():
+        cols = tuple(torch.tensor(ax, dtype=torch.long) for ax in zip(*d.keys()))
+        cells.append((k, cols, list(d.values())))
+    globs = [(k, float(v)) for k, v in c.globals_]
+    parts = []
+    for k, p, v in c.particles:
+        spec = PARAM_SPECS[k]
+        lo, hi = spec.dims[0]
+        if lo <= p <= hi:
+            parts.append((k, p + spec.offsets[0], float(v)))
+    plan = (cells, globs, parts)
+    if len(_PLANS) > 64:
+        _PLANS.clear()
+    _PLANS[key] = (c, plan)
+    return plan
 
 
 def apply_params(Z: int, A: int, options, params):
@@ -582,7 +793,9 @@ def apply_params(Z: int, A: int, options, params):
     c = _ACTIVE
     if c is None or c.empty():
         return params
-    from physics.hf.input.defaults import PARAM_SPECS, Params
+    import torch
+
+    from physics.hf.input.defaults import Params
 
     new: dict = {}
 
@@ -592,35 +805,16 @@ def apply_params(Z: int, A: int, options, params):
             t = new[k] = params.values[k].clone()
         return t
 
-    for k, z, a, v, idx in c.cells:
-        if k in UNAPPLIED_GAMMA_CELLS:
-            raise NotImplementedError(
-                f"not ported: `{k} {z} {a} {v}`: the giant/pygmy resonance cells are stored in Params but "
-                "gamma.parameters builds egr/ggr/sgr from its own tables, so the run would be unchanged "
-                "(checked 2026-09-22); scale the E1 strength with `ftable` for tabulated strengths")
-        spec = PARAM_SPECS[k]
-        zix, nix = options.Zinit - int(z), options.Ninit - (int(a) - int(z))
-        (zlo, zhi), (nlo, nhi) = spec.dims[0], spec.dims[1]
-        if not (zlo <= zix <= zhi and nlo <= nix <= nhi):
-            continue
-        pos = [zix + spec.offsets[0], nix + spec.offsets[1]]
-        ok = True
-        for i, (lo, hi), off in zip(idx, spec.dims[2:], spec.offsets[2:], strict=True):
-            if not lo <= i <= hi:
-                ok = False
-                break
-            pos.append(i + off)
-        if ok:
-            _t(k)[tuple(pos)] = float(v)
-    for k, v in c.globals_:
-        _t(k)[...] = float(v)
-    for k, p, v in c.particles:
-        spec = PARAM_SPECS[k]
-        lo, hi = spec.dims[0]
-        if lo <= p <= hi:
-            _t(k)[p + spec.offsets[0]] = float(v)
+    cells, globs, parts = _write_plan(c, int(options.Zinit), int(options.Ninit))
+    for k, pos, vals in cells:
+        t = _t(k)
+        t[pos] = torch.tensor(vals, dtype=t.dtype)
+    for k, v in globs:
+        _t(k)[...] = v
+    for k, i, v in parts:
+        _t(k)[i] = v
     return Params({**params.values, **new}) if new else params
 
 
-__all__ = ["ENV", "Cards", "activate", "active", "apply_params", "best_file", "best_lines",
-           "cards", "deactivate", "enabled", "modes", "option_overrides", "par_lines"]
+__all__ = ["ENV", "ENV_LINES", "ENV_LINES_FILE", "Cards", "activate", "active", "apply_params", "best_file", "best_lines",
+           "cards", "current", "deactivate", "enabled", "modes", "option_overrides", "par_lines", "table_lines"]

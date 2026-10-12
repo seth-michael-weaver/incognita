@@ -47,6 +47,7 @@ from dataclasses import dataclass, field
 from functools import cache, lru_cache
 
 import numpy as np
+from physics.hf import stagetime
 
 __all__ = [
     "mode",
@@ -393,7 +394,15 @@ def num1l(n: int, h: float, e: float, s2: float, u: list, no: int, eps: float):
 def coufra(rho: float, eta: float, ll: int) -> tuple[float, float]:
     """(F_l(eta, rho), G_l(eta, rho)) with minl = maxl = l. TALYS: racapcalc.f:1504 (coufra)
     Test: tests/hf/test_directcap.py
+
+    ENGAUDIT RACAPBESSEL (INCOGNITA_RACAPBESSEL=1, default OFF): for eta = 0 (neutrons) F_l = rho j_l(rho), G_l = -rho y_l(rho)
+    exactly. Steed's continued fraction below fails at small rho: ZeroDivisionError (l = 2, rho = 1e-4; Mg-26 at thermal,
+    LIGHTCAP) and wrong values (l = 2, rho = 1e-5: G = -5.4e7 against 3e10).
     """
+    if eta == 0.0 and os.environ.get("INCOGNITA_RACAPBESSEL", "0") == "1":
+        from scipy.special import spherical_jn, spherical_yn
+
+        return float(rho * spherical_jn(ll, rho)), float(-rho * spherical_yn(ll, rho))
     acc = 1.0e-7
     pace = 100.0
     r = rho
@@ -1232,6 +1241,7 @@ def _cached_addend(Z: int, A: int, es: tuple, w: str) -> np.ndarray:
     return np.asarray(r["total_mb"], float)
 
 
+@stagetime.timed("direct_capture")
 def add_to_results(res, injection):
     """`engine.run` / `engine_c.run` Results with the `INCOGNITA_DIRECT_CAPTURE` addend in the
     capture channel (xs000000) and in the compound nucleus's residual production, in place.

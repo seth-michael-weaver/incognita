@@ -14,6 +14,14 @@ INGRED: it also saves the physics ingredients the curves were built FROM -- `ing
 ldmodel/strength actually used, and the fission barrier heights and widths per barrier of a
 fissile system) -- so a chart arm can be put next to measured D0 / <Gamma_gamma> / S0 without
 re-running it. On by default; `--no-ingredients` restores the previous output exactly.
+
+STAGETIME: every npz also carries where the CPU went -- `stage_cpu_s`, `stage_wall_s`,
+`stage_calls`, `stage_cpu_s_by_e` (JSON strings, `physics.hf.stagetime` exclusive per-stage
+time; whatever no stage claims is booked to `other`, so the stage sum is the run's CPU),
+`stage_counters` (CC cache rows: memory hits, disk hits / misses, rows solved), `cc_cache_hits` /
+`cc_cache_misses`, `engine_stats` (C-path counts and fallbacks), and the worker's start-up cost
+(`worker_startup_cpu_s`, booked once: `worker_target_index` 0 is the worker's first target).
+`scripts/speed/stage_report.py` aggregates them. `INCOGNITA_STAGETIME=0` turns the timer off.
 """
 from __future__ import annotations
 
@@ -54,6 +62,7 @@ GRID_EV = np.logspace(3.0, np.log10(2e7), 64)
 
 def _worker(cpu: int, jobs, out_dir: str, arm: str, grid_ev, cc_cache: str = "",
             ingredients: bool = True):
+    t_boot = time.process_time()  # interpreter + spawn start-up so far
     if cc_cache:
         os.environ["INCOGNITA_CC_CACHE"] = cc_cache
     if arm:
@@ -70,7 +79,14 @@ def _worker(cpu: int, jobs, out_dir: str, arm: str, grid_ev, cc_cache: str = "",
     from physics.hf.engine_c import run as engine_run
     from physics.hf.ingredients import ingredients as ingredient_dump
     from physics.hf.input import fitlib
+    from physics.hf import stagetime
+    try:  # the calibrated-uncertainty sidecar is not part of the public engine; absent = off
+        from physics import unccal
+    except ImportError:
+        unccal = None
 
+    startup_cpu_s = time.process_time()  # interpreter + engine imports (CPU since process start)
+    n_done = 0
     e_mev = tuple(float(np.float32(e)) for e in np.asarray(grid_ev) / 1e6)
     # SPEED50: everything imported so far lives for the whole worker; freezing it takes it out of
     # every later collection (the per-target `gc.collect` in `drop_target_caches` included)
@@ -119,12 +135,17 @@ def _worker(cpu: int, jobs, out_dir: str, arm: str, grid_ev, cc_cache: str = "",
             continue
         if use_gpu:
             ccgpu.restore(Z, A)
-        t0, w0, status = time.process_time(), time.perf_counter(), "ok"
+        status = "ok"
+        t0 = time.process_time()
+        w0 = time.perf_counter()
+        stagetime.reset()
+        stats: dict = {}
         try:
-            cas = warmrun.new_cascade(Z, A, e_mev)
-            with torch.inference_mode():
-                res = engine_run(injection=ChainedFull(Z=Z, A=A, declared_energies=e_mev,
-                                                       cascade=cas))
+            with stagetime.stage("other"):
+                cas = warmrun.new_cascade(Z, A, e_mev)
+                with torch.inference_mode():
+                    res = engine_run(injection=ChainedFull(Z=Z, A=A, declared_energies=e_mev,
+                                                           cascade=cas), stats=stats)
             xs = res.channels_mb["xs000000"].detach().cpu().numpy().astype(float)
             c = fitlib.active()
             cards = "" if c is None else json.dumps(
@@ -152,13 +173,21 @@ def _worker(cpu: int, jobs, out_dir: str, arm: str, grid_ev, cc_cache: str = "",
             if ingredients:
                 t_ing = time.process_time()
                 try:
-                    extra.update(ingredient_dump(cas, res))
+                    with stagetime.stage("output.ingredients"):
+                        extra.update(ingredient_dump(cas, res))
                 except Exception as exc:
                     with open(Path(out_dir) / f"ingerr_{Z:03d}_{A:03d}.txt", "w") as fh:
                         fh.write(f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}")
                 extra["ing_cpu_s"] = time.process_time() - t_ing
+            cpu_s = time.process_time() - t0
+            extra.update(_stage_record(stagetime.snapshot(), stats, cpu_s))
+            if unccal is not None and unccal.enabled():  # uncertainty sidecar: u68_/u95_ (dex) beside every curve; values untouched
+                extra.update(unccal.attach(dict(extra, capture_mb=xs, e_ev=np.asarray(grid_ev, float)), Z, A))
             np.savez(path, capture_mb=xs, e_ev=np.asarray(grid_ev, float), arm=arm,
-                     cards=cards, cpu_s=time.process_time() - t0, **extra)
+                     cards=cards, cpu_s=cpu_s, wall_s=time.perf_counter() - w0,
+                     worker_startup_cpu_s=startup_cpu_s, worker_boot_cpu_s=t_boot,
+                     worker_target_index=n_done, host=os.uname().nodename, **extra)
+            n_done += 1
         except Exception as exc:
             status = type(exc).__name__
             with open(Path(out_dir) / f"err_{Z:03d}_{A:03d}.txt", "w") as fh:
@@ -172,6 +201,24 @@ def _worker(cpu: int, jobs, out_dir: str, arm: str, grid_ev, cc_cache: str = "",
             ccgpu.forget(Z, A)
         _telemetry(out_dir, kind="target", item=f"{Z}-{A}", status=status, cpu=cpu, arm=arm, n_energies=len(e_mev),
                    wall_s=round(time.perf_counter() - w0, 2), cpu_self_s=round(time.process_time() - t0, 2))
+
+
+def _stage_record(snap: dict, stats: dict, cpu_s: float | None = None) -> dict:
+    """STAGETIME: the npz fields of one run's `stagetime.snapshot()` and `engine_c.run` stats.
+    `unstaged` = the run's cpu_s minus the stage sum (collecting the output arrays, outside any stage)."""
+    ctr = snap.get("counters", {})
+    if cpu_s is not None and snap["stage_cpu_s"]:
+        snap = dict(snap, stage_cpu_s=dict(snap["stage_cpu_s"],
+                                           unstaged=max(0.0, cpu_s - sum(snap["stage_cpu_s"].values()))))
+    st = {k: (v if isinstance(v, (int, float)) else len(v)) for k, v in stats.items()}
+    return {"stage_cpu_s": json.dumps(snap["stage_cpu_s"]),
+            "stage_wall_s": json.dumps(snap["stage_wall_s"]),
+            "stage_calls": json.dumps(snap["stage_calls"]),
+            "stage_cpu_s_by_e": json.dumps(snap["stage_cpu_s_by_e"]),
+            "stage_counters": json.dumps(ctr),
+            "cc_cache_hits": int(ctr.get("cc_mem_hits", 0) + ctr.get("cc_disk_hits", 0)),
+            "cc_cache_misses": int(ctr.get("cc_solved_rows", 0)),
+            "engine_stats": json.dumps(st)}
 
 
 def targets() -> list[tuple[int, int]]:
@@ -194,6 +241,11 @@ def main() -> int:
                     "disk cache (sets INCOGNITA_CC_CACHE in every worker); '' = off")
     ap.add_argument("--no-ingredients", dest="ingredients", action="store_false",
                     help="INGRED: do not save the `ing_*` physics ingredients (on by default)")
+    ap.add_argument("--lines-table", default="", help="CHUNKFIX: chart-wide recipe table (sets "
+                    "INCOGNITA_TALYS_FIT_LINES_FILE): each target takes the lines of the nuclei in its own box")
+    ap.add_argument("--shared-lines", action="store_true", help="CHUNKFIX: allow one per-nucleus "
+                    "INCOGNITA_TALYS_FIT_LINES string for several targets (chunk-dependent; only to reproduce a "
+                    "pre-CHUNKFIX freeze in its exact chunks)")
     a = ap.parse_args()
     from physics.hf.gamma.e1_width import ENV as E1_ENV, resolve as e1_resolve
     if E1_ENV not in os.environ and e1_resolve(a.arm, a.e1):
@@ -205,6 +257,18 @@ def main() -> int:
                                                          float)
     tg = ([tuple(int(x) for x in s.split("-")) for s in a.only.split(",")] if a.only
           else targets())
+    from physics.hf.input import fitlib
+    if a.lines_table:
+        os.environ[fitlib.ENV_LINES_FILE] = str(Path(a.lines_table).resolve())  # spawned workers inherit it
+    # CHUNKFIX: keyword lines are in absolute coordinates and land on every nucleus of a run's box, so ONE per-nucleus
+    # line string shared by several targets puts one target's lines on another's residual nuclei: the curve then
+    # depends on the chunk. Per-nucleus recipes go in --lines-table, which every target reads the same way.
+    bag = [x for x in os.environ.get(fitlib.ENV_LINES, "").split(";") if x.strip()]
+    if len(tg) > 1 and not a.shared_lines and fitlib._split([x.strip().lower() for x in bag], True)[1]:
+        raise SystemExit(f"CHUNKFIX: {fitlib.ENV_LINES} holds per-nucleus lines and this run has {len(tg)} targets: "
+                         "each target would also take the other targets' lines on its residual nuclei. Put the "
+                         "recipe for every nucleus in --lines-table, or pass --shared-lines to reproduce a "
+                         "pre-CHUNKFIX freeze in its exact chunks.")
     Path(a.out).mkdir(parents=True, exist_ok=True)
     ctx = get_context("spawn")
     q = ctx.Queue()

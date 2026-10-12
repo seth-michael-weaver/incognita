@@ -38,6 +38,16 @@
 #include <string.h>
 
 #define NJ 41 /* NUMJ + 1 */
+#include "binquad.h"
+
+/* BINQUAD (`binquad y`): set once per run by physics.hf.core.grids.binquad_sync; 0 = TALYS */
+static int bq_on = 0, bq_q = 3;
+static double bq_rt = 1.0, bq_mt = 1.0;
+void ce_set_binquad(int64_t on, int64_t q, double mtilt, double rtilt)
+{
+    bq_on = (int)on; bq_q = (int)q; bq_rt = rtilt; bq_mt = mtilt;
+}
+
 #define SI 16
 #define SD 18
 #define SP 14
@@ -72,6 +82,16 @@ static walk_fn k_walk;
 static photon_fn k_photon;
 
 int64_t ce_version(void) { return 2; }
+
+/* SPECOUT (output only): when a sink is registered (ce_set_specsink, Python's specout recorder), every
+ * walked nucleus hands over mcontrib(type, nex, nexout) and mpecontrib(type, nex, nexout) as nx_walk
+ * accumulated them in separate buffers, with its grids. NULL (the default) = no buffer, no call.
+ *   iv: 0 zc, 1 nc, 2 xrows, 3 maxex, 4 nlast, 5..11 drows[t] (0 = no daughter), 12..18 daughter nlast,
+ *       19..25 daughter maxex, 26 1 = cascade_only (discrete lines only)
+ *   pv: 0 ex, 1 dex, 2 sep (7 doubles), 3..9 daughter ex, 10..16 daughter dex, 17..23 mc[t], 24..30 mpe[t] */
+typedef void (*so_sink_fn)(const int64_t *iv, const uint64_t *pv);
+static so_sink_fn so_sink = NULL;
+void ce_set_specsink(void *fn) { so_sink = (so_sink_fn)fn; }
 
 void ce_set_kernels(void *widths, void *walk, void *photon)
 {
@@ -121,9 +141,18 @@ static int64_t need_spec(const Ctx *c, int64_t zix, int64_t nix)
     return s;
 }
 
+/* FIXENG F15: INCOGNITA_NGNEXCL=1 records the initial compound's gamma-fed bins' particle decays ((n,gamma X),
+ * TALYS's xsngn) for the exclusive channels, as emission/multiple.py's _records_feedexcl */
+static int ngnexcl_flag = -1;
+
 static int records(int64_t zc, int64_t nc, int t)
 {
     if (zc > NUMZCHAN || nc > NUMNCHAN) return 0;
+    if (ngnexcl_flag < 0) {
+        const char *e = getenv("INCOGNITA_NGNEXCL");
+        ngnexcl_flag = (e && (e[0] == '1' || e[0] == 'y' || e[0] == 'Y')) ? 1 : 0;
+    }
+    if (ngnexcl_flag) return 1;
     return !(zc == 0 && nc == 0 && t > 0);
 }
 
@@ -152,6 +181,7 @@ static double cascade_only(Ctx *c, int64_t s, int64_t zc, int64_t nc, double smi
     double *val = (double *)((const uint64_t *)O[5])[0];
     uint8_t *pres = (uint8_t *)((const uint64_t *)O[6])[0];
     double gamdis = 0.0;
+    double *so_lines = so_sink ? calloc((size_t)(xrows * xrows), sizeof(double)) : NULL;
     for (int64_t nex = maxex; nex >= 1; nex--) {
         popexcl[nex] = XE[nex];
         if (nex <= nlast && ex[nex] <= smin && tau[nex] == 0.0) {
@@ -164,6 +194,7 @@ static double cascade_only(Ctx *c, int64_t s, int64_t zc, int64_t nc, double smi
                 X[(k * NJ + (int64_t)jdis[k]) * 2 + (parlev[k] == -1 ? 0 : 1)] += intens;
                 XE[k] += intens;
                 XE[nex] -= intens;
+                if (so_lines) so_lines[nex * xrows + k] += intens;
             }
             if (b1 > b0 && rec) {
                 /* the dict `contrib`: first-occurrence order, last intensity */
@@ -180,6 +211,15 @@ static double cascade_only(Ctx *c, int64_t s, int64_t zc, int64_t nc, double smi
                 }
             }
         }
+    }
+    if (so_lines) {
+        int64_t iv[27] = {0};
+        uint64_t pv[31] = {0};
+        iv[0] = zc; iv[1] = nc; iv[2] = xrows; iv[3] = maxex; iv[4] = nlast; iv[5] = xrows; iv[26] = 1;
+        pv[0] = P[0]; pv[1] = P[1]; pv[2] = (uint64_t)(SPD(c, s) + 2); pv[3] = P[0]; pv[10] = P[1];
+        pv[17] = (uint64_t)so_lines;
+        so_sink(iv, pv);
+        free(so_lines);
     }
     return gamdis;
 }
@@ -256,6 +296,15 @@ static double walk_nucleus(Ctx *c, int64_t s, int64_t zc, int64_t nc, int64_t fi
         if (mj[b] + 1 > nj) nj = mj[b] + 1;
     }
     nexmax_rows(c, s, m, bins, nxm, dspec);
+    if (bq_on && bq_mt <= -2.0) { /* BINQUAD centroid: each mother bin decays at its population centroid */
+        const double *rhom = (const double *)P[6];
+        for (int64_t b = 0; b < m; b++) {
+            int64_t k = bins[b];
+            if (k <= I[5]) continue;
+            double al = bq_slope(rhom, ex, dex, I[5], xrows < I[8] ? xrows : I[8], k, 2 * NJ);
+            exinc[b] = ex[k] + bq_centroid(al, dex[k]);
+        }
+    }
     int64_t ns[7];
     for (int t = 0; t < 7; t++) {
         int64_t mx = 0;
@@ -305,7 +354,8 @@ static double walk_nucleus(Ctx *c, int64_t s, int64_t zc, int64_t nc, int64_t fi
         wpp[1] = (uint64_t)dexinc;
         wpp[2] = (uint64_t)nxm;
         wpp[3] = (uint64_t)sepv;
-        wpp[4] = c->pp[0];
+        /* SLFIRST (INCOGNITA_SFUNC_SCOPE=first): pp[17], when set, is the first compound nucleus's Tl stack */
+        wpp[4] = (zc == 0 && nc == 0 && c->pp[17]) ? c->pp[17] : c->pp[0];
         wpp[5] = c->pp[1];
         wpp[6] = c->pp[2];
         wpp[7] = c->pp[3];
@@ -525,7 +575,37 @@ static double walk_nucleus(Ctx *c, int64_t s, int64_t zc, int64_t nc, int64_t fi
                     else { app[146] = block; attached = 1; }
                 }
             }
+            double *so_mc[7] = {0}, *so_mpe[7] = {0};
+            int64_t so_dr[7] = {0};
+            if (so_sink) {
+                for (int t = 0; t < 7; t++) {
+                    int64_t ds = dspec[t];
+                    if (t > 0 && (ds < 0 || !SPI(c, ds)[9])) continue;
+                    so_dr[t] = t == 0 ? xrows : SPI(c, ds)[4] + 1;
+                    so_mc[t] = calloc((size_t)(xrows * so_dr[t]), sizeof(double));
+                    if (t == 1 || t == 2) so_mpe[t] = calloc((size_t)(xrows * so_dr[t]), sizeof(double));
+                }
+                app[153] = (uint64_t)so_mc; app[154] = (uint64_t)so_mpe; app[155] = (uint64_t)so_dr;
+            }
             if (rc == 0 && maxex >= 1) rc = k_walk(aip, app, dpar, maxex, 1, 0, 0.0);
+            if (so_sink) {
+                if (rc == 0) {
+                    int64_t iv[27] = {0};
+                    uint64_t pv[31] = {0};
+                    iv[0] = zc; iv[1] = nc; iv[2] = xrows; iv[3] = maxex; iv[4] = nlast_grid;
+                    pv[0] = P[0]; pv[1] = P[1]; pv[2] = (uint64_t)(Dd + 2);
+                    for (int t = 0; t < 7; t++) {
+                        iv[5 + t] = so_dr[t];
+                        if (!so_dr[t]) continue;
+                        int64_t ds = t == 0 ? s : dspec[t];
+                        iv[12 + t] = SPI(c, ds)[6]; iv[19 + t] = SPI(c, ds)[4];
+                        pv[3 + t] = SPP(c, ds)[0]; pv[10 + t] = SPP(c, ds)[1];
+                        pv[17 + t] = (uint64_t)so_mc[t]; pv[24 + t] = (uint64_t)so_mpe[t];
+                    }
+                    so_sink(iv, pv);
+                }
+                for (int t = 0; t < 7; t++) { free(so_mc[t]); free(so_mpe[t]); }
+            }
             if (rc == 0 && attached) {
                 /* detach_mpe: the daughters' particle-hole additions and mulpre */
                 for (int di = 0; di < 2; di++) {
@@ -862,7 +942,7 @@ int64_t ce_channels(int64_t *ip, const double *dp, const uint64_t *pp)
                         }
                         int table = mst == 2 || (mst == 3 && t == 0 &&
                                                  ((const double *)SPO(c, ms)[7])[1] != 0.0);
-                        if (table && !(is_root && t > 0)) {
+                        if (table && (records(0, 0, t) || !(is_root && t > 0))) {   /* FIXENG F15 INCOGNITA_NGNEXCL */
                             int64_t mx = SPI(c, ms)[4];
                             const double *val = (const double *)((const uint64_t *)SPO(c, ms)[5])[t];
                             const double *popx = (const double *)SPO(c, ms)[0];
@@ -1013,6 +1093,29 @@ void ce_set_front_kernels(void *points) { k_points = (points_fn)points; }
 #define DP 10
 #define DO 4
 
+/* LOGTINT (default OFF; physics/hf/compound/tlog.py): Lagrange in ln T for the charged types (2..6) where the three
+ * nodes are > 0, TALYS's linear pol2 (same term order) elsewhere. 0 = OFF = TALYS. */
+static int64_t CE_TLOG = 0;
+
+void ce_set_tlog(int64_t on) { CE_TLOG = on; }
+
+/* TLOGIT (CE_TLOG == 2): Lagrange in u = ln(T/(1-T)) where the three nodes are in (1e-300, 1-1e-12), else linear pol2. */
+static double ce_logit(double x) { return log(x) - log1p(-x); }
+
+static double ce_tlog_lagr(double w1, double w2, double w3, double a, double b, double c)
+{
+    if (CE_TLOG == 2) {
+        const double lo = 1e-300, hi = 1.0 - 1e-12;
+        if (a > lo && a < hi && b > lo && b < hi && c > lo && c < hi) {
+            double u = w1 * ce_logit(a) + w2 * ce_logit(b) + w3 * ce_logit(c), eu = exp(-fabs(u));
+            return u < 0.0 ? eu / (1.0 + eu) : 1.0 / (1.0 + eu);
+        }
+        return (w1 * a + w2 * b) + w3 * c;
+    }
+    if (a > 0.0 && b > 0.0 && c > 0.0) return exp(w1 * log(a) + w2 * log(b) + w3 * log(c));
+    return (w1 * a + w2 * b) + w3 * c;
+}
+
 int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
 {
     int64_t k0 = ip[0], lt = ip[1], lmaxinc = ip[2], gammax = ip[3], ntjl = ip[4];
@@ -1112,11 +1215,62 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
                     double w2 = (e - ea) * (e - ec) / ((eb - ea) * (eb - ec));
                     double w3 = (e - ea) * (e - eb) / ((ec - ea) * (ec - eb));
                     const double *ja = tjl + na * L * 3, *jb = tjl + nb * L * 3, *jc = tjl + nc * L * 3;
+                    int tlg = CE_TLOG && t >= 2;  /* LOGTINT/TLOGIT (default OFF) */
+                    const double *dexr = (const double *)P[9];
+                    if (bq_on && bq_rt >= 0.0 && dexr && n > nlast && dexr[n] > 0.0) {
+                        /* BINQUAD: the incident point decays into [ex - dex/2, ex + dex/2]: tilted eps quadrature */
+                        double qe[BQ_KMAX], qw[BQ_KMAX], rq;
+                        double beta = bq_rt * bq_slope(rg, ex, dexr, nlast, nex, n, 2 * NJ);
+                        double u0 = exinc - D[1];
+                        int K = bq_nodes(u0, u0, ex[n] - 0.5 * dexr[n], ex[n] + 0.5 * dexr[n], 0.0, beta, bq_q,
+                                         qe, qw, &rq);
+                        if (K >= 0) {
+                            for (int64_t j = 0; j < NJ && j <= maxj[n]; j++)
+                                for (int p = 0; p < 2; p++) rho[(n * NJ + j) * 2 + p] *= rq;
+                            double acc[3 * 64];
+                            int64_t Lq = L < 64 ? L : 64;
+                            for (int64_t q = 0; q < 3 * Lq; q++) acc[q] = 0.0;
+                            for (int kq = 0; kq < K; kq++) {
+                                double e2 = qe[kq];
+                                float x2 = (float)e2;
+                                int64_t a2 = 0, b2 = ie - ib + 1;
+                                while (a2 < b2) {
+                                    int64_t mid = (a2 + b2) / 2;
+                                    if (xs[ib + mid] <= x2) a2 = mid + 1; else b2 = mid;
+                                }
+                                int64_t j2 = a2 - 1 + ib;
+                                if (x2 == xs[ib]) j2 = ib;
+                                else if (x2 == xs[ie]) j2 = ie - 1;
+                                int64_t nn2 = e2 < lo ? 0 : j2;
+                                int c2 = nn2 > ib + 1 || nn2 >= maxen - 1;
+                                int64_t qa = c2 ? nn2 - 1 : nn2, qb = qa + 1, qc = qa + 2;
+                                if (qa < 0 || qc >= rows || qc >= I[8]) continue;
+                                double fa = egrid[qa], fb = egrid[qb], fc = egrid[qc];
+                                double v1 = (e2 - fb) * (e2 - fc) / ((fa - fb) * (fa - fc));
+                                double v2 = (e2 - fa) * (e2 - fc) / ((fb - fa) * (fb - fc));
+                                double v3 = (e2 - fa) * (e2 - fb) / ((fc - fa) * (fc - fb));
+                                const double *sa = tjl + qa * L * 3, *sb = tjl + qb * L * 3, *sc = tjl + qc * L * 3;
+                                for (int64_t l = 0; l < Lq && l <= lm; l++)
+                                    for (int64_t k = 0; k < 3; k++) {
+                                        double v = tlg ? ce_tlog_lagr(v1, v2, v3, sa[l * 3 + k], sb[l * 3 + k], sc[l * 3 + k])
+                                                   : (v1 * sa[l * 3 + k] + v2 * sb[l * 3 + k]) + v3 * sc[l * 3 + k];
+                                        acc[l * 3 + k] += qw[kq] * (v > 0.0 ? v : 0.0);
+                                    }
+                            }
+                            for (int64_t l = 0; l < L; l++)
+                                for (int64_t k = 0; k < 3; k++) {
+                                    double v = l < Lq && l <= lm ? acc[l * 3 + k] : 0.0;
+                                    T[(n * Lo + l) * 3 + k] = (v < transeps ? 0.0 : v) * fn;
+                                }
+                            continue;
+                        }
+                    }
                     for (int64_t l = 0; l < L; l++) {
                         int keep = l <= lm;
                         for (int64_t k = 0; k < 3; k++) {
                             int64_t q = l * 3 + k;
-                            double v = keep ? (w1 * ja[q] + w2 * jb[q]) + w3 * jc[q] : 0.0;
+                            double v = !keep ? 0.0 : tlg ? ce_tlog_lagr(w1, w2, w3, ja[q], jb[q], jc[q])
+                                                         : (w1 * ja[q] + w2 * jb[q]) + w3 * jc[q];
                             T[(n * Lo + l) * 3 + k] = (v < transeps ? 0.0 : v) * fn;
                         }
                     }

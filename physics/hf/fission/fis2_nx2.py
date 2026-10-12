@@ -160,7 +160,7 @@ def _run(fp, grid, ibar: int, eex: np.ndarray, deltaw, maxj: int, collect: bool)
 
 
 def ladder(fp, grid, ibar: int, eex: Tensor, deltaw, shape) -> Tensor | None:
-    """`fission_batch_ladder._barrier`: `t1barrier(...).trfis` at every energy of `eex`,
+    """`fission_batch_ladder._continuum`: the continuum of `t1barrier(...).trfis` at every energy of `eex`,
     `(E, maxj+1, 2)`, or None. The (energy, triple) weights come from C and the two contractions
     with the slopes stay the matrix products the torch code takes (a scalar loop over
     energy x triple x (J, parity) is slower than them).
@@ -175,7 +175,7 @@ def ladder(fp, grid, ibar: int, eex: Tensor, deltaw, shape) -> Tensor | None:
                      lever=_LEVER)
     ks = _kernels()
     maxj = int(shape[0]) - 1
-    if wfn is None or ks is None or not _covered(fp, grid, ibar, deltaw, maxj):
+    if wfn is None or ks is None or not _covered(fp, grid, ibar, deltaw, maxj, band_ok=True):
         return None
     pen = _penetrability(fp, ibar, deltaw)
     if pen is None:
@@ -199,10 +199,14 @@ def ladder(fp, grid, ibar: int, eex: Tensor, deltaw, shape) -> Tensor | None:
     return tr.reshape(E, *shape)
 
 
-def _covered(fp, grid, ibar: int, deltaw, maxj: int) -> bool:
+def _covered(fp, grid, ibar: int, deltaw, maxj: int, band_ok: bool = False) -> bool:
+    """`band_ok` (FISTSC, `ladder` only): the caller adds the band; the kernel sums the continuum."""
+    from physics.hf.fission.barriers import fistsc_on
+
+    band = fp.rotational[ibar].n == 0 or (band_ok and fistsc_on())
     return (not _grad(grid.rhofis, grid.eintfis_mev, deltaw, fp.fbarrier_mev, fp.fwidth_mev,
                       fp.fecont_mev)
-            and fp.rotational[ibar].n == 0 and grid.rhofis.shape[2] == maxj + 1)
+            and band and grid.rhofis.shape[2] == maxj + 1)
 
 
 def t1(fp, grid, ibar: int, eex, deltaw, maxj: int, collect_hill: bool):
@@ -258,7 +262,10 @@ def level_densities(fp, ld, exfis_top_mev: float, odd: int, maxj: int):
         exfis = exfis_top_mev - elowest
         nbin = NUMBINFIS // 2
         if exfis <= 0.0:
-            nb_out[ibar] = nbin
+            # COMBINE4 port fix: TALYS sets nbintfis = numbinfis/2 and `cycle`s (densprepare.f90:413-414), leaving eintfis/rhofis
+            # from the previous residual; the port has no such arrays and t1barrier indexed past the grid (IndexError; the native
+            # coefficient path read out of bounds). The barrier has no continuum below the residual's top Ex: an empty grid (0).
+            nb_out[ibar] = 0
             continue
         if not ld.has_table(ibar) or _grad(ld.tables[ibar].ldtable_per_mev):
             return None

@@ -89,6 +89,30 @@ def _giant_of(target: str, e_inc_mev: float, declared: tuple[float, ...] | None 
     return _giant(target, e_inc_mev, **kw)
 
 
+def _seed_exciton(k0: int) -> dict:
+    """MPEFID: `population.f90:211-236` labels the binary residuals' particle-hole populations
+    with the GLOBAL `ppi0`/`pnu0`/`p0` that `preeq.f90:63-79` set from the projectile
+    (`parZ(k0)`, `parN(k0)`, `parA(k0)`; a photon is one neutron particle). `PopulationInputs`
+    defaults to the neutron's (1, 0, 1), and this builder never passed the projectile's, so every
+    charged-particle run (INCOGNITA_CPINC) seeded `xspopph2` with neutron hole labels: for a proton
+    the `pcnu = 0` column (the 2p1h proton-only states, the source of second protons) was dropped
+    and every proton hole number was one too high. INCOGNITA_MPEFIX: charged-projectile fidelity made it default ON
+    (unset = on, "0" = the old neutron labels); for k0 = 1 it returns the defaults, so neutron
+    runs are the same bits either way.
+
+    TALYS: population.f90:1 (population), preeq.f90:63-79
+    Test: development notes (WP-25 stock fidelity, F1)
+    """
+    import os
+
+    if os.environ.get("INCOGNITA_MPEFIX", "") == "0" or k0 == 1:
+        return {}
+    if k0 == 0:
+        return {"p0": 1, "ppi0": 0, "pnu0": 1}
+    c = talys_constants()
+    return {"p0": int(c["parA"][k0]), "ppi0": int(c["parZ"][k0]), "pnu0": int(c["parN"][k0])}
+
+
 def pop_inputs_of(cas: Cascade, binp, target: str, etotal_mev: float, add: dict,
                   declared: tuple[float, ...] | None = None):
     """`PopulationInputs` for one incident energy, built off the Cascade's own grids.
@@ -148,6 +172,7 @@ def pop_inputs_of(cas: Cascade, binp, target: str, etotal_mev: float, add: dict,
         xsgrtot_mb={cas.k0: float(gres.xsgrtot_mb)},
         pespinmodel=options.pespinmodel, flagmulpre=flagmulpre, flag2comp=options.flag2comp,
         maxpar=maxpar,
+        **_seed_exciton(cas.k0),
         xsstep2_mb=(_xsstep2_by_type(xstep2, pres.get("states"), maxpar, E)
                     if (flagmulpre and xstep2 is not None and pres.get("states") is not None)
                     else {}),

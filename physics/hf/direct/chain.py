@@ -41,6 +41,7 @@ import numpy as np
 import torch
 
 from physics.hf.core.tensors import DTYPE
+from physics.hf import stagetime
 
 
 @lru_cache(maxsize=64)
@@ -167,11 +168,19 @@ def computed_cross_sections(cs, levels, *, refine: int = 4, energies=None,
     Test: A-direct / E2E
     """
     from physics.hf.ecis.dwba import dwba_case, prepare_case
+    from physics.hf.ecis.formfactor import dwba_parts
 
     omp = _omp_for(cs.Z, cs.A, float(cs.e_inc_mev), int(cs.options.k0), energies)
     case = prepare_case(omp, cs.target, float(cs.e_inc_mev), direct_case=cs,
                         levels=levels if levels_are_dwba else None)
-    xs_by_level, xsgr = dwba_case(omp, case, refine=refine)
+    # CPINC: the distorted waves are the projectile's (Coulomb, mass, spin); a neutron run passes
+    # nothing, so its call is unchanged
+    pkw = {} if int(cs.options.k0) == 1 else {"particle": int(cs.options.k0)}
+    xs_by_level, xsgr = dwba_case(omp, case, refine=refine, parts=dwba_parts(cs.options),  # VIBLEN
+                                  **pkw)
+    from physics.hf import specang  # SPECOUT: keep this energy's DWBA deck for the level angular distributions (output only)
+
+    specang.record_dwba(cs.Z, cs.A, float(cs.e_inc_mev), omp, case, dwba_parts(cs.options), refine, xs_by_level)
     by = {int(i): float(v) for i, v in zip(case.level_index.tolist(),
                                            xs_by_level.tolist(), strict=True)}
     xs = torch.tensor([by.get(int(i), 0.0) for i in levels.index], dtype=DTYPE)
@@ -197,6 +206,7 @@ def computed_cross_sections(cs, levels, *, refine: int = 4, energies=None,
     return xs, cc, grc
 
 
+@stagetime.timed("direct_dwba")
 def direct_result(target: str, e_inc_mev: float, energies, *, refine: int = 4):
     """`(DirectResult, has_giant)` for one (target, incident energy), with nothing injected.
 
@@ -205,21 +215,93 @@ def direct_result(target: str, e_inc_mev: float, energies, *, refine: int = 4):
     TALYS: direct.f90:1 (direct), giant.f90:1 (giant)
     Test: A-mult / E2E
     """
+    from physics.hf import stagedisk
+
+    energies = tuple(float(e) for e in energies)
+    if not stagedisk.enabled():
+        return _direct_result(target, e_inc_mev, energies, refine)
+    # STAGECACHE: from disk when this energy's optical-model / level / deformation inputs were
+    # seen before; the `dircap` log lines the call appended are stored with it and replayed
+    from physics.hf.compound.dens_reference import _structure_of
+    from physics.hf.direct import prepare as P
+
+    if not energies:
+        return _direct_result(target, e_inc_mev, energies, refine)
+    from physics.hf.preeq.chain import energy_subset
+
+    from physics.hf.direct import dwbaunit
+
+    Z, A = P.parse_target(target)
+    o2, p2, m2 = _structure_of(int(Z), int(A))
+    o3, p3 = _defaults(Z, A)  # `_omp_grid` / `_omp_at` / the coupled rows' default_options family
+    # the levels and deformations `_base` builds are keyed by their inputs (options, params,
+    # masses, environment, data paths, DWBAUNIT decision), not built here: building them runs
+    # the DWBAUNIT evaluation's deformation path, which is most of what a hit saves
+    extra = (energy_subset(Z, A, energies), dwbaunit.state(int(Z), int(A)))
+
+    ran = []
+
+    def compute():
+        ran.append(True)
+        n0 = len(DIRCAP_LOG)
+        res, flaggiant = _direct_result(target, e_inc_mev, energies, refine)
+        return res, flaggiant, list(DIRCAP_LOG[n0:])
+
+    res, flaggiant, log = stagedisk.cached(
+        "direct", (str(target), float(e_inc_mev), energies, int(refine)), compute,
+        options=(o2, o3), params=(p2, p3), values=(m2, *extra))
+    if not ran:  # a hit: the log lines the original call appended
+        DIRCAP_LOG.extend(tuple(x) for x in log)
+    return res, flaggiant
+
+
+def _direct_result(target: str, e_inc_mev: float, energies: tuple, refine: int):
     from physics.hf.direct import dwba as D
     from physics.hf.direct import prepare as P
 
-    energies = tuple(float(e) for e in energies)
     cs = P.case(target, e_inc_mev, energies)
     lv = D.direct_levels(cs.struct, cs.eninccm_mev, cs.eoutdis_mev, e_inc_mev, cs.options.k0)
     gr = D.giant_resonance_parameters_of(cs.struct, cs.params)
     xs, xscc, xsgrcoll = computed_cross_sections(cs, lv, refine=refine, energies=energies,
                                                  levels_are_dwba=True)
-    res = D.direct(
-        cs.struct, gr, lv, xs, xsgrcoll, cs.eoutdis_mev, cs.eninccm_mev,
-        torch.as_tensor(cs.egrid_mev, dtype=DTYPE),
-        torch.as_tensor(cs.deltae_mev, dtype=DTYPE), cs.grid_mask, xscc,
-        flaggiant=cs.flaggiant, elwidth_mev=float(cs.params.at("elwidth")))
+    def _run(xs_, gr_):
+        return D.direct(
+            cs.struct, gr, lv, xs_, gr_, cs.eoutdis_mev, cs.eninccm_mev,
+            torch.as_tensor(cs.egrid_mev, dtype=DTYPE),
+            torch.as_tensor(cs.deltae_mev, dtype=DTYPE), cs.grid_mask, xscc,
+            flaggiant=cs.flaggiant, elwidth_mev=float(cs.params.at("elwidth")))
+
+    res = _run(xs, xsgrcoll)
+    from physics.hf import engphys
+    if engphys.on("dircap"):
+        res = _dircap(cs, energies, e_inc_mev, xs, xsgrcoll, xscc, res, _run)
+    # FIXDWBA fallback (INCOGNITA_DWBAUNIT, default off): cap the direct part at sigma_R
+    from physics.hf.direct.dwbaunit import cap_direct
+
+    res = cap_direct(res, cs.Z, cs.A, e_inc_mev)
     return res, cs.flaggiant
+
+
+#: ENGPHYS `dircap` log: (Z, A, E, sigma_R, coupled, non-coupled direct before, scale) of every capped energy.
+DIRCAP_LOG: list = []
+
+
+def _dircap(cs, energies, e_inc_mev, xs, xsgrcoll, xscc, res, run):
+    """ENGPHYS `dircap`: first-order DWBA is not unitary. Where the non-coupled direct cross section (DWBA discrete
+    levels + collective continuum + giant resonances) exceeds the flux the coupled channels leave (sigma_R - sum of
+    the coupled levels; sigma_R alone for a spherical target), scale the DWBA and giant-resonance inputs by one
+    common factor so it equals that flux. Everything downstream (level feeding, spectra, compound flux) follows."""
+    from physics.hf.preeq.chain import incident_reaction_xs
+
+    sr = float(incident_reaction_xs(int(cs.Z), int(cs.A), tuple(float(e) for e in energies))[round(float(e_inc_mev), 6)])
+    cc = float(xscc.sum()) if xscc is not None and xscc.numel() else 0.0
+    avail = max(sr - cc, 0.0)
+    dnon = float(res.xsdirdisctot_mb) + float(res.xsgrtot_mb) - cc
+    if not (dnon > avail) or dnon <= 0.0:
+        return res
+    s = avail / dnon
+    DIRCAP_LOG.append((int(cs.Z), int(cs.A), float(e_inc_mev), sr, cc, dnon, s))
+    return run(xs * s, xsgrcoll * s)
 
 
 __all__ = ["computed_cross_sections", "direct_result"]

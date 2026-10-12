@@ -26,7 +26,10 @@ CASES = [(92, 238, 92, 239), (92, 238, 92, 237), (90, 232, 90, 233), (88, 223, 8
 
 
 @pytest.fixture(autouse=True)
-def _one_thread():
+def _one_thread(monkeypatch):
+    # The bitwise claims are about the older fission kernels, which run only under HF_NX2_FISSC=0; the default
+    # kernels are held to the fis2 path at 1e-10/1e-9 by tests/hf/test_fissc.py.
+    monkeypatch.setenv("HF_NX2_FISSC", "0")
     prev = torch.get_num_threads()
     torch.set_num_threads(1)
     yield

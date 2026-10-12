@@ -60,7 +60,7 @@ import torch
 from torch import Tensor
 
 from physics.hf.core.tensors import DTYPE
-from physics.hf.density.particle_hole import EFERMI_MEV, apauli2, phdens2
+from physics.hf.density.particle_hole import EFERMI_MEV, apauli2, ph_override, phdens2
 
 NUMZPH = 4  # A0_talys_mod.f90:34
 NUMNPH = 8  # A0_talys_mod.f90:35
@@ -123,6 +123,7 @@ class MultiPreeqInputs:
     efermi_mev: float = EFERMI_MEV
     mpreeqmode: int = 2  # input_preeqmodel.f90:74
     flag2comp: bool = True
+    phzn0: tuple | None = None  # PHMICRO: (Z0, N0) of the initial compound nucleus when phmodel 2 is on
 
 
 @dataclass
@@ -239,6 +240,8 @@ def multiple_preequilibrium(inp: MultiPreeqInputs, numj: int = 40) -> MultiPreeq
                         torch.tensor(ipp, device=dev), torch.tensor(ihp, device=dev),
                         torch.tensor(ipn, device=dev), torch.tensor(ihn, device=dev),
                         gsp_state, gsn_state, inp.exinc_mev, ef, False, ap2=ap)
+                    omegaph = ph_override(omegaph, ipp, ihp, ipn, ihn, inp.exinc_mev, inp.zcomp, inp.ncomp,
+                                          inp.phzn0)  # PHMICRO (multipreeq2.f90:195)
                     live_om = float(omegaph) > 0.0  # :224
 
                     term = torch.zeros(2, b, dtype=DTYPE, device=dev)
@@ -281,6 +284,8 @@ def multiple_preequilibrium(inp: MultiPreeqInputs, numj: int = 40) -> MultiPreeq
                                 torch.tensor(ipn - nej, device=dev),
                                 torch.tensor(ihn, device=dev),
                                 gsp_o, gsn_o, eex, ef, False, ap2=ap1)
+                            omegap1h = ph_override(omegap1h, ipp - zej, ihp, ipn - nej, ihn, eex, d.zix, d.nix,
+                                                   inp.phzn0)  # PHMICRO (multipreeq2.f90:247)
                             ap1p = apauli2(
                                 torch.tensor(zej, device=dev), torch.tensor(0, device=dev),
                                 torch.tensor(nej, device=dev), torch.tensor(0, device=dev),
@@ -289,6 +294,8 @@ def multiple_preequilibrium(inp: MultiPreeqInputs, numj: int = 40) -> MultiPreeq
                                 torch.tensor(zej, device=dev), torch.tensor(0, device=dev),
                                 torch.tensor(nej, device=dev), torch.tensor(0, device=dev),
                                 gsp_o, gsn_o, inp.exinc_mev - eex, ef, False, ap2=ap1p)
+                            omega1p = ph_override(omega1p, zej, 0, nej, 0, inp.exinc_mev - eex, d.zix, d.nix,
+                                                  inp.phzn0)  # PHMICRO (multipreeq2.f90:249)
                             proba = omega1p * omegap1h / omegaph / float(ipp + ipn)  # :236
                             pescape = proba * d.tswave[lo:hi + 1]  # :237-238
                             if hi == d.nexmax:  # :239-243, the top bin runs to the kinematic max

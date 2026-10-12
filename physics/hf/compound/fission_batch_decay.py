@@ -83,6 +83,22 @@ class FissionLadder:
                                  float(sp.exmax_mev), self.chain.o, maxj=self.chain.maxj,
                                  fnorm=self.fnorm, cache=cache)
 
+    def widths_at(self, sp, ex_mev: np.ndarray, dex_mev: np.ndarray, nj: int) -> np.ndarray:
+        """BINQUAD sub-points: `widths` at arbitrary mother energies/widths (rows), J up to nj - 1."""
+        from physics.hf.fission.fis_ceng import ladder_widths
+        from physics.hf.fission.fission_batch_ladder import ladder_bin_widths
+
+        n = self.chain.nucleus(self.Z, self.A)
+        ex = np.ascontiguousarray(ex_mev, dtype=np.float64)
+        dx = np.ascontiguousarray(dex_mev, dtype=np.float64)
+        got = ladder_widths(self.chain, n, ex, dx, float(sp.exmax_mev), float(sp.ex_mev[sp.maxex]),
+                            self.fnorm, int(nj))
+        if got is None:
+            grid = self.chain._grid(n, float(sp.ex_mev[sp.maxex]))
+            got = ladder_bin_widths(n.fp, grid, n.ld, ex, dx, float(sp.exmax_mev), self.chain.o,
+                                    maxj=self.chain.maxj, fnorm=self.fnorm, cache={})
+        return got
+
     def nucleus_widths(self, cas, st, sp, bins: list[int]) -> FissionNucleusWidths:
         return FissionNucleusWidths(cas, st, sp, bins, self)
 

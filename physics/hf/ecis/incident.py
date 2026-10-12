@@ -24,6 +24,7 @@ from typing import TYPE_CHECKING
 import torch
 from torch import Tensor
 
+from physics.hf import stagetime
 from physics.hf.core.tensors import DTYPE
 from physics.hf.ecis import ccdisk
 from physics.hf.ecis.solver import CoupledResult, solve_rotational, solve_vibrational
@@ -142,17 +143,30 @@ def _t4_parameters(Z: int, A: int, particle: int, e: Tensor, options):
     TALYS: incidentecis.f90:1 (incidentecis)
     Test: A-inc
     """
-    from physics.hf.input.defaults import default_options, default_params
+    from physics.hf.input.defaults import default_options
     from physics.hf.omp.parameters import omp_parameters
 
     o = options if options is not None else default_options(Z, A)
-    # SPEEDT: `default_params` is ~16 ms and depends only on (Z, A, options); a caller walking an
-    # energy grid one energy at a time (`Cascade.incident`) hands the same `Options` every time
+    return omp_parameters(Z, A - Z, particle, e, t4_params(Z, A, o), o)
+
+
+def t4_params(Z: int, A: int, o):
+    """The `Params` `_t4_parameters` builds the incident OMP from (`default_params(Z, A, o)`, memoised).
+
+    SPEEDT: `default_params` is ~16 ms and depends only on (Z, A, options); a caller walking an
+    energy grid one energy at a time (`Cascade.incident`) hands the same `Options` every time.
+    STAGECACHE keys the coupled incident channel on this object too.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    from physics.hf.input.defaults import default_params
+
     hit = _PARAMS_CACHE.get((Z, A))
     if hit is None or hit[0] is not o:
         hit = (o, default_params(Z, A, o))
         _PARAMS_CACHE[(Z, A)] = hit
-    return omp_parameters(Z, A - Z, particle, e, hit[1], o)
+    return hit[1]
 
 
 _PARAMS_CACHE: dict[tuple[int, int], tuple] = {}  # (Z, A) -> (options, its default Params)
@@ -307,6 +321,12 @@ def incident_coupled(
 
         scheme, band_beta = scheme_from_band(band)
     soswitch = SOSWITCH_DEFAULT_MEV if options is None else float(options.soswitch_mev)
+    # CCSOCB (INCOGNITA_CCSOCB; charged-projectile fidelity: default ON, "0" = old): for a charged projectile incidentecis.f90:280 switches the rotational
+    # deck's spin-orbit deformation at the Coulomb barrier, `Ein <= coulbar(k0)` (nuclides.f90:243: Zt z e2 /
+    # (1.25 At^1/3)), not at `soswitch`; OFF keeps the spherical spin-orbit at every energy for k0 > 1.
+    ccsocb = particle != 1 and os.environ.get("INCOGNITA_CCSOCB", "") != "0"
+    if ccsocb:
+        soswitch = float(Z * PARZ[particle]) * 1.4399645 / (1.25 * float(A) ** (1.0 / 3.0))  # constants.f90 e2
     m_t = nucleus_mass_amu(Z, A)
     nj = njmax_incident(A, PARMASS_AMU[particle], float(e.max())) if lmax is None else int(lmax)
     n_e = e.shape[0]
@@ -331,7 +351,7 @@ def incident_coupled(
     # vibrational target never deforms its spin-orbit and has no soswitch.
     above = (
         (e > soswitch)
-        if (band["colltype"] == "R" and particle == 1 and not allow_undeformed_spin_orbit)
+        if (band["colltype"] == "R" and (particle == 1 or ccsocb) and not allow_undeformed_spin_orbit)
         else torch.zeros(n_e, dtype=torch.bool)
     )
 
@@ -365,27 +385,37 @@ def incident_coupled(
     from physics.hf.ecis import solver as _solver
 
     if keys is None:
-        res = solve_axis(torch.ones(n_e, dtype=torch.bool))
+        stagetime.count("cc_solved_rows", n_e)
+        with stagetime.stage("incident.cc_solve"):
+            res = solve_axis(torch.ones(n_e, dtype=torch.bool))
         if _solver._PLAN is not None:  # SPEED50 CCGPU planning pass: nothing was solved
             raise _solver.Planned()
     else:
         miss = torch.tensor([k not in _SOLVED for k in keys], dtype=torch.bool)
+        stagetime.count("cc_mem_hits", n_e - int(miss.sum()))
         # CCCACHE: the same rows, from disk, across processes and runs. `ccdisk.load` returns
         # None for anything but an exact key match on a readable file, so a hit is the row this
         # process would have solved and a corrupt file is simply a miss.
         if bool(miss.any()) and ccdisk.enabled():
-            for i in torch.nonzero(miss).reshape(-1).tolist():
-                got = ccdisk.load(keys[i])
-                if got is not None:
-                    _SOLVED[keys[i]] = got
-                    miss[i] = False
+            with stagetime.stage("incident.cc_cache"):
+                for i in torch.nonzero(miss).reshape(-1).tolist():
+                    got = ccdisk.load(keys[i])
+                    if got is not None:
+                        _SOLVED[keys[i]] = got
+                        miss[i] = False
+                        stagetime.count("cc_disk_hits")
+                    else:
+                        stagetime.count("cc_disk_misses")
         if bool(miss.any()):
-            got = solve_axis(miss)
+            stagetime.count("cc_solved_rows", int(miss.sum()))
+            with stagetime.stage("incident.cc_solve"):
+                got = solve_axis(miss)
             if _solver._PLAN is not None:  # SPEED50 CCGPU planning pass: nothing was solved
                 raise _solver.Planned()
-            for j, i in enumerate(torch.nonzero(miss).reshape(-1).tolist()):
-                _SOLVED[keys[i]] = _row(got, j)
-                ccdisk.store(keys[i], _SOLVED[keys[i]])
+            with stagetime.stage("incident.cc_cache"):
+                for j, i in enumerate(torch.nonzero(miss).reshape(-1).tolist()):
+                    _SOLVED[keys[i]] = _row(got, j)
+                    ccdisk.store(keys[i], _SOLVED[keys[i]])
             while len(_SOLVED) > _SOLVED_MAX:
                 _SOLVED.popitem(last=False)
         rows = []

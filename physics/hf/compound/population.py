@@ -44,6 +44,7 @@ import numpy as np
 from physics.hf.compound import pop_nx2
 from physics.hf.core.grids import locate_scalar
 from physics.hf.core.tensors import DTYPE  # noqa: F401  (documents the dtype contract)
+from physics.hf import stagetime
 
 XS_MIN_MB = 1.0e-30  # population.f90:168 "if (xs < 1.e-30) xs = 0."
 
@@ -163,6 +164,7 @@ def _bin_nodes_many(eg: np.ndarray, ib: int, ie: int, etop: float, emax: float, 
     return out
 
 
+@stagetime.timed("preeq")
 def population(inp: PopulationInputs) -> PopulationResult:
     """`preeqpopex` (and, when the flags ask for them, `preeqpop`, `xspopph`, `xspopph2`) for every
     binary residual of the initial compound nucleus.

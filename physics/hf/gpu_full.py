@@ -41,6 +41,8 @@ import numpy as np
 import torch
 from torch import Tensor
 
+from physics.hf import engphys
+
 F64 = torch.float64
 NUMJ = 40
 PARZ = (0, 0, 1, 1, 1, 2, 2)
@@ -889,6 +891,9 @@ def binary(bk: Batch, ct: dict, sf_state: dict | None = None) -> dict:
         ppx = t["b_pex"][:, ty]
         add = spread * ppx[:, :, None, None]
         add = torch.where((sl[:, :, None] & jm[:, None, :])[..., None], add, 0.0)
+        if engphys.on("pespin"):  # ENGPHYS: each bin gets exactly its pre-equilibrium flux
+            s = add.sum(dim=(2, 3), keepdim=True)
+            add = torch.where(s > 0, add * (ppx[:, :, None, None] / torch.where(s > 0, s, 1.0)), add)
         pop[:, :, :mj] = pop[:, :, :mj] + add
         pex = torch.where(sl, pex + ppx, pex)
         out["xspop"][ty] = pop
@@ -949,6 +954,9 @@ def run_batch(runs: list, device, chan_state: dict | None = None) -> dict:
     TALYS: talysreaction.f90:1 (talysreaction)
     Test: GPUFULL
     """
+    from physics.hf.compound import ewfc as _ewfc
+    if _ewfc.enabled():
+        raise NotImplementedError("INCOGNITA_EWFC: the GPU full path is not wired (use engine_c / engine.py)")
     import time
 
     from physics.hf.gpu_full_cascade import cascade

@@ -28,6 +28,7 @@ are what supplies :class:`physics.hf.density.parameters.BarrierLevels` (T6's `ib
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -208,6 +209,39 @@ def read_class2_states(Z: int, N: int, nclass2: int, path: str | None = None):
     return tuple(out)
 
 
+def fists2_on(options: "Options") -> bool:
+    """TS2FREEZE switch: keyword `fists2 y|n` (an explicit keyword wins), else env `INCOGNITA_FIS_TS2=1`. Default OFF.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    if options.is_explicit("fists2"):
+        return bool(options.flagfists2)
+    env = os.environ.get("INCOGNITA_FIS_TS2", "0").strip().lower() in ("1", "y", "yes", "on")
+    return bool(options.flagfists2) or env
+
+
+def ts2_headband(Z: int, A: int, N: int, nfisbar: int, device=None):
+    """TS2 (SADDLEPAIR arm, registered cf60e0e, amended development notes): Bohr K-band transition states at an even-even saddle.
+
+    Below the saddle pair gap an even-even saddle has only collective K channels. The head band is TALYS's own
+    `structure/fission/states/hbstates.ee` (0+ ground, 2+ gamma, octupole 0-/1-/2-, beta 0+; energies, K and parity unchanged), with
+    rotational bands built by `rotband`, and the continuum (barrier level-density table) starts at fecont = 2 Delta_f = 28/sqrt(A) MeV
+    on every barrier (RIPL-3 saddle gap Delta_f = 14/sqrt(A)), rounded to 1 keV as in the registered hbtransfile runs (f8.3).
+    No fitted parameter. Odd nuclides are untouched (identical to OFF). Identical to stock TALYS-2 with `hbstate y` and a per-nuclide
+    `hbtransfile` holding these heads.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    headband, _ = read_headband_states(Z, N, nfisbar)
+    fec = round(28.0 / A**0.5, 3)
+    fecont = torch.zeros(NUMBAR + 1, dtype=DTYPE, device=device)
+    for i in range(1, nfisbar + 1):
+        fecont[i] = fec
+    return headband, fecont
+
+
 # ------------------------------------------------------------------ rotational bands
 
 
@@ -308,6 +342,16 @@ def rotclass2(
 
 
 # ------------------------------------------------------------------ fissionpar
+
+
+def _nbinswkb(options) -> int:
+    """wkb.f90's table size: `binquadw` under `binquad y` (BINQUAD4), else TALYS's nbins0 (30 if 0)."""
+    from physics.hf.core.grids import binquad_wkb
+
+    n = binquad_wkb(options)
+    if n:
+        return n
+    return 30 if options.nbins0 == 0 else options.nbins0
 
 
 def fission_parameters(
@@ -435,7 +479,7 @@ def fission_parameters(
                 A,
                 path,
                 fismodel=fislocal,
-                nbinswkb=30 if options.nbins0 == 0 else options.nbins0,
+                nbinswkb=_nbinswkb(options),
                 rmiufiscor=rmiufiscor,
                 bdamp=(
                     float(p("bdamp", Zix, Nix, 1) * p("bdampadjust", Zix, Nix, 1)),
@@ -456,6 +500,8 @@ def fission_parameters(
     if options.flaghbstate:
         headband, fecont = read_headband_states(Z, N, nfisbar)
         fecont = fecont.to(device=device)
+    if Z % 2 == 0 and N % 2 == 0 and nfisbar > 0 and fists2_on(options):
+        headband, fecont = ts2_headband(Z, A, N, nfisbar, device)
     nclass2 = nfisbar - 1 if options.flagclass2 else 0
     class2 = tuple(TransitionStates() for _ in range(NUMBAR + 1))
     if options.flagclass2:

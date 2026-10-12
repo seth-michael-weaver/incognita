@@ -581,3 +581,252 @@ def preeqpair(
     pairex = torch.where(cond, pairex, torch.zeros_like(pairex))
     out = pcn - 0.25 * gs * pairex**2
     return torch.where(pos, out, zero)
+
+
+# --------------------------------------------------------------------------- PHMICRO (phmodel 2)
+# PHMICRO (Incognita extension of TALYS's `phmodel 2`, default OFF): the tabulated microscopic (HFB, Hilaire)
+# particle-hole state densities of structure/density/ph replace the equidistant-spacing Betak-Dobes density
+# wherever the table has the configuration (phdens2.f90:76-110, phdensitytable.f90). TALYS 2.25 (and main
+# c13e5ee) opens `density/ph/<El>.ld` (phdensitytable.f90:72) while the database ships `<El>.ph`, so stock
+# `phmodel 2` is a silent no-op; this port reads the `.ph` file that strucinitial.f90:550 reads the header of.
+# Switch: deck `phmodel 2` or INCOGNITA_PHMODEL=2. `Zix, Nix` are TALYS's indices relative to the initial
+# compound nucleus (Z0, N0); tables exist for Zix <= numZph = 4, Nix <= numNph = 8 (structure.f90:93).
+NUMZPH, NUMNPH = 4, 8  # A0_talys_mod.f90:34-35
+NENPHDENS = 60  # strucinitial.f90:548
+EPHDENSMAX = 200.0  # strucinitial.f90:547
+
+
+def phmicro_on(options=None) -> bool:
+    """PHMICRO switch: `phmodel 2` on the deck, else INCOGNITA_PHMODEL=2.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    import os
+
+    if options is not None and int(getattr(options, "phmodel", 1) or 1) == 2:
+        return True
+    return os.environ.get("INCOGNITA_PHMODEL", "1").strip() == "2"
+
+
+def ph_edens() -> np.ndarray:
+    """TALYS's level-density energy grid edens(0:60) (strucinitial.f90:446-460).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    e = np.zeros(NENPHDENS + 1)
+    for nex in range(1, 21):
+        e[nex] = 0.25 * nex
+    for nex in range(21, 31):
+        e[nex] = 5.0 + 0.5 * (nex - 20)
+    for nex in range(31, 41):
+        e[nex] = 10.0 + nex - 30
+    e[41], e[42], e[43] = 22.5, 25.0, 30.0
+    for nex in range(44, NENPHDENS + 1):
+        e[nex] = 30.0 + 10.0 * (nex - 43)
+    return e
+
+
+_PH_EDENS = ph_edens()
+
+
+@lru_cache(maxsize=None)
+def _ph_file_blocks(Z: int):
+    """{A: (configs2, table2 (60, 72), configs1, table1 (60, 14))} of `density/ph/<El>.ph`, or {} if absent."""
+    from physics.hf.core.constants import nuclide_symbol, talys_structure_path
+
+    path = talys_structure_path() / "density" / "ph" / f"{nuclide_symbol(Z).strip()}.ph"
+    if not path.is_file():
+        return {}
+    lines = path.read_text().splitlines()
+    out, i = {}, 0
+    while i < len(lines):
+        if "Particle-hole density" not in lines[i]:
+            i += 1
+            continue
+        a = int(lines[i][31:34])  # '(/31x, i3)' on the record after the stars
+        head = lines[i + 4].split()[1:]  # 'U[MeV]' then 72 four-digit + 14 two-digit configuration labels
+        rows = np.array([[float(x) for x in ln[7:].split()] for ln in lines[i + 5:i + 5 + NENPHDENS]])
+        c2 = [tuple(int(ch) for ch in s) for s in head if len(s) == 4]
+        c1 = [tuple(int(ch) for ch in s) for s in head if len(s) == 2]
+        out[a] = (c2, rows[:, :len(c2)], c1, rows[:, len(c2):len(c2) + len(c1)])
+        i += 5 + NENPHDENS
+    return out
+
+
+def _smooth5(col: np.ndarray) -> np.ndarray:
+    """phdensitytable.f90:96-118: 5-point energy-weighted running mean, phtable(1:60); index 0 stays 0."""
+    e = _PH_EDENS
+    n = NENPHDENS
+    out = np.zeros(n + 1)
+    for nex in range(1, n + 1):
+        s = 0.0
+        for nex2 in range(max(nex - 2, 1), min(nex + 2, n) + 1):
+            s += col[nex2 - 1] * 0.5 * (e[min(nex2 + 1, n)] - e[max(nex2 - 1, 1)])
+        out[nex] = s / (e[min(nex + 2, n)] - e[max(nex - 2, 1)])
+    return out
+
+
+@lru_cache(maxsize=None)
+def ph_table2(Z: int, A: int):
+    """(exists (5,5,5,5) bool, table (5,5,5,5,61)) of the two-component densities of nucleus (Z, A), or None.
+
+    TALYS: phdensitytable.f90:1 (phdensitytable), flag2comp branch
+    """
+    blk = _ph_file_blocks(int(Z)).get(int(A))
+    if blk is None:
+        return None
+    c2, t2 = blk[0], blk[1]
+    ex = np.zeros((5, 5, 5, 5), bool)
+    tab = np.zeros((5, 5, 5, 5, NENPHDENS + 1))
+    for k, (a, b, c, d) in enumerate(c2):
+        ex[a, b, c, d] = True
+        tab[a, b, c, d] = _smooth5(t2[:, k])
+    return ex, tab
+
+
+def _ph_interp(tab_rows: np.ndarray, eex: np.ndarray) -> np.ndarray:
+    """phdens2.f90:96-115 on arrays: locate on edens(0:60), log-linear if both ends > 1 else linear, extrapolate
+    the last segment above Ephdensmax, 0 for Eex <= 0, floor 1e-10."""
+    e = _PH_EDENS
+    x = np.asarray(eex, dtype=np.float64)
+    j = np.clip(np.searchsorted(e, x, side="right") - 1, 0, NENPHDENS - 1)
+    j = np.where(x > EPHDENSMAX, NENPHDENS - 1, j)
+    eb, ee = e[j], e[j + 1]
+    ldb = np.take_along_axis(tab_rows, j[..., None], -1)[..., 0]
+    lde = np.take_along_axis(tab_rows, (j + 1)[..., None], -1)[..., 0]
+    t = (x - eb) / (ee - eb)
+    with np.errstate(all="ignore"):
+        lg = np.exp(np.log(np.where(ldb > 1, ldb, 1.0)) + t * (np.log(np.where(lde > 1, lde, 1.0))
+                                                               - np.log(np.where(ldb > 1, ldb, 1.0))))
+    v = np.where((ldb > 1.0) & (lde > 1.0), lg, ldb + t * (lde - ldb))
+    v = np.where(x <= 0.0, 0.0, v)
+    return np.where(v < PHDENS_FLOOR, 0.0, v)
+
+
+def phnorm_on() -> bool:
+    """PHMICRO3 switch INCOGNITA_PHNORM=1 (default OFF): put the tables on the Betak-Dobes counting convention.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    import os
+
+    return os.environ.get("INCOGNITA_PHNORM", "0").strip() == "1"
+
+
+def ph_refdeg(Z: int, N: int) -> float:
+    """PHMICRO3: degeneracy of the table's reference vacuum, 2 per odd species (Kramers pair +-Omega of the blocked HFB orbital,
+    counted twice by the combinatorial table at every j; spectator steps 0.300/0.301 dex vs lg 2). The Betak-Dobes exciton density
+    (TALYS manual eq. 13.4) counts excitons above a non-degenerate vacuum and carries odd-even only via Fu's P, so the table is
+    divided by this factor for every configuration of the nucleus (development notes).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    return float((2 if int(Z) % 2 else 1) * (2 if int(N) % 2 else 1))
+
+
+def ph_override(dens, ppi, hpi, pnu, hnu, eex, zix, nix, zn0):
+    """PHMICRO: `dens` (the analytic phdens2) with the tabulated microscopic density of nucleus (Zix, Nix) put in
+    wherever the table has the configuration (phdens2.f90:76). `zn0` = (Z0, N0) of the initial compound nucleus, or
+    None (switch off: `dens` is returned untouched, bitwise). `zix`/`nix` broadcast like the exciton numbers.
+
+    TALYS: phdens2.f90:1 (phdens2), tabulated branch
+
+    Test: none in the public suite
+    """
+    if zn0 is None:
+        return dens
+    z0, n0 = int(zn0[0]), int(zn0[1])
+    is_t = isinstance(dens, torch.Tensor)
+    d = dens.detach().cpu().numpy() if is_t else np.asarray(dens, dtype=np.float64)
+    arrs = [np.asarray(v.detach().cpu().numpy() if isinstance(v, torch.Tensor) else v) for v in
+            (ppi, hpi, pnu, hnu, eex, zix, nix)]
+    shape = np.broadcast_shapes(d.shape, *(a.shape for a in arrs))
+    ip, ih, jp, jh = (np.broadcast_to(a, shape).astype(np.int64) for a in arrs[:4])
+    x = np.broadcast_to(arrs[4], shape).astype(np.float64)
+    zi = np.broadcast_to(arrs[5], shape).astype(np.int64)
+    ni = np.broadcast_to(arrs[6], shape).astype(np.int64)
+    out = np.array(np.broadcast_to(d, shape), dtype=np.float64)
+    inr = (ip >= 0) & (ih >= 0) & (jp >= 0) & (jh >= 0) & (ip <= 4) & (ih <= 4) & (jp <= 4) & (jh <= 4)
+    cl = [np.clip(v, 0, 4) for v in (ip, ih, jp, jh)]
+    norm = phnorm_on()
+    # fast-phmodel: the distinct (Zix, Nix) from the un-broadcast Zix/Nix (was a set over every element); one nucleus skips its mask
+    zr, nr = arrs[5], arrs[6]
+    if zr.size == 1 and nr.size == 1:
+        pairs = [(int(zr.reshape(-1)[0]), int(nr.reshape(-1)[0]))]
+    else:
+        zb, nb = np.broadcast_arrays(zr, nr)  # the same set as over the full broadcast, without its size
+        pairs = sorted({(int(a), int(b)) for a, b in zip(zb.ravel(), nb.ravel())})
+    for z_, n_ in pairs:
+        if z_ < 0 or n_ < 0 or z_ > NUMZPH or n_ > NUMNPH:
+            continue
+        t = ph_table2(z0 - z_, z0 - z_ + n0 - n_)
+        if t is None:
+            continue
+        ex, tab = t
+        m = inr & ex[cl[0], cl[1], cl[2], cl[3]]
+        if len(pairs) > 1:
+            m &= (zi == z_) & (ni == n_)
+        if not m.any():
+            continue
+        rows = tab[cl[0][m], cl[1][m], cl[2][m], cl[3][m]]
+        out[m] = _ph_interp(rows, x[m]) / (ph_refdeg(z0 - z_, n0 - n_) if norm else 1.0)
+    if is_t:
+        return torch.as_tensor(out, dtype=dens.dtype, device=dens.device)
+    return out
+
+
+def phfast_on() -> bool:
+    """fast-phmodel switch: INCOGNITA_PHFAST (default 1) hands phmodel 2 to the compiled multipreeq2 (`mpe_bin` in nativex.c)
+    with the tables packed by `ph_table_packed`; 0 = the PHMICRO reference (Python engine, torch multipreeq2 loop).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    import os
+
+    return os.environ.get("INCOGNITA_PHFAST", "1").strip() != "0"
+
+
+@lru_cache(maxsize=None)
+def _ph_table_packed(Z: int, A: int, norm: bool):
+    T = ph_table2(Z, A)
+    if T is None:
+        return None
+    ex, tab = T
+    out = np.zeros(1 + 625 + 625 * (NENPHDENS + 1))
+    out[0] = ph_refdeg(Z, A - Z) if norm else 1.0
+    out[1:626] = ex.reshape(-1)
+    out[626:] = tab.reshape(-1)
+    out.flags.writeable = False
+    return out
+
+
+def ph_table_packed(zix: int, nix: int, zn0):
+    """fast-phmodel: the table of nucleus (Zix, Nix) for `mpe_bin` (nativex.c `mpe_phtab`) as one float64 array
+    [divisor (ph_refdeg under INCOGNITA_PHNORM=1, else 1), exists (5,5,5,5) as 0/1, smoothed table (5,5,5,5,61)],
+    or None where `ph_override` leaves the analytic density (switch off, Zix/Nix beyond numZph/numNph, no table).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    if zn0 is None or zix < 0 or nix < 0 or zix > NUMZPH or nix > NUMNPH:
+        return None
+    z0, n0 = int(zn0[0]), int(zn0[1])
+    return _ph_table_packed(z0 - int(zix), z0 - int(zix) + n0 - int(nix), phnorm_on())
+
+
+def phfast_tables(options, c0, sp, dsp):
+    """fast-phmodel: ((Z0, N0) or None, [mother, daughter 1, daughter 2] packed tables) for one `mpe_bin` block; (None,
+    [None] * 3) when phmodel 2 is off (the compiled bin then never reads them: production bitwise).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    if not phmicro_on(options):
+        return None, [None, None, None]
+    zn0 = (int(c0.Z), int(c0.A - c0.Z))
+    return zn0, [ph_table_packed(int(x.zix), int(x.nix), zn0) for x in (sp, *dsp)]

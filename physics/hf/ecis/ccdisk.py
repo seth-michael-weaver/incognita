@@ -19,11 +19,21 @@ typed, exact encoding (float64 bytes for every float, never `repr`), together wi
 
 **the version** (`_version`): the source bytes of the modules that produce the row
 (`ecis/solver.py`, `ccnative.py`, `incident.py`, `vibm.py`, `coupling.py`, `formfactor.py`,
-`omp/schrodinger.py`), the bytes of the native libraries the solve runs on (`libccfast.so`,
-`libccsplit.so`, `libnx2.so`), whether those are actually loaded, the values of every `HF_*`
-numerics switch those modules read, and `FORMAT` below.  Rebuild the kernel or edit the solver
-and the whole cache is bypassed rather than trusted; bump `FORMAT` for any change to the stored
-payload itself.
+`omp/schrodinger.py`, and the loaders they call through), the bytes of the native libraries the
+solve runs on, whether those are actually loaded, the values of every `HF_*` numerics switch
+those modules read, the torch version (ccfast calls torch's MKL by address), and `FORMAT` below.
+Rebuild a kernel the solve runs or edit the solver and the whole cache is bypassed rather than
+trusted; bump `FORMAT` for any change to the stored payload itself.
+
+CCKEY: "the libraries the solve runs on" is what a call trace inside `solve_rotational` /
+`solve_vibrational` shows (development notes): `libccfast`/`libccsplit`,
+`libhfnative` (`hf_cf1`; `hf_cc_block` on the exact path) and the provider of the `omp` kernels.
+`libnx2` is NOT among them in a normal build: its `nx2_omp_*` kernels are swapped for
+`libsetup`'s copies of the same translation unit (`setup_c.swap`), and the rest of `libnx2` --
+PSF, level densities, the cascade -- never runs inside the solve.  So the provider of each `omp`
+kernel is resolved here exactly as `omp_nx2._kernel` resolves it and only that library's bytes
+are hashed: a PSF edit no longer throws the whole cache away, while a build without `libsetup`
+(where `libnx2` really does serve the kernels) still keys on `libnx2`.
 
 The version is computed once per process (the switches are read at the first solve, as a
 worker sets its environment before it imports anything); the cache DIRECTORY is read per call,
@@ -36,7 +46,7 @@ never be readable.  Every read is guarded: a truncated, corrupt or key-mismatche
 and the row is recomputed (and rewritten).  Nothing here can change a number -- a hit is only
 taken when the stored key bytes equal the asked-for key bytes.
 
-Task: CCCACHE.  Test: tests/hf/test_ccdisk.py; gates in the development notes (CCCACHE).
+Task: CCCACHE.  Test: tests/hf/test_ccdisk.py; gates in development notes.
 """
 
 from __future__ import annotations
@@ -62,15 +72,26 @@ _NUMERICS_ENV: tuple[str, ...] = (
     "HF_CCBLOCKD", "HF_CCBLOCKD_SMALL", "HF_CCFAST_LIB", "HF_CCFAST_NATIVE", "HF_CCGLUE",
     "HF_CCSPLIT", "HF_CC_GEMM_SMALL", "HF_CC_MODNUM", "HF_INC_REFINE", "HF_INC_REFINE_EMAX",
     "HF_NX2_CCX", "HF_NX2_SWEEP", "HF_NX2_GEMM", "HF_NATIVE", "HF_NATIVEX",
+    # CCKEY: the loaders the solve goes through (native/__init__, nx2, setup_c, omp_nx2); their
+    # `*_LIB` path overrides are not keyed by name, the bytes of the library loaded are
+    "HF_NX2", "HF_NX2_OMP", "HF_SETUP",
 )
 
 _SOURCES: tuple[str, ...] = (
     "physics/hf/ecis/solver.py", "physics/hf/ecis/ccnative.py", "physics/hf/ecis/incident.py",
     "physics/hf/ecis/vibm.py", "physics/hf/ecis/coupling.py", "physics/hf/ecis/formfactor.py",
     "physics/hf/omp/schrodinger.py",
+    # CCKEY: the rest of what the call trace found running inside the solve
+    "physics/hf/core/angmom.py", "physics/hf/native/__init__.py", "physics/hf/native/nx2.py",
+    "physics/hf/native/setup_c.py", "physics/hf/omp/omp_nx2.py",
 )
 
-_LIBS: tuple[str, ...] = ("libccfast", "libccsplit", "libnx2")
+# CC-only libraries, hashed whenever present (as CCCACHE did)
+_LIBS: tuple[str, ...] = ("libccfast", "libccsplit")
+
+# the `omp` lever's kernels (omp/omp_nx2.py); their provider is resolved per kernel
+_OMP_KERNELS: tuple[str, ...] = ("nx2_omp_card", "nx2_omp_coulomb", "nx2_omp_grid", "nx2_omp_job",
+                                 "nx2_omp_set_numerov")
 
 # the six arrays of `incident._row`, in order
 _ARRAYS: tuple[str, ...] = ("sigma_tot_mb", "sigma_reac_mb", "sigma_abs_mb",
@@ -141,12 +162,36 @@ def key_bytes(key: tuple) -> bytes:
     return bytes(out)
 
 
+def _file_digest(path) -> bytes:
+    p = Path(path) if path else None
+    return hashlib.sha256(p.read_bytes()).digest() if p is not None and p.is_file() else b"missing"
+
+
+def _omp_providers() -> list[tuple[str, str, str | None]]:
+    """(kernel, "setup" | "nx2" | "none", library path) for each `omp` kernel, resolved as
+    `omp_nx2._kernel` resolves it: `nx2.kernel(name, lever="omp")` must exist (else the Python
+    path runs), then `setup_c.swap` takes libsetup's symbol when libsetup has it."""
+    from physics.hf.native import nx2, setup_c
+
+    out = []
+    base = nx2.lib() if os.environ.get("HF_NX2_OMP", "1") != "0" else None
+    so = setup_c.lib()
+    for name in _OMP_KERNELS:
+        if base is None or not hasattr(base, name):
+            out.append((name, "none", None))
+        elif so is not None and hasattr(so, setup_c.ALIAS.get(name, name)):
+            out.append((name, "setup", so._name))
+        else:
+            out.append((name, "nx2", base._name))
+    return out
+
+
 @lru_cache(maxsize=1)
 def _version() -> str:
-    """sha256 over the CC source, the native libraries, whether they are loaded, and the
-    numerics switches -- the fingerprint of "what this process would compute"."""
+    """sha256 over the CC source, the native libraries the solve runs, whether they are loaded,
+    and the numerics switches -- the fingerprint of "what this process would compute"."""
     h = hashlib.sha256()
-    h.update(b"cccache-format-%d\n" % FORMAT)
+    h.update(b"cccache-format-%d cckey-v2\n" % FORMAT)
     root = Path(__file__).resolve().parents[3]
     for rel in _SOURCES:
         p = root / rel
@@ -166,8 +211,29 @@ def _version() -> str:
         from physics.hf.ecis import ccnative
 
         h.update(b"loaded=%d%d\n" % (int(ccnative.available()), int(ccnative.glue_available())))
+        cc = ccnative._load()
+        h.update(b"ccfast=" + (_file_digest(cc._name) if cc is not None else b"none") + b"\n")
     except Exception:  # pragma: no cover - a broken import is not a reason to poison the key
         h.update(b"loaded=??\n")
+    try:
+        from physics.hf import native as hfnative
+
+        lib = hfnative._load()
+        h.update(b"hfnative=%d%d%d " % (int(hfnative.available()), int(hfnative.vhypot()),
+                                         int(hfnative.lapack_symbols())))
+        h.update((_file_digest(lib._name) if lib is not None else b"none") + b"\n")
+    except Exception:  # pragma: no cover
+        h.update(b"hfnative=??\n")
+    try:
+        digests: dict[str, bytes] = {}
+        for name, who, path in _omp_providers():
+            if path is not None and path not in digests:
+                digests[path] = _file_digest(path)
+            h.update(name.encode() + b"=" + who.encode() + b":"
+                     + (digests[path] if path is not None else b"-") + b"\n")
+    except Exception:  # pragma: no cover
+        h.update(b"omp=??\n")
+    h.update(b"torch=" + torch.__version__.encode() + b"\n")
     for name in _NUMERICS_ENV:
         h.update(name.encode() + b"=" + (os.environ.get(name) or "").encode() + b"\n")
     return h.hexdigest()[:24]
@@ -239,9 +305,8 @@ def store(key: tuple, row) -> None:
         try:
             with os.fdopen(fd, "wb") as fh:
                 np.savez(fh, **payload)
-            # SPEED50C: no fsync (220 per 20-nuclide batch). `os.replace` is still atomic for a
-            # concurrent reader; after a crash a file may be empty or truncated, and `load`
-            # rejects any such file (unreadable zip or key mismatch -> miss -> recompute)
+                fh.flush()
+                os.fsync(fh.fileno())
             os.replace(tmp, path)  # atomic: a concurrent reader sees the old file or the new one
             tmp = None
         finally:

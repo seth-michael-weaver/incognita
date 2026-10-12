@@ -41,11 +41,13 @@ from dataclasses import dataclass, field
 from functools import cache, lru_cache
 from typing import TYPE_CHECKING
 
+import os
 import numpy as np
 import torch
 from torch import Tensor
 
 from physics.hf.core.tensors import DTYPE
+from physics.hf.structure import levjpar
 from physics.hf.structure.files import fortran_reader, level_records
 
 if TYPE_CHECKING:
@@ -66,6 +68,11 @@ _BRANCH_FMT = "(29x, i3, f10.6, e10.3, 5x, a1)"  # levels.f90:176
 
 def _f32(x: float) -> float:
     return float(np.float32(x))
+
+
+def _isolevnum() -> bool:
+    """ISOMAPT: uncapped TALYS file level number for moved continuum isomers (default OFF = TALYS min(i, 99))."""
+    return os.environ.get("INCOGNITA_ISOLEVNUM", "") == "1"
 
 
 @dataclass(frozen=True)
@@ -103,6 +110,9 @@ class Levels:
     Lisomer: tuple[int, ...]
     file_found: bool
     notes: tuple[str, ...] = field(default=())
+    # FIXENG F14 (INCOGNITA_GGDEADEND): the uncut nlev when ggdeadend cut the decay list; -1 = not cut.
+    # Only the level-density Ntop default reads it, so the LD matching keeps the file's list.
+    nlev_ld: int = -1
 
 
 # SPEEDP. `discrete_levels` re-parses `levels/z<ZZZ>` from disk on every call, and the chain asks
@@ -143,7 +153,7 @@ def discrete_levels(
     TALYS: levels.f90:1 (levels)
     Test: A-struct
     """
-    key = (int(Z), int(A), id(options), id(masses), id(params), nlev, bool(prior_call))
+    key = (int(Z), int(A), id(options), id(masses), id(params), nlev, bool(prior_call), levjpar.enabled())
     hit = _LEVELS_CACHE.get(key)
     if hit is not None:
         return hit[0]
@@ -174,15 +184,60 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
         risomer = float(params.at("risomer", Zix, Nix))
     # COREX: everything below reads only these values and the level file, so the result is a
     # pure function of them (no target in the key: Zix/Nix only chose gs_j, gs_p, nlev0, risomer)
-    return _levels_of_values(int(Z), int(A), gs_j, gs_p, int(nlev0), risomer,
-                             int(options.disctable), float(options.isomer_s),
-                             int(options.massmodel), bool(prior_call))
+    lv = _levels_of_values(int(Z), int(A), gs_j, gs_p, int(nlev0), risomer,
+                           int(options.disctable), float(options.isomer_s),
+                           int(options.massmodel), bool(prior_call), levjpar.enabled())
+    from physics.hf.structure import ggdeadend
+
+    if ggdeadend.enabled() and 0 <= Zix < masses.gsspin.shape[0] and 0 <= Nix + 1 < masses.gsspin.shape[1]:
+        sn = float(masses.s_mev[Zix, Nix, 1])
+        # the capture parent's ground-state spin as the reaction sees it: its own level list (TALYS replaces the
+        # file value by the mass table's only for unassigned spins, levels.f90:200-204)
+        parent = _levels_of_values(int(Z), int(A) - 1, float(masses.gsspin[Zix, Nix + 1]),
+                                   int(masses.gsparity[Zix, Nix + 1]), 1, 1.0, int(options.disctable),
+                                   float(options.isomer_s), int(options.massmodel), False, levjpar.enabled())
+        parent_j = float(parent.spin[0])
+        n_cut = ggdeadend.new_nlev(int(Z), int(A), lv.e_mev, lv.spin, int(lv.nlev), sn, parent_j)
+        if n_cut < int(lv.nlev):
+            from dataclasses import replace
+
+            cut = _levels_of_values(int(Z), int(A), gs_j, gs_p, n_cut, risomer,
+                                    int(options.disctable), float(options.isomer_s),
+                                    int(options.massmodel), bool(prior_call), levjpar.enabled())
+            ggdeadend.LAST[(int(Z), int(A))] = dict(nlev=int(lv.nlev), n_cut=int(cut.nlev), sn=sn,
+                                                     parent_j=parent_j, e_nlev=float(lv.e_mev[lv.nlev]))
+            lv = replace(cut, nlev_ld=int(lv.nlev),
+                         notes=tuple(cut.notes) + (f"ggdeadend: nlev {int(lv.nlev)} -> {int(cut.nlev)}",))
+    from physics.hf.structure import levcomplete
+
+    if levcomplete.mode() and levcomplete.applies((Zix, Nix) == _target_ix(options.k0)):
+        n_cut = levcomplete.new_nlev(int(Z), int(A), lv.e_mev, int(lv.nlev))
+        if n_cut < int(lv.nlev):
+            from dataclasses import replace
+
+            cut = _levels_of_values(int(Z), int(A), gs_j, gs_p, n_cut, risomer,
+                                    int(options.disctable), float(options.isomer_s),
+                                    int(options.massmodel), bool(prior_call), levjpar.enabled())
+            if int(cut.nlev) < int(lv.nlev):
+                n_ld = int(lv.nlev_ld) if int(lv.nlev_ld) >= 0 else int(lv.nlev)
+                levcomplete.LAST[(int(Z), int(A))] = dict(nlev=int(lv.nlev), n_cut=int(cut.nlev),
+                                                          e_nlev=float(lv.e_mev[lv.nlev]), e_cut=float(cut.e_mev[cut.nlev]))
+                lv = replace(cut, nlev_ld=n_ld,
+                             notes=tuple(lv.notes) + (f"levcomplete: nlev {int(lv.nlev)} -> {int(cut.nlev)}",))
+    return lv
+
+
+def _target_ix(k0: int) -> tuple[int, int]:
+    """(Zix, Nix) of the target: the compound minus the projectile (PARZ/PARN of k0)."""
+    from physics.hf.input.defaults import PARN, PARZ
+
+    return int(PARZ[k0]), int(PARN[k0])
 
 
 @lru_cache(maxsize=2048)
 def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risomer: float,
                       disctable: int, isomer_s: float, massmodel: int,
-                      prior_call: bool) -> Levels:
+                      prior_call: bool, levj: bool = False) -> Levels:
     """COREX: `_discrete_levels` by value, shared across targets (`chartrun.KEEP`). `Levels` is
     frozen and nothing writes into its tensors: the id-keyed `_LEVELS_CACHE` already hands one
     object to every caller of a run."""
@@ -286,6 +341,10 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
                             conv[i, ii] = con[jj]
                             bassign[i][ii] = bas[jj]
                     nbranch[i] = ii
+            if levj:  # LEVJPAR: wrong-integrality spins re-assigned (structure/levjpar.py), before the numJ cap
+                fix = [(i, j) for i, j in levjpar.corrections(int(Z), int(A), int(disctable)) if i < n1]
+                for i, j in fix:
+                    jdis[i] = j
             jdis[:n1] = np.minimum(jdis[:n1], float(NUMJ))
             tauripl[:n1] = tau[:n1]
             tau[:n1] = np.where(tau[:n1] < isomer_s, 0.0, tau[:n1])
@@ -302,6 +361,10 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
                 sl = slice(nlev2 + 1, nlevmax2 + 1)
                 edis[sl], jdis[sl], parlev[sl], tau[sl] = re_, rj, rp, rt
                 eas[sl], jas[sl], pas[sl] = ra1, ra2, ra3
+                if levj:  # LEVJPAR (the rest list's spins are capped at numJ in _level_block)
+                    for i, j in levjpar.corrections(int(Z), int(A), int(disctable)):
+                        if nlev2 < i <= nlevmax2:
+                            jdis[i] = min(j, float(NUMJ))
         nlev_final = max(min(nlev0, nlev2), 1)
         nlevmax2 = max(min(nnn, NUMLEV2), 1)
 
@@ -320,7 +383,10 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
             lis -= 1
             N = nlev_final - nisomer + lis
             if lis >= 0 and N >= 0:
-                levnum[N] = min(i, 99)
+                # ISOMAPT (INCOGNITA_ISOLEVNUM=1, default OFF): keep the true file level number. TALYS caps it at 99
+                # (two-digit rpZZZAAA.LNN names), so a continuum isomer above file level 99 (Hf-178m2 = level 109)
+                # was keyed L99, an unrelated level (2349.7 keV 9+); the RESISO key is the only consumer of levnum.
+                levnum[N] = i if _isolevnum() else min(i, 99)
                 edis[N], jdis[N], parlev[N], tau[N] = edis[i], jdis[i], parlev[i], tau[i]
                 if N != i:
                     tau[i] = 0.0

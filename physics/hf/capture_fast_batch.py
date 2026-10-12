@@ -219,10 +219,12 @@ class CaptureDecay:
                 lmaxhf = np.full((m, n), cas.gammax, dtype=np.int64)
                 sfac = 1.0
             else:
-                tjl, tl, lmax = cas.trans[t]
+                from physics.hf.compound import tlog as _tlg  # LOGTINT (default OFF)
+                tjl, tl, lmax = cas.trans_of(sp.zix, sp.nix)[t]  # SLFIRST: per emitting nucleus
                 eend = min(int(eendmax[t]), cas.rg.maxen)
                 tlm, lm = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
-                                     tl, lmax, float(fnorm[t + 1]), cas.transeps)
+                                     tl, lmax, float(fnorm[t + 1]), cas.transeps,
+                                     tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
                 L = tl.shape[1]
                 lmaxhf = np.where(inrow, lm, 0)
                 lp = np.arange(L)
@@ -386,6 +388,9 @@ def capture_xs(tg, e_inc_mev: float, differentiable: bool = False, trim_l: bool 
     binp = SimpleNamespace(e_inc_mev=e, k0=k0, targetspin2=tg.targetspin2,
                            target_parity=tg.target_parity, ltarget=0, popeps_mb=tg.popeps_mb,
                            flagpreeq=False)
+    from physics.hf.compound import ewfc as _ewfc
+    if _ewfc.enabled(cas.options) and cas._coupled_band() is not None:
+        raise NotImplementedError("INCOGNITA_EWFC: this capture path is not wired (use the full engine, engine_c / engine.py)")
     ci = compound_inputs(cas, st, binp, SimpleNamespace(flagfission=False), etot,
                          CF.ZERO_ADDENDS)
     if trim_l:

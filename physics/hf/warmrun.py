@@ -36,6 +36,7 @@ import sys
 from dataclasses import dataclass, field
 
 import numpy as np
+from physics.hf import stagetime
 
 # `lru_cache`d functions (module-qualified `__wrapped__` name) whose values read a level density
 # or a photon strength, directly or through another cache (the trace's closure).
@@ -88,6 +89,10 @@ def drop_parameter_caches(cas, drop_lru: frozenset[str] = DROP_LRU,
     TALYS: none (worker cache policy)
     Test: harness/route100_warm.py one
     """
+    # SPEEDFIX: dropping the LD/PSF caches does not make a Cascade valid under other fitlib cards
+    # (SPEEDPROF: capture frozen at the first sweep point, up to 5.4x off); refuse instead
+    if hasattr(cas, "check_cards"):
+        cas.check_cards()
     dropped = []
     for name, (w, _owner) in _lru_wrappers().items():
         if name in drop_lru:
@@ -121,6 +126,7 @@ def run_on(Z: int, A: int, declared_energies: tuple[float, ...], cas):
                                                 cascade=cas))
 
 
+@stagetime.timed("setup.cascade")
 def new_cascade(Z: int, A: int, declared_energies: tuple[float, ...]):
     """The `Cascade` `ChainedFull.cases` would build for this run (float32 grid, as TALYS)."""
     import torch

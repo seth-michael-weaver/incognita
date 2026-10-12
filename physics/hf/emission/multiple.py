@@ -29,6 +29,8 @@ Quirks this reproduces:
 
 from __future__ import annotations
 
+import os
+
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
@@ -36,11 +38,15 @@ import numpy as np
 import torch
 from torch import Tensor
 
+from physics.hf import stagetime
 from physics.hf.core.tensors import DTYPE
 from physics.hf.emission.channels import NUMNCHAN, NUMZCHAN, PARN, PARZ
 from physics.hf.emission.feed_table import FeedTable
 
 NUMJ = 40
+
+
+from physics.hf import specout as _SO  # noqa: E402  SPECOUT recorder (output only)
 
 
 def _pi(parity: int) -> int:
@@ -109,6 +115,54 @@ class MpeFeeding:
     ph_mother_mb: Tensor | None = None
 
 
+# RESISO: (Z, A) -> {isomer level slot: TALYS file number levnum} over the nucleus's level scheme (levels.f90:259-305;
+# a continuum isomer moved into a last slot keeps min(i, 99)). Filled when the cascade reads a nucleus's levels.
+LEVNUM: dict[tuple[int, int], dict[int, int]] = {}
+
+
+def isomer_files(Z: int, A: int, branch: dict, tot: float) -> dict[int, float]:
+    """RESISO: {file level number: mb} of one residual, residual.f90:67 / finalout: L00 = xsbranch(0) x rp.tot and every
+    isomer of the level scheme, 0 where the cascade's Nlast did not reach it (then xsbranch(0) = 1). Empty if no isomer.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    iso = LEVNUM.get((int(Z), int(A)))
+    if not iso:
+        iso = {nex: nex for nex in branch if nex > 0}
+    if not iso:
+        return {}
+    out = {0: float(branch.get(0, 0.0)) * tot}
+    for nex, num in iso.items():
+        out[int(num)] = float(branch.get(nex, 0.0)) * tot
+    return out
+
+
+def resiso_enabled() -> bool:
+    """RESISO: residual isomer branches (residual.f90:60-70) from the cascade's own populations; default OFF.
+
+    Without it `channels._channel_result` reads an empty `NucleusState.xspopex_mb`, every `xsbranch`
+    is 0, and isomer production exists only through the exclusive channels (at most `maxchannel`
+    particles): TALYS's rpZZZAAA.LNN of every deeper residual was missing.
+
+    TALYS: residual.f90:1 (residual) line 60
+    Test: tests/hf/test_resiso.py
+    """
+    v = os.environ.get("INCOGNITA_RESISO", "")
+    if v == "" and _charged_run():  # charged-projectile fidelity: default ON for a charged projectile (neutron default unchanged)
+        return True
+    return v == "1"
+
+
+def _charged_run() -> bool:
+    """charged-projectile fidelity: True for a proton/alpha-incident run (INCOGNITA_CPINC), where the port-fidelity
+    bookkeeping fixes RESISO and TRITFID default ON (unset); "0" keeps the old path. Neutron runs
+    keep their default OFF, so every neutron number is the same bits."""
+    from physics.hf.projectile import k0
+
+    return k0() != 1
+
+
 @dataclass
 class MultipleResult:
     """multiple.f90's outputs: what channels.f90 then consumes."""
@@ -120,6 +174,11 @@ class MultipleResult:
     xspartial_mb: dict[tuple[int, int], dict[int, dict[int, float]]] = field(default_factory=dict)
     xsgamdistot_mb: dict[tuple[int, int], float] = field(default_factory=dict)
     xspopnuc_mb: dict[tuple[int, int], float] = field(default_factory=dict)
+    # the nuclei that passed multiple.f90:263's popeps cut: the mothers exgrid runs for
+    decayed: set[tuple[int, int]] = field(default_factory=set)
+    # RESISO (INCOGNITA_RESISO=1): the surviving ground-state and isomer populations xspopex(nex) after the
+    # cascade (multiple.f90:643-646), which residual.f90:67 turns into xsbranch; empty when the switch is off
+    xspopex_mb: dict[tuple[int, int], dict[int, float]] = field(default_factory=dict)
 
 
 def _records_feedexcl(zcomp: int, ncomp: int, t: int) -> bool:
@@ -138,7 +197,20 @@ def _records_feedexcl(zcomp: int, ncomp: int, t: int) -> bool:
     """
     if zcomp > NUMZCHAN or ncomp > NUMNCHAN:
         return False
+    if zcomp == 0 and ncomp == 0 and t > 0 and _ngnexcl():
+        # FIXENG F15 (INCOGNITA_NGNEXCL, default OFF): the initial compound's continuum bins 1..maxex hold only
+        # the flux of its own binary gamma emission; their particle decays ((n,gamma n), (n,gamma p), ...) are
+        # TALYS's `xsngn` (multiple.f90:945), outside every exclusive channel. Recorded, they reach the
+        # one-particle channels through the existing recursion; the binary row nex = maxex + 1 is stored
+        # elsewhere (multiple.f90:961), so nothing is counted twice.
+        return True
     return not (zcomp == 0 and ncomp == 0 and t > 0)
+
+
+def _ngnexcl() -> bool:
+    import os
+
+    return os.environ.get("INCOGNITA_NGNEXCL", "0").lower() in ("1", "y", "yes")
 
 
 def gamma_cascade(nuc: NucleusPopulation, nex: int) -> dict[int, float]:
@@ -163,6 +235,8 @@ def gamma_cascade(nuc: NucleusPopulation, nex: int) -> dict[int, float]:
         nuc.xspopex_mb[k] += intens
         nuc.xspopex_mb[nex] -= intens
         out[k] = float(intens)
+        if _SO.active():
+            _SO.acc_cell(nuc.zcomp, nuc.ncomp, 0, nex, k, float(intens))
     return out
 
 
@@ -195,6 +269,7 @@ def emission_limits(
     return out
 
 
+@stagetime.timed("multiple_emission")
 def multiple_emission(
     nuclei: dict[tuple[int, int], NucleusPopulation],
     decay: Callable[[int, int, int], BinFeeding | None],
@@ -227,6 +302,7 @@ def multiple_emission(
     """
     xsbinary_mb = xsbinary_mb or {}
     res = MultipleResult(popexcl_mb={}, feedexcl_mb={})
+    _SO.begin_attempt("py")
     for zc in range(maxz + 1):
         for nc in range(maxn + 1):
             key = (zc, nc)
@@ -251,6 +327,7 @@ def multiple_emission(
                 _binary_feed(res, key, zc, nc, k0, xsreacinc_mb, xsbinary_mb, feedbinary_mb,
                              nuc, flagfission)
                 continue
+            res.decayed.add(key)
             popepsA = popeps_mb / max(5 * nuc.maxex, 1)
             smin = nuc.sep_mev.get(1, 0.0)
             daughters = {t: nuclei[(zc + PARZ[t], nc + PARN[t])]
@@ -304,6 +381,8 @@ def multiple_emission(
                                else decay(zc, nc, nex, dmulti=dmulti))
                     if feeding is None:
                         continue
+                    if feeding.leftover_mb and nex <= nuc.nlast and trapfix_on():
+                        raise NotImplementedError("INCOGNITA_TRAPFIX: the tensor walk is not wired; run the native or numpy walk")
                     if feeding.leftover_mb:
                         _apply_leftover(
                             nuc, nex, feeding.leftover_mb,
@@ -322,6 +401,8 @@ def multiple_emission(
                         d.xspop_mb[:n, : dp.shape[1]] += dp[:n]
                         sumip = sumip[:n]
                         d.xspopex_mb[:n] += sumip
+                        if _SO.active():
+                            _SO.acc_mc(zc, nc, t, nex, sumip)
                         tot = float(sumip.sum())
                         nuc.xspopex_mb[nex] -= tot
                         d.xspopnuc_mb += tot
@@ -346,7 +427,12 @@ def multiple_emission(
                     pop += float(nuc.xspopex_mb[nex])
             nuc.xspopnuc_mb = pop
             res.xspopnuc_mb[key] = pop
+            if resiso_enabled():
+                res.xspopex_mb[key] = {nex: float(nuc.xspopex_mb[nex]) for nex in range(nuc.nlast + 1)
+                                       if nex == 0 or float(nuc.tau_s[nex]) != 0.0}
             res.xsgamdistot_mb[key] = gamdis
+            if _SO.active():
+                _SO.py_finish(nuc, daughters)
             _binary_feed(res, key, zc, nc, k0, xsreacinc_mb, xsbinary_mb, feedbinary_mb, nuc,
                          flagfission)
     return res
@@ -398,6 +484,8 @@ def _decay_nucleus_numpy(nuc: NucleusPopulation, daughters: dict, decay, zc: int
                     XE[k] += intens
                     XE[nex] -= intens
                     contrib[k] = intens
+                    if _SO.active():
+                        _SO.acc_cell(zc, nc, 0, nex, k, intens)
                 if contrib and rec0:
                     fe = _table(feedexcl, 0, nuc.maxex + 2, X.shape[0])
                     part = xspartial.setdefault(0, {})
@@ -413,7 +501,8 @@ def _decay_nucleus_numpy(nuc: NucleusPopulation, daughters: dict, decay, zc: int
             continue
         if not pending and _carries_graph(feeding):
             raise _GraphFeeding  # nothing has been fed yet: the tensor loop starts over
-        if feeding.leftover_mb:
+        tfix = bool(feeding.leftover_mb) and nex <= nuc.nlast and trapfix_on()
+        if feeding.leftover_mb and not tfix:
             _apply_leftover(nuc, nex, feeding.leftover_mb, None, xspartial, XE)
             leftovers.append((nex, feeding.leftover_mb))
         if 0 in dviews and getattr(feeding.dpop_mb, "nw", None) is not None:
@@ -427,12 +516,20 @@ def _decay_nucleus_numpy(nuc: NucleusPopulation, daughters: dict, decay, zc: int
                 sumip = feeding.dpop_mb.mc0[:n]
                 X[:n, : dp0.shape[1]] += dp0[:n]
                 XE[:n] += sumip
+                if _SO.active():
+                    _SO.acc_mc(zc, nc, 0, nex, sumip)
                 tot = float(sumip.sum())
                 XE[nex] -= tot
                 photon.append((nex, sumip, tot))
         elif 0 in feeding.dpop_mb and 0 in dviews:
+            if tfix:
+                raise NotImplementedError("INCOGNITA_TRAPFIX: tensor photon exit not wired; run the native or decay_fast walk")
             _apply_numpy(nuc, XE, dviews[0], 0, nex, feeding.dpop_mb[0], feeding.mcontrib_mb[0],
                          xsfeed, xspartial, feedexcl, _records_feedexcl(zc, nc, 0))
+        if tfix:
+            gamdis += _trapfix_numpy(nuc, nex, float(feeding.leftover_mb), X, XE, tau, jdis, parlev, xspartial,
+                                     _table(feedexcl, 0, nuc.maxex + 2, X.shape[0]) if rec0 else None,
+                                     undo_share=getattr(feeding.dpop_mb, "dp0", None) is not None)
         pending.append((nex, feeding))
     if photon:
         part = xspartial.setdefault(0, {})
@@ -510,6 +607,9 @@ def _apply_particle_batch(nuc, XE, dviews: dict, pending: list, zc: int, nc: int
         DX[:n, :jx] = np.add.accumulate(np.concatenate([DX[None, :n, :jx], dp[:, :n]]), 0)[-1]
         sumip = mc[:, :n]
         DXE[:n] = np.add.accumulate(np.concatenate([DXE[None, :n], sumip]), 0)[-1]
+        if _SO.active():
+            for b_, x_ in enumerate(nexs):
+                _SO.acc_mc(zc, nc, t, x_, sumip[b_])
         tots = [float(sumip[b, : min(int(nrows[b]), n)].sum()) for b in range(len(nexs))]
         XE[rows] -= np.asarray(tots)
         acc_nuc = d.xspopnuc_mb
@@ -561,6 +661,8 @@ def _apply_numpy(nuc, XE, dview, t: int, nex: int, dp, sumip, xsfeed: dict, xspa
         DX[:n, : dp.shape[1]] += dp[:n]
         sumip = sumip[:n]
         DXE[:n] += sumip
+        if _SO.active():
+            _SO.acc_mc(nuc.zcomp, nuc.ncomp, t, nex, sumip)
         if tot is None:
             tot = float(sumip.sum())
         XE[nex] -= tot
@@ -575,6 +677,47 @@ def _apply_numpy(nuc, XE, dview, t: int, nex: int, dp, sumip, xsfeed: dict, xspa
         return
     # each (nex, nexout) is fed once without multiple pre-equilibrium: 0.0 + v == v
     fe.set_row_nonzero(nex, sumip)
+
+
+def trapfix_on() -> bool:
+    """ENGAUDIT TRAPFIX (INCOGNITA_TRAPFIX=1, default OFF; native/nativex.c nx_walk carries the same rule).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    return os.environ.get("INCOGNITA_TRAPFIX", "0") == "1"
+
+
+def _trapfix_numpy(nuc, nex: int, leftover: float, X, XE, tau, jdis, parlev, xspartial: dict, fe,
+                   undo_share: bool) -> float:
+    """ENGAUDIT TRAPFIX: the trapped flux of DISCRETE level `nex` (above S_n, decayed as a compound bin) follows the
+    level's own gamma branching instead of TALYS's equal spread over levels 0..NL (compound.f90:404-419), whose shares on
+    levels above `nex` are never decayed again and are lost. The decay already put the spread into `xspop` (photon exit,
+    `undo_share`); it is taken back first. An isomer keeps the flux; a level without branches feeds the ground state.
+    Returns the gamma intensity recorded (xsgamdistot)."""
+    nl = nuc.nlast
+    if undo_share:
+        share = leftover / (nl + 1.0)
+        for k in range(min(nl, X.shape[0] - 1) + 1):
+            X[k, int(jdis[k]), _pi(int(parlev[k]))] -= share
+    part = xspartial.setdefault(0, {})
+    part[nex] = part.get(nex, 0.0) + leftover
+    if tau[nex] != 0.0:
+        X[nex, int(jdis[nex]), _pi(int(parlev[nex]))] += 0.0
+        return 0.0
+    br = nuc.branch.get(nex, []) or [(0, 1.0)]
+    g = 0.0
+    for k, ratio in br:
+        intens = leftover * ratio
+        X[k, int(jdis[k]), _pi(int(parlev[k]))] += intens
+        XE[k] += intens
+        XE[nex] -= intens
+        if _SO.active():
+            _SO.acc_cell(nuc.zcomp, nuc.ncomp, 0, nex, k, intens)
+        if fe is not None:
+            fe.add(nex, k, intens)
+            g += intens
+    return g
 
 
 def _apply_leftover(nuc: NucleusPopulation, nex: int, leftover_mb: float, fe,
@@ -599,6 +742,8 @@ def _apply_leftover(nuc: NucleusPopulation, nex: int, leftover_mb: float, fe,
     if nl < 0 or leftover_mb == 0.0:
         return
     share = leftover_mb / (nl + 1.0)
+    if _SO.active():
+        _SO.acc_mc(nuc.zcomp, nuc.ncomp, 0, nex, np.full(min(nl, int(xe.shape[0]) - 1) + 1, share))
     for nexout in range(min(nl, int(xe.shape[0]) - 1) + 1):
         xe[nexout] += share
         if fe is not None:
@@ -634,6 +779,8 @@ def _apply_mpe(nuc: NucleusPopulation, daughters: dict, nex: int, m: "MpeFeeding
             continue
         n = min(term.shape[0], d.xspop_mb.shape[0])
         d.xspopex_mb[:n] += term[:n]
+        if _SO.active():
+            _SO.acc_mc(zc, nc, t, nex, term[:n], "mpe")
         d.xspop_mb[:n, :, 0] += m.xspop_add_mb[t][:n]
         d.xspop_mb[:n, :, 1] += m.xspop_add_mb[t][:n]
         tot = m.sumtype_mb.get(t, 0.0)
@@ -697,6 +844,34 @@ def _np_row(x, n: int):
             and not x.requires_grad:
         return x[:n].numpy()
     return None
+
+
+def full_xsbinary(binp, xsbinary):
+    """TRITFID: TALYS's `xsbinary(type)` as `multiple.f90:950` adds it to `xsfeed(0,0,type)`: the
+    compound part (comptarget.f90:721) plus direct discrete (binary.f90:215), pre-equilibrium and
+    giant resonance (binary.f90:259, when `flagpreeq`) and direct capture (binary.f90:277). The
+    chained engine handed the cascade the compound part alone, so every particle production
+    (`xsparticle`, totalxs.f90:102) and multiplicity lost all non-compound binary emission
+    (Fe-56 20 MeV: t 0.188 vs stock 1.776 mb). Exclusive channels read `feedbinary`, not this.
+    Behind INCOGNITA_TRITFID=1 (default off for neutrons: `xsbinary` is returned as is, the same object;
+    charged-projectile fidelity: default ON for a charged projectile, "0" = off).
+
+    TALYS: binary.f90:215,259,277; multiple.f90:948-950
+    Test: development notes (stored stock TALYS-2.24 production, G1/G2)
+    """
+    import os
+
+    v = os.environ.get("INCOGNITA_TRITFID", "")
+    if xsbinary is None or v == "0" or (v == "" and not _charged_run()):  # charged-projectile fidelity: default ON for k0 > 1
+        return xsbinary
+    out = xsbinary.clone()
+    for t in sorted(binp.grids):
+        add = float(binp.xsdirdisctot_mb.get(t, 0.0))
+        if binp.flagpreeq:
+            add += float(binp.xspreeqtot_mb.get(t, 0.0)) + float(binp.xsgrtot_mb.get(t, 0.0))
+        out[t + 1] = out[t + 1] + add
+    out[1] = out[1] + float(binp.xsracape_mb)
+    return out
 
 
 def _binary_feed(res, key, zc, nc, k0, xsreacinc_mb, xsbinary_mb, feedbinary_mb, nuc, flagfission):

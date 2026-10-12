@@ -59,13 +59,20 @@ def _on() -> bool:
     return env.get("HF_NX2_CENGFIS", "1") != "0" and env.get("HF_NX2_FIS2", "1") != "0"
 
 
+def _fissc(lever: str) -> bool:
+    """FISSC (development notes): lever F1..F4 on unless `HF_NX2_FISSC=0` or `HF_NX2_FISSC_<lever>=0`."""
+    env = os.environ
+    return env.get("HF_NX2_FISSC", "1") != "0" and env.get("HF_NX2_FISSC_" + lever, "1") != "0"
+
+
 def _kernels():
     if not _on():
         return None
-    ks = (nx2.kernel("ceng_fis_grid", [_P, _I, _D, _P, _P, _I, _D, _D, _D, _D, _P, _I, _D, _I, _P,
+    f2, f3 = _fissc("F2"), _fissc("F3")
+    ks = (nx2.kernel("ceng_fis_grid2" if f2 else "ceng_fis_grid", [_P, _I, _D, _P, _P, _I, _D, _D, _D, _D, _P, _I, _D, _I, _P,
                                        _P, _P, _P, _P, _I], _I),
-          nx2.kernel("ceng_fis_weights", [_P, _P, _P, _I, _D, _P, _I, _I, _D, _D, _D, _P, _P, _I,
-                                          _P, _P], nx2.INT),
+          nx2.kernel("ceng_fis_weights2" if f3 else "ceng_fis_weights",
+                     [_P, _P, _P, _I, _D, _P, _I, _I, _D, _D, _D, _P, _P, _I, _P, _P], nx2.INT),
           nx2.kernel("ceng_fis_bins", [_P, _P, _P, _P, _I, _I, _D, _P, _P, _D, _P], nx2.INT),
           nx2.kernel("ceng_fis_log_table", [_P, _I, _P], None))
     return None if any(k is None for k in ks) else ks
@@ -100,6 +107,10 @@ def _covered(fp, ld, options) -> bool:
     if _grad(fp.fecont_mev, fp.fbarrier_mev, fp.fwidth_mev, ld.ctable, ld.ptable_mev,
              ld.deltaW_mev):
         return False
+    from physics.hf.fission.barriers import fistsc_on
+
+    if fistsc_on():  # FISTSC: `ladder_widths`/`target_transmission` add the band's transition states
+        return True
     return all(fp.rotational[ibar].n == 0 for ibar in range(1, nb + 1))
 
 
@@ -178,6 +189,46 @@ def ladder_widths(chain, n, ex_mev: np.ndarray, dex_mev: np.ndarray, exmax_mev: 
     TALYS: tfission.f90:1 (tfission), compound.f90:120-147 (compound)
     Test: tests/hf/test_cengfis.py
     """
+    f1 = _fissc("F1")
+    if f1:
+        ex_c = np.ascontiguousarray(ex_mev, dtype=np.float64)
+        dex_c = np.ascontiguousarray(dex_mev, dtype=np.float64)
+        lkey = (ex_c.tobytes(), dex_c.tobytes(), float(exmax_mev), float(exfis_top_mev),
+                float(fnorm), int(nJ), int(chain.maxj))
+        lstore = n.__dict__.setdefault("_fissc_ladder", {})
+        hit = lstore.get(lkey)
+        if hit is not None:
+            return hit.copy()
+    got = _ladder_widths(chain, n, ex_mev, dex_mev, exmax_mev, exfis_top_mev, fnorm, nJ)
+    if f1 and got is not None:
+        while len(lstore) >= _KEEP_LADDER:
+            lstore.pop(next(iter(lstore)))
+        lstore[lkey] = got.copy()
+    return got
+
+
+#: FISSC F1: ladders kept per nucleus (a repeat comes within a few calls of the first, development notes)
+_KEEP_LADDER = 8
+#: FISSC F4: row block of the active-triple contraction
+_BLOCK = 16
+
+
+def _contract(W1, W2, A, B, act):
+    """`W1 @ A + W2 @ B` with W's rows sorted by energy and each row zero beyond its `act` active
+    triples: row blocks contract over their active triples only (FISSC F4)."""
+    E = W1.shape[0]
+    out = np.zeros((E, A.shape[1]))
+    for r0 in range(0, E, _BLOCK):
+        r1 = min(E, r0 + _BLOCK)
+        k = int(act[r1 - 1])
+        if k <= 0:
+            continue
+        out[r0:r1] = (torch.from_numpy(W1[r0:r1, :k]) @ torch.from_numpy(A[:k])
+                      + torch.from_numpy(W2[r0:r1, :k]) @ torch.from_numpy(B[:k])).numpy()
+    return out
+
+
+def _ladder_widths(chain, n, ex_mev, dex_mev, exmax_mev, exfis_top_mev, fnorm, nJ):
     co = grid_coefficients(chain, n, exfis_top_mev, nJ)
     if co is None:
         return None
@@ -194,12 +245,23 @@ def ladder_widths(chain, n, ex_mev: np.ndarray, dex_mev: np.ndarray, exmax_mev: 
     hi = np.minimum(ex + 0.5 * dex, exmax_mev)
     eex = np.ascontiguousarray(np.concatenate([lo, ex, hi]))
     E = eex.size
+    f3, f4 = _fissc("F3"), _fissc("F4")
+    if f3 or f4:  # the distinct energies, ascending; `inv` spreads their rows back
+        ueex, inv = np.unique(eex, return_inverse=True)
+        ueex = np.ascontiguousarray(ueex)
+    else:
+        ueex, inv = eex, None
+    Eu = ueex.size
     twopi = float(talys_constants()["twopi"])
     ts = [None, None, None]
+    from physics.hf.fission.barriers import band_ladder
+
     for ibar in range(1, int(fp.nfisbar) + 1):
+        band = band_ladder(fp, ibar, torch.from_numpy(eex), n.ld.deltaW_mev, nJ)  # FISTSC
+        band = None if band is None else band.reshape(E, nj2).numpy()
         c = co[ibar]
         if c is None:
-            ts[ibar - 1] = np.zeros((E, nj2))
+            ts[ibar - 1] = np.zeros((E, nj2)) if band is None else np.ascontiguousarray(band)
             continue
         pen = _pen(fp, n.ld, ibar)
         if pen is None:
@@ -207,13 +269,18 @@ def ladder_widths(chain, n, ex_mev: np.ndarray, dex_mev: np.ndarray, exmax_mev: 
         elow, emid, eup, A, B = c
         S = elow.shape[0]
         mode, bfis, wfis, u, col, nbins = pen
-        W1, W2 = np.empty((E, S)), np.empty((E, S))
+        W1, W2 = np.empty((Eu, S)), np.empty((Eu, S))
         if w_fn(nx2.ptr(elow), nx2.ptr(emid), nx2.ptr(eup), S, float(fp.fecont_mev[ibar]),
-                nx2.ptr(eex), E, mode, bfis, wfis, twopi, nx2.ptr(u), nx2.ptr(col), nbins,
+                nx2.ptr(ueex), Eu, mode, bfis, wfis, twopi, nx2.ptr(u), nx2.ptr(col), nbins,
                 nx2.ptr(W1), nx2.ptr(W2)) != 0:
             return None
-        tr = torch.from_numpy(W1) @ torch.from_numpy(A) + torch.from_numpy(W2) @ torch.from_numpy(B)
-        ts[ibar - 1] = tr.numpy()
+        if f4:
+            tr = _contract(W1, W2, A, B, np.searchsorted(elow, ueex, side="right"))
+        else:
+            tr = (torch.from_numpy(W1) @ torch.from_numpy(A)
+                  + torch.from_numpy(W2) @ torch.from_numpy(B)).numpy()
+        tr = tr if inv is None else np.ascontiguousarray(tr[inv])
+        ts[ibar - 1] = tr if band is None else np.ascontiguousarray(band + tr)
     fis = np.empty((m, nj2))
     if bins_fn(int(fp.nfisbar), nx2.ptr(ts[0]), nx2.ptr(ts[1]), nx2.ptr(ts[2]), m, nj2,
                float(fnorm), nx2.ptr(ex), nx2.ptr(dex), float(exmax_mev), nx2.ptr(fis)) != 0:
@@ -248,11 +315,21 @@ def target_transmission(chain, n, exinc_mev: float, fnorm: float):
     tfisA = np.zeros((nj2, nh))
     rhofisA = np.zeros((nj2, nh))
     ts = [None, None, None]
+    from physics.hf.fission.barriers import band_hill
+
     for ibar in range(1, int(fp.nfisbar) + 1):
         tr = np.zeros(nj2)
         ts[ibar - 1] = tr
+        # FISTSC: the band's transition states first (t1barrier's order); the kernel adds the continuum's
+        # histogram entries on top and clamps tfisA(0) when it integrated the continuum
+        bh = band_hill(fp, ibar, float(exinc_mev), n.ld.deltaW_mev, nJ)
+        if bh is not None and ibar == 1:
+            tfisA += bh[1]
+            rhofisA += bh[2]
         c = co[ibar]
         if c is None:
+            if bh is not None:
+                tr += bh[0]
             continue
         pen = _pen(fp, n.ld, ibar)
         if pen is None:
@@ -266,6 +343,8 @@ def target_transmission(chain, n, exinc_mev: float, fnorm: float):
                   nx2.ptr(tfisA) if collect else 0, nx2.ptr(rhofisA) if collect else 0,
                   NUMHILL) != 0:
             return None
+        if bh is not None:
+            tr += bh[0]
     tf = np.empty(nj2)
     comb = nx2.kernel("ceng_fis_combine", [_I, _P, _P, _P, _I, _D, _P], nx2.INT)
     if comb is None or comb(int(fp.nfisbar), nx2.ptr(ts[0]), nx2.ptr(ts[1]), nx2.ptr(ts[2]), nj2,

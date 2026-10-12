@@ -437,6 +437,15 @@ def vibrational_coupling_matrix(
         ph = torch.cos(torch.pi * ((lr + lc + L) / 2.0 + J + ir + lc - jr))
         val = ph * (2.0 * L + 1.0) ** 0.5 * w6 * cgs
         val = torch.where(torch.isfinite(val), val, torch.zeros_like(val))
+        # WEAKCPL: ECIS fills only the i2 <= i1 triangle (row = the one-phonon level, column = the g.s.) and copies it
+        # (quan-379..417). With t = +1 both ways the formula above is symmetric iff I_b - I_0 - lambda is even, which holds
+        # for every even-even target (g.s. 0+, one-phonon I_b = lambda); for an odd-A weak-coupling multiplet member with
+        # J - I - lambda odd it is ANTI-symmetric (non-hermitian). Copy the triangle there, as ECIS does; untouched otherwise.
+        i0 = float(spin[0])
+        ib = float(spin[b])
+        if round(ib - i0 - L) % 2 != 0:
+            low = (level == b)[:, None] & (level == 0)[None, :]
+            val = torch.where(low, val, val.T)
         out[b] = torch.where(pair, val, torch.zeros_like(val))
     return out
 

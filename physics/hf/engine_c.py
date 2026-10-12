@@ -39,7 +39,11 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from physics.hf import stagetime
 from physics.hf.core.tensors import DTYPE
+from physics.hf import specout
+from physics.hf.emission import binspec
+from physics.hf.emission.binspec import binspec_ctx
 
 _DIR = Path(__file__).resolve().parent / "native" / "lib"
 _P = ctypes.c_void_p
@@ -205,6 +209,7 @@ class _Unsupported(Exception):
 class _Run:
     """What `ce_cascade` reads that is fixed for the run (one `Cascade`)."""
 
+    @stagetime.timed("setup.cascade")
     def __init__(self, cas):
         from physics.hf.compound.decay_fast import _tl_stack
         from physics.hf.compound.dens_reference import _eendmax
@@ -223,10 +228,24 @@ class _Run:
                 is None or os.environ.get("HF_NATIVEX_WIDTHS", "1") == "0"):
             self.ok = False
             return
+        if isinstance(cas.trans, dict) and "tlogref" in cas.trans:  # LOGTINT G0 reference: numpy paths only
+            self.ok = False
+            return
         TL, LM, head0 = _tl_stack(cas, tls)
+        from physics.hf.compound import tlog
+
+        tlog.native_arm(cas.trans)  # LOGTINT (default OFF): log-T Lagrange of charged T in the C kernels
         rg = cas.rg
         self.keep = []
         self.TL = np.ascontiguousarray(TL, dtype=np.float64)
+        self.TLf = None  # SLFIRST: the first compound nucleus's stack when it differs (C pp[17]; 0 = use TL)
+        if cas.trans_of(0, 0) is not cas.trans:
+            tlf = [cas.trans_of(0, 0)[t] for t in range(1, 7)]
+            TLf, LMf, h0f = _tl_stack(cas, tlf)
+            if TLf.shape != TL.shape or not (np.array_equal(LMf, LM) and np.array_equal(h0f, head0)):
+                self.ok = False
+                return
+            self.TLf = np.ascontiguousarray(TLf, dtype=np.float64)
         self.LM = np.ascontiguousarray(LM, dtype=_I64)
         self.head0 = np.ascontiguousarray(head0, dtype=_I64)
         egrid = np.ascontiguousarray(np.asarray(rg.egrid, dtype=np.float64))
@@ -251,13 +270,14 @@ class _Run:
         """CENGBOOK: type t's (Tjl, lmax) as `ce_densprepare` reads them, once per run."""
         got = self.front_trans.get(t)
         if got is None:
-            tjl, _tl, lmax = self.cas.trans[t]
+            tjl, _tl, lmax = self.cas.trans_of(0, 0)[t]  # front = the primary densprepare (SLFIRST)
             if isinstance(tjl, torch.Tensor) or np.ndim(tjl) != 3 or np.shape(tjl)[2] != 3:
                 raise _Unsupported("Tjl")
             got = self.front_trans[t] = (np.ascontiguousarray(tjl, dtype=np.float64),
                                          np.ascontiguousarray(lmax, dtype=_I64))
         return got
 
+    @stagetime.timed("setup.psf")
     def psf(self, Z: int, A: int) -> int:
         """The PSF pack index of `cas.gamma_params(Z, A)`, or -1."""
         key = (Z, A)
@@ -305,12 +325,16 @@ def _discfactor(sp) -> float:
     return min(max(ratio, 0.5), 2.0)
 
 
+@stagetime.timed("multiple_emission")
 def cascade(run: _Run, st, maxz: int, maxn: int, seed: dict, popeps_mb: float, k0: int,
-            xsreacinc_mb: float, xsbinary_mb: dict, feedbinary_mb, flagfission: bool, fis, prq):
+            xsreacinc_mb: float, xsbinary_mb: dict, feedbinary_mb, flagfission: bool, fis, prq,
+            propagated: set | None = None):
     """`cas.populations` twice with `propagate_exmax` between, `_seed_mulpre` and
     `multiple_emission` (NATIVEX's walk, multiple pre-equilibrium included) in one `ce_cascade`
     call: the `MultipleResult` the Python path returns, with `st.spec` as it leaves it; or raises
     `_Unsupported` before anything but `st.spec` entries the Python path also makes is touched.
+    An empty `propagated` is filled with the nuclei exgrid ran for; a non-empty one says `st` is
+    a regrown state (`Cascade.regrow`) whose set is already built.
 
     TALYS: multiple.f90:1 (multiple), cascade.f90:1 (cascade), compound.f90:1 (compound)
     Test: tests/hf/test_engine_c.py
@@ -318,6 +342,12 @@ def cascade(run: _Run, st, maxz: int, maxn: int, seed: dict, popeps_mb: float, k
     from physics.hf.density.overrides import torch_path
     from physics.hf.emission import multiple as M
     from physics.hf.emission.feeding import NUMN, NUMZ
+    from physics.hf.core.grids import binquad_photon, binquad_sub
+
+    if binquad_sub(run.cas.options) > 1:  # BINQUAD sub-points: the Python-driven native walk only
+        raise _Unsupported("binquad sub-points")
+    if binquad_photon(run.cas.options) > 0:  # BINQUAD2 photon quadrature: the Python-driven native walk only
+        raise _Unsupported("binquad photon quadrature")
 
     cas = run.cas
     so = lib()
@@ -343,11 +373,14 @@ def cascade(run: _Run, st, maxz: int, maxn: int, seed: dict, popeps_mb: float, k
                 if zc <= NUMZ and nc <= NUMN
                 and (float(st.exmax[zc, nc]) > 0.0 or (zc, nc) == (0, 0))]
 
-    first = grid_set()
-    for key in first:
-        cas.spec(st, *key)
-    for key in first:
-        cas.propagate_exmax(st, *key)
+    if not propagated:
+        first = grid_set()
+        for key in first:
+            cas.spec(st, *key)
+        for key in first:
+            cas.propagate_exmax(st, *key)
+        if propagated is not None:
+            propagated.update(first)
     nuclei = grid_set()
     return _Packed(run, so, st, nuclei, maxz, maxn, P1).run(
         seed, mulpre, prq, popeps_mb, k0, xsreacinc_mb, xsbinary_mb, feedbinary_mb,
@@ -450,6 +483,7 @@ class _Packed:
             self.error = ex
             return 1
 
+    @stagetime.timed("fission")
     def fis_cb(self, s, m, bins, out, nj):
         try:
             sp = self.specs[s]
@@ -478,13 +512,14 @@ class _Packed:
             self.error = ex
             return 1
 
+    @stagetime.timed("preeq")
     def _mpe(self, s, arrs, block):
         """`multiple_native._Walk.attach_mpe` less the arrays the C side owns."""
         from physics.hf.compound.decay_fast import nexmax_rows
         from physics.hf.compound.prepare import NUMJ
         from physics.hf.core.grids import emission_end
-        from physics.hf.density.particle_hole import EFERMI_MEV
-        from physics.hf.preeq.prepare import single_particle_densities
+        from physics.hf.density.particle_hole import EFERMI_MEV, phfast_tables
+        from physics.hf.preeq.prepare import exciton_densities
         from physics.hf.preeq.spin import preeq_spin_distribution
 
         cas, st = self.cas, self.st
@@ -492,7 +527,7 @@ class _Packed:
         P1 = self.P1
         zc, nc = self.keys[s]
         xrows = int(sp.maxex) + 1
-        tj = [cas.trans[t][0] for t in (1, 2)]
+        tj = [cas.trans_of(zc, nc)[t][0] for t in (1, 2)]  # SLFIRST: per emitting nucleus
         dsp = [cas.spec(st, sp.zix + PARZ[t], sp.nix + PARN[t]) for t in (1, 2)]
         nb = max(d.maxex for d in dsp) + 1
         flags = np.ctypeslib.as_array(ctypes.cast(int(arrs[1]), ctypes.POINTER(ctypes.c_uint8)),
@@ -527,14 +562,15 @@ class _Packed:
             for nexout in range(nb):
                 mj = int(d.maxj[nexout]) if nexout <= d.maxex else 0
                 jw[di, nexout, : min(mj, NUMJ) + 1] = rnj[: min(mj, NUMJ) + 1]
-        _, gpc, gnc = single_particle_densities(sp.Z, sp.A - sp.Z, kph)
+        _, gpc, gnc = exciton_densities(sp.Z, sp.A - sp.Z, kph, cas.params, cas.options)
         c0 = cas.spec(st, 0, 0)
-        _, gp0, gn0 = single_particle_densities(c0.Z, c0.A - c0.Z, kph)
-        dg = [single_particle_densities(d.Z, d.A - d.Z, kph) for d in dsp]
+        _, gp0, gn0 = exciton_densities(c0.Z, c0.A - c0.Z, kph, cas.params, cas.options)
+        dg = [exciton_densities(d.Z, d.A - d.Z, kph, cas.params, cas.options) for d in dsp]
+        phz, pht = phfast_tables(cas.options, c0, sp, dsp)  # fast-phmodel: phmodel 2 tables for mpe_bin (None = analytic)
         rg = cas.rg
         mi = np.array([P1 - 1, nb, dsp[0].nlast_grid, dsp[1].nlast_grid, dsp[0].zix, dsp[1].zix,
                        dsp[0].nix, dsp[1].nix, dsp[0].maxex, dsp[1].maxex, rg.ebegin[1],
-                       rg.ebegin[2], eend[1], eend[2], rg.maxen, xrows], dtype=_I64)
+                       rg.ebegin[2], eend[1], eend[2], rg.maxen, xrows, int(phz is not None)], dtype=_I64)
         md = np.array([gpc, gnc, gp0, gn0, EFERMI_MEV, sp.sep_mev[1], sp.sep_mev[2], dg[0][1],
                        dg[1][1], dg[0][2], dg[1][2]], dtype=np.float64)
         own = [np.ascontiguousarray(np.asarray(rg.egrid, dtype=np.float64)[: rg.maxen + 1],
@@ -544,9 +580,10 @@ class _Packed:
                np.zeros(2 * nb), np.zeros(2 * nb), np.zeros(2 * nb * nj1), np.zeros(2 * nb)]
         mp = np.array([arrs[0], arrs[1], _ptr(nxm), _ptr(jw), _ptr(dx), _ptr(dex), _ptr(own[0]),
                        _ptr(own[1]), _ptr(own[2]), arrs[2], arrs[3], arrs[4], arrs[5], arrs[6],
-                       _ptr(own[3]), _ptr(own[4]), _ptr(own[5]), _ptr(own[6])], dtype=np.uint64)
+                       _ptr(own[3]), _ptr(own[4]), _ptr(own[5]), _ptr(own[6]), *(_ptr(t) for t in pht)],
+                      dtype=np.uint64)
         blk = np.array([_ptr(mi), _ptr(md), _ptr(mp)], dtype=np.uint64)
-        self.keep.append((nxm, jw, dx, dex, mi, md, mp, blk, own))
+        self.keep.append((nxm, jw, dx, dex, mi, md, mp, blk, own, pht))
         block[0] = _ptr(blk)
         return 0
 
@@ -628,7 +665,10 @@ class _Packed:
         pp = np.array([_ptr(run_.TL), _ptr(run_.LM), _ptr(run_.head0), _ptr(run_.egrid),
                        _ptr(run_.egrid32), _ptr(run_.ebegin), _ptr(run_.eend), _ptr(idx),
                        _ptr(self.si), _ptr(self.sd), _ptr(self.spt), 0, _ptr(sot), cp[2], cp[0],
-                       cp[1], cp[3]], dtype=np.uint64)
+                       cp[1], cp[3], _ptr(run_.TLf)], dtype=np.uint64)
+        from physics.hf.core.grids import binquad_sync
+
+        binquad_sync(cas.options)
         rc = self.so.ce_cascade(_ptr(ip), _ptr(dp), _ptr(pp))
         del cbs
         if rc != 0:
@@ -637,6 +677,10 @@ class _Packed:
         self.k0, self.xsreacinc_mb, self.xsbinary_mb = k0, xsreacinc_mb, xsbinary_mb
         self.feedbinary_mb, self.flagfission = feedbinary_mb, flagfission
         return self
+
+    def decayed(self) -> set:
+        """The set nuclei that passed the popeps cut (`ce_cascade` status 2 or 3)."""
+        return {key for s, key in enumerate(self.nuclei) if int(self.si[s, 12]) in (2, 3)}
 
     def result(self):
         """The `MultipleResult` `multiple_emission` returns, off the arena."""
@@ -648,6 +692,7 @@ class _Packed:
         feedbinary_mb, flagfission = self.feedbinary_mb, self.flagfission
         res = M.MultipleResult(popexcl_mb={}, feedexcl_mb={})
         si, sd = self.si, self.sd
+        resiso = M.resiso_enabled()
         for s, key in enumerate(self.nuclei):
             xrows, fo, uo, tl = views[s]
             maxex = xrows - 1
@@ -682,11 +727,17 @@ class _Packed:
             else:
                 res.xsgamdistot_mb[key] = 0.0
             res.xspopnuc_mb[key] = float(sd[s, 17])
+            if resiso and s in self.pops:  # RESISO: the surviving populations XE (multiple.f90:643-646)
+                XE = self.pops[s][4]
+                res.xspopex_mb[key] = dict(enumerate(XE[:int(si[s, 6]) + 1].tolist()))
+            if status in (2, 3):
+                res.decayed.add(key)
             if key == (0, 0):
                 M._binary_feed(res, key, 0, 0, k0, xsreacinc_mb, xsbinary_mb, feedbinary_mb,
                                _Top(maxex), flagfission)
         return res
 
+    @stagetime.timed("channels")
     def channels(self, cinp, b, xsbinary, chst: "_ChanState", keys: "_Keys"):
         """CENGBOOK: `exclusive_channels(built.channels(cinp, st, self.result(), b, xsbinary))`
         as `run` reads it, in one `ce_channels` call over the arena.
@@ -748,7 +799,32 @@ class _Packed:
         chst.idnumfull, chst.opennum = int(ip[9]), int(ip[10])
         n = int(oint[0])
         xsch = dict(zip(ocode[:n].tolist(), oxs[:n].tolist()))  # noqa: B905
-        return _Chan(xsch, keys.resid(ores), float(odbl[0]), float(odbl[1]))
+        chan = _Chan(xsch, keys.resid(ores), float(odbl[0]), float(odbl[1]))
+        from physics.hf.emission.multiple import resiso_enabled
+
+        if resiso_enabled():  # RESISO: residual.f90:67 off the arena (xsbranch x rpZZZAAA.tot)
+            chan.residual.update(self.resiso(cas, st, ores, keys))
+        return chan
+
+    def resiso(self, cas, st, ores, keys) -> dict:
+        """RESISO: `rpZZZAAA.LNN` for every arena nucleus with an isomer, as engine.resiso_keys."""
+        from physics.hf.emission.multiple import isomer_files
+
+        out = {}
+        for s, (key, sp) in enumerate(zip(self.keys, self.specs)):  # noqa: B905
+            zc, nc = key
+            if s not in self.pops or zc > keys.maxz or nc > keys.maxn:
+                continue
+            pop = float(self.sd[s, 17])
+            if pop == 0.0:
+                continue
+            XE = self.pops[s][4]
+            nl = min(int(self.si[s, 6]), len(sp.tau_s) - 1, XE.shape[0] - 1)
+            br = {nex: float(XE[nex]) / pop for nex in range(nl + 1) if nex == 0 or float(sp.tau_s[nex]) != 0.0}
+            ri = zc * (keys.maxn + 1) + nc
+            for num, v in isomer_files(sp.Z, sp.A, br, float(ores[ri])).items():
+                out[f"{keys.rkeys[ri]}.L{num:02d}"] = v
+        return out
 
 
 _SPEC_CB = ctypes.CFUNCTYPE(ctypes.c_int64, ctypes.c_int64, ctypes.c_int64)
@@ -796,8 +872,11 @@ class _Chan:
     def of(cls, ch):
         from physics.hf.results import residual_key
 
-        return cls(ch.xschannel_mb, {residual_key(Z, A): v for (Z, A), v in ch.residual_mb.items()},
-                   ch.xsfistot_mb, ch.xsresprod_mb)
+        from physics.hf.engine import resiso_keys
+
+        resid = {residual_key(Z, A): v for (Z, A), v in ch.residual_mb.items()}
+        resid.update(resiso_keys(ch.residual_mb, ch.xsbranch))  # RESISO (nothing when off)
+        return cls(ch.xschannel_mb, resid, ch.xsfistot_mb, ch.xsresprod_mb)
 
 
 class _Keys:
@@ -807,6 +886,7 @@ class _Keys:
         from physics.hf.results import residual_key
 
         maxz, maxn = int(cinp.maxz), int(cinp.maxn)
+        self.maxz, self.maxn = maxz, maxn
         self.live_t = [t for t in range(7) if not cinp.parskip[t]]
         self.rkeys = [residual_key(*cas.zn(zc, nc)) for zc in range(maxz + 1)
                       for nc in range(maxn + 1)]
@@ -861,7 +941,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
     from types import SimpleNamespace
 
     from physics.hf.compound import fission_batch_target as fbt
-    from physics.hf.compound.chain import _NormView
+    from physics.hf.compound.chain import _NormView, _cnfactor
     from physics.hf.compound.dens_reference import _to_updown_axis
     from physics.hf.compound.norm_reference import chained_formation
     from physics.hf.compound.prepare import PARSPIN2, SPIN2
@@ -878,10 +958,18 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
             or cas.flagfullhf or not glue_enabled()):
         raise _Unsupported("front")
     o = cas.options
+    from physics.hf.core.grids import binquad_mode, binquad_photon, binquad_sync
+
+    if binquad_photon(o) > 0:  # BINQUAD2 photon quadrature: Python densprepare only (no C twin)
+        raise _Unsupported("binquadp")
+
     k0, lt = int(binp.k0), int(binp.ltarget)
     use_wfc = bool(binp.e_inc_mev <= cas.ewfc_mev) and o.wmode >= 1
     if use_wfc and (o.wmode != 1 or o.WFCfactor not in (1, 2, 3)):
         raise _Unsupported("width fluctuation mode")
+    from physics.hf.compound import ewfc
+    if ewfc.enabled(o) and cas._coupled_band() is not None:
+        raise _Unsupported("ewfc (Engelbrecht-Weidenmueller runs on the Python compound path)")
     gammax = int(o.gammax)
     gs = cas.gamma_strength(cas.Zt, cas.At)
     gp = cas.gamma_params(cas.Zt, cas.At)
@@ -926,6 +1014,10 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
         ti[t, :4] = (nex, d.nlast, d.ntop, arrs[4].shape[0])
         td[t, :3] = (_discfactor(d), sp0.sep_mev[t], float(fnorm[t + 1]))
         tp[t, :5] = [_ptr(a) for a in arrs]
+        if binquad_mode(o):  # BINQUAD: the residual bin widths for the in-bin quadrature (tp slot 9)
+            dexa = np.ascontiguousarray(d.dex_mev, dtype=np.float64)
+            keep.append(dexa)
+            tp[t, 9] = _ptr(dexa)
         if t == 0:
             L = gammax + 1
             T = np.zeros((nex, L, 2))
@@ -947,6 +1039,10 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
     pk = np.array([_ptr(a) for a in pack], dtype=np.uint64)
     pp = np.array([_ptr(ti), _ptr(td), _ptr(tp), _ptr(to), _ptr(pk), _ptr(tjlinc)],
                   dtype=np.uint64)
+    binquad_sync(o)
+    from physics.hf.compound import tlog
+
+    tlog.native_arm(cas.trans)  # LOGTINT (default OFF)
     rc = so.ce_densprepare(_ptr(ip), _ptr(dp), _ptr(pp))
     if rc != 0:
         raise _Unsupported(f"ce_densprepare refused type {rc - 1}")
@@ -986,10 +1082,16 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
                     int(fis is not None), binp.targetspin2, binp.target_parity, lmaxinc,
                     tjlinc.shape[0], 7)
         tip[12:19] = range(7)
-        tdp = np.array([float(cf.cn_factor_mb)])
+        tdp = np.array([_cnfactor(cf, binp.xseps_mb)])  # ENGDEFECT: comptarget.f90:256
         out = np.zeros(2)
         if nxl.nx_target(_ptr(tip), _ptr(tpp), _ptr(tdp), _ptr(pop), _ptr(out)) != 0:
             raise _Unsupported("nx_target refused")
+        from physics.hf.compound import wfcnorm  # FIXENG F15 (INCOGNITA_WFCNORM, default OFF)
+
+        if use_wfc and wfcnorm.enabled() and float(tdp[0]) != 0.0:
+            f = wfcnorm.factor(float(pop.sum()), float(out[0]), float(cf.xs_flux_mb))
+            pop *= f
+            out[0] *= f
         xsfis = torch.tensor(out[0], dtype=DTYPE)
     popt = torch.from_numpy(pop)
     el = popt[k0, lt].sum() if lt <= outs[k0][0] - 1 else torch.zeros((), dtype=DTYPE)
@@ -1052,12 +1154,7 @@ def binary_lean(inp, state):
         xsnonel_mb=torch.clamp(inp.xsreacinc_mb - xscompel, min=0.0))
 
 
-def _bin_decay_kw():
-    from physics.hf import engine
-
-    return engine._bin_decay, engine._seed_mulpre
-
-
+@stagetime.timed("compound")
 def cases(zf, stats: dict | None = None):
     """`engine.ChainedFull.cases` for the dump-free chain (`inject=()`), with `cascade` above in
     place of `populations` + `multiple_emission` wherever it applies, and the energy's exclusive
@@ -1077,12 +1174,11 @@ def cases(zf, stats: dict | None = None):
     from physics.hf.emission.binary import BinaryState, binary
     from physics.hf.emission.feed_reference import etotal_of, pop_inputs_of
     from physics.hf.emission.feeding import Cascade
-    from physics.hf.emission.multiple import multiple_emission
-    from physics.hf.engine import _BuiltInputs
+    from physics.hf.engine import _BuiltInputs, _py_cascade
     from physics.hf.fission.chain import fission_chain
     from physics.hf.preeq.chain import lend_cascade, set_energy_subset, target_tag
+    from physics.hf.astro import stellar
 
-    _bin_decay, _seed_mulpre = _bin_decay_kw()
     if zf.inject or zf.run_dir is not None and zf.declared_energies is None:
         raise ValueError("engine_c runs the dump-free chain with declared_energies")
     stats = stats if stats is not None else {}
@@ -1106,6 +1202,8 @@ def cases(zf, stats: dict | None = None):
     set_energy_subset(zf.Z, zf.A, declared, run_axis if trim else None)
     lend_cascade(cas)
     rn = _Run(cas) if lib() is not None else None
+    specout.sync_c(lib())  # SPECOUT: (un)register the C sink per the switch; output only
+    specout.begin_run(cas)
     chst = _ChanState()
     keys = None
     try:
@@ -1114,7 +1212,10 @@ def cases(zf, stats: dict | None = None):
         out = []
         bstate = BinaryState()
         for nin in range(1, n_run + 1):
+            stagetime.set_energy(run_axis[nin - 1])
             binp, cinp = built.shell(nin, run_axis[nin - 1])
+            if keep[nin - 1]:
+                specout.begin_energy(binp.e_inc_mev)
             etot = etotal_of(zf.Z, zf.A, enincmax, binp.e_inc_mev, binp.k0)
             inc = cas.incident(binp.e_inc_mev)
             st = cas.new_energy(etot, lmaxinc=int(inc.lmax[0]), e_inc_mev=binp.e_inc_mev)
@@ -1122,7 +1223,8 @@ def cases(zf, stats: dict | None = None):
             fkw = {}
             if fis is not None and cinp.flagfission:
                 cn = cas.spec(st, 0, 0)
-                fkw = fis.compound_target(int(cn.Z), int(cn.A), etot, fnorm=float(cas.fiso()[0]))
+                with stagetime.stage("fission"):
+                    fkw = fis.compound_target(int(cn.Z), int(cn.A), etot, fnorm=float(cas.fiso()[0]))
             a_e = add[round(binp.e_inc_mev, 6)]
             got = None
             if rn is not None:
@@ -1135,8 +1237,13 @@ def cases(zf, stats: dict | None = None):
                 pop, ci = got
             else:
                 ci = compound_inputs(cas, st, binp, cinp, etot, a_e, **fkw)
+                from physics.hf.compound import ewfc
+                ewfc.attach(ci, cas, binp.e_inc_mev)
                 pop = compound_target_inputs(ci)
             xsb = binary_cross_sections(pop, [ci])[0]
+            if stellar.enabled():  # STELLARSEF (INCOGNITA_STELLAR, default OFF): read-only re-entrance per target level
+                with stagetime.stage("stellar"):
+                    stellar.record(cas, st, binp, cinp, etot, a_e, fkw, pop)
             p = pop.pop_mb[0]
             xspop, xspopex, xspopnuc = {}, {}, {}
             for t, g in binp.grids.items():
@@ -1150,8 +1257,8 @@ def cases(zf, stats: dict | None = None):
                     xsbinary[t + 1] = xsb[t]
                 if fis is not None and cinp.flagfission:
                     xsbinary[0] = pop.xs_fission_mb[0]
-            prq = (population(pop_inputs_of(cas, binp, target, etot, add, declared))
-                   if keep[nin - 1] else None)
+            pinp = pop_inputs_of(cas, binp, target, etot, add, declared) if keep[nin - 1] else None
+            prq = population(pinp) if pinp is not None else None
             pex = {}
             for t, g in binp.grids.items():
                 n = g.ex_mev.shape[0]
@@ -1176,22 +1283,42 @@ def cases(zf, stats: dict | None = None):
                     stats.setdefault("binary_fallback", []).append((binp.e_inc_mev, str(ex)))
             if b is None:
                 b = binary(b2, bstate)
+            if binspec.enabled() and keep[nin - 1]:  # SPECOUT/XDHARD: binary emission spectra, output only
+                binspec.record(binp.e_inc_mev, pinp, b2, b, binp.k0, binspec_ctx(cas, target, declared))
+            if specout.active():  # SPECOUT: compound Legendre of the target levels, output only
+                from physics.hf import specang
+
+                specang.record_energy(cas, st, binp, cinp, etot, a_e, fkw, None if got is not None else ci,
+                                      pop, b2, b)
             if not keep[nin - 1]:
                 continue
             seed = {t: (b.xspop_mb[t].detach().numpy(), b.xspopex_mb[t].detach().numpy(),
                         float(b.xspop_mb[t].sum())) for t in b.xspop_mb}
+            from physics.hf.emission.multiple import full_xsbinary
+            xsbinary = full_xsbinary(b2, xsbinary)  # TRITFID (OFF: unchanged)
             xsb_by_type = ({t - 1: float(v) for t, v in enumerate(xsbinary)}
                            if xsbinary is not None else {})
             mres = packed = chan = None
             if keys is None:
                 keys = _Keys(cas, cinp)
+            propagated: set = set()
             if rn is not None:
                 try:
-                    packed = cascade(rn, st, cinp.maxz, cinp.maxn, seed, binp.popeps_mb, binp.k0,
-                                     float(inc.sigma_reac_mb[0]), xsb_by_type, b.feedbinary_mb,
-                                     cinp.flagfission, fis if cinp.flagfission else None, prq)
+                    while True:  # PYCDIFF: grown until every decayed mother has its daughters
+                        specout.begin_attempt("c")
+                        packed = cascade(rn, st, cinp.maxz, cinp.maxn, seed, binp.popeps_mb,
+                                         binp.k0, float(inc.sigma_reac_mb[0]), xsb_by_type,
+                                         b.feedbinary_mb, cinp.flagfission,
+                                         fis if cinp.flagfission else None, prq, propagated)
+                        grown = cas.regrow(st, propagated, packed.decayed(), packed.in_set,
+                                           cinp.maxz, cinp.maxn)
+                        if grown is None:
+                            break
+                        st, packed = grown, None
+                        stats["regrow"] = stats.get("regrow", 0) + 1
                     stats["c"] = stats.get("c", 0) + 1
                 except _Unsupported as ex:
+                    packed = None
                     stats.setdefault("fallback", []).append((binp.e_inc_mev, str(ex)))
             if packed is not None:
                 try:
@@ -1199,41 +1326,40 @@ def cases(zf, stats: dict | None = None):
                     stats["channels_c"] = stats.get("channels_c", 0) + 1
                 except _Unsupported as ex:
                     stats.setdefault("channels_fallback", []).append((binp.e_inc_mev, str(ex)))
-                    mres = packed.result()
+                    with stagetime.stage("multiple_emission"):
+                        mres = packed.result()
             if packed is None:
-                nuclei = cas.populations(st, cinp.maxz, cinp.maxn, seed)
-                for zc in range(cinp.maxz + 1):
-                    for nc in range(cinp.maxn + 1):
-                        if (zc, nc) in nuclei:
-                            cas.propagate_exmax(st, zc, nc)
-                nuclei = cas.populations(st, cinp.maxz, cinp.maxn, seed)
-                _seed_mulpre(nuclei, prq)
-                decay = _bin_decay(cas, st, nuclei, binp.popeps_mb,
-                                   fis if cinp.flagfission else None)
-                mpe_cb = None
-                if any(n.mulpre for n in nuclei.values()):
-                    def mpe_cb(zc, nc, nex, cas=cas, st=st, nuclei=nuclei, etot=etot):
-                        return cas.mpe(st, nuclei, zc, nc, nex, etotal_mev=etot)
-
-                    mpe_cb.context = (cas, st, nuclei, etot)
-                mres = multiple_emission(
-                    nuclei, decay,
-                    popeps_mb=binp.popeps_mb, maxz=cinp.maxz, maxn=cinp.maxn, k0=binp.k0,
-                    xsreacinc_mb=float(inc.sigma_reac_mb[0]), xsbinary_mb=xsb_by_type,
-                    feedbinary_mb=b.feedbinary_mb, flagfission=cinp.flagfission,
-                    mpe=mpe_cb)
+                specout.begin_attempt("py")
+                with stagetime.stage("multiple_emission"):
+                    st, mres = _py_cascade(cas, st, cinp, binp, b, seed, prq, xsb_by_type,
+                                           fis if cinp.flagfission else None,
+                                           float(inc.sigma_reac_mb[0]), etot, propagated or None)
             if chan is None:
                 from physics.hf.emission.channels import exclusive_channels
 
-                py = chst.to_py()
-                chan = _Chan.of(exclusive_channels(built.channels(cinp, st, mres, b, xsbinary), py))
-                chst.from_py(py)
+                with stagetime.stage("channels"):
+                    py = chst.to_py()
+                    chan = _Chan.of(exclusive_channels(built.channels(cinp, st, mres, b, xsbinary), py))
+                    chst.from_py(py)
+            specout.end_energy(pinp, binp.k0, b2)
             out.append((b2, chan, b, keys))
+        specout.end_run(cas)
         return out
     finally:
+        stagetime.set_energy(None)
         set_energy_subset(zf.Z, zf.A, declared, None)
 
 
+def _binquad_refuse(cas, what: str, stats=None) -> None:
+    """BINQUAD is native-only: a Python fallback would silently run TALYS's midpoint quadrature."""
+    from physics.hf.core.grids import binquad_mode
+
+    if binquad_mode(cas.options):
+        raise RuntimeError(f"binquad: {what} ({stats.get('front_fallback') if stats else ''}"
+                           f"{stats.get('fallback') if stats else ''})")
+
+
+@stagetime.timed("output")
 def run(injection, stats: dict | None = None):
     """`engine.run(injection=ChainedFull(...))` for the dump-free chain, through `cases`.
 
@@ -1244,7 +1370,12 @@ def run(injection, stats: dict | None = None):
     from physics.hf.emission.binary import BinaryState, binary
     from physics.hf.results import Results
 
-    if lib() is None or injection.inject:
+    from physics.hf.density.particle_hole import phfast_on, phmicro_on
+
+    # PHMICRO: phmodel 2 runs here with its tables handed to mpe_bin (fast-phmodel); INCOGNITA_PHFAST=0 = the Python reference
+    if lib() is None or injection.inject or (phmicro_on(getattr(injection, "options", None)) and not phfast_on()):
+        if injection.cascade is not None:
+            _binquad_refuse(injection.cascade, "no native engine")
         return engine.run(injection=injection)
     per_case = cases(injection, stats)
     e_inc, chans, levels, resid, totals = [], [], [], [], []
@@ -1276,7 +1407,11 @@ def run(injection, stats: dict | None = None):
     # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
     from physics.hf.direct.racapcalc import add_to_results
 
-    return add_to_results(res, injection)
+    res = add_to_results(res, injection)
+    # MACSCLOSED: few-resonance capture where HF is not valid, off unless INCOGNITA_FEWRES is set
+    from physics.hf import fewres
+
+    return fewres.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

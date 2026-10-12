@@ -50,7 +50,10 @@ Nothing here is a TALYS routine: it schedules `engine.ChainedFull` + `engine.run
    `fresh=True` solves the task in a process forked from the warm worker, so a task never sees
    caches another target left behind and the worker never grows; `fresh=False` solves it in the
    worker itself and keeps what it built (a sweep's residual nuclei, level schemes and parameter
-   files carry over to the next target).
+   files carry over to the next target). SPEEDFIX: a fresh task may carry `env` (its own fitlib
+   lines / INCOGNITA_* switches, e.g. the B55 recipe), set in the forked process only, with the
+   card and target caches dropped first -- a one-off run without the 2-3 CPU-s of start-up;
+   `engine: "c"` runs it on the native engine (`engine_c.run`) instead of the Python reference.
 
 3. Batching energies inside one process (SPEEDD's widths, SPEEDT's coupled channels): not done.
    See docs/results/hf-speed-profile.md, "Whole runs", for why it is not bit-identical.
@@ -476,15 +479,51 @@ def results_from_json(d: dict):
                    injected=tuple(d["injected"]))
 
 
+def _task_env(env: dict) -> None:
+    """SPEEDFIX lever 5: a task's own engine environment (fitlib lines file / extra lines, INCOGNITA_* switches), set in the
+    FORKED task process only (`fresh`), then every card- and target-scoped cache dropped so the run is the one a cold
+    process with that environment would make. A key mapped to None is removed."""
+    from physics.hf import chartrun
+    from physics.hf.input import fitlib
+
+    for k, v in env.items():
+        if v is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = str(v)
+    fitlib.deactivate()
+    fitlib._cards.cache_clear()
+    chartrun.drop_target_caches()
+
+
 def do_task(task: dict) -> dict:
     """One whole run in this process. `jobs` > 1 forks energy children."""
     Z, A = int(task["Z"]), int(task["A"])
+    if task.get("env"):
+        if not task.get("_forked"):
+            raise ValueError("a task with its own `env` runs only fresh (forked from the warm worker)")
+        _task_env(task["env"])
     tm: dict = {}
-    if int(task.get("jobs", 1)) > 1:
+    stats: dict = {}
+    if task.get("engine") == "c":
+        # SPEEDFIX: the native engine (`engine_c.run`, what the production runners and engine_curves run), one Cascade for this task
+        import torch
+
+        from physics.hf import engine_c
+        from physics.hf.engine import ChainedFull
+
+        t0, c0 = time.perf_counter(), cpu_s()
+        with torch.inference_mode():
+            res = engine_c.run(injection=ChainedFull(Z=Z, A=A, declared_energies=declared_grid(task["energies"])),
+                               stats=stats)
+        cases = None
+        tm.update({"wall_s": time.perf_counter() - t0, "cpu_s": cpu_s() - c0, "mode": "engine_c"})
+    elif int(task.get("jobs", 1)) > 1:
         res, cases = run_parallel(Z, A, task["energies"], int(task["jobs"]), timings=tm)
     else:
         res, cases = run_serial(Z, A, task["energies"], timings=tm)
-    out = {"Z": Z, "A": A, "timings": tm, "results": results_json(res)}
+    out = {"Z": Z, "A": A, "timings": tm, "results": results_json(res),
+           "engine_stats": {k: (v if isinstance(v, (int, float)) else len(v)) for k, v in stats.items()}}
     if task.get("pickle"):  # the whole (Results, cases), for the identity check
         out["pickle"] = base64.b64encode(pickle.dumps((res, cases), protocol=5)).decode()
     return out
@@ -493,8 +532,10 @@ def do_task(task: dict) -> dict:
 def _task_fresh(task: dict) -> dict:
     """`do_task` in a process forked from this warm one; its CPU-s is counted from here."""
     if os_threads() != 1:
+        if task.get("env"):
+            raise RuntimeError("a task with its own `env` needs a fork; this worker has more than one OS thread")
         return do_task(task)
-    return _fork_map(do_task, [(task,)])[0]
+    return _fork_map(do_task, [({**task, "_forked": True},)])[0]
 
 
 def serve(warm_level: str = "full") -> None:

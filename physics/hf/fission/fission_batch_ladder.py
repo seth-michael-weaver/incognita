@@ -53,6 +53,10 @@ def covered(fp, options) -> bool:
     nb = int(fp.nfisbar)
     if nb not in (1, 2, 3) or options.flagclass2 or options.flagfispartdamp:
         return False
+    from physics.hf.fission.barriers import fistsc_on
+
+    if fistsc_on():  # FISTSC: `_barrier` adds the rotational band's transition states
+        return True
     return all(fp.rotational[ibar].n == 0 for ibar in range(1, nb + 1))
 
 
@@ -77,9 +81,23 @@ def _coefficients(grid, ibar: int, dev) -> tuple[Tensor, ...]:
 
 
 def _barrier(fp, grid, ibar: int, eex: Tensor, deltaw: Tensor, shape, cache: dict) -> Tensor:
-    """`t1barrier(...).trfis` at every energy of `eex`, `(E, maxj+1, 2)`.
+    """`t1barrier(...).trfis` at every energy of `eex`, `(E, maxj+1, 2)`: the continuum
+    (`_continuum`) plus, under FISTSC, the rotational band's transition states (`band_ladder`).
 
     TALYS: t1barrier.f90:1 (t1barrier)
+    Test: tests/hf/test_fission_batch.py, tests/hf/test_fistsc.py
+    """
+    from physics.hf.fission.barriers import band_ladder
+
+    out = _continuum(fp, grid, ibar, eex, deltaw, shape, cache)
+    band = band_ladder(fp, ibar, eex, deltaw, int(shape[0]))
+    return out if band is None else band + out
+
+
+def _continuum(fp, grid, ibar: int, eex: Tensor, deltaw: Tensor, shape, cache: dict) -> Tensor:
+    """The continuum part of `t1barrier(...).trfis` at every energy of `eex`, `(E, maxj+1, 2)`.
+
+    TALYS: t1barrier.f90:142-176 (t1barrier)
     Test: tests/hf/test_fission_batch.py
     """
     dev = eex.device

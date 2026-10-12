@@ -15,6 +15,9 @@
  *   [7..9] tpr, epr, gpr of i = 1  [10..12] of i = 2  [13..15] upbend C, eta, F
  * Integers ip: [0] L (= gammax + 1)  [1] qrpa E1 table present  [2] flagupbend  [3] strengthM1
  *   [4] zix + nix  [5] n_tqrpa  [6] ie (table length - 1)  [7] NUMGAMQRPA  [8] n_t columns
+ *   SPEEDFIX, the tabulated M1 (strengthM1 >= 8, one column, no temperature axis), stored after the
+ *   E1 table in the same arrays: [9] M1 table present  [10] its ie  [11] its offset in etab
+ *   [12] its offset in ftab / lftab
  * Doubles dp: [0] S_k0  [1] delta  [2] alev  [3] beta2  [4] pi2h2c2
  */
 #include <math.h>
@@ -64,12 +67,12 @@ static double interp_lg(double e, double eb, double ee, double gamb, double game
     return gamb + frac * (game - gamb);
 }
 
-/* psf_fast._table_strength for one point (the E1 table, irad = 1, l = 1); `lftab` is
- * log10(ftab) wherever ftab > 0 */
+/* psf_fast._table_strength for one point: the E1 table (irad = 1, l = 1; n_t0 = n_tqrpa, ncol
+ * columns) or the M1 table (n_t0 = 1, one column); `lftab` is log10(ftab) wherever ftab > 0 */
 static double table_strength(const int64_t *ip, const double *dp, const double *etab,
                              const double *ftab, const double *lftab, const double *tq, double efs,
-                             double eg) {
-    int64_t n_t0 = ip[5], ie = ip[6], nq = ip[7], ncol = ip[8];
+                             double eg, int64_t n_t0, int64_t ie, int64_t ncol) {
+    int64_t nq = ip[7];
     double tnuc = 0.0, tb = 0.0, te = 0.0;
     int64_t n_t = 1;
     int itemp = 1;
@@ -122,7 +125,7 @@ static double fstrength1(const int64_t *ip, const double *dp, const double *par,
                          double eg, int irad, int l) {
     int64_t L = ip[0];
     const double *pq = par + PQ(irad, l);
-    int qrpa = (int)ip[1];
+    int qrpa = (int)ip[1], qrpa_m1 = (int)ip[9];
     int flag_m1 = irad == 0 && l == 1, flag_e1 = irad == 1 && l == 1;
     double out = 0.0, egam2 = eg * eg;
     double k = dp[4] / (2 * l + 1.0);
@@ -138,7 +141,10 @@ static double fstrength1(const int64_t *ip, const double *dp, const double *par,
                 out += k * sgr * (ggr * ggr * pw) / denom;
         }
         if (qrpa && flag_e1)
-            out = table_strength(ip, dp, etab, ftab, lftab, tq, efs, eg);
+            out = table_strength(ip, dp, etab, ftab, lftab, tq, efs, eg, ip[5], ip[6], ip[8]);
+        else if (qrpa_m1 && flag_m1)
+            out = table_strength(ip, dp, etab + ip[11], ftab + ip[12], lftab + ip[12], tq, efs, eg,
+                                 1, ip[10], 1);
     }
     for (int i = 0; i < 2; i++) {
         double tpr = pq[7 + 3 * i];

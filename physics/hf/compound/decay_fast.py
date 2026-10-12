@@ -70,6 +70,29 @@ def _tl_stack(cas, tls):
     return got[1], got[2], got[3]
 
 
+def _tlog_rows(cas, ts, e_, na, w1, w2, w3, TL, Lm, keep, u):
+    """LOGTINT (default OFF; compound/tlog.py): the charged rows (type index ts >= 1) of decay_fast's pol2 values `u`
+    replaced by the log-T Lagrange value (or, with `tlogref`, the fine-table reference)."""
+    from physics.hf.compound import tlog
+
+    u = u.copy()
+    nb, nc = na + 1, na + 2
+    for k in range(1, 6):
+        s = np.flatnonzero(ts == k)
+        if not s.size:
+            continue
+        t = k + 1
+        ta, tb, tc = TL[k, na[s], :Lm], TL[k, nb[s], :Lm], TL[k, nc[s], :Lm]
+        ref = cas.trans.get("tlogref", {}).get(t)
+        rv = tlog.interp_ref(e_[s], ref[0], ref[2])[:, :Lm] if ref is not None else None
+        tlog.record(t, e_[s], na[s], w1[s], w2[s], w3[s], ta, tb, tc, keep[s], cas.transeps, rv)
+        if rv is not None:
+            u[s] = rv
+        elif cas.trans.get("tlog", False):
+            u[s] = tlog.lagr_log(w1[s], w2[s], w3[s], ta, tb, tc, tlog.on(cas.trans, t))
+    return u
+
+
 def _rows(idx):
     """A slice when the row indices are consecutive (a view, not a copy)."""
     idx = np.asarray(idx)
@@ -140,7 +163,10 @@ class NucleusWidths:
 
     def __init__(self, cas, st, sp, bins: list[int]):
         from physics.hf.compound.dens_reference import _eendmax
+        from physics.hf.core.grids import binquad_mode
 
+        if binquad_mode(cas.options):  # BINQUAD is native-only: never run the midpoint rule silently
+            raise RuntimeError("binquad: the numpy decay widths do not implement it (native nx_widths only)")
         self.bins = list(bins)
         self.row = {b: i for i, b in enumerate(self.bins)}
         self.odd = sp.A % 2
@@ -160,7 +186,7 @@ class NucleusWidths:
         T0, T1 = self._photon(cas, st, sp, g, exinc, fnorm)
         self.exits.append(self._finish(cas, st, g, 0, daughters[0], T0, T1))
         eendmax = _eendmax(cas.Zt, cas.At, cas.enincmax)
-        TP0, TP1 = self._particles(cas, st, g, fnorm, eendmax)
+        TP0, TP1 = self._particles(cas, st, g, fnorm, eendmax, sp)
         for t in range(1, 7):
             self.exits.append(self._finish(cas, st, g, t, daughters[t], TP0[t - 1], TP1[t - 1]))
         # denominators of the six exits other than alpha, and where all six are zero
@@ -216,10 +242,11 @@ class NucleusWidths:
         lmaxhf = np.full((m, n), cas.gammax, dtype=np.int64)
         return _cap_l(T0, T1, lmaxhf, g.nexmax[0], cas.k0 == 0, st.lmaxinc)
 
-    def _particles(self, cas, st, g: "_Geometry", fnorm, eendmax):
+    def _particles(self, cas, st, g: "_Geometry", fnorm, eendmax, sp=None):
         """Tl interpolated to every (type, bin, row) Eout, split by c and lmaxhf-capped, for
         the six particle exits in one pass (densprepare.f90's pol2, as `_interp_tl`)."""
-        tls = [cas.trans[t] for t in range(1, 7)]
+        # SLFIRST: the emitting nucleus's set (sp None = the cascade's `trans`)
+        tls = [(cas.trans if sp is None else cas.trans_of(sp.zix, sp.nix))[t] for t in range(1, 7)]
         L = tls[0][1].shape[1]
         if any(isinstance(x[1], torch.Tensor) or x[1].shape[1] != L for x in tls):
             raise ValueError("decay_fast needs one numpy Tl shape for every particle")
@@ -264,6 +291,8 @@ class NucleusWidths:
                 Lm = min(int(lsel.max()) + 1, L)
                 keep = np.arange(Lm)[None, :] <= lsel[:, None]
                 u = w1 * TL[ts, na, :Lm] + w2 * TL[ts, nb, :Lm] + w3 * TL[ts, nc, :Lm]
+                if cas.trans.get("tlog", False) or "tlogref" in cas.trans:  # LOGTINT (default OFF)
+                    u = _tlog_rows(cas, ts, e_, na, w1, w2, w3, TL, Lm, keep, u)
                 u = np.where(keep, u, 0.0)
                 fn = np.array([float(fnorm[t + 1]) for t in range(1, 7)])[ts][:, None]
                 vals = np.where(u < cas.transeps, 0.0, u) * fn

@@ -55,6 +55,7 @@ def _par(ld) -> np.ndarray | None:
     when the kernel does not carry this nucleus's model or any of its tensors asks for a
     gradient."""
     from physics.hf.density.parameters import _ign_floats, _ld_memo, _sc_floats
+    from physics.hf.density.spinquench import c_params as _sq_c_params
 
     memo = _ld_memo(ld)
     got = memo.get("nx2_ld", False)
@@ -74,6 +75,7 @@ def _par(ld) -> np.ndarray | None:
             0.0 if colld is None else colld, 1.0 if ld.spincutmodel == 1 else 0.0,
             float(ld.T_mev[0]), float(ld.E0_mev[0]), float(ld.Exmatch_mev[0]),
             float(ld.ctable[0]), float(ld.ptable_mev[0]), float(ld.pair_mev),
+            *_sq_c_params(ld),
         ], dtype=np.float64)
     memo["nx2_ld"] = par
     return par
@@ -393,7 +395,7 @@ def _gather_key(Z, A, options, params, masses, levels, deformation):
         e, j = levels.all_e_mev, levels.all_spin
         if e.requires_grad or j.requires_grad:
             return None
-        out += [int(levels.nlev), int(levels.nlevmax2), str(e.dtype), str(j.dtype),
+        out += [int(levels.nlev), int(getattr(levels, "nlev_ld", -1)), int(levels.nlevmax2), str(e.dtype), str(j.dtype),
                 _view(e)[: n2 + 1].tobytes(), _view(j)[: n2 + 1].tobytes(),
                 np.array(fl, dtype=np.float64).tobytes()]
     except Exception:  # a read the build would raise on (or a non-tensor record): no key
@@ -526,7 +528,8 @@ def _densitypar_floats(Z, A, options, params, masses, levels, deformation, bar, 
     # --- Nlast/Ntop/Nlow (densitypar.f90:344-355)
     Nlast = int(levels.nlev)
     if Ntop == -1:
-        Ntop = Nlast
+        # FIXENG F14: the LD matching keeps the uncut list when ggdeadend cut the decay list
+        Ntop = Nlast if getattr(levels, "nlev_ld", -1) < 0 else int(levels.nlev_ld)
     if Nlow == -1:
         Nlow = 2
     if Ntop <= 2:

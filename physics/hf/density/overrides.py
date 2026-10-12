@@ -174,6 +174,32 @@ def torch_path(overrides: Mapping[str, object] | None) -> bool:
 FISSION_KEYS: frozenset[str] = frozenset({"fismodel", "fisbaradjust", "fishwadjust"})
 FIT_KEYS: frozenset[str] = frozenset({"aadjust", "ftable", "wtable"}) | FISSION_KEYS
 
+#: FISSBAR2 (`INCOGNITA_FISBAR_LD=1`, default OFF: the keys are rejected by `fit_params` when off, so
+#: a default run cannot carry them). TALYS's per-barrier keywords `<kw> Z A value ibar`, ibar 1-3,
+#: named `<kw>@<ibar>`; like the FISBARWIRE keys they reach only the fission chain
+#: (`FissionChain.params`), whose barrier level densities (ibar > 0) nothing else reads.
+#:   fisbaradjust@i, fishwadjust@i  multiply barrier i's height / curvature (input_fissionpar.f90)
+#:   ctable@i, ptable@i             SET barrier i's table-level-density shifts (input_densitypar.f90:
+#:                                  347/356): rho x exp(ctable sqrt(E - ptable)), ldmodel 4-7. TALYS
+#:                                  never applies `ctableadjust` above ibar 0 (densitypar.f90:295),
+#:                                  which is why FISSBAR's barrier `ctableadjust` probe was inert.
+#:   s2adjust@i                     SET barrier i's spin-cutoff scaling; under the tables it reshapes
+#:                                  the barrier's J distribution (densitytable.f90:175), the table
+#:                                  analogue of the moment of inertia
+#:   rtransmom@i, krotconstant@i    SET barrier i's moment-of-inertia factor / rotational enhancement
+#:                                  (analytical models, ldmodel 1-3; inert on a table barrier, as in TALYS)
+#:   rclass2mom@i                   SET the class-II-well moment-of-inertia factor (flagclass2 only)
+FISBAR_LD_BASE: tuple[str, ...] = ("fisbaradjust", "fishwadjust", "ctable", "ptable", "s2adjust",
+                                   "rtransmom", "krotconstant", "rclass2mom")
+FISBAR_LD_KEYS: frozenset[str] = frozenset(f"{k}@{i}" for k in FISBAR_LD_BASE for i in (1, 2, 3))
+_FISBAR_LD_MULT = ("fisbaradjust", "fishwadjust")
+
+
+def fisbar_ld_on() -> bool:
+    import os
+
+    return os.environ.get("INCOGNITA_FISBAR_LD", "0") == "1"
+
 
 def fit_params(items) -> tuple[tuple[str, int, int, float], ...]:
     """A parameter set in canonical form: lowercase keyword, int Z and A, float value, sorted.
@@ -185,7 +211,7 @@ def fit_params(items) -> tuple[tuple[str, int, int, float], ...]:
     for it in items or ():
         k, z, a, v = it
         k = str(k).lower()
-        if k not in FIT_KEYS:
+        if k not in FIT_KEYS and not (k in FISBAR_LD_KEYS and fisbar_ld_on()):
             raise KeyError(f"parameter set: {k!r} is not one of {sorted(FIT_KEYS)}")
         if isinstance(v, torch.Tensor):
             raise TypeError(f"parameter set: {k} {z} {a} is a tensor; use set_param_overrides / "
@@ -251,13 +277,13 @@ def with_aadjust(params, options, entries) -> object:
 
 
 def fission_entries(fit) -> tuple:
-    """The `FISSION_KEYS` entries of a canonical parameter set."""
-    return tuple(e for e in fit or () if e[0] in FISSION_KEYS)
+    """The `FISSION_KEYS` (and FISSBAR2 `FISBAR_LD_KEYS`) entries of a canonical parameter set."""
+    return tuple(e for e in fit or () if e[0] in FISSION_KEYS or e[0] in FISBAR_LD_KEYS)
 
 
 def without_fission(fit) -> tuple:
-    """A canonical parameter set without its `FISSION_KEYS` entries."""
-    return tuple(e for e in fit or () if e[0] not in FISSION_KEYS)
+    """A canonical parameter set without its `FISSION_KEYS` / `FISBAR_LD_KEYS` entries."""
+    return tuple(e for e in fit or () if e[0] not in FISSION_KEYS and e[0] not in FISBAR_LD_KEYS)
 
 
 def with_fission_adjust(params, options, fit) -> object:
@@ -283,6 +309,21 @@ def with_fission_adjust(params, options, fit) -> object:
         if t is None:
             t = new[k] = params.values[k].clone()
         t[zix + spec.offsets[0], nix + spec.offsets[1], 1 + spec.offsets[2]:] = float(v)
+    # FISSBAR2 per-barrier keys, after the tied ones (a per-barrier factor multiplies the tied value)
+    for k, z, a, v in fit or ():
+        if k not in FISBAR_LD_KEYS:
+            continue
+        kw, ib = k.split("@")
+        spec = PARAM_SPECS[kw]
+        zix, nix = options.Zinit - int(z), options.Ninit - (int(a) - int(z))
+        (zlo, zhi), (nlo, nhi), (blo, bhi) = spec.dims
+        if not (zlo <= zix <= zhi and nlo <= nix <= nhi and blo <= int(ib) <= bhi):
+            continue
+        t = new.get(kw)
+        if t is None:
+            t = new[kw] = params.values[kw].clone()
+        i = (zix + spec.offsets[0], nix + spec.offsets[1], int(ib) + spec.offsets[2])
+        t[i] = t[i] * float(v) if kw in _FISBAR_LD_MULT else float(v)
     return Params({**params.values, **new}) if new else params
 
 
@@ -307,7 +348,7 @@ def gamma_fit_overrides(tok: tuple | None, gammax: int) -> dict | None:
     return out or None
 
 
-__all__ = ["DENSITY_KEYS", "FISSION_KEYS", "FIT_KEYS", "OPTICAL_KEYS", "aadjust_entries", "check",
+__all__ = ["DENSITY_KEYS", "FISBAR_LD_KEYS", "FISSION_KEYS", "FIT_KEYS", "fisbar_ld_on", "OPTICAL_KEYS", "aadjust_entries", "check",
            "fission_entries", "fit_params", "fit_subset", "fit_value", "gamma_fit_overrides",
            "gamma_token", "ld_token", "merge", "token", "torch_path", "with_aadjust",
            "with_fission_adjust", "without_fission"]

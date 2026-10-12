@@ -37,6 +37,8 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
+import os
+
 import numpy as np
 import torch
 from torch import Tensor
@@ -54,12 +56,18 @@ f32 = np.float32
 f64 = np.float64
 
 # A0_talys_mod.f90 dimensions
-NUMEN = 260  # A0_talys_mod.f90:59
+NUMEN = int(os.environ.get("INCOGNITA_NUMEN", "260"))  # A0_talys_mod.f90:59; INCOGNITA_NUMEN (PECOLLAPSE): larger only for refined-segment reference runs
 NUMENIN = 600  # A0_talys_mod.f90:31
 NUMENLOW = 20  # A0_talys_mod.f90:99
 NUMLEV = 40  # A0_talys_mod.f90:43
 NUMBINS = 20 * (6 - 1)  # A0_talys_mod.f90:66, memorypar = 6
 NUMEX = NUMLEV + NUMBINS  # A0_talys_mod.f90:67
+# SNBIN: allocation cap of the residual excitation grid (and of the pre-equilibrium spin-factor rows in
+# emission.binary), larger than TALYS's numex so `bins` up to NUMBINS_ALLOC works on every path. Arrays are
+# returned trimmed to maxex, so at the default `bins 40` nothing downstream changes (OFF bit-identical).
+# NUMEX itself is kept: `bins 0` and radwidtheory's grid depend on it.
+NUMBINS_ALLOC = 300  # SNBIN3: 200 -> 300 so `bins 240` (+ window sub-bins) fits; arrays trimmed to maxex
+NUMEX_ALLOC = NUMLEV + NUMBINS_ALLOC
 NUMJ = 40  # A0_talys_mod.f90:68
 
 # input_numerics.f90 / input_basicpar.f90 defaults this module needs until input.defaults lands
@@ -732,6 +740,9 @@ def excitation_energies(
     aix: int,
     flagequi: bool = FLAGEQUI_DEFAULT,
     etotal_mev: float | None = None,
+    thresholds_mev=None,
+    snwin: int = 0,
+    adapt=None,
 ) -> tuple[np.ndarray, np.ndarray, int]:
     """Excitation energies `Ex(0:maxex)` and bin widths `deltaEx` of one residual
     (exgrid.f90:141-181): the discrete levels 0..NL (stopping at the first level at or above
@@ -745,15 +756,19 @@ def excitation_energies(
     TALYS: exgrid.f90:1 (exgrid)
     Test: A-grid
     """
+    if thresholds_mev:  # SNBIN (`snbin y`): the numpy body pins continuum edges at the thresholds
+        return _excitation_energies(edis_mev, nlast, exmax_mev, nbins, aix, flagequi, etotal_mev,
+                                    thresholds_mev, snwin, adapt)
     got = exgrid_nx2.excitation_energies(edis_mev, nlast, exmax_mev, nbins, aix, flagequi,
-                                         etotal_mev, NUMEX)
+                                         etotal_mev, NUMEX_ALLOC)
     if got is not None:
         return got
     return _excitation_energies(edis_mev, nlast, exmax_mev, nbins, aix, flagequi, etotal_mev)
 
 
 def _excitation_energies(edis_mev, nlast: int, exmax_mev: float, nbins: int, aix: int,
-                         flagequi: bool = FLAGEQUI_DEFAULT, etotal_mev: float | None = None):
+                         flagequi: bool = FLAGEQUI_DEFAULT, etotal_mev: float | None = None,
+                         thresholds_mev=None, snwin: int = 0, adapt=None):
     """`excitation_energies`' reference body (numpy, single precision).
 
     TALYS: exgrid.f90:1 (exgrid)
@@ -761,8 +776,8 @@ def _excitation_energies(edis_mev, nlast: int, exmax_mev: float, nbins: int, aix
     """
     ed = np.zeros(max(len(edis_mev), nlast + 2, 2), f32)
     ed[: len(edis_mev)] = np.asarray(edis_mev, dtype=f32)
-    ex = np.zeros(NUMEX + 2, f32)
-    dex = np.zeros(NUMEX + 1, f32)
+    ex = np.zeros(NUMEX_ALLOC + 2, f32)
+    dex = np.zeros(NUMEX_ALLOC + 1, f32)
     emax = f32(exmax_mev)
     half = f32(0.5)
     # the discrete levels, elementwise (the same single-precision operations as the loop)
@@ -792,12 +807,377 @@ def _excitation_energies(edis_mev, nlast: int, exmax_mev: float, nbins: int, aix
         lb, le = np.log(eb), np.log(ee)
         for i in range(nexbins + 1):
             eup[i] = np.exp(f32(lb + f32(i) / f32(nexbins) * (le - lb)))
+    if adapt is not None:  # BINCONV (`binconv y`): graded continuum mesh, edges at every knot
+        eup = binconv_edges(eb, ee, nexbins, thresholds_mev or (), *adapt[:5], chain_mev=adapt[5], amass=adapt[6],
+                            fis_mev=adapt[7])
+    if thresholds_mev:
+        if adapt is None:
+            eup = snbin_edges(eup, thresholds_mev)
+        if snwin > 0:  # SNBIN3 (`snbin w`): >= snwin bins inside every open window [S(type), Exmax]
+            eup = snbin_window_edges(eup, thresholds_mev, snwin)
+        nexbins = eup.size - 1
     ex[nlast + 1 : nlast + nexbins + 1] = half * (eup[:-1] + eup[1:])
     dex[nlast + 1 : nlast + nexbins + 1] = eup[1:] - eup[:-1]
     maxex = nlast + nexbins
     if etotal_mev is not None:
         ex[maxex + 1] = f32(etotal_mev)
     return ex[: maxex + 2].astype(f64), dex[: maxex + 1].astype(f64), maxex
+
+
+SNBIN_ENV = "INCOGNITA_SNBIN"
+
+
+SNBIN_WINDOW_MIN = 24  # SNBIN3 (`snbin w`): minimum continuum bins inside an open emission window (design study development notes: 3 leaves (n,2n) +4 %, 12-24 converge to <=0.6 %)
+
+
+def snbin_mode(options=None) -> str:
+    """SNBIN mode "n" | "y" | "w" from keyword `snbin` (env `INCOGNITA_SNBIN` when the keyword is off).
+    `w` (SNBIN3) = `y` + at least SNBIN_WINDOW_MIN bins inside every open window [S(type), Exmax]
+    (`snbin_window_edges`).
+
+    Test: tests/hf/test_snbin.py
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    """
+    import os
+
+    v = str(getattr(options, "snbin", "n") or "n").strip().lower()
+    if v in ("n", "0", ""):
+        v = os.environ.get(SNBIN_ENV, "").strip().lower()
+    if v in ("y", "1", "on"):
+        return "y"
+    if v in ("w", "window"):
+        return "w"
+    if v in ("", "n", "0", "off"):
+        return "n"
+    raise ValueError(f"snbin: unknown value {v!r} (n|y|w)")
+
+
+def snbin_window_min(options=None) -> int:
+    """SNBIN3: minimum bins per open window for `snbin w`: keyword `snbinwmin` (numerics only).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    return int(getattr(options, "snbinwmin", SNBIN_WINDOW_MIN) or SNBIN_WINDOW_MIN)
+
+
+def snbin_on(options=None) -> bool:
+    """SNBIN (off by default): keyword `snbin n|y|w` (env `INCOGNITA_SNBIN`, used when the keyword is off).
+
+    `n` = TALYS: the residual continuum is `nexbins` equidistant (or logarithmic) bins between Ex(NL)
+    and Exmax (exgrid.f90:186-203) with no edge at the residual's particle separation energies, so a
+    bin that straddles S(type) decays as a whole from its midpoint: densprepare.f90:213-240 weights the
+    partly-open transitions by Rboundary (the open fraction of the mother bin) inside the WIDTH, so once
+    Rboundary * Gamma_type >> Gamma_gamma the closed part of the bin emits the particle too.
+    `y` puts a continuum edge at every S(Zix, Nix, type), type = n, p, d, t, h, a, inside the
+    continuum (`snbin_edges`), so no bin straddles an emission threshold. Parameter-free.
+
+    Test: tests/hf/test_snbin.py
+    """
+    return snbin_mode(options) != "n"
+
+
+def snbin_edges(eup: np.ndarray, thresholds_mev) -> np.ndarray:
+    """SNBIN: continuum bin edges `eup` (float32, increasing) with an edge at every threshold strictly
+    inside (eup[0], eup[-1]). Each threshold moves the NEAREST free interior edge onto itself (bin count
+    unchanged, neighbouring widths within [w/2, 3w/2]); if that edge is an end point or already pinned by
+    another threshold, the threshold is inserted as a new edge (+1 bin). Pure bookkeeping, no parameter.
+
+    Test: tests/hf/test_snbin.py
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    """
+    e = [f32(x) for x in eup]
+    pinned = {0, len(e) - 1}
+    for s in sorted({f32(t) for t in thresholds_mev}):
+        if not (e[0] < s < e[-1]):
+            continue
+        if s in e:
+            pinned.add(e.index(s))
+            continue
+        i = min(range(len(e)), key=lambda k: (abs(float(e[k]) - float(s)), k))
+        if i not in pinned:
+            e[i] = s
+            pinned.add(i)
+        else:
+            j = int(np.searchsorted(np.asarray(e, f32), s))
+            e.insert(j, s)
+            pinned = {k + 1 if k >= j else k for k in pinned} | {j}
+    return np.asarray(e, f32)
+
+
+def snbin_window_edges(eup: np.ndarray, thresholds_mev, nmin: int = SNBIN_WINDOW_MIN) -> np.ndarray:
+    """SNBIN3: continuum edges `eup` (float32, increasing, thresholds already pinned by `snbin_edges`)
+    with at least `nmin` bins inside every open emission window [S, eup[-1]], S a threshold strictly
+    inside (eup[0], eup[-1]). A window holding m < nmin bins has each of its m bins split into
+    ceil(nmin / m) equal parts; bins below S are untouched, so every pinned edge stays. Windows are
+    processed from the highest threshold down. Quadrature only (the decay of a bin from its midpoint
+    over [S, Exmax] narrower than ~2 bins), no parameter.
+
+    Test: tests/hf/test_snbin.py
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    """
+    e = np.asarray(eup, f32)
+    for s in sorted({f32(t) for t in thresholds_mev}, reverse=True):
+        if not (e[0] < s < e[-1]):
+            continue
+        i = int(np.searchsorted(e, s, side="left"))  # e[i] >= s; e[i] == s once pinned
+        m = e.size - 1 - i if e[i] == s else e.size - i  # bins whose content lies in [S, top]
+        if m >= nmin:
+            continue
+        k = -(-nmin // m)
+        lo = i if e[i] == s else i - 1  # an unpinned S: split the bin containing it as well
+        new = [e[: lo + 1]]
+        for j in range(lo, e.size - 1):
+            a, b = e[j], e[j + 1]
+            new.append((a + np.arange(1, k + 1, dtype=f32) / f32(k) * (b - a)).astype(f32))
+            new[-1][-1] = b
+        e = np.concatenate(new).astype(f32)
+    return e
+
+
+BINCONV_ENV = "INCOGNITA_BINCONV"
+BINCONV_RATIO = 8.0  # BINCONV: finest width at a knot = base width / ratio (development notes design study)
+BINCONV_GROWTH = 0.3  # BINCONV: width grows by this many MeV per MeV of distance from the nearest knot
+BINCONV_CAP = 1.0  # BINCONV: widest bin = cap * the TALYS base width (Exmax - Ex(NL)) / nexbins
+BINCONV_KNOTS = "btscf"  # b = Ex(NL) (up), t = Exmax (down), s = each threshold S (up), S = each S (both sides),
+# c = each multi-chance chain threshold S_x + S_y(daughter) [+ S_z] (up), C = chain (both sides),
+# f = each fission barrier height of a fissioning nucleus (both sides); every knot is an edge
+BINCONV_KAPPA = 0.35  # BINCONV: widest bin <= kappa * T(U) (Fermi-gas temperature, a = A/8)
+BINCONV_CN = 1.0  # BINCONV: the compound nucleus gets the mesh only when Etotal - S_n(CN) >= this (MeV): keV capture untouched
+
+
+def binconv_mode(options=None) -> bool:
+    """BINCONV (off by default): keyword `binconv n|y` (env `INCOGNITA_BINCONV` when the keyword is off).
+    `y` replaces TALYS's equidistant residual continuum (exgrid.f90:186-203) by the graded mesh of
+    `binconv_edges` (implies the SNBIN threshold edges and the SNBIN3 `snbinwmin` windows), and gives the
+    compound nucleus the same mesh (with its own S edges) once its neutron window is >= `binconvcn` MeV.
+
+    Test: tests/hf/test_binconv.py
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    """
+    import os
+
+    v = str(getattr(options, "binconv", "n") or "n").strip().lower()
+    if v in ("n", "0", ""):
+        v = os.environ.get(BINCONV_ENV, "").strip().lower()
+    if v in ("y", "1", "on"):
+        return True
+    if v in ("", "n", "0", "off"):
+        return False
+    raise ValueError(f"binconv: unknown value {v!r} (n|y)")
+
+
+def binconv_params(options=None) -> tuple:
+    """(ratio, growth, cap, knots, kappa) of `binconv y` from keywords binconvr/binconvg/binconvc/binconvk/binconvt.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    g = lambda k, d: getattr(options, k, d) if getattr(options, k, None) not in (None, "", 0) else d  # noqa: E731
+    return (float(g("binconvr", BINCONV_RATIO)), float(g("binconvg", BINCONV_GROWTH)),
+            float(g("binconvc", BINCONV_CAP)), str(g("binconvk", BINCONV_KNOTS)), float(g("binconvt", BINCONV_KAPPA)))
+
+
+def binconv_edges(eb, ee, nexbins: int, thresholds_mev, ratio: float = BINCONV_RATIO,
+                  growth: float = BINCONV_GROWTH, cap: float = BINCONV_CAP, knots: str = BINCONV_KNOTS,
+                  kappa: float = 0.0, chain_mev=(), amass: int = 0, fis_mev=()) -> np.ndarray:
+    """BINCONV: graded continuum edges on [eb, ee] (float32). The emission integrand of every channel that
+    feeds or leaves this nucleus varies fastest at its knots: just above Ex(NL) (high-energy tails of the
+    emission into the residual: Coulomb-barrier penetrability and the steep low-U level density), just below
+    Exmax (the low-energy end of the evaporation spectrum, epsilon ~ T) and just above each separation energy
+    S (the open window of the next emission). Width w(x) = min(cap * w0, w0 / ratio + growth * d(x), kappa * T(x)),
+    T(x) = sqrt(max(x, 1 MeV) / (A/8)) the Fermi-gas temperature: populations and widths vary as exp(Ex / T), so the
+    midpoint rule's relative error per bin is ~ (w / T)^2 / 24 wherever the bin sits;
+    w0 = (ee - eb) / nexbins, d = distance to the nearest knot on its refined side; each segment between
+    knots gets n = ceil(int dx / w) bins placed at equal steps of int dx / w (equidistribution), so every
+    knot is an edge and the mesh is smooth. Quadrature only, no physics parameter.
+
+    Test: tests/hf/test_binconv.py
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    """
+    eb, ee = float(eb), float(ee)
+    w0 = (ee - eb) / max(int(nexbins), 1)
+    h, wmax = w0 / ratio, cap * w0
+    ths = sorted({float(f32(t)) for t in thresholds_mev if eb < float(f32(t)) < ee})
+    chs = sorted({float(f32(t)) for t in chain_mev if eb < float(f32(t)) < ee} - set(ths)) if (
+        "c" in knots or "C" in knots) else []
+    fis = sorted({float(f32(t)) for t in fis_mev if eb < float(f32(t)) < ee} - set(ths) - set(chs)) if (
+        "f" in knots) else []
+    up = ([eb] if "b" in knots else []) + (ths if ("s" in knots or "S" in knots) else []) + chs + fis
+    down = ([ee] if "t" in knots else []) + (ths if "S" in knots else []) + (chs if "C" in knots else []) + fis
+    cuts = [eb] + sorted(ths + chs + fis) + [ee]
+    out = [eb]
+    for a, b in zip(cuts[:-1], cuts[1:]):
+        x = np.linspace(a, b, 4001)
+        d = np.full_like(x, np.inf)
+        for k in up:
+            d = np.where(x >= k - 1e-12, np.minimum(d, x - k), d)
+        for k in down:
+            d = np.where(x <= k + 1e-12, np.minimum(d, k - x), d)
+        w = np.minimum(wmax, h + growth * np.where(np.isfinite(d), d, np.inf))
+        if kappa > 0 and amass > 0:  # temperature bound: w <= kappa * T(U), T = sqrt(U / a), a = A/8, U >= 1 MeV
+            w = np.minimum(w, kappa * np.sqrt(np.maximum(x, 1.0) / (amass / 8.0)))
+        inv = 1.0 / w
+        phi = np.concatenate([[0.0], np.cumsum(0.5 * (inv[1:] + inv[:-1]) * np.diff(x))])
+        n = max(1, int(np.ceil(phi[-1] - 1e-9)))
+        e = np.interp(np.arange(1, n) / n * phi[-1], phi, x)
+        out.extend(e.tolist() + [b])
+    e = np.asarray(out, f32)
+    e[0], e[-1] = f32(eb), f32(ee)
+    e = np.unique(e)
+    if e.size - 1 > NUMBINS_ALLOC - 20:
+        raise ValueError(f"binconv: {e.size - 1} continuum bins > {NUMBINS_ALLOC - 20} (lower binconvr or raise binconvg)")
+    return e
+
+
+BINQUAD_ENV = "INCOGNITA_BINQUAD"
+BINQUAD_NODES = 3  # BINQUAD: Gauss-Legendre nodes per smooth piece of the eps distribution
+BINQUAD_MTILT = 1.0  # BINQUAD: weight of the mother bin's own d ln rho / dE in its population shape (0 = uniform)
+BINQUAD_RTILT = 1.0  # BINQUAD: weight of the residual bin's d ln rho / dE (0 = uniform levels)
+
+
+def binquad_mode(options=None) -> bool:
+    """BINQUAD (off by default): keyword `binquad n|y` (env `INCOGNITA_BINQUAD` when the keyword is off).
+    `y` replaces densprepare's midpoint transmission T_l(eps_mid) and triangle Rboundary of every particle
+    exit (primary and cascade, continuum and discrete rows) by a Gauss-Legendre average of T_l over the
+    population-weighted eps distribution of the mother bin x residual bin (native/binquad.h): level
+    densities rho(y) ~ exp(beta y), mother population ~ exp(alpha x), slopes from each nucleus's own
+    rhogrid. Photon exits keep TALYS's numbers. Native engine (engine_c / nativex) only: the Python
+    reference paths refuse it.
+
+    Test: tests/hf/test_binquad.py
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    """
+    import os
+
+    v = str(getattr(options, "binquad", "n") or "n").strip().lower()
+    if v in ("n", "0", ""):
+        v = os.environ.get(BINQUAD_ENV, "").strip().lower()
+    if v in ("y", "1", "on"):
+        return True
+    if v in ("", "n", "0", "off"):
+        return False
+    raise ValueError(f"binquad: unknown value {v!r} (n|y)")
+
+
+def binquad_params(options=None) -> tuple:
+    """(nodes, mother tilt, residual tilt, sub-points) of `binquad y` from keywords
+    binquadq/binquadm/binquadr/binquads. Mother tilt -1 = the mother as a point at its centre, -2 = at its
+    rho-weighted centroid; residual tilt < 0 = no transmission quadrature; sub-points S > 1 = each mother
+    bin decays from S Gauss-Legendre points of the bin (uniform population, weights w_q / 2), each with
+    its own branching ratios.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    def g(k, d):
+        v = getattr(options, k, None)
+        return d if v is None or v == "" else v
+
+    return (int(g("binquadq", BINQUAD_NODES)), float(g("binquadm", BINQUAD_MTILT)),
+            float(g("binquadr", BINQUAD_RTILT)), int(g("binquads", 1)))
+
+
+def binquad_sub(options=None) -> int:
+    """BINQUAD sub-points per mother bin (1 = off).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    return binquad_params(options)[3] if binquad_mode(options) else 1
+
+
+def binquad_photon(options=None) -> int:
+    """BINQUAD2: Gauss-Legendre nodes of the photon-exit quadrature over each residual continuum bin
+    (keyword `binquadp`, rho-tilted like the particle exits; 0 = TALYS's bin-centre Egamma).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    if not binquad_mode(options):
+        return 0
+    q = int(getattr(options, "binquadp", 0) or 0)
+    return q if 0 < q <= 4 else 0
+
+
+def binquad_wkb(options=None) -> int:
+    """BINQUAD4: nodes of the WKB fission-penetrability table (keyword `binquadw`; 0 = TALYS).
+
+    wkb.f90 tabulates T_WKB(U) at nbinswkb = nbins0 energies (3/4 of them up to the highest barrier,
+    then 0.2 MeV steps) and twkbint interpolates it log-linearly, so the sub-barrier fission width
+    of every fissioning nucleus moves with the continuum bin count `bins`: at 40 bins the nodes are
+    ~0.2 MeV apart, comparable to hbar*omega/2pi, the scale on which T_WKB changes by e. `binquadw N`
+    builds the table with N nodes whatever `bins` is (only under `binquad y`).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    if not binquad_mode(options):
+        return 0
+    n = int(getattr(options, "binquadw", 0) or 0)
+    return n if n >= 4 else 0
+
+
+def binquad_knots(options=None) -> int:
+    """BINQUAD2: `binquadk` bitmask of the in-bin knots that cut a mother bin into smooth pieces.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    return int(getattr(options, "binquadk", 0) or 0) if binquad_mode(options) else 0
+
+
+def binquad_sync(options=None) -> None:
+    """Push `binquad` (on/off, nodes, tilts) into the native kernels' globals before a native decay call.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    from physics.hf.native import nativex
+
+    on = binquad_mode(options)
+    q, mt, rt, sub = binquad_params(options) if on else (BINQUAD_NODES, BINQUAD_MTILT, BINQUAD_RTILT, 1)
+    so = nativex.lib()
+    if so is not None:
+        if not hasattr(so, "nx_set_binquad"):
+            if on:
+                raise RuntimeError("binquad: libnativex.so has no nx_set_binquad (rebuild)")
+        else:
+            import ctypes
+
+            f = so.nx_set_binquad
+            f.argtypes = [ctypes.c_int64, ctypes.c_int64, ctypes.c_double, ctypes.c_double]
+            f.restype = None
+            f(int(on), int(q), float(mt), float(rt))
+            if hasattr(so, "nx_set_binquad_sub"):
+                fs = so.nx_set_binquad_sub
+                fs.argtypes = [ctypes.c_int64]
+                fs.restype = None
+                fs(int(sub) if on else 1)
+            elif on and sub > 1:
+                raise RuntimeError("binquad: libnativex.so has no nx_set_binquad_sub (rebuild)")
+    from physics.hf import engine_c
+
+    ce = engine_c.lib()
+    if ce is not None:
+        if not hasattr(ce, "ce_set_binquad"):
+            if on:
+                raise RuntimeError("binquad: libengdecay.so has no ce_set_binquad (rebuild)")
+        else:
+            import ctypes
+
+            f = ce.ce_set_binquad
+            f.argtypes = [ctypes.c_int64, ctypes.c_int64, ctypes.c_double, ctypes.c_double]
+            f.restype = None
+            f(int(on), int(q), float(mt), float(rt))
+    elif on:
+        raise RuntimeError("binquad: native engine only (engine_c lib missing)")
 
 
 def excitation_bins(

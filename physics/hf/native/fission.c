@@ -356,3 +356,296 @@ int ceng_fis_bins(int64_t nb, const double *t1, const double *t2, const double *
     free(tf);
     return 0;
 }
+
+/* ---------------------------------------------------------------------------------------------
+ * FISSC: ceng_fis_grid2 / ceng_fis_weights2, ceng_fis_grid / ceng_fis_weights with fewer exp/log.
+ * Held to closeness (development notes), not bits; HF_NX2_FISSC=0 runs the kernels above.
+ *
+ * Grid: along the ascending grid points the tabulated density's log-linear interpolation
+ * exp(lb + frac (le - lb)) stays in one table interval for many points, and frac advances by the same
+ * step (the points are dex/2 apart). Each column's exp is taken exactly at the first point of an
+ * interval and at every FISSC_ANCHOR-th point after, and multiplied by q = exp(dfrac (le - lb))
+ * (taken once per interval) in between. The density's logarithm is not log(v): log(rho) is the
+ * exponent expo + lb + frac (le - lb) the density was built from, and log(v) = log(rho) + log1p of
+ * the 1e-10 shift's share (a two-term series when that share is below 1e-6, else log(v) itself).
+ * The floor, the linear branch (an entry <= 1) and the copied columns are as ceng_fis_grid.
+ * Weights: twkbint's exp(la + fac (lb - la)) along the triples, within one WKB interval, by the same
+ * recurrence (fac falls by the same step per triple; any other step re-anchors). */
+#define FISSC_ANCHOR 16
+#define FISSC_SERIES 1.0e-6
+#define FISSC_FLAT 1.0e-4
+
+typedef struct {
+    int64_t i;      /* table interval of the previous point, -1: none */
+    double frac;    /* its frac */
+    double dfrac;   /* the step q was built for, 0: q not built */
+    int64_t n;      /* points since the last exact exp */
+} gwalk;
+
+static void point2(const double *edens, int64_t nendens, double edensmax, const double *ldtable,
+                   const double *lgtable, int64_t nj, double ct, double pt, double eex,
+                   const int64_t *jidx, int64_t nJ, int edge, const double *floorv,
+                   const double *floorlg, double lg1eps, double hstep, gwalk *w, double *tcur,
+                   double *q, double *val, double *lg)
+{
+    double eshift = eex - pt;
+    int valid = (eex >= 0.0) && (eshift > 0.0);
+    double x = valid ? eshift : 1.0;
+    int64_t i = table_index(edens, nendens, edensmax, x);
+    double eb = edens[i], ee = edens[i + 1];
+    double frac = (x - eb) / (ee - eb);
+    double expo = ct * sqrt(valid ? eshift : 0.0);
+    if (expo > 80.0)
+        expo = 80.0;
+    double enh = exp(expo);
+    /* the log change of a column over one grid step is sf (le - lb); below FISSC_FLAT the slopes'
+     * divisions by neighbouring logs would amplify the recurrence's and the series' last bits, so
+     * that column takes exp and log exactly (a flat column: the 1e-10 shift sets the slopes) */
+    double sf = hstep / (ee - eb);
+    /* exact: a new interval, an invalid point, or the anchor count reached */
+    int same = valid && w->i == i && w->n < FISSC_ANCHOR;
+    int build_q = 0;
+    double dfrac = frac - w->frac;
+    if (same) {
+        if (w->dfrac == 0.0) {
+            build_q = 1;
+        } else if (fabs(dfrac - w->dfrac) > 1.0e-13 * fabs(w->dfrac) + 1.0e-300) {
+            same = 0; /* a step other than the one q was built for */
+        }
+    }
+    for (int64_t b = 0; b < nJ; b++) {
+        if (b > 0 && jidx[b] == jidx[b - 1]) {
+            for (int64_t c = 0; c < 2; c++) {
+                val[b * 2 + c] = val[(b - 1) * 2 + c];
+                lg[b * 2 + c] = lg[(b - 1) * 2 + c];
+            }
+            continue;
+        }
+        for (int64_t c = 0; c < 2; c++) {
+            int64_t kb = (i * nj + jidx[b]) * 2 + c;
+            int64_t ke = ((i + 1) * nj + jidx[b]) * 2 + c;
+            int64_t o = b * 2 + c;
+            double ldb = ldtable[kb], lde = ldtable[ke];
+            if (c == 1 && ldb == ldtable[kb - 1] && lde == ldtable[ke - 1]) {
+                val[o] = val[o - 1];
+                lg[o] = lg[o - 1];
+                continue;
+            }
+            double t, L = 0.0;
+            int logbranch = ldb > 1.0 && lde > 1.0;
+            int fast = 0;
+            if (logbranch) {
+                double lb = lgtable[kb], le = lgtable[ke];
+                L = lb + frac * (le - lb);
+                fast = fabs(sf * (le - lb)) > FISSC_FLAT;
+                if (same && fast) {
+                    if (build_q)
+                        q[o] = exp(dfrac * (le - lb));
+                    t = tcur[o] * q[o];
+                } else {
+                    t = exp(L);
+                }
+                tcur[o] = t;
+            } else {
+                t = ldb + frac * (lde - ldb);
+            }
+            double rho = valid ? enh * t : 0.0;
+            if (rho < 1.0e-30) {
+                val[o] = floorv[edge];
+                lg[o] = floorlg[edge];
+                continue;
+            }
+            double v = edge ? rho * (1.0 + EPS_FIS) + EPS_FIS : rho + EPS_FIS;
+            val[o] = v;
+            if (fast) {
+                double y = edge ? EPS_FIS / (rho * (1.0 + EPS_FIS)) : EPS_FIS / rho;
+                if (y < FISSC_SERIES) {
+                    double lr = expo + L;
+                    lg[o] = (edge ? lr + lg1eps : lr) + y * (1.0 - 0.5 * y);
+                    continue;
+                }
+            }
+            lg[o] = log(v);
+        }
+    }
+    if (!valid) {
+        w->i = -1;
+        w->dfrac = 0.0;
+        w->n = 0;
+    } else if (same) {
+        if (build_q)
+            w->dfrac = dfrac;
+        w->n++;
+    } else {
+        if (w->i != i)
+            w->dfrac = 0.0; /* a new interval: q is built at its second point */
+        w->n = 1;
+    }
+    w->i = i;
+    w->frac = frac;
+}
+
+int64_t ceng_fis_grid2(const double *edens, int64_t nendens, double edensmax,
+                       const double *ldtable, const double *lgtable, int64_t nj, double ct,
+                       double pt, double elowest, double exfis_top, const int64_t *jidx,
+                       int64_t nJ, double dexmin, int64_t numbinfis, double *elow, double *emid,
+                       double *eup, double *A, double *B, int64_t smax)
+{
+    int64_t nj2 = 2 * nJ;
+    double exfis = exfis_top - elowest;
+    int64_t nbin = numbinfis / 2;
+    if (exfis <= 0.0) {
+        if (nbin < 2)
+            return 0;
+        if (smax < 1)
+            return -1;
+        elow[0] = emid[0] = eup[0] = 0.0;
+        memset(A, 0, (size_t)nj2 * sizeof(double));
+        memset(B, 0, (size_t)nj2 * sizeof(double));
+        return 1;
+    }
+    double dex = exfis / (double)nbin;
+    if (dex < dexmin) {
+        nbin = (int64_t)(exfis / dexmin);
+        if (nbin < 1)
+            nbin = 1;
+        dex = exfis / (double)nbin;
+    }
+    int64_t S = nbin - 1;
+    if (S <= 0)
+        return 0;
+    if (S > smax)
+        return -1;
+    double *buf = (double *)malloc((size_t)(8 * nj2) * sizeof(double));
+    if (buf == NULL)
+        return -1;
+    double *v1 = buf, *l1 = buf + nj2, *v2 = buf + 2 * nj2, *l2 = buf + 3 * nj2;
+    double *v3 = buf + 4 * nj2, *l3 = buf + 5 * nj2, *tcur = buf + 6 * nj2, *q = buf + 7 * nj2;
+    double half = 0.5 * dex;
+    double floorv[2] = {1.0e-30 + EPS_FIS, 1.0e-30 * (1.0 + EPS_FIS) + EPS_FIS};
+    double floorlg[2] = {log(floorv[0]), log(floorv[1])};
+    double lg1eps = log1p(EPS_FIS);
+    gwalk w = {-1, 0.0, 0.0, 0};
+    double e_edge = elowest + dex * 0.0;
+    point2(edens, nendens, edensmax, ldtable, lgtable, nj, ct, pt, e_edge, jidx, nJ, 1, floorv,
+           floorlg, lg1eps, half, &w, tcur, q, v1, l1);
+    for (int64_t s = 0; s < S; s++) {
+        double e1 = elowest + dex * (double)s;
+        double e2 = e1 + half;
+        double e3 = elowest + dex * (double)(s + 1);
+        elow[s] = e1;
+        emid[s] = e2;
+        eup[s] = e3;
+        point2(edens, nendens, edensmax, ldtable, lgtable, nj, ct, pt, e2, jidx, nJ, 0, floorv,
+               floorlg, lg1eps, half, &w, tcur, q, v2, l2);
+        point2(edens, nendens, edensmax, ldtable, lgtable, nj, ct, pt, e3, jidx, nJ, 1, floorv,
+               floorlg, lg1eps, half, &w, tcur, q, v3, l3);
+        double *a = A + s * nj2, *bb = B + s * nj2;
+        for (int64_t c = 0; c < nj2; c++) {
+            if (l2[c] != l1[c] && l2[c] != l3[c]) {
+                a[c] = (v1[c] - v2[c]) / (l1[c] - l2[c]);
+                bb[c] = (v2[c] - v3[c]) / (l2[c] - l3[c]);
+            } else {
+                a[c] = v2[c];
+                bb[c] = v2[c];
+            }
+        }
+        double *t = v1;
+        v1 = v3;
+        v3 = t;
+        t = l1;
+        l1 = l3;
+        l3 = t;
+    }
+    free(buf);
+    return S;
+}
+
+/* ceng_fis_weights with twkbint's exp by recurrence along the triples (mode 1); mode 0 as is.
+ * Rows are written only up to their last active triple plus the zeros the caller's blocks read:
+ * the whole row is zeroed as in ceng_fis_weights. */
+int ceng_fis_weights2(const double *elow, const double *e1, const double *e2, int64_t S,
+                      double fecont, const double *eex, int64_t n, int64_t mode, double bfis,
+                      double wfis, double twopi, const double *uwkb, const double *twkb,
+                      int64_t nbins, double *W1, double *W2)
+{
+    if (mode != 1)
+        return ceng_fis_weights(elow, e1, e2, S, fecont, eex, n, mode, bfis, wfis, twopi, uwkb,
+                                twkb, nbins, W1, W2);
+    if (uwkb == NULL || twkb == NULL || nbins < 1)
+        return -1;
+    for (int64_t k = 0; k < n; k++) {
+        double *w1 = W1 + k * S, *w2 = W2 + k * S;
+        double x = eex[k];
+        memset(w1, 0, (size_t)S * sizeof(double));
+        memset(w2, 0, (size_t)S * sizeof(double));
+        if (!(x >= fecont))
+            continue;
+        int64_t m = nbins;
+        int64_t pj = -1, cnt = 0;
+        double pfac = 0.0, dfac = 0.0, q = 0.0, tprev = 0.0;
+        for (int64_t s = 0; s < S; s++) {
+            if (!(elow[s] <= x))
+                break;
+            double emid = e1[s] < x ? e1[s] : x;
+            double eup = e2[s] < x ? e2[s] : x;
+            double ee = x - emid;
+            while (m >= 0 && !(uwkb[m] <= ee))
+                m--;
+            int64_t j;
+            if (ee == uwkb[0])
+                j = 0;
+            else if (ee == uwkb[nbins])
+                j = nbins - 1;
+            else
+                j = m;
+            if (j < 0)
+                j = 0;
+            if (j > nbins - 1)
+                j = nbins - 1;
+            double ea = uwkb[j], eb = uwkb[j + 1], ta = twkb[j], tb = twkb[j + 1];
+            int flat = ea == eb;
+            double t1;
+            if (ee > uwkb[nbins]) { /* twkbint_at's last override */
+                t1 = 1.0;
+                pj = -1;
+            } else if (flat) {
+                t1 = ta;
+                pj = -1;
+            } else if (ta > 0 && tb > 0) {
+                double la = twkb[nbins + 1 + j], lb = twkb[nbins + 2 + j];
+                double fac = (ee - ea) / (eb - ea);
+                int rec = 0;
+                if (j == pj && cnt < FISSC_ANCHOR) {
+                    double d = fac - pfac;
+                    if (dfac == 0.0) {
+                        q = exp(d * (lb - la));
+                        dfac = d;
+                        rec = d != 0.0;
+                    } else if (fabs(d - dfac) <= 1.0e-13 * fabs(dfac)) {
+                        rec = 1;
+                    }
+                }
+                if (rec) {
+                    t1 = tprev * q;
+                    cnt++;
+                } else {
+                    t1 = exp(la + fac * (lb - la));
+                    if (j != pj)
+                        dfac = 0.0;
+                    cnt = 1;
+                }
+                pj = j;
+                pfac = fac;
+                tprev = t1;
+            } else {
+                double fac = (ee - ea) / (eb - ea);
+                t1 = ta + fac * (tb - ta);
+                pj = -1;
+            }
+            w1[s] = (emid - elow[s]) * t1;
+            w2[s] = (eup - emid) * t1;
+        }
+    }
+    return 0;
+}

@@ -49,10 +49,11 @@ from dataclasses import dataclass, field
 import torch
 from torch import Tensor
 
+from physics.hf import engphys
 from physics.hf.core.tensors import DTYPE
 
 NUMJ = 40  # A0_talys_mod.f90:  numJ = 40
-NUMEX = 80  # A0_talys_mod.f90:67, numex = numlev + numbins
+from physics.hf.core.grids import NUMEX_ALLOC as NUMEX  # SNBIN: was 80 (< grids' numex 140): `bins` > ~48 overflowed sfactor
 MAXJPH = 30  # preeqinit.f90: maxJph, the pre-equilibrium spin ceiling
 PARDIS = 0.5  # constants.f90:158
 
@@ -184,8 +185,10 @@ def bin_spin_cutoff(ld, ex_mev: Tensor) -> tuple[Tensor, Tensor]:
     """
     from physics.hf.density.parameters import ignatyuk, spincut
 
+    from physics.hf.density import spinquench as _sq
+
     ald = ignatyuk(ld, ex_mev, 0)
-    return ald, spincut(ld, ald, ex_mev, 0, 0)
+    return ald, _sq.quench_t(ld, ex_mev, spincut(ld, ald, ex_mev, 0, 0), 0)  # SPINQUENCH (OFF: unchanged)
 
 
 def binary(inp: BinaryInputs, state: BinaryState | None = None, device=None) -> BinaryResult:
@@ -269,6 +272,8 @@ def binary(inp: BinaryInputs, state: BinaryState | None = None, device=None) -> 
                 wig = spindis(g.spincut[sl][:, None], jj[None, :]) * PARDIS
                 use_sf = (inp.pespinmodel == 1) & (new > 0.0)
                 spread = torch.where(use_sf, new, wig[:, :, None])
+                if engphys.on("pespin"):  # ENGPHYS: the bin gets exactly its pre-equilibrium flux
+                    spread = engphys.spread_norm_torch(spread, None)
                 add = spread * ppx[sl][:, None, None]
                 pop[sl, :mj, :] = pop[sl, :mj, :] + add
                 pex[sl] = pex[sl] + ppx[sl]

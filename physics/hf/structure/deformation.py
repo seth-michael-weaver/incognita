@@ -35,6 +35,7 @@ What deformpar.f90 does (reproduced branch by branch)
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass
 from functools import cache
 from typing import TYPE_CHECKING
@@ -94,6 +95,7 @@ class Deformation:
     ndef: int
     irigid0: float
     irigid: tuple[float, ...]  # (numbar+1,)
+    weakcc: bool = False  # WEAKCPL: odd target run as weak-coupling CC (collrule svw/svwa); default TALYS
 
 
 def _natpar(j: float) -> int:
@@ -124,6 +126,12 @@ def deformation(
     c = talys_constants()
     Zix, Nix = options.Zinit - Z, options.Ninit - (A - Z)
     N = A - Z
+    if flagautorot is None:
+        # FIXDWBA (INCOGNITA_DWBAUNIT, default off): a spherical target whose DWBA exceeds sigma_R
+        # is solved as TALYS's automatic rotor (physics/hf/direct/dwbaunit.py)
+        from physics.hf.direct.dwbaunit import autorot_for
+
+        flagautorot = autorot_for(Z, A, options)
     autorot = options.flagautorot if flagautorot is None else flagautorot
     flagspher = options.flagspher
     k0 = options.k0
@@ -163,6 +171,23 @@ def deformation(
     ndef = 0
 
     block = read_deformation_file(Z, A) if options.disctable != 3 else None
+    # COLLRULE (off by default): the target's scheme from measured structure (physics.hf.structure.collrule)
+    from physics.hf.structure import collrule as _collrule
+
+    rule = _collrule.target_letter(Z, A, options) if options.disctable != 3 and not flagspher else None
+    force_rot = False
+    if rule == "S" and block is not None:
+        block = ("S", block[1], block[2])  # the target's block read as `spherical y` reads it
+    elif rule == "V":
+        vb = _collrule.vib_block(Z, A, block, jdis, parlev, n_all)
+        block = vb if vb is not None else block
+    elif rule == "W":  # WEAKCPL: odd-A weak-coupling CC (collrule.weak_block)
+        wb = _collrule.weak_block(Z, A, block, jdis, parlev, edis, n_all)
+        block = wb if wb is not None else block
+    elif rule == "R" and (block is None or block[0] not in ("R", "A")):
+        # TALYS's autorot band construction, without its A/magic-distance test; a band incomplete in the level file leaves the
+        # target untouched (autorot's partial side effects on an S target are not taken over by the rule)
+        force_rot = _collrule.band_complete(jdis, parlev, A, maxrot, n_all)
     if block is not None:
         colltype1, deftype1, rows = block
         if colltype1 not in ("R", "A", "V"):
@@ -222,7 +247,7 @@ def deformation(
         distance = min(abs(Z - m), distance)
     odd = A % 2
     skip_to_400 = False
-    if colltype == "S" and not flagspher and A > 150 and distance >= 8 and autorot:
+    if colltype == "S" and not flagspher and ((A > 150 and distance >= 8 and autorot) or force_rot):
         indexlevel[1] = 0
         indexcc[1] = 0
         leveltype[0] = "R"
@@ -236,7 +261,14 @@ def deformation(
                     indexcc[i] = nex
                     leveltype[nex] = "R"
                     break
-        if indexcc[ndef] != 0:
+        # ENGAUDIT BANDCHECK (INCOGNITA_BANDCHECK=1, default OFF): TALYS tests only the LAST member; a member missing
+        # from the level list keeps indexcc = 0 and is coupled at the ground state's index, so its direct flux is
+        # removed with the elastic and lost to every channel (Lr-314 at 0.1 MeV: 2,631 of 5,227 mb). With the
+        # switch every member must be found before the nucleus is taken as a rotor.
+        complete = indexcc[ndef] != 0
+        if complete and os.environ.get("INCOGNITA_BANDCHECK", "0") == "1":
+            complete = all(indexcc[i] != 0 for i in range(2, ndef + 1))
+        if complete:
             colltype = "R"
         nrot = 2
         rotpar[1] = b2_gs
@@ -252,7 +284,10 @@ def deformation(
                 nrotlev += 1
                 if nrotlev > maxrot:
                     leveltype[nex] = "D"
-        if odd == 0:
+        # ENGPHYS `oddodd`: the vibrational systematics are an even-even phenomenon; an odd-odd nucleus's first
+        # 2+ is not a core phonon, so it is left without default collectivity, as TALYS leaves odd-A nuclei
+        from physics.hf import engphys
+        if odd == 0 and not (Z % 2 == 1 and engphys.on("oddodd")):
             first = colltype == "S"
             first2 = first3 = first4 = first
             typ = 2 * Zix + Nix
@@ -327,6 +362,7 @@ def deformation(
         ndef=ndef,
         irigid0=irigid0,
         irigid=irigid,
+        weakcc=rule == "W" and colltype == "V",
     )
 
 
@@ -409,8 +445,13 @@ def weak_coupling(
     deform = target.deform.copy()
     j0 = _F(tj[0])
     a13 = _pow32(_F(A), _F(c["onethird"]))
+    from physics.hf.structure import collrule as _collrule
+
+    skip = _collrule.core_skip(target, core_levels)  # WEAKCPL: None unless the target's multiplet is in CC
     for i in range(0, NUMLEV2 + 1):
         if i == 0:  # `i == 0 .and. type == k0`: nuclides.f90 always passes type = k0
+            continue
+        if i == skip:
             continue
         if target.leveltype[i] in ("R", "V"):
             continue

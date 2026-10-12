@@ -27,6 +27,25 @@
 #include <string.h>
 
 #define NJ 41 /* NUMJ + 1 */
+#include "binquad.h"
+
+/* ENGAUDIT TRAPFIX switch, read per walk (workers set the environment after the library is loaded) */
+static int trapfix_on(void) {
+    const char *v = getenv("INCOGNITA_TRAPFIX");
+    return v != NULL && v[0] == '1';
+}
+
+/* BINQUAD (`binquad y`): set once per run by physics.hf.core.grids.binquad_sync; 0 = TALYS */
+static int bq_on = 0, bq_q = 3, bq_sub = 1;
+static double bq_mt = 1.0, bq_rt = 1.0;
+void nx_set_binquad(int64_t on, int64_t q, double mtilt, double rtilt)
+{
+    bq_on = (int)on; bq_q = (int)q; bq_mt = mtilt; bq_rt = rtilt;
+}
+/* BINQUAD sub-points: each mother bin is S widths rows (Gauss-Legendre nodes of the bin, built by
+ * compound/widths_native.NativeWidths); nx_walk decays the bin's population on each with weight w_q / 2 */
+void nx_set_binquad_sub(int64_t sub) { bq_sub = sub > 1 && sub <= BQ_QMAX ? (int)sub : 1; }
+
 #define NHILL 20
 #define NNODE 32
 
@@ -96,6 +115,52 @@ static int ok_s(const Ty *y, int64_t l, int64_t u)
 static inline int64_t jj_of(const Ty *y, int64_t l, int64_t u)
 {
     return y->photon ? 2 * l : 2 * l + (u - 1) * y->spin2;
+}
+
+/* SPECOUT (output only): with a sink registered (nx_set_targetsink, Python's specang), nx_target hands over, per live
+ * (J2, parity) cell, what TALYS's comptarget cleg needs for the target's own discrete levels n <= tg_nlev: the cell's
+ * prefactor and Moldauer node product, the incident channels and the exit channels to those levels. Nothing is read back.
+ *   iv: 0 J2, 1 parity (-1/+1), 2 wfc, 3 na, 4 nb, 5 NNODE, 6 elastic (lt live), 7 lt
+ *   dv: 0 pref = cn (J2+1) / denom, 1 denom
+ *   pv: 0 l_in, 1 j2_in (int64, na), 2 tinc, 3 fa, 4 ea (na), 5 prod (NNODE), 6 x (NNODE), 7 n, 8 l, 9 j2 (int64, nb),
+ *       10 T, 11 c = 2 T / (st nu), 12 rho_d (0 for a level the flush skips) (nb) */
+typedef void (*tg_sink_fn)(const int64_t *iv, const double *dv, const uint64_t *pv);
+static tg_sink_fn tg_sink = NULL;
+static int64_t tg_nlev = 10;
+void nx_set_targetsink(void *fn, int64_t nlev) { tg_sink = (tg_sink_fn)fn; tg_nlev = nlev; }
+
+static void tg_emit(const Ty *y, int64_t J2, int64_t p, int wfc, int64_t na, const int64_t *il, const int64_t *iu,
+                    int64_t sp2, const double *tinc, const double *fa, const double *ea, const double *prod,
+                    const double *x, double pref, double st, int elastic, int64_t lt)
+{
+    if (!tg_sink || !y || y->nd <= 0) return;
+    int64_t nb = 0;
+    for (int64_t e = 0; e < y->ne; e++) {
+        int64_t n = y->en[e], l = y->el[e];
+        if (n > y->nlast || n > tg_nlev || !(n < y->nd && y->okd[e] && (l & 1) == (p != y->pd[n]))) continue;
+        nb++;
+    }
+    int64_t *li = malloc((size_t)(2 * na + 3 * nb + 1) * sizeof(int64_t));
+    double *db = malloc((size_t)(3 * nb + 1) * sizeof(double));
+    int64_t *j2i = li + na, *bn = li + 2 * na, *bl = bn + nb, *bj = bl + nb;
+    double *bt = db, *bc = db + nb, *br = db + 2 * nb;
+    for (int64_t i = 0; i < na; i++) { li[i] = il[i]; j2i[i] = 2 * il[i] + (iu[i] - 1) * sp2; }
+    int64_t q = 0;
+    for (int64_t e = 0; e < y->ne; e++) {
+        int64_t n = y->en[e], l = y->el[e], u = y->eu[e];
+        if (n > y->nlast || n > tg_nlev || !(n < y->nd && y->okd[e] && (l & 1) == (p != y->pd[n]))) continue;
+        double raw = y->T[(n * y->L + l) * 3 + u];
+        bn[q] = n; bl[q] = l; bj[q] = jj_of(y, l, u); bt[q] = raw;
+        bc[q] = (wfc && raw > 1.0e-30) ? 2.0 * raw / (st * y->nu[e]) : 0.0;
+        br[q] = y->ok[n] ? y->rho_d[n] : 0.0;
+        q++;
+    }
+    int64_t iv[8] = {J2, p == 0 ? -1 : 1, wfc, na, nb, NNODE, elastic, lt};
+    double dv[2] = {pref, st};
+    uint64_t pv[13] = {(uint64_t)li, (uint64_t)j2i, (uint64_t)tinc, (uint64_t)fa, (uint64_t)ea, (uint64_t)prod,
+                       (uint64_t)x, (uint64_t)bn, (uint64_t)bl, (uint64_t)bj, (uint64_t)bt, (uint64_t)bc, (uint64_t)br};
+    tg_sink(iv, dv, pv);
+    free(li); free(db);
 }
 
 static inline int ok_j(int64_t J2, int64_t irs2, int64_t jj)
@@ -438,6 +503,8 @@ int nx_target(const int64_t *ip, const uint64_t *pp, const double *dp, double *p
             if (!wfc) {
                 double feed = 0.0;
                 for (int64_t i = 0; i < na; i++) feed += tinc[i];
+                if (tg_sink)
+                    tg_emit(yk0, J2, p, 0, na, il, iu, sp2, tinc, NULL, NULL, NULL, x, cn * (J2 + 1.0) / d, d, 0, lt);
                 double w = cn * (J2 + 1.0) / d * feed;
                 for (int64_t a = 0; a < ntypes; a++) ty_scatter_w(&ty[order[a]], k, p, w);
                 if (has_fis) xs_fis += w * tfis[k];
@@ -540,6 +607,8 @@ int nx_target(const int64_t *ip, const uint64_t *pp, const double *dp, double *p
                     ea[i] = ee;
                 }
             }
+            if (tg_sink)
+                tg_emit(yk0, J2, p, 1, na, il, iu, sp2, tinc, fa, elastic ? ea : NULL, prod, x, pref, st, elastic, lt);
             for (int64_t a = 0; a < ntypes; a++) {
                 Ty *y = &ty[order[a]];
                 if (y->photon) continue;
@@ -818,6 +887,47 @@ static double mpe_phdens2(int64_t ppi, int64_t hpi, int64_t pnu, int64_t hnu, do
     return dens;
 }
 
+/* fast-phmodel: phdens2.f90:76-117 tabulated branch (density/particle_hole.ph_override + _ph_interp) on one table packed
+ * by particle_hole.ph_table_packed: T[0] divisor, T[1 + k] exists, T[626 + 61 k + nex] the smoothed density on
+ * edens(0:60), k = ((ppi * 5 + hpi) * 5 + pnu) * 5 + hnu. T == NULL or a configuration the table lacks: `dens`. */
+#define PH_NEN 60
+static double ph_edens[PH_NEN + 1];
+static int ph_edens_ok = 0;
+
+static void ph_edens_init(void)
+{
+    if (ph_edens_ok) return;
+    ph_edens[0] = 0.0;
+    for (int n = 1; n <= 20; n++) ph_edens[n] = 0.25 * n;
+    for (int n = 21; n <= 30; n++) ph_edens[n] = 5.0 + 0.5 * (n - 20);
+    for (int n = 31; n <= 40; n++) ph_edens[n] = 10.0 + (n - 30);
+    ph_edens[41] = 22.5; ph_edens[42] = 25.0; ph_edens[43] = 30.0;
+    for (int n = 44; n <= PH_NEN; n++) ph_edens[n] = 30.0 + 10.0 * (n - 43);
+    ph_edens_ok = 1;
+}
+
+static double mpe_phtab(const double *T, int64_t ppi, int64_t hpi, int64_t pnu, int64_t hnu, double x,
+                        double dens)
+{
+    if (T == NULL || ppi < 0 || hpi < 0 || pnu < 0 || hnu < 0 || ppi > 4 || hpi > 4 || pnu > 4 || hnu > 4)
+        return dens;
+    int64_t k = ((ppi * 5 + hpi) * 5 + pnu) * 5 + hnu;
+    if (T[1 + k] == 0.0) return dens;
+    const double *row = T + 626 + 61 * k;
+    int64_t j = 0;
+    while (j + 1 <= PH_NEN && ph_edens[j + 1] <= x) j++; /* searchsorted(right) - 1 */
+    if (j > PH_NEN - 1) j = PH_NEN - 1;
+    if (x > 200.0) j = PH_NEN - 1;
+    double eb = ph_edens[j], ee = ph_edens[j + 1], ldb = row[j], lde = row[j + 1];
+    double t = (x - eb) / (ee - eb);
+    double v;
+    if (ldb > 1.0 && lde > 1.0) v = exp(log(ldb) + t * (log(lde) - log(ldb)));
+    else v = ldb + t * (lde - ldb);
+    if (x <= 0.0) v = 0.0;
+    if (v < MPE_PHDENS_FLOOR) v = 0.0;
+    return v / T[0];
+}
+
 /* grids.locate_scalar on a float32 copy of the grid */
 static int64_t locate_scalar32(const float *xs, int64_t ib, int64_t ie, double xd)
 {
@@ -845,7 +955,7 @@ static inline void fe_add(double *val, uint8_t *present, int64_t ncols, int64_t 
 /* multipreeq2.f90 for mother bin nex of the nucleus being walked (Cascade.mpe_inputs +
  * preeq.mpe_fast's kernel, sw_mpe_bin's loop), applied as multiple._apply_mpe applies it.
  * mi (int64): 0 P, 1 nb, 2-3 daughter nlast, 4-5 zix, 6-7 nix, 8-9 maxex, 10-11 ebegin,
- *             12-13 eend (<= maxen), 14 maxen, 15 Xrows;
+ *             12-13 eend (<= maxen), 14 maxen, 15 Xrows, 16 phmodel-2 tables in mp[18..20];
  * md (double): 0 gp(Zcomp, Ncomp), 1 gn, 2 gp(0, 0), 3 gn(0, 0), 4 Efermi, 5-6 S, 7-8 daughter gp,
  *             9-10 daughter gn;
  * mp (ptr):   0 mother particle-hole populations (Xrows, P1^4), 1 flags (Xrows, uint8; 1 = has
@@ -853,7 +963,8 @@ static inline void fe_add(double *val, uint8_t *present, int64_t ncols, int64_t 
  *             5 dex (2, nb), 6 float32 egrid (maxen + 1), 7-8 s-wave Tjl (rows) per daughter,
  *             9-10 daughter particle-hole additions (drows, P1^4), 11-12 their flags (drows, uint8),
  *             13 mulpre out (2, uint8), 14 scratch term (2 nb), 15 term_tot (2 nb),
- *             16 xspop_add (2, nb, NJ), 17 tsw (2 nb)
+ *             16 xspop_add (2, nb, NJ), 17 tsw (2 nb),
+ *             18-20 fast-phmodel tables (mother, daughters 1-2; NULL = analytic) when mi[16] (phmodel 2)
  * Returns Dmulti (0 when nothing was emitted). */
 static double mpe_bin(const int64_t *ip, const uint64_t *pp, double *XE, int64_t nex,
                       double *part, uint8_t *partf, double *xsfeed, uint8_t *xsfeedf,
@@ -902,6 +1013,11 @@ static double mpe_bin(const int64_t *ip, const uint64_t *pp, double *XE, int64_t
     memset(xspop_add, 0, (size_t)(2 * nb * NJ) * sizeof(double));
     double gsp_state = md[0], gsn_state = md[1];
     double gp_cn0 = md[2], gn_cn0 = md[3], ef = md[4];
+    const double *phT[3] = {NULL, NULL, NULL}; /* fast-phmodel: mother, daughter 1, daughter 2 */
+    if (mi[16]) {
+        ph_edens_init();
+        for (int q = 0; q < 3; q++) phT[q] = (const double *)mp[18 + q];
+    }
     double summpe = 0.0, sumtype_tot[2] = {0.0, 0.0};
     int64_t last_nlast = mi[2];
     int any_key = 0;
@@ -918,6 +1034,7 @@ static double mpe_bin(const int64_t *ip, const uint64_t *pp, double *XE, int64_t
             if (feedph <= MPE_FEED_MIN_MB) continue;
             double ap = mpe_apauli2(ipp, ihp, ipn, ihn, gp_cn0, gn_cn0);
             double omegaph = mpe_phdens2(ipp, ihp, ipn, ihn, gsp_state, gsn_state, exinc, ef, ap);
+            omegaph = mpe_phtab(phT[0], ipp, ihp, ipn, ihn, exinc, omegaph); /* multipreeq2.f90:195 */
             int live_om = omegaph > 0.0;
             memset(term, 0, (size_t)(2 * nb) * sizeof(double));
             double sumtype[2] = {0.0, 0.0};
@@ -946,6 +1063,8 @@ static double mpe_bin(const int64_t *ip, const uint64_t *pp, double *XE, int64_t
                                                       exd[j], ef, ap1);
                         double omega1p = mpe_phdens2(zej, 0, nej, 0, gsp_o, gsn_o, exinc - exd[j],
                                                      ef, ap1p);
+                        omegap1h = mpe_phtab(phT[1 + di], ipp - zej, ihp, ipn - nej, ihn, exd[j], omegap1h);
+                        omega1p = mpe_phtab(phT[1 + di], zej, 0, nej, 0, exinc - exd[j], omega1p);
                         double proba = omega1p * omegap1h / omegaph / (double)(ipp + ipn);
                         double pescape = proba * tw[j];
                         double dj = (j == hi) ? exm - exmin : dexd[j];
@@ -1026,6 +1145,11 @@ static double mpe_bin(const int64_t *ip, const uint64_t *pp, double *XE, int64_t
         double *DX = (double *)pt[0], *DXE = (double *)pt[1];
         const double *tt = term_tot + di * nb;
         for (int64_t j = 0; j < n; j++) DXE[j] += tt[j];
+        if (pp[154] && ((double *const *)pp[154])[t]) { /* SPECOUT: mpecontrib(type, nex, j), output only */
+            double *sm = ((double *const *)pp[154])[t];
+            int64_t st = ((const int64_t *)pp[155])[t];
+            for (int64_t j = 0; j < n; j++) sm[nex * st + j] += tt[j];
+        }
         for (int64_t j = 0; j < n; j++) {
             const double *xa = xspop_add + (di * nb + j) * NJ;
             double *xr = DX + j * NJ * 2;
@@ -1083,6 +1207,12 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
     const int64_t *t0 = ip + 16;
     const uint64_t *p0 = pp + 20;
     int64_t rec0 = t0[2];
+    /* SPECOUT (output only, INCOGNITA_SPECOUT): pp[153] = 7 pointers, mcontrib(type, nex, nexout) as
+     * (Xrows, so_dr[t]) row-major, 0 = not wanted; pp[155] = so_dr (7 row strides; type 0 = Xrows).
+     * Only ever written here, never read: every other array sees the same additions in the same order. */
+    double *const *so_mc = (double *const *)pp[153];
+    const int64_t *so_dr = (const int64_t *)pp[155];
+#define SO_ADD(t, nx, k, v) do { if (so_mc && so_mc[t]) so_mc[t][(nx) * so_dr[t] + (k)] += (v); } while (0)
     int64_t nmaxr = 1;
     for (int64_t t = 0; t < 7; t++) if (ip[16 + 16 * t + 4] > nmaxr) nmaxr = ip[16 + 16 * t + 4];
     int64_t *cext = malloc((size_t)nmaxr * sizeof(int64_t)); /* contract1's row extents */
@@ -1100,6 +1230,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                         X[(k * NJ + jdis[k]) * 2 + lpar[k]] += intens;
                         XE[k] += intens;
                         XE[nex] -= intens;
+                        SO_ADD(0, nex, k, intens);
                         /* the numpy walk records per daughter level in a dict: a level named
                          * twice in the branching list keeps its last intensity only */
                         int later = 0;
@@ -1120,8 +1251,15 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
         double dm = first ? dmulti : 0.0;
         if (!first && pp[146] && ((const uint8_t *)((const uint64_t *)((const uint64_t *)pp[146])[2])[1])[nex] == 1)
             dm = mpe_bin(ip, pp, XE, nex, part, partf, xsfeed, xsfeedf, xspopnuc, created);
-        int64_t i = m > 0 ? rowmap[nex] : -1;
-        if (i < 0) { free(cext); return -2; }
+        int64_t i0 = m > 0 ? rowmap[nex] : -1;
+        if (i0 < 0) { free(cext); return -2; }
+        /* BINQUAD sub-points: bin i0's widths rows are first .. first + cnt - 1 (pp[150] counts, pp[151] offsets) */
+        const int64_t *bq_cnt = bq_sub > 1 ? (const int64_t *)pp[150] : NULL, *bq_off = bq_sub > 1 ? (const int64_t *)pp[151] : NULL;
+        int64_t ncnt = bq_cnt ? bq_cnt[i0] : 1, row0 = bq_off ? bq_off[i0] : i0;
+        for (int64_t qq = 0; qq < ncnt; qq++) {
+        int64_t i = row0 + qq;
+        /* this sub-point's share of the population (BINQUAD2: pp[152] per row, pieces cut at knots) */
+        double bq_pw = bq_sub > 1 && pp[152] ? ((const double *)pp[152])[i] : ncnt > 1 ? 0.5 * BQ_W[ncnt][qq] : 1.0;
         int64_t mj = maxj[i], njb = mj + 1;
         const double *pop = X + nex * NJ * 2;
         double popeps_b = popepsA / (5 * (mj > 1 ? mj : 1)) * 0.5;
@@ -1139,21 +1277,59 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
             double denom = ds[x];
             if (dd6) denom = any_dead ? denom + (dead[x] ? 0.0 : dd6[x]) : denom + dd6[x];
             int live = active && pop[x] != 0.0 && denom != 0.0;
-            feed[x] = live ? (1.0 - dm) * pop[x] / denom : 0.0;
+            feed[x] = live ? (1.0 - dm) * (bq_pw * pop[x]) / denom : 0.0;
             if (active && pop[x] != 0.0 && denom == 0.0) {
                 trapped = 1;
-                leftover += pop[x];
+                leftover += bq_pw * pop[x];
             }
         }
-        if (trapped) {
+        /* ENGAUDIT TRAPFIX (INCOGNITA_TRAPFIX=1, default OFF): TALYS's trapped-flux spread (compound.f90:404-419) was written
+         * for continuum bins, below which every discrete level lies. A discrete level above S_n is decayed as a compound
+         * bin (multiple.f90:507) and can be trapped too; the spread then puts (NL - nex)/(NL + 1) of its flux on levels the
+         * descending walk has already passed, where it is never decayed and is lost (Os-241 at 0.15 MeV: 55 of 66 mb).
+         * With the switch a trapped discrete level follows its own gamma branching, as a level below S_n does
+         * (an isomer keeps it; a level without branches feeds the ground state). */
+        int tfix = trapped && nex <= nlast && trapfix_on();
+        if (trapped && !tfix) {
             /* compound.f90:404-419, multiple._apply_leftover: the mother's own discrete levels */
             if (nlast >= 0 && leftover != 0.0) {
                 double share = leftover / (nlast + 1.0);
                 int64_t top = nlast < Xrows - 1 ? nlast : Xrows - 1;
                 for (int64_t k = 0; k <= top; k++) XE[k] += share;
+                for (int64_t k = 0; k <= top; k++) SO_ADD(0, nex, k, share);
                 part[nex] += leftover;
                 partf[nex] = 1;
             }
+        }
+        if (tfix && leftover != 0.0) {
+            if (tau[nex] == 0.0) {
+                if (boff[nex + 1] > boff[nex]) {
+                    for (int64_t b = boff[nex]; b < boff[nex + 1]; b++) {
+                        int64_t k = bk[b];
+                        double intens = leftover * bratio[b];
+                        X[(k * NJ + jdis[k]) * 2 + lpar[k]] += intens;
+                        XE[k] += intens;
+                        XE[nex] -= intens;
+                        SO_ADD(0, nex, k, intens);
+                        if (rec0) {
+                            fe_add((double *)p0[12], (uint8_t *)p0[13], t0[11], nex, k, intens);
+                            dpar[2] += intens;
+                        }
+                    }
+                } else {
+                    X[(0 * NJ + jdis[0]) * 2 + lpar[0]] += leftover;
+                    XE[0] += leftover;
+                    XE[nex] -= leftover;
+                    SO_ADD(0, nex, 0, leftover);
+                    if (rec0) {
+                        fe_add((double *)p0[12], (uint8_t *)p0[13], t0[11], nex, 0, leftover);
+                        dpar[2] += leftover;
+                    }
+                }
+                if (rec0) created[0] = 1;
+            }
+            part[nex] += leftover;
+            partf[nex] = 1;
         }
         /* the photon exit, into this nucleus's own lower bins */
         {
@@ -1175,7 +1351,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                 for (int64_t k = 0; k < n; k++) {
                     double *xr = X + k * NJ * 2;
                     const double *dr = dpw + k * jx * 2;
-                    if (trapped && k <= nlast) {
+                    if (trapped && !tfix && k <= nlast) {
                         int64_t cell = (l0jd2[k] / 2) * 2 + l0pi[k];
                         for (int64_t c = 0; c < jx * 2; c++) {
                             double v = dr[c];
@@ -1184,7 +1360,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                                     int active = pop[x] >= popeps_b;
                                     double denom = ds[x];
                                     if (dd6) denom = any_dead ? denom + (dead[x] ? 0.0 : dd6[x]) : denom + dd6[x];
-                                    if (active && pop[x] != 0.0 && denom == 0.0) v += pop[x] / (nlast + 1.0);
+                                    if (active && pop[x] != 0.0 && denom == 0.0) v += bq_pw * pop[x] / (nlast + 1.0);
                                 }
                             }
                             xr[c] += v;
@@ -1195,7 +1371,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                                 int active = pop[x] >= popeps_b;
                                 double denom = ds[x];
                                 if (dd6) denom = any_dead ? denom + (dead[x] ? 0.0 : dd6[x]) : denom + dd6[x];
-                                if (active && pop[x] != 0.0 && denom == 0.0) v += pop[x] / (nlast + 1.0);
+                                if (active && pop[x] != 0.0 && denom == 0.0) v += bq_pw * pop[x] / (nlast + 1.0);
                             }
                             xr[cell] += v;
                         }
@@ -1206,6 +1382,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                 }
                 double tot = 0.0;
                 for (int64_t k = 0; k < n; k++) XE[k] += mcw[k];
+                if (so_mc && so_mc[0]) for (int64_t k = 0; k < n; k++) SO_ADD(0, nex, k, mcw[k]);
                 for (int64_t k = 0; k < n; k++) tot += mcw[k];
                 XE[nex] -= tot;
                 part[nex] += tot;
@@ -1225,7 +1402,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
             }
             if (rec0) {
                 created[0] = 1;
-                if (trapped && leftover != 0.0 && nlast >= 0) {
+                if (trapped && !tfix && leftover != 0.0 && nlast >= 0) {
                     double share = leftover / (nlast + 1.0);
                     int64_t top = nlast < Xrows - 1 ? nlast : Xrows - 1;
                     for (int64_t k = 0; k <= top; k++)
@@ -1266,6 +1443,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                 for (int64_t c = 0; c < cext[k] * 2; c++) xr[c] += dr[c]; /* NXC: +0 past it */
             }
             for (int64_t k = 0; k < n; k++) DXE[k] += mcw[k];
+            if (so_mc && so_mc[t]) for (int64_t k = 0; k < n; k++) SO_ADD(t, nex, k, mcw[k]);
             int64_t nr = ((const int64_t *)pt[6])[i];
             int64_t ntot = nr < n ? nr : n;
             double tot = 0.0;
@@ -1293,7 +1471,9 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                 XE[nex] -= ff;
             }
         }
+        } /* BINQUAD sub-points */
     }
+#undef SO_ADD
     free(cext);
     return 0;
 }
@@ -1331,6 +1511,29 @@ static int64_t locate_right32(const float *xs, int64_t n, float x)
 
 static const int64_t PARSPIN2_[7] = {0, 1, 1, 2, 1, 1, 0};
 
+/* LOGTINT (Incognita extension, default OFF; physics/hf/compound/tlog.py): Lagrange in ln T for the charged types where
+ * the three nodes are > 0, TALYS's linear pol2 (same term order) elsewhere. Set per run (0 = OFF = TALYS). */
+static int64_t NX_TLOG = 0;
+
+void nx_set_tlog(int64_t on) { NX_TLOG = on; }
+
+/* TLOGIT (NX_TLOG == 2): Lagrange in u = ln(T/(1-T)) where the three nodes are in (1e-300, 1-1e-12), else linear pol2. */
+static double nx_logit(double x) { return log(x) - log1p(-x); }
+
+static double nx_tlog_lagr(double w1, double w2, double w3, double a, double b, double c)
+{
+    if (NX_TLOG == 2) {
+        const double lo = 1e-300, hi = 1.0 - 1e-12;
+        if (a > lo && a < hi && b > lo && b < hi && c > lo && c < hi) {
+            double u = w1 * nx_logit(a) + w2 * nx_logit(b) + w3 * nx_logit(c), eu = exp(-fabs(u));
+            return u < 0.0 ? eu / (1.0 + eu) : 1.0 / (1.0 + eu);
+        }
+        return w1 * a + w2 * b + w3 * c;
+    }
+    if (a > 0.0 && b > 0.0 && c > 0.0) return exp(w1 * log(a) + w2 * log(b) + w3 * log(c));
+    return w1 * a + w2 * b + w3 * c;
+}
+
 int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uint64_t *outp,
               int64_t *meta)
 {
@@ -1360,6 +1563,24 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
     int64_t *wext = malloc((size_t)(m * nmax) * sizeof(int64_t));
     int64_t *live_d = malloc((size_t)nddmax * sizeof(int64_t));
     int64_t *win_d = malloc((size_t)(2 * NJ * nddmax) * sizeof(int64_t));
+    /* BINQUAD: the mother bins' own d ln rho / dE (from the photon exit's rows = this nucleus's bins) */
+    double *bq_alpha = NULL, *bq_e = NULL, *bq_w = NULL;
+    int *bq_k = NULL;
+    if (bq_on) {
+        bq_alpha = calloc((size_t)m, sizeof(double));
+        bq_e = malloc((size_t)(m * nmax * BQ_KMAX) * sizeof(double));
+        bq_w = malloc((size_t)(m * nmax * BQ_KMAX) * sizeof(double));
+        bq_k = malloc((size_t)(m * nmax) * sizeof(int));
+        const uint64_t *p0 = pp + 20;
+        int64_t n0 = ip[16], nl0 = ip[17];
+        for (int64_t b = 0; b < m && bq_mt > 0.0; b++) {
+            int64_t k = nxm[b * 7] + 1;
+            int64_t r = k < n0 ? k : n0 - 1;
+            if (r > nl0)
+                bq_alpha[b] = bq_mt * bq_slope((const double *)p0[6], (const double *)p0[0],
+                                               (const double *)p0[1], nl0, n0, r, 2 * NJ);
+        }
+    }
     for (int64_t t = 0; t < 7; t++) {
         const int64_t *ti = ip + 16 + 8 * t;
         const uint64_t *pt = pp + 20 + 8 * t;
@@ -1373,6 +1594,7 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
         int64_t *nrows = (int64_t *)o[8];
         double ss = sep[t];
         double sfac = t == 0 ? 1.0 : (double)(PARSPIN2_[t] + 1);
+        int emax_guard = bq_sub > 1;
         /* _Geometry, this type's rows */
         for (int64_t b = 0; b < m; b++) {
             int64_t nexmax = nxm[b * 7 + t] > 0 ? nxm[b * 7 + t] : 0;
@@ -1398,6 +1620,25 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                     int part = ex0min < exm && exm <= ex0plus;
                     rbv = part ? (ex0plus - exm) / dexinc[b] : 1.0;
                     eo = part ? 0.5 * (ex0plus + exm) - ss - ex[r] : (exinc[b] - ss) - ex[r];
+                }
+                if (bq_on && emax_guard && r <= nexmax && t >= 1) {
+                    /* a sub-point row above its own reach (TALYS's geometry assumes rows <= nexmax are) */
+                    if (r > nl ? (ex0plus - ss) - e1min <= 0.0 : ex[r] + ss > ex0plus) rbv = 0.0;
+                }
+                if (bq_on && bq_rt >= 0.0 && t >= 1 && r <= nexmax) { /* BINQUAD: tilted eps quadrature, its Rboundary */
+                    double beta = r > nl ? bq_rt * bq_slope(rhog, ex, dex, nl, n, r, 2 * NJ) : 0.0;
+                    double y0 = r > nl ? e1min : ex[r], y1 = r > nl ? e1plus : ex[r], rq;
+                    double u0 = ex0min - ss, u1 = ex0plus - ss;
+                    if (bq_mt < 0.0) { /* mother as a point at its centre, the residual bin whole */
+                        u0 = u1 = exinc[b] - ss;
+                        if (r > nl) y1 = ex[r] + 0.5 * dex[r];
+                    }
+                    int K = bq_nodes(u0, u1, y0, y1, bq_alpha[b], beta, bq_q,
+                                     bq_e + (b * n + r) * BQ_KMAX, bq_w + (b * n + r) * BQ_KMAX, &rq);
+                    bq_k[b * n + r] = K;
+                    if (K >= 0) rbv = rq;
+                } else if (bq_on) {
+                    bq_k[b * n + r] = -1;
                 }
                 rb[b * n + r] = rbv;
                 eout[b * n + r] = r <= nexmax ? eo : 0.0;
@@ -1457,9 +1698,48 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                         wext[b * n + r] = lt + 1 > 0 ? lt + 1 : 0;
                         const double *ta = TL + (tt * tlrows + na) * L, *tb = TL + (tt * tlrows + nb) * L;
                         const double *tc = TL + (tt * tlrows + nc) * L;
-                        for (int64_t l = 0; l <= lt; l++) {
-                            double u = w1 * ta[l] + w2 * tb[l] + w3 * tc[l];
-                            Tw[(b * n + r) * L + l] = (u < transeps ? 0.0 : u) * fn[tt];
+                        int tlg = NX_TLOG && tt >= 1;  /* LOGTINT/TLOGIT (default OFF) */
+                        int K = bq_on ? bq_k[b * n + r] : -1;
+                        if (K < 0) {
+                            for (int64_t l = 0; l <= lt; l++) {
+                                double u = tlg ? nx_tlog_lagr(w1, w2, w3, ta[l], tb[l], tc[l]) : w1 * ta[l] + w2 * tb[l] + w3 * tc[l];
+                                Tw[(b * n + r) * L + l] = (u < transeps ? 0.0 : u) * fn[tt];
+                            }
+                        } else { /* BINQUAD: sum_k w_k T_l(eps_k), each node pol2-interpolated as the centre */
+                            double *row = Tw + (b * n + r) * L;
+                            for (int64_t l = 0; l <= lt; l++) row[l] = 0.0;
+                            const double *ek = bq_e + (b * n + r) * BQ_KMAX, *wk = bq_w + (b * n + r) * BQ_KMAX;
+                            for (int k = 0; k < K; k++) {
+                                double e2 = ek[k];
+                                if (e2 < lo && head0[tt]) continue;
+                                float x2 = (float)e2;
+                                int64_t j2 = locate_right32(xs, maxen + 1, x2) - 1;
+                                if (j2 < eb - 1) j2 = eb - 1;
+                                if (j2 > ee) j2 = ee;
+                                if (x2 == xs[eb]) j2 = eb;
+                                else if (x2 == xs[ee]) j2 = ee - 1;
+                                int64_t nn = e2 < lo ? 0 : j2;
+                                int c2 = nn > eb + 1 || nn >= maxen - 1;
+                                int64_t qa = c2 ? nn - 1 : nn, qb = qa + 1, qc = qa + 2;
+                                int64_t ha = qa < 0 ? qa + ip[8] : qa, hb = qb < 0 ? qb + ip[8] : qb;
+                                int64_t hc = qc < 0 ? qc + ip[8] : qc;
+                                double fa = egrid[ha], fb = egrid[hb], fc = egrid[hc];
+                                if (qa < 0) qa += tlrows;
+                                if (qb < 0) qb += tlrows;
+                                if (qc < 0) qc += tlrows;
+                                double v1 = (e2 - fb) * (e2 - fc) / ((fa - fb) * (fa - fc));
+                                double v2 = (e2 - fa) * (e2 - fc) / ((fb - fa) * (fb - fc));
+                                double v3 = (e2 - fa) * (e2 - fb) / ((fc - fa) * (fc - fb));
+                                const double *sa = TL + (tt * tlrows + qa) * L, *sb = TL + (tt * tlrows + qb) * L;
+                                const double *sc = TL + (tt * tlrows + qc) * L;
+                                for (int64_t l = 0; l <= lt; l++) {
+                                    double u = tlg ? nx_tlog_lagr(v1, v2, v3, sa[l], sb[l], sc[l]) : v1 * sa[l] + v2 * sb[l] + v3 * sc[l];
+                                    row[l] += wk[k] * (u > 0.0 ? u : 0.0);
+                                }
+                            }
+                            (void)w1; (void)w2; (void)w3; (void)ta; (void)tb; (void)tc;
+                            for (int64_t l = 0; l <= lt; l++)
+                                row[l] = (row[l] < transeps ? 0.0 : row[l]) * fn[tt];
                         }
                     }
                 }
@@ -1703,6 +1983,7 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
         mt[0] = !nz;
     }
     free(rb); free(eout); free(lmaxhf); free(Tw); free(R); free(rext_d); free(wext); free(live_d); free(win_d);
+    free(bq_alpha); free(bq_e); free(bq_w); free(bq_k);
     return 0;
 }
 

@@ -96,7 +96,7 @@ def _base(target: str, energies: tuple[float, ...]):
     m = masses(options, params)
     c = talys_constants()
     k0 = options.k0
-    Zr, Ar = Z - c["parZ"][k0], A + 1 - c["parA"][k0]  # residual of the k0 channel = the target
+    Zr, Ar = Z, A  # residual of the k0 channel = the target (CPINC: any projectile)
     lev = discrete_levels(Zr, Ar, options, m, params)
     dfm = deformation(Zr, Ar, options, lev, m, params)
     if Ar % 2 == 1:  # nuclides.f90:227 -- an odd-A target gets its deformations by weak coupling
@@ -104,7 +104,11 @@ def _base(target: str, energies: tuple[float, ...]):
         cz = options.Zinit - zc
         ca = cz + options.Ninit - nc
         clev = discrete_levels(cz, ca, options, m, params)
-        dfm = weak_coupling(dfm, lev, deformation(cz, ca, options, clev, m, params), clev, options)
+        # FIXDWBA: the core of a target decided 'R' is a rotor too (no systematics 2+ beta)
+        from physics.hf.direct.dwbaunit import core_autorot
+
+        cdf = deformation(cz, ca, options, clev, m, params, flagautorot=core_autorot(options))
+        dfm = weak_coupling(dfm, lev, cdf, clev, options)
     # nuclides.f90:251-259 -- `ewfc`, `eurr` and `epreeq` are -1 sentinels in the raw record and
     # `energy_flags` raises on them, so `case` would fall back to `flaggiant0` (true at EVERY
     # energy) and put a giant-resonance block below the pre-equilibrium onset, where TALYS

@@ -125,7 +125,10 @@ def preeq_fit(fit, Zt: int, At: int) -> tuple:
     if not fit:
         return ()
     c = talys_constants()
-    return fit_subset(fit, [(Zt - c["parZ"][t], At + 1 - c["parA"][t]) for t in range(7)])
+    from physics.hf.projectile import compound_of
+
+    Zc, Ac = compound_of(Zt, At)  # CPINC
+    return fit_subset(fit, [(Zc - c["parZ"][t], Ac - c["parA"][t]) for t in range(7)])
 
 
 def _giant(target: str, e_inc_mev: float, variant: str = "default",
@@ -215,7 +218,11 @@ def pop_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float, targe
         xspreeqtot_mb={t: float(xspreeqtot[t]) for t in range(7)},
         flaggiant=has_giant and options.flaggiant0, xsgr_mb=xsgr, xsgrtot_mb=xsgrtot,
         pespinmodel=options.pespinmodel, flagmulpre=flagmulpre, flag2comp=options.flag2comp,
-        maxpar=maxpar, ppi0=0 if c["parZ"][k0] == 0 else 1, pnu0=1 if k0 == 1 else 0,
+        maxpar=maxpar,
+        # preeq.f90:63-79: ppi0 = parZ(k0), pnu0 = parN(k0); a photon starts as one neutron
+        # particle. CPINC: the old (0 or 1, 1 if k0 == 1) form was right for n and p only (an
+        # alpha starts with 2 + 2, not 1 + 0)
+        ppi0=0 if k0 == 0 else int(c["parZ"][k0]), pnu0=1 if k0 == 0 else int(c["parN"][k0]),
         xsstep2_mb=(_xsstep2_by_type(xsstep2, states, maxpar, E)
                     if (flagmulpre and xsstep2 is not None and states is not None) else {}),
     )

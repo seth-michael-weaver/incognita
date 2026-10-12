@@ -609,7 +609,8 @@ def densitypar(
     for ib in bars:
         Nlast.append(int(levels.nlev) if ib == 0 else max(int(bar.nfistrrot[ib]), 1))
         if Ntop[ib] == -1:
-            Ntop[ib] = Nlast[ib]
+            # FIXENG F14: the LD matching keeps the uncut list when ggdeadend cut the decay list
+            Ntop[ib] = Nlast[ib] if ib != 0 or getattr(levels, "nlev_ld", -1) < 0 else int(levels.nlev_ld)
         if Nlow[ib] == -1:
             Nlow[ib] = 2
         if Ntop[ib] <= 2:

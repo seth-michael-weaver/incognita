@@ -43,6 +43,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from physics.hf.fission.barriers import NUMJ
+from physics.hf import stagetime
 
 __all__ = ["FissionChain", "fission_chain"]
 
@@ -133,8 +134,12 @@ class FissionChain:
             fp = fission_parameters(Z, A, self.o, p, masses=ms)
             if int(fp.nfisbar) > 0:
                 lv = discrete_levels(Z, A, self.o, ms, p)
+                from physics.hf.density.ctwindow import enabled as _ctw
+                from physics.hf.density.ctwindow2 import enabled as _ctw2
+
                 ld = densitymatch(attach_tables(densitypar(
-                    Z, A, self.o, p, ms, lv, barriers=barrier_levels(fp))))
+                    Z, A, self.o, p, ms, lv, barriers=barrier_levels(fp))), ctwindow=_ctw(self.o),
+                    ctwindow2=_ctw2(self.o))
                 got = _Nucleus(fp=fp, ld=ld, odd=A % 2, grids={})
         self._nuc[key] = got
         return got
@@ -250,6 +255,7 @@ def _by_jp(arr: np.ndarray, odd: int) -> dict:
     return out
 
 
+@stagetime.timed("fission")
 def fission_chain(Z: int, A: int, options=None, params=None, fit: tuple = ()
                   ) -> FissionChain | None:
     """A `FissionChain` for a target that fissions at its defaults, else `None`.

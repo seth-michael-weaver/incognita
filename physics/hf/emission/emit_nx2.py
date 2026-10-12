@@ -37,6 +37,7 @@ import os
 import numpy as np
 import torch
 
+from physics.hf import engphys
 from physics.hf.core.tensors import DTYPE
 
 
@@ -105,9 +106,13 @@ def _binary_type_c(kern, pop, pex, dd, g, ppx, sfglobal, sfac, nl, nmax, mj, do_
             or min(N, len(pex), len(ppx), len(spincut)) < nmax + 1
             or min(len(ddc), len(jdis), len(parlev)) < nl + 1):
         return False
+    norm = bool(do_pe) and engphys.on("pespin")
+    pop0 = pop.copy() if norm else None
     rc = kern(N, J, nl, nmax, mj, int(bool(do_pe)), int(pespinmodel), float(popeps_a),
               float(pardis), _ptr(pop), _ptr(pex), _ptr(ddc), _ptr(jdis), _ptr(parlev),
               _ptr(spincut), _ptr(ppx), _ptr(sfglobal), _ptr(sfac))
+    if rc == 0 and norm:  # ENGPHYS `pespin`: rescale the kernel's pre-equilibrium addition row by row
+        engphys.spread_norm_np(pop0, pop, range(nl + 1, nmax + 1), ppx)
     return rc == 0
 
 
@@ -208,6 +213,9 @@ def binary(inp, state=None, device=None):
                 wig = _np(spindis(g.spincut[sl][:, None], jj[None, :]) * PARDIS)
                 use_sf = (inp.pespinmodel == 1) & (new > 0.0)
                 spread = np.where(use_sf, new, wig[:, :, None])
+                if engphys.on("pespin"):  # ENGPHYS: the bin gets exactly its pre-equilibrium flux
+                    s = spread.sum(axis=(1, 2), keepdims=True)
+                    spread = np.where(s > 0, spread / np.where(s > 0, s, 1.0), spread)
                 add = spread * ppx[sl][:, None, None]
                 pop[sl, :mj, :] = pop[sl, :mj, :] + add
                 pex[sl] = pex[sl] + ppx[sl]

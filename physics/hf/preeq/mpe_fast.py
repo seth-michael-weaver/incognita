@@ -70,7 +70,7 @@ def multiple_preequilibrium_fast(inp: MultiPreeqInputs, numj: int = 40) -> Multi
     """
     lib = _lib()
     if (lib is None or inp.mpreeqmode != 2 or not inp.flag2comp or inp.flaggshell
-            or len(inp.daughters) != 2 or _on_graph(inp)):
+            or len(inp.daughters) != 2 or _on_graph(inp) or inp.phzn0 is not None):  # PHMICRO: torch loop
         return multiple_preequilibrium(inp, numj=numj)
     if inp.zcomp == 0 and inp.ncomp == 0:
         return _zero(inp, numj)

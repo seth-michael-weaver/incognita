@@ -94,8 +94,14 @@ class DwbaResult:
     h_fm: float
 
 
-def _lj_table(lmax: int) -> tuple[Tensor, Tensor, Tensor]:
-    """(l, j, 2 l.s) of every channel with l <= lmax and j = l +/- 1/2, l = 0 having only j=1/2."""
+def _lj_table(lmax: int, spin: float = 0.5) -> tuple[Tensor, Tensor, Tensor]:
+    """(l, j, 2 l.s) of every channel with l <= lmax and j = l +/- 1/2, l = 0 having only j=1/2.
+
+    CPINC2: a spin-0 projectile (alpha) has ONE channel per l, j = l, and no spin-orbit term. The spin-1/2 table
+    counted every l twice for an alpha, which doubled its DWBA cross sections (sum_j (2j+1) = 2 (2l+1))."""
+    if spin == 0.0:
+        l = torch.arange(lmax + 1, dtype=torch.int64)
+        return l, l.to(DTYPE), torch.zeros(lmax + 1, dtype=DTYPE)
     ls, js = [], []
     for orb in range(lmax + 1):
         for jj in (orb - 0.5, orb + 0.5):
@@ -290,7 +296,10 @@ def dwba_cross_sections(
                               lmax=njmax, n_r=n, h_fm=h)
         rows_of = {b: i + 1 for i, b in enumerate(live)}
         sel = torch.tensor([0] + [b + 1 for b in live])
-    l, j, ls2 = _lj_table(lmax)
+    from physics.hf.projectile import cpinc2
+
+    spin0 = spin == 0.0 and cpinc2()  # PORTSTACK: CPINC2 spin-0 channels behind INCOGNITA_CPINC2
+    l, j, ls2 = _lj_table(lmax, 0.0 if spin0 else 0.5)
 
     central, so, coul = optical_potential(omp, m_targ, r_safe, z_prod)
     diag = central[0] + coul[0].to(CDTYPE)  # (n+1,)
@@ -329,16 +338,17 @@ def dwba_cross_sections(
         if pb != (-1) ** lam or d == 0.0 or float(kappa2[b + 1]) <= 0.0:
             continue  # a lambda-pole form factor cannot reach unnatural parity
         key = (lam, pb)
-        if key not in weights and not torch.is_grad_enabled():
+        if key not in weights and not torch.is_grad_enabled() and not spin0:
             # SETB: the same table, cached for the worker (ecis/dwba_setb.py)
             from physics.hf.ecis.dwba_setb import cg_weights
 
             weights[key] = cg_weights(lam, pb, int(lmax), int(njmax), float(spin))
         if key not in weights:
             lm = torch.full_like(jp.expand(jp.shape[0], jc.shape[1]), float(lam))
+            mproj = 0.0 if spin0 else -0.5  # CPINC2: <l 0; lambda 0 | l' 0> for a spin-0 projectile
             cg = clebsch(
                 jc.expand_as(lm), lm, jp.expand_as(lm),
-                torch.full_like(lm, -0.5), torch.zeros_like(lm), torch.full_like(lm, -0.5),
+                torch.full_like(lm, mproj), torch.zeros_like(lm), torch.full_like(lm, mproj),
             )
             keep = (pb * par > 0).to(DTYPE) * open_j
             weights[key] = (2.0 * jc + 1.0) / (2.0 * spin + 1.0) * cg * cg * keep
@@ -406,7 +416,10 @@ def _core_spins_of(cs, Z: int, A: int):
     cz = o.Zinit - zc
     ca = cz + o.Ninit - nc
     clev = discrete_levels(cz, ca, o, m, cs.params)
-    out = core_spins(dfm, lev, deformation(cz, ca, o, clev, m, cs.params), clev)
+    from physics.hf.direct.dwbaunit import core_autorot  # FIXDWBA
+
+    out = core_spins(dfm, lev, deformation(cz, ca, o, clev, m, cs.params,
+                                           flagautorot=core_autorot(o)), clev)
     if memo:
         _CORE_LAST[:] = [cs.struct, o, cs.params, out]
     return out

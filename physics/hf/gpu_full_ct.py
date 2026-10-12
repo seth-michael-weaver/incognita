@@ -528,8 +528,13 @@ def comptarget(bk: Batch, res: dict, budget: float | None = None) -> dict:
     TALYS: comptarget.f90:1 (comptarget), molprepare.f90:1 (molprepare), moldauer.f90:1
     Test: GPU3
     """
-    from physics.hf.compound import wfc
+    from physics.hf.compound import wfc, wfcnorm
 
+    if wfcnorm.enabled():  # FIXENG F15: the compound flux rescale is wired on the Py and C paths only
+        raise NotImplementedError("INCOGNITA_WFCNORM is not wired on the GPU path; run the Py/C engine")
+    import os as _os
+    if _os.environ.get("INCOGNITA_TRAPFIX", "0") == "1":  # ENGAUDIT: the trapped-level rule is in nx_walk / the numpy walk only
+        raise NotImplementedError("INCOGNITA_TRAPFIX is not wired on the GPU path; run the Py/C engine")
     budget = CT_BUDGET if budget is None else budget
     t, d = bk.t, bk.dims
     dev = bk.device

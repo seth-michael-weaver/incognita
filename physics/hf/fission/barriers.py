@@ -117,6 +117,69 @@ def _band_index(band, eex: Tensor, odd: int, maxj: int, dev):
     return ok, flat, etrans
 
 
+def fistsc_on() -> bool:
+    """FISTSC switch: the batched fission paths (`fission_batch_ladder`, CENGFIS, NX2 `fis2`'s ladder) accept
+    barriers that carry a rotational band (`fists2 y`, `hbstate y`) by adding `band_ladder` to their continuum
+    sum, so the C cascade keeps those compounds. `HF_NX2_FISTSC=0` restores the refusal (B71). Speed only.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    import os
+
+    return os.environ.get("HF_NX2_FISTSC", "1") != "0"
+
+
+def band_ladder(fp: FissionParameters, ibar: int, eex_mev: Tensor, deltaw_mev: Tensor, nJ: int):
+    """The discrete transition-state part of `t1barrier(...).trfis` at every energy of `eex_mev`,
+    `(E, nJ, 2)` (spins `0 .. nJ-1`, parity axis `(-1, +1)`), or None when the barrier has no band.
+    The same expressions as `t1barrier`'s band branch, broadcast over energy; the continuum is
+    added by the caller.
+
+    TALYS: t1barrier.f90:123-140 (t1barrier)
+    Test: tests/hf/test_fistsc.py
+    """
+    band = fp.rotational[ibar]
+    if band.n == 0:
+        return None
+    dev = fp.fbarrier_mev.device
+    eex = torch.as_tensor(eex_mev, dtype=DTYPE, device=dev).reshape(-1)
+    E = eex.shape[0]
+    ok, flat, etrans = _band_index(band, eex[:, None], int(fp.A) % 2, nJ - 1, dev)
+    bfis, wfis = barrier_height(fp, ibar, deltaw_mev)
+    t1 = _penetrability(fp, eex[:, None] - etrans[None, :], ibar, bfis, wfis) * ok.to(DTYPE)
+    out = torch.zeros((E, nJ * 2), dtype=DTYPE, device=dev)
+    return out.index_add(1, flat, t1).view(E, nJ, 2)
+
+
+def band_hill(fp: FissionParameters, ibar: int, eex_mev: float, deltaw_mev: Tensor, nJ: int):
+    """`band_ladder` at one energy with `t1barrier`'s Hill-Wheeler histograms of the band:
+    `(trfis (nJ*2,), tfisA (nJ*2, NUMHILL+1), rhofisA (nJ*2, NUMHILL+1))` numpy, or None.
+
+    TALYS: t1barrier.f90:123-140 (t1barrier)
+    Test: tests/hf/test_fistsc.py
+    """
+    band = fp.rotational[ibar]
+    if band.n == 0:
+        return None
+    dev = fp.fbarrier_mev.device
+    eex = torch.as_tensor(float(eex_mev), dtype=DTYPE, device=dev)
+    ok, flat, etrans = _band_index(band, eex, int(fp.A) % 2, nJ - 1, dev)
+    bfis, wfis = barrier_height(fp, ibar, deltaw_mev)
+    t1 = _penetrability(fp, eex - etrans, ibar, bfis, wfis) * ok.to(DTYPE)
+    one = ok.to(DTYPE)
+    nj2 = nJ * 2
+    zeros = torch.zeros(nj2, dtype=DTYPE, device=dev)
+    tr = zeros.index_add(0, flat, t1)
+    ihill = torch.clamp((NUMHILL * t1).to(torch.int64) + 1, max=NUMHILL)
+    lin = flat * (NUMHILL + 1) + ihill
+    hz = torch.zeros(nj2 * (NUMHILL + 1), dtype=DTYPE, device=dev)
+    tA = hz.index_add(0, lin, t1).view(nj2, NUMHILL + 1)
+    rA = hz.index_add(0, lin, one).view(nj2, NUMHILL + 1)
+    tA[:, 0] = tA[:, 0] + tr
+    return tr.numpy().copy(), tA.numpy().copy(), rA.numpy().copy()
+
+
 def _log_integrate(rho1: Tensor, rho2: Tensor, rho3: Tensor, de1: Tensor, de2: Tensor) -> Tensor:
     """TALYS's logarithmic integration of the level density over one `eintfis` triple.
 

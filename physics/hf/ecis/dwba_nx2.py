@@ -255,6 +255,10 @@ def case_cross_sections(
     """
     if torch.is_grad_enabled():
         return None
+    from physics.hf.projectile import cpinc2
+
+    if float(_s.PARSPIN[particle]) == 0.0 and cpinc2():  # CPINC2: the compiled deck is spin-1/2 only; spin 0 takes the torch path
+        return None
     fn = _kernel()
     if fn is None:
         return None

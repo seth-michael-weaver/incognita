@@ -65,17 +65,29 @@ def primary_dens_inputs(cas, st, etotal_mev: float, *, gammax: int,
             nexmax=d.maxex, sep_mev=sp.sep_mev[t], ex_mev=d.ex_mev, dex_mev=d.dex_mev,
             maxj=d.maxj, parlev=d.parlev, jdis=d.jdis, rhogrid=d.rhogrid, ncum_nl=d.ncum_nl)
         if t >= 1:
-            tjl, tl, lmax = cas.trans[t]
+            tjl, tl, lmax = cas.trans_of(0, 0)[t]  # SLFIRST: the first compound nucleus's set
             trans[t] = DensTrans(
                 egrid_mev=cas.rg.egrid, ebegin=cas.rg.ebegin[t],
                 eend=min(int(eend[t]), cas.rg.maxen), maxen=cas.rg.maxen,
                 tjl=tjl, tl=tl, lmax=lmax)
+            if t >= 2 and cas.trans.get("tlog", False):  # LOGTINT (default OFF): log-T Lagrange, charged types
+                trans[t].tlog = cas.trans["tlog"]  # True / "c" = ln T, "l" = TLOGIT logit T
+            if t >= 2 and "tlogref" in cas.trans:  # LOGTINT G0 reference (default OFF)
+                trans[t].tlogref = cas.trans["tlogref"][t]
     return DensPrepareInputs(
         exinc_mev=float(etotal_mev), dexinc_mev=0.0, s_n_mev=sp.sep_mev[1], gammax=gammax,
         lmaxinc=st.lmaxinc, k0=cas.k0, fnorm=cas.fiso(), residuals=residuals, trans=trans,
         gamma_strength=cas.gamma_strength(cas.Zt, cas.At), primary=True,
         flagfullhf=flagfullhf, transeps=cas.transeps,
-        gamma_params=cas.gamma_params(cas.Zt, cas.At))  # PARAMWIRE: the run's parameter set
+        gamma_params=cas.gamma_params(cas.Zt, cas.At),  # PARAMWIRE: the run's parameter set
+        binquad=_binquad_of(cas))
+
+
+def _binquad_of(cas):
+    """BINQUAD: (nodes, mother tilt, residual tilt) under `binquad y`, else None (TALYS)."""
+    from physics.hf.core.grids import binquad_mode, binquad_params, binquad_photon
+
+    return binquad_params(cas.options) + (binquad_photon(cas.options),) if binquad_mode(cas.options) else None
 
 
 def compound_inputs(cas, st, binp, cinp, etotal_mev: float, add: dict,
@@ -106,7 +118,7 @@ def compound_inputs(cas, st, binp, cinp, etotal_mev: float, add: dict,
     tjlinc = tjl_t if grad else tjl_t.detach().numpy()
     out = CompoundInputs(
         e_inc_mev=binp.e_inc_mev,
-        cnfactor_mb=cf.cn_factor_mb if grad else float(cf.cn_factor_mb),
+        cnfactor_mb=_cnfactor(cf, getattr(binp, "xseps_mb", XSEPS_MB), grad),
         xsflux_mb=float(cf.xs_flux_mb),
         xsreacinc_mb=inc.sigma_reac_mb[0] if grad else float(inc.sigma_reac_mb[0]),
         j2beg=cf.j2beg, j2end=cf.j2end, targetspin2=binp.targetspin2,
@@ -121,6 +133,28 @@ def compound_inputs(cas, st, binp, cinp, etotal_mev: float, add: dict,
     )
     out.residuals = res
     return out
+
+
+XSEPS_MB = 1.0e-7  # input_numerics.f90:81, TALYS's default `xseps`
+
+
+def _cnfactor(cf, xseps_mb: float, grad: bool = False):
+    """`CNfactor`, or 0 where there is no compound flux to decay.
+
+    ENGDEFECT: comptarget.f90:256 returns at once when `xsflux <= xseps` (direct + pre-equilibrium
+    exhaust the reaction cross section), so TALYS has no binary compound population, no compound
+    elastic and no first-chance fission at that energy. Running comptarget anyway with
+    `CNfactor * cfratio < 0` gives NEGATIVE populations: compound elastic -3e5 mb, hence nonelastic
+    = sigma_R - xscompel at x100 sigma_R, and negative fission (n + Am-308 at 0.34 MeV, where DWBA
+    puts 3.1e5 mb into one 2+ level; 565 far chart nuclei). A zero CNfactor zeroes exactly what the
+    early return leaves unset.
+
+    TALYS: comptarget.f90:256
+    Test: tests/hf/test_engdefect.py
+    """
+    if float(cf.xs_flux_mb) <= float(np.float32(xseps_mb)):
+        return cf.cn_factor_mb * 0.0 if grad else 0.0
+    return cf.cn_factor_mb if grad else float(cf.cn_factor_mb)
 
 
 class _NormView:

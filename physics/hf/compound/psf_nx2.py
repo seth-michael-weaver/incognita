@@ -68,6 +68,18 @@ def _pack(gp):
         else:
             etab = np.zeros(NUMGAMQRPA + 2)
             ftab = np.zeros((NUMGAMQRPA + 2, 1))
+        # SPEEDFIX: the tabulated M1 (strengthM1 >= 8, fstrength.f90:356) after the E1 table in the
+        # same arrays (column 0 only: the M1 has no temperature axis); ip[9..12] say where
+        qrpa_m1 = gp.qrpaexist(0, 1) and gp.strengthM1 >= 8
+        ncol, ie_m1, off_e, off_f = ftab.shape[1], 0, etab.size, ftab.size
+        if qrpa_m1:
+            e_m1, f_m1 = table_arrays(gp, 0, 1)
+            e_m1 = np.asarray(e_m1.detach().numpy(), dtype=np.float64)
+            f_m1 = np.asarray(f_m1.detach().numpy(), dtype=np.float64)
+            f_m1 = f_m1 if f_m1.ndim == 1 else f_m1[:, 0]
+            ie_m1 = e_m1.size - 1
+            etab = np.concatenate([etab, e_m1])
+            ftab = np.concatenate([ftab.ravel(), f_m1])
         n_t = gp.n_tqrpa if qrpa else 1
         tq = (np.ascontiguousarray(gp.tqrpa_mev.detach().numpy(), dtype=np.float64)
               if gp.tqrpa_mev is not None else np.zeros(1))
@@ -75,7 +87,9 @@ def _pack(gp):
             pack = None
         else:
             ip = np.array([L, int(qrpa), int(bool(gp.flagupbend)), gp.strengthM1, gp.zix + gp.nix,
-                           n_t, etab.size - 1, NUMGAMQRPA, ftab.shape[1]], dtype=np.int64)
+                           n_t, off_e - 1, NUMGAMQRPA, ncol, int(qrpa_m1), ie_m1, off_e, off_f],
+                          dtype=np.int64)
+            etab, ftab = np.ascontiguousarray(etab), np.ascontiguousarray(ftab)
             dp = np.array([_f(gp.S_k0_mev), _f(gp.delta_mev), _f(gp.alev_per_mev), _f(gp.beta2),
                            PI2H2C2])
             with np.errstate(divide="ignore", invalid="ignore"):

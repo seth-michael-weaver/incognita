@@ -515,13 +515,18 @@ def test_rhogrid_torch_path_matches_numpy(monkeypatch):
     assert d == 0.0, d
 
 
-def test_a_float_override_at_the_talys_default_reproduces_the_unoverridden_level_density():
+def test_a_float_override_at_the_talys_default_reproduces_the_unoverridden_level_density(monkeypatch):
     """A `density_overrides` of the TALYS defaults must be the un-overridden `LDNucleus`.
 
     This is the test that the override plumbing does not quietly take a different branch: the
-    same numbers have to come out of the cached arm and out of the rebuilt one.
+    same numbers have to come out of the cached arm and out of the rebuilt one. The rebuilt arm is
+    the Python reference, so the cached arm is pinned to it too (HF_NX2_LD=0): the C level-density
+    kernel is held to closeness, not bits, in tests/hf/test_nx2_ld.py.
     """
-    from physics.hf.compound.dens_reference import _ld_of
+    from physics.hf.compound.dens_reference import _ld_of, _ld_of_cached
+
+    monkeypatch.setenv("HF_NX2_LD", "0")
+    _ld_of_cached.cache_clear()
 
     ld0, ntop0, nl0, ncum0 = _ld_of(26, 57, 26, 56)
     ld1, ntop1, nl1, ncum1 = _ld_of(26, 57, 26, 56, {"aadjust": 1.0, "pshift": 0.0})

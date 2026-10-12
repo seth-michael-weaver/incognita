@@ -11,7 +11,7 @@ that says which regime the value is in (measured, anchored, interpolated or extr
 the exam the model was graded on and the pre-registered, timestamped predictions for nuclei not yet measured are all
 public, so every claim below can be checked.
 
-Code: Apache-2.0 · Data: CC-BY-4.0 · Status: v0.1 preview
+Code: Apache-2.0 · Data: CC-BY-4.0 · Status: v0.1 preview · Engine: 2026-10 (tag `engine-2026-10`)
 
 ---
 
@@ -76,6 +76,30 @@ uv run python scripts/bestfit/engine_curves.py --arm nodata --only 26-56,79-197 
 
 Each target writes `out/engine/<ZZZ>_<AAA>.npz` with the capture curve on the 64-point grid, the partial channels and the
 resolved TALYS keyword cards. The (n,α) recipe described below is enabled with `INCOGNITA_NA_V1=1 ... --arm lines`.
+
+**Engine version 2026-10.** The engine was updated on 2026-10-12; tag `engine-2026-10` marks it, and commit `7246b93`
+is the last commit with the v0.1 engine. The v0.1 library, the benchmark and every other number in this README were
+produced with the v0.1 engine and have not been re-measured with this one. With no switch set, neutron-induced results
+are unchanged from v0.1 on the check targets Fe-56, Zr-90, Pb-208 and U-238. Changes that apply without a switch:
+keyword cards for giant resonances and the exciton model, which v0.1 ignored, are now applied, and charged-particle
+projectiles are handled more faithfully. New physics, all off by default: pre-equilibrium photon emission, M1/scissors
+photon strength, a constant-temperature level-density anchor on the complete level scheme, measured neutron strength
+functions at low energy, coupling schemes from measured structure, transition states at fission saddles, isomeric
+residual production and emission spectra. The native kernels are faster. The full-physics configuration is:
+
+```bash
+export INCOGNITA_ENGPHYS=dircap,pespin INCOGNITA_FEWRES=off INCOGNITA_PEWINDOW=g INCOGNITA_ISOE2=e \
+       INCOGNITA_TRITFID=1 INCOGNITA_RESISO=1 INCOGNITA_CCSOCB=1 INCOGNITA_MPEFIX=1 INCOGNITA_CPINC2=1 \
+       INCOGNITA_SPECOUT=1 INCOGNITA_SPECOUT_DA=0 INCOGNITA_LEVJ=1 INCOGNITA_C6FIX=1 INCOGNITA_TLOGIT=y \
+       INCOGNITA_RIPL_LEVELS_PARAM=/path/to/RIPL-4/levels/levels-param.data
+# keyword lines for every target; append ";collrule svw" when N - Z >= 20
+export INCOGNITA_TALYS_FIT_LINES="preequilibrium y;multipreeq y;knockfix2 y;leeshell nm;ctwindow2 y;peunits y;fists2 y;sigavcont y;m1share r"
+# optional, with your own table of measured strength functions (columns Z,A,S0,S1):
+# export INCOGNITA_SFUNC=u1 INCOGNITA_SFUNC_SCOPE=first INCOGNITA_SFUNC_TABLE=strength_functions.csv
+uv run python scripts/bestfit/engine_curves.py --arm nodata --e1 stock --only 26-56 --out out/full --cpus 0-0
+```
+
+Per-target keyword lines can be added in a file named by `INCOGNITA_TALYS_FIT_LINES_FILE`.
 
 **Reproduce the benchmark tables:**
 

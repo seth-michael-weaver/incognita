@@ -128,6 +128,182 @@ class PSFTable:
     f_raw_mev3: Tensor  # (301, nT)
 
 
+#: LEESHELL: magic numbers of the valence rule (jj closures; arm b adds Z/N = 20)
+LEESHELL_N = (28, 50, 82, 126)
+LEESHELL_B = (20, 28, 50, 82, 126)
+
+
+def leeshell_mode(options) -> int:
+    """LEESHELL: keyword `leeshell n|nm|b`, else env INCOGNITA_LEESHELL; n / unset = 0 = OFF = TALYS.
+    1 (nm): no M1 upbend in a decaying nucleus with N in LEESHELL_N; 2 (b): N or Z in LEESHELL_B.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    v = str(getattr(options, "leeshell", "n") or "n").strip().lower()
+    if v in ("", "n"):
+        v = os.environ.get("INCOGNITA_LEESHELL", "n").strip().lower() or "n"
+    if v in ("n", "0"):
+        return 0
+    if v in ("nm", "1"):
+        return 1
+    if v in ("b", "2"):
+        return 2
+    raise ValueError(f"leeshell: expected n, nm or b, got {v!r}")
+
+
+def m1share_mode(options) -> int:
+    """M1SHARE: keyword `m1share n|s|t`, else env INCOGNITA_M1SHARE; n / unset = 0 = OFF = TALYS.
+    1 (s): spin-flip part of the tabulated M1 replaced by an independent SLO (m1share_slo), E1 table x the
+    nucleus's `m1kappa` cell; 2 (t): as s, but kappa acts on the E1 table only below E_GDR - Gamma_GDR,
+    linear blend to 1 at E_GDR, 1 above. 3 (p, E1M1NR): non-rotors only (|beta2| < E1M1NR_BETA): the M1 table as s,
+    and the same strength taken off the E1 table at every photon energy, so f_E1 + f_M1 is held pointwise
+    (e1m1nr_transfer); no kappa. Rotors are OFF. 4 (r, M1ROT): rotors only (|beta2| >= E1M1NR_BETA): as p, but the
+    spin-flip SLO is split by deformation into K = 0 / K = 1 components (m1rot_slo); non-rotors OFF. 5 (b): p on
+    non-rotors + r on rotors (= M1ROT arm RB, r stacked on E1M1NR's B68).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    v = str(getattr(options, "m1share", "n") or "n").strip().lower()[:1]
+    if v in ("", "n"):
+        v = os.environ.get("INCOGNITA_M1SHARE", "n").strip().lower()[:1] or "n"
+    if v in ("n", "0"):
+        return 0
+    if v in ("s", "1"):
+        return 1
+    if v in ("t", "2"):
+        return 2
+    if v in ("p", "3"):
+        return 3
+    if v in ("r", "4"):
+        return 4
+    if v in ("b", "5"):
+        return 5
+    raise ValueError(f"m1share: expected n, s, t, p, r or b, got {v!r}")
+
+
+#: M1SHARE: (16 pi / 9) (hbar c)^-3 in MeV^-3 per (mu_N^2 / MeV): f_M1 = M1_CONV * dB(M1)up/dE
+M1_CONV = 11.5473e-9
+#: M1SHARE: spin-flip Sum B(M1)up = M1SF_C * A mu_N^2 (geometric mean of B/A over Ca-48, Zr-90, Sn (112-124 mean),
+#: Pb-208 measured (p,p') 0 deg / (e,e') totals; development notes s2), SLO centroid 41 A^-1/3 MeV, width 4 MeV
+M1SF_C = 0.0854
+M1SF_G = 4.0
+M1SF_SPLIT_W = 0.5
+
+
+def m1share_slo(A: int, e: np.ndarray, e0: float | None = None) -> np.ndarray:
+    """M1SHARE spin-flip SLO f(E) [MeV^-3], TALYS SLO shape (fstrength.f90:148-156, l = 1) with integral
+    over 0..inf equal to M1_CONV * M1SF_C * A. Centroid e0 (default 41 A^-1/3 MeV).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    e0, g = (41.0 * A ** (-1.0 / 3.0) if e0 is None else float(e0)), M1SF_G
+    shape = lambda x: x * g**2 / ((x**2 - e0**2) ** 2 + x**2 * g**2)  # noqa: E731
+    grid = np.linspace(0.0, 80.0, 160001)
+    norm = M1_CONV * M1SF_C * A / np.trapezoid(shape(grid), grid)
+    return norm * shape(np.asarray(e, float))
+
+
+#: M1ROT: quadrupole radius coefficient sqrt(5 / 4 pi): R(theta) = R0 (1 + beta2 Y20), so R_par = R0 (1 + a beta2),
+#: R_perp = R0 (1 - a beta2 / 2) (Bohr-Mottelson; the Danos-Okamoto axis split used for the deformed GDR)
+M1ROT_A = float(np.sqrt(5.0 / (4.0 * np.pi)))
+
+
+def m1rot_energies(A: int, beta2: float) -> tuple[float, float]:
+    """M1ROT: K = 0 / K = 1 spin-flip centroids of a deformed nucleus. The published centroid 41 A^-1/3 MeV scales as
+    1 / R (spin-orbit splitting ~ A^-1/3), applied per axis: E_K0 = E0 / (1 + a b2), E_K1 = E0 / (1 - a b2 / 2);
+    splitting E_K1 - E_K0 ~ (3/2) a b2 E0 to first order (prolate: K = 0 lower). No fitted number.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    e0, a = 41.0 * A ** (-1.0 / 3.0), M1ROT_A * float(beta2)
+    return e0 / (1.0 + a), e0 / (1.0 - 0.5 * a)
+
+
+def m1rot_slo(A: int, beta2: float, e: np.ndarray) -> np.ndarray:
+    """M1ROT spin-flip f(E) [MeV^-3] of a rotor: two m1share_slo components at m1rot_energies, weights 1/3 (K = 0, one
+    axis) and 2/3 (K = 1, two axes), each with width M1SF_G; total integral M1_CONV * M1SF_C * A as m1share_slo.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    ek0, ek1 = m1rot_energies(A, beta2)
+    return m1share_slo(A, e, ek0) / 3.0 + 2.0 * m1share_slo(A, e, ek1) / 3.0
+
+
+def m1share_split(A: int, e: np.ndarray) -> np.ndarray:
+    """M1SHARE: weight of the tabulated M1 kept (scissors / low-energy part): logistic step at
+    E_c = 41 A^-1/3 - Gamma/2, width M1SF_SPLIT_W MeV; the part above is the table's spin-flip, replaced.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    ec = 41.0 * A ** (-1.0 / 3.0) - M1SF_G / 2.0
+    return 1.0 / (1.0 + np.exp((np.asarray(e, float) - ec) / M1SF_SPLIT_W))
+
+
+#: E1M1NR: `m1share p` acts only on non-rotors, |beta2| < E1M1NR_BETA (E1TAIL's rotor class, |b2| >= 0.2)
+E1M1NR_BETA = 0.2
+#: E1M1NR: the E1 table never falls below this fraction of its own value (count recorded in e1m1nr_clip)
+E1M1NR_FLOOR = 0.05
+
+
+def _qrpa_guard(f_tab: np.ndarray) -> np.ndarray:
+    """gammapar.f90:240-243 / 402-405 last-point guard on a raw table (copy)."""
+    f = f_tab.copy()
+    for it in range(f.shape[1]):
+        if f[NUMGAMQRPA, it] > f[NUMGAMQRPA - 1, it]:
+            f[NUMGAMQRPA, it] = f[NUMGAMQRPA - 1, it] * 0.9
+    return f
+
+
+def e1m1nr_transfer(gp: "GammaParameters", m1_off: "PSFTable") -> "GammaParameters":
+    """E1M1NR (`m1share p`): gp's M1 table already carries the m1share-s substitution; `m1_off` is the unmodified
+    M1 table. The M1 change dM1(E) = f_M1(on) - f_M1(off), both as TALYS evaluates them (etable/ftable/wtable,
+    table_arrays), is interpolated (linear in E, 0 outside the M1 grid) to the E1 table's evaluated energies and
+    taken off the E1 table there (divided by the E1 ftable, so the evaluated f_E1 falls by exactly dM1), per
+    temperature column (M1 column min(c, last)). E1 floor E1M1NR_FLOOR x its own value. Upbend, E2, M2 untouched.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    e_m, f_on = table_arrays(gp, 0, 1)
+    _, f_off = table_arrays(replace(gp, tables={**gp.tables, (0, 1): m1_off}), 0, 1)
+    e_m = e_m.detach().cpu().numpy()
+    d = (f_on - f_off).detach().cpu().numpy()
+    e_e, _ = table_arrays(gp, 1, 1)
+    e_e = e_e.detach().cpu().numpy()
+    tab = gp.tables[(1, 1)]
+    fr = tab.f_raw_mev3.detach().cpu().numpy().copy()
+    ft = float(gp.ftable[1, 1])
+    clip = 0
+    for c in range(fr.shape[1]):
+        dc = np.interp(e_e[1:], e_m[1:], d[1:, min(c, d.shape[1] - 1)], left=0.0, right=0.0)
+        new = fr[1:, c] - dc / ft
+        low = new < E1M1NR_FLOOR * fr[1:, c]
+        clip += int(low.sum())
+        fr[1:, c] = np.where(low, E1M1NR_FLOOR * fr[1:, c], new)
+    tables = {**gp.tables, (1, 1): PSFTable(tab.e_raw_mev, _t(fr).to(tab.f_raw_mev3.dtype))}
+    return replace(gp, tables=tables, e1m1nr_clip=clip)
+
+
+def leeshell_closed(Z: int, A: int, mode: int) -> bool:
+    """True when the LEESHELL valence rule switches the M1 upbend of nucleus (Z, A) off.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    N = int(A) - int(Z)
+    if mode == 1:
+        return N in LEESHELL_N
+    if mode == 2:
+        return N in LEESHELL_B or int(Z) in LEESHELL_B
+    return False
+
+
 @dataclass(frozen=True)
 class GammaParameters:
     """gammapar.f90 output for one nucleus (Zix, Nix), plus the injected scalars fstrength reads."""
@@ -160,6 +336,10 @@ class GammaParameters:
     alev_per_mev: Tensor | float = 0.0
     beta2: Tensor | float = 0.0
     gamgam_ev: float = 0.0  # experimental <Gamma_gamma>, physical eV (ResonanceData.gamgam_ev)
+    m1share: int = 0  # M1SHARE (Incognita extension): 0 OFF = TALYS, 1 s, 2 t, 3 p, 4 rotor r (tables already substituted)
+    m1kappa: float = 1.0  # M1SHARE: the nucleus's E1 factor (its `m1kappa Z A k` cell), record only
+    e1m1nr_clip: int = -1  # E1M1NR (m1share p): E1 table points held at the floor; -1 = transfer not applied
+    e1_imax: int = 0  # M1SHARE t: wtable stretch pivot index of the UNMODIFIED E1 table (0 = find it in the table, TALYS)
 
     def qrpaexist(self, irad: int, l: int) -> bool:  # noqa: E741
         return (irad, l) in self.tables
@@ -369,6 +549,19 @@ def gamma_parameters(
     egr, ggr, sgr = fill("egr_mev", egr), fill("ggr_mev", ggr), fill("sgr_mb", sgr)
     epr, gpr, tpr = fill("epr_mev", epr), fill("gpr_mev", gpr), fill("tpr_mb", tpr)
 
+    # ISOE2 (INCOGNITA_ISOE2=e, default OFF): collective quasi-continuum E2 in the E2 Lorentzian slot (irad 1, l 2, i 1);
+    # user-given values win (fill above), OFF never imports the module
+    # ISOHOLD: INCOGNITA_ISOE2=g = the same term only where the core E(2+) < 1.0 MeV (collective nuclei)
+    _ie2 = os.environ.get("INCOGNITA_ISOE2", "").strip().lower()
+    if L1 > 2 and _ie2 in ("e", "g"):
+        from physics.hf.gamma import isoe2
+
+        lz = isoe2.lorentzian(int(Z), int(A), PI2H2C2 / 5.0)
+        if _ie2 == "g" and (isoe2.core_values(int(Z), int(A)) or (99.0, 0.0))[0] >= 1.0:
+            lz = None
+        if lz is not None and tpr[1, 2, 1] == 0.0 and epr[1, 2, 1] == 0.0 and gpr[1, 2, 1] == 0.0:
+            tpr[1, 2, 1], epr[1, 2, 1], gpr[1, 2, 1] = lz
+
     # gammapar.f90:94-115 -- E1 GDR from the RIPL table unless flagpsfglobal
     if not flagpsfglobal:
         rec = _read_gdr(nuclide_symbol(Z)).get(A)
@@ -497,6 +690,59 @@ def gamma_parameters(
         if sgr[0, l, 1] == 0.0:
             sgr[0, l, 1] = sgr[0, l - 1, 1] * 8.0e-4  # propagates the -1 sentinel; fixed below
 
+    # M1SHARE (Incognita extension, not TALYS): `m1share s|t`. The tabulated M1 (strengthM1 8: D1M+QRPA spin-flip +
+    # scissors) keeps only its part below E_c = E_sf - Gamma_sf/2 (m1share_split; scissors / low energy, still x the
+    # card's ftable m1); the spin-flip above is replaced by an independent SLO (m1share_slo, NOT x ftable m1). The
+    # E1 table is multiplied by the nucleus's `m1kappa Z A k` cell (1 without a cell): s everywhere, t only below
+    # E_GDR - Gamma_GDR (first GDR hump as loaded) with a linear blend to 1 at E_GDR. Upbend, E2, M2 untouched.
+    m1mode = m1share_mode(options)
+    m1rot = False
+    if m1mode in (4, 5):  # M1ROT r (rotors only) / b (p on non-rotors + r on rotors)
+        if not abs(b2) < E1M1NR_BETA:
+            m1mode, m1rot = 3, True
+        else:
+            m1mode = 3 if m1mode == 5 else 0
+    elif m1mode == 3 and not abs(b2) < E1M1NR_BETA:
+        m1mode = 0  # E1M1NR: rotors stay TALYS
+    m1kap = 1.0
+    e1_imax = 0
+    m1_off_raw = None
+    if m1mode == 3:  # E1M1NR: keep the unmodified M1 table and the unmodified E1 stretch pivot
+        if (0, 1) in tables and (1, 1) in tables:
+            m1_off_raw = tables[(0, 1)]
+            f0 = tables[(1, 1)][1][1:, 0]
+            e1_imax = int(np.argmax(f0 == f0.max())) + 1 if f0.max() > 0 else 0
+        else:
+            m1mode = 0
+    if m1mode:
+        kv = ov.get("m1kappa_cards")
+        if kv is not None and np.isfinite(np.asarray(kv, float)[1, 1, 0]):
+            m1kap = float(np.asarray(kv, float)[1, 1, 0])
+        if (0, 1) in tables:
+            e_raw, f_tab = tables[(0, 1)]
+            ftm1 = float(fill("ftable", ftable)[0, 1])
+            em = e_raw + float(fill("etable_mev", etable)[0, 1])
+            w = m1share_split(A, em)
+            sf = m1rot_slo(A, b2, em) if m1rot else m1share_slo(A, em)  # M1ROT: deformation-split spin-flip
+            add = sf / (ONETHIRD * PI2H2C2 * ftm1)
+            f_new = f_tab * w[:, None] + add[:, None]
+            f_new[0, :] = f_tab[0, :]
+            tables[(0, 1)] = (e_raw, f_new)
+        if (1, 1) in tables and m1kap != 1.0 and m1mode != 3:
+            e_raw, f_tab = tables[(1, 1)]
+            if m1mode == 2:  # keep TALYS's stretch pivot (first T=0 maximum) of the unmodified table: kappa(E) lowers the
+                f0 = f_tab[1:, 0]  # first GDR hump of a deformed nucleus and would move the maximum to the second hump
+                e1_imax = int(np.argmax(f0 == f0.max())) + 1 if f0.max() > 0 else 0
+            ee = e_raw + float(fill("etable_mev", etable)[1, 1])
+            if m1mode == 1:
+                b = np.ones_like(ee)
+            else:
+                eg, gg = float(egr[1, 1, 1]), float(ggr[1, 1, 1])
+                b = np.clip((eg - ee) / gg, 0.0, 1.0)
+            f_new = f_tab * (1.0 + (m1kap - 1.0) * b)[:, None]
+            f_new[0, :] = f_tab[0, :]
+            tables[(1, 1)] = (e_raw, f_new)
+
     # last-point guard, gammapar.f90:240-243 and 402-405
     psf_tables: dict[tuple[int, int], PSFTable] = {}
     for key, (e_raw, f_tab) in tables.items():
@@ -507,6 +753,19 @@ def gamma_parameters(
         psf_tables[key] = PSFTable(_t(e_raw), _t(onethird * PI2H2C2 * f))
 
     upb = fill("upbend", upb)
+    # LEESHELL (Incognita extension, default OFF): the M1 low-energy enhancement needs open valence
+    # shells (recoupling of high-j proton AND neutron spins); at a closed shell the default M1 upbend
+    # strength C is 0. A rule on the DEFAULT, so explicit upbendc cards below still win (as in TALYS).
+    if leeshell_closed(Z, A, leeshell_mode(options)):
+        upb[0, 1, 1] = 0.0
+    # LEESHELL fidelity fix: per-nucleus upbendc/e/f cards replace the default (a user 0 included,
+    # input_gammapar.f90:392-407), the *adjust cards multiply (fstrength.f90:489-491)
+    if "upbend_cards" in ov:
+        v = np.asarray(ov["upbend_cards"], float)
+        upb = np.where(np.isnan(v), upb, v)
+    if "upbendadjust_cards" in ov:
+        v = np.asarray(ov["upbendadjust_cards"], float)
+        upb = upb * np.where(np.isnan(v), 1.0, v)
     if tmc:  # UQ1: the E1 table's ftable/wtable, as TALYS's `ftable Z A f 1 E1` would set them
         if strengthM1 != 3 and float(tmc.get("sgr_m1", 1.0)) != 1.0:
             raise NotImplementedError("UQ1: sgr(M1) factor is wired for strengthM1 3 only")
@@ -541,6 +800,9 @@ def gamma_parameters(
         alev_per_mev=alev_per_mev,
         beta2=beta2,
         gamgam_ev=gamgam_ev,
+        m1share=4 if m1rot else m1mode,
+        m1kappa=m1kap if m1mode else 1.0,
+        e1_imax=e1_imax,
     )
     # tensors from overrides keep their autograd graph (fill() only decided which entries are set)
     for name in (
@@ -583,6 +845,13 @@ def gamma_parameters(
                         (prev * f if f != 1.0 else prev).reshape(1))
         gp = replace(gp, **new)
 
+    # ETABLEFIX: the `*adjust` keywords. TALYS applies the table ones when it reads the table
+    # (gammapar.f90:261-267, 437-443, 566) and the resonance ones inside fstrength
+    # (fstrength.f90:158-173, 456-471), so both reach gammapar's own fstrength(E1, 7 MeV) call
+    # below: the E1 factors go on before it, the M1 ones after (the M1 normalisation itself uses
+    # the unadjusted egr/ggr(M1), gammapar.f90:348-349).
+    gp = _apply_adjust(gp, ov, 1)
+
     # gammapar.f90:287-296 -- RIPL-1/2 M1 normalisation needs the E1 strength at 7 MeV
     if strengthM1 <= 2 or strengthM1 == 4:
         from physics.hf.gamma.strength import fstrength_gp
@@ -605,7 +874,63 @@ def gamma_parameters(
                 if sgr[0, l, 1] < 0.0:
                     sg[0, l, 1] = sg[0, l - 1, 1] * 8.0e-4
             gp = replace(gp, sgr_mb=sg)
+    gp = _apply_adjust(gp, ov, 0)
+    if m1_off_raw is not None:  # E1M1NR: hold f_E1 + f_M1 pointwise (after every etable/ftable/wtable/adjust)
+        gp = e1m1nr_transfer(gp, PSFTable(_t(m1_off_raw[0]), _t(onethird * PI2H2C2 * _qrpa_guard(m1_off_raw[1]))))
+    # ISOHOLD (INCOGNITA_ISOHOLD="Z,A,h", default unset = OFF): the whole dipole (l = 1, E and M) strength of nucleus (Z, A)
+    # times h; every l = 1 term of fstrength is linear in sgr / tpr / ftable (tables) / upbend C, so all paths carry it
+    _ih = os.environ.get("INCOGNITA_ISOHOLD", "").strip()
+    if _ih:
+        hz, ha, hh = _ih.split(",")
+        if int(hz) == int(Z) and int(ha) == int(A):
+            h = float(hh)
+            sg, tp, ft, up = gp.sgr_mb.clone(), gp.tpr_mb.clone(), gp.ftable.clone(), gp.upbend.clone()
+            sg[:, 1, :] = sg[:, 1, :] * h
+            tp[:, 1, :] = tp[:, 1, :] * h
+            ft[:, 1] = ft[:, 1] * h
+            up[:, 1, 1] = up[:, 1, 1] * h
+            gp = replace(gp, sgr_mb=sg, tpr_mb=tp, ftable=ft, upbend=up)
     return gp
+
+
+#: `*adjust` keyword -> (field, how): TALYS `et = etable + etableadjust`, `ft = ftable *
+#: ftableadjust`, `wt = wtable * wtableadjust` (gammapar.f90:261-267, 437-443, 566) and
+#: `egr1 = egr * egradjust` etc. (fstrength.f90:158-173, 456-471; `spr` fills tpr)
+_ADJUST = (
+    ("etableadjust", "etable_mev", "add"),
+    ("ftableadjust", "ftable", "mul"),
+    ("wtableadjust", "wtable", "mul"),
+    ("egradjust", "egr_mev", "mul"),
+    ("ggradjust", "ggr_mev", "mul"),
+    ("sgradjust", "sgr_mb", "mul"),
+    ("epradjust", "epr_mev", "mul"),
+    ("gpradjust", "gpr_mev", "mul"),
+    ("spradjust", "tpr_mb", "mul"),
+)
+
+
+def _apply_adjust(gp: GammaParameters, ov: dict, irad: int) -> GammaParameters:
+    """`gp` with the radiation type `irad`'s `*adjust` overrides applied (zero = not set).
+
+    TALYS: gammapar.f90:261-267, 437-443, 566; fstrength.f90:158-173, 456-471
+    Test: tests/hf/test_etablefix.py
+    """
+    new = {}
+    for key, field, how in _ADJUST:
+        v = ov.get(key)
+        if v is None:
+            continue
+        a = np.asarray(v.detach().cpu().numpy() if isinstance(v, Tensor) else v, float)
+        if not a[irad].any():
+            continue
+        base = new.get(field, getattr(gp, field))
+        sel = np.zeros(a.shape, bool)
+        sel[irad] = a[irad] != 0.0
+        if how == "add":
+            new[field] = base + _t(np.where(sel, a, 0.0)).to(base.dtype)
+        else:
+            new[field] = base * _t(np.where(sel, a, 1.0)).to(base.dtype)
+    return replace(gp, **new) if new else gp
 
 
 def table_arrays(gp: GammaParameters, irad: int, l: int) -> tuple[Tensor, Tensor]:  # noqa: E741
@@ -627,6 +952,8 @@ def table_arrays(gp: GammaParameters, irad: int, l: int) -> tuple[Tensor, Tensor
         f0 = f[1:, 0]
         # first maximum wins (strict `>` in gammapar.f90:571)
         imax = int(torch.argmax((f0 == f0.max()).to(torch.int64))) + 1 if f0.max() > 0 else None
+        if (irad, l) == (1, 1) and gp.e1_imax > 0:  # M1SHARE t: pivot of the unmodified table
+            imax = gp.e1_imax
         if imax is not None:
             emid = e[imax]
             e = torch.cat([e[:1], emid + (e[1:] - emid) * wt])

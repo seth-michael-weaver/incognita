@@ -25,9 +25,11 @@ contract test can anchor, so its four routines are named in the docstrings that 
 Two notes on faithfulness.
 
 * `ParabFit` calls `WPLFT`, a standardised-variable formulation of an unweighted
-  least-squares fit of ``y = a1 + a2 x + a3 x^2``. :func:`parab_fit` solves the same normal
-  equations directly (`torch.linalg.lstsq`), which is the same estimator, so that the fitted
-  half-width stays differentiable in the path energies. Only ``a3`` reaches the physics: the
+  least-squares fit of ``y = a1 + a2 x + a3 x^2``. :func:`parab_fit` solves the same centred
+  normal equations in closed form with scalar tensor ops in a fixed order (CENGFIS13), which is the
+  same estimator, so that the fitted half-width stays differentiable in the path energies and is
+  bitwise reproducible (`torch.linalg.lstsq`, used before and kept under `HF_WKB_LSTSQ=1`, goes
+  through MKL LAPACK, whose last bit depends on the heap alignment of its inputs). Only ``a3`` reaches the physics: the
   barrier *height* TALYS uses is the tabulated ``vfis`` at the extremum, not the fitted ``a1``
   (wkb.f90:122).
 * TALYS runs the whole WKB path in `real(sgl)`. This port is float64 (contract §4.1), so the
@@ -250,10 +252,47 @@ def parab_fit(imax: int, npfit: int, rmiu: float, path: FissionPath) -> tuple[Te
     idx = torch.arange(lo, hi + 1, device=path.vfis_mev.device)
     x = path.betafis[idx] - path.betafis[imax]
     y = path.vfis_mev[idx]
-    design = torch.stack([torch.ones_like(x), x, x * x], dim=1)
-    a = torch.linalg.lstsq(design, y.unsqueeze(1)).solution.squeeze(1)
-    width = torch.sqrt(2.0 * torch.abs(a[2]) / _t(rmiu, x.device))
-    return a[0], width
+    if __import__("os").environ.get("HF_WKB_LSTSQ", "0") == "1":
+        design = torch.stack([torch.ones_like(x), x, x * x], dim=1)
+        a = torch.linalg.lstsq(design, y.unsqueeze(1)).solution.squeeze(1)
+        width = torch.sqrt(2.0 * torch.abs(a[2]) / _t(rmiu, x.device))
+        return a[0], width
+    a0, a2 = _wplft2(x, y)
+    width = torch.sqrt(2.0 * torch.abs(a2) / _t(rmiu, x.device))
+    return a0, width
+
+
+def _wplft2(x: Tensor, y: Tensor) -> tuple[Tensor, Tensor]:
+    """`(a1, a3)` of the unweighted least-squares parabola ``y = a1 + a2 x + a3 x^2``, WPLFT's way:
+    centred moments of ``x``, ``x^2`` and ``y`` summed point by point in index order, the 2x2
+    centred normal equations solved by Cramer's rule, ``a1 = <y> - a2 <x> - a3 <x^2>``. Every
+    operation is a 0-d tensor op in a fixed order, so the result does not depend on memory layout.
+
+    TALYS: wkbfunctions.f:185 (WPLFT)
+    Test: tests/hf/test_cengfis13.py
+    """
+    n = int(x.shape[0])
+    xs = [x[i] for i in range(n)]
+    ys = [y[i] for i in range(n)]
+    qs = [xi * xi for xi in xs]
+    sx, sq, sy = xs[0], qs[0], ys[0]
+    for i in range(1, n):
+        sx, sq, sy = sx + xs[i], sq + qs[i], sy + ys[i]
+    mx, mq, my = sx / n, sq / n, sy / n
+    dx = [xi - mx for xi in xs]
+    dq = [qi - mq for qi in qs]
+    dy = [yi - my for yi in ys]
+    sxx, sxq, sqq, sxy, sqy = dx[0] * dx[0], dx[0] * dq[0], dq[0] * dq[0], dx[0] * dy[0], dq[0] * dy[0]
+    for i in range(1, n):
+        sxx = sxx + dx[i] * dx[i]
+        sxq = sxq + dx[i] * dq[i]
+        sqq = sqq + dq[i] * dq[i]
+        sxy = sxy + dx[i] * dy[i]
+        sqy = sqy + dq[i] * dy[i]
+    det = sxx * sqq - sxq * sxq
+    a1 = (sxy * sqq - sqy * sxq) / det
+    a2 = (sxx * sqy - sxq * sxy) / det
+    return my - a1 * mx - a2 * mq, a2
 
 
 # ----------------------------------------------------------------------------- momentum integrals

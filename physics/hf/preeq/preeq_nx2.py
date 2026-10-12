@@ -195,6 +195,8 @@ def preeq_correct(spectra: dict, inp, disc) -> dict | None:
     xsdisc = np.zeros((C, 7, nlmax))
     k0 = inp.k0
     xseps = 1.0e-7  # A0_talys_mod.f90 xseps
+    from physics.hf.preeq.exciton import c6fix_on
+    c6 = c6fix_on()
     egall = inp.egrid_mev.detach().cpu().numpy()
     deall = inp.deltae_mev.detach().numpy()
     etopall = disc.etop_mev.detach().numpy()
@@ -245,6 +247,8 @@ def preeq_correct(spectra: dict, inp, disc) -> dict | None:
                         elast = esd_l[NL]
                         rb = (float(etopall[c, nd]) - elast) / float(deall[c, nd])
                         if abs(rb) > 1.0:
+                            rb = 0.0
+                        if rb < 0.0 and c6:  # C6FIX (exciton.c6fix_on): Elast above the grid's top bin
                             rb = 0.0
                         if t != k0:
                             xsdisc[c, t, NL] = xp[c, t, nd] * rb

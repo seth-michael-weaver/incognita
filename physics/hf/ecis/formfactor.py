@@ -34,6 +34,8 @@ Two traps, both read off the Fortran and both easy to get wrong:
 
 from __future__ import annotations
 
+import os
+
 import math
 from dataclasses import dataclass
 
@@ -238,6 +240,31 @@ def rotational_form_factors(
 #   * `directecis.f90:133` leaves it 'F'              -> the DWBA transition form factor is REAL.
 DWBA_PARTS: tuple[str, ...] = ("v", "vd")  # real volume, real surface
 ALL_CENTRAL_PARTS: tuple[str, ...] = ("v", "w", "vd", "wd")
+DWBAIMAG_ENV = "INCOGNITA_DWBAIMAG"
+
+
+def dwba_parts(options=None) -> tuple[str, ...]:
+    """VIBLEN (off by default): the Woods-Saxon terms the DWBA transition potential is built from.
+
+    Keyword `dwbaimag n|y` (env `INCOGNITA_DWBAIMAG`, used when the keyword is off). `n` = TALYS:
+    `directecis.f90:137` leaves ecis1(12:12) = 'F', so the one-step form factor is the derivative
+    of the REAL potential only. `y` deforms the imaginary volume and surface terms as well
+    (ECIS lo(12) = T), i.e. the collective-model form factor -delta dU/dr of the full complex
+    optical potential U = V + iW -- the coupling TALYS's own coupled-channels deck uses
+    (`incidentecis.f90:257`) for the same kind of level. Same deformation, same bookkeeping
+    (`lo(6)`); nothing else moves.
+
+    TALYS: directecis.f90:137 (`ecis1` flags), incidentecis.f90:257
+    Test: tests/hf/test_viblen.py
+    """
+    v = str(getattr(options, "dwbaimag", "n") or "n").strip().lower()
+    if v in ("n", "0", ""):
+        v = os.environ.get(DWBAIMAG_ENV, "").strip().lower()
+    if v in ("y", "1", "on"):
+        return ALL_CENTRAL_PARTS
+    if v in ("", "n", "0", "off"):
+        return DWBA_PARTS
+    raise ValueError(f"dwbaimag: unknown value {v!r} (n|y)")
 
 
 def derivative_form_factor(

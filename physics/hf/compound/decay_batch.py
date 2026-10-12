@@ -63,7 +63,7 @@ class _TypeWidths:
 
 def _interp_tl(eout: np.ndarray, egrid: np.ndarray, ebegin: int, eend: int, maxen: int,
                tl: np.ndarray, lmax: np.ndarray, fn: float, transeps: float,
-               ) -> tuple[np.ndarray, np.ndarray]:
+               tlog: bool | str = False, ref=None, t: int = 0) -> tuple[np.ndarray, np.ndarray]:
     """densprepare.f90's pol2 interpolation of `Tl` to every (bin, row) Eout, and `lmax` there.
     (m, n, L) and (m, n); the same arithmetic as `prepare.densprepare`, over two axes.
 
@@ -101,9 +101,26 @@ def _interp_tl(eout: np.ndarray, egrid: np.ndarray, ebegin: int, eend: int, maxe
     if isinstance(tl, Tensor):  # DIFFPARAM: the same pol2, on the optical parameters' graph
         w1, w2, w3 = (torch.as_tensor(w, dtype=DTYPE) for w in (w1, w2, w3))
         z = torch.zeros((), dtype=DTYPE)
-        u = w1 * tl[na] + w2 * tl[nb] + w3 * tl[nc]
+        if ref is not None:
+            raise NotImplementedError("TLOGREF (G0 reference) is not wired on the DIFFPARAM graph")
+        if tlog:  # LOGTINT (default OFF; compound/tlog.py)
+            from physics.hf.compound.tlog import lagr_log_torch
+
+            u = lagr_log_torch(w1, w2, w3, tl[na], tl[nb], tl[nc], kind=tlog)
+        else:
+            u = w1 * tl[na] + w2 * tl[nb] + w3 * tl[nc]
         u = torch.where(torch.as_tensor(keep), u, z)
         return torch.where(u < transeps, z, u) * fn, lm
+    if tlog or ref is not None:  # LOGTINT (default OFF; compound/tlog.py)
+        from physics.hf.compound import tlog as _tl
+
+        rv = _tl.interp_ref(eout.reshape(-1), ref[0], ref[2]).reshape(m, n, L) if ref is not None else None
+        _tl.record(t, eout.reshape(-1), na.reshape(-1), w1.reshape(-1, 1), w2.reshape(-1, 1), w3.reshape(-1, 1),
+                   tl[na].reshape(m * n, L), tl[nb].reshape(m * n, L), tl[nc].reshape(m * n, L),
+                   keep.reshape(m * n, L), transeps, None if rv is None else rv.reshape(m * n, L))
+        u = rv if rv is not None else _tl.lagr_log(w1, w2, w3, tl[na], tl[nb], tl[nc], tlog)
+        u = np.where(keep, u, 0.0)
+        return np.where(u < transeps, 0.0, u) * fn, lm
     u = w1 * tl[na] + w2 * tl[nb] + w3 * tl[nc]
     u = np.where(keep, u, 0.0)
     return np.where(u < transeps, 0.0, u) * fn, lm
@@ -119,6 +136,10 @@ class NucleusDecay:
     def __init__(self, cas, st, sp, bins: list[int], device=None):
         from physics.hf.compound.dens_reference import _eendmax
         from physics.hf.compound.prepare import _discfactor
+        from physics.hf.core.grids import binquad_mode
+
+        if binquad_mode(cas.options):  # BINQUAD is native-only: never run the midpoint rule silently
+            raise RuntimeError("binquad: the torch decay widths do not implement it (native nx_widths only)")
 
         self.device = device
         self.bins = list(bins)
@@ -254,10 +275,12 @@ class NucleusDecay:
                 lmaxhf = np.full((m, n), cas.gammax, dtype=np.int64)
                 sfac = 1.0
             else:
-                tjl, tl, lmax = cas.trans[t]
+                tjl, tl, lmax = cas.trans_of(sp.zix, sp.nix)[t]  # SLFIRST: per emitting nucleus
                 eend = min(int(eendmax[t]), cas.rg.maxen)
+                from physics.hf.compound import tlog as _tlg
                 tlm, lm = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
-                                     tl, lmax, float(fnorm[t + 1]), cas.transeps)
+                                     tl, lmax, float(fnorm[t + 1]), cas.transeps,
+                                     tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
                 L = tl.shape[1]
                 lmaxhf = np.where(inrow, lm, 0)
                 lp = np.arange(L)
