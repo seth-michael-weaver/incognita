@@ -1,5 +1,6 @@
 /* Spanish: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.es.ui, {
+  sb_h_eng: "El motor frente a otros códigos", sb_h_terra: "El producto de datos frente a las bibliotecas evaluadas",
   brand: "Dentro de una reacción nuclear", nav_physics: "La física", nav_data: "Todos los núclidos", nav_board: "Marcador", menu: "Menú", site_nav: "Sitio",
   sb_title: "Marcador · Dentro de una reacción nuclear",
   site_nav: "Sitio",

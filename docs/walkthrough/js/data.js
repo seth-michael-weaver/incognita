@@ -68,7 +68,7 @@
   const fromXY = (x, y) => ({ N: Math.floor(x / view.s + view.x0), Z: Math.floor((G.H - y) / view.s + view.y0) });
   function drawChart() {
     const { ctx, W, H } = G, s = view.s, gap = s > 5 ? 1 : 0;
-    ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, H); ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
     // magic numbers: faint lines where shells close
     ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
     for (const m of MAGIC) { const x = toX(m) - 0.5 * gap, y = toY(m) + s; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
@@ -77,6 +77,14 @@
       const x = toX(r.A - r.Z), y = toY(r.Z); if (x < -s || x > W || y < -s || y > H) continue;
       ctx.fillStyle = colorOf(r); ctx.fillRect(x, y, s - gap, s - gap);
     }
+    // glow on the nuclides that stand out in this view (measured, or with measured data), so the valley of stability shines
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    for (const r of rows) {
+      if (!r.A) continue; const lit = mode === "tier" ? r.tier === 0 || r.tier === 1 : mode === "meas" ? r.ncap + r.nmxw > 0 : r.macs > 300;
+      if (!lit) continue; const x = toX(r.A - r.Z), y = toY(r.Z); if (x < -s || x > W || y < -s || y > H) continue;
+      const col = colorOf(r); ctx.shadowColor = col; ctx.shadowBlur = Math.max(6, s * 1.4); ctx.fillStyle = col; ctx.globalAlpha = 0.55; ctx.fillRect(x, y, s - gap, s - gap);
+    }
+    ctx.restore();
     // labels: element symbols along the left edge of each row, mass numbers inside cells when large
     ctx.textBaseline = "middle";
     if (s >= 9) {
@@ -175,6 +183,45 @@
   sug.addEventListener("pointerdown", (e) => { const li = e.target.closest("li"); if (li) { e.preventDefault(); pick(hits[+li.dataset.i]); } });
   q.addEventListener("blur", () => setTimeout(() => { sug.hidden = true; q.setAttribute("aria-expanded", "false"); }, 120));
 
+  // ---------- the nucleus itself: Z protons and N neutrons packed in a sphere, slowly turning (as in the hero) ----------
+  const atom = { cv: $("#dx-atom"), pts: [], t: 0, tx: 0, ty: 0, run: false, key: "" };
+  function ball(col) {
+    const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d"), gr = g.createRadialGradient(20, 18, 2, 32, 32, 32);
+    gr.addColorStop(0, "#ffffff"); gr.addColorStop(0.22, col); gr.addColorStop(0.75, col); gr.addColorStop(1, "#0b1020");
+    g.fillStyle = gr; g.beginPath(); g.arc(32, 32, 31, 0, Math.PI * 2); g.fill(); return c;
+  }
+  const BALL = { p: ball("#ff6a5c"), n: ball("#6f8cff") };
+  function atomSet(Z, A) {
+    const key = Z + "-" + A; if (atom.key === key) return; atom.key = key;
+    const n = Math.max(1, A || Z * 2), rnd = (() => { let s = (Z * 977 + n * 131) % 2147483647 || 1; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+    const P = []; for (let i = 0; i < n; i++) { let x, y, z; do { x = rnd() * 2 - 1; y = rnd() * 2 - 1; z = rnd() * 2 - 1; } while (x * x + y * y + z * z > 1); P.push({ x, y, z, p: false }); }
+    const rb = Math.cbrt(0.62 / n), d0 = 2 * rb * 0.97, lim = 1 - rb;
+    for (let it = 0; it < (n > 150 ? 30 : 50); it++) {
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { const a = P[i], b = P[j], dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z, d = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1e-6; if (d < d0) { const k = (d0 - d) / d * 0.5; a.x -= dx * k; a.y -= dy * k; a.z -= dz * k; b.x += dx * k; b.y += dy * k; b.z += dz * k; } }
+      for (const a of P) { const d = Math.hypot(a.x, a.y, a.z); if (d > lim) { a.x *= lim / d; a.y *= lim / d; a.z *= lim / d; } }
+    }
+    const idx = P.map((_, i) => i); for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    for (let k = 0; k < Math.min(Z, n); k++) P[idx[k]].p = true;
+    atom.pts = P; atom.rb = rb; atom.born = performance.now();
+    if (!atom.run) { atom.run = true; requestAnimationFrame(atomFrame); }
+  }
+  function atomFrame(now) {
+    const cv2 = atom.cv; if (!cv2 || !atom.pts.length) { atom.run = false; return; }
+    const S = cv2.clientWidth, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv2.width !== Math.round(S * dpr)) { cv2.width = cv2.height = Math.round(S * dpr); }
+    const g = cv2.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, S, S);
+    const grow = Math.min(1, (now - atom.born) / 600), e = 1 - Math.pow(1 - grow, 3), R = S * 0.36 * e, cx = S / 2, cy = S / 2;
+    const glow = g.createRadialGradient(cx, cy, 0, cx, cy, S * 0.5); glow.addColorStop(0, "rgba(255,170,100,.22)"); glow.addColorStop(0.5, "rgba(80,120,255,.10)"); glow.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = glow; g.fillRect(0, 0, S, S);
+    const ya = now / 4000 + atom.tx * 0.6, pa = 0.3 + atom.ty * 0.4, cY = Math.cos(ya), sY = Math.sin(ya), cP = Math.cos(pa), sP = Math.sin(pa), D = 5;
+    const L = atom.pts.map((a) => { let x = a.x * cY + a.z * sY, z = -a.x * sY + a.z * cY; const y = a.y * cP - z * sP; z = a.y * sP + z * cP; const k = D / (D - z); return { X: cx + x * k * R, Y: cy + y * k * R, z, k, p: a.p }; }).sort((a, b) => a.z - b.z);
+    const br = atom.rb * R * 1.08;
+    for (const q of L) { g.globalAlpha = 0.55 + 0.45 * (q.z + 1) / 2; g.drawImage(q.p ? BALL.p : BALL.n, q.X - br * q.k, q.Y - br * q.k, 2 * br * q.k, 2 * br * q.k); }
+    g.globalAlpha = 1;
+    if (!document.hidden && atom.cv.getBoundingClientRect().bottom > 0) requestAnimationFrame(atomFrame); else setTimeout(() => requestAnimationFrame(atomFrame), 400);
+  }
+  if (atom.cv) atom.cv.parentElement.addEventListener("pointermove", (e) => { const r = atom.cv.getBoundingClientRect(); atom.tx = (e.clientX - r.left) / r.width - 0.5; atom.ty = (e.clientY - r.top) / r.height - 0.5; });
+
   // ---------- one nuclide ----------
   let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false;
   async function select(r, center) {
@@ -188,9 +235,11 @@
     if (cur.d.macs || (cur.d.meas && cur.d.meas.mxw.some((p) => p[0] >= 1000))) tabs.push("macs");
     if (!tabs.includes(tab)) tab = "cap";
     $("#dx-tabs").innerHTML = tabs.map((k) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${CH[k]}</button>`).join("");
-    $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); renderNuc(); }));
+    $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); sweep(); }));
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
+    atomSet(r.Z, r.A);
+    $("#dx-tile").innerHTML = `<span>${IDX.sym[r.Z]}</span>`; $("#dx-tile").title = "Z = " + r.Z;
     const d = cur.d, f = [];
     if (d.tier != null) f.push(`<span class="dx-chip t${d.tier}">${TIERS[d.tier]}</span>`);
     f.push(`<span>Z ${r.Z} · N ${r.A ? r.A - r.Z : "–"}</span>`);
@@ -199,10 +248,15 @@
     if (d.tier != null && !d.valid) f.push(`<span class="dx-warn">${T("dx_outside", "outside the validated range (Z 26–83)")}</span>`);
     if (d.flag) f.push(`<span class="dx-warn">${T("dx_flag", "resolved resonances reach the MACS window: prefer a measured MACS")}</span>`);
     $("#dx-facts").innerHTML = f.join("");
+    const st = [[r.Z, T("dx_s_p", "protons")], [r.A ? r.A - r.Z : "–", T("dx_s_n", "neutrons")]];
+    if (d.macs30) st.push([num(d.macs30) + " mb", T("dx_s_macs", "capture in a star at 30 keV")]);
+    if (d.meas) st.push([d.meas.cap.length + d.meas.mxw.length, T("dx_s_pts", "measured capture points")]);
+    const nThr = d.thr ? Object.values(d.thr).reduce((s, v) => s + v.length, 0) : 0; if (nThr) st.push([nThr, T("dx_s_thr", "(n,2n), (n,p), (n,α) points")]);
+    $("#dx-stats").innerHTML = st.map(([v, l]) => `<div class="dx-stat"><b>${v}</b><span>${l}</span></div>`).join("");
     const nm = r.A ? `${IDX.sym[r.Z]}-${r.A}` : "";
     $("#dx-cmd").textContent = nm && d.cap ? `uv run python -m incognita.library show ${nm}\n\n# or from Python\nfrom incognita.library import capture_curve\ndf = capture_curve("${nm}")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier`
       : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/inputs/exfor_cells.parquet`;
-    renderNuc();
+    sweep();
     if (center) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -232,6 +286,10 @@
   }
 
   const pcv = $("#dx-plot"), ptip = $("#dx-ptip");
+  // a sweep from left to right draws the curve and reveals the measured points when a nuclide or reaction opens
+  let anim = 1, animT0 = 0;
+  function sweep() { if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { anim = 1; renderNuc(); return; } animT0 = performance.now(); anim = 0;
+    const step = (now) => { const u = Math.min(1, (now - animT0) / 1100); anim = 1 - Math.pow(1 - u, 3); renderNuc(); if (u < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
   function renderNuc() {
     if (!cur) return;
     const S = series(), shown = S.points.filter((p) => showExcl || p.dec !== "x");
@@ -248,6 +306,7 @@
     x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0);
     const X = (x) => m.l + (log10(x) - x0) / (x1 - x0) * (W - m.l - m.r), Y = (y) => H - m.b - (log10(y) - y0) / (y1 - y0) * (H - m.t - m.b);
     Object.assign(P, { X, Y, m, x0, x1, y0, y1, W, H });
+    P.reveal = m.l + anim * (W - m.l - m.r) + (anim >= 1 ? 60 : 0);
     ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
     // grid and axes (decades)
     ctx.font = `500 12px ${SANS}`; ctx.fillStyle = C.soft; ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
@@ -266,7 +325,7 @@
     // measured points: error bars, energy-bin bars, dots (hollow = excluded, faint = down-weighted); 2px surface ring
     for (const p of shown) {
       if (!(p.y > 0)) continue;
-      const dim = hl != null && p.ds !== hl, a = dim ? 0.15 : p.dec === "d" ? 0.55 : 1, x = X(p.x), y = Y(p.y);
+      const dim = hl != null && p.ds !== hl, a = ($2) * clamp((P.reveal - X(p.x)) / 30, 0, 1), x = X(p.x), y = Y(p.y);
       ctx.globalAlpha = a; ctx.strokeStyle = C.meas; ctx.lineWidth = 1.2;
       if (p.e > 0) { ctx.beginPath(); ctx.moveTo(x, Y(p.y * (1 + p.e))); ctx.lineTo(x, Y(Math.max(p.y * (1 - p.e), p.y * 0.05))); ctx.stroke(); }
       if (p.xhi > p.xlo * 1.02) { ctx.beginPath(); ctx.moveTo(X(p.xlo), y); ctx.lineTo(X(p.xhi), y); ctx.stroke(); }
@@ -274,15 +333,18 @@
       if (p.dec === "x") { ctx.strokeStyle = C.meas; ctx.lineWidth = 1.5; ctx.stroke(); } else { ctx.fillStyle = C.meas; ctx.fill(); ctx.strokeStyle = C.surface; ctx.lineWidth = 1.5; ctx.stroke(); }
     }
     ctx.globalAlpha = 1;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, P.reveal, H); ctx.clip();
     for (const c of S.curves) for (const [w, col] of [[5, C.surface], [2.2, c.col]]) {
-      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineJoin = "round"; ctx.beginPath(); let on = false;
+      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.shadowColor = w > 3 ? "transparent" : col; ctx.shadowBlur = w > 3 ? 0 : 12; ctx.lineJoin = "round"; ctx.beginPath(); let on = false;
       for (const [x, y] of c.pts) { if (!(y > 0)) { on = false; continue; } on ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)); on = true; }
       ctx.stroke();
     }
     ctx.restore();
+    ctx.restore();
     finishNuc(S);
   }
   function finishNuc(S) {
+    if (anim > 0 && anim < 1) return; // the lists and legend are rebuilt once, not on every frame of the sweep
     const nPts = S.points.length, nEx = S.points.filter((p) => p.dec === "x").length;
     $("#dx-excl").parentElement.hidden = nEx === 0;
     const leg = S.curves.map((c) => `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);

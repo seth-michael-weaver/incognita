@@ -32,5 +32,6 @@ Object.assign(WT.es.ui, {
   dx_empty: "No hay nada que mostrar para esta reacción.", dx_bands: "bandas: 68 % y 95 %", dx_band68: "banda: 68 %",
   dx_meas_pts: "medidos", dx_table_hint: "Usa «Ver como tabla» para los valores.", dx_ds_h: "Medidas", dx_pts: "pts",
   dx_th_src: "Fuente", dx_th_val: "Valor", dx_th_unc: "Rango / incertidumbre", dx_th_cur: "Depuración",
+  dx_s_p: "protones", dx_s_n: "neutrones", dx_s_macs: "captura en una estrella a 30 keV", dx_s_pts: "puntos de captura medidos", dx_s_thr: "puntos de (n,2n), (n,p), (n,α)", dx_sets: "conjuntos",
   dx_mxw: "promedio de Maxwell", dx_state: "estado", dx_cur: "depuración", dx_fail: "No se pudieron cargar los datos.",
 });
