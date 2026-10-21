@@ -95,41 +95,41 @@
 
   WT.chapter("cascade", {
     num: "Chapter 8", title: "Down the chart", short: "Cascade",
-    lead: "One emission is rarely the end. The nucleus left behind is often still hot: it holds enough spare energy to emit again.",
+    lead: "One emission is rarely the end: the nucleus left behind is often hot enough to emit again.",
     html: `
 <div class="step">
-  <p>On the left is the compound nucleus, target and neutron merged into one. Its rungs are energy levels: sparse near the ground state at the bottom, crowding into a continuum higher up. The orange ball is its energy. On the right is the <b>residual</b>, the nucleus left after one neutron flies out. Its ground state sits higher, by the neutron's <b>separation energy</b> S<sub>n</sub> (the cost of pulling it out).</p>
-  <p>Each time a neutron leaves, the orange ball crosses over and drops. The drop is the kinetic energy the neutron carried off; where it stops is the <b>excitation</b> (spare energy) the residual keeps. The dots stacked on the right count where they landed.</p>
+  <p>A neutron has left the compound nucleus (left), and the <b>residual</b> it leaves behind (right) is still hot. The orange ball is the energy. The residual's ground state sits higher by the neutron's <b>separation energy</b> S<sub>n</sub>, the cost of pulling it out.</p>
+  <p>Each time a neutron leaves, the ball drops by the neutron's kinetic energy. Where it stops is the residual's <b>excitation</b>, its spare energy; the dots on the right count the landings.</p>
   <div class="ctl"><label for="cs-e">Neutron energy</label><input id="cs-e" type="range" data-bind="E" min="1" max="30" step="0.5" value="15"><output data-show="E" data-fmt="1"></output></div>
-  <p>Emitted neutrons are usually slow, so most drops are short and the residual stays hot. Blue dots sit above the residual's dashed neutron threshold: they can afford a second neutron, the (n,2n) reaction. Below about 11 MeV none get there.</p>
+  <p>Emitted neutrons are usually slow, so most drops are short. Blue dots sit above the dashed neutron threshold: they can afford a second neutron, the (n,2n) reaction. Below about 11 MeV none get there.</p>
 </div>
 <div class="step">
   <h3>A walk across the chart</h3>
-  <p>Each square is one nucleus on a corner of the <b>chart of nuclides</b>, the map of all nuclei by neutron number N (across) and proton number Z (up); the faded squares carry on into the rest of the chart. Every reaction starts in the outlined square, the compound nucleus, one square right of the target. Each square is labelled with the reaction that ends there.</p>
-  <p>The streams are the reaction flowing. Emitting a <em class="n">neutron</em> moves it one square left, a <em class="p">proton</em> one square down, an <em class="a">alpha particle</em> (two protons and two neutrons) two squares diagonally. A stream's width shows how much takes that step; the shade and percentage show where it finishes.</p>
+  <p>The streams are reactions walking across a corner of the <b>chart of nuclides</b>, nuclei mapped by neutron number N (across) and proton number Z (up). Each starts in the outlined compound square; each square is named for the reaction that ends there.</p>
+  <p>A <em class="n">neutron</em> out moves one square left, a <em class="p">proton</em> one down, an <em class="a">alpha particle</em> (two protons, two neutrons) two diagonally. Stream width is how much takes that step; shade and percentage are where reactions end.</p>
   <div class="btns"><button class="btn" data-act="fire">Fire 200 reactions</button></div>
-  <p>Each step costs a separation energy of about 7 to 11 MeV, so even at 30 MeV the walk is three or four steps at most.</p>
+  <p>Each step costs 7 to 11 MeV of separation energy, so even at 30 MeV the walk is three or four steps at most.</p>
 </div>
 <div class="step">
   <h3>Top down, bin by bin</h3>
-  <p>Two nuclei again: on the right the residual from the first emission, on the left its daughter, one neutron fewer. The engine cuts each into energy slices called <b>bins</b> (drawn 1 MeV tall here; the engine's are 0.5 MeV). The orange balls are reactions waiting in each bin, placed by the first emission. The marker sweeps down from the top.</p>
-  <p>When it reaches a bin, each ball takes an exit by the competition of Chapter 6. A photon (<em class="g">γ</em>) drops it to a lower bin of the same nucleus; a <em class="n">neutron</em> moves it into a bin of the daughter; a proton or alpha takes it to another nucleus, off this picture. Below every threshold, photons carry what is left to the ground state (grey). Then the daughter is swept the same way.</p>
+  <p>The engine empties each nucleus from the top down, one energy slice, or <b>bin</b>, at a time. Right: the residual from the first emission; left: its daughter, one neutron fewer. Orange balls are reactions waiting in each bin. Bins are 1 MeV here; the engine uses about 40 per nucleus, sized to the energy available.</p>
+  <p>As the marker sweeps a bin, each ball takes an exit by the competition of Chapter 6: a photon (<em class="g">γ</em>) drops it to a lower bin, a <em class="n">neutron</em> moves it into the daughter, a proton or alpha takes it off the picture. Below every threshold, photons carry the rest to the ground state (grey). Then the daughter is swept.</p>
   <div class="ctl"><label for="cs-e3">Neutron energy</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Start again</button></div>
-  <p>Photons only fall, and the engine finishes each nucleus before its daughters, so nothing ever lands on a bin that was already emptied.</p>
+  <p>Photons only fall, and each nucleus is finished before its daughters, so nothing lands on a bin already emptied.</p>
 </div>
 <div class="step">
   <h3>Naming the history</h3>
-  <p>One reaction plays at a time. The orange marker is the hot nucleus hopping across the chart; at each hop, the particle it emits falls into the tray below. The full tray spells the <b>exclusive channel</b>: a reaction named by the set of particles that came out, such as (n,2n) for two neutrons. Photons fly off and do not count. The engine keeps every channel apart and gives each its own cross section (how likely it is, as an effective target area).</p>
+  <p>One reaction plays at a time: the marker hops across the chart and each particle emitted falls into the tray. The full tray names the <b>exclusive channel</b>, such as (n,2n); photons do not count. The engine gives each channel its own cross section (its likelihood, as an effective target area).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Next channel</button></div>
-  <p>Step through them. (n,np) plays twice, neutron first and then proton first: both end on the same square with the same tray, so they are one channel. Then a ghost shows a deuteron (a bound proton and neutron) reaching that square in one hop. Its tray reads d: a different channel, (n,d). The engine names channels by what was emitted, not by where they end.</p>
+  <p>Step through them. (n,np) plays twice, neutron first and proton first: same square, same tray, one channel. Then a ghost deuteron (a bound proton and neutron) reaches that square in one hop: its tray reads d, a different channel, (n,d).</p>
 </div>
 <div class="step">
   <h3>Where everything ends</h3>
-  <p>Each square now holds shelves. The ink shelf at the bottom is the nucleus's <b>ground state</b>, its lowest state. The green shelf, on two squares, is an <b>isomer</b>: an excited state that lives long enough to count as a separate product. Each fired reaction hops to where it ends, drops onto a shelf and gives off its last photon. The height of each pile is the <b>residual production</b>: how much of that nucleus the reactions made.</p>
+  <p>Each square now holds shelves: ink for the <b>ground state</b>, green (on two squares) for an <b>isomer</b>, an excited state long-lived enough to count as a separate product. Pile height is the <b>residual production</b>: how much of each nucleus the reactions made.</p>
   <div class="ctl"><label for="cs-e2">Neutron energy</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Fire 200 reactions</button></div>
-  <p>Drag the energy: the next batch uses it and the old piles fade. Production moves away from the start as more particles can leave. Below every particle threshold a nucleus can only emit photons, so every history ends on one of these shelves. An activation measurement sees exactly these piles: irradiate a sample, then count the decays of each product.</p>
+  <p>Drag the energy: the next batch uses it and old piles fade. Production moves away from the start as more particles can leave. Every history ends on a shelf, and an activation measurement sees exactly these piles: irradiate a sample, then count each product's decays.</p>
   <div class="aside">In the code: <code>emission/multiple.py</code> (the loop over nuclei and bins, the γ cascade), <code>emission/feeding.py</code> (grids and inputs for every nucleus of the chain), <code>compound/continuum.py</code> (the decay of one bin), <code>emission/channels.py</code> (exclusive channels, residual production, isomer branches), <code>emission/binary.py</code> (the first emission's bookkeeping).</div>
 </div>`,
     setup(S) {

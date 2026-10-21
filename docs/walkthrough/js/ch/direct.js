@@ -8,7 +8,7 @@
  *                   "ledger"  = the reaction flux split: direct slices peel off first.
  * Shapes follow ecis/formfactor.py (deformed Woods-Saxon, dU/dr form factor), ecis/coupling.py + solver.py
  * (all band states solved together), direct/dwba.py (beta^2 scaling, GMR/GQR/LEOR/HEOR as Gaussians),
- * direct/racapcalc.py (direct capture), compound/normalization.py (flux ledger). Numbers illustrative. */
+ * direct/racapcalc.py (direct capture, opt-in), compound/normalization.py (flux ledger). Numbers illustrative. */
 (function () {
   const { TAU, clamp, lerp, smooth, rng } = WT.util;
   const A_GR = 100;
@@ -40,49 +40,49 @@
     lead: "Not every neutron that reaches the nucleus is swallowed. Some brush its surface, give it one push, and fly on.",
     html: `
 <div class="step">
-  <p>The picture shows a neutron flying past a nucleus. Its distance from the centre line is <i>b</i>, the <b>impact parameter</b>, given here in nuclear radii <i>R</i>. The dotted ring is the nucleus's thin outer layer, its skin. A neutron aimed at the middle is absorbed, and its energy ends up shared among all the nucleons. A neutron that only grazes the skin can do something quicker: push the nucleus once into an excited level and fly on, mostly forward and only a little slower. That is a <b>direct reaction</b>: one step, over in about 10⁻²² seconds.</p>
+  <p>A neutron that only grazes the nucleus can push it once into an excited level and fly on, mostly forward and only a little slower. That is a <b>direct reaction</b>: one step, over in about 10⁻²² seconds. Here a neutron flies past at distance <i>b</i>, the <b>impact parameter</b>, in nuclear radii <i>R</i>; the dotted ring is the nucleus's skin.</p>
   <div class="ctl"><label for="di-b">Aim b (in radii)</label><input id="di-b" type="range" data-bind="b" min="0" max="1.5" step="0.01" value="1.0"><output data-show="b" data-fmt="2"></output></div>
-  <p>Drag <i>b</i>. Below about 0.8 the neutron is swallowed. Near 1 it grazes and leaves the nucleus on its first excited level, 2⁺. Above about 1.2 it misses and only bends: <b>elastic scattering</b>, which leaves the nucleus unchanged.</p>
+  <p>Drag <i>b</i>. Below about 0.8 the neutron is swallowed. Near 1 it grazes and leaves the nucleus on its first excited level, 2⁺. Above about 1.2 it misses and only bends: <b>elastic scattering</b>, nucleus unchanged.</p>
 </div>
 <div class="step">
   <h3>Setting a stretched nucleus spinning</h3>
-  <p>On the left is a stretched, football-shaped nucleus (Chapter 1). A passing neutron's push sets it rotating. Each faster rotation is one level of its <b>rotational band</b>, the ladder on the right: 0⁺, 2⁺, 4⁺, 6⁺, 8⁺. The neutron can push the nucleus up the ladder, and the nucleus can push back, so no level can be worked out alone. The engine solves them all together. This is called <b>coupled channels</b>: each channel is one possible outcome, here one level of the band, and each one affects the others.</p>
+  <p>A push sets a stretched nucleus (Chapter 1) rotating, up the ladder of its <b>rotational band</b>: 0⁺, 2⁺, 4⁺, 6⁺, 8⁺. The neutron can push the nucleus up and the nucleus can push back, so no level can be worked out alone. The engine solves them all together: <b>coupled channels</b>, where each channel is one outcome, here one level of the band.</p>
   <div class="btns"><button class="btn" data-act="kick">Push it up a level</button><button class="btn ghost" data-act="rpause">Pause / resume</button></div>
   <div class="ctl"><label for="di-beta">Deformation β₂</label><input id="di-beta" type="range" data-bind="beta2" min="0.05" max="0.4" step="0.01" value="0.25"><output data-show="beta2" data-fmt="2"></output></div>
-  <p>The arcs show which levels are linked. <i>λ</i> names the part of the shape that does the linking: <i>λ</i> = 2 is the overall stretch, and it links neighbouring levels; <i>λ</i> = 4 is a finer bulge, and it jumps two levels at once. Drag <i>β₂</i>: a more stretched nucleus links its levels more strongly, so the arcs thicken. Because the band is solved together with the incoming wave, the transmission coefficients from this step already leave out what the band takes.</p>
+  <p>The arcs show which levels are linked: <i>λ</i> = 2, the overall stretch, links neighbours; <i>λ</i> = 4, a finer bulge, jumps two. Drag <i>β₂</i>: a more stretched nucleus links its levels more strongly, and the arcs thicken. Since the band is solved with the incoming wave, the transmission coefficients already leave out what it takes.</p>
 </div>
 <div class="step">
   <h3>Ripples on a sphere</h3>
-  <p>On the left is a round nucleus whose surface ripples. Ripple energy comes in fixed packets called <b>phonons</b>, each adding the same energy. The ladder on the right shows the result. One phonon of the football-to-disc ripple (<i>λ</i> = 2) gives the 2⁺ level. Two phonons give three levels, 0⁺, 2⁺ and 4⁺, at twice the energy. The engine solves these levels together with the ground state. Reaching the two-phonon levels takes two pushes in a row.</p>
+  <p>A round nucleus can ripple, and ripple energy comes in equal packets called <b>phonons</b>. One phonon of the football-to-disc ripple (<i>λ</i> = 2) gives the 2⁺ level; two give three levels, 0⁺, 2⁺ and 4⁺, at twice the energy. Reaching them takes two pushes in a row. The engine solves these levels together with the ground state.</p>
   <div class="ctl"><label for="di-lam">Ripple shape λ</label><input id="di-lam" type="range" data-bind="lam" min="2" max="3" step="1" value="2" data-instant><output data-show="lam" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="ph1">One phonon</button><button class="btn ghost" data-act="ph2">Two phonons</button></div>
   <p>Set <i>λ</i> = 3 for a pear-shaped ripple, whose first level is 3⁻. Press the buttons to add one or two phonons.</p>
 </div>
 <div class="step">
   <h3>One push, once</h3>
-  <p>The picture shows a neutron wave rolling in from the left onto a nucleus whose rim is slightly stretched and wobbling. For most levels the link is weak, and a simpler method is enough: let the incoming wave of Chapter 2 push the nucleus a single time, then calculate the outgoing wave. This one-push method is called <b>DWBA</b> (distorted-wave Born approximation). The push can only happen at the rim, where the potential of Chapter 2 drops from deep to zero within about half a femtometre; the rim glows orange where the crests strike it. From there a second, circular wave spreads out: the neutrons that left the nucleus on an excited level.</p>
+  <p>For most levels the link is weak, and one push is enough: <b>DWBA</b> (distorted-wave Born approximation). The incoming wave of Chapter 2 pushes the nucleus once, at the rim, where the potential drops from deep to zero; the rim glows where the crests strike. The circular wave spreading out is the neutrons that left the nucleus excited.</p>
   <div class="ctl"><label for="di-bd">Level's deformation β</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
-  <p>Drag <i>β</i>: the rim wobbles harder and the outgoing circles brighten. Their strength grows as <i>β</i>², so a level with twice the deformation is excited four times as often. The engine looks up each known level's <i>β</i> in a table of measured values, and computes how the scattered neutrons spread over angles for each.</p>
+  <p>Drag <i>β</i>: the rim wobbles harder and the circles brighten, as <i>β</i>²: twice the deformation, four times as many. The engine takes each level's <i>β</i> from measured values, or from systematics where none is known. How the scattered neutrons spread over angles is an optional extra output.</p>
 </div>
 <div class="step">
   <h3>The whole nucleus moves</h3>
-  <p>The picture shows three ways all the nucleons can move together. The nucleus can breathe in and out, squash and stretch, or swing into a pear shape. These motions are <b>giant resonances</b>. In this medium-mass nucleus they sit about 7 to 25 MeV above the ground state, and each is several MeV wide: too broad to count as one level. The small humps at the bottom mark where each one lies in <b>excitation energy</b>, the energy above the ground state.</p>
-  <p>The engine sets each one's total strength from a <b>sum rule</b>, a limit from basic physics on how strongly a nucleus can respond to that motion. It spreads that strength as a hump above the last known level. These humps, plus pushes to high levels, make up the <b>collective continuum</b>.</p>
+  <p>All the nucleons can move together: breathe, squash and stretch, or swing into a pear shape. These are <b>giant resonances</b>. In this medium-mass nucleus they sit about 7 to 25 MeV up, each several MeV wide, too broad to count as one level; the humps mark each one's <b>excitation energy</b>.</p>
+  <p>The engine sets each one's total strength from a <b>sum rule</b>, a limit from basic physics on how strongly a nucleus can respond, and spreads it as a hump above the last known level. These humps, plus pushes to high levels, make up the <b>collective continuum</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Breathing</button><button class="btn ghost" data-act="quad">Squash</button><button class="btn ghost" data-act="oct">Pear</button></div>
-  <p>The best-known motion, protons sloshing against neutrons, is the giant dipole resonance. It mainly absorbs and emits light, so it belongs to Chapter 7.</p>
+  <p>The best-known one, protons sloshing against neutrons (the giant dipole resonance), mainly absorbs and emits light, so it belongs to Chapter 7.</p>
 </div>
 <div class="step">
   <h3>Straight into an orbit</h3>
-  <p>The picture shows the well again. Neutrons fill its lower <b>orbits</b> (the allowed energies for one neutron inside); two near the top are empty. A free neutron can drop straight into an empty orbit and send the spare energy out as a <em class="g">photon</em>. The nucleus never heats up. This is <b>direct capture</b>. The engine computes it from the same well as Chapter 2: the free wave outside, the bound orbit inside, and the photon linking them. As in TALYS, it is off unless asked for.</p>
+  <p>A free neutron can drop straight into an empty <b>orbit</b> of the well (an allowed energy for one neutron inside) and send the spare energy out as a <em class="g">photon</em>. The nucleus never heats up. This is <b>direct capture</b>. The engine can compute it from the same well as Chapter 2: the free wave outside, the bound orbit inside, the photon linking them. It is optional and off by default.</p>
   <div class="btns"><button class="btn" data-act="drop">Drop a neutron in</button></div>
-  <p>Direct capture matters most where the usual route, absorbing the neutron and sharing its energy, is weak: light nuclei and nuclei far from stability, which have few, widely spaced levels.</p>
+  <p>Direct capture matters most where the usual route, sharing the neutron's energy, is weak: light nuclei and nuclei far from stability, with few, widely spaced levels.</p>
 </div>
 <div class="step">
   <h3>Direct takes its share first</h3>
-  <p>The picture shows a beam of neutrons that all react with the nucleus (the reaction cross section of Chapter 2), each path ending in one of three fates. A neutron that grazes the rim gives one push and flies on: a <b>direct</b> reaction. One that enters may knock a nucleon out at once, before the energy has time to spread: a fast collision, or <b>pre-equilibrium</b> emission (Chapter 4). The rest are swallowed, and the nucleus glows as their energy is shared by all its nucleons: a <b>compound nucleus</b> (Chapter 5). The piles below count the fates as they happen.</p>
+  <p>The engine splits the reaction cross section of Chapter 2 in order: direct reactions first, then fast collisions, and only the remainder forms a compound nucleus. In the picture each neutron meets one of three fates: <b>direct</b> (grazes and flies on), fast (knocks a nucleon out before the energy spreads: <b>pre-equilibrium</b>, Chapter 4) or swallowed (a <b>compound nucleus</b>, Chapter 5). The piles count them.</p>
   <div class="ctl"><label for="di-e">Neutron energy (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
-  <p>Drag the energy and watch the piles refill. At a few MeV almost every neutron is swallowed. At tens of MeV, direct reactions and fast collisions together take a large part. The engine does its accounting in that order: it subtracts every direct piece first, then the fast collisions; only the remainder forms a compound nucleus.</p>
-  <div class="aside">In the code: <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (deformed potential, coupled channels for rotors and vibrators), <code>ecis/dwba.py</code> and <code>direct/dwba.py</code> (single push, giant resonances, collective continuum), <code>direct/racapcalc.py</code> (direct capture), <code>compound/normalization.py</code> (the ledger).</div>
+  <p>Drag the energy and watch the piles refill. At a few MeV almost every neutron is swallowed. At tens of MeV, direct reactions and fast collisions together take a large part.</p>
+  <div class="aside">In the code: <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (deformed potential, coupled channels for rotors and vibrators), <code>ecis/dwba.py</code> and <code>direct/dwba.py</code> (single push, giant resonances, collective continuum), <code>direct/racapcalc.py</code> (direct capture, optional, off by default), <code>compound/normalization.py</code> (the ledger).</div>
 </div>`,
     setup(S) {
       S.set("mode", "graze"); S.to("b", 1.0, true); S.to("beta2", 0.25, true); S.set("J", 0); S.to("lam", 2, true); S.to("nph", 1, true);

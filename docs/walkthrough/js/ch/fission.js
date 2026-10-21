@@ -69,41 +69,41 @@
     lead: "The heaviest nuclei have an exit lighter ones lack: instead of throwing out one particle, the whole nucleus tears in two. This is fission.",
     html: `
 <div class="step">
-  <p>The picture shows the nucleus as a drop of charged liquid. Surface tension (grey arrows) pulls it round; the protons, all positively charged, repel each other and push it apart (red arrows). For a nucleus as heavy as uranium the two are nearly balanced.</p>
+  <p>A heavy nucleus behaves like a drop of charged liquid. Surface tension (grey arrows) pulls it round; the protons, all positively charged, push it apart (red arrows). For uranium the two nearly balance.</p>
   <div class="ctl"><label for="fis-d">Stretch the drop</label><input id="fis-d" type="range" data-bind="def" min="0" max="1" step="0.01" value="0"><output data-show="def" data-fmt="2"></output></div>
-  <p>Drag to stretch it, and watch the dot on the small curve below, the drop's energy. Stretching adds surface, which costs energy, but spreads the charge out, which releases energy. Past the top of the curve the charge wins: a neck forms and the two halves fly apart carrying about 200 MeV.</p>
+  <p>Drag to stretch it and watch the dot on the small energy curve below. Stretching adds surface, which costs energy, but spreads the charge, which releases energy. Past the top of the curve the charge wins: a neck forms and the halves fly apart with about 200 MeV.</p>
 </div>
 <div class="step">
   <h3>The landscape of shapes</h3>
-  <p>The height of the curve is the nucleus's energy for every shape, from round on the left to split on the right; the little drop rolling along it shows each shape. A smooth liquid drop would give one hill. But nucleons fill energy levels in groups, called <b>shells</b>, and in the heaviest elements this carves a second valley into the hill. The result is a <b>double-humped barrier</b>: two hills with a well between, where the nucleus can linger in a stretched shape.</p>
-  <p>The engine does not assume this curve. It reads it point by point from a microscopic calculation of the energy at each deformation, that is, at each amount of stretch.</p>
+  <p>The curve is the energy for every shape, from round (left) to split (right). A smooth liquid drop gives one hill, but nucleons fill energy levels in groups, called <b>shells</b>, and in the heaviest elements this carves a well into it: a <b>double-humped barrier</b>, where the nucleus can linger in a stretched shape.</p>
+  <p>The engine does not assume this curve: it reads it point by point from a microscopic calculation of the energy at each deformation (amount of stretch).</p>
 </div>
 <div class="step">
   <h3>Tunnelling through the hill</h3>
-  <p>The ball is the excited nucleus in the first valley, and the orange dashed line is its excitation energy. Below the hilltop, about 6 MeV here, classical physics says it can never reach the other side. Quantum mechanics lets it <b>tunnel</b> through the darker, forbidden part of the hill, with a chance <i>T</i> that falls off exponentially as that part gets thicker.</p>
+  <p>The ball is the excited nucleus in the first valley, at the excitation energy of the orange dashed line, below the 6 MeV hilltop. Classically it can never cross; quantum mechanics lets it <b>tunnel</b> through the darker, forbidden part, with a chance <i>T</i> that falls exponentially as that part thickens.</p>
   <div class="ctl"><label for="fis-e">Excitation energy</label><input id="fis-e" type="range" data-bind="E" min="3" max="8" step="0.05" value="5"><output data-show="E" data-fmt="2"></output></div>
-  <p>Raise the energy and watch <i>T</i> climb as the forbidden part thins. The textbook shortcut (Hill–Wheeler) treats the hilltop as a parabola, the blue dashed curve. The engine follows the real shape, which is wider lower down, so far below the top the chance is smaller than the parabola says. <i>K</i> below measures how much hill is in the way.</p>
+  <p>Raise the energy and watch <i>T</i> climb as the forbidden part thins. The textbook shortcut (Hill–Wheeler) treats the hilltop as a parabola (blue dashed). The engine follows the real shape, wider lower down, so far below the top its chance is smaller. <i>K</i> measures how much hill is in the way.</p>
   <div class="formula">T = 1 / (1 + e<sup>2K</sup>),  K = ∫ √(2μ(V−E)) dβ / ħ</div>
 </div>
 <div class="step">
   <h3>Gates on the hilltop</h3>
-  <p>The doors standing on the hilltop are the <b>transition states</b>: the quantum states the nucleus can be in while stretched over the barrier. Each has a spin and parity (0⁺, 2⁻, …: how the state spins, and whether it looks the same in a mirror), and each acts as a gate: the width of its lit gap shows how open it is. A nucleus can only pass through gates with its own spin and parity, and each gate opens gradually as the energy passes its height.</p>
+  <p>The doors on the hilltop are the <b>transition states</b>, the quantum states of the nucleus stretched over the barrier. Each has a spin and parity (0⁺, 2⁻, …) and acts as a gate; its lit gap shows how open it is. A nucleus passes only through gates matching its own spin and parity, and each opens gradually as the energy passes its height.</p>
   <div class="ctl"><label for="fis-e2">Excitation energy</label><input id="fis-e2" type="range" data-bind="E" min="3" max="8" step="0.05" value="5"><output data-show="E" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="jpAll">Any spin</button><button class="btn ghost" data-act="jp0">Compound 0⁺</button><button class="btn ghost" data-act="jp1">Compound 1⁻</button></div>
-  <p>Pick one spin and parity: only matching gates count, and the total opening drops. Higher up, the gates crowd into a <b>continuum</b> too dense to list, so the engine uses their density instead, as it does for ordinary levels.</p>
+  <p>Pick one spin and parity: only matching gates count, and the total opening drops. Higher up, the gates crowd into a <b>continuum</b>, and the engine counts them by their density, as it does for ordinary levels.</p>
 </div>
 <div class="step">
   <h3>Two hills in series</h3>
-  <p>Now both hills, each with a gate (the circle; its filled part is how open it is). The dots are nuclei arriving from the left. Those that cross the first hill are trapped in the well and bounce between the two gates until they leave one way or the other. The chances combine like electrical resistors in series, so the harder hill mostly decides.</p>
+  <p>Now both hills, each with a gate (the circle; its filled part is how open it is). Nuclei arrive from the left; those that cross the first hill are trapped in the well, bouncing between the gates until they leave one way or the other. The chances combine like resistors in series, so the harder hill mostly decides.</p>
   <div class="ctl"><label for="fis-b">Outer hill height</label><input id="fis-b" type="range" data-bind="Bb" min="3.5" max="7.5" step="0.05" value="5.6"><output data-show="Bb" data-fmt="2"></output></div>
   <div class="formula">1/T = 1/T<sub>A</sub> + 1/T<sub>B</sub></div>
   <p>Drag the outer hill up and watch the flow to fission choke, however open the inner gate is.</p>
 </div>
 <div class="step">
   <h3>More than one chance</h3>
-  <p>The picture follows one nucleus at a time. Uranium-238 absorbs the neutron and becomes uranium-239 with excitation energy <i>E</i>* (the dashed line). It tries the barrier. If it does not split, it may throw out a neutron instead: that costs energy, so the line drops, and the lighter nucleus left behind, uranium-238, is still hot and tries its own barrier. That is <b>second-chance</b> fission, written (n,n′f). The piles below collect how each nucleus ended.</p>
+  <p>Uranium-238 absorbs the neutron and becomes uranium-239 with excitation <i>E</i>* (dashed line). If it does not split, it may emit a neutron instead; the line drops, and the uranium-238 left behind, still hot, tries its own barrier: <b>second-chance</b> fission, (n,n′f). The piles collect how each nucleus ended.</p>
   <div class="ctl"><label for="fis-en">Neutron energy</label><input id="fis-en" type="range" data-bind="En" min="0" max="25" step="0.1" value="7"><output data-show="En" data-fmt="1"></output></div>
-  <p>Raise the energy and the later attempts start to succeed: a third chance opens near 12 MeV. In the measured <b>fission cross section</b>, how likely the nucleus is to split, each new chance shows up as a step. The engine computes how often the nucleus splits, not which pieces it splits into.</p>
+  <p>Raise the energy and later attempts start to succeed; a third chance opens near 12 MeV. Each new chance shows up as a step in the measured <b>fission cross section</b>, how likely the nucleus is to split. The engine computes how often it splits, not which pieces it splits into.</p>
   <div class="aside">In the code: <code>fission/wkb.py</code> (the deformation-energy path and the WKB integrals), <code>fission/barriers.py</code> (Hill–Wheeler, transition states, the barrier level density), <code>fission/transmission.py</code> (humps in series, T<sub>fis</sub> per spin and parity), <code>fission/chain.py</code> (barriers for every nucleus of the cascade).</div>
 </div>`,
     setup(S) {

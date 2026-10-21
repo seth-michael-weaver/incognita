@@ -9,9 +9,11 @@
  *   "star"    = a Maxwellian gas of neutrons among target nuclei; captures flash and drop into a pile of captured energies;
  *   "hot"     = thermally populated target levels as separate entrances (stellar enhancement);
  *   "tmc"     = Total Monte Carlo: three input knobs jitter per variant; translucent capture discs at three energies.
- * Shapes follow the Kalbach systematics (a(E_in, E_out), K = a e^{a cos} / 4 pi sinh a; not computed by the engine), the stellar textbook formulas
- * (int E sigma e^{-E/kT} dE, partition function sum (2J+1) e^{-E/kT}) and tmc.py (TASMAN factors: 1 + RR d for RR >= 0,
- * 1/(1 + |RR| d) for RR < 0, truncated at |RR| <= 3). Numbers are illustrative. */
+ * Shapes follow the Kalbach systematics (a(E_in, E_out), K = a e^{a cos} / 4 pi sinh a; the engine writes them as an
+ * optional output, physics/hf/specang.py, INCOGNITA_SPECOUT, off by default), the stellar formulas of physics/hf/astro/stellar.py
+ * (int E sigma e^{-E/kT} dE, partition function sum (2J+1) e^{-E/kT}; thermally populated targets behind INCOGNITA_STELLAR,
+ * off by default) and tmc.py (TASMAN factors: 1 + RR d for RR >= 0, 1/(1 + |RR| d) for RR < 0, truncated at |RR| <= 3).
+ * Ground-state MACS against KADoNiS is folded from the capture curves in validation/differential/core.py. Numbers are illustrative. */
 (function () {
   const { TAU, clamp, lerp, smooth, rng } = WT.util;
   const sigR = (E) => Math.PI * Math.pow(7.4 + 4.57 / Math.sqrt(Math.max(E, 0.01)), 2) / 100; // b, A ~ 238
@@ -44,50 +46,50 @@
 
   WT.chapter("measure", {
     num: "Chapter 11", title: "What comes out", short: "Observables",
-    lead: "Everything so far happened inside the nucleus. An experiment, a reactor or a star sees only a handful of numbers. This chapter shows how the engine assembles them.",
+    lead: "An experiment, a reactor or a star sees only a handful of numbers. This chapter shows how the engine turns what happens inside the nucleus into them.",
     html: `
 <div class="step">
-  <p>A beam of neutrons, coming from the left, passes through a thin foil of nuclei. The pale disc around each nucleus is its <b>cross section</b>: the area a neutron must hit for a reaction to happen. It is not the nucleus's real size. It is measured in barns (10⁻²⁴ cm², about the face of a uranium nucleus). The share of the beam that reacts is that area times how many nuclei the beam meets.</p>
+  <p>The pale disc around each nucleus is its <b>cross section</b>: the area a neutron must hit for a reaction to happen, not the nucleus's real size. A beam comes from the left through a thin foil of nuclei; the share that reacts is that area times how many nuclei it meets. The unit is the barn (10⁻²⁴ cm², about the face of a uranium nucleus).</p>
   <div class="ctl"><label for="mea-e">Neutron energy (MeV)</label><input id="mea-e" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Lower the energy and the discs swell: a slow neutron behaves as a wide wave, so it can react from farther away. At high energy the disc shrinks toward the size of the nucleus itself.</p>
+  <p>Lower the energy and the discs swell: a slow neutron is a wide wave and reacts from farther away. At high energy the disc shrinks toward the nucleus itself.</p>
 </div>
 <div class="step">
   <h3>New exits open with energy</h3>
-  <p>Each door around the nucleus is one exit, or <b>channel</b>: the neutron bounces back out (elastic), leaves the target excited (n′, inelastic), knocks out a second or third neutron (2n, 3n), is captured with only photons coming out (γ), or a proton or an α particle leaves instead. A padlocked door has a <b>threshold</b>: the reaction costs more energy than the neutron brings. The strip at the bottom marks where each door opens.</p>
+  <p>Each door is one exit, or <b>channel</b>: the neutron bounces out (elastic), leaves the target excited (n′), knocks out more neutrons (2n, 3n), is captured with only photons leaving (γ), or a proton or α particle leaves instead. A padlocked door has a <b>threshold</b>: the reaction costs more energy than the neutron brings.</p>
   <div class="ctl"><label for="mea-e2">Neutron energy (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Drag the energy past a threshold and that door flashes open. Particles stream out through each door at a rate set by its share, and the buckets below fill to those shares; every new door takes share from the others. Inelastic scattering opens at the first excited level, a second neutron costs about 7.5 MeV, a third about 14. The thresholds come from measured masses; the shares come from the competition of Chapter 6.</p>
+  <p>Drag the energy past a threshold and that door flashes open; the buckets fill to each channel's share, and every new door takes share from the others. The thresholds come from the masses of the nuclei; the shares from the competition of Chapter 6.</p>
 </div>
 <div class="step">
   <h3>What a detector sees</h3>
-  <p>An experiment cannot watch the nucleus. It pulses the beam, and a ring of detectors around the target times each neutron's flight: fast neutrons arrive first, slow ones later, so the arrival time gives the energy. The two halves of the ring each build a pile of neutrons sorted by energy.</p>
+  <p>The two piles are the neutrons that reach the forward and backward halves of a detector ring, sorted by energy. The beam is pulsed, so each neutron's flight time gives its energy: fast ones arrive first.</p>
   <div class="ctl"><label for="mea-ein">Incident energy (MeV)</label><input id="mea-ein" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="30"><output data-show="Ein" data-fmt="0"></output></div>
-  <p>Both piles show a hump of slow neutrons around 1 to 2 MeV. These are <b>evaporated</b>: they boil off the compound nucleus after the energy has been shared among all its nucleons, and they leave in every direction alike. Only the forward pile has a long tail of fast neutrons. These leave from the first collisions, before the energy is shared, still moving roughly the way the beam was going: the <b>pre-equilibrium</b> part. Raise the incident energy and the tail grows.</p>
+  <p>Both piles have a hump of slow, <b>evaporated</b> neutrons: they boil off the compound nucleus once the energy is shared, in every direction alike. Only the forward pile has a long fast tail: <b>pre-equilibrium</b> neutrons, which leave from the first collisions still moving roughly with the beam. Raise the incident energy and the tail grows.</p>
 </div>
 <div class="step">
   <h3>Which way they go</h3>
-  <p>The petal shape shows how many neutrons leave in each direction; the beam comes from the left. Evaporated neutrons have forgotten the beam's direction and leave equally every way. Fast pre-equilibrium ones remember it and lean forward. Kalbach's rule describes this: one slope <i>a</i>, growing with the outgoing energy, sets how far forward they lean. The engine itself stops at how many particles leave with each energy; it does not compute their directions.</p>
+  <p>The petal shows how many neutrons leave in each direction; the beam comes from the left. Evaporated neutrons have forgotten the beam and leave every way alike; fast pre-equilibrium ones lean forward. Kalbach's rule sets how far, with one slope <i>a</i> that grows with the outgoing energy. The engine can write these angular distributions out too, as an optional output.</p>
   <div class="ctl"><label for="mea-eo">Outgoing energy (MeV)</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>Lower the outgoing energy and the petal rounds out: slow neutrons are mostly evaporated.</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
 </div>
 <div class="step">
   <h3>In a star</h3>
-  <p>Inside a star the neutrons form a hot gas among the target nuclei. Their speeds follow a Maxwell distribution set by the temperature, written as an energy <i>kT</i> (30 keV is about 350 million degrees). The longer a neutron's trail, the faster it moves. Each time one passes a nucleus it may be captured, a flash, with a chance set by the cross section at its energy.</p>
+  <p>The pile below collects the energies of neutrons captured in a star's hot gas. Their speeds follow a Maxwell distribution set by the temperature <i>kT</i> (30 keV is about 350 million degrees); longer trails mean faster neutrons, and each pass by a nucleus may end in a capture flash.</p>
   <div class="ctl"><label for="mea-kt">Temperature kT (keV)</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
-  <p>Each captured neutron drops into the pile below, by its energy. The pile is the window that counts: slow neutrons are captured easily but are few and pass by rarely, the fastest are rare, so most captures come from a band around a few <i>kT</i>. The capture rate over the whole gas is the <b>Maxwellian-averaged cross section</b> (MACS), here in millibarns (mb). Heat the gas and the window slides to higher energy, where the nucleus is a smaller target. The engine supplies the capture cross section; the average over the gas is taken afterwards, from that curve.</p>
+  <p>Slow neutrons are easy to catch but pass by rarely, and fast ones are few, so most captures come from a window a few <i>kT</i> wide. The rate over the whole gas is the <b>Maxwellian-averaged cross section</b> (MACS), in millibarns (mb). Heat the gas and the window slides to higher energy, where the target is smaller. The MACS is folded from the engine's capture curve.</p>
 </div>
 <div class="step">
   <h3>The target is hot too</h3>
-  <p>The shelves are the target's lowest energy levels, labelled with spin and energy, and the balls show what share of target nuclei sit on each at this temperature. In a star some targets are already excited. Hotter means more on the upper shelves, and a level with spin <i>J</i> holds more because it has 2<i>J</i>+1 orientations. Each excited level is a different entrance to the same compound nucleus.</p>
+  <p>The balls show what share of target nuclei sit on each of its lowest levels at this temperature. In a star some targets are already excited, and each excited level is a different entrance to the same compound nucleus. A level with spin <i>J</i> holds more because it has 2<i>J</i>+1 orientations.</p>
   <div class="ctl"><label for="mea-kt2">Temperature kT (keV)</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
-  <p>Raise the temperature and watch nuclei move up. A full stellar rate runs the reaction from each populated level and adds the results with these shares; the weights sum to the partition function <i>G</i>, and the ratio to the rate from the ground state alone is the <b>stellar enhancement factor</b>. The engine does not take this step: it computes every reaction on a target in its ground state.</p>
+  <p>Raise the temperature and watch nuclei move up. A stellar rate runs capture from each populated level and adds the results with these shares; the weights sum to the partition function <i>G</i>, and the ratio to the ground-state rate is the <b>stellar enhancement factor</b>. The engine can do this as an option, off by default; normally every target starts in its ground state.</p>
 </div>
 <div class="step">
   <h3>How sure is any of this?</h3>
-  <p>The three knobs are model inputs, each known only to within some percent: the depth of the optical well (the potential the neutron feels), the level density (how many states per MeV) and the photon strength (how readily the nucleus emits light). Each run of the engine turns them to random settings within those limits and adds one faint disc, its capture cross section, at three neutron energies. Reading the spread of many runs gives an honest uncertainty: <b>Total Monte Carlo</b>.</p>
+  <p>Each faint disc is one run of the engine with its inputs nudged at random: the depth of the optical well, the level density and the photon strength, each known only to within some percent. The spread of many runs is an honest uncertainty: <b>Total Monte Carlo</b>.</p>
   <div class="btns"><button class="btn" data-act="tmc1">Run a variant</button><button class="btn ghost" data-act="tmc">Run 10</button><button class="btn ghost" data-act="clear">Clear</button></div>
-  <p>A crisp rim means the inputs pin the answer; a fuzzy rim means they do not. At 10 MeV the optical well matters too and the rim blurs most. That is where new measurements would help most.</p>
-  <div class="aside">In the code: <code>emission/channels.py</code> (exclusive channels and residuals), <code>preeq/</code> and <code>emission/</code> (emission spectra), <code>tmc.py</code> (the Total Monte Carlo sampler). Maxwellian averages are taken after the run from the engine's capture curves (<code>validation/differential/core.py</code>). Angular distributions and thermally excited targets are not computed.</div>
+  <p>A crisp rim means the inputs pin the answer; a fuzzy rim means they do not, and that is where new measurements would help most.</p>
+  <div class="aside">In the code: <code>emission/channels.py</code> (exclusive channels and residuals), <code>specout.py</code> and <code>specang.py</code> (outgoing spectra, angular distributions and double-differential cross sections, written only when asked for), <code>astro/stellar.py</code> (capture from thermally populated target levels, optional), <code>tmc.py</code> (the Total Monte Carlo sampler). Ground-state MACS are folded from the capture curves in <code>validation/differential/core.py</code>.</div>
 </div>`,
     setup(S) {
       S.set("mode", "area"); S.to("E", 2, true); S.to("Ein", 30, true); S.to("Eout", 25, true); S.to("kT", 30, true);

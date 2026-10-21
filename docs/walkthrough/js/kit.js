@@ -30,6 +30,7 @@
   const KEYS = ["ink", "soft", "faint", "paper", "card", "line", "accent", "neutron", "proton", "alpha", "photon", "fission", "warm", "cool"];
   function readColors() { const cs = getComputedStyle(document.documentElement); KEYS.forEach((k) => (COL[k] = cs.getPropertyValue("--" + k).trim())); }
   WT.col = COL;
+  function shade(hex, f) { const n = parseInt(hex.slice(1), 16), c = (v) => Math.min(255, Math.round(v * f)); return `rgb(${c((n >> 16) & 255)},${c((n >> 8) & 255)},${c(n & 255)})`; }
   function rgba(hex, a) {
     const h = hex.replace("#", ""); const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
     return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
@@ -46,14 +47,15 @@
     g.label = (s, x, y, o = {}) => {
       if (WT.tr) s = WT.tr(s);
       ctx.save(); ctx.globalAlpha = o.alpha ?? 1;
-      ctx.font = `${o.italic ? "italic " : ""}${o.weight || 500} ${o.size || 14}px ${o.serif ? SERIF : SANS}`;
+      const size = Math.max(o.size || 14, 12);                // never smaller than 12 px
+      ctx.font = `${o.italic ? "italic " : ""}${o.weight || 500} ${size}px ${o.serif ? SERIF : SANS}`;
       ctx.textAlign = o.align || "center"; ctx.textBaseline = o.base || "middle";
       if (o.bg) {
-        const w = ctx.measureText(s).width, h = (o.size || 14) * 1.5, pad = 6;
+        const w = ctx.measureText(s).width, h = size * 1.5, pad = 6;
         const x0 = (o.align === "left" ? x : o.align === "right" ? x - w : x - w / 2) - pad;
         ctx.fillStyle = rgba(COL.paper, 0.88); ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x0, y - h / 2, w + 2 * pad, h, 6); else ctx.rect(x0, y - h / 2, w + 2 * pad, h); ctx.fill();
       }
-      ctx.fillStyle = o.color || COL.soft; ctx.fillText(s, x, y); ctx.restore();
+      ctx.fillStyle = !o.color || o.color === COL.faint ? COL.soft : o.color; ctx.fillText(s, x, y); ctx.restore(); // faint grey is too pale for text
     };
     /** Fade the stage edges into the page so drawings never look boxed. */
     g.vignette = (edge = 0.12) => {
@@ -92,7 +94,8 @@
     g.ball = (x, y, r, color, alpha = 1) => {
       ctx.save(); ctx.globalAlpha = alpha;
       const gr = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
-      gr.addColorStop(0, "#ffffff"); gr.addColorStop(0.28, color); gr.addColorStop(1, rgba(color.length === 7 ? color : "#888888", 1));
+      const hx = color.length === 7 ? color : "#888888";
+      gr.addColorStop(0, "#ffffff"); gr.addColorStop(0.22, color); gr.addColorStop(0.75, shade(hx, 0.62)); gr.addColorStop(1, shade(hx, 0.34));
       ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, Math.max(0.1, r), 0, TAU); ctx.fill();
       ctx.strokeStyle = rgba("#000000", 0.18); ctx.lineWidth = 0.8; ctx.stroke(); ctx.restore();
     };
@@ -210,7 +213,7 @@
     const setOf = (map, k) => { let s = map.get(k); if (!s) map.set(k, (s = new Set())); return s; };
     document.querySelectorAll(GL_BLOCKS).forEach((block) => {
       if (block.closest(GL_SKIP)) return;
-      const scopeEl = block.closest(".step") || block.closest(".lead") || block.closest(".coda") || block.closest(".intro-text") || block;
+      const scopeEl = block.closest("[data-ch]") || block.closest(".coda") || block.closest(".intro-text") || block; // first use per chapter keeps the page calm
       const chEl = block.closest("[data-ch]"), chKey = chEl ? chEl : block.closest(".coda") || block;
       const used = setOf(scopes, scopeEl), chUsed = setOf(chapters, chKey);
       // the block's text, as segments of text nodes (segments inside controls/code are off limits)
@@ -457,6 +460,11 @@
     if (toc) {
       chapters.filter((c) => c.mod.title).forEach((c) => { const li = document.createElement("li"); li.innerHTML = `<a href="#${c.id}"><span>${(c.mod.num || "").replace(/[^0-9]/g, "")}</span>${c.mod.short || c.mod.title}</a>`; toc.appendChild(li); });
       const links = [...toc.querySelectorAll("a")];
+      const nav = toc.parentElement, menu = document.createElement("button"); // phones: the list opens from a button
+      menu.type = "button"; menu.className = "toc-menu"; menu.setAttribute("aria-expanded", "false"); menu.textContent = (WT.ui ? WT.ui("chapters", "Chapters") : "Chapters") + " ▾";
+      menu.addEventListener("click", () => { const o = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", String(o)); });
+      links.forEach((a) => a.addEventListener("click", () => { nav.classList.remove("open"); menu.setAttribute("aria-expanded", "false"); }));
+      nav.insertBefore(menu, toc);
       new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) links.forEach((a) => a.classList.toggle("here", a.getAttribute("href") === "#" + en.target.id)); }), { rootMargin: "-50% 0px -50% 0px" })
         && chapters.forEach((c) => c.mod.title && links.length && new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { links.forEach((a) => a.classList.toggle("here", a.getAttribute("href") === "#" + c.id)); const h = toc.querySelector("a.here"); h && h.scrollIntoView({ block: "nearest", inline: "center" }); } }), { rootMargin: "-50% 0px -50% 0px" }).observe(c.el));
     }

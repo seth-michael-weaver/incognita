@@ -9,7 +9,8 @@
  *                   "second"  = at high energy a second exciton still sits above the free line and escapes too; then calm.
  * Shapes follow preeq/exciton.py (two-component chain, never-come-back, emission by detailed balance),
  * density/particle_hole.py (Williams densities with Pauli and finite-well corrections), preeq/complex.py
- * (Kalbach pickup/stripping, alpha knockout), preeq/multi.py (multiple pre-equilibrium). Numbers illustrative. */
+ * (Kalbach pickup/stripping, alpha knockout), preeq/multi.py (multiple pre-equilibrium, on from emulpre = 20 MeV).
+ * The chain runs only above epreeq (default: the target's last discrete level, input/defaults.py). Numbers illustrative. */
 (function () {
   const { TAU, clamp, lerp, smooth, rng } = WT.util;
   const SEP = 8; // MeV, separation energy drawn above the Fermi surface
@@ -20,50 +21,50 @@
 
   WT.chapter("preeq", {
     num: "Chapter 4", title: "Collisions before calm", short: "Pre-equilibrium",
-    lead: "Pre-equilibrium means “before the energy evens out”. A neutron that enters a nucleus does not share its energy with everyone at once. For the first few collisions one particle still holds most of it, and that particle can fly straight back out.",
+    lead: "A neutron that enters a nucleus does not share its energy with everyone at once. For the first few collisions one particle holds most of it, and that particle can fly straight back out. This is pre-equilibrium: emission “before the energy evens out”.",
     html: `
 <div class="step">
-  <p>The picture shows two wells, one for <em class="p">protons</em> and one for <em class="n">neutrons</em>. Each ball is a nucleon (a proton or a neutron) sitting on an energy level, drawn as a rung. The rungs are filled from the bottom up to the <b>Fermi surface</b>, the top of the filled levels. A nucleon above the dashed line marked “free” has enough energy to escape. The engine tracks protons and neutrons separately throughout this chapter.</p>
-  <p>The incoming neutron hovers above both wells. It carries its own energy plus the energy released when it was captured, several MeV (million electron-volts, the energy unit used here). Right now one particle holds all of that energy, and the filled levels have no gaps.</p>
+  <p>Two wells, one for <em class="p">protons</em> and one for <em class="n">neutrons</em>. Each ball is a nucleon on an energy level, drawn as a rung; the rungs are filled from the bottom up to the <b>Fermi surface</b>. A nucleon above the dashed “free” line has enough energy to escape. The engine tracks protons and neutrons separately.</p>
+  <p>The incoming neutron hovers above, holding all the energy: its own plus several MeV (million electron-volts) released by its capture.</p>
 </div>
 <div class="step">
   <h3>Lifting pairs</h3>
-  <p>Now the neutron has hit a nucleon below the surface and knocked it up onto an empty rung. The empty slot it left behind is a <b>hole</b>, drawn as an open ring. The engine counts particles above the surface plus holes below it, and calls each one an <b>exciton</b>. The first collision turns 1 particle into 2 particles and 1 hole (n = 3 excitons); each further collision adds one more particle–hole pair.</p>
+  <p>Each collision lifts a nucleon onto an empty rung and leaves a <b>hole</b> (an open ring) behind. Particles above the surface and holes below it are both called <b>excitons</b>. The first collision makes 2 particles and 1 hole (n = 3); each later one adds another pair.</p>
   <div class="btns"><button class="btn" data-act="collide">Collide</button><button class="btn ghost" data-act="reset">Start again</button></div>
-  <p>Press Collide a few times. The lifted nucleon may be a proton or a neutron, and the engine keeps a separate count for each. With every pair the energy is split more ways, so the highest particle sits lower.</p>
+  <p>Press Collide a few times. The lifted nucleon may be a proton or a neutron, and the engine counts each kind. With every pair the energy is split more ways, so the top particle sits lower.</p>
 </div>
 <div class="step">
   <h3>The fork at every stage</h3>
-  <p>The picture shows one stage of the chain. The top neutron can escape (the arrow up and out), if it still sits above the free line, or it can collide again (the arrow down). The thickness of each arrow shows its chance. The escape rate comes from <b>detailed balance</b>: the chance of leaving follows from the chance of the reverse process, the same particle being absorbed, which Chapter 2 computes. The collision rate is the average strength of one nucleon–nucleon collision times the number of new arrangements it can reach.</p>
+  <p>At each stage the top neutron either escapes (arrow up, only if it is above the free line) or collides again (arrow down); thickness shows the odds. The escape rate follows from <b>detailed balance</b>: from the chance of the reverse process, the same particle being absorbed, which Chapter 2 computes. The collision rate is the strength of one nucleon–nucleon collision times the number of new arrangements it can reach.</p>
   <div class="ctl"><label for="pe-n">Stage (excitons n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
-  <p>Drag the stage up. Early in the chain one particle holds most of the energy, so whatever escapes is fast. Later the energy is spread thin, and only slow particles get out, if any.</p>
+  <p>Drag the stage up. Early on one particle holds most of the energy, so what escapes is fast. Later the energy is spread thin, and little gets out.</p>
 </div>
 <div class="step">
   <h3>Where the fast tail comes from</h3>
-  <p>The same two wells, now running whole reactions. In each one the chain steps through stages 3, 5, 7, … until the top neutron escapes. It flies to the right and lands in a pile sorted by its energy: slow on the left, fast on the right. Its colour says when it left: <em style="font-style:normal;color:var(--warm);font-weight:600">deep orange</em> at stage 3, paler at later stages, and <em class="n">blue</em> if nothing escaped during the chain and the neutron came out later, from the calm compound nucleus (Chapter 5). The pile is the <b>spectrum</b>: how many neutrons come out at each energy.</p>
+  <p>The pile on the right is the <b>spectrum</b>: how many neutrons come out at each energy, slow on the left, fast on the right. Each reaction runs the chain until the top neutron escapes, and its colour says when: <em style="font-style:normal;color:var(--warm);font-weight:600">deep orange</em> at stage 3, paler later, <em class="n">blue</em> if it came out only after the nucleus calmed down (Chapter 5).</p>
   <div class="btns"><button class="btn" data-act="run">Run 300 reactions</button></div>
-  <p>Stage 3 builds a broad, nearly flat shelf that reaches all the way to the maximum energy, because one particle still holds most of it. Later stages pile up lower. The blue hump on the left is <b>evaporation</b>: once the energy is shared by everyone, only slow neutrons trickle out, like steam from a hot liquid.</p>
+  <p>Stage 3 builds a broad, nearly flat shelf that reaches the maximum energy. Later stages pile up lower. The blue hump is <b>evaporation</b>: once everyone shares the energy, only slow neutrons trickle out, like steam from a hot liquid.</p>
   <div class="ctl"><label for="pe-e">Neutron energy</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>
-  <p>Drag the incoming neutron's energy and a new batch runs. Evaporation alone cannot make fast neutrons; the shelf can, and it stretches further as the incoming neutron gets faster.</p>
+  <p>Drag the incoming neutron's energy: a new batch runs and the shelf stretches further. Evaporation alone never makes fast neutrons.</p>
 </div>
 <div class="step">
   <h3>Counting arrangements</h3>
-  <p>One well, drawn with evenly spaced rungs 1 MeV apart. The picture runs through every way to place the particles on empty rungs above the Fermi surface and the holes in filled rungs below it, so that their energies add up to the energy to share; the counter ticks once per arrangement. Nucleons are fermions: no two can sit on the same rung, so a lifted nucleon must land on an empty rung and a hole can only open where a nucleon was. This rule is <b>Pauli blocking</b>.</p>
+  <p>The counter ticks through every way to put particles on empty rungs and holes in filled rungs so that their energies add up to the energy to share (rungs here are 1 MeV apart). Nucleons are fermions: no two share a rung, so a particle must land on an empty rung and a hole opens only where a nucleon was. This is <b>Pauli blocking</b>.</p>
   <div class="ctl"><label for="pe-u">Energy to share (MeV)</label><input id="pe-u" type="range" data-bind="U" min="2" max="16" step="1" value="8" data-instant><output data-show="U" data-fmt="0"></output></div>
   <div class="btns"><button class="btn" data-act="addpair">Add a pair</button><button class="btn ghost" data-act="droppair">Remove a pair</button></div>
-  <p>Add a pair and the count jumps; raise the energy and it climbs roughly like <i>E</i><sup>n−1</sup>, where n is the number of excitons. That count, the <b>particle–hole state density</b>, is what sets the collision rate of the last step: more ways to arrange means more places a collision can lead. The engine counts with the Pauli rule built in, on the real ladder (rungs about a quarter MeV apart in a medium nucleus, so far more arrangements), plus one more limit you can see at high energy: a hole cannot be deeper than the bottom of the well.</p>
+  <p>Add a pair and the count jumps; raise the energy and it climbs roughly like <i>E</i><sup>n−1</sup>. This count, the <b>particle–hole state density</b>, sets the collision rate: more arrangements, more places a collision can lead. The engine counts on the real ladder, with rungs a fraction of an MeV apart, and adds one limit you see at high energy: a hole cannot sit below the bottom of the well.</p>
 </div>
 <div class="step">
   <h3>Clusters leave too</h3>
-  <p>Press a button to watch a small cluster of nucleons leave early. In a <b>pickup</b>, a proton on its way out grabs a neutron at the surface and leaves with it as a <em class="n">deuteron</em> (one proton plus one neutron). Grabbing two gives a triton (one proton, two neutrons) or helium-3 (two protons, one neutron). The engine uses Kalbach's formulas for how often each pickup happens. In a <b>knockout</b>, the incoming neutron hits an <em class="a">alpha particle</em> (two protons and two neutrons bound tightly together) that already exists near the surface, and knocks it straight out.</p>
+  <p>Small clusters can also leave early. In a <b>pickup</b>, a proton on its way out grabs a neutron at the surface and leaves with it as a <em class="n">deuteron</em>; grabbing two gives a triton or helium-3. In a <b>knockout</b>, the incoming neutron hits an <em class="a">alpha particle</em> (two protons and two neutrons) already formed near the surface and knocks it out. The engine uses Kalbach's formulas for both.</p>
   <div class="btns"><button class="btn ghost" data-act="pickup">Pick up a neutron → d</button><button class="btn ghost" data-act="knock">Knock out an α</button></div>
-  <p>Both give deuterons and alphas fast tails of their own, starting just above their separation energies (the energy it costs to pull each one out).</p>
+  <p>Press a button to watch one. Both give deuterons and alphas fast tails of their own, starting just above the energy it costs to pull each one out.</p>
 </div>
 <div class="step">
   <h3>A second fast one</h3>
-  <p>The wells replay one reaction at a time, with the energy scale squeezed to fit. The neutron enters and collides; the top neutron escapes fast. Look at what is left: one more lifted nucleon and a hole. At low energy that nucleon sits below the free line and stays. At high energy it can still sit above the line, and it escapes too, a second fast neutron or proton, before the rest settles.</p>
+  <p>At high energy, a second lifted nucleon can still sit above the free line when the first neutron leaves, and escape too, as a fast neutron or proton. The wells replay one reaction at a time, with the energy scale squeezed.</p>
   <div class="ctl"><label for="pe-e2">Neutron energy</label><input id="pe-e2" type="range" data-bind="E" min="5" max="80" step="0.5" value="40"><output data-show="E" data-fmt="1"></output></div>
-  <p>Drag the energy. Below about 20 MeV the second nucleon almost never clears the line; above it, more and more reactions shed two fast particles. This is <b>multiple pre-equilibrium</b> emission, and the engine follows the residual's excitons for it. Whatever has not left by the end of the chain becomes the compound nucleus of the next chapter. The engine runs this chain at every incoming energy with a smooth onset, because a sudden switch would put a false step into the capture cross section (how often the neutron is captured and a photon comes out).</p>
+  <p>Drag the energy. Below about 20 MeV the second nucleon rarely clears the line; above, more and more reactions shed two fast particles. This is <b>multiple pre-equilibrium</b>, which the engine includes from 20 MeV up. Whatever has not left becomes the compound nucleus of the next chapter. Below a few MeV (the target's highest discrete level in use) the engine skips the chain entirely.</p>
   <div class="aside">In the code: <code>preeq/exciton.py</code> (two-component exciton chain, collision and escape rates), <code>density/particle_hole.py</code> (particle–hole state densities with Pauli and finite-well corrections), <code>preeq/complex.py</code> (Kalbach pickup, stripping and α knockout), <code>preeq/multi.py</code> (multiple pre-equilibrium), <code>compound/normalization.py</code> (hand-off to the compound nucleus).</div>
 </div>`,
     setup(S) {

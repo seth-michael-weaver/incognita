@@ -35,8 +35,8 @@
   const SPD = { n: DEPTH.map((f) => ballSprite(shade(C.n, f))), p: DEPTH.map((f) => ballSprite(shade(C.p, f))) }, SP = { n: SPD.n[2], p: SPD.p[2] }, GL = { n: glowSprite(C.n), p: glowSprite(C.p), hot: glowSprite(C.hot), white: glowSprite(C.white), gam: glowSprite(C.gam), a: glowSprite(C.a) };
   const stamp = (img, x, y, r, a = 1) => { if (a <= 0.003 || r <= 0.2) return; ctx.globalAlpha = Math.min(1, a); ctx.drawImage(img, x - r, y - r, 2 * r, 2 * r); };
 
-  // ---------- the nucleus: N nucleons packed in a unit sphere (relaxed once) ----------
-  const N = 190, Z = 78, rb = Math.cbrt(0.62 / N);
+  // ---------- the nucleus: uranium-235 (92 protons, 143 neutrons) packed in a unit sphere (relaxed once) ----------
+  const N = 235, Z = 92, rb = Math.cbrt(0.62 / N);
   const nuc = [];
   (function pack() {
     const r = rng(11);
@@ -59,7 +59,7 @@
   for (let i = 0; i < 70; i++) flux.push({ x: R0(), y: R0(), v: 0.04 + R0() * 0.12, l: 10 + R0() * 40, a: 0.08 + R0() * 0.22 });
 
   // ---------- the reaction cycle ----------
-  const SEQ = ["fission", "gamma", "alpha", "proton", "two", "fission", "neutron", "alpha", "gamma", "fission", "proton", "two"];
+  const SEQ = ["fission", "gamma", "neutron", "fission", "alpha", "two", "fission", "proton", "gamma", "fission"]; // U-235: fission comes up often
   const CAP = {
     neutron: "a neutron comes back out", gamma: "a gamma ray: a burst of light", proton: "a proton escapes",
     two: "two neutrons come out", alpha: "an alpha particle: 2 protons + 2 neutrons", fission: "fission: the nucleus splits in two",

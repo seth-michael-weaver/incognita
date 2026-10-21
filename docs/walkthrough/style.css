@@ -116,8 +116,8 @@ body.shot .chapter .stage { top: 0; }
 
 /* ---------- glossary terms and their card ---------- */
 .term {
-  color: color-mix(in srgb, var(--accent) 24%, currentColor);
-  text-decoration: underline dotted color-mix(in srgb, var(--accent) 50%, transparent);
+  color: inherit;
+  text-decoration: underline dotted color-mix(in srgb, var(--accent) 38%, transparent);
   text-decoration-thickness: 1.5px; text-underline-offset: 0.22em; text-decoration-skip-ink: none;
   cursor: help; border-radius: 3px; -webkit-tap-highlight-color: transparent;
   transition: color .12s ease, background-color .12s ease, text-decoration-color .12s ease, box-shadow .12s ease;
@@ -312,3 +312,13 @@ input[type=range] { min-height: 32px; }
 .vd-win, .layer-chip.on { box-shadow: inset 0 0 0 1.5px var(--win-ink); }
 .vd-loss, .sb-loss .sb-n, .figs .l b, .sb-table .neg { color: var(--loss-ink); }
 .vd-loss { box-shadow: inset 0 0 0 1.5px var(--loss-ink); }
+
+/* ---------- phones: the chapter list opens from a "Chapters" button ---------- */
+.toc-menu { display: none; }
+@media (max-width: 720px) {
+  .toc { position: sticky; }
+  .toc-menu { display: inline-flex; align-items: center; flex: none; margin-left: 12px; margin-right: auto; font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--ink); background: var(--card); border: 0; box-shadow: 0 0 0 1px var(--line); border-radius: 999px; padding: 10px 14px; cursor: pointer; }
+  .toc ol { display: none; }
+  .toc.open ol { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; max-height: 70vh; overflow-y: auto; padding: 8px 12px 14px; background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: 0 12px 24px rgba(0,0,0,.12); -webkit-mask-image: none; mask-image: none; }
+  .toc.open ol a { padding-block: 11px; }
+}

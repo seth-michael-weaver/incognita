@@ -1,41 +1,41 @@
 /* Spanish: cascade (chapter 8) */
 WT.es.ch.cascade = {
   num: "Capítulo 8", title: "Bajando por la carta", short: "Cascada",
-  lead: "Una emisión rara vez es el final. El núcleo que queda suele seguir caliente: guarda energía de sobra para volver a emitir.",
+  lead: "Una emisión rara vez es el final: el núcleo que queda suele seguir lo bastante caliente para volver a emitir.",
   html: `
 <div class="step">
-  <p>A la izquierda está el núcleo compuesto, blanco y neutrón fundidos en uno. Sus peldaños son niveles de energía: escasos cerca del estado fundamental, abajo, y cada vez más apretados hasta formar un continuo más arriba. La bola naranja es su energía. A la derecha está el <b>núcleo residual</b>, el que queda cuando sale un neutrón. Su estado fundamental está más alto, en la <b>energía de separación</b> S<sub>n</sub> del neutrón (lo que cuesta arrancarlo).</p>
-  <p>Cada vez que sale un neutrón, la bola naranja cruza al otro lado y cae. La caída es la energía cinética que se llevó el neutrón; donde se detiene es la <b>excitación</b> (energía de sobra) que conserva el residual. Los puntos apilados a la derecha cuentan dónde aterrizaron.</p>
+  <p>Un neutrón ha salido del núcleo compuesto (izquierda), y el <b>núcleo residual</b> que deja (derecha) sigue caliente. La bola naranja es la energía. El estado fundamental del residual está más alto, en la <b>energía de separación</b> S<sub>n</sub> del neutrón, lo que cuesta arrancarlo.</p>
+  <p>Cada vez que sale un neutrón, la bola cae lo que vale la energía cinética del neutrón. Donde se detiene es la <b>excitación</b> del residual, su energía de sobra; los puntos de la derecha cuentan los aterrizajes.</p>
   <div class="ctl"><label for="cs-e">Energía del neutrón</label><input id="cs-e" type="range" data-bind="E" min="1" max="30" step="0.5" value="15"><output data-show="E" data-fmt="1"></output></div>
-  <p>Los neutrones emitidos suelen ser lentos, así que la mayoría de las caídas son cortas y el residual sigue caliente. Los puntos azules quedan por encima del umbral de neutrones del residual (línea discontinua): pueden permitirse un segundo neutrón, la reacción (n,2n). Por debajo de unos 11 MeV ninguno llega.</p>
+  <p>Los neutrones emitidos suelen ser lentos, así que la mayoría de las caídas son cortas. Los puntos azules quedan por encima del umbral de neutrones (línea discontinua): pueden permitirse un segundo neutrón, la reacción (n,2n). Por debajo de unos 11 MeV ninguno llega.</p>
 </div>
 <div class="step">
   <h3>Un paseo por la carta</h3>
-  <p>Cada casilla es un núcleo de una esquina de la <b>carta de núclidos</b>, el mapa de todos los núcleos según su número de neutrones N (en horizontal) y de protones Z (en vertical); las casillas difuminadas continúan hacia el resto de la carta. Toda reacción empieza en la casilla remarcada, el núcleo compuesto, una casilla a la derecha del blanco. Cada casilla lleva el nombre de la reacción que termina allí.</p>
-  <p>Las corrientes son la reacción en movimiento. Emitir un <em class="n">neutrón</em> la mueve una casilla a la izquierda, un <em class="p">protón</em> una casilla hacia abajo, una <em class="a">partícula alfa</em> (dos protones y dos neutrones) dos casillas en diagonal. El ancho de una corriente indica cuánto da ese paso; el tono y el porcentaje, dónde termina.</p>
+  <p>Las corrientes son reacciones que recorren una esquina de la <b>carta de núclidos</b>, los núcleos ordenados por número de neutrones N (en horizontal) y de protones Z (en vertical). Todas empiezan en la casilla remarcada del núcleo compuesto; cada casilla lleva el nombre de la reacción que termina allí.</p>
+  <p>Un <em class="n">neutrón</em> emitido mueve una casilla a la izquierda, un <em class="p">protón</em> una hacia abajo, una <em class="a">partícula alfa</em> (dos protones, dos neutrones) dos en diagonal. El ancho de la corriente es cuánto da ese paso; el tono y el porcentaje, dónde terminan las reacciones.</p>
   <div class="btns"><button class="btn" data-act="fire">Lanzar 200 reacciones</button></div>
-  <p>Cada paso cuesta una energía de separación de unos 7 a 11 MeV, así que incluso a 30 MeV el paseo tiene como mucho tres o cuatro pasos.</p>
+  <p>Cada paso cuesta de 7 a 11 MeV de energía de separación, así que incluso a 30 MeV el recorrido tiene como mucho tres o cuatro pasos.</p>
 </div>
 <div class="step">
   <h3>De arriba abajo, intervalo a intervalo</h3>
-  <p>Otra vez dos núcleos: a la derecha, el residual de la primera emisión; a la izquierda, su hijo, con un neutrón menos. El motor corta cada uno en rebanadas de energía llamadas <b>intervalos</b> (aquí de 1 MeV de alto; los del motor miden 0,5 MeV). Las bolas naranjas son reacciones que esperan en cada intervalo, colocadas por la primera emisión. El marcador baja desde arriba.</p>
-  <p>Cuando llega a un intervalo, cada bola toma una salida según la competencia del capítulo 6. Un fotón (<em class="g">γ</em>) la baja a un intervalo inferior del mismo núcleo; un <em class="n">neutrón</em> la lleva a un intervalo del hijo; un protón o una alfa la llevan a otro núcleo, fuera de este dibujo. Por debajo de todos los umbrales, los fotones llevan lo que queda al estado fundamental (gris). Después se barre el hijo de la misma manera.</p>
+  <p>El motor vacía cada núcleo de arriba abajo, una rebanada de energía, o <b>intervalo</b>, cada vez. A la derecha, el residual de la primera emisión; a la izquierda, su hijo, con un neutrón menos. Las bolas naranjas son reacciones que esperan en cada intervalo. Aquí los intervalos miden 1 MeV; el motor usa unos 40 por núcleo, ajustados a la energía disponible.</p>
+  <p>Cuando el marcador barre un intervalo, cada bola toma una salida según la competencia del capítulo 6: un fotón (<em class="g">γ</em>) la baja a un intervalo inferior, un <em class="n">neutrón</em> la lleva al hijo, un protón o una alfa la sacan del dibujo. Por debajo de todos los umbrales, los fotones llevan el resto al estado fundamental (gris). Después se barre el hijo.</p>
   <div class="ctl"><label for="cs-e3">Energía del neutrón</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Empezar de nuevo</button></div>
-  <p>Los fotones solo bajan, y el motor termina cada núcleo antes que sus hijos, así que nada cae nunca en un intervalo que ya se vació.</p>
+  <p>Los fotones solo bajan, y cada núcleo se termina antes que sus hijos, así que nada cae en un intervalo ya vaciado.</p>
 </div>
 <div class="step">
   <h3>Ponerle nombre a la historia</h3>
-  <p>Se reproduce una reacción cada vez. El marcador naranja es el núcleo caliente saltando por la carta; en cada salto, la partícula que emite cae en la bandeja de abajo. La bandeja llena forma el <b>canal exclusivo</b>: una reacción nombrada por el conjunto de partículas que salieron, como (n,2n) para dos neutrones. Los fotones se van y no cuentan. El motor mantiene cada canal por separado y le da su propia sección eficaz (su probabilidad, expresada como un área efectiva del blanco).</p>
+  <p>Se reproduce una reacción cada vez: el marcador salta por la carta y cada partícula emitida cae en la bandeja. La bandeja llena nombra el <b>canal exclusivo</b>, como (n,2n); los fotones no cuentan. El motor da a cada canal su propia sección eficaz (su probabilidad, como un área efectiva del blanco).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Siguiente canal</button></div>
-  <p>Recórrelos. (n,np) se reproduce dos veces, primero con el neutrón y luego con el protón por delante: ambos terminan en la misma casilla con la misma bandeja, así que son un solo canal. Después, un fantasma muestra un deuterón (un protón y un neutrón ligados) llegando a esa casilla en un solo salto. Su bandeja dice d: otro canal, (n,d). El motor nombra los canales por lo que se emitió, no por dónde terminan.</p>
+  <p>Recórrelos. (n,np) se reproduce dos veces, primero con el neutrón y luego con el protón: misma casilla, misma bandeja, un solo canal. Después, un deuterón fantasma (un protón y un neutrón ligados) llega a esa casilla en un solo salto: su bandeja dice d, otro canal, (n,d).</p>
 </div>
 <div class="step">
   <h3>Dónde termina todo</h3>
-  <p>Cada casilla tiene ahora estantes. El estante de tinta, abajo, es el <b>estado fundamental</b> del núcleo, su estado más bajo. El estante verde, en dos casillas, es un <b>isómero</b>: un estado excitado que vive lo bastante como para contar como un producto aparte. Cada reacción lanzada salta hasta donde termina, cae en un estante y emite su último fotón. La altura de cada montón es la <b>producción residual</b>: cuánto de ese núcleo fabricaron las reacciones.</p>
+  <p>Cada casilla tiene ahora estantes: de tinta para el <b>estado fundamental</b>, verde (en dos casillas) para un <b>isómero</b>, un estado excitado que vive lo bastante como para contar como un producto aparte. La altura del montón es la <b>producción residual</b>: cuánto de cada núcleo fabricaron las reacciones.</p>
   <div class="ctl"><label for="cs-e2">Energía del neutrón</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lanzar 200 reacciones</button></div>
-  <p>Arrastra la energía: el siguiente lote la usa y los montones viejos se desvanecen. La producción se aleja del punto de partida a medida que pueden salir más partículas. Por debajo de todos los umbrales de partículas un núcleo solo puede emitir fotones, así que toda historia termina en uno de estos estantes. Una medida por activación ve exactamente estos montones: se irradia una muestra y luego se cuentan las desintegraciones de cada producto.</p>
+  <p>Arrastra la energía: el siguiente lote la usa y los montones viejos se desvanecen. La producción se aleja del punto de partida a medida que pueden salir más partículas. Toda historia termina en un estante, y una medida por activación ve exactamente estos montones: se irradia una muestra y luego se cuentan las desintegraciones de cada producto.</p>
   <div class="aside">En el código: <code>emission/multiple.py</code> (el bucle sobre núcleos e intervalos, la cascada γ), <code>emission/feeding.py</code> (mallas y datos de entrada para cada núcleo de la cadena), <code>compound/continuum.py</code> (la desintegración de un intervalo), <code>emission/channels.py</code> (canales exclusivos, producción residual, ramas isoméricas), <code>emission/binary.py</code> (la contabilidad de la primera emisión).</div>
 </div>`,
 };

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 
@@ -26,7 +26,7 @@
 
 <section class="intro-text" id="intro">
   <p data-i18n="hero1">Fire a neutron at an atomic nucleus and something comes back out. It might be the neutron itself, bounced off. It might be a proton, an alpha particle (a tight cluster of 2 protons and 2 neutrons), or a burst of light. A heavy nucleus might even split in two.</p>
-  <p data-i18n="hero2">Which one happens, and how often? This page walks through how our software answers that question, one step at a time. Scroll down, and try the controls along the way. Every animation runs on the same physics as the real code.</p>
+  <p data-i18n="hero2">Which one happens, and how often? This page walks through how our software answers that question, one step at a time. Scroll down, and try the controls along the way. The pictures follow the same physics as the engine; the numbers in them are illustrative.</p>
 </section>
 
 <main>
@@ -46,73 +46,93 @@
 
 <section class="coda" id="code">
   <h2 data-i18n="coda_h2">Where this lives in the code</h2>
-  <p data-i18n="coda_p1">Each stage above is a package in <code>physics/hf</code>, and the engine calls them in the order you just read. Out of the box the engine reproduces TALYS-2.x, the established reaction code it was ported from. The physics it adds sits behind named switches inside the same packages, all off by default, so turning one on changes exactly one thing.</p>
+  <p data-i18n="coda_p1">Each stage above is a package in <code>physics/hf</code>, and the engine calls them in the order you just read. The engine is a port of TALYS-2.x, the established reaction code. What it adds sits behind named switches inside the same packages: most are off by default, a few corrections are on, and each one can be switched back to plain TALYS on its own.</p>
   <table class="code-map" data-i18n="coda_table">
     <thead><tr><th>Chapter</th><th>What it does</th><th>Code</th></tr></thead>
     <tbody>
       <tr><td><a href="#structure">1</a></td><td>Masses, levels, deformation, resonance data</td><td><code>structure/</code></td></tr>
       <tr><td><a href="#omp">2</a></td><td>Optical model, transmission coefficients (how easily particles get in and out)</td><td><code>omp/</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>Coupled channels, DWBA, giant resonances, direct capture</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
+      <tr><td><a href="#direct">3</a></td><td>Coupled channels, DWBA, giant resonances, direct capture (optional)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
       <tr><td><a href="#preeq">4</a></td><td>Pre-equilibrium: exciton model, pickup and knockout, multiple emission</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
       <tr><td><a href="#compound">5</a></td><td>Level densities (states per MeV), spin distribution</td><td><code>density/</code></td></tr>
       <tr><td><a href="#decay">6</a></td><td>Choosing an exit (Hauser–Feshbach), width fluctuations</td><td><code>compound/</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Photon strength, γ cascade, isomers</td><td><code>gamma/</code>, <code>structure/levels.py</code></td></tr>
-      <tr><td><a href="#cascade">8</a></td><td>The cascade of emissions, exclusive channels, residuals</td><td><code>emission/</code></td></tr>
+      <tr><td><a href="#gamma">7</a></td><td>Photon strength and γ transmission; discrete levels and isomers</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
+      <tr><td><a href="#cascade">8</a></td><td>The cascade of particle and γ emissions, exclusive channels, residuals</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>Fission barriers and transmission</td><td><code>fission/</code></td></tr>
+      <tr><td><a href="#measure">11</a></td><td>Emission spectra, angular distributions and double-differential cross sections (optional, output only)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">11</a></td><td>Capture on thermally excited targets and stellar rates (optional)</td><td><code>astro/stellar.py</code></td></tr>
       <tr><td><a href="#measure">11</a></td><td>Uncertainty by many random variants (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
-      <tr><td></td><td>Every default and option, read once at the start</td><td><code>input/</code></td></tr>
+      <tr><td></td><td>The driver that runs the stages in order, and optional C kernels for speed</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
+      <tr><td></td><td>Every default and option, read once at the start; also TENDL's per-nuclide fitted parameters, applied as TALYS applies them (optional)</td><td><code>input/</code></td></tr>
     </tbody>
   </table>
 
   <h3 data-i18n="coda_h3_added">Added beyond TALYS</h3>
-  <p data-i18n="coda_p_added">Each of these is a switch, off unless set, so a default run still matches TALYS.</p>
+  <p data-i18n="coda_p_added">Rows marked <b>On</b> run by default, so a default run no longer matches TALYS exactly; each can be switched back with one keyword or environment variable. The rest stay off unless set.</p>
   <table class="code-map" data-i18n="coda_table_added">
     <thead><tr><th>Chapter</th><th>What it changes</th><th>Code</th></tr></thead>
     <tbody>
-      <tr><td><a href="#gamma">7</a></td><td>A stronger scissors mode in deformed nuclei, from newer systematics fitted to Oslo measurements (about 4–5× in actinides); or a variant that scales its energy and strength with deformation</td><td><code>gamma/scissors.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Photon strength rescaled so each nucleus matches its measured average photon width ⟨Γγ⟩, for every nucleus in the cascade, not only the first</td><td><code>gamma/ggnorm.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Both corrections at once for the heaviest nuclei (Z ≥ 88), aimed at capture at keV energies</td><td><code>gamma/actphys.py</code></td></tr>
+      <tr><td><a href="#cascade">8</a></td><td><b>On.</b> Flux bookkeeping closed: residuals kept down to 10⁻⁹ mb (TALYS: 10⁻³ mb), residuals one step past TALYS's cascade window kept, up to 8 of each ejectile in exclusive channels, a level's repeated decay branches all counted</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
+      <tr><td><a href="#decay">6</a></td><td><b>On.</b> The top bin of the first compound nucleus is filled as primary photons fill it (weighted by E<sub>γ</sub>³), not evenly</td><td><code>compound/nnleak.py</code></td></tr>
+      <tr><td><a href="#decay">6</a></td><td><b>On.</b> No averaged compound elastic below the first resonances (under 1 keV), where elastic is potential scattering</td><td><code>lowepot.py</code></td></tr>
+      <tr><td><a href="#decay">6</a></td><td><b>On.</b> Deformed targets without fission: neutron exits to levels outside the coupled band use the coupled-channel transmission</td><td><code>compound/ccexitnb.py</code></td></tr>
+      <tr><td><a href="#omp">2</a></td><td><b>On.</b> Alpha emission sees a potential that depends on the residual's temperature; alpha projectiles enter through alpha model 6; triton and helion potentials include the projectile's size</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
+      <tr><td><a href="#fission">9</a></td><td><b>On.</b> Exact one-dimensional transmission through each barrier hump</td><td><code>fission/wkb.py</code></td></tr>
+      <tr><td><a href="#gamma">7</a></td><td><b>On.</b> Per-nucleus E1/M1 strength factors, where a run supplies them, replaced by one global function of deformation</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#gamma">7</a></td><td>A stronger scissors mode in deformed nuclei, from newer systematics that match Oslo measurements (about 4–5× in actinides); or a variant that scales its energy and strength with deformation</td><td><code>gamma/scissors.py</code></td></tr>
+      <tr><td><a href="#gamma">7</a></td><td>Photon strength rescaled so each nucleus matches its measured radiative strength ⟨Γγ⟩/D₀, for every nucleus in the cascade, not only the first</td><td><code>gamma/ggnorm.py</code></td></tr>
+      <tr><td><a href="#gamma">7</a></td><td>Stronger scissors and ⟨Γγ⟩ normalisation for the heaviest nuclei (Z ≥ 88) only, aimed at capture at keV energies</td><td><code>gamma/actphys.py</code></td></tr>
+      <tr><td><a href="#gamma">7</a></td><td>Our own E1-width constant in place of TALYS's TENDL-derived table (the shipped no-data recipe sets it)</td><td><code>gamma/e1_width.py</code></td></tr>
+      <tr><td><a href="#gamma">7</a></td><td>Collective E2 strength of rotational bands in the quasi-continuum</td><td><code>gamma/isoe2.py</code></td></tr>
       <tr><td><a href="#omp">2</a></td><td>A regional adjustment of the optical well for deformed rare-earth targets, fitted to measured S₀ and S₁ with no capture data</td><td><code>omp/regional.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>Direct capture into bound orbits, with an upstream fix: in stock TALYS it silently returns zero unless every optical-model output is also requested</td><td><code>direct/racapcalc.py</code></td></tr>
-      <tr><td></td><td>The per-nuclide fitted parameters TALYS ships with TENDL, applied the same way TALYS applies them</td><td><code>input/fitlib.py</code></td></tr>
+      <tr><td><a href="#omp">2</a></td><td>Measured neutron strength functions S₀, S₁ set the low-energy neutron transmission</td><td><code>omp/sfunc.py</code></td></tr>
+      <tr><td><a href="#direct">3</a></td><td>Direct capture into bound orbits, with an upstream fix: in stock TALYS it returns zero unless every optical-model output is also requested</td><td><code>direct/racapcalc.py</code></td></tr>
+      <tr><td><a href="#direct">3</a></td><td>The target's coupling scheme (rotor, vibrator, spherical) chosen from its measured levels</td><td><code>structure/collrule.py</code></td></tr>
+      <tr><td><a href="#structure">1</a></td><td>The continuum starts where the measured level scheme stops being complete</td><td><code>structure/levcomplete.py</code></td></tr>
+      <tr><td><a href="#structure">1</a></td><td>A level whose listed spin is impossible for its nucleus (integer in odd-A) is treated as a level of unknown spin</td><td><code>structure/levjpar.py</code></td></tr>
+      <tr><td><a href="#compound">5</a></td><td>Constant-temperature level density anchored on the complete part of the discrete levels</td><td><code>density/ctwindow2.py</code></td></tr>
+      <tr><td><a href="#fission">9</a></td><td>Rotational bands of transition states at the fission saddles</td><td><code>fission/barriers.py</code></td></tr>
+      <tr><td><a href="#resonance">10</a></td><td>Capture where only a few resonances fall in the stellar window: the typical value of one resonance ladder instead of the average</td><td><code>fewres.py</code></td></tr>
+      <tr><td></td><td>Four guards far from stability: direct flux capped by unitarity, a limit on the Fermi energy, no default collectivity for odd-odd nuclei, pre-equilibrium spin spread normalised</td><td><code>engphys.py</code></td></tr>
     </tbody>
   </table>
 
   <h3 data-i18n="coda_h3_outside">Outside the engine</h3>
-  <p data-i18n="coda_p_outside">Two parts of the story run beside the engine rather than inside it. The statistical resonance ladders of <a href="#resonance">Chapter 10</a> live in <code>physics/resonance/</code>. The stellar averages of <a href="#measure">Chapter 11</a> are taken after the run from the engine's capture curves, in <code>validation/differential/core.py</code>. The engine does not compute angular distributions or reactions on thermally excited targets.</p>
+  <p data-i18n="coda_p_outside">Some parts of the story run beside the engine rather than inside it. The statistical resonance ladders of <a href="#resonance">Chapter 10</a> live in <code>physics/resonance/</code>. The Maxwellian averages (MACS) of <a href="#measure">Chapter 11</a> are folded from the engine's capture curves after the run, in <code>validation/differential/core.py</code>; capture on thermally excited targets and the stellar rate, by contrast, come from the engine itself (<code>astro/stellar.py</code>, optional). The anchoring layer of <a href="#layers">Chapter 12</a> lives in <code>incognita/terra/</code>.</p>
 </section>
 
-<script src="js/i18n.js?v=13"></script>
-<script src="js/i18n/es-ui.js?v=13"></script>
-<script src="js/i18n/es-glossary.js?v=13"></script>
-<script src="js/i18n/es-structure.js?v=13"></script>
-<script src="js/i18n/es-omp.js?v=13"></script>
-<script src="js/i18n/es-direct.js?v=13"></script>
-<script src="js/i18n/es-preeq.js?v=13"></script>
-<script src="js/i18n/es-compound.js?v=13"></script>
-<script src="js/i18n/es-decay.js?v=13"></script>
-<script src="js/i18n/es-gamma.js?v=13"></script>
-<script src="js/i18n/es-cascade.js?v=13"></script>
-<script src="js/i18n/es-fission.js?v=13"></script>
-<script src="js/i18n/es-resonance.js?v=13"></script>
-<script src="js/i18n/es-measure.js?v=13"></script>
-<script src="js/i18n/es-intro.js?v=13"></script>
-<script src="js/i18n/es-layers.js?v=13"></script>
-<script src="js/glossary.js?v=13"></script>
-<script src="js/kit.js?v=13"></script>
-<script src="js/ch/intro.js?v=13"></script>
-<script src="js/ch/structure.js?v=13"></script>
-<script src="js/ch/omp.js?v=13"></script>
-<script src="js/ch/direct.js?v=13"></script>
-<script src="js/ch/preeq.js?v=13"></script>
-<script src="js/ch/compound.js?v=13"></script>
-<script src="js/ch/decay.js?v=13"></script>
-<script src="js/ch/gamma.js?v=13"></script>
-<script src="js/ch/cascade.js?v=13"></script>
-<script src="js/ch/fission.js?v=13"></script>
-<script src="js/ch/resonance.js?v=13"></script>
-<script src="js/ch/measure.js?v=13"></script>
-<script src="js/ch/layers.js?v=13"></script>
+<script src="js/scoreboard-data.js?v=14"></script>
+<script src="js/i18n.js?v=14"></script>
+<script src="js/i18n/es-ui.js?v=14"></script>
+<script src="js/i18n/es-glossary.js?v=14"></script>
+<script src="js/i18n/es-structure.js?v=14"></script>
+<script src="js/i18n/es-omp.js?v=14"></script>
+<script src="js/i18n/es-direct.js?v=14"></script>
+<script src="js/i18n/es-preeq.js?v=14"></script>
+<script src="js/i18n/es-compound.js?v=14"></script>
+<script src="js/i18n/es-decay.js?v=14"></script>
+<script src="js/i18n/es-gamma.js?v=14"></script>
+<script src="js/i18n/es-cascade.js?v=14"></script>
+<script src="js/i18n/es-fission.js?v=14"></script>
+<script src="js/i18n/es-resonance.js?v=14"></script>
+<script src="js/i18n/es-measure.js?v=14"></script>
+<script src="js/i18n/es-intro.js?v=14"></script>
+<script src="js/i18n/es-layers.js?v=14"></script>
+<script src="js/glossary.js?v=14"></script>
+<script src="js/kit.js?v=14"></script>
+<script src="js/ch/intro.js?v=14"></script>
+<script src="js/ch/structure.js?v=14"></script>
+<script src="js/ch/omp.js?v=14"></script>
+<script src="js/ch/direct.js?v=14"></script>
+<script src="js/ch/preeq.js?v=14"></script>
+<script src="js/ch/compound.js?v=14"></script>
+<script src="js/ch/decay.js?v=14"></script>
+<script src="js/ch/gamma.js?v=14"></script>
+<script src="js/ch/cascade.js?v=14"></script>
+<script src="js/ch/fission.js?v=14"></script>
+<script src="js/ch/resonance.js?v=14"></script>
+<script src="js/ch/measure.js?v=14"></script>
+<script src="js/ch/layers.js?v=14"></script>
 <script>WT.start();</script>
 </body>
 </html>

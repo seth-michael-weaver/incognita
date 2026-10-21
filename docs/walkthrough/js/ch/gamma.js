@@ -5,7 +5,8 @@
  *                   "cascade" = a random cascade from the bins down the measured branchings (stretched ladder, parity by fill);
  *                   "isomer"  = cascades as balls piling up on the isomer or the ground state; the isomer ratio depends on the entrance spin;
  *                   "capture" = the photon door against the neutron door (g.door, gap ~ width): (n, gamma).
- * Shapes follow gamma/parameters.py (GDR, M1 and scissors systematics, upbend), gamma/strength.py (Lorentzian forms),
+ * Shapes follow gamma/parameters.py (GDR, M1 and scissors systematics, upbend; the engine's default E1 is the tabulated
+ * SMLO-2019 strength, drawn here as its Lorentzian stand-in), gamma/strength.py (Lorentzian forms),
  * gamma/transmission.py (T = 2 pi E^(2l+1) f), structure/levels.py (branchings; isomers = half-life >= 1 s) and
  * emission/multiple.py (cascade). Numbers are illustrative. */
 (function () {
@@ -110,46 +111,46 @@
 
   WT.chapter("gamma", {
     num: "Chapter 7", title: "Shedding light", short: "Photons",
-    lead: "When no particle can leave, or none happens to, the nucleus cools by emitting photons: gamma rays, particles of very high-energy light. This exit is open at every energy.",
+    lead: "When no particle leaves, the nucleus cools by emitting photons: gamma rays, particles of high-energy light. This exit is open at every energy.",
     html: `
 <div class="step">
-  <p>The picture shows the energy ladder again, with a hot state glowing at 8 MeV (million electron-volts). It sheds photons (γ); each one carries away the energy of the drop, <i>E<sub>γ</sub></i>, and lands the nucleus on a lower state. Below 2 MeV the states are a few named rungs; above, they are a crowd that thickens steeply with energy (the grey dots). Each photon is drawn thicker and brighter in proportion to <i>E<sub>γ</sub></i>³, which grows steeply with photon energy (for dipole photons, the most common kind).</p>
+  <p>A hot state at 8 MeV (million electron-volts) sheds photons (γ); the pile beside the ladder collects where they land. Below 2 MeV the states are a few named rungs; above, a crowd that thickens steeply with energy (grey dots). Each photon carries off the energy of its drop, <i>E<sub>γ</sub></i>, and is drawn brighter in proportion to <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p>Here <i>T<sub>γ</sub></i> is the photon's transmission coefficient (the “how open is the door” factor of Chapter 6), <i>l</i> = 1 for dipole photons, and <i>f</i>(<i>E<sub>γ</sub></i>) is the <b>photon strength</b>, how readily the nucleus radiates at that energy. The chance of a drop is <i>T<sub>γ</sub></i> times the crowd of states where it lands. Small drops land in a big crowd but are faint; big drops are bright but find few states. The pile beside the ladder collects where they land.</p>
+  <p><i>T<sub>γ</sub></i> is the photon's transmission coefficient (Chapter 6's door), <i>l</i> = 1 for dipole photons, and <i>f</i> is the <b>photon strength</b>: how readily the nucleus radiates at that energy. A drop's chance is <i>T<sub>γ</sub></i> times the crowd of states where it lands: small drops find many states but are faint; big drops are bright but find few.</p>
   <div class="ctl"><label for="gm-e0">Start energy</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Emit 100</button></div>
-  <p>The pile peaks a few MeV below the start: the likeliest photons carry about 2 to 4 MeV. Move the start energy and the peak moves with it.</p>
+  <p>The pile peaks a few MeV below the start: most photons carry 2 to 4 MeV. Move the start energy and the peak follows.</p>
 </div>
 <div class="step">
   <h3>The whole nucleus rings</h3>
-  <p>On the left, the nucleus's protons (hatched) and neutrons (filled) swing back and forth against each other. On the right is the photon strength <i>f</i> at each photon energy, with height on a log scale (each step up is ten times more). Its big peak is the <b>giant dipole resonance</b>: all the protons sloshing against all the neutrons. The frequency of that motion sets the photon energy the nucleus absorbs and emits most readily.</p>
+  <p>The big peak on the right is the <b>giant dipole resonance</b>: all the protons (hatched, left) sloshing against all the neutrons (filled). Its frequency sets the photon energy the nucleus absorbs and emits most readily. The curve is the photon strength <i>f</i>, on a log scale (each step up is ten times more).</p>
   <div class="ctl"><label for="gm-a">Mass number A</label><input id="gm-a" type="range" data-bind="A" min="40" max="240" step="1" value="112"><output data-show="A" data-fmt="0"></output></div>
-  <p>Drag the mass number A, the count of protons plus neutrons: the sloshing slows for heavy nuclei. They ring around 12 to 14 MeV; light ones near 20. Photons from a decaying nucleus carry only a few MeV, far below the peak, so what matters most is the shaded low-energy tail.</p>
+  <p>Drag the mass number A (protons plus neutrons): heavy nuclei slosh more slowly, ringing near 12 to 14 MeV; light ones near 20. A decaying nucleus emits photons of only a few MeV, so what matters most is the shaded low-energy tail.</p>
 </div>
 <div class="step">
   <h3>Scissors and the upbend</h3>
-  <p>The picture shows a deformed nucleus as two footballs, protons (hatched) and neutrons (filled). They can rock against each other like the blades of scissors. This <b>scissors mode</b> is a magnetic vibration near 3 MeV, and each swing can send off a photon. A second magnetic source, near 8 MeV, is <b>spin-flip</b>: single nucleons flipping their spin (the small arrows), which happens in any shape.</p>
+  <p>A deformed nucleus also radiates magnetically: its protons (hatched) and neutrons (filled), two footballs, rock against each other like scissor blades. This <b>scissors mode</b> sits near 3 MeV. <b>Spin-flip</b>, near 8 MeV, is single nucleons flipping their spin (the small arrows), in any shape.</p>
   <div class="ctl"><label for="gm-b">Deformation β₂</label><input id="gm-b" type="range" data-bind="beta" min="0" max="0.35" step="0.01" value="0.25"><output data-show="beta" data-fmt="2"></output></div>
-  <p>Drag the deformation β₂, a measure of how stretched the nucleus is (0 is a sphere). The more stretched, the harder the blades rock and the more scissors photons fly; a sphere has no blades. At the lowest photon energies the strength rises again: the <b>upbend</b>, seen in many measured nuclei as a trickle of soft photons. The engine makes it weaker as the nucleus deforms. An added option swaps the default scissors strength for newer systematics fitted to Oslo measurements, about four to five times stronger in the heaviest nuclei.</p>
+  <p>Drag the deformation β₂ (0 is a sphere). The more stretched, the more scissors photons fly; a sphere has none. At the lowest energies the strength rises again: the <b>upbend</b>, a trickle of soft photons, which the engine weakens as the nucleus deforms. An optional switch, off by default, uses stronger scissors systematics that match Oslo measurements (four to five times stronger in uranium).</p>
 </div>
 <div class="step">
   <h3>Down the ladder</h3>
-  <p>The picture shows the ladder with bins at the top, where states are too dense to list (Chapter 5), and named measured levels below (stretched, so they can be read), each with its spin and parity: a solid rung is parity +, a hollow rung parity −. From a bin, the nucleus emits photons one after another, each landing in a lower bin, until it reaches the measured levels. From there the engine stops estimating: each measured level decays with measured probabilities, called <b>branching ratios</b>, and it follows those.</p>
+  <p>A cascade is photons emitted one after another, from the bins at the top (states too dense to list, Chapter 5) down to the named levels, stretched so they can be read (solid rung parity +, hollow −). There the engine stops estimating and follows the tabulated <b>branching ratios</b>: each level's measured odds of decaying to each lower one.</p>
   <div class="btns"><button class="btn" data-act="drop">Drop a cascade</button></div>
-  <p>Press the button a few times. Each press follows one possible history. The upper part changes every time, but the ending always follows one of a few measured paths.</p>
+  <p>Press the button a few times: the upper part changes every time; the ending follows one of a few measured paths.</p>
 </div>
 <div class="step">
   <h3>Shelves that hold</h3>
-  <p>The picture marks one level as special: the 11/2− level at 0.40 MeV. Its spin is so different from the levels below it that a photon can hardly connect them, so it lives for seconds, hours or even years. A long-lived level like this is an <b>isomer</b>, and whatever lands there stays. The engine treats any level that lives longer than one second as an end point of its own. Each ball is one cascade, dropping rung to rung and shedding a photon at each drop; it ends in the isomer's pile or the ground state's.</p>
+  <p>The 11/2− level at 0.40 MeV is an <b>isomer</b>: its spin is so far from the levels below that a photon can hardly connect them, so it lives seconds to years, and whatever lands there stays. The engine treats any level living longer than one second as an end point. Each ball is one cascade, ending in the isomer's pile or the ground state's.</p>
   <div class="ctl"><label for="gm-j">Entrance spin</label><input id="gm-j" type="range" data-bind="J0" min="0" max="8" step="1" value="2" data-instant><output id="gm-jout">5/2</output></div>
-  <p>Drag the entrance spin, the spin of the state where the cascades start, and watch the piles start again. The share that ends on the isomer, the <b>isomer ratio</b>, depends on that starting spin. A high-spin start feeds the high-spin isomer; a low-spin start slides past it to the ground state, the lowest level.</p>
+  <p>Drag the entrance spin, where the cascades start, and the piles restart. The share that ends on the isomer, the <b>isomer ratio</b>, depends on it: a high-spin start feeds the high-spin isomer; a low-spin start slides past it to the ground state.</p>
 </div>
 <div class="step">
   <h3>Capture</h3>
-  <p>The picture shows a nucleus that has just absorbed a slow neutron, with two exit doors, as in Chapter 6: photons (top) and neutrons (right). Below the neutron threshold, the energy needed to free a neutron, the photon door is the only one. Just above it it has one rival: the neutron going back out. Each door's gap is its <b>width</b>, in eV, which measures how fast the nucleus decays through it. The photon width hardly changes with energy; the neutron width grows as the neutron gets faster.</p>
+  <p>A nucleus that has just absorbed a slow neutron has two exit doors (Chapter 6): photons (top) and the neutron going back out (right). Each door's gap is its <b>width</b>, in eV: how fast the nucleus decays through it. The photon width hardly changes; the neutron width grows with the neutron's speed.</p>
   <div class="ctl"><label for="gm-e">Neutron energy</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
-  <p>Drag the neutron energy, from 10 eV to 2 MeV. <b>Capture</b>, written (n,γ), means the neutron stays and a photon leaves: at 10 eV it wins most of the time; above a few keV the neutron door has swung wide and capture becomes a small share. The total photon width at threshold has been measured for hundreds of nuclei from their resonances, so it is a check on the photon strength. By default the engine only compares against it; an added option scales each nucleus's photon strength until the two agree, for every nucleus in the cascade.</p>
-  <div class="aside">In the code: <code>gamma/parameters.py</code> (giant resonance, spin-flip, scissors and upbend systematics; tabulated strengths), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) for every multipole), <code>gamma/transmission.py</code> (T<sub>γ</sub> and the average radiative width), <code>structure/levels.py</code> (branching ratios, isomers), <code>emission/multiple.py</code> (the cascade). Added options, off by default: <code>gamma/scissors.py</code> (stronger scissors), <code>gamma/ggnorm.py</code> (match the measured ⟨Γγ⟩), <code>gamma/actphys.py</code> (both, for actinides).</div>
+  <p>Drag the neutron energy, from 10 eV to 2 MeV. <b>Capture</b>, (n,γ), means the neutron stays and a photon leaves: it wins most of the time at 10 eV and becomes a small share above a few keV. The photon width at threshold is measured for hundreds of nuclei, a check on the photon strength. By default the engine uses its own; an optional switch scales each measured nucleus's photon strength until the two agree.</p>
+  <div class="aside">In the code: <code>gamma/parameters.py</code> (tabulated E1 strengths; giant resonance, spin-flip, scissors and upbend systematics), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) for every multipole), <code>gamma/transmission.py</code> (T<sub>γ</sub> and the average radiative width), <code>structure/levels.py</code> (branching ratios, isomers), <code>emission/multiple.py</code> (the cascade). Optional, off by default: <code>gamma/scissors.py</code> (stronger scissors), <code>gamma/ggnorm.py</code> (match the measured ⟨Γγ⟩, up to lead), <code>gamma/actphys.py</code> (both, for actinides).</div>
 </div>`,
     setup(S) {
       S.set("mode", "emit"); S.to("E0", 8, true); S.to("A", 112, true); S.to("beta", 0.25, true); S.to("J0", 2, true); S.to("lgE", 0, true);

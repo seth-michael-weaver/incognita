@@ -29,45 +29,45 @@
     lead: "Before anything else, the engine asks a simpler question: what does the nucleus look like to an incoming neutron?",
     html: `
 <div class="step">
-  <p>The picture shows a neutron as a wave rolling in from the left; the bright bands are its crests. In quantum mechanics every particle also behaves like a wave. The dashed circle is the nucleus. Nothing acts on the wave yet, so the crests pass straight through.</p>
+  <p>In quantum mechanics a neutron is also a wave. The picture shows one rolling in from the left, its crests as bright bands, toward a nucleus (the dashed circle). Nothing acts on it yet, so the crests pass straight through.</p>
   <div class="ctl"><label for="omp-e">Neutron energy (MeV)</label><input id="omp-e" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
-  <p>Drag the energy and watch the wavelength (the gap between crests) at the bottom, in femtometres (fm, 10⁻¹⁵ m). Slow neutrons have long waves: below about 1 MeV one wavelength is wider than the whole nucleus.</p>
+  <p>Drag the energy and watch the wavelength at the bottom, in femtometres (fm, 10⁻¹⁵ m). Slow neutrons have long waves: below about 9 MeV one wavelength is wider than this whole nucleus.</p>
 </div>
 <div class="step">
   <h3>The real part pulls</h3>
-  <p>Now the crests crowd together inside the circle. The 56 nucleons pull the neutron in, like a well about 50 MeV deep. The neutron speeds up inside, so its wavelength shortens. This well is the first half of the <b>optical potential</b>: the averaged force the whole nucleus exerts on the neutron. Physicists call it the <em>real part</em>. The engine gives it a smooth Woods–Saxon shape: flat and deep in the middle, fading to zero over about half a femtometre at the surface.</p>
+  <p>The <b>optical potential</b> is the averaged force of the whole nucleus on the neutron. Its <em>real part</em> is a well about 50 MeV deep: the neutron speeds up inside, so the crests crowd together. The engine gives it a Woods–Saxon shape, flat and deep in the middle, fading smoothly to zero at the surface.</p>
 </div>
 <div class="step">
   <h3>The imaginary part absorbs</h3>
-  <p>Now the wave behind the nucleus is fainter, and a coloured ring marks the surface. Sometimes the neutron hits a nucleon and starts a reaction, so it leaves the wave. The model adds this as the second half of the potential, the <em>imaginary part</em>: a term that shrinks the wave instead of bending it. It acts mostly near the surface. The shadow behind the nucleus is the neutrons lost to reactions.</p>
+  <p>The shadow behind the nucleus is the neutrons lost to reactions. The <em>imaginary part</em> of the potential models them: it shrinks the wave instead of bending it, mostly near the surface (the coloured ring).</p>
   <div class="ctl"><label for="omp-w">Absorption W (MeV)</label><input id="omp-w" type="range" data-bind="W" min="0" max="14" step="0.5" value="7"><output data-show="W" data-fmt="1"></output></div>
-  <p>Drag <i>W</i> to 0 and the shadow fills in: no absorption, no reactions. This is why it is called the optical model: the nucleus acts like a cloudy glass ball, partly bending light and partly absorbing it.</p>
+  <p>Drag <i>W</i> to 0 and the shadow fills in: no absorption, no reactions. Hence the name optical model: the nucleus is a cloudy glass ball that partly bends and partly absorbs.</p>
 </div>
 <div class="step">
   <h3>Aim matters</h3>
-  <p>Now you look at the nucleus head-on, as the neutron sees it. A neutron passing at distance <i>b</i> from the centre carries <b>angular momentum</b> (how much it swings around the centre) <i>l</i> ≈ <i>k b</i>, where <i>k</i> grows with energy. So the target splits into rings, one for each whole number <i>l</i> = 0, 1, 2, … Each ring is a <b>partial wave</b>. The darker a ring, the larger its <b>transmission coefficient</b> <i>T<sub>l</sub></i>: the chance that a neutron in that ring is absorbed. </p>
+  <p>Seen head-on, the target splits into rings, one per <b>partial wave</b> <i>l</i> = 0, 1, 2, … A neutron passing at distance <i>b</i> from the centre carries <b>angular momentum</b> <i>l</i> ≈ <i>k b</i>, where <i>k</i> grows with energy. The darker a ring, the larger its <b>transmission coefficient</b> <i>T<sub>l</sub></i>: the chance that a neutron in that ring is absorbed.</p>
   <div class="ctl"><label for="omp-e3">Neutron energy (MeV)</label><input id="omp-e3" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Fire 200 neutrons</button></div>
-  <p>Orange flashes are absorbed neutrons. The bars above the target count your volley ring by ring: the orange fill is the share of that ring's neutrons that were absorbed, and the dark tick is the model's <i>T<sub>l</sub></i>. Each press starts a fresh count; with 200 neutrons the bars land near the ticks. Inner rings absorb nearly everything; outer rings let neutrons sail past. At low energy the rings are huge and only <i>l</i> = 0 matters.</p>
+  <p>Orange flashes are absorbed neutrons; the bars count each ring's absorbed share against the model's <i>T<sub>l</sub></i> (the tick). Inner rings absorb nearly everything, outer rings let neutrons pass. At low energy the rings are huge and only <i>l</i> = 0 matters.</p>
 </div>
 <div class="step">
   <h3>Swinging past the nucleus</h3>
-  <p>The picture looks down on the nucleus from above. Every neutron shown belongs to one partial wave <i>l</i>, so it flies past at the same <b>swing distance</b> <i>b</i> ≈ (<i>l</i>+½)/<i>k</i> (the dashed circle; the faint band is its ring from the last step). That is the barrier: a neutron with a lot of angular momentum simply passes too far out to touch the nucleus. Physicists draw this as a hill, the <b>centrifugal barrier</b>, but it is the same thing.</p>
-  <p>A neutron is a wave, though, and the glow around each one is its fuzz, about one reduced wavelength λ̄ wide. Even when the path misses, the fuzzy edge can brush the surface and the neutron can still get in. That is <b>tunnelling</b>.</p>
+  <p>A neutron with a lot of angular momentum passes too far out to touch the nucleus: that is the <b>centrifugal barrier</b>. Seen from above, every neutron here belongs to one partial wave <i>l</i>, so it passes at the same <b>swing distance</b> <i>b</i> ≈ (<i>l</i>+½)/<i>k</i> (the dashed circle).</p>
+  <p>But each neutron is a wave, fuzzy over about one reduced wavelength λ̄ (the glow). Even when its path misses, the fuzzy edge can brush the surface and get in: <b>tunnelling</b>.</p>
   <div class="ctl"><label for="omp-l">Partial wave l</label><input id="omp-l" type="range" data-bind="L" min="0" max="8" step="1" value="3" data-instant><output data-show="L" data-fmt="0"></output></div>
   <div class="ctl"><label for="omp-e2">Energy (MeV)</label><input id="omp-e2" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
-  <p>Raise <i>l</i> and the path moves out: fewer get in. Raise the energy: <i>k</i> grows, so the same <i>l</i> passes closer, and the fuzz shrinks too. The counter compares what you see with the model's <i>T<sub>l</sub></i>. The engine finds each <i>T<sub>l</sub></i> exactly. It solves the Schrödinger equation (the basic wave equation of quantum mechanics) outward through the full potential and matches it to a free wave outside. <i>S</i> measures how much wave comes back out; the rest was absorbed.</p>
+  <p>Raise <i>l</i> and the path moves out: fewer get in. Raise the energy and the same <i>l</i> passes closer, with less fuzz. The engine finds each <i>T<sub>l</sub></i> exactly by solving the Schrödinger equation through the full potential; <i>S</i> measures how much wave comes back out.</p>
   <div class="formula">T<sub>lj</sub> = 1 − |S<sub>lj</sub>|²</div>
 </div>
 <div class="step">
   <h3>Adding up the target</h3>
-  <p>On the left are the rings again. One at a time, each ring lifts off, keeps only the part of its area that absorbs (its area times <i>T<sub>l</sub></i>), and flies into the disc on the right. The disc grows ring by ring. When every ring is in, its area is how big the nucleus looks to the neutron: the <b>reaction cross section</b>, measured in barns (1 barn = 10⁻²⁴ cm²). The dashed circle is the nucleus's geometric size, for comparison.</p>
+  <p>The disc on the right is how big the nucleus looks to the neutron: the <b>reaction cross section</b>, in barns (10⁻²⁴ cm²). Each ring adds its area times <i>T<sub>l</sub></i> to it. The dashed circle is the geometric size.</p>
   <div class="ctl"><label for="omp-e4">Neutron energy (MeV)</label><input id="omp-e4" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="sum">Add up again</button></div>
-  <p>Change the energy and the sum runs again. At low energy one or two big rings make almost the whole disc; at high energy many thin rings each add a sliver, and the disc settles close to the geometric size.</p>
+  <p>Change the energy and the sum runs again: at low energy one or two big rings make almost the whole disc; at high energy many thin rings add slivers and the disc nears the geometric size.</p>
   <div class="formula">σ<sub>R</sub> = (π/k²) Σ (2l+1) T<sub>l</sub></div>
-  <p>The <i>T<sub>l</sub></i> values feed the rest of the engine. They decide how often each spin of the excited nucleus forms and, run in reverse, how easily each kind of particle gets back out.</p>
-  <div class="aside">In the code: <code>omp/parameters.py</code> (Koning–Delaroche global potential; dispersive potentials for actinides), <code>omp/schrodinger.py</code> (Numerov integration and Coulomb matching), <code>omp/inverse.py</code> (outgoing particles by detailed balance), <code>omp/regional.py</code> (an added option, off by default: a regional adjustment of the well for deformed rare-earth targets, fitted to measured S₀ and S₁).</div>
+  <p>The <i>T<sub>l</sub></i> feed the rest of the engine: they decide how often each spin of the excited nucleus forms and, run in reverse, how easily each particle gets back out.</p>
+  <div class="aside">In the code: <code>omp/parameters.py</code> (Koning–Delaroche global potential; dispersive potentials for actinides), <code>omp/schrodinger.py</code> (Numerov integration and Coulomb matching), <code>omp/inverse.py</code> (outgoing particles by detailed balance), <code>omp/regional.py</code> (optional, off by default: a regional adjustment of the well for deformed rare-earth targets, fitted to measured S₀ and S₁).</div>
 </div>`,
     setup(S) {
       S.set("mode", "wave"); S.to("Wshow", 0, true); S.to("V", 0, true); S.to("W", 7, true); S.to("E", 8, true); S.to("L", 3, true);
