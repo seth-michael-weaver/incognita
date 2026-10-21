@@ -1,0 +1,344 @@
+# Incognita guide
+
+The reference companion to the [README](../README.md): how to use the library and the engine, how the predictions are
+made, every benchmark table, and every known limitation.
+
+> [!IMPORTANT]
+> The v0.1 library, the benchmark and every other number in this guide were produced with the **v0.1 engine** and have
+> not been re-measured with the newer engines in `physics/`. Commit `7246b93` is the last commit with the v0.1 engine.
+
+## Contents
+
+- [Repository layout](#repository-layout)
+- [Using the library](#using-the-library)
+- [Running the engine](#running-the-engine)
+- [Engine versions](#engine-versions)
+- [Method](#method)
+- [Benchmark](#benchmark)
+- [Performance](#performance)
+- [Prospective registry](#prospective-registry)
+- [Reproducing the numbers](#reproducing-the-numbers)
+- [Status and limitations](#status-and-limitations)
+- [Acknowledgements](#acknowledgements)
+
+## Repository layout
+
+| path | content |
+|---|---|
+| [`library/v0.1/`](../library/v0.1/) | the predictions (CC-BY-4.0): capture σ(n,γ)(E), MACS at kT = 5–100 keV, stellar rates and REACLIB fits, (n,p)/(n,2n)/(n,α) no-data recipe curves, (n,p) with a learned correction and intervals |
+| [`incognita/`](../incognita/) | the library reader, benchmark scorer and tracks, calibration report, curation-register builder, (n,p) correction, engine entry point |
+| [`physics/`](../physics/) | the Hauser–Feshbach engine (a Python/C re-implementation of TALYS-2 physics; see [Method](#method)) |
+| [`models/`](../models/) | the learned capture model and its uncertainty ensembles |
+| [`native/`](../native/) | a standalone C driver that runs a whole chart of targets across threads |
+| [`harness/`](../harness/) | analysis harnesses for engine kernels (e.g. FLOP counts of the coupled-channels solver) |
+| [`scripts/`](../scripts/) | `reproduce.sh`, the scorers it calls, the registry scorers, the engine driver, native-kernel builds, the structure-database fetcher |
+| [`data/`](../data/) | EXFOR ingest code and the open curation register ([`data/curation/`](../data/curation/)): which datasets are excluded, down-weighted or renormalised, and why |
+| [`docs/release/`](release/) | frozen exam inputs (`exam/`, `uq/`), expected tables (`expected/`), benchmark guide, curation rules, uncertainty evidence |
+| [`docs/registry/`](registry/) | frozen prospective predictions with SHA-256 manifests and OpenTimestamps proofs |
+| [`emu/`](../emu/) | fast emulators of the engine at tag `engine-2026-10` ([`emu/README.md`](../emu/README.md)) |
+| [`docs/walkthrough/`](walkthrough/) | "Inside a Nuclear Reaction", the explorable explanation and scoreboard (static site; view locally with `cd docs/walkthrough && python3 serve.py 8765`, then open http://localhost:8765) |
+| [`tests/`](../tests/) | the test suite (`uv run pytest`; tests that need external data are skipped, not failed) |
+
+## Using the library
+
+The shipped library in [`library/v0.1/`](../library/v0.1/) needs no other downloads:
+
+```bash
+uv run python -m incognita.library summary          # nuclides per regime tier, energy grid
+uv run python -m incognita.library show Au-197      # capture curve with 68 / 95 % bands, MACS at 30 keV
+```
+
+```python
+from incognita.library import capture_curve
+df = capture_curve("Fe-56")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier
+```
+
+### Library format
+
+The library holds capture σ(n,γ)(E), MACS at kT = 5–100 keV, stellar rates and REACLIB fits, (n,p)/(n,2n)/(n,α)
+no-data recipe curves, and (n,p) with a learned correction and intervals (CC-BY-4.0).
+
+`capture_v01_indep.parquet` has one row per nuclide (Z = 8–110) with array columns on a common grid of 64 energies from
+1 keV to 20 MeV; `unc68_log10` and `unc95_log10` are multiplicative half-widths in log10. MACS and rate tables are CSV;
+REACLIB fits use the standard seven-parameter form. Full column descriptions:
+[`library/v0.1/README.md`](../library/v0.1/README.md).
+
+### Regime tiers
+
+Every nuclide carries one label. Counts from `uv run python -m incognita.library summary`:
+
+| tier | nuclides | meaning |
+|---|---:|---|
+| MEASURED | 220 | capture data exist; learned model trained on all EXFOR data |
+| ANCHORED | 21 | no σ(E) data in training but a measured 30 keV MACS; the held-out curve is scaled to it |
+| INTERPOLATED | 316 | unmeasured, structure data known, Z 26–83, within two neutrons or protons of measured nuclei |
+| EXTRAPOLATED | 5,611 | everything else: the engine's no-data recipe with a calibrated interval |
+
+Only Z = 26–83 lies inside the range the benchmark tests (`in_validated_range`).
+
+## Running the engine
+
+**Requirements:** Linux or macOS, Python 3.12, [uv](https://docs.astral.sh/uv/). A C compiler and `make` are optional
+(native kernels; without them the engine runs in pure Python, more slowly, and says so):
+
+```bash
+make native                         # optional: compile the C kernels (gcc)
+```
+
+The engine reads the TALYS structure database, which is not redistributed here (a multi-gigabyte download; see
+[`talys-install.md`](talys-install.md)):
+
+```bash
+git clone --depth 1 --filter=blob:none --sparse https://github.com/arjankoning1/talys "$HOME/opt/talys-src"
+git -C "$HOME/opt/talys-src" sparse-checkout set structure
+export TALYS_DIR="$HOME/opt/talys-src"
+
+# the no-data recipe with this project's E1-width constant, Fe-56 and Au-197, two worker processes
+uv run python scripts/bestfit/engine_curves.py --arm nodata --only 26-56,79-197 \
+    --out out/engine --cpus 0-1 --cc-cache "$HOME/.cache/incognita-cc"
+```
+
+To fetch only the part of the structure database the engine reads (about 0.9 of 8.7 GB):
+
+```bash
+bash scripts/fetch_structure.sh DEST
+```
+
+Check results bitwise against a full checkout before relying on the partial copy for a new region of the chart.
+
+Each target writes `out/engine/<ZZZ>_<AAA>.npz` with the capture curve on the 64-point grid, the partial channels and
+the resolved TALYS keyword cards. From Python, `incognita.engine.run(26, 56)` returns every exclusive channel as a
+pandas DataFrame (mb). The (n,α) recipe described under [Method](#method) is enabled with
+`INCOGNITA_NA_V1=1 ... --arm lines`.
+
+## Engine versions
+
+### Engine 2026-10 (tag `engine-2026-10`)
+
+The engine was updated on 2026-10-12; tag `engine-2026-10` marks it. With no switch set, neutron-induced results are
+unchanged from v0.1 on the check targets Fe-56, Zr-90, Pb-208 and U-238.
+
+**Changes that apply without a switch:** keyword cards for giant resonances and the exciton model, which v0.1 ignored,
+are now applied, and charged-particle projectiles are handled more faithfully. The native kernels are faster.
+
+**New physics, all off by default:** pre-equilibrium photon emission, M1/scissors photon strength, a
+constant-temperature level-density anchor on the complete level scheme, measured neutron strength functions at low
+energy, coupling schemes from measured structure, transition states at fission saddles, isomeric residual production
+and emission spectra.
+
+The full-physics configuration is:
+
+```bash
+export INCOGNITA_ENGPHYS=dircap,pespin INCOGNITA_FEWRES=off INCOGNITA_PEWINDOW=g INCOGNITA_ISOE2=e \
+       INCOGNITA_TRITFID=1 INCOGNITA_RESISO=1 INCOGNITA_CCSOCB=1 INCOGNITA_MPEFIX=1 INCOGNITA_CPINC2=1 \
+       INCOGNITA_SPECOUT=1 INCOGNITA_SPECOUT_DA=0 INCOGNITA_LEVJ=1 INCOGNITA_C6FIX=1 INCOGNITA_TLOGIT=y \
+       INCOGNITA_RIPL_LEVELS_PARAM=/path/to/RIPL-4/levels/levels-param.data
+# keyword lines for every target; append ";collrule svw" when N - Z >= 20
+export INCOGNITA_TALYS_FIT_LINES="preequilibrium y;multipreeq y;knockfix2 y;leeshell nm;ctwindow2 y;peunits y;fists2 y;sigavcont y;m1share r"
+# optional, with your own table of measured strength functions (columns Z,A,S0,S1):
+# export INCOGNITA_SFUNC=u1 INCOGNITA_SFUNC_SCOPE=first INCOGNITA_SFUNC_TABLE=strength_functions.csv
+uv run python scripts/bestfit/engine_curves.py --arm nodata --e1 stock --only 26-56 --out out/full --cpus 0-0
+```
+
+Per-target keyword lines can be added in a file named by `INCOGNITA_TALYS_FIT_LINES_FILE`.
+
+### Engine 2026-10-19 (current)
+
+This update turns several corrections on by default, so results differ from the 2026-10 engine even with no switch
+set; the numbers in the README and this guide have not been re-measured with it. Each change is a deck keyword; the
+value shown restores the earlier behaviour.
+
+| change (default on) | keyword to turn it off |
+|---|---|
+| residual-population cut lowered from 1e-3 mb to 1e-9 mb (TALYS's cut zeroed sub-barrier residuals) | `popeps 1e-3` |
+| flux bookkeeping closed: residuals one step past TALYS's cascade window are kept as terminal residuals, and emission to levels with no continuum bin is placed | `fluxclose n` |
+| exclusive-channel caps raised to 8 ejectiles of each type | `chancap n` |
+| two discrete-level bookkeeping fixes (decay branches to the same level listed twice; pre-equilibrium flux on the projectile's discrete levels) | `kevleak2 n` |
+| continuum-to-discrete boundary of the first compound nucleus's top bin weighted by E<sub>γ</sub><sup>3</sup> | `nnleak n` |
+| constant-temperature level-density matching falls back to the closest count when there is no root | `ctwcont n` |
+| exact one-dimensional fission transmission per barrier hump | `exactfis n` |
+| alpha optical potential depends on the residual state's temperature (T* = 0.64 MeV) | `alphatemp 0` |
+| alpha-induced runs use alpha optical model 6 for the entrance channel | `alphaentr 0` |
+| E1/M1 photon-strength table overrides follow one global function of deformation (table in `physics/hf/gamma/`) | `ftglobal n`, `heavymacs2 n` |
+| deformed targets without a fission channel: neutron exits of the first compound nucleus to non-band target levels use the ground-state coupled-channel transmission | `ccexitnbnf n` |
+| with measured strength functions (`INCOGNITA_SFUNC`): continuum neutron exits of the first compound nucleus divide out the engine's own coupled-channel enhancement | `sfexit n` |
+| triton and helion optical potentials include the projectile's finite size | `tfold n` |
+
+## Method
+
+- **Physics.** Cross sections come from a Hauser–Feshbach, pre-equilibrium and direct-reaction engine that follows
+  TALYS-2 (A. Koning, S. Hilaire, S. Goriely et al.) routine by routine, ported to Python with optional C and GPU
+  kernels. Options that are not ported stop with a named error rather than silently substituting another model. Scored
+  against measured data, the engine agrees with stock TALYS on total, elastic, (n,p) and (n,α)
+  ([Benchmark](#benchmark)).
+- **Global rules only.** No parameter is fitted to the target nucleus itself in the held-out tests: a nucleus's own
+  cross-section data never enter its prediction.
+- **Independence from evaluated libraries.** No value from ENDF/B, JENDL, JEFF, TENDL, CENDL, BROND, FENDL, IRDFF or
+  BRUSLIB enters what is trained or shipped. Libraries appear only as scoring baselines, built from files the user
+  downloads. Physics inputs are measurements (EXFOR), compilations of measured quantities (RIPL resonance spacings,
+  AME2020 masses) and theory tables (RIPL level-density and HFB tables).
+- **Curation.** Which EXFOR datasets are excluded, down-weighted or renormalised is decided by written rules that do
+  not consult libraries, and the decisions are published ([`data/curation/`](../data/curation/),
+  [`release/CURATION_RULE_v2.md`](release/CURATION_RULE_v2.md)).
+
+**Documented modifications** to the TALYS defaults:
+
+| what | change |
+|---|---|
+| E1 width | TALYS's default `globalwtable` constant is replaced by a single chart-wide E1-width constant, 1.0425, fitted to EXFOR capture data on the development folds (`physics/hf/gamma/e1_width.py`). The method (one global constant) is unchanged; only its value is ours. |
+| (n,α) | optical model `alphaomp 8` plus a parity-dependent alpha-pickup strength (Kalbach `cstrip` 1.85 for even-even targets, 0.52 otherwise; `physics/hf/input/fitlib.py`) |
+| capture | for nuclei with structure data, a learned correction on top of the engine is trained on EXFOR capture data only; uncertainty intervals are built from ensemble spread and conformal scaling on held-out nuclei |
+| (n,p) | a shallow gradient-boosted correction on nucleus and energy features (`incognita/terra/`) |
+
+## Benchmark
+
+The score is the rms of log10(prediction / measurement), in dex; **lower is better**. Brackets are 95 % paired
+nucleus-bootstrap intervals of the difference. "DEV" is the development folds 0–5; "vault" is folds 6–7, read once for
+the shipped model. The baseline ("recipe") is the default TALYS no-data recipe run by the same engine. Each number
+below is regenerated by `bash scripts/reproduce.sh` from frozen exam files in `docs/release/exam/` (see
+[Reproducing the numbers](#reproducing-the-numbers)).
+
+### Capture on held-out nuclei
+
+`reproduce.sh capblind`, `vault`:
+
+| what is known about the held-out nucleus | set | cells (nuclei) | Incognita | recipe | difference |
+|---|---|---:|---:|---:|---|
+| structure data and measured D0 | DEV | 1,947 (122) | 0.1569 | 0.1684 | −0.0114 [−0.0198, −0.0028] |
+| structure data and measured D0 | vault | 1,517 (62) | 0.1519 | 0.1712 | −0.0193 [−0.0311, −0.0081] |
+| structure data, D0 withheld | DEV | 1,947 (122) | 0.1765 | 0.1898 | −0.0133 [−0.0229, −0.0035] |
+| structure data, D0 withheld | vault | 1,517 (62) | 0.2006 | 0.2060 | −0.0055 [−0.0210, +0.0097] |
+| no structure data | DEV | 1,966 (126) | 0.2101 | 0.2042 | +0.0059 [−0.0025, +0.0140] |
+
+How to read it:
+
+- **With the measured resonance spacing D0**, the model is better than the recipe on both DEV and the sealed vault.
+- **With D0 withheld**, the DEV improvement is in-sample for the fitted E1 constant; on the sealed vault it is a **tie**.
+- **With no structure data**, the model does not beat the recipe, so for those nuclides the library ships the recipe
+  itself (EXTRAPOLATED), with a calibrated interval.
+- **Retrodiction** (trained on data up to a year Y, scored on 286 later measurements of 16 nuclides): 0.1373 vs 0.1728,
+  a tie, −0.0355 [−0.0764, +0.0193] (`reproduce.sh retro`).
+
+### Uncertainty intervals
+
+`reproduce.sh final674`, `retromeasured`, `vault`, `nostruct`:
+
+| test | rows (nuclides) | 68 % covers | 95 % covers | reading |
+|---|---|---|---|---|
+| sealed set, 674 capture bins published after 2012 | 674 (51) | 75.5 [66.0, 83.7] | 95.3 [90.8, 98.4] | conservative at 68 %; not sharp (sharpness 1.08) |
+| same, 1–10 MeV | 96 (20) | 52.1 | 89.6 | under-covers |
+| measured tier, data published after its cutoff | 286 (16) | 79.7 | 97.6 | too wide |
+| same, below 10 keV | 18 (3) | 22.2 | 72.2 | fails |
+| vault, D0 withheld | 1,517 (62) | 63.3 | 88.1 | 95 % interval too narrow |
+| no-structure interval, out-of-fold | 1,966 (126) | 65.8 | 95.3 | calibrated on near-stability nuclei only |
+
+### Other channels and the engine
+
+| test | result | command |
+|---|---|---|
+| (n,α) recipe vs default TALYS, on data not used to build it | −29 % rms on 920 isomer, ground and total points (57 targets); −23 % on 197 helium-production points (52); −31 % on 51 never-read records (8) | `reproduce.sh na` |
+| (n,p) learned correction, fresh set | 0.2744 vs 0.3362, −0.0618 [−0.0924, −0.0342] (203 records, 49 nuclides) | `reproduce.sh np` |
+| (n,p), the 9 nuclides never touched in development | not significant: −0.0150 [−0.0689, +0.0635]; the shipped 68 % interval covers only 53.3 % on the 19 nuclides the correction never saw | `reproduce.sh np` |
+| engine vs stock TALYS at identical settings, rms against measured data | identical to four decimals on total (0.0730), elastic (0.0567), (n,p) (0.2412) and (n,α) (0.4516); within 0.0013 on inelastic and (n,2n) | `reproduce.sh stock` |
+
+### Scoring your own model
+
+The benchmark tracks, with their manifests and SHA-256 pins, are in `incognita/bench/tracks/`. To score a CSV of
+predictions:
+
+```bash
+uv run python -m incognita.bench.score score --track capture-heldout --csv my_predictions.csv --name MyModel
+```
+
+[`TESTING.md`](TESTING.md) and [`release/BENCHMARK.md`](release/BENCHMARK.md) describe the tracks and the leaderboard.
+
+## Performance
+
+| | per-target compute | whole process (incl. Python start-up) |
+|---|---|---|
+| engine, no cache | 11.7x faster (8.6–13.0x by class) | 8.6x (3.4–10.9x by class) |
+| engine, warm coupled-channels cache | 32.2x | 16.2x |
+
+The warm-cache figure applies only when the same coupled-channels solutions recur (parameter sweeps, reruns); the
+no-cache figure is the one for a single fresh calculation. On the same runs the two codes agree on total, elastic,
+nonelastic and capture cross sections to a median of ≤7e-6 and at worst 1.2e-3 in |log10(engine/TALYS)|.
+
+Measured against stock TALYS-2.25 (minimal default input, no dump keywords) on one pinned core of a 16-thread x86-64
+laptop that was running other jobs, 12 targets (spherical, vibrational, rotational, actinide) × 64 energies from 1 keV
+to 20 MeV, median CPU-seconds of three interleaved repeats. Protocol, per-target table and the reproduce command:
+[`performance.md`](performance.md).
+
+## Prospective registry
+
+[`docs/registry/`](registry/) holds predictions frozen before measurements exist, each with a SHA-256 manifest, an
+OpenTimestamps proof and an entry in a hash chain (`CHAIN.jsonl`):
+
+| registry | contents |
+|---|---|
+| `na-2026-09-22-v1` | (n,α) predictions for unmeasured targets |
+| `capture-v01-2026-09-24` | capture predictions of the shipped model for the targets listed in its protocol |
+| `prospective-2026-10-02` | hashes only of further frozen predictions; the values will be released later in the files the hashes cover (caveats in [its README](registry/prospective-2026-10-02/README.md)) |
+
+```bash
+uv run python -m incognita.bench.registry verify      # check the hash chain
+bash scripts/reproduce.sh --download registry         # score against the current EXFOR release (scripts/registry/)
+```
+
+**None has been scored against new measurements yet.** To register your own predictions the same way, see
+[`registry/SUBMIT.md`](registry/SUBMIT.md).
+
+## Reproducing the numbers
+
+```bash
+bash scripts/reproduce.sh                       # everything that runs from files in the repo
+bash scripts/reproduce.sh --download            # also fetch what can be fetched automatically (EXFOR master, benchmark repo)
+bash scripts/reproduce.sh --with-engine terra   # also run the engine for the steps that need it
+```
+
+`reproduce.sh` recomputes each table from the frozen, hash-checked inputs and compares it byte for byte with
+`docs/release/expected/`, writing `out/reproduce/SUMMARY.md` (IDENTICAL / DIFFERS / SKIPPED per table).
+
+- Steps whose inputs cannot be redistributed (the EXFOR master file, TALYS structure data) are reported as SKIPPED
+  with the command that fetches them; `--download` and `--with-engine` enable them.
+- [`release/REPRODUCE.md`](release/REPRODUCE.md) maps claims to steps; [`release/INPUTS.md`](release/INPUTS.md) lists
+  external inputs.
+- [`release/MEASURE_NEXT.csv`](release/MEASURE_NEXT.csv) ranks 188 unmeasured capture targets by today's uncertainty
+  at 30 keV (`reproduce.sh measure`).
+
+## Status and limitations
+
+This is a **v0.1 preview** released for review by the nuclear-data and nuclear-astrophysics communities. Treat the
+numbers as research output, not as an evaluation.
+
+- **Retrospective so far.** Capture predictions are scored on nuclei whose own cross-section data were withheld from
+  the fit, against a fixed baseline (the default TALYS no-data recipe run by the same engine). Results on held-out
+  nuclei are retrospective tests, however carefully sealed, and are not a substitute for prospective confirmation.
+- **Prospective confirmation is pending.** The registries in `docs/registry/` hold predictions made and timestamped
+  before any measurement of those targets; none has yet been scored against new data.
+- **Engine version.** All numbers come from the v0.1 engine (see [Engine versions](#engine-versions)).
+
+### What is not claimed
+
+- No claim of better accuracy than evaluated libraries for measured nuclei. Where good data exist, use the data or an
+  evaluation.
+- No transport-ready (ENDF-6/ACE) files, and no criticality or shielding validation.
+- No calibration claim for capture intervals above 5 MeV, or for (n,2n) and (n,α) intervals.
+
+### Known limitations
+
+- The overall capture level of an unmeasured nucleus scatters by tens of percent and is not predicted by anything tried
+  so far; one measurement fixes it much better than any model change.
+- Far from stability, where no structure data exist, the product is the default recipe with an interval; that interval
+  was calibrated on near-stability nuclei with their structure files removed and is untested far from stability.
+- Coverage is uneven: under-coverage at 1–10 MeV, too-wide intervals for measured nuclei, and failures below 10 keV
+  (see [Uncertainty intervals](#uncertainty-intervals)).
+- The (n,p) intervals are too narrow for nuclides the correction never saw.
+- The ANCHORED tier (21 nuclides) is scaled to compiled measured MACS values.
+- Tested on Linux x86-64 with CPU-only PyTorch; macOS is expected to work but is less tested. The native kernels need gcc.
+
+## Acknowledgements
+
+The engine re-implements TALYS-2 physics; we thank its authors, A. Koning, S. Hilaire and S. Goriely, and the authors
+of ECIS (J. Raynal). The work relies on the EXFOR library maintained by the IAEA Nuclear Data Section and the
+International Network of Nuclear Reaction Data Centres (NRDC), on the Reference Input Parameter Library (RIPL, IAEA),
+on the Atomic Mass Evaluation (AME2020) and on NUBASE2020.
