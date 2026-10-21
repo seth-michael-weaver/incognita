@@ -429,7 +429,7 @@
       const esm = WT.lang === "es" && WT.es && WT.es.ch[id]; if (esm) Object.assign(mod, esm);
       if (!el.querySelector(".stage") && mod.html) {
         el.id = id;
-        el.innerHTML = `<div class="stage" aria-hidden="true"></div><div class="story"><header><div class="num">${mod.num || ""}</div><h2>${mod.title || ""}</h2>${mod.lead ? `<p class="lead">${mod.lead}</p>` : ""}</header>${mod.html}</div>`;
+        el.innerHTML = `<div class="stage"></div><div class="story"><header><div class="num">${mod.num || ""}</div><h2>${mod.title || ""}</h2>${mod.lead ? `<p class="lead">${mod.lead}</p>` : ""}</header>${mod.html}</div>`;
       }
       const stage = el.querySelector(".stage"); const cv = document.createElement("canvas"); stage.appendChild(cv);
       const ctx = cv.getContext("2d"); const S = makeState(id); const ch = { id, el, stage, cv, ctx, S, mod, visible: false, g: null };
@@ -442,11 +442,14 @@
       el.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", () => { const f = S.handlers[b.dataset.act]; f && f(); }));
       // step observer
       const steps = [...el.querySelectorAll(".step")];
+      // screen readers: the drawing is an image whose description is the active step's heading and first sentence
+      const describe = (i) => { const st = steps[i], h = st && st.querySelector("h3"), p = st && st.querySelector("p"); const first = p ? (p.textContent.trim().match(/^.*?[.!?](\s|$)/) || [p.textContent])[0].trim() : ""; cv.setAttribute("aria-label", `${WT.ui ? WT.ui("diagram", "Diagram") : "Diagram"}: ${(h ? h.textContent : mod.title || "").trim()}. ${first}`); };
+      cv.setAttribute("role", "img"); describe(0);
       const io = new IntersectionObserver((ents) => {
         ents.forEach((en) => {
           if (!en.isIntersecting) return;
           const i = steps.indexOf(en.target); if (i === S.step) return;
-          steps.forEach((s, j) => s.classList.toggle("active", j === i)); S.step = i;
+          steps.forEach((s, j) => s.classList.toggle("active", j === i)); S.step = i; describe(i);
           const fn = mod.steps && mod.steps[i]; if (fn) { try { fn(S); } catch (e) { console.error(id, e); } }
           el.querySelectorAll("[data-bind]").forEach((inp) => { const k = inp.dataset.bind; if (typeof S.target[k] === "number" && Math.abs(parseFloat(inp.value) - S.target[k]) > 1e-9) inp.value = S.target[k]; });
         });

@@ -7,7 +7,8 @@ Object.assign(WT.es.ui, {
   hero2: "¿Cuál de estas cosas ocurre, y con qué frecuencia? Esta página recorre, paso a paso, cómo nuestro software responde a esa pregunta. Desplázate hacia abajo y prueba los controles por el camino. Las imágenes siguen la misma física que el motor; los números que muestran son ilustrativos.",
   scrollcue: "Desplázate para empezar ↓",
   hero_tag: "Un neutrón. Un núcleo. Muchas maneras de terminar.",
-  hero_hint: "Haz clic o toca en cualquier sitio para disparar tu propio neutrón.",
+  hero_fire: "Dispara un neutrón",
+  hero_hint: "o haz clic en cualquier parte de la imagen",
   coda_h2: "Dónde vive esto en el código",
   coda_p1: "Cada etapa anterior es un paquete en <code>physics/hf</code>, y el motor los llama en el orden en que acabas de leerlos. El motor es un port de TALYS-2.x, el consolidado código de reacciones. Lo que añade está tras interruptores con nombre dentro de los mismos paquetes: la mayoría están desactivados por defecto, unas pocas correcciones están activadas, y cada una puede devolverse por separado al TALYS original.",
   coda_table: `
@@ -62,6 +63,7 @@ Object.assign(WT.es.ui, {
   coda_p_outside: "Algunas partes de la historia funcionan junto al motor y no dentro de él. Las escaleras estadísticas de resonancias del <a href=\"#resonance\">capítulo 10</a> viven en <code>physics/resonance/</code>. Los promedios maxwellianos (MACS) del <a href=\"#measure\">capítulo 11</a> se obtienen después de la ejecución a partir de las curvas de captura del motor, en <code>validation/differential/core.py</code>; en cambio, la captura en blancos excitados térmicamente y la tasa estelar las calcula el propio motor (<code>astro/stellar.py</code>, opcional). La capa de anclaje del <a href=\"#layers\">capítulo 12</a> vive en <code>incognita/terra/</code>.",
   close: "Cerrar",
   chapters: "Capítulos",
+  diagram: "Diagrama",
 });
 
 Object.assign(WT.es.ui, { pause_sweep: "Pausar el barrido", play_sweep: "Reanudar el barrido" });

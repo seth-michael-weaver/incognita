@@ -112,6 +112,9 @@
     shots.push({ x, y, sx: x, sy: y, t0: time, trail: [], dx: cx, dy: cy });
     if (reduce) frame(0);
   });
+  // the same for keyboard and screen-reader users: a real button fires a neutron in from the left
+  const fire = hero.querySelector(".fire-btn");
+  if (fire) fire.addEventListener("click", () => { const { cy } = geo(), y = cy + (Math.random() - 0.5) * H * 0.3; shots.push({ x: 0, y, sx: -20, sy: y, t0: time, trail: [] }); if (reduce) frame(0); });
 
   // ---------- drawing ----------
   function background(cx, cy, R) {
@@ -275,7 +278,7 @@
     if (impacted && !emitted && time - imp.t > 0.15) { cap = CAP.absorbed; ca = smooth(0.15, 0.5, time - imp.t); }
     if (!isF && !emitted && ct >= T_EMIT) { emitted = true; emit(kind, cx, cy, R); }
     if (emitted || (isF && ct > F_SCISSION - 0.2)) { cap = CAP[kind]; ca = smooth(isF ? F_SCISSION - 0.2 : T_EMIT, (isF ? F_SCISSION : T_EMIT) + 0.3, ct) * (1 - smooth(end - 0.7, end - 0.1, ct)); }
-    if (cap && ca > 0.01 && scrollP < 0.5) {
+    if (cap && ca > 0.01 && scrollP < 0.5 && !document.body.classList.contains("og")) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = ca * (1 - scrollP * 2);
       const fs = phone ? 15 : 18; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillStyle = "rgba(230,236,250,0.92)"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12;
@@ -301,6 +304,7 @@
   window.addEventListener("resize", () => { resize(); if (reduce) frame(0); });
   window.addEventListener("scroll", onScroll, { passive: true });
   resize(); onScroll(); startCycle();
+  if (/[?&]og=1/.test(location.search)) document.body.classList.add("og"); // dev aid: render the share image (1200x630)
   const ff = /[?&]herot=([\d.]+)/.exec(location.search); // dev aid for screenshots: fast-forward the hero by N seconds
   if (ff) { cv.width = cv.height = 1; for (let s = +ff[1]; s > 0; s -= 1 / 60) frame(1 / 60); resize(); frame(0); }
   if (reduce) {

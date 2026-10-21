@@ -42,7 +42,7 @@ a { color: var(--accent); }
 @keyframes cue { 0%, 100% { translate: 0 0; } 50% { translate: 0 6px; } }
 .intro-text { max-width: 40rem; margin: 0 auto; padding: 8vh 20px 2vh; }
 .intro-text p { margin: 0 0 16px; font-size: 21px; color: var(--soft); }
-@media (max-width: 720px) { .hero-copy { max-width: none; right: 20px; bottom: 64px; } .hero .hero-hint { display: none; } .intro-text p { font-size: 19px; } }
+@media (max-width: 720px) { .hero-copy { max-width: none; right: 20px; bottom: 64px; } .hero .hero-hint span { display: none; } .intro-text p { font-size: 19px; } }
 @media (prefers-reduced-motion: reduce) { .scrollcue { animation: none; } }
 
 /* ---------- table of contents ---------- */
@@ -322,3 +322,11 @@ input[type=range] { min-height: 32px; }
   .toc.open ol { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; max-height: 70vh; overflow-y: auto; padding: 8px 12px 14px; background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: 0 12px 24px rgba(0,0,0,.12); -webkit-mask-image: none; mask-image: none; }
   .toc.open ol a { padding-block: 11px; }
 }
+
+/* dev aid: ?og=1 renders the hero alone for the share image (og.png) */
+body.og .toc, body.og .hero-hint, body.og .scrollcue, body.og .hero::after, body.og .intro-text, body.og main, body.og .coda { display: none; }
+body.og .hero { height: 100vh; min-height: 0; }
+body.og .hero-copy { bottom: 64px; }
+.hero .fire-btn { pointer-events: auto; font-family: var(--sans); font-size: 13px; font-weight: 600; color: #fff; background: rgba(111,140,255,.18); border: 1px solid rgba(160,180,255,.45); border-radius: 999px; padding: 7px 14px; margin-right: 8px; cursor: pointer; }
+.hero .fire-btn:hover { background: rgba(111,140,255,.32); }
+.hero .fire-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
