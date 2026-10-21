@@ -11,6 +11,38 @@ license:
   - Apache-2.0
   - CC-BY-4.0
 version: 0.1.0
+references:
+  - type: article
+    title: "TALYS: modeling of nuclear reactions"
+    authors:
+      - family-names: Koning
+        given-names: Arjan
+      - family-names: Hilaire
+        given-names: Stéphane
+      - family-names: Goriely
+        given-names: Stéphane
+    journal: "The European Physical Journal A"
+    volume: 59
+    start: 131
+    year: 2023
+    doi: "10.1140/epja/s10050-023-01034-3"
+  - type: software
+    title: "TALYS"
+    authors:
+      - family-names: Koning
+        given-names: Arjan
+    license: MIT
+    repository-code: "https://github.com/arjankoning1/talys"
+  - type: article
+    title: "Towards a More Complete and Accurate Experimental Nuclear Reaction Data Library (EXFOR): International Collaboration Between Nuclear Reaction Data Centres (NRDC)"
+    authors:
+      - family-names: Otuka
+        given-names: N.
+    journal: "Nuclear Data Sheets"
+    volume: 120
+    start: 272
+    year: 2014
+    doi: "10.1016/j.nds.2014.07.065"
 keywords:
   - nuclear data
   - neutron cross sections

@@ -1,3 +1,5 @@
+/* Derived from TALYS-2.x / ECIS-06 (https://github.com/arjankoning1/talys), MIT License,
+ * Copyright (c) A.J. Koning (ECIS-06: J. Raynal). See physics/hf/NOTICE-TALYS.md. */
 /* SPEEDT3: compiled kernels for the transmission-coefficient stages of the TALYS port.
  *
  * Every kernel repeats, element by element and in the same order, the floating-point operations

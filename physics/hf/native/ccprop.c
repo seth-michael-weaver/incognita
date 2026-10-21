@@ -1,3 +1,5 @@
+/* Derived from TALYS-2.x / ECIS-06 (https://github.com/arjankoning1/talys), MIT License,
+ * Copyright (c) A.J. Koning (ECIS-06: J. Raynal). See physics/hf/NOTICE-TALYS.md. */
 /* CCPROP (ROUTE100 WP8): the log-derivative propagator of one coupled-channels (J, parity) block,
  * as the candidate replacement for the renormalised Numerov step of `ccfast.c::cc_block_w`.
  *

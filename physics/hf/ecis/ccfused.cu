@@ -1,3 +1,6 @@
+// Derived from ECIS-06 (J. Raynal) as shipped in TALYS-2.x (https://github.com/arjankoning1/talys),
+// MIT License, Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
+//
 // SPEED50B CCFUSED: the coupled-channels radial loops of `ccgpu._Side` as ONE CUDA kernel launch
 // per bucket (compiled at run time by NVRTC through torch; no nvcc needed).
 //

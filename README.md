@@ -74,8 +74,12 @@ uv run python scripts/bestfit/engine_curves.py --arm nodata --only 26-56,79-197 
     --out out/engine --cpus 0-1 --cc-cache "$HOME/.cache/incognita-cc"
 ```
 
+`scripts/fetch_structure.sh DEST` fetches only the part of the structure database the engine reads (about 0.9 of 8.7 GB;
+check results bitwise against a full checkout before relying on it for a new region of the chart).
+
 Each target writes `out/engine/<ZZZ>_<AAA>.npz` with the capture curve on the 64-point grid, the partial channels and the
-resolved TALYS keyword cards. The (n,α) recipe described below is enabled with `INCOGNITA_NA_V1=1 ... --arm lines`.
+resolved TALYS keyword cards. From Python, `incognita.engine.run(26, 56)` returns every exclusive channel as a pandas
+DataFrame (mb). The (n,α) recipe described below is enabled with `INCOGNITA_NA_V1=1 ... --arm lines`.
 
 **Engine version 2026-10.** The engine was updated on 2026-10-12; tag `engine-2026-10` marks it, and commit `7246b93`
 is the last commit with the v0.1 engine. The v0.1 library, the benchmark and every other number in this README were

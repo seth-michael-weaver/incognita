@@ -1,3 +1,5 @@
+/* Derived from TALYS-2.x / ECIS-06 (https://github.com/arjankoning1/talys), MIT License,
+ * Copyright (c) A.J. Koning (ECIS-06: J. Raynal). See physics/hf/NOTICE-TALYS.md. */
 #define _POSIX_C_SOURCE 199309L
 
 /* CCFAST2: the coupled-channels radial loop of one (J, parity) block, without bit-identity.
