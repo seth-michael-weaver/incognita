@@ -209,7 +209,7 @@
   function atomFrame(now) {
     const cv2 = atom.cv; if (!cv2 || !atom.pts.length) { atom.run = false; return; }
     const S = cv2.clientWidth, dpr = Math.min(2, window.devicePixelRatio || 1);
-    if (cv2.width !== Math.round(S * dpr)) { cv2.width = cv2.height = Math.round(S * dpr); }
+    const px = Math.round(S * dpr); if (cv2.width !== px || cv2.height !== px) { cv2.width = cv2.height = px; } // check both: a new canvas starts at 300x150, which matches the width at 125 % scaling
     const g = cv2.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, S, S);
     const grow = Math.min(1, (now - atom.born) / 600), e = 1 - Math.pow(1 - grow, 3), R = S * 0.36 * e, cx = S / 2, cy = S / 2;
     const glow = g.createRadialGradient(cx, cy, 0, cx, cy, S * 0.5); glow.addColorStop(0, "rgba(255,170,100,.22)"); glow.addColorStop(0.5, "rgba(80,120,255,.10)"); glow.addColorStop(1, "rgba(0,0,0,0)");
