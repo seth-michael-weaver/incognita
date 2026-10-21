@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scoreboard · Inside a Nuclear Reaction</title>
+<meta name="description" content="How the INCOGNITA reaction engine and the TERRA data product compare with other codes and libraries, losses first.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=9">
+</head>
+<body class="sb-page">
+
+<nav class="toc" aria-label="Site" data-i18n-aria="site_nav">
+  <ol class="sitenav">
+    <li><a href="./" data-keep-lang data-i18n="nav_walk">The walkthrough</a></li>
+    <li><a href="scoreboard.html" class="here" aria-current="page" data-keep-lang data-i18n="nav_board">Scoreboard</a></li>
+  </ol>
+</nav>
+
+<main class="sb">
+  <header class="sb-head">
+    <div class="kicker" data-i18n="sb_kicker">INCOGNITA · TERRA</div>
+    <h1 data-i18n="sb_h1">Scoreboard</h1>
+    <p class="sb-asof"><span data-i18n="sb_asof">As of</span> <time id="sb-date"></time>.</p>
+    <p data-i18n="sb_intro">How our results compare with other reaction codes and data libraries, judged against measurements. Losses and ties come first, because they are where the work is. A tie is not a win.</p>
+  </header>
+
+  <section class="sb-sec" aria-labelledby="sb-inc-h">
+    <h2 id="sb-inc-h" data-i18n="sb_inc_h">1 · The blind engine (INCOGNITA) against other codes</h2>
+    <p data-i18n="sb_inc_p">The reaction engine predicts every nuclide with one set of rules and is judged on measurements. Each comparison below is one data view (for example "capture cross sections, 10–100 keV") against one rival code, scored on the same nuclei. Class-A comparisons only (see the legend).</p>
+    <div class="sb-tiles" id="sb-inc-tiles"></div>
+    <div class="sb-strip" id="sb-inc-strip" role="img"></div>
+    <p class="sb-note" id="sb-inc-note"></p>
+
+    <h3 data-i18n="sb_loss_h">The one loss</h3>
+    <p id="sb-loss-p" data-i18n="sb_loss_p">(n,p) near its threshold against the stock TALYS input: our errors are larger, and the whole 95 % interval is above zero. The largest contributors are arsenic-75, yttrium-89 and iron-58. None of the last six engine updates moved it.</p>
+
+    <h3 data-i18n="sb_open_h">Every comparison that is not a win</h3>
+    <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-open-cap">
+      <table class="sb-table" id="sb-open"><caption id="sb-open-cap" data-i18n="sb_open_cap">Open comparisons, worst first. Gap = our error minus the rival's (dex, log10); negative means we are closer to the data.</caption></table>
+    </div>
+
+    <h3 data-i18n="sb_rival_h">By rival</h3>
+    <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-rival-cap">
+      <table class="sb-table" id="sb-rival"><caption id="sb-rival-cap" data-i18n="sb_rival_cap">Wins, ties and losses against each rival; N/A = not scorable (too few nuclei, or the rival has no values).</caption></table>
+    </div>
+
+    <h3 data-i18n="sb_chg_h">What changed today</h3>
+    <p data-i18n="sb_chg_p">A data-ledger correction was applied to every code alike: one (n,2n) measurement on germanium-76 at 9.60 MeV, judged defective, now leaves the score. It costs us one win and gains two.</p>
+    <ul class="sb-changes" id="sb-changes"></ul>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="sb-terra-h">
+    <h2 id="sb-terra-h" data-i18n="sb_terra_h">2 · The data product (TERRA) against evaluated libraries</h2>
+    <p data-i18n="sb_terra_p">TERRA takes the engine's curves and, where good measurements exist, anchors the result to them, with an uncertainty band. It is compared with the four major evaluated libraries on accuracy and on whether its uncertainty bands cover the data as often as they claim.</p>
+    <div class="sb-tiles" id="sb-terra-tiles"></div>
+    <div class="sb-strip" id="sb-terra-strip" role="img"></div>
+    <p class="sb-note" id="sb-terra-note"></p>
+    <h3 data-i18n="sb_terra_loss_h">The one loss</h3>
+    <p id="sb-terra-loss"></p>
+    <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-trival-cap">
+      <table class="sb-table" id="sb-trival"><caption id="sb-trival-cap" data-i18n="sb_trival_cap">Wins, ties and losses against each library.</caption></table>
+    </div>
+    <p class="sb-caveat" data-i18n="sb_terra_caveat">Read this board with care. Most of its comparisons are in-sample: TERRA has seen the measurements it is scored on, as the libraries have. 28 comparisons are scored leave-one-series-out (TERRA refitted without the series being judged) and are included in the count; the libraries cannot be refitted, so they stay in-sample.</p>
+    <p class="sb-next" data-i18n="sb_terra_next">In progress: R073, a rebuild of this candidate on the current engine. This board will be updated when its scores are in.</p>
+  </section>
+
+  <section class="sb-sec sb-legend" aria-labelledby="sb-leg-h">
+    <h2 id="sb-leg-h" data-i18n="sb_leg_h">How to read it</h2>
+    <dl>
+      <dt data-i18n="sb_leg_gap_t">Gap</dt>
+      <dd data-i18n="sb_leg_gap_d">For each nucleus in a comparison, the typical error against measurement is taken in log10 units (dex; 0.01 dex ≈ 2.3 %). The gap is our error minus the rival's on the same nuclei. Negative = we are closer to the data.</dd>
+      <dt data-i18n="sb_leg_ci_t">WIN, TIE, LOSS</dt>
+      <dd data-i18n="sb_leg_ci_d">The 95 % confidence interval of the gap comes from resampling the nuclei. WIN: the whole interval is below zero. LOSS: the whole interval is above zero. TIE: the interval contains zero, so the data cannot tell the two apart, whatever the point estimate says.</dd>
+      <dt data-i18n="sb_leg_cls_t">Trail, parity, underpowered</dt>
+      <dd data-i18n="sb_leg_cls_d">Kinds of tie. Trail: we are behind on the point estimate. Parity: the two are close. Underpowered: we lead on the point estimate, but there are too few nuclei to be sure.</dd>
+      <dt data-i18n="sb_leg_a_t">Class A</dt>
+      <dd data-i18n="sb_leg_a_d">The engine is compared on equal terms only with other model calculations (class A). Evaluated libraries are fitted to the same measurements, so they are not counted against the engine; TERRA, which also uses the measurements, is the product judged against them.</dd>
+      <dt data-i18n="sb_leg_riv_t">The rivals</dt>
+      <dd data-i18n="sb_leg_riv_d"><b>stock</b>: TALYS-2 with its standard input. <b>R_T</b> ("recipe R"): the same physics run the way the TENDL library is made, without per-nucleus fitted inputs. <b>CoH3</b> and <b>YAHFC</b>: two independent Hauser–Feshbach reaction codes. TERRA's rivals are the evaluated libraries ENDF/B-VIII.1, JEFF-4.0, JENDL-5 and TENDL-2025.</dd>
+      <dt data-i18n="sb_leg_k_t">MACS bands</dt>
+      <dd data-i18n="sb_leg_k_d">Maxwellian-averaged capture cross sections, the stellar capture rates, grouped by proton number Z. They are scored on two label sets (126 and 185 nuclides) that give identical verdicts, so each band counts once.</dd>
+    </dl>
+    <p class="sb-src" id="sb-src"></p>
+  </section>
+</main>
+
+<script src="js/i18n.js?v=9"></script>
+<script src="js/i18n/es-scoreboard.js?v=9"></script>
+<script src="js/scoreboard-data.js?v=9"></script>
+<script src="js/scoreboard.js?v=9"></script>
+</body>
+</html>
