@@ -112,7 +112,7 @@
   // ---------- the two wells ----------
   function wells(g) {
     const { W, H } = g; const phone = W < 600;
-    const yFermi = H * 0.56, yFloor = H * 0.9, yFree = yFermi - (yFloor - yFermi) * 0.35, yTop = H * 0.08;
+    const yFermi = H * 0.56, yFloor = H * (phone ? 0.86 : 0.9), yFree = yFermi - (yFloor - yFermi) * 0.35, yTop = H * 0.08;
     const gapx = phone ? W * 0.05 : W * 0.07, ww = (W * (phone ? 0.6 : 0.7) - gapx) / 2;
     const px0 = W * 0.07, nx0 = px0 + ww + gapx;
     // energy in MeV above the Fermi surface mapped to y: SEP MeV = yFermi - yFree
@@ -199,9 +199,9 @@
     const n = chain.length;
     const P = counts.p[0] + counts.n[0], Hh = counts.p[1] + counts.n[1];
     g.label(`${P} particle${P > 1 ? "s" : ""}, ${Hh} hole${Hh !== 1 ? "s" : ""}: n = ${n}`, W / 2, H * 0.97, { color: c.ink, size: phone ? 13 : 16, weight: 600, serif: true });
-    g.label(`protons: ${counts.p[0]} lifted, ${counts.p[1]} hole${counts.p[1] !== 1 ? "s" : ""}`, px0 + ww / 2, yTop - 2 + 10, { color: c.proton, size: 12, bg: true });
-    g.label(`neutrons: ${counts.n[0]} lifted, ${counts.n[1]} hole${counts.n[1] !== 1 ? "s" : ""}`, nx0 + ww / 2, yTop - 2 + 10, { color: c.neutron, size: 12, bg: true });
-    if (P >= 6) g.label("chain ends: the rest becomes a compound nucleus", W / 2, yTop + 30, { color: c.soft, size: 12, bg: true });
+    g.label(`protons: ${counts.p[0]} lifted, ${counts.p[1]} hole${counts.p[1] !== 1 ? "s" : ""}`, phone ? px0 : px0 + ww / 2, yTop - 2 + (phone ? 4 : 10), { color: c.proton, size: phone ? 11 : 12, align: phone ? "left" : "center", bg: true });
+    g.label(`neutrons: ${counts.n[0]} lifted, ${counts.n[1]} hole${counts.n[1] !== 1 ? "s" : ""}`, phone ? nx0 + ww : nx0 + ww / 2, yTop - 2 + (phone ? 22 : 10), { color: c.neutron, size: phone ? 11 : 12, align: phone ? "right" : "center", bg: true });
+    if (P >= 6) g.label("chain ends: the rest becomes a compound nucleus", W / 2, yTop + (phone ? 44 : 30), { color: c.soft, size: phone ? 11 : 12, bg: true });
   }
 
   // ---------- scene 3: the fork ----------
@@ -282,7 +282,7 @@
     run.cols.forEach((col, k) => col.forEach((st, i) => { const [cl, a] = stageStyle(c, st); g.dot(x0 + (k + 0.5) * colW, yB - r - i * unit, r, cl, a); }));
     g.line(x0 - 4, yB + 1, x1 + 2, yB + 1, c.line, 1.5);
     g.line(X(run.E), yB + 1, X(run.E), yB + 12, c.ink, 1.2, 0.8); g.label(`max ${run.E.toFixed(0)} MeV`, X(run.E), yB + 22, { color: c.ink, size: 11, bg: true });
-    g.label("slow", x0, yB + 22, { color: c.faint, size: 11, align: "left" }); if (X(run.E) < x1 - 70) g.label("fast →", x1, yB + 22, { color: c.faint, size: 11, align: "right" });
+    if (!phone || X(run.E) > x0 + 90) g.label("slow", x0, yB + 22, { color: c.faint, size: 11, align: "left" }); if (X(run.E) < x1 - 70) g.label("fast →", x1, yB + 22, { color: c.faint, size: 11, align: "right" });
     // launches: one reaction every 35 ms; the well shows the latest chain's stage
     while (run.next < run.evs.length && S.time >= run.tNext) {
       const ev = run.evs[run.next++]; run.tNext += 0.035; run.last = ev; run.lastT = S.time;
@@ -304,7 +304,7 @@
     wellLabelsInside(g, L);
     // legend chips in exactly the pile's colours
     const items = [[3, "stage 3"], [5, "5"], [7, "7"], [9, "9"], [0, "evaporation"]];
-    let lx = x0, ly = yT - 2;
+    let lx = phone ? px0 : x0, ly = phone ? H * 0.045 : yT - 2;
     g.label(phone ? "left at:" : "neutron left at:", lx, ly, { color: c.soft, size: 11, align: "left" }); lx += phone ? 44 : 88;
     items.forEach(([st, nm]) => { const [cl, a] = stageStyle(c, st); g.dot(lx + 4, ly, 4.5, cl, a); g.label(nm, lx + 12, ly, { color: c.soft, size: 11, align: "left" }); ctx.save(); ctx.font = "500 11px sans-serif"; lx += 22 + ctx.measureText(nm).width; ctx.restore(); });
     const fast = run.cols.reduce((a, col) => a + col.filter((st) => st > 0).length, 0), tot = run.counts.reduce((a, b) => a + b, 0);

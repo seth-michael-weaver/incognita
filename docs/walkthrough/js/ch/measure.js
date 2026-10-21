@@ -177,8 +177,8 @@
       const tgt = open ? 0.18 + 0.82 * Math.sqrt(shares[i] / mx) : 0; d.gap += (tgt - d.gap) * (1 - Math.exp(-6 * dt));
       const [x, y, a] = pos[i]; door(g, x, y, dw, dh, open, d.gap, c[ch.col], d.flash, S.time);
       const ox = x + Math.cos(a) * (dw * 0.5 + 18), oy = y + Math.sin(a) * (dh * 0.5 + 14), al = Math.abs(Math.cos(a)) < 0.3 ? "center" : Math.cos(a) > 0 ? "left" : "right";
-      g.label(ch.name, ox, oy, { color: open ? c.ink : c.faint, size: fs, weight: 600, align: al });
-      if (!open) g.label(`opens at ${ch.th} MeV`, ox, oy + fs + 3, { color: c.faint, size: fs - 2, align: al });
+      g.label(phone && !open ? `${ch.name} · ${ch.th} MeV` : ch.name, ox, oy, { color: open ? c.ink : c.faint, size: fs, weight: 600, align: al });
+      if (!open && !phone) g.label(`opens at ${ch.th} MeV`, ox, oy + fs + 3, { color: c.faint, size: fs - 2, align: al });
     });
     // particles: out through a door, then down into the bucket
     spawn += dt; const rate = 0.09;
@@ -199,7 +199,7 @@
       const x = bX(i), col = c[ch.col], h = bH * fill[i];
       g.ctx.save(); g.ctx.fillStyle = g.rgba(col, 0.5); g.ctx.fillRect(x - bW / 2 + 2, bY - h, bW - 4, h); g.ctx.restore();
       g.poly([[x - bW / 2 - 2, bY - bH - 4], [x - bW / 2, bY], [x + bW / 2, bY], [x + bW / 2 + 2, bY - bH - 4]], c.soft, 1.5, 0.7);
-      g.label(ch.name, x, bY + 12, { color: fill[i] > 0.003 ? c.soft : c.faint, size: fs - 2 });
+      g.label(phone ? ch.name.split(" ")[0] : ch.name, x, bY + 12, { color: fill[i] > 0.003 ? c.soft : c.faint, size: fs - 2 });
       if (fill[i] > 0.003) g.label(`${(100 * fill[i]).toFixed(fill[i] < 0.1 ? 1 : 0)} %`, x, bY - h - 10, { color: c.ink, size: fs - 1, weight: 600 });
     });
     // threshold strip
@@ -348,8 +348,8 @@
     LEVELS.forEach(([e, j], i) => {
       const y = Y(e), p = w[i] / G; g.line(x0 - 20, y, x0 + shelf, y, c.ink, 1.5, 0.8);
       g.label(`${j}⁺  ${e === 0 ? "ground state" : (1000 * e).toFixed(0) + " keV"}`, x0 - 28, y, { color: c.soft, size: fs, align: "right" });
-      const n = Math.round(p * 40), r = 5; for (let k = 0; k < n; k++) g.ball(x0 + 8 + k * (2 * r + 1.5), y - r - 1, r, c.proton);
-      if (p > 0.004) g.label(`${(100 * p).toFixed(p < 0.1 ? 1 : 0)} %`, x0 + 8 + Math.max(n, 0) * (2 * r + 1.5) + 8, y - r - 1, { color: c.ink, size: fs - 1, align: "left" });
+      const n = Math.round(p * 40), r = phone ? 4 : 5, sp = phone ? 2 * r + 1 : 2 * r + 1.5; for (let k = 0; k < n; k++) g.ball(x0 + 8 + k * sp, y - r - 1, r, c.proton);
+      if (p > 0.004) g.label(`${(100 * p).toFixed(p < 0.1 ? 1 : 0)} %`, x0 + 8 + Math.max(n, 0) * sp + 8, y - r - 1, { color: c.ink, size: fs - 1, align: "left" });
     });
     g.label(`kT = ${(1000 * kT).toFixed(0)} keV`, x0 + shelf, yTop - 14, { color: c.warm, size: fs, align: "right", bg: true });
     g.label("target levels, with the share of nuclei sitting on each", W * 0.5, yBot + 26, { color: c.soft, size: fs, bg: true });

@@ -73,6 +73,7 @@ Object.assign(WT.es.labels, {
   "{#}⁺ {#}⁺ {#}⁺ {#}⁺  two phonons": "{#}⁺ {#}⁺ {#}⁺ {#}⁺  dos fonones",
   "one push": "un empujón",
   "two pushes": "dos empujones",
+  "two phonons": "dos fonones",
   "equal energy steps": "pasos de energía iguales",
   // scene: DWBA
   "rim: the push happens here": "borde: aquí ocurre el empujón",

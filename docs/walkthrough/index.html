@@ -19,11 +19,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=15">
+<link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 
-<nav class="toc" aria-label="Chapters" data-i18n-aria="chapters"><ol></ol><a class="board-link" href="scoreboard.html" data-keep-lang data-i18n="nav_board">Scoreboard</a></nav>
+<nav class="toc site" aria-label="Site" data-i18n-aria="site_nav">
+  <a class="brand" href="./" data-keep-lang><img src="favicon.svg" alt="" width="26" height="26"><span data-i18n="brand">Inside a Nuclear Reaction</span></a>
+  <div class="chap"><button type="button" class="toc-menu here" aria-expanded="false" aria-current="page"><span data-i18n="nav_physics">The physics</span> ▾</button><ol aria-label="Chapters" data-i18n-aria="chapters"></ol></div>
+  <div class="site-links">
+    <a href="data.html" data-keep-lang data-i18n="nav_data">Every nuclide</a>
+    <a href="scoreboard.html" data-keep-lang data-i18n="nav_board">Scoreboard</a>
+    <a class="gh" href="https://github.com/seth-michael-weaver/incognita"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
+  </div>
+  <button type="button" class="site-burger" aria-expanded="false" aria-label="Menu" data-i18n-aria="menu">☰</button>
+</nav>
 
 <section class="hero">
   <canvas class="hero-cv" aria-hidden="true"></canvas>
@@ -39,6 +48,16 @@
 <section class="intro-text" id="intro">
   <p data-i18n="hero1">Fire a neutron at an atomic nucleus and something comes back out. It might be the neutron itself, bounced off. It might be a proton, an alpha particle (a tight cluster of 2 protons and 2 neutrons), or a burst of light. A heavy nucleus might even split in two.</p>
   <p data-i18n="hero2">Which one happens, and how often? This page walks through how our software answers that question, one step at a time. Scroll down, and try the controls along the way. The pictures follow the same physics as the engine; the numbers in them are illustrative.</p>
+</section>
+
+<section class="ways" aria-labelledby="ways-h">
+  <h2 id="ways-h" data-i18n="ways_h">More ways in</h2>
+  <div class="ways-grid">
+    <a class="way" href="data.html" data-keep-lang><span class="way-k" data-i18n="way1_k">Explore</span><b data-i18n="way1_t">Every nuclide</b><span class="way-p" data-i18n="way1_p">Predicted cross sections for 6,168 nuclides beside every curated measurement. Search any isotope, see every dataset.</span><span class="way-go" data-i18n="way1_go">Open the data →</span></a>
+    <a class="way" href="scoreboard.html" data-keep-lang><span class="way-k" data-i18n="way2_k">Compare</span><b data-i18n="way2_t">Scoreboard</b><span class="way-p" data-i18n="way2_p">How the engine and its data product compare with other reaction codes and libraries, judged against measurements, losses first.</span><span class="way-go" data-i18n="way2_go">See the scores →</span></a>
+    <a class="way" href="https://github.com/seth-michael-weaver/incognita"><span class="way-k" data-i18n="way3_k">Run</span><b data-i18n="way3_t">The code</b><span class="way-p" data-i18n="way3_p">Everything here is open. Clone the repository, look up any curve, or run the engine yourself.</span><span class="way-go" data-i18n="way3_go">GitHub →</span></a>
+  </div>
+  <p class="ways-more" data-i18n="ways_more">Or keep scrolling: the physics starts here ↓</p>
 </section>
 
 <main>
@@ -111,40 +130,42 @@
 
   <h3 data-i18n="coda_h3_outside">Outside the engine</h3>
   <p data-i18n="coda_p_outside">Some parts of the story run beside the engine rather than inside it. The statistical resonance ladders of <a href="#resonance">Chapter 10</a> live in <code>physics/resonance/</code>. The Maxwellian averages (MACS) of <a href="#measure">Chapter 11</a> are folded from the engine's capture curves after the run, in <code>validation/differential/core.py</code>; capture on thermally excited targets and the stellar rate, by contrast, come from the engine itself (<code>astro/stellar.py</code>, optional). The anchoring layer of <a href="#layers">Chapter 12</a> lives in <code>incognita/terra/</code>.</p>
+  <p data-i18n="coda_repo">The code, the library and the curated measurements are open: <a href="https://github.com/seth-michael-weaver/incognita">seth-michael-weaver/incognita on GitHub</a>. You can look up any prediction yourself on the <a href="data.html" data-keep-lang>Every nuclide</a> page, or clone the repository and run it.</p>
 </section>
 
-<script src="js/scoreboard-data.js?v=15"></script>
-<script src="js/i18n.js?v=15"></script>
-<script src="js/i18n/es-ui.js?v=15"></script>
-<script src="js/i18n/es-glossary.js?v=15"></script>
-<script src="js/i18n/es-structure.js?v=15"></script>
-<script src="js/i18n/es-omp.js?v=15"></script>
-<script src="js/i18n/es-direct.js?v=15"></script>
-<script src="js/i18n/es-preeq.js?v=15"></script>
-<script src="js/i18n/es-compound.js?v=15"></script>
-<script src="js/i18n/es-decay.js?v=15"></script>
-<script src="js/i18n/es-gamma.js?v=15"></script>
-<script src="js/i18n/es-cascade.js?v=15"></script>
-<script src="js/i18n/es-fission.js?v=15"></script>
-<script src="js/i18n/es-resonance.js?v=15"></script>
-<script src="js/i18n/es-measure.js?v=15"></script>
-<script src="js/i18n/es-intro.js?v=15"></script>
-<script src="js/i18n/es-layers.js?v=15"></script>
-<script src="js/glossary.js?v=15"></script>
-<script src="js/kit.js?v=15"></script>
-<script src="js/ch/intro.js?v=15"></script>
-<script src="js/ch/structure.js?v=15"></script>
-<script src="js/ch/omp.js?v=15"></script>
-<script src="js/ch/direct.js?v=15"></script>
-<script src="js/ch/preeq.js?v=15"></script>
-<script src="js/ch/compound.js?v=15"></script>
-<script src="js/ch/decay.js?v=15"></script>
-<script src="js/ch/gamma.js?v=15"></script>
-<script src="js/ch/cascade.js?v=15"></script>
-<script src="js/ch/fission.js?v=15"></script>
-<script src="js/ch/resonance.js?v=15"></script>
-<script src="js/ch/measure.js?v=15"></script>
-<script src="js/ch/layers.js?v=15"></script>
+<script src="js/scoreboard-data.js?v=16"></script>
+<script src="js/i18n.js?v=16"></script>
+<script src="js/i18n/es-ui.js?v=16"></script>
+<script src="js/i18n/es-glossary.js?v=16"></script>
+<script src="js/i18n/es-structure.js?v=16"></script>
+<script src="js/i18n/es-omp.js?v=16"></script>
+<script src="js/i18n/es-direct.js?v=16"></script>
+<script src="js/i18n/es-preeq.js?v=16"></script>
+<script src="js/i18n/es-compound.js?v=16"></script>
+<script src="js/i18n/es-decay.js?v=16"></script>
+<script src="js/i18n/es-gamma.js?v=16"></script>
+<script src="js/i18n/es-cascade.js?v=16"></script>
+<script src="js/i18n/es-fission.js?v=16"></script>
+<script src="js/i18n/es-resonance.js?v=16"></script>
+<script src="js/i18n/es-measure.js?v=16"></script>
+<script src="js/i18n/es-intro.js?v=16"></script>
+<script src="js/i18n/es-layers.js?v=16"></script>
+<script src="js/glossary.js?v=16"></script>
+<script src="js/nav.js?v=16"></script>
+<script src="js/kit.js?v=16"></script>
+<script src="js/ch/intro.js?v=16"></script>
+<script src="js/ch/structure.js?v=16"></script>
+<script src="js/ch/omp.js?v=16"></script>
+<script src="js/ch/direct.js?v=16"></script>
+<script src="js/ch/preeq.js?v=16"></script>
+<script src="js/ch/compound.js?v=16"></script>
+<script src="js/ch/decay.js?v=16"></script>
+<script src="js/ch/gamma.js?v=16"></script>
+<script src="js/ch/cascade.js?v=16"></script>
+<script src="js/ch/fission.js?v=16"></script>
+<script src="js/ch/resonance.js?v=16"></script>
+<script src="js/ch/measure.js?v=16"></script>
+<script src="js/ch/layers.js?v=16"></script>
 <script>WT.start();</script>
 </body>
 </html>

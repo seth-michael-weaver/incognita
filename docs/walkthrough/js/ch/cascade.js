@@ -472,7 +472,7 @@
     const play = plays[pi];
     drawChartBase(g, G, (key) => (key === dest ? [c.accent, 0.16] : null));
     // tray
-    const r = G.phone ? 7 : 9, slot = r * 2.8, ty = Math.min(G.bottom + G.cell * 0.62, H - 54), tx = W * 0.5;
+    const r = G.phone ? 7 : 9, slot = r * 2.8, ty = Math.min(G.bottom + G.cell * 0.62 + (G.phone ? 10 : 0), H - 54), tx = W * 0.5;
     const ctx = g.ctx; ctx.save(); ctx.strokeStyle = c.soft; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(tx - slot * 2.2, ty - r - 2); ctx.quadraticCurveTo(tx, ty + r * 2.6, tx + slot * 2.2, ty - r - 2); ctx.stroke(); ctx.restore();
     g.label("collected", tx - slot * 2.2 - 8, ty - 2, { color: c.faint, size: 11, align: "right" });
     const slotX = (i, n) => tx + (i - (n - 1) / 2) * slot;

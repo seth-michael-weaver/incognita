@@ -379,7 +379,7 @@
     const { W, H, c } = g, phone = W < 600, fs = phone ? 10.5 : 13, NR = phone ? 11 : 18;
     const rx0 = W * 0.04, rx1 = W * (phone ? 0.52 : 0.58), top = H * 0.1, rh = (H * 0.8 - top) / NR, eLo = -25, eHi = 70;
     const X = (e) => rx0 + (rx1 - rx0) * (e - eLo) / (eHi - eLo), xt = X(ETH), dX = W * (phone ? 0.66 : 0.65);
-    const px0 = W * (phone ? 0.74 : 0.72), px1 = W * 0.97, pY = H * 0.86, LO = 0.1, HI = 1000, NB = 16, bw = (px1 - px0) / NB, dr = clamp(bw / 4.6, 1.3, 3), pitch = 2 * dr + 0.6;
+    const px0 = W * (phone ? 0.74 : 0.72), px1 = W * 0.97, pY = H * (phone ? 0.8 : 0.86), LO = 0.1, HI = 1000, NB = 16, bw = (px1 - px0) / NB, dr = clamp(bw / 4.6, 1.3, 3), pitch = 2 * dr + 0.6;
     const PX = (v) => px0 + (px1 - px0) * Math.log(clamp(v, LO, HI * 0.999) / LO) / Math.log(HI / LO), binOf = (v) => clamp(Math.floor((PX(v) - px0) / bw), 0, NB - 1);
     ens.qT += dt; ens.auto += dt;
     if (ens.queue > 0 && ens.qT > 0.3) { addRow(S); ens.queue--; ens.qT = 0; ens.auto = 0; }
@@ -413,7 +413,7 @@
     const cnt = new Array(NB).fill(0);
     for (const v of ens.pile) { const b = binOf(v), k = cnt[b]++; g.dot(px0 + (b + 0.5) * bw + ((k % 2) - 0.5) * (2 * dr + 0.4), pY - dr - 1 - Math.floor(k / 2) * pitch, dr, c.neutron, 0.85); }
     g.line(px0 - 3, pY, px1 + 3, pY, c.line, 1);
-    [1, 10, 100, 1000].forEach((v) => g.label(v >= 1000 ? "1k" : String(v), clamp(PX(v), px0, px1 - 6), pY + 12, { color: c.faint, size: fs - 2 }));
+    (phone ? [1, 10, 100] : [1, 10, 100, 1000]).forEach((v) => g.label(v >= 1000 ? "1k" : String(v), clamp(PX(v), px0, px1 - 6), pY + 12, { color: c.faint, size: fs - 2 }));
     g.label(phone ? "thermal σ (b)" : "thermal σ, barns", (px0 + px1) / 2, pY + 28, { color: c.soft, size: fs - 1 });
     const so = [...ens.pile].sort((p, q) => p - q), n = so.length;
     if (n > 5) {

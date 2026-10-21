@@ -16,15 +16,7 @@
     document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.es.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
     document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.es.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
   }
-  document.querySelectorAll("a[data-keep-lang]").forEach((a) => { if (es) a.href = a.getAttribute("href") + "?lang=es"; });
-  const nav = $(".toc"), box = document.createElement("div");
-  box.className = "lang"; box.setAttribute("role", "group"); box.setAttribute("aria-label", es ? "Idioma" : "Language");
-  [["en", "EN", "English"], ["es", "ES", "Español"]].forEach(([l, t, full]) => {
-    const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.title = full; b.lang = l; b.setAttribute("aria-pressed", String(WT.lang === l));
-    if (WT.lang === l) b.className = "on"; else b.addEventListener("click", () => WT.setLang(l));
-    box.appendChild(b);
-  });
-  nav.appendChild(box);
+  // links that keep the language and the EN | ES switch: js/nav.js
   if (!B) return;
   $("#sb-date").textContent = date(B.asof); $("#sb-date").setAttribute("datetime", B.asof);
 

@@ -126,7 +126,8 @@
     if ((S.Wshow ?? 0) > 0.5) {
       g.ring(cx, cy, Rpx * 1.02, c.proton, 6, 0.18 * S.Wshow);
       g.label("absorbing surface", cx, cy - Rpx - 18, { color: c.proton, size: 13, bg: true });
-      g.label("shadow: neutrons lost to reactions", Math.min(cx + Rpx * 1.9, W - 120), cy + Rpx * 1.3, { color: c.soft, size: 13, bg: true });
+      if (W < 600) g.label("shadow: neutrons lost to reactions", W - 12, cy + Rpx + 50, { color: c.soft, size: 12, align: "right", bg: true });
+      else g.label("shadow: neutrons lost to reactions", Math.min(cx + Rpx * 1.9, W - 120), cy + Rpx * 1.3, { color: c.soft, size: 13, bg: true });
     }
     const lam = 2 * Math.PI / kOf(S.E);
     g.label(`wavelength ${lam.toFixed(1)} fm   ·   nucleus ${(2 * R_FM).toFixed(1)} fm across`, W / 2, H - 22, { color: c.soft, size: 13, bg: true });
@@ -136,7 +137,7 @@
   // ---------- scene 2: partial-wave rings ----------
   function drawRings(g, S) {
     const { W, H, c } = g;
-    const phoneR = W < 600, cx = W * 0.5, cy = phoneR ? H * 0.5 : H * 0.55, maxR = Math.min(W, H) * (phoneR ? 0.36 : 0.34);
+    const phoneR = W < 600, cx = W * (phoneR ? 0.62 : 0.5), cy = phoneR ? H * 0.53 : H * 0.55, maxR = phoneR ? W * 0.28 : Math.min(W, H) * 0.34;
     const k = kOf(S.E);
     // show the target out to b = max(1.6 R, (l+1)/k for the last visible ring), scaled to maxR
     const bMax = Math.max(R_FM * 1.7, Math.min(5.5 / k, 30));
@@ -147,7 +148,7 @@
       const T = Tl(l, S.E, S.W);
       g.dot(cx, cy, r1, c.neutron, 0.08 + 0.72 * T);
       g.ring(cx, cy, r1, c.paper, 1.2, 0.9);
-      if (r1 - (l / k) * px > 16 && l < 6) g.label(`l=${l}`, cx + ((l + 0.5) / k) * px, cy, { color: T > 0.5 ? c.card : c.soft, size: 12 });
+      if (r1 - (l / k) * px > 16 && l < 6) g.label(`l=${l}`, cx + ((l + 0.5) / k) * px, cy + (phoneR ? (l % 2 ? 8 : -8) : 0), { color: T > 0.5 ? c.card : c.soft, size: 12 });
     }
     g.ring(cx, cy, R_FM * px, c.ink, 1.5, 0.8, [5, 5]);
     g.label("nuclear radius", cx, cy - R_FM * px - 12, { color: c.ink, size: 12 });
@@ -164,14 +165,15 @@
       if (age > 1.8) shots.splice(i, 1);
     }
     const sR = sigmaR(S.E, S.W), geo = Math.PI * Math.pow(R_FM + 1 / k, 2) / 100;
-    g.label(`reaction cross section ≈ ${sR.toFixed(2)} b`, cx, H - 44, { color: c.ink, size: 16, weight: 600, serif: true });
-    g.label(`geometric size π(R+λ̄)² ≈ ${geo.toFixed(2)} b · darker ring = more absorbed · orange flash = absorbed`, cx, H - 20, { color: c.faint, size: 12 });
+    g.label(`reaction cross section ≈ ${sR.toFixed(2)} b`, phoneR ? W / 2 : cx, H - 44, { color: c.ink, size: 16, weight: 600, serif: true });
+    if (phoneR) g.label(`geometric ${geo.toFixed(2)} b · darker = more absorbed · orange = absorbed`, W / 2, H - 20, { color: c.faint, size: 11 });
+    else g.label(`geometric size π(R+λ̄)² ≈ ${geo.toFixed(2)} b · darker ring = more absorbed · orange flash = absorbed`, cx, H - 20, { color: c.faint, size: 12 });
     // a new energy invalidates the old count: clear it and fire a fresh volley once the slider settles
     if (tally.E === undefined) tally.E = S.target.E;
     if (S.target.E !== tally.E) { tally.E = S.target.E; resetTally(); shots.length = 0; tally.refireAt = S.time + 0.5; }
     if (tally.refireAt && S.time > tally.refireAt) { tally.refireAt = 0; S.handlers.fire(); }
     // per-ring tally of the last volley: filled bar = share of that ring's neutrons absorbed; dark tick = the model's T_l
-    const n = 7, phone = W < 600, bw = phone ? 14 : 20, gap = phone ? 6 : 10, bh = phone ? 60 : 84;
+    const n = 7, phone = W < 600, bw = phone ? 15 : 20, gap = phone ? 9 : 10, bh = phone ? 54 : 84;
     const x0 = phone ? 14 : cx - (n * (bw + gap) - gap) / 2, y0 = phone ? 34 : 44;
     g.label("absorbed, ring by ring", x0 + (n * (bw + gap) - gap) / 2, y0 - 26, { color: c.ink, size: 12, weight: 600 });
     g.label("bar: your neutrons · tick: model Tₗ", x0 + (n * (bw + gap) - gap) / 2, y0 - 11, { color: c.faint, size: 11 });

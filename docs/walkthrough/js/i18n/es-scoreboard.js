@@ -1,9 +1,10 @@
 /* Spanish: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.es.ui, {
+  brand: "Dentro de una reacción nuclear", nav_physics: "La física", nav_data: "Todos los núclidos", nav_board: "Marcador", menu: "Menú", site_nav: "Sitio",
   sb_title: "Marcador · Dentro de una reacción nuclear",
   site_nav: "Sitio",
   nav_walk: "El recorrido",
-  nav_board: "Marcador",
+  nav_board: "Marcador", nav_data: "Todos los núclidos", nav_repo: "Código en GitHub",
   sb_kicker: "INCOGNITA · TERRA",
   sb_h1: "Marcador",
   sb_asof: "A fecha de",

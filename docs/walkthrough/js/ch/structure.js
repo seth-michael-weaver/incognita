@@ -451,7 +451,7 @@
 
     // ---- layout ----
     const open = smooth(0, 1, (S.time - S.fT0) / 1.1);
-    const lx0 = W * 0.045, lx1 = W * (phone ? 0.15 : 0.15), yBot = H * 0.9, yTop = H * 0.13, Emax = T.Sn * 1.16;
+    const lx0 = W * 0.045, lx1 = W * (phone ? 0.15 : 0.15), yBot = H * (phone ? 0.86 : 0.9), yTop = H * 0.13, Emax = T.Sn * 1.16;
     const LY = (E) => yBot - (yBot - yTop) * E / Emax, ySn = LY(T.Sn);
     const ix0 = W * (phone ? 0.3 : 0.27), ix1 = W * 0.965, iw = ix1 - ix0;
     const tTop = H * 0.43, tBase = H * 0.7, th = (tBase - tTop) * 0.92, bTop = tBase + 5, bBot = tBase + H * 0.055;
@@ -482,7 +482,8 @@
     const mag = (iw / T.span) / ((yBot - yTop) / (Emax * 1e6));
     if (open > 0.5) {
       const mx = lerp(bx1, ix0, 0.5), my = lerp((ySn - bh / 2), (pT + pB) / 2, 0.5);
-      g.label(`×${fmtMag(mag)}`, mx, my, { color: c.accent, size: fs + 1, weight: 700, bg: true, alpha: smooth(0.5, 1, open) });
+      if (phone) g.label(`×${fmtMag(mag)}`, lx0 - 4, ySn + 33, { color: c.accent, size: fs, weight: 700, align: "left", bg: true, alpha: smooth(0.5, 1, open) });
+      else g.label(`×${fmtMag(mag)}`, mx, my, { color: c.accent, size: fs + 1, weight: 700, bg: true, alpha: smooth(0.5, 1, open) });
       if (!phone) g.label("magnified", mx, my + 17, { color: c.accent, size: 11, bg: true, alpha: smooth(0.5, 1, open) });
     }
     if (open < 1) ctx.globalAlpha = open;
@@ -491,7 +492,7 @@
 
     // ---- right top: the beam and the nucleus ----
     const yB = H * 0.175, nx = ix0 + iw * 0.6, R = Math.max(14, Math.min(28, H * 0.038)), sx = ix0 + 4;
-    g.label(`beam of neutrons at ${fmtE(T, Eb)}`, sx, H * 0.055, { color: c.ink, size: fs + 1, weight: 600, align: "left" });
+    g.label(`beam of neutrons at ${fmtE(T, Eb)}`, phone ? ix1 : sx, H * 0.055, { color: c.ink, size: fs + 1, weight: 600, align: phone ? "right" : "left" });
     // launch: one drawn neutron every ~0.15 s, its fate drawn from the same catch chance
     if (S.time > S.fnext) {
       S.fnext = S.time + 0.15; const P = fCatch(T, Eb), q = fNear(T, Eb);

@@ -189,7 +189,7 @@
   function drawVib(g, S) {
     const { W, H, c } = g; const phone = W < 600;
     const lam = Math.round(S.lam), nph = S.nph;
-    const cx = phone ? W * 0.28 : W * 0.3, cy = H * 0.48, R = Math.min(W, H) * 0.18;
+    const cx = phone ? W * 0.23 : W * 0.3, cy = H * 0.48, R = Math.min(W, H) * (phone ? 0.15 : 0.18);
     const amp = 0.13 * Math.sqrt(nph) * Math.sin(S.time * 3.6);
     const pts = []; for (let i = 0; i <= 120; i++) { const th = i / 120 * TAU; const r = R * (1 + amp * Math.cos(lam * th)); pts.push([cx + Math.cos(th) * r, cy + Math.sin(th) * r]); }
     g.glow(cx, cy, R * 1.5, c.neutron, 0.12);
@@ -197,18 +197,21 @@
     // a few nucleons inside that follow the surface motion
     const r = rng(23); for (let i = 0; i < 28; i++) { const th = r() * TAU, rr = Math.sqrt(r()) * 0.85; const sc = 1 + amp * Math.cos(lam * th) * rr; g.ball(cx + Math.cos(th) * rr * R * sc, cy + Math.sin(th) * rr * R * sc, R * 0.11, i % 2 ? c.proton : c.neutron, 0.8); }
     g.ring(cx, cy, R, c.faint, 1, 0.6, [3, 5]);
-    g.label(lam === 2 ? "quadrupole ripple: football ↔ disc" : "octupole ripple: pear ↔ pear", cx, cy + R * 1.3 + 26, { color: c.ink, size: phone ? 13 : 15, weight: 600, serif: true });
+    g.label(lam === 2 ? "quadrupole ripple: football ↔ disc" : "octupole ripple: pear ↔ pear", phone ? W / 2 : cx, phone ? H * 0.94 : cy + R * 1.3 + 26, { color: c.ink, size: phone ? 13 : 15, weight: 600, serif: true });
     // phonon ladder
-    const x0 = phone ? W * 0.66 : W * 0.68, x1 = phone ? W * 0.78 : W * 0.8, yb = H * 0.82, yt = H * 0.18, dy = (yb - yt) / 2;
-    const one = lam === 2 ? "2⁺" : "3⁻", two = lam === 2 ? "0⁺ 2⁺ 4⁺" : "0⁺ 2⁺ 4⁺ 6⁺";
-    g.line(x0, yb, x1, yb, c.ink, 2.5); g.label("0⁺  no phonon", x1 + 8, yb, { color: c.ink, size: 12, align: "left" });
+    const x0 = phone ? W * 0.52 : W * 0.68, x1 = phone ? W * 0.64 : W * 0.8, yb = H * 0.82, yt = H * 0.18, dy = (yb - yt) / 2;
+    const one = lam === 2 ? "2⁺" : "3⁻", two = lam === 2 ? "0⁺ 2⁺ 4⁺" : "0⁺ 2⁺ 4⁺ 6⁺", ls = phone ? 11 : 12;
+    g.line(x0, yb, x1, yb, c.ink, 2.5); g.label("0⁺  no phonon", x1 + 8, yb, { color: c.ink, size: ls, align: "left" });
     const on1 = Math.abs(nph - 1) < 0.5, on2 = nph > 1.5;
-    g.line(x0, yb - dy, x1, yb - dy, on1 ? c.warm : c.soft, on1 ? 3 : 1.6); g.label(`${one}  one phonon`, x1 + 8, yb - dy, { color: on1 ? c.warm : c.soft, size: 12, align: "left" });
+    g.line(x0, yb - dy, x1, yb - dy, on1 ? c.warm : c.soft, on1 ? 3 : 1.6); g.label(`${one}  one phonon`, x1 + 8, yb - dy, { color: on1 ? c.warm : c.soft, size: ls, align: "left" });
     for (let k = -1; k <= 1; k++) g.line(x0, yb - 2 * dy + k * 6, x1, yb - 2 * dy + k * 6, on2 ? c.warm : c.soft, on2 ? 2.5 : 1.4);
-    g.label(`${two}  two phonons`, x1 + 8, yb - 2 * dy, { color: on2 ? c.warm : c.soft, size: 12, align: "left" });
+    if (phone) { g.label(two, x1 + 8, yb - 2 * dy - 9, { color: on2 ? c.warm : c.soft, size: ls, align: "left" }); g.label("two phonons", x1 + 8, yb - 2 * dy + 9, { color: on2 ? c.warm : c.soft, size: ls, align: "left" }); }
+    else g.label(`${two}  two phonons`, x1 + 8, yb - 2 * dy, { color: on2 ? c.warm : c.soft, size: 12, align: "left" });
     arc(g, x0 - 8, yb, yb - dy, -26, c.cool, 3, 0.7); arc(g, x0 - 8, yb - dy, yb - 2 * dy, -26, c.cool, 3, 0.7); arc(g, x1 + 4, yb, yb - 2 * dy, 30, c.alpha, 1.2, 0.6);
-    g.label("one push", x0 - 38, yb - dy, { color: c.cool, size: 11, align: "right" }); g.label("two pushes", x1 + 34, yb - dy - 24, { color: c.alpha, size: 11, align: "left", bg: true });
-    g.label("equal energy steps", (x0 + x1) / 2, yt - 16, { color: c.soft, size: 12, bg: true });
+    if (phone) g.label("one push", x0 - 24, yb + 16, { color: c.cool, size: 11 });
+    else g.label("one push", x0 - 38, yb - dy, { color: c.cool, size: 11, align: "right" });
+    g.label("two pushes", x1 + 34, yb - dy - 24, { color: c.alpha, size: 11, align: "left", bg: true });
+    g.label("equal energy steps", (x0 + x1) / 2, yt - (phone ? 32 : 16), { color: c.soft, size: 12, bg: true });
   }
 
   // ---------- scene 4: DWBA single push at a wobbling rim ----------

@@ -1,5 +1,10 @@
 /* Spanish: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.es.ui, {
+  brand: "Dentro de una reacción nuclear", nav_physics: "La física", nav_data: "Todos los núclidos", nav_board: "Marcador", menu: "Menú", site_nav: "Sitio",
+  ways_h: "Más formas de entrar", ways_more: "O sigue bajando: la física empieza aquí ↓",
+  way1_k: "Explora", way1_t: "Todos los núclidos", way1_p: "Secciones eficaces predichas para 6168 núclidos junto a cada medida depurada. Busca cualquier isótopo y mira cada conjunto de datos.", way1_go: "Abrir los datos →",
+  way2_k: "Compara", way2_t: "Marcador", way2_p: "Cómo se comparan el motor y su producto de datos con otros códigos de reacciones y bibliotecas, juzgados frente a las medidas, con las derrotas primero.", way2_go: "Ver los resultados →",
+  way3_k: "Ejecútalo", way3_t: "El código", way3_p: "Todo lo que hay aquí es abierto. Clona el repositorio, consulta cualquier curva o ejecuta el motor tú mismo.", way3_go: "GitHub →",
   title: "Dentro de una reacción nuclear",
   kicker: "Una explicación interactiva del motor de reacciones INCOGNITA",
   h1: "Dentro de una reacción nuclear",
@@ -63,6 +68,8 @@ Object.assign(WT.es.ui, {
   coda_p_outside: "Algunas partes de la historia funcionan junto al motor y no dentro de él. Las escaleras estadísticas de resonancias del <a href=\"#resonance\">capítulo 10</a> viven en <code>physics/resonance/</code>. Los promedios maxwellianos (MACS) del <a href=\"#measure\">capítulo 11</a> se obtienen después de la ejecución a partir de las curvas de captura del motor, en <code>validation/differential/core.py</code>; en cambio, la captura en blancos excitados térmicamente y la tasa estelar las calcula el propio motor (<code>astro/stellar.py</code>, opcional). La capa de anclaje del <a href=\"#layers\">capítulo 12</a> vive en <code>incognita/terra/</code>.",
   close: "Cerrar",
   chapters: "Capítulos",
+  nav_board: "Marcador", nav_data_short: "Datos",
+  coda_repo: "El código, la biblioteca y las medidas depuradas son abiertos: <a href=\"https://github.com/seth-michael-weaver/incognita\">seth-michael-weaver/incognita en GitHub</a>. Puedes consultar cualquier predicción en la página <a href=\"data.html?lang=es\">Todos los núclidos</a>, o clonar el repositorio y ejecutarlo.",
   diagram: "Diagrama",
 });
 

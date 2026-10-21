@@ -47,9 +47,14 @@
     g.label = (s, x, y, o = {}) => {
       if (WT.tr) s = WT.tr(s);
       ctx.save(); ctx.globalAlpha = o.alpha ?? 1;
-      const size = Math.max(o.size || 14, 12);                // never smaller than 12 px
-      ctx.font = `${o.italic ? "italic " : ""}${o.weight || 500} ${size}px ${o.serif ? SERIF : SANS}`;
-      ctx.textAlign = o.align || "center"; ctx.textBaseline = o.base || "middle";
+      let size = Math.max(o.size || 14, W < 600 ? 10 : 12); // legible minimum; phones keep their tighter sizes so labels fit
+      const font = () => `${o.italic ? "italic " : ""}${o.weight || 500} ${size}px ${o.serif ? SERIF : SANS}`;
+      ctx.font = font(); ctx.textAlign = o.align || "center"; ctx.textBaseline = o.base || "middle";
+      // never run off the drawing: shrink a too-long label (down to 9 px), then slide it inside the edges
+      const room = W - 8 - (o.bg ? 12 : 0);
+      while (ctx.measureText(s).width > room && size > 9) { size -= 0.5; ctx.font = font(); }
+      { const w = ctx.measureText(s).width, a = ctx.textAlign, left = a === "left" ? x : a === "right" ? x - w : x - w / 2, pad = 4 + (o.bg ? 6 : 0);
+        if (left < pad) x += pad - left; else if (left + w > W - pad) x -= left + w - (W - pad); }
       if (o.bg) {
         const w = ctx.measureText(s).width, h = size * 1.5, pad = 6;
         const x0 = (o.align === "left" ? x : o.align === "right" ? x - w : x - w / 2) - pad;
@@ -423,6 +428,9 @@
     const th = /[?&]theme=(dark|light)/.exec(location.search); if (th) document.documentElement.dataset.theme = th[1]; // dev aid
     readColors();
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const PHONE = window.matchMedia("(max-width: 860px)").matches; // stacked layout: picture pinned on top, text below
+    const navH = () => { const t = document.querySelector(".toc"); document.documentElement.style.setProperty("--navh", (t ? t.offsetHeight : 0) + "px"); };
+    navH(); window.addEventListener("resize", navH);
     const chapters = [];
     document.querySelectorAll("[data-ch]").forEach((el) => {
       const id = el.dataset.ch, mod = WT.mods[id]; if (!mod) return;
@@ -453,7 +461,7 @@
           const fn = mod.steps && mod.steps[i]; if (fn) { try { fn(S); } catch (e) { console.error(id, e); } }
           el.querySelectorAll("[data-bind]").forEach((inp) => { const k = inp.dataset.bind; if (typeof S.target[k] === "number" && Math.abs(parseFloat(inp.value) - S.target[k]) > 1e-9) inp.value = S.target[k]; });
         });
-      }, { rootMargin: "-45% 0px -45% 0px" });
+      }, { rootMargin: PHONE ? "-58% 0px -18% 0px" : "-45% 0px -45% 0px" }); // phones: the step being read sits just below the pinned picture
       steps.forEach((s) => io.observe(s));
       new IntersectionObserver((ents) => ents.forEach((en) => (ch.visible = en.isIntersecting)), { rootMargin: "100px 0px" }).observe(el);
       chapters.push(ch);
@@ -463,13 +471,13 @@
     if (toc) {
       chapters.filter((c) => c.mod.title).forEach((c) => { const li = document.createElement("li"); li.innerHTML = `<a href="#${c.id}"><span>${(c.mod.num || "").replace(/[^0-9]/g, "")}</span>${c.mod.short || c.mod.title}</a>`; toc.appendChild(li); });
       const links = [...toc.querySelectorAll("a")];
-      const nav = toc.parentElement, menu = document.createElement("button"); // phones: the list opens from a button
-      menu.type = "button"; menu.className = "toc-menu"; menu.setAttribute("aria-expanded", "false"); menu.textContent = (WT.ui ? WT.ui("chapters", "Chapters") : "Chapters") + " ▾";
-      menu.addEventListener("click", () => { const o = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", String(o)); });
+      const nav = toc.parentElement, made = !nav.querySelector(".toc-menu"), menu = nav.querySelector(".toc-menu") || document.createElement("button"); // the chapter list opens from a button
+      if (made) { menu.type = "button"; menu.className = "toc-menu"; menu.setAttribute("aria-expanded", "false"); menu.textContent = (WT.ui ? WT.ui("chapters", "Chapters") : "Chapters") + " ▾"; }
+      menu.addEventListener("click", (e) => { e.stopPropagation(); const h = document.querySelector(".site"); h && h.classList.remove("menu-open"); const o = nav.classList.toggle("open"); menu.setAttribute("aria-expanded", String(o)); });
       links.forEach((a) => a.addEventListener("click", () => { nav.classList.remove("open"); menu.setAttribute("aria-expanded", "false"); }));
-      nav.insertBefore(menu, toc);
+      if (made) nav.insertBefore(menu, toc);
       new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) links.forEach((a) => a.classList.toggle("here", a.getAttribute("href") === "#" + en.target.id)); }), { rootMargin: "-50% 0px -50% 0px" })
-        && chapters.forEach((c) => c.mod.title && links.length && new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { links.forEach((a) => a.classList.toggle("here", a.getAttribute("href") === "#" + c.id)); const h = toc.querySelector("a.here"); h && h.scrollIntoView({ block: "nearest", inline: "center" }); } }), { rootMargin: "-50% 0px -50% 0px" }).observe(c.el));
+        && chapters.forEach((c) => c.mod.title && links.length && new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { links.forEach((a) => a.classList.toggle("here", a.getAttribute("href") === "#" + c.id)); const h = toc.querySelector("a.here"); if (h && toc.offsetParent && toc.scrollWidth > toc.clientWidth) h.scrollIntoView({ block: "nearest", inline: "center" }); } }), { rootMargin: "-50% 0px -50% 0px" }).observe(c.el));
     }
     function resize() {
       chapters.forEach((ch) => {

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Every nuclide · Inside a Nuclear Reaction</title>
+<meta name="description" content="Explore the INCOGNITA engine's predicted neutron cross sections for 6,168 nuclides beside every curated EXFOR measurement behind them.">
+<meta property="og:title" content="Every nuclide · Inside a Nuclear Reaction">
+<meta property="og:description" content="Predicted neutron cross sections for 6,168 nuclides beside every curated measurement. Pick a nuclide and explore.">
+<meta property="og:image" content="https://nucleus-incognita-woad.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=16">
+</head>
+<body class="sb-page dx-page">
+
+<nav class="toc site" aria-label="Site" data-i18n-aria="site_nav">
+  <a class="brand" href="./" data-keep-lang><img src="favicon.svg" alt="" width="26" height="26"><span data-i18n="brand">Inside a Nuclear Reaction</span></a>
+  <div class="site-links">
+    <a href="./" data-keep-lang data-i18n="nav_physics">The physics</a>
+    <a href="data.html" class="here" aria-current="page" data-keep-lang data-i18n="nav_data">Every nuclide</a>
+    <a href="scoreboard.html" data-keep-lang data-i18n="nav_board">Scoreboard</a>
+    <a class="gh" href="https://github.com/seth-michael-weaver/incognita"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
+  </div>
+  <button type="button" class="site-burger" aria-expanded="false" aria-label="Menu" data-i18n-aria="menu">☰</button>
+</nav>
+
+<main class="dx">
+  <header class="dx-head">
+    <div class="kicker" data-i18n="dx_kicker">INCOGNITA · data explorer</div>
+    <h1 data-i18n="dx_h1">Every nuclide</h1>
+    <p data-i18n="dx_lede">The engine's predicted neutron cross sections for every nuclide in the library, beside every curated measurement behind them. Pick a nuclide on the chart, or search for one.</p>
+  </header>
+
+  <div class="dx-controls" role="group" aria-label="Chart controls" data-i18n-aria="dx_controls">
+    <label class="dx-search"><span class="sr" data-i18n="dx_search_label">Find a nuclide</span>
+      <input id="dx-q" type="search" placeholder="Search: U-235, Fe56, Au…" data-i18n-ph="dx_search_ph" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dx-sugg"></label>
+    <ul id="dx-sugg" class="dx-sugg" role="listbox" hidden></ul>
+    <div class="dx-seg" role="radiogroup" aria-label="Colour the chart by" data-i18n-aria="dx_colour">
+      <button type="button" data-mode="tier" aria-pressed="true" data-i18n="dx_m_tier">How it's known</button>
+      <button type="button" data-mode="macs" aria-pressed="false" data-i18n="dx_m_macs">Capture at 30 keV</button>
+      <button type="button" data-mode="meas" aria-pressed="false" data-i18n="dx_m_meas">Measured data</button>
+    </div>
+  </div>
+
+  <section class="dx-chart" aria-labelledby="dx-chart-h">
+    <h2 id="dx-chart-h" class="sr" data-i18n="dx_chart_h">Chart of nuclides</h2>
+    <div class="dx-chartwrap">
+      <canvas id="dx-chart" role="img" aria-label="Chart of nuclides: protons up, neutrons across. Use the search box to pick a nuclide." data-i18n-aria="dx_chart_aria"></canvas>
+      <div class="dx-zoom"><button type="button" data-z="1" aria-label="Zoom in">+</button><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="0" aria-label="Show the whole chart">⤢</button></div>
+      <div class="dx-tip" id="dx-tip" hidden></div>
+    </div>
+    <div class="dx-legend" id="dx-legend"></div>
+    <p class="dx-hint" data-i18n="dx_hint">Drag to pan, scroll or pinch to zoom, click a square to open it. Protons up, neutrons across.</p>
+  </section>
+
+  <section class="dx-nuc" id="dx-nuc" aria-live="polite" hidden>
+    <header class="dx-nuc-head">
+      <h2 id="dx-name"></h2>
+      <div class="dx-facts" id="dx-facts"></div>
+    </header>
+    <div class="dx-tabs" role="tablist" id="dx-tabs"></div>
+    <div class="dx-plotwrap">
+      <canvas id="dx-plot" role="img"></canvas>
+      <div class="dx-tip" id="dx-ptip" hidden></div>
+    </div>
+    <div class="dx-plotbar">
+      <div class="dx-plegend" id="dx-plegend"></div>
+      <label class="dx-check"><input type="checkbox" id="dx-excl"> <span data-i18n="dx_show_excl">Show points the curation excluded</span></label>
+      <button type="button" class="dx-link" id="dx-tbtn" aria-expanded="false" data-i18n="dx_table">Show as a table</button>
+    </div>
+    <div class="dx-table" id="dx-table" hidden></div>
+    <div class="dx-ds" id="dx-ds"></div>
+    <div class="dx-run">
+      <h3 data-i18n="dx_run_h">Get these numbers yourself</h3>
+      <pre><code id="dx-cmd"></code></pre>
+      <button type="button" class="dx-link" id="dx-copy" data-i18n="dx_copy">Copy</button>
+    </div>
+  </section>
+
+  <section class="dx-repo" aria-labelledby="dx-repo-h">
+    <h2 id="dx-repo-h" data-i18n="dx_repo_h">Run it yourself</h2>
+    <p data-i18n="dx_repo_p">Everything on this page comes from the open repository: the engine, the library and the curated measurements. You need Linux or macOS, Python 3.12 and <a href="https://docs.astral.sh/uv/">uv</a>.</p>
+<pre><code>git clone https://github.com/seth-michael-weaver/incognita.git && cd incognita
+uv sync --extra dev
+uv run python -m incognita.library summary        # every nuclide by how it is known
+uv run python -m incognita.library show Au-197    # one capture curve with its 68 / 95 % bands</code></pre>
+    <p data-i18n="dx_repo_p2">Running the engine itself also needs the TALYS structure database; the README explains how to fetch it.</p>
+    <p><a class="dx-gh" href="https://github.com/seth-michael-weaver/incognita" data-i18n="dx_repo_link">seth-michael-weaver/incognita on GitHub →</a></p>
+    <p class="dx-src" data-i18n="dx_src">Sources: predictions from the v0.1 library (<code>library/v0.1</code>); capture measurements from EXFOR as curated in <code>data/curation</code>; (n,2n), (n,p) and (n,α) measurements from the benchmark rows in <code>incognita/bench</code>. Measurements the curation excluded are hidden unless you ask for them.</p>
+  </section>
+</main>
+
+<script src="js/i18n.js?v=16"></script>
+<script src="js/i18n/es-data.js?v=16"></script>
+<script src="js/nav.js?v=16"></script>
+<script src="js/data.js?v=16"></script>
+</body>
+</html>

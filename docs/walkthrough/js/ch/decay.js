@@ -285,7 +285,7 @@
       g.label(rOut >= rMax ? "tunnel: wider than the picture" : `tunnel ${(rOut - rIn).toFixed(1)} fm`, Math.max(X(rIn) + 44, (X(rIn) + X(rOut)) / 2), ey + 28, { color: col, size: 12, weight: 600, bg: true });
     }
     const rightBelow = V(rMax) < eps;
-    g.label(`${isA ? "alpha" : "proton"} energy ${eps.toFixed(1)} MeV${eps > vMax ? " ↑" : ""}`, x1, rightBelow ? ey - 14 : ey + 16, { color: col, size: 13, align: "right", bg: true });
+    g.label(`${isA ? "alpha" : "proton"} energy ${eps.toFixed(1)} MeV${eps > vMax ? " ↑" : ""}`, x1, rightBelow && !phone ? ey - 14 : ey + 16, { color: col, size: phone ? 12 : 13, align: "right", bg: true });
     // the particle: rattles in the well, knocks on the wall, sometimes gets through
     const T = Tc(eps, k);
     if (!S.cb || S.cb.k !== k) S.cb = { k, ph: "in", r: 1, dir: 1, knocks: 0, t: 0, last: 0 };
@@ -331,7 +331,8 @@
     const lit = SPIN.lit;
     g.glow(cx, cy, R * 2.6, c.warm, 0.3);
     g.nucleus(cx, cy, R, { N: 36, Z: 16, t: S.time, rot: S.time * (0.4 + J * 0.35), heat: 1.6, jiggle: 0.5 });
-    g.label(`J = ${2 * J + 1}/2, parity +`, cx + R + 12, cy, { color: c.ink, size: 13, weight: 600, align: "left", bg: true });
+    if (phone) g.label(`J = ${2 * J + 1}/2, parity +`, cx - R, cy + R + 14, { color: c.ink, size: 12, weight: 600, align: "left", bg: true });
+    else g.label(`J = ${2 * J + 1}/2, parity +`, cx + R + 12, cy, { color: c.ink, size: 13, weight: 600, align: "left", bg: true });
     const doors = lit.map((v, i) => g.door(X(i), sill, dh, v.T < 0.02 ? 0 : v.T, c.neutron, !phone && v.T >= 0.02 ? `l=${v.need}` : null, { w: dw, size: 10 }));
     // each drawer: its states as faint slots (how many it holds), and the decays that landed there
     const peak = Math.max(...lit.map((v) => v.nRooms)), maxC = Math.max(...SPIN.cnt), tops = [];
@@ -385,13 +386,13 @@
     g.label(phone ? "entrance x" : "entrance, width x", xE, yS0 - 13, { color: c.neutron, size: 12, weight: 600, bg: true });
     g.label(phone ? `${N} other doors, y` : `${N} other door${N > 1 ? "s" : ""}, widths y`, xX0 + Math.max(N * step, 120) / 2, yS0 - 13, { color: c.photon, size: 12, weight: 600, bg: true });
     // trays
-    const tY = Math.min(H * 0.92, yS1 + 160), tL = W * 0.22, tR = W * 0.68;
+    const tY = Math.min(H * 0.92, yS1 + 160), tL = W * (phone ? 0.26 : 0.22), tR = W * (phone ? 0.76 : 0.68);
     const back = WF.el, on = WF.tot - WF.el, rd = phone ? 2.4 : 3, wide = phone ? 8 : 11, rows = Math.max(3, Math.floor((tY - yS1 - 50) / (rd * 2.05)));
     const mx = Math.max(back, on, rows * wide * 0.6);
     pile(g, tL, tY, back, mx, rows, wide, rd, c.neutron);
     pile(g, tR, tY, on, mx, rows, wide, rd, c.photon);
-    g.label(`back out the entrance: ${back} of ${WF.tot}`, tL, tY + 14, { color: c.neutron, size: 12, weight: 600, bg: true });
-    g.label(`out another door: ${on}`, tR, tY + 14, { color: c.photon, size: 12, weight: 600, bg: true });
+    g.label(`back out the entrance: ${back} of ${WF.tot}`, tL, tY + 14, { color: c.neutron, size: phone ? 11 : 12, weight: 600, bg: true });
+    g.label(`out another door: ${on}`, tR, tY + 14, { color: c.photon, size: phone ? 11 : 12, weight: 600, bg: true });
     // the comparison
     g.label(phone ? `back out ${pct(st.avgProd)}, not ${pct(st.prodAvg)}: × ${(st.avgProd / st.prodAvg).toFixed(1)}` : `share back out: average of products ${pct(st.avgProd)} · product of averages ${pct(st.prodAvg)} · × ${(st.avgProd / st.prodAvg).toFixed(1)}`, W * 0.5, H * 0.035, { color: c.ink, size: phone ? 12 : 14, weight: 600, serif: true, bg: true });
     g.label(phone ? `other doors ${pct(1 - st.avgProd)}, not ${pct(1 - st.prodAvg)}` : `other doors together: ${pct(1 - st.avgProd)} instead of ${pct(1 - st.prodAvg)}`, W * 0.5, yS1 + 20, { color: c.soft, size: 12, bg: true });

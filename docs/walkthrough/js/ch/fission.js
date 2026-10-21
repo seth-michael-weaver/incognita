@@ -173,7 +173,7 @@
     const px = F.X(u), py = F.Y(Vof(S, u)) - R * 1.5 - 14;
     drop(g, px, py, R, u, S.time, 0.95, 0.6); g.line(px, py + R, px, F.Y(Vof(S, u)) - 4, c.faint, 1, 0.6, [3, 3]);
     g.label("round → stretched → necked → split", W * 0.5, F.yBot + 30, { color: c.ink, size: fs + 2, serif: true, italic: true });
-    g.label("stretch (deformation) →", F.x1, F.yBot + 30, { color: c.faint, size: fs - 1, align: "right" });
+    g.label("stretch (deformation) →", F.x1, F.yBot + (g.W < 600 ? 52 : 30), { color: c.faint, size: fs - 1, align: "right" });
   }
 
   // ---------- scene: tunnelling ----------

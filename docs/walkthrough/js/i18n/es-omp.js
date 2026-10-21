@@ -63,6 +63,7 @@ Object.assign(WT.es.labels, {
   "all {#} rings added": "los {#} anillos sumados",
   "σ_R = {#} b": "σ_R = {#} b",
   "geometric {#} b": "geométrico {#} b",
+  "geometric {#} b · darker = more absorbed · orange = absorbed": "geométrico {#} b · más oscuro = más absorción · naranja = absorbido",
   "swing distance b ≈ (l+½)/k = {#} fm": "distancia de paso b ≈ (l+½)/k = {#} fm",
   "nuclear radius R = {#} fm · wave fuzz λ̄ = {#} fm": "radio nuclear R = {#} fm · difuminado λ̄ = {#} fm",
   "path crosses the nucleus: most get in": "la trayectoria cruza el núcleo: casi todos entran",

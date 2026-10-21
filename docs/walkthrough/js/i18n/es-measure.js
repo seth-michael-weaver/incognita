@@ -59,6 +59,7 @@ Object.assign(WT.es.labels, {
   "fast: close to the nucleus's own size": "rápido: cerca del tamaño del propio núcleo",
   // doors
   "elastic": "elástico", "n′ inelastic": "n′ inelástico", "{#}n": "{#}n", "γ capture": "captura γ", "p": "p", "α": "α", "n′": "n′",
+  "{#}n · {#} MeV": "{#}n · {#} MeV", "p · {#} MeV": "p · {#} MeV", "α · {#} MeV": "α · {#} MeV", "n′ inelastic · {#} MeV": "n′ inelástico · {#} MeV",
   "opens at {#} MeV": "se abre a {#} MeV",
   "{#} MeV": "{#} MeV",
   // detect
