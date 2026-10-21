@@ -65,11 +65,12 @@
     two: "two neutrons come out", alpha: "an alpha particle: 2 protons + 2 neutrons", fission: "fission: the nucleus splits in two",
     absorbed: "absorbed: its energy spreads through the whole nucleus",
   };
+  const FA = 1.15, FC = Math.cos(FA), FS = Math.sin(FA);                         // fission axis: steep, so both halves stay right of the title
   const T_IMP = 1.9, T_EMIT = 3.5, T_END = 6.6;                                    // ordinary cycle
   const F_STRETCH = 3.0, F_SCISSION = 4.6, F_GONE = 7.4, F_REFORM = 9.0, F_END = 9.6; // fission cycle
   let W = 0, H = 0, dpr = 1, time = 0, ct = 0, cyc = 0, kind = SEQ[0], ang = 0, yaw = 0.4;
   let tiltX = 0, tiltY = 0, tgtX = 0, tgtY = 0, scrollP = 0, shake = 0, flash = 0, flashCol = C.white, impacted = false, emitted = false;
-  let spin = 1, fis = { e: 0, sep: 0, done: false, rot: 0, alpha: 1 }, reform = 1, kick = 0;
+  let spin = 1, fis = { e: 0, sep: 0, done: false, rot: 0, alpha: 1, away: 0 }, reform = 1, kick = 0;
   const parts = [], rings = [], shots = [];
   let imp = { x: 0, y: 0, t: -99 };
   const geo = () => {
@@ -81,7 +82,7 @@
 
   function startCycle() {
     ct = 0; kind = SEQ[cyc % SEQ.length]; cyc++; impacted = false; emitted = false; ang = (rng(cyc * 31 + 7))() * TAU;
-    fis = { e: 0, sep: 0, done: false, rot: 0, alpha: 1 }; for (const a of nuc) a.side = 0;
+    fis = { e: 0, sep: 0, done: false, rot: 0, alpha: 1, away: 0 }; for (const a of nuc) a.side = 0;
     const { R, cx, cy } = geo(), r = rng(cyc * 13 + 3), off = (r() - 0.5) * R * 0.9;
     // the projectile: from far off-screen left, aimed at the nucleus's left side
     parts.push({ k: "in", x: -W * 0.15, y: cy + off - H * 0.12, tx: cx - Math.sqrt(Math.max(0, R * R - off * off)) * 0.92, ty: cy + off, t0: 0, dur: T_IMP, trail: [] });
@@ -140,7 +141,9 @@
     const sc = R * reform, list = [];
     const e = fis.e, sx = 1 + e * 0.9, syz = 1 / Math.sqrt(1 + e * 0.9);
     for (const a of nuc) {
-      let x = a.x * cyw + a.z * syw, z = -a.x * syw + a.z * cyw, y = a.y * cp - z * spt; z = a.y * spt + z * cp;
+      let x, y, z;
+      if (a.side) { x = a.fx; y = a.fy; z = a.fz; }   // fission: orientation frozen when the stretch began, so each half stays on its side
+      else { x = a.x * cyw + a.z * syw; z = -a.x * syw + a.z * cyw; y = a.y * cp - z * spt; z = a.y * spt + z * cp; }
       const j = rb * 0.42 * (a.h + kick * 0.6) + rb * 0.06; // thermal jiggle grows with local heat
       x += Math.sin(time * 9.1 + a.ph) * j; y += Math.cos(time * 8.3 + a.ph * 1.7) * j; z += Math.sin(time * 7.7 + a.ph * 2.3) * j;
       let ox = 0, oy = 0;
@@ -149,9 +152,11 @@
         x *= sx; y *= syz; z *= syz;
         const s = a.side || (x < 0 ? -1 : 1), neck = smooth(0.35, 1, e), c = s * 0.62 * sx;
         x = lerp(x, c + (x - c) * 0.82, neck); y *= lerp(1, 0.9, neck);
-        if (fis.sep > 0) { const rx = x - c, ry = y, ca = Math.cos(s * fis.rot), sa = Math.sin(s * fis.rot); x = c + rx * ca - ry * sa; y = rx * sa + ry * ca; ox = s * fis.sep; oy = s * fis.sep * 0.18; }
+        if (fis.sep > 0) { const rx = x - c, ry = y, ca = Math.cos(s * fis.rot), sa = Math.sin(s * fis.rot); x = c + rx * ca - ry * sa; y = rx * sa + ry * ca; ox = s * fis.sep; }
       }
-      const k = D / (D - z), X = cx + (x * k) * sc + ox, Y = cy + (y * k) * sc + oy;
+      const k = D / (D - z); let dx = (x * k) * sc + ox, dy = (y * k) * sc + oy;
+      if (a.side) { const f = 1 / (1 + fis.away), u = dx * FC - dy * FS; dy = (dx * FS + dy * FC) * f; dx = u * f; } // fission runs along a steep axis, clear of the title; halves recede as they part
+      const X = cx + dx, Y = cy + dy;
       list.push({ X, Y, z, k, a });
     }
     list.sort((p, q) => p.z - q.z);
@@ -162,7 +167,7 @@
     const br = rb * sc * 1.08;
     for (const q of list) { const d = clamp(Math.floor((q.z + 1) * 0.5 * DEPTH.length), 0, DEPTH.length - 1); stamp((q.a.p ? SPD.p : SPD.n)[d], q.X, q.Y, br * q.k, fis.alpha * clamp(reform * 1.4, 0, 1)); }
     ctx.globalCompositeOperation = "lighter";
-    for (const q of list) if (q.a.h > 0.05) stamp(GL.hot, q.X, q.Y, br * q.k * 2.4, q.a.h * 0.45 * fis.alpha);
+    for (const q of list) if (q.a.h > 0.05) stamp(GL.hot, q.X, q.Y, br * q.k * 1.8, q.a.h * 0.22 * fis.alpha);
     ctx.globalCompositeOperation = "source-over";
     return list;
   }
@@ -186,6 +191,7 @@
     for (const a of nuc) {
       if (since < 3) { const px = cx + a.x * R, py = cy + a.y * R, d = Math.hypot(px - imp.x, py - imp.y) / R, front = since * 2.6; if (front > d) a.h = Math.max(a.h, (imp.s || 1) * (1 - 0.35 * smooth(0, 1.6, front - d))); }
       if (cool > 0) a.h *= Math.exp(-dt * 2.2 * cool);
+      if (isF && fis.done) a.h *= Math.exp(-dt * 1.4);              // fragments cool as they fly apart
       heatAll += a.h;
     }
     heatAll /= N;
@@ -193,17 +199,21 @@
     // fission timeline
     if (isF) {
       fis.e = smooth(F_STRETCH, F_SCISSION, ct) * (1 - smooth(F_GONE, F_GONE + 0.01, ct));
-      if (ct >= F_STRETCH && !nuc[0].side) { const ya = yaw + tiltX * 0.55, c = Math.cos(ya), s = Math.sin(ya); for (const a of nuc) a.side = (a.x * c + a.z * s) < 0 ? -1 : 1; }
-      if (ct >= F_SCISSION && !fis.done) {
-        fis.done = true; flash = 1; flashCol = C.white; shake = 22; impact(cx, cy, 1.3);
-        const r = rng(cyc * 7 + 1), sp = Math.max(W, H) * 0.6;
-        for (let i = 0; i < 3; i++) { const d = (i / 3) * TAU + r() * 1.2 + 0.6; parts.push({ k: "n", x: cx, y: cy, vx: Math.cos(d) * sp, vy: Math.sin(d) * sp, t0: time, trail: [] }); }
-        for (let i = 0; i < 4; i++) { const d = r() * TAU; parts.push({ k: "gam", x: cx, y: cy, vx: Math.cos(d) * sp * 1.4, vy: Math.sin(d) * sp * 1.4, t0: time, trail: [] }); }
+      if (ct >= F_STRETCH && ct < F_GONE && !nuc[0].side) {
+        const ya = yaw + tiltX * 0.55, pa = 0.28 + tiltY * 0.35, c = Math.cos(ya), s = Math.sin(ya), cp = Math.cos(pa), sp = Math.sin(pa);
+        for (const a of nuc) { const x = a.x * c + a.z * s, z0 = -a.x * s + a.z * c; a.fx = x; a.fy = a.y * cp - z0 * sp; a.fz = a.y * sp + z0 * cp; a.side = x < 0 ? -1 : 1; }
       }
-      if (fis.done) { const u = (ct - F_SCISSION) / (F_GONE - F_SCISSION); fis.sep = Math.max(W, H) * 0.62 * easeOut(u) + R * 0.1; fis.rot = u * 2.4; }
-      if (ct >= F_GONE) { fis.sep = 0; fis.e = 0; fis.done = false; for (const a of nuc) { a.side = 0; a.h = 0; } reform = 0; }
+      if (ct >= F_SCISSION && !fis.done) {
+        fis.done = true; flash = 0.75; flashCol = C.white; shake = 9; impact(cx, cy, 1);
+        // the neck snaps: two or three neutrons and a couple of gammas leave from the middle, across the fission axis
+        const r = rng(cyc * 7 + 1), sp = Math.max(W, H) * 0.32;
+        for (let i = 0; i < 3; i++) { const d = FA + (i % 2 ? 1 : -1) * Math.PI / 2 + (r() - 0.5) * 1.1; parts.push({ k: "n", x: cx, y: cy, vx: Math.cos(d) * sp, vy: Math.sin(d) * sp, t0: time, trail: [] }); }
+        for (let i = 0; i < 2; i++) { const d = FA + (i ? 1 : -1) * Math.PI / 2 + (r() - 0.5) * 1.6; parts.push({ k: "gam", x: cx, y: cy, vx: Math.cos(d) * sp * 2, vy: Math.sin(d) * sp * 2, t0: time, trail: [] }); }
+      }
+      if (fis.done) { const u = (ct - F_SCISSION) / (F_GONE - F_SCISSION); fis.sep = R * (0.1 + 0.75 * easeOut(u)); fis.rot = u * 0.45; fis.away = 0.7 * easeOut(u); }
+      if (ct >= F_GONE) { fis.sep = 0; fis.e = 0; fis.away = 0; fis.done = false; for (const a of nuc) { a.side = 0; a.h = 0; } reform = 0; }
       if (ct >= F_GONE) reform = easeOut((ct - F_GONE) / (F_REFORM - F_GONE));
-      fis.alpha = fis.done ? 1 - smooth(0.75, 1, (ct - F_SCISSION) / (F_GONE - F_SCISSION)) : 1;
+      fis.alpha = fis.done ? 1 - smooth(0.6, 1, (ct - F_SCISSION) / (F_GONE - F_SCISSION)) : 1;
     } else reform += (1 - reform) * (1 - Math.exp(-4 * dt));
     if (reform < 0.999 && ct >= F_GONE && isF) stamp(GL.white, cx, cy, R * 1.6 * (1 - reform), 0.5 * (1 - reform));
 
