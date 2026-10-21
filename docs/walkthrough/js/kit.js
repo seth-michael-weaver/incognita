@@ -182,7 +182,7 @@
   // ---------- glossary: mark technical terms in the prose, explain them in a card ----------
   // Terms come from WT.glossary (js/glossary.js). Each step, lead, the hero and the coda mark the FIRST use of each
   // term (entries with scope "chapter"/"page": first use per chapter/page), so the page stays calm. Longest match wins.
-  const GL_BLOCKS = ".hero p, .story .lead, .step p, .coda p, .coda td:first-child";
+  const GL_BLOCKS = ".intro-text p, .story .lead, .step p, .coda p, .coda td:nth-child(2)";
   const GL_SKIP = ".ctl, .btns, button, input, label, output, select, textarea, code, pre, .formula, .aside, .term, h1, h2, h3, a";
   const BOUND = "[\\p{L}\\p{N}_\\-]";
   const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
@@ -210,7 +210,7 @@
     const setOf = (map, k) => { let s = map.get(k); if (!s) map.set(k, (s = new Set())); return s; };
     document.querySelectorAll(GL_BLOCKS).forEach((block) => {
       if (block.closest(GL_SKIP)) return;
-      const scopeEl = block.closest(".step") || block.closest(".lead") || block.closest(".coda") || block.closest(".hero") || block;
+      const scopeEl = block.closest(".step") || block.closest(".lead") || block.closest(".coda") || block.closest(".intro-text") || block;
       const chEl = block.closest("[data-ch]"), chKey = chEl ? chEl : block.closest(".coda") || block;
       const used = setOf(scopes, scopeEl), chUsed = setOf(chapters, chKey);
       // the block's text, as segments of text nodes (segments inside controls/code are off limits)
@@ -498,6 +498,7 @@
     if (/[?&]i18ndump=1/.test(location.search)) setTimeout(() => { const pre = document.createElement("pre"); pre.id = "i18n-missing"; pre.textContent = [...WT.missing].join("\n"); document.body.appendChild(pre); }, 3000);
     // screenshot aid: ?shot=<chapter>:<step> shows only that chapter and step (headless Chrome does not paint script-scrolled pages)
     const m = /[?&]shot=([a-z]+):(\d+)/.exec(location.search);
+    if (/[?&]shot=code\b/.test(location.search)) document.body.classList.add("shot-code"); // ?shot=code shows only "Where this lives in the code"
     if (m) {
       document.body.classList.add("shot");
       const el = document.querySelector(`[data-ch="${m[1]}"]`); if (el) el.classList.add("shot-target");

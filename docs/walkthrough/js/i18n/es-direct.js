@@ -37,7 +37,7 @@ WT.es.ch.direct = {
 </div>
 <div class="step">
   <h3>Directo a una órbita</h3>
-  <p>La imagen vuelve a mostrar el pozo. Los neutrones llenan sus <b>órbitas</b> inferiores (las energías permitidas para un neutrón dentro); dos cerca de la cima están vacías. Un neutrón libre puede caer directamente en una órbita vacía y enviar la energía sobrante en forma de <em class="g">fotón</em>. El núcleo nunca se calienta. Esto es la <b>captura directa</b>. El motor la calcula con el mismo pozo del capítulo 2: la onda libre fuera, la órbita ligada dentro y el fotón que las conecta.</p>
+  <p>La imagen vuelve a mostrar el pozo. Los neutrones llenan sus <b>órbitas</b> inferiores (las energías permitidas para un neutrón dentro); dos cerca de la cima están vacías. Un neutrón libre puede caer directamente en una órbita vacía y enviar la energía sobrante en forma de <em class="g">fotón</em>. El núcleo nunca se calienta. Esto es la <b>captura directa</b>. El motor la calcula con el mismo pozo del capítulo 2: la onda libre fuera, la órbita ligada dentro y el fotón que las conecta. Como en TALYS, está desactivada salvo que se pida.</p>
   <div class="btns"><button class="btn" data-act="drop">Dejar caer un neutrón</button></div>
   <p>La captura directa importa sobre todo donde la ruta habitual, absorber el neutrón y repartir su energía, es débil: núcleos ligeros y núcleos lejos de la estabilidad, que tienen pocos niveles y muy separados.</p>
 </div>

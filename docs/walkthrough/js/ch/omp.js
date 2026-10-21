@@ -67,7 +67,7 @@
   <p>Change the energy and the sum runs again. At low energy one or two big rings make almost the whole disc; at high energy many thin rings each add a sliver, and the disc settles close to the geometric size.</p>
   <div class="formula">σ<sub>R</sub> = (π/k²) Σ (2l+1) T<sub>l</sub></div>
   <p>The <i>T<sub>l</sub></i> values feed the rest of the engine. They decide how often each spin of the excited nucleus forms and, run in reverse, how easily each kind of particle gets back out.</p>
-  <div class="aside">In the code: <code>omp/parameters.py</code> (Koning–Delaroche global potential; dispersive potentials for actinides), <code>omp/schrodinger.py</code> (Numerov integration and Coulomb matching), <code>omp/inverse.py</code> (outgoing particles by detailed balance).</div>
+  <div class="aside">In the code: <code>omp/parameters.py</code> (Koning–Delaroche global potential; dispersive potentials for actinides), <code>omp/schrodinger.py</code> (Numerov integration and Coulomb matching), <code>omp/inverse.py</code> (outgoing particles by detailed balance), <code>omp/regional.py</code> (an added option, off by default: a regional adjustment of the well for deformed rare-earth targets, fitted to measured S₀ and S₁).</div>
 </div>`,
     setup(S) {
       S.set("mode", "wave"); S.to("Wshow", 0, true); S.to("V", 0, true); S.to("W", 7, true); S.to("E", 8, true); S.to("L", 3, true);

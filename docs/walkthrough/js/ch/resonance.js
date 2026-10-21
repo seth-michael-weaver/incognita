@@ -1,11 +1,11 @@
-/* Chapter 10: the resonance forest (physics/resonance/). Scenes (S.mode):
- *   "forest"  = one statistical ladder drawn as literal trees (trunk at E_i, canopy width = Gamma, height = log of the
+/* Chapter 10: the resonance peaks (physics/resonance/). Scenes (S.mode):
+ *   "forest"  = one statistical ladder drawn as Breit-Wigner peaks (at E_i, width = Gamma, height = log of the
  *               peak capture cross section); a neutron hops along in energy and is caught with probability set by sigma;
- *   "spacing" = three rows of trees: Poisson, random-matrix (Wigner/GOE), two GOE sequences mixed;
- *   "widths"  = Porter-Thomas: trees of LINEAR height = Gn, a yellow Gg cap; "roll a width" squares a bell-curve number;
- *   "params"  = the forest regrown live from D0, S0, <Gg> (S1 fixed); p-wave (negative parity) trees hollow;
- *   "thermal" = log-energy ground: neutrons slowing down in equal log steps through the forest to thermal;
- *   "ensemble"= one row per ladder: trees near 0 eV, the thermal neutron, a disc of area sigma_th, a pile of values.
+ *   "spacing" = three rows of peaks: Poisson, random-matrix (Wigner/GOE), two GOE sequences mixed;
+ *   "widths"  = Porter-Thomas: peaks of LINEAR height = Gn, a yellow Gg cap; "roll a width" squares a bell-curve number;
+ *   "params"  = the ladder regrown live from D0, S0, <Gg> (S1 fixed); p-wave (negative parity) peaks hollow;
+ *   "thermal" = log-energy ground: neutrons slowing down in equal log steps through the peaks to thermal;
+ *   "ensemble"= one row per ladder: peaks near 0 eV, the thermal neutron, a disc of area sigma_th, a pile of values.
  * Follows physics/resonance/ladder.py: spin groups for I = 0 (one s-wave sequence J = 1/2, two p-wave sequences),
  * reduced widths at 1 eV, Gn = Gn^l sqrt(E) V_l, Porter-Thomas chi^2_1, <Gg> with ~100 dof, SLBW capture with
  * pi/k^2 in barns, k = 2.196807e-3 awri/(awri+1) sqrt(E). Spacings are real GOE levels: the Dumitriu-Edelman
@@ -67,13 +67,13 @@
   const snap = () => document.body.classList.contains("shot");
   const fmtB = (v) => (v >= 1e4 ? `${(v / 1000).toFixed(0)}k b` : v >= 1000 ? `${(v / 1000).toFixed(1)}k b` : v >= 10 ? `${v.toFixed(0)} b` : v >= 1 ? `${v.toFixed(1)} b` : `${v.toFixed(2)} b`);
   const fmt = (v) => (v >= 10 ? v.toFixed(0) : v >= 1 ? v.toFixed(1) : v.toFixed(2));
-  const WX = 110;                       // canopy widths are drawn this many times wider than the true resonance width
+  const WX = 110;                       // peak widths are drawn this many times wider than the true resonance width
   const nrmOf = (r) => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(TAU * r());
   function erf(x) { const t = 1 / (1 + 0.3275911 * Math.abs(x)), y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; }
   const chi1cdf = (x) => erf(Math.sqrt(Math.max(x, 0) / 2));
 
   let seed = 3, draws = makeDraws(seed), fc = null;
-  /** the current ladder as trees: peak cross section on top of each level, total width */
+  /** the current ladder as peaks: peak cross section on top of each level, total width */
   function forestOf(S) {
     const key = [S.D0.toFixed(2), S.S0.toFixed(3), S.Gg.toFixed(1), S.ptMix.toFixed(3), seed].join("|");
     if (fc && fc.key === key) return fc;
@@ -95,16 +95,20 @@
     const lg = ctx.createLinearGradient(x0, 0, x1, 0); lg.addColorStop(0, g.rgba(c.soft, 0)); lg.addColorStop(0.06, g.rgba(c.soft, 0.6)); lg.addColorStop(0.94, g.rgba(c.soft, 0.6)); lg.addColorStop(1, g.rgba(c.soft, 0));
     ctx.strokeStyle = lg; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); ctx.restore();
   }
-  /** One resonance as a tree: trunk, crown of width w; solid crown = positive parity, hollow = negative. o.down grows it below ground. */
-  function tree(g, x, yG, h, w, o = {}) {
+  /** One resonance as its peak: the Breit-Wigner (Lorentzian) shape h / (1 + (2d/w)^2), full width w at half height.
+   *  Solid = positive parity, hollow (outline only) = negative. o.down hangs it below ground. Returns the tip's y. */
+  function peak(g, x, yG, h, w, o = {}) {
     const ctx = g.ctx, c = g.c, col = o.col || c.cool, a = o.alpha ?? 1, s = o.down ? -1 : 1;
     if (h < 2) { g.dot(x, yG - s * 1.5, 1.4, col, 0.45 * a); return yG; }
-    const ch = Math.min(h * 0.62, Math.max(w * 1.3, h * 0.38)), cx = x + (o.sway || 0), cy = yG - s * (h - ch / 2);
-    g.line(x, yG, cx, cy + s * ch * 0.25, c.soft, clamp(w * 0.12, 1, 2.2), 0.7 * a);
-    ctx.save(); ctx.globalAlpha = a; ctx.beginPath(); ctx.ellipse(cx, cy, Math.max(1.5, w / 2), ch / 2, 0, 0, TAU);
-    if (o.hollow) { ctx.fillStyle = c.paper; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.4; ctx.stroke(); }
-    else { ctx.fillStyle = g.rgba(col, 0.85); ctx.fill(); }
-    ctx.restore(); return yG - s * h;
+    const hw = Math.max(1.2, w / 2), span = Math.max(hw * 4, 4), n = 28, pts = [];
+    for (let i = 0; i <= n; i++) { const d = (i / n * 2 - 1) * span, u = d / hw; pts.push([x + d, yG - s * h / (1 + u * u)]); }
+    ctx.save(); ctx.globalAlpha = a; ctx.beginPath(); ctx.moveTo(x - span, yG); pts.forEach((p) => ctx.lineTo(p[0], p[1])); ctx.lineTo(x + span, yG); ctx.closePath();
+    const gr = ctx.createLinearGradient(0, yG - s * h, 0, yG); gr.addColorStop(0, g.rgba(col, o.hollow ? 0.1 : 0.55)); gr.addColorStop(1, g.rgba(col, o.hollow ? 0.02 : 0.12));
+    ctx.fillStyle = gr; ctx.fill();
+    ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+    ctx.strokeStyle = col; ctx.lineWidth = o.hollow ? 1.3 : 1.5; ctx.lineJoin = "round"; ctx.stroke(); ctx.restore();
+    if (!o.hollow && h > 12) g.dot(x, yG - s * h, Math.min(2.4, 1 + hw * 0.25), col, a);
+    return yG - s * h;
   }
   function burst(g, x, y, age, seedA) {
     const f = 1 - smooth(0.5, 0.9, age);
@@ -119,45 +123,45 @@
   const ens = { rows: [], pile: [], ri: [], queue: 0, qT: 0, auto: 0, k: 0 };
 
   WT.chapter("resonance", {
-    num: "Chapter 10", title: "The resonance forest", short: "Resonances",
+    num: "Chapter 10", title: "Sharp peaks", short: "Resonances",
     lead: "At low enough energy, a neutron no longer sees a smooth, averaged nucleus. It sees the individual energy levels of the compound nucleus, one at a time.",
     html: `
 <div class="step">
-  <p>Each tree is one <b>resonance</b>: an energy level of the compound nucleus that a neutron of exactly that energy can drop into. The trunk stands at the level's energy, a few eV to a few hundred eV (one MeV is a million eV). The tree's height is how large the <b>capture</b> cross section gets on top of it, on a compressed (logarithmic) scale; capture means the neutron is absorbed and the nucleus gives off photons. The canopy width is the resonance width Γ, drawn about a hundred times wider than it is so you can see it.</p>
+  <p>Each peak is one <b>resonance</b>: an energy level of the compound nucleus that a neutron of exactly that energy can drop into. It stands at the level's energy, a few eV to a few hundred eV (one MeV is a million eV). Its height is how large the <b>capture</b> cross section gets there, on a compressed (logarithmic) scale; capture means the neutron is absorbed and the nucleus gives off photons. Its width at half height is the resonance width Γ, drawn about a hundred times wider than it is so you can see it.</p>
   <div class="ctl"><label for="res-e">Neutron energy (eV)</label><input id="res-e" type="range" data-bind="En" min="0.5" max="300" step="0.1" value="30"><output data-show="En" data-fmt="1"></output></div>
-  <p>The neutron hops along in energy. Each time it lands it may be captured: a flash and a burst of photons. On a tree the cross section is thousands of barns and capture is almost certain; between trees it is a few barns and the neutron nearly always hops on. Drag the energy to park it under a tree, then between two.</p>
+  <p>The neutron hops along in energy. Each time it lands it may be captured: a flash and a burst of photons. On a peak the cross section is thousands of barns and capture is almost certain; between peaks it is a few barns and the neutron nearly always hops on. Drag the energy to park it on a peak, then between two.</p>
 </div>
 <div class="step">
-  <h3>Trees keep their distance</h3>
+  <h3>Peaks keep their distance</h3>
   <p>Each row shows a line of level positions with the same average spacing. Real levels are not placed at random: two levels with the same spin and parity repel, and the closer they come, the more they push apart. <b>Random-matrix theory</b>, the mathematics of levels in a complicated quantum system, gives the pattern (middle row): near-coincidences are rare. Truly random positions (top row) clump and leave gaps.</p>
   <div class="btns"><button class="btn" data-act="again">Draw again</button></div>
   <p>Draw again for a new sample. The number ⟨r̃⟩ compares each spacing with the next: about 0.39 for random, 0.53 for repelling levels. The engine draws its spacings from the random-matrix pattern. Mixing two sequences, say two spins (bottom row), partly hides the repulsion, which is how a measured set of levels reveals how many sequences it holds.</p>
 </div>
 <div class="step">
   <h3>Heights scatter wildly</h3>
-  <p>Now each tree's height is its <b>neutron width</b> Γ<sub>n</sub> on an ordinary linear scale: how strongly that level connects to a neutron plus the target. The yellow cap on every tree is its γ width Γ<sub>γ</sub>, how fast it emits photons. The γ width sums hundreds of photon paths, so it is nearly the same for every level.</p>
+  <p>Now each peak's height is its <b>neutron width</b> Γ<sub>n</sub> on an ordinary linear scale: how strongly that level connects to a neutron plus the target. The yellow cap on every peak is its γ width Γ<sub>γ</sub>, how fast it emits photons. The γ width sums hundreds of photon paths, so it is nearly the same for every level.</p>
   <div class="btns"><button class="btn" data-act="roll">Roll a width</button><button class="btn ghost" data-act="equal">Equal widths</button><button class="btn ghost" data-act="pt">Porter–Thomas</button></div>
-  <p>A level has only one way to break up into neutron plus target, so its width behaves like the square of a single bell-curve random number. Roll one: a ball lands on the bell at <i>x</i>, the square <i>x</i>² becomes the next tree's height, and a dot drops into the pile on the right. The pile piles up near zero with a long tail, the <b>Porter–Thomas</b> law: most levels are weak, a few enormous. Equal widths shows what a forest of average trees would look like instead.</p>
+  <p>A level has only one way to break up into neutron plus target, so its width behaves like the square of a single bell-curve random number. Roll one: a ball lands on the bell at <i>x</i>, the square <i>x</i>² becomes the next peak's height, and a dot drops into the pile on the right. The pile piles up near zero with a long tail, the <b>Porter–Thomas</b> law: most levels are weak, a few enormous. Equal widths shows what a row of average peaks would look like instead.</p>
 </div>
 <div class="step">
   <h3>A ladder from four numbers</h3>
-  <p>The forest is now grown from average numbers you can set. For a nucleus nobody has measured, no one can say where each tree stands, but the averages can be predicted: the mean spacing <i>D</i><sub>0</sub>; the <b>strength functions</b> <i>S</i><sub>0</sub> and <i>S</i><sub>1</sub>, the average neutron width per unit spacing, for s-wave neutrons (arriving head-on) and p-wave neutrons (arriving off-centre, with one unit of angular momentum); and the average γ width. From these four the engine builds a <b>ladder</b>: one random set of levels with those averages.</p>
+  <p>The peaks now come from average numbers you can set. For a nucleus nobody has measured, no one can say where each peak stands, but the averages can be predicted: the mean spacing <i>D</i><sub>0</sub>; the <b>strength functions</b> <i>S</i><sub>0</sub> and <i>S</i><sub>1</sub>, the average neutron width per unit spacing, for s-wave neutrons (arriving head-on) and p-wave neutrons (arriving off-centre, with one unit of angular momentum); and the average γ width. From these four the engine builds a <b>ladder</b>: one random set of levels with those averages.</p>
   <div class="ctl"><label for="res-d0">Spacing D₀ (eV)</label><input id="res-d0" type="range" data-bind="D0" min="3" max="60" step="0.5" value="20"><output data-show="D0" data-fmt="1"></output></div>
   <div class="ctl"><label for="res-s0">Strength S₀ (×10⁻⁴)</label><input id="res-s0" type="range" data-bind="S0" min="0.2" max="3" step="0.05" value="1"><output data-show="S0" data-fmt="2"></output></div>
   <div class="ctl"><label for="res-gg">γ width ⟨Γγ⟩ (meV)</label><input id="res-gg" type="range" data-bind="Gg" min="10" max="80" step="1" value="23"><output data-show="Gg" data-fmt="0"></output></div>
-  <p>Drag <i>D</i><sub>0</sub> and the trees spread out or crowd together. Solid crowns are s-wave levels (positive parity), hollow crowns p-wave levels (negative parity). Neutron widths grow as √<i>E</i> for s-waves and as <i>E</i><sup>3/2</sup> for p-waves, so the hollow trees stay short at low energy and grow taller toward the right.</p>
+  <p>Drag <i>D</i><sub>0</sub> and the peaks spread out or crowd together. Solid peaks are s-wave levels (positive parity), outlined peaks p-wave levels (negative parity). Neutron widths grow as √<i>E</i> for s-waves and as <i>E</i><sup>3/2</sup> for p-waves, so the outlined peaks stay short at low energy and grow taller toward the right.</p>
 </div>
 <div class="step">
   <h3>Down at thermal</h3>
-  <p>The same forest on a logarithmic energy scale reaching down to a few thousandths of an eV. Neutrons in a reactor start fast and slow down by bouncing off light nuclei; each bounce takes away about the same fraction of their energy, so each hop here covers the same stretch of the log scale. On the way down they cross the forest, and some are caught.</p>
+  <p>The same peaks on a logarithmic energy scale reaching down to a few thousandths of an eV. Neutrons in a reactor start fast and slow down by bouncing off light nuclei; each bounce takes away about the same fraction of their energy, so each hop here covers the same stretch of the log scale. On the way down they cross the peaks, and some are caught.</p>
   <div class="btns"><button class="btn" data-act="slow">Slow down 10 neutrons</button></div>
-  <p>Those that get through settle at room temperature, 0.025 eV, the <b>thermal</b> energy, far below the first tree. There the cross section is the sum of the tails of all the resonances, including bound levels just below zero energy; the ground rises toward the left because the tails grow as 1/<i>v</i>, with <i>v</i> the neutron's speed (a slower neutron spends longer near the nucleus). The disc's area is the thermal cross section. Because the neutron lands equally often in every factor of energy, the forest's catch on the way down is measured by the <b>resonance integral</b>: the cross section above 0.5 eV with each energy weighted by 1/<i>E</i>.</p>
+  <p>Those that get through settle at room temperature, 0.025 eV, the <b>thermal</b> energy, far below the first peak. There the cross section is the sum of the tails of all the resonances, including bound levels just below zero energy; the ground rises toward the left because the tails grow as 1/<i>v</i>, with <i>v</i> the neutron's speed (a slower neutron spends longer near the nucleus). The disc's area is the thermal cross section. Because the neutron lands equally often in every factor of energy, the peaks' catch on the way down is measured by the <b>resonance integral</b>: the cross section above 0.5 eV with each energy weighted by 1/<i>E</i>.</p>
 </div>
 <div class="step">
   <h3>Only the statistics are predictable</h3>
-  <p>Each row is one ladder drawn from the same four numbers: its trees near zero energy, the thermal neutron at 0.025 eV, and a disc whose area is that ladder's thermal capture cross section. The bracket reaches to the tree that sets the value, usually the nearest one, and the number gives its distance. Its distance changes from ladder to ladder, and the disc swings by a factor of ten or more.</p>
+  <p>Each row is one ladder drawn from the same four numbers: its peaks near zero energy, the thermal neutron at 0.025 eV, and a disc whose area is that ladder's thermal capture cross section. The bracket reaches to the peak that sets the value, usually the nearest one, and the number gives its distance. Its distance changes from ladder to ladder, and the disc swings by a factor of ten or more.</p>
   <div class="btns"><button class="btn" data-act="draw1">Draw a ladder</button><button class="btn ghost" data-act="more">Draw 20</button></div>
-  <p>Each value drops into the pile on the right. So for an unmeasured nucleus the engine gives a spread of values, not one number, and no better model can narrow it. The resonance integral, which sums over the whole forest, spreads less. For light nuclei the levels are tens of keV apart and none is near thermal; capture there happens by a different, direct process, and the ladder method gives no answer.</p>
+  <p>Each value drops into the pile on the right. So for an unmeasured nucleus the engine gives a spread of values, not one number, and no better model can narrow it. The resonance integral, which sums over all the peaks, spreads less. For light nuclei the levels are tens of keV apart and none is near thermal; capture there happens by a different, direct process, and the ladder method gives no answer.</p>
   <div class="aside">In the code: <code>physics/resonance/ladder.py</code> (random-matrix spacings, Porter–Thomas widths, Breit–Wigner cross sections, thermal capture and resonance integral over an ensemble), <code>ladder_statistics.py</code> (the same laws tested on measured ladders), <code>ensemble_runner.py</code>.</div>
 </div>`,
     setup(S) {
@@ -186,14 +190,14 @@
     },
   });
 
-  /** cross section as the drawing shows it: each tree's peak spread over its (exaggerated) canopy, plus the true background */
+  /** cross section as the drawing shows it: each peak spread over its (exaggerated) width, plus the true background */
   function sigVis(F, E, x, xs, ws) {
     let s = sigma(F.lad, E);
     for (let i = 0; i < F.trees.length; i++) { const d = 2 * (x - xs[i]) / ws[i]; if (Math.abs(d) < 6) s = Math.max(s, F.trees[i].peak / (1 + d * d)); }
     return s;
   }
 
-  // ---------- scene: the forest (steps 0 and 3) ----------
+  // ---------- scene: the peaks (steps 0 and 3) ----------
   const fx = [], fw = [];
   function sceneForest(g, S, dt) {
     const { W, H, c } = g, phone = W < 600, fs = phone ? 11 : 13, params = S.mode === "params";
@@ -203,14 +207,14 @@
     groundStrip(g, x0 - 12, x1 + 12, yG, H * 0.07);
     F.trees.forEach((t, i) => {
       const x = X(t.r.er), h = hOf(t.peak), w = clamp(t.G * ppe * WX, 3.5, 34); fx[i] = x; fw[i] = w;
-      tree(g, x, yG, h, w, { hollow: t.r.l === 1, sway: Math.sin(S.time * 1.1 + x * 0.07) * (0.6 + h / 140) });
+      peak(g, x, yG, h, w, { hollow: t.r.l === 1, sway: Math.sin(S.time * 1.1 + x * 0.07) * (0.6 + h / 140) });
     });
     [0, 100, 200, 300].forEach((e) => g.label(`${e} eV`, clamp(X(e), x0 + 16, x1 - 16), yG + 14, { color: c.faint, size: fs - 2 }));
-    g.label(phone ? "height: peak capture (log) · canopy: width Γ ×110" : "tree height: peak capture cross section (log scale) · canopy: resonance width Γ, drawn 110× wide", x0, H * 0.06, { color: c.faint, size: fs - 1, align: "left" });
+    g.label(phone ? "height: peak capture (log) · width Γ ×110" : "peak height: capture cross section (log scale) · width: resonance width Γ, drawn 110× wide", x0, H * 0.06, { color: c.faint, size: fs - 1, align: "left" });
     if (params) {
       g.label(`D₀ ${S.D0.toFixed(0)} eV · S₀ ${S.S0.toFixed(2)}×10⁻⁴ · S₁ ${(S1 * 1e4).toFixed(1)}×10⁻⁴ · ⟨Γγ⟩ ${S.Gg.toFixed(0)} meV`, W * 0.5, yG + 40, { color: c.ink, size: fs + 1, weight: 600, serif: true });
-      const ly = H * 0.9; tree(g, W * 0.5 - (phone ? 120 : 150), ly + 8, 22, 9, {}); g.label("s-wave (+ parity)", W * 0.5 - (phone ? 110 : 140), ly - 3, { color: c.soft, size: fs, align: "left" });
-      tree(g, W * 0.5 + (phone ? 14 : 30), ly + 8, 22, 9, { hollow: true }); g.label("p-wave (− parity)", W * 0.5 + (phone ? 24 : 40), ly - 3, { color: c.soft, size: fs, align: "left" });
+      const ly = H * 0.9; peak(g, W * 0.5 - (phone ? 120 : 150), ly + 8, 22, 9, {}); g.label("s-wave (+ parity)", W * 0.5 - (phone ? 110 : 140), ly - 3, { color: c.soft, size: fs, align: "left" });
+      peak(g, W * 0.5 + (phone ? 14 : 30), ly + 8, 22, 9, { hollow: true }); g.label("p-wave (− parity)", W * 0.5 + (phone ? 24 : 40), ly - 3, { color: c.soft, size: fs, align: "left" });
       return;
     }
     // the walking neutron
@@ -226,7 +230,7 @@
     g.line(wx, yG + 3, wx, yG + 24, c.neutron, 1, 0.5, [2, 3]);
     g.label(`σ ≈ ${fmtB(sv)} · caught on ${P < 0.01 ? "<1" : (100 * P).toFixed(0)} % of landings`, lx, yG + 36, { color: c.ink, size: fs, weight: 600, bg: true });
     g.label(`caught ${walk.nC} times in ${walk.nH} landings`, W * 0.5, yG + 62, { color: c.soft, size: fs });
-    g.label(phone ? "each tree: one level of the compound nucleus" : `each tree: one level of the compound nucleus · about ${S.D0.toFixed(0)} eV apart`, W * 0.5, H * 0.92, { color: c.soft, size: fs + 1, serif: true, italic: true });
+    g.label(phone ? "each peak: one level of the compound nucleus" : `each peak: one level of the compound nucleus · about ${S.D0.toFixed(0)} eV apart`, W * 0.5, H * 0.92, { color: c.soft, size: fs + 1, serif: true, italic: true });
   }
 
   // ---------- scene: spacing rows ----------
@@ -240,7 +244,7 @@
     rows.forEach((row, i) => {
       const y = H * (0.24 + 0.27 * i), hT = H * 0.09, px = (x1 - x0) / nShow, r = meanRatio(row.lv.slice(0, 300));
       groundStrip(g, x0 - 10, x1 + 10, y, H * 0.04);
-      for (const v of row.lv) { const x = x0 + (v - row.lv[0]) * px; if (x > x1) break; tree(g, x, y, hT, 9, { col: row.col, sway: Math.sin(S.time * 1.1 + x * 0.07) * 0.8 }); }
+      for (const v of row.lv) { const x = x0 + (v - row.lv[0]) * px; if (x > x1) break; peak(g, x, y, hT, 9, { col: row.col, sway: Math.sin(S.time * 1.1 + x * 0.07) * 0.8 }); }
       g.label(row.name, x0, y - hT - 14, { color: row.col === c.faint ? c.soft : row.col, size: fs, align: "left", weight: 600 });
       g.label(W < 600 ? `${row.expect} · ⟨r̃⟩ ≈ ${r.toFixed(2)}` : `${row.expect} · spacing ratio ⟨r̃⟩ ≈ ${r.toFixed(2)}`, x1, y - hT - 14, { color: c.soft, size: fs - 1, align: "right", bg: true });
     });
@@ -268,14 +272,14 @@
     pt.trees.forEach((t, i) => {
       const p = i + off; if (t.pos === 99) t.pos = p; t.pos += (p - t.pos) * a;
       const raw = lerp(1, t.z2, S.ptMix) * hMean, h = Math.min(maxH, raw), x = slotX(t.pos), w = slot * 0.62;
-      const top = tree(g, x, yG, h, w, { sway: Math.sin(S.time * 1.2 + i) * 0.8 });
+      const top = peak(g, x, yG, h, w, { sway: Math.sin(S.time * 1.2 + i) * 0.8 });
       g.ctx.save(); g.ctx.fillStyle = g.rgba(c.photon, 0.95); g.ctx.beginPath(); const cw = w * 0.75, chh = hCap * t.gg;
       if (g.ctx.roundRect) g.ctx.roundRect(x - cw / 2, top - chh, cw, chh, 3); else g.ctx.rect(x - cw / 2, top - chh, cw, chh); g.ctx.fill(); g.ctx.restore();
       if (raw > maxH + 1) g.label("↑", x, top - hCap - 9, { color: c.soft, size: 12 });
     });
-    g.label(phone ? "height: neutron width Γn (linear)" : "tree height: neutron width Γn, linear scale", rx0, H * 0.05, { color: c.soft, size: fs, align: "left" });
-    g.label(phone ? "yellow: γ width" : "yellow cap: γ width, nearly the same on every tree", rx0, H * 0.05 + fs + 6, { color: c.photon, size: fs, align: "left" });
-    if (S.ptMix < 0.5) g.label("equal widths: every tree the average", (rx0 + rx1) / 2, yG - hMean - hCap - 26, { color: c.ink, size: fs + 1, weight: 600, bg: true });
+    g.label(phone ? "height: neutron width Γn (linear)" : "peak height: neutron width Γn, linear scale", rx0, H * 0.05, { color: c.soft, size: fs, align: "left" });
+    g.label(phone ? "yellow: γ width" : "yellow cap: γ width, nearly the same on every peak", rx0, H * 0.05 + fs + 6, { color: c.photon, size: fs, align: "left" });
+    if (S.ptMix < 0.5) g.label("equal widths: every peak the average", (rx0 + rx1) / 2, yG - hMean - hCap - 26, { color: c.ink, size: fs + 1, weight: 600, bg: true });
     // the pile of rolled widths
     const px0 = W * (phone ? 0.69 : 0.71), px1 = W * 0.97, NB = 13, bw = (px1 - px0) / NB, dr = clamp(bw / 4.6, 1.4, 3.4), pitch = 2 * dr + 0.7;
     const cnt = new Array(NB).fill(0), binOf = (v) => Math.min(NB - 1, Math.floor(v / 0.5));
@@ -317,16 +321,16 @@
     const { W, H, c } = g, phone = W < 600, fs = phone ? 11 : 13, lo = 0.003, hi = EMAX;
     const x0 = W * 0.06, x1 = W * 0.96, yG = H * 0.7, hMax = H * 0.46, LN = Math.log(hi / lo);
     const X = (e) => x0 + (x1 - x0) * Math.log(e / lo) / LN, F = forestOf(S), hOf = (pk) => hMax * clamp(log10(Math.max(pk, 1e-6)) / 5, 0, 1);
-    // ground rising toward low energy: the 1/v tails (capped where trees take over)
+    // ground rising toward low energy: the 1/v tails (capped where the peaks take over)
     if (!F.terr || F.terr.W !== W) { const pts = []; for (let i = 0; i <= 90; i++) { const e = lo * Math.pow(10, i * log10(3 / lo) / 90); pts.push([e, Math.min(sigma(F.lad, e), e < 1 ? 1e4 : 60)]); } F.terr = { W, pts }; }
     const terr = F.terr.pts.map(([e, s]) => [X(e), yG - hOf(s)]);
     g.ground([[terr[0][0], yG], ...terr, [terr[terr.length - 1][0], yG]], c.soft, 40, 0.26); g.poly(terr, c.soft, 1.6, 0.75);
     const yAt = (e) => { if (e >= 3) return yG; const i = clamp(Math.round(log10(e / lo) / log10(3 / lo) * 90), 0, 90); return terr[i][1]; };
     groundStrip(g, x0 - 12, x1 + 12, yG, H * 0.06);
-    F.trees.forEach((t, i) => { const e = t.r.er, x = X(e), ppe = (x1 - x0) / LN / e, w = clamp(t.G * ppe * 30, 3, 26); fx[i] = x; fw[i] = w; tree(g, x, yG, hOf(t.peak), w, { hollow: t.r.l === 1, sway: Math.sin(S.time + x * 0.05) * 0.6 }); });
+    F.trees.forEach((t, i) => { const e = t.r.er, x = X(e), ppe = (x1 - x0) / LN / e, w = clamp(t.G * ppe * 30, 3, 26); fx[i] = x; fw[i] = w; peak(g, x, yG, hOf(t.peak), w, { hollow: t.r.l === 1, sway: Math.sin(S.time + x * 0.05) * 0.6 }); });
     // bound level below zero energy, drawn sunk under the left edge
     const bound = F.lad.filter((r) => r.l === 0 && r.er < 0).pop();
-    if (bound) { tree(g, x0 + 4, yG, H * 0.09, 10, { down: true, alpha: 0.55 }); g.label(phone ? `bound level −${(-bound.er).toFixed(1)} eV` : `a bound level at −${(-bound.er).toFixed(1)} eV: its tail lifts this end`, x0 + 16, yG + H * 0.07, { color: c.soft, size: fs - 1, align: "left" }); }
+    if (bound) { peak(g, x0 + 4, yG, H * 0.09, 10, { down: true, alpha: 0.55 }); g.label(phone ? `bound level −${(-bound.er).toFixed(1)} eV` : `a bound level at −${(-bound.er).toFixed(1)} eV: its tail lifts this end`, x0 + 16, yG + H * 0.07, { color: c.soft, size: fs - 1, align: "left" }); }
     // resonance-integral stretch
     const yb = H * 0.16; g.line(X(ECUT), yb, x1, yb, c.photon, 2, 0.7); g.line(X(ECUT), yb - 5, X(ECUT), yb + 5, c.photon, 2, 0.7); g.line(x1, yb - 5, x1, yb + 5, c.photon, 2, 0.7);
     g.label(phone ? `resonance integral ≈ ${riOf(F).toFixed(0)} b` : `resonance integral above 0.5 eV ≈ ${riOf(F).toFixed(0)} b`, (X(ECUT) + x1) / 2, yb - 14, { color: c.photon, size: fs, weight: 600, bg: true });
@@ -355,7 +359,7 @@
       } else if (n.st === "caught") { if (age > 0.9) { sd.ns.splice(i, 1); continue; } burst(g, n.x, n.y, age, n.j); }
       else { if (age > 4) { sd.ns.splice(i, 1); continue; } const f = 1 - smooth(3.4, 4, age); g.ball(xt + n.dx + Math.sin(S.time * 7 + n.j) * 4, yAt(ETH) - 6 - Math.abs(Math.sin(S.time * 9 + n.j)) * 4, 5.5, c.neutron, f); }
     }
-    g.label(`caught by a tree on the way down: ${sd.down} · reached thermal: ${sd.reached}`, W * 0.5, H * 0.86, { color: c.ink, size: fs + 1, weight: 600, serif: true });
+    g.label(`caught by a peak on the way down: ${sd.down} · reached thermal: ${sd.reached}`, W * 0.5, H * 0.86, { color: c.ink, size: fs + 1, weight: 600, serif: true });
     g.label("each hop: one bounce, the same fraction of energy lost", W * 0.5, H * 0.92, { color: c.soft, size: fs, serif: true, italic: true });
   }
 
@@ -390,10 +394,10 @@
       g.line(rx0, y, rx1, y, c.line, 1, al);
       for (const t of row.trees) {
         const x = X(t.er);
-        if (t.er > 0) tree(g, x, y, rh * 0.82 * clamp(log10(Math.max(t.pk, 1)) / 4.6, 0.06, 1), 5, { hollow: t.l === 1, alpha: al });
-        else if (t.l === 0) tree(g, x, y, rh * 0.35 * clamp(Math.sqrt(t.w), 0.3, 1.4), 5, { down: true, alpha: 0.45 * al });
+        if (t.er > 0) peak(g, x, y, rh * 0.82 * clamp(log10(Math.max(t.pk, 1)) / 4.6, 0.06, 1), 5, { hollow: t.l === 1, alpha: al });
+        else if (t.l === 0) peak(g, x, y, rh * 0.35 * clamp(Math.sqrt(t.w), 0.3, 1.4), 5, { down: true, alpha: 0.45 * al });
       }
-      // bracket to the tree that sets the thermal value
+      // bracket to the peak that sets the thermal value
       const xb = X(row.best), by = y + rh * 0.12;
       g.line(xt, by, xb, by, c.ink, 1, 0.55 * al); g.line(xb, by - 3, xb, by + 3, c.ink, 1, 0.55 * al);
       g.label(`${Math.abs(row.best).toFixed(1)} eV`, rx1 + 4, y - 4, { color: c.soft, size: fs - 3, alpha: al, align: "left" });

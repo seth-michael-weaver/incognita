@@ -42,7 +42,7 @@ WT.es.ch.omp = {
   <p>Cambia la energía y la suma vuelve a empezar. A baja energía, uno o dos anillos grandes forman casi todo el disco; a alta energía, muchos anillos finos añaden cada uno una tajada, y el disco se acerca al tamaño geométrico.</p>
   <div class="formula">σ<sub>R</sub> = (π/k²) Σ (2l+1) T<sub>l</sub></div>
   <p>Los valores de <i>T<sub>l</sub></i> alimentan el resto del motor. Deciden con qué frecuencia se forma cada espín del núcleo excitado y, al revés, con qué facilidad cada tipo de partícula vuelve a salir.</p>
-  <div class="aside">En el código: <code>omp/parameters.py</code> (potencial global de Koning–Delaroche; potenciales dispersivos para actínidos), <code>omp/schrodinger.py</code> (integración de Numerov y empalme coulombiano), <code>omp/inverse.py</code> (partículas salientes por balance detallado).</div>
+  <div class="aside">En el código: <code>omp/parameters.py</code> (potencial global de Koning–Delaroche; potenciales dispersivos para actínidos), <code>omp/schrodinger.py</code> (integración de Numerov y empalme coulombiano), <code>omp/inverse.py</code> (partículas salientes por balance detallado), <code>omp/regional.py</code> (una opción añadida, desactivada por defecto: un ajuste regional del pozo para blancos deformados de tierras raras, ajustado a S₀ y S₁ medidos).</div>
 </div>`,
 };
 Object.assign(WT.es.labels, {

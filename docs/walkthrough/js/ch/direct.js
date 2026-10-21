@@ -73,7 +73,7 @@
 </div>
 <div class="step">
   <h3>Straight into an orbit</h3>
-  <p>The picture shows the well again. Neutrons fill its lower <b>orbits</b> (the allowed energies for one neutron inside); two near the top are empty. A free neutron can drop straight into an empty orbit and send the spare energy out as a <em class="g">photon</em>. The nucleus never heats up. This is <b>direct capture</b>. The engine computes it from the same well as Chapter 2: the free wave outside, the bound orbit inside, and the photon linking them.</p>
+  <p>The picture shows the well again. Neutrons fill its lower <b>orbits</b> (the allowed energies for one neutron inside); two near the top are empty. A free neutron can drop straight into an empty orbit and send the spare energy out as a <em class="g">photon</em>. The nucleus never heats up. This is <b>direct capture</b>. The engine computes it from the same well as Chapter 2: the free wave outside, the bound orbit inside, and the photon linking them. As in TALYS, it is off unless asked for.</p>
   <div class="btns"><button class="btn" data-act="drop">Drop a neutron in</button></div>
   <p>Direct capture matters most where the usual route, absorbing the neutron and sharing its energy, is weak: light nuclei and nuclei far from stability, which have few, widely spaced levels.</p>
 </div>

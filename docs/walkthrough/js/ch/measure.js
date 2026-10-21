@@ -9,7 +9,7 @@
  *   "star"    = a Maxwellian gas of neutrons among target nuclei; captures flash and drop into a pile of captured energies;
  *   "hot"     = thermally populated target levels as separate entrances (stellar enhancement);
  *   "tmc"     = Total Monte Carlo: three input knobs jitter per variant; translucent capture discs at three energies.
- * Shapes follow specout.py / specang.py (Kalbach a(E_in, E_out), K = a e^{a cos} / 4 pi sinh a), astro/stellar.py
+ * Shapes follow the Kalbach systematics (a(E_in, E_out), K = a e^{a cos} / 4 pi sinh a; not computed by the engine), the stellar textbook formulas
  * (int E sigma e^{-E/kT} dE, partition function sum (2J+1) e^{-E/kT}) and tmc.py (TASMAN factors: 1 + RR d for RR >= 0,
  * 1/(1 + |RR| d) for RR < 0, truncated at |RR| <= 3). Numbers are illustrative. */
 (function () {
@@ -65,7 +65,7 @@
 </div>
 <div class="step">
   <h3>Which way they go</h3>
-  <p>The petal shape shows how many neutrons leave in each direction; the beam comes from the left. Evaporated neutrons have forgotten the beam's direction and leave equally every way. Fast pre-equilibrium ones remember it and lean forward. The engine uses Kalbach's rule: one slope <i>a</i>, growing with the outgoing energy, sets how far forward they lean.</p>
+  <p>The petal shape shows how many neutrons leave in each direction; the beam comes from the left. Evaporated neutrons have forgotten the beam's direction and leave equally every way. Fast pre-equilibrium ones remember it and lean forward. Kalbach's rule describes this: one slope <i>a</i>, growing with the outgoing energy, sets how far forward they lean. The engine itself stops at how many particles leave with each energy; it does not compute their directions.</p>
   <div class="ctl"><label for="mea-eo">Outgoing energy (MeV)</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>Lower the outgoing energy and the petal rounds out: slow neutrons are mostly evaporated.</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
@@ -74,20 +74,20 @@
   <h3>In a star</h3>
   <p>Inside a star the neutrons form a hot gas among the target nuclei. Their speeds follow a Maxwell distribution set by the temperature, written as an energy <i>kT</i> (30 keV is about 350 million degrees). The longer a neutron's trail, the faster it moves. Each time one passes a nucleus it may be captured, a flash, with a chance set by the cross section at its energy.</p>
   <div class="ctl"><label for="mea-kt">Temperature kT (keV)</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
-  <p>Each captured neutron drops into the pile below, by its energy. The pile is the window that counts: slow neutrons are captured easily but are few and pass by rarely, the fastest are rare, so most captures come from a band around a few <i>kT</i>. The capture rate over the whole gas is the <b>Maxwellian-averaged cross section</b> (MACS), here in millibarns (mb). Heat the gas and the window slides to higher energy, where the nucleus is a smaller target.</p>
+  <p>Each captured neutron drops into the pile below, by its energy. The pile is the window that counts: slow neutrons are captured easily but are few and pass by rarely, the fastest are rare, so most captures come from a band around a few <i>kT</i>. The capture rate over the whole gas is the <b>Maxwellian-averaged cross section</b> (MACS), here in millibarns (mb). Heat the gas and the window slides to higher energy, where the nucleus is a smaller target. The engine supplies the capture cross section; the average over the gas is taken afterwards, from that curve.</p>
 </div>
 <div class="step">
   <h3>The target is hot too</h3>
   <p>The shelves are the target's lowest energy levels, labelled with spin and energy, and the balls show what share of target nuclei sit on each at this temperature. In a star some targets are already excited. Hotter means more on the upper shelves, and a level with spin <i>J</i> holds more because it has 2<i>J</i>+1 orientations. Each excited level is a different entrance to the same compound nucleus.</p>
   <div class="ctl"><label for="mea-kt2">Temperature kT (keV)</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
-  <p>Raise the temperature and watch nuclei move up. The engine runs the reaction from each populated level and adds the results with these shares; the weights sum to the partition function <i>G</i>. The ratio to the rate from the ground state alone is the <b>stellar enhancement factor</b>.</p>
+  <p>Raise the temperature and watch nuclei move up. A full stellar rate runs the reaction from each populated level and adds the results with these shares; the weights sum to the partition function <i>G</i>, and the ratio to the rate from the ground state alone is the <b>stellar enhancement factor</b>. The engine does not take this step: it computes every reaction on a target in its ground state.</p>
 </div>
 <div class="step">
   <h3>How sure is any of this?</h3>
   <p>The three knobs are model inputs, each known only to within some percent: the depth of the optical well (the potential the neutron feels), the level density (how many states per MeV) and the photon strength (how readily the nucleus emits light). Each run of the engine turns them to random settings within those limits and adds one faint disc, its capture cross section, at three neutron energies. Reading the spread of many runs gives an honest uncertainty: <b>Total Monte Carlo</b>.</p>
   <div class="btns"><button class="btn" data-act="tmc1">Run a variant</button><button class="btn ghost" data-act="tmc">Run 10</button><button class="btn ghost" data-act="clear">Clear</button></div>
   <p>A crisp rim means the inputs pin the answer; a fuzzy rim means they do not. At 10 MeV the optical well matters too and the rim blurs most. That is where new measurements would help most.</p>
-  <div class="aside">In the code: <code>emission/channels.py</code> (exclusive channels and residuals), <code>specout.py</code> and <code>specang.py</code> (spectra, Kalbach angular distributions), <code>astro/stellar.py</code> (Maxwellian averages, thermally populated targets, partition function), <code>tmc.py</code> (the Total Monte Carlo sampler).</div>
+  <div class="aside">In the code: <code>emission/channels.py</code> (exclusive channels and residuals), <code>preeq/</code> and <code>emission/</code> (emission spectra), <code>tmc.py</code> (the Total Monte Carlo sampler). Maxwellian averages are taken after the run from the engine's capture curves (<code>validation/differential/core.py</code>). Angular distributions and thermally excited targets are not computed.</div>
 </div>`,
     setup(S) {
       S.set("mode", "area"); S.to("E", 2, true); S.to("Ein", 30, true); S.to("Eout", 25, true); S.to("kT", 30, true);

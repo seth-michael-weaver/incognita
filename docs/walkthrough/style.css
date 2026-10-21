@@ -29,14 +29,21 @@ html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 19px; line-height: 1.62; }
 a { color: var(--accent); }
 
-/* ---------- top: hero ---------- */
-.hero { min-height: 88vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 24px; padding-inline: max(20px, 5vw); padding-block: 40px; }
-.hero .stage { position: relative; height: min(70vh, 620px); top: auto; }
-.hero h1 { font-family: var(--display); font-weight: 600; font-size: clamp(40px, 6vw, 76px); line-height: 1.02; margin: 0 0 18px; letter-spacing: -0.01em; text-wrap: balance; }
-.hero p { margin: 0 0 14px; max-width: 34rem; color: var(--soft); }
-.hero .kicker { font-family: var(--sans); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; }
-.scrollcue { font-family: var(--sans); font-size: 14px; color: var(--faint); margin-top: 22px; }
-@media (max-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr); min-height: auto; } .hero .stage { height: 52vh; order: -1; } }
+/* ---------- top: hero (full screen, always dark: a live reaction drawn by js/ch/intro.js) ---------- */
+.hero { position: relative; height: calc(100svh - 47px); min-height: 560px; overflow: hidden; background: #020308; color: #eef2fa; isolation: isolate; }
+.hero-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: pan-y; }
+.hero::after { content: ""; position: absolute; inset: auto 0 0 0; height: 9vh; background: linear-gradient(to bottom, rgba(2,3,8,0), var(--paper)); pointer-events: none; }
+.hero-copy { position: absolute; z-index: 1; left: max(20px, 5vw); bottom: max(96px, 16vh); max-width: min(40rem, 52vw); pointer-events: none; will-change: opacity, transform; }
+.hero h1 { font-family: var(--display); font-weight: 600; font-size: clamp(46px, 7.2vw, 108px); line-height: 0.98; margin: 0 0 18px; letter-spacing: -0.015em; text-wrap: balance; color: #fff; text-shadow: 0 2px 30px rgba(0,0,0,.6); }
+.hero .kicker { font-family: var(--sans); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: rgba(214,224,255,.7); margin-bottom: 16px; }
+.hero .hero-tag { font-family: var(--serif); font-size: clamp(19px, 1.9vw, 25px); line-height: 1.4; color: rgba(236,240,250,.88); margin: 0 0 14px; }
+.hero .hero-hint { font-family: var(--sans); font-size: 13px; color: rgba(214,224,255,.55); margin: 0; }
+.scrollcue { position: absolute; z-index: 2; left: 50%; bottom: 22px; transform: translateX(-50%); font-family: var(--sans); font-size: 14px; color: var(--soft); text-decoration: none; animation: cue 2.2s ease-in-out infinite; }
+@keyframes cue { 0%, 100% { translate: 0 0; } 50% { translate: 0 6px; } }
+.intro-text { max-width: 40rem; margin: 0 auto; padding: 8vh 20px 2vh; }
+.intro-text p { margin: 0 0 16px; font-size: 21px; color: var(--soft); }
+@media (max-width: 720px) { .hero-copy { max-width: none; right: 20px; bottom: 64px; } .hero .hero-hint { display: none; } .intro-text p { font-size: 19px; } }
+@media (prefers-reduced-motion: reduce) { .scrollcue { animation: none; } }
 
 /* ---------- table of contents ---------- */
 .toc { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
@@ -92,10 +99,17 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 .coda th, .coda td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .coda th { color: var(--faint); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
 .coda td code { font-family: var(--mono); font-size: 13px; color: var(--soft); }
+.coda h3 { font-family: var(--display); font-weight: 600; font-size: 26px; margin: 48px 0 6px; }
+.coda a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.coda a:hover { border-bottom-color: var(--accent); }
+.coda .code-map td:first-child, .coda .code-map th:first-child { width: 3.2em; font-variant-numeric: tabular-nums; }
+.coda .code-map td:first-child a { font-weight: 600; border-bottom: 0; }
+.coda .code-map td:last-child { white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .step { transition: none; } }
 
 /* screenshot aid (?shot=chapter:step) */
-body.shot .hero, body.shot .coda, body.shot .toc, body.shot [data-ch]:not(.shot-target) { display: none; }
+body.shot .hero, body.shot .intro-text, body.shot .coda, body.shot .toc, body.shot [data-ch]:not(.shot-target) { display: none; }
+body.shot-code .hero, body.shot-code .intro-text, body.shot-code main, body.shot-code .toc { display: none; } body.shot-code .coda { padding-block: 4vh; }
 body.shot .story { padding-block: 6vh; } body.shot .story header { margin-bottom: 4vh; }
 body.shot .step:not(.shot-step) { display: none; } body.shot .step.shot-step { opacity: 1; margin: 0; }
 body.shot .chapter .stage { top: 0; }
@@ -179,7 +193,7 @@ body.shot .chapter .stage { top: 0; }
 
 /* language switch (EN | ES) at the right end of the contents bar */
 .toc { display: flex; align-items: center; }
-.toc ol { flex: 1 1 auto; min-width: 0; }
+.toc ol { flex: 1 1 auto; min-width: 0; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); padding-right: 32px; }
 .toc .lang { flex: none; display: flex; gap: 2px; margin-right: max(16px, 4vw); padding: 2px; border-radius: 999px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
 .toc .lang button { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--faint); background: none; border: 0; padding: 4px 10px; border-radius: 999px; cursor: pointer; }
 .toc .lang button:hover { color: var(--ink); }
@@ -220,6 +234,7 @@ input[type=range] { min-height: 32px; }
   .coda table { font-size: 14px; }
   .coda th, .coda td { padding: 8px 6px; }
   .coda td code { word-break: break-all; }
+  .coda .code-map td:last-child { white-space: normal; }
   .story h2 { font-size: clamp(30px, 8.4vw, 40px); }
 }
 

@@ -6,4 +6,5 @@ Object.assign(WT.es.labels, {
   "two neutrons come out": "salen dos neutrones",
   "an alpha particle: {#} protons + {#} neutrons": "una partícula alfa: {#} protones + {#} neutrones",
   "absorbed: its energy spreads through the whole nucleus": "absorbido: su energía se reparte por todo el núcleo",
+  "fission: the nucleus splits in two": "fisión: el núcleo se parte en dos",
 });
