@@ -78,9 +78,10 @@ em.f { font-style: normal; color: var(--fission); font-weight: 600; }
 @media (max-width: 860px) {
   .chapter { grid-template-columns: minmax(0, 1fr); }
   /* phones: the picture stays pinned under the nav bar, on top; the text scrolls up beneath it */
-  .chapter .stage { grid-column: 1; height: 46vh; min-height: 290px; top: var(--navh, 44px); z-index: 4; background: var(--paper); box-shadow: 0 10px 12px -10px color-mix(in srgb, var(--ink) 25%, transparent); }
-  .story { grid-row: 2; padding-block: 4vh 34vh; }
-  .step { margin-bottom: 24vh; }
+  .chapter .stage { grid-column: 1; height: 42vh; min-height: 260px; top: var(--navh, 56px); z-index: 4; background: var(--paper); }
+  .chapter .stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: -26px; height: 26px; background: linear-gradient(var(--paper), color-mix(in srgb, var(--paper) 0%, transparent)); pointer-events: none; }
+  .story { grid-row: 2; padding-block: 3vh 30vh; }
+  .step { margin-bottom: 12vh; opacity: 1; }
 }
 
 /* ---------- inline controls ---------- */
@@ -477,3 +478,9 @@ body.sb-lit { background: radial-gradient(1400px 700px at 30% -10%, #12305a 0%, 
 .sb-lit .sb-sec { position: relative; }
 .sb-lit .sb-sec h2 { color: #fff; }
 .sb-lit .sb-table { background: rgba(10,16,34,.5); }
+.dx { padding-top: 14px; }
+.dx-hero .dx-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 10px; }
+.dx-hero .dx-top h1 { font-size: clamp(26px, 3.4vw, 36px); margin: 0; text-shadow: 0 2px 24px rgba(80,120,255,.35); }
+.dx-hero .dx-controls { margin-bottom: 10px; }
+.dx-lede { max-width: 44rem; margin: 14px 2px 0; font-size: 18px; color: rgba(225,232,250,.8); }
+@media (max-width: 640px) { .dx-seg { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; } .dx-seg button { padding: 7px 10px; font-size: 12.5px; white-space: nowrap; } }

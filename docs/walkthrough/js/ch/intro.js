@@ -280,7 +280,8 @@
     if (emitted || (isF && ct > F_SCISSION - 0.2)) { cap = CAP[kind]; ca = smooth(isF ? F_SCISSION - 0.2 : T_EMIT, (isF ? F_SCISSION : T_EMIT) + 0.3, ct) * (1 - smooth(end - 0.7, end - 0.1, ct)); }
     if (cap && ca > 0.01 && scrollP < 0.5 && !document.body.classList.contains("og")) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = ca * (1 - scrollP * 2);
-      const fs = phone ? 15 : 18; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      let fs = phone ? 15 : 18; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`;
+      while (ctx.measureText(tr(cap)).width > W - 28 && fs > 10) { fs -= 0.5; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`; } // fit narrow screens ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillStyle = "rgba(230,236,250,0.92)"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12;
       ctx.fillText(tr(cap), cx, Math.min(H - 30, cy + R * (phone ? 1.42 : 1.5))); ctx.shadowBlur = 0;
     }

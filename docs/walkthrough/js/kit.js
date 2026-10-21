@@ -461,7 +461,7 @@
           const fn = mod.steps && mod.steps[i]; if (fn) { try { fn(S); } catch (e) { console.error(id, e); } }
           el.querySelectorAll("[data-bind]").forEach((inp) => { const k = inp.dataset.bind; if (typeof S.target[k] === "number" && Math.abs(parseFloat(inp.value) - S.target[k]) > 1e-9) inp.value = S.target[k]; });
         });
-      }, { rootMargin: PHONE ? "-58% 0px -18% 0px" : "-45% 0px -45% 0px" }); // phones: the step being read sits just below the pinned picture
+      }, { rootMargin: PHONE ? "-50% 0px -22% 0px" : "-45% 0px -45% 0px" }); // phones: the step being read sits just below the pinned picture
       steps.forEach((s) => io.observe(s));
       new IntersectionObserver((ents) => ents.forEach((en) => (ch.visible = en.isIntersecting)), { rootMargin: "100px 0px" }).observe(el);
       chapters.push(ch);

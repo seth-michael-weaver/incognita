@@ -62,6 +62,7 @@
   }
   function fit() {
     const H = G.H, W = G.W, s = Math.min(W / (bounds.n1 - bounds.n0 + 4), H / (bounds.z1 - bounds.z0 + 4));
+    if (H > W * 1.15) { const s2 = H / (bounds.z1 - bounds.z0 + 6); view = { s: s2, x0: 62 - W / s2 / 2, y0: bounds.z0 - 3 }; return; } // tall phone screens: fill the height, centred on the valley; pan sideways
     view = { s, x0: bounds.n0 - 2 - (W / s - (bounds.n1 - bounds.n0 + 4)) / 2, y0: bounds.z0 - 2 - (H / s - (bounds.z1 - bounds.z0 + 4)) / 2 };
   }
   const toX = (N) => (N - view.x0) * view.s, toY = (Z) => G.H - (Z - view.y0 + 1) * view.s;
@@ -101,7 +102,7 @@
     }
     // axis hints
     ctx.font = `500 12px ${SANS}`; ctx.fillStyle = C.soft; ctx.textAlign = "left";
-    let lastX = -99; for (const m of MAGIC) { const x = toX(m) + 3; if (x > 20 && x < W - 40 && x - lastX > 44) { ctx.fillText(`N=${m}`, x, H - 10); lastX = x; } const y = toY(m) + s / 2; if (y > 14 && y < H - 20) ctx.fillText(`Z=${m}`, 6, y); }
+    let lastX = -99, lastY = 1e9; for (const m of MAGIC) { const x = toX(m) + 3; if (x > 20 && x < W - 40 && x - lastX > 44) { ctx.fillText(`N=${m}`, x, H - 10); lastX = x; } const y = toY(m) + s / 2; if (y > 14 && y < H - 20 && lastY - y > 18) { ctx.fillText(`Z=${m}`, 6, y); lastY = y; } }
     // selection and hover
     for (const [r, col, w] of [[hover, C.ink, 1.5], [sel, C.sel, 2.5]]) if (r && r.A) { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.strokeRect(toX(r.A - r.Z) - 1, toY(r.Z) - 1, s + 1 - gap, s + 1 - gap); }
   }
@@ -224,7 +225,7 @@
 
   // ---------- one nuclide ----------
   let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false;
-  async function select(r, center) {
+  async function select(r, center, stay) {
     sel = r; drawChart();
     if (center && r.A) { view.x0 = r.A - r.Z - G.W / view.s / 2; view.y0 = r.Z - G.H / view.s / 2; if (view.s < 14) zoomAt(G.W / 2, G.H / 2, 18); drawChart(); }
     history.replaceState(null, "", location.pathname + location.search + "#" + (r.A ? `${IDX.sym[r.Z]}-${r.A}` : `${IDX.sym[r.Z]}-nat`));
@@ -257,7 +258,7 @@
     $("#dx-cmd").textContent = nm && d.cap ? `uv run python -m incognita.library show ${nm}\n\n# or from Python\nfrom incognita.library import capture_curve\ndf = capture_curve("${nm}")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier`
       : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/inputs/exfor_cells.parquet`;
     sweep();
-    if (center) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
+    if (center && !stay) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   // series for the current tab: { unit, curves:[{name,col,pts:[[x,y]],band68:[[x,lo,hi]],band95}], points:[{x,y,lo,hi,xlo,xhi,ds,dec,kind}], ds:[...] }
@@ -311,7 +312,7 @@
     // grid and axes (decades)
     ctx.font = `500 12px ${SANS}`; ctx.fillStyle = C.soft; ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
     ctx.textAlign = "center"; ctx.textBaseline = "top";
-    for (let k = Math.ceil(x0); k <= Math.floor(x1); k++) { const x = X(10 ** k); ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, H - m.b); ctx.stroke(); ctx.fillText(decE(k), x, H - m.b + 6); }
+    { let lastX = -1e9; const step = W < 600 ? 62 : 48; for (let k = Math.ceil(x0); k <= Math.floor(x1); k++) { const x = X(10 ** k); ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, H - m.b); ctx.stroke(); if (x - lastX >= step) { ctx.fillText(decE(k), x, H - m.b + 6); lastX = x; } } }
     ctx.textAlign = "right"; ctx.textBaseline = "middle";
     for (let k = Math.ceil(y0); k <= Math.floor(y1); k++) { const y = Y(10 ** k); ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke(); ctx.fillText(decY(k, S.unit), m.l - 8, y); }
     ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(S.xlab + " →", m.l, H - 6);
@@ -325,7 +326,7 @@
     // measured points: error bars, energy-bin bars, dots (hollow = excluded, faint = down-weighted); 2px surface ring
     for (const p of shown) {
       if (!(p.y > 0)) continue;
-      const dim = hl != null && p.ds !== hl, a = ($2) * clamp((P.reveal - X(p.x)) / 30, 0, 1), x = X(p.x), y = Y(p.y);
+      const dim = hl != null && p.ds !== hl, a = (dim ? 0.15 : p.dec === "d" ? 0.55 : 1) * clamp((P.reveal - X(p.x)) / 30, 0, 1), x = X(p.x), y = Y(p.y);
       ctx.globalAlpha = a; ctx.strokeStyle = C.meas; ctx.lineWidth = 1.2;
       if (p.e > 0) { ctx.beginPath(); ctx.moveTo(x, Y(p.y * (1 + p.e))); ctx.lineTo(x, Y(Math.max(p.y * (1 - p.e), p.y * 0.05))); ctx.stroke(); }
       if (p.xhi > p.xlo * 1.02) { ctx.beginPath(); ctx.moveTo(X(p.xlo), y); ctx.lineTo(X(p.xhi), y); ctx.stroke(); }
@@ -385,7 +386,8 @@
   pcv.addEventListener("pointerleave", () => (ptip.hidden = true));
 
   // ---------- start ----------
-  function layout() { G = setupCanvas(cv, Math.round(clamp(cv.parentElement.clientWidth * 0.62, 320, window.innerHeight * 0.72))); }
+  // the chart fills the rest of the first screen (title, controls and legend stay visible), so it is never cut off at the fold
+  function layout() { const top = cv.parentElement.getBoundingClientRect().top + window.scrollY; G = setupCanvas(cv, Math.round(clamp(window.innerHeight - top - 64, 300, 1100))); }
   fetch("data/index.json").then((r) => r.json()).then((idx) => {
     IDX = idx; readColors();
     const k = Object.fromEntries(idx.cols.map((c, i) => [c, i]));
@@ -395,7 +397,7 @@
     const real = rows.filter((r) => r.A); bounds = { n0: 0, n1: Math.max(...real.map((r) => r.A - r.Z)), z0: 0, z1: Math.max(...real.map((r) => r.Z)) };
     layout(); fit(); legend(); drawChart();
     const h = decodeURIComponent(location.hash.slice(1)); const r0 = (h && parseQ(h.replace(/-nat$/i, " nat"))) || byKey.get("79-197");
-    if (r0) select(r0, !!h);
+    if (r0) select(r0, !!h, true);
   }).catch((e) => { $("#dx-legend").textContent = T("dx_fail", "Could not load the data.") + " " + e; });
   let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (!IDX) return; const c = { N: view.x0 + G.W / view.s / 2, Z: view.y0 + G.H / view.s / 2 }; layout(); view.x0 = c.N - G.W / view.s / 2; view.y0 = c.Z - G.H / view.s / 2; drawChart(); renderNuc(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); legend(); drawChart(); renderNuc(); });
