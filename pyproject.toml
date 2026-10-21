@@ -5,7 +5,7 @@ description = "Open, calibrated predictions of neutron reaction cross sections a
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.12,<3.13"
-authors = [{ name = "Incognita contributors" }]
+authors = [{ name = "Seth Michael Weaver" }]
 keywords = ["nuclear data", "neutron cross sections", "Hauser-Feshbach", "TALYS", "uncertainty quantification", "benchmark"]
 classifiers = [
   "Development Status :: 3 - Alpha",

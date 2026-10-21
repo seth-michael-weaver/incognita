@@ -22,7 +22,7 @@ Python ≥ 3.10 with numpy, scipy, torch, pandas and pyarrow. With [uv](https://
 `python -m venv .venv` and `pip install -e ".[test]"`):
 
 ```bash
-git clone <repository-url> incognita && cd incognita/emu
+git clone https://github.com/seth-michael-weaver/incognita.git incognita && cd incognita/emu
 uv venv && . .venv/bin/activate
 uv pip install -e ".[test]"
 python scripts/fetch_assets.py      # models + verification runs from the GitHub release (~150 MB, sha256-checked)

@@ -69,7 +69,7 @@ Where the model ties or loses, that is reported too: see [Benchmark](#benchmark)
 ### Install
 
 ```bash
-git clone <repository-url> incognita && cd incognita
+git clone https://github.com/seth-michael-weaver/incognita.git incognita && cd incognita
 uv sync --extra dev
 uv run pytest                       # tests that need external data are skipped, not failed
 make native                         # optional: compile the C kernels (gcc)

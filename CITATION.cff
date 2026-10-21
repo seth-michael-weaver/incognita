@@ -3,7 +3,10 @@ title: "Incognita: open, calibrated predictions of neutron reaction cross sectio
 message: "If you use this software or its data, please cite it as below."
 type: software
 authors:
-  - name: "Incognita contributors"
+  - family-names: Weaver
+    given-names: Seth Michael
+repository-code: "https://github.com/seth-michael-weaver/incognita"
+url: "https://nucleus-incognita-woad.vercel.app/"
 abstract: >-
   Incognita: open, calibrated predictions of neutron reaction cross sections across the chart of nuclides, with a
   public blind benchmark and a registry of predictions made before the data.
