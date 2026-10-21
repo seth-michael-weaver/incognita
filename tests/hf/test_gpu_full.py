@@ -18,6 +18,16 @@ import numpy as np
 import pytest
 import torch
 
+
+@pytest.fixture(scope="module", autouse=True)
+def _alphatemp_off():
+    """ALPHAADOPT (alphatemp default ON 0.64): the GPU full path does not wire ALPHATEMP (it refuses the switch); this module runs at alphatemp 0."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_ALPHATEMP", "0")
+        yield
+
+
+
 REPO = Path(__file__).resolve().parents[2]
 SWEEP = tuple(float(e) for e in np.logspace(np.log10(1e-3), np.log10(20.0), 20))
 
@@ -208,10 +218,12 @@ def test_window_comptarget_matches_the_dense_masks(fe56, monkeypatch):
         assert float(((x - y).abs()[live] / m[live]).max()) <= 1.0e-12, k
 
 
-def test_sfactor_is_carried_across_energies():
+def test_sfactor_is_carried_across_energies(talys_popeps):
     """GPUC (OPEN4 D): binary.f90's `sfactor` is run-scoped. Pb-208 (n,g) at 20 MeV takes the
     11.88 MeV compound spin shape in bins below popepsA: carried (one batch, or batch to batch
-    through the state) it is the CPU engine's; from a fresh state it is 6% off and flagged."""
+    through the state) it is the CPU engine's; from a fresh state it is 6% off and flagged. Those bins
+    exist at TALYS's popeps 1e-3 mb; at ours (1e-9, POPEPS3) they are above the cut and the fresh state
+    agrees to 1e-8, so the carry is tested at TALYS's value."""
     from physics.hf import engine
     from physics.hf.gpu_full import run_batch
     from physics.hf.gpu_full_setup import setup_nuclide

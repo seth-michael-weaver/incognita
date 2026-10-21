@@ -213,4 +213,9 @@ def fstrength_np(gp, efs, e_gamma: np.ndarray, irad: int, l: int):  # noqa: E741
             beta2 = torch.as_tensor(_f(gp.beta2), dtype=_T)
             x2 = float(torch.exp(-upf * torch.abs(beta2)))
             out = out + upc * torch.exp(_t(-upe * e_gamma)).numpy() * x2
+    bumps = gp.eadj_e1 if flag_e1 else (gp.eadj_m1 if flag_m1 else ())
+    if bumps:  # ENGADJ (strength.fstrength_gp)
+        from physics.hf import eadj
+
+        out = out * eadj.bump_values(bumps, e_gamma)
     return out

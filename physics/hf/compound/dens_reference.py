@@ -60,6 +60,7 @@ from physics.hf.input.nuclides import coulomb_barriers
 from physics.hf.structure.levels import discrete_levels
 from physics.hf.structure.masses import masses
 from physics.hf import stagetime
+from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
 NUMEN = int(__import__("os").environ.get("INCOGNITA_NUMEN", "250"))  # INCOGNITA_NUMEN (PECOLLAPSE): reference runs only
 NUML = 60  # A0_talys_mod.f90 numl
@@ -119,7 +120,7 @@ def _ld_build(Z: int, A: int, Zt: int, At: int, overrides: dict | None,
     if not overrides and not torch.is_grad_enabled():
         from physics.hf.density import ld_nx2
         from physics.hf.density.ctwindow import enabled as _ctw
-        from physics.hf.density.ctwindow2 import enabled as _ctw2
+        from physics.hf.density.ctwindow2 import mode as _ctw2
 
         k = ld_nx2.densitypar_key(Z, A, o, p, m, lv) if ld_nx2._xt_on() else None
         if k is not None:
@@ -128,7 +129,7 @@ def _ld_build(Z: int, A: int, Zt: int, At: int, overrides: dict | None,
             xacc = _XACC if matching_xacc is None else matching_xacc
             return ld_nx2.shared_record(
                 ("ld", k, bool(o.flagldglobal), bool(o.flagctmglob), float(xacc))
-                + (("ctwindow2",) if _ctw2(o) else (("ctwindow",) if _ctw(o) else ())),
+                + ((("ctwindow2",) + (("cont",) if _ctw2(o) == "cont" else ())) if _ctw2(o) else (("ctwindow",) if _ctw(o) else ())),
                 o.Zinit - Z, o.Ninit - (A - Z), lambda: _ld_match(Z, A, o, p, m, lv, xacc))
     return _ld_match(Z, A, o, p, m, lv, _XACC if matching_xacc is None else matching_xacc)
 
@@ -136,7 +137,7 @@ def _ld_build(Z: int, A: int, Zt: int, At: int, overrides: dict | None,
 def _ld_match(Z: int, A: int, o, p, m, lv, xacc: float):
     """`_ld_build`'s record from its structure: densitypar, tables, densitymatch, Ntop/Nlast/Ncum."""
     from physics.hf.density.ctwindow import enabled as _ctw
-    from physics.hf.density.ctwindow2 import enabled as _ctw2
+    from physics.hf.density.ctwindow2 import mode as _ctw2
     from physics.hf.density.matching import densitycum, densitymatch
     from physics.hf.density.parameters import densitypar
     from physics.hf.density.tables import attach_tables
@@ -354,36 +355,26 @@ def _transmission(Zt: int, At: int, enincmax_mev: float, overrides: dict | None 
 
 
 @lru_cache(maxsize=32)
-def _transmission_sfunc(Zt: int, At: int, enincmax_mev: float, mode: str, table: str) -> dict:
+def _transmission_sfunc(Zt: int, At: int, enincmax_mev: float, mode: str, table: str, div: tuple = ()) -> dict:
     """SLINPUT (`omp.sfunc`): the emission-grid neutron Tjl/Tl x F_l(E_lab) = [S_l,meas / S_l,model(1 keV)]^w,
     clipped at 1, with S_l,model log-interpolated at 1 keV from this grid's own Tl; the neutron inverse
     sigma_reac scales with sum (2l+1) Tl. Keyed on the mode and table, so a warm worker never mixes arms.
-    `flagompall n`: this is the ONE neutron set of the cascade, i.e. the target's (Zt, At)."""
-    from physics.hf.core.grids import incident_kinematics
+    `flagompall n`: this is the ONE neutron set of the cascade, i.e. the target's (Zt, At).
+    `div` (ROTEXIT1CN3 `sfexit ccf`, default ()): ((l, f_l), ...) -- S_l,meas / f_l replaces S_l,meas."""
     from physics.hf.omp import sfunc
-    from physics.hf.omp.schrodinger import PARMASS_AMU, nucleus_mass_amu
 
     d = _transmission_cached(Zt, At, enincmax_mev)
     meas = sfunc.measured(Zt, At)
     if not meas or 1 not in d:
         return d
     ud, tl, lm = d[1]
-    rg = run_grid(Zt, At, enincmax_mev)
-    n_e = tl.shape[0]
-    m_res = nucleus_mass_amu(Zt, At)
-    e_lab = np.asarray(rg.egrid[:n_e], dtype=float) / (m_res / (m_res + PARMASS_AMU[1]))
-    pos = e_lab > 0
-    wk = np.zeros(n_e)
-    wk[pos] = [incident_kinematics(float(e), 1, m_res, 0.0, 0.0)[1] for e in e_lab[pos]]
-    model = {}
-    for l in meas:
-        if l >= tl.shape[1]:
-            continue
-        ok = pos & (tl[:, l] > 0) & (e_lab <= sfunc.E_FULL_MEV)
-        s = np.full(n_e, np.nan)
-        s[ok] = sfunc.strength(tl[ok, l], e_lab[ok], At, wk[ok], l)
-        model[l] = sfunc.interp_ref(e_lab[ok], s[ok])
-    sfunc.LAST[(int(Zt), int(At), "inv")] = {"model": dict(model), "meas": dict(meas)}
+    e_lab, model = _sfunc_inv_model(Zt, At, enincmax_mev, tuple(sorted(meas)))
+    if not div:
+        sfunc.LAST[(int(Zt), int(At), "inv")] = {"model": dict(model), "meas": dict(meas)}
+    else:
+        dv = dict(div)
+        meas = {l: s / dv.get(l, 1.0) for l, s in meas.items()}
+        sfunc.LAST[(int(Zt), int(At), "ccf")] = {"model": dict(model), "meas": dict(meas), "f": dict(dv)}
     F = sfunc.factors(meas, model, e_lab)
     if not F:
         return d
@@ -397,9 +388,38 @@ def _transmission_sfunc(Zt: int, At: int, enincmax_mev: float, mode: str, table:
     out = dict(d)
     out[1] = (ud2, tl2, lm)
     sig = d["sigma_reac_mb"].clone()
+    n_e = tl.shape[0]
     sig[0, : n_e] = sig[0, : n_e] * torch.as_tensor(r, dtype=sig.dtype)
     out["sigma_reac_mb"] = sig
     return out
+
+
+@lru_cache(maxsize=32)
+def _sfunc_inv_model(Zt: int, At: int, enincmax_mev: float, ls: tuple) -> tuple:
+    """(E_lab grid, {l: S_l,model(1 keV)}) of the target's emission-grid neutron Tl (SLINPUT's inverse-channel
+    reference strength functions; spr.f90 form, log-log interpolated at 1 keV)."""
+    from physics.hf.core.grids import incident_kinematics
+    from physics.hf.omp import sfunc
+    from physics.hf.omp.schrodinger import PARMASS_AMU, nucleus_mass_amu
+
+    d = _transmission_cached(Zt, At, enincmax_mev)
+    tl = d[1][1]
+    rg = run_grid(Zt, At, enincmax_mev)
+    n_e = tl.shape[0]
+    m_res = nucleus_mass_amu(Zt, At)
+    e_lab = np.asarray(rg.egrid[:n_e], dtype=float) / (m_res / (m_res + PARMASS_AMU[1]))
+    pos = e_lab > 0
+    wk = np.zeros(n_e)
+    wk[pos] = [incident_kinematics(float(e), 1, m_res, 0.0, 0.0)[1] for e in e_lab[pos]]
+    model = {}
+    for l in ls:
+        if l >= tl.shape[1]:
+            continue
+        ok = pos & (tl[:, l] > 0) & (e_lab <= sfunc.E_FULL_MEV)
+        s = np.full(n_e, np.nan)
+        s[ok] = sfunc.strength(tl[ok, l], e_lab[ok], At, wk[ok], l)
+        model[l] = sfunc.interp_ref(e_lab[ok], s[ok])
+    return e_lab, model
 
 
 @stagetime.timed("setup.omp_inverse")
@@ -487,6 +507,28 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
         out["tlog"] = True if tlog.mode(rg.options) == "c" else "l"
     if tlog.ref(rg.options) and not differentiable:
         out["tlogref"] = _tlogref_tables(Zt, At, rg, rg_params, lcap, eendmax)
+    # ALPHATEMP (default OFF; omp/alphatemp.py): the alpha ABSORPTION potential (alphaomp 6) on the same grid and keep window,
+    # for the cold residual states. The hot table is the run's own (out[6]); lmax stays the run's.
+    from physics.hf.omp import alphatemp
+
+    ts = alphatemp.tstar(rg.options)
+    if ts > 0.0 and not differentiable:
+        import dataclasses
+
+        from physics.hf.omp.omp_nx2 import inverse_kept
+
+        o6 = dataclasses.replace(rg.options, alphaomp=6)
+        k6 = {t: (keep_e[t].numpy() if t == 6 else np.zeros_like(keep_e[t].numpy())) for t in range(1, 7)}
+        tc = inverse_kept(Zt, At, np.asarray(rg.egrid[:E], dtype=float), rg.maxen, o6, rg_params, lcap, k6)
+        if tc is None:
+            tc = inverse_channels(cases, grid, o6, rg_params, lmax=lcap)
+        t6 = torch.as_tensor(tc.tjl, dtype=DTYPE)[0, 5]
+        t6 = torch.where(keep_e[6][: t6.shape[0], None, None], t6, torch.zeros((), dtype=DTYPE))
+        out["alpha_cold"] = (_to_updown_axis(t6, 6).detach().numpy().astype(float),
+                             t6[..., 0].detach().numpy().astype(float), out[6][2])
+        out["alphatemp_ustar"] = alphatemp.ustar(At + 1 - 4, ts)
+        out["alphatemp_tstar"] = ts
+        out["alphatemp_dom"] = alphatemp.domain(rg.options)  # KEVCOLD (n = everywhere)
     return out
 
 
@@ -502,7 +544,7 @@ def _eendmax(Zt: int, At: int, enincmax_mev: float) -> dict:
     c = talys_constants()
     rg = run_grid(Zt, At, enincmax_mev)
     eninccm, _ = incident_kinematics(
-        enincmax_mev, rg.options.k0, float(rg.m.mass_amu[0, 1]),
+        enincmax_mev, rg.options.k0, float(rg.m.mass_amu[target_mass_index()]),
         float(rg.m.specmass[c["parZ"][rg.options.k0], c["parN"][rg.options.k0], rg.options.k0]),
         float(rg.m.redumass_amu[c["parZ"][rg.options.k0], c["parN"][rg.options.k0],
                                 rg.options.k0]),
@@ -617,6 +659,8 @@ def _to_updown_axis(tjl: torch.Tensor, particle: int) -> torch.Tensor:
     out = torch.zeros_like(tjl)
     if particle == 3:  # deuteron: spin 1, updown = -1, 0, +1 already
         return tjl
+    if particle == 0:  # ENGPROJ: incident photon, Tjlinc(irad, l) is stored at index irad + 1 already (incident_gamma)
+        return tjl
     if particle == 6:  # alpha: spin 0, only updown = 0
         out[..., 1] = tjl[..., 0]
         return out
@@ -646,8 +690,19 @@ def _gamma_parameters(Zt: int, At: int, fit: tuple | None = None):
     return _build_gamma_parameters(Zt, At, None, fit)
 
 
+@lru_cache(maxsize=64)
+def _gamma_parameters_nuc(Z: int, A: int, fit: tuple | None = None):
+    """ENGPROJ GPRESFIX: `_gamma_parameters` of the nucleus (Z, A) itself (not of a pseudo-target's compound).
+
+    TALYS: gammapar.f90:1 (gammapar)
+    Test: tests/hf/test_engproj_gamma.py
+    """
+    return _build_gamma_parameters(Z, A, None, fit, nucleus=(Z, A))
+
+
 @stagetime.timed("setup.psf")
-def _build_gamma_parameters(Zt: int, At: int, overrides: dict | None, fit: tuple | None = None):
+def _build_gamma_parameters(Zt: int, At: int, overrides: dict | None, fit: tuple | None = None,
+                            nucleus: tuple | None = None):
     """`_gamma_parameters` with T7's `overrides` (requires_grad tensors keep their graph).
 
     PARAMWIRE: `fit`'s `aadjust` reaches `alev` (densitypar with the adjusted `Params`, as TALYS's
@@ -658,8 +713,13 @@ def _build_gamma_parameters(Zt: int, At: int, overrides: dict | None, fit: tuple
     from physics.hf.density.parameters import densitypar
     from physics.hf.gamma.parameters import gamma_parameters
 
+    from physics.hf.projectile import gpres_active, k0 as _k0, pseudo_target
+
+    if nucleus is not None:  # ENGPROJ GPRESFIX: the run whose initial compound nucleus IS this nucleus
+        Zt, At = pseudo_target(int(nucleus[0]), int(nucleus[1]))
     o, p, m = _structure_of(Zt, At)
     Zc, Ac = compound_of(Zt, At)  # CPINC: (Zt, At + 1) for a neutron
+    s_type = _k0() if gpres_active() else 1  # GPRESFIX: S(Zcomp, Ncomp, k0) (fstrength.f90:192); legacy S_n
     lv = discrete_levels(Zc, Ac, o, m, p)
     if fit is not None and fit[0] is not None:
         p = with_aadjust(p, o, ((Zc, Ac, fit[0]),))
@@ -675,7 +735,7 @@ def _build_gamma_parameters(Zt: int, At: int, overrides: dict | None, fit: tuple
     if gov:
         overrides = {**gov, **(overrides or {})}
     return gamma_parameters(
-        Zc, Ac, o, zix=0, nix=0, S_k0_mev=float(m.s_mev[0, 0, 1]),
+        Zc, Ac, o, zix=0, nix=0, S_k0_mev=float(m.s_mev[0, 0, s_type]),
         delta_mev=float(ld.delta_mev[0]), alev_per_mev=float(ld.alev),
         beta2=float(ld.beta2[0]), projectile_k0=o.k0, flagcol=bool(ld.flagcol),
         overrides=overrides,
@@ -684,7 +744,7 @@ def _build_gamma_parameters(Zt: int, At: int, overrides: dict | None, fit: tuple
 
 @stagetime.timed("setup.psf")
 def strength_fn(Zt: int, At: int, e_inc_mev: float, overrides: dict | None = None,
-                fit: tuple | None = None):
+                fit: tuple | None = None, nucleus: tuple | None = None):
     """`fstrength(Efs, Egamma, irad, l)` for the compound nucleus, T7's port.
 
     With `overrides` (T7's `gamma_parameters` overrides: `ftable`, `wtable`, `sgr_mb`, ... as
@@ -698,7 +758,9 @@ def strength_fn(Zt: int, At: int, e_inc_mev: float, overrides: dict | None = Non
     from physics.hf.gamma.strength import fstrength
 
     if overrides:
-        gp, o = _build_gamma_parameters(Zt, At, overrides, fit)
+        gp, o = _build_gamma_parameters(Zt, At, overrides, fit, nucleus=nucleus)
+    elif nucleus is not None:  # ENGPROJ GPRESFIX
+        gp, o = _gamma_parameters_nuc(int(nucleus[0]), int(nucleus[1]), fit)
     else:
         gp, o = _gamma_parameters(Zt, At) if fit is None else _gamma_parameters(Zt, At, fit)
     # PARAMWIRE: only a TENSOR override is on a graph; float overrides and parameter sets return
@@ -738,7 +800,7 @@ def dens_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float) -> D
     tr_all = _transmission(Zt, At, enincmax_mev)
     Zc, Ac = compound_of(Zt, At)  # CPINC: (Zt, At + 1) for a neutron
     eninccm, _ = incident_kinematics(
-        inp.e_inc_mev, inp.k0, float(rg.m.mass_amu[0, 1]),
+        inp.e_inc_mev, inp.k0, float(rg.m.mass_amu[target_mass_index()]),
         float(rg.m.specmass[c["parZ"][inp.k0], c["parN"][inp.k0], inp.k0]),
         float(rg.m.redumass_amu[c["parZ"][inp.k0], c["parN"][inp.k0], inp.k0]),
         rg.options.flagrel)

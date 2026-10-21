@@ -37,6 +37,7 @@ import numpy as np
 import torch
 from torch import Tensor
 
+from physics.hf import eadj as _eadj
 from physics.hf.native import nx2
 
 __all__ = ["densitypar_floats", "densitypar_key", "fermi_tables", "match_roots", "ncum", "retarget",
@@ -150,7 +151,7 @@ def rhogrid(ld, A: int, ex_mev, dex_mev, maxj, nlast: int, numj: int) -> np.ndar
     Test: tests/hf/test_nx2_ld.py
     """
     global _RHOGRID_FN
-    if os.environ.get("HF_NX2_LD", "1") == "0":
+    if (os.environ.get("HF_NX2_LD", "1") == "0" or not _eadj.ld_native_ok()):
         return None
     fn = _RHOGRID_FN
     if fn is None:
@@ -222,7 +223,7 @@ def densitypar_floats(Z: int, A: int, options, params, masses, levels, deformati
     from physics.hf.core.tensors import DTYPE
     from physics.hf.density import parameters as P
 
-    if os.environ.get("HF_NX2_LD", "1") == "0":
+    if (os.environ.get("HF_NX2_LD", "1") == "0" or not _eadj.ld_native_ok()):
         return None
     Zix, Nix = options.Zinit - Z, options.Ninit - (A - Z)
     ldmod = options.ldmodel_of(Zix, Nix)
@@ -305,7 +306,7 @@ def densitypar_key(Z: int, A: int, options, params, masses, levels, deformation=
     TALYS: densitypar.f90:1 (densitypar)
     Test: tests/hf/test_cengld2.py
     """
-    if barriers is not None or os.environ.get("HF_NX2_LD", "1") == "0":
+    if barriers is not None or (os.environ.get("HF_NX2_LD", "1") == "0" or not _eadj.ld_native_ok()):
         return None
     last = _LAST_KEY[0]
     if (last is not None and last[0] == Z and last[1] == A and last[2] is options

@@ -386,7 +386,7 @@ def _straight_through(value: float, t: Tensor) -> Tensor:
 
 
 def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = False,
-                 xacc: float = _XACC, ctwindow: bool = False, ctwindow2: bool = False) -> LDNucleus:
+                 xacc: float = _XACC, ctwindow: bool = False, ctwindow2: bool | str = False) -> LDNucleus:
     """`ld` with T [MeV], E0 [MeV] and Exmatch [MeV] resolved for every barrier as
     densitymatch.f90 (CTM models only: skipped for ldmodel 2, 3 and for tabulated barriers),
     including the Tadjust/E0adjust second passes and the empirical fallbacks.
@@ -402,7 +402,8 @@ def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = 
     if ctwindow2:
         from physics.hf.density.ctwindow2 import anchor as anchor2
 
-        return anchor2(densitymatch(ld, flagldglobal, flagctmglob, xacc))
+        # ARTFIX: ctwindow2 = "cont" (or True) anchors no-root records at least |g|; "root" = the pre-ARTFIX rule
+        return anchor2(densitymatch(ld, flagldglobal, flagctmglob, xacc), cont=(ctwindow2 != "root"))
     if ctwindow:
         from physics.hf.density.ctwindow import anchor
 

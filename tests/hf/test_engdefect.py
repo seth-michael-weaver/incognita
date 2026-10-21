@@ -20,6 +20,16 @@ import numpy as np
 import pytest
 import torch
 
+
+@pytest.fixture(scope="module", autouse=True)
+def _alphatemp_off():
+    """ALPHAADOPT (alphatemp default ON 0.64): the GPU batch path does not wire ALPHATEMP (it refuses the switch); this module runs at alphatemp 0."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_ALPHATEMP", "0")
+        yield
+
+
+
 Z, A = 95, 308
 # MeV, float32-rounded Stage C grid points: 0.287 (xsflux > 0), then 0.336 / 0.393 / 0.538 (xsflux < 0 in TALYS)
 E_MEV = tuple(float(np.float32(e)) for e in (0.2869006, 0.3357390, 0.3928910, 0.5380377))

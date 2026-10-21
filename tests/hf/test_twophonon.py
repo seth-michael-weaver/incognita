@@ -28,6 +28,16 @@ from physics.hf.ecis.coupling import (
 from physics.hf.ecis.reference import coupled_band
 from physics.hf.ecis.vibm import Phonons, VibLevel, reduced_matrix_elements, scheme_from_band
 
+
+@pytest.fixture(scope="module", autouse=True)
+def _alphatemp_off():
+    """ALPHAADOPT (alphatemp default ON 0.64): the U-238 chained check compares to stock TALYS (one alpha T for every residual state); this module runs at alphatemp 0."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_ALPHATEMP", "0")
+        yield
+
+
+
 FIXTURE = Path(__file__).parent / "fixtures" / "ecis_vibm.json"
 # Zn-64 ... Ce-136: the 37 `colltype V` nuclides of features/talys_sweep_broad with a
 # two-phonon level, from docs/results/hf-ecis-twophonon.md §1.
@@ -362,7 +372,7 @@ def test_binary_feed_adds_the_binary_cross_section_once_per_type():
     assert res.fisfeedex_mb[key][4] == 5.0
 
 
-def test_chained_u238_fission_matches_talys():
+def test_chained_u238_fission_matches_talys(monkeypatch):
     """(n,f) of the dump-free chain against TALYS's own `fission.tot`, three energies that span
     first, second and third chance. Before TWOPH this was 0 at every energy:
     `engine.ChainedFull` passed `tfis=None` and `flagfission=False`.
@@ -376,6 +386,7 @@ def test_chained_u238_fission_matches_talys():
     from physics.hf.engine import run as engine_run
     from physics.hf.talys_reference import ENERGIES_MEV
 
+    monkeypatch.setenv("INCOGNITA_EXACTFIS", "0")  # TALYS reproduction: Kemble-WKB per hump
     want = {2.0: 429.3058, 14.0: 1270.645, 20.0: 1764.395}  # default__U238/fission.tot
     res = engine_run(injection=ChainedFull(Z=92, A=238, declared_energies=ENERGIES_MEV,
                                            energies=tuple(want)))

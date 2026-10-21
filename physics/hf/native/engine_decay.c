@@ -78,6 +78,10 @@ typedef int (*psf_fn)(int64_t s, uint64_t *out);
 typedef int (*mpe_fn)(int64_t s, const uint64_t *arrs, uint64_t *block);
 
 static widths_fn k_widths;
+/* NNLEAK (default y via physics/hf/compound/nnleak.py native_arm; 0 = TALYS): nx_widths gets the initial compound
+ * nucleus's top continuum bin in wip[10] (+1) and Egamma^3-weights its continuum -> discrete Rboundary */
+static int64_t CE_NNLEAK = 0;
+void ce_set_nnleak(int64_t on) { CE_NNLEAK = on; }
 static walk_fn k_walk;
 static photon_fn k_photon;
 
@@ -163,6 +167,14 @@ static void fe_set(double *val, uint8_t *pres, int64_t ncols, int64_t a, int64_t
     pres[q] = 1;
 }
 
+/* KEVLEAK3 `dup2` part (physics/hf/kevleak2.py: INCOGNITA_KEVLEAK2 = 2 or a list naming dup2), read per call like nativex */
+static int kevleak3_dup2_on(void) {
+    const char *v = getenv("INCOGNITA_KEVLEAK2_EFF"); /* resolved per run by kevleak2.sync (deck > env > default) */
+    if (v == NULL) v = getenv("INCOGNITA_KEVLEAK2");
+    if (v == NULL || v[0] == 0) v = "2"; /* KEVLEAK3 gate candidate: default 2 = dup2 + pe2 */
+    return !strcmp(v, "2") || strstr(v, "dup2") != NULL;
+}
+
 /* multiple_native._cascade_only: a nucleus with no bin to decay */
 static double cascade_only(Ctx *c, int64_t s, int64_t zc, int64_t nc, double smin)
 {
@@ -181,6 +193,7 @@ static double cascade_only(Ctx *c, int64_t s, int64_t zc, int64_t nc, double smi
     double *val = (double *)((const uint64_t *)O[5])[0];
     uint8_t *pres = (uint8_t *)((const uint64_t *)O[6])[0];
     double gamdis = 0.0;
+    const int kv3dup = kevleak3_dup2_on();
     double *so_lines = so_sink ? calloc((size_t)(xrows * xrows), sizeof(double)) : NULL;
     for (int64_t nex = maxex; nex >= 1; nex--) {
         popexcl[nex] = XE[nex];
@@ -206,6 +219,10 @@ static double cascade_only(Ctx *c, int64_t s, int64_t zc, int64_t nc, double smi
                     int64_t last = b;
                     for (int64_t b2 = b + 1; b2 < b1; b2++) if (bk[b2] == k) last = b2;
                     double v = xsjp * br[last];
+                    if (kv3dup) { /* KEVLEAK3 dup2: the record carries every branch to k (cascade.f90:72 assigns) */
+                        v = 0.0;
+                        for (int64_t b2 = b; b2 < b1; b2++) if (bk[b2] == k) v += xsjp * br[b2];
+                    }
                     fe_set(val, pres, xrows, nex, k, v);
                     gamdis += v;
                 }
@@ -356,6 +373,8 @@ static double walk_nucleus(Ctx *c, int64_t s, int64_t zc, int64_t nc, int64_t fi
         wpp[3] = (uint64_t)sepv;
         /* SLFIRST (INCOGNITA_SFUNC_SCOPE=first): pp[17], when set, is the first compound nucleus's Tl stack */
         wpp[4] = (zc == 0 && nc == 0 && c->pp[17]) ? c->pp[17] : c->pp[0];
+        /* ROTEXIT1CN (sfexit cont, default OFF): pp[18], when set, is the stack the first CN's CONTINUUM rows read */
+        wpp[13] = (zc == 0 && nc == 0 && c->pp[17]) ? c->pp[18] : 0;
         wpp[5] = c->pp[1];
         wpp[6] = c->pp[2];
         wpp[7] = c->pp[3];
@@ -366,6 +385,7 @@ static double walk_nucleus(Ctx *c, int64_t s, int64_t zc, int64_t nc, int64_t fi
         wpp[12] = (uint64_t)tg;
         wip[0] = m; wip[1] = nj; wip[2] = I[3] % 2; wip[3] = ip[3]; wip[4] = ip[4]; wip[5] = ip[5];
         wip[6] = Ltl; wip[7] = ip[7]; wip[8] = ip[8]; wip[9] = L0;
+        wip[10] = (CE_NNLEAK && zc == 0 && nc == 0 && maxex > nlast_grid) ? maxex + 1 : 0; /* NNLEAK */
         wdp[0] = dp[0];
         Bufs bufs[7];
         int64_t *ird[7], *pdv[7], *nrows[7], *lb[7], *le[7];
@@ -718,7 +738,7 @@ int64_t ce_cascade(const int64_t *ip, const double *dp, const uint64_t *pp)
  *
  *   ip: 0 maxz, 1 maxn, 2 zinit, 3 ninit, 4 maxchannel, 5 k0, 6 flagfission, 7 index width W,
  *       8 NUMCHANTOT, 9 idnumfull (in/out), 10 opennum (in/out), 11..17 parskip(0..6),
- *       18..23 parinclude(types 1..6), 24 exmax0 columns
+ *       18..23 parinclude(types 1..6), 24 exmax0 columns, 25..30 per-ejectile caps (n p d t h a; CHANCAP)
  *   dp: 0 xseps, 1 targetE, 2 S(0, 0, k0), 3 Etotal (Exmax0(0, 0)), 4 xsbinary(-1) (fission of the
  *       primary compound nucleus, 0 without), 5 1.0 if `xsbinary` exists
  *   pp: 0 idx, 1 spec ints, 2 spec doubles, 3 spec pointers, 4 outputs (as `ce_cascade`),
@@ -729,8 +749,7 @@ int64_t ce_cascade(const int64_t *ip, const double *dp, const uint64_t *pp)
  *   spec ints (this job): 10 length of ex_mev
  */
 #define NUMLEV2 300
-#define CH_KEYS (9 * 5 * 3 * 2 * 2 * 4)
-static const int64_t CAPS[6] = {8, 4, 2, 1, 1, 3};
+#define CH_KEYS (9 * 9 * 9 * 9 * 9 * 9) /* CHANCAP: one digit per ejectile, as the channel code */
 
 typedef void (*gemv_fn)(const char *, const int *, const int *, const double *, const double *,
                         const int *, const double *, const int *, const double *, double *,
@@ -783,7 +802,7 @@ typedef struct {
 
 static int64_t key_index(int64_t in, int64_t ip, int64_t id, int64_t it, int64_t ih, int64_t ia)
 {
-    return ((((in * 5 + ip) * 3 + id) * 2 + it) * 2 + ih) * 4 + ia;
+    return ((((in * 9 + ip) * 9 + id) * 9 + it) * 9 + ih) * 9 + ia;
 }
 
 int64_t ce_channels(int64_t *ip, const double *dp, const uint64_t *pp)
@@ -842,7 +861,7 @@ int64_t ce_channels(int64_t *ip, const double *dp, const uint64_t *pp)
                     if (ip[18 + i]) lim[i] = v;
                 }
             }
-            for (int i = 0; i < 6; i++) if (lim[i] > CAPS[i]) lim[i] = CAPS[i];
+            for (int i = 0; i < 6; i++) if (lim[i] > ip[25 + i]) lim[i] = ip[25 + i]; /* CHANCAP caps */
             int64_t s = REC_S(zix, nix);
             int64_t maxex = 0, nlast = 0;
             const double *ex = NULL, *tau = NULL;
@@ -1071,7 +1090,7 @@ out:
  *
  *   ip: 0 k0, 1 Ltarget, 2 lmaxinc, 3 gammax, 4 rows of Tjlinc, 5 exact incident channel (1/0)
  *   dp: 0 Exinc, 1 transeps, 2 Efs, 3 twopi Fnorm(0)
- *   pp: 0 per type ints (7, 12), 1 per type doubles (7, 4), 2 per type inputs (7, 10),
+ *   pp: 0 per type ints (7, 12), 1 per type doubles (7, 4), 2 per type inputs (7, 11; slot 10 = ROTEXIT1CN continuum Tjl),
  *       3 per type outputs (7, 4), 4 PSF pack (7 pointers), 5 Tjlinc (rows, 3)
  *   type ints: 0 nex, 1 Nlast, 2 Ntop, 3 rhogrid rows, 4 ebegin, 5 min(eendmax, maxen), 6 maxen,
  *       7 L of Tjl, 8 egrid length, 9 L out (>= L), 10 Tjl rows, 11 photon points buffer rows
@@ -1090,7 +1109,7 @@ void ce_set_front_kernels(void *points) { k_points = (points_fn)points; }
 
 #define DI 12
 #define DD 4
-#define DP 10
+#define DP 11
 #define DO 4
 
 /* LOGTINT (default OFF; physics/hf/compound/tlog.py): Lagrange in ln T for the charged types (2..6) where the three
@@ -1114,6 +1133,27 @@ static double ce_tlog_lagr(double w1, double w2, double w3, double a, double b, 
     }
     if (a > 0.0 && b > 0.0 && c > 0.0) return exp(w1 * log(a) + w2 * log(b) + w3 * log(c));
     return (w1 * a + w2 * b) + w3 * c;
+}
+
+/* ALPHATEMP (default OFF; physics/hf/omp/alphatemp.py): the COLD alpha Tjl (alphaomp 6, same layout as type 6's Tjl) and
+ * U*. The alpha rows take Tcold^(1-g) Thot^g, g = min(1, Ex/U*), mixed on the RAW interpolated values (same Lagrange rule
+ * as the hot table: pol2, or LOGTINT/TLOGIT; with BINQUAD at every quadrature node) before the transeps cut and Fnorm.
+ * NULL / U* <= 0 = OFF = TALYS. */
+static const double *CE_AT_TJLC = 0;
+static int64_t CE_AT_ROWS = 0, CE_AT_L = 0;
+static double CE_AT_USTAR = 0.0;
+
+void ce_set_alphatemp(const double *tjlc, int64_t rows, int64_t L, double ustar)
+{
+    CE_AT_TJLC = tjlc; CE_AT_ROWS = rows; CE_AT_L = L; CE_AT_USTAR = ustar;
+}
+
+static double ce_at_mix(double hot, double cold, double g)
+{
+    if (g >= 1.0) return hot;
+    if (g <= 0.0) return cold;
+    if (hot > 0.0 && cold > 0.0) return exp((1.0 - g) * log(cold) + g * log(hot));
+    return (1.0 - g) * cold + g * hot;
 }
 
 int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
@@ -1184,7 +1224,8 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
             int64_t ib = I[4], ie = I[5], maxen = I[6], L = I[7], Lo = I[9], rows = I[10];
             const double *egrid = (const double *)P[5];
             const float *xs = (const float *)P[6];
-            const double *tjl = (const double *)P[7];
+            const double *tjl0 = (const double *)P[7];
+            const double *tjc = (const double *)P[10]; /* ROTEXIT1CN (sfexit cont, default 0 = OFF): continuum rows' Tjl */
             const int64_t *lmax = (const int64_t *)P[8];
             double *T = (double *)O[3];
             if (ib < ie) {
@@ -1214,8 +1255,12 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
                     double w1 = (e - eb) * (e - ec) / ((ea - eb) * (ea - ec));
                     double w2 = (e - ea) * (e - ec) / ((eb - ea) * (eb - ec));
                     double w3 = (e - ea) * (e - eb) / ((ec - ea) * (ec - eb));
+                    const double *tjl = (tjc && n > nlast) ? tjc : tjl0; /* ROTEXIT1CN */
                     const double *ja = tjl + na * L * 3, *jb = tjl + nb * L * 3, *jc = tjl + nc * L * 3;
                     int tlg = CE_TLOG && t >= 2;  /* LOGTINT/TLOGIT (default OFF) */
+                    /* ALPHATEMP (default OFF): alpha rows, g at the row's residual excitation */
+                    int at = t == 6 && CE_AT_TJLC && CE_AT_USTAR > 0.0 && CE_AT_ROWS == rows && CE_AT_L == L;
+                    double g = at ? (ex[n] > 0.0 ? ex[n] / CE_AT_USTAR : 0.0) : 1.0;
                     const double *dexr = (const double *)P[9];
                     if (bq_on && bq_rt >= 0.0 && dexr && n > nlast && dexr[n] > 0.0) {
                         /* BINQUAD: the incident point decays into [ex - dex/2, ex + dex/2]: tilted eps quadrature */
@@ -1250,10 +1295,17 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
                                 double v2 = (e2 - fa) * (e2 - fc) / ((fb - fa) * (fb - fc));
                                 double v3 = (e2 - fa) * (e2 - fb) / ((fc - fa) * (fc - fb));
                                 const double *sa = tjl + qa * L * 3, *sb = tjl + qb * L * 3, *sc = tjl + qc * L * 3;
+                                const double *xa = at ? CE_AT_TJLC + qa * L * 3 : 0, *xb = at ? CE_AT_TJLC + qb * L * 3 : 0;
+                                const double *xc = at ? CE_AT_TJLC + qc * L * 3 : 0;
                                 for (int64_t l = 0; l < Lq && l <= lm; l++)
                                     for (int64_t k = 0; k < 3; k++) {
                                         double v = tlg ? ce_tlog_lagr(v1, v2, v3, sa[l * 3 + k], sb[l * 3 + k], sc[l * 3 + k])
                                                    : (v1 * sa[l * 3 + k] + v2 * sb[l * 3 + k]) + v3 * sc[l * 3 + k];
+                                        if (at) { /* ALPHATEMP: the cold node by the same rule, mixed raw */
+                                            double c = tlg ? ce_tlog_lagr(v1, v2, v3, xa[l * 3 + k], xb[l * 3 + k], xc[l * 3 + k])
+                                                       : (v1 * xa[l * 3 + k] + v2 * xb[l * 3 + k]) + v3 * xc[l * 3 + k];
+                                            v = ce_at_mix(v > 0.0 ? v : 0.0, c > 0.0 ? c : 0.0, g);
+                                        }
                                         acc[l * 3 + k] += qw[kq] * (v > 0.0 ? v : 0.0);
                                     }
                             }
@@ -1271,6 +1323,12 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
                             int64_t q = l * 3 + k;
                             double v = !keep ? 0.0 : tlg ? ce_tlog_lagr(w1, w2, w3, ja[q], jb[q], jc[q])
                                                          : (w1 * ja[q] + w2 * jb[q]) + w3 * jc[q];
+                            if (at && keep) { /* ALPHATEMP: the cold row by the same rule, mixed raw */
+                                const double *ka = CE_AT_TJLC + na * L * 3, *kb = CE_AT_TJLC + nb * L * 3;
+                                const double *kc = CE_AT_TJLC + nc * L * 3;
+                                double c = tlg ? ce_tlog_lagr(w1, w2, w3, ka[q], kb[q], kc[q]) : (w1 * ka[q] + w2 * kb[q]) + w3 * kc[q];
+                                v = ce_at_mix(v > 0.0 ? v : 0.0, c > 0.0 ? c : 0.0, g);
+                            }
                             T[(n * Lo + l) * 3 + k] = (v < transeps ? 0.0 : v) * fn;
                         }
                     }

@@ -185,7 +185,7 @@ def clear_preeq_caches() -> None:
 
 
 @lru_cache(maxsize=32)
-def inverse_reaction_xs(Zt: int, At: int, enincmax_mev: float) -> np.ndarray:
+def inverse_reaction_xs(Zt: int, At: int, enincmax_mev: float, model: bool | tuple = False) -> np.ndarray:
     """`xsreac(type, nen)` [mb] for types 1..6 on the emission grid -- T5's inverse channels.
 
     Shape (7, maxen+1); row 0 (the photo-absorption) is left at zero, because it is per INCIDENT
@@ -195,7 +195,7 @@ def inverse_reaction_xs(Zt: int, At: int, enincmax_mev: float) -> np.ndarray:
     TALYS: inverse.f90:1 (inverse), inverseecis.f90:1 (inverseecis), basicxs.f90:1 (basicxs)
     Test: A-trans / A-pe
     """
-    from physics.hf.compound.dens_reference import _eendmax, _transmission, run_grid
+    from physics.hf.compound.dens_reference import _eendmax, _transmission, _transmission_cached, run_grid
 
     # SPEEDP: `_transmission` runs exactly this `inverse_channels` solve -- same run grid, same
     # `CaseBatch`, same `lmax` cap -- for the emission-grid `Tjl` the cascade needs, and now
@@ -203,7 +203,17 @@ def inverse_reaction_xs(Zt: int, At: int, enincmax_mev: float) -> np.ndarray:
     # expensive thing NODUMP added per target after the DWBA.
     rg = run_grid(Zt, At, enincmax_mev)
     E = rg.maxen + 1
-    sigma = _transmission(Zt, At, enincmax_mev)["sigma_reac_mb"]
+    # ROTEXIT1CN (`model`, default False): the model set's inverse sigma_reac (PE neutrons leave into the continuum)
+    if isinstance(model, tuple):  # ROTEXIT1CN3 (`sfexit ccf`): ((l, f_l), ...) = the CC-ratio set
+        import os
+
+        from physics.hf.compound.dens_reference import _transmission_sfunc
+        from physics.hf.omp import sfunc as _sf
+
+        sigma = _transmission_sfunc(Zt, At, enincmax_mev, _sf.mode(), os.environ.get("INCOGNITA_SFUNC_TABLE", ""),
+                                    model)["sigma_reac_mb"]
+    else:
+        sigma = (_transmission_cached if model else _transmission)(Zt, At, enincmax_mev)["sigma_reac_mb"]
     eendmax = _eendmax(Zt, At, enincmax_mev)
     out = np.zeros((7, E))
     nen = np.arange(E)
@@ -270,6 +280,11 @@ def chained_flux(Zt: int, At: int, energies: tuple[float, ...], grid=None) -> np
     `DirectResult`, the last taken BEFORE giant.f90:130 folds the collective continuum into
     `xsgrtot` (which would double-count it).
 
+    The collective continuum is part of `xsgrsum` only through `giant` (giant.f90:129-131), and
+    direct.f90:37 calls `giant` only when `flaggiant` -- never for d/t/h/alpha (input_directmodel.f90:93-97)
+    nor below `epreeq`. There `xsgrsum = 0` and TALYS's flux keeps the collective continuum
+    (ENGPROJ9: subtracting it anyway left that flux, 4.1 mb for t+Y-89 at 45 MeV, to the compound nucleus).
+
     `grid` is the energy axis the direct calculation belongs to. It is the pre-equilibrium
     energy list of the WHOLE declared grid even when `energies` is the subset a run computes
     (SPEEDP): `direct.chain._coupled` and `direct.prepare.case` both read that axis, so trimming
@@ -284,9 +299,12 @@ def chained_flux(Zt: int, At: int, energies: tuple[float, ...], grid=None) -> np
     out = np.zeros(len(energies))
     for i, e in enumerate(energies):
         k = round(float(e), 6)
-        d, _g = dirs[k]
-        x = (reac[k] - float(d.xsdirdisctot_mb) - float(d.xscollconttot_mb)
-             - float(d.xsgrcoll_mb.sum()))
+        d, flaggiant = dirs[k]
+        if flaggiant:
+            x = (reac[k] - float(d.xsdirdisctot_mb) - float(d.xscollconttot_mb)
+                 - float(d.xsgrcoll_mb.sum()))
+        else:  # no giant call: xsgrsum = 0 (direct.f90:37)
+            x = reac[k] - float(d.xsdirdisctot_mb)
         out[i] = max(x, 0.0)
     return out
 

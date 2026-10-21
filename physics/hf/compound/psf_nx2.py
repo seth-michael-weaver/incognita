@@ -91,7 +91,8 @@ def _pack(gp):
                           dtype=np.int64)
             etab, ftab = np.ascontiguousarray(etab), np.ascontiguousarray(ftab)
             dp = np.array([_f(gp.S_k0_mev), _f(gp.delta_mev), _f(gp.alev_per_mev), _f(gp.beta2),
-                           PI2H2C2])
+                           PI2H2C2, len(gp.eadj_e1), len(gp.eadj_m1)]
+                          + [x for b in gp.eadj_e1 + gp.eadj_m1 for x in _bump_row(b)])
             with np.errstate(divide="ignore", invalid="ignore"):
                 lftab = np.where(ftab > 0.0, np.log10(np.where(ftab > 0.0, ftab, 1.0)), 0.0)
             pack = (ip, dp, par, etab, ftab, np.ascontiguousarray(lftab), tq)
@@ -99,6 +100,12 @@ def _pack(gp):
         _PACKS.clear()
     _PACKS[id(gp)] = (gp, pack)
     return pack
+
+
+def _bump_row(b) -> list:
+    """ENGADJ: one bump as nx2_psf.c reads it, [shape (0 tal, 1 gau), p0, p1, p2, p3]: tal Ea Eb Em D, gau E0 W D 0."""
+    a = [float(x) for x in b.args]
+    return [0.0] + a if b.shape == "tal" else [1.0] + a + [0.0]
 
 
 def _args():

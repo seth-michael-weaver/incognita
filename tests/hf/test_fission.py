@@ -256,8 +256,9 @@ def _ld(Z, A, o, p, fp):
 
 @needs_structure
 @needs_u238
-def test_tfission_reproduces_the_u239_transmission_dump():
+def test_tfission_reproduces_the_u239_transmission_dump(monkeypatch):
     """A-fis on the U-239 compound nucleus: T, Gamma, tau and rho at every incident energy."""
+    monkeypatch.setenv("INCOGNITA_EXACTFIS", "0")  # TALYS reproduction: Kemble-WKB per hump
     d = R.extract("U238", "default", WORKDIR)
     blocks = R.read_transmission(d / "fis092239.trans")
     groups = R.transmission_groups(blocks)
@@ -376,8 +377,9 @@ def test_sierk_and_rldm_give_physical_barriers():
 
 @needs_structure
 @needs_u238
-def test_a_fis_gate_on_u238():
+def test_a_fis_gate_on_u238(monkeypatch):
     """The published A-fis row for one target, so a regression fails the suite, not just the CLI."""
+    monkeypatch.setenv("INCOGNITA_EXACTFIS", "0")  # TALYS reproduction: Kemble-WKB per hump
     from physics.hf.fission.score import TOLERANCE, score_target
 
     res = score_target("U238", workdir=WORKDIR)

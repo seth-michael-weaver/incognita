@@ -90,6 +90,7 @@ class FissionChain:
         self.o = options
         self.maxj = int(maxj)
         self._nuc: dict[tuple[int, int], _Nucleus | None] = {}
+        self._nodes: dict = {}  # ENGADJ: per (Z, A) the path-scale node nuclei, or None
         self._masses = None
 
     # ---- lazily built per-nucleus pieces -----------------------------------------------------
@@ -121,6 +122,12 @@ class FissionChain:
         key = (Z, A)
         if key in self._nuc:
             return self._nuc[key]
+        got = self._build(Z, A)
+        self._nuc[key] = got
+        return got
+
+    def _build(self, Z: int, A: int, sv: float = 1.0, sm: float = 1.0) -> _Nucleus | None:
+        """`nucleus` built afresh; ENGADJ nodes scale the (Zix, Nix) `vfiscoradjust` / `rmiufiscoradjust` by sv / sm."""
         got = None
         if A > FISLIM:
             from physics.hf.density.matching import densitymatch
@@ -131,18 +138,62 @@ class FissionChain:
 
             # masses from `params()` too: no parameter-set keyword reaches structure.masses
             p, ms = self.params(), self.masses()
+            if sv != 1.0 or sm != 1.0:
+                p = _scaled_params(p, self.o.Zinit - Z, self.o.Ninit - (A - Z), sv, sm)
             fp = fission_parameters(Z, A, self.o, p, masses=ms)
             if int(fp.nfisbar) > 0:
                 lv = discrete_levels(Z, A, self.o, ms, p)
                 from physics.hf.density.ctwindow import enabled as _ctw
-                from physics.hf.density.ctwindow2 import enabled as _ctw2
+                from physics.hf.density.ctwindow2 import mode as _ctw2
 
                 ld = densitymatch(attach_tables(densitypar(
                     Z, A, self.o, p, ms, lv, barriers=barrier_levels(fp))), ctwindow=_ctw(self.o),
                     ctwindow2=_ctw2(self.o))
                 got = _Nucleus(fp=fp, ld=ld, odd=A % 2, grids={})
-        self._nuc[key] = got
         return got
+
+    # ---- ENGADJ: energy-dependent fission path (physics/hf/eadj.py) ----------------------------
+
+    def nodes(self, Z: int, A: int):
+        """(nv, nm, node nuclei in (iv, im) row-major order, index of the (1, 1) node) when `eadj vfiscor|rmiufiscor
+        Z A ...` bumps act on this nucleus, else None (the default). The base node IS `nucleus(Z, A)`."""
+        key = (Z, A)
+        if key in self._nodes:
+            return self._nodes[key]
+        from physics.hf import eadj
+
+        got = None
+        if eadj.on():
+            bv, bm = eadj.nucleus_bumps("vfiscor", Z, A), eadj.nucleus_bumps("rmiufiscor", Z, A)
+            base = self.nucleus(Z, A) if (bv or bm) else None
+            if base is not None:
+                nv, nm = eadj.node_set(bv), eadj.node_set(bm)
+                nuc = [base if (sv == 1.0 and sm == 1.0) else self._build(Z, A, sv, sm) for sv in nv for sm in nm]
+                if all(n is not None and int(n.fp.nfisbar) == int(base.fp.nfisbar) for n in nuc):
+                    got = (nv, nm, nuc, nv.index(1.0) * len(nm) + nm.index(1.0))
+                else:
+                    raise ValueError(f"ENGADJ: a fission-path node of ({Z}, {A}) changes the barrier count")
+        self._nodes[key] = got
+        return got
+
+    def combine(self, Z: int, A: int, nod, vals: list, ex_mev) -> np.ndarray:
+        """The node results `vals` (leading axis = rows at mother energies ex_mev) at each row's own path scale."""
+        from physics.hf import eadj
+
+        nv, nm, _, ib = nod
+        ex = np.asarray(ex_mev, dtype=np.float64).reshape(-1)
+        sv, sm = eadj.fission_factors(Z, A, ex)
+        out = eadj.fission_interp(vals, eadj.fission_weights(nv, nm, sv, sm))
+        bad = ~np.isfinite(out)
+        if bad.any():
+            # ENGNAN: the Lagrange combine overflowed (ill-conditioned node set): those cells take the piecewise-linear
+            # combine of the same node values (finite, bounded by them); every finite cell is unchanged bit for bit.
+            alt = eadj.fission_interp(vals, eadj.fission_weights(nv, nm, sv, sm, bilin=True))
+            out = np.where(bad, alt, out)
+        base = (sv == 1.0) & (sm == 1.0)
+        if base.any():
+            out[base] = np.asarray(vals[ib], dtype=np.float64)[base]
+        return out
 
     def nfisbar(self, Z: int, A: int) -> int:
         n = self.nucleus(Z, A)
@@ -172,11 +223,27 @@ class FissionChain:
         n = self.nucleus(Z, A)
         if n is None:
             return None
-        return fission_transmission(
-            n.fp, self._grid(n, exfis_top_mev), n.ld, float(exinc_mev), float(dexinc_mev),
-            self.o, exmax_mev=exmax_mev, odd=n.odd, maxj=self.maxj, primary=primary,
-            fnorm=fnorm,
-        )
+
+        def one(n):
+            return fission_transmission(
+                n.fp, self._grid(n, exfis_top_mev), n.ld, float(exinc_mev), float(dexinc_mev),
+                self.o, exmax_mev=exmax_mev, odd=n.odd, maxj=self.maxj, primary=primary,
+                fnorm=fnorm,
+            )
+
+        nod = self.nodes(Z, A)
+        if nod is None:
+            return one(n)
+        fts = [one(m) for m in nod[2]]
+        from dataclasses import fields
+
+        import torch
+
+        out = {}
+        for f in fields(fts[0]):
+            arrs = [getattr(ft, f.name).detach().cpu().numpy()[None] for ft in fts]
+            out[f.name] = torch.from_numpy(self.combine(Z, A, nod, arrs, [exinc_mev])[0])
+        return type(fts[0])(**out)
 
     def compound_target(self, Z: int, A: int, exinc_mev: float, fnorm: float = 1.0) -> dict:
         """`tfis`/`tfisA`/`rhofisA`/`nfisbar` for `compound.chain.compound_inputs`, i.e. the
@@ -191,21 +258,14 @@ class FissionChain:
         Test: A-fis / E2E
         """
         n = self.nucleus(Z, A)
-        got = None
-        if n is not None:
-            from physics.hf.fission.fis_ceng import target_transmission
-
-            got = target_transmission(self, n, float(exinc_mev), fnorm)  # CENGFIS: C, once
-        if got is not None:
-            m, a, rho = got
-        else:
-            ft = self.transmission(Z, A, exinc_mev, 0.0, exinc_mev, exmax_mev=exinc_mev,
-                                   primary=True, fnorm=fnorm)
-            if ft is None:
-                return {"tfis": {}, "tfisA": {}, "rhofisA": {}, "nfisbar": 0}
-            m = ft.tfis.detach().cpu().numpy()
-            a = ft.tfisA.detach().cpu().numpy()
-            rho = ft.rhofisA.detach().cpu().numpy()
+        nod = self.nodes(Z, A) if n is not None else None
+        got = self._target_arrays(Z, A, n, exinc_mev, fnorm)
+        if got is None:
+            return {"tfis": {}, "tfisA": {}, "rhofisA": {}, "nfisbar": 0}
+        if nod is not None:  # ENGADJ: each node's arrays at the incident compound energy, combined
+            per = [got if m is n else self._target_arrays(Z, A, m, exinc_mev, fnorm) for m in nod[2]]
+            got = tuple(self.combine(Z, A, nod, [p[i][None] for p in per], [exinc_mev])[0] for i in range(3))
+        m, a, rho = got
         odd = n.odd
         tfis = _by_jp(m, odd)
         tfisA, rhofisA = {}, {}
@@ -215,6 +275,25 @@ class FissionChain:
             rhofisA[(j2, par)] = rho[j, 0 if par < 0 else 1]
         return {"tfis": tfis, "tfisA": tfisA, "rhofisA": rhofisA,
                 "nfisbar": self.nfisbar(Z, A)}
+
+    def _target_arrays(self, Z: int, A: int, n, exinc_mev: float, fnorm: float):
+        """(tfis, tfisA, rhofisA) arrays of the primary compound for nucleus object `n`, or None."""
+        got = None
+        if n is not None:
+            from physics.hf.fission.fis_ceng import target_transmission
+
+            got = target_transmission(self, n, float(exinc_mev), fnorm)  # CENGFIS: C, once
+        if got is not None:
+            return got
+        if n is None:
+            return None
+        from physics.hf.fission.transmission import fission_transmission
+
+        ft = fission_transmission(
+            n.fp, self._grid(n, exinc_mev), n.ld, float(exinc_mev), 0.0, self.o,
+            exmax_mev=exinc_mev, odd=n.odd, maxj=self.maxj, primary=True, fnorm=fnorm)
+        return (ft.tfis.detach().cpu().numpy(), ft.tfisA.detach().cpu().numpy(),
+                ft.rhofisA.detach().cpu().numpy())
 
     def bin_triples(self, Z: int, A: int, ex_mev: float, dex_mev: float, exmax_mev: float,
                     exfis_top_mev: float, fnorm: float = 1.0) -> dict:
@@ -272,3 +351,20 @@ def fission_chain(Z: int, A: int, options=None, params=None, fit: tuple = ()
     if not bool(o.flagfission):
         return None
     return FissionChain(Z, A, o, params, fit=fit)
+
+
+def _scaled_params(p, zix: int, nix: int, sv: float, sm: float):
+    """ENGADJ: `p` with the (zix, nix) `vfiscoradjust` / `rmiufiscoradjust` cells times sv / sm (a new Params)."""
+    from physics.hf.input.defaults import PARAM_SPECS
+
+    vals = dict(p.values)
+    for key, f in (("vfiscoradjust", sv), ("rmiufiscoradjust", sm)):
+        if f == 1.0:
+            continue
+        spec = PARAM_SPECS[key]
+        pos = tuple(i + o for i, o in zip((zix, nix), spec.offsets, strict=True))
+        t = vals[spec.keyword].clone()
+        t[pos] = t[pos] * f
+        vals[spec.keyword] = t
+    return type(p)(values=vals)
+

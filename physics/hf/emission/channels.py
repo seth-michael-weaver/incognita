@@ -46,6 +46,51 @@ PARN = (0, 1, 0, 1, 2, 1, 2)  # constants.f90: parN
 NUMZCHAN, NUMNCHAN = 6, 10  # A0_talys_mod.f90: numZchan, numNchan
 NUMIN, NUMIP, NUMID, NUMIT, NUMIH, NUMIA = 8, 4, 2, 1, 1, 3
 NUMCHANTOT = 35 * 7  # A0_talys_mod.f90:92, memorypar = 8 at the default `memory` setting
+# CHANCAP (Incognita extension, not TALYS; deck keyword `chancap y|n`, default y; n = the stock caps above, production engine-20261017-2 bit for bit):
+# the per-ejectile caps leave flux the residual book (rp) keeps in no exclusive channel -- Be-9 + n at 20.5 MeV,
+# Be-10* -> t -> Li-7* -> t -> He-4 (channel 000200, two tritons) is never enumerated with numit = 1, 3.5 mb of
+# sigma_nonel. y lifts every per-ejectile cap to 8 (the channel code keeps one digit per ejectile), so only
+# channels.f90:204-225's physical limits and `maxchannel` bind, and widens the channel table to 4 x NUMCHANTOT so
+# the extra (sub-xseps) candidates cannot fill it (idnumfull) before a channel the stock table holds.
+CHANCAP_CAPS = (8, 8, 8, 8, 8, 8)
+CHANCAP_NUMCHANTOT = 4 * NUMCHANTOT
+
+
+def chancap_on() -> bool:
+    """CHANCAP for this run: `INCOGNITA_CHANCAP` (0/n/off, 1/y/on) wins, else the run's deck keyword as
+    `default_options` resolved it (`INCOGNITA_CHANCAP_EFF`), else on (the keyword default).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    import os
+
+    v = os.environ.get("INCOGNITA_CHANCAP", "").strip().lower()
+    if v == "":
+        v = os.environ.get("INCOGNITA_CHANCAP_EFF", "1").strip().lower()
+    if v in ("0", "n", "off", "no"):
+        return False
+    if v in ("1", "y", "on", "yes"):
+        return True
+    raise ValueError(f"INCOGNITA_CHANCAP={v!r}: 0/n/off or 1/y/on")
+
+
+def caps() -> tuple[int, ...]:
+    """The per-ejectile caps (n, p, d, t, h, alpha) of this run.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    return CHANCAP_CAPS if chancap_on() else (NUMIN, NUMIP, NUMID, NUMIT, NUMIH, NUMIA)
+
+
+def numchantot() -> int:
+    """The exclusive channel table size of this run.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    return CHANCAP_NUMCHANTOT if chancap_on() else NUMCHANTOT
 
 
 @dataclass
@@ -83,7 +128,8 @@ class ChannelResult:
     xsresprod_mb: float
 
 
-def _limits(zix: int, nix: int, parinclude: list[bool], maxchannel: int) -> tuple[int, ...]:
+def _limits(zix: int, nix: int, parinclude: list[bool], maxchannel: int,
+            cap: tuple[int, ...] | None = None) -> tuple[int, ...]:
     """channels.f90:204-225: the largest number of each ejectile that can reach (Zix, Nix)."""
     aix = zix + nix
     lim = [0] * 6
@@ -94,14 +140,15 @@ def _limits(zix: int, nix: int, parinclude: list[bool], maxchannel: int) -> tupl
         for i, c in enumerate(cand):
             if parinclude[i + 2]:  # parinclude index 0 is type -1
                 lim[i] = c
-    caps = (NUMIN, NUMIP, NUMID, NUMIT, NUMIH, NUMIA)
-    return tuple(min(a, b) for a, b in zip(lim, caps))  # noqa: B905 (py3.9 boxes)
+    cap = caps() if cap is None else cap  # CHANCAP
+    return tuple(min(a, b) for a, b in zip(lim, cap))  # noqa: B905 (py3.9 boxes)
 
 
 @lru_cache(maxsize=4096)
-def _limits_of(zix: int, nix: int, parinclude: tuple, maxchannel: int) -> tuple[int, ...]:
+def _limits_of(zix: int, nix: int, parinclude: tuple, maxchannel: int,
+               cap: tuple[int, ...] = (NUMIN, NUMIP, NUMID, NUMIT, NUMIH, NUMIA)) -> tuple[int, ...]:
     """NATIVEX: `_limits`, memoised (a pure function of its arguments)."""
-    return _limits(zix, nix, list(parinclude), maxchannel)
+    return _limits(zix, nix, list(parinclude), maxchannel, cap)
 
 
 @lru_cache(maxsize=4096)
@@ -214,6 +261,7 @@ def exclusive_channels(inp: ChannelInputs, state: ExclusiveState | None = None) 
     channelsum = 0.0
     xsabs = 0.0
     idnum = -1
+    cap, nchtot = caps(), numchantot()  # CHANCAP
     zend = min(NUMZCHAN, inp.maxz, inp.zinit)
     nend = min(NUMNCHAN, inp.maxn, inp.ninit)
     for zix in range(zend + 1):
@@ -222,7 +270,7 @@ def exclusive_channels(inp: ChannelInputs, state: ExclusiveState | None = None) 
                 continue
             res = nuc[(zix, nix)]
             inend, ipend, idend, itend, ihend, iaend = _limits_of(
-                zix, nix, tuple(inp.parinclude), inp.maxchannel)
+                zix, nix, tuple(inp.parinclude), inp.maxchannel, cap)
             # the six particle loops, nested h, t, d, a, p, n, keep only the tuples that reach
             # (Zix, Nix); the others fall through every test below without a side effect
             for key in _channel_keys(zix, nix, (inend, ipend, idend, itend, ihend, iaend),
@@ -230,7 +278,7 @@ def exclusive_channels(inp: ChannelInputs, state: ExclusiveState | None = None) 
                     i_n, ip, idd_, it, ih, ia = key
                     if key not in st.chanopen and st.idnumfull:
                         continue
-                    if idnum == NUMCHANTOT:
+                    if idnum == nchtot:
                         continue
                     npart = i_n + ip + idd_ + it + ih + ia
                     ident = (100000 * i_n + 10000 * ip + 1000 * idd_ + 100 * it + 10 * ih + ia)
@@ -348,7 +396,7 @@ def exclusive_channels(inp: ChannelInputs, state: ExclusiveState | None = None) 
                         st.chanopen.add(key)
                     if xschannel[idnum] < xseps and npart > 1 and key not in st.chanopen:
                         idnum -= 1
-                    if st.opennum == NUMCHANTOT - 10:
+                    if st.opennum == nchtot - 10:
                         st.idnumfull = True
                     if idnum < 0:
                         continue

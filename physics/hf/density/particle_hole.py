@@ -673,6 +673,8 @@ def ph_table2(Z: int, A: int):
     """(exists (5,5,5,5) bool, table (5,5,5,5,61)) of the two-component densities of nucleus (Z, A), or None.
 
     TALYS: phdensitytable.f90:1 (phdensitytable), flag2comp branch
+
+    Test: none in the public suite
     """
     blk = _ph_file_blocks(int(Z)).get(int(A))
     if blk is None:

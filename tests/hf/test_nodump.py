@@ -60,16 +60,20 @@ def _rel(a, b):
 
 
 @pytest.mark.parametrize("tag,Z,A", [("Fe056", 26, 56), ("Ca040", 20, 40), ("Pb208", 82, 208)])
-def test_structure_scalars_reproduce_the_dumped_record(tag, Z, A):
+def test_structure_scalars_reproduce_the_dumped_record(tag, Z, A, talys_popeps):
     """A-struct, extended to the scalars `ChainedFull` used to read: `Ltarget`, the target's spin,
     parity and excitation energy, `popeps`, `xseps`, `maxZ`/`maxN`, `maxchannel`, `Ninclow`,
     `specmass` and `parinclude`/`parskip`. Every one is exact, not approximate: they are T3's
     resolved input record and one row of T2's level scheme, not a computed quantity.
 
     `popeps` and `xseps` are `real(sgl)` in TALYS, so the port rounds them the same way; reading
-    `1e-3` where TALYS holds `1.0000000474974513e-3` is a real difference to a `<` test."""
+    `1e-3` where TALYS holds `1.0000000474974513e-3` is a real difference to a `<` test. The dumps are
+    TALYS runs at its popeps 1e-3 mb (ours is 1e-9, POPEPS3), so the run is pinned to it."""
     from physics.hf.emission.dumps import load_binary_dump, load_channel_dump
+    from physics.hf.input import fitlib
     from physics.hf.structure.scalars import structure_scalars
+
+    fitlib.activate(Z, A)  # the run's target, as `Cascade` does: the pinned deck line applies from here
 
     d = _work(tag)
     b = load_binary_dump(d / "bin_inputs.txt")[0]

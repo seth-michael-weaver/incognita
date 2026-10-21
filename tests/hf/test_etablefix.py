@@ -16,6 +16,14 @@ from physics.hf.input import fitlib
 Z, A = 26, 56  # target Fe-56; the keywords sit on the compound nucleus Fe-57
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _ftglobal_off():
+    """FTPROMO (ftglobal default ON): this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_FTGLOBAL", "0")
+        yield
+
+
 def _gp(monkeypatch, lines: str):
     from physics.hf.compound.dens_reference import _gamma_parameters
 

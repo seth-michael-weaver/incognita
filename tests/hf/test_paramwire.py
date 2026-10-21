@@ -23,6 +23,14 @@ except FileNotFoundError:
 needs_structure = pytest.mark.skipif(not _HAVE, reason="TALYS structure database not found")
 
 Z, A = 26, 54
+@pytest.fixture(scope="module", autouse=True)
+def _ftglobal_off():
+    """FTPROMO (ftglobal default ON): this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_FTGLOBAL", "0")
+        yield
+
+
 DECLARED = (1.0, 14.0)
 
 

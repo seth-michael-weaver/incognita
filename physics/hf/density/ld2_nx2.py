@@ -48,7 +48,9 @@ def enabled() -> bool:
     through `nx2.kernel`)."""
     import os
 
-    return os.environ.get("HF_NX2_LD2", "1") != "0"
+    from physics.hf import eadj
+
+    return os.environ.get("HF_NX2_LD2", "1") != "0" and eadj.ld_native_ok()
 
 
 def _k(name: str, args: list, res=nx2.INT):

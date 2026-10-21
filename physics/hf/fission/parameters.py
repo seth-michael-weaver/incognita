@@ -39,7 +39,7 @@ from torch import Tensor
 
 from physics.hf.core.constants import nuclide_symbol
 from physics.hf.core.tensors import DTYPE
-from physics.hf.fission.wkb import NUMBAR, FissionPath, WKBResult, read_hfbpath, wkb
+from physics.hf.fission.wkb import NUMBAR, FissionPath, WKBResult, exactfis_on, read_hfbpath, wkb
 from physics.hf.structure.files import fortran_read, talys_structure_dir
 
 if TYPE_CHECKING:
@@ -486,6 +486,7 @@ def fission_parameters(
                     float(p("bdamp", Zix, Nix, 2) * p("bdampadjust", Zix, Nix, 2)),
                 ),
                 flagfispartdamp=options.flagfispartdamp,
+                exactfis=exactfis_on(options),
             )
             nfisbar = wkbres.nbar
             for i in range(1, NUMBAR + 1):

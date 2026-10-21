@@ -63,10 +63,11 @@ def test_coupled_branch_is_compnorm():
     assert float(sph.xs_flux_mb) == pytest.approx(1.0e4 - 8.0, rel=1e-14)
 
 
-def test_d_sfactor_reaches_the_multiple_emission():
+def test_d_sfactor_reaches_the_multiple_emission(talys_popeps, monkeypatch):
     """U-235 (n,g) at 11.88 MeV, computed as a one-energy subset (which walks the declared prefix
     for `sfactor`): CHART1's TALYS value within 1e-3, and a fresh state per energy reproduces the
-    old 1.6e-2 deficit."""
+    old 1.6e-2 deficit. At TALYS's popeps 1e-3 mb (POPEPS3: ours is 1e-9), the value CHART1 holds."""
+    monkeypatch.setenv("INCOGNITA_EXACTFIS", "0")  # TALYS reproduction: Kemble-WKB per hump
     e = (CHART1_E[-2],)
     got = float(_run(92, 235, e).channels_mb["xs000000"][0])
     talys = 1.288375  # features/hf_chart1/cells.parquet, U-235 (n,g) at 11.87572 MeV

@@ -25,6 +25,7 @@ from __future__ import annotations
 import numpy as np
 import torch
 
+from physics.hf.projectile import residual_nucleus  # ENGPROJ GPRESFIX
 from physics.hf.compound.decay_batch import PARN, PARZ, _twopi
 from physics.hf.compound.decay_fast import _tl_stack, jd2_all, nexmax_rows
 from physics.hf.compound.prepare import NUMJ, PARSPIN2
@@ -160,6 +161,9 @@ class NativeWidths:
         if isinstance(cas.trans, dict) and "tlogref" in cas.trans:
             raise NotImplementedError("TLOGREF (G0 reference) is numpy-only")  # -> decay_fast numpy widths
         tlog.native_arm(cas.trans)  # LOGTINT (default OFF): log-T Lagrange of charged T in nx_widths
+        from physics.hf.omp import alphatemp
+
+        alphatemp.arm_native(cas)  # ALPHATEMP (default OFF): cold alpha Tl + U* into nx_widths
         rg = cas.rg
         eendmax = _eendmax(cas.Zt, cas.At, cas.enincmax)
         egrid = np.ascontiguousarray(np.asarray(rg.egrid, dtype=np.float64))
@@ -187,7 +191,14 @@ class NativeWidths:
         put(10, np.array([min(int(eendmax[t]), rg.maxen) for t in range(1, 7)], dtype=_I64))
         put(11, np.array([float(fnorm[t + 1]) for t in range(1, 7)], dtype=np.float64))
         put(12, tg)
+        tlc = cas.trans_cont_of(sp.zix, sp.nix)  # ROTEXIT1CN (default OFF): continuum rows' stack (nx_widths pp[13])
+        if tlc is not None:
+            TLc, LMc, h0c = _tl_stack(cas, [tlc[t] for t in range(1, 7)])
+            if TLc.shape != TL.shape or not (np.array_equal(LMc, LM) and np.array_equal(h0c, head0)):
+                raise NotImplementedError("sfexit cont: the model and measured stacks differ in shape/lmax")
+            put(13, np.ascontiguousarray(TLc, dtype=np.float64))
         ip[:10] = (m, nj, self.odd, cas.k0, st.lmaxinc, rg.maxen, Ltl, TL.shape[1], egrid.size, L0)
+        ip[10] = cas.nnleak_top(sp) + 1  # NNLEAK (default y): the rule's mother bin + 1, 0 = none
         dp[0] = cas.transeps
         outp = np.zeros(12 * 7, dtype=np.uint64)
         bufs = []
@@ -346,8 +357,8 @@ class NativeWidths:
             from physics.hf.compound.psf_fast import fstrength_np
 
             twopi = _twopi()
-            gstrength = cas.gamma_strength(sp.Z, sp.A - 1)
-            gp = cas.gamma_params(sp.Z, sp.A - 1)  # PARAMWIRE: the run's parameter set
+            gstrength = cas.gamma_strength(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))
+            gp = cas.gamma_params(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))  # PARAMWIRE: the run's parameter set
             if gp is not None:
                 # NATIVEX2: the strength function and the rows in C (compound/psf_nx2.py)
                 from physics.hf.compound.psf_nx2 import photon_rows

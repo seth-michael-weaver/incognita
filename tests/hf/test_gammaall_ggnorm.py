@@ -19,6 +19,14 @@ from physics.hf.gamma import ggnorm
 from physics.hf.gamma.transmission import GAMGAM_MIN_EV
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _ftglobal_off():
+    """FTPROMO (ftglobal default ON): this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_FTGLOBAL", "0")
+        yield
+
+
 def test_the_shipped_default_is_off():
     out = subprocess.run(
         [sys.executable, "-c", "from physics.hf.gamma import ggnorm; print(repr(ggnorm.mode()), ggnorm.factor(79, 198))"],

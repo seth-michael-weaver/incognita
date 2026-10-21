@@ -352,18 +352,28 @@ def end_energy(pinp, k0: int, b2=None) -> None:
         xsmpe = np.zeros((7, len(eg)))
         glines = []
         per_nuc = {}
+        from physics.hf.emission.binspec import specclose_on
+
+        closed = specclose_on()
+        discpar = np.zeros((7, len(eg)))
         for key in sorted(cur["walks"]):
             rec = cur["walks"][key]
             if rec["lines_only"]:
                 glines += _gamma_lines(rec)
                 continue
             ce, cm = compemission(rec, eg, eb, et, de, ebegin, eend, speceps)
+            if closed:  # SPECCLOSE: + the particle emission of discrete parents above threshold (both paths)
+                dc, dm = discrete_parent_emission(rec, eg, eb, et, de, ebegin, eend, speceps)
+                ce, cm = ce + dc, cm + dm
+                discpar += dc + dm
             xsemis += ce
             xsmpe += cm
             glines += _gamma_lines(rec)
             per_nuc[key] = (ce, cm)
         cur.update(egrid=eg, ebottom=eb, etop=et, deltae=de, ebegin=ebegin, eend=eend, speceps=speceps,
                    eninccm=eninccm, xsemis_mul=xsemis, xsmpeemis=xsmpe, gamma_lines=glines, per_nucleus=per_nuc)
+        if closed:
+            cur["xsemis_discpar"] = discpar
     except Exception as exc:  # noqa: BLE001 -- output only
         cur.setdefault("errors", []).append(f"end_energy {type(exc).__name__}: {exc}")
     ENERGIES.append(cur)
@@ -631,6 +641,80 @@ def compemission_py(rec: dict, eg, eb, et, de, ebegin: dict, eend: dict, speceps
     return out_c, out_m
 
 
+def discrete_parent_emission(rec: dict, eg, eb, et, de, ebegin: dict, eend: dict, speceps: float):
+    """SPECCLOSE (output only): the particle emission (t >= 1) of one cascade nucleus' DISCRETE levels lying above a
+    separation energy. The cascade decays them like any bin (multiple.f90: only levels with Ex <= S_min gamma-cascade)
+    and the recorder books that flux (mcontrib rows nex <= Nlast), but compemission.f90 loops the mother over the
+    continuum bins only, so it reached no spectrum. A level is sharp: to a discrete daughter level the particle is a
+    line at E = Ex - S - Ex', put in the bin holding it; to a daughter continuum bin it is spread flat over
+    [Ex - S - (Ex' + dEx'/2), Ex - S - (Ex' - dEx'/2)] by overlap with the bins. Flux outside ebegin..eend goes to the
+    edge bin, so sum value * deltaE = the recorded flux. Also the cells compemission skips from CONTINUUM parents,
+    `nexout == 0 and Nlast(daughter) == 0` (a daughter whose grid is its ground state only, e.g. O-18* -> C-14 + alpha):
+    the parent bin spread flat over its width. Returns (xsemis (7, E), xsmpeemis (7, E)) in mb/MeV.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    E = len(eg)
+    out_c = np.zeros((7, E))
+    out_m = np.zeros((7, E))
+    ex, nl0 = rec["ex"], int(rec["nlast"])
+    sep = rec["sep"]
+    for t, e in rec["types"].items():
+        if t == 0:
+            continue
+        ib, ie = int(ebegin[t]), int(eend[t])
+        if ie < ib or ie < 1:
+            continue
+        ib = max(ib, 1)
+        mc, mp = e["mc"], e["mpe"]
+        NL = int(e["nlast"])
+        rows = min(nl0, mc.shape[0] - 1)
+        top = min(int(rec["maxex"]), mc.shape[0] - 1)
+        cells = []  # (parent row, daughter row, sharp parent)
+        if rows >= 1:
+            M = mc[1:rows + 1] + mp[1:rows + 1]
+            cells += [(int(a) + 1, int(b), True) for a, b in np.argwhere(M > speceps)]
+        if NL == 0 and top > nl0:
+            col = mc[nl0 + 1:top + 1, 0] + mp[nl0 + 1:top + 1, 0]
+            cells += [(int(a) + nl0 + 1, 0, False) for a in np.flatnonzero(col > speceps)]
+        if not cells:
+            continue
+        dexm = rec["dex"]
+        exd, dexd = np.asarray(e["ex"], float), np.asarray(e["dex"], float)
+        SS = float(sep[t])
+        lo_edges, hi_edges = np.asarray(eb[ib:ie + 1], float), np.asarray(et[ib:ie + 1], float)
+        lo_edges = lo_edges.copy()
+        hi_edges = hi_edges.copy()
+        lo_edges[0] = -np.inf  # below ebegin -> the first bin
+        hi_edges[-1] = np.inf  # above eend -> the last bin
+        dsl = np.asarray(de[ib:ie + 1], float)
+        for nex, nexout, sharp in cells:
+            xso = float(mc[nex, nexout] + mp[nex, nexout])
+            fmpe = float(mp[nex, nexout]) / xso if xso > 0.0 else 0.0
+            w = np.zeros(ie - ib + 1)
+            hw = 0.0 if sharp else 0.5 * float(dexm[nex])  # parent half width (a level is sharp)
+            if sharp and (nexout <= NL or nexout >= len(exd)):
+                eo = float(ex[nex]) - SS - float(exd[min(nexout, len(exd) - 1)])
+                k = int(np.searchsorted(hi_edges, eo, side="right"))
+                w[min(k, len(w) - 1)] = 1.0
+            else:
+                hd = 0.5 * float(dexd[nexout]) if nexout > NL and nexout < len(exd) else 0.0
+                elo = max(float(ex[nex]) - SS - float(exd[nexout]) - hd - hw, 0.0)
+                ehi = max(float(ex[nex]) - SS - float(exd[nexout]) + hd + hw, elo)
+                if ehi - elo <= 0.0:
+                    k = int(np.searchsorted(hi_edges, ehi, side="right"))
+                    w[min(k, len(w) - 1)] = 1.0
+                else:
+                    w = np.clip(np.minimum(hi_edges, ehi) - np.maximum(lo_edges, elo), 0.0, None) / (ehi - elo)
+                    s = w.sum()
+                    w = w / s if s > 0.0 else w
+            v = xso * np.where(dsl > 0.0, w / np.where(dsl > 0.0, dsl, 1.0), 0.0)
+            out_c[t, ib:ie + 1] += (1.0 - fmpe) * v
+            out_m[t, ib:ie + 1] += fmpe * v
+    return out_c, out_m
+
+
 # ---------------------------------------------------------------- output
 def pack(Z: int, A: int) -> dict:
     """Everything recorded for the run as flat numpy arrays (npz-ready). Spectra (mb/MeV, on egrid):
@@ -653,7 +737,7 @@ def pack(Z: int, A: int) -> dict:
     E = len(eg)
     out["so_egrid"] = np.asarray(eg, float)
     out["so_deltae"] = np.asarray(next(r["deltae"] for r in ENERGIES if "deltae" in r), float)
-    comps = {k: np.zeros((ne, 7, E)) for k in ("bincomp", "mulcomp", "pe", "mpe", "gr")}
+    comps = {k: np.zeros((ne, 7, E)) for k in ("bincomp", "mulcomp", "pe", "mpe", "gr", "discpar")}
     nlev = 1
     for r in ENERGIES:
         b = r.get("binary")
@@ -671,6 +755,8 @@ def pack(Z: int, A: int) -> dict:
             n = min(E, r["xsemis_mul"].shape[1])
             comps["mulcomp"][i, :, :n] = r["xsemis_mul"][:, :n]
             comps["mpe"][i, :, :n] = r["xsmpeemis"][:, :n]
+            if "xsemis_discpar" in r:
+                comps["discpar"][i, :, :n] = r["xsemis_discpar"][:, :n]
             for t in range(7):
                 eb_[i, t], ee_[i, t] = r["ebegin"][t], r["eend"][t]
             gl += [(i, *g) for g in r["gamma_lines"]]
@@ -692,7 +778,11 @@ def pack(Z: int, A: int) -> dict:
         out[f"so_{x}_cont"] = out[f"so_{x}_comp"] + comps["pe"][:, t] + comps["mpe"][:, t] + comps["gr"][:, t]
         out[f"so_{x}_lines_e"] = le[:, t]
         out[f"so_{x}_lines_xs"] = lx[:, t]
+        if any("xsemis_discpar" in r for r in ENERGIES):  # SPECCLOSE: the discrete-parent part (already in comp / mpe)
+            out[f"so_{x}_discpar"] = comps["discpar"][:, t]
     out["so_ebegin"], out["so_eend"] = eb_, ee_
+    if any("xsemis_discpar" in r for r in ENERGIES):
+        out["so_specclose"] = np.array(1)
     out["so_glines"] = np.asarray(gl, float).reshape(-1, 7)
     out["so_errors"] = np.array("\n".join(errs))
     from physics.hf import specang

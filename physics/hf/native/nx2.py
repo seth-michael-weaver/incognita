@@ -48,11 +48,21 @@ def lib():
         return None
 
 
+_EADJ_LEVERS = {
+    "ld": lambda e: e.ld_native_ok(), "ld2": lambda e: e.ld_native_ok(),
+}
+
+
 def kernel(name: str, argtypes: list, restype=INT, lever: str | None = None):
     """The C function `name` with its signature set, or None when the library or the symbol is
     missing, or when `HF_NX2_<lever>=0`."""
     if lever is not None and os.environ.get(f"HF_NX2_{lever.upper()}", "1") == "0":
         return None
+    if lever in _EADJ_LEVERS:  # ENGADJ: a lever whose physics an active energy-local bump changes runs its Python twin
+        from physics.hf import eadj
+
+        if not _EADJ_LEVERS[lever](eadj):
+            return None
     so = lib()
     if so is None:
         return None

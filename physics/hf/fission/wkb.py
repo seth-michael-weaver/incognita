@@ -516,6 +516,118 @@ def _wkbfis_native(path: FissionPath, uexcs: list[float], vheight: Tensor, vwidt
     return None if rc != 0 else (tff, tdir)
 
 
+# ----------------------------------------------------------------------------- exact transmission
+
+
+def exactfis_on(options=None) -> bool:
+    """IDEA_EXACTFIS switch: keyword `exactfis y|n` (an explicit keyword wins), else env
+    `INCOGNITA_EXACTFIS=1`. Default OFF (TALYS's Kemble-WKB per hump).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    import os
+
+    if options is not None and options.is_explicit("exactfis"):
+        return bool(options.flagexactfis)
+    env = os.environ.get("INCOGNITA_EXACTFIS", "").strip().lower()
+    if env:  # a set env var (1 or 0) beats the Options default
+        return env in ("1", "y", "yes", "on")
+    return bool(getattr(options, "flagexactfis", False))
+
+
+EXACTFIS_NSUB = 20  # staircase pieces per path-row interval (table ln T within 4e-4 of 40 pieces, development notes)
+EXACTFIS_HW = 0.6  # MeV, half-width of the energy average (one well-flank interference period)
+EXACTFIS_DE = 0.02  # MeV, fine grid of the energy average
+
+
+def _t_exact_vec(beta: np.ndarray, v: np.ndarray, mu: np.ndarray, lo: int, hi: int,
+                 es: np.ndarray, nsub: int = EXACTFIS_NSUB) -> np.ndarray:
+    """Exact 1-D transmission through the path between rows `lo` and `hi` (1-based) at energies
+    `es` [MeV]: -(1/2) d/dx[(1/mu) dpsi/dx] + V psi = E psi (BenDaniel-Duke; psi and psi'/mu
+    continuous) on the linear interpolation of the tabulated V, mu, as a staircase of `nsub`
+    pieces per row, with V and mu held flat outside [lo, hi]. NaN where E <= V(lo) or V(hi)."""
+    xs, vs, ms = beta[lo:hi + 1], v[lo:hi + 1], mu[lo:hi + 1]
+    vl, vr, ml, mr = vs[0], vs[-1], ms[0], ms[-1]
+    edges = np.concatenate([np.linspace(xs[i], xs[i + 1], nsub + 1)[:-1] for i in range(len(xs) - 1)]
+                           + [xs[-1:]])
+    mids = 0.5 * (edges[1:] + edges[:-1])
+    V = np.concatenate([[vl], np.interp(mids, xs, vs), [vr]])
+    M = np.concatenate([[ml], np.maximum(np.interp(mids, xs, ms), 1e-6), [mr]])
+    E = np.asarray(es, dtype=np.float64)
+    out = np.full(E.shape, np.nan)
+    ok = (E > vl) & (E > vr) & (ml > 0) & (mr > 0)
+    if not ok.any():
+        return out
+    E = E[ok]
+    k = np.sqrt((2.0 * M[:, None] * (E[None, :] - V[:, None])).astype(complex))
+    k = np.where(np.abs(k) < 1e-12, 1e-12, k)
+    a = np.ones(E.shape, dtype=complex)
+    b = np.zeros(E.shape, dtype=complex)
+    for j in range(len(edges) - 1, -1, -1):
+        x = edges[j]
+        kr, kl = k[j + 1], k[j]
+        er = np.exp(1j * kr * x)
+        psi = a * er + b / er
+        g = (1j * kr * (a * er - b / er) / M[j + 1]) * M[j] / (1j * kl)
+        el = np.exp(1j * kl * x)
+        a, b = 0.5 * (psi + g) / el, 0.5 * (psi - g) * el
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        out[ok] = (k[-1].real / mr) / (np.abs(a) ** 2 * k[0].real / ml)
+    return out
+
+
+def exactfis_correction(path: FissionPath, nextr: int, vh: Tensor, vw: Tensor,
+                        uexcs: list[float]) -> np.ndarray:
+    """IDEA_EXACTFIS: per-hump correction C_k(U) = < ln T_exact - ln T_WKB >_{|E-U| <= HW} at the
+    table energies `uexcs`, shape (len, 2*NUMBAR+1) (odd columns = barriers, 0 elsewhere).
+
+    Each hump is isolated between the V minima on either side (wells, g.s. or path end) and
+    solved exactly (:func:`_t_exact_vec`); the energy average over one well-flank interference
+    period removes the coherent reflections that complete damping discards. Energies where the
+    exact problem has no propagating ends (E below a side minimum) or T < 1e-300 contribute 0.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    beta = path.betafis.detach().cpu().numpy().astype(np.float64)
+    v = path.vfis_mev.detach().cpu().numpy().astype(np.float64)
+    mu = path.rmiufis.detach().cpu().numpy().astype(np.float64)
+    ii = list(path.iiextr)
+    u = np.asarray(uexcs, dtype=np.float64)
+    corr = np.zeros((u.size, 2 * NUMBAR + 1))
+    efine = np.arange(EXACTFIS_DE, float(u.max()) + EXACTFIS_HW + 1e-9, EXACTFIS_DE)
+    got = _wkbfis_native(path, [float(e) for e in efine], vh, vw)
+    if got is not None:
+        tw = got[0]
+    else:
+        tw = np.stack([np.asarray(wkbfis(path, float(e), vh, vw)[0].detach().cpu().numpy())
+                       for e in efine])
+    for kb in range(1, nextr + 1, 2):
+        if float(vw[kb]) <= 0:
+            continue
+        a0, a1, a2 = ii[kb - 1], ii[kb], ii[kb + 1]
+        lo = a0 + int(np.argmin(v[a0:a1 + 1]))
+        hi = a1 + int(np.argmin(v[a1:a2 + 1]))
+        if mu[lo] <= 0:
+            lo += 1
+        te = _t_exact_vec(beta, v, mu, lo, hi, efine)
+        twk = tw[:, kb]
+        good = np.isfinite(te) & (te > 1e-300) & (twk > 1e-300)
+        d = np.where(good, np.log(np.where(good, te, 1.0)) - np.log(np.where(good, twk, 1.0)), 0.0)
+        for i, e in enumerate(u):
+            w = np.abs(efine - e) <= EXACTFIS_HW + 1e-9
+            corr[i, kb] = float(d[w].mean()) if w.any() else 0.0
+    return corr
+
+
+def _apply_exactfis(tff: np.ndarray, corr: np.ndarray) -> np.ndarray:
+    """T_k -> min(1, T_k exp(C_k)) on the barrier columns."""
+    out = tff.copy()
+    out[:, 1::2] = np.minimum(1.0, tff[:, 1::2] * np.exp(corr[:, 1::2]))
+    return out
+
+
 # ----------------------------------------------------------------------------- driver
 
 
@@ -552,6 +664,7 @@ def wkb(
     rmiufiscor: float = 1.0,
     bdamp: tuple[float, float] = (0.01, 0.01),
     flagfispartdamp: bool = False,
+    exactfis: bool | None = None,
 ) -> WKBResult:
     """Fit the barriers of the fission path and tabulate their penetrability against energy.
 
@@ -559,6 +672,8 @@ def wkb(
     Test: A-fis
     """
     dev = path.vfis_mev.device
+    if exactfis is None:
+        exactfis = exactfis_on()
     if fismodel != 6:
         path = find_extrem(path, 5)
     nextr = min(path.nextr, 2 * NUMBAR - 1)
@@ -605,6 +720,8 @@ def wkb(
             uexc += float(uexc1) / n1 if i <= n1 else 0.2
             uexcs.append(uexc)
         got = _wkbfis_native(path, uexcs, vh, vw)
+        if got is not None and exactfis:
+            got = (_apply_exactfis(got[0], exactfis_correction(path, nextr, vh, vw, uexcs)), got[1])
         if got is not None:
             tff, tdir = got
             twkb_t = torch.zeros((nbinswkb + 1, NUMBAR + 1), dtype=DTYPE, device=dev)
@@ -617,11 +734,22 @@ def wkb(
                 twkbdir=_t(np.concatenate(([0.0], tdir)), dev), twkbtrans=zeros,
                 twkbphase=zeros.clone(),
             )
+    corr = None
+    if exactfis:
+        ue, uexc = [], 0.0
+        for i in range(1, nbinswkb + 1):
+            uexc += float(uexc1) / n1 if i <= n1 else 0.2
+            ue.append(uexc)
+        corr = exactfis_correction(path, nextr, vh, vw, ue)
     uexc = 0.0
     for i in range(1, nbinswkb + 1):
         de = float(uexc1) / n1 if i <= n1 else 0.2
         uexc += de
         tff, phase, tdir = wkbfis(path, uexc, vh, vw)
+        if corr is not None:
+            tff = torch.clamp(tff * torch.as_tensor(np.exp(corr[i - 1]), dtype=tff.dtype, device=tff.device),
+                              max=1.0) * (torch.arange(tff.shape[0], device=tff.device) % 2 == 1) + tff * (
+                torch.arange(tff.shape[0], device=tff.device) % 2 == 0)
         uwkb.append(_t(uexc, dev))
         row = [torch.zeros((), dtype=DTYPE, device=dev)] * (NUMBAR + 1)
         prow = [torch.zeros((), dtype=DTYPE, device=dev)] * (NUMBAR + 1)
@@ -743,4 +871,6 @@ __all__ = [
     "twkbtransint",
     "wkb",
     "wkbfis",
+    "exactfis_on",
+    "exactfis_correction",
 ]

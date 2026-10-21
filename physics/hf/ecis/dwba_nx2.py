@@ -259,6 +259,12 @@ def case_cross_sections(
 
     if float(_s.PARSPIN[particle]) == 0.0 and cpinc2():  # CPINC2: the compiled deck is spin-1/2 only; spin 0 takes the torch path
         return None
+    if float(_s.PARSPIN[particle]) == 1.0:  # ENGPROJ: the compiled deck is spin-1/2 only; a deuteron takes the torch path
+        return None
+    from physics.hf.projectile import dwba_ecis_numerics
+
+    if dwba_ecis_numerics(particle):  # ENGPROJ4 DWECIS: ECIS's own DWBA numerics run on the torch path
+        return None
     fn = _kernel()
     if fn is None:
         return None

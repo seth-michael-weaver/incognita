@@ -319,6 +319,11 @@ def fstrength_gp(
             out = out + upc * torch.exp(-upe * e_gamma) * torch.exp(
                 -upf * torch.abs(_scalar(gp.beta2))
             )
+    bumps = gp.eadj_e1 if flag_e1 else (gp.eadj_m1 if flag_m1 else ())
+    if bumps:  # ENGADJ: energy-local strength factor f(Egamma) (TALYS fstrength.f90 adjust on the strength)
+        from physics.hf import eadj
+
+        out = out * torch.as_tensor(eadj.bump_values(bumps, e_gamma.detach().numpy()), dtype=out.dtype)
     return out
 
 

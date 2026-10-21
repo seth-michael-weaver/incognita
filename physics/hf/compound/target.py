@@ -117,7 +117,39 @@ def _elastic_channel(t: Tensor, jl: Tensor, chans, ltarget: int, device):
             torch.where(live[:, None], jl[ltarget][ls, us], zero6))
 
 
+def _case_dom(inp: CompoundInputs, device=None, max_nex: int | None = None):
+    """KEVCOLD (alphatemp_dom gd, default OFF): the production (hot) residuals in every cell with Gamma_tot/D >= 1, the
+    ALPHATEMP alpha table (inp.alphadom) in the isolated cells (denomhf / 2 pi < 1, denomhf of the production tables)."""
+    from physics.hf.omp import alphatemp
+
+    nexmax = max_nex or max(r.maxex + 1 for r in inp.residuals.values())
+    hot = replace(inp, alphadom=None)
+    ex = _exact_incident_channel(hot)
+    cells = [(J2, p) for p in (-1, 1) for J2 in range(inp.j2beg, inp.j2end + 1, 2)]
+    den = [float(exit_channel_sums(ex, J2, p, device)["denom"].detach()) for J2, p in cells]
+    gd = alphatemp.gd_cells(cells, den, float(inp.e_inc_mev))
+    if not gd.any():
+        return _case(hot, device, nexmax)
+    cold = [c for c, g in zip(cells, gd, strict=True) if g]
+    rest = frozenset(c for c, g in zip(cells, gd, strict=True) if not g)
+    _NO_WFCNORM[0] = True  # the norm is one factor over every cell: applied once, below
+    try:
+        pop, fis = _case(replace(hot, residuals={**inp.residuals, 6: inp.alphadom}, cellsel=frozenset(cold)), device,
+                         nexmax)
+        if rest:
+            ph, fh = _case(replace(hot, cellsel=rest), device, nexmax)
+            pop, fis = pop + ph, fis + fh
+    finally:
+        _NO_WFCNORM[0] = False
+    return _wfcnorm(inp, inp.flagwidth and inp.wmode >= 1, pop, fis)
+
+
+_NO_WFCNORM = [False]  # KEVCOLD: set while _case_dom runs its two cell subsets
+
+
 def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
+    if getattr(inp, "alphadom", None) is not None:  # KEVCOLD (default None)
+        return _case_dom(inp, device, max_nex)
     inp = _exact_incident_channel(inp)
     types = sorted(inp.residuals)
     nexmax = max_nex or max(r.maxex + 1 for r in inp.residuals.values())
@@ -143,6 +175,8 @@ def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
         lmap = ewfc.level_map(inp, ew)
     for parity in (-1, 1):
         for J2 in range(inp.j2beg, inp.j2end + 1, 2):
+            if inp.cellsel is not None and (J2, parity) not in inp.cellsel:  # KEVCOLD (default None)
+                continue
             s = exit_channel_sums(inp, J2, parity, device)
             st = s["denom"]
             if float(st.detach()) == 0.0:
@@ -285,7 +319,7 @@ def _wfcnorm(inp: CompoundInputs, use_wfc: bool, pop: Tensor, xs_fis: Tensor):
     formation cross section `xsflux` (`compound.wfcnorm`). OFF returns the arrays untouched."""
     from physics.hf.compound import wfcnorm
 
-    if not (use_wfc and wfcnorm.enabled()) or float(inp.cnfactor_mb) == 0.0:
+    if not (use_wfc and wfcnorm.enabled()) or float(inp.cnfactor_mb) == 0.0 or _NO_WFCNORM[0]:
         return pop, xs_fis
     f = wfcnorm.factor(float(pop.detach().sum()), float(xs_fis.detach()), float(inp.xsflux_mb))
     return pop * f, xs_fis * f

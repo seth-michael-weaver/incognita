@@ -8,6 +8,7 @@ Task: T5 (physics/hf/CONTRACT.md §7). Acceptance test: A-inc (§6).
 
 TALYS routines ported here (file:line of the subroutine/function statement):
     incident.f90:1 (incident)
+    incidentgamma.f90:1 (incidentgamma)
     incidentread.f90:1 (incidentread)
     incidentnorm.f90:1 (incidentnorm)
     spr.f90:1 (spr)
@@ -98,6 +99,8 @@ def incident_channel(
     from physics.hf.omp.inverse import _slice_omp
 
     k0 = PARTICLE_INDEX[cases.projectile]
+    if k0 == 0:
+        return incident_gamma(cases, options, params)
     n_c = cases.n
     tjl = torch.zeros((n_c, 61, 3), dtype=DTYPE)
     out = {k: torch.zeros(n_c, dtype=DTYPE) for k in ("tot", "reac", "el", "wk")}
@@ -139,6 +142,45 @@ def incident_channel(
     return IncidentChannel(
         tjl_inc=tjl, sigma_tot_mb=out["tot"], sigma_reac_mb=out["reac"],
         sigma_shape_el_mb=out["el"], s0=s0, s1=s1, r_prime_fm=rp, t_l=t_l, lmax=lm,
+    )
+
+
+def incident_gamma(cases: CaseBatch, options, params) -> IncidentChannel:
+    """ENGPROJ: the photon entrance (k0 = 0). Tjlinc(irad, l) = 2 pi Einc^(2l+1) f(Einc, Einc, irad, l) * factor for
+    l = 1..gammax, factor = xsreacinc / xsgdr, and xsreacinc = gammaxs(0, 0, Einc) = GDR + quasideuteron
+    photoabsorption of the compound nucleus, which for a photon is the target itself. lmaxinc = gammax.
+    Stored on the (l, irad + 1) slot of the updown axis (compnorm.f90:133-135 reads Tjlinc(updown = irad, l)).
+    No elastic, no total (binary.f90:323 builds xstotinc from the elastic and non-elastic later).
+
+    TALYS: incidentgamma.f90:1 (incidentgamma), gammaxs.f90:1 (gammaxs), quasideuteron.f90:1 (quasideuteron)
+    Test: tests/hf/test_engproj_gamma.py
+    """
+    from physics.hf.compound.dens_reference import _gamma_parameters
+    from physics.hf.gamma.strength import TWOPI, fstrength_gp
+    from physics.hf.gamma.transmission import gammaxs
+
+    n_c = cases.n
+    tjl = torch.zeros((n_c, 61, 3), dtype=DTYPE)
+    reac = torch.zeros(n_c, dtype=DTYPE)
+    lm = torch.zeros(n_c, dtype=torch.int64)
+    for c in range(n_c):
+        Z, A = int(cases.Z[c]), int(cases.A[c])
+        gp = _gamma_parameters(Z, A)[0]
+        gammax = int(gp.gammax)
+        e = float(cases.e_inc_mev[c])
+        et = torch.tensor([e], dtype=DTYPE)
+        xsg, xsgdr, _xsqd = gammaxs(gp, et, e, Z, A)
+        factor = float(xsg[0] / xsgdr[0]) if float(xsgdr[0]) > 0.0 else 1.0
+        for irad in (0, 1):
+            for l in range(1, gammax + 1):  # noqa: E741
+                tg = TWOPI * e ** (2 * l + 1) * fstrength_gp(gp, e, et, irad, l, e)[0]
+                tjl[c, l, irad + 1] = tg * factor
+        reac[c] = xsg[0]
+        lm[c] = gammax
+    nan = torch.full((n_c,), float("nan"), dtype=DTYPE)
+    return IncidentChannel(
+        tjl_inc=tjl, sigma_tot_mb=nan.clone(), sigma_reac_mb=reac, sigma_shape_el_mb=torch.zeros(n_c, dtype=DTYPE),
+        s0=nan.clone(), s1=nan.clone(), r_prime_fm=nan.clone(), t_l=None, lmax=lm,
     )
 
 

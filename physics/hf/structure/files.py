@@ -77,7 +77,9 @@ def _structure_dir(env: str) -> Path:
     """COREX: the resolved directory per $TALYS_DIR value, remembered once it exists."""
     path = _STRUCTURE_DIRS.get(env)
     if path is None:
-        base = env or str(Path.home() / "opt" / "talys-src")
+        from physics.hf.core.constants import default_talys_root
+
+        base = env or default_talys_root()
         path = Path(base) / "structure"
         if not path.is_dir():
             raise FileNotFoundError(f"TALYS structure database not found at {path}; set TALYS_DIR")

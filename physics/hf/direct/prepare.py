@@ -48,6 +48,7 @@ from physics.hf.input.nuclides import coulomb_barriers, weak_coupling_core
 from physics.hf.structure.deformation import deformation, weak_coupling
 from physics.hf.structure.levels import NUMLEV2, discrete_levels
 from physics.hf.structure.masses import masses
+from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
 
 @dataclass(frozen=True)
@@ -189,7 +190,7 @@ def case(target: str, e_inc_mev: float, energies: tuple[float, ...] | None = Non
     eninccm, _ = incident_kinematics(
         e_inc_mev,
         k0,
-        float(m.mass_amu[0, 1]),
+        float(m.mass_amu[target_mass_index()]),
         float(m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
         float(m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]),
         options.flagrel,

@@ -48,6 +48,7 @@ from physics.hf.preeq.exciton import DiscreteInputs, PreeqInputs, esurf
 from physics.hf.structure.levels import discrete_levels
 from physics.hf.structure.masses import masses
 from physics.hf import stagetime
+from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
 NUMEN = int(__import__("os").environ.get("INCOGNITA_NUMEN", "250"))  # A0_talys_mod.f90 numen; INCOGNITA_NUMEN (PECOLLAPSE): reference runs only
 PARSYM = ("g", "n", "p", "d", "t", "h", "a")
@@ -427,7 +428,12 @@ def prepare(
     xsreac = np.zeros((C, 7, E))
     if chained:
         xsreac[:, 0, : maxen + 1] = PC.chained_photoabsorption(Z, A, eg, maxen, energies, fit)
-        inv = PC.inverse_reaction_xs(Z, A, enincmax)
+        from physics.hf.omp import sfunc as _sf  # ROTEXIT1CN (default OFF): PE inverse from the model set
+
+        _mdl = _sf.exit_cont(options, Z, A)
+        if _sf.exit_ccf(options):  # ROTEXIT1CN3 (default OFF): PE inverse from the CC-ratio set (None -> production set)
+            _mdl = PC._incident_cascade(Z, A, tuple(energies)).ccf_div() or False
+        inv = PC.inverse_reaction_xs(Z, A, enincmax, _mdl)
         for t in range(1, 7):
             xsreac[:, t, :] = inv[t][:E]
     else:
@@ -466,7 +472,7 @@ def prepare(
         eninccm, _ = incident_kinematics(
             e,
             k0,
-            float(m.mass_amu[0, 1]),
+            float(m.mass_amu[target_mass_index()]),
             float(m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
             float(m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]),
             options.flagrel,

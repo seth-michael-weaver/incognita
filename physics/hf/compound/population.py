@@ -75,6 +75,7 @@ class PopulationInputs:
     flaggiant: bool = False
     xsgr_mb: dict[int, np.ndarray] = field(default_factory=dict)  # type -> (maxen+1,)
     xsgrtot_mb: dict[int, float] = field(default_factory=dict)
+    xsgrres_mb: dict[int, np.ndarray] = field(default_factory=dict)  # SPECCLOSE (output only): the resonance part of xsgr, mb per bin
     # pespinmodel >= 3 only
     pespinmodel: int = 1
     maxjph: int = 0

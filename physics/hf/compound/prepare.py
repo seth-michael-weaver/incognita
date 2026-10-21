@@ -121,6 +121,8 @@ class CompoundInputs:
     popeps_mb: float = 0.0
     flagpreeq: bool = False
     ew: object = None  # EWCC: ewfc.CCBlocks when INCOGNITA_EWFC is on for a coupled target (else None)
+    alphadom: object = None  # KEVCOLD (default None): type 6 ResidualChannels with the ALPHATEMP mix, for Gamma/D < 1 cells
+    cellsel: frozenset | None = None  # KEVCOLD: only these (J2, parity) cells (None = every cell)
 
 
 def _pidx(p: int) -> int:
@@ -429,6 +431,8 @@ def incident_channels(inp: CompoundInputs, J2: int, parity: int) -> tuple[list[t
     TALYS: comptarget.f90:1 (loops 130), compprepare.f90:1 (incident block)
     Test: A-cn1
     """
+    if inp.k0 == 0:
+        return _incident_channels_photon(inp, J2, parity)
     s2 = inp.residuals[inp.k0].parspin2
     spin2 = inp.residuals[inp.k0].spin2
     pardif = abs(inp.target_parity - parity) // 2
@@ -442,6 +446,33 @@ def incident_channels(inp: CompoundInputs, J2: int, parity: int) -> tuple[list[t
             chans.append((l, ud))
             t.append(inp.tjlinc[l, ud + 1])
     if isinstance(inp.tjlinc, Tensor):  # DIFFPARAM: an optical override on the incident channel
+        return chans, (torch.stack(t) if t else torch.zeros(0, dtype=DTYPE))
+    return chans, np.asarray(t, dtype=float)
+
+
+def _incident_channels_photon(inp: CompoundInputs, J2: int, parity: int) -> tuple[list[tuple[int, int]], np.ndarray]:
+    """ENGPROJ: the photon entrance block of compprepare.f90 (k0 = 0): for every multipole l = 1..gammax with
+    |I - l| <= J <= I + l, irad = E (1) unless the parity change is the M-type one for this l
+    ((-1)^l == -pardif sign), and nothing at J = I = 0. Channels are (l, irad); T = Tjlinc(irad, l), stored at
+    `tjlinc[l, irad + 1]`. lmaxinc = gammax (incidentgamma.f90).
+
+    TALYS: compprepare.f90:1 (compprepare, the `k0 == 0` branch of the incident block)
+    Test: tests/hf/test_engproj_gamma.py
+    """
+    chans, t = [], []
+    tspin = 0.5 * inp.targetspin2
+    if not (J2 == inp.targetspin2 and J2 == 0):
+        for l in range(1, int(inp.lmaxinc) + 1):  # noqa: E741
+            if 0.5 * J2 < tspin - l or 0.5 * J2 > tspin + l:
+                continue
+            irad = 1
+            if parity == inp.target_parity and l % 2 == 1:
+                irad = 0
+            if parity != inp.target_parity and l % 2 == 0:
+                irad = 0
+            chans.append((l, irad))
+            t.append(inp.tjlinc[l, irad + 1])
+    if isinstance(inp.tjlinc, Tensor):
         return chans, (torch.stack(t) if t else torch.zeros(0, dtype=DTYPE))
     return chans, np.asarray(t, dtype=float)
 
@@ -515,6 +546,13 @@ class DensTrans:
     # LOGTINT (Incognita, default OFF; compound/tlog.py): log-T Lagrange for this (charged) type; REF fine table (G0 only)
     tlog: bool | str = False  # True / "c" = ln T, "l" = TLOGIT logit T
     tlogref: tuple | None = None  # (efine, tjl_fine (Ef, L, 3), tl_fine (Ef, L))
+    # ALPHATEMP (Incognita, default OFF; omp/alphatemp.py): the cold-residual (alphaomp 6) tables and U*
+    cold_tjl: np.ndarray | None = None
+    cold_tl: np.ndarray | None = None
+    ustar: float = 0.0
+    # ROTEXIT1CN (Incognita, default OFF; omp/sfunc.py exit_mode): the set the CONTINUUM rows (> nlast) read instead
+    cont_tjl: np.ndarray | None = None
+    cont_tl: np.ndarray | None = None
 
 
 @dataclass
@@ -539,6 +577,7 @@ class DensPrepareInputs:
     # compound.psf_fast, bit for bit
     gamma_params: object = None
     binquad: tuple | None = None  # BINQUAD (`binquad y`): (nodes, mother tilt, residual tilt); None = TALYS
+    nnleak_top: bool = False  # NNLEAK: this mother bin is the initial CN top bin and `nnleak` is on (compound/nnleak.py)
 
 
 def _eout_and_rboundary(
@@ -581,6 +620,12 @@ def _eout_and_rboundary(
         return 0.5 * (emin + emax), rboundary, exout
     exm = exout + ss
     if ex0min < exm <= ex0plus:
+        if inp.nnleak_top and r.type >= 1:  # NNLEAK (default y): Egamma^3-filled top bin
+            from physics.hf.compound import nnleak
+
+            rb, eo = nnleak.scalar((ex0plus - exm) / inp.dexinc_mev,
+                                   0.5 * (ex0plus + exm) - ss - exout, ex0plus, exm, inp.dexinc_mev)
+            return eo, rb, exout
         return (0.5 * (ex0plus + exm) - ss - exout,
                 (ex0plus - exm) / inp.dexinc_mev, exout)
     return inp.exinc_mev - ss - exout, 1.0, exout
@@ -624,6 +669,10 @@ def _eout_and_rboundary_rows(
     with np.errstate(divide="ignore", invalid="ignore"):
         rb_d = np.where(part, (ex0plus - exm) / inp.dexinc_mev, 1.0)
     eout_d = np.where(part, 0.5 * (ex0plus + exm) - ss - ex, inp.exinc_mev - ss - ex)
+    if inp.nnleak_top and r.type >= 1:  # NNLEAK (default y): Egamma^3-filled top bin
+        from physics.hf.compound import nnleak
+
+        rb_d, eout_d = nnleak.adjust(rb_d, eout_d, part, ex0plus, exm, inp.dexinc_mev, True)
     cont = n > r.nlast
     return (np.where(cont, eout_c, eout_d), np.where(cont, rb_c, rb_d),
             np.where(cont, exout_c, ex))
@@ -1147,6 +1196,64 @@ def _binquad_primary(inp: DensPrepareInputs, r: DensResidual, tr: DensTrans, nex
         ch.tl[rows] = np.where(u < inp.transeps, 0.0, u) * fn
 
 
+def _alphatemp_rows(inp, r, tr, nex, ch, na, nb, nc, w1, w2, w3, keep, lm, fn, eout, t) -> None:
+    """ALPHATEMP (Incognita extension, default OFF; omp/alphatemp.py) on the alpha rows: the run's (hot) and the alphaomp-6
+    (cold) tables go through the SAME interpolation (TALYS pol2, or LOGTINT/TLOGIT's rule) and, with BINQUAD, the same
+    in-bin quadrature nodes; the two raw values are mixed node by node as Tcold^(1-g) Thot^g, g = min(1, Ex/U*) at the
+    row's residual excitation, and only then cut at transeps and scaled by Fnorm (TALYS's order for one table). This is
+    why the mix sits on the raw, uncut values: mixing after a cut (the 29100dd6 port) would change with the interpolation
+    rule and drop a cold node TLOGIT keeps. Numpy only."""
+    import copy
+    import dataclasses
+
+    from physics.hf.omp import alphatemp
+
+    if tr.tlogref is not None:
+        raise NotImplementedError("ALPHATEMP is not wired with TLOGREF (G0 reference)")
+    raw = dataclasses.replace(inp, transeps=0.0)  # cut after the mix
+    ctr = dataclasses.replace(tr, tjl=tr.cold_tjl, tl=tr.cold_tl, cold_tjl=None, cold_tl=None, ustar=0.0)
+    parts = []
+    for tt in (tr, ctr):
+        c = copy.copy(ch)
+        c.rho = np.array(ch.rho, copy=True)
+        c.tjl = np.zeros_like(ch.tjl)
+        c.tl = np.zeros_like(ch.tl)
+        _interpolate(raw, tt, c, False, 1.0, na, nb, nc, w1, w2, w3, keep, eout, t)
+        if inp.binquad is not None:
+            if not inp.primary:
+                raise NotImplementedError("binquad: Python densprepare takes the primary decay only")
+            _binquad_primary(raw, r, tt, nex, c, lm, 1.0)
+        parts.append(c)
+    hot, cold = parts
+    g = alphatemp.weight(np.asarray(r.ex_mev[:nex], dtype=float), tr.ustar)
+    v = alphatemp.mix(hot.tjl, cold.tjl, g)
+    ch.tjl = np.where(v < inp.transeps, 0.0, v) * fn
+    if not inp.flagfullhf:
+        u = alphatemp.mix(hot.tl, cold.tl, g)
+        ch.tl = np.where(u < inp.transeps, 0.0, u) * fn
+    ch.rho = hot.rho  # BINQUAD's accessible fraction (geometry only, the same in both passes)
+
+
+def _cont_rows(inp: DensPrepareInputs, t: int, r, ch, lmaxhf) -> None:
+    """ROTEXIT1CN (default OFF): rows above the residual's last discrete level (exits into its continuum) take the
+    Tjl / Tl / lmaxhf that the same densprepare builds from `cont_tjl` / `cont_tl` (the model set); discrete rows keep
+    the measured-S_l set. Same interpolation, so each row is bitwise what the model set alone would give."""
+    import dataclasses
+
+    tr = inp.trans[t]
+    if isinstance(tr.tjl, Tensor):
+        raise NotImplementedError("sfexit cont is not wired on the DIFFPARAM graph")
+    sub = dataclasses.replace(inp, residuals={t: r}, trans={t: dataclasses.replace(
+        tr, tjl=tr.cont_tjl, tl=tr.cont_tl, cont_tjl=None, cont_tl=None)}, k0=-99)
+    c = densprepare(sub)[t]
+    lo = max(int(r.nlast), -1) + 1
+    hi = r.nexmax + 1
+    if lo < hi:
+        ch.tjl[lo:hi] = c.tjl[lo:hi]
+        ch.tl[lo:hi] = c.tl[lo:hi]
+        lmaxhf[lo:hi] = c.lmaxhf[lo:hi]
+
+
 def densprepare(inp: DensPrepareInputs) -> dict[int, ResidualChannels]:
     """Build the four arrays `compprepare`/`compound` read -- `rho0`, `Tjlnex`, `Tlnex` and
     `Tgam` -- plus `lmaxhf`, from T5's emission-grid transmission, T6's level densities and T7's
@@ -1202,7 +1309,15 @@ def densprepare(inp: DensPrepareInputs) -> dict[int, ResidualChannels]:
                 ea, eb, ec = tr.egrid_mev[na], tr.egrid_mev[nb], tr.egrid_mev[nc]
                 lm = tr.lmax[np.minimum(np.maximum(nen, 0), tr.maxen)]  # np.clip's values
                 fn = float(inp.fnorm[t + 1])
-                if glue and not grad_t and not (tr.tlog or tr.tlogref is not None) and _interp_c(
+                if tr.cold_tjl is not None and tr.ustar > 0.0:  # ALPHATEMP (default OFF)
+                    if grad_t:
+                        raise NotImplementedError("ALPHATEMP is not wired on the DIFFPARAM graph")
+                    w1 = ((eout - eb) * (eout - ec) / ((ea - eb) * (ea - ec)))[:, None]
+                    w2 = ((eout - ea) * (eout - ec) / ((eb - ea) * (eb - ec)))[:, None]
+                    w3 = ((eout - ea) * (eout - eb) / ((ec - ea) * (ec - eb)))[:, None]
+                    keep = np.arange(L)[None, :] <= lm[:, None]
+                    _alphatemp_rows(inp, r, tr, nex, ch, na, nb, nc, w1, w2, w3, keep, lm, fn, eout, t)
+                elif glue and not grad_t and not (tr.tlog or tr.tlogref is not None) and _interp_c(
                         tr, nex, L, eout, ea, eb, ec, na, nb, nc,
                                                      lm, inp.transeps, fn, ch,
                                                      not inp.flagfullhf):
@@ -1213,11 +1328,13 @@ def densprepare(inp: DensPrepareInputs) -> dict[int, ResidualChannels]:
                     w3 = ((eout - ea) * (eout - eb) / ((ec - ea) * (ec - eb)))[:, None]
                     keep = np.arange(L)[None, :] <= lm[:, None]
                     _interpolate(inp, tr, ch, grad_t, fn, na, nb, nc, w1, w2, w3, keep, eout, t)
-                if inp.binquad is not None:  # BINQUAD: population-weighted in-bin quadrature
+                if inp.binquad is not None and not (tr.cold_tjl is not None and tr.ustar > 0.0):  # BINQUAD
                     if not inp.primary or grad_t:
                         raise NotImplementedError("binquad: Python densprepare takes the primary decay only")
                     _binquad_primary(inp, r, tr, nex, ch, lm, fn)
                 lmaxhf[:] = lm
+        if t >= 1 and inp.trans[t].cont_tjl is not None:  # ROTEXIT1CN: continuum rows from the model set
+            _cont_rows(inp, t, r, ch, lmaxhf)
         if r.nexmax > 0:
             lmaxhf[r.nexmax] = lmaxhf[r.nexmax - 1]
         out[t] = ch

@@ -26,7 +26,7 @@ Which nuclei TALYS builds structure for
 1. the binary residuals of the initial compound nucleus, particle types 0..6 in order, skipping
    excluded ejectiles (nuclides.f90:219-228) -- type 0 is the compound nucleus itself;
 2. during multiple emission, for every compound nucleus ``Zcomp <= maxZ, Ncomp <= maxN`` whose
-   population is at least `popeps` (1e-3 mb), each of its particle-emission residuals
+   population is at least `popeps` (TALYS 1e-3 mb, ours 1e-9 mb), each of its particle-emission residuals
    (multiple.f90:76-128).
 
 Population is a result of the physics, so :func:`residual_nuclei` replaces item 2's population
@@ -325,7 +325,7 @@ def residual_nuclei(
     initial one counts as populated at energy E when its formation is energetically open: E in
     the centre of mass plus S(0,0,k0) covers the cheapest way to remove (Zcomp, Ncomp) nucleons
     as n, p, d, t, h, alpha (masses from the grid). TALYS's real criterion is population >=
-    popeps (1e-3 mb), which the energy test can only bound from above -- see the module
+    popeps (TALYS 1e-3 mb, ours 1e-9 mb), which the energy test can only bound from above -- see the module
     docstring. Pass `populated(Zcomp, Ncomp, e_mev) -> bool` to use a known population instead.
 
     TALYS: nuclides.f90:1 (nuclides), multiple.f90:1 (multiple)

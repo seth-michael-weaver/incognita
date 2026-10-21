@@ -44,7 +44,9 @@ _DEX = np.float32(0.1)
 def _on() -> bool:
     """`HF_NX2_CENGLD=0` (or NATIVEX2's `HF_NX2_LD=0`) turns the lever off, read at every call."""
     env = os.environ
-    return env.get("HF_NX2_CENGLD", "1") != "0" and env.get("HF_NX2_LD", "1") != "0"
+    from physics.hf import eadj
+
+    return env.get("HF_NX2_CENGLD", "1") != "0" and env.get("HF_NX2_LD", "1") != "0" and eadj.ld_native_ok()
 
 
 def _kernel(name: str, args: list):

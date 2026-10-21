@@ -38,9 +38,10 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from physics.hf.core.constants import nuclide_symbol, talys_constants, talys_structure_path
+from physics.hf import eadj as _eadj
+from physics.hf.core.constants import default_talys_root, nuclide_symbol, talys_constants, talys_structure_path
 from physics.hf.core.tensors import DTYPE
-from physics.hf.gamma import actphys, ggnorm, scissors
+from physics.hf.gamma import actphys, ftglobal, ggnorm, scissors
 
 if TYPE_CHECKING:
     from physics.hf.input.defaults import Options
@@ -109,7 +110,7 @@ def structure_dir() -> Path:
     try:
         return talys_structure_path()
     except FileNotFoundError:
-        root = os.environ.get("TALYS_DIR", str(Path.home() / "opt" / "talys-src"))
+        root = os.environ.get("TALYS_DIR") or default_talys_root()
         return Path(root) / "structure"
 
 
@@ -340,6 +341,8 @@ class GammaParameters:
     m1kappa: float = 1.0  # M1SHARE: the nucleus's E1 factor (its `m1kappa Z A k` cell), record only
     e1m1nr_clip: int = -1  # E1M1NR (m1share p): E1 table points held at the floor; -1 = transfer not applied
     e1_imax: int = 0  # M1SHARE t: wtable stretch pivot index of the UNMODIFIED E1 table (0 = find it in the table, TALYS)
+    eadj_e1: tuple = ()  # ENGADJ: energy-local f_E1(Egamma) bumps of this nucleus (physics/hf/eadj.py); () = OFF
+    eadj_m1: tuple = ()  # ENGADJ: the same for f_M1
 
     def qrpaexist(self, irad: int, l: int) -> bool:  # noqa: E741
         return (irad, l) in self.tables
@@ -516,6 +519,7 @@ def gamma_parameters(
     ftable[1, 1] = actphys.e1_factor(Z, A) * ggnorm.factor(Z, A)
     wtable = np.ones((2, L1))
     ov = dict(overrides or {})
+    ov = ftglobal.apply(options, Z, A, ov)  # FTGLOBAL (default ON; `ftglobal n` = deck ftable lines verbatim)
     b2 = float(beta2.detach() if isinstance(beta2, Tensor) else beta2)
     # UQ1: multiplicative Total Monte Carlo factors for THIS nucleus (`TMC_GAMMA`), or None
     tmc = TMC_GAMMA(int(Z), int(A)) if TMC_GAMMA is not None else None
@@ -803,6 +807,8 @@ def gamma_parameters(
         m1share=4 if m1rot else m1mode,
         m1kappa=m1kap if m1mode else 1.0,
         e1_imax=e1_imax,
+        eadj_e1=_eadj.nucleus_bumps("fe1", Z, A),
+        eadj_m1=_eadj.nucleus_bumps("fm1", Z, A),
     )
     # tensors from overrides keep their autograd graph (fill() only decided which entries are set)
     for name in (

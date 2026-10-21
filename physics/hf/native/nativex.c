@@ -35,6 +35,16 @@ static int trapfix_on(void) {
     return v != NULL && v[0] == '1';
 }
 
+/* KEVLEAK2 `dup` part (physics/hf/kevleak2.py), read per walk like TRAPFIX */
+static int kevleak2_dup_on(void) {
+    const char *v = getenv("INCOGNITA_KEVLEAK2_EFF"); /* resolved per run by kevleak2.sync (deck > env > default) */
+    if (v == NULL) v = getenv("INCOGNITA_KEVLEAK2");
+    if (v == NULL || v[0] == 0) v = "2"; /* KEVLEAK3 gate candidate: default 2 = dup2 + pe2 */
+    if (!strcmp(v, "1") || !strcmp(v, "y") || !strcmp(v, "yes") || !strcmp(v, "on") || !strcmp(v, "all")) return 1;
+    if (!strcmp(v, "2")) return 1; /* KEVLEAK3: 2 = dup2 + pe2 (dup2 contains dup) */
+    return strstr(v, "dup") != NULL;
+}
+
 /* BINQUAD (`binquad y`): set once per run by physics.hf.core.grids.binquad_sync; 0 = TALYS */
 static int bq_on = 0, bq_q = 3, bq_sub = 1;
 static double bq_mt = 1.0, bq_rt = 1.0;
@@ -409,7 +419,8 @@ static inline double ser_g(const double *mu, double c)
 
 /* comptarget for one incident energy (target_batch.case_nowfc / case_moldauer).
  * ip: K, wfc, wfcfactor, k0, ltarget, nexmax, has_fis, targetspin2, target_parity, lmaxinc,
- *     tjlinc_rows, ntypes, type order (7 slots), then per type t (8 slots at 20 + 8 t): present, nex,
+ *     tjlinc_rows, ntypes, type order (7 slots), 19: 1 = also write each cell's denomhf to out[2 + k]
+ *     (KEVCOLD; 0 = production, out has 2 slots), then per type t (8 slots at 20 + 8 t): present, nex,
  *     nlast, L, spin2, parspin2, -, -
  * pp: j2 (K), pidx (K), tjlinc (rows, 3), tfis (K) or 0, hump ratio (K, 20), hump t, hump rho,
  *     hump on (K int64), x (32), w (32), then per type t (6 slots at 10 + 6 t): rho, lmaxhf, maxj,
@@ -655,6 +666,8 @@ int nx_target(const int64_t *ip, const uint64_t *pp, const double *dp, double *p
         pop[((k0 * nexmax + lt) * NJ + yk0->ird[lt]) * 2 + yk0->pd[lt]] += elas * yk0->rho_d[lt];
     out[0] = xs_fis;
     out[1] = (double)nlive;
+    if (ip[19] == 1)  /* KEVCOLD (default 0): each cell's denomhf into out[2 .. 2 + K) */
+        for (int64_t k = 0; k < K; k++) out[2 + k] = denom[k];
 done:
     for (int64_t a = 0; a < ntypes; a++) ty_free(&ty[order[a]]);
     free(denom); free(dph); free(tinc); free(nuinc); free(fa); free(ea); free(il); free(iu);
@@ -1217,6 +1230,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
     for (int64_t t = 0; t < 7; t++) if (ip[16 + 16 * t + 4] > nmaxr) nmaxr = ip[16 + 16 * t + 4];
     int64_t *cext = malloc((size_t)nmaxr * sizeof(int64_t)); /* contract1's row extents */
     if (cext == NULL) return -2;
+    const int kv2dup = kevleak2_dup_on();
     for (int64_t nex = nex_hi; nex >= nex_lo; nex--) {
         int first = resume && nex == nex_hi;
         if (!first) {
@@ -1236,10 +1250,16 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                         int later = 0;
                         for (int64_t b2 = b + 1; b2 < boff[nex + 1]; b2++) if (bk[b2] == k) later = 1;
                         if (rec0 && !later) {
-                            fe_add((double *)p0[12], (uint8_t *)p0[13], t0[11], nex, k, intens);
-                            part[nex] += intens;
+                            /* KEVLEAK2 dup: the record carries every branch to k (cascade.f90:72 assigns) */
+                            double rec = intens;
+                            if (kv2dup) {
+                                rec = 0.0;
+                                for (int64_t b2 = boff[nex]; b2 <= b; b2++) if (bk[b2] == k) rec += xsjp * bratio[b2];
+                            }
+                            fe_add((double *)p0[12], (uint8_t *)p0[13], t0[11], nex, k, rec);
+                            part[nex] += rec;
                             partf[nex] = 1;
-                            dpar[2] += intens;
+                            dpar[2] += rec;
                         }
                     }
                     if (rec0 && boff[nex + 1] > boff[nex]) created[0] = 1;
@@ -1534,15 +1554,38 @@ static double nx_tlog_lagr(double w1, double w2, double w3, double a, double b, 
     return w1 * a + w2 * b + w3 * c;
 }
 
+/* ALPHATEMP (Incognita extension, default OFF; physics/hf/omp/alphatemp.py): the alpha row of the Tl table for the COLD
+ * residual (alphaomp 6), same layout as TL's alpha block (tlrows, Ltl), and U*; T = Tcold^(1-g) Thot^g, g = min(1, Ex/U*),
+ * mixed on the RAW interpolated values (the hot table's Lagrange rule; with BINQUAD at every node) before transeps / Fnorm.
+ * Set per run by the caller (NULL / U* <= 0 = OFF = TALYS). */
+static const double *AT_TLC = 0;
+static int64_t AT_ROWS = 0, AT_L = 0;
+static double AT_USTAR = 0.0;
+
+void nx_set_alphatemp(const double *tlc, int64_t rows, int64_t L, double ustar)
+{
+    AT_TLC = tlc; AT_ROWS = rows; AT_L = L; AT_USTAR = ustar;
+}
+
+static double nx_alphatemp_mix(double hot, double cold, double g)
+{
+    if (g >= 1.0) return hot;
+    if (g <= 0.0) return cold;
+    if (hot > 0.0 && cold > 0.0) return exp((1.0 - g) * log(cold) + g * log(hot));
+    return (1.0 - g) * cold + g * hot;
+}
+
 int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uint64_t *outp,
               int64_t *meta)
 {
     int64_t m = ip[0], nj = ip[1], odd = ip[2], k0 = ip[3], lmaxinc = ip[4], maxen = ip[5];
     int64_t Ltl = ip[6], tlrows = ip[7], L0 = ip[9];
+    int64_t nnl_bin = ip[10] - 1; /* NNLEAK: the rule's mother bin index, -1 = none (ip[10] = 0) */
     const double *exinc = (const double *)pp[0], *dexinc = (const double *)pp[1];
     const int64_t *nxm = (const int64_t *)pp[2];
     const double *sep = (const double *)pp[3];
     const double *TL = (const double *)pp[4];
+    const double *TLC = (const double *)pp[13]; /* ROTEXIT1CN (default 0 = OFF): continuum rows' (r > nlast) stack */
     const int64_t *LM = (const int64_t *)pp[5], *head0 = (const int64_t *)pp[6];
     const double *egrid = (const double *)pp[7];
     const float *xs = (const float *)pp[8];
@@ -1620,6 +1663,11 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                     int part = ex0min < exm && exm <= ex0plus;
                     rbv = part ? (ex0plus - exm) / dexinc[b] : 1.0;
                     eo = part ? 0.5 * (ex0plus + exm) - ss - ex[r] : (exinc[b] - ss) - ex[r];
+                    if (part && t >= 1 && nnl_bin >= 0 && nxm[b * 7] + 1 == nnl_bin) {
+                        /* NNLEAK (default y, compound/nnleak.py): Egamma^3-filled initial-CN top bin */
+                        rbv = rbv * rbv * rbv * rbv;
+                        eo -= 0.3 * (ex0plus - exm);
+                    }
                 }
                 if (bq_on && emax_guard && r <= nexmax && t >= 1) {
                     /* a sub-point row above its own reach (TALYS's geometry assumes rows <= nexmax are) */
@@ -1696,13 +1744,23 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                         double w3 = (e - ea) * (e - ebv) / ((ec - ea) * (ec - ebv));
                         int64_t lt = lsel < L - 1 ? lsel : L - 1;
                         wext[b * n + r] = lt + 1 > 0 ? lt + 1 : 0;
-                        const double *ta = TL + (tt * tlrows + na) * L, *tb = TL + (tt * tlrows + nb) * L;
-                        const double *tc = TL + (tt * tlrows + nc) * L;
+                        const double *TLr = (TLC && r > nl) ? TLC : TL; /* ROTEXIT1CN */
+                        const double *ta = TLr + (tt * tlrows + na) * L, *tb = TLr + (tt * tlrows + nb) * L;
+                        const double *tc = TLr + (tt * tlrows + nc) * L;
                         int tlg = NX_TLOG && tt >= 1;  /* LOGTINT/TLOGIT (default OFF) */
                         int K = bq_on ? bq_k[b * n + r] : -1;
+                        /* ALPHATEMP (default OFF): alpha rows, g at the row's residual excitation */
+                        int at = tt == 5 && AT_TLC && AT_USTAR > 0.0 && AT_ROWS == tlrows && AT_L == L;
+                        double g = at ? (ex[r] > 0.0 ? ex[r] / AT_USTAR : 0.0) : 1.0;
                         if (K < 0) {
+                            const double *ca = at ? AT_TLC + na * L : 0, *cb = at ? AT_TLC + nb * L : 0;
+                            const double *cc = at ? AT_TLC + nc * L : 0;
                             for (int64_t l = 0; l <= lt; l++) {
                                 double u = tlg ? nx_tlog_lagr(w1, w2, w3, ta[l], tb[l], tc[l]) : w1 * ta[l] + w2 * tb[l] + w3 * tc[l];
+                                if (at) { /* ALPHATEMP: the cold row by the same rule, mixed raw */
+                                    double v = tlg ? nx_tlog_lagr(w1, w2, w3, ca[l], cb[l], cc[l]) : w1 * ca[l] + w2 * cb[l] + w3 * cc[l];
+                                    u = nx_alphatemp_mix(u > 0.0 ? u : 0.0, v > 0.0 ? v : 0.0, g);
+                                }
                                 Tw[(b * n + r) * L + l] = (u < transeps ? 0.0 : u) * fn[tt];
                             }
                         } else { /* BINQUAD: sum_k w_k T_l(eps_k), each node pol2-interpolated as the centre */
@@ -1730,10 +1788,16 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                                 double v1 = (e2 - fb) * (e2 - fc) / ((fa - fb) * (fa - fc));
                                 double v2 = (e2 - fa) * (e2 - fc) / ((fb - fa) * (fb - fc));
                                 double v3 = (e2 - fa) * (e2 - fb) / ((fc - fa) * (fc - fb));
-                                const double *sa = TL + (tt * tlrows + qa) * L, *sb = TL + (tt * tlrows + qb) * L;
-                                const double *sc = TL + (tt * tlrows + qc) * L;
+                                const double *sa = TLr + (tt * tlrows + qa) * L, *sb = TLr + (tt * tlrows + qb) * L;
+                                const double *sc = TLr + (tt * tlrows + qc) * L;
+                                const double *xa = at ? AT_TLC + qa * L : 0, *xb = at ? AT_TLC + qb * L : 0;
+                                const double *xc = at ? AT_TLC + qc * L : 0;
                                 for (int64_t l = 0; l <= lt; l++) {
                                     double u = tlg ? nx_tlog_lagr(v1, v2, v3, sa[l], sb[l], sc[l]) : v1 * sa[l] + v2 * sb[l] + v3 * sc[l];
+                                    if (at) { /* ALPHATEMP: the cold node by the same rule, mixed raw */
+                                        double v = tlg ? nx_tlog_lagr(v1, v2, v3, xa[l], xb[l], xc[l]) : v1 * xa[l] + v2 * xb[l] + v3 * xc[l];
+                                        u = nx_alphatemp_mix(u > 0.0 ? u : 0.0, v > 0.0 ? v : 0.0, g);
+                                    }
                                     row[l] += wk[k] * (u > 0.0 ? u : 0.0);
                                 }
                             }

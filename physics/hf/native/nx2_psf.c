@@ -19,6 +19,8 @@
  *   E1 table in the same arrays: [9] M1 table present  [10] its ie  [11] its offset in etab
  *   [12] its offset in ftab / lftab
  * Doubles dp: [0] S_k0  [1] delta  [2] alev  [3] beta2  [4] pi2h2c2
+ *   ENGADJ (physics/hf/eadj.py): [5] n_e1 bumps  [6] n_m1 bumps, then 5 doubles per bump (E1 first):
+ *   [shape (0 tal: Ea Eb Em D | 1 gau: E0 W D 0)], f_XL x= prod (1 + (D - 1) shape(Egamma)). 0 bumps = TALYS.
  */
 #include <math.h>
 #include <stdint.h>
@@ -119,6 +121,33 @@ static double table_strength(const int64_t *ip, const double *dp, const double *
     return f2;
 }
 
+/* ENGADJ: eadj._shape for one bump b = [shape, p0, p1, p2, p3] at energy e: 0 outside, 1 at the peak */
+static double eadj_shape(const double *b, double e) {
+    if (b[0] != 0.0) {
+        double x = e - b[1];
+        return exp(-(x * x) / (2.0 * b[2] * b[2]));
+    }
+    double ea = b[1], eb = b[2], em = b[3];
+    if (e > ea && e <= em) {
+        double c = ea + 0.5 * (em - ea), x = ipow(e - ea, 4);
+        return (1.0 + 0.0625) * x / (x + ipow(c - ea, 4));
+    }
+    if (e > em && e < eb) {
+        double c = em + 0.5 * (eb - em), x = ipow(eb - e, 4);
+        return (1.0 + 0.0625) * x / (x + ipow(c - eb, 4));
+    }
+    return 0.0;
+}
+
+static double eadj_factor(const double *b, int64_t n, double e) {
+    double f = 1.0;
+    for (int64_t i = 0; i < n; i++, b += 5) {
+        double d = (b[0] != 0.0 ? b[3] : b[4]) - 1.0;
+        f *= 1.0 + d * eadj_shape(b, e);
+    }
+    return f;
+}
+
 /* psf_fast.fstrength_np for one point */
 static double fstrength1(const int64_t *ip, const double *dp, const double *par, const double *etab,
                          const double *ftab, const double *lftab, const double *tq, double efs,
@@ -168,6 +197,11 @@ static double fstrength1(const int64_t *ip, const double *dp, const double *par,
         if (irad == 0)
             out += upc * exp(-upe * eg) * exp(-upf * fabs(dp[3]));
     }
+    int64_t ne1 = (int64_t)dp[5], nm1 = (int64_t)dp[6];
+    if (flag_e1 && ne1 > 0)
+        out *= eadj_factor(dp + 7, ne1, eg);
+    else if (flag_m1 && nm1 > 0)
+        out *= eadj_factor(dp + 7 + 5 * ne1, nm1, eg);
     return out;
 }
 

@@ -107,6 +107,7 @@ _SOURCE_FILES: tuple[str, ...] = (
     "physics/hf/density/ctwindow.py", "physics/hf/preeq/chain.py", "physics/hf/preeq/exciton.py",
     "physics/hf/preeq/prepare.py", "physics/hf/reference.py", "physics/hf/engphys.py",
     "physics/hf/chartrun.py", "physics/hf/stagedisk.py", "physics/hf/record/codec.py",
+    "physics/hf/eadj.py",
 )
 _LIBS: tuple[str, ...] = ("libsetup", "libnx2", "libhfnative", "libnativex", "libccfast",
                           "libccsplit")
@@ -409,6 +410,10 @@ def key(stage: str, args: tuple, *, options=(), params=(), values=()) -> bytes:
     out += b"|p" + b"".join(_params_digest(p) for p in params)
     out += b"|v" + b"".join(_value_digest(v) for v in values)
     out += b"|e" + hashlib.sha256(_env_part()).digest()
+    from physics.hf import eadj
+
+    if eadj.on():  # ENGADJ: the energy-local bumps reach the OMP / LD / PSF / fission stages outside Params
+        out += b"|j" + hashlib.sha256(repr(eadj.token()).encode()).digest()
     out += b"|V" + _version().encode()
     return bytes(out)
 

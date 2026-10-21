@@ -176,17 +176,21 @@ class Options:
     maxN: int = NUMN - 2  # :65, then capped at Ninit - 3 (nuclides.f90:141)
     maxNrp: int = NUMN - 2  # :66
     maxZ: int = NUMZ - 2  # :67, then capped at Zinit - 3 (nuclides.f90:140)
+    fluxclose: str = "cn"  # Incognita extension (FLUXCLOSE A+C / FLUXPROMO2, N / FLUXCN), not TALYS: cn (default) = residual window Zinit-1/Ninit-1 with terminal (skipCN) residuals past Zinit-3/Ninit-3 + PE/GR of an exit with no continuum bin on its levels + the KEVLEAK3 sentinel zeroed as in production (capture-neutral); y = A+C without N; n = TALYS bookkeeping. Resolved by default_options to the part list ("A,C,N", "A,C", "0")
     maxZrp: int = NUMZ - 2  # :68
     nbins0: int = 40  # :69
     segment: int = 1  # :70
     nangle: int = NUMANG  # :71
     nanglecont: int = 18  # :72
     maxchannel: int = 4  # :73
+    chancap: bool = True  # Incognita extension (CHANCAP), not TALYS: y (default) = exclusive-channel per-ejectile caps lifted to 8 (channels.py); n = numin..numia 8/4/2/1/1/3 (TALYS)
     nanglerec: int = 1  # :74-78, numangrec with labddx y
     transpower: int = 5  # :79; 10 with massdis y (:84), 15 with astro y (:90)
     transeps: float = 1.0e-8  # :80; 1e-12 / 1e-18
     xseps_mb: float = 1.0e-7  # :81; 1e-12 / 1e-17
-    popeps_mb: float = 1.0e-3  # :82; 1e-10 / 1e-13
+    # :82 is 1e-3 in TALYS; ours is 1e-9 (POPEPS 2026-10-12, development notes; POPEPS3: 1e-9 is the converged value, development notes): the 1e-3 mb residual-population gate
+    # zeroed sub-barrier (n,a) residuals and made a >1 dex step (NASTEP). `popeps 1e-3` restores TALYS.
+    popeps_mb: float = 1.0e-9  # 1e-10 / 1e-13 with massdis / astro
     # --- masses (input_mass.f90) ---
     flagexpmass: bool = True  # :70
     massmodel: int = 2  # :73
@@ -212,6 +216,8 @@ class Options:
     flagctmglob: bool = False  # input_densitymodel.f90:106
     flagctwindow: bool = False  # Incognita extension (CTWFREEZE), not TALYS: CT anchored on the complete level window
     flagctwindow2: bool = False  # Incognita extension (CTKINK), not TALYS: ctwindow with a value+slope-continuous join
+    flagctwcont: bool = True  # Incognita extension (ARTFIX): ctwindow2 without a root anchors at least |count - target|
+    nnleak: bool = True  # Incognita extension (NNLEAK): Egamma^3-weighted continuum->discrete Rboundary of the initial CN top bin; n = TALYS
     flagparity: bool = False  # input_densitypar.f90:176-180, true for ldmodelall >= 5
     flaggshell: bool = False  # input_preeqmodel.f90:62 (read with the density keywords)
     nlow_default: int = -1  # input_densitypar.f90:188 -- Nlow, resolved by T6
@@ -319,6 +325,7 @@ class Options:
     fismodelalt: int = 3  # input_fissionmodel.f90:86
     flaghbstate: bool = False  # input_fissionmodel.f90:87
     flagfists2: bool = False  # Incognita extension (TS2FREEZE), not TALYS: ee saddle K-band transition states, continuum from 2 Delta_f
+    flagexactfis: bool = True  # Incognita extension (IDEA_EXACTFIS), not TALYS: exact 1-D per-hump fission transmission (fm5/6 WKB table)
     flagclass2: bool = False  # input_fissionmodel.f90:88
     flagfispartdamp: bool = False  # input_fissionmodel.f90:89
     flagsffactor: bool = False  # input_fissionmodel.f90:90
@@ -351,6 +358,16 @@ class Options:
     knockfix: bool = False  # Incognita extension (ALPHAHUMP), not TALYS: knockout sigav from the last computed inverse-xs bin
     tlog: str = "n"  # Incognita extension (LOGTINT), not TALYS: c = charged-particle T_lj Lagrange in ln T in densprepare, n = OFF
     tlogit: bool = False  # Incognita extension (TLOGIT), not TALYS: charged-particle T_lj Lagrange in logit T in densprepare
+    alphatemp: float = 0.64  # Incognita extension (ALPHATEMP), not TALYS: T* in MeV; default ON 0.64 (ALPHAADOPT); 0 = OFF = TALYS (one alpha T for every residual state)
+    sfexit: str = "contr"  # Incognita extension (ROTEXIT1CN), not TALYS: contr (default, ROTEXIT1CN2_GATE) = cont on colltype R targets only; cont = under SLFIRST the first CN's continuum neutron exits + PE inverse use the model T_l (omp/sfunc.py exit_mode); contr = cont only for colltype R targets (ROTEXIT1CN2); '' = OFF
+    kevleak2: str = "y"  # Incognita extension (KEVLEAK3), not TALYS: y (default) = INCOGNITA_KEVLEAK2 `2` (dup2 + pe2 bookkeeping fixes, physics/hf/kevleak2.py); n = OFF = previous production
+    alphaentr: str = "6"  # Incognita extension (ALPHAREOPEN E1, E1PROMO), not TALYS: 6 (default) = alpha-projectile entrance solved with alphaomp 6; hw:0.77 = HWA770 = previous production (hf/alphaentr.py); 0 = OFF (pre-HWA770); deck keyword > env INCOGNITA_ALPHAENTR > default
+    heavymacs2: str = "y"  # Incognita extension (HEAVYMACS2), not TALYS: y (default, HEAVYMACS2 gate) = global E1/M1 ftable value 1 for 60<=Z<=83, |beta2|>=0.2 (gamma/ftglobal.py); n = OFF = previous production; env INCOGNITA_HEAVYMACS2
+    ftglobal: str = "y"  # Incognita extension (FTGLOBAL/FTPROMO), not TALYS: y (default) = E1/M1 ftable overrides -> the global f(beta2) form (gamma/ftglobal.py); n = deck ftable lines verbatim
+    alphatemp_dom: str = "n"  # Incognita extension (KEVCOLD), not TALYS: n (default, ALPHAPROMO) = ALPHATEMP everywhere; gd = only in first-chance cells with Gamma/D < 1
+    ccexitnb: bool = False  # Incognita extension (CCEXITNB), not TALYS: y = colltype-R target, first-compound neutron exit to a discrete NON-band target level takes the g.s. CC Tjlinc at Eout (hf/compound/ccexitnb.py); n = OFF = TALYS (spherical inverse); env INCOGNITA_CCEXITNB=1 also turns it on
+    ccexitnbnf: bool = True  # Incognita extension (CCEXITNB2), not TALYS: y (default, CCEXITNB2) = the CCEXITNB rule only for targets with no fission channel (flagfission False); n = OFF = TALYS = previous production; env INCOGNITA_CCEXITNB2=1 also turns it on
+    tfold: bool = True  # Incognita extension (TFOLD), not TALYS: t / 3He OMP diffuseness a' = sqrt(a^2 + (1.74/pi)^2) (finite-size fold) + cstrip t/h x0.99; default ON (TRITON3 T2); n = TALYS point geometry
     tlogref: bool = False  # Incognita extension (LOGTINT G0 reference), not TALYS: charged T from an 8x-refined OMP table
     knockcb: bool = False  # Incognita extension (ALPHAHUMP), not TALYS: knockout Coulomb barrier with both radii
     knockfix2: bool = False  # Incognita extension (ALPHAHUMP), not TALYS: knockfix + no zero sigav in the dE>2 branch
@@ -476,6 +493,7 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "maxn": ("numerics", "maxN", "int"),
     "maxnrp": ("numerics", "maxNrp", "int"),
     "maxz": ("numerics", "maxZ", "int"),
+    "fluxclose": ("numerics", "fluxclose", "str"),  # Incognita extension (FLUXCLOSE A+C+N), cn (default) | y | n = TALYS bookkeeping
     "maxzrp": ("numerics", "maxZrp", "int"),
     "bins": ("numerics", "nbins0", "int"),
     "segment": ("numerics", "segment", "int"),
@@ -483,6 +501,7 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "anglescont": ("numerics", "nanglecont", "int"),
     "anglesrec": ("numerics", "nanglerec", "int"),
     "maxchannel": ("numerics", "maxchannel", "int"),
+    "chancap": ("numerics", "chancap", "yn"),  # Incognita extension (CHANCAP), default y; n = TALYS caps
     "transpower": ("numerics", "transpower", "int"),
     "transeps": ("numerics", "transeps", "float"),
     "xseps": ("numerics", "xseps_mb", "float"),
@@ -508,6 +527,8 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "ctmglobal": ("densitymodel", "flagctmglob", "yn"),
     "ctwindow": ("densitymodel", "flagctwindow", "yn"),  # Incognita extension (CTWFREEZE), default n = OFF
     "ctwindow2": ("densitymodel", "flagctwindow2", "yn"),  # Incognita extension (CTKINK), default n = OFF
+    "ctwcont": ("densitymodel", "flagctwcont", "yn"),  # Incognita extension (ARTFIX), default y; n = pre-ARTFIX no-root rule
+    "nnleak": ("densitymodel", "nnleak", "yn"),  # Incognita extension (NNLEAK), default y; n = TALYS uniform-bin Rboundary
     "parity": ("densitypar", "flagparity", "yn"),
     "gshell": ("preeqmodel", "flaggshell", "yn"),
     "strengthm1": ("gammamodel", "strengthM1", "int"),
@@ -594,6 +615,7 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "fismodelalt": ("fissionmodel", "fismodelalt", "int"),
     "hbstate": ("fissionmodel", "flaghbstate", "yn"),
     "fists2": ("fissionmodel", "flagfists2", "yn"),  # Incognita extension (TS2FREEZE), default n = OFF
+    "exactfis": ("fissionmodel", "flagexactfis", "yn"),  # Incognita extension (IDEA_EXACTFIS), gate candidate default y (exactfis n = production)
     "class2": ("fissionmodel", "flagclass2", "yn"),
     "fispartdamp": ("fissionmodel", "flagfispartdamp", "yn"),
     "sffactor": ("fissionmodel", "flagsffactor", "yn"),
@@ -623,6 +645,16 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "knockfix": ("preeqmodel", "knockfix", "yn"),  # Incognita extension (ALPHAHUMP), n = OFF = TALYS
     "tlog": ("ompmodel", "tlog", "str"),  # Incognita extension (LOGTINT), n = OFF = TALYS
     "tlogit": ("ompmodel", "tlogit", "yn"),  # Incognita extension (TLOGIT), n = OFF = TALYS
+    "alphatemp": ("ompmodel", "alphatemp", "float"),  # Incognita extension (ALPHATEMP), default 0.64; 0 = OFF = TALYS
+    "sfexit": ("ompmodel", "sfexit", "str"),  # Incognita extension (ROTEXIT1CN), default '' = OFF; cont = continuum exits model T_l
+    "kevleak2": ("ompmodel", "kevleak2", "str"),  # Incognita extension (KEVLEAK3), default y = `2`; n = OFF
+    "alphaentr": ("ompmodel", "alphaentr", "str"),  # Incognita extension (E1PROMO), default 6; hw:0.77 = previous production (HWA770); 0 = OFF
+    "heavymacs2": ("ompmodel", "heavymacs2", "str"),  # Incognita extension (HEAVYMACS2), default y; n = OFF = previous production
+    "ftglobal": ("ompmodel", "ftglobal", "str"),  # Incognita extension (FTPROMO), default y; n = deck ftable lines verbatim
+    "alphatemp_dom": ("ompmodel", "alphatemp_dom", "str"),  # Incognita extension (KEVCOLD), n = ALPHATEMP everywhere
+    "ccexitnb": ("ompmodel", "ccexitnb", "yn"),  # Incognita extension (CCEXITNB), default n = OFF = TALYS
+    "ccexitnbnf": ("ompmodel", "ccexitnbnf", "yn"),  # Incognita extension (CCEXITNB2), default y; n = OFF = TALYS
+    "tfold": ("ompmodel", "tfold", "yn"),  # Incognita extension (TFOLD), default y; n = TALYS
     "tlogref": ("ompmodel", "tlogref", "yn"),  # Incognita extension (LOGTINT G0 reference), n = OFF
     "knockcb": ("preeqmodel", "knockcb", "yn"),  # Incognita extension (ALPHAHUMP), n = OFF = TALYS
     "knockfix2": ("preeqmodel", "knockfix2", "yn"),  # Incognita extension (ALPHAHUMP), n = OFF = TALYS
@@ -918,9 +950,25 @@ def default_options(
         o["flagchannels"] = True
 
     # nuclides.f90:140-141 -- no residual beyond three protons/neutrons short of the CN
+    # FLUXCLOSE A: the compound widths keep every particle exit, so flux into a residual past the
+    # cap leaves the book; `Zinit - 1`, `Ninit - 1` lets those residuals join the cascade as
+    # terminal residuals (Cascade.stock_cap, multiple_emission)
+    from types import SimpleNamespace
+
+    from physics.hf.emission import fluxclose
+
+    _fcp = fluxclose.parts(o["fluxclose"])  # FLUXCN: y|n|cn or a part list; INCOGNITA_FLUXCLOSE wins
+    o["fluxclose"] = fluxclose.canon(_fcp)  # the resolved parts ("A,C,N" = cn, "A,C" = y, "0" = n)
+    fluxclose.sync(SimpleNamespace(fluxclose=o["fluxclose"]))  # FLUXPROMO2: run-scoped parts (A, C, N) for on()
+    cut = 1 if "A" in _fcp else 3
     zinit, ninit = Z + PARZ[k0], (A - Z) + PARN[k0]
-    o["maxZ"] = min(o["maxZ"], zinit - 3)
-    o["maxN"] = min(o["maxN"], ninit - 3)
+    o["maxZ"] = min(o["maxZ"], zinit - cut)
+    o["maxN"] = min(o["maxN"], ninit - cut)
+
+    # CHANCAP: run-scoped for the option-less channel sites (channels.caps / numchantot); INCOGNITA_CHANCAP wins
+    import os
+
+    os.environ["INCOGNITA_CHANCAP_EFF"] = "1" if o["chancap"] else "0"
 
     return Options(**o, explicit=frozenset(ov))
 

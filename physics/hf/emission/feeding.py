@@ -67,10 +67,11 @@ from physics.hf.compound.prepare import (
     densprepare,
 )
 from physics.hf.core.constants import PARSYM
-from physics.hf.projectile import compound_of
+from physics.hf.projectile import compound_of, residual_nucleus
 from physics.hf.core.tensors import DTYPE
 from physics.hf.emission.multiple import BinFeeding, NucleusPopulation
 from physics.hf import stagetime
+from physics.hf.omp import alphatemp as _alphatemp  # ALPHATEMP / KEVCOLD (cascade_cold)
 
 PARZ = (0, 0, 1, 1, 1, 2, 2)
 PARN = (0, 1, 0, 1, 2, 1, 2)
@@ -240,6 +241,12 @@ class Cascade:
         from physics.hf.input.defaults import reject_unported
 
         reject_unported(self.options)  # a calculation must not run on an unported keyword
+        from physics.hf.emission import fluxclose as _fc
+
+        _fc.sync(self.options)  # FLUXPROMO2: run-scoped FLUXCLOSE parts (run_grid's options may be cached)
+        from physics.hf import kevleak2
+
+        kevleak2.sync(self.options)  # KEVLEAK3: run-scoped kevleak2 value (deck > env > default 2)
         # SPEED0: decay all bins of a nucleus through compound.decay_batch (False: per bin)
         self.batched = True
         # SPEED0 G0.3: T7 overrides (requires_grad) for the INITIAL compound nucleus's photon
@@ -300,6 +307,51 @@ class Cascade:
             return _transmission(self.Zt, self.At, self.enincmax)
         return self.trans
 
+    def trans_cont_of(self, zix: int, nix: int):
+        """ROTEXIT1CN (`sfunc.exit_cont`, default OFF): the set nucleus (zix, nix)'s exits into CONTINUUM rows use when it
+        differs from `trans_of` -- the model set `trans` for the first compound nucleus under SLFIRST -- else None."""
+        if (int(zix), int(nix)) != (0, 0):
+            return None
+        from physics.hf.omp import sfunc
+
+        if sfunc.exit_ccf(self.options):  # ROTEXIT1CN3 (default OFF): measured S_l / the engine's own CC ratio
+            div = self.ccf_div()
+            if div is None or self.trans_of(0, 0) is self.trans:
+                return None
+            from physics.hf.compound.dens_reference import _transmission_sfunc
+
+            return _transmission_sfunc(self.Zt, self.At, self.enincmax, sfunc.mode(),
+                                       os.environ.get("INCOGNITA_SFUNC_TABLE", ""), div)
+        if not sfunc.exit_cont(self.options, self.Zt, self.At):
+            return None
+        tf = self.trans_of(0, 0)
+        return None if tf is self.trans else self.trans
+
+    def ccf_div(self) -> tuple | None:
+        """ROTEXIT1CN3 (`sfexit ccf`): ((l, f_l), ...) with f_l = max(1, S_l,inc,model / S_l,inv,model) at 1 keV --
+        the coupled-channels enhancement the measured g.s. S_l carries (`sfunc.cc_ratio`). None when the incident
+        channel is solved spherically (colltype S), nothing is measured, or every f_l == 1."""
+        from physics.hf.omp import sfunc
+
+        if self.k0 != 1 or self.omp_overrides or self.diff_params or self._coupled_band() is None:
+            return None
+        meas = sfunc.measured(self.Zt, self.At)
+        if not meas:
+            return None
+        ref = self.__dict__.get("_sfunc_ref")
+        if ref is None:
+            i1 = self._incident_raw(sfunc.E_REF_MEV)
+            ref = {0: float(i1.s0[0]), 1: float(i1.s1[0])}
+            self.__dict__["_sfunc_ref"] = ref
+            sfunc.LAST[(int(self.Zt), int(self.At), "inc")] = {"model": dict(ref), "meas": dict(meas)}
+        from physics.hf.compound.dens_reference import _sfunc_inv_model
+
+        _, inv = _sfunc_inv_model(self.Zt, self.At, self.enincmax, tuple(sorted(meas)))
+        f = sfunc.cc_ratio({l: ref[l] for l in meas}, inv)
+        sfunc.LAST[(int(self.Zt), int(self.At), "ccf_ratio")] = {"inc": {l: ref[l] for l in meas}, "inv": dict(inv),
+                                                                  "f": dict(f)}
+        return tuple(sorted(f.items())) if any(v != 1.0 for v in f.values()) else None
+
     def set_param_overrides(self, density: dict | None = None, optical: dict | None = None,
                             matching_xacc: float | None = None) -> None:
         """Install DIFFPARAM's level-density / optical-model keyword overrides on this run.
@@ -331,6 +383,9 @@ class Cascade:
         # does) and there is nothing to invalidate. Clearing them here would empty the caches of
         # every OTHER live Cascade, which is what an `lru_cache` on a method does.
         self.options, self.params, self.m = structure_of(self.Zt, self.At, merged)
+        from physics.hf.emission import fluxclose as _fc
+
+        _fc.sync(self.options)  # FLUXPROMO2: run-scoped FLUXCLOSE parts
 
     def check_cards(self) -> None:
         """Refuse a run on this Cascade when the fitlib cards are no longer the ones it was built
@@ -382,7 +437,7 @@ class Cascade:
         return _ld_of(Z, A, self.Zt, self.At, self.density_overrides, self.matching_xacc,
                       self.ld_token(Z, A))
 
-    def gamma_strength(self, Zt: int, At: int):
+    def gamma_strength(self, Zt: int, At: int, nucleus: tuple | None = None):
         """`dens_reference.strength_fn` for the compound nucleus (Zt, At + 1), honouring
         `gamma_overrides` when that nucleus is this run's initial compound nucleus, and the
         parameter set's `aadjust`/`ftable`/`wtable` of (Zt, At + 1) (PARAMWIRE) for every nucleus.
@@ -393,6 +448,9 @@ class Cascade:
         from physics.hf.compound.dens_reference import strength_fn
         from physics.hf.density.overrides import gamma_token
 
+        if nucleus is not None:  # ENGPROJ GPRESFIX: a residual, named by the nucleus itself
+            tok = gamma_token(self.fit, *nucleus) if self.fit else None
+            return strength_fn(Zt, At, self.enincmax, fit=tok, nucleus=tuple(nucleus))
         tok = gamma_token(self.fit, *compound_of(Zt, At)) if self.fit else None
         if self.gamma_overrides and (Zt, At) == (self.Zt, self.At):
             got = self._gamma_override_fn
@@ -403,7 +461,7 @@ class Cascade:
             return got
         return strength_fn(Zt, At, self.enincmax, fit=tok)
 
-    def gamma_params(self, Zt: int, At: int):
+    def gamma_params(self, Zt: int, At: int, nucleus: tuple | None = None):
         """The `GammaParameters` of (Zt, At + 1) that `psf_fast.fstrength_np` evaluates on the
         numpy paths (`decay_fast`, `widths_native`, the primary `densprepare`), or None where only
         the torch `fstrength` may run: a TENSOR photon-strength override on this run.
@@ -418,6 +476,12 @@ class Cascade:
                 return None
             if (Zt, At) == (self.Zt, self.At):
                 return self.gamma_strength(Zt, At).gp
+        if nucleus is not None and not self.gamma_overrides:  # ENGPROJ GPRESFIX
+            if not self.fit:
+                from physics.hf.compound.dens_reference import _gamma_parameters_nuc
+
+                return _gamma_parameters_nuc(int(nucleus[0]), int(nucleus[1]))[0]
+            return self.gamma_strength(Zt, At, nucleus=nucleus).gp
         if not self.fit:
             from physics.hf.compound.dens_reference import _gamma_parameters
 
@@ -714,41 +778,52 @@ class Cascade:
         TALYS: incident.f90:1 (incident), incidentecis.f90:1 (incidentecis)
         Test: A-inc
         """
+        from physics.hf import alphaentr
+
+        if alphaentr.active(self.k0, self.options):  # ALPHAENTR: alpha projectile, entrance-only potential (default off)
+            return alphaentr.incident(self, float(e_inc_mev))
+        return self._incident_with(e_inc_mev, self.options)
+
+    def _incident_with(self, e_inc_mev: float, options, tag: str = ""):
+        """`incident` solved with `options` (the Cascade's own unless ALPHAENTR substitutes the entrance
+        alpha potential). `tag` keeps a substituted solve's grid table and xscoupled memo apart."""
         from physics.hf.core.tensors import CaseBatch
         from physics.hf.omp.incident import incident_channel
 
         band = self._coupled_band()
+        if band is not None and self.k0 == 0:
+            band = None  # ENGPROJ: incident.f90:82-87 -- a photon never runs incidentecis, whatever colltype
         if band is not None:
             from physics.hf.ecis.incident import incident_coupled
 
             def solve():
                 inc, res = incident_coupled(
                     None, self.Zt, self.At, torch.tensor([e_inc_mev], dtype=DTYPE), band,
-                    particle=self.k0, options=self.options)
+                    particle=self.k0, options=options)
                 return inc, res.sigma_direct_mb[0].sum()
 
             inc, xscoupled = self._stage_cached(
-                "incident_cc", (float(e_inc_mev), int(self.k0)), solve, band=band)
-            self.__dict__.setdefault("_xscoupled", {})[float(e_inc_mev)] = xscoupled
+                "incident_cc", (float(e_inc_mev), int(self.k0)), solve, band=band, options=options)
+            self.__dict__.setdefault("_xscoupled" + tag, {})[float(e_inc_mev)] = xscoupled
             return inc
         if not torch.is_grad_enabled() and self.energies and float(e_inc_mev) in self.energies:
             # SETB: the whole declared grid in one batch per njmax (omp/incident_axis.py)
-            tab = self.__dict__.get("_setb_incident")
+            tab = self.__dict__.get("_setb_incident" + tag)
             if tab is None:
                 from physics.hf.omp.incident_axis import incident_axis
 
                 tab = self._stage_cached(
                     "incident_axis", (tuple(self.energies), int(self.k0)),
-                    lambda: incident_axis(self.Zt, self.At, self.energies, self.options,
-                                          self.params, particle=self.k0))
-                self.__dict__["_setb_incident"] = tab
+                    lambda: incident_axis(self.Zt, self.At, self.energies, options,
+                                          self.params, particle=self.k0), options=options)
+                self.__dict__["_setb_incident" + tag] = tab
             return tab[float(e_inc_mev)]
         cases = CaseBatch(Z=torch.tensor([self.Zt]), A=torch.tensor([self.At]),
                           e_inc_mev=torch.tensor([e_inc_mev], dtype=DTYPE),
                           projectile=PARSYM[self.k0])  # CPINC: was "n"
-        return incident_channel(cases, self.options, self.params)
+        return incident_channel(cases, options, self.params)
 
-    def _stage_cached(self, stage: str, args: tuple, compute, band=None):
+    def _stage_cached(self, stage: str, args: tuple, compute, band=None, options=None):
         """STAGECACHE (`physics.hf.stagedisk`): `compute()` from disk when the incident channel's
         optical-model inputs were seen before; `compute()` itself when the cache is off or this
         Cascade carries optical / differentiable overrides (which today's memos bypass too)."""
@@ -760,13 +835,14 @@ class Cascade:
 
         from physics.hf.direct import dwbaunit
 
+        options = self.options if options is None else options
         o, p, m = _structure_of(self.Zt, self.At)
-        opts, pars = [self.options, o], [self.params, p]
+        opts, pars = [options, o], [self.params, p]
         values = [m, self.m, dwbaunit.state(*dwbaunit.target_of(self.options))]
         if band is not None:
             from physics.hf.ecis.incident import t4_params
 
-            pars.append(t4_params(self.Zt, self.At, self.options))
+            pars.append(t4_params(self.Zt, self.At, options))
             values.append(band)
         return stagedisk.cached(stage, (int(self.Zt), int(self.At)) + tuple(args), compute,
                                 options=opts, params=pars, values=values)
@@ -782,7 +858,13 @@ class Cascade:
         band = self._coupled_band()
         if band is None:
             return None
+        if self.k0 == 0:
+            # ENGPROJ: no incidentread for a photon, so xscoupled keeps reacinitial's 0, but compnorm.f90:163 still
+            # takes the colltype /= 'S' branch (norm 1, flux from the Tjlinc sum)
+            return 0.0
         memo = self.__dict__.setdefault("_xscoupled", {})
+        if float(e_inc_mev) not in memo and alphaentr_active(self.k0, self.options):
+            self.incident(float(e_inc_mev))  # ALPHAENTR: the switched solve records it
         if float(e_inc_mev) not in memo:
             # `incident` records it when it solves; a table installed over `incident`
             # (`capture_fast_batch.install_tables`) does not, so solve it here then
@@ -846,6 +928,15 @@ class Cascade:
         sep = self._sep_table()
         st.exmax0, st.exmax = residual_exmax(
             zcomp, ncomp, st.exmax0, st.exmax, sep, {t: False for t in range(7)})
+
+    def stock_cap(self) -> tuple[int, int]:
+        """FLUXCLOSE A: the stock nuclides.f90:140-141 window (`Zinit - 3`, `Ninit - 3`). With part A
+        (`fluxclose y`) the cascade runs to `Zinit - 1`, `Ninit - 1` and the nuclei past this window
+        are terminal residuals (TALYS `skipCN`: they keep the flux they are fed and are never
+        decayed); with `fluxclose n` the options window is capped here, so nothing is past it."""
+        from physics.hf.emission.channels import PARN as _PN, PARZ as _PZ
+
+        return self.Zt + _PZ[self.k0] - 3, (self.At - self.Zt) + _PN[self.k0] - 3
 
     def regrow(self, st: ChainState, propagated: set, decayed, nuclei, maxz: int,
                maxn: int) -> ChainState | None:
@@ -1035,6 +1126,7 @@ class Cascade:
         eend = self._eend(st, sp)
         residuals, trans = {}, {}
         tr_sp = self.trans_of(sp.zix, sp.nix)
+        tr_cont = self.trans_cont_of(sp.zix, sp.nix)
         for t in range(7):
             d = self.spec(st, sp.zix + PARZ[t], sp.nix + PARN[t])
             residuals[t] = DensResidual(
@@ -1048,17 +1140,30 @@ class Cascade:
                     egrid_mev=self.rg.egrid, ebegin=self.rg.ebegin[t],
                     eend=min(eend[t], self.rg.maxen), maxen=self.rg.maxen,
                     tjl=tjl, tl=tl, lmax=lmax)
+                if tr_cont is not None:  # ROTEXIT1CN (default OFF): continuum rows read the model set
+                    trans[t].cont_tjl, trans[t].cont_tl = tr_cont[t][:2]
             if t >= 2 and self.trans.get("tlog", False):  # LOGTINT (default OFF): log-T Lagrange, charged types
                 trans[t].tlog = self.trans["tlog"]  # True / "c" = ln T, "l" = TLOGIT logit T
             if t >= 2 and "tlogref" in self.trans:  # LOGTINT G0 reference (default OFF)
                 trans[t].tlogref = self.trans["tlogref"][t]
+            if t == 6 and _alphatemp.cascade_cold(self.trans):  # ALPHATEMP (default OFF; KEVCOLD gd: production here)
+                trans[t].cold_tjl, trans[t].cold_tl = self.trans["alpha_cold"][:2]
+                trans[t].ustar = float(self.trans["alphatemp_ustar"])
         self.ndens += 1
         return DensPrepareInputs(
             exinc_mev=float(sp.ex_mev[nex]), dexinc_mev=float(sp.dex_mev[nex]),
             s_n_mev=sp.sep_mev[1], gammax=self.gammax, lmaxinc=st.lmaxinc, k0=self.k0,
             fnorm=self.fisom(sp.zix, sp.nix, st), residuals=residuals, trans=trans,
-            gamma_strength=self.gamma_strength(sp.Z, sp.A - 1),
-            primary=False, flagfullhf=self.flagfullhf, transeps=self.transeps)
+            gamma_strength=self.gamma_strength(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A)),
+            primary=False, flagfullhf=self.flagfullhf, transeps=self.transeps,
+            nnleak_top=nex == self.nnleak_top(sp))
+
+    def nnleak_top(self, sp: NucleusSpec) -> int:
+        """NNLEAK (default y): the mother bin of `sp` whose continuum -> discrete Rboundary is
+        Egamma^3-weighted (the initial compound nucleus's top bin), or -1 (compound/nnleak.py)."""
+        from physics.hf.compound import nnleak
+
+        return nnleak.top_bin(self.options, sp.zix, sp.nix, sp.maxex, sp.nlast_grid)
 
     def _eend(self, st: ChainState, sp: NucleusSpec) -> dict[int, int]:
         """`eend(type)` for this mother's total energy; `inverse` filled Tjl only up to
@@ -1360,6 +1465,7 @@ class Cascade:
         Test: A-mult
         """
         out: dict[tuple[int, int], NucleusPopulation] = {}
+        zcap, ncap = self.stock_cap()
         for zc in range(maxz + 1):
             for nc in range(maxn + 1):
                 if zc > NUMZ or nc > NUMN:
@@ -1369,6 +1475,7 @@ class Cascade:
                 sp = self.spec(st, zc, nc)
                 n = sp.maxex + 1
                 out[(zc, nc)] = NucleusPopulation(
+                    skipcn=zc > zcap or nc > ncap,  # FLUXCLOSE A: a terminal residual (booked, not decayed)
                     zcomp=zc, ncomp=nc, Z=sp.Z, A=sp.A, maxex=sp.maxex, nlast=sp.nlast_grid,
                     ex_mev=torch.as_tensor(sp.ex_mev, dtype=DTYPE),
                     dex_mev=torch.as_tensor(sp.dex_mev, dtype=DTYPE),
@@ -1388,3 +1495,12 @@ class Cascade:
             p.xspopex_mb[:k] = torch.as_tensor(np.asarray(xspopex)[:k], dtype=DTYPE)
             p.xspopnuc_mb = float(xspopnuc)
         return out
+
+
+def alphaentr_active(k0: int, options=None) -> bool:
+    """TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    from physics.hf import alphaentr
+
+    return alphaentr.active(k0, options)

@@ -56,10 +56,13 @@ def target(inp, wfc: bool, max_nex: int | None):
     so = nativex.lib()
     if so is None or isinstance(inp.tjlinc, torch.Tensor):
         return None
+    if inp.k0 == 0:  # ENGPROJ: the kernel's incident loop is the particle one; a photon takes the Python path
+        return None
     if wfc and inp.wfcfactor not in (1, 2, 3):
         return None
     nexmax = max_nex or max(r.maxex + 1 for r in inp.residuals.values())
-    cells = [(J2, p) for p in (-1, 1) for J2 in range(inp.j2beg, inp.j2end + 1, 2)]
+    sel = getattr(inp, "cellsel", None)  # KEVCOLD (default None = every cell)
+    cells = [(J2, p) for p in (-1, 1) for J2 in range(inp.j2beg, inp.j2end + 1, 2) if sel is None or (J2, p) in sel]
     pop = np.zeros((7, nexmax, NUMJ + 1, 2))
     if not cells:
         return torch.from_numpy(pop), torch.zeros((), dtype=DTYPE)

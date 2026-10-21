@@ -297,13 +297,14 @@ class Cards:
     particles: tuple[tuple[str, int, float], ...] = ()    # (keyword, particle type, value)
     skipped: tuple[tuple[str, str], ...] = ()             # (line, reason)
     source: tuple[str, ...] = ()                          # which files it came from
+    eadj: tuple = ()                                      # ENGADJ energy-local bumps (physics/hf/eadj.py)
 
     @property
     def option_overrides(self) -> dict:
         return dict(self.options)
 
     def empty(self) -> bool:
-        return not (self.options or self.cells or self.globals_ or self.particles)
+        return not (self.options or self.cells or self.globals_ or self.particles or self.eadj)
 
 
 def _split(lines, want_options: bool) -> tuple[list, list, list, list, list]:
@@ -474,7 +475,7 @@ def _lines_key() -> tuple:
     p = os.environ.get(ENV_LINES_FILE, "").strip()
     st = os.stat(p) if p and os.path.exists(p) else None
     return (os.environ.get(ENV_LINES, ""), p, st.st_mtime_ns if st else 0, st.st_size if st else 0,
-            os.environ.get("INCOGNITA_OMPROTOR", ""))
+            os.environ.get("INCOGNITA_OMPROTOR", ""), os.environ.get("INCOGNITA_ENGADJ", ""))
 
 
 def cards(Z: int, A: int, projectile: str = "n", Ltarget: int = 0,
@@ -522,6 +523,17 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
         if extra:
             bl = bl + extra
             src.append("ENV lines")
+    ead: list = []
+    if any(x.split()[:1] == ["eadj"] for x in bl):  # ENGADJ: `eadj ...` lines are the engine's own, not TALYS keywords
+        from physics.hf import eadj as _eadj
+
+        keep = []
+        for x in bl:
+            if x.split()[:1] != ["eadj"]:
+                keep.append(x)
+            elif not _eadj.disabled():
+                ead.append(_eadj.parse_line(x))  # a malformed eadj line raises: a dial must not be dropped silently
+        bl = tuple(keep)
     opts, cells, globs, parts, skipped = _split(bl, want_options=True)
     if "s8" in arms and not any(k == "strength" for k, _ in opts):
         opts = [("strength", 8)] + opts
@@ -568,7 +580,7 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
         cells, globs, parts = cells + c2, globs + g2, parts + p2
         skipped = skipped + s2
     return Cards(Z, A, projectile, tuple(opts), tuple(cells), tuple(globs), tuple(parts),
-                 tuple(skipped), tuple(src))
+                 tuple(skipped), tuple(src), tuple(ead))
 
 
 # ------------------------------------------------------------------------- the run's active set

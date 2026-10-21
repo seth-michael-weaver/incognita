@@ -102,6 +102,19 @@ def _lj_table(lmax: int, spin: float = 0.5) -> tuple[Tensor, Tensor, Tensor]:
     if spin == 0.0:
         l = torch.arange(lmax + 1, dtype=torch.int64)
         return l, l.to(DTYPE), torch.zeros(lmax + 1, dtype=DTYPE)
+    if spin == 1.0:
+        # ENGPROJ: a spin-1 projectile (deuteron) has j = l-1, l, l+1 (j >= 0) and 2 l.s = j(j+1) - l(l+1) - 2,
+        # the same channel set and l.s as the incident solver (omp/schrodinger._lj_grid)
+        ls, js = [], []
+        for orb in range(lmax + 1):
+            for jj in (orb - 1, orb, orb + 1):
+                if jj < abs(orb - 1):  # triangle (l, 1, j): l = 0 has only j = 1
+                    continue
+                ls.append(orb)
+                js.append(float(jj))
+        l = torch.tensor(ls, dtype=torch.int64)
+        j = torch.tensor(js, dtype=DTYPE)
+        return l, j, j * (j + 1.0) - l.to(DTYPE) * (l.to(DTYPE) + 1.0) - 2.0
     ls, js = [], []
     for orb in range(lmax + 1):
         for jj in (orb - 0.5, orb + 0.5):
@@ -113,6 +126,33 @@ def _lj_table(lmax: int, spin: float = 0.5) -> tuple[Tensor, Tensor, Tensor]:
     j = torch.tensor(js, dtype=DTYPE)
     ls2 = j * (j + 1.0) - l.to(DTYPE) * (l.to(DTYPE) + 1.0) - 0.75
     return l, j, ls2
+
+
+def spin_weights(l: Tensor, j: Tensor, lam: int, pb: int, njmax: int, spin: float) -> Tensor:
+    """`dwba_cross_sections`'s weight table (exit by entrance channel) for ANY projectile spin s, 0+ target:
+
+        (2J+1)/(2s+1) (2l'+1)(2j'+1) {l' j' s; j l lambda}^2 <l' 0 lambda 0 | l 0>^2,   J = j,
+
+    i.e. quan's coefficient for a spin-independent lambda-pole form factor, through the reduced matrix element of
+    Y_lambda between (l s) j states. For s = 1/2 it is exactly <j -1/2; lambda 0 | j' -1/2>^2 times (2J+1)/(2s+1)
+    (the spin-1/2 form above; tests/hf/test_engproj_dwba_spin.py checks the identity), for s = 0 the spin-0 form.
+    ENGPROJ: used for the spin-1 deuteron. 6j = W(l' j' l j; s lambda) up to a sign (racah.f90).
+
+    TALYS: directecis.f90:1 (directecis)
+    Test: tests/hf/test_engproj_dwba_spin.py
+    """
+    from physics.hf.core.angmom import racah
+
+    lf = l.to(DTYPE)
+    lp, jp, lc, jc = lf[:, None], j[:, None], lf[None, :], j[None, :]
+    full = torch.broadcast_shapes(lp.shape, lc.shape)
+    six = racah(lp.expand(full), jp.expand(full), lc.expand(full), jc.expand(full),
+                torch.full(full, float(spin), dtype=DTYPE), torch.full(full, float(lam), dtype=DTYPE))
+    cg = clebsch(lp.expand(full), torch.full(full, float(lam), dtype=DTYPE), lc.expand(full),
+                 torch.zeros(full, dtype=DTYPE), torch.zeros(full, dtype=DTYPE), torch.zeros(full, dtype=DTYPE))
+    par = (-1.0) ** (lp + lc)
+    keep = (pb * par > 0).to(DTYPE) * (jc <= njmax + 0.5 + 1.0e-9).to(DTYPE)
+    return (2.0 * jc + 1.0) / (2.0 * spin + 1.0) * (2.0 * lp + 1.0) * (2.0 * jp + 1.0) * six * six * cg * cg * keep
 
 
 def distorted_waves(
@@ -206,6 +246,75 @@ def _normalise(
     return y / cnorm[:, :, None]
 
 
+def _ecis_fams(h: float, ism: int, k: Tensor, eta: Tensor, l: Tensor) -> tuple[Tensor, ...]:
+    """tlnc's Numerov-consistent Coulomb functions F, F, G, G at nodes ism-1 / ism+1 (f1..f4 of
+    `omp.schrodinger._match_ecis`, the same algebra) for every (channel energy, l): (NK, NLJ) each.
+
+    TALYS: ecist.f:14415 (tlnc)
+    Test: tests/hf/test_engproj4_dwecis.py
+    """
+    lmax = int(l.max())
+    rm = h * ism
+    F, dF, G, dG = coulomb_functions(eta.detach(), (k * rm).detach(), lmax)
+    idx = l[None, :].expand(k.shape[0], l.shape[0])
+    F, dF, G, dG = (t.gather(1, idx) for t in (F, dF, G, dG))
+    wk, et = k[:, None], eta[:, None]
+    b1c = h * h / 48.0
+    cll = (l * (l + 1)).to(DTYPE)[None, :]
+    av = []
+    c1 = (ism - 1) * h
+    for _ in range(5):
+        av.append(b1c * (2.0 * wk * et / c1 - wk * wk + cll / c1 ** 2))
+        c1 = c1 + 0.5 * h
+    a1 = (1 - av[1]) / (2 + 10 * av[1])
+    b1 = (1 - av[3]) / (2 + 10 * av[3])
+    a2 = a1 * (1 - av[0]) / (1 - 4 * av[0])
+    b2 = b1 * (1 - av[4]) / (1 - 4 * av[4])
+    c1 = (2 + 10 * av[2]) - (1 - av[2]) * (a1 + b1)
+    a1 = (16 - 144 * av[1]) / (2 + 10 * av[1])
+    b1 = (16 - 144 * av[3]) / (2 + 10 * av[3])
+    c2 = (7 + a1 * (1 - av[0])) / (1 - 4 * av[0])
+    d2 = (7 + b1 * (1 - av[4])) / (1 - 4 * av[4])
+    d1 = (b1 - a1) * (1 - av[2])
+    a1 = a2 * d2 + b2 * c2
+    b1 = (c1 * d2 + d1 * b2) / a1
+    b2 = 30.0 * h * b2 * wk / a1
+    f1, f3 = b1 * F - b2 * dF, b1 * G - b2 * dG
+    b1 = (c2 * c1 - a2 * d1) / a1
+    a2 = -30.0 * h * a2 * wk / a1
+    return f1, b1 * F - a2 * dF, f3, b1 * G - a2 * dG
+
+
+def ecis_distorted_waves(f_lj: Tensor, kappa2: Tensor, k: Tensor, eta: Tensor, l: Tensor, h: float,
+                         ism: int) -> Tensor:
+    """ENGPROJ4 DWECIS: the regular solutions of ECIS's DWBA, (NK, NLJ, ism+1) on nodes 0..ism, normalised
+    to H^- - S H^+ like `_normalise`.
+
+    insh: x = q - q^2/12 with q = h^2 (k^2 - f_lj) (modified Numerov, lo(27) = F; lo(26) off),
+    z_{n+1} = 2 z_n - z_{n-1} - x_n z_n from z(0) = 0, z(h) small; the solution is the Numerov
+    stencil u_n = (z_{n-1} + 10 z_n + z_{n+1}) / 12; z at ism-1 / ism+1 is matched to tlnc's
+    functions f1..f4: with D = (z_m f4 - f3 z_p) + i (z_m f2 - f1 z_p) and W = f1 f4 - f3 f2,
+    u W / D is F + C H^+ and -2i times it is H^- - S H^+ (S = 1 + 2iC, `_match_ecis`).
+    `f_lj` must hold nodes 0..ism+1. ECIS rescales z by 1e-30 past 1e15; here z starts at 1e-100,
+    which keeps r^(l+1) growth over ~150 nodes and l <= 70 inside double range (scale-free).
+
+    TALYS: ecist.f:17399 (insh), ecist.f:14415 (tlnc)
+    Test: tests/hf/test_engproj4_dwecis.py
+    """
+    g = (h * h) * (kappa2.to(CDTYPE)[:, None, None] - f_lj[None, :, :])  # (NK, NLJ, ism+2)
+    x = g - g * g / 12.0
+    zs = [torch.zeros(g.shape[:2], dtype=CDTYPE), torch.full(g.shape[:2], 1.0e-100, dtype=CDTYPE)]
+    for i in range(1, ism + 1):
+        zs.append(2.0 * zs[i] - zs[i - 1] - x[:, :, i] * zs[i])
+    z = torch.stack(zs, dim=2)  # nodes 0..ism+1
+    u = torch.cat([torch.zeros(g.shape[:2] + (1,), dtype=CDTYPE),
+                   (z[:, :, 0:ism] + 10.0 * z[:, :, 1:ism + 1] + z[:, :, 2:ism + 2]) / 12.0], dim=2)
+    f1, f2, f3, f4 = _ecis_fams(h, ism, k, eta, l)
+    zm, zp = z[:, :, ism - 1], z[:, :, ism + 1]
+    d = (zm * f4 - f3 * zp) + 1j * (zm * f2 - f1 * zp)
+    return u * (-2.0j * (f1 * f4 - f3 * f2) / d)[:, :, None]
+
+
 def _simpson_weights(n: int, h: float) -> Tensor:
     """Composite Simpson on r_i = i h, i = 0..n, falling back to the trapezoid on the last
     interval when n is odd."""
@@ -273,9 +382,14 @@ def dwba_cross_sections(
         ecm_mev=kin.ecm_mev[:, 0], k_fm=k[:1], eta=eta[:1], mu_coef=kin.mu_coef
     )
     h_t, ism, _ = ecis_grid(omp, m_targ, grid_kin)
+    from physics.hf.projectile import dwba_ecis_numerics
+
+    ecisnum = dwba_ecis_numerics(particle)  # ENGPROJ4 DWECIS: ECIS's grid (refine ignored), its integrator and sum
+    if ecisnum:
+        refine = 1
     h = float(h_t[0]) / refine
     n = int(ism[0]) * refine
-    r = h * torch.arange(0, n + 1, dtype=DTYPE)
+    r = h * torch.arange(0, n + 1 + int(ecisnum), dtype=DTYPE)  # DWECIS: node ism + 1 for tlnc's matching
     r_safe = r.clone()
     r_safe[0] = h  # column 0 multiplies u(0) = 0
     if njmax is None:
@@ -299,7 +413,8 @@ def dwba_cross_sections(
     from physics.hf.projectile import cpinc2
 
     spin0 = spin == 0.0 and cpinc2()  # PORTSTACK: CPINC2 spin-0 channels behind INCOGNITA_CPINC2
-    l, j, ls2 = _lj_table(lmax, 0.0 if spin0 else 0.5)
+    spin1 = spin == 1.0  # ENGPROJ: deuteron (was the spin-1/2 table)
+    l, j, ls2 = _lj_table(lmax, 1.0 if spin1 else (0.0 if spin0 else 0.5))
 
     central, so, coul = optical_potential(omp, m_targ, r_safe, z_prod)
     diag = central[0] + coul[0].to(CDTYPE)  # (n+1,)
@@ -307,15 +422,22 @@ def dwba_cross_sections(
         (l.to(DTYPE) * (l.to(DTYPE) + 1.0))[:, None] / r_safe[None, :] ** 2
     ).to(CDTYPE) + mu * (diag[None, :] + ls2.to(CDTYPE)[:, None] * so[0][None, :])
 
-    if rows_of is None:
+    if ecisnum:
+        rows = slice(None) if rows_of is None else sel
+        u = ecis_distorted_waves(f_lj, kappa2[rows], k[rows], eta[rows], l, h, n)
+    elif rows_of is None:
         u = distorted_waves(f_lj, kappa2, l, h, n)
         u = _normalise(u, f_lj, kappa2, eta, l, h)
     else:
         u = distorted_waves(f_lj, kappa2[sel], l, h, n)
         u = _normalise(u, f_lj, kappa2[sel], eta[sel], l, h)
-    w = derivative_form_factor(omp, m_targ, r_safe, deformation_length, parts)[0]
+    w = derivative_form_factor(omp, m_targ, r_safe[:n + 1], deformation_length, parts)[0]
     w[0] = 0.0  # r = 0 carries no weight; u(0) = 0 anyway
-    wt = _simpson_weights(n, h)
+    if ecisnum:  # insi-140: x(ism) = sum over nodes of (exit solution) (coupling) (entrance solution)
+        wt = torch.full((n + 1,), h, dtype=DTYPE)
+        wt[0] = 0.0
+    else:
+        wt = _simpson_weights(n, h)
     # I[b, c', c] = int u^(b)_c'(r) W(r) u^(0)_c(r) dr
     lhs = u * (w * wt.to(CDTYPE))[None, None, :]
     integral = torch.einsum("bpr,qr->bpq", lhs, u[0])
@@ -338,6 +460,8 @@ def dwba_cross_sections(
         if pb != (-1) ** lam or d == 0.0 or float(kappa2[b + 1]) <= 0.0:
             continue  # a lambda-pole form factor cannot reach unnatural parity
         key = (lam, pb)
+        if key not in weights and spin1:
+            weights[key] = spin_weights(l, j, lam, pb, int(njmax), 1.0)
         if key not in weights and not torch.is_grad_enabled() and not spin0:
             # SETB: the same table, cached for the worker (ecis/dwba_setb.py)
             from physics.hf.ecis.dwba_setb import cg_weights

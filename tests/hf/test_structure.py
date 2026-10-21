@@ -91,7 +91,7 @@ def test_units_against_known_physical_values():
 
 
 @needs_db
-def test_masses_match_the_pre_vectorisation_capture():
+def test_masses_match_the_pre_vectorisation_capture(monkeypatch):
     """SPEED2 turned masses()'s grid loops into numpy array operations (the same float64
     operations per cell), parses each mass table once and memoises Duflo-Zuker. The fixture
     holds every output array of the cell-by-cell code for five runs: Fe-56 and Pb-208 defaults,
@@ -101,6 +101,10 @@ def test_masses_match_the_pre_vectorisation_capture():
 
     from physics.hf.input.defaults import PARAM_SPECS, default_options, default_params
     from physics.hf.structure.masses import masses
+
+    # FLUXPROMO2 pin: the fixture is TALYS's residual window (Ninit - 3); `fluxclose y` widens it
+    monkeypatch.setenv("INCOGNITA_FLUXCLOSE", "0")
+    monkeypatch.delenv("INCOGNITA_FLUXCLOSE_EFF", raising=False)
 
     z = np.load(Path(__file__).parent / "fixtures" / "masses_speed2.npz")
     cases = [

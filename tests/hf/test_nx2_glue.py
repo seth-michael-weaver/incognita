@@ -21,6 +21,16 @@ import numpy as np
 import pytest
 import torch
 
+
+@pytest.fixture(scope="module", autouse=True)
+def _alphatemp_off():
+    """KEVCOLD (alphatemp default ON 0.64, alphatemp_dom gd): the gd front calls densprepare twice (cold + hot pass); this glue test pins the production one-pass count; this module runs at alphatemp 0."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_ALPHATEMP", "0")
+        yield
+
+
+
 TALYS_DIR = Path(os.environ.get("TALYS_DIR", Path.home() / "opt/talys-src"))
 needs_structure = pytest.mark.skipif(not (TALYS_DIR / "structure").is_dir(),
                                      reason="TALYS structure/ not installed")

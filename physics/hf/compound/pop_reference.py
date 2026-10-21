@@ -36,6 +36,7 @@ from physics.hf.core.grids import emission_end, incident_kinematics, total_energ
 from physics.hf.preeq.multi import NUMPARX
 from physics.hf.core.tensors import DTYPE
 from physics.hf.emission.score import POP_FLOOR_MB, _r
+from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT_JSON = ROOT / "docs" / "results" / "hf-population-gate.json"
@@ -194,7 +195,7 @@ def pop_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float, targe
     rg = run_grid(Zt, At, enincmax_mev)
     k0 = inp.k0
     eninccm, _ = incident_kinematics(
-        inp.e_inc_mev, k0, float(rg.m.mass_amu[0, 1]),
+        inp.e_inc_mev, k0, float(rg.m.mass_amu[target_mass_index()]),
         float(rg.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
         float(rg.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), rg.options.flagrel)
     ecomp = total_energy(eninccm, rg.s0[k0], 0.0)
@@ -217,6 +218,7 @@ def pop_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float, targe
         xspreeq_mb={t: np.asarray(xspreeq[t], float)[:E] for t in range(7)},
         xspreeqtot_mb={t: float(xspreeqtot[t]) for t in range(7)},
         flaggiant=has_giant and options.flaggiant0, xsgr_mb=xsgr, xsgrtot_mb=xsgrtot,
+        xsgrres_mb=_grres(gres, k0, E),
         pespinmodel=options.pespinmodel, flagmulpre=flagmulpre, flag2comp=options.flag2comp,
         maxpar=maxpar,
         # preeq.f90:63-79: ppi0 = parZ(k0), pnu0 = parN(k0); a photon starts as one neutron
@@ -317,3 +319,16 @@ def main(argv=None) -> None:
 
 if __name__ == "__main__":
     main()
+
+
+def _grres(gres, k0: int, E: int) -> dict:
+    """SPECCLOSE (INCOGNITA_SPECCLOSE, output only): the giant-resonance part of `xsgr` (giant.f90:113, mb per bin) so
+    the shipped spectrum can carry it per MeV; empty (no work) when the switch is off."""
+    from physics.hf.emission.binspec import specclose_on
+
+    if not specclose_on():
+        return {}
+    g = getattr(gres, "xsgrstate_mb", None)
+    if g is None:
+        return {}
+    return {k0: np.asarray(g.detach().cpu().numpy() if hasattr(g, "detach") else g, float).sum(0)[:E]}

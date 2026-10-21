@@ -10,9 +10,10 @@ TALYS routines ported here (file:line of the subroutine/function statement):
     knockout.f90:1 (knockout)
     stripping.f90:1 (stripping)
     bonetti.f90:1 (bonetti)
+    breakup.f90:1 (breakup)
 
 `bonetti` is only read for `preeqmode 3` (optical-model transition rates) and is not ported;
-`breakup` (`k0 > 2`) is out of scope for a neutron-induced port and raises.
+`breakup` (`k0 > 2`, breakup.f90:1) is ported for d/t/h (ENGPROJ); `breakupAVR` (breakupmodel 2) raises.
 
 These are the `Pickup/strip` and `Knockout` columns of `preeq*.out`. Batched over
 (case, energy, particle); the only loops are Kalbach's four small exciton sums.
@@ -102,6 +103,11 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
         base = 2.0 * Z / A
         term5 = base ** (2 * (parZ[k0] + 2) * hpi + 2 * pnu)
         cstrip = torch.as_tensor(params.at("cstrip", t), dtype=DTYPE, device=dev)
+        if t in (4, 5):  # TFOLD (default ON; omp/tfold.py): Kalbach stripping constant of t / 3He x0.99
+            from physics.hf.omp import tfold as _tf
+
+            if _tf.enabled(options):
+                cstrip = cstrip * _tf.CSTRIP_FACTOR
         termps = cstrip * term1 * term2 * term3 * term4 * term5
 
         if k0 == 1:
@@ -394,6 +400,77 @@ def knockout(inp: PreeqInputs, options, params, coulbar_mev, xsreacinc_mb: Tenso
     return out
 
 
+# breakup.f90:107-128 normalisation constants Nab(k0, type), Napb(k0, type) (all others 1)
+_NAB = {(3, 1): 3.6, (3, 2): 3.6, (4, 1): 4.1, (4, 2): 2.0, (4, 3): 1.3, (5, 1): 2.0, (5, 2): 4.1, (5, 3): 1.3,
+        (6, 1): 0.61, (6, 2): 0.61, (6, 3): 0.23, (6, 4): 0.19, (6, 5): 0.34}
+_NAPB = {(6, 2): 1.2, (6, 3): 1.2, (5, 2): 1.8, (5, 3): 1.8}
+# breakup.f90:136-174: the break-up partner type2 of each ejectile type, per projectile
+_BU_PAIRS = {3: {1: 2, 2: 1}, 4: {1: 3, 2: 1, 3: 1}, 5: {1: 2, 2: 3, 3: 2}, 6: {1: 5, 2: 4, 3: 3, 4: 2, 5: 1}}
+
+
+def breakup(inp: PreeqInputs, options, cbreak) -> Tensor:
+    """Kalbach break-up spectra `xspreeqbu(type, nen)` [mb/MeV], shape (C, 7, E) (Phys. Rev. C95, 014606 (2017)).
+
+    `cbreak[type-1]` = Cbreak(type). The energy-dependent `adjust` factor is 1 (no `cbreakadjust` keyword in
+    the port, as stripping/knockout). Per case: the case's Einc, eninccm and Q(type) = S(0,0,k0) - S(0,0,type)
+    (nuclides.f90:242); ZZ(0,0,type) is the compound Z minus parZ(type).
+
+    TALYS: breakup.f90:1 (breakup)
+    Test: tests/hf/test_engproj_breakup.py
+    """
+    c = talys_constants()
+    parZ, parA, parmass = c["parZ"], c["parA"], c["parmass"]
+    amu, onethird = c["amu"], c["onethird"]
+    sqrttwopi = float(np.sqrt(2.0 * np.pi))
+    k0 = inp.k0
+    C, E = inp.C, inp.E
+    dev = inp.egrid_mev.device
+    out = torch.zeros(C, 7, E, dtype=DTYPE, device=dev)
+    parskip = getattr(options, "parskip", None)
+    Zt, At = inp.Z, inp.A
+    Zcomp = Zt + parZ[k0]
+    einc = inp.einc_mev.reshape(C, 1)
+    eninccm = inp.ecomp_mev.reshape(C, 1) - inp.s_mev[:, k0].reshape(C, 1)
+    ksig, widthsig = 112.0, 13.0
+    for t, t2 in _BU_PAIRS[k0].items():
+        if parskip is not None and bool(parskip[t]):
+            continue
+        r0 = 1.2 + 5.0 / (1.0 + torch.exp(einc / 30.0))
+        deff = r0 * (At ** onethird) + 1.2
+        ca = 1.44 * parZ[k0] * Zt / deff
+        cb = 1.44 * parZ[t] * (Zcomp - parZ[t]) / deff
+        ecent = parA[t] / float(parA[k0]) * (einc - ca) + cb
+        step = 0.0 if parA[k0] - parA[t] - 1.5 < 0.0 else 1.0
+        sab = (parmass[t] + parmass[t2] - parmass[k0]) * amu
+        F = 62.0 * (1.0 - 1.0 / torch.exp(einc / 173.0)) * (1.0 - At / (155.0 * sab * sab)) - 3.0 * step
+        H = 0.5 * F
+        q = inp.s_mev[:, k0].reshape(C, 1) - inp.s_mev[:, t].reshape(C, 1)
+        emax = eninccm + q
+        feff = H + torch.minimum(H, 0.6 * (emax - ecent))
+        width = torch.maximum(feff / 2.35, 0.1 * einc)
+        fac1 = 1.0 / (width * sqrttwopi)
+        wplus = torch.clamp(torch.minimum(H, 0.6 * (emax - ecent)), min=0.0) / 2.35
+        wmin = torch.clamp(H - torch.clamp(0.6 * (ecent - emax), min=0.0), min=0.0) / 2.35
+        epk = torch.where((emax >= ecent - 1.67 * H) & (emax <= ecent), emax, ecent)
+        ehalf = 34.0 * (parA[k0] - parA[t]) ** 0.84
+        tpren = 1.0 / (1.0 + torch.exp((ehalf - einc) / widthsig))
+        eout = inp.egrid_mev
+        wi = torch.where(eout <= epk, wmin.expand(C, E), wplus.expand(C, E))
+        live = inp.emask[:, t] & (wi > 0.0)
+        wis = torch.where(live, wi, torch.ones_like(wi))
+        fac2 = 2.0 * (2.0 * wis) ** 2
+        if t > 1:
+            te = 1.0 / (1.0 + torch.exp(3.0 * (cb - eout) / cb))
+        else:
+            te = torch.ones_like(eout)
+        pbu = torch.where(live, fac1 * torch.exp(-((eout - epk) ** 2) / fac2) * te, torch.zeros_like(eout))
+        pbuint = (pbu * inp.deltae_mev).sum(1, keepdim=True)
+        xsbu = cbreak[t - 1] * (_NAB.get((k0, t), 1.0) * deff * deff + _NAPB.get((k0, t), 1.0) * deff) \
+            * torch.exp(einc / ksig) * tpren
+        out[:, t] = torch.where((pbuint > 0.0) & inp.emask[:, t], xsbu * pbu, torch.zeros_like(pbu))
+    return out
+
+
 def complex_particle_spectra(
     inp: PreeqInputs,
     options,
@@ -420,12 +497,16 @@ def complex_particle_spectra(
     if inp.k0 > 2:
         # CPINC: breakup.f90's cross section carries the factor Cbreak(type), and
         # input_preeqpar.f90:90-91 sets Cbreak = 0 for an alpha projectile, so a default alpha run
-        # has no breakup term. Deuteron/triton/helion breakup (and a non-zero alpha Cbreak) is not
-        # ported and still raises.
+        # has no breakup term (the alpha path is unchanged: it never calls breakup()).
+        # ENGPROJ: d/t/h run Kalbach's breakup (preeqcomplex.f90:62-67, breakupmodel 1 = default);
+        # the deuteron Avrigeanu model (breakupmodel 2, breakupAVR.f90) is not ported and raises.
         cbreak = [float(params.at("cbreak", t)) for t in range(1, 7)]
-        if inp.k0 != 6 or any(c != 0.0 for c in cbreak):
-            raise NotImplementedError("T8: breakup (k0 > 2, breakup.f90/breakupAVR.f90) is not "
-                                      "ported (only the default alpha Cbreak = 0 runs)")
+        if inp.k0 in (3, 4, 5):
+            if inp.k0 == 3 and int(getattr(options, "breakupmodel", 1)) != 1:
+                raise NotImplementedError("T8: breakupmodel 2 (breakupAVR.f90) is not ported")
+            bu = breakup(inp, options, cbreak)
+        elif any(c != 0.0 for c in cbreak):
+            raise NotImplementedError("T8: alpha breakup with Cbreak != 0 (breakup.f90) is not ported")
     # Coulomb damping of the whole complex-particle part (preeqcomplex.f90:60-64)
     cb = coulbar_mev[inp.k0]
     damper = torch.ones(C, dtype=DTYPE, device=dev)

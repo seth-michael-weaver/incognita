@@ -340,6 +340,20 @@ def nuclide_symbol(Z: int) -> str:
     return NUC[Z - 1]
 
 
+PINNED_TALYS_ROOT = Path.home() / "opt" / "talys-structure-pinned-2026-10-12"  # TALYSPIN: frozen, checksummed copy of the strip store
+
+
+def default_talys_root() -> str:
+    """Root used when $TALYS_DIR is unset: the pinned structure copy (INCOGNITA_TALYS_LIVE=1 -> legacy ~/opt/talys-src).
+
+    TALYS: machine.f90:1 (machine)
+    Test: A-struct
+    """
+    if os.environ.get("INCOGNITA_TALYS_LIVE") != "1" and (PINNED_TALYS_ROOT / "structure" / "abundance" / "H.abun").is_file():
+        return str(PINNED_TALYS_ROOT)
+    return str(Path.home() / "opt" / "talys-src")
+
+
 def talys_structure_path(code_dir: str | os.PathLike | None = None) -> Path:
     """The structure-database directory TALYS reads: $TALYS_DIR/structure/, falling back to the
     compiled-in code_dir (machine.f90:50-66). Raises FileNotFoundError with TALYS's own check
@@ -349,7 +363,7 @@ def talys_structure_path(code_dir: str | os.PathLike | None = None) -> Path:
     Test: A-struct
     """
     if code_dir is None:
-        code_dir = os.environ.get("TALYS_DIR") or str(Path.home() / "opt" / "talys-src")
+        code_dir = os.environ.get("TALYS_DIR") or default_talys_root()
     path = Path(code_dir) / "structure"
     if not (path / "abundance" / "H.abun").is_file():
         raise FileNotFoundError(

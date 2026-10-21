@@ -108,3 +108,39 @@ def test_unanchorable_kept(monkeypatch):
     assert ctwindow2.WHY[(26, 57)] == "no_umax"
     assert torch.equal(off.Exmatch_mev, on.Exmatch_mev) and torch.equal(off.T_mev, on.T_mev)
     assert math.isfinite(float(on.E0_mev[0]))
+
+
+def test_least_finds_closest_approach():
+    """ARTFIX `_least`: g never crosses zero -> the x of least |g|, to 1e-6, never worse than the grid point."""
+    xs = np.linspace(0.3, 3.0, 101)
+    for c in (1e-2, -1e-2, 1e-8):
+        gb = (lambda c_: (lambda z: (np.asarray(z) - 1.234) ** 2 * np.sign(c_) + c_))(c)
+        assert ctwindow2._least(gb, xs, gb(xs)) == pytest.approx(1.234, abs=1e-6)
+    assert ctwindow2._least(lambda z: np.asarray(z) + 1.0, xs, xs + 1.0) == pytest.approx(0.3, abs=1e-6)  # bracket edge
+    assert ctwindow2._least(lambda z: np.full(np.shape(z), np.nan), xs, np.full(101, np.nan)) is None
+
+
+@pytest.mark.skipif(not HAVE_RIPL, reason="RIPL-4 levels-param.data not available")
+def test_ctwcont_no_root(monkeypatch):
+    """ARTFIX `ctwcont`: an unreachable window count (no root) is kept as densitymatch's values with ctwcont n (pre-ARTFIX),
+    and anchored at the least |count - target| with ctwcont y (default); records with a root are identical either way."""
+    monkeypatch.delenv("INCOGNITA_CTW2_CONT", raising=False)
+    assert ctwindow2.mode(default_options(26, 56)) is False
+    assert ctwindow2.mode(default_options(26, 56, overrides={"ctwindow2": "y"})) == "cont"
+    assert ctwindow2.mode(default_options(26, 56, overrides={"ctwindow2": "y", "ctwcont": "n"})) == "root"
+    ld = _ld(26, 57, 26, 56)
+    a, b = densitymatch(ld, ctwindow2="root"), densitymatch(ld, ctwindow2="cont")
+    assert torch.equal(a.T_mev, b.T_mev) and torch.equal(a.Exmatch_mev, b.Exmatch_mev)
+    w = ctwindow2._window
+
+    def big(ld_):
+        win, why = w(ld_)
+        return (None, why) if win is None else ((win[0], win[1] + 10 ** 6) + tuple(win[2:]), why)
+
+    monkeypatch.setattr(ctwindow2, "_window", big)
+    off, root, cont = densitymatch(ld), densitymatch(ld, ctwindow2="root"), densitymatch(ld, ctwindow2="cont")
+    assert torch.equal(off.T_mev, root.T_mev) and torch.equal(off.Exmatch_mev, root.Exmatch_mev)
+    rec = ctwindow2.LAST[(26, 57)]
+    if (26, 57) not in ctwindow2.WHY:   # anchored at the closest approach (guards may still keep densitymatch's values)
+        assert rec["least"] and rec["nroots"] == 1
+        assert float(cont.Exmatch_mev[0]) == pytest.approx(rec["Ex"])

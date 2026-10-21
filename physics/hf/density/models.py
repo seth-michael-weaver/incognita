@@ -39,6 +39,7 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor
 
+from physics.hf import eadj as _eadj
 from physics.hf.core.constants import talys_constants
 from physics.hf.core.numerics import locate
 from physics.hf.core.tensors import DTYPE
@@ -178,7 +179,7 @@ def _ct_pt(ld: LDNucleus, ibar: int) -> tuple[Tensor, Tensor]:
     return ld.ctable[ibar], ld.ptable_mev[ibar]
 
 
-def densitytot(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0, ldmodel: int | None = None) -> Tensor:
+def _densitytot(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0, ldmodel: int | None = None) -> Tensor:
     """Total level density [MeV^-1] (both parities, levels): the analytical model times the
     collective enhancement for ldmodel <= 3 (or a missing table), the table otherwise, times
     exp(ctable sqrt(Eex - ptable)); 1e-30 below zero.
@@ -214,7 +215,7 @@ def densitytot(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0, ldmodel: int | Non
     return torch.clamp(out, min=1.0e-30)
 
 
-def densitytotP(
+def _densitytotP(
     ld: LDNucleus, eex_mev: Tensor, parity: int, ibar: int = 0, ldmodel: int | None = None
 ) -> Tensor:
     """Total level density of one parity [MeV^-1]: pardis x densitytot for the analytical models,
@@ -229,7 +230,7 @@ def densitytotP(
     eshift = eex - pt
     valid = (eex >= 0.0) & (eshift > 0.0)
     if ldmod <= 3 or not ld.has_table(ibar):
-        dens = densitytot(ld, eex, ibar, ldmod) * PARDIS
+        dens = _densitytot(ld, eex, ibar, ldmod) * PARDIS
     else:
         tab = ld.tables[ibar]
         pi = 0 if parity == -1 else 1
@@ -242,7 +243,7 @@ def densitytotP(
     return torch.clamp(out, min=1.0e-30)
 
 
-def density(
+def _density(
     ld: LDNucleus,
     eex_mev: Tensor,
     J: Tensor,
@@ -266,7 +267,7 @@ def density(
         # given ((X, 1) from the grid callers) and broadcast against J once, in spindis
         ald = ignatyuk(ld, eex, ibar)
         sc = spincut(ld, ald, eex, ibar)
-        dt = densitytot(ld, eex, ibar, ldmod)
+        dt = _densitytot(ld, eex, ibar, ldmod)
         from physics.hf.density import spinquench as _sq  # SPINQUENCH: spin distribution only (OFF: sc)
         sc = _sq.quench_t(ld, eex, sc, ibar)
         out = dt * PARDIS * spindis(sc, J)
@@ -291,6 +292,80 @@ def density(
     expo = torch.clamp(ct * torch.sqrt(_safe(eshift, valid, 0.0)), max=80.0)
     out = torch.where(valid, torch.exp(expo) * ldtab, torch.zeros_like(ldtab))
     return torch.clamp(out, min=1.0e-30)
+
+
+# ------------------------------------------------------------------------------ ENGADJ (physics/hf/eadj.py)
+def _ldbumps(ld: LDNucleus, ibar: int):
+    """(pshift bumps, ctable bumps) of this nucleus' ground-state density, or None (the default: no bump)."""
+    if ibar != 0 or not _eadj.on():
+        return None
+    bp = _eadj.nucleus_bumps("pshift", ld.Z, ld.A)
+    bc = _eadj.nucleus_bumps("ctable", ld.Z, ld.A)
+    return (bp, bc) if (bp or bc) else None
+
+
+def _adjusted(core, ld: LDNucleus, eex_mev, ibar: int, adj, *args):
+    """ENGADJ energy-local level-density adjustment around the unadjusted `core(ld, eex, ...)`:
+    pshift: the model is evaluated at Eex - dP(Eex) (a local pairing / energy shift, U = Eex - delta - dP for the
+    Fermi gas); ctable: x exp(dc(Eex) sqrt(Eex - dP - ptable)), TALYS density.f90's `ct = ctable + factor - 1`."""
+    bp, bc = adj
+    eex = _t(eex_mev)
+    e_np = eex.detach().numpy()
+    ee = eex - torch.as_tensor(_eadj.bump_shift(bp, e_np), dtype=eex.dtype) if bp else eex
+    out = core(ld, ee, *args)
+    if bc:
+        _, pt = _ct_pt(ld, ibar)
+        es = torch.clamp(ee - pt, min=0.0)
+        dc = torch.as_tensor(_eadj.bump_shift(bc, e_np), dtype=eex.dtype)
+        out = torch.clamp(out * torch.exp(torch.clamp(dc * torch.sqrt(es), max=80.0)), min=1.0e-30)
+    return out
+
+
+def densitytot(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0, ldmodel: int | None = None) -> Tensor:
+    """Total level density [MeV^-1] (both parities, levels): the analytical model times the
+    collective enhancement for ldmodel <= 3 (or a missing table), the table otherwise, times
+    exp(ctable sqrt(Eex - ptable)); 1e-30 below zero. ENGADJ bumps on top (`_adjusted`).
+
+    TALYS: densitytot.f90:1 (densitytot)
+    Test: A-ld
+    """
+    adj = _ldbumps(ld, ibar)
+    if adj is None:
+        return _densitytot(ld, eex_mev, ibar, ldmodel)
+    return _adjusted(lambda l, e: _densitytot(l, e, ibar, ldmodel), ld, eex_mev, ibar, adj)
+
+
+def densitytotP(
+    ld: LDNucleus, eex_mev: Tensor, parity: int, ibar: int = 0, ldmodel: int | None = None
+) -> Tensor:
+    """Total level density of one parity [MeV^-1] (densitytotP.f90); ENGADJ bumps on top (`_adjusted`).
+
+    TALYS: densitytotP.f90:1 (densitytotP)
+    Test: A-ld
+    """
+    adj = _ldbumps(ld, ibar)
+    if adj is None:
+        return _densitytotP(ld, eex_mev, parity, ibar, ldmodel)
+    return _adjusted(lambda l, e: _densitytotP(l, e, parity, ibar, ldmodel), ld, eex_mev, ibar, adj)
+
+
+def density(
+    ld: LDNucleus,
+    eex_mev: Tensor,
+    J: Tensor,
+    parity: int,
+    ibar: int = 0,
+    ldmodel: int | None = None,
+) -> Tensor:
+    """rho(Ex, J, parity) [MeV^-1] as density.f90 (`_density`); ENGADJ bumps on top (`_adjusted`).
+
+    TALYS: density.f90:1 (density)
+    Test: A-ld
+    """
+    adj = _ldbumps(ld, ibar)
+    if adj is None:
+        return _density(ld, eex_mev, J, parity, ibar, ldmodel)
+    return _adjusted(lambda l, e: _density(l, e, J, parity, ibar, ldmodel), ld, eex_mev, ibar, adj)
 
 
 def density_callable(ld: LDNucleus, ibar: int = 0) -> Callable[[Tensor, Tensor, int], Tensor]:

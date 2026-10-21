@@ -200,7 +200,8 @@ def _native(inp: CompoundInputs, wfc: bool, device, max_nex: int | None):
 
 
 def _cells(inp: CompoundInputs) -> list[tuple[int, int]]:
-    return [(J2, p) for p in (-1, 1) for J2 in range(inp.j2beg, inp.j2end + 1, 2)]
+    sel = getattr(inp, "cellsel", None)  # KEVCOLD (default None = every cell)
+    return [(J2, p) for p in (-1, 1) for J2 in range(inp.j2beg, inp.j2end + 1, 2) if sel is None or (J2, p) in sel]
 
 
 def case_nowfc(inp: CompoundInputs, device=None, max_nex: int | None = None

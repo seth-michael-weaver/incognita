@@ -1140,6 +1140,9 @@ def binquad_sync(options=None) -> None:
     Test: none in the public suite
     """
     from physics.hf.native import nativex
+    from physics.hf import kevleak2
+
+    kevleak2.sync(options)  # KEVLEAK3: the run's kevleak2 value for the C kernels (INCOGNITA_KEVLEAK2_EFF)
 
     on = binquad_mode(options)
     q, mt, rt, sub = binquad_params(options) if on else (BINQUAD_NODES, BINQUAD_MTILT, BINQUAD_RTILT, 1)

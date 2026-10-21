@@ -61,6 +61,7 @@ print("JSON" + json.dumps(out))
 def _probe(Z, A, path, on):
     env = {k: v for k, v in os.environ.items() if not k.startswith("INCOGNITA_")}
     env.update(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", PYTHONPATH=str(ROOT))
+    env["INCOGNITA_ALPHATEMP"] = "0"  # KEVCOLD (alphatemp default ON): gpu_full_setup refuses ALPHATEMP; the paths are compared at production
     if on:
         env["INCOGNITA_ENGPHYS"] = "all"
     e = ",".join(str(x) for x in CASES[(Z, A)])

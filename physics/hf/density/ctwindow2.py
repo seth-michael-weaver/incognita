@@ -36,7 +36,7 @@ import torch
 
 from physics.hf.density.ctwindow import _window, ripl_umax  # noqa: F401  (same window as ctwindow)
 
-__all__ = ["enabled", "anchor", "fg_log", "used_density"]
+__all__ = ["enabled", "mode", "anchor", "fg_log", "used_density"]
 
 LAST: dict = {}   # (Z, A) -> anchoring record of the last anchor() call on that nucleus (diagnostics only)
 WHY: dict = {}    # (Z, A) -> reason a nucleus was not anchored
@@ -50,6 +50,50 @@ _NS = 200                                                        # Simpson inter
 def enabled(options) -> bool:
     """`ctwindow2 y` on the options, or env INCOGNITA_CT_WINDOW2=1."""
     return bool(getattr(options, "flagctwindow2", False)) or os.environ.get("INCOGNITA_CT_WINDOW2", "0") == "1"
+
+
+def mode(options):
+    """False when ctwindow2 is off, else the no-root rule: "cont" (ARTFIX, keyword `ctwcont y`, default) or "root" (the
+    pre-ARTFIX rule, `ctwcont n` or env INCOGNITA_CTW2_CONT=0)."""
+    if not enabled(options):
+        return False
+    on = bool(getattr(options, "flagctwcont", True)) and os.environ.get("INCOGNITA_CTW2_CONT", "1") != "0"
+    return "cont" if on else "root"
+
+
+_GR = 0.5 * (math.sqrt(5.0) - 1.0)
+
+
+def _least(gb, xs, gs):
+    """ARTFIX `ctwcont`: the x of least |g| when g has no sign change on the grid (the count condition solved in the
+    least-squares sense). Grid argmin of |g|, then golden section on |g| over the two adjacent segments to 1e-9 MeV, so
+    at a root's birth (tangency or bracket edge) the anchor moves continuously onto the root. None if no finite g."""
+    a = np.abs(np.asarray(gs, dtype=np.float64))
+    if not np.isfinite(a).any():
+        return None
+    i = int(np.nanargmin(np.where(np.isfinite(a), a, np.nan)))
+    lo, hi = float(xs[max(i - 1, 0)]), float(xs[min(i + 1, len(xs) - 1)])
+
+    def f(z):
+        v = float(np.abs(gb(np.array([z]))[0]))
+        return v if np.isfinite(v) else math.inf
+
+    c, d = hi - _GR * (hi - lo), lo + _GR * (hi - lo)
+    fc, fd = f(c), f(d)
+    for _ in range(200):
+        if hi - lo < 1e-9:
+            break
+        if fc <= fd:
+            hi, d, fd = d, c, fc
+            c = hi - _GR * (hi - lo)
+            fc = f(c)
+        else:
+            lo, c, fc = c, d, fd
+            d = lo + _GR * (hi - lo)
+            fd = f(d)
+    x = 0.5 * (lo + hi)
+    best = min(((f(x), x), (float(a[i]), float(xs[i]))))   # never worse than the grid point
+    return best[1]
 
 
 def _pure(ld):
@@ -189,9 +233,12 @@ def used_density(ld, E) -> np.ndarray:
     return densitytot(ld, x, 0).double().numpy().reshape(np.shape(E))
 
 
-def anchor(ld):
+def anchor(ld, cont: bool = False):
     """`ld` (already matched by densitymatch) with T, E0, Exmatch of barrier 0 solved jointly on the complete level window
-    (value + slope continuity at Ex, window count), or `ld` unchanged where the rule does not apply."""
+    (value + slope continuity at Ex, window count), or `ld` unchanged where the rule does not apply.
+    `cont` (ARTFIX, `ctwcont y`): without a root, or when the root fails TALYS's guards, anchor at the least
+    |count - target| on the admissible x (`_least`) instead of keeping densitymatch's values; that on/off switch made
+    0.03-0.33 dex steps in knob space (ARTSCAN case 1)."""
     from physics.hf.density import matching as M
 
     key = (int(ld.Z), int(ld.A))
@@ -246,12 +293,28 @@ def anchor(ld):
                     if hi - lo < 1e-9:
                         break
                 roots.append(0.5 * (lo + hi))
+        if not roots and cont:
+            xl = _least(lambda z: _g_batch(ld0, z, EL, EP, ct, pt, target), xs, gs)
+            if xl is not None:
+                roots = [xl]
         if not roots:
             WHY[key] = "no_root"
             return ld
         Ex = min(roots[:2], key=lambda x: abs(x - Exmemp))
-        ald2 = float(M.ignatyuk(ld, M._t(Ex), 0))
-        if Ex <= max(2.25 / ald2 + P, 0.0) + 0.11 or Ex > 3.0 * Exmemp:
+
+        def bad(x):
+            return x <= max(2.25 / float(M.ignatyuk(ld, M._t(x), 0)) + P, 0.0) + 0.11 or x > 3.0 * Exmemp
+
+        guarded = bad(Ex)
+        if guarded and cont:   # ARTFIX: least |g| on the admissible part of the bracket (+ its upper edge 3 Exmemp)
+            hb = min(3.0 * Exmemp, x2)
+            ad = sorted({float(x) for x in xs if not bad(float(x))} | ({hb} if hb > x1 and not bad(hb) else set()))
+            if ad:
+                gb = lambda z: _g_batch(ld0, z, EL, EP, ct, pt, target)  # noqa: E731
+                xl = _least(gb, np.array(ad), gb(np.array(ad)))
+                if xl is not None and not bad(xl):
+                    Ex, guarded = xl, False
+        if guarded:
             WHY[key] = "guard"
             return ld
         L, d = _fg_point(ld0, Ex)
@@ -259,7 +322,8 @@ def anchor(ld):
         E0 = Ex - T * math.log(T) - T * L
         LAST[key] = dict(T0=float(ld.T_mev[0]), E00=float(ld.E0_mev[0]), Ex0=float(ld.Exmatch_mev[0]), T=T, E0=E0, Ex=Ex,
                          lnrho=L, NL=NL, NP=NP, EL=EL, EP=EP, umax=umax, nmax_ripl=nmax, ct=ct, pt=pt, nroots=len(roots),
-                         EP_above_Ex=bool(EP > Ex), count=_count(ld0, Ex, L, T, EL, EP, ct, pt))
+                         EP_above_Ex=bool(EP > Ex), count=_count(ld0, Ex, L, T, EL, EP, ct, pt),
+                         least=bool(cont and abs(_count(ld0, Ex, L, T, EL, EP, ct, pt) - target) > 1e-6 * max(target, 1.0)))
         WHY.pop(key, None)
         Tm, Em, Xm = ld.T_mev.clone(), ld.E0_mev.clone(), ld.Exmatch_mev.clone()
         Tm[0] = torch.as_tensor(T, dtype=Tm.dtype)

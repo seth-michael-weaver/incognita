@@ -30,6 +30,7 @@ import os
 from dataclasses import replace
 
 import numpy as np
+from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
 ENV = "INCOGNITA_STELLAR"
 KT12_KEV = (5.0, 8.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0)  # RATEPACK kT grid
@@ -112,7 +113,7 @@ def record(cas, st, binp, cinp, etot: float, a_e: dict, fkw: dict, pop_front) ->
         k0 = 1
         pz, pn = c["parZ"][k0], c["parN"][k0]
         spm = float(cas.m.specmass[pz, pn, k0]); red = float(cas.m.redumass_amu[pz, pn, k0])
-        tm = float(cas.m.mass_amu[0, 1]); rel = cas.options.flagrel
+        tm = float(cas.m.mass_amu[target_mass_index()]); rel = cas.options.flagrel
         ecm, _ = incident_kinematics(e, k0, tm, spm, red, rel)
         rec.update(e_cm_mev=float(ecm), specmass=spm)
         if "g" not in STATE:

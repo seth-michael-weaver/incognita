@@ -54,6 +54,7 @@ import torch
 from physics.hf.core.tensors import DTYPE
 from physics.hf import specout
 from physics.hf.emission import binspec
+from physics.hf.emission import fluxclose
 from physics.hf.emission.binspec import binspec_ctx
 from physics.hf.emission.binary import BinaryInputs, BinaryState, binary
 from physics.hf.emission.channels import ExclusiveState, exclusive_channels
@@ -371,6 +372,8 @@ class ChainedFull:
                              xsdirdiscsum_mb=add[round(binp.e_inc_mev, 6)]["xsdirdiscsum_mb"],
                              xspreeqsum_mb=add[round(binp.e_inc_mev, 6)]["xspreeqsum_mb"],
                              xsgrsum_mb=add[round(binp.e_inc_mev, 6)]["xsgrsum_mb"])
+                if fluxclose.on("C"):  # FLUXCLOSE C: PE + GR flux of an exit with no continuum bin
+                    b2, _ = fluxclose.place_unplaced(b2)
                 b = binary(b2, bstate)
                 if binspec.enabled() and keep[nin - 1]:  # SPECOUT/XDHARD: binary emission spectra, output only
                     binspec.record(binp.e_inc_mev, pinp, b2, b, binp.k0,
@@ -871,7 +874,11 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     # MACSCLOSED: few-resonance capture where HF is not valid, off unless INCOGNITA_FEWRES is set
     from physics.hf import fewres
 
-    return fewres.add_to_results(res, injection)
+    res = fewres.add_to_results(res, injection)
+    # LOWEPOT: no HF compound elastic below the resonance region, off unless INCOGNITA_LOWEPOT is set
+    from physics.hf import lowepot
+
+    return lowepot.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

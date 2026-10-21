@@ -213,6 +213,12 @@ def _ngnexcl() -> bool:
     return os.environ.get("INCOGNITA_NGNEXCL", "0").lower() in ("1", "y", "yes")
 
 
+def _kevleak2_dup() -> bool:
+    from physics.hf import kevleak2
+
+    return kevleak2.on("dup")
+
+
 def gamma_cascade(nuc: NucleusPopulation, nex: int) -> dict[int, float]:
     """Gamma-ray cascade out of one discrete level into the levels it branches to [mb].
 
@@ -227,6 +233,7 @@ def gamma_cascade(nuc: NucleusPopulation, nex: int) -> dict[int, float]:
     parity = int(nuc.parlev[nex].item())
     xsjp = nuc.xspop_mb[nex, J, _pi(parity)].clone()
     out: dict[int, float] = {}
+    dup = _kevleak2_dup()
     for k, ratio in nuc.branch.get(nex, []):
         jres = int(nuc.jdis[k].item())
         pres = int(nuc.parlev[k].item())
@@ -234,7 +241,7 @@ def gamma_cascade(nuc: NucleusPopulation, nex: int) -> dict[int, float]:
         nuc.xspop_mb[k, jres, _pi(pres)] += intens
         nuc.xspopex_mb[k] += intens
         nuc.xspopex_mb[nex] -= intens
-        out[k] = float(intens)
+        out[k] = out.get(k, 0.0) + float(intens) if dup else float(intens)  # KEVLEAK2 dup: cascade.f90:72 assigns
         if _SO.active():
             _SO.acc_cell(nuc.zcomp, nuc.ncomp, 0, nex, k, float(intens))
     return out
@@ -307,7 +314,30 @@ def multiple_emission(
         for nc in range(maxn + 1):
             key = (zc, nc)
             nuc = nuclei.get(key)
-            if nuc is None or nuc.skipcn:
+            if nuc is not None and nuc.skipcn:
+                # FLUXCLOSE A: a terminal residual past the stock window (Cascade.stock_cap) keeps (and books)
+                # what it was fed; its bins are the exclusive channels' end points: each bin goes to the ground
+                # state in one step, so the channel that ends here sees it at nex = 0 (channels.f90 counts
+                # g.s. + isomers). Never decayed, so no daughter is fed from it.
+                popexcl, fe0, part0 = {}, {}, {}
+                for nex in range(nuc.maxex, 0, -1):
+                    v = float(nuc.xspopex_mb[nex])
+                    popexcl[nex] = v
+                    if v != 0.0:
+                        nuc.xspopex_mb[0] += v
+                        nuc.xspopex_mb[nex] = 0.0
+                        fe0[(nex, 0)] = v
+                        part0[nex] = v
+                res.popexcl_mb[key] = popexcl
+                res.feedexcl_mb[key] = {0: fe0} if fe0 and _records_feedexcl(zc, nc, 0) else {}
+                res.fisfeedex_mb[key], res.xsfeed_mb[key] = {}, {}
+                res.xspartial_mb[key] = {0: part0} if part0 else {}
+                res.xspopnuc_mb[key] = nuc.xspopnuc_mb
+                if resiso_enabled():
+                    res.xspopex_mb[key] = {0: float(nuc.xspopex_mb[0])}
+                res.xsgamdistot_mb[key] = 0.0
+                continue
+            if nuc is None:
                 continue
             popexcl: dict[int, float] = {}
             feedexcl: dict[int, dict[tuple[int, int], float]] = {}
@@ -471,6 +501,7 @@ def _decay_nucleus_numpy(nuc: NucleusPopulation, daughters: dict, decay, zc: int
     # the `feedexcl` row cannot: the photon rows are written with `set_row_nonzero` after the
     # walk, which overwrites. So the row is added afterwards, where `add` accumulates.
     leftovers: list[tuple[int, float]] = []
+    dup = _kevleak2_dup()
     for nex in range(nuc.maxex, 0, -1):
         popexcl[nex] = float(XE[nex])
         if nex <= nuc.nlast and ex[nex] <= smin:
@@ -483,7 +514,7 @@ def _decay_nucleus_numpy(nuc: NucleusPopulation, daughters: dict, decay, zc: int
                     X[k, int(jdis[k]), _pi(int(parlev[k]))] += intens
                     XE[k] += intens
                     XE[nex] -= intens
-                    contrib[k] = intens
+                    contrib[k] = contrib.get(k, 0.0) + intens if dup else intens  # KEVLEAK2 dup
                     if _SO.active():
                         _SO.acc_cell(zc, nc, 0, nex, k, intens)
                 if contrib and rec0:

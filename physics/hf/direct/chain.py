@@ -170,6 +170,11 @@ def computed_cross_sections(cs, levels, *, refine: int = 4, energies=None,
     from physics.hf.ecis.dwba import dwba_case, prepare_case
     from physics.hf.ecis.formfactor import dwba_parts
 
+    if int(cs.options.k0) == 0:
+        # ENGPROJ: direct.f90:32 -- no direct reaction for an incident photon (no OMP, no DWBA, no coupled levels)
+        cc_levels = np.asarray(cs.struct.cc_levels).reshape(-1)
+        return (torch.zeros(len(levels.index), dtype=DTYPE), torch.zeros(len(cc_levels), dtype=DTYPE),
+                torch.zeros(4, dtype=DTYPE))
     omp = _omp_for(cs.Z, cs.A, float(cs.e_inc_mev), int(cs.options.k0), energies)
     case = prepare_case(omp, cs.target, float(cs.e_inc_mev), direct_case=cs,
                         levels=levels if levels_are_dwba else None)

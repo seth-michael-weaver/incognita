@@ -41,6 +41,7 @@ from physics.hf.emission.feeding import Cascade
 from physics.hf.emission.multiple import multiple_emission
 from physics.hf.emission.score import POP_FLOOR_MB, _r
 from physics.hf.preeq.multi import NUMPARX
+from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
 PARSYM_ = "gnpdtha"  # constants.f90: parsym, types 0..6
 
@@ -59,7 +60,7 @@ def etotal_of(Zt: int, At: int, enincmax_mev: float, e_inc_mev: float, k0: int) 
     c = talys_constants()
     rg = run_grid(Zt, At, enincmax_mev)
     eninccm, _ = incident_kinematics(
-        e_inc_mev, k0, float(rg.m.mass_amu[0, 1]),
+        e_inc_mev, k0, float(rg.m.mass_amu[target_mass_index()]),
         float(rg.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
         float(rg.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), rg.options.flagrel)
     return float(total_energy(eninccm, rg.s0[k0], 0.0))
@@ -170,6 +171,7 @@ def pop_inputs_of(cas: Cascade, binp, target: str, etotal_mev: float, add: dict,
         flaggiant=has_giant and options.flaggiant0,
         xsgr_mb={cas.k0: np.asarray(gres.xsgr_mb.detach().numpy(), float)[:E]},
         xsgrtot_mb={cas.k0: float(gres.xsgrtot_mb)},
+        xsgrres_mb=_grres(gres, cas.k0, E),
         pespinmodel=options.pespinmodel, flagmulpre=flagmulpre, flag2comp=options.flag2comp,
         maxpar=maxpar,
         **_seed_exciton(cas.k0),
@@ -385,3 +387,16 @@ def main(argv=None) -> None:
 
 if __name__ == "__main__":
     main()
+
+
+def _grres(gres, k0: int, E: int) -> dict:
+    """SPECCLOSE (INCOGNITA_SPECCLOSE, output only): the giant-resonance part of `xsgr` (giant.f90:113, mb per bin) so
+    the shipped spectrum can carry it per MeV; empty (no work) when the switch is off."""
+    from physics.hf.emission.binspec import specclose_on
+
+    if not specclose_on():
+        return {}
+    g = getattr(gres, "xsgrstate_mb", None)
+    if g is None:
+        return {}
+    return {k0: np.asarray(g.detach().cpu().numpy() if hasattr(g, "detach") else g, float).sum(0)[:E]}

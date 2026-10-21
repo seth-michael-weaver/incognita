@@ -243,6 +243,9 @@ class Bucket:
         self.dev_dspec = d(self.dspec)
         self.dev_brk = d(brk)
         self.dev_brr = d(self.br_r)
+        from physics.hf import kevleak2 as _kv2
+        if _kv2.on("dup"):  # KEVLEAK2 dup: feedexcl carries every branch to a twice-named level (cascade.f90:72 assigns)
+            later[...] = False
         self.dev_brrec = d(~later)
         self.dev_rec = d(self.rec_row)
         self.dev_popeps = d(self.popeps_row)
@@ -290,6 +293,7 @@ class Chunk:
         self.NJ = int(max(ni[:, 2].max(), 1))
         self.maxex_h = bu.s_int[sm_h, 0]
         self.maxex = bu.dev_s_int[sm, 0]
+        self.nnl = torch.as_tensor(ni[:, 7] - 1, dtype=torch.int64, device=dev)  # NNLEAK rule bin, -1 = none
         self.nlg = bu.dev_s_int[sm, 2]
         self.ex, self.dex = bu.dev_s_row[sm, 0], bu.dev_s_row[sm, 1]
         self.jdis, self.tau = bu.dev_s_row[sm, 2], bu.dev_s_row[sm, 3]
@@ -922,7 +926,7 @@ def _widths_particles(bk: Batch, ch: Chunk, c: dict, ty: int, bchunks: list) -> 
     for c0, c1 in bchunks:
         nd = K.particle_nodes_c(*_bin_args(ch, c, ty, c0, c1), c["egrid_r"], c["egrid32_r"],
                                 c["ib"], c["ie"], c["maxen"], c["lmax_r"], c["head0"],
-                                ch.lmaxinc, ty, ty == bk.dims["k0"])
+                                ch.lmaxinc, ty, ty == bk.dims["k0"], nnl=ch.nnl)
         nodes.append(nd)
         a_ = nd[7].any(1)
         brl = a_ if brl is None else brl | a_
@@ -973,7 +977,7 @@ def _widths_dense(bk: Batch, ch: Chunk, c: dict, ty: int, bchunks: list) -> tupl
         _t = time.perf_counter()
         nd = K.particle_nodes_c(*_bin_args(ch, c, ty, c0, c1), c["egrid_r"], c["egrid32_r"],
                                 c["ib"], c["ie"], c["maxen"], c["lmax_r"], c["head0"],
-                                ch.lmaxinc, ty, ty == bk.dims["k0"])
+                                ch.lmaxinc, ty, ty == bk.dims["k0"], nnl=ch.nnl)
         rb, lcap, na, w1, w2, w3, _inrow, live = nd
         idx = torch.nonzero(live.reshape(-1)).flatten()
         if idx.numel() == 0:

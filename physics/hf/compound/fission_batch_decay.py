@@ -64,11 +64,18 @@ class FissionLadder:
 
     def widths(self, sp, bins: np.ndarray) -> np.ndarray:
         """`continuum.fission_width` for mother bins `bins`, `(bins, J, 2)` with J at least the
-        bins' largest `maxj` + 1 (the chain's `maxj` + 1 off the CENGFIS path)."""
+        bins' largest `maxj` + 1 (the chain's `maxj` + 1 off the CENGFIS path). ENGADJ: with fission-path
+        bumps, every node nucleus's ladder, combined at each bin's own path scale (`FissionChain.combine`)."""
+        nod = self.chain.nodes(self.Z, self.A)
+        if nod is None:
+            return self._widths(self.chain.nucleus(self.Z, self.A), sp, bins)
+        vals = [self._widths(n, sp, bins) for n in nod[2]]
+        return self.chain.combine(self.Z, self.A, nod, vals, np.asarray(sp.ex_mev, dtype=np.float64)[bins])
+
+    def _widths(self, n, sp, bins: np.ndarray) -> np.ndarray:
         from physics.hf.fission.fis_ceng import ladder_widths
         from physics.hf.fission.fission_batch_ladder import ladder_bin_widths
 
-        n = self.chain.nucleus(self.Z, self.A)
         # CENGFIS: C, no rhofis; the spins up to the bins' maxj, which is all `NucleusWidths` reads
         nj = int(np.asarray(sp.maxj, dtype=np.int64)[bins].max()) + 1 if len(bins) else 1
         got = ladder_widths(self.chain, n, np.asarray(sp.ex_mev, dtype=np.float64)[bins],
@@ -85,10 +92,16 @@ class FissionLadder:
 
     def widths_at(self, sp, ex_mev: np.ndarray, dex_mev: np.ndarray, nj: int) -> np.ndarray:
         """BINQUAD sub-points: `widths` at arbitrary mother energies/widths (rows), J up to nj - 1."""
+        nod = self.chain.nodes(self.Z, self.A)
+        if nod is None:
+            return self._widths_at(self.chain.nucleus(self.Z, self.A), sp, ex_mev, dex_mev, nj)
+        vals = [self._widths_at(n, sp, ex_mev, dex_mev, nj) for n in nod[2]]
+        return self.chain.combine(self.Z, self.A, nod, vals, ex_mev)
+
+    def _widths_at(self, n, sp, ex_mev: np.ndarray, dex_mev: np.ndarray, nj: int) -> np.ndarray:
         from physics.hf.fission.fis_ceng import ladder_widths
         from physics.hf.fission.fission_batch_ladder import ladder_bin_widths
 
-        n = self.chain.nucleus(self.Z, self.A)
         ex = np.ascontiguousarray(ex_mev, dtype=np.float64)
         dx = np.ascontiguousarray(dex_mev, dtype=np.float64)
         got = ladder_widths(self.chain, n, ex, dx, float(sp.exmax_mev), float(sp.ex_mev[sp.maxex]),

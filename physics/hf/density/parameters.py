@@ -50,6 +50,7 @@ import numpy as np
 import torch
 from torch import Tensor
 
+from physics.hf import eadj as _eadj
 from physics.hf.core.constants import nuclide_symbol, talys_constants
 from physics.hf.core.tensors import DTYPE
 from physics.hf.structure.files import fortran_read, talys_structure_dir
@@ -173,7 +174,12 @@ def _ignatyuk_f(ld: LDNucleus, eex: float, ibar: int) -> float:
         qfermi = 1.0 / (1.0 + math.exp(-max(e, -80.0))) if e > -80.0 else 0.0
         aldlim = aldlow * qfermi + aldlim * (1.0 - qfermi)
     v = aldlim * damp
-    return v if not v < 1.0 else 1.0
+    v = v if not v < 1.0 else 1.0
+    if ibar == 0 and _eadj.on():
+        bs = _eadj.nucleus_bumps("a", ld.Z, ld.A)
+        if bs:  # ENGADJ: a(Eex) x the energy-local factor (after TALYS's floor of 1)
+            v = v * float(_eadj.bump_values(bs, np.array([eex]))[0])
+    return v
 
 
 def _ignatyuk_fast(ld: LDNucleus, eex_mev, ibar: int) -> Tensor:
@@ -188,7 +194,7 @@ def _ignatyuk_fast(ld: LDNucleus, eex_mev, ibar: int) -> Tensor:
 
     got = _ceng_ignatyuk(ld, eex, ibar)  # CENGLD: the same loop in C
     if got is not None:
-        return got
+        return _abump(ld, eex, ibar, got)
     delta, aldlim, gam, dW, colldamp, aldlow, uf, cf = _ign_floats(ld, ibar)
     with np.errstate(all="ignore"):
         U = eex - delta
@@ -202,7 +208,19 @@ def _ignatyuk_fast(ld: LDNucleus, eex_mev, ibar: int) -> Tensor:
             e = (U - uf) / cf
             qfermi = np.where(e > -80.0, 1.0 / (1.0 + np.exp(-np.maximum(e, -80.0))), 0.0)
             aldlim = aldlow * qfermi + aldlim * (1.0 - qfermi)
-        return torch.from_numpy(np.asarray(np.maximum(aldlim * damp, 1.0), dtype=np.float64))
+        return _abump(ld, eex, ibar,
+                      torch.from_numpy(np.asarray(np.maximum(aldlim * damp, 1.0), dtype=np.float64)))
+
+
+def _abump(ld: LDNucleus, eex, ibar: int, v: Tensor) -> Tensor:
+    """ENGADJ: `v` = a(eex) times the `eadj a Z A ...` factor at eex (ground state only); `v` itself when none."""
+    if ibar != 0 or not _eadj.on():
+        return v
+    bs = _eadj.nucleus_bumps("a", ld.Z, ld.A)
+    if not bs:
+        return v
+    e = eex.detach().numpy() if isinstance(eex, Tensor) else np.asarray(eex, dtype=np.float64)
+    return v * torch.as_tensor(_eadj.bump_values(bs, e), dtype=v.dtype)
 
 
 def _sc_floats(ld: LDNucleus, ibar: int, ipop: int, rspincutff: float) -> tuple:
@@ -522,7 +540,7 @@ def densitypar(
     """
     from physics.hf.density.ld_nx2 import densitypar_floats
 
-    if not torch.is_grad_enabled() and os.environ.get("HF_NX2_CENGLD", "1") != "0":
+    if not torch.is_grad_enabled() and os.environ.get("HF_NX2_CENGLD", "1") != "0" and _eadj.ld_native_ok():
         # CENGLD: one nucleus's record is asked for by its level density, its photon strength's
         # `alev` and the pre-equilibrium pairing, on the same objects: built once per target. Only
         # where no graph can be recorded (the chart runs in inference mode), so a tensor turned
@@ -880,7 +898,7 @@ def ignatyuk(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0) -> Tensor:
         e = (U - ld.Ufermi_mev[0]) / ld.cfermi_mev[0]
         qfermi = torch.where(e > -80.0, 1.0 / (1.0 + torch.exp(-torch.clamp(e, min=-80.0))), 0.0)
         aldlim = aldlow * qfermi + aldlim * (1.0 - qfermi)
-    return torch.clamp(aldlim * damp, min=1.0)
+    return _abump(ld, eex, ibar, torch.clamp(aldlim * damp, min=1.0))
 
 
 def spincut(

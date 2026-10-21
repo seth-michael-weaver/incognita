@@ -52,6 +52,64 @@ def scope() -> str:
     return s
 
 
+EXIT_ENV = "INCOGNITA_SFEXIT"
+EXIT_DEFAULT = "ccf"  # ROTEXIT1CN3G gate: ccf; deck keyword `sfexit contr` = previous production (ROTEXIT1CN2)
+
+
+def exit_mode(options=None) -> str:
+    """ROTEXIT1CN (deck keyword `sfexit`, else env INCOGNITA_SFEXIT, else EXIT_DEFAULT = OFF): `cont` = under SLFIRST
+    (SCOPE=first) the first compound nucleus keeps the measured-S_l set only for neutron exits into the target's
+    DISCRETE levels (the n + target(g.s./levels) channel the measured S_l describes by reciprocity); its exits into
+    the target's continuum bins and the pre-equilibrium neutron inverse sigma_reac use the model set (as every later
+    compound nucleus does). The incident channel is unchanged. `contr` (ROTEXIT1CN2) = `cont` only for a target of
+    colltype R (the `.def` deformation class), every other target OFF. `ccf` (ROTEXIT1CN3) = the continuum exits + PE
+    inverse keep the measured S_l divided by the engine's own coupled-channels enhancement f_l = S_l,inc,model /
+    S_l,inv,model at 1 keV (f_l := 1 for a spherically solved incident channel, clipped below at 1; `cc_ratio`), i.e. the
+    continuum factor is [S_l,meas / S_l,inc,model]^w(E); discrete exits keep the full factor. '' / 0 / n = OFF."""
+    if options is not None and hasattr(options, "is_explicit") and options.is_explicit("sfexit"):
+        m = str(getattr(options, "sfexit", EXIT_DEFAULT)).strip().lower()
+    else:
+        m = os.environ.get(EXIT_ENV)
+        m = EXIT_DEFAULT if m is None or not m.strip() else m.strip().lower()
+    m = "" if m in ("0", "n", "no", "off") else m
+    if m not in ("", "cont", "contr", "ccf"):
+        raise ValueError(f"{EXIT_ENV}={m!r}: use cont, contr, ccf (or 0)")
+    return m
+
+
+def exit_cont(options=None, Z: int | None = None, A: int | None = None) -> bool:
+    """True iff ROTEXIT1CN's continuum split is active for target (Z, A): SFUNC on, SCOPE=first and exit_mode == cont,
+    or exit_mode == contr (ROTEXIT1CN2) and the target is colltype R (deformation class, `spherical y` forces S)."""
+    if mode() is None or scope() != "first":
+        return False
+    m = exit_mode(options)
+    if m == "cont":
+        return True
+    if m != "contr":
+        return False
+    if Z is None or A is None or options is None:
+        raise ValueError("sfexit contr needs the target (Z, A) and options")
+    from physics.hf.omp.parameters import _colltype
+
+    return _colltype(int(Z), int(A), options) == "R"
+
+
+def exit_ccf(options=None) -> bool:
+    """True iff ROTEXIT1CN3's CC-ratio continuum set is active: SFUNC on, SCOPE=first and exit_mode == ccf."""
+    return mode() is not None and scope() == "first" and exit_mode(options) == "ccf"
+
+
+def cc_ratio(model_inc: dict, model_inv: dict) -> dict:
+    """ROTEXIT1CN3: {l: f_l} = max(1, S_l,inc,model / S_l,inv,model) (the coupled-channels enhancement of the g.s.
+    strength function over the spherical solve of the same potential); l without two finite positive values -> 1."""
+    out = {}
+    for l, si in model_inc.items():
+        sv = model_inv.get(l)
+        ok = si is not None and sv is not None and si > 0 and sv > 0 and math.isfinite(si) and math.isfinite(sv)
+        out[l] = max(1.0, float(si) / float(sv)) if ok else 1.0
+    return out
+
+
 def _ls(m: str) -> tuple[int, ...]:
     return (0, 1) if m == "u01" else (1,)
 

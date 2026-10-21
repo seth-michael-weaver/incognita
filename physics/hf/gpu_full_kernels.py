@@ -118,7 +118,8 @@ def _rho_discrete(rb: Tensor, inrow: Tensor, dmask: Tensor, dfac: Tensor) -> Ten
 
 
 def particle_nodes(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, egrid_r,
-                   egrid32_r, ib, ie, maxen, lmax_r, head0, lmaxinc, ty: int, is_k0: bool):
+                   egrid32_r, ib, ie, maxen, lmax_r, head0, lmaxinc, ty: int, is_k0: bool,
+                   nnl=None):
     """`exit_arrays` for a particle exit up to the transmissions, dense over (row, bin, residual
     row): Rboundary `rb` (0 outside the bin's reach), the pol2 node `na` and weights `w1..w3` of
     the emission energy, the l' cap `lcap` (-1: no transmission), and `live`, the cells where
@@ -133,6 +134,11 @@ def particle_nodes(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlas
      nexm) = _geometry(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, ty)
     eout_c = 0.5 * (torch.where(below, 0.0, emin) + emax)
     eout_d = torch.where(part, 0.5 * (ex0plus + exm) - ss - ex, (exinc[..., None] - ss) - ex)
+    if nnl is not None and ty >= 1:  # NNLEAK (default y): Egamma^3-filled initial-CN top bin
+        sel = (bins == nnl[:, None])[..., None] & part & ~cont_row  # rb there is (Ex0plus - Exm)/dExinc
+        dd = ex0plus - exm
+        rb = torch.where(sel, rb * rb * rb * rb, rb)
+        eout_d = torch.where(sel, eout_d - 0.3 * dd, eout_d)
     e = torch.where(inrow, torch.where(cont_row, eout_c, eout_d), 0.0).reshape(n, mc * Rt)
     # interp_nodes with the nuclide's grid per row
     x = e.to(torch.float32)

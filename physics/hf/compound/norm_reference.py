@@ -45,6 +45,7 @@ from physics.hf.core.constants import talys_constants
 from physics.hf.core.grids import incident_kinematics
 from physics.hf.core.tensors import DTYPE
 from physics.hf import stagetime
+from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT_JSON = ROOT / "docs" / "results" / "hf-compnorm-gate.json"
@@ -98,7 +99,7 @@ def chained_formation(cas, inp, add: dict):
     inc = cas.incident(inp.e_inc_mev)
     k0 = inp.k0
     _, wavenum = incident_kinematics(
-        inp.e_inc_mev, k0, float(cas.m.mass_amu[0, 1]),
+        inp.e_inc_mev, k0, float(cas.m.mass_amu[target_mass_index()]),
         float(cas.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
         float(cas.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), cas.options.flagrel)
     lm = int(inc.lmax[0])
@@ -112,7 +113,7 @@ def chained_formation(cas, inp, add: dict):
 
         e_card = float(ecis_card_energy(torch.tensor(float(inp.e_inc_mev), dtype=DTYPE)))
         _, wavenum = incident_kinematics(
-            e_card, k0, float(cas.m.mass_amu[0, 1]),
+            e_card, k0, float(cas.m.mass_amu[target_mass_index()]),
             float(cas.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
             float(cas.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), cas.options.flagrel)
     # OPEN4: compnorm.f90:163-166 -- a coupled-channels target (colltype /= 'S', no `spherical y`)

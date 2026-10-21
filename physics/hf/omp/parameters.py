@@ -548,6 +548,27 @@ def ompadjust(params: Params | None, k: int) -> dict[str, Tensor | float]:
     return {f: params[key][k] for f, key in _ADJ.items()}
 
 
+def eadj_F(F: dict, k: int, e: Tensor) -> dict:
+    """ENGADJ: the F* factors of particle type k times the energy-local bumps `eadj <key> <particle> ...` at the channel
+    energies e (physics/hf/eadj.py; TALYS ompadjust.f90 `Fv1 = factor * v1adjust(k)`). `F` itself when no bump is set.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    from physics.hf import eadj
+
+    if not eadj.on():
+        return F
+    out = None
+    for f, key in _ADJ.items():
+        bs = eadj.select(key, (k,))
+        if bs:
+            out = dict(F) if out is None else out
+            fac = torch.as_tensor(eadj.bump_values(bs, e.detach().numpy()), dtype=DTYPE)
+            out[f] = F[f] * fac
+    return F if out is None else out
+
+
 def ejectile_params(params: Params | None, projectile: int = 1) -> Params | None:
     """`params` as TALYS's inverse channels see them: the projectile's type, leaving as an
     ejectile, takes the type-0 `ompadjust` factors (flagompejec), so `rvadjust n 0.96` moves the
@@ -795,6 +816,7 @@ def opticalnp(
     table: OMPTable | None = None,
     join: JoinValues | None = None,
     soukho_eferm_mev: float | None = None,
+    eadj_on: bool = True,
 ) -> dict[str, Tensor]:
     """The 19 OMP quantities for a neutron (k = 1) or proton (k = 2) on nucleus (Z, A) at
     energies e_mev: interpolated from `table` where it covers the energy, else Soukhovitskii for
@@ -808,6 +830,8 @@ def opticalnp(
     """
     e = torch.clamp(torch.as_tensor(e_mev, dtype=DTYPE), min=0.0)  # optical.f90:24
     F = ompadjust(params, k if adjust_type is None else adjust_type)
+    if eadj_on:
+        F = eadj_F(F, k, e)
     ejoin = 200.0 if params is None else params["ejoin"][k]
     vinfadjust = 1.0 if params is None else params["vinfadjust"][k]
     flagsoukho = options.flagsoukho if options is not None else True
@@ -1180,12 +1204,13 @@ def opticalcomp(
             table=tables.get(kk),
             join=joins.get(kk),
             soukho_eferm_mev=se.get(kk),
+            eadj_on=False,  # ENGADJ: a composite takes ITS OWN particle's bumps (below), not the nucleons' at E/A
         )
 
     ea = e / PARA[k]
     n, p = np_(1, ea), np_(2, ea)
     n_e, p_e = np_(1, e), np_(2, e)
-    F = ompadjust(params, k)
+    F = eadj_F(ompadjust(params, k), k, e)
     iz, in_, ia = PARZ[k], PARN[k], PARA[k]
     o = {
         "v_mev": F["Fv1"] * (in_ * n["v_mev"] + iz * p["v_mev"]),
@@ -1206,6 +1231,12 @@ def opticalcomp(
         "awso_fm": F["Fawso"] * (in_ * n_e["avso_fm"] + iz * p_e["avso_fm"]) / ia,
         "rc_fm": F["Frc"] * p_e["rc_fm"],
     }
+    from physics.hf.omp import tfold as _tf
+
+    if k in _tf.KS and _tf.enabled(options):  # TFOLD (default ON): a' = sqrt(a^2 + (r_m/pi)^2), then the adjust factors
+        for c, f in _tf.COLS:
+            src = "avd_fm" if c in ("avd_fm", "awd_fm") else c
+            o[c] = F[f] * _tf.fold((in_ * n[src] + iz * p[src]) / ia)
     if k == 3:
         o["vso_mev"] = F["Fvso1"] * (n_e["vso_mev"] + p_e["vso_mev"]) / 2.0
         o["wso_mev"] = F["Fwso1"] * (n_e["wso_mev"] + p_e["wso_mev"]) / 2.0

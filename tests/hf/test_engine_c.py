@@ -90,3 +90,20 @@ def test_switch_off_is_engine_run(monkeypatch):
     finally:
         monkeypatch.delenv("HF_ENGINE_C")
         engine_c.lib.cache_clear()
+
+
+def test_photon_takes_the_python_driver(monkeypatch):
+    """ENGPROJ6: k0 = 0 (INCOGNITA_CPINC=g) is routed to engine.run; the CENG `cases` driver has no photon entrance."""
+    from types import SimpleNamespace
+
+    from physics.hf import engine, engine_c
+
+    seen = []
+    monkeypatch.setenv("INCOGNITA_CPINC", "g")
+    monkeypatch.setattr(engine, "run", lambda injection: seen.append(injection) or "py")
+    monkeypatch.setattr(engine_c, "cases", lambda *a, **k: (_ for _ in ()).throw(AssertionError("cases called")))
+    inj = SimpleNamespace(inject=False, cascade=None, options=None)
+    try:
+        assert engine_c.run(inj) == "py" and seen == [inj]
+    finally:  # engine_c.run loads + caches lib(); leave it unloaded as test_switch_off does (a later HF_NATIVEX=0 test
+        engine_c.lib.cache_clear()  # would otherwise take the C driver without nativex: ENGPORTPROMO gate T)

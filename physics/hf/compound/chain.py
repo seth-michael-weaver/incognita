@@ -47,7 +47,7 @@ PARN = (0, 1, 0, 1, 2, 1, 2)
 
 
 def primary_dens_inputs(cas, st, etotal_mev: float, *, gammax: int,
-                        flagfullhf: bool = False) -> DensPrepareInputs:
+                        flagfullhf: bool = False, cold: bool = True) -> DensPrepareInputs:
     """`DensPrepareInputs` of the primary decay: the whole compound nucleus at `Etotal`.
 
     TALYS: densprepare.f90:1 (densprepare)
@@ -70,10 +70,16 @@ def primary_dens_inputs(cas, st, etotal_mev: float, *, gammax: int,
                 egrid_mev=cas.rg.egrid, ebegin=cas.rg.ebegin[t],
                 eend=min(int(eend[t]), cas.rg.maxen), maxen=cas.rg.maxen,
                 tjl=tjl, tl=tl, lmax=lmax)
+            tr_cont = cas.trans_cont_of(0, 0)
+            if tr_cont is not None:  # ROTEXIT1CN (default OFF): continuum rows read the model set
+                trans[t].cont_tjl, trans[t].cont_tl = tr_cont[t][:2]
             if t >= 2 and cas.trans.get("tlog", False):  # LOGTINT (default OFF): log-T Lagrange, charged types
                 trans[t].tlog = cas.trans["tlog"]  # True / "c" = ln T, "l" = TLOGIT logit T
             if t >= 2 and "tlogref" in cas.trans:  # LOGTINT G0 reference (default OFF)
                 trans[t].tlogref = cas.trans["tlogref"][t]
+            if t == 6 and cold and "alpha_cold" in cas.trans:  # ALPHATEMP (default OFF): cold alpha table + U*
+                trans[t].cold_tjl, trans[t].cold_tl = cas.trans["alpha_cold"][:2]
+                trans[t].ustar = float(cas.trans["alphatemp_ustar"])
     return DensPrepareInputs(
         exinc_mev=float(etotal_mev), dexinc_mev=0.0, s_n_mev=sp.sep_mev[1], gammax=gammax,
         lmaxinc=st.lmaxinc, k0=cas.k0, fnorm=cas.fiso(), residuals=residuals, trans=trans,
@@ -106,7 +112,11 @@ def compound_inputs(cas, st, binp, cinp, etotal_mev: float, add: dict,
 
     o = cas.options
     cf, lmaxinc = chained_formation(cas, _NormView(binp), add)
-    res = densprepare(primary_dens_inputs(cas, st, etotal_mev, gammax=o.gammax))
+    from physics.hf.omp import alphatemp
+
+    dom = alphatemp.dom_on(cas.trans)  # KEVCOLD (default OFF): production tables + the ALPHATEMP alpha table aside
+    res = densprepare(primary_dens_inputs(cas, st, etotal_mev, gammax=o.gammax, cold=not dom))
+    alphadom = densprepare(primary_dens_inputs(cas, st, etotal_mev, gammax=o.gammax))[6] if dom else None
     inc = cas.incident(binp.e_inc_mev)
     from physics.hf.compound.dens_reference import _to_updown_axis
 
@@ -132,6 +142,13 @@ def compound_inputs(cas, st, binp, cinp, etotal_mev: float, add: dict,
         tfisA=tfisA or {}, rhofisA=rhofisA or {},
     )
     out.residuals = res
+    from physics.hf.compound import ccexitnb
+
+    if ccexitnb.enabled(o) and cas.k0 in res:  # CCEXITNB (default OFF): CC exit T on non-band target levels
+        out.residuals = dict(res)
+        out.residuals[cas.k0] = ccexitnb.apply_residual(cas, res[cas.k0], binp.ltarget, etotal_mev,
+                                                           float(cas.spec(st, 0, 0).sep_mev[cas.k0]))
+    out.alphadom = alphadom
     return out
 
 

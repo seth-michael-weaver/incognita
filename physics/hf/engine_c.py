@@ -235,10 +235,18 @@ class _Run:
         from physics.hf.compound import tlog
 
         tlog.native_arm(cas.trans)  # LOGTINT (default OFF): log-T Lagrange of charged T in the C kernels
+        from physics.hf.compound import nnleak
+
+        nnleak.native_arm(cas.options)  # NNLEAK (default y): C cascade's initial-CN top-bin rule
+
+        from physics.hf.omp import alphatemp
+
+        alphatemp.arm_native(cas)  # ALPHATEMP (default OFF): cold alpha tables + U* into the C kernels
         rg = cas.rg
         self.keep = []
         self.TL = np.ascontiguousarray(TL, dtype=np.float64)
         self.TLf = None  # SLFIRST: the first compound nucleus's stack when it differs (C pp[17]; 0 = use TL)
+        self.TLc = None  # ROTEXIT1CN: the stack the first CN's continuum rows read (C pp[18]; 0 = OFF)
         if cas.trans_of(0, 0) is not cas.trans:
             tlf = [cas.trans_of(0, 0)[t] for t in range(1, 7)]
             TLf, LMf, h0f = _tl_stack(cas, tlf)
@@ -246,6 +254,8 @@ class _Run:
                 self.ok = False
                 return
             self.TLf = np.ascontiguousarray(TLf, dtype=np.float64)
+            if cas.trans_cont_of(0, 0) is not None:  # ROTEXIT1CN (default OFF): the first CN's continuum rows read TL
+                self.TLc = self.TL
         self.LM = np.ascontiguousarray(LM, dtype=_I64)
         self.head0 = np.ascontiguousarray(head0, dtype=_I64)
         egrid = np.ascontiguousarray(np.asarray(rg.egrid, dtype=np.float64))
@@ -277,6 +287,19 @@ class _Run:
                                          np.ascontiguousarray(lmax, dtype=_I64))
         return got
 
+    def cont_pack(self, t: int):
+        """ROTEXIT1CN (default OFF): type t's model-set Tjl for the primary densprepare's continuum rows, else None."""
+        tc = self.cas.trans_cont_of(0, 0)
+        if tc is None:
+            return None
+        got = self.front_trans.get(("cont", t))
+        if got is None:
+            tjl = tc[t][0]
+            if isinstance(tjl, torch.Tensor) or np.shape(tjl) != np.shape(self.trans_pack(t)[0]):
+                raise _Unsupported("Tjl (sfexit cont)")
+            got = self.front_trans[("cont", t)] = np.ascontiguousarray(tjl, dtype=np.float64)
+        return got
+
     @stagetime.timed("setup.psf")
     def psf(self, Z: int, A: int) -> int:
         """The PSF pack index of `cas.gamma_params(Z, A)`, or -1."""
@@ -286,7 +309,10 @@ class _Run:
             return got
         from physics.hf.compound.psf_nx2 import _pack
 
-        gp = self.cas.gamma_params(Z, A)
+        from physics.hf.projectile import residual_nucleus
+
+        # ENGPROJ GPRESFIX: (Z, A) is the pseudo-target of the residual (Z, A + 1) (the call at `psf(sp.Z, sp.A - 1)`)
+        gp = self.cas.gamma_params(Z, A, nucleus=residual_nucleus(Z, A + 1))
         pack = None if gp is None or gp.gammax != self.cas.gammax else _pack(gp)
         idx = -1
         if pack is not None:
@@ -382,6 +408,11 @@ def cascade(run: _Run, st, maxz: int, maxn: int, seed: dict, popeps_mb: float, k
         if propagated is not None:
             propagated.update(first)
     nuclei = grid_set()
+    zcap, ncap = cas.stock_cap()
+    if any(zc > zcap or nc > ncap for zc, nc in nuclei):
+        # FLUXCLOSE A: a reachable terminal residual (`skipCN`, multiple.py) is the Python walk's only; a widened
+        # window with nothing reachable past the stock cap (Fe-56 Ncomp 29-30) is the stock cascade
+        raise _Unsupported("fluxclose terminal residuals")
     return _Packed(run, so, st, nuclei, maxz, maxn, P1).run(
         seed, mulpre, prq, popeps_mb, k0, xsreacinc_mb, xsbinary_mb, feedbinary_mb,
         flagfission, fis, M)
@@ -665,7 +696,7 @@ class _Packed:
         pp = np.array([_ptr(run_.TL), _ptr(run_.LM), _ptr(run_.head0), _ptr(run_.egrid),
                        _ptr(run_.egrid32), _ptr(run_.ebegin), _ptr(run_.eend), _ptr(idx),
                        _ptr(self.si), _ptr(self.sd), _ptr(self.spt), 0, _ptr(sot), cp[2], cp[0],
-                       cp[1], cp[3], _ptr(run_.TLf)], dtype=np.uint64)
+                       cp[1], cp[3], _ptr(run_.TLf), _ptr(run_.TLc)], dtype=np.uint64)
         from physics.hf.core.grids import binquad_sync
 
         binquad_sync(cas.options)
@@ -745,8 +776,9 @@ class _Packed:
         TALYS: channels.f90:1 (channels), totalxs.f90:1 (totalxs), residual.f90:1 (residual)
         Test: tests/hf/test_engine_c.py
         """
-        from physics.hf.emission.channels import NUMCHANTOT
+        from physics.hf.emission import channels as CH
 
+        NUMCHANTOT = CH.numchantot()  # CHANCAP
         cas, st = self.cas, self.st
         if not getattr(self.so, "channels_ok", False):
             raise _Unsupported("no BLAS pointers for the channels")
@@ -780,12 +812,13 @@ class _Packed:
         ores = np.zeros((maxz + 1) * (maxn + 1))
         oint = np.zeros(2, dtype=_I64)
         odbl = np.zeros(2)
-        ip = np.zeros(25, dtype=_I64)
+        ip = np.zeros(31, dtype=_I64)
         ip[:11] = (maxz, maxn, cinp.zinit, cinp.ninit, cinp.maxchannel, cinp.k0,
                    bool(cinp.flagfission), W, NUMCHANTOT, chst.idnumfull, chst.opennum)
         ip[11:18] = [bool(x) for x in cinp.parskip]
         ip[18:24] = [bool(cinp.parinclude[t + 1]) for t in range(1, 7)]
         ip[24] = e0.shape[1]
+        ip[25:31] = CH.caps()  # CHANCAP: per-ejectile caps (n, p, d, t, h, alpha)
         dp = np.array([cinp.xseps_mb, cinp.targete_mev, float(cas.m.s_mev[0, 0, cas.k0]),
                        float(e0[0, 0]), float(xsbinary[0]) if xsbinary is not None else 0.0,
                        1.0 if xsbinary is not None else 0.0])
@@ -835,10 +868,10 @@ _MPE_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int64, ctypes.POINTER(ctypes.c
 
 class _ChanState:
     """CENGBOOK: `ExclusiveState` as the byte map `ce_channels` reads (one byte per channel key
-    (n, p, d, t, h, alpha) within channels.f90's caps), convertible both ways for an energy that
-    runs the Python channels."""
+    (n, p, d, t, h, alpha) within the CHANCAP caps, one digit each), convertible both ways for an energy
+    that runs the Python channels."""
 
-    DIMS = (9, 5, 3, 2, 2, 4)
+    DIMS = (9, 9, 9, 9, 9, 9)
 
     def __init__(self):
         self.open = np.zeros(int(np.prod(self.DIMS)), dtype=np.uint8)
@@ -992,7 +1025,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
     rg = cas.rg
     ti = np.zeros((7, 12), dtype=_I64)
     td = np.zeros((7, 4))
-    tp = np.zeros((7, 10), dtype=np.uint64)
+    tp = np.zeros((7, 11), dtype=np.uint64)  # slot 10: ROTEXIT1CN continuum-row Tjl (0 = OFF)
     to = np.zeros((7, 4), dtype=np.uint64)
     keep, outs = [], []
     ninc = min(lmaxinc + 1, tjlinc.shape[0])
@@ -1029,6 +1062,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
             ti[t, 4:11] = (int(rg.ebegin[t]), min(int(run.eendmax[t]), rg.maxen), rg.maxen, L,
                            run.egrid.size, Lo, tjl.shape[0])
             tp[t, 5:9] = (_ptr(run.egrid), _ptr(run.egrid32f), _ptr(tjl), _ptr(lmax))
+            tp[t, 10] = _ptr(run.cont_pack(t))
             L = Lo
         to[t] = (_ptr(rho), _ptr(lmaxhf), _ptr(jdis2), _ptr(T))
         outs.append((nex, int(d.nlast), L, rho, lmaxhf, np.ascontiguousarray(arrs[1][:nex]),
@@ -1043,9 +1077,24 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
     from physics.hf.compound import tlog
 
     tlog.native_arm(cas.trans)  # LOGTINT (default OFF)
+    from physics.hf.omp import alphatemp
+
+    alphatemp.arm_native(cas)  # ALPHATEMP (default OFF)
     rc = so.ce_densprepare(_ptr(ip), _ptr(dp), _ptr(pp))
     if rc != 0:
         raise _Unsupported(f"ce_densprepare refused type {rc - 1}")
+    from physics.hf.compound import ccexitnb
+
+    # CCEXITNB (default OFF): the shared row builder, written into the k0 residual's arrays in place
+    ccx = (ccexitnb.rows(cas, lt, cas.spec(st, PARZ[k0], PARN[k0]).ex_mev, outs[k0][1], outs[k0][0] - 1, float(etot), float(sp0.sep_mev[k0]),
+                         outs[k0][2], float(fnorm[k0 + 1])) if ccexitnb.enabled(o) else {})
+
+    def _ccx_write(o_k0):
+        for i, (row, lm) in ccx.items():
+            o_k0[8][i] = row
+            o_k0[4][i] = lm
+
+    _ccx_write(outs[k0])
     # target_native.target on those arrays
     nexmax = max(x[0] for x in outs)
     cells = [(J2, p) for p in (-1, 1) for J2 in range(cf.j2beg, cf.j2end + 1, 2)]
@@ -1055,40 +1104,75 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
         if use_wfc and lt > outs[k0][1]:
             raise _Unsupported("target level above Nlast")
         nxl = nativex.lib()
-        tip = np.zeros(20 + 8 * 7, dtype=_I64)
-        tpp = np.zeros(10 + 6 * 7, dtype=np.uint64)
-        for t, (nex, nlast, L, rho, lmaxhf, maxj, jdis2, parlev, T) in enumerate(outs):
-            tip[20 + 8 * t: 26 + 8 * t] = (1, nex, nlast, L, SPIN2[t], PARSPIN2[t])
-            tpp[10 + 6 * t: 16 + 6 * t] = [_ptr(a) for a in (rho, lmaxhf, maxj, jdis2, parlev, T)]
-        j2 = np.array([c[0] for c in cells], dtype=_I64)
-        pidx = np.array([0 if c[1] == -1 else 1 for c in cells], dtype=_I64)
-        tpp[0], tpp[1], tpp[2] = _ptr(j2), _ptr(pidx), _ptr(tjlinc)
         view = SimpleNamespace(flagfission=bool(cinp.flagfission), nfisbar=fkw.get("nfisbar", 0),
                                tfis=fkw.get("tfis") or {}, tfisA=fkw.get("tfisA") or {},
                                rhofisA=fkw.get("rhofisA") or {})
-        fis = fbt.cell_fission_widths(view, cells)
-        if fis is not None:
-            fa = np.ascontiguousarray(fis.numpy(), dtype=np.float64)
-            keep.append(fa)
-            tpp[3] = _ptr(fa)
-            if use_wfc:
-                hum = [np.ascontiguousarray(x.numpy()) for x in fbt.hump_channels(view, cells, fis)]
-                hum[3] = hum[3].astype(_I64)
-                keep.append(hum)
-                tpp[4:8] = [_ptr(x) for x in hum]
         x, w = _nodes()
-        tpp[8], tpp[9] = _ptr(x), _ptr(w)
-        tip[:12] = (len(cells), int(use_wfc), o.WFCfactor if use_wfc else 1, k0, lt, nexmax,
-                    int(fis is not None), binp.targetspin2, binp.target_parity, lmaxinc,
-                    tjlinc.shape[0], 7)
-        tip[12:19] = range(7)
-        tdp = np.array([_cnfactor(cf, binp.xseps_mb)])  # ENGDEFECT: comptarget.f90:256
-        out = np.zeros(2)
-        if nxl.nx_target(_ptr(tip), _ptr(tpp), _ptr(tdp), _ptr(pop), _ptr(out)) != 0:
-            raise _Unsupported("nx_target refused")
+
+        def _target(cl, outs_, want_denom: int):
+            """nx_target over the cells `cl` on the densprepare arrays `outs_` -> (pop, out)."""
+            tkeep = []
+            pop_ = np.zeros((7, nexmax, NJ, 2))
+            tip = np.zeros(20 + 8 * 7, dtype=_I64)
+            tpp = np.zeros(10 + 6 * 7, dtype=np.uint64)
+            for t, (nex, nlast, L, rho, lmaxhf, maxj, jdis2, parlev, T) in enumerate(outs_):
+                tip[20 + 8 * t: 26 + 8 * t] = (1, nex, nlast, L, SPIN2[t], PARSPIN2[t])
+                tpp[10 + 6 * t: 16 + 6 * t] = [_ptr(a) for a in (rho, lmaxhf, maxj, jdis2, parlev, T)]
+            j2 = np.array([c[0] for c in cl], dtype=_I64)
+            pidx = np.array([0 if c[1] == -1 else 1 for c in cl], dtype=_I64)
+            tpp[0], tpp[1], tpp[2] = _ptr(j2), _ptr(pidx), _ptr(tjlinc)
+            fis = fbt.cell_fission_widths(view, cl)
+            if fis is not None:
+                fa = np.ascontiguousarray(fis.numpy(), dtype=np.float64)
+                tkeep.append(fa)
+                tpp[3] = _ptr(fa)
+                if use_wfc:
+                    hum = [np.ascontiguousarray(x_.numpy()) for x_ in fbt.hump_channels(view, cl, fis)]
+                    hum[3] = hum[3].astype(_I64)
+                    tkeep.append(hum)
+                    tpp[4:8] = [_ptr(x_) for x_ in hum]
+            tpp[8], tpp[9] = _ptr(x), _ptr(w)
+            tip[:12] = (len(cl), int(use_wfc), o.WFCfactor if use_wfc else 1, k0, lt, nexmax,
+                        int(fis is not None), binp.targetspin2, binp.target_parity, lmaxinc,
+                        tjlinc.shape[0], 7)
+            tip[12:19] = range(7)
+            tip[19] = want_denom  # KEVCOLD: per-cell denomhf into out[2:]
+            tdp = np.array([_cnfactor(cf, binp.xseps_mb)])  # ENGDEFECT: comptarget.f90:256
+            out_ = np.zeros(2 + (len(cl) if want_denom else 0))
+            if nxl.nx_target(_ptr(tip), _ptr(tpp), _ptr(tdp), _ptr(pop_), _ptr(out_)) != 0:
+                raise _Unsupported("nx_target refused")
+            return pop_, out_, float(tdp[0])
+
+        dom = alphatemp.dom_on(cas.trans)
+        pop, out, cnf = _target(cells, outs, int(dom))
+        if dom:  # KEVCOLD (default OFF): the cold/hot alpha table only in the Gamma/D < 1 cells
+            gd = alphatemp.gd_cells(cells, out[2:], float(binp.e_inc_mev), f"{cas.Zt}-{cas.At}")
+            if gd.any():
+                outs_c, to_c = [], np.zeros_like(to)
+                for t, (nex, nlast, L, rho, lmaxhf, maxj, jdis2, parlev, T) in enumerate(outs):
+                    arr = (np.zeros_like(rho), np.zeros_like(lmaxhf), np.zeros_like(jdis2), np.zeros_like(T))
+                    to_c[t] = [_ptr(a) for a in arr]
+                    outs_c.append((nex, nlast, L, arr[0], arr[1], maxj, arr[2], parlev, arr[3]))
+                pp_c = pp.copy()
+                pp_c[3] = _ptr(to_c)
+                alphatemp.arm_front(cas, True)
+                try:
+                    rc = so.ce_densprepare(_ptr(ip), _ptr(dp), _ptr(pp_c))
+                finally:
+                    alphatemp.arm_front(cas, False)
+                if rc != 0:
+                    raise _Unsupported(f"ce_densprepare (KEVCOLD cold pass) refused type {rc - 1}")
+                _ccx_write(outs_c[k0])  # CCEXITNB (default OFF)
+                cold = [c for c, g in zip(cells, gd, strict=True) if g]
+                hot = [c for c, g in zip(cells, gd, strict=True) if not g]
+                pop, out, _ = _target(cold, outs_c, 0)
+                if hot:
+                    ph, oh, _ = _target(hot, outs, 0)
+                    pop = pop + ph
+                    out = out + oh
         from physics.hf.compound import wfcnorm  # FIXENG F15 (INCOGNITA_WFCNORM, default OFF)
 
-        if use_wfc and wfcnorm.enabled() and float(tdp[0]) != 0.0:
+        if use_wfc and wfcnorm.enabled() and cnf != 0.0:
             f = wfcnorm.factor(float(pop.sum()), float(out[0]), float(cf.xs_flux_mb))
             pop *= f
             out[0] *= f
@@ -1275,6 +1359,9 @@ def cases(zf, stats: dict | None = None):
                          xsreacinc_mb=float(inc.sigma_reac_mb[0]),
                          xsdirdiscsum_mb=a_e["xsdirdiscsum_mb"],
                          xspreeqsum_mb=a_e["xspreeqsum_mb"], xsgrsum_mb=a_e["xsgrsum_mb"])
+            from physics.hf.emission import fluxclose
+            if fluxclose.on("C"):  # FLUXCLOSE C: PE + GR flux of an exit with no continuum bin
+                b2, _ = fluxclose.place_unplaced(b2)
             b = None
             if rn is not None and keep[nin - 1]:
                 try:
@@ -1372,8 +1459,14 @@ def run(injection, stats: dict | None = None):
 
     from physics.hf.density.particle_hole import phfast_on, phmicro_on
 
+    from physics.hf.projectile import k0 as _k0
+
     # PHMICRO: phmodel 2 runs here with its tables handed to mpe_bin (fast-phmodel); INCOGNITA_PHFAST=0 = the Python reference
-    if lib() is None or injection.inject or (phmicro_on(getattr(injection, "options", None)) and not phfast_on()):
+    # ENGPROJ6: the photon entrance (k0 = 0: incidentgamma.f90, compprepare.f90 photon block) is wired in the Python
+    # driver only; this driver's `cases` gave Ta-181 (g,n) 13.5 mb at 12 MeV (engine.run and stock TALYS-2.25: 373.6),
+    # so a photon run takes engine.run (which still uses the native kernels). n/p/d/t/h are bitwise equal on both drivers.
+    if lib() is None or injection.inject or (phmicro_on(getattr(injection, "options", None)) and not phfast_on()) \
+            or _k0() == 0:
         if injection.cascade is not None:
             _binquad_refuse(injection.cascade, "no native engine")
         return engine.run(injection=injection)
@@ -1411,7 +1504,11 @@ def run(injection, stats: dict | None = None):
     # MACSCLOSED: few-resonance capture where HF is not valid, off unless INCOGNITA_FEWRES is set
     from physics.hf import fewres
 
-    return fewres.add_to_results(res, injection)
+    res = fewres.add_to_results(res, injection)
+    # LOWEPOT: no HF compound elastic below the resonance region, off unless INCOGNITA_LOWEPOT is set
+    from physics.hf import lowepot
+
+    return lowepot.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

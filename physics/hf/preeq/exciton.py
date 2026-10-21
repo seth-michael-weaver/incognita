@@ -1049,6 +1049,19 @@ def preeq_total(spectra: dict, inp: PreeqInputs, disc: DiscreteInputs, ungate: b
     totki = torch.zeros(C, 7, dtype=DTYPE, device=dev)
     totbu = torch.zeros(C, 7, dtype=DTYPE, device=dev)
     c6 = c6fix_on()
+    from physics.hf import kevleak2 as _kv2
+
+    kv = _kv2.on("pe")
+    kv3 = not kv and _kv2.on("pe2")
+    if kv3:
+        try:
+            from physics.hf.emission import fluxclose as _fc
+
+            # FLUXCN part N (capture-neutral): the sink is evaluated as if C were off (zeroed as in production), so the
+            # sentinel PE never leaves the compound flux and its PE photons are never booked into capture
+            fcC = _fc.on("C") and not _fc.on("N")
+        except ImportError:  # an engine without FLUXCLOSE: C off, so pe2 zeroes every sink like pe
+            fcC = False
     for c in range(C):
         de = inp.deltae_mev[c]
         for t in range(7):
@@ -1056,6 +1069,19 @@ def preeq_total(spectra: dict, inp: PreeqInputs, disc: DiscreteInputs, ungate: b
             nd = disc.nendisc[c][t]
             esd_all = disc.eoutdis_mev[c][t]
             elast = float(esd_all[disc.nlast[t]]) if esd_all is not None else 0.0
+            # KEVLEAK3 pe2: only where that flux is booked nowhere -- FLUXCLOSE C (place_unplaced) puts the PE of an exit
+            # with no continuum bin on its open levels 1..NL, so the sink is "no level above the ground state open"
+            sink = kv or (kv3 and (not fcC or len(esd_all) < 2 or float(esd_all[1]) <= 0.0)) if esd_all is not None else False
+            if sink and t == inp.k0 and elast <= 0.0:
+                # KEVLEAK2 pe: the projectile's last discrete level is closed, so no continuum of the
+                # target exists; energies.f90's nendisc = 1 sentinel would book bin [ebegin, 1] as continuum PE that no
+                # exit receives. Zero it (spectra and totals of (c, t) stay 0).
+                for key in ("xspreeq", "xspreeqps", "xspreeqki", "xspreeqbu"):
+                    out[key][c, t] = 0.0
+                out["xsstep"][c, t] = 0.0
+                if "xsstep2" in out:
+                    out["xsstep2"][c, :, t] = 0.0
+                continue
             frac = float(disc.etop_mev[c][nd]) - elast if elast > 0.0 else 0.0
             if frac < 0.0 and c6:  # C6FIX: Elast above the grid's top bin, nothing of bin nd is discrete
                 frac = 0.0
@@ -1862,8 +1888,10 @@ def preequilibrium(
     TALYS: preeq.f90:1 (preeq)
     Test: A-pe
     """
+    from physics.hf import kevleak2
     from physics.hf.preeq.complex import complex_particle_spectra
 
+    kevleak2.sync(options)  # KEVLEAK3: run-scoped kevleak2 value for preeq_total (deck > env > default 2)
     res = exciton_model(inp, options, params, states)
     if getattr(options, "flagpecomp", True) and coulbar_mev is not None:
         cx = complex_particle_spectra(
@@ -1900,7 +1928,14 @@ def preequilibrium(
         prm = "1"  # pewindow implies peremove 1
     pudiag = pudiag or os.environ.get("INCOGNITA_PEREMOVE_DIAG", "") == "1"
     pre = {k: res[k].detach().clone() for k in _PC_KEYS if k in res} if (pcm != "n" or pcdiag or pun or pudiag) else None
-    res.update(preeq_correct(res, inp, disc, res["states"]))
+    if inp.k0 > 0:
+        res.update(preeq_correct(res, inp, disc, res["states"]))
+    else:
+        # ENGPROJ: preeq.f90:134 calls preeqcorrect only for k0 > 0, so a photon run keeps its continuum spectra
+        # and reacinitial's zero discrete pre-equilibrium (preeqtotal still integrates up to nendisc)
+        nlmax = max((len(a) for row in disc.eoutdis_mev for a in row if a is not None), default=1)
+        z = torch.zeros(inp.C, 7, nlmax, dtype=DTYPE, device=inp.egrid_mev.device)
+        res.update({"xspreeqdisc": z, "xspreeqdisctot": z.sum(-1), "xspreeqdiscsum": z.sum((-1, -2))})
     nofrac = None
     if pun or pudiag:
         res.update(peunits(res, pre, inp, disc, pun, prm, pwm,

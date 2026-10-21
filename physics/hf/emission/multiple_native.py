@@ -437,6 +437,7 @@ def _cascade_only(nuc, zc, nc, popepsA, smin, popexcl, feedexcl, xspartial, reco
     tau = nuc.tau_s.tolist()
     jdis = nuc.jdis.tolist()
     parlev = nuc.parlev.tolist()
+    dup = M._kevleak2_dup()
     gamdis = 0.0
     for nex in range(nuc.maxex, 0, -1):
         popexcl[nex] = float(XE[nex])
@@ -448,7 +449,7 @@ def _cascade_only(nuc, zc, nc, popepsA, smin, popexcl, feedexcl, xspartial, reco
                 X[k, int(jdis[k]), M._pi(int(parlev[k]))] += intens
                 XE[k] += intens
                 XE[nex] -= intens
-                contrib[k] = intens
+                contrib[k] = contrib.get(k, 0.0) + intens if dup else intens  # KEVLEAK2 dup
                 if M._SO.active():
                     M._SO.acc_cell(zc, nc, 0, nex, k, intens)
             if contrib and records[0]:

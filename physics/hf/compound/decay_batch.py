@@ -36,6 +36,7 @@ import numpy as np
 import torch
 from torch import Tensor
 
+from physics.hf.projectile import residual_nucleus  # ENGPROJ GPRESFIX
 from physics.hf.compound.continuum import _spin_l_mask
 from physics.hf.compound.prepare import NUMJ, PARSPIN2
 from physics.hf.core.tensors import DTYPE
@@ -155,11 +156,14 @@ class NucleusDecay:
         nxm = [cas.nexmax(st, sp, b) for b in self.bins]
         eendmax = _eendmax(cas.Zt, cas.At, cas.enincmax)
         fnorm = cas.fisom(sp.zix, sp.nix, st)
-        gstrength = cas.gamma_strength(sp.Z, sp.A - 1)
+        gstrength = cas.gamma_strength(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))
         diff = bool(getattr(gstrength, "differentiable", False))
         s_n = sp.sep_mev[1]
         ex0plus = exinc + 0.5 * dexinc
         ex0min = exinc - 0.5 * dexinc
+        from physics.hf.compound import nnleak
+
+        nnl_bins = np.asarray(self.bins, dtype=np.int64) == cas.nnleak_top(sp)
         self.types: dict[int, _TypeWidths] = {}
         self.daughter_rows: dict[int, tuple] = {}
         for t in range(7):
@@ -193,6 +197,9 @@ class NucleusDecay:
                 rb_d = np.where(part, (ex0plus[:, None] - exm) / dexinc[:, None], 1.0)
             eout_d = np.where(part, 0.5 * (ex0plus[:, None] + exm) - ss - ex,
                               (exinc - ss)[:, None] - ex)
+            if t >= 1 and nnl_bins.any():  # NNLEAK (default y): Egamma^3-filled initial-CN top bin
+                rb_d, eout_d = nnleak.adjust(rb_d, eout_d, part, ex0plus[:, None], exm,
+                                             dexinc[:, None], nnl_bins[:, None])
             cont_row = rows[None, :] > nl
             eout = np.where(cont_row, eout_c, eout_d)
             rb = np.where(cont_row, rb_c, rb_d)
@@ -276,11 +283,21 @@ class NucleusDecay:
                 sfac = 1.0
             else:
                 tjl, tl, lmax = cas.trans_of(sp.zix, sp.nix)[t]  # SLFIRST: per emitting nucleus
+                from physics.hf.omp import alphatemp as _at  # ALPHATEMP (default OFF): not wired here
+                _at.refuse(cas.trans, 'decay_batch.py')
                 eend = min(int(eendmax[t]), cas.rg.maxen)
                 from physics.hf.compound import tlog as _tlg
                 tlm, lm = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
                                      tl, lmax, float(fnorm[t + 1]), cas.transeps,
                                      tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
+                tlc_ = cas.trans_cont_of(sp.zix, sp.nix)  # ROTEXIT1CN (default OFF): continuum rows from the model set
+                if tlc_ is not None:
+                    if isinstance(tlm, torch.Tensor):
+                        raise NotImplementedError("sfexit cont is not wired on the differentiable path")
+                    tlm_c, _ = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
+                                         tlc_[t][1], lmax, float(fnorm[t + 1]), cas.transeps,
+                                         tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
+                    tlm = np.where(np.broadcast_to(cont_row, tlm.shape[:2])[:, :, None], tlm_c, tlm)
                 L = tl.shape[1]
                 lmaxhf = np.where(inrow, lm, 0)
                 lp = np.arange(L)

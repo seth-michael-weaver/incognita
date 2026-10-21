@@ -149,6 +149,9 @@ def _particle_widths(cas, st, sp, bins: list[int]) -> list[np.ndarray | None]:
     fnorm = cas.fisom(sp.zix, sp.nix)
     ex0plus = exinc + 0.5 * dexinc
     ex0min = exinc - 0.5 * dexinc
+    from physics.hf.compound import nnleak
+
+    nnl_bins = np.asarray(bins, dtype=np.int64) == cas.nnleak_top(sp)
     out: list[np.ndarray | None] = []
     for t in range(1, 7):
         d = cas.spec(st, sp.zix + PARZ[t], sp.nix + PARN[t])
@@ -178,16 +181,29 @@ def _particle_widths(cas, st, sp, bins: list[int]) -> list[np.ndarray | None]:
             rb_d = np.where(part, (ex0plus[:, None] - exm) / dexinc[:, None], 1.0)
         eout_d = np.where(part, 0.5 * (ex0plus[:, None] + exm) - ss - ex,
                           (exinc - ss)[:, None] - ex)
+        if nnl_bins.any():  # NNLEAK (default y): Egamma^3-filled initial-CN top bin (t >= 1 here)
+            rb_d, eout_d = nnleak.adjust(rb_d, eout_d, part, ex0plus[:, None], exm,
+                                         dexinc[:, None], nnl_bins[:, None])
         cont_row = rows[None, :] > nl
         eout = np.where(cont_row, eout_c, eout_d)
         rb = np.where(cont_row, rb_c, rb_d)
         eout = np.where(inrow, eout, 0.0)
         from physics.hf.compound import tlog as _tlg  # LOGTINT (default OFF)
         _tjl, tl, _lmax = cas.trans_of(sp.zix, sp.nix)[t]  # SLFIRST: per emitting nucleus
+        from physics.hf.omp import alphatemp as _at  # ALPHATEMP (default OFF): not wired here
+        _at.refuse(cas.trans, 'capture_gpu_setup.py')
         eend = min(int(eendmax[t]), cas.rg.maxen)
         tlm, lm = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
                              tl, _lmax, float(fnorm[t + 1]), cas.transeps,
                              tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
+        tlc_ = cas.trans_cont_of(sp.zix, sp.nix)  # ROTEXIT1CN (default OFF): continuum rows from the model set
+        if tlc_ is not None:
+            if isinstance(tlm, torch.Tensor):
+                raise NotImplementedError("sfexit cont is not wired on the differentiable path")
+            tlm_c, _ = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
+                                 tlc_[t][1], _lmax, float(fnorm[t + 1]), cas.transeps,
+                                 tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
+            tlm = np.where(np.broadcast_to(cont_row, tlm.shape[:2])[:, :, None], tlm_c, tlm)
         L = tl.shape[1]
         lmaxhf = np.where(inrow, lm, 0)
         lp = np.arange(L)
@@ -383,6 +399,8 @@ def gamma_pack(Z: int, A: int) -> dict:
     ok = ok and float(gp.etable_mev[1, 1]) == 0.0
     if not ok:
         raise Unsupported(f"photon strength model of {Z}-{A + 1}")
+    if gp.eadj_e1 or gp.eadj_m1:  # ENGADJ: energy-local strength bumps are evaluated on the CPU paths
+        raise Unsupported(f"ENGADJ photon strength bumps on {Z}-{A + 1}")
     tab = gp.tables[(1, 1)]
     e_raw = tab.e_raw_mev.numpy()
     if not np.all(np.diff(e_raw[1:]) > 0) or not e_raw[1] > 0.0:

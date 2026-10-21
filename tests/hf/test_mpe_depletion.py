@@ -21,6 +21,16 @@ import numpy as np
 import pytest
 import torch
 
+
+@pytest.fixture(scope="module", autouse=True)
+def _alphatemp_off():
+    """ALPHAADOPT (alphatemp default ON 0.64): decay_batch does not wire ALPHATEMP (it refuses the switch); this module runs at alphatemp 0."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_ALPHATEMP", "0")
+        yield
+
+
+
 GRID = (1.0e-3, 1.0, 5.0, 14.0, 20.0)
 
 

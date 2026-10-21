@@ -52,6 +52,52 @@ def enabled() -> bool:
                for k in ("INCOGNITA_BINSPEC", "INCOGNITA_SPECOUT"))
 
 
+def specclose_on() -> bool:
+    """`INCOGNITA_SPECCLOSE` = 1/y/yes/on (THEORYFIX_U7SPEC, output only, default off = SPECOUT as before): the shipped spectra
+    integrate (sum value * deltaE) to the flux the engine booked -- binary compound continuum and pre-equilibrium closed
+    in the endpoint bin, the giant-resonance part (giant.f90:113, mb per bin) shipped per MeV, and the cascade emission
+    of discrete parents above a particle threshold binned (specout.discrete_parent_emission). No cross section moves.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    return os.environ.get("INCOGNITA_SPECCLOSE", "1").strip().lower() in ("1", "y", "yes", "on")  # gate candidate: default ON
+
+
+def close_binary(xsemis, xspre, xsgr, de, et, ib: int, ie: int, nendisc: int, cut: float | None, petot: float,
+                 grres=None):
+    """SPECCLOSE: the binary continuum spectra closed on their booked totals (returns new arrays).
+    - compound (binemission.f90:157-170 normalises with the top bin cut at the last discrete line): the endpoint bin
+      ships its kept part, xsemis(nendisc) * (deltaE - cut) / deltaE, so sum xsemis deltaE = xscompcont exactly;
+    - pre-equilibrium: the endpoint bin carries what xspreeqtot leaves after the bins below it (nothing above it);
+      if that is negative the whole PE spectrum is scaled to xspreeqtot;
+    - giant resonance: the resonance part (mb per bin) divided by deltaE, the collective continuum (mb/MeV) as is.
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: none in the public suite
+    """
+    xsemis, xspre, xsgr = (np.array(v, float) for v in (xsemis, xspre, xsgr))
+    if ie > ib:
+        if cut is not None and de[nendisc] > 0.0:
+            xsemis[nendisc] *= (de[nendisc] - cut) / de[nendisc]
+        lo = float(np.sum(xspre[ib:nendisc] * de[ib:nendisc]))
+        rem = petot - lo
+        if de[nendisc] > 0.0 and rem >= 0.0:
+            xspre[nendisc] = rem / de[nendisc]
+            xspre[nendisc + 1:] = 0.0
+        else:
+            tot = float(np.sum(xspre[ib:ie + 1] * de[ib:ie + 1]))
+            xspre = xspre * (petot / tot) if tot > 0.0 else xspre * 0.0
+    if grres is not None:
+        g = np.zeros(len(xsgr))
+        n = min(len(g), len(grres))
+        g[:n] = np.asarray(grres, float)[:n]
+        g[: ib] = 0.0
+        g[ie + 1:] = 0.0
+        xsgr = xsgr - g + np.where(de > 0.0, g / np.where(de > 0.0, de, 1.0), 0.0)
+    return xsemis, xspre, xsgr
+
+
 def _np(x) -> np.ndarray:
     if hasattr(x, "detach"):
         x = x.detach().cpu().numpy()
@@ -210,6 +256,15 @@ def record(e_inc_mev: float, pinp, b2, b, k0: int, ctx=None) -> dict | None:
         sl = slice(ib, ie + 1) if ie >= ib else slice(0, 0)
         mask = np.zeros(len(eg), bool)
         mask[sl] = True
+        closed = specclose_on() and ie > ib
+        if closed:
+            cut = None
+            if nl >= 0 and eoutdis[nl] > 0:
+                cut = max(et[nendisc] - eoutdis[nl], 0.0) if c6 else (et[nendisc] - eoutdis[nl])
+            petot = float(b2.xspreeqtot_mb.get(t, 0.0)) if b2.flagpreeq else float(pinp.xspreeqtot_mb.get(t, 0.0))
+            grres = (getattr(pinp, "xsgrres_mb", {}) or {}).get(t) if pinp.flaggiant else None
+            xsemis, xspre, xsgr = close_binary(np.where(mask, xsemis, 0.0), np.where(mask, xspre, 0.0),
+                                               np.where(mask, xsgr, 0.0), de, et, ib, ie, int(nendisc), cut, petot, grres)
         xsbinemis = np.where(mask, xsemis + xspre + xsgr, 0.0)
         disc = _np(b.xsdisc_mb[t]) if t in b.xsdisc_mb else np.zeros(0)
         nd = min(len(disc), nl + 1)
@@ -228,6 +283,9 @@ def record(e_inc_mev: float, pinp, b2, b, k0: int, ctx=None) -> dict | None:
                    continuum_sum=float(np.sum(xsbinemis[ib:nendisc + 1] * de[ib:nendisc + 1])
                                        - (xsbinemis[nendisc] * (max(et[nendisc] - eoutdis[nl], 0.0) if c6 else (et[nendisc] - eoutdis[nl]))
                                           if (ie > ib and nl >= 0 and eoutdis[nl] > 0) else 0.0)))
+        if closed:
+            ent["continuum_sum"] = float(np.sum(xsbinemis[sl] * de[sl]))
+            ent["specclose"] = True
         if pres is not None:
             for key, name in (("xspreeqps", "pe_ps"), ("xspreeqki", "pe_ki")):
                 if key in pres:

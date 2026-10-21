@@ -127,6 +127,7 @@ def binary(inp, state=None, device=None):
         BinaryResult,
         BinaryState,
         _pi,
+        sfaclocal_on,
         spindis,
     )
 
@@ -176,6 +177,8 @@ def binary(inp, state=None, device=None):
 
         sfglobal = _np(st.get(g.zix, g.nix, nj, device))  # written through: run-scoped
         sfac = sfglobal[: nmax + 1].copy()
+        if sfaclocal_on():  # TALYS 2c5d15f: binary.f90:232 (binary): zero fallback, C kernel unchanged
+            sfac[:] = 0.0
         ppx = _np(inp.preeqpopex_mb[t]).copy()
         do_pe = inp.flagpreeq and nmax - nl > 0 and inp.pespinmodel <= 2
         popepsA = inp.popeps_mb / max(5 * nmax, 1)
@@ -358,7 +361,7 @@ def exclusive_channels(inp, state=None):
     q00 = root.sep_mev.get(inp.k0, 0.0) + inp.targete_mev
     fis_root = root.fisfeedex_mb.get(top0, 0.0)
     flagfission = inp.flagfission
-    numchantot = CH.NUMCHANTOT
+    numchantot, cap = CH.numchantot(), CH.caps()  # CHANCAP
 
     channelsum = 0.0
     xsabs = 0.0
@@ -370,7 +373,7 @@ def exclusive_channels(inp, state=None):
             if (zix, nix) not in nuc:
                 continue
             res = nuc[(zix, nix)]
-            lim = CH._limits_of(zix, nix, tuple(inp.parinclude), inp.maxchannel)
+            lim = CH._limits_of(zix, nix, tuple(inp.parinclude), inp.maxchannel, cap)
             keys = CH._channel_keys(zix, nix, lim, inp.maxchannel)
             if not keys:
                 continue

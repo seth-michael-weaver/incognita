@@ -101,6 +101,7 @@ def _nucleus_record(cas, st, sp) -> dict:
     bins = _decayable_bins(sp)
     rec = dict(key=(sp.zix, sp.nix), bins=np.array(bins, dtype=np.int64),
                fnorm=np.asarray(cas.fisom(sp.zix, sp.nix, st), dtype=np.float64))
+    rec["nnl"] = cas.nnleak_top(sp)  # NNLEAK (default y): the rule's mother bin, -1 = none
     daughters = [cas.spec(st, sp.zix + PARZ[t], sp.nix + PARN[t]) for t in range(7)]
     rec["daughters"] = [(d.zix, d.nix) for d in daughters]
     if not bins:
@@ -233,6 +234,39 @@ def _binary_shell(built, nin: int, e: float, binp) -> dict:
         xsgrtot=np.array([float(binp.xsgrtot_mb.get(t, 0.0)) for t in range(7)]))
 
 
+def _fluxclose_c(bn: dict, pex: dict, binp) -> None:
+    """GPUREFUSE F (FLUXPROMO2 port): FLUXCLOSE part C (`fluxclose.place_unplaced`, INCOGNITA_FLUXCLOSE) on `_binary_shell`'s record: an exit
+    whose continuum column is empty but which carries pre-equilibrium + giant-resonance flux gets it as direct-discrete
+    feeding, in equal shares over its levels 1..NL (the target level excluded on the incident channel; the ground
+    state when an outgoing exit has no excited level). Same numbers as place_unplaced on the C path's BinaryInputs.
+
+    Test: GPUREFUSE / FLUXPROMO2
+    """
+    for t, g in bn["grids"].items():
+        nmax = int(g["maxex"])
+        nl = min(int(g["nlast"]), nmax)
+        tot = float(binp.xspreeqtot_mb.get(t, 0.0)) if binp.flagpreeq else 0.0
+        tot += float(binp.xsgrtot_mb.get(t, 0.0))
+        if tot <= 0.0:
+            continue
+        col = pex.get(t)
+        check = float(torch.as_tensor(col[nl + 1: nmax + 1], dtype=DTYPE).sum()) if col is not None and nmax > nl \
+            else 0.0
+        if check != 0.0:
+            continue
+        dd = g["xsdirdisc"]
+        levels = [i for i in range(1, min(nl, dd.shape[0] - 1) + 1) if not (t == binp.k0 and i == binp.ltarget)]
+        if not levels:
+            if t == binp.k0:
+                continue
+            levels = [0]
+        add = np.zeros_like(dd)
+        share = tot / len(levels)
+        for i in levels:
+            add[i] = share
+        g["xsdirdisc"] = dd + add
+
+
 def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> dict:
     """Every population-independent array of one dump-free run over `declared` (module docstring).
 
@@ -258,6 +292,9 @@ def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> 
     t0 = time.perf_counter()
     target = target_tag(Z, A)
     declared = tuple(float(np.float32(e)) for e in declared)
+    from physics.hf import lowepot as _lp  # LOWEPOT (default OFF): sub-keV elastic rule, not wired on the GPU full path
+    if _lp.on() and min(declared) * 1e6 < _lp.EMAX_EV:
+        raise NotImplementedError("INCOGNITA_LOWEPOT below 1 keV is not wired on the GPU full path; run the C or numpy engine")
     enincmax = max(declared)
     e_axis = list(declared)
     cas = cascade if cascade is not None else Cascade(Z, A, enincmax, energies=declared)
@@ -274,8 +311,12 @@ def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> 
 
     if binquad_mode(o):  # BINQUAD: native CPU engine only (the GPU path would run the midpoint rule)
         raise NotImplementedError("binquad: not wired on the GPU path; use the native engine")
+    from physics.hf.omp import alphatemp as _at  # ALPHATEMP (default OFF): not wired on the GPU full path
+    _at.refuse(cas.trans, 'gpu_full_setup.py')
     if isinstance(cas.trans, dict) and (cas.trans.get("tlog", False) or "tlogref" in cas.trans):
         raise NotImplementedError("LOGTINT (tlog c / tlogref) is not wired on the GPU full path; run the C or numpy engine")
+    if cas.trans_cont_of(0, 0) is not None:  # ROTEXIT1CN (default OFF): two first-CN stacks
+        raise NotImplementedError("sfexit cont is not wired on the GPU full path; run the C or numpy engine")
     if cas.trans_of(0, 0) is not cas.trans:
         raise NotImplementedError("SLFIRST (INCOGNITA_SFUNC_SCOPE=first): one Tjl stack per run on the GPU full path; "
                                   "run the C or numpy engine")
@@ -332,9 +373,19 @@ def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> 
             transeps=cas.transeps, gamma_params=_default_gamma_params(Z, A))
         rec["tgam0"] = _tgam_rows(dpi, float(etot) - np.asarray(sp0.ex_mev[: sp0.maxex + 1],
                                                                  dtype=np.float64))
+        from physics.hf.compound import ccexitnb
+
+        if ccexitnb.enabled(o):  # CCEXITNB (default OFF): the shared row builder, applied in gpu_full.primary_residuals
+            dk = cas.spec(st, PARZ[cas.k0], PARN[cas.k0])
+            rec["ccx"] = ccexitnb.rows(cas, int(sc.ltarget), dk.ex_mev, int(dk.nlast), int(dk.maxex), float(etot),
+                                       float(sp0.sep_mev[cas.k0]), L, ccexitnb.fnorm_n(cas))
         rec["binary"] = _binary_shell(built, nin, e, binp)
         prq = population(pop_inputs_of(cas, binp, target, etot, add, declared))
         rec["pex"] = {t: _np(prq.preeqpopex_mb[t]).copy() for t in prq.preeqpopex_mb}
+        from physics.hf.emission import fluxclose
+
+        if fluxclose.on("C"):  # GPUREFUSE F: FLUXCLOSE C (engine_c.run's place_unplaced) on the binary record
+            _fluxclose_c(rec["binary"], rec["pex"], binp)
         # the cascade tree (cases(): populations, propagate_exmax over it, populations again)
         nuclei = cas.populations(st, cinp.maxz, cinp.maxn, {})
         for zc in range(cinp.maxz + 1):
@@ -357,6 +408,13 @@ def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> 
             if k not in rec["specs"]:
                 rec["specs"][k] = _spec_record(cas, sp)
         rec["maxz"], rec["maxn"] = int(cinp.maxz), int(cinp.maxn)
+        # FLUXCLOSE A: the widened window only adds nuclei the cascade can reach (exmax > 0); a populated terminal
+        # residual past the stock window (skipCN: booked to its ground state, never decayed, multiple.py) is the
+        # Python walk's only and is refused here
+        skip = sorted(k for k, n in nuclei.items() if n.skipcn)
+        if skip:
+            raise NotImplementedError(f"FLUXCLOSE A terminal residuals {skip} (skipCN) are not wired on the GPU path; "
+                                      "run the Py/C engine or fluxclose n")
         run["E"].append(rec)
     set_energy_subset(Z, A, declared, None)
     run["seconds"] = time.perf_counter() - t0
@@ -449,7 +507,7 @@ def stack_run(run: dict) -> None:
             c = e["cascade"][k]
             m = len(c["bins"])
             n_int[j] = (sid[k], m, _row_nj(sp, c["bins"]), k[0] + k[1], sp["A"] % 2, k[0], k[1],
-                        0)
+                        int(c.get("nnl", -1)) + 1)  # NNLEAK: rule bin + 1, 0 = none
             bins[j, :m] = c["bins"]
             nxm[j, :m] = c["nxm"]
             fnorm[j] = c["fnorm"]

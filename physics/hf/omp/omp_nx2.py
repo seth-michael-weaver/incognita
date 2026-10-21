@@ -616,6 +616,12 @@ def _opticalcomp(xp, k: int, Z: int, A: int, e, nucleon, options, fac, soukho) -
         "awso_fm": F["Fawso"] * (in_ * n_e["avso_fm"] + iz * p_e["avso_fm"]) / ia,
         "rc_fm": F["Frc"] * p_e["rc_fm"],
     }
+    from physics.hf.omp import tfold as _tf
+
+    if k in _tf.KS and _tf.enabled(options):  # TFOLD (default ON): a' = sqrt(a^2 + (r_m/pi)^2), then the adjust factors
+        for c, f in _tf.COLS:
+            src = "avd_fm" if c in ("avd_fm", "awd_fm") else c
+            o[c] = F[f] * _tf.fold((in_ * n[src] + iz * p[src]) / ia)
     if k == 3:
         o["vso_mev"] = F["Fvso1"] * (n_e["vso_mev"] + p_e["vso_mev"]) / 2.0
         o["wso_mev"] = F["Fwso1"] * (n_e["wso_mev"] + p_e["wso_mev"]) / 2.0
@@ -660,6 +666,10 @@ def omp_columns(Z: int, N: int, particle: int, e_mev, params, options, *, collty
     from physics.hf.core.constants import PARA, PARZ
 
     if options is None or not enabled():
+        return None
+    from physics.hf import eadj
+
+    if eadj.any_target(eadj.OMP_TARGETS):  # ENGADJ: energy-local F* bumps are built by the torch path only
         return None
     fac = _factors(params)
     if fac is None:

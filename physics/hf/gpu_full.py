@@ -355,6 +355,13 @@ def primary_residuals(bk: Batch) -> dict:
     row = tj[ar, lt]  # (B, L', 3)
     row[:, :n_inc] = torch.where(okl[..., None], t["tjlinc"], row[:, :n_inc])
     tj[ar, lt] = row
+    for b, e in enumerate(bk.host["E"]):  # CCEXITNB (default OFF): non-band target rows, shared builder
+        for i, (crow, lm) in (e.get("ccx") or {}).items():
+            if i <= int(t["maxex"][b, k0]):
+                k = min(crow.shape[0], tj.shape[2])
+                tj[b, i] = 0.0
+                tj[b, i, :k] = torch.as_tensor(crow[:k], dtype=F64, device=dev)
+                out[k0]["lmaxhf"][b, i] = int(lm)
     out[k0]["tjl"] = tj
     return out
 
@@ -783,6 +790,8 @@ def binary(bk: Batch, ct: dict, sf_state: dict | None = None) -> dict:
     TALYS: binary.f90:1 (binary), spindis.f90:1 (spindis)
     Test: GPUFULL
     """
+    from physics.hf.emission.binary import sfaclocal_on
+
     t, d = bk.t, bk.dims
     dev = bk.device
     B, R, J = d["B"], d["R"], d["J"]
@@ -885,6 +894,8 @@ def binary(bk: Batch, ct: dict, sf_state: dict | None = None) -> dict:
             for name, (i, b) in sf_last.items():
                 sf_state.setdefault(name, [i, {}])[1][ty] = state[b].clone()
                 sf_state[name][0] = i
+        if sfaclocal_on():  # TALYS 2c5d15f: binary.f90:232 (binary) `sfactor = 0.` per cell (upstream 57de284)
+            sf = torch.where(hs, ratio, torch.zeros_like(ratio))
         wig = _spindis(t["b_spincut"][:, ty][:, :, None], jj[None, None, :]) * 0.5
         use_sf = (pespin == 1)[:, None, None, None] & (sf > 0.0)
         spread = torch.where(use_sf, sf, wig[..., None])

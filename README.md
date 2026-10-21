@@ -11,7 +11,7 @@ that says which regime the value is in (measured, anchored, interpolated or extr
 the exam the model was graded on and the pre-registered, timestamped predictions for nuclei not yet measured are all
 public, so every claim below can be checked.
 
-Code: Apache-2.0 · Data: CC-BY-4.0 · Status: v0.1 preview · Engine: 2026-10 (tag `engine-2026-10`)
+Code: Apache-2.0 · Data: CC-BY-4.0 · Status: v0.1 preview · Engine: 2026-10-19
 
 ---
 
@@ -100,6 +100,26 @@ uv run python scripts/bestfit/engine_curves.py --arm nodata --e1 stock --only 26
 ```
 
 Per-target keyword lines can be added in a file named by `INCOGNITA_TALYS_FIT_LINES_FILE`.
+
+**Engine update 2026-10-19.** This update turns several corrections on by default, so results differ from the 2026-10
+engine even with no switch set; the numbers in this README have not been re-measured with it. Each change is a deck
+keyword; the value shown restores the earlier behaviour:
+
+| change (default on) | keyword to turn it off |
+|---|---|
+| residual-population cut lowered from 1e-3 mb to 1e-9 mb (TALYS's cut zeroed sub-barrier residuals) | `popeps 1e-3` |
+| flux bookkeeping closed: residuals one step past TALYS's cascade window are kept as terminal residuals, and emission to levels with no continuum bin is placed | `fluxclose n` |
+| exclusive-channel caps raised to 8 ejectiles of each type | `chancap n` |
+| two discrete-level bookkeeping fixes (decay branches to the same level listed twice; pre-equilibrium flux on the projectile's discrete levels) | `kevleak2 n` |
+| continuum-to-discrete boundary of the first compound nucleus's top bin weighted by E<sub>γ</sub><sup>3</sup> | `nnleak n` |
+| constant-temperature level-density matching falls back to the closest count when there is no root | `ctwcont n` |
+| exact one-dimensional fission transmission per barrier hump | `exactfis n` |
+| alpha optical potential depends on the residual state's temperature (T* = 0.64 MeV) | `alphatemp 0` |
+| alpha-induced runs use alpha optical model 6 for the entrance channel | `alphaentr 0` |
+| E1/M1 photon-strength table overrides follow one global function of deformation (table in `physics/hf/gamma/`) | `ftglobal n`, `heavymacs2 n` |
+| deformed targets without a fission channel: neutron exits of the first compound nucleus to non-band target levels use the ground-state coupled-channel transmission | `ccexitnbnf n` |
+| with measured strength functions (`INCOGNITA_SFUNC`): continuum neutron exits of the first compound nucleus divide out the engine's own coupled-channel enhancement | `sfexit n` |
+| triton and helion optical potentials include the projectile's finite size | `tfold n` |
 
 **Reproduce the benchmark tables:**
 
