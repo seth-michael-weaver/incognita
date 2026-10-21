@@ -79,6 +79,7 @@
       ctx.fillStyle = colorOf(r); ctx.fillRect(x, y, s - gap, s - gap);
     }
     // glow on the nuclides that stand out in this view (measured, or with measured data), so the valley of stability shines
+    if (!(drag && moved > 4) && !pinch) { // glow is skipped while dragging or pinching (it is the costly part) and restored on release
     ctx.save(); ctx.globalCompositeOperation = "lighter";
     for (const r of rows) {
       if (!r.A) continue; const lit = mode === "tier" ? r.tier === 0 || r.tier === 1 : mode === "meas" ? r.ncap + r.nmxw > 0 : r.macs > 300;
@@ -86,6 +87,7 @@
       const col = colorOf(r); ctx.shadowColor = col; ctx.shadowBlur = Math.max(6, s * 1.4); ctx.fillStyle = col; ctx.globalAlpha = 0.55; ctx.fillRect(x, y, s - gap, s - gap);
     }
     ctx.restore();
+    }
     // labels: element symbols along the left edge of each row, mass numbers inside cells when large
     ctx.textBaseline = "middle";
     if (s >= 9) {
@@ -127,7 +129,7 @@
     if (r) { tip.hidden = false; tip.innerHTML = chartTip(r); place(tip, e.offsetX, e.offsetY, cv); } else tip.hidden = true;
   });
   const endPtr = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null;
-    if (pts.size === 0 && drag) { if (moved < 5 && e.type === "pointerup") { const { N, Z } = fromXY(e.offsetX, e.offsetY), r = byKey.get(Z + "-" + (N + Z)); if (r) select(r); } drag = null; } };
+    if (pts.size === 0 && drag) { if (moved < 5 && e.type === "pointerup") { const { N, Z } = fromXY(e.offsetX, e.offsetY), r = byKey.get(Z + "-" + (N + Z)); if (r) select(r); } drag = null; drawChart(); } };
   cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
   cv.addEventListener("pointerleave", () => { hover = null; tip.hidden = true; drawChart(); });
   cv.addEventListener("wheel", (e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, view.s * Math.exp(-e.deltaY * 0.0015)); }, { passive: false });

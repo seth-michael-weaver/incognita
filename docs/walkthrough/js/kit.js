@@ -481,7 +481,7 @@
     }
     function resize() {
       chapters.forEach((ch) => {
-        const r = ch.stage.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+        const r = ch.stage.getBoundingClientRect(), dpr = Math.min(PHONE ? 1.5 : 2, window.devicePixelRatio || 1); // phones: 1.5x keeps lines sharp with ~45 % fewer pixels
         ch.cv.width = Math.round(r.width * dpr); ch.cv.height = Math.round(r.height * dpr);
         ch.cv.style.width = r.width + "px"; ch.cv.style.height = r.height + "px";
         ch.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ch.g = makeG(ch.ctx, r.width, r.height);

@@ -12,7 +12,8 @@ benchmark and a registry of predictions made before the data.**
 <a href="https://nucleus-incognita-woad.vercel.app/?lang=en"><img src="docs/walkthrough/og.png" alt="Inside a Nuclear Reaction: an explorable explanation of the Incognita reaction engine" width="100%"></a>
 
 **New here?** Start with [**Inside a Nuclear Reaction**](https://nucleus-incognita-woad.vercel.app/?lang=en), an
-interactive walk through what the engine computes, and its
+interactive walk through what the engine computes; [**Every nuclide**](https://nucleus-incognita-woad.vercel.app/data?lang=en),
+an explorer of the library's predicted curves for 6,168 nuclides beside every curated measurement; and the
 [**Scoreboard**](https://nucleus-incognita-woad.vercel.app/scoreboard?lang=en), which compares the engine with other
 codes and the data product with evaluated libraries, losses first.
 

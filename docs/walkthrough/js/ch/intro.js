@@ -117,17 +117,25 @@
   if (fire) fire.addEventListener("click", () => { const { cy } = geo(), y = cy + (Math.random() - 0.5) * H * 0.3; shots.push({ x: 0, y, sx: -20, sy: y, t0: time, trail: [] }); if (reduce) frame(0); });
 
   // ---------- drawing ----------
+  // performance: the backdrop gradient is painted once per size into its own canvas, and the drifting streaks are one
+  // pre-drawn image, instead of a full-screen gradient and 70 new gradient objects every frame
+  let bgC = null, bgKey = "";
+  const STREAK = (() => { const c = document.createElement("canvas"); c.width = 64; c.height = 2; const g = c.getContext("2d"), gr = g.createLinearGradient(0, 0, 64, 0); gr.addColorStop(0, rgba(C.n, 0)); gr.addColorStop(1, rgba(C.n, 1)); g.fillStyle = gr; g.fillRect(0, 0, 64, 2); return c; })();
   function background(cx, cy, R) {
-    const g = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, Math.max(W, H) * 0.95);
-    g.addColorStop(0, "#101a33"); g.addColorStop(0.45, "#070b17"); g.addColorStop(1, "#020308");
-    ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const key = W + "x" + H + "@" + dpr + ":" + Math.round(cx) + "," + Math.round(cy);
+    if (key !== bgKey) {
+      bgKey = key; bgC = bgC || document.createElement("canvas"); bgC.width = Math.round(W * dpr); bgC.height = Math.round(H * dpr);
+      const b = bgC.getContext("2d"); b.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const g = b.createRadialGradient(cx, cy, R * 0.2, cx, cy, Math.max(W, H) * 0.95);
+      g.addColorStop(0, "#101a33"); g.addColorStop(0.45, "#070b17"); g.addColorStop(1, "#020308"); b.fillStyle = g; b.fillRect(0, 0, W, H);
+    }
+    ctx.globalAlpha = 1; ctx.drawImage(bgC, 0, 0, W, H);
     ctx.globalCompositeOperation = "lighter";
     for (const s of stars) { const x = ((s.x * W - tiltX * 18 * s.d) % W + W) % W, y = ((s.y * H - tiltY * 12 * s.d) % H + H) % H; ctx.globalAlpha = (0.25 + 0.35 * Math.sin(time * 1.3 + s.tw) ** 2) * s.d; ctx.fillStyle = "#cfd8ff"; ctx.fillRect(x, y, s.s, s.s); }
     ctx.lineCap = "round";
     for (const f of flux) {
       f.x += f.v * (reduce ? 0 : 1 / 60); if (f.x > 1.1) f.x = -0.1;
-      const x = f.x * W, y = f.y * H - tiltY * 8, gr = ctx.createLinearGradient(x - f.l, y, x, y); gr.addColorStop(0, rgba(C.n, 0)); gr.addColorStop(1, rgba(C.n, f.a));
-      ctx.globalAlpha = 1; ctx.strokeStyle = gr; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x - f.l, y); ctx.lineTo(x, y); ctx.stroke();
+      const x = f.x * W, y = f.y * H - tiltY * 8; ctx.globalAlpha = f.a; ctx.drawImage(STREAK, x - f.l, y - 0.6, f.l, 1.2);
     }
     ctx.globalCompositeOperation = "source-over";
   }
@@ -293,14 +301,14 @@
 
   // ---------- sizing, scrolling, the loop ----------
   function resize() {
-    const r = cv.getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1);
+    const r = cv.getBoundingClientRect(); dpr = Math.min(maxDpr, r.width < 720 ? 1.5 : 2, window.devicePixelRatio || 1); // phones: 1.5x is sharp enough and draws ~45 % fewer pixels
     W = Math.max(1, r.width); H = Math.max(1, r.height); cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
   }
   function onScroll() {
     const r = hero.getBoundingClientRect(); scrollP = clamp(-r.top / Math.max(1, r.height), 0, 1);
     if (copy) { copy.style.opacity = String(clamp(1 - scrollP * 2.2, 0, 1)); copy.style.transform = `translateY(${-scrollP * 60}px)`; }
   }
-  let visible = true, last = 0;
+  let visible = true, last = 0; let maxDpr = 2, slowAcc = 0, slowN = 0;
   new IntersectionObserver((ents) => ents.forEach((en) => (visible = en.isIntersecting))).observe(hero);
   window.addEventListener("resize", () => { resize(); if (reduce) frame(0); });
   window.addEventListener("scroll", onScroll, { passive: true });
@@ -315,6 +323,7 @@
   }
   function loop(now) {
     const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+    if (visible && dt > 0) { slowAcc += dt; slowN++; if (slowN >= 90) { if (slowAcc / slowN > 0.019 && maxDpr > 1) { maxDpr = Math.max(1, dpr - 0.5); resize(); } slowAcc = 0; slowN = 0; } } // slow device: step the resolution down
     if (visible && !document.hidden) frame(ff ? 0 : dt); // a fast-forwarded screenshot holds still
     requestAnimationFrame(loop);
   }
