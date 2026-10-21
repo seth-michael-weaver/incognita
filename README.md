@@ -142,6 +142,8 @@ bash scripts/reproduce.sh            # writes out/reproduce/SUMMARY.md: IDENTICA
 | `docs/release/` | frozen exam inputs (`exam/`, `uq/`), expected tables (`expected/`), benchmark guide, curation rules, uncertainty evidence |
 | `docs/registry/` | frozen prospective predictions with SHA-256 manifests and OpenTimestamps proofs |
 | `data/curation/` | the open EXFOR curation register (which datasets are excluded, down-weighted or renormalised, and why) |
+| `emu/` | fast emulators of the engine at tag `engine-2026-10` ([`emu/README.md`](emu/README.md)) |
+| `docs/walkthrough/` | "Inside a Nuclear Reaction", an explorable explanation of the engine's physics (static site; `vercel.json`) |
 
 **Library format.** `capture_v01_indep.parquet` has one row per nuclide (Z = 8–110) with array columns on a common grid of
 64 energies from 1 keV to 20 MeV; `unc68_log10` and `unc95_log10` are multiplicative half-widths in log10. MACS and rate
