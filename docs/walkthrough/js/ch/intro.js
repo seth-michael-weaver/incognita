@@ -203,7 +203,7 @@
         const ya = yaw + tiltX * 0.55, pa = 0.28 + tiltY * 0.35, c = Math.cos(ya), s = Math.sin(ya), cp = Math.cos(pa), sp = Math.sin(pa);
         for (const a of nuc) { const x = a.x * c + a.z * s, z0 = -a.x * s + a.z * c; a.fx = x; a.fy = a.y * cp - z0 * sp; a.fz = a.y * sp + z0 * cp; a.side = x < 0 ? -1 : 1; }
       }
-      if (ct >= F_SCISSION && !fis.done) {
+      if (ct >= F_SCISSION && ct < F_GONE && !fis.done) {   // once per cycle (fis.done is cleared again at F_GONE)
         fis.done = true; flash = 0.75; flashCol = C.white; shake = 9; impact(cx, cy, 1);
         // the neck snaps: two or three neutrons and a couple of gammas leave from the middle, across the fission axis
         const r = rng(cyc * 7 + 1), sp = Math.max(W, H) * 0.32;
