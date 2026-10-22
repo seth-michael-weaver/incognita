@@ -1,5 +1,5 @@
 /* Data explorer (data.html): a chart of nuclides coloured by how each is known, and for any nuclide the library's
- * predicted curves (with 68 / 95 % bands) beside every curated measurement. Data: data/index.json and data/z/<Z>.json,
+ * predicted curves (with 68 / 95 % bands) beside every curated measurement. Data: data/index.json and data/n/<Z>/<A>.json,
  * built by scripts/build_site_data.py from library/v0.1, data/curation and incognita/bench. Plain script, no build. */
 (function () {
   "use strict";
@@ -47,8 +47,13 @@
 
   // ---------- data ----------
   let IDX = null, rows = [], byKey = new Map(), sel = null, mode = "tier";
-  const zcache = new Map();
-  const loadZ = (Z) => zcache.get(Z) || zcache.set(Z, fetch(`data/z/${Z}.json`).then((r) => r.json())).get(Z);
+  // one small file per nuclide (data/n/<Z>/<A|nat>.json), fetched the first time that nuclide is opened and kept in memory;
+  // a failed fetch is forgotten so the next try fetches again
+  const nkey = (Z, A) => `${Z}/${A || "nat"}`, ncache = new Map(), ndata = new Map();
+  const loadNuc = (Z, A) => { const k = nkey(Z, A);
+    if (!ncache.has(k)) ncache.set(k, fetch(`data/n/${k}.json`).then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then((d) => { ndata.set(k, d); return d; }, (e) => { ncache.delete(k); throw e; }));
+    return ncache.get(k); };
   // evaluated libraries (comparators only, never used by INCOGNITA): data/lib/<Z>.json, fetched only when the overlay box is ticked.
   // Built offline by scripts/build_site_overlay.py (display-only); a missing file just means no library covers that element.
   const lcache = new Map(), LIBS = ["endfb8.1", "jeff4.0", "tendl2025"];
@@ -238,13 +243,27 @@
 
   // ---------- one nuclide ----------
   let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false;
+  /** Loading state while nuclide r's file is on its way (r null: done); with err, say it failed and offer a retry. */
+  function busy(r, err) {
+    const box = $("#dx-nuc"), s = $("#dx-status"), on = !!r && !err;
+    box.classList.toggle("dx-loading", !!r); box.setAttribute("aria-busy", String(on)); box.classList.toggle("dx-empty", !cur);
+    if (!r) { s.hidden = true; return; }
+    box.hidden = false; $("#dx-name").textContent = nameOf(r.Z, r.A); atomSet(r.Z, r.A);
+    $("#dx-tile").innerHTML = `<span>${IDX.sym[r.Z]}</span>`; $("#dx-facts").innerHTML = ""; $("#dx-stats").innerHTML = "";
+    s.hidden = false;
+    s.innerHTML = err ? `${T("dx_nload", "Could not load this nuclide.")} <button type="button" class="dx-link" id="dx-retry">${T("dx_retry", "Try again")}</button>`
+      : `${T("dx_loading", "Loading")} ${esc(nameOf(r.Z, r.A))}…`;
+    if (err) $("#dx-retry").addEventListener("click", () => select(r, false, true));
+  }
   async function select(r, center, stay) {
     sel = r; drawChart();
     if (center && r.A) { view.x0 = r.A - r.Z - G.W / view.s / 2; view.y0 = r.Z - G.H / view.s / 2; if (view.s < 14) zoomAt(G.W / 2, G.H / 2, 18); drawChart(); }
     history.replaceState(null, "", location.pathname + location.search + "#" + (r.A ? `${IDX.sym[r.Z]}-${r.A}` : `${IDX.sym[r.Z]}-nat`));
-    const z = await loadZ(r.Z); if (sel !== r) return;
-    const lz = libOn ? await loadLib(r.Z) : null; if (sel !== r) return;
-    cur = { r, d: z.nuc[r.A ? String(r.A) : "nat"] || {}, lib: libOf(lz, r) };
+    if (!ndata.has(nkey(r.Z, r.A)) || (libOn && !lcache.has(r.Z))) busy(r);
+    let d0, lz; // the nuclide's file and, if the overlay is ticked, its element's library file
+    try { [d0, lz] = await Promise.all([loadNuc(r.Z, r.A), libOn ? loadLib(r.Z) : null]); } catch (e) { if (sel === r) busy(r, e); return; }
+    if (sel !== r) return;
+    cur = { r, d: d0, lib: libOf(lz, r) }; busy(null);
     buildTabs();
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
@@ -452,7 +471,7 @@
   pcv.addEventListener("pointerleave", (e) => { if ((e.pointerType || "mouse") === "mouse") { tipPin = null; showTip(null); } });
   document.addEventListener("pointerdown", (e) => { if (!ptip.hidden && e.target !== pcv && !ptip.contains(e.target)) { tipPin = null; showTip(null); } });
 
-  // ---------- downloads: everything loaded for one nuclide, as CSV or JSON, built here from data/z/<Z>.json ----------
+  // ---------- downloads: everything loaded for one nuclide, as CSV or JSON, built here from data/n/<Z>/<A>.json ----------
   const DECW = { k: "kept", d: "down-weighted", x: "excluded", f: "unit fixed" };
   /** { name, csv, json } for nuclide (Z, A) with record d; English labels so files read the same in either language. */
   function exportNuc(Z, A, d) {
@@ -499,13 +518,14 @@
     const csv = head.map((l) => "# " + l).join("\n") + "\n" + rows.map((r) => r.map(q).join(",")).join("\n") + "\n";
     return { name: `incognita_${id}_v0.1`, csv, json: JSON.stringify(J, null, 1) + "\n" };
   }
-  WT.dxExport = (Z, A) => loadZ(Z).then((z) => exportNuc(Z, A, z.nuc[A ? String(A) : "nat"] || {}));
+  WT.dxExport = (Z, A) => loadNuc(Z, A).then((d) => exportNuc(Z, A, d));
   function save(text, name, type) {
     const url = URL.createObjectURL(new Blob([text], { type })), a = document.createElement("a");
     a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
   [["#dx-dl-csv", "csv", "text/csv;charset=utf-8"], ["#dx-dl-json", "json", "application/json"]].forEach(([s, ext, type]) => { const b = $(s); if (b) b.addEventListener("click", () => {
-    if (!cur) return; const e = exportNuc(cur.r.Z, cur.r.A, cur.d); save(e[ext], `${e.name}.${ext}`, type); }); });
+    const r = sel; if (!r) return; // the selected nuclide, fetched first if it has not arrived yet
+    WT.dxExport(r.Z, r.A).then((e) => save(e[ext], `${e.name}.${ext}`, type), (err) => { if (sel === r) busy(r, err); }); }); });
 
   // ---------- start ----------
   // the chart fills the rest of the first screen (title, controls and legend stay visible), so it is never cut off at the fold
@@ -518,8 +538,9 @@
     rows.forEach((r) => byKey.set(r.Z + "-" + r.A, r));
     const real = rows.filter((r) => r.A); bounds = { n0: 0, n1: Math.max(...real.map((r) => r.A - r.Z)), z0: 0, z1: Math.max(...real.map((r) => r.Z)) };
     layout(); fit(); legend(); drawChart();
-    const h = decodeURIComponent(location.hash.slice(1)); const r0 = (h && parseQ(h.replace(/-nat$/i, " nat"))) || byKey.get("79-197");
-    if (r0) select(r0, !!h, true);
+    // nothing is fetched for a nuclide until it is opened; a link like data.html#Fe-56 opens that one
+    const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)), r0 = h && parseQ(h.replace(/-nat$/i, " nat")); if (r0 && r0 !== sel) select(r0, true, true); };
+    fromHash(); window.addEventListener("hashchange", fromHash);
   }).catch((e) => { $("#dx-legend").textContent = T("dx_fail", "Could not load the data.") + " " + e; });
   let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (!IDX) return; const c = { N: view.x0 + G.W / view.s / 2, Z: view.y0 + G.H / view.s / 2 }; layout(); view.x0 = c.N - G.W / view.s / 2; view.y0 = c.Z - G.H / view.s / 2; drawChart(); renderNuc(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); legend(); drawChart(); renderNuc(); });

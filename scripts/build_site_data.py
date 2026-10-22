@@ -3,11 +3,12 @@
 Reads the v0.1 library (engine/library curves for every nuclide) and the curated EXFOR capture cells, plus the benchmark
 rows for (n,2n), (n,p) and (n,alpha), and writes:
   data/index.json      one row per nuclide (chart of nuclides: tier, MACS at 30 keV, counts of measured data)
-  data/z/<Z>.json      everything about the nuclides of one element, loaded when a nuclide is opened
+  data/n/<Z>/<A>.json  everything about one nuclide (<A> is "nat" for a natural element), fetched only when that
+                       nuclide is opened; the chart itself needs only the index
 
 usage:  uv run --no-project --with pyarrow python scripts/build_site_data.py
 """
-import csv, json, math, os, re
+import csv, json, math, os, re, shutil
 from collections import defaultdict
 
 import pyarrow.parquet as pq
@@ -56,7 +57,8 @@ def relerr(r):
 
 
 def main():
-    os.makedirs(os.path.join(OUT, "z"), exist_ok=True)
+    for old in ("z", "n"):  # data/z/<Z>.json was the per-element layout before per-nuclide files
+        shutil.rmtree(os.path.join(OUT, old), ignore_errors=True)
     nucs = {}  # (Z, A) -> dict
 
     # ---- library curves ----
@@ -145,15 +147,19 @@ def main():
         if A == 0:  # natural element
             byz[Z]["nat"] = {"meas": {"ds": m["ds"], "cap": m["cap"], "mxw": m["mxw"], "other": dict(m["other"])}}
     nat = sorted(Z for Z in byz if "nat" in byz[Z])
+    nfiles = 0
     for Z, d in byz.items():
-        with open(os.path.join(OUT, "z", f"{Z}.json"), "w") as f:
-            json.dump({"Z": Z, "sym": SYM[Z], "nuc": d}, f, separators=(",", ":"))
+        os.makedirs(os.path.join(OUT, "n", str(Z)), exist_ok=True)
+        for key, rec in d.items():
+            with open(os.path.join(OUT, "n", str(Z), f"{key}.json"), "w") as f:
+                json.dump(rec, f, separators=(",", ":"))
+            nfiles += 1
     with open(os.path.join(OUT, "index.json"), "w") as f:
         json.dump({"cols": ["Z", "A", "tier", "macs30_mb", "unc68_30", "n_cap", "n_mxw", "n_ds", "n_n2n", "n_np", "n_na", "valid"],
                    "tiers": TIERS, "sym": SYM, "grid_ev": grid, "kT_keV": KT, "natural": nat, "rows": index},
                   f, separators=(",", ":"))
-    tot = sum(os.path.getsize(os.path.join(OUT, "z", x)) for x in os.listdir(os.path.join(OUT, "z")))
-    print(f"{len(index)} nuclides, {len(byz)} element files ({tot / 1e6:.1f} MB), "
+    tot = sum(os.path.getsize(os.path.join(dp, x)) for dp, _, fs in os.walk(os.path.join(OUT, "n")) for x in fs)
+    print(f"{len(index)} nuclides, {nfiles} nuclide files ({tot / 1e6:.1f} MB), "
           f"index {os.path.getsize(os.path.join(OUT, 'index.json')) / 1e3:.0f} kB, "
           f"measured capture on {sum(1 for k in meas if k[1] > 0)} nuclides + {len(nat)} natural elements")
 

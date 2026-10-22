@@ -567,4 +567,9 @@ body.og .hero-credit { display: none; }
 .dx-dl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 22px 0 6px; font: 500 14px var(--sans); color: var(--soft); }
 .dx-dl .btn { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; padding: 7px 14px; }
 .dx-dl-note { flex-basis: 100%; font-size: 13px; color: var(--faint); margin: 0; }
+/* a nuclide's file is fetched when it is opened: dim the old one meanwhile (after a beat, so fast loads don't flicker); first open shows just the head */
+.dx-status { font: 500 15px var(--sans); color: var(--soft); margin: 0 0 16px; }
+.dx-nuc > :not(.dx-nuc-head):not(.dx-status) { transition: opacity .15s; }
+.dx-nuc.dx-loading > :not(.dx-nuc-head):not(.dx-status) { opacity: .35; pointer-events: none; transition-delay: .15s; }
+.dx-nuc.dx-empty > :not(.dx-nuc-head):not(.dx-status) { display: none; }
 @media (min-width: 861px) and (max-width: 1140px) { .site .brand span { display: none; } .site .site-links a, .site .toc-menu { padding-inline: 11px; } }

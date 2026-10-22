@@ -29,7 +29,7 @@ cd docs/walkthrough && python3 serve.py 8765    # then open http://localhost:876
 | `js/ch/<id>.js` | One chapter each: its text (`html`) and its drawing (`frame`) |
 | `js/glossary.js` | One entry per technical term; the first use per chapter is marked and explained in a card |
 | `js/i18n.js`, `js/i18n/es-*.js` | Language layer and Spanish text; the Spanish files load only for Spanish readers |
-| `js/data.js`, `data/` | The data explorer and its data: `data/index.json` (one row per nuclide) and `data/z/<Z>.json` (loaded on demand) |
+| `js/data.js`, `data/` | The data explorer and its data: `data/index.json` (one row per nuclide) and `data/n/<Z>/<A>.json` (one nuclide, fetched only when it is opened) |
 | `js/scoreboard.js`, `js/scoreboard-data.js` | The scoreboard page and its data (`WT.board`, also read by Chapter 12) |
 
 ## Updating the data
