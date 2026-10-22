@@ -88,6 +88,21 @@
     parts.push({ k: "in", x: -W * 0.15, y: cy + off - H * 0.12, tx: cx - Math.sqrt(Math.max(0, R * R - off * off)) * 0.92, ty: cy + off, t0: 0, dur: T_IMP, trail: [] });
   }
 
+  // your neutron reaches the nucleus and starts the next reaction (same outcome sequence, captions and timing from the
+  // impact on), replacing whatever the cycle was doing; only a fission split in progress is let finish, and the hit
+  // then waits for the nucleus to re-form (pending)
+  let pending = null;
+  const idle = () => kind !== "fission" || ct < F_STRETCH || ct >= F_REFORM;
+  function userHit(x, y) {
+    if (!idle()) { pending = { x, y }; return false; }
+    pending = null;
+    for (let i = parts.length - 1; i >= 0; i--) if (parts[i].k === "in") parts.splice(i, 1);
+    kind = SEQ[cyc % SEQ.length]; cyc++; emitted = false; ang = (rng(cyc * 31 + 7))() * TAU;
+    fis = { e: 0, sep: 0, done: false, rot: 0, alpha: 1, away: 0 }; for (const a of nuc) a.side = 0;
+    reform = 1; ct = T_IMP; impact(x, y, 1); impacted = true;
+    return true;
+  }
+
   function impact(x, y, strength) {
     imp = { x, y, t: time, s: strength }; flash = Math.max(flash, 0.55 * strength); flashCol = C.white; shake = Math.max(shake, 10 * strength);
     rings.push({ x, y, t: time, s: strength, col: C.white }, { x, y, t: time + 0.08, s: strength * 0.7, col: C.hot });
@@ -186,6 +201,7 @@
   function frame(dt) {
     time += dt; ct += dt;
     tiltX += (tgtX - tiltX) * (1 - Math.exp(-3 * dt)); tiltY += (tgtY - tiltY) * (1 - Math.exp(-3 * dt));
+    if (pending && idle()) { const { cx, cy, R } = geo(); userHit(cx - R * 0.9, cy); }
     const isF = kind === "fission", end = isF ? F_END : T_END;
     if (ct >= end) startCycle();
     // during fission the spin stops so the split stays in the picture plane
@@ -275,7 +291,7 @@
       const s = shots[i], u = clamp((time - s.t0) / 0.55, 0, 1), f = u * u, x = lerp(s.sx, cx, f), y = lerp(s.sy, cy, f);
       s.trail.push([x, y]); if (s.trail.length > 16) s.trail.shift(); trail(s.trail, C.n, R * 0.07);
       ctx.globalCompositeOperation = "lighter"; stamp(GL.n, x, y, R * 0.32, 0.9); ctx.globalCompositeOperation = "source-over"; stamp(SP.n, x, y, rb * R * 1.1, 1);
-      if (Math.hypot(x - cx, y - cy) < R * 0.95 * reform || u >= 1) { shots.splice(i, 1); if (reform > 0.5) { impact(x, y, 0.75); kick = 1; } }
+      if (Math.hypot(x - cx, y - cy) < R * 0.95 * reform || u >= 1) { shots.splice(i, 1); if (reform > 0.5 && !userHit(x, y)) { impact(x, y, 0.75); kick = 1; } }
     }
 
     // flash over everything
