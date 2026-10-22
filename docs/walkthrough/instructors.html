@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>For instructors · Inside a Nuclear Reaction</title>
+<meta name="description" content="Teaching with Inside a Nuclear Reaction: chapters by level and time, suggested one- and three-lecture courses, and links to any chapter or step.">
+<meta property="og:title" content="For instructors · Inside a Nuclear Reaction">
+<meta property="og:description" content="Chapters by level and time, suggested courses, and stable links to every step of the explorable explanation.">
+<meta property="og:image" content="https://nucleus-incognita-woad.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=23">
+</head>
+<body class="sb-page in-page">
+
+<nav class="toc site" aria-label="Site" data-i18n-aria="site_nav">
+  <a class="brand" href="./" data-keep-lang><img src="favicon.svg" alt="" width="26" height="26"><span data-i18n="brand">Inside a Nuclear Reaction</span></a>
+  <div class="site-links">
+    <a href="./" data-keep-lang data-i18n="nav_physics">The physics</a>
+    <a href="data.html" data-keep-lang data-i18n="nav_data">Every nuclide</a>
+    <a href="scoreboard.html" data-keep-lang data-i18n="nav_board">Scoreboard</a>
+    <a class="gh" href="https://github.com/seth-michael-weaver/incognita"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
+  </div>
+  <button type="button" class="site-burger" aria-expanded="false" aria-label="Menu" data-i18n-aria="menu">☰</button>
+</nav>
+
+<main class="sb in-wrap">
+  <header class="sb-head">
+    <div class="kicker" data-i18n="in_kicker">INCOGNITA · teaching guide</div>
+    <h1 data-i18n="in_h1">For instructors</h1>
+    <p data-i18n="in_lead"><a href="./" data-keep-lang>Inside a Nuclear Reaction</a> explains, one picture at a time, how a modern reaction code computes what happens when a neutron hits a nucleus. Every picture answers to sliders, so it works projected in a lecture, as reading before class, or on students' phones. It is free and open, in English and Spanish, with nothing to install.</p>
+    <p class="site-credit" data-i18n="credit_sub">The INCOGNITA engine is a port of <a href="https://doi.org/10.1140/epja/s10050-023-01034-3">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) and uses the TALYS nuclear-structure database. What INCOGNITA adds is <a href="./#code" data-keep-lang>listed, switch by switch, at the end of the teaching page</a>.</p>
+  </header>
+
+  <section class="sb-sec" aria-labelledby="in-lv-h">
+    <h2 id="in-lv-h" data-i18n="in_lv_h">Three levels</h2>
+    <p data-i18n="in_lv_p">It starts simple and ends in detail, on purpose. Each chapter carries one of three tags, shown beside its number on the teaching page.</p>
+    <div class="in-levels">
+      <div class="in-level"><span class="lvl l0" data-i18n="lvl0">Intro</span><p data-i18n="in_lv0">No physics needed. Ideas, pictures and orders of magnitude; suits a first-year or general audience.</p></div>
+      <div class="in-level"><span class="lvl l1" data-i18n="lvl1">Intermediate</span><p data-i18n="in_lv1">The standard models of reaction theory, at the level of an undergraduate or first graduate nuclear physics course.</p></div>
+      <div class="in-level"><span class="lvl l2" data-i18n="lvl2">Advanced</span><p data-i18n="in_lv2">Research level: the details that decide a modern evaluation, and how this project builds its data on the engine.</p></div>
+    </div>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="in-ch-h">
+    <h2 id="in-ch-h" data-i18n="in_ch_h">The chapters</h2>
+    <p data-i18n="in_ch_p">Times are for reading a chapter and trying its controls; presenting one in class takes about as long. Each chapter stands on its own, but they build on each other in order.</p>
+    <div class="in-filterbar"><div class="in-filter dx-seg" id="in-filter" role="group" aria-label="Filter by level" data-i18n-aria="in_filter"></div><span class="in-faint" id="in-total"></span></div>
+    <ol class="in-list" id="in-list"></ol>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="in-co-h">
+    <h2 id="in-co-h" data-i18n="in_co_h">Suggested courses</h2>
+    <p data-i18n="in_co_p">Bar lengths are minutes; colours are levels. Tap a segment to open that chapter.</p>
+    <h3 data-i18n="in_one_h">One lecture (about an hour)</h3>
+    <div class="in-course" id="in-course-one"></div>
+    <h3 data-i18n="in_three_h">Three lectures</h3>
+    <div class="in-course" id="in-course-three"></div>
+    <p class="sb-note" data-i18n="in_co_note">For a general audience, the Intro chapters (1–3) and chapter 11 make a self-contained session. Chapters 9, 10 and 12 can each be dropped or swapped without breaking the rest.</p>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="in-ln-h">
+    <h2 id="in-ln-h" data-i18n="in_ln_h">Linking to a chapter or a step</h2>
+    <p data-i18n="in_ln_p">Every chapter and every step has a stable address. A chapter is <code>#omp</code>; a step adds its number, counted from 1: <code>#omp-3</code> is the third step of chapter 2. Add <code>?lang=es</code> before the <code>#</code> for Spanish. On the teaching page, the link mark beside each step copies its address.</p>
+    <div class="in-builder">
+      <label><span data-i18n="in_b_ch">Chapter</span><select id="in-b-ch"></select></label>
+      <label><span data-i18n="in_b_st">Step</span><select id="in-b-step"></select></label>
+      <label><span data-i18n="in_b_lang">Language</span><select id="in-b-lang"><option value="en">English</option><option value="es">Español</option></select></label>
+      <code class="in-url" id="in-b-url"></code>
+      <div class="in-b-btns"><button type="button" class="btn" id="in-b-copy" data-i18n="in_b_copy">Copy</button><a class="btn ghost" id="in-b-open" href="./" data-i18n="in_b_open">Open</a></div>
+    </div>
+    <p data-i18n="in_ln_data">The data explorer links the same way: <code>data.html#Au-197</code> opens gold-197, <code>data.html#Fe-56</code> iron-56.</p>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="in-dt-h">
+    <h2 id="in-dt-h" data-i18n="in_dt_h">Data for exercises</h2>
+    <p data-i18n="in_dt_p">On <a href="data.html" data-keep-lang>Every nuclide</a>, any nuclide's predicted curves and its curated measurements download as CSV or JSON, with units, sources and EXFOR ids in the file. The whole library is in the repository under <code>library/v0.1</code>. Exercises that work well: compare the prediction with the measurements for a nuclide the class chooses; find where the 68 % band is widest and ask why; follow capture at 30 keV across an isotope chain.</p>
+  </section>
+
+  <section class="sb-sec" aria-labelledby="in-cr-h">
+    <h2 id="in-cr-h" data-i18n="in_cr_h">Credit and feedback</h2>
+    <p data-i18n="in_cr_p">Code is Apache-2.0 and the data CC-BY-4.0. If you use the site or its data in teaching material, please cite the project (<a href="https://github.com/seth-michael-weaver/incognita/blob/main/CITATION.cff">CITATION.cff</a>) and TALYS (A. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131). Corrections and classroom experience are welcome as <a href="https://github.com/seth-michael-weaver/incognita/issues">GitHub issues</a>.</p>
+  </section>
+</main>
+
+<script src="js/i18n.js?v=23"></script>
+<script>if (WT.lang === "es") ["ui", "instructors"].forEach((f) => document.write('<script src="js/i18n/es-' + f + '.js?v=23"><\/script>'));</script>
+<script src="js/nav.js?v=23"></script>
+<script src="js/instructors.js?v=23"></script>
+</body>
+</html>

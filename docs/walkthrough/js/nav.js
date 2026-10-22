@@ -4,6 +4,13 @@
   "use strict";
   const head = document.querySelector(".site"); if (!head) return;
   const es = WT.lang === "es";
+  // "Instructors" link (every page): the teaching guide, placed before GitHub
+  const sl = head.querySelector(".site-links");
+  if (sl && !sl.querySelector('a[href^="instructors.html"]')) {
+    const a = document.createElement("a"); a.href = "instructors.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_teach"; a.textContent = es ? "Docentes" : "Instructors";
+    if (/\/instructors(\.html)?$/.test(location.pathname)) { a.className = "here"; a.setAttribute("aria-current", "page"); }
+    sl.insertBefore(a, sl.querySelector(".gh"));
+  }
   if (es) {
     head.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.es.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
     document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.es.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });

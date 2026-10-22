@@ -75,3 +75,10 @@ Object.assign(WT.es.ui, {
 });
 
 Object.assign(WT.es.ui, { pause_sweep: "Pausar el barrido", play_sweep: "Reanudar el barrido" });
+
+/* course mode: audience note, chapter level tags, per-step links */
+Object.assign(WT.es.ui, {
+  audience: '<b>Para quién es:</b> para cualquier persona con curiosidad. Los primeros capítulos no exigen saber física; los últimos llegan al nivel de investigación. Cada capítulo lleva una etiqueta: <span class="lvl l0">Introducción</span>, <span class="lvl l1">Intermedio</span> o <span class="lvl l2">Avanzado</span>. ¿Quieres usarlo en clase? Consulta la <a href="instructors.html" data-keep-lang>guía para docentes</a>.',
+  lvl0: "Introducción", lvl1: "Intermedio", lvl2: "Avanzado", lvl_title: "Nivel",
+  step_link: "Copiar un enlace a este paso", link_copied: "Enlace copiado",
+});

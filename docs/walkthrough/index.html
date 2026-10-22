@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=22">
+<link rel="stylesheet" href="style.css?v=23">
 </head>
 <body>
 
@@ -49,6 +49,7 @@
 <section class="intro-text" id="intro">
   <p data-i18n="hero1">Fire a neutron at an atomic nucleus and something comes back out. It might be the neutron itself, bounced off. It might be a proton, an alpha particle (a tight cluster of 2 protons and 2 neutrons), or a burst of light. A heavy nucleus might even split in two.</p>
   <p data-i18n="hero2">Which one happens, and how often? This page walks through how our software answers that question, one step at a time. Scroll down, and try the controls along the way. The pictures follow the same physics as the engine; the numbers in them are illustrative.</p>
+  <p class="audience" data-i18n="audience"><b>Who it is for:</b> anyone curious. No physics needed for the first chapters; later ones go to research level. Each chapter carries a tag: <span class="lvl l0">Intro</span>, <span class="lvl l1">Intermediate</span> or <span class="lvl l2">Advanced</span>. Teaching with it? See the <a href="instructors.html" data-keep-lang>guide for instructors</a>.</p>
 </section>
 
 <section class="ways" aria-labelledby="ways-h">
@@ -134,26 +135,26 @@
   <p data-i18n="coda_repo">The code, the library and the curated measurements are open: <a href="https://github.com/seth-michael-weaver/incognita">seth-michael-weaver/incognita on GitHub</a>. You can look up any prediction yourself on the <a href="data.html" data-keep-lang>Every nuclide</a> page, or clone the repository and run it.</p>
 </section>
 
-<script src="js/scoreboard-data.js?v=22"></script>
-<script src="js/i18n.js?v=22"></script>
+<script src="js/scoreboard-data.js?v=23"></script>
+<script src="js/i18n.js?v=23"></script>
 <!-- Spanish text loads only for Spanish readers (synchronous, in order, before the chapters) -->
-<script>if (WT.lang === "es") ["ui", "glossary", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "intro", "layers"].forEach((f) => document.write('<script src="js/i18n/es-' + f + '.js?v=22"><\/script>'));</script>
-<script src="js/glossary.js?v=22"></script>
-<script src="js/nav.js?v=22"></script>
-<script src="js/kit.js?v=22"></script>
-<script src="js/ch/intro.js?v=22"></script>
-<script src="js/ch/structure.js?v=22"></script>
-<script src="js/ch/omp.js?v=22"></script>
-<script src="js/ch/direct.js?v=22"></script>
-<script src="js/ch/preeq.js?v=22"></script>
-<script src="js/ch/compound.js?v=22"></script>
-<script src="js/ch/decay.js?v=22"></script>
-<script src="js/ch/gamma.js?v=22"></script>
-<script src="js/ch/cascade.js?v=22"></script>
-<script src="js/ch/fission.js?v=22"></script>
-<script src="js/ch/resonance.js?v=22"></script>
-<script src="js/ch/measure.js?v=22"></script>
-<script src="js/ch/layers.js?v=22"></script>
+<script>if (WT.lang === "es") ["ui", "glossary", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "intro", "layers"].forEach((f) => document.write('<script src="js/i18n/es-' + f + '.js?v=23"><\/script>'));</script>
+<script src="js/glossary.js?v=23"></script>
+<script src="js/nav.js?v=23"></script>
+<script src="js/kit.js?v=23"></script>
+<script src="js/ch/intro.js?v=23"></script>
+<script src="js/ch/structure.js?v=23"></script>
+<script src="js/ch/omp.js?v=23"></script>
+<script src="js/ch/direct.js?v=23"></script>
+<script src="js/ch/preeq.js?v=23"></script>
+<script src="js/ch/compound.js?v=23"></script>
+<script src="js/ch/decay.js?v=23"></script>
+<script src="js/ch/gamma.js?v=23"></script>
+<script src="js/ch/cascade.js?v=23"></script>
+<script src="js/ch/fission.js?v=23"></script>
+<script src="js/ch/resonance.js?v=23"></script>
+<script src="js/ch/measure.js?v=23"></script>
+<script src="js/ch/layers.js?v=23"></script>
 <script>WT.start();</script>
 </body>
 </html>

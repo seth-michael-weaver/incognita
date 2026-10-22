@@ -37,3 +37,10 @@ Object.assign(WT.es.ui, {
   dx_exfor_click: "haz clic en el punto para abrir", dx_exfor_tap: "toca otra vez, o aquí, para abrir",
   dx_mxw: "promedio de Maxwell", dx_state: "estado", dx_cur: "depuración", dx_fail: "No se pudieron cargar los datos.",
 });
+
+/* downloads and data access */
+Object.assign(WT.es.ui, {
+  dx_dl: "Descargar este núclido:",
+  dx_dl_note: "Cada curva y cada punto medido de este núclido, todas las reacciones, con unidades, fuentes e identificadores EXFOR escritos en el archivo.",
+  dx_access: "<b>Acceso a los datos.</b> Todo lo que se muestra aquí está en el repositorio, en <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.1\"><code>library/v0.1</code></a>: curvas de captura con bandas del 68 / 95 % (<code>capture_v01_indep.parquet</code>), promedios de Maxwell (<code>macs30_v01_indep.csv</code>, <code>macs_kt_v01_indep.csv</code>), tasas estelares (<code>rates_v01_indep.csv</code>, <code>reaclib_v01_indep.dat</code>) y los canales (n,2n), (n,p), (n,α) (<code>channels_recipe_v01_indep.parquet</code>, <code>grid_np_v01_indep.parquet</code>), comprobados con <code>SHA256SUMS</code>. Para un solo núclido bastan las descargas CSV y JSON de arriba. Las medidas depuradas están en <code>data/curation</code>; proceden de EXFOR (Sección de Datos Nucleares del OIEA) y conservan sus identificadores EXFOR. Los datos de la biblioteca son CC-BY-4.0.",
+});

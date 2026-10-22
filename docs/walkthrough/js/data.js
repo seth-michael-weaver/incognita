@@ -413,6 +413,61 @@
   pcv.addEventListener("pointerleave", (e) => { if ((e.pointerType || "mouse") === "mouse") { tipPin = null; showTip(null); } });
   document.addEventListener("pointerdown", (e) => { if (!ptip.hidden && e.target !== pcv && !ptip.contains(e.target)) { tipPin = null; showTip(null); } });
 
+  // ---------- downloads: everything loaded for one nuclide, as CSV or JSON, built here from data/z/<Z>.json ----------
+  const DECW = { k: "kept", d: "down-weighted", x: "excluded", f: "unit fixed" };
+  /** { name, csv, json } for nuclide (Z, A) with record d; English labels so files read the same in either language. */
+  function exportNuc(Z, A, d) {
+    const sym = IDX.sym[Z], id = A ? `${sym}-${A}` : `${sym}-nat`, grid = IDX.grid_ev, kT = IDX.kT_keV;
+    const page = `${location.origin}${location.pathname.replace(/data(\.html)?$/, "")}data.html#${id}`;
+    const meta = {
+      nuclide: id, Z, A: A || null,
+      source: "INCOGNITA library v0.1 (preview): library/v0.1 in https://github.com/seth-michael-weaver/incognita, as shown on the Every nuclide page",
+      page, generated: new Date().toISOString().slice(0, 10),
+      engine: "The INCOGNITA engine is a port of TALYS-2 (A. J. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131) and uses the TALYS nuclear-structure database.",
+      license: "Predictions and data: CC-BY-4.0. Cite the project (CITATION.cff in the repository), TALYS (Eur. Phys. J. A 59 (2023) 131) and EXFOR (N. Otuka et al., Nucl. Data Sheets 120 (2014) 272).",
+      measurements: "Measured points are from EXFOR (IAEA Nuclear Data Section) as curated in data/curation; each row carries its EXFOR dataset id (entry/subentry/pointer). (n,2n), (n,p) and (n,alpha) points are the benchmark rows in incognita/bench, with their EXFOR subentry.",
+      units: "energy in eV (Maxwellian rows: kT in eV); capture cross sections in barns (b); (n,2n), (n,p), (n,alpha) and MACS in millibarns (mb)",
+    };
+    const J = { ...meta };
+    if (d.tier != null) Object.assign(J, { tier: IDX.tiers[d.tier], in_validated_range: !!d.valid, value_source: d.src || null, uncertainty_kind: d.unc || null, resolved_resonances_up_to_ev: d.res ?? null, macs30_mb: d.macs30 ?? null, macs30_flag: d.flag || null });
+    if (d.cap) J.capture = { unit: "b", energy_ev: grid, sigma_b: d.cap, unc68_log10: d.u68 || null, unc95_log10: d.u95 || null, note: "68 % and 95 % bands: sigma divided and multiplied by 10^unc" };
+    if (d.ch) J.channels_recipe = { unit: "mb", energy_ev: grid, ...Object.fromEntries(Object.entries(d.ch).map(([k, v]) => [k === "na" ? "n_alpha" : k, v])), note: "engine, no-data recipe" };
+    if (d.npL) J.np_learned = { unit: "mb", columns: ["energy_ev", "sigma_mb", "lo68_mb", "hi68_mb"], rows: d.npL, note: "(n,p) with a learned correction, 68 % interval" };
+    if (d.macs) J.macs = { unit: "mb", kT_keV: kT, macs_mb: d.macs, unc68_factor: d.macsU || null, note: "68 % band: MACS divided and multiplied by the factor" };
+    const ds = d.meas ? d.meas.ds.map((x, i) => { const ex = exforOf(x[0]); return { index: i, exfor_id: x[0], exfor_subentry: ex ? ex.id : null, url: ex ? ex.url : null, author: x[1] || null, year: x[2] ?? null, facility: x[3] || null }; }) : [];
+    const mrow = (p) => [p[0], p[1], p[2], p[3], p[4], DECW[p[5]] || p[5], p[6] || ""];
+    if (d.meas || d.thr) J.measured = {
+      datasets: ds,
+      capture: d.meas ? { unit: "b", columns: ["e_lo_ev", "e_hi_ev", "sigma_b", "rel_unc", "dataset", "curation", "state"], rows: d.meas.cap.map(mrow) } : null,
+      maxwellian: d.meas ? { unit: "b", columns: ["kT_lo_ev", "kT_hi_ev", "value_b", "rel_unc", "dataset", "curation", "state"], rows: d.meas.mxw.map(mrow) } : null,
+      threshold: d.thr ? Object.fromEntries(Object.entries(d.thr).map(([k, v]) => [k === "na" ? "n_alpha" : k, { unit: "mb", columns: ["energy_ev", "sigma_mb", "exfor_subentry", "year"], rows: v }])) : null,
+    };
+    // CSV: one long table, '#' header lines first
+    const q = (v) => { if (v == null) return ""; const s = String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const rows = [["kind", "reaction", "energy_ev", "energy_hi_ev", "value", "unit", "lo68", "hi68", "lo95", "hi95", "rel_unc", "exfor_id", "author", "year", "curation", "state"]];
+    const r4 = (v) => (v == null ? null : +v.toPrecision(4));
+    if (d.cap) grid.forEach((x, i) => { const y = d.cap[i], u = d.u68 && d.u68[i], w = d.u95 && d.u95[i];
+      rows.push(["prediction", "capture (n,g)", x, "", y, "b", u != null ? r4(y / 10 ** u) : "", u != null ? r4(y * 10 ** u) : "", w != null ? r4(y / 10 ** w) : "", w != null ? r4(y * 10 ** w) : ""]); });
+    if (d.ch) for (const [k, v] of Object.entries(d.ch)) grid.forEach((x, i) => rows.push(["prediction (no-data recipe)", k === "na" ? "(n,alpha)" : `(${k[0]},${k.slice(1)})`, x, "", v[i], "mb"]));
+    if (d.npL) d.npL.forEach((p) => rows.push(["prediction (learned correction)", "(n,p)", p[0], "", p[1], "mb", p[2] ?? "", p[3] ?? ""]));
+    if (d.macs) kT.forEach((k, i) => { const f = d.macsU && d.macsU[i]; rows.push(["prediction", "MACS (kT)", k * 1e3, "", d.macs[i], "mb", f ? r4(d.macs[i] / f) : "", f ? r4(d.macs[i] * f) : ""]); });
+    const mline = (kind, reac, p) => { const s = ds[p[4]] || {}; rows.push([kind, reac, p[0], p[1], p[2], "b", "", "", "", "", p[3] ?? "", s.exfor_id || "", s.author || "", s.year ?? "", DECW[p[5]] || p[5], p[6] || ""]); };
+    if (d.meas) { d.meas.cap.forEach((p) => mline("measured (EXFOR)", "capture (n,g)", p)); d.meas.mxw.forEach((p) => mline("measured (EXFOR)", "Maxwellian average (kT)", p)); }
+    if (d.thr) for (const [k, v] of Object.entries(d.thr)) v.forEach((p) => rows.push(["measured (EXFOR, benchmark)", k === "na" ? "(n,alpha)" : `(${k[0]},${k.slice(1)})`, p[0], "", p[1], "mb", "", "", "", "", "", p[2] || "", "", p[3] ?? "", "", ""]));
+    const head = [`INCOGNITA · ${id} (Z=${Z}${A ? `, A=${A}` : ""})`, `Source: ${meta.source}`, `Page: ${page} (generated ${meta.generated})`, `Engine: ${meta.engine}`, `License: ${meta.license}`,
+      `Measurements: ${meta.measurements}`, `Units: ${meta.units}. Bands: lo/hi columns are the 68 % and 95 % intervals where the library gives them.`]
+      .concat(d.tier != null ? [`Tier: ${IDX.tiers[d.tier]}${d.valid ? "" : " (outside the validated range Z 26-83)"}${d.res ? `; resolved resonances up to ${d.res} eV (the curve is an average there)` : ""}`] : []);
+    const csv = head.map((l) => "# " + l).join("\n") + "\n" + rows.map((r) => r.map(q).join(",")).join("\n") + "\n";
+    return { name: `incognita_${id}_v0.1`, csv, json: JSON.stringify(J, null, 1) + "\n" };
+  }
+  WT.dxExport = (Z, A) => loadZ(Z).then((z) => exportNuc(Z, A, z.nuc[A ? String(A) : "nat"] || {}));
+  function save(text, name, type) {
+    const url = URL.createObjectURL(new Blob([text], { type })), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+  [["#dx-dl-csv", "csv", "text/csv;charset=utf-8"], ["#dx-dl-json", "json", "application/json"]].forEach(([s, ext, type]) => { const b = $(s); if (b) b.addEventListener("click", () => {
+    if (!cur) return; const e = exportNuc(cur.r.Z, cur.r.A, cur.d); save(e[ext], `${e.name}.${ext}`, type); }); });
+
   // ---------- start ----------
   // the chart fills the rest of the first screen (title, controls and legend stay visible), so it is never cut off at the fold
   function layout() { const top = cv.parentElement.getBoundingClientRect().top + window.scrollY; G = setupCanvas(cv, Math.round(clamp(window.innerHeight - top - 64, 300, 1100))); }

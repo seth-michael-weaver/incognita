@@ -432,12 +432,15 @@
     const navH = () => { const t = document.querySelector(".toc"); document.documentElement.style.setProperty("--navh", (t ? t.offsetHeight : 0) + "px"); };
     navH(); window.addEventListener("resize", navH);
     const chapters = [];
+    const LEVELS = ["Intro", "Intermediate", "Advanced"]; // course level of each chapter (also listed on instructors.html)
+    const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, measure: 1, layers: 2 };
     document.querySelectorAll("[data-ch]").forEach((el) => {
       const id = el.dataset.ch, mod = WT.mods[id]; if (!mod) return;
       const esm = WT.lang === "es" && WT.es && WT.es.ch[id]; if (esm) Object.assign(mod, esm);
       if (!el.querySelector(".stage") && mod.html) {
         el.id = id;
-        el.innerHTML = `<div class="stage"></div><div class="story"><header><div class="num">${mod.num || ""}</div><h2>${mod.title || ""}</h2>${mod.lead ? `<p class="lead">${mod.lead}</p>` : ""}</header>${mod.html}</div>`;
+        const lv = LEVEL[id], lvt = lv == null ? "" : ` <span class="lvl l${lv}" title="${WT.ui ? WT.ui("lvl_title", "Level") : "Level"}">${WT.ui ? WT.ui("lvl" + lv, LEVELS[lv]) : LEVELS[lv]}</span>`;
+        el.innerHTML = `<div class="stage"></div><div class="story"><header><div class="num">${mod.num || ""}${lvt}</div><h2>${mod.title || ""}</h2>${mod.lead ? `<p class="lead">${mod.lead}</p>` : ""}</header>${mod.html}</div>`;
       }
       const stage = el.querySelector(".stage"); const cv = document.createElement("canvas"); stage.appendChild(cv);
       const ctx = cv.getContext("2d"); const S = makeState(id); const ch = { id, el, stage, cv, ctx, S, mod, visible: false, g: null };
@@ -450,6 +453,15 @@
       el.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", () => { const f = S.handlers[b.dataset.act]; f && f(); }));
       // step observer
       const steps = [...el.querySelectorAll(".step")];
+      // stable deep links: #<chapter>-<n> (n from 1); the link mark beside each step copies the address
+      steps.forEach((s, i) => { s.id = `${id}-${i + 1}`; const a = document.createElement("a"); a.className = "step-link"; a.href = "#" + s.id;
+        a.setAttribute("aria-label", (WT.ui ? WT.ui("step_link", "Copy a link to this step") : "Copy a link to this step") + ` (${id}-${i + 1})`); a.title = a.getAttribute("aria-label");
+        a.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M6.5 9.5l3-3M7 4.6l1.2-1.2a2.6 2.6 0 013.7 3.7L10.7 8.3M9 11.4l-1.2 1.2a2.6 2.6 0 01-3.7-3.7L5.3 7.7"/></svg>';
+        a.addEventListener("click", (e) => { e.preventDefault(); const url = location.origin + location.pathname + (WT.lang === "es" ? "?lang=es" : "") + "#" + s.id;
+          history.replaceState(null, "", location.pathname + location.search + "#" + s.id);
+          const done = () => { a.dataset.done = WT.ui ? WT.ui("link_copied", "Link copied") : "Link copied"; clearTimeout(a._t); a._t = setTimeout(() => delete a.dataset.done, 1600); };
+          try { navigator.clipboard.writeText(url).then(done, done); } catch (err) { done(); } });
+        s.prepend(a); });
       // screen readers: the drawing is an image whose description is the active step's heading and first sentence
       const describe = (i) => { const st = steps[i], h = st && st.querySelector("h3"), p = st && st.querySelector("p"); const first = p ? (p.textContent.trim().match(/^.*?[.!?](\s|$)/) || [p.textContent])[0].trim() : ""; cv.setAttribute("aria-label", `${WT.ui ? WT.ui("diagram", "Diagram") : "Diagram"}: ${(h ? h.textContent : mod.title || "").trim()}. ${first}`); };
       cv.setAttribute("role", "img"); describe(0);
@@ -534,5 +546,15 @@
       }
     }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
+    // deep links (#omp, #omp-3): scroll there once the page has its final layout; a step lands where it becomes active
+    const goHash = (smooth) => {
+      const t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (!t || m) return;
+      const isStep = t.classList.contains("step"); if (!isStep && !t.matches("[data-ch]")) return;
+      const nh = document.querySelector(".toc") ? document.querySelector(".toc").offsetHeight : 0;
+      const y = t.getBoundingClientRect().top + window.scrollY - (isStep ? window.innerHeight * (PHONE ? 0.5 : 0.38) : nh);
+      window.scrollTo({ top: Math.max(0, y), behavior: smooth ? "smooth" : "instant" });
+    };
+    if (location.hash) { goHash(false); if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(() => goHash(false))); }
+    window.addEventListener("hashchange", () => goHash(!reduce));
   };
 })();

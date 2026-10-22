@@ -92,7 +92,7 @@
     const rows = [[I, T("sb_h_eng", "The engine against other codes")], [B.terra, T("sb_h_terra", "The data product against evaluated libraries")]].filter((r) => r[0]);
     const lists = rows.map(([b]) => [].concat(Array(b.WIN || 0).fill("WIN"), Array(b.TIE || 0).fill("TIE"), Array(b.LOSS || 0).fill("LOSS")));
     let t0 = 0, W = 0, H = 0, dpr = 1;
-    function size() { dpr = Math.min(2, window.devicePixelRatio || 1); W = cv.parentElement.clientWidth; H = W < 640 ? 2 * 250 : Math.round(Math.min(420, Math.max(300, W * 0.36))); cv.style.width = W + "px"; cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr; }
+    function size() { dpr = Math.min(2, window.devicePixelRatio || 1); const ps = getComputedStyle(cv.parentElement); W = Math.floor(cv.parentElement.clientWidth - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight)); H = W < 640 ? 2 * 250 : Math.round(Math.min(420, Math.max(300, W * 0.36))); cv.style.width = W + "px"; cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr; }
     function frame(now) {
       if (!t0) t0 = now; const u = reduce ? 1 : Math.min(1, (now - t0) / 2200);
       const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
