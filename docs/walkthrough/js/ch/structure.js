@@ -365,7 +365,7 @@
     Au: { tgt: "gold-197", cn: "gold-198", Z: 79, A: 197, Sn: 6.512, D0: 15.8, Gg: 0.125, S0: 1.7e-4, span: 200, keV: false, Ec: 0.55, seed: 19707 },
     U: { tgt: "uranium-238", cn: "uranium-239", Z: 92, A: 238, Sn: 4.806, D0: 20.9, Gg: 0.023, S0: 1.0e-4, span: 250, keV: false, Ec: 0.32, seed: 23811 },
   };
-  const FNB = 360, FSWEEP = 16, FSHOT = /[?&]shot=/.test(location.search), FSHOT_T = "U";
+  const FNB = 360, FSWEEP = 64, FSHOT = /[?&]shot=/.test(location.search), FSHOT_T = "U";
   function gauss(r) { return Math.sqrt(-2 * Math.log(1 - r() * 0.999999)) * Math.cos(TAU * r()); }
   function buildFT(T) {
     const r = rng(T.seed), res = [];
@@ -502,13 +502,13 @@
     const fly = 0.9;
     // effective size: the drawn radius swells with the cross section at the marker's energy (wave overlap at a
     // resonance, not a real size change). Peak sum sampled across this frame's sweep step so no peak is skipped;
-    // fast attack, gentle release, 1x to 1.6x.
+    // slow attack, slower release, 1x to 1.6x.
     {
       const e0 = S.fEprev != null && Math.abs(Eb - S.fEprev) < 0.05 * T.span ? S.fEprev : Eb, n = Math.min(24, 2 + Math.ceil(Math.abs(Eb - e0) / (T.X * T.Gg * 0.25 + 1e-9)));
       let s = 0; for (let k = 0; k <= n; k++) { const E = lerp(e0, Eb, k / n); let v = 0; for (const q of T.res) { const d = (E - q.E) / (q.Gd / 2); if (d > -40 && d < 40) v += q.h / (1 + d * d); } s = Math.max(s, v); }
       if (!T.hRef) { const hs = T.res.map((q) => q.h).sort((a, b) => a - b); T.hRef = hs[hs.length >> 1] || 1; }
       const goal = 1 + 0.6 * clamp(Math.pow(s / T.hRef, 0.5), 0, 1), cur0 = S.fswell || 1;
-      S.fswell = cur0 + (goal - cur0) * Math.min(1, dt / (goal > cur0 ? 0.03 : 0.22)); S.fEprev = Eb;
+      S.fswell = cur0 + (goal - cur0) * Math.min(1, dt / (goal > cur0 ? 0.3 : 1.0)); S.fEprev = Eb;
     }
     const Rv = R * S.fswell;
     g.glow(nx, yB, Rv * 2.6, c.warm, 0.12 + 0.4 * S.fhalo);
