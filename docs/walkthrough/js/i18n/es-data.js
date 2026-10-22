@@ -15,6 +15,7 @@ Object.assign(WT.es.ui, {
   dx_run_h: "Obtén estos números tú mismo", dx_copy: "Copiar", dx_copied: "Copiado",
   dx_repo_h: "Ejecútalo tú mismo",
   dx_repo_p: "Todo lo que hay en esta página sale del repositorio abierto: el motor, la biblioteca y las medidas depuradas. Necesitas Linux o macOS, Python 3.12 y <a href=\"https://docs.astral.sh/uv/\">uv</a>.",
+  credit_sub: "El motor INCOGNITA es un port de <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) y usa la base de datos de estructura nuclear de TALYS. Lo que INCOGNITA añade está <a href=\"./?lang=es#code\">listado, interruptor por interruptor, al final de la página didáctica</a>.",
   dx_repo_p2: "Para ejecutar el propio motor hace falta además la base de datos de estructura de TALYS; el README explica cómo descargarla.",
   dx_repo_link: "seth-michael-weaver/incognita en GitHub →",
   dx_src: "Fuentes: predicciones de la biblioteca v0.1 (<code>library/v0.1</code>); medidas de captura de EXFOR depuradas en <code>data/curation</code>; medidas de (n,2n), (n,p) y (n,α) de las filas de referencia en <code>incognita/bench</code>. Las medidas que la depuración excluyó quedan ocultas salvo que las pidas.",

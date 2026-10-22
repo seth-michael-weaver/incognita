@@ -14,6 +14,7 @@ Object.assign(WT.es.ui, {
   hero_tag: "Un neutrón. Un núcleo. Muchas maneras de terminar.",
   hero_fire: "Dispara un neutrón",
   hero_hint: "o haz clic en cualquier parte de la imagen",
+  credit_idx: "El motor INCOGNITA es un port de <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) y usa la base de datos de estructura nuclear de TALYS. Lo que INCOGNITA añade está <a href=\"#code\">listado, interruptor por interruptor, al final de esta página</a>.",
   coda_h2: "Dónde vive esto en el código",
   coda_p1: "Cada etapa anterior es un paquete en <code>physics/hf</code>, y el motor los llama en el orden en que acabas de leerlos. El motor es un port de TALYS-2.x, el consolidado código de reacciones. Lo que añade está tras interruptores con nombre dentro de los mismos paquetes: la mayoría están desactivados por defecto, unas pocas correcciones están activadas, y cada una puede devolverse por separado al TALYS original.",
   coda_table: `

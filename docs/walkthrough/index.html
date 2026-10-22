@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
 
@@ -41,6 +41,7 @@
     <h1 data-i18n="h1">Inside a Nuclear Reaction</h1>
     <p class="hero-tag" data-i18n="hero_tag">One neutron. One nucleus. Many ways for it to end.</p>
     <p class="hero-hint"><button type="button" class="fire-btn" data-i18n="hero_fire">Fire a neutron</button> <span data-i18n="hero_hint">or click anywhere on the picture</span></p>
+    <p class="hero-credit" data-i18n="credit_idx">The INCOGNITA engine is a port of <a href="https://doi.org/10.1140/epja/s10050-023-01034-3">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) and uses the TALYS nuclear-structure database. What INCOGNITA adds is <a href="#code">listed, switch by switch, at the end of this page</a>.</p>
   </div>
   <a class="scrollcue" href="#intro" data-i18n="scrollcue">Scroll to begin ↓</a>
 </section>
@@ -133,26 +134,26 @@
   <p data-i18n="coda_repo">The code, the library and the curated measurements are open: <a href="https://github.com/seth-michael-weaver/incognita">seth-michael-weaver/incognita on GitHub</a>. You can look up any prediction yourself on the <a href="data.html" data-keep-lang>Every nuclide</a> page, or clone the repository and run it.</p>
 </section>
 
-<script src="js/scoreboard-data.js?v=21"></script>
-<script src="js/i18n.js?v=21"></script>
+<script src="js/scoreboard-data.js?v=22"></script>
+<script src="js/i18n.js?v=22"></script>
 <!-- Spanish text loads only for Spanish readers (synchronous, in order, before the chapters) -->
-<script>if (WT.lang === "es") ["ui", "glossary", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "intro", "layers"].forEach((f) => document.write('<script src="js/i18n/es-' + f + '.js?v=21"><\/script>'));</script>
-<script src="js/glossary.js?v=21"></script>
-<script src="js/nav.js?v=21"></script>
-<script src="js/kit.js?v=21"></script>
-<script src="js/ch/intro.js?v=21"></script>
-<script src="js/ch/structure.js?v=21"></script>
-<script src="js/ch/omp.js?v=21"></script>
-<script src="js/ch/direct.js?v=21"></script>
-<script src="js/ch/preeq.js?v=21"></script>
-<script src="js/ch/compound.js?v=21"></script>
-<script src="js/ch/decay.js?v=21"></script>
-<script src="js/ch/gamma.js?v=21"></script>
-<script src="js/ch/cascade.js?v=21"></script>
-<script src="js/ch/fission.js?v=21"></script>
-<script src="js/ch/resonance.js?v=21"></script>
-<script src="js/ch/measure.js?v=21"></script>
-<script src="js/ch/layers.js?v=21"></script>
+<script>if (WT.lang === "es") ["ui", "glossary", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "intro", "layers"].forEach((f) => document.write('<script src="js/i18n/es-' + f + '.js?v=22"><\/script>'));</script>
+<script src="js/glossary.js?v=22"></script>
+<script src="js/nav.js?v=22"></script>
+<script src="js/kit.js?v=22"></script>
+<script src="js/ch/intro.js?v=22"></script>
+<script src="js/ch/structure.js?v=22"></script>
+<script src="js/ch/omp.js?v=22"></script>
+<script src="js/ch/direct.js?v=22"></script>
+<script src="js/ch/preeq.js?v=22"></script>
+<script src="js/ch/compound.js?v=22"></script>
+<script src="js/ch/decay.js?v=22"></script>
+<script src="js/ch/gamma.js?v=22"></script>
+<script src="js/ch/cascade.js?v=22"></script>
+<script src="js/ch/fission.js?v=22"></script>
+<script src="js/ch/resonance.js?v=22"></script>
+<script src="js/ch/measure.js?v=22"></script>
+<script src="js/ch/layers.js?v=22"></script>
 <script>WT.start();</script>
 </body>
 </html>

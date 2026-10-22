@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=22">
 </head>
 <body class="sb-page sb-lit">
 
@@ -34,6 +34,7 @@
     <p class="sb-asof"><span data-i18n="sb_asof">As of</span> <time id="sb-date"></time>.</p>
     <div class="sb-hero"><canvas id="sb-hero-cv"></canvas></div>
     <p data-i18n="sb_intro">How our results compare with other reaction codes and data libraries, judged against measurements. Losses and ties come first, because they are where the work is. A tie is not a win.</p>
+    <p class="site-credit" data-i18n="credit_sub">The INCOGNITA engine is a port of <a href="https://doi.org/10.1140/epja/s10050-023-01034-3">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) and uses the TALYS nuclear-structure database. What INCOGNITA adds is <a href="./#code" data-keep-lang>listed, switch by switch, at the end of the teaching page</a>.</p>
   </header>
 
   <section class="sb-sec" aria-labelledby="sb-inc-h">
@@ -43,8 +44,8 @@
     <div class="sb-strip" id="sb-inc-strip" role="img"></div>
     <p class="sb-note" id="sb-inc-note"></p>
 
-    <h3 data-i18n="sb_loss_h">The one loss</h3>
-    <p id="sb-loss-p" data-i18n="sb_loss_p">(n,p) near its threshold against the stock TALYS input: our errors are larger, and the whole 95 % interval is above zero. The largest contributors are arsenic-75, yttrium-89 and iron-58. None of the last six engine updates moved it.</p>
+    <h3 data-i18n="sb_loss_h">No class-A loss</h3>
+    <p id="sb-loss-p" data-i18n="sb_loss_p">No class-A comparison is a loss. The last one, (n,p) near its threshold against the stock TALYS input, became a tie with the engine update of 22 October 2026, and it still trails: our errors are larger on the point estimate, but the 95 % interval now contains zero.</p>
 
     <h3 data-i18n="sb_open_h">Every comparison that is not a win</h3>
     <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-open-cap">
@@ -56,8 +57,8 @@
       <table class="sb-table" id="sb-rival"><caption id="sb-rival-cap" data-i18n="sb_rival_cap">Wins, ties and losses against each rival; N/A = not scorable (too few nuclei, or the rival has no values).</caption></table>
     </div>
 
-    <h3 data-i18n="sb_chg_h">What changed today</h3>
-    <p data-i18n="sb_chg_p">A data-ledger correction was applied to every code alike: one (n,2n) measurement on germanium-76 at 9.60 MeV, judged defective, now leaves the score. It costs us one win and gains two.</p>
+    <h3 data-i18n="sb_chg_h">What changed on 22 October 2026</h3>
+    <p data-i18n="sb_chg_p">A new production engine, <code>engine-20261022-1</code>: target nuclei with no measured s-wave resonance spacing (D0) of their own get a level-density adjustment from one global formula, the same for every such nucleus. Two verdicts moved, listed below; no class-A verdict got worse. The change was accepted with small recorded harms against measurements, each under 0.007 dex: two capture views, one (n,2n) view and the fitted (n,α) views.</p>
     <ul class="sb-changes" id="sb-changes"></ul>
   </section>
 
@@ -96,10 +97,10 @@
   </section>
 </main>
 
-<script src="js/i18n.js?v=21"></script>
-<script src="js/i18n/es-scoreboard.js?v=21"></script>
-<script src="js/nav.js?v=21"></script>
-<script src="js/scoreboard-data.js?v=21"></script>
-<script src="js/scoreboard.js?v=21"></script>
+<script src="js/i18n.js?v=22"></script>
+<script src="js/i18n/es-scoreboard.js?v=22"></script>
+<script src="js/nav.js?v=22"></script>
+<script src="js/scoreboard-data.js?v=22"></script>
+<script src="js/scoreboard.js?v=22"></script>
 </body>
 </html>
