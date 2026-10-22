@@ -42,7 +42,7 @@
   function setupCanvas(cv, h) {
     const dpr = Math.min(2, window.devicePixelRatio || 1), w = cv.parentElement.clientWidth;
     cv.style.width = w + "px"; cv.style.height = h + "px"; cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
-    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); return { ctx, W: w, H: h };
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); return { ctx, W: w, H: h, dpr };
   }
 
   // ---------- data ----------
@@ -77,9 +77,24 @@
   }
   const toX = (N) => (N - view.x0) * view.s, toY = (Z) => G.H - (Z - view.y0 + 1) * view.s;
   const fromXY = (x, y) => ({ N: Math.floor(x / view.s + view.x0), Z: Math.floor((G.H - y) / view.s + view.y0) });
-  function drawChart() {
-    const { ctx, W, H } = G, s = view.s, gap = s > 5 ? 1 : 0;
-    ctx.clearRect(0, 0, W, H); ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
+  // drawn in two steps: a cached picture of every square with its glow (redrawn only when the view, colouring or size changes),
+  // then the hover and selection outlines on top, so moving the mouse costs one image copy; redraws are batched to one per frame
+  const baseCv = document.createElement("canvas"), glowCv = document.createElement("canvas");
+  let baseKey = "", chartRaf = 0, zooming = false, zt = 0;
+  function drawChart() { if (!chartRaf) chartRaf = requestAnimationFrame(() => { chartRaf = 0; paintChart(); }); }
+  const fresh = (c, w, h, dpr) => { const g = c.getContext("2d"); if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h); g.setTransform(dpr, 0, 0, dpr, 0, 0); return g; };
+  function paintChart() {
+    if (!G) return;
+    const { ctx, dpr } = G, s = view.s, gap = s > 5 ? 1 : 0, glow = !(drag && moved > 4) && !pinch && !zooming; // the glow is skipped while dragging, pinching or wheel-zooming and restored after
+    const key = [view.x0, view.y0, s, mode, cv.width, cv.height, glow, C.surface, C.t0].join();
+    if (key !== baseKey) { baseKey = key; drawBase(glow); }
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(baseCv, 0, 0); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // selection and hover
+    for (const [r, col, w] of [[hover, C.ink, 1.5], [sel, C.sel, 2.5]]) if (r && r.A) { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.strokeRect(toX(r.A - r.Z) - 1, toY(r.Z) - 1, s + 1 - gap, s + 1 - gap); }
+  }
+  function drawBase(glow) {
+    const { W, H, dpr } = G, s = view.s, gap = s > 5 ? 1 : 0, ctx = fresh(baseCv, cv.width, cv.height, dpr);
+    ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
     // magic numbers: faint lines where shells close
     ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
     for (const m of MAGIC) { const x = toX(m) - 0.5 * gap, y = toY(m) + s; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
@@ -89,14 +104,20 @@
       ctx.fillStyle = colorOf(r); ctx.fillRect(x, y, s - gap, s - gap);
     }
     // glow on the nuclides that stand out in this view (measured, or with measured data), so the valley of stability shines
-    if (!(drag && moved > 4) && !pinch) { // glow is skipped while dragging or pinching (it is the costly part) and restored on release
-    ctx.save(); ctx.globalCompositeOperation = "lighter";
-    for (const r of rows) {
-      if (!r.A) continue; const lit = mode === "tier" ? r.tier === 0 || r.tier === 1 : mode === "meas" ? r.ncap + r.nmxw > 0 : r.macs > 300;
-      if (!lit) continue; const x = toX(r.A - r.Z), y = toY(r.Z); if (x < -s || x > W || y < -s || y > H) continue;
-      const col = colorOf(r); ctx.shadowColor = col; ctx.shadowBlur = Math.max(6, s * 1.4); ctx.fillStyle = col; ctx.globalAlpha = 0.55; ctx.fillRect(x, y, s - gap, s - gap);
-    }
-    ctx.restore();
+    if (glow) {
+      const lit = rows.filter((r) => { if (!r.A || !(mode === "tier" ? r.tier === 0 || r.tier === 1 : mode === "meas" ? r.ncap + r.nmxw > 0 : r.macs > 300)) return false;
+        const x = toX(r.A - r.Z), y = toY(r.Z); return !(x < -s || x > W || y < -s || y > H); });
+      const blur = Math.max(6, s * 1.4);
+      if (typeof ctx.filter === "string") { // one blur of all lit squares at once: the same picture as a shadow per square, far cheaper
+        const g = fresh(glowCv, cv.width, cv.height, dpr);
+        for (const r of lit) { g.fillStyle = colorOf(r); g.fillRect(toX(r.A - r.Z), toY(r.Z), s - gap, s - gap); }
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.55;
+        ctx.filter = `blur(${blur / 2}px)`; ctx.drawImage(glowCv, 0, 0); ctx.filter = "none"; ctx.drawImage(glowCv, 0, 0); ctx.restore();
+      } else {
+        ctx.save(); ctx.globalCompositeOperation = "lighter";
+        for (const r of lit) { const col = colorOf(r); ctx.shadowColor = col; ctx.shadowBlur = blur; ctx.fillStyle = col; ctx.globalAlpha = 0.55; ctx.fillRect(toX(r.A - r.Z), toY(r.Z), s - gap, s - gap); }
+        ctx.restore();
+      }
     }
     // labels: element symbols along the left edge of each row, mass numbers inside cells when large
     ctx.textBaseline = "middle";
@@ -115,8 +136,6 @@
     // axis hints
     ctx.font = `500 12px ${SANS}`; ctx.fillStyle = C.soft; ctx.textAlign = "left";
     let lastX = -99, lastY = 1e9; for (const m of MAGIC) { const x = toX(m) + 3; if (x > 20 && x < W - 40 && x - lastX > 44) { ctx.fillText(`N=${m}`, x, H - 10); lastX = x; } const y = toY(m) + s / 2; if (y > 14 && y < H - 20 && lastY - y > 18) { ctx.fillText(`Z=${m}`, 6, y); lastY = y; } }
-    // selection and hover
-    for (const [r, col, w] of [[hover, C.ink, 1.5], [sel, C.sel, 2.5]]) if (r && r.A) { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.strokeRect(toX(r.A - r.Z) - 1, toY(r.Z) - 1, s + 1 - gap, s + 1 - gap); }
   }
   function legend() {
     const L = $("#dx-legend");
@@ -127,22 +146,28 @@
   }
 
   // pointer: pan, zoom, pinch, hover, click
-  const pts = new Map(); let drag = null, moved = 0, pinch = null;
-  cv.addEventListener("pointerdown", (e) => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.offsetX, y: e.offsetY }); moved = 0; drag = { x: e.offsetX, y: e.offsetY, v: { ...view } };
+  const pts = new Map(); let drag = null, moved = 0, pinch = null, tipR = null, tipW = 0, tipH = 0, pf = 0;
+  // a nuclide's file is fetched as soon as the pointer rests on it (or presses it), so it is usually here by the time of the click
+  const prefetch = (r) => { if (r && IDX) loadNuc(r.Z, r.A).catch(() => {}); };
+  const at = (e) => { const { N, Z } = fromXY(e.offsetX, e.offsetY); return byKey.get(Z + "-" + (N + Z)) || null; };
+  cv.addEventListener("pointerdown", (e) => { prefetch(at(e)); cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.offsetX, y: e.offsetY }); moved = 0; drag = { x: e.offsetX, y: e.offsetY, v: { ...view } };
     if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), v: { ...view }, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; } });
   cv.addEventListener("pointermove", (e) => {
     if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.offsetX, y: e.offsetY });
     if (pinch && pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y); zoomAt(pinch.mx, pinch.my, pinch.v.s * d / pinch.d, pinch.v); moved = 99; return; }
     if (drag && pts.size === 1) { const dx = e.offsetX - drag.x, dy = e.offsetY - drag.y; moved = Math.max(moved, Math.abs(dx) + Math.abs(dy)); view.x0 = drag.v.x0 - dx / view.s; view.y0 = drag.v.y0 + dy / view.s; drawChart(); return; }
-    const { N, Z } = fromXY(e.offsetX, e.offsetY), r = byKey.get(Z + "-" + (N + Z)) || null;
-    if (r !== hover) { hover = r; drawChart(); }
-    if (r) { tip.hidden = false; tip.innerHTML = chartTip(r); place(tip, e.offsetX, e.offsetY, cv); } else tip.hidden = true;
+    const r = at(e);
+    if (r !== hover) { hover = r; drawChart(); clearTimeout(pf); if (r) pf = setTimeout(() => prefetch(r), 150); }
+    if (r) { // the tooltip is rebuilt and measured only when it changes nuclide; between those, moving it forces no layout
+      if (r !== tipR) { tipR = r; tip.innerHTML = chartTip(r); tip.hidden = false; tip.style.left = tip.style.top = "0px"; tipW = tip.offsetWidth; tipH = tip.offsetHeight; }
+      const x = e.offsetX, y = e.offsetY; tip.style.transform = `translate(${clamp(x + 14, 4, G.W - tipW - 4)}px,${y - tipH - 12 < 0 ? y + 16 : y - tipH - 12}px)`; // a transform: no layout
+    } else { tip.hidden = true; tipR = null; }
   });
   const endPtr = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null;
     if (pts.size === 0 && drag) { if (moved < 5 && e.type === "pointerup") { const { N, Z } = fromXY(e.offsetX, e.offsetY), r = byKey.get(Z + "-" + (N + Z)); if (r) select(r); } drag = null; drawChart(); } };
   cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
-  cv.addEventListener("pointerleave", () => { hover = null; tip.hidden = true; drawChart(); });
-  cv.addEventListener("wheel", (e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, view.s * Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+  cv.addEventListener("pointerleave", () => { hover = null; tip.hidden = true; tipR = null; clearTimeout(pf); drawChart(); });
+  cv.addEventListener("wheel", (e) => { e.preventDefault(); zooming = true; clearTimeout(zt); zt = setTimeout(() => { zooming = false; drawChart(); }, 160); zoomAt(e.offsetX, e.offsetY, view.s * Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
   function zoomAt(x, y, s, base = view) { s = clamp(s, 1.2, 60); const N = x / base.s + base.x0, Z = (G.H - y) / base.s + base.y0; view = { s, x0: N - x / s, y0: Z - (G.H - y) / s }; drawChart(); }
   document.querySelectorAll(".dx-zoom button").forEach((b) => b.addEventListener("click", () => { const z = +b.dataset.z; if (!z) { fit(); drawChart(); } else zoomAt(G.W / 2, G.H / 2, view.s * (z > 0 ? 1.6 : 1 / 1.6)); }));
   /** EXFOR link for a dataset id like "32234/32234009/1" (entry/subentry/pointer): the 8-character subentry, or null.
@@ -180,8 +205,7 @@
     const t = norm(q.value); hits = []; hi = -1;
     if (t) {
       for (const r of rows) {
-        const sy = IDX.sym[r.Z].toLowerCase(), a = r.A ? String(r.A) : "nat";
-        const keys = [sy + a, a + sy, sy];
+        const keys = r.keys || (r.keys = ((sy, a) => [sy + a, a + sy, sy])(IDX.sym[r.Z].toLowerCase(), r.A ? String(r.A) : "nat")); // built once per nuclide
         let s = -1; keys.forEach((k, i) => { if (k === t) s = Math.max(s, 100 - i); else if (k.startsWith(t)) s = Math.max(s, 50 - i); });
         if (s >= 0) hits.push([s + (r.tier === 0 ? 3 : 0) + Math.min(2, (r.nds || 0) / 50), r]);
       }
@@ -222,10 +246,18 @@
     const idx = P.map((_, i) => i); for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
     for (let k = 0; k < Math.min(Z, n); k++) P[idx[k]].p = true;
     atom.pts = P; atom.rb = rb; atom.born = performance.now();
-    if (!atom.run) { atom.run = true; requestAnimationFrame(atomFrame); }
+    atomGo();
   }
+  // it turns only while it is on screen, at about 30 frames a second (the turn is slow, so this looks the same and halves the cost)
+  atom.vis = true;
+  const atomGo = () => { if (!atom.run && atom.vis && !document.hidden && atom.pts.length) { atom.run = true; atom.last = 0; requestAnimationFrame(atomFrame); } };
+  if (atom.cv && "IntersectionObserver" in window) new IntersectionObserver((es) => { atom.vis = es[es.length - 1].isIntersecting; atomGo(); }).observe(atom.cv);
+  document.addEventListener("visibilitychange", atomGo);
+  // the packing is worked out after the plot's first frame is on screen, so opening a nuclide never waits for it
+  const atomSoon = (Z, A) => requestAnimationFrame(() => setTimeout(() => atomSet(Z, A), 0));
   function atomFrame(now) {
-    const cv2 = atom.cv; if (!cv2 || !atom.pts.length) { atom.run = false; return; }
+    const cv2 = atom.cv; if (!cv2 || !atom.pts.length || !atom.vis || document.hidden) { atom.run = false; return; }
+    if (now - atom.last < 30) { requestAnimationFrame(atomFrame); return; } atom.last = now;
     const S = cv2.clientWidth, dpr = Math.min(2, window.devicePixelRatio || 1);
     const px = Math.round(S * dpr); if (cv2.width !== px || cv2.height !== px) { cv2.width = cv2.height = px; } // check both: a new canvas starts at 300x150, which matches the width at 125 % scaling
     const g = cv2.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, S, S);
@@ -237,7 +269,7 @@
     const br = atom.rb * R * 1.08;
     for (const q of L) { g.globalAlpha = 0.55 + 0.45 * (q.z + 1) / 2; g.drawImage(q.p ? BALL.p : BALL.n, q.X - br * q.k, q.Y - br * q.k, 2 * br * q.k, 2 * br * q.k); }
     g.globalAlpha = 1;
-    if (!document.hidden && atom.cv.getBoundingClientRect().bottom > 0) requestAnimationFrame(atomFrame); else setTimeout(() => requestAnimationFrame(atomFrame), 400);
+    requestAnimationFrame(atomFrame);
   }
   if (atom.cv) atom.cv.parentElement.addEventListener("pointermove", (e) => { const r = atom.cv.getBoundingClientRect(); atom.tx = (e.clientX - r.left) / r.width - 0.5; atom.ty = (e.clientY - r.top) / r.height - 0.5; });
 
@@ -248,7 +280,7 @@
     const box = $("#dx-nuc"), s = $("#dx-status"), on = !!r && !err;
     box.classList.toggle("dx-loading", !!r); box.setAttribute("aria-busy", String(on)); box.classList.toggle("dx-empty", !cur);
     if (!r) { s.hidden = true; return; }
-    box.hidden = false; $("#dx-name").textContent = nameOf(r.Z, r.A); atomSet(r.Z, r.A);
+    box.hidden = false; $("#dx-name").textContent = nameOf(r.Z, r.A); atomSoon(r.Z, r.A);
     $("#dx-tile").innerHTML = `<span>${IDX.sym[r.Z]}</span>`; $("#dx-facts").innerHTML = ""; $("#dx-stats").innerHTML = "";
     s.hidden = false;
     s.innerHTML = err ? `${T("dx_nload", "Could not load this nuclide.")} <button type="button" class="dx-link" id="dx-retry">${T("dx_retry", "Try again")}</button>`
@@ -267,7 +299,7 @@
     buildTabs();
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
-    atomSet(r.Z, r.A);
+    atomSoon(r.Z, r.A);
     $("#dx-tile").innerHTML = `<span>${IDX.sym[r.Z]}</span>`; $("#dx-tile").title = "Z = " + r.Z;
     const d = cur.d, f = [];
     if (d.tier != null) f.push(`<span class="dx-chip t${d.tier}">${TIERS[d.tier]}</span>`);
@@ -346,27 +378,37 @@
   }
 
   const pcv = $("#dx-plot"), ptip = $("#dx-ptip");
+  // the plot is drawn once per nuclide, reaction or size into three layers (base: grid, axes, bands; measured points; curves);
+  // the opening sweep and the dataset highlight only recompose them, so an animation frame is a few image copies
+  const LAY = { a: document.createElement("canvas"), p: document.createElement("canvas"), c: document.createElement("canvas") };
+  const layer = (c) => fresh(c, pcv.width, pcv.height, P.dpr);
   // a sweep from left to right draws the curve and reveals the measured points when a nuclide or reaction opens
-  let anim = 1, animT0 = 0;
-  function sweep() { if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { anim = 1; renderNuc(); return; } animT0 = performance.now(); anim = 0;
-    const step = (now) => { const u = Math.min(1, (now - animT0) / 1100); anim = 1 - Math.pow(1 - u, 3); renderNuc(); if (u < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
-  function renderNuc() {
+  let anim = 1, animT0 = 0, animRaf = 0;
+  function sweep() {
+    buildNuc(); cancelAnimationFrame(animRaf);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { anim = 1; compose(); return; }
+    animT0 = performance.now(); anim = 0; compose();
+    const step = (now) => { const u = clamp((now - animT0) / 1100, 0, 1); anim = 1 - Math.pow(1 - u, 3); compose(); if (u < 1) animRaf = requestAnimationFrame(step); }; animRaf = requestAnimationFrame(step);
+  }
+  function renderNuc() { buildNuc(); compose(); }
+  function buildNuc() {
     if (!cur) return;
     const S = series(), shown = S.points.filter((p) => showExcl || p.dec !== "x");
     const W = pcv.parentElement.clientWidth, H = Math.round(clamp(W * 0.55, 300, 460));
     P = { ...setupCanvas(pcv, H), S, shown };
-    const { ctx } = P, m = { l: 62, r: 16, t: 16, b: 44 };
+    const ctx = layer(LAY.a), m = { l: 62, r: 16, t: 16, b: 44 };
     // ranges (log-log)
-    const xs = [], ys = [];
-    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > 0) { xs.push(x); ys.push(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (lo > 0) ys.push(lo); ys.push(hi); }); });
-    shown.forEach((p) => { if (p.y > 0) { xs.push(p.xlo || p.x, p.xhi || p.x); ys.push(p.y); } });
-    if (!xs.length) { P.ctx.fillStyle = C.surface; P.ctx.fillRect(0, 0, W, H); P.ctx.fillStyle = C.soft; P.ctx.font = `500 14px ${SANS}`; P.ctx.textAlign = "center"; P.ctx.fillText(T("dx_empty", "Nothing to show for this reaction."), W / 2, H / 2); finishNuc(S); return; }
-    let x0 = log10(Math.min(...xs)), x1 = log10(Math.max(...xs)), y0 = log10(Math.min(...ys)), y1 = log10(Math.max(...ys));
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    const ax = (x) => { if (x < x0) x0 = x; if (x > x1) x1 = x; }, ay = (y) => { if (y < y0) y0 = y; if (y > y1) y1 = y; };
+    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > 0) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (lo > 0) ay(lo); ay(hi); }); });
+    shown.forEach((p) => { if (p.y > 0) { ax(p.xlo || p.x); ax(p.xhi || p.x); ay(p.y); } });
+    for (const c of [LAY.p, LAY.c]) layer(c);
+    if (!(x1 > 0)) { ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H); ctx.fillStyle = C.soft; ctx.font = `500 14px ${SANS}`; ctx.textAlign = "center"; ctx.fillText(T("dx_empty", "Nothing to show for this reaction."), W / 2, H / 2); finishNuc(S); return; }
+    x0 = log10(x0); x1 = log10(x1); y0 = log10(y0); y1 = log10(y1);
     if (x1 - x0 < 1) { x0 -= 0.5; x1 += 0.5; } if (y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; }
     x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0);
     const X = (x) => m.l + (log10(x) - x0) / (x1 - x0) * (W - m.l - m.r), Y = (y) => H - m.b - (log10(y) - y0) / (y1 - y0) * (H - m.t - m.b);
     Object.assign(P, { X, Y, m, x0, x1, y0, y1, W, H });
-    P.reveal = m.l + anim * (W - m.l - m.r) + (anim >= 1 ? 60 : 0);
     ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
     // grid and axes (decades)
     ctx.font = `500 12px ${SANS}`; ctx.fillStyle = C.soft; ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
@@ -375,37 +417,64 @@
     ctx.textAlign = "right"; ctx.textBaseline = "middle";
     for (let k = Math.ceil(y0); k <= Math.floor(y1); k++) { const y = Y(10 ** k); ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke(); ctx.fillText(decY(k, S.unit), m.l - 8, y); }
     ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(S.xlab + " →", m.l, H - 6);
+    let note = null; // drawn last, over the points, with a dark halo so it stays readable
     ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, W - m.l - m.r, H - m.t - m.b); ctx.clip();
     if (S.note && S.note.upto > 10 ** x0) { const xe = Math.min(X(S.note.upto), W - m.r); ctx.fillStyle = rgba(C.soft, 0.07); ctx.fillRect(m.l, m.t, xe - m.l, H - m.t - m.b);
-      ctx.fillStyle = C.soft; ctx.font = `500 12px ${SANS}`; ctx.textAlign = "left"; if (xe - m.l > 120) ctx.fillText(S.note.text, m.l + 8, m.t + 14); }
+      ctx.font = `500 12px ${SANS}`;
+      if (xe - m.l > 120) { // wrapped to the plot's width, so a narrow (phone) plot shows the whole note instead of cutting it off
+        const maxW = W - m.r - m.l - 16; let ln = ""; note = [];
+        for (const w of S.note.text.split(" ")) { const t = ln ? ln + " " + w : w; if (ln && ctx.measureText(t).width > maxW) { note.push(ln); ln = w; } else ln = t; }
+        note.push(ln); } }
     // bands, then measured points, then the curves on top
     for (const c of S.curves) {
       for (const [b, a] of [[c.b95, 0.1], [c.b68, 0.2]]) if (b && b.length > 1) { ctx.fillStyle = rgba(c.col, a); ctx.beginPath(); b.forEach(([x, , hi], i) => (i ? ctx.lineTo(X(x), Y(hi)) : ctx.moveTo(X(x), Y(hi)))); for (let i = b.length - 1; i >= 0; i--) ctx.lineTo(X(b[i][0]), Y(Math.max(b[i][1], 10 ** (y0 - 1)))); ctx.closePath(); ctx.fill(); }
     }
-    // measured points: error bars, energy-bin bars, dots (hollow = excluded, faint = down-weighted); 2px surface ring
-    for (const p of shown) {
+    ctx.restore();
+    drawPoints(false);
+    const cc = LAY.c.getContext("2d"); cc.save(); cc.beginPath(); cc.rect(m.l, m.t, W - m.l - m.r, H - m.t - m.b); cc.clip();
+    for (const c of [...S.curves].sort((a, b) => !!a.dash - !!b.dash)) for (const [w, col] of c.dash ? [[1.7, c.col]] : [[5, C.surface], [2.2, c.col]]) { // dashed library lines go on top, thin and without a halo, so they never hide the prediction
+      cc.strokeStyle = col; cc.lineWidth = w; cc.shadowColor = w > 3 || c.dash ? "transparent" : col; cc.shadowBlur = w > 3 || c.dash ? 0 : 12; cc.lineJoin = "round"; cc.setLineDash(c.dash ? [7, 5] : []); cc.beginPath(); let on = false;
+      for (const [x, y] of c.pts) { if (!(y > 0)) { on = false; continue; } on ? cc.lineTo(X(x), Y(y)) : cc.moveTo(X(x), Y(y)); on = true; }
+      cc.stroke();
+    }
+    if (note) { cc.shadowBlur = 0; cc.setLineDash([]); cc.font = `500 12px ${SANS}`; cc.textAlign = "left"; cc.textBaseline = "alphabetic"; cc.lineJoin = "round"; cc.lineWidth = 3; cc.strokeStyle = document.documentElement.dataset.theme === "light" ? C.surface : "rgba(8,13,28,.85)"; cc.fillStyle = C.soft;
+      note.forEach((l, i) => { cc.strokeText(l, m.l + 8, m.t + 14 + i * 15); cc.fillText(l, m.l + 8, m.t + 14 + i * 15); }); }
+    cc.restore();
+    finishNuc(S);
+  }
+  // measured points: error bars, energy-bin bars, dots (hollow = excluded, faint = down-weighted); 2px surface ring
+  function drawPoints(clear) {
+    const ctx = clear === false ? LAY.p.getContext("2d") : layer(LAY.p), { X, Y, m, W, H } = P;
+    ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, W - m.l - m.r, H - m.t - m.b); ctx.clip();
+    for (const p of P.shown) {
       if (!(p.y > 0)) continue;
-      const dim = hl != null && p.ds !== hl, a = (dim ? 0.15 : p.dec === "d" ? 0.55 : 1) * clamp((P.reveal - X(p.x)) / 30, 0, 1), x = X(p.x), y = Y(p.y);
-      ctx.globalAlpha = a; ctx.strokeStyle = C.meas; ctx.lineWidth = 1.2;
+      const dim = hl != null && p.ds !== hl, x = X(p.x), y = Y(p.y);
+      ctx.globalAlpha = dim ? 0.15 : p.dec === "d" ? 0.55 : 1; ctx.strokeStyle = C.meas; ctx.lineWidth = 1.2;
       if (p.e > 0) { ctx.beginPath(); ctx.moveTo(x, Y(p.y * (1 + p.e))); ctx.lineTo(x, Y(Math.max(p.y * (1 - p.e), p.y * 0.05))); ctx.stroke(); }
       if (p.xhi > p.xlo * 1.02) { ctx.beginPath(); ctx.moveTo(X(p.xlo), y); ctx.lineTo(X(p.xhi), y); ctx.stroke(); }
       ctx.beginPath(); ctx.arc(x, y, p.kind === "mxw" ? 5 : 4, 0, Math.PI * 2);
       if (p.dec === "x") { ctx.strokeStyle = C.meas; ctx.lineWidth = 1.5; ctx.stroke(); } else { ctx.fillStyle = C.meas; ctx.fill(); ctx.strokeStyle = C.surface; ctx.lineWidth = 1.5; ctx.stroke(); }
     }
-    ctx.globalAlpha = 1;
-    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, P.reveal, H); ctx.clip();
-    for (const c of [...S.curves].sort((a, b) => !!a.dash - !!b.dash)) for (const [w, col] of c.dash ? [[1.7, c.col]] : [[5, C.surface], [2.2, c.col]]) { // dashed library lines go on top, thin and without a halo, so they never hide the prediction
-      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.shadowColor = w > 3 || c.dash ? "transparent" : col; ctx.shadowBlur = w > 3 || c.dash ? 0 : 12; ctx.lineJoin = "round"; ctx.setLineDash(c.dash ? [7, 5] : []); ctx.beginPath(); let on = false;
-      for (const [x, y] of c.pts) { if (!(y > 0)) { on = false; continue; } on ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)); on = true; }
-      ctx.stroke();
+    ctx.restore();
+  }
+  const setHl = (v) => { if (hl === v) return; hl = v; if (P && P.X) { drawPoints(); compose(); } };
+  // one frame: the base, the points fading in over the 30 px behind the sweep, the curves up to it
+  function compose() {
+    if (!P) return;
+    const g = P.ctx, d = P.dpr, pw = pcv.width, ph = pcv.height;
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, pw, ph); g.drawImage(LAY.a, 0, 0);
+    if (P.X) {
+      if (anim >= 1) { g.drawImage(LAY.p, 0, 0); g.drawImage(LAY.c, 0, 0); }
+      else {
+        const rv = (P.m.l + anim * (P.W - P.m.l - P.m.r)) * d, f = 30 * d;
+        const part = (c, a, b, al) => { a = clamp(Math.round(a), 0, pw); b = clamp(Math.round(b), 0, pw); if (b > a) { g.globalAlpha = al; g.drawImage(c, a, 0, b - a, ph, a, 0, b - a, ph); } };
+        part(LAY.p, 0, rv - f, 1); for (let i = 0; i < 3; i++) part(LAY.p, rv - f + i * f / 3, rv - f + (i + 1) * f / 3, (5 - 2 * i) / 6);
+        g.globalAlpha = 1; part(LAY.c, 0, rv, 1);
+      }
     }
-    ctx.setLineDash([]);
-    ctx.restore();
-    ctx.restore();
-    finishNuc(S);
+    g.globalAlpha = 1; g.setTransform(d, 0, 0, d, 0, 0);
   }
   function finishNuc(S) {
-    if (anim > 0 && anim < 1) return; // the lists and legend are rebuilt once, not on every frame of the sweep
     const nPts = S.points.length, nEx = S.points.filter((p) => p.dec === "x").length;
     $("#dx-excl").parentElement.hidden = nEx === 0;
     libNote();
@@ -419,7 +488,7 @@
     $("#dx-ds").innerHTML = list.length ? `<h3>${T("dx_ds_h", "Measurements")} <span class="dx-faint">(${list.length})</span></h3><ul>${list.map(({ d, i, n }) => {
       const ex = exforOf(d[0]), sub = ex ? ex.id : String(d[0]).split("/").filter(Boolean).pop() || d[0];
       return `<li data-ds="${i}"><span class="dx-who">${esc(d[1] || "EXFOR " + sub)}${d[2] ? ` <span class="dx-faint">${d[2]}</span>` : ""}</span><span class="dx-faint">${esc(d[3] || "")}</span><span class="dx-faint">${n} ${T("dx_pts", "pts")}</span>${ex ? `<a href="${ex.url}" target="_blank" rel="noopener">EXFOR ${sub}</a>` : `<span class="dx-faint">${esc(d[0])}</span>`}</li>`; }).join("")}</ul>` : "";
-    $("#dx-ds").querySelectorAll("li").forEach((li) => { li.addEventListener("mouseenter", () => { hl = +li.dataset.ds; renderNuc(); }); li.addEventListener("mouseleave", () => { hl = null; renderNuc(); }); li.addEventListener("focusin", () => { hl = +li.dataset.ds; renderNuc(); }); });
+    $("#dx-ds").querySelectorAll("li").forEach((li) => { li.addEventListener("mouseenter", () => setHl(+li.dataset.ds)); li.addEventListener("mouseleave", () => setHl(null)); li.addEventListener("focusin", () => setHl(+li.dataset.ds)); });
     if (tableOpen) table(S);
   }
   function table(S) {
@@ -537,7 +606,7 @@
     for (const Z of idx.natural) rows.push({ Z, A: 0, tier: -1, ncap: 1, nmxw: 0, nds: 0, nn2n: 0, nnp: 0, nna: 0 });
     rows.forEach((r) => byKey.set(r.Z + "-" + r.A, r));
     const real = rows.filter((r) => r.A); bounds = { n0: 0, n1: Math.max(...real.map((r) => r.A - r.Z)), z0: 0, z1: Math.max(...real.map((r) => r.Z)) };
-    layout(); fit(); legend(); drawChart();
+    layout(); fit(); legend(); paintChart();
     // nothing is fetched for a nuclide until it is opened; a link like data.html#Fe-56 opens that one
     const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)), r0 = h && parseQ(h.replace(/-nat$/i, " nat")); if (r0 && r0 !== sel) select(r0, true, true); };
     fromHash(); window.addEventListener("hashchange", fromHash);
