@@ -58,7 +58,7 @@
   // Built offline by scripts/build_site_overlay.py (display-only); a missing file just means no library covers that element.
   const lcache = new Map(), LIBS = ["endfb8.1", "jeff4.0", "tendl2025"];
   const loadLib = (Z) => lcache.get(Z) || lcache.set(Z, fetch(`data/lib/${Z}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)).get(Z);
-  let libOn = false;
+  let libOn = true; // the comparison libraries show by default; untick the box to hide them
   const nameOf = (Z, A) => (A ? `${IDX.sym[Z]}-${A}` : `${IDX.sym[Z]} (${T("dx_nat", "natural")})`);
 
   // ---------- chart of nuclides ----------
