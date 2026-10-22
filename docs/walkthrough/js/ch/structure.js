@@ -111,7 +111,7 @@
   <p>A slow neutron joining the target lands just above <i>S<sub>n</sub></i>, in the small box on the left. The right panel magnifies that box thousands of times, neutron energy running left to right.</p>
   <div class="ctl"><label for="st-fe">Beam energy</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">Pause the sweep</button></div>
-  <p>At most energies the beam passes straight through. At certain exact energies the neutron plus the nucleus match a hidden level and much of the beam is taken in: a <b>resonance</b>. The nucleus then gives the energy back as a <em class="g">photon</em> or a neutron. The curve shows the share taken in; the bars mark each resonance found.</p>
+  <p>At most energies the beam passes straight through. At certain exact energies the neutron plus the nucleus match a hidden level and much of the beam is taken in: a <b>resonance</b>. On a peak the drawn nucleus swells: not a real change of size, but the bigger target the neutron effectively sees when its wave overlaps the nucleus's. The nucleus then gives the energy back as a <em class="g">photon</em> or a neutron. The curve shows the share taken in; the bars mark each resonance found.</p>
   <div class="btns"><button class="btn ghost" data-act="fFe">Iron-56</button><button class="btn ghost" data-act="fAu">Gold-197</button><button class="btn ghost" data-act="fU">Uranium-238</button></div>
   <p>Each nucleus has its own barcode at its own scale: thousands of electron-volts between iron's resonances, tens for gold and uranium. Three averages sum it up: <i>D₀</i>, the average gap; ⟨Γ<sub>γ</sub>⟩, the <b>photon width</b>, nearly the same for every peak; and <i>S₀</i>, the <b>strength function</b>, how easily a slow neutron gets in.</p>
   <p>Each one checks a later step. The engine's level-density parameters were fitted to <i>D₀</i>, nucleus by nucleus; ⟨Γ<sub>γ</sub>⟩ tests photon emission, <i>S₀</i> the optical model of the next chapter. For unmeasured nuclei the engine uses trends fitted across many nuclei.</p>
@@ -500,22 +500,36 @@
       if (S.fbeam.length > 40) S.fbeam.shift();
     }
     const fly = 0.9;
-    g.glow(nx, yB, R * 2.6, c.warm, 0.12 + 0.4 * S.fhalo);
+    // effective size: the drawn radius swells with the cross section at the marker's energy (wave overlap at a
+    // resonance, not a real size change). Peak sum sampled across this frame's sweep step so no peak is skipped;
+    // fast attack, gentle release, 1x to 1.6x.
+    {
+      const e0 = S.fEprev != null && Math.abs(Eb - S.fEprev) < 0.05 * T.span ? S.fEprev : Eb, n = Math.min(24, 2 + Math.ceil(Math.abs(Eb - e0) / (T.X * T.Gg * 0.25 + 1e-9)));
+      let s = 0; for (let k = 0; k <= n; k++) { const E = lerp(e0, Eb, k / n); let v = 0; for (const q of T.res) { const d = (E - q.E) / (q.Gd / 2); if (d > -40 && d < 40) v += q.h / (1 + d * d); } s = Math.max(s, v); }
+      if (!T.hRef) { const hs = T.res.map((q) => q.h).sort((a, b) => a - b); T.hRef = hs[hs.length >> 1] || 1; }
+      const goal = 1 + 0.6 * clamp(Math.pow(s / T.hRef, 0.5), 0, 1), cur0 = S.fswell || 1;
+      S.fswell = cur0 + (goal - cur0) * Math.min(1, dt / (goal > cur0 ? 0.03 : 0.22)); S.fEprev = Eb;
+    }
+    const Rv = R * S.fswell;
+    g.glow(nx, yB, Rv * 2.6, c.warm, 0.12 + 0.4 * S.fhalo);
     S.fhalo = Math.max(0, S.fhalo - dt * 1.6);
-    g.nucleus(nx, yB, R, { N: 34, Z: 14, seed: 9, t: S.time, jiggle: 0.4 + 1.2 * S.fhalo });
+    g.nucleus(nx, yB, Rv, { N: 34, Z: 14, seed: 9, t: S.time, jiggle: 0.4 + 1.2 * S.fhalo });
     for (const n of S.fbeam) {
-      const age = S.time - n.t0, u = age / fly, x = lerp(sx + 10, nx - R * 0.6, u), y = yB + n.y * (1 - smooth(0.6, 1, u) * (n.hit ? 1 : 0));
+      const age = S.time - n.t0, u = age / fly, x = lerp(sx + 10, nx - Rv * 0.6, u), y = yB + n.y * (1 - smooth(0.6, 1, u) * (n.hit ? 1 : 0));
       if (u >= 1 && !n.counted) { n.counted = true; S.flast.push(n.hit); if (S.flast.length > 20) S.flast.shift(); if (n.hit) S.fhalo = Math.min(1, S.fhalo + 0.5); }
       if (!n.hit) { const xx = lerp(sx + 10, nx - R * 0.6, u); if (xx < ix1) g.ball(xx, y, 4, c.neutron, 0.9 * (1 - smooth(0.85, 1, (xx - ix0) / iw))); continue; }
       if (u < 1) { g.ball(x, y, 4, c.neutron, 0.95); continue; }
       const e = age - fly - 0.25; // after a short stay, the energy leaves as a photon or the neutron is thrown back out
       if (e < 0 || e > 1.2) continue;
-      const d = R + e * iw * 0.26, px = nx + Math.cos(n.ang) * d, py = yB + Math.sin(n.ang) * d * 0.5, fa = 1 - smooth(0.6, 1.2, e);
+      const d = Rv + e * iw * 0.26, px = nx + Math.cos(n.ang) * d, py = yB + Math.sin(n.ang) * d * 0.5, fa = 1 - smooth(0.6, 1.2, e);
       if (e < 0.25) g.glow(nx, yB, R * 1.8, n.gam ? c.photon : c.neutron, 0.45 * (1 - e / 0.25));
       if (n.gam) g.photon(px, py, n.ang, 26, fa); else g.ball(px, py, 4, c.neutron, fa);
     }
     const nIn = S.flast.filter(Boolean).length;
-    g.label(`${T.tgt}: took in ${nIn} of the last ${S.flast.length}`, nx, yB + R + 20, { color: c.soft, size: fs, bg: true });
+    const yTk = yB + R * 1.6 + 14;
+    g.label(`${T.tgt}: took in ${nIn} of the last ${S.flast.length}`, nx, yTk, { color: c.soft, size: fs, bg: true });
+    // phones: no room under the nucleus; the step text says the same
+    if (!phone) g.label("swells on a peak: the size the neutron effectively “sees” (waves overlap), not a real size change", (ix0 + ix1) / 2, yTk + fs + 5, { color: c.soft, size: fs - 1, italic: true });
 
     // ---- right middle: the measured trace (share taken in vs energy) ----
     const tx = (i) => ix0 + (i + 0.5) / FNB * iw, ty = (v) => tBase - v * th;

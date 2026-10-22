@@ -135,6 +135,12 @@
   cv.addEventListener("wheel", (e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, view.s * Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
   function zoomAt(x, y, s, base = view) { s = clamp(s, 1.2, 60); const N = x / base.s + base.x0, Z = (G.H - y) / base.s + base.y0; view = { s, x0: N - x / s, y0: Z - (G.H - y) / s }; drawChart(); }
   document.querySelectorAll(".dx-zoom button").forEach((b) => b.addEventListener("click", () => { const z = +b.dataset.z; if (!z) { fit(); drawChart(); } else zoomAt(G.W / 2, G.H / 2, view.s * (z > 0 ? 1.6 : 1 / 1.6)); }));
+  /** EXFOR link for a dataset id like "32234/32234009/1" (entry/subentry/pointer): the 8-character subentry, or null.
+   *  Entry-only ids stay unlinked: no entry-level IAEA URL could be verified (the site sits behind a bot check). */
+  function exforOf(id) {
+    const s = String(id || "").split("/").find((p) => /^[0-9A-Z]\d{7}$/.test(p));
+    return s ? { id: s, url: `https://www-nds.iaea.org/exfor/servlet/X4sGetSubent?subID=${s}` } : null;
+  }
   function place(el, x, y, host) { const w = el.offsetWidth, h = el.offsetHeight, W = host.clientWidth; el.style.left = clamp(x + 14, 4, W - w - 4) + "px"; el.style.top = (y - h - 12 < 0 ? y + 16 : y - h - 12) + "px"; }
   function chartTip(r) {
     const bits = [`<b>${esc(nameOf(r.Z, r.A))}</b> <span class="dx-faint">Z ${r.Z} · N ${r.A - r.Z}</span>`];
@@ -358,8 +364,8 @@
     const cnt = new Map(); S.points.forEach((p) => cnt.set(p.ds, (cnt.get(p.ds) || 0) + 1));
     const list = S.ds.map((d, i) => ({ d, i, n: cnt.get(i) || 0 })).filter((x) => x.n).sort((a, b) => (a.d[2] || 0) - (b.d[2] || 0));
     $("#dx-ds").innerHTML = list.length ? `<h3>${T("dx_ds_h", "Measurements")} <span class="dx-faint">(${list.length})</span></h3><ul>${list.map(({ d, i, n }) => {
-      const sub = String(d[0]).split("/").filter(Boolean).pop() || d[0];
-      return `<li data-ds="${i}"><span class="dx-who">${esc(d[1] || "EXFOR " + sub)}${d[2] ? ` <span class="dx-faint">${d[2]}</span>` : ""}</span><span class="dx-faint">${esc(d[3] || "")}</span><span class="dx-faint">${n} ${T("dx_pts", "pts")}</span>${/^[0-9A-Z]\d{7}$/.test(sub) ? `<a href="https://www-nds.iaea.org/exfor/servlet/X4sGetSubent?subID=${sub}" target="_blank" rel="noopener">EXFOR ${sub}</a>` : `<span class="dx-faint">${esc(d[0])}</span>`}</li>`; }).join("")}</ul>` : "";
+      const ex = exforOf(d[0]), sub = ex ? ex.id : String(d[0]).split("/").filter(Boolean).pop() || d[0];
+      return `<li data-ds="${i}"><span class="dx-who">${esc(d[1] || "EXFOR " + sub)}${d[2] ? ` <span class="dx-faint">${d[2]}</span>` : ""}</span><span class="dx-faint">${esc(d[3] || "")}</span><span class="dx-faint">${n} ${T("dx_pts", "pts")}</span>${ex ? `<a href="${ex.url}" target="_blank" rel="noopener">EXFOR ${sub}</a>` : `<span class="dx-faint">${esc(d[0])}</span>`}</li>`; }).join("")}</ul>` : "";
     $("#dx-ds").querySelectorAll("li").forEach((li) => { li.addEventListener("mouseenter", () => { hl = +li.dataset.ds; renderNuc(); }); li.addEventListener("mouseleave", () => { hl = null; renderNuc(); }); li.addEventListener("focusin", () => { hl = +li.dataset.ds; renderNuc(); }); });
     if (tableOpen) table(S);
   }
@@ -371,21 +377,41 @@
   $("#dx-tbtn").addEventListener("click", (e) => { tableOpen = !tableOpen; e.currentTarget.setAttribute("aria-expanded", String(tableOpen)); $("#dx-table").hidden = !tableOpen; if (tableOpen) table(series()); });
   $("#dx-excl").addEventListener("change", (e) => { showExcl = e.target.checked; renderNuc(); });
   $("#dx-copy").addEventListener("click", (e) => { try { navigator.clipboard.writeText($("#dx-cmd").textContent); e.currentTarget.textContent = T("dx_copied", "Copied"); } catch (err) {} });
-  pcv.addEventListener("pointermove", (e) => {
-    if (!P || !P.X) return; const x = e.offsetX, y = e.offsetY;
-    let best = null, bd = 14 * 14;
+  // hover (mouse) or tap (touch) shows the tooltip; clicking a measured point, or tapping it a second time, opens its EXFOR subentry
+  let tipPin = null, lastPT = "mouse";
+  function tipAt(x, y) {
+    if (!P || !P.X) return null;
+    let best = null, bd = (lastPT === "mouse" ? 14 : 22) ** 2;
     for (const p of P.shown) { if (!(p.y > 0)) continue; const d = (P.X(p.x) - x) ** 2 + (P.Y(p.y) - y) ** 2; if (d < bd) { bd = d; best = p; } }
-    if (best) { const d = P.S.ds[best.ds] || [];
-      ptip.innerHTML = `<b>${esc(d[1] || "EXFOR " + (String(d[0]).split("/").filter(Boolean).pop() || ""))}</b> ${d[2] || ""}<br>${best.xhi > best.xlo * 1.02 ? `${fmtE(best.xlo)}–${fmtE(best.xhi)}` : fmtE(best.x)}: <b>${num(best.y)} ${P.S.unit}</b>${best.e ? ` ± ${num(best.e * 100, 2)} %` : ""}${best.kind === "mxw" ? ` · ${T("dx_mxw", "Maxwellian average")}` : ""}${best.st ? ` · ${T("dx_state", "state")} ${esc(best.st)}` : ""}<br><span class="dx-faint">${T("dx_cur", "curation")}: ${DEC[best.dec]}</span>`;
-      ptip.hidden = false; place(ptip, x, y, pcv); return; }
+    if (best) { const d = P.S.ds[best.ds] || [], ex = exforOf(d[0]);
+      let html = `<b>${esc(d[1] || "EXFOR " + (ex ? ex.id : String(d[0]).split("/").filter(Boolean).pop() || ""))}</b> ${d[2] || ""}<br>${best.xhi > best.xlo * 1.02 ? `${fmtE(best.xlo)}–${fmtE(best.xhi)}` : fmtE(best.x)}: <b>${num(best.y)} ${P.S.unit}</b>${best.e ? ` ± ${num(best.e * 100, 2)} %` : ""}${best.kind === "mxw" ? ` · ${T("dx_mxw", "Maxwellian average")}` : ""}${best.st ? ` · ${T("dx_state", "state")} ${esc(best.st)}` : ""}<br><span class="dx-faint">${T("dx_cur", "curation")}: ${DEC[best.dec]}</span>`;
+      if (ex) html += lastPT === "mouse" ? `<br><span class="dx-exhint">${T("dx_exfor_click", "click the point to open")} EXFOR ${ex.id} ↗</span>`
+        : `<br><a class="dx-exhint" href="${ex.url}" target="_blank" rel="noopener">${T("dx_exfor_tap", "tap again, or here, to open")} EXFOR ${ex.id} ↗</a>`;
+      return { html, url: ex && ex.url, p: best }; }
     const c = P.S.curves[0];
     if (c && x > P.m.l && x < P.W - P.m.r) {
       const xv = 10 ** (P.x0 + (x - P.m.l) / (P.W - P.m.l - P.m.r) * (P.x1 - P.x0)); let j = -1, jd = Infinity; c.pts.forEach(([px], i) => { const dd = Math.abs(log10(px) - log10(xv)); if (dd < jd) { jd = dd; j = i; } });
       if (j >= 0 && jd < 0.2 && c.pts[j][1] > 0) { const b = c.b68 && c.b68.find((q) => q[0] === c.pts[j][0]);
-        ptip.innerHTML = `${fmtE(c.pts[j][0])}: <b>${num(c.pts[j][1])} ${P.S.unit}</b>${b ? `<br><span class="dx-faint">68 %: ${num(b[1])}–${num(b[2])}</span>` : ""}`; ptip.hidden = false; place(ptip, x, y, pcv); return; } }
-    ptip.hidden = true;
+        return { html: `${fmtE(c.pts[j][0])}: <b>${num(c.pts[j][1])} ${P.S.unit}</b>${b ? `<br><span class="dx-faint">68 %: ${num(b[1])}–${num(b[2])}</span>` : ""}`, url: null, p: null }; } }
+    return null;
+  }
+  function showTip(h, x, y) {
+    pcv.style.cursor = h && h.url ? "pointer" : "";
+    ptip.style.pointerEvents = h && h.url && lastPT !== "mouse" ? "auto" : "";
+    if (!h) { ptip.hidden = true; return; }
+    ptip.innerHTML = h.html; ptip.hidden = false; place(ptip, x, y, pcv);
+  }
+  const openEx = (url) => { try { window.open(url, "_blank", "noopener"); } catch (err) {} };
+  pcv.addEventListener("pointerdown", (e) => { lastPT = e.pointerType || "mouse"; });
+  pcv.addEventListener("pointermove", (e) => { if ((e.pointerType || "mouse") !== "mouse") return; lastPT = "mouse"; tipPin = null; showTip(tipAt(e.offsetX, e.offsetY), e.offsetX, e.offsetY); });
+  pcv.addEventListener("click", (e) => {
+    const h = tipAt(e.offsetX, e.offsetY);
+    if (lastPT === "mouse") { if (h && h.url) openEx(h.url); return; }
+    if (h && h.url && h.p === tipPin) { openEx(h.url); return; } // second tap on the same point
+    tipPin = h ? h.p : null; showTip(h, e.offsetX, e.offsetY);
   });
-  pcv.addEventListener("pointerleave", () => (ptip.hidden = true));
+  pcv.addEventListener("pointerleave", (e) => { if ((e.pointerType || "mouse") === "mouse") { tipPin = null; showTip(null); } });
+  document.addEventListener("pointerdown", (e) => { if (!ptip.hidden && e.target !== pcv && !ptip.contains(e.target)) { tipPin = null; showTip(null); } });
 
   // ---------- start ----------
   // the chart fills the rest of the first screen (title, controls and legend stay visible), so it is never cut off at the fold

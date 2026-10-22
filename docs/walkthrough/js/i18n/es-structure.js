@@ -44,7 +44,7 @@ WT.es.ch.structure = {
   <p>Un neutrón lento que se une al blanco cae justo por encima de <i>S<sub>n</sub></i>, en la cajita de la izquierda. El panel de la derecha amplía esa caja miles de veces, con la energía del neutrón de izquierda a derecha.</p>
   <div class="ctl"><label for="st-fe">Energía del haz</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">Pausar el barrido</button></div>
-  <p>A la mayoría de las energías el haz atraviesa sin más. A ciertas energías exactas, el neutrón más el núcleo coinciden con un nivel escondido y buena parte del haz queda capturada: una <b>resonancia</b>. Luego el núcleo devuelve la energía como un <em class="g">fotón</em> o un neutrón. La curva muestra la fracción capturada; las barras marcan cada resonancia encontrada.</p>
+  <p>A la mayoría de las energías el haz atraviesa sin más. A ciertas energías exactas, el neutrón más el núcleo coinciden con un nivel escondido y buena parte del haz queda capturada: una <b>resonancia</b>. En un pico el núcleo dibujado se hincha: no cambia de tamaño real, es el blanco mayor que el neutrón «ve» en efecto cuando su onda se solapa con la del núcleo. Luego el núcleo devuelve la energía como un <em class="g">fotón</em> o un neutrón. La curva muestra la fracción capturada; las barras marcan cada resonancia encontrada.</p>
   <div class="btns"><button class="btn ghost" data-act="fFe">Hierro-56</button><button class="btn ghost" data-act="fAu">Oro-197</button><button class="btn ghost" data-act="fU">Uranio-238</button></div>
   <p>Cada núcleo tiene su propio código de barras, a su propia escala: miles de electronvoltios entre las resonancias del hierro, decenas en el oro y el uranio. Tres promedios lo resumen: <i>D₀</i>, la separación media; ⟨Γ<sub>γ</sub>⟩, la <b>anchura fotónica</b>, casi igual en todos los picos; y <i>S₀</i>, la <b>función de fuerza</b>, con qué facilidad entra un neutrón lento.</p>
   <p>Cada uno pone a prueba un paso posterior. Los parámetros de densidad de niveles del motor se ajustaron a <i>D₀</i>, núcleo a núcleo; ⟨Γ<sub>γ</sub>⟩ pone a prueba la emisión de fotones, y <i>S₀</i> el modelo óptico del capítulo siguiente. Para los núcleos no medidos, el motor usa tendencias ajustadas sobre muchos núcleos.</p>
@@ -116,6 +116,7 @@ WT.es.ch.structure = {
     "×{#} million": "×{#} millones",
     "×{#} thousand": "×{#} mil",
     "magnified": "ampliado",
+    "swells on a peak: the size the neutron effectively “sees” (waves overlap), not a real size change": "se hincha en un pico: el tamaño que el neutrón “ve” en efecto (las ondas se solapan), no un cambio de tamaño real",
     "share taken in": "fracción capturada",
     "share of the beam taken in": "fracción del haz capturada",
     "{#} (Sₙ)": "{#} (Sₙ)",

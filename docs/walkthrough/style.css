@@ -357,6 +357,8 @@ body.og .hero-copy { bottom: 64px; }
 .dx-zoom { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 4px; }
 .dx-zoom button { width: 34px; height: 34px; font: 600 17px var(--sans); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
 .dx-tip { position: absolute; z-index: 3; pointer-events: none; max-width: 300px; font: 500 13px/1.45 var(--sans); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+.dx-tip .dx-exhint { display: inline-block; margin-top: 4px; font-size: 12px; color: var(--accent); text-decoration: none; }
+.dx-tip a.dx-exhint { text-decoration: underline; text-underline-offset: 2px; padding: 4px 0; }
 .dx-faint { color: var(--faint); }
 .dx-legend, .dx-plegend { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 500 13px var(--sans); color: var(--soft); margin: 10px 2px 4px; align-items: center; }
 .dx-key { display: inline-flex; align-items: center; gap: 6px; }
