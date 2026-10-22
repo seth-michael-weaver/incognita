@@ -607,9 +607,10 @@
     rows.forEach((r) => byKey.set(r.Z + "-" + r.A, r));
     const real = rows.filter((r) => r.A); bounds = { n0: 0, n1: Math.max(...real.map((r) => r.A - r.Z)), z0: 0, z1: Math.max(...real.map((r) => r.Z)) };
     layout(); fit(); legend(); paintChart();
-    // nothing is fetched for a nuclide until it is opened; a link like data.html#Fe-56 opens that one
+    // other nuclides are fetched only when opened; a link like data.html#Fe-56 opens that one, otherwise U-238 opens by default
     const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)), r0 = h && parseQ(h.replace(/-nat$/i, " nat")); if (r0 && r0 !== sel) select(r0, true, true); };
     fromHash(); window.addEventListener("hashchange", fromHash);
+    if (!sel) { const u = byKey.get("92-238"); if (u) select(u, false, true); }
   }).catch((e) => { $("#dx-legend").textContent = T("dx_fail", "Could not load the data.") + " " + e; });
   let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (!IDX) return; const c = { N: view.x0 + G.W / view.s / 2, Z: view.y0 + G.H / view.s / 2 }; layout(); view.x0 = c.N - G.W / view.s / 2; view.y0 = c.Z - G.H / view.s / 2; drawChart(); renderNuc(); }, 120); });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); legend(); drawChart(); renderNuc(); });
