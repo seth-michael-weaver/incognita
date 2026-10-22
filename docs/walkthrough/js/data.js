@@ -33,7 +33,7 @@
   let C = {};
   function readColors() {
     const cs = getComputedStyle($(".dx"));
-    ["surface", "ink", "soft", "faint", "line", "grid", "curve", "meas", "alt", "none", "t0", "t1", "t2", "t3", "sel"].forEach((k) => (C[k] = cs.getPropertyValue("--dx-" + k).trim()));
+    ["surface", "ink", "soft", "faint", "line", "grid", "curve", "meas", "alt", "none", "t0", "t1", "t2", "t3", "sel", "l1", "l2", "l3"].forEach((k) => (C[k] = cs.getPropertyValue("--dx-" + k).trim()));
     C.ramp = [1, 2, 3, 4, 5, 6, 7].map((i) => cs.getPropertyValue("--dx-r" + i).trim());
   }
   const rgba = (hex, a) => { const n = parseInt(hex.replace("#", ""), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
@@ -49,6 +49,11 @@
   let IDX = null, rows = [], byKey = new Map(), sel = null, mode = "tier";
   const zcache = new Map();
   const loadZ = (Z) => zcache.get(Z) || zcache.set(Z, fetch(`data/z/${Z}.json`).then((r) => r.json())).get(Z);
+  // evaluated libraries (comparators only, never used by INCOGNITA): data/lib/<Z>.json, fetched only when the overlay box is ticked.
+  // Built offline by scripts/build_site_overlay.py (display-only); a missing file just means no library covers that element.
+  const lcache = new Map(), LIBS = ["endfb8.1", "jeff4.0", "tendl2025"];
+  const loadLib = (Z) => lcache.get(Z) || lcache.set(Z, fetch(`data/lib/${Z}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)).get(Z);
+  let libOn = false;
   const nameOf = (Z, A) => (A ? `${IDX.sym[Z]}-${A}` : `${IDX.sym[Z]} (${T("dx_nat", "natural")})`);
 
   // ---------- chart of nuclides ----------
@@ -238,13 +243,9 @@
     if (center && r.A) { view.x0 = r.A - r.Z - G.W / view.s / 2; view.y0 = r.Z - G.H / view.s / 2; if (view.s < 14) zoomAt(G.W / 2, G.H / 2, 18); drawChart(); }
     history.replaceState(null, "", location.pathname + location.search + "#" + (r.A ? `${IDX.sym[r.Z]}-${r.A}` : `${IDX.sym[r.Z]}-nat`));
     const z = await loadZ(r.Z); if (sel !== r) return;
-    cur = { r, d: z.nuc[r.A ? String(r.A) : "nat"] || {} };
-    const tabs = ["cap"];
-    for (const k of ["n2n", "np", "na"]) if ((cur.d.ch && cur.d.ch[k]) || (cur.d.thr && cur.d.thr[k])) tabs.push(k);
-    if (cur.d.macs || (cur.d.meas && cur.d.meas.mxw.some((p) => p[0] >= 1000))) tabs.push("macs");
-    if (!tabs.includes(tab)) tab = "cap";
-    $("#dx-tabs").innerHTML = tabs.map((k) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${CH[k]}</button>`).join("");
-    $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); sweep(); }));
+    const lz = libOn ? await loadLib(r.Z) : null; if (sel !== r) return;
+    cur = { r, d: z.nuc[r.A ? String(r.A) : "nat"] || {}, lib: libOf(lz, r) };
+    buildTabs();
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
     atomSet(r.Z, r.A);
@@ -269,6 +270,34 @@
     if (center && !stay) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function libOf(lz, r) { const n = lz && lz.nuc[r.A ? String(r.A) : "nat"]; return { libs: (lz && lz.libs) || {}, n: n || {} }; }
+  const libHas = (k) => !!(libOn && cur.lib && Object.values(cur.lib.n).some((v) => v[k]));
+  function buildTabs() {
+    const tabs = ["cap"], d = cur.d;
+    for (const k of ["n2n", "np", "na"]) if ((d.ch && d.ch[k]) || (d.thr && d.thr[k]) || libHas(k)) tabs.push(k);
+    if (d.macs || (d.meas && d.meas.mxw.some((p) => p[0] >= 1000)) || libHas("macs")) tabs.push("macs");
+    if (!tabs.includes(tab)) tab = "cap";
+    $("#dx-tabs").innerHTML = tabs.map((k) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${CH[k]}</button>`).join("");
+    $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); sweep(); }));
+  }
+  // evaluated-library curves for the current tab: dashed, thin, one muted colour per library
+  function libCurves(out) {
+    if (!libOn || !cur.lib) return;
+    const xs = tab === "macs" ? IDX.kT_keV.map((k) => k * 1e3) : IDX.grid_ev;
+    LIBS.forEach((key, i) => { const v = cur.lib.n[key] && cur.lib.n[key][tab], L = cur.lib.libs[key];
+      if (!v || !L) return; const floor = tab === "cap" || tab === "macs" ? 0 : Math.max(...v.filter((y) => y > 0)) * 1e-6; // drop sub-threshold tails so they do not stretch the axis
+      out.curves.push({ name: `${L.label} (${T("dx_eval", "evaluation")})`, short: L.label, col: C["l" + (i + 1)], pts: xs.map((x, j) => [x, v[j] > floor ? v[j] : null]), dash: true }); });
+  }
+  function libNote() {
+    const box = $("#dx-libnote"); box.hidden = !libOn; if (!libOn || !cur) return;
+    const L = cur.lib || { libs: {}, n: {} }, have = LIBS.filter((k) => L.n[k] && L.libs[k]), miss = LIBS.filter((k) => !L.n[k]);
+    const LAB = { "endfb8.1": "ENDF/B-VIII.1", "jeff4.0": "JEFF-4.0", "tendl2025": "TENDL-2025" };
+    const lic = (s) => (s === "US public domain" ? T("dx_lib_pd", "US public domain") : s);
+    box.innerHTML = `<p>${T("dx_lib_note", "Dashed lines are evaluated nuclear-data libraries, shown only for comparison: INCOGNITA does not use them and they are not in the downloads. Each is reconstructed at 0 K from the library’s ENDF-6 file (NJOY) and averaged over the same energy bins as the curve (log-energy bin averages, so resonances are smoothed out); the MACS uses the full pointwise curve.")}</p>`
+      + (have.length ? `<ul>${have.map((k) => `<li><i style="color:${C["l" + (LIBS.indexOf(k) + 1)]}"></i><span><b>${esc(L.libs[k].label)}</b> · ${esc(lic(L.libs[k].lic))} · ${esc(L.libs[k].cite)}</span></li>`).join("")}</ul>` : "")
+      + `<p>${miss.length ? `${T("dx_lib_none", "No file for this nuclide in")} ${miss.map((k) => LAB[k]).join(", ")}. ` : ""}${(() => { const no = have.filter((k) => !L.n[k][tab]); return no.length ? `${T("dx_lib_notab", "No separate value for this reaction in")} ${no.map((k) => LAB[k]).join(", ")}. ` : ""; })()}${T("dx_lib_held", "JENDL-5 will be added once its terms for redistributing derived tables are confirmed.")}</p>`;
+  }
+
   // series for the current tab: { unit, curves:[{name,col,pts:[[x,y]],band68:[[x,lo,hi]],band95}], points:[{x,y,lo,hi,xlo,xhi,ds,dec,kind}], ds:[...] }
   function series() {
     const d = cur.d, grid = IDX.grid_ev, out = { curves: [], points: [], ds: [], xlab: T("dx_xE", "neutron energy"), unit: "b", note: null };
@@ -278,14 +307,17 @@
       if (d.meas) { out.ds = d.meas.ds;
         for (const p of d.meas.cap) out.points.push({ x: Math.sqrt(p[0] * p[1]), xlo: p[0], xhi: p[1], y: p[2], e: p[3], ds: p[4], dec: p[5], st: p[6], kind: "sig" });
         for (const p of d.meas.mxw) if (p[0] < 1000) out.points.push({ x: p[0], xlo: p[0], xhi: p[1], y: p[2], e: p[3], ds: p[4], dec: p[5], st: p[6], kind: "mxw" }); }
+      libCurves(out);
       if (d.res) out.note = { upto: d.res, text: T("dx_res", "resolved resonances: the curve is an average here") };
     } else if (tab === "macs") {
       out.xlab = "kT"; out.unit = "mb";
       if (d.macs) out.curves.push({ name: T("dx_pred", "prediction (library v0.1)"), col: C.curve, pts: IDX.kT_keV.map((k, i) => [k * 1e3, d.macs[i]]), b68: IDX.kT_keV.map((k, i) => (d.macsU && d.macsU[i] ? [k * 1e3, d.macs[i] / d.macsU[i], d.macs[i] * d.macsU[i]] : null)).filter(Boolean) });
+      libCurves(out);
       if (d.meas) { out.ds = d.meas.ds; for (const p of d.meas.mxw) if (p[0] >= 1000) out.points.push({ x: p[0], xlo: p[0], xhi: p[1], y: p[2] * 1000, e: p[3], ds: p[4], dec: p[5], st: p[6], kind: "mxw" }); }
     } else {
       out.unit = "mb";
       if (d.ch && d.ch[tab]) out.curves.push({ name: T("dx_recipe", "engine, no-data recipe"), col: C.curve, pts: grid.map((x, i) => [x, d.ch[tab][i]]) });
+      libCurves(out);
       if (tab === "np" && d.npL) out.curves.push({ name: T("dx_learned", "learned correction, 68 % band"), col: C.alt, pts: d.npL.map((p) => [p[0], p[1]]), b68: d.npL.filter((p) => p[2] != null).map((p) => [p[0], p[2], p[3]]) });
       const t = (d.thr && d.thr[tab]) || [], keys = [...new Set(t.map((p) => p[2]))];
       out.ds = keys.map((k) => [k, "", (t.find((p) => p[2] === k) || [])[3], ""]);
@@ -343,11 +375,12 @@
     }
     ctx.globalAlpha = 1;
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, P.reveal, H); ctx.clip();
-    for (const c of S.curves) for (const [w, col] of [[5, C.surface], [2.2, c.col]]) {
-      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.shadowColor = w > 3 ? "transparent" : col; ctx.shadowBlur = w > 3 ? 0 : 12; ctx.lineJoin = "round"; ctx.beginPath(); let on = false;
+    for (const c of [...S.curves].sort((a, b) => !!a.dash - !!b.dash)) for (const [w, col] of c.dash ? [[1.7, c.col]] : [[5, C.surface], [2.2, c.col]]) { // dashed library lines go on top, thin and without a halo, so they never hide the prediction
+      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.shadowColor = w > 3 || c.dash ? "transparent" : col; ctx.shadowBlur = w > 3 || c.dash ? 0 : 12; ctx.lineJoin = "round"; ctx.setLineDash(c.dash ? [7, 5] : []); ctx.beginPath(); let on = false;
       for (const [x, y] of c.pts) { if (!(y > 0)) { on = false; continue; } on ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)); on = true; }
       ctx.stroke();
     }
+    ctx.setLineDash([]);
     ctx.restore();
     ctx.restore();
     finishNuc(S);
@@ -356,7 +389,8 @@
     if (anim > 0 && anim < 1) return; // the lists and legend are rebuilt once, not on every frame of the sweep
     const nPts = S.points.length, nEx = S.points.filter((p) => p.dec === "x").length;
     $("#dx-excl").parentElement.hidden = nEx === 0;
-    const leg = S.curves.map((c) => `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);
+    libNote();
+    const leg = S.curves.map((c) => c.dash ? `<span class="dx-key"><i class="dash" style="color:${c.col}"></i>${esc(c.name)}</span>` : `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);
     if (nPts) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas}"></i>${T("dx_meas_pts", "measured")} (${nPts}${nEx ? `, ${nEx} ${T("dx_excl", "excluded")}` : ""})</span>`);
     $("#dx-plegend").innerHTML = leg.join("");
     pcv.setAttribute("aria-label", `${nameOf(cur.r.Z, cur.r.A)}, ${CH[tab]}: ${S.curves.length ? S.curves.map((c) => c.name).join(", ") : ""}${nPts ? `; ${nPts} ${T("dx_meas_pts", "measured")}` : ""}. ${T("dx_table_hint", "Use “Show as a table” for the values.")}`);
@@ -375,6 +409,9 @@
     $("#dx-table").innerHTML = `<table><thead><tr><th>${T("dx_th_src", "Source")}</th><th>${S.xlab}</th><th>${T("dx_th_val", "Value")}</th><th>${T("dx_th_unc", "Range / uncertainty")}</th><th>${T("dx_th_cur", "Curation")}</th></tr></thead><tbody>${rowsC.join("")}${rowsP.join("")}</tbody></table>`;
   }
   $("#dx-tbtn").addEventListener("click", (e) => { tableOpen = !tableOpen; e.currentTarget.setAttribute("aria-expanded", String(tableOpen)); $("#dx-table").hidden = !tableOpen; if (tableOpen) table(series()); });
+  $("#dx-lib").addEventListener("change", async (e) => { libOn = e.target.checked; if (!cur) return; const c0 = cur;
+    if (libOn) { $("#dx-libnote").hidden = false; $("#dx-libnote").textContent = T("dx_lib_loading", "Loading the libraries…"); const lz = await loadLib(c0.r.Z); if (cur !== c0) return; cur.lib = libOf(lz, c0.r); }
+    buildTabs(); renderNuc(); });
   $("#dx-excl").addEventListener("change", (e) => { showExcl = e.target.checked; renderNuc(); });
   $("#dx-copy").addEventListener("click", (e) => { try { navigator.clipboard.writeText($("#dx-cmd").textContent); e.currentTarget.textContent = T("dx_copied", "Copied"); } catch (err) {} });
   // hover (mouse) or tap (touch) shows the tooltip; clicking a measured point, or tapping it a second time, opens its EXFOR subentry
@@ -391,8 +428,10 @@
     const c = P.S.curves[0];
     if (c && x > P.m.l && x < P.W - P.m.r) {
       const xv = 10 ** (P.x0 + (x - P.m.l) / (P.W - P.m.l - P.m.r) * (P.x1 - P.x0)); let j = -1, jd = Infinity; c.pts.forEach(([px], i) => { const dd = Math.abs(log10(px) - log10(xv)); if (dd < jd) { jd = dd; j = i; } });
-      if (j >= 0 && jd < 0.2 && c.pts[j][1] > 0) { const b = c.b68 && c.b68.find((q) => q[0] === c.pts[j][0]);
-        return { html: `${fmtE(c.pts[j][0])}: <b>${num(c.pts[j][1])} ${P.S.unit}</b>${b ? `<br><span class="dx-faint">68 %: ${num(b[1])}–${num(b[2])}</span>` : ""}`, url: null, p: null }; } }
+      if (j >= 0 && jd < 0.2) { const xe = c.pts[j][0], lines = [], anyLib = P.S.curves.some((cc) => cc.dash);
+        for (const cc of P.S.curves) { const q = cc.pts.find((p) => p[0] === xe); if (!q || !(q[1] > 0)) continue; const b = cc.b68 && cc.b68.find((r) => r[0] === xe);
+          lines.push(cc.dash ? `<span class="dx-faint">${esc(cc.short)}: ${num(q[1])} ${P.S.unit}</span>` : `<b>${num(q[1])} ${P.S.unit}</b>${b ? ` <span class="dx-faint">(68 %: ${num(b[1])}–${num(b[2])})</span>` : ""}${anyLib ? ` <span class="dx-faint">· ${esc(cc.name)}</span>` : ""}`); }
+        if (lines.length) return { html: `${fmtE(xe)}${anyLib && tab !== "macs" ? ` <span class="dx-faint">· ${T("dx_lib_bin", "libraries: bin averages")}</span>` : ""}<br>${lines.join("<br>")}`, url: null, p: null }; } }
     return null;
   }
   function showTip(h, x, y) {

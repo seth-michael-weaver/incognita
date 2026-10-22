@@ -344,16 +344,19 @@ body.og .hero-copy { bottom: 64px; }
 .dx {
   --dx-surface: var(--card); --dx-ink: var(--ink); --dx-soft: var(--soft); --dx-faint: var(--faint); --dx-line: var(--line); --dx-grid: #e6e9ef;
   --dx-curve: #2a78d6; --dx-meas: #eb6834; --dx-alt: #1baf7a; --dx-none: #e2e5ea; --dx-sel: #eb6834;
+  --dx-l1: #7d5bbf; --dx-l2: #b0507e; --dx-l3: #8c7a2e; /* evaluated-library overlay (comparators): muted, dashed */
   --dx-t0: #104281; --dx-t1: #256abf; --dx-t2: #5598e7; --dx-t3: #86b6ef;
   --dx-r1: #cde2fb; --dx-r2: #9ec5f4; --dx-r3: #6da7ec; --dx-r4: #3987e5; --dx-r5: #256abf; --dx-r6: #184f95; --dx-r7: #0d366b;
   max-width: 72rem; margin: 0 auto; padding: 40px 20px 96px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .dx {
   --dx-grid: #262d3a; --dx-curve: #3987e5; --dx-meas: #d95926; --dx-alt: #199e70; --dx-none: #262d3a; --dx-sel: #f0f3f8;
+  --dx-l1: #a68be0; --dx-l2: #d784ab; --dx-l3: #c7b065;
   --dx-t0: #9ec5f4; --dx-t1: #5598e7; --dx-t2: #2a78d6; --dx-t3: #184f95;
   --dx-r1: #0d366b; --dx-r2: #184f95; --dx-r3: #256abf; --dx-r4: #3987e5; --dx-r5: #6da7ec; --dx-r6: #9ec5f4; --dx-r7: #cde2fb; } }
 :root[data-theme="dark"] .dx {
   --dx-grid: #262d3a; --dx-curve: #3987e5; --dx-meas: #d95926; --dx-alt: #199e70; --dx-none: #262d3a; --dx-sel: #f0f3f8;
+  --dx-l1: #a68be0; --dx-l2: #d784ab; --dx-l3: #c7b065;
   --dx-t0: #9ec5f4; --dx-t1: #5598e7; --dx-t2: #2a78d6; --dx-t3: #184f95;
   --dx-r1: #0d366b; --dx-r2: #184f95; --dx-r3: #256abf; --dx-r4: #3987e5; --dx-r5: #6da7ec; --dx-r6: #9ec5f4; --dx-r7: #cde2fb; }
 .dx .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -395,6 +398,13 @@ body.og .hero-copy { bottom: 64px; }
 .dx-tabs button[aria-selected="true"] { color: var(--paper); background: var(--ink); border-color: var(--ink); }
 .dx-plotbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 18px; align-items: center; font: 500 13px var(--sans); color: var(--soft); }
 .dx-check { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.dx-key i.dash { height: 0; width: 18px; border-radius: 0; background: none !important; border-top: 2px dashed; }
+.dx-libbar { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font: 500 13px var(--sans); color: var(--soft); }
+.dx-libbar .dx-check { align-items: flex-start; } .dx-libbar .dx-check input { margin-top: 2px; flex: none; }
+.dx-libnote { margin: 8px 0 0; font-size: 12.5px; color: var(--faint); line-height: 1.5; overflow-wrap: anywhere; }
+.dx-libnote p { margin: 0 0 6px; } .dx-libnote ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.dx-libnote li { display: flex; gap: 8px; align-items: baseline; } .dx-libnote li i { flex: none; width: 16px; border-top: 2px dashed; transform: translateY(-3px); }
+.dx-libnote b { color: var(--soft); font-weight: 600; }
 .dx-link { font: 600 13px var(--sans); color: var(--accent); background: none; border: 0; padding: 6px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .dx-table { max-height: 420px; overflow: auto; margin-top: 10px; border: 1px solid var(--line); border-radius: 10px; }
 .dx-table table { width: 100%; border-collapse: collapse; font: 500 13px var(--sans); }

@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=23">
+<link rel="stylesheet" href="style.css?v=24">
 </head>
 <body class="sb-page dx-page">
 
@@ -80,6 +80,10 @@
       <label class="dx-check"><input type="checkbox" id="dx-excl"> <span data-i18n="dx_show_excl">Show points the curation excluded</span></label>
       <button type="button" class="dx-link" id="dx-tbtn" aria-expanded="false" data-i18n="dx_table">Show as a table</button>
     </div>
+    <div class="dx-libbar">
+      <label class="dx-check"><input type="checkbox" id="dx-lib" aria-describedby="dx-libnote"> <span data-i18n="dx_lib">Overlay evaluated libraries (comparison only — not used by INCOGNITA)</span></label>
+      <div class="dx-libnote" id="dx-libnote" hidden></div>
+    </div>
     <div class="dx-table" id="dx-table" hidden></div>
     <div class="dx-ds" id="dx-ds"></div>
     <div class="dx-run">
@@ -101,13 +105,13 @@ uv run python -m incognita.library show Au-197    # one capture curve with its 6
     <p data-i18n="dx_repo_p2">Running the engine itself also needs the TALYS structure database; the README explains how to fetch it.</p>
     <p data-i18n="dx_access"><b>Data access.</b> Everything shown here is in the repository under <a href="https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.1"><code>library/v0.1</code></a>: capture curves with 68 / 95 % bands (<code>capture_v01_indep.parquet</code>), Maxwellian averages (<code>macs30_v01_indep.csv</code>, <code>macs_kt_v01_indep.csv</code>), stellar rates (<code>rates_v01_indep.csv</code>, <code>reaclib_v01_indep.dat</code>) and the (n,2n), (n,p), (n,α) channels (<code>channels_recipe_v01_indep.parquet</code>, <code>grid_np_v01_indep.parquet</code>), checked by <code>SHA256SUMS</code>. For one nuclide, the CSV and JSON downloads above are enough. The curated measurements are in <code>data/curation</code>; they come from EXFOR (IAEA Nuclear Data Section) and keep their EXFOR ids. Library data are CC-BY-4.0.</p>
     <p><a class="dx-gh" href="https://github.com/seth-michael-weaver/incognita" data-i18n="dx_repo_link">seth-michael-weaver/incognita on GitHub →</a></p>
-    <p class="dx-src" data-i18n="dx_src">Sources: predictions from the v0.1 library (<code>library/v0.1</code>); capture measurements from EXFOR as curated in <code>data/curation</code>; (n,2n), (n,p) and (n,α) measurements from the benchmark rows in <code>incognita/bench</code>. Measurements the curation excluded are hidden unless you ask for them.</p>
+    <p class="dx-src" data-i18n="dx_src">Sources: predictions from the v0.1 library (<code>library/v0.1</code>); capture measurements from EXFOR as curated in <code>data/curation</code>; (n,2n), (n,p) and (n,α) measurements from the benchmark rows in <code>incognita/bench</code>. Measurements the curation excluded are hidden unless you ask for them. The optional dashed overlay of evaluated libraries (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) is built by <code>scripts/build_site_overlay.py</code> for display only; INCOGNITA never reads it.</p>
   </section>
 </main>
 
-<script src="js/i18n.js?v=23"></script>
-<script src="js/i18n/es-data.js?v=23"></script>
-<script src="js/nav.js?v=23"></script>
-<script src="js/data.js?v=23"></script>
+<script src="js/i18n.js?v=24"></script>
+<script src="js/i18n/es-data.js?v=24"></script>
+<script src="js/nav.js?v=24"></script>
+<script src="js/data.js?v=24"></script>
 </body>
 </html>

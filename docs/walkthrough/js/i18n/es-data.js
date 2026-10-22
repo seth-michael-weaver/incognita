@@ -18,7 +18,7 @@ Object.assign(WT.es.ui, {
   credit_sub: "El motor INCOGNITA es un port de <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) y usa la base de datos de estructura nuclear de TALYS. Lo que INCOGNITA añade está <a href=\"./?lang=es#code\">listado, interruptor por interruptor, al final de la página didáctica</a>.",
   dx_repo_p2: "Para ejecutar el propio motor hace falta además la base de datos de estructura de TALYS; el README explica cómo descargarla.",
   dx_repo_link: "seth-michael-weaver/incognita en GitHub →",
-  dx_src: "Fuentes: predicciones de la biblioteca v0.1 (<code>library/v0.1</code>); medidas de captura de EXFOR depuradas en <code>data/curation</code>; medidas de (n,2n), (n,p) y (n,α) de las filas de referencia en <code>incognita/bench</code>. Las medidas que la depuración excluyó quedan ocultas salvo que las pidas.",
+  dx_src: "Fuentes: predicciones de la biblioteca v0.1 (<code>library/v0.1</code>); medidas de captura de EXFOR depuradas en <code>data/curation</code>; medidas de (n,2n), (n,p) y (n,α) de las filas de referencia en <code>incognita/bench</code>. Las medidas que la depuración excluyó quedan ocultas salvo que las pidas. La superposición opcional (líneas discontinuas) de bibliotecas evaluadas (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) la genera <code>scripts/build_site_overlay.py</code> solo para mostrarla; INCOGNITA nunca la lee.",
   dx_t0: "Medido", dx_t1: "Anclado a una MACS medida", dx_t2: "Interpolado de los vecinos", dx_t3: "Extrapolado (solo el motor)",
   dx_ts0: "medido", dx_ts1: "anclado", dx_ts2: "interpolado", dx_ts3: "extrapolado",
   dx_keep: "conservado", dx_down: "con menos peso", dx_excl: "excluido", dx_fix: "unidad corregida",
@@ -43,4 +43,12 @@ Object.assign(WT.es.ui, {
   dx_dl: "Descargar este núclido:",
   dx_dl_note: "Cada curva y cada punto medido de este núclido, todas las reacciones, con unidades, fuentes e identificadores EXFOR escritos en el archivo.",
   dx_access: "<b>Acceso a los datos.</b> Todo lo que se muestra aquí está en el repositorio, en <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.1\"><code>library/v0.1</code></a>: curvas de captura con bandas del 68 / 95 % (<code>capture_v01_indep.parquet</code>), promedios de Maxwell (<code>macs30_v01_indep.csv</code>, <code>macs_kt_v01_indep.csv</code>), tasas estelares (<code>rates_v01_indep.csv</code>, <code>reaclib_v01_indep.dat</code>) y los canales (n,2n), (n,p), (n,α) (<code>channels_recipe_v01_indep.parquet</code>, <code>grid_np_v01_indep.parquet</code>), comprobados con <code>SHA256SUMS</code>. Para un solo núclido bastan las descargas CSV y JSON de arriba. Las medidas depuradas están en <code>data/curation</code>; proceden de EXFOR (Sección de Datos Nucleares del OIEA) y conservan sus identificadores EXFOR. Los datos de la biblioteca son CC-BY-4.0.",
+});
+Object.assign(WT.es.ui, {
+  dx_lib: "Superponer bibliotecas evaluadas (solo para comparar — INCOGNITA no las usa)",
+  dx_eval: "evaluación", dx_lib_pd: "dominio público (EE. UU.)", dx_lib_loading: "Cargando las bibliotecas…",
+  dx_lib_bin: "bibliotecas: promedios por intervalo",
+  dx_lib_note: "Las líneas discontinuas son bibliotecas evaluadas de datos nucleares, mostradas solo para comparar: INCOGNITA no las usa y no están en las descargas. Cada una se reconstruye a 0 K a partir del archivo ENDF-6 de la biblioteca (NJOY) y se promedia sobre los mismos intervalos de energía que la curva (promedios en el logaritmo de la energía, así que las resonancias quedan suavizadas); la MACS usa la curva puntual completa.",
+  dx_lib_none: "No hay archivo para este núclido en", dx_lib_notab: "No hay un valor separado para esta reacción en",
+  dx_lib_held: "JENDL-5 se añadirá cuando se confirmen sus condiciones para redistribuir tablas derivadas.",
 });
