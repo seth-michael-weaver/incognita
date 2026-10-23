@@ -1,7 +1,7 @@
 # dev-only files (not part of the site)
 BRIEF.md
 I18N_BRIEF.md
-README.md
+/README.md
 shot.sh
 i18n_missing.sh
 glossary_check.py
