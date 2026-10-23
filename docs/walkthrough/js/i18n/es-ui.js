@@ -1,5 +1,6 @@
 /* Spanish: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.es.ui, {
+  lang_label: "Idioma", nav_teach: "Docentes",
   brand: "Dentro de una reacción nuclear", nav_physics: "La física", nav_data: "Todos los núclidos", nav_board: "Marcador", menu: "Menú", site_nav: "Sitio",
   ways_h: "Más formas de entrar", ways_more: "O sigue bajando: la física empieza aquí ↓",
   way1_k: "Explora", way1_t: "Todos los núclidos", way1_p: "Secciones eficaces predichas para 6168 núclidos junto a cada medida depurada. Busca cualquier isótopo y mira cada conjunto de datos.", way1_go: "Abrir los datos →",

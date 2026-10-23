@@ -3,7 +3,7 @@
  * built by scripts/build_site_data.py from library/v0.1, data/curation and incognita/bench. Plain script, no build. */
 (function () {
   "use strict";
-  const es = WT.lang === "es", T = (k, en) => WT.ui(k, en);
+  const es = WT.tl, T = (k, en) => WT.ui(k, en);
   const $ = (s) => document.querySelector(s);
   const th = /[?&]theme=(dark|light)/.exec(location.search); if (th) document.documentElement.dataset.theme = th[1];
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -11,10 +11,10 @@
 
   // ---------- static text, language switch ----------
   if (es) {
-    if (WT.es.ui.dx_title) document.title = WT.es.ui.dx_title;
-    document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.es.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
-    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.es.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
-    document.querySelectorAll("[data-i18n-ph]").forEach((el) => { const t = WT.es.ui[el.dataset.i18nPh]; if (t != null) el.setAttribute("placeholder", t); });
+    if (WT.L.ui.dx_title) document.title = WT.L.ui.dx_title;
+    document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.L.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
+    document.querySelectorAll("[data-i18n-ph]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nPh]; if (t != null) el.setAttribute("placeholder", t); });
   }
   // links that keep the language and the EN | ES switch: js/nav.js
 

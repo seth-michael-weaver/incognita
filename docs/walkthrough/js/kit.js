@@ -193,8 +193,11 @@
   const GL_BLOCKS = ".intro-text p, .story .lead, .step p, .coda p, .coda td:nth-child(2)";
   const GL_SKIP = ".ctl, .btns, button, input, label, output, select, textarea, code, pre, .formula, .aside, .term, h1, h2, h3, a";
   const BOUND = "[\\p{L}\\p{N}_\\-]";
+  // Korean attaches particles to the noun (핵이, 핵을), so a term may be followed by Hangul; Latin letters still end a match
+  const BOUND_AFTER = WT.lang === "ko" ? "[A-Za-z0-9_\\-]" : BOUND;
   const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
   function plural(a) {
+    if (WT.tl && WT.lang !== "es") return a;   // other languages list their plural forms as glossary aliases
     if (WT.lang === "es") { if (/[aeiouáéó]$/.test(a)) return a + "s"; if (/z$/.test(a)) return a.slice(0, -1) + "ces"; if (/s$/.test(a)) return a; return a + "es"; }
     if (/(s|x|ch|sh)$/.test(a)) return a + "es";
     if (/[^aeiou]y$/.test(a)) return a.slice(0, -1) + "ies";
@@ -208,7 +211,7 @@
       if (/^\p{L}[\p{Ll}' \-–]*$/u.test(a)) { const l = a.toLowerCase(); if (!ci.has(l)) ci.set(l, key); const pl = plural(l); if (!ci.has(pl)) ci.set(pl, key); }
       else if (!cs.has(a)) cs.set(a, key);
     }
-    const mk = (m, fl) => { if (!m.size) return null; const alts = [...m.keys()].sort((x, y) => y.length - x.length).map(escRe).join("|"); return new RegExp(`(?<!${BOUND})(?:${alts})(?!${BOUND})`, "gu" + fl); };
+    const mk = (m, fl) => { if (!m.size) return null; const alts = [...m.keys()].sort((x, y) => y.length - x.length).map(escRe).join("|"); return new RegExp(`(?<!${BOUND})(?:${alts})(?!${BOUND_AFTER})`, "gu" + fl); };
     return { ci, cs, rci: mk(ci, "i"), rcs: mk(cs, "") };
   }
   function glMark() {
@@ -410,16 +413,11 @@
   }
   WT.term = { open: (t, pin) => glOpen(t, pin), close: () => glClose(false) };
 
-  WT.gl = () => (WT.lang === "es" && WT.es && Object.keys(WT.es.glossary).length ? WT.es.glossary : WT.glossary);
-  // EN | ES switch in the contents bar
+  WT.gl = () => (WT.tl && Object.keys(WT.L.glossary).length ? WT.L.glossary : WT.glossary);
+  // language picker in the contents bar
   function langToggle() {
     const nav = document.querySelector(".toc"); if (!nav || nav.querySelector(".lang")) return;
-    const box = document.createElement("div"); box.className = "lang"; box.setAttribute("role", "group"); box.setAttribute("aria-label", WT.lang === "es" ? "Idioma" : "Language");
-    [["en", "EN", "English"], ["es", "ES", "Español"]].forEach(([l, t, full]) => {
-      const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.title = full; b.setAttribute("aria-pressed", String(WT.lang === l)); b.lang = l;
-      if (WT.lang === l) b.className = "on"; else b.addEventListener("click", () => WT.setLang && WT.setLang(l));
-      box.appendChild(b);
-    });
+    const box = WT.langSwitch();
     const board = nav.querySelector(".board-link"); // keep the order: chapters, scoreboard link, language switch
     if (board) nav.appendChild(board);
     nav.appendChild(box);
@@ -436,7 +434,7 @@
     const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, measure: 1, layers: 2 };
     document.querySelectorAll("[data-ch]").forEach((el) => {
       const id = el.dataset.ch, mod = WT.mods[id]; if (!mod) return;
-      const esm = WT.lang === "es" && WT.es && WT.es.ch[id]; if (esm) Object.assign(mod, esm);
+      const esm = WT.tl && WT.L.ch[id]; if (esm) Object.assign(mod, esm);
       if (!el.querySelector(".stage") && mod.html) {
         el.id = id;
         const lv = LEVEL[id], lvt = lv == null ? "" : ` <span class="lvl l${lv}" title="${WT.ui ? WT.ui("lvl_title", "Level") : "Level"}">${WT.ui ? WT.ui("lvl" + lv, LEVELS[lv]) : LEVELS[lv]}</span>`;
@@ -457,7 +455,7 @@
       steps.forEach((s, i) => { s.id = `${id}-${i + 1}`; const a = document.createElement("a"); a.className = "step-link"; a.href = "#" + s.id;
         a.setAttribute("aria-label", (WT.ui ? WT.ui("step_link", "Copy a link to this step") : "Copy a link to this step") + ` (${id}-${i + 1})`); a.title = a.getAttribute("aria-label");
         a.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M6.5 9.5l3-3M7 4.6l1.2-1.2a2.6 2.6 0 013.7 3.7L10.7 8.3M9 11.4l-1.2 1.2a2.6 2.6 0 01-3.7-3.7L5.3 7.7"/></svg>';
-        a.addEventListener("click", (e) => { e.preventDefault(); const url = location.origin + location.pathname + (WT.lang === "es" ? "?lang=es" : "") + "#" + s.id;
+        a.addEventListener("click", (e) => { e.preventDefault(); const url = location.origin + location.pathname + WT.langQ() + "#" + s.id;
           history.replaceState(null, "", location.pathname + location.search + "#" + s.id);
           const done = () => { a.dataset.done = WT.ui ? WT.ui("link_copied", "Link copied") : "Link copied"; clearTimeout(a._t); a._t = setTimeout(() => delete a.dataset.done, 1600); };
           try { navigator.clipboard.writeText(url).then(done, done); } catch (err) { done(); } });
@@ -519,11 +517,9 @@
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     if (mq.addEventListener) mq.addEventListener("change", readColors);
     resize(); requestAnimationFrame(loop);
-    if (WT.lang === "es" && WT.es.ui.title) document.title = WT.es.ui.title;
-    if (WT.lang === "es") document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.es.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
-    if (WT.lang === "es") document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.es.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
+    WT.applyStatic(document, "title");
     langToggle();
-    if (WT.lang === "es") document.querySelectorAll("a[data-keep-lang]").forEach((a) => { const h = a.getAttribute("href"); if (!/[?&]lang=/.test(h)) a.setAttribute("href", h + (h.includes("?") ? "&" : "?") + "lang=es"); });
+    WT.keepLang();
     try { WT.termCount = glMark(); glCard(); } catch (e) { console.error("glossary", e); }
     try { const f = sessionStorage.getItem("wt_scroll"); if (f !== null) { sessionStorage.removeItem("wt_scroll"); requestAnimationFrame(() => window.scrollTo(0, +f * document.documentElement.scrollHeight)); } } catch (e) {}
     if (/[?&]i18ndump=1/.test(location.search)) setTimeout(() => { const pre = document.createElement("pre"); pre.id = "i18n-missing"; pre.textContent = [...WT.missing].join("\n"); document.body.appendChild(pre); }, 3000);

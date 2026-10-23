@@ -1,5 +1,6 @@
 /* Spanish: data explorer (data.html, js/data.js) */
 Object.assign(WT.es.ui, {
+  lang_label: "Idioma", nav_teach: "Docentes",
   brand: "Dentro de una reacción nuclear", nav_physics: "La física", nav_data: "Todos los núclidos", nav_board: "Marcador", menu: "Menú", site_nav: "Sitio",
   dx_title: "Todos los núclidos · Dentro de una reacción nuclear",
   site_nav: "Sitio", nav_walk: "El recorrido", nav_board: "Marcador", nav_data: "Todos los núclidos", nav_repo: "Código en GitHub",

@@ -209,14 +209,16 @@ body.shot .chapter .stage { top: 0; }
   .term { transition: none; }
 }
 
-/* language switch (EN | ES) at the right end of the contents bar */
+/* language picker at the right end of the contents bar: a pill showing the current code (EN ▾); the native menu sits
+   invisibly on top of it, so a tap opens the phone's own picker and every language is listed in its own name */
 .toc { display: flex; align-items: center; }
 .toc ol { flex: 1 1 auto; min-width: 0; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); padding-right: 32px; }
-.toc .lang { flex: none; display: flex; gap: 2px; margin-right: max(16px, 4vw); padding: 2px; border-radius: 999px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
-.toc .lang button { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--faint); background: none; border: 0; padding: 4px 10px; border-radius: 999px; cursor: pointer; }
-.toc .lang button:hover { color: var(--ink); }
-.toc .lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.toc .lang button.on { color: var(--paper); background: var(--ink); cursor: default; }
+.toc .lang { flex: none; position: relative; display: inline-flex; align-items: center; margin-right: max(16px, 4vw); border-radius: 999px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.toc .lang .lang-face { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--ink); padding: 6px 12px; white-space: nowrap; }
+.toc .lang .lang-face::after { content: " ▾"; color: var(--faint); }
+.toc .lang select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; }
+.toc .lang:hover { box-shadow: 0 0 0 1px var(--faint); }
+.toc .lang:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* ---------- accessibility and phone polish ---------- */
 /* light-mode muted text meets 4.5:1 on the paper colour (was about 3:1) */
@@ -234,7 +236,7 @@ input[type=range] { min-height: 32px; }
 @media (pointer: coarse) {
   .toc a, .toc .board-link { padding-block: 13px; }
   .toc ol { padding-block: 0; }
-  .toc .lang button { min-height: 40px; min-width: 44px; }
+  .toc .lang { min-height: 40px; min-width: 56px; justify-content: center; }
   .gl-close { width: 44px !important; height: 44px !important; top: 8px !important; right: 8px !important; }
   input[type=range] { min-height: 44px; }
 }

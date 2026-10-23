@@ -2,12 +2,12 @@
  * time bars, and a link builder for any chapter or step. Levels match LEVEL in kit.js; step counts match js/ch/*.js. */
 (function () {
   "use strict";
-  const es = WT.lang === "es", T = (k, en) => WT.ui(k, en);
+  const es = WT.tl, T = (k, en) => WT.ui(k, en);
   const $ = (s) => document.querySelector(s);
   if (es) {
-    if (WT.es.ui.in_title) document.title = WT.es.ui.in_title;
-    document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.es.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
-    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.es.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
+    if (WT.L.ui.in_title) document.title = WT.L.ui.in_title;
+    document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.L.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
     document.querySelectorAll("a[data-keep-lang]").forEach((a) => { const h = a.getAttribute("href"); if (/[?&]lang=/.test(h)) return; const [p, hash] = h.split("#"); a.setAttribute("href", p + (p.includes("?") ? "&" : "?") + "lang=es" + (hash != null ? "#" + hash : "")); });
   }
   const LV = [T("lvl0", "Intro"), T("lvl1", "Intermediate"), T("lvl2", "Advanced")];
@@ -27,7 +27,7 @@
     ["layers", 12, 2, 12, 5, "How the model is layered", "Layers", "How the data product is built on the engine: one global rule, each nucleus's own data, anchoring to good data (TERRA), calibrated error bars."],
   ].map(([id, n, lv, min, steps, title, topic, what]) => ({ id, n, lv, min, steps, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
   const byId = Object.fromEntries(CH.map((c) => [c.id, c]));
-  const lang = es ? "?lang=es" : "";
+  const lang = WT.langQ();
   const href = (id) => "./" + lang + "#" + id;
   const pill = (lv) => `<span class="lvl l${lv}">${LV[lv]}</span>`;
   const mins = (m) => `${m} min`;
@@ -71,8 +71,8 @@
   const base = location.origin + location.pathname.replace(/instructors(\.html)?$/, "");
   selC.innerHTML = CH.map((c) => `<option value="${c.id}">${c.n} · ${c.title}</option>`).join("");
   const fillSteps = () => { const c = byId[selC.value], v = selS.value; selS.innerHTML = `<option value="">${T("in_b_whole", "whole chapter")}</option>` + Array.from({ length: c.steps }, (_, i) => `<option value="${i + 1}">${T("in_b_step", "step")} ${i + 1}</option>`).join(""); if (v && +v <= c.steps) selS.value = v; };
-  const build = () => { const url = base + (selL.value === "es" ? "?lang=es" : "") + "#" + selC.value + (selS.value ? "-" + selS.value : ""); out.textContent = url; open.href = url; };
-  selL.value = WT.lang; fillSteps(); build();
+  const build = () => { const url = base + (selL.value !== "en" ? "?lang=" + selL.value : "") + "#" + selC.value + (selS.value ? "-" + selS.value : ""); out.textContent = url; open.href = url; };
+  selL.innerHTML = Object.entries(WT.LANGS).map(([l, [, name]]) => `<option value="${l}" lang="${l}">${name}</option>`).join(""); selL.value = WT.lang; fillSteps(); build();
   selC.addEventListener("change", () => { fillSteps(); build(); }); selS.addEventListener("change", build); selL.addEventListener("change", build);
   copy.addEventListener("click", () => { const done = () => { copy.textContent = T("link_copied", "Link copied"); setTimeout(() => (copy.textContent = T("in_b_copy", "Copy")), 1600); };
     try { navigator.clipboard.writeText(out.textContent).then(done, done); } catch (e) { done(); } });

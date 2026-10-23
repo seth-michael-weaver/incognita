@@ -1,5 +1,9 @@
 /* Spanish: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.es.ui, {
+  lang_label: "Idioma", nav_teach: "Docentes",
+  sb_g_macs: "captura estelar (MACS), Z ", sb_g_thrA1_np: "(n,p) cerca del umbral", sb_g_capture_FAR: "captura, núcleos lejos de la estabilidad",
+  sb_g_fission_SELECT: "fisión, actínidos seleccionados", sb_g_n2n_SELECT: "(n,2n), núcleos seleccionados",
+  sb_g_n2n_SELECT_RL3: "(n,2n), núcleos seleccionados, segundo conjunto de datos", sb_g_np_FRESH_curated: "(n,p), conjunto depurado",
   sb_h_eng: "El motor frente a otros códigos", sb_h_terra: "El producto de datos frente a las bibliotecas evaluadas",
   brand: "Dentro de una reacción nuclear", nav_physics: "La física", nav_data: "Todos los núclidos", nav_board: "Marcador", menu: "Menú", site_nav: "Sitio",
   sb_title: "Marcador · Dentro de una reacción nuclear",

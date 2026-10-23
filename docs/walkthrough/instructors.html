@@ -71,7 +71,7 @@
     <div class="in-builder">
       <label><span data-i18n="in_b_ch">Chapter</span><select id="in-b-ch"></select></label>
       <label><span data-i18n="in_b_st">Step</span><select id="in-b-step"></select></label>
-      <label><span data-i18n="in_b_lang">Language</span><select id="in-b-lang"><option value="en">English</option><option value="es">Español</option></select></label>
+      <label><span data-i18n="in_b_lang">Language</span><select id="in-b-lang"></select></label>
       <code class="in-url" id="in-b-url"></code>
       <div class="in-b-btns"><button type="button" class="btn" id="in-b-copy" data-i18n="in_b_copy">Copy</button><a class="btn ghost" id="in-b-open" href="./" data-i18n="in_b_open">Open</a></div>
     </div>
@@ -90,7 +90,7 @@
 </main>
 
 <script src="js/i18n.js?v=28"></script>
-<script>if (WT.lang === "es") ["ui", "instructors"].forEach((f) => document.write('<script src="js/i18n/es-' + f + '.js?v=28"><\/script>'));</script>
+<script>WT.load(["ui", "instructors"], 28);</script>
 <script src="js/nav.js?v=28"></script>
 <script src="js/instructors.js?v=28"></script>
 </body>
