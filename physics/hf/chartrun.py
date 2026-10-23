@@ -147,4 +147,49 @@ def drop_target_caches(keep: frozenset[str] = KEEP) -> None:
             memo = getattr(mod, n, None)
             if memo is not None:
                 memo.clear()
+    from physics.hf.fission.chain import heavymem_on
+
+    hm = heavymem_on()
+    if hm:
+        _clear_class_caches(keep)
     gc.collect()
+    if hm:
+        _malloc_trim()
+
+
+def _clear_class_caches(keep: frozenset[str]) -> None:
+    """HEAVYMEM: the `lru_cache`d methods of `physics.hf` classes (`Cascade._sep`, `_chain_knots`, `_fis_knots`,
+    `_discrete`, ...) key on `self`, so their class-level caches kept finished targets' Cascades alive (2 after a
+    U-238 drop). A new target's objects never hit those entries; clearing them frees the old ones and moves no number."""
+    for name, mod in list(sys.modules.items()):
+        if not name.startswith("physics.hf") or mod is None:
+            continue
+        for obj in list(vars(mod).values()):
+            if not (isinstance(obj, type) and obj.__module__ == name):
+                continue
+            for v in list(vars(obj).values()):
+                if not isinstance(v, functools._lru_cache_wrapper):
+                    continue
+                fn = v.__wrapped__
+                mq = getattr(fn, "__module__", "")
+                if (f"{mq}.{getattr(fn, '__name__', '')}" in keep
+                        or f"{mq}.{getattr(fn, '__qualname__', '')}" in keep):
+                    continue
+                try:
+                    v.cache_clear()
+                except Exception:  # noqa: BLE001
+                    pass
+
+
+def _malloc_trim() -> None:
+    """HEAVYMEM: hand the freed heap back to the OS between targets. glibc keeps it after a heavy target (U-238 + p:
+    3.3 GB RSS with 0.03 GB of live tensors after the drop, 0.72 GB after the trim), which is how long item lists
+    grew workers to ~8 GB. No-op off glibc."""
+    if not sys.platform.startswith("linux"):
+        return
+    try:
+        import ctypes
+
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except Exception:  # noqa: BLE001
+        pass

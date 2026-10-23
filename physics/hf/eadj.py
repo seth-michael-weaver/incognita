@@ -178,8 +178,15 @@ def active() -> tuple:
     return getattr(c, "eadj", ())
 
 
+def _npw():
+    from physics.hf.density import npwindow
+
+    return npwindow
+
+
 def on() -> bool:
-    return bool(active())
+    """Any bump this run (deck lines, or the NPWINDOW rule's target ctable bumps, physics/hf/density/npwindow.py)."""
+    return bool(active()) or _npw().applies_run()
 
 
 def select(target: str, sel: tuple) -> tuple:
@@ -195,15 +202,79 @@ def any_target(targets) -> bool:
     return bool(bs) and any(b.target in targets for b in bs)
 
 
-def ld_native_ok() -> bool:
-    """False while any level-density bump is active: the native LD kernels (ld_nx2 / ld_ceng / ld2_nx2, which evaluate
-    a(Eex) and rho in C) are then skipped and the Python twins, which carry the bumps, run. True (the default) otherwise."""
-    return not any_target(LD_TARGETS)
+#: NPWPROMO: the nuclei whose level density the native LD kernels are being asked about (innermost last); pushed by
+#: `per_nucleus` wrappers only while the NPWINDOW rule applies to the run
+_NUC: list = []
+
+
+class _Nuc:
+    __slots__ = ("za",)
+
+    def __init__(self, Z, A):
+        self.za = (int(Z), int(A))
+
+    def __enter__(self):
+        _NUC.append(self.za)
+        return self
+
+    def __exit__(self, *exc):
+        _NUC.pop()
+        return False
+
+
+class _Null:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+_NULL = _Null()
+
+
+def nucleus(Z, A):
+    """Context: native LD kernels called inside are about nucleus (Z, A) (no-op unless the NPWINDOW rule applies)."""
+    return _Nuc(Z, A) if _npw().target() is not None else _NULL
+
+
+def per_nucleus(fn):
+    """Decorator for an LD function whose first argument is the nucleus's `LDNucleus`: its native kernels are asked
+    for that nucleus (`ld_native_ok`). Off the NPWINDOW rule it calls `fn` directly."""
+    import functools
+
+    @functools.wraps(fn)
+    def w(ld, *a, **k):
+        if _npw().target() is None:
+            return fn(ld, *a, **k)
+        with _Nuc(ld.Z, ld.A):
+            return fn(ld, *a, **k)
+
+    return w
+
+
+def ld_native_ok(Z=None, A=None) -> bool:
+    """False while a deck level-density bump is active (every nucleus: the native LD kernels ld_nx2 / ld_ceng / ld2_nx2,
+    which evaluate a(Eex) and rho in C, are skipped and the Python twins, which carry the bumps, run), or, under the
+    NPWINDOW rule, for the rule's target nucleus ((Z, A) given, else the innermost `nucleus` context; none: False).
+    True (the default) otherwise."""
+    if any_target(LD_TARGETS):  # a deck LD bump: every nucleus on the Python twins (it may name any nucleus)
+        return False
+    t = _npw().target()
+    if t is None:
+        return True
+    # NPWINDOW: only the rule's target needs the Python twins (its bumps live in models._adjusted); every other
+    # nucleus keeps the native kernels. Unknown nucleus (no context): Python, as an ENGADJ run.
+    if Z is None:
+        if not _NUC:
+            return False
+        Z, A = _NUC[-1]
+    return (int(Z), int(A)) != t
 
 
 def token() -> tuple:
-    """Hashable identity of the active bump set (for cache keys); () when off."""
-    return tuple(active())
+    """Hashable identity of the active bump set (for cache keys); () when off. NPWINDOW: + the rule's marker."""
+    return tuple(active()) + _npw().token()
 
 
 def omp_factor(key: str, k: int, e):

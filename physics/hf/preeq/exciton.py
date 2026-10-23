@@ -1681,7 +1681,8 @@ def pewindow_mode(options) -> str:
     linear ramp through the zero node; q = a + two exactly evaluated nodes at 1/3 and 2/3 of each endpoint segment.
     pewindow g: g = p + the ground state (level 0, TALYS window [mid(E0, E1), E0]) gets the same exact integral (p leaves it on
     TALYS's two-point floor-node sample, which alternates x4 with the 0.5 MeV grid phase).
-    Test: tests/hf/test_pewindow.py, tests/hf/test_pepauli.py, tests/hf/test_pewindow_gs.py
+    A photon entrance (k0 = 0) has no discrete PE collapse to correct: `preequilibrium` runs it as n (PEPHOTFIX).
+    Test: tests/hf/test_pewindow.py, tests/hf/test_pepauli.py, tests/hf/test_pewindow_gs.py, tests/hf/test_pephotfix.py
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     """
@@ -1920,6 +1921,14 @@ def preequilibrium(
     if prm != "n" and not pun:
         raise ValueError("peremove 1/2 is built on peunits y: set both")
     pwm = pewindow_mode(options)  # PEWINDOW (default n = OFF = TALYS/PEUNITS/PEREMOVE)
+    if pwm != "n" and inp.k0 == 0:
+        # PEPHOTFIX: PEWINDOW (and the PEREMOVE 1 it implies) rewrites preeqcorrect's collapse of the PE spectrum onto the
+        # discrete levels (two-point window samples, (1 - Rboundary) scaling of bin nendisc). A photon entrance has no such
+        # collapse (preeq.f90:134 calls preeqcorrect only for k0 > 0: no level gets PE, bin nendisc is not scaled), so the
+        # window has nothing to correct and is a no-op: the photon run is the PEWINDOW n run (PEUNITS alone). Before this,
+        # `g` crashed in pepauli_onsets (Kalbach-pickup onsets read gscomp[k0 = 0]; no pickup exists for k0 = 0, flagpecomp
+        # is false), and a/l would book the window integrals onto levels on top of an unscaled continuum (double counting).
+        pwm = "n"
     if pwm != "n":
         if not pun:
             raise ValueError("pewindow a/l is built on peunits y: set both")

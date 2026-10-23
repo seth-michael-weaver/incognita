@@ -40,6 +40,8 @@ import torch
 from torch import Tensor
 
 from physics.hf import eadj as _eadj
+from physics.hf.eadj import per_nucleus as _npw_per_nucleus
+from physics.hf.density import npwindow as _npwindow
 from physics.hf.core.constants import talys_constants
 from physics.hf.core.numerics import locate
 from physics.hf.core.tensors import DTYPE
@@ -300,7 +302,7 @@ def _ldbumps(ld: LDNucleus, ibar: int):
     if ibar != 0 or not _eadj.on():
         return None
     bp = _eadj.nucleus_bumps("pshift", ld.Z, ld.A)
-    bc = _eadj.nucleus_bumps("ctable", ld.Z, ld.A)
+    bc = _eadj.nucleus_bumps("ctable", ld.Z, ld.A) + _npwindow.bumps(ld, ibar)  # NPWINDOW (default OFF: ())
     return (bp, bc) if (bp or bc) else None
 
 
@@ -321,6 +323,7 @@ def _adjusted(core, ld: LDNucleus, eex_mev, ibar: int, adj, *args):
     return out
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def densitytot(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0, ldmodel: int | None = None) -> Tensor:
     """Total level density [MeV^-1] (both parities, levels): the analytical model times the
     collective enhancement for ldmodel <= 3 (or a missing table), the table otherwise, times
@@ -335,6 +338,7 @@ def densitytot(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0, ldmodel: int | Non
     return _adjusted(lambda l, e: _densitytot(l, e, ibar, ldmodel), ld, eex_mev, ibar, adj)
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def densitytotP(
     ld: LDNucleus, eex_mev: Tensor, parity: int, ibar: int = 0, ldmodel: int | None = None
 ) -> Tensor:
@@ -349,6 +353,7 @@ def densitytotP(
     return _adjusted(lambda l, e: _densitytotP(l, e, parity, ibar, ldmodel), ld, eex_mev, ibar, adj)
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def density(
     ld: LDNucleus,
     eex_mev: Tensor,

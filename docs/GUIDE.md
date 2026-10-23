@@ -142,7 +142,7 @@ uv run python scripts/bestfit/engine_curves.py --arm nodata --e1 stock --only 26
 
 Per-target keyword lines can be added in a file named by `INCOGNITA_TALYS_FIT_LINES_FILE`.
 
-### Engine 2026-10-19 (current)
+### Engine 2026-10-19 (tag `engine-2026-10-19`)
 
 This update turns several corrections on by default, so results differ from the 2026-10 engine even with no switch
 set; the numbers in the README and this guide have not been re-measured with it. Each change is a deck keyword; the
@@ -163,6 +163,24 @@ value shown restores the earlier behaviour.
 | deformed targets without a fission channel: neutron exits of the first compound nucleus to non-band target levels use the ground-state coupled-channel transmission | `ccexitnbnf n` |
 | with measured strength functions (`INCOGNITA_SFUNC`): continuum neutron exits of the first compound nucleus divide out the engine's own coupled-channel enhancement | `sfexit n` |
 | triton and helion optical potentials include the projectile's finite size | `tfold n` |
+
+### Engine 2026-10-22 (tag `engine-2026-10-22`, current)
+
+One physics change is on by default, so neutron-induced results differ from the 2026-10-19 engine for some targets;
+the numbers in the README and this guide have not been re-measured with it. The other changes are fixes or are off by
+default.
+
+| change | default | to turn it off |
+|---|---|---|
+| **Level density of targets without a measured resonance spacing.** When the target of a neutron-induced run has no measured s-wave resonance spacing D<sub>0</sub> of its own, the target's continuum level density (as the residual nucleus of inelastic scattering) is raised above E<sub>lo</sub> = max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV by the factor exp(d<sub>c</sub> √S<sub>n</sub>), switched on smoothly over 1 MeV. d<sub>c</sub> comes from one global formula of the nucleus's parity class, deformation, shell correction, distance from magic numbers and its level-density table correction; no value is fitted to the target. Which targets have a measured D<sub>0</sub> is read from the RIPL resonance table and listed in `physics/hf/density/npwindow_d0anchored.csv` (only whether a value exists is used, never the value). Every other nucleus, the discrete levels and targets with a measured D<sub>0</sub> are unchanged. The rule was added to address (n,p) near threshold; it makes a few capture, (n,2n) and (n,α) comparisons slightly worse. Code: `physics/hf/density/npwindow.py`. | on | `npwindow n` or `INCOGNITA_NPWINDOW=0` |
+| **Coupled-channel kinematics at very low energy.** At about 1e-11 MeV the relativistic centre-of-mass energy formula used by ECIS cancels to exactly zero for some target masses (Tb-159, for example), which gave 0/0 in the coupled-channel solve. Only where that happens, the same quantity is computed in a cancellation-free form; every other energy keeps the ECIS expression bit for bit. | on | `INCOGNITA_ECMSTABLE=0` |
+| **Memory use on heavy targets.** Fission barrier level-density grids are kept for the two most recent energies per nucleus instead of every energy of the run, and finished targets' caches are released between targets in a worker. No number changes; a worker running fissile targets stays at a few GB instead of growing to about 8 GB. | on | `INCOGNITA_HEAVYMEM=0` |
+| **Pre-equilibrium window on a photon entrance.** `pewindow` (off by default) has nothing to correct for an incident photon, since TALYS applies its discrete-level correction only for particle projectiles; it is now a no-op there instead of failing (`g`) or double counting (`a`, `l`). | fix | — |
+| **Ingredient tables.** `INCOGNITA_INGDUMP=1` adds the level-density tables and photon-strength curves of the compound nucleus and its main residuals to the run's ingredient output. Output only. | off | — |
+
+With `INCOGNITA_NPWINDOW=0` the engine reproduces the 2026-10-19 engine bit for bit on the check targets Fe-56, Zr-90,
+Pb-208 and U-238 (`scripts/bestfit/engine_curves.py --arm nodata`). With the default, Pb-208 and U-238 (measured
+D<sub>0</sub>) are unchanged and Fe-56 and Zr-90 change.
 
 ## Method
 

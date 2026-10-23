@@ -6,7 +6,7 @@ benchmark and a registry of predictions made before the data.**
 [![Code: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 [![Data: CC-BY-4.0](https://img.shields.io/badge/data-CC--BY--4.0-lightgrey)](LICENSE-DATA)
 [![Status: v0.1 preview](https://img.shields.io/badge/status-v0.1%20preview-orange)](#status-and-limitations)
-[![Engine: 2026-10-19](https://img.shields.io/badge/engine-2026--10--19-informational)](docs/GUIDE.md#engine-versions)
+[![Engine: 2026-10-22](https://img.shields.io/badge/engine-2026--10--22-informational)](docs/GUIDE.md#engine-versions)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](pyproject.toml)
 
 <a href="https://nucleus-incognita-woad.vercel.app/?lang=en"><img src="docs/walkthrough/og.png" alt="Inside a Nuclear Reaction: an explorable explanation of the Incognita reaction engine" width="100%"></a>

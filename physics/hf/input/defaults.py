@@ -183,6 +183,7 @@ class Options:
     nangle: int = NUMANG  # :71
     nanglecont: int = 18  # :72
     maxchannel: int = 4  # :73
+    npwindow: str = "y"  # Incognita extension (NPWINDOW / NPWPROMO), not TALYS: y (default, NPWPROMO) = windowed target-rho factor exp(dc sqrt(S_n)) on Ex >= max(Ecut+2, S_n-6) for D0-unanchored targets (physics/hf/density/npwindow.py); n = off (the previous engine, bit for bit). INCOGNITA_NPWINDOW wins
     chancap: bool = True  # Incognita extension (CHANCAP), not TALYS: y (default) = exclusive-channel per-ejectile caps lifted to 8 (channels.py); n = numin..numia 8/4/2/1/1/3 (TALYS)
     nanglerec: int = 1  # :74-78, numangrec with labddx y
     transpower: int = 5  # :79; 10 with massdis y (:84), 15 with astro y (:90)
@@ -501,6 +502,7 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "anglescont": ("numerics", "nanglecont", "int"),
     "anglesrec": ("numerics", "nanglerec", "int"),
     "maxchannel": ("numerics", "maxchannel", "int"),
+    "npwindow": ("numerics", "npwindow", "str"),  # Incognita extension (NPWINDOW), y (default) | n
     "chancap": ("numerics", "chancap", "yn"),  # Incognita extension (CHANCAP), default y; n = TALYS caps
     "transpower": ("numerics", "transpower", "int"),
     "transeps": ("numerics", "transeps", "float"),
@@ -969,6 +971,11 @@ def default_options(
     import os
 
     os.environ["INCOGNITA_CHANCAP_EFF"] = "1" if o["chancap"] else "0"
+
+    # NPWINDOW: resolved switch (INCOGNITA_NPWINDOW wins); the run-scoped state is written at Cascade set-up (feeding.py)
+    from physics.hf.density import npwindow
+
+    o["npwindow"] = "y" if npwindow.flag(o["npwindow"]) else "n"
 
     return Options(**o, explicit=frozenset(ov))
 

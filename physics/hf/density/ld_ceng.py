@@ -34,6 +34,7 @@ import torch
 
 from physics.hf.core.tensors import DTYPE
 from physics.hf.native import nx2
+from physics.hf.eadj import per_nucleus as _npw_per_nucleus
 
 __all__ = ["densitymatch_fast", "ignatyuk", "rhogrid", "spec_rows", "spincut"]
 
@@ -63,6 +64,7 @@ def _light(Z: int, A: int) -> tuple:
     return tuple((1.0, float(d[k])) if k in d else (0.0, 0.0) for k in ("T", "E0", "Exmatch"))
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def densitymatch_fast(ld, flagldglobal: bool, flagctmglob: bool, xacc: float):
     """`matching.densitymatch(ld, ...)` for a nucleus the kernel carries, or None.
 
@@ -141,6 +143,7 @@ def rhogrid(par: np.ndarray, A: int, ex_mev, dex_mev, maxj, nlast: int, numj: in
     return out
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def spec_rows(ld, A: int, ex_mev: np.ndarray, dex_mev: np.ndarray, n: int, nlast: int,
               parts, numj: int):
     """CENGLD2: (maxJ, rhogrid) of one cascade nucleus's grid from `ceng_ld_spec` -- what
@@ -196,6 +199,7 @@ def _floats(ld, key: tuple, make) -> np.ndarray:
     return got
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def ignatyuk(ld, eex: np.ndarray, ibar: int):
     """`parameters._ignatyuk_fast`'s array result as a tensor, from `ceng_ld_ignatyuk`, or None.
 
@@ -219,6 +223,7 @@ def ignatyuk(ld, eex: np.ndarray, ibar: int):
     return torch.from_numpy(out)
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def spincut(ld, ald, eex: np.ndarray, ibar: int, ipop: int, rspincutff: float):
     """`parameters._spincut_fast`'s array result as a tensor, from `ceng_ld_spincut`, or None
     (`ald` neither a float nor an array of `eex`'s shape).

@@ -540,7 +540,7 @@ def densitypar(
     """
     from physics.hf.density.ld_nx2 import densitypar_floats
 
-    if not torch.is_grad_enabled() and os.environ.get("HF_NX2_CENGLD", "1") != "0" and _eadj.ld_native_ok():
+    if not torch.is_grad_enabled() and os.environ.get("HF_NX2_CENGLD", "1") != "0" and _eadj.ld_native_ok(Z, A):
         # CENGLD: one nucleus's record is asked for by its level density, its photon strength's
         # `alev` and the pre-equilibrium pairing, on the same objects: built once per target. Only
         # where no graph can be recorded (the chart runs in inference mode), so a tensor turned

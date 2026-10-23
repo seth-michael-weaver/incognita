@@ -54,6 +54,7 @@ from physics.hf.core.tensors import DTYPE
 from physics.hf.core.units import MB_PER_FM2
 from physics.hf.ecis.formfactor import DWBA_PARTS
 from physics.hf.native import nx2, setup_c
+from physics.hf.ecis import solver as _solver
 from physics.hf.omp import schrodinger as _s
 
 __all__ = ["case_cross_sections"]
@@ -127,7 +128,10 @@ def _kinematics(e: float, m1: float, m2: float, z_prod: float, e_lev: np.ndarray
     Test: tests/hf/test_nx2_dwba.py
     """
     cm = _s.ECIS_CM_MEV
-    ecm1 = cm * (math.sqrt((m1 + m2) ** 2 + 2.0 * m2 * e / cm) - m1 - m2)
+    root = math.sqrt((m1 + m2) ** 2 + 2.0 * m2 * e / cm)
+    ecm1 = cm * (root - m1 - m2)
+    if _solver.ECMSTABLE and ecm1 <= 0.0 and e > 0.0:  # CCNANTHERM, as `channel_kinematics`
+        ecm1 = 2.0 * m2 * e / (root + m1 + m2)
     amr = ecm1 / cm + m1 + m2
     ecm = ecm1 - np.concatenate([[0.0], e_lev])
     x = ecm / cm

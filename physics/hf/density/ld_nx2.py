@@ -38,6 +38,7 @@ import torch
 from torch import Tensor
 
 from physics.hf import eadj as _eadj
+from physics.hf.eadj import per_nucleus as _npw_per_nucleus
 from physics.hf.native import nx2
 
 __all__ = ["densitypar_floats", "densitypar_key", "fermi_tables", "match_roots", "ncum", "retarget",
@@ -82,6 +83,7 @@ def _par(ld) -> np.ndarray | None:
     return par
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def fermi_tables(ld, ibar: int, nEx: int, dEx: float) -> tuple[Tensor, Tensor, int] | None:
     """`matching._fermi_tables`'s logrho(0..nEx+1), temprho(0..nEx+1) and Nstart, or None.
 
@@ -125,6 +127,7 @@ def match_roots(logrho: Tensor, temprho: Tensor, x1: float, x2: float, nseg: int
     return [float(roots[k]) for k in range(nb)]
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def ncum(ld, NL: int, index: int) -> float | None:
     """`densitycum(ld)["Ncum"][index]` (`dens_reference._ncum_no_grad`), or None.
 
@@ -144,6 +147,7 @@ def ncum(ld, NL: int, index: int) -> float | None:
 _RHOGRID_FN = None
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def rhogrid(ld, A: int, ex_mev, dex_mev, maxj, nlast: int, numj: int) -> np.ndarray | None:
     """`dens_reference.rhogrid_of`'s numpy result, (n, numj+1, 2), or None.
 
@@ -223,7 +227,7 @@ def densitypar_floats(Z: int, A: int, options, params, masses, levels, deformati
     from physics.hf.core.tensors import DTYPE
     from physics.hf.density import parameters as P
 
-    if (os.environ.get("HF_NX2_LD", "1") == "0" or not _eadj.ld_native_ok()):
+    if (os.environ.get("HF_NX2_LD", "1") == "0" or not _eadj.ld_native_ok(Z, A)):
         return None
     Zix, Nix = options.Zinit - Z, options.Ninit - (A - Z)
     ldmod = options.ldmodel_of(Zix, Nix)
@@ -306,7 +310,7 @@ def densitypar_key(Z: int, A: int, options, params, masses, levels, deformation=
     TALYS: densitypar.f90:1 (densitypar)
     Test: tests/hf/test_cengld2.py
     """
-    if barriers is not None or (os.environ.get("HF_NX2_LD", "1") == "0" or not _eadj.ld_native_ok()):
+    if barriers is not None or (os.environ.get("HF_NX2_LD", "1") == "0" or not _eadj.ld_native_ok(Z, A)):
         return None
     last = _LAST_KEY[0]
     if (last is not None and last[0] == Z and last[1] == A and last[2] is options

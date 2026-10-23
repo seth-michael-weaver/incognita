@@ -37,7 +37,7 @@ import json
 
 import numpy as np
 
-__all__ = ["ingredients", "eavres_mev", "PREFIX"]
+__all__ = ["ingredients", "eavres_mev", "PREFIX", "ingdump", "ingdump_enabled"]
 
 PREFIX = "ing_"
 
@@ -305,7 +305,169 @@ def ingredients(cas, res=None) -> dict:
     out["psf_json"] = json.dumps(_psf_meta(gp), default=float)
     out["fis_json"] = json.dumps({"compound": fis_cn_meta, "target": fis_tg_meta}, default=float)
 
+    if ingdump_enabled():
+        # INGDUMP (output only, default OFF): appended AFTER every existing key is computed, and
+        # never raises -- an error is recorded in `ingdump_json` and the run's other keys stand
+        out.update(ingdump(cas))
+
     return {PREFIX + k: v for k, v in out.items()}
+
+
+# ---------------------------------------------------------------------------------------- INGDUMP
+
+ENV_INGDUMP = "INCOGNITA_INGDUMP"
+INGDUMP_VERSION = 1
+# the nuclei dumped, as cascade indices (zix, nix) counted down from the initial compound nucleus:
+# the compound nucleus and the major binary/two-step residuals (n-incident: CN = (Z, A+1),
+# "n" = the target, "2n" = (Z, A-1), "p" = (Z-1, A), "a" = (Z-2, A-3))
+INGDUMP_NUCLEI = (("cn", 0, 0), ("n", 0, 1), ("2n", 0, 2), ("p", 1, 0), ("a", 2, 2))
+INGDUMP_EX_ABOVE_SN = 5.0  # rho tables up to S_n + 5 MeV (one edens node beyond, for interpolation)
+INGDUMP_EG_STEP, INGDUMP_EG_MAX = 0.05, 30.0  # photon-strength Egamma grid [MeV]: 0.05 .. 30
+
+
+def ingdump_enabled() -> bool:
+    """INCOGNITA_INGDUMP=1 (or y/yes/on) switches the INGDUMP tables on; default OFF."""
+    import os
+
+    return os.environ.get(ENV_INGDUMP, "0").strip().lower() in ("1", "y", "yes", "on", "true")
+
+
+def ingdump(cas) -> dict:
+    """INGDUMP: the level-density tables and photon-strength curves of the run's compound nucleus and
+    its major residuals, read off the run's own `Cascade` (cache hits; no reaction is recomputed).
+
+    Keys (un-prefixed here; `ingredients` adds ``ing_``), per nucleus tag T in INGDUMP_NUCLEI:
+      ldtab_T_ex_mev    (nE,)        the engine's own tabulated-density grid edens(1..) up to S_n+5 MeV
+      ldtab_T_j         (NUMJ+1,)    J = j + (A mod 2)/2
+      ldtab_T_rho_j     (2, nE, NUMJ+1) float32  rho(Ex, J, pi) [MeV^-1], parity axis (-1, +1)
+      ldtab_T_rho_tot   (2, nE) float32  sum_J (2J+1) rho(Ex, J, pi) per parity
+      ldtab_T_rho_obs   (2, nE) float32  densitytotP (the engine's total density per parity)
+      ldtab_T_ncum      (2, nE) float32  cumulative number of levels (table models; analytical: integral)
+      ldtab_T_t_mev     (2, nE) float32  nuclear temperature column
+      ldtab_T_sig2      (nE,)        spin cut-off sigma^2(Ex) as the engine evaluates it (spincut(ignatyuk))
+      ldtab_T_sig2_eff  (nE,)        <(J+1/2)^2>/2 of the tabulated rho(J) (both parities)
+      ldtab_T_lev       (nlev+1, 3)  the discrete levels the reaction uses: E [MeV], J, parity
+      psfc_T_e1/m1/e2   (nEg,) float32  f_XL(Egamma) [MeV^-3] at Ex = S_n (efs 0), the function the
+                                    cascade's photon exits evaluate (psf_fast / fstrength_gp)
+      psfc_T_e1_up/m1_up (nEg,) float32  the upbend part of f_E1 / f_M1 (f - f without the upbend)
+      psfc_T_e1_ex      (nX, nEg) float32  f_E1 at Ex = psfc_T_e1_ex_mev = 1, 2, ... MeV up to
+                                    S_n + 5 (the E1 of the tables depends on the temperature)
+    plus ``psfc_eg_mev`` (the common Egamma grid) and ``ingdump_json`` (per-nucleus
+    Z, A, S_n, ldmodel, has_table, Nlow/Ntop/Nlast, the discrete-level cut energy, Exmatch, the
+    psf model numbers, and any error). Typical size ~50-100 kB per target compressed.
+
+    TALYS: densityout.f90:1 (densityout), gammaout.f90:1 (gammaout) -- the ld*.tot / psf* tables
+    Test: tests/hf/test_ingdump.py
+    """
+    import traceback
+
+    meta: dict = {"version": INGDUMP_VERSION, "nuclei": {}, "ex_above_sn_mev": INGDUMP_EX_ABOVE_SN}
+    out: dict = {}
+    try:
+        import torch
+
+        eg = np.round(np.arange(1, int(round(INGDUMP_EG_MAX / INGDUMP_EG_STEP)) + 1) * INGDUMP_EG_STEP, 6)
+        out["psfc_eg_mev"] = eg
+        with torch.no_grad():
+            for tag, zix, nix in INGDUMP_NUCLEI:
+                rec: dict = {"zix": zix, "nix": nix}
+                meta["nuclei"][tag] = rec
+                try:
+                    Z, A = (int(v) for v in cas.zn(zix, nix))
+                    rec.update(Z=Z, A=A)
+                    if Z < 1 or A <= Z:
+                        rec["skip"] = "no such nucleus"
+                        continue
+                    sn = _ingdump_ld(cas, tag, zix, nix, Z, A, rec, out)
+                    _ingdump_psf(cas, tag, Z, A, sn, eg, rec, out)
+                except Exception as exc:  # one nucleus failing never stops the others
+                    rec["error"] = f"{type(exc).__name__}: {exc}"
+                    rec["tb"] = traceback.format_exc()[-1500:]
+    except Exception as exc:
+        meta["error"] = f"{type(exc).__name__}: {exc}"
+        meta["tb"] = traceback.format_exc()[-1500:]
+    out["ingdump_json"] = json.dumps(meta, default=float)
+    return out
+
+
+def _ingdump_ld(cas, tag: str, zix: int, nix: int, Z: int, A: int, rec: dict, out: dict) -> float:
+    """densityout's parity blocks for (Z, A), cut at S_n + 5 MeV; returns S_n [MeV]."""
+    import torch
+
+    from physics.hf.density.models import densityout
+    from physics.hf.density.parameters import ignatyuk, spincut
+
+    ld = cas.ld_of(Z, A)[0]
+    sn = _f(ld.S_mev)
+    nlast = int(ld.Nlast[0])
+    rec.update(sn_mev=sn, ldmodel=int(ld.ldmodel), has_table=int(ld.has_table(0)),
+               nlow=int(ld.Nlow[0]), ntop=int(ld.Ntop[0]), nlast=nlast,
+               ecut_mev=_f(ld.edis_mev[nlast]) if nlast < len(ld.edis_mev) else float("nan"),
+               exmatch_mev=_f(ld.Exmatch_mev[0]), ldtable_used=int(int(ld.ldmodel) >= 4 and ld.has_table(0)))
+    d = densityout(ld, None, 0, None)
+    blocks = d["parity_blocks"]
+    E = _a(blocks[1]["E"])
+    n = int(np.searchsorted(E, sn + INGDUMP_EX_ABOVE_SN, side="right")) + 1
+    n = min(max(n, 1), E.size)
+    p = f"ldtab_{tag}_"
+    out[p + "ex_mev"] = E[:n]
+    J = np.arange(_a(blocks[1]["rho_J"]).shape[-1]) + 0.5 * (A % 2)
+    out[p + "j"] = J
+    rj = np.stack([_a(blocks[s]["rho_J"])[:n] for s in (-1, 1)])
+    out[p + "rho_j"] = rj.astype(np.float32)
+    for key, src in (("rho_tot", "rho_total"), ("rho_obs", "rho_observed"), ("ncum", "N_cumulative"),
+                     ("t_mev", "T")):
+        out[p + key] = np.stack([_a(blocks[s][src])[:n] for s in (-1, 1)]).astype(np.float32)
+    et = torch.as_tensor(E[:n], dtype=torch.float64)
+    out[p + "sig2"] = _a(spincut(ld, ignatyuk(ld, et, 0), et, 0))
+    w = rj.sum(0)  # (nE, J), both parities
+    ws = w.sum(1)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        out[p + "sig2_eff"] = np.where(ws > 0, (w * (J + 0.5) ** 2).sum(1) / np.where(ws > 0, ws, 1.0) / 2.0, np.nan)
+    lv = cas._levels(zix, nix)
+    out[p + "lev"] = np.stack([_a(lv.e_mev), _a(lv.spin), _a(lv.parity)], axis=1)
+    rec["n_ex"] = n
+    rec["nlev"] = int(lv.nlev)
+    return sn
+
+
+def _ingdump_psf(cas, tag: str, Z: int, A: int, sn: float, eg: np.ndarray, rec: dict, out: dict) -> None:
+    """f_E1, f_M1, f_E2 (and the upbend parts) of (Z, A) as its photon exits evaluate them."""
+    from dataclasses import replace
+
+    import torch
+
+    from physics.hf.compound.psf_fast import fstrength_np
+    from physics.hf.gamma.strength import fstrength_gp
+    from physics.hf.projectile import residual_nucleus
+
+    gp = cas.gamma_params(Z, A - 1, nucleus=residual_nucleus(Z, A))
+    if gp is None:  # a tensor override: only the torch strength function may run
+        rec["psf"] = "none (tensor override)"
+        return
+    rec["psf"] = {"strength": int(gp.strength), "strengthM1": int(gp.strengthM1), "gammax": int(gp.gammax),
+                  "flagupbend": int(bool(gp.flagupbend)), "m1share": int(getattr(gp, "m1share", 0)),
+                  "eadj_e1": len(getattr(gp, "eadj_e1", ()) or ()), "eadj_m1": len(getattr(gp, "eadj_m1", ()) or ())}
+
+    def f(g, efs, irad, l):  # noqa: E741
+        v = fstrength_np(g, efs, eg, irad, l)
+        if v is None:
+            v = _a(fstrength_gp(g, efs, torch.as_tensor(eg, dtype=torch.float64), irad, l))
+        return np.asarray(v, dtype=np.float64)
+
+    p = f"psfc_{tag}_"
+    e1, m1 = f(gp, 0.0, 1, 1), f(gp, 0.0, 0, 1)
+    out[p + "e1"] = e1.astype(np.float32)
+    out[p + "m1"] = m1.astype(np.float32)
+    if int(gp.gammax) >= 2:
+        out[p + "e2"] = f(gp, 0.0, 1, 2).astype(np.float32)
+    if gp.flagupbend:
+        g0 = replace(gp, flagupbend=False)
+        out[p + "e1_up"] = (e1 - f(g0, 0.0, 1, 1)).astype(np.float32)
+        out[p + "m1_up"] = (m1 - f(g0, 0.0, 0, 1)).astype(np.float32)
+    ex = np.arange(1.0, np.floor(sn + INGDUMP_EX_ABOVE_SN) + 1.0)
+    out[p + "e1_ex"] = np.stack([f(gp, float(x - sn), 1, 1) for x in ex]).astype(np.float32)
+    out[p + "e1_ex_mev"] = ex
 
 
 def _psf_meta(gp) -> dict:

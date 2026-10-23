@@ -36,6 +36,7 @@ import torch
 from torch import Tensor
 
 from physics.hf.native import nx2
+from physics.hf.eadj import per_nucleus as _npw_per_nucleus
 
 __all__ = ["table_density", "table_grid", "fission_rhofis", "table_rhogrid", "enabled"]
 
@@ -122,6 +123,7 @@ def table_grid(tab, ct, pt, e, jidx: np.ndarray, pcols: tuple[int, ...]) -> np.n
     return out
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def fission_rhofis(ld, ibar: int, ee: Tensor, jgrid: Tensor) -> Tensor | None:
     """`fission_level_densities`' two `density(ld, ee, jgrid, parity, ibar)` columns stacked on
     the parity axis (-1, +1), (len(ee), len(jgrid), 2), in one call; None when the barrier has no
@@ -139,6 +141,7 @@ def fission_rhofis(ld, ibar: int, ee: Tensor, jgrid: Tensor) -> Tensor | None:
     return None if got is None else torch.from_numpy(got)
 
 
+@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
 def table_rhogrid(ld, ex_mev, dex_mev, maxj, nlast: int, numj: int) -> np.ndarray | None:
     """`dens_reference.rhogrid_of`'s numpy result for a nucleus with a ground-state table, both
     parity columns from the table, or None.

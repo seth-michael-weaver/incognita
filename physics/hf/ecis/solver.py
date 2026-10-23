@@ -57,6 +57,11 @@ from physics.hf.omp.schrodinger import (
 CDTYPE = torch.complex128
 
 
+# CCNANTHERM (INCOGNITA_ECMSTABLE, default ON; "0" = old): cancellation-free c.m. energy where
+# ECIS's expression underflows to ecm <= 0 at a positive lab energy (`channel_kinematics`).
+ECMSTABLE = os.environ.get("INCOGNITA_ECMSTABLE", "") != "0"
+
+
 @dataclass(frozen=True)
 class ChannelKinematics:
     """Per-level channel kinematics at one incident energy axis (E,). `ecm_mev` and `k_fm` are
@@ -86,7 +91,13 @@ def channel_kinematics(
     cm = ECIS_CM_MEV
     m1, m2 = float(m_proj_amu), float(m_targ_amu)
     e = e_lab_mev.to(DTYPE)
-    ecm1 = cm * (torch.sqrt((m1 + m2) ** 2 + 2.0 * m2 * e / cm) - m1 - m2)
+    root = torch.sqrt((m1 + m2) ** 2 + 2.0 * m2 * e / cm)
+    ecm1 = cm * (root - m1 - m2)
+    if ECMSTABLE:
+        # CCNANTHERM: the subtraction cancels (2 m2 e/cm ~ 3e-12 against (m1+m2)**2 ~ 2.5e4 at
+        # 1e-11 MeV) and gives exactly 0 for some masses, so k = 0 and lect's k/ecm is 0/0. Only
+        # there, the identical 2 m2 e/(root + m1 + m2); every other row keeps ECIS's expression.
+        ecm1 = torch.where((ecm1 <= 0.0) & (e > 0.0), 2.0 * m2 * e / (root + m1 + m2), ecm1)
     amr = ecm1 / cm + m1 + m2  # (E,)
     ecm = ecm1[:, None] - e_level_mev[None, :].to(DTYPE)  # (E, NLEV)
     x = ecm / cm

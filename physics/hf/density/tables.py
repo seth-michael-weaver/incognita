@@ -137,9 +137,12 @@ def density_table(
         return None
     nendens, edensmax = nendens_of(ldmodel)
     if rspincut == 1.0 and s2adjust == 1.0:
+        from physics.hf import eadj as _eadj
         from physics.hf.density.ld2_nx2 import enabled
 
-        if enabled():  # NX2 ld2: the same arithmetic on whole columns (bit for bit)
+        with _eadj.nucleus(Z, A):  # NPWPROMO: native LD kernels per nucleus
+            _en = enabled()
+        if _en:  # NX2 ld2: the same arithmetic on whole columns (bit for bit)
             return _density_table_np(str(p), A, ldmodel, ibar, nendens, edensmax, flagparity, ld)
     ploop = (1, -1) if ldmodel >= 5 else (1,)
     pardisloc = 1.0 if ldmodel >= 5 else 0.5

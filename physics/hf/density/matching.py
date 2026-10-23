@@ -303,8 +303,11 @@ def matching(
 
     EL, EP = _level_window(ld, ibar)
     # NX2 ld: zbrak's scan and rtbis's bisection on floats in C (None: the torch loop below)
-    roots = match_roots(logrho, temprho, x1, x2, _NSEG, E0save, ld.Nlow[ibar], ld.Ntop[ibar],
-                        EL, EP, SENTINEL, xacc)
+    from physics.hf import eadj as _eadj
+
+    with _eadj.nucleus(ld.Z, ld.A):  # NPWPROMO: native LD kernels per nucleus
+        roots = match_roots(logrho, temprho, x1, x2, _NSEG, E0save, ld.Nlow[ibar], ld.Ntop[ibar],
+                            EL, EP, SENTINEL, xacc)
     if roots is None:
         def f(x):
             return match(ld, x, logrho, temprho, E0save, ibar).detach()

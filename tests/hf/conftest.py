@@ -44,3 +44,13 @@ def _talys_point_geometry_triton(monkeypatch):
     """TFOLD (default ON; omp/tfold.py) folds the t / 3He diffuseness and scales cstrip t/h by 0.99; the tests that compare with
     TALYS output or golden records made before TFOLD run with the fold off. tests/hf/test_tfold.py removes the pin."""
     monkeypatch.setenv("INCOGNITA_TFOLD", "0")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _no_npwindow():
+    """NPWINDOW (default ON since NPWPROMO; density/npwindow.py) raises the continuum rho of D0-unanchored targets (Fe-56 among them); tests
+    that compare with TALYS output or golden records made before NPWPROMO run with it off. Session scope, so module-scoped fixtures
+    (test_gpu_full's Fe-56 setup, test_nx2_emit/glue `captured`) see the pin too (gate d1471a4a1 T). tests/hf/test_npwindow.py removes it."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_NPWINDOW", "0")
+        yield

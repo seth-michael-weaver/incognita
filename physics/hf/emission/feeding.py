@@ -233,6 +233,9 @@ class Cascade:
 
         if k0 is None:
             k0 = _proj.k0()
+        from physics.hf.density import npwindow as _npw
+
+        _npw.begin(Zt, At, k0)  # NPWINDOW: run-scoped target state, before anything is built for this target
         self.Zc, self.Ac = Zt + PARZ[k0], At + PARZ[k0] + PARN[k0]  # the initial compound nucleus
         self.k0, self.gammax = k0, gammax
         self.flagfullhf, self.transeps = flagfullhf, transeps
@@ -247,6 +250,7 @@ class Cascade:
         from physics.hf import kevleak2
 
         kevleak2.sync(self.options)  # KEVLEAK3: run-scoped kevleak2 value (deck > env > default 2)
+        _npw.sync(self.options)  # NPWINDOW: the resolved options agree with the set-up state
         # SPEED0: decay all bins of a nucleus through compound.decay_batch (False: per bin)
         self.batched = True
         # SPEED0 G0.3: T7 overrides (requires_grad) for the INITIAL compound nucleus's photon

@@ -49,6 +49,21 @@ __all__ = ["FissionChain", "fission_chain"]
 
 FISLIM = 150  # checkvalue.f90: "Fission not allowed for A <= 150"
 
+#: HEAVYMEM: barrier grids kept per fissioning nucleus (`FissionChain._grid`)
+GRID_KEEP = 2
+
+
+def heavymem_on() -> bool:
+    """HEAVYMEM (development notes): bounded per-run fission grids and the worker memory hygiene of
+    `chartrun.drop_target_caches`; `INCOGNITA_HEAVYMEM=0` = the previous engine (unbounded, no trim). No number moves.
+
+    TALYS: none (worker memory policy)
+    Test: tests/hf/test_heavymem.py
+    """
+    import os
+
+    return os.environ.get("INCOGNITA_HEAVYMEM", "1") != "0"
+
 
 @dataclass
 class _Nucleus:
@@ -203,10 +218,24 @@ class FissionChain:
         from physics.hf.fission.transmission import fission_level_densities
 
         key = round(float(exfis_top_mev), 9)
-        if key not in n.grids:
-            n.grids[key] = fission_level_densities(
-                n.fp, n.ld, key, odd=n.odd, maxj=self.maxj)
-        return n.grids[key]
+        got = n.grids.get(key)
+        if got is not None:
+            if heavymem_on():  # HEAVYMEM: most recently used last
+                n.grids[key] = n.grids.pop(key)
+            return got
+        if heavymem_on():
+            # HEAVYMEM: the key is the ladder top Ex(maxex), new at every incident energy, and this chain lives for
+            # the whole run -- unbounded, U-238 + p kept ~1700 grids (2.6 MB each, 9 GB RSS over p60). Every reuse is
+            # within one energy at reuse distance 0, so 2 per nucleus (as CENGFIS `_ceng_coef`) keeps every hit; a
+            # grid is a pure function of (nucleus, key), so an eviction can only cost a rebuild, never a number.
+            while len(n.grids) >= GRID_KEEP:
+                old = n.grids.pop(next(iter(n.grids)))
+                coef = n.__dict__.get("_fissb_coef")
+                if coef:
+                    for k in [k for k, v in coef.items() if v[0] is old]:
+                        del coef[k]
+        got = n.grids[key] = fission_level_densities(n.fp, n.ld, key, odd=n.odd, maxj=self.maxj)
+        return got
 
     # ---- what the two compound consumers ask for ---------------------------------------------
 
