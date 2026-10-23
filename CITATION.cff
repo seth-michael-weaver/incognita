@@ -6,7 +6,7 @@ authors:
   - family-names: Weaver
     given-names: Seth Michael
 repository-code: "https://github.com/seth-michael-weaver/incognita"
-url: "https://nucleus-incognita-woad.vercel.app/"
+url: "https://www.incognitanuclear.org/"
 abstract: >-
   Incognita: open, calibrated predictions of neutron reaction cross sections across the chart of nuclides, with a
   public blind benchmark and a registry of predictions made before the data.

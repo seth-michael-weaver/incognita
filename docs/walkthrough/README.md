@@ -1,6 +1,6 @@
 # Inside a Nuclear Reaction (website)
 
-Live at <https://nucleus-incognita-woad.vercel.app/>. Three pages, in English and Spanish (`?lang=es` or the EN | ES switch):
+Live at <https://www.incognitanuclear.org/>. Three pages, in English and Spanish (`?lang=es` or the EN | ES switch):
 
 | Page | What it is |
 |---|---|
