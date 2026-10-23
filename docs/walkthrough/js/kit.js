@@ -192,9 +192,12 @@
   // term (entries with scope "chapter"/"page": first use per chapter/page), so the page stays calm. Longest match wins.
   const GL_BLOCKS = ".intro-text p, .story .lead, .step p, .coda p, .coda td:nth-child(2)";
   const GL_SKIP = ".ctl, .btns, button, input, label, output, select, textarea, code, pre, .formula, .aside, .term, h1, h2, h3, a";
-  const BOUND = "[\\p{L}\\p{N}_\\-]";
-  // Korean attaches particles to the noun (핵이, 핵을), so a term may be followed by Hangul; Latin letters still end a match
-  const BOUND_AFTER = WT.lang === "ko" ? "[A-Za-z0-9_\\-]" : BOUND;
+  const BOUND = "[\\p{L}\\p{M}\\p{N}_\\-]";   // \p{M}: Devanagari vowel signs are marks, not letters
+  // Korean attaches particles to the noun (핵이, 핵을), so a term may be followed by Hangul; Chinese and Japanese write no spaces
+  // at all, so there a term may sit between any characters. Latin letters and digits still bound a match in every language.
+  const LATIN = "[A-Za-z0-9_\\-]";
+  const BOUND_BEFORE = WT.lang === "zh" || WT.lang === "ja" ? LATIN : BOUND;
+  const BOUND_AFTER = WT.lang === "ko" || WT.lang === "zh" || WT.lang === "ja" ? LATIN : BOUND;
   const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
   function plural(a) {
     if (WT.tl && WT.lang !== "es") return a;   // other languages list their plural forms as glossary aliases
@@ -207,11 +210,12 @@
     const ci = new Map(), cs = new Map(); // alias -> key
     const G = WT.gl() || {};
     for (const key in G) for (const a of G[key].aliases || []) {
-      // plain words (an optional capital first letter, then lower case) match case-insensitively, with plurals
-      if (/^\p{L}[\p{Ll}' \-–]*$/u.test(a)) { const l = a.toLowerCase(); if (!ci.has(l)) ci.set(l, key); const pl = plural(l); if (!ci.has(pl)) ci.set(pl, key); }
+      // plain words (an optional capital first letter, then lower case) match case-insensitively, with plurals;
+      // a single letter is a symbol and keeps its case (the width Γ must not mark every γ)
+      if (/^\p{L}[\p{Ll}' \-–]+$/u.test(a)) { const l = a.toLowerCase(); if (!ci.has(l)) ci.set(l, key); const pl = plural(l); if (!ci.has(pl)) ci.set(pl, key); }
       else if (!cs.has(a)) cs.set(a, key);
     }
-    const mk = (m, fl) => { if (!m.size) return null; const alts = [...m.keys()].sort((x, y) => y.length - x.length).map(escRe).join("|"); return new RegExp(`(?<!${BOUND})(?:${alts})(?!${BOUND_AFTER})`, "gu" + fl); };
+    const mk = (m, fl) => { if (!m.size) return null; const alts = [...m.keys()].sort((x, y) => y.length - x.length).map(escRe).join("|"); return new RegExp(`(?<!${BOUND_BEFORE})(?:${alts})(?!${BOUND_AFTER})`, "gu" + fl); };
     return { ci, cs, rci: mk(ci, "i"), rcs: mk(cs, "") };
   }
   function glMark() {

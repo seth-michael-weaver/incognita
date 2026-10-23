@@ -8,7 +8,7 @@
     if (WT.L.ui.in_title) document.title = WT.L.ui.in_title;
     document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.L.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
     document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
-    document.querySelectorAll("a[data-keep-lang]").forEach((a) => { const h = a.getAttribute("href"); if (/[?&]lang=/.test(h)) return; const [p, hash] = h.split("#"); a.setAttribute("href", p + (p.includes("?") ? "&" : "?") + "lang=es" + (hash != null ? "#" + hash : "")); });
+    WT.keepLang();
   }
   const LV = [T("lvl0", "Intro"), T("lvl1", "Intermediate"), T("lvl2", "Advanced")];
   // id, number, level, minutes, steps, English title / topic / what it teaches (Spanish in js/i18n/es-instructors.js)
@@ -30,7 +30,7 @@
   const lang = WT.langQ();
   const href = (id) => "./" + lang + "#" + id;
   const pill = (lv) => `<span class="lvl l${lv}">${LV[lv]}</span>`;
-  const mins = (m) => `${m} min`;
+  const mins = (m) => `${m} ${T("in_min", "min")}`;
 
   // ---------- chapter list with a level filter ----------
   const list = $("#in-list"), chips = $("#in-filter");

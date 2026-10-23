@@ -18,7 +18,16 @@
     nl: ["NL", "Nederlands", "nl-NL", true],
     da: ["DA", "Dansk", "da-DK", true],
     ko: ["KO", "한국어", "ko-KR", false],
+    zh: ["中文", "简体中文", "zh-CN", false],
+    ja: ["JA", "日本語", "ja-JP", false],
+    fr: ["FR", "Français", "fr-FR", true],
+    ru: ["RU", "Русский", "ru-RU", true],
+    it: ["IT", "Italiano", "it-IT", true],
+    hi: ["HI", "हिन्दी", "hi-IN", false],
   };
+  // languages shipped so far (a language is listed once all its js/i18n/<code>-*.js files are in)
+  const LIVE = ["en", "es", "pt", "da", "ko"];
+  Object.keys(LANGS).forEach((l) => { if (!LIVE.includes(l)) delete LANGS[l]; });
   WT.LANGS = LANGS;
   WT.L = WT.es = WT.L || WT.es || { ch: {}, labels: {}, ui: {}, glossary: {} };
   let lang = "en";
