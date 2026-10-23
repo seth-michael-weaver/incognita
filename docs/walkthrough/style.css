@@ -597,3 +597,17 @@ body.og .hero-credit { display: none; }
 canvas { direction: ltr; }
 [dir="rtl"] .toc ol { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent); padding-right: 0; padding-left: 32px; }
 [dir="rtl"] .toc .lang { margin-right: 0; margin-left: max(16px, 4vw); }
+[dir="rtl"] .site .brand { margin-right: 0; margin-left: auto; }
+[dir="rtl"] .site .site-links a.gh { margin-left: 0; margin-right: 6px; }
+[dir="rtl"] .site .lang { margin: 0 10px 0 0; }
+[dir="rtl"] .aside, [dir="rtl"] .sb-caveat { border-left: 0; padding-left: 0; border-right: 2px solid var(--line); padding-right: 12px; }
+[dir="rtl"] .sb-caveat { border-right-color: var(--warm); }
+[dir="rtl"] .lvl { margin-left: 0; margin-right: 10px; }
+[dir="rtl"] .intro-text p .lvl, [dir="rtl"] .in-wrap .lvl { margin-right: 0; }
+[dir="rtl"] .step-link { left: auto; right: -34px; }
+[dir="rtl"] .coda th, [dir="rtl"] .coda td, [dir="rtl"] .sb-table th, [dir="rtl"] .sb-table td, [dir="rtl"] .dx-table th, [dir="rtl"] .dx-table td, [dir="rtl"] .gl-card { text-align: right; }
+[dir="rtl"] .hero-copy { left: auto; right: max(20px, 5vw); }
+[dir="rtl"] .dx-sugg { left: auto; right: 0; }
+/* formulas and number ranges inside right-to-left prose keep their left-to-right order */
+[dir="rtl"] .formula, [dir="rtl"] code, [dir="rtl"] sub, [dir="rtl"] sup { unicode-bidi: isolate; direction: ltr; }
+@media (max-width: 860px) { [dir="rtl"] .step-link { right: auto; left: -6px; } }

@@ -50,6 +50,8 @@
       let size = Math.max(o.size || 14, W < 600 ? 10 : 12); // legible minimum; phones keep their tighter sizes so labels fit
       const font = () => `${o.italic ? "italic " : ""}${o.weight || 500} ${size}px ${o.serif ? SERIF : SANS}`;
       ctx.font = font(); ctx.textAlign = o.align || "center"; ctx.textBaseline = o.base || "middle";
+      // Arabic labels mixed with numbers or units read right to left; alignment above is absolute, so positions don't move
+      ctx.direction = WT.rtl && /[؀-ۿ]/.test(s) ? "rtl" : "ltr";
       // never run off the drawing: shrink a too-long label (down to 9 px), then slide it inside the edges
       const room = W - 8 - (o.bg ? 12 : 0);
       while (ctx.measureText(s).width > room && size > 9) { size -= 0.5; ctx.font = font(); }
