@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scoreboard · Inside a Nuclear Reaction</title>
-<meta name="description" content="How the INCOGNITA reaction engine and the TERRA data product compare with other codes and libraries, losses first.">
+<meta name="description" content="How the INCOGNITA reaction engine compares with the TALYS-2.24 program it was ported from, two independent reaction codes and a TENDL-style recipe, and the TERRA data product, an in-sample fit, with four evaluated libraries, on measured neutron cross sections.">
 <meta property="og:title" content="Scoreboard · Inside a Nuclear Reaction">
 <meta property="og:image" content="https://nucleus-incognita-woad.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=45">
+<link rel="stylesheet" href="style.css?v=48">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -34,76 +34,116 @@
     <div class="kicker" data-i18n="sb_kicker">INCOGNITA · TERRA</div>
     <h1 data-i18n="sb_h1">Scoreboard</h1>
     <p class="sb-asof"><span data-i18n="sb_asof">As of</span> <time id="sb-date"></time>.</p>
+    <p class="sb-scope" id="sb-scope"></p>
+    <p class="sb-sum" id="sb-sum"></p>
     <div class="sb-hero"><canvas id="sb-hero-cv"></canvas></div>
-    <p data-i18n="sb_intro">How our results compare with other reaction codes and data libraries, judged against measurements. Losses and ties come first, because they are where the work is. A tie is not a win.</p>
     <p class="site-credit" data-i18n="credit_sub">The INCOGNITA engine is a port of <a href="https://doi.org/10.1140/epja/s10050-023-01034-3">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) and uses the TALYS nuclear-structure database. What INCOGNITA adds is <a href="./#code" data-keep-lang>listed, switch by switch, at the end of the teaching page</a>.</p>
   </header>
 
+  <section class="sb-sec sb-guide" aria-labelledby="sb-read-h">
+    <h2 id="sb-read-h" data-i18n="sb_read_h">How to read this</h2>
+    <ul class="sb-list">
+      <li data-i18n="sb_read_1"><b>Error</b>: how far a code's values are from the measurements, as a root-mean-square in dex (log10 units; 0.01 dex ≈ 2.3 %).</li>
+      <li data-i18n="sb_read_2"><b>Gap</b>: the engine's error minus the rival's, on the same nuclei. Negative means the engine is closer to the data.</li>
+      <li data-i18n="sb_read_3"><b>WIN</b>: the whole 95 % interval of the gap is below zero. <b>LOSS</b>: the whole interval is above zero. <b>TIE</b>: the interval contains zero, so the data cannot tell the two apart. A tie is not a win.</li>
+      <li data-i18n="sb_read_4"><b>Second scoring</b>: the same measurements, with each code's curve read on a fixed 0.25 MeV grid. <b>Second data set</b>: another, partly overlapping selection of nuclei and measurements. <b>Capture, nuclei far from stability</b>: the compound nucleus has at least one proton fewer than the valley of stability at its mass.</li>
+    </ul>
+    <h2 id="sb-keep-h" data-i18n="sb_keep_h">What to keep in mind</h2>
+    <ul class="sb-list">
+      <li data-i18n="sb_keep_1">This is not a blind test: the engine's global rules were chosen while watching these comparisons.</li>
+      <li data-i18n="sb_keep_2">We ran the rival codes ourselves at their default input; their authors did not tune them.</li>
+      <li id="sb-keep-3">Some comparisons reuse the same measurements (for example a second scoring of the same (n,2n) data), so the comparisons are not independent; no correction for multiple comparisons is applied.</li>
+      <li id="sb-keep-5"></li>
+    </ul>
+  </section>
+
   <section class="sb-sec" aria-labelledby="sb-inc-h">
-    <h2 id="sb-inc-h" data-i18n="sb_inc_h">1 · The engine (INCOGNITA) against other reaction codes</h2>
-    <p data-i18n="sb_inc_p">The reaction engine predicts every nuclide with one set of global rules; nothing in it is fitted to the cross sections of an individual nucleus. Those global rules were chosen while watching these same comparisons, so they are development comparisons, not a blind test. Each comparison below is one data view (for example "capture cross sections, 10–100 keV") against one rival code, scored on the same nuclei. Class-A comparisons only (see the legend).</p>
+    <h2 id="sb-inc-h" data-i18n="sb_inc_h">1 · The engine against other reaction codes</h2>
+    <p data-i18n="sb_inc_p">The engine predicts every nuclide with one set of global rules: no parameter is adjusted to the cross sections of an individual nucleus. Like TALYS, it reads each nucleus's measured structure data (discrete levels, and resonance spacings where measured) from the TALYS structure database. Each comparison is one kind of measurement (for example “capture, 10–100 keV”) scored for the engine and one rival.</p>
     <div class="sb-tiles" id="sb-inc-tiles"></div>
     <div class="sb-strip" id="sb-inc-strip" role="img"></div>
     <p class="sb-note" id="sb-inc-note"></p>
-    <p class="sb-note" data-i18n="sb_inc_overlap">The comparisons are not independent: several views overlap (for example, <code>thrA1_n2n</code> and <code>n2n_step1</code> cover the same nuclei, <code>capture_all</code> contains the narrower capture views, and each "all" group of stellar capture contains its Z bands). The counts above apply no correction for multiple comparisons.</p>
 
-    <h3 data-i18n="sb_loss_h">No class-A loss</h3>
-    <p id="sb-loss-p" data-i18n="sb_loss_p">No class-A comparison is a loss. The last one, (n,p) near its threshold against TALYS-2's default input (computed with our port), became a tie with the engine update of 22 October 2026. That update added a rule aimed at this comparison (NPWINDOW, listed with the other additions at the end of the teaching page); it makes a few other views slightly worse, a harm we accepted and recorded. The comparison still trails: our errors are larger on the point estimate, but the 95 % interval now contains zero.</p>
+    <h3 id="sb-loss-h"></h3>
+    <p id="sb-loss-p"></p>
 
     <h3 data-i18n="sb_open_h">Every comparison that is not a win</h3>
     <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-open-cap">
-      <table class="sb-table" id="sb-open"><caption id="sb-open-cap" data-i18n="sb_open_cap">Open comparisons, worst first. Gap = our error minus the rival's (dex, log10); negative means we are closer to the data.</caption></table>
+      <table class="sb-table" id="sb-open"><caption id="sb-open-cap" data-i18n="sb_open_cap">Closest to a loss first (highest upper end of the interval). In dex; a negative gap means the engine is closer to the data.</caption></table>
     </div>
 
     <h3 data-i18n="sb_rival_h">By rival</h3>
     <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-rival-cap">
-      <table class="sb-table" id="sb-rival"><caption id="sb-rival-cap" data-i18n="sb_rival_cap">Wins, ties and losses against each rival; N/A = not scorable (too few nuclei, or the rival has no values).</caption></table>
+      <table class="sb-table" id="sb-rival"><caption id="sb-rival-cap" data-i18n="sb_rival_cap">N/A: not scored and not counted (reasons above).</caption></table>
     </div>
 
-    <h3 data-i18n="sb_chg_h">What changed on 22 October 2026</h3>
-    <p data-i18n="sb_chg_p">Two new production engines, the latest <code>engine-20261022-3</code>. Both are fixes, not physics changes: the first removes a numerical breakdown of the coupled-channels calculation at very low neutron energies (53 target nuclei failed there and now run), the second cuts the memory used for heavy, fissile nuclei. The census was rerun on the new engine: no verdict moved, and the scores match the previous engine's to rounding.</p>
-    <ul class="sb-changes" id="sb-changes"></ul>
+    <details class="sb-more">
+      <summary data-i18n="sb_how_h">How this is scored</summary>
+      <dl>
+        <dt data-i18n="sb_how_err_t">Error</dt>
+        <dd data-i18n="sb_how_err_d">The root-mean-square of log10(code / measured), in dex. In most comparisons every measured point counts, with weight 1 / (0.1² + u²) for a point of uncertainty u (dex), so nuclei with many points weigh more; in fission and stellar capture each nucleus counts equally. Both codes are scored on the same points. The 0.1 dex in the weight is a floor: no point counts as more precise than about 26 %, so a few very precise points cannot dominate.</dd>
+        <dt data-i18n="sb_how_ci_t">Interval</dt>
+        <dd data-i18n="sb_how_ci_d">A paired bootstrap over nuclei: 2,000 resamples, with both codes scored on each; the interval runs from the 2.5th to the 97.5th percentile of the gap.</dd>
+        <dt data-i18n="sb_how_na_t">Not scored (N/A)</dt>
+        <dd data-i18n="sb_how_na_d">A comparison is N/A when the rival gives no value, when 5 or fewer nuclei can be scored, or when the rival's error exceeds 1 dex (a factor of 10: its run failed). The rule is the same whatever the verdict would have been; the data package still lists these gaps. The TERRA board keeps its own rule: N/A with 3 or fewer nuclei for plain accuracy, fewer than 5 otherwise.</dd>
+        <dt data-i18n="sb_how_cls_t">Kinds of tie</dt>
+        <dd data-i18n="sb_how_cls_d"><i>Engine behind</i>: the gap is zero or positive. <i>Engine ahead, not resolved</i>: the gap is negative but the interval contains zero; this label is given when a power estimate finds that at most four times as many nuclei would put the interval below zero. <i>About level</i>: the other ties.</dd>
+        <dt data-i18n="sb_how_cls2_t">Which rivals count</dt>
+        <dd data-i18n="sb_how_cls2_d">Only model calculations. Evaluated libraries are fitted to the same measurements, so the engine is not scored against them; TERRA is (section 2).</dd>
+        <dt data-i18n="sb_how_riv_t">The rivals</dt>
+        <dd data-i18n="sb_how_riv_d"><b>TALYS-2.24</b>: the TALYS program at default input, from runs we made and stored earlier. This project's own port of TALYS-2, the TALYS rival before 23 October 2026, matches the program to within 0.002 dex rms for capture, stellar capture and fission, and 0.013–0.023 dex for (n,p) and (n,α). The program's results are stored on its 64-point energy grid; for (n,2n), which rises steeply above threshold, the engine is read on the same grid (read on its own finer grid, it would win those four comparisons, mostly because of the grid). <b>TENDL-style recipe</b>: this project's reproduction, in its own engine, of the recipe TENDL uses for nuclei without fitted inputs; not the TENDL library. <b>CoH3</b> 3.6.1 and <b>YAHFC</b> 3.67: independent Hauser–Feshbach codes; by default YAHFC emits no alpha particles, so it has no (n,α) comparisons.</dd>
+        <dt data-i18n="sb_how_k_t">Stellar capture</dt>
+        <dd id="sb-how-k">Maxwellian-averaged capture cross sections (MACS) at 30 keV, grouped by proton number Z, scored on the nuclides whose compiled value is measured, not estimated. The bands Z &lt; 20 and Z ≥ 84 hold no such nuclide and are not counted.</dd>
+        <dt data-i18n="sb_how_ov_t">Overlaps</dt>
+        <dd data-i18n="sb_how_ov_d">For example, “(n,2n) near threshold” and its second scoring use the same measurements; “capture, all” contains the narrower capture comparisons; each all-Z stellar-capture comparison contains its Z bands.</dd>
+        <dt data-i18n="sb_how_blind_t">Blind test</dt>
+        <dd data-i18n="sb_how_blind_d">None has been run on this engine yet. A blind test, on measurements kept sealed from development, is held back for later.</dd>
+        <dt data-i18n="sb_how_terms_t">Terms</dt>
+        <dd><ul class="sb-gloss">
+          <li data-i18n="sb_gl_1"><b>EXFOR</b>: the international library of measured nuclear reaction data (IAEA and partners).</li>
+          <li data-i18n="sb_gl_2"><b>Evaluated library</b>: a recommended set of cross sections for applications (ENDF/B, JEFF, JENDL, TENDL), built by fitting models to measurements.</li>
+          <li data-i18n="sb_gl_3"><b>MACS</b>: Maxwellian-averaged capture cross section, the capture rate in a star at a given temperature.</li>
+          <li data-i18n="sb_gl_4"><b>Hauser–Feshbach</b>: the statistical model of a compound nucleus decaying through every open channel; every code here uses it.</li>
+          <li data-i18n="sb_gl_5"><b>Surrogate measurement</b>: a cross section inferred from a different reaction that forms the same compound nucleus.</li>
+          <li data-i18n="sb_gl_6"><b>Near threshold</b>: energies just above the lowest energy at which a reaction can occur, where its cross section rises steeply.</li>
+          <li data-i18n="sb_gl_7"><b>Curated set, selected nuclei</b>: smaller subsets of nuclei and measurements chosen by this project; the data package lists them.</li>
+        </ul></dd>
+        <dt data-i18n="sb_chg_h">What changed</dt>
+        <dd data-i18n="sb_chg_p"><b>23 October 2026.</b> Comparisons resting on 5 or fewer nuclei, or on a failed rival run, are now N/A: three wins and two ties, all for fission, left the count. Stellar-capture bands with no scored nucleus (Z &lt; 20, Z ≥ 84) are no longer counted as N/A. The TALYS rival is now the TALYS-2.24 program itself, at default input, in place of this project's port of TALYS-2. Every verdict is the same as against the port except four (n,2n) comparisons, which are now ties: the program's results are stored on a coarser energy grid, and with both codes read on that grid the two cannot be told apart. <b>22 October 2026.</b> Two engine fixes (a numerical breakdown at very low neutron energies; memory use for heavy nuclei). No verdict moved.</dd>
+        <dt data-i18n="sb_how_ver_t">Version</dt>
+        <dd id="sb-src"></dd>
+      </dl>
+      <ul class="sb-changes" id="sb-changes" hidden></ul>
+      <p class="sb-data"><a href="https://github.com/seth-michael-weaver/incognita/tree/main/docs/walkthrough/data/board" data-i18n="sb_data_link">Check the numbers yourself: data and a script that recomputes every engine comparison</a></p>
+    </details>
   </section>
 
   <section class="sb-sec" aria-labelledby="sb-terra-h">
     <h2 id="sb-terra-h" data-i18n="sb_terra_h">2 · The data product (TERRA) against evaluated libraries</h2>
-    <p data-i18n="sb_terra_p">TERRA takes the engine's curves and, where good measurements exist, anchors the result to them, with an uncertainty band. It is compared with the four major evaluated libraries on accuracy and on whether its uncertainty bands cover the data as often as they claim.</p>
+    <p class="sb-asof" id="sb-terra-asof"></p>
+    <p data-i18n="sb_terra_p">TERRA anchors the engine's curves to good measurements where they exist, with an uncertainty band. It is compared with ENDF/B-VIII.1, JEFF-4.0, JENDL-5 and TENDL-2025 on accuracy and on whether its bands contain the measurements as often as they claim.</p>
+    <p class="sb-caveat" data-i18n="sb_terra_caveat">TERRA was fitted to exactly these measurements, while the libraries were evaluated with other, often older, data and with integral benchmarks. The comparison therefore favours TERRA; its results are not predictions.</p>
     <div class="sb-tiles" id="sb-terra-tiles"></div>
     <div class="sb-strip" id="sb-terra-strip" role="img"></div>
-    <p class="sb-note" id="sb-terra-note"></p>
-    <h3 data-i18n="sb_terra_loss_h">The one loss</h3>
+    <p class="sb-note" id="sb-terra-split"></p>
+    <h3 id="sb-terra-loss-h"></h3>
     <p id="sb-terra-loss"></p>
     <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-trival-cap">
       <table class="sb-table" id="sb-trival"><caption id="sb-trival-cap" data-i18n="sb_trival_cap">Wins, ties and losses against each library.</caption></table>
     </div>
-    <p class="sb-caveat" data-i18n="sb_terra_caveat">Read this board with care. Every accuracy comparison on it is in-sample: where TERRA fits a reaction, it is scored on the same measurements it was fitted to, as the libraries are. 28 comparisons are scored leave-one-series-out (TERRA refitted without the series being judged) and are included in the count. All 28 measure uncertainty coverage, not accuracy, and 12 of them are identical to their in-sample versions, because TERRA does not fit (n,2n) or fission. The libraries cannot be refitted, so they stay in-sample.</p>
-    <p class="sb-next" data-i18n="sb_terra_next">In progress: R073, a rebuild of this candidate on the current engine. This board will be updated when its scores are in.</p>
-  </section>
-
-  <section class="sb-sec sb-legend" aria-labelledby="sb-leg-h">
-    <h2 id="sb-leg-h" data-i18n="sb_leg_h">How to read it</h2>
-    <dl>
-      <dt data-i18n="sb_leg_gap_t">Gap</dt>
-      <dd data-i18n="sb_leg_gap_d">Each code's error in a comparison is a root-mean-square difference from the measurements in log10 units (dex; 0.01 dex ≈ 2.3 %). In most engine comparisons it is taken over all measured points, each weighted by how far its measurement is trusted, so nuclei with many points weigh more; in fission and stellar capture each nucleus counts equally. The gap is our error minus the rival's on the same nuclei. Negative = we are closer to the data.</dd>
-      <dt data-i18n="sb_leg_ci_t">WIN, TIE, LOSS</dt>
-      <dd data-i18n="sb_leg_ci_d">The 95 % confidence interval of the gap comes from resampling the nuclei. WIN: the whole interval is below zero. LOSS: the whole interval is above zero. TIE: the interval contains zero, so the data cannot tell the two apart, whatever the point estimate says.</dd>
-      <dt data-i18n="sb_leg_cls_t">Trail, parity, underpowered</dt>
-      <dd data-i18n="sb_leg_cls_d">Kinds of tie. Trail: we are behind on the point estimate. Parity: the two are close. Underpowered: we lead on the point estimate, but there are too few nuclei to be sure.</dd>
-      <dt data-i18n="sb_leg_a_t">Class A</dt>
-      <dd data-i18n="sb_leg_a_d">The engine is compared on equal terms only with other model calculations (class A). Evaluated libraries are fitted to the same measurements, so they are not counted against the engine; TERRA, which also uses the measurements, is the product judged against them.</dd>
-      <dt data-i18n="sb_leg_riv_t">The rivals</dt>
-      <dd data-i18n="sb_leg_riv_d"><b>stock</b>: TALYS-2 default input, computed with this project's port of TALYS-2 (not the TALYS program itself). <b>R_T</b> ("recipe R"): this project's reproduction, in its own engine, of the recipe TENDL uses for nuclei without fitted inputs; it is not the TENDL library. <b>CoH3</b> (3.6.1) and <b>YAHFC</b> (3.67): two independent Hauser–Feshbach reaction codes, run by us with default input, not tuned by their authors. By default YAHFC emits no alpha particles, so it has no (n,α) comparisons. TERRA's rivals are the evaluated libraries ENDF/B-VIII.1, JEFF-4.0, JENDL-5 and TENDL-2025.</dd>
-      <dt data-i18n="sb_leg_k_t">MACS bands</dt>
-      <dd data-i18n="sb_leg_k_d">Maxwellian-averaged capture cross sections, the stellar capture rates, grouped by proton number Z. They are scored on two label sets (126 and 185 nuclides) that give identical verdicts, so each band counts once.</dd>
-    </dl>
-    <p class="sb-src" id="sb-src"></p>
+    <details class="sb-more">
+      <summary data-i18n="sb_thow_h">How TERRA is scored</summary>
+      <p data-i18n="sb_thow_1">Accuracy uses the same error as section 1. Uncertainty coverage scores how well the bands' stated 68 % and 95 % match how often they contain the measurements. In every comparison lower is better for TERRA, and the verdict rule is the same.</p>
+      <p id="sb-terra-note"></p>
+      <p data-i18n="sb_thow_2">TERRA's comparisons cannot be recomputed from the data package: that would need values derived from the evaluated libraries, which this project does not redistribute. Each comparison is listed there.</p>
+    </details>
   </section>
 </main>
 
-<script src="js/i18n.js?v=45"></script>
-<script>WT.load(["scoreboard"], 45);</script>
-<script src="js/nav.js?v=45"></script>
-<script src="js/scoreboard-data.js?v=45"></script>
-<script src="js/scoreboard.js?v=45"></script>
+<script src="js/i18n.js?v=48"></script>
+<script>WT.load(["scoreboard"], 48);</script>
+<script src="js/nav.js?v=48"></script>
+<script src="js/scoreboard-data.js?v=48"></script>
+<script src="js/scoreboard.js?v=48"></script>
 </body>
 </html>

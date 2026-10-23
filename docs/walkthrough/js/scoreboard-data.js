@@ -7,212 +7,54 @@ WT.board = {
   "commit": "16606b356",
   "date": "2026-10-23",
   "census": "BOARDREFRESH",
-  "WIN": 54,
-  "TIE": 17,
+  "WIN": 47,
+  "TIE": 19,
   "LOSS": 0,
-  "decided": 71,
-  "NA": 17,
+  "decided": 66,
+  "NA": 14,
   "by_rival": {
-   "stock": {
-    "WIN": 14,
-    "TIE": 6,
-    "LOSS": 0,
-    "NA": 2
-   },
    "R_T": {
     "WIN": 12,
     "TIE": 2,
     "LOSS": 0,
-    "NA": 8
+    "NA": 6
    },
    "CoH3": {
-    "WIN": 16,
+    "WIN": 14,
     "TIE": 4,
     "LOSS": 0,
     "NA": 2
    },
    "YAHFC": {
-    "WIN": 12,
-    "TIE": 5,
+    "WIN": 11,
+    "TIE": 4,
     "LOSS": 0,
     "NA": 5
+   },
+   "TALYS-2.24": {
+    "WIN": 10,
+    "TIE": 9,
+    "LOSS": 0,
+    "NA": 1
    }
   },
   "open": [
    {
     "block": "K",
     "cell": "K185 Z20-39",
-    "rival": "stock",
-    "n": 20,
-    "gap": 0.0132,
-    "lo": -0.0177,
-    "hi": 0.0458,
+    "rival": "TALYS-2.24",
+    "n": 17,
+    "gap": 0.0153,
+    "lo": -0.0183,
+    "hi": 0.0505,
     "verdict": "TIE",
     "cls": "trail",
+    "ours": 0.1722,
+    "theirs": 0.1569,
     "carriers": [
      "Ni-63",
      "Fe-54",
      "Zn-66"
-    ]
-   },
-   {
-    "block": "D",
-    "cell": "capture_FAR",
-    "rival": "stock",
-    "n": 9,
-    "gap": 0.01,
-    "lo": -0.0105,
-    "hi": 0.0283,
-    "verdict": "TIE",
-    "cls": "trail",
-    "carriers": [
-     "Te-125",
-     "Rb-87",
-     "Kr-84"
-    ]
-   },
-   {
-    "block": "D",
-    "cell": "thrA1_np",
-    "rival": "stock",
-    "n": 41,
-    "gap": 0.0081,
-    "lo": -0.0017,
-    "hi": 0.0166,
-    "verdict": "TIE",
-    "cls": "trail",
-    "carriers": [
-     "Fe-58",
-     "Pb-208",
-     "Ba-138"
-    ]
-   },
-   {
-    "block": "K",
-    "cell": "K185 Z20-39",
-    "rival": "R_T",
-    "n": 20,
-    "gap": -0.0021,
-    "lo": -0.0214,
-    "hi": 0.0191,
-    "verdict": "TIE",
-    "cls": "parity",
-    "carriers": [
-     "Ge-70",
-     "Se-78",
-     "Zn-70"
-    ]
-   },
-   {
-    "block": "D",
-    "cell": "fission_SELECT",
-    "rival": "YAHFC",
-    "n": 4,
-    "gap": -0.0022,
-    "lo": -0.0907,
-    "hi": 0.0436,
-    "verdict": "TIE",
-    "cls": "parity",
-    "carriers": [
-     "Np-236",
-     "Cm-247",
-     "Cm-243"
-    ]
-   },
-   {
-    "block": "D",
-    "cell": "fission_SELECT",
-    "rival": "stock",
-    "n": 5,
-    "gap": -0.007,
-    "lo": -0.0395,
-    "hi": 0.0119,
-    "verdict": "TIE",
-    "cls": "parity",
-    "carriers": [
-     "Pa-233",
-     "Np-236",
-     "Cm-244"
-    ]
-   },
-   {
-    "block": "K",
-    "cell": "K185 Z60-83",
-    "rival": "YAHFC",
-    "n": 69,
-    "gap": -0.0191,
-    "lo": -0.056,
-    "hi": 0.0229,
-    "verdict": "TIE",
-    "cls": "parity",
-    "carriers": [
-     "Bi-209",
-     "Eu-151",
-     "Gd-155"
-    ]
-   },
-   {
-    "block": "D",
-    "cell": "capture_FAR",
-    "rival": "YAHFC",
-    "n": 8,
-    "gap": -0.0233,
-    "lo": -0.0815,
-    "hi": 0.027,
-    "verdict": "TIE",
-    "cls": "parity",
-    "carriers": [
-     "Br-81",
-     "Te-125",
-     "Rb-87"
-    ]
-   },
-   {
-    "block": "K",
-    "cell": "K185 Z40-59",
-    "rival": "stock",
-    "n": 15,
-    "gap": -0.0259,
-    "lo": -0.0746,
-    "hi": 0.0372,
-    "verdict": "TIE",
-    "cls": "parity",
-    "carriers": [
-     "Cs-135",
-     "Ba-132",
-     "Ce-142"
-    ]
-   },
-   {
-    "block": "K",
-    "cell": "K185 Z20-39",
-    "rival": "CoH3",
-    "n": 20,
-    "gap": -0.0304,
-    "lo": -0.0962,
-    "hi": 0.0332,
-    "verdict": "TIE",
-    "cls": "parity",
-    "carriers": [
-     "Zn-70",
-     "Ni-63",
-     "Se-78"
-    ]
-   },
-   {
-    "block": "D",
-    "cell": "thrA1_np",
-    "rival": "CoH3",
-    "n": 32,
-    "gap": -0.0224,
-    "lo": -0.0824,
-    "hi": 0.0072,
-    "verdict": "TIE",
-    "cls": "underpowered",
-    "carriers": [
-     "Ni-58",
-     "Cd-111",
-     "Ge-70"
     ]
    },
    {
@@ -225,6 +67,8 @@ WT.board = {
     "hi": 0.0366,
     "verdict": "TIE",
     "cls": "underpowered",
+    "ours": 0.1423,
+    "theirs": 0.1784,
     "carriers": [
      "Te-128",
      "Sn-117",
@@ -232,19 +76,39 @@ WT.board = {
     ]
    },
    {
+    "block": "K",
+    "cell": "K185 Z20-39",
+    "rival": "CoH3",
+    "n": 20,
+    "gap": -0.0304,
+    "lo": -0.0962,
+    "hi": 0.0332,
+    "verdict": "TIE",
+    "cls": "parity",
+    "ours": 0.1608,
+    "theirs": 0.1912,
+    "carriers": [
+     "Zn-70",
+     "Ni-63",
+     "Se-78"
+    ]
+   },
+   {
     "block": "D",
     "cell": "capture_FAR",
-    "rival": "R_T",
+    "rival": "TALYS-2.24",
     "n": 9,
-    "gap": -0.0428,
-    "lo": -0.101,
-    "hi": 0.0212,
+    "gap": 0.01,
+    "lo": -0.0105,
+    "hi": 0.0283,
     "verdict": "TIE",
-    "cls": "underpowered",
+    "cls": "trail",
+    "ours": 0.1483,
+    "theirs": 0.1383,
     "carriers": [
-     "Br-81",
      "Te-125",
-     "Zr-94"
+     "Rb-87",
+     "Kr-84"
     ]
    },
    {
@@ -257,6 +121,8 @@ WT.board = {
     "hi": 0.0278,
     "verdict": "TIE",
     "cls": "underpowered",
+    "ours": 0.1539,
+    "theirs": 0.1975,
     "carriers": [
      "Xe-136",
      "Ba-132",
@@ -265,34 +131,38 @@ WT.board = {
    },
    {
     "block": "D",
-    "cell": "np_FRESH_curated",
-    "rival": "CoH3",
+    "cell": "capture_FAR",
+    "rival": "YAHFC",
     "n": 8,
-    "gap": -0.0479,
-    "lo": -0.1016,
-    "hi": 0.0117,
+    "gap": -0.0233,
+    "lo": -0.0815,
+    "hi": 0.027,
     "verdict": "TIE",
-    "cls": "underpowered",
+    "cls": "parity",
+    "ours": 0.1477,
+    "theirs": 0.171,
     "carriers": [
-     "Mo-95",
-     "Sn-112",
-     "Ni-58"
+     "Br-81",
+     "Te-125",
+     "Rb-87"
     ]
    },
    {
-    "block": "D",
-    "cell": "np_FRESH_curated",
-    "rival": "stock",
-    "n": 11,
-    "gap": -0.0485,
-    "lo": -0.0856,
-    "hi": 0.0087,
+    "block": "K",
+    "cell": "K185 Z60-83",
+    "rival": "YAHFC",
+    "n": 69,
+    "gap": -0.0191,
+    "lo": -0.056,
+    "hi": 0.0229,
     "verdict": "TIE",
-    "cls": "underpowered",
+    "cls": "parity",
+    "ours": 0.1142,
+    "theirs": 0.1333,
     "carriers": [
-     "Mo-95",
-     "Pb-208",
-     "Ni-58"
+     "Bi-209",
+     "Eu-151",
+     "Gd-155"
     ]
    },
    {
@@ -305,10 +175,210 @@ WT.board = {
     "hi": 0.0228,
     "verdict": "TIE",
     "cls": "underpowered",
+    "ours": 0.1539,
+    "theirs": 0.2024,
     "carriers": [
      "Cs-135",
      "Ba-132",
      "Xe-136"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "capture_FAR",
+    "rival": "R_T",
+    "n": 9,
+    "gap": -0.0428,
+    "lo": -0.101,
+    "hi": 0.0212,
+    "verdict": "TIE",
+    "cls": "underpowered",
+    "ours": 0.1483,
+    "theirs": 0.1912,
+    "carriers": [
+     "Br-81",
+     "Te-125",
+     "Zr-94"
+    ]
+   },
+   {
+    "block": "K",
+    "cell": "K185 Z20-39",
+    "rival": "R_T",
+    "n": 20,
+    "gap": -0.0021,
+    "lo": -0.0214,
+    "hi": 0.0191,
+    "verdict": "TIE",
+    "cls": "parity",
+    "ours": 0.1608,
+    "theirs": 0.1629,
+    "carriers": [
+     "Ge-70",
+     "Se-78",
+     "Zn-70"
+    ]
+   },
+   {
+    "block": "K",
+    "cell": "K185 Z40-59",
+    "rival": "TALYS-2.24",
+    "n": 14,
+    "gap": -0.0394,
+    "lo": -0.0821,
+    "hi": 0.0174,
+    "verdict": "TIE",
+    "cls": "underpowered",
+    "ours": 0.1421,
+    "theirs": 0.1814,
+    "carriers": [
+     "Ba-132",
+     "Ce-142",
+     "Zr-90"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "thrA1_np",
+    "rival": "TALYS-2.24",
+    "n": 41,
+    "gap": 0.0071,
+    "lo": -0.0029,
+    "hi": 0.0145,
+    "verdict": "TIE",
+    "cls": "trail",
+    "ours": 0.1692,
+    "theirs": 0.162,
+    "carriers": [
+     "Fe-58",
+     "Ni-58",
+     "As-75"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "n2n_step1",
+    "rival": "TALYS-2.24",
+    "n": 35,
+    "gap": -0.003,
+    "lo": -0.0239,
+    "hi": 0.0119,
+    "verdict": "TIE",
+    "cls": "parity",
+    "ours": 0.1364,
+    "theirs": 0.1394,
+    "carriers": [
+     "Ni-58",
+     "Cu-65",
+     "Y-89"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "np_FRESH_curated",
+    "rival": "CoH3",
+    "n": 8,
+    "gap": -0.0479,
+    "lo": -0.1016,
+    "hi": 0.0117,
+    "verdict": "TIE",
+    "cls": "underpowered",
+    "ours": 0.1236,
+    "theirs": 0.1716,
+    "carriers": [
+     "Mo-95",
+     "Sn-112",
+     "Ni-58"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "thrA1_n2n",
+    "rival": "TALYS-2.24",
+    "n": 35,
+    "gap": -0.0033,
+    "lo": -0.0237,
+    "hi": 0.011,
+    "verdict": "TIE",
+    "cls": "parity",
+    "ours": 0.137,
+    "theirs": 0.1402,
+    "carriers": [
+     "Ni-58",
+     "Cu-65",
+     "Y-89"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "thrA1_np",
+    "rival": "CoH3",
+    "n": 32,
+    "gap": -0.0224,
+    "lo": -0.0824,
+    "hi": 0.0072,
+    "verdict": "TIE",
+    "cls": "underpowered",
+    "ours": 0.1551,
+    "theirs": 0.1775,
+    "carriers": [
+     "Ni-58",
+     "Cd-111",
+     "Ge-70"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "n2n_SELECT_RL3",
+    "rival": "TALYS-2.24",
+    "n": 15,
+    "gap": -0.0003,
+    "lo": -0.0028,
+    "hi": 0.0018,
+    "verdict": "TIE",
+    "cls": "parity",
+    "ours": 0.1049,
+    "theirs": 0.1052,
+    "carriers": [
+     "Y-89",
+     "Se-74",
+     "Rb-87"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "n2n_SELECT",
+    "rival": "TALYS-2.24",
+    "n": 15,
+    "gap": -0.002,
+    "lo": -0.0058,
+    "hi": 0.0016,
+    "verdict": "TIE",
+    "cls": "underpowered",
+    "ours": 0.1069,
+    "theirs": 0.1089,
+    "carriers": [
+     "Ge-70",
+     "Se-74",
+     "Rb-87"
+    ]
+   },
+   {
+    "block": "D",
+    "cell": "np_FRESH_curated",
+    "rival": "TALYS-2.24",
+    "n": 11,
+    "gap": -0.0504,
+    "lo": -0.0864,
+    "hi": 0.0005,
+    "verdict": "TIE",
+    "cls": "underpowered",
+    "ours": 0.1423,
+    "theirs": 0.1927,
+    "carriers": [
+     "Mo-95",
+     "Ni-58",
+     "As-75"
     ]
    }
   ],
@@ -316,7 +386,70 @@ WT.board = {
   "by_class": {
    "trail": 3,
    "parity": 7,
-   "underpowered": 7
+   "underpowered": 9
+  },
+  "na_rule": [
+   {
+    "cell": "fission_SELECT",
+    "rival": "CoH3",
+    "was": "WIN",
+    "why": "too few nuclei",
+    "n": 5
+   },
+   {
+    "cell": "SURR fission_SELECT",
+    "rival": "CoH3",
+    "was": "WIN",
+    "why": "too few nuclei",
+    "n": 5
+   },
+   {
+    "cell": "fission_SELECT",
+    "rival": "YAHFC",
+    "was": "TIE",
+    "why": "too few nuclei",
+    "n": 4
+   },
+   {
+    "cell": "SURR fission_SELECT",
+    "rival": "YAHFC",
+    "was": "WIN",
+    "why": "rival run failed",
+    "n": 5
+   },
+   {
+    "cell": "fission_SELECT",
+    "rival": "TALYS-2.24",
+    "was": "TIE",
+    "why": "too few nuclei",
+    "n": 5
+   }
+  ],
+  "effect": {
+   "err_min": 0.063,
+   "err_max": 0.237,
+   "pct_min": 16,
+   "pct_max": 73,
+   "win_gap": 0.072,
+   "win_pct": 18,
+   "n_win": 47
+  },
+  "scope": {
+   "nuclides": 163,
+   "values": 3149,
+   "rows": 5440,
+   "e_lo_kev": 3,
+   "e_hi_mev": 20
+  },
+  "curation": {
+   "rows": 6425,
+   "excluded": 985,
+   "ds_down": 502,
+   "ds_excl": 221
+  },
+  "k_scope": {
+   "n": 104,
+   "talys": 97
   }
  },
  "terra": {
@@ -326,35 +459,55 @@ WT.board = {
   "TIE": 108,
   "LOSS": 1,
   "decided": 326,
+  "NA": 28,
   "loso": {
-   "WIN": 17,
+   "WIN": 21,
    "TIE": 11,
-   "LOSS": 0
+   "LOSS": 0,
+   "cov": 28,
+   "acc": 4,
+   "same": 12
+  },
+  "split": {
+   "acc": {
+    "WIN": 168,
+    "TIE": 66,
+    "LOSS": 0
+   },
+   "cov": {
+    "WIN": 49,
+    "TIE": 42,
+    "LOSS": 1
+   }
   },
   "by_rival": [
    {
     "rival": "ENDF/B-VIII.1",
     "WIN": 54,
     "TIE": 25,
-    "LOSS": 0
+    "LOSS": 0,
+    "NA": 7
    },
    {
     "rival": "JEFF-4.0",
     "WIN": 56,
     "TIE": 21,
-    "LOSS": 0
+    "LOSS": 0,
+    "NA": 11
    },
    {
     "rival": "JENDL-5",
     "WIN": 46,
     "TIE": 39,
-    "LOSS": 0
+    "LOSS": 0,
+    "NA": 5
    },
    {
     "rival": "TENDL-2025",
     "WIN": 61,
     "TIE": 23,
-    "LOSS": 1
+    "LOSS": 1,
+    "NA": 5
    }
   ],
   "losses": [
@@ -365,7 +518,6 @@ WT.board = {
     "lo": 0.027,
     "hi": 0.138
    }
-  ],
-  "next": "R073"
+  ]
  }
 };

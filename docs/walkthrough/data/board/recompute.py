@@ -10,6 +10,11 @@ Standard library only, plus numpy if it is installed. With numpy (numpy.random.d
 draws are the same as the census's, so the CIs are reproduced to rounding. Without numpy the gaps are still exact,
 but the CIs come from Python's own random generator: they will differ slightly from cells.csv and a verdict whose
 interval end sits near zero can differ.
+
+Verdict: WIN if the interval's upper end < 0, LOSS if its lower end > 0, TIE otherwise; N/A (not counted) when the rival gives
+no value, when 5 or fewer nuclei are scored, or when the rival's error exceeds 1 dex (a failed rival run). cells.csv keeps the
+gap, interval and scores of such cells and says why in `na_reason`. A stellar-capture band with no scored nuclide at all
+(Z < 20 and Z >= 84: no compiled value there is a measurement) is not a comparison: `na_reason` "empty band", not counted.
 """
 import csv, gzip, math, os, random, sys
 from collections import OrderedDict, defaultdict
@@ -24,7 +29,7 @@ NB = 2000                 # bootstrap replicates
 SEED_D = 20261001         # D cells (data views): paired nucleus bootstrap
 SEED_K = 20261004         # K cells (MACS bands): nucleus bootstrap
 TOL = 1e-8                # agreement required with cells.csv (dex); the files carry 10-12 significant digits
-RIVALS = ["stock", "R_T", "CoH3", "YAHFC"]
+RIVALS = ["TALYS-2.24", "TALYS-port", "R_T", "CoH3", "YAHFC"]   # order of d_pernuc.csv
 
 
 def fnum(s):
@@ -77,10 +82,12 @@ def d_cell(nucs):
     return dict(n=len(nucs), ours=a, rival=b, gap=a - b, lo=percentile(d, 2.5), hi=percentile(d, 97.5))
 
 
-def pernuc_from_rows():
+def pernuc_from_rows(ours_col):
     """Rebuild d_pernuc.csv from d_rows.csv.gz: for each view (and its SURR variant) and rival, the rows with status
     'scored' ('scored_surrogate'), in file order; a row counts for a rival when both residuals are finite; nuclei in
-    order of first appearance among the view's scored rows, nuclei with no counted row dropped."""
+    order of first appearance among the view's scored rows, nuclei with no counted row dropped.
+    ours_col[(view, rival)] names our residual column for that cell (cells.csv, ours_residual): r_ours, except the
+    (n,2n) views against TALYS-2.24, which use r_ours_talysgrid (see README)."""
     rows = read_csv("d_rows.csv.gz"); out = []
     views = sorted({r["view"] for r in rows})
     for v in views:
@@ -88,9 +95,9 @@ def pernuc_from_rows():
             g = [r for r in rows if r["view"] == v and r["status"] == st]
             if not g: continue
             for riv in RIVALS:
-                acc = OrderedDict()
+                acc = OrderedDict(); oc = ours_col.get((vn, riv), "r_ours")
                 for r in g:
-                    a, b, w = fnum(r["r_ours"]), fnum(r["r_" + riv]), fnum(r["weight"])
+                    a, b, w = fnum(r[oc]), fnum(r["r_" + riv]), fnum(r["weight"])
                     e = acc.setdefault(r["nucleus"], [0, 0.0, 0.0, 0.0])
                     if math.isfinite(a) and math.isfinite(b) and math.isfinite(w):
                         e[0] += 1; e[1] += w; e[2] += w * a * a; e[3] += w * b * b
@@ -119,19 +126,33 @@ def k_cell(a, b):
 
 
 def k_cells():
-    K = read_csv("k_pernuc.csv"); out = {}
+    """Returns ({(band, rival): cell or None}, {band: number of scored nuclides in it})."""
+    K = read_csv("k_pernuc.csv"); out = {}; size = {}
     for lab in ("K185", "K126"):
         for band in ("all", "Z<20", "Z20-39", "Z40-59", "Z60-83", "Z>=84"):
             sel = [r for r in K if r["in_scope"] == "True" and (lab == "K185" or r["in_K126"] == "True") and (band == "all" or r["z_band"] == band)]
+            size[f"{lab} {band}"] = len(sel)
             for riv in RIVALS:
                 pr = [(fnum(r["err_ours"]), fnum(r["err_" + riv])) for r in sel]
                 pr = [(x, y) for x, y in pr if math.isfinite(x) and math.isfinite(y)]
                 out[(f"{lab} {band}", riv)] = k_cell([x for x, _ in pr], [y for _, y in pr]) if len(pr) >= 3 else None
-    return out
+    return out, size
+
+
+MIN_NUCLEI = 6           # a comparison needs at least 6 nuclei ...
+RIVAL_FAIL_DEX = 1.0     # ... and a rival error of at most 1 dex (above that the rival's run failed); otherwise N/A
+
+
+def na_reason(c):
+    """Why a cell is N/A ('' when it is scored). The rule is the same for every cell, whatever its verdict would be."""
+    if c is None: return "rival gives no value or too few nuclei"
+    if c["rival"] > RIVAL_FAIL_DEX: return "rival run failed"
+    if c["n"] < MIN_NUCLEI: return "too few nuclei"
+    return ""
 
 
 def verdict(c):
-    if c is None: return "N/A"
+    if na_reason(c): return "N/A"
     return "WIN" if c["hi"] < 0 else "LOSS" if c["lo"] > 0 else "TIE"
 
 
@@ -140,7 +161,7 @@ def main():
     cells = [r for r in read_csv("cells.csv") if r["section"] == "engine"]
     pn = read_csv("d_pernuc.csv")
     if "--rows" in args:
-        rb = pernuc_from_rows(); mx = 0.0
+        rb = pernuc_from_rows({(r["view"], r["rival"]): r["ours_residual"] for r in cells if r["block"] == "D"}); mx = 0.0
         assert len(rb) == len(pn), (len(rb), len(pn))
         for x, y in zip(rb, pn):
             assert (x["view"], x["rival"], x["nucleus"], int(x["order"]), int(x["rows"])) == (y["view"], y["rival"], y["nucleus"], int(y["order"]), int(y["rows"])), (x, y)
@@ -152,14 +173,19 @@ def main():
     by = defaultdict(list)
     for r in pn: by[(r["view"], r["rival"])].append(r)
     for v in by.values(): v.sort(key=lambda r: int(r["order"]))
-    K = k_cells()
+    K, ksize = k_cells()
     worst = 0.0; bad = []; table = []; tally = defaultdict(int)
     for r in cells:
         key = (r["view"], r["rival"])
+        if r["block"] == "K" and ksize[r["view"]] == 0:   # empty band: not a comparison, never counted
+            if (r["na_reason"], r["verdict"], r["counted_on_board"]) != ("empty band", "N/A", "False"): bad.append((key, "empty band", r["na_reason"], r["counted_on_board"]))
+            table.append((r["block"], r["view"], r["rival"], None, "N/A", r["verdict"])); continue
         c = d_cell(by.get(key, [])) if r["block"] == "D" else K[key]
         v = verdict(c)
         if r["counted_on_board"] == "True": tally[v] += 1
         if v != r["verdict"]: bad.append((key, v, r["verdict"]))
+        why = na_reason(c)
+        if why and c is not None and why != r.get("na_reason"): bad.append((key, "na_reason", why, r.get("na_reason")))
         if c is not None:
             n_ref = int(r["n_nuclei"])
             if c["n"] != n_ref: bad.append((key, "n", c["n"], n_ref))
@@ -168,11 +194,11 @@ def main():
                 worst = max(worst, abs(c[a] - float(r[b])))
         table.append((r["block"], r["view"], r["rival"], c, v, r["verdict"]))
     if "--table" in args or bad:
-        print(f"{'blk':3} {'view':22} {'rival':6} {'n':>4} {'ours':>8} {'rival':>8} {'gap':>8} {'ci_lo':>8} {'ci_hi':>8}  verdict (cells.csv)")
+        print(f"{'blk':3} {'view':22} {'rival':10} {'n':>4} {'ours':>8} {'rival':>8} {'gap':>8} {'ci_lo':>8} {'ci_hi':>8}  verdict (cells.csv)")
         for blk, view, riv, c, v, ref in table:
-            if c is None: print(f"{blk:3} {view:22} {riv:6} {'':>4} {'':>8} {'':>8} {'':>8} {'':>8} {'':>8}  {v:5} ({ref})"); continue
-            print(f"{blk:3} {view:22} {riv:6} {c['n']:4d} {c['ours']:8.4f} {c['rival']:8.4f} {c['gap']:+8.4f} {c['lo']:+8.4f} {c['hi']:+8.4f}  {v:5} ({ref})")
-    print(f"engine cells recomputed: {len(cells)}; counted on the board: " + ", ".join(f"{k} {tally[k]}" for k in ("WIN", "TIE", "LOSS", "N/A")))
+            if c is None: print(f"{blk:3} {view:22} {riv:10} {'':>4} {'':>8} {'':>8} {'':>8} {'':>8} {'':>8}  {v:5} ({ref})"); continue
+            print(f"{blk:3} {view:22} {riv:10} {c['n']:4d} {c['ours']:8.4f} {c['rival']:8.4f} {c['gap']:+8.4f} {c['lo']:+8.4f} {c['hi']:+8.4f}  {v:5} ({ref})")
+    print(f"engine cells recomputed: {len(cells)} ({sum(r['na_reason'] == 'empty band' for r in cells)} of them empty MACS bands, not counted); counted on the board: " + ", ".join(f"{k} {tally[k]}" for k in ("WIN", "TIE", "LOSS", "N/A")))
     print(f"max |difference| vs cells.csv over gap, scores" + (", CI ends" if np is not None else " (CIs skipped: numpy not installed)") + f": {worst:.1e} dex (tolerance {TOL:.0e})")
     if np is None:
         print("note: without numpy the bootstrap uses Python's random module, so CI ends differ slightly from cells.csv")
