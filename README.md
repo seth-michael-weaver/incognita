@@ -11,11 +11,24 @@ benchmark and a registry of predictions made before the data.**
 
 <a href="https://www.incognitanuclear.org/?lang=en"><img src="docs/walkthrough/og.png" alt="Inside a Nuclear Reaction: an explorable explanation of the Incognita reaction engine" width="100%"></a>
 
-**New here?** Start with [**Inside a Nuclear Reaction**](https://www.incognitanuclear.org/?lang=en), an
-interactive walk through what the engine computes; [**Every nuclide**](https://www.incognitanuclear.org/data?lang=en),
-an explorer of the library's predicted curves for 6,168 nuclides beside every curated measurement; and the
-[**Scoreboard**](https://www.incognitanuclear.org/scoreboard?lang=en), which compares the engine with other
-codes and the data product with evaluated libraries, losses first.
+## At a glance
+
+- **Website: [www.incognitanuclear.org](https://www.incognitanuclear.org/?lang=en).**
+  [Inside a Nuclear Reaction](https://www.incognitanuclear.org/?lang=en) is a teaching walkthrough of what the engine
+  computes; [Every nuclide](https://www.incognitanuclear.org/data?lang=en) shows the predicted curves for 6,168 nuclides
+  beside every curated measurement; the [Scoreboard](https://www.incognitanuclear.org/scoreboard?lang=en) compares the
+  engine with other reaction codes, losses first.
+- **Scoreboard result** (development comparisons against existing measurements, not a blind test): against the
+  TALYS-2.24 program, 10 wins, 9 ties, 0 losses; against all rivals together, 47 wins, 19 ties, 0 losses in 66 decided
+  comparisons (14 more are not applicable).
+- **Data package:** [`docs/walkthrough/data/board/`](docs/walkthrough/data/board/) holds the per-nucleus rows behind
+  every scoreboard cell, and [`recompute.py`](docs/walkthrough/data/board/recompute.py) recomputes the verdicts from them.
+- **Prediction registry:** [`predictions/2026-10-23/`](predictions/2026-10-23/) holds predictions registered on
+  2026-10-23 for measurements not yet published, with a fixed scoring rule; 16 of the targets are blind and decide the
+  headline verdict.
+- **Engine:** release tag [`engine-2026-10-22`](https://github.com/seth-michael-weaver/incognita/tree/engine-2026-10-22).
+- **Library:** [`library/v0.1/`](library/v0.1/) is the current release; v0.2 is in preparation.
+- **Citing:** [`CITATION.cff`](CITATION.cff) (see [Citing](#citing)).
 
 ## What is this
 
@@ -58,6 +71,7 @@ Running the engine itself needs the TALYS structure database: see [Running the e
 | [`physics/`](physics/) | the Hauser–Feshbach engine |
 | [`scripts/`](scripts/) | `reproduce.sh`, scorers, engine driver, native-kernel builds |
 | [`docs/release/`](docs/release/), [`docs/registry/`](docs/registry/) | frozen exam inputs and expected tables; pre-registered predictions |
+| [`predictions/`](predictions/) | dated prediction registries (blind targets, fixed scoring rule) |
 | [`emu/`](emu/) | fast emulators of the engine |
 | [`docs/walkthrough/`](docs/walkthrough/) | the explainer website |
 
@@ -67,8 +81,8 @@ The full layout is in the [guide](docs/GUIDE.md#repository-layout).
 
 This is a **v0.1 preview**: research output, not an evaluation. Held-out tests are retrospective; the pre-registered
 predictions have not yet been scored against new measurements. There is no claim of better accuracy than evaluated
-libraries for measured nuclei; where good data exist, use the data or an evaluation. All numbers come from the v0.1
-engine. Details: [Status and limitations](docs/GUIDE.md#status-and-limitations).
+libraries for measured nuclei; where good data exist, use the data or an evaluation. The library and its benchmark
+numbers come from the v0.1 engine; the scoreboard uses the current engine (22 October 2026). Details: [Status and limitations](docs/GUIDE.md#status-and-limitations).
 
 ## Learn more
 
