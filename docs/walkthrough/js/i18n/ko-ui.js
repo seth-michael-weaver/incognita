@@ -49,6 +49,7 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#omp">2</a></td><td><b>켜짐.</b> 알파 방출은 잔류핵의 온도에 의존하는 퍼텐셜을 봄. 입사 알파는 알파 모형 6으로 들어옴. 삼중양성자와 헬륨-3 퍼텐셜에 입사 입자의 크기를 포함</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td><b>켜짐.</b> 장벽의 각 봉우리를 지나는 정확한 1차원 투과</td><td><code>fission/wkb.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td><b>켜짐.</b> 실행에서 원자핵별 E1/M1 세기 인자를 주는 경우, 이를 변형에 대한 하나의 전역 함수로 대체</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">5</a></td><td><b>켜짐.</b> 자체 측정된 공명 간격 D₀가 없는 표적: max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV 위에서 표적의 연속 영역 준위 밀도를, 홀짝성·껍질·변형 특징에 기반한 하나의 전역 규칙이 주는 인자만큼 높입니다. TALYS-2 기본 입력에 대한 문턱 근처 (n,p)의 패배를 무승부로 바꾸려고 추가했으며, 포획·(n,2n)·(n,α)의 몇몇 관점을 조금 나쁘게 만드는 손해는 받아들이고 기록해 두었습니다</td><td><code>density/npwindow.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>오슬로 측정에 맞는 새 계통성에 따른, 변형된 원자핵의 더 강한 가위 모드(악티늄족에서 약 4–5배). 또는 그 에너지와 세기를 변형에 따라 조정하는 변종</td><td><code>gamma/scissors.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>첫 번째 원자핵만이 아니라 캐스케이드의 모든 원자핵이 측정된 복사 세기 ⟨Γγ⟩/D₀와 일치하도록 감마 세기 함수를 재조정</td><td><code>gamma/ggnorm.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>가장 무거운 원자핵(Z ≥ 88)에만 적용하는 더 강한 가위 모드와 ⟨Γγ⟩ 규격화. keV 에너지에서의 포획이 목표</td><td><code>gamma/actphys.py</code></td></tr>

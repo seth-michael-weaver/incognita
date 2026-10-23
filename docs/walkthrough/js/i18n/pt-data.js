@@ -7,6 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · explorador de dados",
   dx_h1: "Todos os nuclídeos",
   dx_lede: "As secções eficazes de neutrões que o motor prevê para cada nuclídeo da biblioteca, ao lado de cada medição curada que as sustenta. Escolhe um nuclídeo na carta ou procura-o.",
+  dx_lede_ver: "As curvas são a biblioteca v0.1 (setembro de 2026), construída com um motor mais antigo: não são a versão do motor nem o candidato TERRA pontuados no Quadro de resultados. A maioria dos nuclídeos está extrapolada (só o motor). Onde um nuclídeo aparece como medido, a sua curva de captura vem de um modelo treinado com as medições mostradas ao lado, por isso a concordância com elas não é um teste.",
   dx_controls: "Controlos da carta", dx_search_label: "Procurar um nuclídeo", dx_search_ph: "Procurar: U-235, Fe56, Au…",
   dx_colour: "Colorir a carta por", dx_m_tier: "Como é conhecido", dx_m_macs: "Captura a 30 keV", dx_m_meas: "Dados medidos",
   dx_chart_h: "Carta de nuclídeos",

@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">En service</div>
   <h3>Couche 1 · Une règle pour tous les noyaux</h3>
-  <p>La ligne bleue est la prédiction du moteur pour une réaction. Le moteur est la couche du bas : la même physique et les mêmes réglages globaux pour tous les nucléides, sans jamais être ajusté sur les sections efficaces sur lesquelles il est jugé.</p>
+  <p>La ligne bleue est la prédiction du moteur pour une réaction. Le moteur est la couche du bas : la même physique et les mêmes réglages globaux pour tous les nucléides, sans rien d'ajusté sur les sections efficaces d'un noyau particulier.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Afficher les mesures</button></div>
-  <p>C'est ce qui le rend vérifiable : il est noté sur des mesures qu'il n'a jamais vues, face à d'autres codes de modèles exécutés sur les mêmes noyaux.${engineScore}</p>
+  <p>C'est ce qui le rend vérifiable, face aux mesures et face à d'autres codes de modèles exécutés sur les mêmes noyaux. Ce n'est pas un test à l'aveugle : les réglages globaux ont été choisis en observant ces mêmes comparaisons.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · moteur aveugle",
+  "{#} · engine": "{#} · moteur",
   "{#} · measured structure": "{#} · structure mesurée",
   "{#} · TERRA: anchored to data": "{#} · TERRA : ancré sur les données",
   "{#} · uncertainty band": "{#} · bande d'incertitude",
   "measured here": "mesuré ici",
   "neutron energy →": "énergie du neutron →",
   "how often the reaction happens": "fréquence de la réaction",
-  "hollow dots: measurements the engine never saw": "points creux : mesures que le moteur n'a jamais vues",
+  "hollow dots: measurements the engine is compared with": "points creux : mesures auxquelles le moteur est comparé",
   "own measured values: the line barely moves": "valeurs mesurées propres : la ligne bouge à peine",
   "global rule": "règle globale",
   "no measurements: TERRA falls back to the engine": "pas de mesures : TERRA revient au moteur",

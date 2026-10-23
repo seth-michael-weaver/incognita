@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">قيد الاستخدام</div>
   <h3>الطبقة 1 · قاعدة واحدة لكل نواة</h3>
-  <p>الخط الأزرق هو تنبؤ المحرك لتفاعل ما. المحرك هو الطبقة السفلى: الفيزياء نفسها والإعدادات العامة نفسها لكل النويدات، ولا يُعاير أبدًا على المقاطع العرضية التي يُحكم عليه بها.</p>
+  <p>الخط الأزرق هو تنبؤ المحرك لتفاعل ما. المحرك هو الطبقة السفلى: الفيزياء نفسها والإعدادات العامة نفسها لكل النويدات، ولا شيء فيه مُعايَر على المقاطع العرضية لأي نواة بعينها.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">أظهر القياسات</button></div>
-  <p>وهذا ما يجعله قابلًا للاختبار: يُقيَّم بقياسات لم يرها قط، في مقابل شيفرات نمذجة أخرى حُسبت على الأنوية نفسها.${engineScore}</p>
+  <p>وهذا ما يجعله قابلًا للاختبار بالقياسات وفي مقابل شيفرات نمذجة أخرى حُسبت على الأنوية نفسها. وليس هذا اختبارًا أعمى: فقد اختيرت الإعدادات العامة ونحن نراقب هذه المقارنات نفسها.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · المحرك الأعمى",
+  "{#} · engine": "{#} · المحرك",
   "{#} · measured structure": "{#} · البنية المقيسة",
   "{#} · TERRA: anchored to data": "{#} · TERRA: مثبّت على البيانات",
   "{#} · uncertainty band": "{#} · نطاق عدم اليقين",
   "measured here": "مقيس هنا",
   "neutron energy →": "طاقة النيوترون →",
   "how often the reaction happens": "كم مرة يحدث التفاعل",
-  "hollow dots: measurements the engine never saw": "النقاط المفرغة: قياسات لم يرها المحرك",
+  "hollow dots: measurements the engine is compared with": "النقاط المجوفة: القياسات التي يُقارَن بها المحرك",
   "own measured values: the line barely moves": "القيم المقيسة الخاصة: الخط بالكاد يتحرك",
   "global rule": "القاعدة العامة",
   "no measurements: TERRA falls back to the engine": "لا قياسات: تعود TERRA إلى المحرك",

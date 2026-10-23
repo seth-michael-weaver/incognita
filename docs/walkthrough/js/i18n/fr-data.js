@@ -7,6 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · explorateur de données",
   dx_h1: "Tous les nucléides",
   dx_lede: "Les sections efficaces neutroniques prédites par le moteur pour chaque nucléide de la bibliothèque, à côté de chaque mesure sélectionnée qui les étaye. Choisissez un nucléide sur la carte, ou cherchez-le.",
+  dx_lede_ver: "Les courbes sont celles de la bibliothèque v0.1 (septembre 2026), construite avec un moteur plus ancien : ce ne sont ni la version du moteur ni le candidat TERRA notés dans le Tableau des scores. La plupart des nucléides sont extrapolés (moteur seul). Lorsqu'un nucléide est marqué comme mesuré, sa courbe de capture vient d'un modèle entraîné sur les mesures affichées à côté ; l'accord avec elles n'est donc pas un test.",
   dx_controls: "Commandes de la carte", dx_search_label: "Trouver un nucléide", dx_search_ph: "Rechercher : U-235, Fe56, Au…",
   dx_colour: "Colorer la carte selon", dx_m_tier: "Comment on le connaît", dx_m_macs: "Capture à 30 keV", dx_m_meas: "Données mesurées",
   dx_chart_h: "Carte des nucléides",

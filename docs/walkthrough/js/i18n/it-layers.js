@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">In uso</div>
   <h3>Strato 1 · Una regola per ogni nucleo</h3>
-  <p>La linea blu è la previsione del motore per una reazione. Il motore è lo strato di base: la stessa fisica e le stesse impostazioni globali per ogni nuclide, mai adattate alle sezioni d'urto su cui viene giudicato.</p>
+  <p>La linea blu è la previsione del motore per una reazione. Il motore è lo strato di base: la stessa fisica e le stesse impostazioni globali per ogni nuclide, senza nulla di adattato alle sezioni d'urto di un singolo nucleo.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Mostra le misure</button></div>
-  <p>Questo lo rende verificabile: viene valutato su misure che non ha mai visto, contro altri codici di modello eseguiti sugli stessi nuclei.${engineScore}</p>
+  <p>Questo lo rende verificabile, rispetto alle misure e rispetto ad altri codici di modello eseguiti sugli stessi nuclei. Non è un test alla cieca: le impostazioni globali sono state scelte osservando proprio questi confronti.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · motore cieco",
+  "{#} · engine": "{#} · motore",
   "{#} · measured structure": "{#} · struttura misurata",
   "{#} · TERRA: anchored to data": "{#} · TERRA: ancorato ai dati",
   "{#} · uncertainty band": "{#} · banda di incertezza",
   "measured here": "misurato qui",
   "neutron energy →": "energia del neutrone →",
   "how often the reaction happens": "quanto spesso avviene la reazione",
-  "hollow dots: measurements the engine never saw": "punti vuoti: misure mai viste dal motore",
+  "hollow dots: measurements the engine is compared with": "punti vuoti: misure con cui il motore è confrontato",
   "own measured values: the line barely moves": "valori misurati propri: la linea si muove appena",
   "global rule": "regola globale",
   "no measurements: TERRA falls back to the engine": "nessuna misura: TERRA torna al motore",

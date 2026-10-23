@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">Em uso</div>
   <h3>Camada 1 · Uma regra para todos os núcleos</h3>
-  <p>A linha azul é a previsão do motor para uma reação. O motor é a camada de baixo: a mesma física e as mesmas definições globais para todos os nuclídeos, nunca ajustado às secções eficazes com que é avaliado.</p>
+  <p>A linha azul é a previsão do motor para uma reação. O motor é a camada de baixo: a mesma física e as mesmas definições globais para todos os nuclídeos, sem nada ajustado às secções eficazes de um núcleo concreto.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Mostrar as medições</button></div>
-  <p>É isso que o torna verificável: é pontuado com medições que nunca viu, face a outros códigos de modelos aplicados aos mesmos núcleos.${engineScore}</p>
+  <p>É isso que o torna verificável, face às medições e face a outros códigos de modelos aplicados aos mesmos núcleos. Não é um teste às cegas: as definições globais foram escolhidas a observar estas mesmas comparações.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · motor cego",
+  "{#} · engine": "{#} · motor",
   "{#} · measured structure": "{#} · estrutura medida",
   "{#} · TERRA: anchored to data": "{#} · TERRA: ancorado nos dados",
   "{#} · uncertainty band": "{#} · banda de incerteza",
   "measured here": "medido aqui",
   "neutron energy →": "energia do neutrão →",
   "how often the reaction happens": "com que frequência ocorre a reação",
-  "hollow dots: measurements the engine never saw": "pontos ocos: medições que o motor nunca viu",
+  "hollow dots: measurements the engine is compared with": "pontos ocos: medições com que o motor é comparado",
   "own measured values: the line barely moves": "valores medidos próprios: a linha quase não se mexe",
   "global rule": "regra global",
   "no measurements: TERRA falls back to the engine": "sem medições: o TERRA volta ao motor",

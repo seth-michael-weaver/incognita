@@ -1,6 +1,6 @@
 /* Chapter 12: how the model is layered. One reaction's cross section drawn as a landscape over neutron energy; four layers
  * stack up on it (a small stack of slabs shows which are on):
- *   1 the blind engine (one global rule; judged on measurements it never saw: hollow dots revealed on demand),
+ *   1 the engine (global rules, nothing fitted per nucleus; the measurements it is compared with: hollow dots revealed on demand),
  *   2 the measured-structure tier (own D0, S0/S1, <Gg>, levels): the line barely moves (tests found no gain),
  *   3 TERRA anchoring: where measurements exist the line follows them, elsewhere it falls back to the engine,
  *   4 the uncertainty band: drag its width and count the measurements inside (68 % is the honest target).
@@ -40,7 +40,7 @@
   const half = (x, S, w) => S.band * lerp(0.06, 0.017, S.anchor * wIn(x, w));
 
   const LAYERS = [
-    { n: 1, name: "blind engine", col: "neutron" },
+    { n: 1, name: "engine", col: "neutron" },
     { n: 2, name: "measured structure", col: "alpha" },
     { n: 3, name: "TERRA: anchored to data", col: "accent" },
     { n: 4, name: "uncertainty band", col: "warm" },
@@ -53,9 +53,9 @@
 <div class="step">
   <div class="layer-chip on">In use</div>
   <h3>Layer 1 · One rule for every nucleus</h3>
-  <p>The blue line is the engine's prediction for one reaction. The engine is the bottom layer: the same physics and global settings for every nuclide, never fitted to the cross sections it is judged on.</p>
+  <p>The blue line is the engine's prediction for one reaction. The engine is the bottom layer: the same physics and global settings for every nuclide, with nothing fitted to the cross sections of any one nucleus.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Show the measurements</button></div>
-  <p>That makes it testable: it is scored on measurements it never saw, against other model codes run on the same nuclei.${engineScore}</p>
+  <p>That makes it testable against measurements and against other model codes run on the same nuclei. It is not a blind test: the global settings were chosen while watching these same comparisons.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -141,7 +141,7 @@
       g.label("how often the reaction happens", x0, top - 18, { color: c.faint, size: 12, align: "left" });
       // readouts per layer
       const ry = phone ? H - 14 : H * 0.9, sz = phone ? 12 : 14;
-      if (S.layer === 1 && S.reveal > 0.5) g.label("hollow dots: measurements the engine never saw", W / 2, ry, { color: c.ink, size: sz, bg: true });
+      if (S.layer === 1 && S.reveal > 0.5) g.label("hollow dots: measurements the engine is compared with", W / 2, ry, { color: c.ink, size: sz, bg: true });
       if (S.layer === 2) g.label(S.ms > 0.5 ? "own measured values: the line barely moves" : "global rule", W / 2, ry, { color: c.ink, size: sz, bg: true });
       if (S.layer === 3) g.label(S.cov < 0.03 ? "no measurements: TERRA falls back to the engine" : "solid: follows the data · dashed: the engine alone", W / 2, ry, { color: c.ink, size: sz, bg: true });
       if (S.layer === 4 && S.bandOn > 0.5) g.label(shown ? `${inside} of ${shown} measurements inside the band (aim: about 68 %)` : "no measurements to check the band against", W / 2, ry, { color: inside / Math.max(1, shown) > 0.85 ? c.warm : c.ink, size: sz, bg: true });

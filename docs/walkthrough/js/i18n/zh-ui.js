@@ -49,6 +49,7 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#omp">2</a></td><td><b>开启。</b>α发射所见的势依赖于剩余核的温度；α入射粒子通过 α 模型 6 进入；氚核与氦-3 的势计入入射粒子的尺寸</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td><b>开启。</b>精确计算穿过每个势垒峰的一维穿透</td><td><code>fission/wkb.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td><b>开启。</b>运行中若提供了逐核的 E1/M1 强度因子，则以一个关于形变的全局函数取代</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">5</a></td><td><b>开启。</b>对没有自身实测共振间距 D₀ 的靶核：在 max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV 以上，将靶核连续区的能级密度乘以一个因子，该因子由一条基于宇称、壳层和形变特征的全局规则给出。加入它是为了把阈能附近 (n,p) 对 TALYS-2 默认输入的落后变为持平；它使俘获、(n,2n) 和 (n,α) 的几个视角略有变差，这一代价已被接受并记录</td><td><code>density/npwindow.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>形变核中更强的剪刀模式，采用与 Oslo 测量相符的较新系统学（在锕系核中约为 4–5 倍）；或一种按形变缩放其能量和强度的变体</td><td><code>gamma/scissors.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>重新标定光子强度，使每个原子核与其测得的辐射强度 ⟨Γγ⟩/D₀ 一致，适用于级联中的每个原子核，而不仅是第一个</td><td><code>gamma/ggnorm.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>仅对最重的原子核（Z ≥ 88）采用更强的剪刀模式和 ⟨Γγ⟩ 归一化，面向 keV 能区的俘获</td><td><code>gamma/actphys.py</code></td></tr>

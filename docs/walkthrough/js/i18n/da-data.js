@@ -7,6 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · dataudforsker",
   dx_h1: "Alle nuklider",
   dx_lede: "Motorens forudsagte neutrontværsnit for hver nuklid i biblioteket, ved siden af hver kurateret måling bag dem. Vælg en nuklid på kortet, eller søg efter en.",
+  dx_lede_ver: "Kurverne er biblioteket v0.1 (september 2026), bygget med en ældre motor: de er ikke den motorversion eller den TERRA-kandidat, der scores på Resultattavlen. De fleste nuklider er ekstrapolerede (kun motoren). Hvor en nuklid er markeret som målt, kommer dens indfangningskurve fra en model trænet på de målinger, der vises ved siden af, så overensstemmelse dér er ikke en test.",
   dx_controls: "Kortets knapper", dx_search_label: "Find en nuklid", dx_search_ph: "Søg: U-235, Fe56, Au…",
   dx_colour: "Farv kortet efter", dx_m_tier: "Hvordan den kendes", dx_m_macs: "Indfangning ved 30 keV", dx_m_meas: "Målte data",
   dx_chart_h: "Nuklidkort",

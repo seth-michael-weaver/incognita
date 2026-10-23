@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">In Gebrauch</div>
   <h3>Schicht 1 · Eine Regel für jeden Kern</h3>
-  <p>Die blaue Linie ist die Vorhersage der Engine für eine Reaktion. Die Engine ist die unterste Schicht: dieselbe Physik und dieselben globalen Einstellungen für jedes Nuklid, nie an die Wirkungsquerschnitte angepasst, an denen sie gemessen wird.</p>
+  <p>Die blaue Linie ist die Vorhersage der Engine für eine Reaktion. Die Engine ist die unterste Schicht: dieselbe Physik und dieselben globalen Einstellungen für jedes Nuklid, ohne dass etwas an die Wirkungsquerschnitte eines einzelnen Kerns angepasst ist.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Messungen zeigen</button></div>
-  <p>Das macht sie überprüfbar: Sie wird an Messungen bewertet, die sie nie gesehen hat, im Vergleich mit anderen Modellcodes, die auf denselben Kernen laufen.${engineScore}</p>
+  <p>Das macht sie überprüfbar, an Messungen und im Vergleich mit anderen Modellcodes, die auf denselben Kernen laufen. Ein Blindtest ist es nicht: Die globalen Einstellungen wurden mit Blick auf genau diese Vergleiche gewählt.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · blinde Engine",
+  "{#} · engine": "{#} · Engine",
   "{#} · measured structure": "{#} · gemessene Struktur",
   "{#} · TERRA: anchored to data": "{#} · TERRA: an Daten verankert",
   "{#} · uncertainty band": "{#} · Unsicherheitsband",
   "measured here": "hier gemessen",
   "neutron energy →": "Neutronenenergie →",
   "how often the reaction happens": "wie oft die Reaktion stattfindet",
-  "hollow dots: measurements the engine never saw": "hohle Punkte: Messungen, die die Engine nie gesehen hat",
+  "hollow dots: measurements the engine is compared with": "hohle Punkte: Messungen, mit denen die Engine verglichen wird",
   "own measured values: the line barely moves": "eigene Messwerte: die Linie bewegt sich kaum",
   "global rule": "globale Regel",
   "no measurements: TERRA falls back to the engine": "keine Messungen: TERRA fällt auf die Engine zurück",

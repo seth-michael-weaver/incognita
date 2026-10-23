@@ -7,6 +7,7 @@ Object.assign(WT.es.ui, {
   dx_kicker: "INCOGNITA · explorador de datos",
   dx_h1: "Todos los núclidos",
   dx_lede: "Las secciones eficaces neutrónicas que predice el motor para cada núclido de la biblioteca, junto a cada medida depurada que las respalda. Elige un núclido en la carta o búscalo.",
+  dx_lede_ver: "Las curvas son la biblioteca v0.1 (septiembre de 2026), construida con un motor anterior: no son la versión del motor ni el candidato TERRA que se puntúan en el Marcador. La mayoría de los núclidos están extrapolados (solo el motor). Donde un núclido figura como medido, su curva de captura sale de un modelo entrenado con las mediciones que se muestran a su lado, así que coincidir con ellas no es una prueba.",
   dx_controls: "Controles de la carta", dx_search_label: "Buscar un núclido", dx_search_ph: "Buscar: U-235, Fe56, Au…",
   dx_colour: "Colorear la carta por", dx_m_tier: "Cómo se conoce", dx_m_macs: "Captura a 30 keV", dx_m_meas: "Datos medidos",
   dx_chart_h: "Carta de núclidos",

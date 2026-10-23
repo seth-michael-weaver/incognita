@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">사용 중</div>
   <h3>1층 · 모든 원자핵에 하나의 규칙</h3>
-  <p>파란 선은 한 반응에 대한 엔진의 예측입니다. 엔진은 맨 아래층입니다. 모든 핵종에 같은 물리와 같은 전역 설정을 쓰며, 평가 기준이 되는 단면적에 맞춰 조정한 적이 결코 없습니다.</p>
+  <p>파란 선은 한 반응에 대한 엔진의 예측입니다. 엔진은 맨 아래층입니다. 모든 핵종에 같은 물리와 같은 전역 설정을 쓰며, 개별 원자핵의 단면적에 맞춘 것은 하나도 없습니다.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">측정값 보기</button></div>
-  <p>그래서 검증할 수 있습니다. 엔진은 한 번도 본 적 없는 측정값으로, 같은 원자핵에 대해 실행한 다른 모형 코드들과 겨루어 점수를 받습니다.${engineScore}</p>
+  <p>그래서 측정값과도, 같은 원자핵에 대해 실행한 다른 모형 코드들과도 견주어 검증할 수 있습니다. 다만 블라인드 테스트는 아닙니다. 전역 설정은 바로 이 비교들을 지켜보며 골랐습니다.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · 블라인드 엔진",
+  "{#} · engine": "{#} · 엔진",
   "{#} · measured structure": "{#} · 측정 구조",
   "{#} · TERRA: anchored to data": "{#} · TERRA: 데이터에 고정",
   "{#} · uncertainty band": "{#} · 불확도 띠",
   "measured here": "측정 구간",
   "neutron energy →": "중성자 에너지 →",
   "how often the reaction happens": "반응이 일어나는 빈도",
-  "hollow dots: measurements the engine never saw": "빈 점: 엔진이 본 적 없는 측정값",
+  "hollow dots: measurements the engine is compared with": "속이 빈 점: 엔진과 비교하는 측정값",
   "own measured values: the line barely moves": "자체 측정값: 선이 거의 움직이지 않음",
   "global rule": "전역 규칙",
   "no measurements: TERRA falls back to the engine": "측정값 없음: TERRA가 엔진으로 돌아감",

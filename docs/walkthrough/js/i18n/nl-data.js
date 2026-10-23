@@ -7,6 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · dataverkenner",
   dx_h1: "Alle nucliden",
   dx_lede: "De door de motor voorspelde werkzame doorsneden voor neutronen voor elke nuclide in de bibliotheek, naast elke gecureerde meting die erachter zit. Kies een nuclide op de kaart, of zoek er een op.",
+  dx_lede_ver: "De curves zijn de bibliotheek v0.1 (september 2026), gebouwd met een oudere motor: het zijn niet de motorversie of de TERRA-kandidaat die op het Scorebord worden gescoord. De meeste nucliden zijn geëxtrapoleerd (alleen de motor). Waar een nuclide als gemeten is gemarkeerd, komt de vangstcurve uit een model dat getraind is op de metingen ernaast, dus overeenstemming daar is geen toets.",
   dx_controls: "Bediening van de kaart", dx_search_label: "Zoek een nuclide", dx_search_ph: "Zoek: U-235, Fe56, Au…",
   dx_colour: "Kleur de kaart op", dx_m_tier: "Hoe het bekend is", dx_m_macs: "Vangst bij 30 keV", dx_m_meas: "Gemeten data",
   dx_chart_h: "Nuclidenkaart",

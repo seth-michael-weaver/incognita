@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">En uso</div>
   <h3>Capa 1 · Una regla para cada núcleo</h3>
-  <p>La línea azul es la predicción del motor para una reacción. El motor es la capa de abajo: la misma física y los mismos ajustes globales para todos los núclidos, sin ajustarse nunca a las secciones eficaces con las que se le juzga.</p>
+  <p>La línea azul es la predicción del motor para una reacción. El motor es la capa de abajo: la misma física y los mismos ajustes globales para todos los núclidos, sin nada ajustado a las secciones eficaces de ningún núcleo concreto.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Mostrar las mediciones</button></div>
-  <p>Eso lo hace comprobable: se puntúa con mediciones que nunca vio, frente a otros códigos de modelos calculados sobre los mismos núcleos.${engineScore}</p>
+  <p>Eso lo hace comprobable frente a las mediciones y frente a otros códigos de modelos calculados sobre los mismos núcleos. No es una prueba a ciegas: los ajustes globales se eligieron observando estas mismas comparaciones.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.es.labels, {
-  "{#} · blind engine": "{#} · motor ciego",
+  "{#} · engine": "{#} · motor",
   "{#} · measured structure": "{#} · estructura medida",
   "{#} · TERRA: anchored to data": "{#} · TERRA: anclado a los datos",
   "{#} · uncertainty band": "{#} · banda de incertidumbre",
   "measured here": "medido aquí",
   "neutron energy →": "energía del neutrón →",
   "how often the reaction happens": "con qué frecuencia ocurre la reacción",
-  "hollow dots: measurements the engine never saw": "puntos huecos: mediciones que el motor nunca vio",
+  "hollow dots: measurements the engine is compared with": "puntos huecos: mediciones con las que se compara el motor",
   "own measured values: the line barely moves": "valores medidos propios: la línea apenas se mueve",
   "global rule": "regla global",
   "no measurements: TERRA falls back to the engine": "sin mediciones: TERRA vuelve al motor",

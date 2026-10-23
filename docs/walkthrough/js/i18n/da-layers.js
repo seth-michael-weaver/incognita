@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">I brug</div>
   <h3>Lag 1 · Én regel for alle kerner</h3>
-  <p>Den blå linje er motorens forudsigelse for én reaktion. Motoren er det nederste lag: den samme fysik og de samme globale indstillinger for alle nuklider, aldrig tilpasset til de tværsnit, den bedømmes på.</p>
+  <p>Den blå linje er motorens forudsigelse for én reaktion. Motoren er det nederste lag: den samme fysik og de samme globale indstillinger for alle nuklider, uden at noget er tilpasset til tværsnittene for en enkelt kerne.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Vis målingerne</button></div>
-  <p>Det gør den testbar: den bedømmes på målinger, den aldrig har set, over for andre modelkoder kørt på de samme kerner.${engineScore}</p>
+  <p>Det gør den testbar, over for målinger og over for andre modelkoder kørt på de samme kerner. Det er ikke en blindtest: de globale indstillinger blev valgt, mens vi fulgte netop disse sammenligninger.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · blind motor",
+  "{#} · engine": "{#} · motor",
   "{#} · measured structure": "{#} · målt struktur",
   "{#} · TERRA: anchored to data": "{#} · TERRA: forankret i data",
   "{#} · uncertainty band": "{#} · usikkerhedsbånd",
   "measured here": "målt her",
   "neutron energy →": "neutronenergi →",
   "how often the reaction happens": "hvor ofte reaktionen sker",
-  "hollow dots: measurements the engine never saw": "hule prikker: målinger, motoren aldrig så",
+  "hollow dots: measurements the engine is compared with": "hule prikker: målinger, motoren sammenlignes med",
   "own measured values: the line barely moves": "egne målte værdier: linjen flytter sig knap",
   "global rule": "global regel",
   "no measurements: TERRA falls back to the engine": "ingen målinger: TERRA falder tilbage på motoren",

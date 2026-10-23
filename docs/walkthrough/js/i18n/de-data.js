@@ -7,6 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · Daten-Explorer",
   dx_h1: "Alle Nuklide",
   dx_lede: "Die von der Engine vorhergesagten Neutronenwirkungsquerschnitte für jedes Nuklid der Bibliothek, neben jeder kuratierten Messung, die dahintersteht. Wähl ein Nuklid auf der Karte oder such danach.",
+  dx_lede_ver: "Die Kurven stammen aus der Bibliothek v0.1 (September 2026), erstellt mit einer älteren Engine: Sie sind weder die Engine-Version noch der TERRA-Kandidat, die in der Rangliste bewertet werden. Die meisten Nuklide sind extrapoliert (nur Engine). Wo ein Nuklid als gemessen markiert ist, stammt seine Einfangkurve aus einem Modell, das an den daneben gezeigten Messungen trainiert wurde; Übereinstimmung dort ist also kein Test.",
   dx_controls: "Steuerung der Karte", dx_search_label: "Nuklid suchen", dx_search_ph: "Suche: U-235, Fe56, Au…",
   dx_colour: "Karte einfärben nach", dx_m_tier: "Wie es bekannt ist", dx_m_macs: "Einfang bei 30 keV", dx_m_meas: "Messdaten",
   dx_chart_h: "Nuklidkarte",

@@ -27,9 +27,9 @@
 <div class="step">
   <div class="layer-chip on">使用中</div>
   <h3>第 1 层 · 所有原子核同一条规则</h3>
-  <p>蓝线是引擎对某个反应的预测。引擎是最底层：对每个核素使用相同的物理和全局设置，从不针对用来评判它的截面进行拟合。</p>
+  <p>蓝线是引擎对某个反应的预测。引擎是最底层：对每个核素使用相同的物理和全局设置，没有任何部分针对单个原子核的截面进行拟合。</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">显示测量数据</button></div>
-  <p>这使它可以被检验：用它从未见过的测量数据给它计分，并与在相同原子核上运行的其他模型程序比较。${engineScore}</p>
+  <p>这使它可以用测量数据检验，也可以与在相同原子核上运行的其他模型程序比较。但这不是盲测：全局设置是在观察这些比较的过程中选定的。${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -63,14 +63,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · 盲预测引擎",
+  "{#} · engine": "{#} · 引擎",
   "{#} · measured structure": "{#} · 实测结构",
   "{#} · TERRA: anchored to data": "{#} · TERRA：锚定数据",
   "{#} · uncertainty band": "{#} · 不确定度区间",
   "measured here": "此处有测量",
   "neutron energy →": "中子能量 →",
   "how often the reaction happens": "反应发生的频繁程度",
-  "hollow dots: measurements the engine never saw": "空心点：引擎从未见过的测量数据",
+  "hollow dots: measurements the engine is compared with": "空心点：与引擎比较的测量数据",
   "own measured values: the line barely moves": "自身测量值：曲线几乎不动",
   "global rule": "全局规则",
   "no measurements: TERRA falls back to the engine": "无测量数据：TERRA 退回引擎",

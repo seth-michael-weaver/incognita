@@ -7,6 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · esploratore di dati",
   dx_h1: "Tutti i nuclidi",
   dx_lede: "Le sezioni d'urto neutroniche previste dal motore per ogni nuclide della libreria, accanto a ogni misura revisionata che le sostiene. Scegli un nuclide sulla carta, oppure cercalo.",
+  dx_lede_ver: "Le curve sono la libreria v0.1 (settembre 2026), costruita con un motore precedente: non sono la versione del motore né il candidato TERRA valutati nella Classifica. La maggior parte dei nuclidi è estrapolata (solo il motore). Dove un nuclide è segnato come misurato, la sua curva di cattura viene da un modello addestrato sulle misure mostrate accanto, quindi l'accordo con esse non è una verifica.",
   dx_controls: "Comandi della carta", dx_search_label: "Trova un nuclide", dx_search_ph: "Cerca: U-235, Fe56, Au…",
   dx_colour: "Colora la carta per", dx_m_tier: "Come è noto", dx_m_macs: "Cattura a 30 keV", dx_m_meas: "Dati misurati",
   dx_chart_h: "Carta dei nuclidi",

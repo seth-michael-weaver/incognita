@@ -49,6 +49,7 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#omp">2</a></td><td><b>オン。</b>α粒子放出では残留核の温度に依存するポテンシャルを使い、α粒子の入射はアルファ模型6で扱う。三重陽子とヘリウム3のポテンシャルには入射粒子の大きさを含める</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td><b>オン。</b>障壁の各こぶを通る厳密な1次元透過</td><td><code>fission/wkb.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td><b>オン。</b>実行時に原子核ごとのE1/M1強度因子が与えられた場合、変形の単一の大域的関数で置き換える</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">5</a></td><td><b>オン。</b>自身の測定された共鳴間隔D₀を持たない標的核について、max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeVより上の標的核の連続領域の準位密度を、パリティ・殻・変形の特徴に基づく単一の大域的規則が与える因子で引き上げる。TALYS-2の既定入力に対するしきい値付近の(n,p)の負けを引き分けにするために追加。捕獲、(n,2n)、(n,α)のいくつかの見方をわずかに悪化させるが、その害は受け入れて記録済み</td><td><code>density/npwindow.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>変形核でより強いシザーズモード。オスロの測定に合う新しい系統式を使用（アクチノイドで約4〜5倍）。または、エネルギーと強度を変形に応じてスケールする変種</td><td><code>gamma/scissors.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>各原子核が測定された放射強度⟨Γγ⟩/D₀に一致するよう光子強度関数を再スケール。最初の原子核だけでなく、カスケードのすべての原子核で</td><td><code>gamma/ggnorm.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>最も重い原子核（Z ≥ 88）に限ったより強いシザーズモードと⟨Γγ⟩の規格化。keVエネルギーでの捕獲向け</td><td><code>gamma/actphys.py</code></td></tr>

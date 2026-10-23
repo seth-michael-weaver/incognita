@@ -27,9 +27,9 @@
 <div class="step">
   <div class="layer-chip on">使用中</div>
   <h3>第1層 · すべての原子核に1つの規則</h3>
-  <p>青い線は、ある反応に対するエンジンの予測です。エンジンはいちばん下の層で、すべての核種に同じ物理と同じ大域的な設定を使い、評価の基準となる断面積に合わせて調整されることは決してありません。</p>
+  <p>青い線は、ある反応に対するエンジンの予測です。エンジンはいちばん下の層で、すべての核種に同じ物理と同じ大域的な設定を使い、個々の原子核の断面積に合わせて調整したものは何もありません。</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">測定値を表示</button></div>
-  <p>だからこそ検証が可能です。一度も見たことのない測定値で採点され、同じ原子核で計算した他の模型コードと比べられます。${engineScore}</p>
+  <p>だからこそ、測定値に対しても、同じ原子核で計算した他の模型コードに対しても検証できます。ただしブラインドテストではありません。大域的な設定は、まさにこれらの比較を見ながら選ばれました。${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -63,14 +63,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · ブラインドのエンジン",
+  "{#} · engine": "{#} · エンジン",
   "{#} · measured structure": "{#} · 測定された構造",
   "{#} · TERRA: anchored to data": "{#} · TERRA：データに固定",
   "{#} · uncertainty band": "{#} · 不確かさの帯",
   "measured here": "ここは測定済み",
   "neutron energy →": "中性子エネルギー →",
   "how often the reaction happens": "反応の起こりやすさ",
-  "hollow dots: measurements the engine never saw": "白抜きの点：エンジンが見ていない測定値",
+  "hollow dots: measurements the engine is compared with": "白抜きの点：エンジンと比べる測定値",
   "own measured values: the line barely moves": "固有の測定値：線はほぼ動かない",
   "global rule": "大域的な規則",
   "no measurements: TERRA falls back to the engine": "測定なし：TERRAはエンジンに戻る",

@@ -28,9 +28,9 @@
 <div class="step">
   <div class="layer-chip on">In gebruik</div>
   <h3>Laag 1 · Eén regel voor elke kern</h3>
-  <p>De blauwe lijn is de voorspelling van de motor voor één reactie. De motor is de onderste laag: dezelfde natuurkunde en globale instellingen voor elke nuclide, nooit gefit aan de werkzame doorsneden waarop hij wordt beoordeeld.</p>
+  <p>De blauwe lijn is de voorspelling van de motor voor één reactie. De motor is de onderste laag: dezelfde natuurkunde en globale instellingen voor elke nuclide, zonder dat er iets gefit is aan de werkzame doorsneden van één afzonderlijke kern.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Toon de metingen</button></div>
-  <p>Dat maakt hem toetsbaar: hij wordt gescoord op metingen die hij nooit heeft gezien, tegenover andere modelcodes die op dezelfde kernen zijn gedraaid.${engineScore}</p>
+  <p>Dat maakt hem toetsbaar, aan metingen en tegenover andere modelcodes die op dezelfde kernen zijn gedraaid. Een blinde test is het niet: de globale instellingen zijn gekozen terwijl we naar precies deze vergelijkingen keken.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -64,14 +64,14 @@
   };
 })();
 Object.assign(WT.L.labels, {
-  "{#} · blind engine": "{#} · blinde motor",
+  "{#} · engine": "{#} · motor",
   "{#} · measured structure": "{#} · gemeten structuur",
   "{#} · TERRA: anchored to data": "{#} · TERRA: verankerd aan data",
   "{#} · uncertainty band": "{#} · onzekerheidsband",
   "measured here": "hier gemeten",
   "neutron energy →": "neutronenergie →",
   "how often the reaction happens": "hoe vaak de reactie plaatsvindt",
-  "hollow dots: measurements the engine never saw": "holle stippen: metingen die de motor nooit zag",
+  "hollow dots: measurements the engine is compared with": "open stippen: metingen waarmee de motor wordt vergeleken",
   "own measured values: the line barely moves": "eigen gemeten waarden: de lijn beweegt nauwelijks",
   "global rule": "globale regel",
   "no measurements: TERRA falls back to the engine": "geen metingen: TERRA valt terug op de motor",

@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=44">
+<link rel="stylesheet" href="style.css?v=45">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -114,6 +114,7 @@
       <tr><td><a href="#omp">2</a></td><td><b>On.</b> Alpha emission sees a potential that depends on the residual's temperature; alpha projectiles enter through alpha model 6; triton and helion potentials include the projectile's size</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td><b>On.</b> Exact one-dimensional transmission through each barrier hump</td><td><code>fission/wkb.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td><b>On.</b> Per-nucleus E1/M1 strength factors, where a run supplies them, replaced by one global function of deformation</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">5</a></td><td><b>On.</b> Targets with no measured resonance spacing D₀ of their own: the target's continuum level density above max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV is raised by a factor from one global rule of parity, shell and deformation features. Added to turn the (n,p)-near-threshold loss against TALYS-2's default input into a tie; it makes a few capture, (n,2n) and (n,α) views slightly worse, a harm accepted and recorded</td><td><code>density/npwindow.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>A stronger scissors mode in deformed nuclei, from newer systematics that match Oslo measurements (about 4–5× in actinides); or a variant that scales its energy and strength with deformation</td><td><code>gamma/scissors.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>Photon strength rescaled so each nucleus matches its measured radiative strength ⟨Γγ⟩/D₀, for every nucleus in the cascade, not only the first</td><td><code>gamma/ggnorm.py</code></td></tr>
       <tr><td><a href="#gamma">7</a></td><td>Stronger scissors and ⟨Γγ⟩ normalisation for the heaviest nuclei (Z ≥ 88) only, aimed at capture at keV energies</td><td><code>gamma/actphys.py</code></td></tr>
@@ -137,26 +138,26 @@
   <p data-i18n="coda_repo">The code, the library and the curated measurements are open: <a href="https://github.com/seth-michael-weaver/incognita">seth-michael-weaver/incognita on GitHub</a>. You can look up any prediction yourself on the <a href="data.html" data-keep-lang>Every nuclide</a> page, or clone the repository and run it.</p>
 </section>
 
-<script src="js/scoreboard-data.js?v=44"></script>
-<script src="js/i18n.js?v=44"></script>
+<script src="js/scoreboard-data.js?v=45"></script>
+<script src="js/i18n.js?v=45"></script>
 <!-- Spanish text loads only for Spanish readers (synchronous, in order, before the chapters) -->
-<script>WT.load(["ui", "glossary", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "intro", "layers"], 44);</script>
-<script src="js/glossary.js?v=44"></script>
-<script src="js/nav.js?v=44"></script>
-<script src="js/kit.js?v=44"></script>
-<script src="js/ch/intro.js?v=44"></script>
-<script src="js/ch/structure.js?v=44"></script>
-<script src="js/ch/omp.js?v=44"></script>
-<script src="js/ch/direct.js?v=44"></script>
-<script src="js/ch/preeq.js?v=44"></script>
-<script src="js/ch/compound.js?v=44"></script>
-<script src="js/ch/decay.js?v=44"></script>
-<script src="js/ch/gamma.js?v=44"></script>
-<script src="js/ch/cascade.js?v=44"></script>
-<script src="js/ch/fission.js?v=44"></script>
-<script src="js/ch/resonance.js?v=44"></script>
-<script src="js/ch/measure.js?v=44"></script>
-<script src="js/ch/layers.js?v=44"></script>
+<script>WT.load(["ui", "glossary", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "intro", "layers"], 45);</script>
+<script src="js/glossary.js?v=45"></script>
+<script src="js/nav.js?v=45"></script>
+<script src="js/kit.js?v=45"></script>
+<script src="js/ch/intro.js?v=45"></script>
+<script src="js/ch/structure.js?v=45"></script>
+<script src="js/ch/omp.js?v=45"></script>
+<script src="js/ch/direct.js?v=45"></script>
+<script src="js/ch/preeq.js?v=45"></script>
+<script src="js/ch/compound.js?v=45"></script>
+<script src="js/ch/decay.js?v=45"></script>
+<script src="js/ch/gamma.js?v=45"></script>
+<script src="js/ch/cascade.js?v=45"></script>
+<script src="js/ch/fission.js?v=45"></script>
+<script src="js/ch/resonance.js?v=45"></script>
+<script src="js/ch/measure.js?v=45"></script>
+<script src="js/ch/layers.js?v=45"></script>
 <script>WT.start();</script>
 </body>
 </html>

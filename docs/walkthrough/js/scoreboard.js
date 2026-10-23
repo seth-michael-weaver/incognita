@@ -39,6 +39,40 @@
   const fill = (t, o) => t.replace(/\{(\w+)\}/g, (m, k) => (k in o ? o[k] : m));
   $("#sb-inc-note").innerHTML = fill(T("sb_n_inc", "Production engine <code>{engine}</code> (<code>{commit}</code>), census of {date}. A further {na} comparisons are not scorable (N/A). Of the {tie} ties, {trail} trail, {parity} are at parity and {under} are underpowered."),
     { engine: esc(I.engine), commit: esc(I.commit), date: date(I.date), na: I.NA, tie: I.TIE, trail: I.by_class.trail, parity: I.by_class.parity, under: I.by_class.underpowered });
+
+  // plain names of the comparison cells (translations: ui keys sb_g_<cell>)
+  const GLOSS = {
+    thrA1_np: "(n,p) near threshold",
+    capture_FAR: "capture, nuclei far from stability",
+    fission_SELECT: "fission, selected actinides",
+    n2n_SELECT: "(n,2n), selected nuclei",
+    n2n_SELECT_RL3: "(n,2n), selected nuclei, second data set",
+    np_FRESH_curated: "(n,p), curated set",
+  };
+  const gloss = (cell) => {
+    const m = /^K\d+ Z(.+)$/.exec(cell);
+    if (m) return T("sb_g_macs", "stellar capture (MACS), Z ") + m[1].replace("-", "–");
+    const g = GLOSS[cell]; return g ? T("sb_g_" + cell, g) : "";
+  };
+  const cellName = (c) => /^K\d+ /.test(c) ? "MACS " + c.split(" ")[1] : c;
+  const CLS = { trail: T("cls_trail", "trail"), parity: T("cls_parity", "parity"), underpowered: T("cls_under", "underpowered") };
+  const RIV = (r) => r;
+  $("#sb-open").insertAdjacentHTML("beforeend",
+    `<thead><tr><th scope="col">${T("th_cell", "Comparison")}</th><th scope="col">${T("th_rival", "Rival")}</th><th scope="col" class="r">${T("th_n", "Nuclei")}</th><th scope="col" class="r">${T("th_gap", "Gap")}</th><th scope="col">${T("th_ci", "95 % interval")}</th><th scope="col">${T("th_verdict", "Verdict")}</th><th scope="col">${T("th_carriers", "Largest contributors")}</th></tr></thead><tbody>`
+    + I.open.map((c) => `<tr><td><code>${esc(cellName(c.cell))}</code><div class="sb-gl">${esc(gloss(c.cell))}</div></td><td>${esc(RIV(c.rival))}</td><td class="r">${c.n}</td><td class="r num">${num(c.gap)}</td><td class="num">[${num(c.lo)}, ${num(c.hi)}]</td><td>${badge(c.verdict)} <span class="sb-cls">${CLS[c.cls] || c.cls}</span></td><td class="sb-car">${c.carriers.map(esc).join(", ")}</td></tr>`).join("")
+    + "</tbody>");
+
+  const rivals = ["stock", "R_T", "CoH3", "YAHFC"].filter((r) => I.by_rival[r]);
+  const sum = (o, k) => rivals.reduce((s, r) => s + o[r][k], 0);
+  const rivalTable = (rows, total, hasNA) =>
+    `<thead><tr><th scope="col">${T("th_rival", "Rival")}</th><th scope="col" class="r">${V.WIN}</th><th scope="col" class="r">${V.TIE}</th><th scope="col" class="r">${V.LOSS}</th>${hasNA ? `<th scope="col" class="r">N/A</th>` : ""}</tr></thead><tbody>`
+    + rows.map((r) => `<tr><th scope="row">${esc(r.name)}</th><td class="r">${r.WIN}</td><td class="r">${r.TIE}</td><td class="r${r.LOSS ? " neg" : ""}">${r.LOSS}</td>${hasNA ? `<td class="r">${r.NA}</td>` : ""}</tr>`).join("")
+    + `</tbody><tfoot><tr><th scope="row">${T("total", "All")}</th><td class="r">${total.WIN}</td><td class="r">${total.TIE}</td><td class="r">${total.LOSS}</td>${hasNA ? `<td class="r">${total.NA}</td>` : ""}</tr></tfoot>`;
+  $("#sb-rival").insertAdjacentHTML("beforeend", rivalTable(rivals.map((r) => Object.assign({ name: r }, I.by_rival[r])), { WIN: sum(I.by_rival, "WIN"), TIE: sum(I.by_rival, "TIE"), LOSS: sum(I.by_rival, "LOSS"), NA: sum(I.by_rival, "NA") }, true));
+
+  $("#sb-changes").innerHTML = I.changes.map((c) => `<li><code>${esc(c.cell)}</code> ${T("vs", "vs")} ${esc(c.rival)}: ${badge(c.from)} → ${badge(c.to)} <span class="num">${num(c.gap)} [${num(c.lo)}, ${num(c.hi)}]</span></li>`).join("");
+
+  // ---- 2. TERRA board
   const R = B.terra;
   tiles($("#sb-terra-tiles"), R); strip($("#sb-terra-strip"), R);
   $("#sb-terra-note").innerHTML = fill(T("sb_n_terra", "Candidate <code>{product}</code>, board of {date}; includes {n} leave-one-series-out comparisons ({win} {W}, {tie} {T}, {loss} {L})."),
