@@ -15,6 +15,7 @@
     if (WT.L.ui.sb_title) document.title = WT.L.ui.sb_title;
     document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.L.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
     document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
+    WT.keepLang();   // after the text above: links inside translated text keep the language too
   }
   // links that keep the language and the EN | ES switch: js/nav.js
   if (!B) return;

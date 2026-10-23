@@ -15,6 +15,7 @@
     document.querySelectorAll("[data-i18n]").forEach((el) => { const t = WT.L.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
     document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
     document.querySelectorAll("[data-i18n-ph]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nPh]; if (t != null) el.setAttribute("placeholder", t); });
+    WT.keepLang();   // after the text above: links inside translated text keep the language too
   }
   // links that keep the language and the EN | ES switch: js/nav.js
 
