@@ -165,7 +165,7 @@
     } else { tip.hidden = true; tipR = null; }
   });
   const endPtr = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null;
-    if (pts.size === 0 && drag) { if (moved < 5 && e.type === "pointerup") { const { N, Z } = fromXY(e.offsetX, e.offsetY), r = byKey.get(Z + "-" + (N + Z)); if (r) select(r); } drag = null; drawChart(); } };
+    if (pts.size === 0 && drag) { if (moved < 5 && e.type === "pointerup") { const { N, Z } = fromXY(e.offsetX, e.offsetY), r = byKey.get(Z + "-" + (N + Z)); if (r) select(r, false, false, true); } drag = null; drawChart(); } };
   cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
   cv.addEventListener("pointerleave", () => { hover = null; tip.hidden = true; tipR = null; clearTimeout(pf); drawChart(); });
   cv.addEventListener("wheel", (e) => { e.preventDefault(); zooming = true; clearTimeout(zt); zt = setTimeout(() => { zooming = false; drawChart(); }, 160); zoomAt(e.offsetX, e.offsetY, view.s * Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
@@ -288,7 +288,7 @@
       : `${T("dx_loading", "Loading")} ${esc(nameOf(r.Z, r.A))}…`;
     if (err) $("#dx-retry").addEventListener("click", () => select(r, false, true));
   }
-  async function select(r, center, stay) {
+  async function select(r, center, stay, scroll) { // scroll: a click on the chart, which opens the details below it
     sel = r; drawChart();
     if (center && r.A) { view.x0 = r.A - r.Z - G.W / view.s / 2; view.y0 = r.Z - G.H / view.s / 2; if (view.s < 14) zoomAt(G.W / 2, G.H / 2, 18); drawChart(); }
     history.replaceState(null, "", location.pathname + location.search + "#" + (r.A ? `${IDX.sym[r.Z]}-${r.A}` : `${IDX.sym[r.Z]}-nat`));
@@ -319,7 +319,7 @@
     $("#dx-cmd").textContent = nm && d.cap ? `uv run python -m incognita.library show ${nm}\n\n# or from Python\nfrom incognita.library import capture_curve\ndf = capture_curve("${nm}")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier`
       : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/inputs/exfor_cells.parquet`;
     sweep();
-    if (center && !stay) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
+    if ((center || scroll) && !stay) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function libOf(lz, r) { const n = lz && lz.nuc[r.A ? String(r.A) : "nat"]; return { libs: (lz && lz.libs) || {}, n: n || {} }; }
@@ -401,7 +401,10 @@
     // ranges (log-log)
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
     const ax = (x) => { if (x < x0) x0 = x; if (x > x1) x1 = x; }, ay = (y) => { if (y < y0) y0 = y; if (y > y1) y1 = y; };
-    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > 0) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (lo > 0) ay(lo); ay(hi); }); });
+    // (n,2n), (n,p), (n,α): the axes cover four decades below the curves' peak, so the far sub-threshold tail (down to 1e-30 mb)
+    // does not squeeze the energies where data and evaluations differ; measured points always stay in range
+    const thr = tab !== "cap" && tab !== "macs", top = Math.max(0, ...S.curves.flatMap((c) => c.pts.map(([, y]) => y || 0))), floor = thr ? top * 1e-4 : 0;
+    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > floor) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (lo > floor) ay(lo); if (hi > floor) ay(hi); }); });
     shown.forEach((p) => { if (p.y > 0) { ax(p.xlo || p.x); ax(p.xhi || p.x); ay(p.y); } });
     for (const c of [LAY.p, LAY.c]) layer(c);
     if (!(x1 > 0)) { ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H); ctx.fillStyle = C.soft; ctx.font = `500 14px ${SANS}`; ctx.textAlign = "center"; ctx.fillText(T("dx_empty", "Nothing to show for this reaction."), W / 2, H / 2); finishNuc(S); return; }
