@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   dx_colour: "Colorir a carta por", dx_m_tier: "Como é conhecido", dx_m_macs: "Captura a 30 keV", dx_m_meas: "Dados medidos",
   dx_chart_h: "Carta de nuclídeos",
   dx_chart_aria: "Carta de nuclídeos: protões para cima, neutrões para a direita. Usa a pesquisa para escolher um nuclídeo.",
-  dx_hint: "Arrasta para mover, usa a roda ou faz pinça para ampliar e clica num quadrado para o abrir. Protões para cima, neutrões para a direita.",
+  dx_hint: "Arrasta para mover, usa a roda ou faz pinça para ampliar. Clica num quadrado para o abrir: os detalhes do nuclídeo aparecem por baixo da carta. Protões para cima, neutrões para a direita.",
   dx_show_excl: "Mostrar os pontos que a curadoria excluiu", dx_table: "Ver como tabela",
   dx_run_h: "Obtém tu mesmo estes números", dx_copy: "Copiar", dx_copied: "Copiado",
   dx_repo_h: "Executa-o tu mesmo",

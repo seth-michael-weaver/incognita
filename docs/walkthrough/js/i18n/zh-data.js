@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   dx_colour: "核素图着色依据", dx_m_tier: "已知程度", dx_m_macs: "30 keV 俘获", dx_m_meas: "测量数据",
   dx_chart_h: "核素图",
   dx_chart_aria: "核素图：质子数向上，中子数向右。使用搜索框选取核素。",
-  dx_hint: "拖动以平移，滚动滚轮或双指捏合以缩放，点击方格即可打开。质子数向上，中子数向右。",
+  dx_hint: "拖动以平移，滚动滚轮或双指捏合以缩放。点击方格即可打开，该核素的详细信息显示在图表下方。质子数向上，中子数向右。",
   dx_show_excl: "显示整理时排除的数据点", dx_table: "以表格显示",
   dx_run_h: "亲自获取这些数字", dx_copy: "复制", dx_copied: "已复制",
   dx_repo_h: "亲自运行",

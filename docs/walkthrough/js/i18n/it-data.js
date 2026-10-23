@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   dx_colour: "Colora la carta per", dx_m_tier: "Come è noto", dx_m_macs: "Cattura a 30 keV", dx_m_meas: "Dati misurati",
   dx_chart_h: "Carta dei nuclidi",
   dx_chart_aria: "Carta dei nuclidi: protoni verso l'alto, neutroni verso destra. Usa la ricerca per scegliere un nuclide.",
-  dx_hint: "Trascina per spostarti, usa la rotellina o pizzica per ingrandire, fai clic su un quadrato per aprirlo. Protoni verso l'alto, neutroni verso destra.",
+  dx_hint: "Trascina per spostarti, usa la rotellina o pizzica per ingrandire. Fai clic su un quadrato per aprirlo: i dettagli del nuclide compaiono sotto la carta. Protoni verso l'alto, neutroni verso destra.",
   dx_show_excl: "Mostra i punti esclusi dalla revisione", dx_table: "Mostra come tabella",
   dx_run_h: "Ottieni tu stesso questi numeri", dx_copy: "Copia", dx_copied: "Copiato",
   dx_repo_h: "Eseguilo tu stesso",
