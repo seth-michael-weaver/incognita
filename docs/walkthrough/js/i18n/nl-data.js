@@ -12,6 +12,7 @@ Object.assign(WT.L.ui, {
   dx_chart_h: "Nuclidenkaart",
   dx_chart_aria: "Nuclidenkaart: protonen omhoog, neutronen naar rechts. Gebruik het zoekvak om een nuclide te kiezen.",
   dx_hint: "Sleep om te verschuiven, scrol of knijp om te zoomen. Klik op een vakje om het te openen: de details van de nuclide verschijnen onder de kaart. Protonen omhoog, neutronen naar rechts.",
+  dx_full: "Toon het hele energiebereik", dx_mk_thr: "drempel", dx_mk_cb: "coulombbarrière",
   dx_show_excl: "Toon punten die de curatie heeft uitgesloten", dx_table: "Toon als tabel",
   dx_run_h: "Bereken deze getallen zelf", dx_copy: "Kopiëren", dx_copied: "Gekopieerd",
   dx_repo_h: "Draai het zelf",

@@ -12,6 +12,7 @@ Object.assign(WT.L.ui, {
   dx_chart_h: "核素图",
   dx_chart_aria: "核素图：质子数向上，中子数向右。使用搜索框选取核素。",
   dx_hint: "拖动以平移，滚动滚轮或双指捏合以缩放。点击方格即可打开，该核素的详细信息显示在图表下方。质子数向上，中子数向右。",
+  dx_full: "显示完整能量范围", dx_mk_thr: "阈能", dx_mk_cb: "库仑势垒",
   dx_show_excl: "显示整理时排除的数据点", dx_table: "以表格显示",
   dx_run_h: "亲自获取这些数字", dx_copy: "复制", dx_copied: "已复制",
   dx_repo_h: "亲自运行",

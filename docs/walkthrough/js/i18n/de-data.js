@@ -12,6 +12,7 @@ Object.assign(WT.L.ui, {
   dx_chart_h: "Nuklidkarte",
   dx_chart_aria: "Nuklidkarte: Protonen nach oben, Neutronen nach rechts. Nutze das Suchfeld, um ein Nuklid zu wählen.",
   dx_hint: "Ziehen zum Verschieben, Scrollen oder Zwei-Finger-Geste zum Zoomen. Klick auf ein Feld öffnet es: Die Details zum Nuklid erscheinen unter der Karte. Protonen nach oben, Neutronen nach rechts.",
+  dx_full: "Gesamten Energiebereich zeigen", dx_mk_thr: "Schwelle", dx_mk_cb: "Coulombbarriere",
   dx_show_excl: "Von der Kuratierung ausgeschlossene Punkte zeigen", dx_table: "Als Tabelle zeigen",
   dx_run_h: "Diese Zahlen selbst erzeugen", dx_copy: "Kopieren", dx_copied: "Kopiert",
   dx_repo_h: "Selbst ausführen",

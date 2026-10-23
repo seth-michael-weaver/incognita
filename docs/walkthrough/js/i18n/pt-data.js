@@ -12,6 +12,7 @@ Object.assign(WT.L.ui, {
   dx_chart_h: "Carta de nuclídeos",
   dx_chart_aria: "Carta de nuclídeos: protões para cima, neutrões para a direita. Usa a pesquisa para escolher um nuclídeo.",
   dx_hint: "Arrasta para mover, usa a roda ou faz pinça para ampliar. Clica num quadrado para o abrir: os detalhes do nuclídeo aparecem por baixo da carta. Protões para cima, neutrões para a direita.",
+  dx_full: "Mostrar toda a gama de energia", dx_mk_thr: "limiar", dx_mk_cb: "barreira de Coulomb",
   dx_show_excl: "Mostrar os pontos que a curadoria excluiu", dx_table: "Ver como tabela",
   dx_run_h: "Obtém tu mesmo estes números", dx_copy: "Copiar", dx_copied: "Copiado",
   dx_repo_h: "Executa-o tu mesmo",

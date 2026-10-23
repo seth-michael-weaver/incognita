@@ -12,6 +12,7 @@ Object.assign(WT.L.ui, {
   dx_chart_h: "Carte des nucléides",
   dx_chart_aria: "Carte des nucléides : protons vers le haut, neutrons vers la droite. Utilisez la recherche pour choisir un nucléide.",
   dx_hint: "Faites glisser pour vous déplacer, utilisez la molette ou pincez pour zoomer. Cliquez sur une case pour l'ouvrir : les détails du nucléide s'affichent sous la carte. Protons vers le haut, neutrons vers la droite.",
+  dx_full: "Afficher toute la plage d'énergie", dx_mk_thr: "seuil", dx_mk_cb: "barrière coulombienne",
   dx_show_excl: "Afficher les points exclus par la sélection", dx_table: "Afficher sous forme de tableau",
   dx_run_h: "Obtenez ces nombres vous-même", dx_copy: "Copier", dx_copied: "Copié",
   dx_repo_h: "Exécutez-le vous-même",

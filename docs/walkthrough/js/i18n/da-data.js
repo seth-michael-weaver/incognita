@@ -12,6 +12,7 @@ Object.assign(WT.L.ui, {
   dx_chart_h: "Nuklidkort",
   dx_chart_aria: "Nuklidkort: protoner opad, neutroner mod højre. Brug søgefeltet til at vælge en nuklid.",
   dx_hint: "Træk for at panorere, scroll eller knib for at zoome. Klik på et felt for at åbne det: nuklidets detaljer vises under kortet. Protoner opad, neutroner mod højre.",
+  dx_full: "Vis hele energiområdet", dx_mk_thr: "tærskel", dx_mk_cb: "Coulombbarriere",
   dx_show_excl: "Vis punkter, som kurateringen udelukkede", dx_table: "Vis som tabel",
   dx_run_h: "Få disse tal selv", dx_copy: "Kopiér", dx_copied: "Kopieret",
   dx_repo_h: "Kør det selv",

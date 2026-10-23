@@ -60,6 +60,10 @@
   const lcache = new Map(), LIBS = ["endfb8.1", "jeff4.0", "tendl2025"];
   const loadLib = (Z) => lcache.get(Z) || lcache.set(Z, fetch(`data/lib/${Z}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)).get(Z);
   let libOn = true; // the comparison libraries show by default; untick the box to hide them
+  // Q-values of (n,p), (n,α) and (n,2n) per nuclide, from the engine's mass tables (scripts/build_site_q.py); they place the
+  // window of the threshold plots. Fetched once, with the first nuclide; without them the plots fall back to the curves alone
+  let QV = null, qLoad = null;
+  const loadQ = () => qLoad || (qLoad = fetch("data/q.json").then((r) => (r.ok ? r.json() : null)).then((j) => { QV = j && j.q; }, () => {}));
   const nameOf = (Z, A) => (A ? `${IDX.sym[Z]}-${A}` : `${IDX.sym[Z]} (${T("dx_nat", "natural")})`);
 
   // ---------- chart of nuclides ----------
@@ -275,7 +279,7 @@
   if (atom.cv) atom.cv.parentElement.addEventListener("pointermove", (e) => { const r = atom.cv.getBoundingClientRect(); atom.tx = (e.clientX - r.left) / r.width - 0.5; atom.ty = (e.clientY - r.top) / r.height - 0.5; });
 
   // ---------- one nuclide ----------
-  let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false;
+  let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false, full = false;
   /** Loading state while nuclide r's file is on its way (r null: done); with err, say it failed and offer a retry. */
   function busy(r, err) {
     const box = $("#dx-nuc"), s = $("#dx-status"), on = !!r && !err;
@@ -288,16 +292,18 @@
       : `${T("dx_loading", "Loading")} ${esc(nameOf(r.Z, r.A))}…`;
     if (err) $("#dx-retry").addEventListener("click", () => select(r, false, true));
   }
+  // the address names the nuclide and, past capture, the reaction: data.html#Ho-165/np
+  const setHash = (r) => history.replaceState(null, "", location.pathname + location.search + "#" + (r.A ? `${IDX.sym[r.Z]}-${r.A}` : `${IDX.sym[r.Z]}-nat`) + (tab !== "cap" ? "/" + tab : ""));
   async function select(r, center, stay, scroll) { // scroll: a click on the chart, which opens the details below it
     sel = r; drawChart();
     if (center && r.A) { view.x0 = r.A - r.Z - G.W / view.s / 2; view.y0 = r.Z - G.H / view.s / 2; if (view.s < 14) zoomAt(G.W / 2, G.H / 2, 18); drawChart(); }
-    history.replaceState(null, "", location.pathname + location.search + "#" + (r.A ? `${IDX.sym[r.Z]}-${r.A}` : `${IDX.sym[r.Z]}-nat`));
+    setHash(r);
     if (!ndata.has(nkey(r.Z, r.A)) || (libOn && !lcache.has(r.Z))) busy(r);
     let d0, lz; // the nuclide's file and, if the overlay is ticked, its element's library file
-    try { [d0, lz] = await Promise.all([loadNuc(r.Z, r.A), libOn ? loadLib(r.Z) : null]); } catch (e) { if (sel === r) busy(r, e); return; }
+    try { [d0, lz] = await Promise.all([loadNuc(r.Z, r.A), libOn ? loadLib(r.Z) : null, loadQ()]); } catch (e) { if (sel === r) busy(r, e); return; }
     if (sel !== r) return;
     cur = { r, d: d0, lib: libOf(lz, r) }; busy(null);
-    buildTabs();
+    buildTabs(); setHash(r);
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
     atomSoon(r.Z, r.A);
@@ -330,7 +336,7 @@
     if (d.macs || (d.meas && d.meas.mxw.some((p) => p[0] >= 1000)) || libHas("macs")) tabs.push("macs");
     if (!tabs.includes(tab)) tab = "cap";
     $("#dx-tabs").innerHTML = tabs.map((k) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${CH[k]}</button>`).join("");
-    $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); sweep(); }));
+    $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; setHash(cur.r); $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); sweep(); }));
   }
   // evaluated-library curves for the current tab: dashed, thin, one muted colour per library
   function libCurves(out) {
@@ -392,6 +398,35 @@
     const step = (now) => { const u = clamp((now - animT0) / 1100, 0, 1); anim = 1 - Math.pow(1 - u, 3); compose(); if (u < 1) animRaf = requestAnimationFrame(step); }; animRaf = requestAnimationFrame(step);
   }
   function renderNuc() { buildNuc(); compose(); }
+  // The window of a threshold plot opens where the reaction can contribute, not at the 1e-30 mb tail of the curves.
+  // Physics edge: the kinematic threshold, and for a proton or alpha out, the neutron energy at which it leaves with half
+  // the Coulomb barrier of the residual nucleus (below that, tunnelling leaves a negligible cross section); the window starts
+  // at half that energy so the rise is in view, but never far below the threshold, under which there is nothing. It opens further down for any measured point, and for any curve that reaches
+  // 1 % of the reaction's size at 14 MeV (thermal and resonance (n,α), for example). The size at 14 MeV is the median over
+  // the curves, so one curve far off does not move the axes; the y-axis reaches four decades below it.
+  // Without a Q-value, the edge is where the curves come within four decades of their peak.
+  function thrWindow(S, shown) {
+    const { Z, A } = cur.r, q = QV && A && QV[`${Z}-${A}`], Q = q ? q[{ np: 0, na: 1, n2n: 2 }[tab]] : null;
+    const at14 = (c) => { let b = null, bd = 0.1; for (const [x, y] of c.pts) { const dd = Math.abs(log10(x / 14e6)); if (y > 0 && dd < bd) { bd = dd; b = y; } } return b; };
+    const refs = S.curves.map(at14).filter((v) => v > 0).sort((a, b) => a - b);
+    const top = Math.max(0, ...S.curves.flatMap((c) => c.pts.map(([, y]) => y || 0))), ref = refs.length ? refs[(refs.length - 1) >> 1] : top;
+    if (!(ref > 0)) return null;
+    const marks = []; let edge, thrE = 0;
+    if (Q != null) {
+      const kin = (A + 1) / A; thrE = Q < 0 ? -Q * kin * 1e6 : 0;
+      if (thrE > 0) marks.push([thrE, T("dx_mk_thr", "threshold")]);
+      if (tab === "n2n") edge = thrE;
+      else {
+        const [z, a] = tab === "np" ? [1, 1] : [2, 4], Ar = A + 1 - a, Vc = 1.44 * z * (Z - z) / (1.4 * (Ar ** (1 / 3) + a ** (1 / 3))); // MeV
+        const cb = Math.max(thrE, (Vc - Q) * kin * 1e6); if (cb > thrE) marks.push([cb, T("dx_mk_cb", "Coulomb barrier")]);
+        edge = Math.max(thrE, (Vc / 2 - Q) * kin * 1e6);
+      }
+    } else edge = Math.min(...S.curves.flatMap((c) => c.pts.filter(([, y]) => y > top * 1e-4).map(([x]) => x)));
+    let x0 = isFinite(edge) && edge > 0 ? Math.max(edge / 2, thrE * 0.9) : 0; // nothing at all below the threshold
+    for (const c of S.curves) for (const [x, y] of c.pts) if (y >= ref * 0.01 && x < x0) x0 = x;
+    for (const p of shown) if (p.y > 0 && (p.xlo || p.x) < x0) x0 = p.xlo || p.x;
+    return { x0, yf: ref * 1e-4, marks };
+  }
   function buildNuc() {
     if (!cur) return;
     const S = series(), shown = S.points.filter((p) => showExcl || p.dec !== "x");
@@ -401,15 +436,15 @@
     // ranges (log-log)
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
     const ax = (x) => { if (x < x0) x0 = x; if (x > x1) x1 = x; }, ay = (y) => { if (y < y0) y0 = y; if (y > y1) y1 = y; };
-    // (n,2n), (n,p), (n,α): the axes cover four decades below the curves' peak, so the far sub-threshold tail (down to 1e-30 mb)
-    // does not squeeze the energies where data and evaluations differ; measured points always stay in range
-    const thr = tab !== "cap" && tab !== "macs", top = Math.max(0, ...S.curves.flatMap((c) => c.pts.map(([, y]) => y || 0))), floor = thr ? top * 1e-4 : 0;
-    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > floor) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (lo > floor) ay(lo); if (hi > floor) ay(hi); }); });
+    // (n,2n), (n,p), (n,α): the window from thrWindow unless "full energy range" is ticked; measured points always stay in range
+    const tw = tab !== "cap" && tab !== "macs" ? thrWindow(S, shown) : null, win = full ? null : tw, xf = win ? win.x0 : 0, yf = win ? win.yf : 0;
+    if (xf > 0) ax(xf);
+    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > yf && x >= xf) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (x < xf) return; if (lo > yf) ay(lo); if (hi > yf) ay(hi); }); });
     shown.forEach((p) => { if (p.y > 0) { ax(p.xlo || p.x); ax(p.xhi || p.x); ay(p.y); } });
     for (const c of [LAY.p, LAY.c]) layer(c);
     if (!(x1 > 0)) { ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H); ctx.fillStyle = C.soft; ctx.font = `500 14px ${SANS}`; ctx.textAlign = "center"; ctx.fillText(T("dx_empty", "Nothing to show for this reaction."), W / 2, H / 2); finishNuc(S); return; }
     x0 = log10(x0); x1 = log10(x1); y0 = log10(y0); y1 = log10(y1);
-    if (x1 - x0 < 1) { x0 -= 0.5; x1 += 0.5; } if (y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; }
+    if (x1 - x0 < 1 && !win) { x0 -= 0.5; x1 += 0.5; } // a threshold window keeps its edge: it may span under a decade if (y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; }
     x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0);
     const X = (x) => m.l + (log10(x) - x0) / (x1 - x0) * (W - m.l - m.r), Y = (y) => H - m.b - (log10(y) - y0) / (y1 - y0) * (H - m.t - m.b);
     Object.assign(P, { X, Y, m, x0, x1, y0, y1, W, H });
@@ -417,7 +452,10 @@
     // grid and axes (decades)
     ctx.font = `500 12px ${SANS}`; ctx.fillStyle = C.soft; ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
     ctx.textAlign = "center"; ctx.textBaseline = "top";
-    { let lastX = -1e9; const step = W < 600 ? 62 : 48; for (let k = Math.ceil(x0); k <= Math.floor(x1); k++) { const x = X(10 ** k); ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, H - m.b); ctx.stroke(); if (x - lastX >= step) { ctx.fillText(decE(k), x, H - m.b + 6); lastX = x; } } }
+    { let lastX = -1e9; const step = W < 600 ? 62 : 48, minor = x1 - x0 < 1.6 ? [1, 2, 5] : [1]; // a narrow (threshold) window also marks 2 and 5
+      for (let k = Math.floor(x0); k <= Math.floor(x1); k++) for (const f of minor) { const v = f * 10 ** k; if (log10(v) < x0 || log10(v) > x1) continue;
+        const x = X(v); ctx.strokeStyle = f === 1 ? C.grid : rgba(C.soft, 0.08); ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, H - m.b); ctx.stroke(); if (x - lastX >= step) { ctx.fillText(f === 1 ? decE(k) : fmtE(v), x, H - m.b + 6); lastX = x; } }
+      ctx.strokeStyle = C.grid; }
     ctx.textAlign = "right"; ctx.textBaseline = "middle";
     for (let k = Math.ceil(y0); k <= Math.floor(y1); k++) { const y = Y(10 ** k); ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke(); ctx.fillText(decY(k, S.unit), m.l - 8, y); }
     ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(S.xlab + " →", m.l, H - 6);
@@ -433,6 +471,11 @@
     for (const c of S.curves) {
       for (const [b, a] of [[c.b95, 0.1], [c.b68, 0.2]]) if (b && b.length > 1) { ctx.fillStyle = rgba(c.col, a); ctx.beginPath(); b.forEach(([x, , hi], i) => (i ? ctx.lineTo(X(x), Y(hi)) : ctx.moveTo(X(x), Y(hi)))); for (let i = b.length - 1; i >= 0; i--) ctx.lineTo(X(b[i][0]), Y(Math.max(b[i][1], 10 ** (y0 - 1)))); ctx.closePath(); ctx.fill(); }
     }
+    // threshold and Coulomb-barrier markers of a threshold reaction: a dotted line, labelled at the top
+    ctx.font = `500 12px ${SANS}`; ctx.textBaseline = "alphabetic";
+    (tw ? tw.marks : []).forEach(([e, label], i) => { const x = X(e); if (x < m.l || x > W - m.r) return;
+      ctx.strokeStyle = rgba(C.soft, 0.55); ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, H - m.b); ctx.stroke(); ctx.setLineDash([]);
+      const right = x > W - m.r - 130; ctx.fillStyle = C.soft; ctx.textAlign = right ? "right" : "left"; ctx.fillText(label, x + (right ? -5 : 5), m.t + 12 + i * 16); });
     ctx.restore();
     drawPoints(false);
     const cc = LAY.c.getContext("2d"); cc.save(); cc.beginPath(); cc.rect(m.l, m.t, W - m.l - m.r, H - m.t - m.b); cc.clip();
@@ -481,6 +524,7 @@
   function finishNuc(S) {
     const nPts = S.points.length, nEx = S.points.filter((p) => p.dec === "x").length;
     $("#dx-excl").parentElement.hidden = nEx === 0;
+    $("#dx-full").parentElement.hidden = tab === "cap" || tab === "macs";
     libNote();
     const leg = S.curves.map((c) => c.dash ? `<span class="dx-key"><i class="dash" style="color:${c.col}"></i>${esc(c.name)}</span>` : `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);
     if (nPts) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas}"></i>${T("dx_meas_pts", "measured")} (${nPts}${nEx ? `, ${nEx} ${T("dx_excl", "excluded")}` : ""})</span>`);
@@ -505,6 +549,7 @@
     if (libOn) { $("#dx-libnote").hidden = false; $("#dx-libnote").textContent = T("dx_lib_loading", "Loading the libraries…"); const lz = await loadLib(c0.r.Z); if (cur !== c0) return; cur.lib = libOf(lz, c0.r); }
     buildTabs(); renderNuc(); });
   $("#dx-excl").addEventListener("change", (e) => { showExcl = e.target.checked; renderNuc(); });
+  $("#dx-full").addEventListener("change", (e) => { full = e.target.checked; renderNuc(); });
   $("#dx-copy").addEventListener("click", (e) => { try { navigator.clipboard.writeText($("#dx-cmd").textContent); e.currentTarget.textContent = T("dx_copied", "Copied"); } catch (err) {} });
   // hover (mouse) or tap (touch) shows the tooltip; clicking a measured point, or tapping it a second time, opens its EXFOR subentry
   let tipPin = null, lastPT = "mouse";
@@ -612,7 +657,9 @@
     const real = rows.filter((r) => r.A); bounds = { n0: 0, n1: Math.max(...real.map((r) => r.A - r.Z)), z0: 0, z1: Math.max(...real.map((r) => r.Z)) };
     layout(); fit(); legend(); paintChart();
     // other nuclides are fetched only when opened; a link like data.html#Fe-56 opens that one, otherwise U-238 opens by default
-    const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)), r0 = h && parseQ(h.replace(/-nat$/i, " nat")); if (r0 && r0 !== sel) select(r0, true, true); };
+    const fromHash = () => { const [h, t] = decodeURIComponent(location.hash.slice(1)).split("/"), r0 = h && parseQ(h.replace(/-nat$/i, " nat")), t0 = tab;
+      if (t in CH) tab = t;
+      if (r0 && r0 !== sel) select(r0, true, true); else if (cur && tab !== t0) { buildTabs(); sweep(); } };
     fromHash(); window.addEventListener("hashchange", fromHash);
     if (!sel) { const u = byKey.get("92-238"); if (u) select(u, false, true); }
   }).catch((e) => { $("#dx-legend").textContent = T("dx_fail", "Could not load the data.") + " " + e; });
