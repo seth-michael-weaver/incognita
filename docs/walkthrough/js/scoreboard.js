@@ -35,57 +35,21 @@
   // ---- 1. INCOGNITA census
   const I = B.incognita;
   tiles($("#sb-inc-tiles"), I); strip($("#sb-inc-strip"), I);
-  $("#sb-inc-note").innerHTML = es
-    ? `Motor de producción <code>${esc(I.engine)}</code> (<code>${esc(I.commit)}</code>), censo del ${date(I.date)}. Además, ${I.NA} comparaciones no son puntuables (N/A). De los ${I.TIE} empates: ${I.by_class.trail} por detrás, ${I.by_class.parity} a la par y ${I.by_class.underpowered} con pocos núcleos.`
-    : `Production engine <code>${esc(I.engine)}</code> (<code>${esc(I.commit)}</code>), census of ${date(I.date)}. A further ${I.NA} comparisons are not scorable (N/A). Of the ${I.TIE} ties, ${I.by_class.trail} trail, ${I.by_class.parity} are at parity and ${I.by_class.underpowered} are underpowered.`;
-
-  // plain names of the comparison cells (translations: ui keys sb_g_<cell>)
-  const GLOSS = {
-    thrA1_np: "(n,p) near threshold",
-    capture_FAR: "capture, nuclei far from stability",
-    fission_SELECT: "fission, selected actinides",
-    n2n_SELECT: "(n,2n), selected nuclei",
-    n2n_SELECT_RL3: "(n,2n), selected nuclei, second data set",
-    np_FRESH_curated: "(n,p), curated set",
-  };
-  const gloss = (cell) => {
-    const m = /^K\d+ Z(.+)$/.exec(cell);
-    if (m) return T("sb_g_macs", "stellar capture (MACS), Z ") + m[1].replace("-", "–");
-    const g = GLOSS[cell]; return g ? T("sb_g_" + cell, g) : "";
-  };
-  const cellName = (c) => /^K\d+ /.test(c) ? "MACS " + c.split(" ")[1] : c;
-  const CLS = { trail: T("cls_trail", "trail"), parity: T("cls_parity", "parity"), underpowered: T("cls_under", "underpowered") };
-  const RIV = (r) => r;
-  $("#sb-open").insertAdjacentHTML("beforeend",
-    `<thead><tr><th scope="col">${T("th_cell", "Comparison")}</th><th scope="col">${T("th_rival", "Rival")}</th><th scope="col" class="r">${T("th_n", "Nuclei")}</th><th scope="col" class="r">${T("th_gap", "Gap")}</th><th scope="col">${T("th_ci", "95 % interval")}</th><th scope="col">${T("th_verdict", "Verdict")}</th><th scope="col">${T("th_carriers", "Largest contributors")}</th></tr></thead><tbody>`
-    + I.open.map((c) => `<tr><td><code>${esc(cellName(c.cell))}</code><div class="sb-gl">${esc(gloss(c.cell))}</div></td><td>${esc(RIV(c.rival))}</td><td class="r">${c.n}</td><td class="r num">${num(c.gap)}</td><td class="num">[${num(c.lo)}, ${num(c.hi)}]</td><td>${badge(c.verdict)} <span class="sb-cls">${CLS[c.cls] || c.cls}</span></td><td class="sb-car">${c.carriers.map(esc).join(", ")}</td></tr>`).join("")
-    + "</tbody>");
-
-  const rivals = ["stock", "R_T", "CoH3", "YAHFC"].filter((r) => I.by_rival[r]);
-  const sum = (o, k) => rivals.reduce((s, r) => s + o[r][k], 0);
-  const rivalTable = (rows, total, hasNA) =>
-    `<thead><tr><th scope="col">${T("th_rival", "Rival")}</th><th scope="col" class="r">${V.WIN}</th><th scope="col" class="r">${V.TIE}</th><th scope="col" class="r">${V.LOSS}</th>${hasNA ? `<th scope="col" class="r">N/A</th>` : ""}</tr></thead><tbody>`
-    + rows.map((r) => `<tr><th scope="row">${esc(r.name)}</th><td class="r">${r.WIN}</td><td class="r">${r.TIE}</td><td class="r${r.LOSS ? " neg" : ""}">${r.LOSS}</td>${hasNA ? `<td class="r">${r.NA}</td>` : ""}</tr>`).join("")
-    + `</tbody><tfoot><tr><th scope="row">${T("total", "All")}</th><td class="r">${total.WIN}</td><td class="r">${total.TIE}</td><td class="r">${total.LOSS}</td>${hasNA ? `<td class="r">${total.NA}</td>` : ""}</tr></tfoot>`;
-  $("#sb-rival").insertAdjacentHTML("beforeend", rivalTable(rivals.map((r) => Object.assign({ name: r }, I.by_rival[r])), { WIN: sum(I.by_rival, "WIN"), TIE: sum(I.by_rival, "TIE"), LOSS: sum(I.by_rival, "LOSS"), NA: sum(I.by_rival, "NA") }, true));
-
-  $("#sb-changes").innerHTML = I.changes.map((c) => `<li><code>${esc(c.cell)}</code> ${T("vs", "vs")} ${esc(c.rival)}: ${badge(c.from)} → ${badge(c.to)} <span class="num">${num(c.gap)} [${num(c.lo)}, ${num(c.hi)}]</span></li>`).join("");
-
-  // ---- 2. TERRA board
+  // the four notes are templates (ui keys sb_n_inc, sb_n_terra, sb_n_loss, sb_n_src); {name} slots are filled below
+  const fill = (t, o) => t.replace(/\{(\w+)\}/g, (m, k) => (k in o ? o[k] : m));
+  $("#sb-inc-note").innerHTML = fill(T("sb_n_inc", "Production engine <code>{engine}</code> (<code>{commit}</code>), census of {date}. A further {na} comparisons are not scorable (N/A). Of the {tie} ties, {trail} trail, {parity} are at parity and {under} are underpowered."),
+    { engine: esc(I.engine), commit: esc(I.commit), date: date(I.date), na: I.NA, tie: I.TIE, trail: I.by_class.trail, parity: I.by_class.parity, under: I.by_class.underpowered });
   const R = B.terra;
   tiles($("#sb-terra-tiles"), R); strip($("#sb-terra-strip"), R);
-  $("#sb-terra-note").innerHTML = es
-    ? `Candidato <code>${R.product}</code>, tablero del ${date(R.date)}; incluye ${R.loso.WIN + R.loso.TIE + R.loso.LOSS} comparaciones dejando una serie fuera (${R.loso.WIN} ${V.WIN}, ${R.loso.TIE} ${V.TIE}, ${R.loso.LOSS} ${V.LOSS}).`
-    : `Candidate <code>${R.product}</code>, board of ${date(R.date)}; includes ${R.loso.WIN + R.loso.TIE + R.loso.LOSS} leave-one-series-out comparisons (${R.loso.WIN} ${V.WIN}, ${R.loso.TIE} ${V.TIE}, ${R.loso.LOSS} ${V.LOSS}).`;
+  $("#sb-terra-note").innerHTML = fill(T("sb_n_terra", "Candidate <code>{product}</code>, board of {date}; includes {n} leave-one-series-out comparisons ({win} {W}, {tie} {T}, {loss} {L})."),
+    { product: R.product, date: date(R.date), n: R.loso.WIN + R.loso.TIE + R.loso.LOSS, win: R.loso.WIN, tie: R.loso.TIE, loss: R.loso.LOSS, W: V.WIN, T: V.TIE, L: V.LOSS });
   const L = R.losses[0];
-  if (L) $("#sb-terra-loss").innerHTML = es
-    ? `Cobertura de la incertidumbre en (n,p) (<code>${esc(L.cell)}</code>) frente a ${esc(L.rival)}: ${num(L.gap, 3)} [${num(L.lo, 3)}, ${num(L.hi, 3)}]. Las bandas (n,p) de TERRA se ensancharon a propósito para que fueran honestas, y ahora cubren de más los datos con los que se ajustaron; ese ensanchamiento cambió una victoria por esta derrota y dos victorias por empates, a cambio de seis victorias al dejar una serie fuera.`
-    : `Uncertainty coverage in (n,p) (<code>${esc(L.cell)}</code>) against ${esc(L.rival)}: ${num(L.gap, 3)} [${num(L.lo, 3)}, ${num(L.hi, 3)}]. TERRA's (n,p) bands were deliberately widened to be honest, and they now over-cover the data they were fitted on; that widening turned one win into this loss and two wins into ties, and gained six wins in the leave-one-series-out view.`;
+  if (L) $("#sb-terra-loss").innerHTML = fill(T("sb_n_loss", "Uncertainty coverage in (n,p) (<code>{cell}</code>) against {rival}: {gap} [{lo}, {hi}]. TERRA's (n,p) bands were deliberately widened to be honest, and they now over-cover the data they were fitted on; that widening turned one win into this loss and two wins into ties, and gained six wins in the leave-one-series-out view."),
+    { cell: esc(L.cell), rival: esc(L.rival), gap: num(L.gap, 3), lo: num(L.lo, 3), hi: num(L.hi, 3) });
   $("#sb-trival").insertAdjacentHTML("beforeend", rivalTable(R.by_rival.map((r) => Object.assign({ name: r.rival }, r)), R, false));
 
-  $("#sb-src").innerHTML = es
-    ? `Fuente: el registro de investigación del proyecto (censo ${esc(I.census || "LEDGERSYNC")} del ${date(I.date)}; tablero GOAL-ALL-METRICS R072w del ${date(R.date)}). Los números se generan con <code>make_scoreboard.py</code>.`
-    : `Source: the project's research ledger (${esc(I.census || "LEDGERSYNC")} census of ${date(I.date)}; GOAL-ALL-METRICS board R072w of ${date(R.date)}). Numbers are generated by <code>make_scoreboard.py</code>.`;
+  $("#sb-src").innerHTML = fill(T("sb_n_src", "Source: the project's research ledger ({census} census of {date}; GOAL-ALL-METRICS board R072w of {rdate}). Numbers are generated by <code>make_scoreboard.py</code>."),
+    { census: esc(I.census || "LEDGERSYNC"), date: date(I.date), rdate: date(R.date) });
   // ---------- hero: one glowing dot per comparison, engine above, TERRA below; counts tick up as the dots arrive ----------
   (function hero() {
     const cv = $("#sb-hero-cv"); if (!cv) return;
