@@ -42,8 +42,8 @@ a { color: var(--accent); }
 .hero .hero-hint[data-i18n="hero_aud"] a { color: rgba(214,224,255,.92); text-underline-offset: 2px; }
 .scrollcue { position: absolute; z-index: 2; left: 50%; bottom: 22px; transform: translateX(-50%); font-family: var(--sans); font-size: 14px; color: var(--soft); text-decoration: none; animation: cue 2.2s ease-in-out infinite; }
 @keyframes cue { 0%, 100% { translate: 0 0; } 50% { translate: 0 6px; } }
-.intro-text { max-width: 40rem; margin: 0 auto; padding: 8vh 20px 2vh; }
-.intro-text p { margin: 0 0 16px; font-size: 21px; color: var(--soft); }
+.intro-text { max-width: 60rem; margin: 0 auto; padding: 9vh 20px 3vh; }
+.intro-text p { margin: 0 0 20px; font-family: var(--serif); font-size: clamp(21px, 1.75vw, 27px); line-height: 1.6; color: var(--soft); }
 @media (max-width: 720px) { .hero-copy { max-width: none; right: 20px; bottom: 64px; } .hero .hero-hint span { display: none; } .intro-text p { font-size: 19px; } }
 @media (prefers-reduced-motion: reduce) { .scrollcue { animation: none; } }
 
