@@ -38,6 +38,8 @@ a { color: var(--accent); }
 .hero .kicker { font-family: var(--sans); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: rgba(214,224,255,.7); margin-bottom: 16px; }
 .hero .hero-tag { font-family: var(--serif); font-size: clamp(19px, 1.9vw, 25px); line-height: 1.4; color: rgba(236,240,250,.88); margin: 0 0 14px; }
 .hero .hero-hint { font-family: var(--sans); font-size: 13px; color: rgba(214,224,255,.55); margin: 0; }
+.hero .hero-hint[data-i18n="hero_aud"] { font-size: 14px; line-height: 1.5; color: rgba(214,224,255,.72); margin: 0 0 14px; pointer-events: auto; }
+.hero .hero-hint[data-i18n="hero_aud"] a { color: rgba(214,224,255,.92); text-underline-offset: 2px; }
 .scrollcue { position: absolute; z-index: 2; left: 50%; bottom: 22px; transform: translateX(-50%); font-family: var(--sans); font-size: 14px; color: var(--soft); text-decoration: none; animation: cue 2.2s ease-in-out infinite; }
 @keyframes cue { 0%, 100% { translate: 0 0; } 50% { translate: 0 6px; } }
 .intro-text { max-width: 40rem; margin: 0 auto; padding: 8vh 20px 2vh; }
