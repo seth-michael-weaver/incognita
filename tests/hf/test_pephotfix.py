@@ -13,8 +13,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[2]
+TALYS_DIR = Path(os.environ.get("TALYS_DIR", Path.home() / "opt/talys-src"))
+# the run is in a subprocess, so conftest's "structure database not found" -> skip cannot see it: skip here instead
+needs_structure = pytest.mark.skipif(not (TALYS_DIR / "structure").is_dir(), reason="TALYS structure/ not installed")
 CODE = r"""
 import json, os, sys, hashlib
 import numpy as np, torch
@@ -39,6 +44,7 @@ def _photon_run(window: str) -> dict:
     return json.loads(line[len("PEPHOTFIX_JSON"):])
 
 
+@needs_structure
 def test_photon_pewindow_is_the_n_run():
     ref = _photon_run("n")
     assert ref["n"] > 10
