@@ -7,6 +7,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
+    { "source": "/", "has": [{ "type": "host", "value": "nucleus-incognita-woad.vercel.app" }], "destination": "https://www.incognitanuclear.org/", "permanent": false },
     { "source": "/:path*", "has": [{ "type": "host", "value": "nucleus-incognita-woad.vercel.app" }], "destination": "https://www.incognitanuclear.org/:path*", "permanent": false },
     { "source": "/:dev(BRIEF\\.md|I18N_BRIEF\\.md|README\\.md|shot\\.sh|i18n_missing\\.sh|glossary_check\\.py|serve\\.py|make_scoreboard\\.py|vercel\\.json|\\.vercelignore)", "destination": "/", "permanent": false },
     { "source": "/:dev(BRIEF|I18N_BRIEF|README|_dev)", "destination": "/", "permanent": false }
