@@ -1,5 +1,9 @@
 /* French: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "Moteur de production <code>{engine}</code> (<code>{commit}</code>), recensement du {date}. En outre, {na} comparaisons ne sont pas notables (N/A). Sur les {tie} matchs nuls, {trail} sont en retard, {parity} à égalité et {under} manquent de noyaux.",
+  sb_n_terra: "Candidat <code>{product}</code>, tableau du {date} ; comprend {n} comparaisons en laissant une série de côté ({win} {W}, {tie} {T}, {loss} {L}).",
+  sb_n_loss: "Couverture de l'incertitude en (n,p) (<code>{cell}</code>) face à {rival} : {gap} [{lo}, {hi}]. Les bandes (n,p) de TERRA ont été volontairement élargies pour être honnêtes, et elles couvrent maintenant trop largement les données sur lesquelles elles ont été ajustées ; cet élargissement a changé une victoire en cette défaite et deux victoires en matchs nuls, et a gagné six victoires dans la vue qui laisse une série de côté.",
+  sb_n_src: "Source : le registre de recherche du projet (recensement {census} du {date} ; tableau GOAL-ALL-METRICS R072w du {rdate}). Les nombres sont produits par <code>make_scoreboard.py</code>.",
   lang_label: "Langue", nav_teach: "Enseignants",
   sb_g_macs: "capture stellaire (MACS), Z ", sb_g_thrA1_np: "(n,p) près du seuil", sb_g_capture_FAR: "capture, noyaux loin de la stabilité",
   sb_g_fission_SELECT: "fission, actinides sélectionnés", sb_g_n2n_SELECT: "(n,2n), noyaux sélectionnés",

@@ -1,5 +1,9 @@
 /* Portuguese (pt-PT): scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "Motor de produção <code>{engine}</code> (<code>{commit}</code>), censo de {date}. Há ainda {na} comparações não pontuáveis (N/A). Dos {tie} empates, {trail} estão atrás, {parity} estão a par e {under} têm poucos núcleos.",
+  sb_n_terra: "Candidato <code>{product}</code>, quadro de {date}; inclui {n} comparações deixando uma série de fora ({win} {W}, {tie} {T}, {loss} {L}).",
+  sb_n_loss: "Cobertura da incerteza em (n,p) (<code>{cell}</code>) contra {rival}: {gap} [{lo}, {hi}]. As bandas (n,p) do TERRA foram alargadas de propósito para serem honestas e agora cobrem em excesso os dados a que foram ajustadas; esse alargamento transformou uma vitória nesta derrota e duas vitórias em empates, e ganhou seis vitórias na vista que deixa uma série de fora.",
+  sb_n_src: "Fonte: o registo de investigação do projeto (censo {census} de {date}; quadro GOAL-ALL-METRICS R072w de {rdate}). Os números são gerados por <code>make_scoreboard.py</code>.",
   lang_label: "Língua", nav_teach: "Docentes",
   sb_g_macs: "captura estelar (MACS), Z ", sb_g_thrA1_np: "(n,p) perto do limiar", sb_g_capture_FAR: "captura, núcleos longe da estabilidade",
   sb_g_fission_SELECT: "fissão, actinídeos selecionados", sb_g_n2n_SELECT: "(n,2n), núcleos selecionados",

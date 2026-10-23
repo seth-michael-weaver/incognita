@@ -1,5 +1,9 @@
 /* Danish: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "Produktionsmotor <code>{engine}</code> (<code>{commit}</code>), opgørelse fra {date}. Yderligere {na} sammenligninger kan ikke scores (N/A). Af de {tie} uafgjorte er {trail} bagud, {parity} lige op og {under} har for få kerner.",
+  sb_n_terra: "Kandidat <code>{product}</code>, tavle fra {date}; omfatter {n} sammenligninger, hvor én måleserie udelades ad gangen ({win} {W}, {tie} {T}, {loss} {L}).",
+  sb_n_loss: "Usikkerhedsdækning for (n,p) (<code>{cell}</code>) mod {rival}: {gap} [{lo}, {hi}]. TERRAs (n,p)-bånd blev bevidst gjort bredere for at være ærlige, og nu overdækker de de data, de blev tilpasset; den udvidelse gjorde én sejr til dette nederlag og to sejre til uafgjorte og gav seks sejre i visningen med én udeladt måleserie.",
+  sb_n_src: "Kilde: projektets forskningslog ({census}-opgørelse fra {date}; GOAL-ALL-METRICS-tavle R072w fra {rdate}). Tallene laves af <code>make_scoreboard.py</code>.",
   lang_label: "Sprog", nav_teach: "Undervisere",
   sb_g_macs: "stellar indfangning (MACS), Z ", sb_g_thrA1_np: "(n,p) nær tærsklen", sb_g_capture_FAR: "indfangning, kerner langt fra stabilitet",
   sb_g_fission_SELECT: "fission, udvalgte aktinider", sb_g_n2n_SELECT: "(n,2n), udvalgte kerner",

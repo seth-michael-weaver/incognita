@@ -1,5 +1,9 @@
 /* Italian: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "Motore di produzione <code>{engine}</code> (<code>{commit}</code>), censimento del {date}. Altri {na} confronti non sono valutabili (N/A). Dei {tie} pareggi, {trail} sono in svantaggio, {parity} alla pari e {under} hanno troppo pochi nuclei.",
+  sb_n_terra: "Candidato <code>{product}</code>, tabella del {date}; include {n} confronti lasciando fuori una serie ({win} {W}, {tie} {T}, {loss} {L}).",
+  sb_n_loss: "Copertura dell'incertezza in (n,p) (<code>{cell}</code>) contro {rival}: {gap} [{lo}, {hi}]. Le bande (n,p) di TERRA sono state allargate di proposito per essere oneste, e ora coprono in eccesso i dati su cui sono state adattate; questo allargamento ha trasformato una vittoria in questa sconfitta e due vittorie in pareggi, e ha guadagnato sei vittorie nella vista che lascia fuori una serie.",
+  sb_n_src: "Fonte: il registro di ricerca del progetto (censimento {census} del {date}; tabella GOAL-ALL-METRICS R072w del {rdate}). I numeri sono generati da <code>make_scoreboard.py</code>.",
   lang_label: "Lingua", nav_teach: "Docenti",
   sb_g_macs: "cattura stellare (MACS), Z ", sb_g_thrA1_np: "(n,p) vicino alla soglia", sb_g_capture_FAR: "cattura, nuclei lontani dalla stabilità",
   sb_g_fission_SELECT: "fissione, attinidi selezionati", sb_g_n2n_SELECT: "(n,2n), nuclei selezionati",

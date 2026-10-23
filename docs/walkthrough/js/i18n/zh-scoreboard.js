@@ -1,5 +1,9 @@
 /* Simplified Chinese (简体中文): scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "生产引擎 <code>{engine}</code>（<code>{commit}</code>），{date} 统计。另有 {na} 项比较无法计分（N/A）。在 {tie} 项平局中，{trail} 项落后，{parity} 项持平，{under} 项核素数量不足。",
+  sb_n_terra: "候选 <code>{product}</code>，{date} 的记分表；包含 {n} 项留出一个测量系列的比较（{win} {W}，{tie} {T}，{loss} {L}）。",
+  sb_n_loss: "(n,p) 不确定度覆盖率（<code>{cell}</code>），对手 {rival}：{gap} [{lo}, {hi}]。TERRA 的 (n,p) 误差带为了诚实而被有意加宽，现在对其拟合所用的数据覆盖过宽；这次加宽把一场胜利变成了这场失利、把两场胜利变成了平局，并在留出一个系列的比较中赢得了六场胜利。",
+  sb_n_src: "来源：项目的研究记录（{census} 统计，{date}；GOAL-ALL-METRICS 记分表 R072w，{rdate}）。数字由 <code>make_scoreboard.py</code> 生成。",
   lang_label: "语言", nav_teach: "教师指南",
   sb_g_macs: "恒星俘获（MACS），Z ", sb_g_thrA1_np: "阈能附近的 (n,p)", sb_g_capture_FAR: "俘获，远离稳定线的原子核",
   sb_g_fission_SELECT: "裂变，选定的锕系核", sb_g_n2n_SELECT: "(n,2n)，选定的原子核",

@@ -1,5 +1,9 @@
 /* Dutch (Nederlands): scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "Productiemotor <code>{engine}</code> (<code>{commit}</code>), census van {date}. Nog eens {na} vergelijkingen zijn niet te scoren (N/A). Van de {tie} gelijkspelen liggen er {trail} achter, {parity} gelijk op en hebben {under} te weinig kernen.",
+  sb_n_terra: "Kandidaat <code>{product}</code>, tabel van {date}; bevat {n} vergelijkingen waarbij steeds één meetreeks wordt weggelaten ({win} {W}, {tie} {T}, {loss} {L}).",
+  sb_n_loss: "Dekking van de onzekerheid bij (n,p) (<code>{cell}</code>) tegen {rival}: {gap} [{lo}, {hi}]. De (n,p)-banden van TERRA zijn bewust verbreed om eerlijk te zijn en overdekken nu de data waarop ze zijn aangepast; die verbreding maakte van één winst dit verlies en van twee winsten gelijkspelen, en leverde zes winsten op in de weergave met een weggelaten meetreeks.",
+  sb_n_src: "Bron: het onderzoekslogboek van het project ({census}-census van {date}; GOAL-ALL-METRICS-tabel R072w van {rdate}). De getallen worden gemaakt door <code>make_scoreboard.py</code>.",
   lang_label: "Taal", nav_teach: "Docenten",
   sb_g_macs: "stellaire vangst (MACS), Z ", sb_g_thrA1_np: "(n,p) bij de drempel", sb_g_capture_FAR: "vangst, kernen ver van de stabiliteit",
   sb_g_fission_SELECT: "splijting, geselecteerde actiniden", sb_g_n2n_SELECT: "(n,2n), geselecteerde kernen",

@@ -1,5 +1,9 @@
 /* Russian: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "Рабочая версия программы <code>{engine}</code> (<code>{commit}</code>), сводка от {date}. Ещё {na} сравнений не оцениваются (N/A). Из {tie} ничьих {trail} — с отставанием, {parity} — на равных и {under} — с недостаточным числом ядер.",
+  sb_n_terra: "Кандидат <code>{product}</code>, таблица от {date}; включает сравнения с исключением одной серии измерений: {n} ({win} {W}, {tie} {T}, {loss} {L}).",
+  sb_n_loss: "Покрытие неопределённости для (n,p) (<code>{cell}</code>) против {rival}: {gap} [{lo}, {hi}]. Полосы (n,p) в TERRA намеренно расширены, чтобы быть честными, и теперь с запасом покрывают данные, по которым они подогнаны; это расширение превратило одну победу в этот проигрыш, а две победы — в ничьи, и дало шесть побед в сравнении с исключением одной серии.",
+  sb_n_src: "Источник: исследовательский журнал проекта (сводка {census} от {date}; таблица GOAL-ALL-METRICS R072w от {rdate}). Числа получены скриптом <code>make_scoreboard.py</code>.",
   lang_label: "Язык", nav_teach: "Преподавателям",
   sb_g_macs: "звёздный захват (MACS), Z ", sb_g_thrA1_np: "(n,p) вблизи порога", sb_g_capture_FAR: "захват, ядра вдали от стабильности",
   sb_g_fission_SELECT: "деление, избранные актиниды", sb_g_n2n_SELECT: "(n,2n), избранные ядра",

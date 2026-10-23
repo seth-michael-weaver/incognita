@@ -1,5 +1,9 @@
 /* Hindi: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "उत्पादन इंजन <code>{engine}</code> (<code>{commit}</code>), {date} की गणना। इसके अलावा {na} तुलनाओं को अंक नहीं दिए जा सकते (N/A)। {tie} बराबरियों में से {trail} पीछे हैं, {parity} बराबरी पर हैं और {under} में नाभिक कम हैं।",
+  sb_n_terra: "उम्मीदवार <code>{product}</code>, {date} की तालिका; इसमें एक मापन-श्रृंखला छोड़कर की गई {n} तुलनाएँ शामिल हैं ({win} {W}, {tie} {T}, {loss} {L})।",
+  sb_n_loss: "(n,p) में अनिश्चितता का आवरण (<code>{cell}</code>), {rival} के विरुद्ध: {gap} [{lo}, {hi}]। TERRA की (n,p) पट्टियाँ ईमानदार रहने के लिए जानबूझकर चौड़ी की गईं, और अब वे उन आँकड़ों को ज़रूरत से ज़्यादा ढकती हैं जिन पर उन्हें फ़िट किया गया था; इस चौड़ाई ने एक जीत को इस हार में और दो जीतों को बराबरी में बदल दिया, और एक श्रृंखला छोड़ने वाली तुलना में छह जीतें दिलाईं।",
+  sb_n_src: "स्रोत: परियोजना का अनुसंधान रिकॉर्ड ({census} गणना, {date}; GOAL-ALL-METRICS तालिका R072w, {rdate})। संख्याएँ <code>make_scoreboard.py</code> से बनती हैं।",
   lang_label: "भाषा", nav_teach: "शिक्षकों के लिए",
   sb_g_macs: "तारकीय प्रग्रहण (MACS), Z ", sb_g_thrA1_np: "देहली के पास (n,p)", sb_g_capture_FAR: "प्रग्रहण, स्थायित्व से दूर के नाभिक",
   sb_g_fission_SELECT: "विखंडन, चुने हुए ऐक्टिनाइड", sb_g_n2n_SELECT: "(n,2n), चुने हुए नाभिक",

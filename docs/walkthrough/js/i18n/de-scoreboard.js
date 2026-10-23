@@ -1,5 +1,9 @@
 /* German (Deutsch): scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "Produktions-Engine <code>{engine}</code> (<code>{commit}</code>), Zensus vom {date}. Weitere {na} Vergleiche sind nicht bewertbar (N/A). Von den {tie} Unentschieden liegen {trail} zurück, {parity} gleichauf und {under} haben zu wenige Kerne.",
+  sb_n_terra: "Kandidat <code>{product}</code>, Tabelle vom {date}; enthält {n} Vergleiche, bei denen jeweils eine Messreihe weggelassen wird ({win} {W}, {tie} {T}, {loss} {L}).",
+  sb_n_loss: "Unsicherheitsabdeckung bei (n,p) (<code>{cell}</code>) gegen {rival}: {gap} [{lo}, {hi}]. Die (n,p)-Bänder von TERRA wurden bewusst verbreitert, um ehrlich zu sein, und überdecken nun die Daten, an die sie angepasst wurden; diese Verbreiterung machte aus einem Sieg diese Niederlage und aus zwei Siegen Unentschieden und brachte sechs Siege in der Ansicht mit weggelassener Messreihe.",
+  sb_n_src: "Quelle: das Forschungsprotokoll des Projekts ({census}-Zensus vom {date}; GOAL-ALL-METRICS-Tabelle R072w vom {rdate}). Die Zahlen erzeugt <code>make_scoreboard.py</code>.",
   lang_label: "Sprache", nav_teach: "Lehrende",
   sb_g_macs: "stellarer Einfang (MACS), Z ", sb_g_thrA1_np: "(n,p) nahe der Schwelle", sb_g_capture_FAR: "Einfang, Kerne fern der Stabilität",
   sb_g_fission_SELECT: "Spaltung, ausgewählte Aktiniden", sb_g_n2n_SELECT: "(n,2n), ausgewählte Kerne",

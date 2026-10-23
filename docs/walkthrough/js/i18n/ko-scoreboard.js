@@ -1,5 +1,9 @@
 /* Korean: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "운영 엔진 <code>{engine}</code> (<code>{commit}</code>), {date} 집계. 이 밖에 {na}개 비교는 점수를 매길 수 없습니다(N/A). 무승부 {tie}개 중 {trail}개는 뒤처지고, {parity}개는 대등하며, {under}개는 핵종 수가 부족합니다.",
+  sb_n_terra: "후보 <code>{product}</code>, {date} 기준 점수판; 측정 계열 하나를 빼고 하는 비교 {n}개를 포함합니다({win} {W}, {tie} {T}, {loss} {L}).",
+  sb_n_loss: "(n,p) 불확도 포함률(<code>{cell}</code>), 상대 {rival}: {gap} [{lo}, {hi}]. TERRA의 (n,p) 띠는 정직하도록 일부러 넓혔고, 그 결과 맞춤에 쓴 데이터를 지나치게 넓게 덮습니다. 이 확장으로 1승이 이 패배로, 2승이 무승부로 바뀌었고, 계열 하나를 뺀 비교에서는 6승을 얻었습니다.",
+  sb_n_src: "출처: 프로젝트 연구 기록({census} 집계, {date}; GOAL-ALL-METRICS 점수판 R072w, {rdate}). 수치는 <code>make_scoreboard.py</code>로 생성합니다.",
   lang_label: "언어", nav_teach: "교수자용",
   sb_g_macs: "항성 포획 (MACS), Z ", sb_g_thrA1_np: "문턱 근처의 (n,p)", sb_g_capture_FAR: "포획, 안정성에서 먼 원자핵",
   sb_g_fission_SELECT: "핵분열, 선정된 악티늄족", sb_g_n2n_SELECT: "(n,2n), 선정된 원자핵",

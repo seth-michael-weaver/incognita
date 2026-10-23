@@ -1,5 +1,9 @@
 /* Japanese: scoreboard page (scoreboard.html data-i18n keys and js/scoreboard.js strings) */
 Object.assign(WT.L.ui, {
+  sb_n_inc: "本番エンジン <code>{engine}</code>（<code>{commit}</code>）、{date} の集計。ほかに {na} 件の比較は採点できません（N/A）。引き分け {tie} 件のうち、{trail} 件は劣勢、{parity} 件は互角、{under} 件は核種数が不足しています。",
+  sb_n_terra: "候補 <code>{product}</code>、{date} の成績表。測定系列を 1 つ除いた比較 {n} 件を含みます（{win} {W}、{tie} {T}、{loss} {L}）。",
+  sb_n_loss: "(n,p) の不確かさの被覆率（<code>{cell}</code>）、相手 {rival}：{gap} [{lo}, {hi}]。TERRA の (n,p) バンドは誠実であるよう意図的に広げられ、その結果、フィットに使ったデータを過大に覆っています。この拡幅で 1 勝がこの負けに、2 勝が引き分けに変わり、系列を 1 つ除いた比較では 6 勝を得ました。",
+  sb_n_src: "出典：プロジェクトの研究記録（{census} 集計、{date}；GOAL-ALL-METRICS 成績表 R072w、{rdate}）。数値は <code>make_scoreboard.py</code> で生成しています。",
   lang_label: "言語", nav_teach: "教員向け",
   sb_g_macs: "恒星内捕獲（MACS）、Z ", sb_g_thrA1_np: "しきい値付近の(n,p)", sb_g_capture_FAR: "捕獲、安定から遠い原子核",
   sb_g_fission_SELECT: "核分裂、選択したアクチノイド", sb_g_n2n_SELECT: "(n,2n)、選択した原子核",
