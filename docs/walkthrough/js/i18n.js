@@ -27,7 +27,7 @@
     ar: ["AR", "العربية", "ar", false, "sa"],   // right to left: html dir="rtl" (diagrams stay left to right)
   };
   // languages shipped so far (a language is listed once all its js/i18n/<code>-*.js files are in)
-  const LIVE = ["en", "es", "pt", "da", "ko", "de", "nl", "ru"];
+  const LIVE = ["en", "es", "pt", "da", "ko", "de", "nl", "ru", "ja"];
   Object.keys(LANGS).forEach((l) => { if (!LIVE.includes(l)) delete LANGS[l]; });
   WT.LANGS = LANGS;
   WT.L = WT.es = WT.L || WT.es || { ch: {}, labels: {}, ui: {}, glossary: {} };
