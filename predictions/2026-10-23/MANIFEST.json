@@ -1,0 +1,57 @@
+{
+ "id": "INCOGNITA-predictions-2026-10-23",
+ "frozen_at_utc": "2026-10-23T13:41:42+00:00",
+ "engine": "INCOGNITA engine 2026-10-22 (public tag engine-2026-10-22)",
+ "private_set_root_sha256": "beeb01a46c9fede02b7b543965069ab31032956ee18eee65905ed2be9426fa3c",
+ "n_targets": 37,
+ "n_cells": 127,
+ "n_targets_by_class": {
+  "BLIND": 16,
+  "PRELIM": 12,
+  "CONTROL": 4,
+  "PLANNED": 5
+ },
+ "blind_headline_targets": [
+  "Cs-135_macs",
+  "Nd-146_macs",
+  "Er-164_capture",
+  "Sm-147_capture",
+  "Sm-149_capture",
+  "Sm-152_capture",
+  "Sb-121_capture",
+  "Sb-123_capture",
+  "Sr-87_capture",
+  "Pu-241_capture",
+  "Am-243_fission",
+  "Al-26_np",
+  "Al-26_na",
+  "Ca-41_na",
+  "Nd-143_capture",
+  "Xe-124_capture"
+ ],
+ "source_check": "independent check of every target against public sources on 2026-10-23, before publication and before any measured value was read",
+ "removed_before_publication": {
+  "Nb-94_macs": "registered quantity already published"
+ },
+ "range_cuts": {
+  "Am-243_fission": "100000-500000 eV",
+  "Al-26_np": "150000-1e+06 eV",
+  "Al-26_na": "160000-1e+06 eV"
+ },
+ "models": {
+  "INCOGNITA": 37,
+  "TERRA_TUNED": 16,
+  "TALYS2_default_via_port": 37,
+  "TALYS-2.24_program": 27,
+  "TENDL_nodata_recipe_via_port": 37,
+  "CoH3": 18,
+  "YAHFC": 17,
+  "NON-SMOKER": 22,
+  "BRUSLIB": 7,
+  "ENDF-B-VIII.1": 32,
+  "JENDL-5": 36,
+  "JEFF-4.0": 36,
+  "TENDL-2025": 37
+ },
+ "note": "private_set_root_sha256 is the root of the internal frozen set these files were exported from (same numbers). Removed targets are left out here; for range-cut targets the headline cells outside the new range are dropped and new cells are read off the same frozen curves; curves.csv.gz keeps every frozen curve in full."
+}
