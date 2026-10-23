@@ -11,7 +11,7 @@
   const WT = (window.WT = window.WT || {});
   // code: [button text, own name, locale, decimal comma, flag (flags/<cc>.svg)]
   const LANGS = {
-    en: ["EN", "English", "en-US", false, "gb"],
+    en: ["EN", "English", "en-US", false, "us"],
     es: ["ES", "Español", "es-ES", true, "es"],
     de: ["DE", "Deutsch", "de-DE", true, "de"],
     pt: ["PT", "Português", "pt-PT", true, "pt"],
