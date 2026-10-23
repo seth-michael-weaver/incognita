@@ -177,7 +177,7 @@ def binary(inp, state=None, device=None):
 
         sfglobal = _np(st.get(g.zix, g.nix, nj, device))  # written through: run-scoped
         sfac = sfglobal[: nmax + 1].copy()
-        if sfaclocal_on():  # TALYS 2c5d15f: binary.f90:232 (binary): zero fallback, C kernel unchanged
+        if sfaclocal_on():  # TALYS 2c5d15f: binary.f90:1 (binary) line 232: zero fallback, C kernel unchanged
             sfac[:] = 0.0
         ppx = _np(inp.preeqpopex_mb[t]).copy()
         do_pe = inp.flagpreeq and nmax - nl > 0 and inp.pespinmodel <= 2

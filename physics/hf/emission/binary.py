@@ -60,7 +60,7 @@ from physics.hf.core.grids import NUMEX_ALLOC as NUMEX  # SNBIN: was 80 (< grids
 
 def sfaclocal_on() -> bool:
     """TSPORT-SFACLOCAL (`INCOGNITA_TS_SFACLOCAL=1`, default off): upstream TALYS 57de284 (2026-09-15) makes
-    `sfactor` a local reset to zero per (nex, J, parity) -- TALYS 2c5d15f: binary.f90:232 (binary) -- so a bin
+    `sfactor` a local reset to zero per (nex, J, parity) -- TALYS 2c5d15f: binary.f90:1 (binary) line 232 -- so a bin
     whose compound population is below popepsA takes the Wigner spin distribution instead of the shape left
     from an earlier incident energy. Off = TALYS-2.25 run-scoped `sfactor` (production behaviour).
 
@@ -265,7 +265,7 @@ def binary(inp: BinaryInputs, state: BinaryState | None = None, device=None) -> 
         # --- pre-equilibrium addend (binary.f90:222-257) -----------------------------------
         sfglobal = st.get(g.zix, g.nix, nj, device)
         sfac = sfglobal[: nmax + 1].clone()
-        if sfaclocal_on():  # TALYS 2c5d15f: binary.f90:232 (binary) `sfactor = 0.` per cell (upstream 57de284)
+        if sfaclocal_on():  # TALYS 2c5d15f: binary.f90:1 (binary) line 232 `sfactor = 0.` per cell (upstream 57de284)
             sfac = torch.zeros_like(sfac)
         ppx = inp.preeqpopex_mb[t].clone()
         if inp.flagpreeq:

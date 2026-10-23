@@ -18,7 +18,7 @@ the KD nucleon potentials). The Fav/Faw/Favd/Fawd adjust factors multiply the fo
 Keyword `tfold y|n` (default y; `n` or env INCOGNITA_TFOLD=0 = TALYS point geometry). Do not combine with the old deck lines
 (double fold).
 
-TALYS: opticalcomp.f90:1 (opticalcomp), input_preeqpar.f90:93 (cstrip)
+TALYS: opticalcomp.f90:1 (opticalcomp), input_preeqpar.f90:1 (input_preeqpar) line 93 `Cstrip`
 Test: tests/hf/test_tfold.py
 """
 

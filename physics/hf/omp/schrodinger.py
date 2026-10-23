@@ -281,7 +281,7 @@ def optical_potential(
 
     Shapes: parameters (E,), r (R,) or (E, R) -> central (E, R) complex [MeV]; spin-orbit
     (E, R) complex [MeV], the radial factor that multiplies 2 l.s (with ECIS's (hbar/m_pi c)^2 =
-    2 fm^2 included: tlnc `cso=2*vpr*cls`, ecist.f:14415); Coulomb (E, R) real [MeV].
+    2 fm^2 included: tlnc `cso=2*vpr*cls`, ecist.f:14445); Coulomb (E, R) real [MeV].
 
     TALYS: ecist.f:12950 (wosa)
     Test: A-trans
@@ -914,7 +914,7 @@ def _ecis_setup(p, kin, m_targ, z_prod, spin, lmax, native: bool = False):
 
 def _integrate_ecis(p, kin, m_targ, z_prod, spin, lmax):
     """ECIS's modified Numerov on ECIS's own grid, matched with ECIS's Numerov-consistent
-    transformation of the Coulomb functions (tlnc, ecist.f:14415)."""
+    transformation of the Coulomb functions (tlnc, ecist.f:14445)."""
     L, jv, valid, h, ism, rm, nmax, shape, x = _ecis_setup(p, kin, m_targ, z_prod, spin, lmax)
     u_prev = torch.zeros(shape, dtype=torch.complex128)  # u(0)
     u_cur = torch.ones(shape, dtype=torch.complex128)  # u(h) (ECIS: 1e-15, scale-free)

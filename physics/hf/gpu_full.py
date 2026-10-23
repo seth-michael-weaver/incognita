@@ -894,7 +894,7 @@ def binary(bk: Batch, ct: dict, sf_state: dict | None = None) -> dict:
             for name, (i, b) in sf_last.items():
                 sf_state.setdefault(name, [i, {}])[1][ty] = state[b].clone()
                 sf_state[name][0] = i
-        if sfaclocal_on():  # TALYS 2c5d15f: binary.f90:232 (binary) `sfactor = 0.` per cell (upstream 57de284)
+        if sfaclocal_on():  # TALYS 2c5d15f: binary.f90:1 (binary) line 232 `sfactor = 0.` per cell (upstream 57de284)
             sf = torch.where(hs, ratio, torch.zeros_like(ratio))
         wig = _spindis(t["b_spincut"][:, ty][:, :, None], jj[None, None, :]) * 0.5
         use_sf = (pespin == 1)[:, None, None, None] & (sf > 0.0)

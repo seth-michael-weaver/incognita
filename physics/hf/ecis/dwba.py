@@ -250,7 +250,7 @@ def _ecis_fams(h: float, ism: int, k: Tensor, eta: Tensor, l: Tensor) -> tuple[T
     """tlnc's Numerov-consistent Coulomb functions F, F, G, G at nodes ism-1 / ism+1 (f1..f4 of
     `omp.schrodinger._match_ecis`, the same algebra) for every (channel energy, l): (NK, NLJ) each.
 
-    TALYS: ecist.f:14415 (tlnc)
+    TALYS: ecist.f:14445 (tlnc)
     Test: tests/hf/test_engproj4_dwecis.py
     """
     lmax = int(l.max())
@@ -298,7 +298,7 @@ def ecis_distorted_waves(f_lj: Tensor, kappa2: Tensor, k: Tensor, eta: Tensor, l
     `f_lj` must hold nodes 0..ism+1. ECIS rescales z by 1e-30 past 1e15; here z starts at 1e-100,
     which keeps r^(l+1) growth over ~150 nodes and l <= 70 inside double range (scale-free).
 
-    TALYS: ecist.f:17399 (insh), ecist.f:14415 (tlnc)
+    TALYS: ecist.f:17429 (insh), ecist.f:14445 (tlnc)
     Test: tests/hf/test_engproj4_dwecis.py
     """
     g = (h * h) * (kappa2.to(CDTYPE)[:, None, None] - f_lj[None, :, :])  # (NK, NLJ, ism+2)
