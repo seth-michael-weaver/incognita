@@ -13,6 +13,7 @@ Object.assign(WT.L.ui, {
   hero2: "Quale di queste cose succede, e con che frequenza? Questa pagina mostra, un passo alla volta, come il nostro software risponde a questa domanda. Scorri verso il basso e prova i comandi lungo la strada. Le immagini seguono la stessa fisica del motore; i numeri che mostrano sono illustrativi.",
   scrollcue: "Scorri per cominciare ↓",
   hero_tag: "Un neutrone. Un nucleo. Molti modi di finire.",
+  hero_aud: "Per gli studenti e per chi si avvicina alla fisica nucleare, e per i docenti che insegnano loro. Addetti ai lavori: i dati di ogni nuclide sono in <a href=\"data.html\" data-keep-lang>Tutti i nuclidi</a>.",
   hero_fire: "Lancia un neutrone",
   hero_hint: "o fai clic in un punto qualsiasi dell'immagine",
   credit_idx: "Il motore INCOGNITA è un port di <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) e usa la banca dati di struttura nucleare di TALYS. Ciò che INCOGNITA aggiunge è <a href=\"#code\">elencato, opzione per opzione, alla fine di questa pagina</a>.",

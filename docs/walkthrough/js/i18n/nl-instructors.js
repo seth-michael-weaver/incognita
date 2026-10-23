@@ -4,6 +4,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "De INCOGNITA-motor is een port van <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) en gebruikt de kernstructuurdatabase van TALYS. Wat INCOGNITA toevoegt, staat <a href=\"./?lang=nl#code\">schakelaar voor schakelaar onderaan de uitlegpagina</a>.",
   in_kicker: "INCOGNITA · handleiding voor docenten",
   in_h1: "Voor docenten",
+  in_course: "<b>Gebruik je dit in een cursus?</b> Ik hoor graag hoe het werkt met studenten en wat het nuttiger zou maken: <a href=\"https://github.com/seth-michael-weaver/incognita/issues\">open een issue op GitHub</a>.",
   in_lead: "<a href=\"./\" data-keep-lang>Binnen in een kernreactie</a> legt afbeelding voor afbeelding uit hoe een moderne reactiecode berekent wat er gebeurt als een neutron een kern raakt. Elke afbeelding reageert op schuifjes, dus het werkt geprojecteerd tijdens een college, als voorbereidend leeswerk of op de telefoon van studenten. Het is gratis en open, in het Engels, het Spaans en het Nederlands, en er hoeft niets geïnstalleerd te worden.",
   in_lv_h: "Drie niveaus",
   in_lv_p: "Het begint eenvoudig en eindigt in detail, met opzet. Elk hoofdstuk heeft een van drie labels, naast zijn nummer op de uitlegpagina.",

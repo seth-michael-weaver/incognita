@@ -13,6 +13,7 @@ Object.assign(WT.L.ui, {
   hero2: "Was davon passiert, und wie oft? Diese Seite zeigt Schritt für Schritt, wie unsere Software diese Frage beantwortet. Scroll nach unten und probier unterwegs die Regler aus. Die Bilder folgen derselben Physik wie die Engine; die Zahlen darin dienen der Veranschaulichung.",
   scrollcue: "Scrollen, um zu beginnen ↓",
   hero_tag: "Ein Neutron. Ein Kern. Viele Arten, wie es enden kann.",
+  hero_aud: "Für Studierende und alle, die neu in der Kernphysik sind, und für die Lehrenden, die sie unterrichten. Fachleute: Die Daten zu jedem Nuklid stehen unter <a href=\"data.html\" data-keep-lang>Alle Nuklide</a>.",
   hero_fire: "Neutron abfeuern",
   hero_hint: "oder klick irgendwo ins Bild",
   credit_idx: "Die Engine INCOGNITA ist eine Portierung von <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) und nutzt die Kernstrukturdatenbank von TALYS. Was INCOGNITA hinzufügt, ist <a href=\"#code\">am Ende dieser Seite Schalter für Schalter aufgelistet</a>.",

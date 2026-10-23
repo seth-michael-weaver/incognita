@@ -13,6 +13,7 @@ Object.assign(WT.L.ui, {
   hero2: "Hvad af det sker, og hvor ofte? Denne side gennemgår trin for trin, hvordan vores software besvarer det spørgsmål. Scroll ned, og prøv knapperne og skyderne undervejs. Billederne følger den samme fysik som motoren; tallene i dem er illustrative.",
   scrollcue: "Scroll for at begynde ↓",
   hero_tag: "Én neutron. Én kerne. Mange måder, det kan ende på.",
+  hero_aud: "Til studerende og alle, der er nye i kernefysik, og til de undervisere, der underviser dem. Fagfolk: data for hver nuklid findes under <a href=\"data.html\" data-keep-lang>Alle nuklider</a>.",
   hero_fire: "Skyd en neutron",
   hero_hint: "eller klik et vilkårligt sted på billedet",
   credit_idx: "INCOGNITA-motoren er en portering af <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) og bruger TALYS' database over kernestruktur. Det, INCOGNITA tilføjer, er <a href=\"#code\">listet, kontakt for kontakt, nederst på denne side</a>.",

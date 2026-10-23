@@ -13,6 +13,7 @@ Object.assign(WT.L.ui, {
   hero2: "이 가운데 어떤 일이, 얼마나 자주 일어날까요? 이 페이지는 우리 소프트웨어가 그 질문에 어떻게 답하는지 한 단계씩 따라갑니다. 아래로 스크롤하면서 도중에 나오는 조작 도구를 직접 움직여 보세요. 그림은 엔진과 같은 물리를 따르지만, 그림 속 숫자는 예시입니다.",
   scrollcue: "스크롤하여 시작 ↓",
   hero_tag: "중성자 하나. 원자핵 하나. 끝나는 방법은 여러 가지.",
+  hero_aud: "학생과 핵물리학을 처음 접하는 모든 사람, 그리고 그들을 가르치는 교수자를 위한 사이트입니다. 전문가께: 모든 핵종의 데이터는 <a href=\"data.html\" data-keep-lang>모든 핵종</a>에 있습니다.",
   hero_fire: "중성자 발사",
   hero_hint: "또는 그림의 아무 곳이나 클릭",
   credit_idx: "INCOGNITA 엔진은 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>(A. J. Koning, S. Hilaire, S. Goriely)를 이식한 것으로, TALYS 핵구조 데이터베이스를 사용합니다. INCOGNITA가 더한 것은 <a href=\"#code\">이 페이지 끝에 스위치별로 정리되어 있습니다</a>.",

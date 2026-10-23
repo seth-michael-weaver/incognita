@@ -13,6 +13,7 @@ Object.assign(WT.L.ui, {
   hero2: "Lequel de ces événements se produit, et à quelle fréquence ? Cette page montre pas à pas comment notre logiciel répond à cette question. Faites défiler la page et essayez les commandes en chemin. Les images suivent la même physique que le moteur ; les nombres qu'elles affichent sont indicatifs.",
   scrollcue: "Faites défiler pour commencer ↓",
   hero_tag: "Un neutron. Un noyau. Bien des façons d'en finir.",
+  hero_aud: "Pour les étudiants et toute personne qui découvre la physique nucléaire, et pour les enseignants qui les forment. Professionnels : les données de chaque nucléide sont dans <a href=\"data.html\" data-keep-lang>Tous les nucléides</a>.",
   hero_fire: "Lancer un neutron",
   hero_hint: "ou cliquez n'importe où sur l'image",
   credit_idx: "Le moteur INCOGNITA est un portage de <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) et utilise la base de données de structure nucléaire de TALYS. Ce qu'INCOGNITA ajoute est <a href=\"#code\">détaillé, option par option, à la fin de cette page</a>.",

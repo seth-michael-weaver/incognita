@@ -4,6 +4,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITAエンジンは<a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely）を移植したもので、TALYSの原子核構造データベースを使っています。INCOGNITAが追加したものは、<a href=\"./#code\" data-keep-lang>解説ページの最後にスイッチごとに一覧</a>しています。",
   in_kicker: "INCOGNITA · 教員向けガイド",
   in_h1: "教員向け",
+  in_course: "<b>授業で使っていますか？</b> 学生にとってどうだったか、何があればもっと役立つかを聞かせてください：<a href=\"https://github.com/seth-michael-weaver/incognita/issues\">GitHubでissueを作成</a>。",
   in_lead: "<a href=\"./\" data-keep-lang>原子核反応の内側</a>は、中性子が原子核に当たったときに何が起こるかを現代の反応コードがどう計算するのかを、図1枚ずつ説明するサイトです。どの図もスライダーで操作できるので、講義でのプロジェクター投影にも、授業前の予習にも、学生のスマートフォンにも使えます。無料かつオープンで、多くの言語に対応しており（各ページ上部の言語メニュー）、インストールは不要です。",
   in_lv_h: "3つのレベル",
   in_lv_p: "意図的に、やさしく始めて詳細で終わる構成にしています。各章には3種類のタグのいずれかがつき、解説ページでは章番号の横に表示されます。",

@@ -13,6 +13,7 @@ Object.assign(WT.L.ui, {
   hero2: "究竟会发生哪一种，概率又有多大？本页一步一步地介绍我们的软件如何回答这个问题。请向下滚动，并随手试试沿途的控件。图中的物理与引擎完全一致；图中的数字仅作示意。",
   scrollcue: "向下滚动开始 ↓",
   hero_tag: "一个中子，一个原子核，多种结局。",
+  hero_aud: "面向学生和刚接触核物理的人，以及教授他们的教师。专业人士：每个核素的数据见<a href=\"data.html\" data-keep-lang>全部核素</a>。",
   hero_fire: "发射一个中子",
   hero_hint: "或点击图中任意位置",
   credit_idx: "INCOGNITA 引擎移植自 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely），并使用 TALYS 的核结构数据库。INCOGNITA 新增的内容<a href=\"#code\">在本页末尾逐个开关地列出</a>。",

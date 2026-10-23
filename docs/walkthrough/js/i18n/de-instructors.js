@@ -4,6 +4,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "Die Engine INCOGNITA ist eine Portierung von <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) und nutzt die Kernstrukturdatenbank von TALYS. Was INCOGNITA hinzufügt, ist <a href=\"./?lang=de#code\" data-keep-lang>am Ende der Lehrseite Schalter für Schalter aufgelistet</a>.",
   in_kicker: "INCOGNITA · Leitfaden für die Lehre",
   in_h1: "Für Lehrende",
+  in_course: "<b>Setzen Sie das in einer Lehrveranstaltung ein?</b> Ich würde gern erfahren, wie es bei Studierenden ankommt und was es nützlicher machen würde: <a href=\"https://github.com/seth-michael-weaver/incognita/issues\">ein GitHub-Issue eröffnen</a>.",
   in_lead: "<a href=\"./?lang=de\" data-keep-lang>Im Inneren einer Kernreaktion</a> erklärt Bild für Bild, wie ein moderner Reaktionscode berechnet, was passiert, wenn ein Neutron auf einen Kern trifft. Jedes Bild reagiert auf Schieberegler, es funktioniert also projiziert in der Vorlesung, als Vorbereitungslektüre oder auf den Handys der Studierenden. Es ist frei und offen, auf Englisch, Spanisch und Deutsch, und es muss nichts installiert werden.",
   in_lv_h: "Drei Niveaus",
   in_lv_p: "Es beginnt einfach und endet im Detail, mit Absicht. Jedes Kapitel trägt eine von drei Marken, neben seiner Nummer auf der Lehrseite.",

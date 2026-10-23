@@ -4,6 +4,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "Il motore INCOGNITA è un port di <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) e usa la banca dati di struttura nucleare di TALYS. Ciò che INCOGNITA aggiunge è <a href=\"./?lang=it#code\" data-keep-lang>elencato, opzione per opzione, alla fine della pagina didattica</a>.",
   in_kicker: "INCOGNITA · guida per i docenti",
   in_h1: "Per i docenti",
+  in_course: "<b>Lo usi in un corso?</b> Mi piacerebbe sapere come funziona con gli studenti e che cosa lo renderebbe più utile: <a href=\"https://github.com/seth-michael-weaver/incognita/issues\">apri una issue su GitHub</a>.",
   in_lead: "<a href=\"./\" data-keep-lang>Dentro una reazione nucleare</a> spiega, un'immagine alla volta, come un codice di reazioni moderno calcola ciò che accade quando un neutrone colpisce un nucleo. Ogni immagine risponde a cursori, quindi funziona proiettata durante una lezione, come lettura prima della lezione o sul telefono degli studenti. È libera e aperta, in molte lingue (il menu della lingua in cima a ogni pagina), e non c'è nulla da installare.",
   in_lv_h: "Tre livelli",
   in_lv_p: "Comincia in modo semplice e finisce nei dettagli, di proposito. Ogni capitolo porta una di tre etichette, accanto al suo numero nella pagina didattica.",

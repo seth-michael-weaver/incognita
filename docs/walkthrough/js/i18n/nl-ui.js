@@ -13,6 +13,7 @@ Object.assign(WT.L.ui, {
   hero2: "Welke van deze dingen gebeurt er, en hoe vaak? Deze pagina laat stap voor stap zien hoe onze software die vraag beantwoordt. Scrol naar beneden en probeer onderweg de knoppen en schuifjes uit. De afbeeldingen volgen dezelfde natuurkunde als de motor; de getallen erin zijn ter illustratie.",
   scrollcue: "Scrol om te beginnen ↓",
   hero_tag: "Eén neutron. Eén kern. Veel manieren waarop het kan aflopen.",
+  hero_aud: "Voor studenten en iedereen die nieuw is in de kernfysica, en voor de docenten die hen lesgeven. Vakmensen: de gegevens van elke nuclide staan onder <a href=\"data.html\" data-keep-lang>Alle nucliden</a>.",
   hero_fire: "Schiet een neutron af",
   hero_hint: "of klik ergens op de afbeelding",
   credit_idx: "De INCOGNITA-motor is een port van <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) en gebruikt de kernstructuurdatabase van TALYS. Wat INCOGNITA toevoegt, staat <a href=\"#code\">schakelaar voor schakelaar onderaan deze pagina</a>.",

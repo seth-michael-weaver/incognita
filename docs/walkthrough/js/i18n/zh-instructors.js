@@ -4,6 +4,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITA 引擎移植自 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely），并使用 TALYS 的核结构数据库。INCOGNITA 新增的内容<a href=\"./?lang=zh#code\" data-keep-lang>在教学页面末尾逐个开关地列出</a>。",
   in_kicker: "INCOGNITA · 教学指南",
   in_h1: "教师指南",
+  in_course: "<b>在课程中使用？</b>我很想知道它在学生中的效果，以及怎样能更有用：<a href=\"https://github.com/seth-michael-weaver/incognita/issues\">在 GitHub 上提交 issue</a>。",
   in_lead: "<a href=\"./\" data-keep-lang>走进核反应</a>用一幅幅图片讲解：当中子撞击原子核时，现代反应程序如何计算所发生的过程。每幅图都可以用滑块调节，因此既可以在课堂上投影，也可以作为课前阅读，或在学生的手机上使用。它免费、开源，提供多种语言（每页顶部的语言菜单），无需安装任何东西。",
   in_lv_h: "三个难度",
   in_lv_p: "内容有意从浅入深。每一章都带有三个标签之一，显示在教学页面中章节编号的旁边。",

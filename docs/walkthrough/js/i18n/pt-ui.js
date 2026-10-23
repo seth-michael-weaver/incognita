@@ -13,6 +13,7 @@ Object.assign(WT.L.ui, {
   hero2: "Qual destas coisas acontece, e com que frequência? Esta página mostra, passo a passo, como o nosso software responde a essa pergunta. Desce a página e experimenta os controlos pelo caminho. As imagens seguem a mesma física que o motor; os números que mostram são ilustrativos.",
   scrollcue: "Desce para começar ↓",
   hero_tag: "Um neutrão. Um núcleo. Muitas maneiras de acabar.",
+  hero_aud: "Para estudantes e para quem está a começar em física nuclear, e para os docentes que os ensinam. Profissionais: os dados de cada nuclídeo estão em <a href=\"data.html\" data-keep-lang>Todos os nuclídeos</a>.",
   hero_fire: "Dispara um neutrão",
   hero_hint: "ou clica em qualquer parte da imagem",
   credit_idx: "O motor INCOGNITA é uma adaptação (port) do <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) e usa a base de dados de estrutura nuclear do TALYS. O que o INCOGNITA acrescenta está <a href=\"#code\">listado, interruptor a interruptor, no fim desta página</a>.",

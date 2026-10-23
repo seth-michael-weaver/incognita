@@ -4,6 +4,7 @@ Object.assign(WT.es.ui, {
   credit_sub: "El motor INCOGNITA es un port de <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) y usa la base de datos de estructura nuclear de TALYS. Lo que INCOGNITA añade está <a href=\"./?lang=es#code\">listado, interruptor por interruptor, al final de la página didáctica</a>.",
   in_kicker: "INCOGNITA · guía docente",
   in_h1: "Para docentes",
+  in_course: "<b>¿Lo usas en un curso?</b> Me gustaría saber cómo funciona con los estudiantes y qué lo haría más útil: <a href=\"https://github.com/seth-michael-weaver/incognita/issues\">abre un issue en GitHub</a>.",
   in_lead: "<a href=\"./\" data-keep-lang>Dentro de una reacción nuclear</a> explica, imagen a imagen, cómo un código de reacciones moderno calcula lo que ocurre cuando un neutrón choca con un núcleo. Cada imagen responde a controles deslizantes, así que sirve proyectada en clase, como lectura previa o en el móvil del alumnado. Es libre y abierta, en muchos idiomas (el menú de idioma arriba en cada página), y no hay nada que instalar.",
   in_lv_h: "Tres niveles",
   in_lv_p: "Empieza sencilla y termina en el detalle, a propósito. Cada capítulo lleva una de tres etiquetas, junto a su número en la página didáctica.",

@@ -4,6 +4,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITA-motoren er en portering af <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) og bruger TALYS' database over kernestruktur. Det, INCOGNITA tilføjer, er <a href=\"./?lang=da#code\" data-keep-lang>listet, kontakt for kontakt, nederst på undervisningssiden</a>.",
   in_kicker: "INCOGNITA · undervisningsvejledning",
   in_h1: "For undervisere",
+  in_course: "<b>Bruger du dette i et kursus?</b> Jeg vil gerne høre, hvordan det fungerer med de studerende, og hvad der ville gøre det mere nyttigt: <a href=\"https://github.com/seth-michael-weaver/incognita/issues\">opret et GitHub-issue</a>.",
   in_lead: "<a href=\"./\" data-keep-lang>Inde i en kernereaktion</a> forklarer, ét billede ad gangen, hvordan en moderne reaktionskode beregner, hvad der sker, når en neutron rammer en kerne. Alle billeder reagerer på skydere, så det fungerer på storskærm i en forelæsning, som forberedelse før timen eller på de studerendes telefoner. Det er gratis og åbent, findes på flere sprog, også dansk, og der er intet at installere.",
   in_lv_h: "Tre niveauer",
   in_lv_p: "Det begynder enkelt og slutter i detaljen, med vilje. Hvert kapitel har ét af tre mærker, vist ved siden af kapitlets nummer på undervisningssiden.",

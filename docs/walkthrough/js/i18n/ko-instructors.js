@@ -5,6 +5,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITA 엔진은 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>(A. J. Koning, S. Hilaire, S. Goriely)를 이식한 것으로, TALYS 핵구조 데이터베이스를 사용합니다. INCOGNITA가 더한 것은 <a href=\"./?lang=ko#code\">해설 페이지 끝에 스위치별로 정리되어 있습니다</a>.",
   in_kicker: "INCOGNITA · 교수 안내서",
   in_h1: "교수자용 안내",
+  in_course: "<b>수업에서 사용하고 계신가요?</b> 학생들과 함께 써 보니 어땠는지, 무엇이 더 있으면 좋을지 알려 주세요: <a href=\"https://github.com/seth-michael-weaver/incognita/issues\">GitHub 이슈 열기</a>.",
   in_lead: "<a href=\"./\" data-keep-lang>핵반응의 내부</a>는 중성자가 원자핵에 부딪힐 때 일어나는 일을 현대 핵반응 코드가 어떻게 계산하는지 그림 하나씩 차례로 설명합니다. 모든 그림이 슬라이더에 반응하므로 강의 중 화면에 띄워도, 수업 전 읽기 자료로도, 학생들의 휴대전화에서도 쓸 수 있습니다. 무료이자 공개되어 있으며, 한국어를 비롯한 여러 언어로 제공되고, 설치할 것이 없습니다.",
   in_lv_h: "세 가지 수준",
   in_lv_p: "일부러 쉽게 시작해서 세부 사항으로 끝나도록 구성했습니다. 각 장에는 세 가지 꼬리표 중 하나가 붙어 있으며, 해설 페이지에서 장 번호 옆에 표시됩니다.",
