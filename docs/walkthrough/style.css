@@ -30,9 +30,8 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
 a { color: var(--accent); }
 
 /* ---------- top: hero (full screen, always dark: a live reaction drawn by js/ch/intro.js) ---------- */
-.hero { position: relative; height: calc(100svh - var(--navh, 56px) - 56px); min-height: 560px; overflow: hidden; background: #020308; color: #eef2fa; isolation: isolate; }
+.hero { position: relative; height: calc(100svh - var(--navh, 56px)); min-height: 560px; overflow: hidden; background: #020308; color: #eef2fa; isolation: isolate; }
 .hero-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: pan-y; }
-.hero::after { content: ""; position: absolute; inset: auto 0 0 0; height: 9vh; background: linear-gradient(to bottom, rgba(2,3,8,0), var(--paper)); pointer-events: none; }
 .hero-copy { position: absolute; z-index: 1; left: max(20px, 5vw); bottom: max(96px, 16vh); top: 28px; display: flex; flex-direction: column; justify-content: flex-end; max-width: min(40rem, 52vw); pointer-events: none; will-change: opacity, transform; }
 .hero h1 { font-family: var(--display); font-weight: 600; font-size: clamp(40px, min(7.2vw, 10.5vh), 108px); line-height: 0.98; margin: 0 0 18px; letter-spacing: -0.015em; text-wrap: balance; color: #fff; text-shadow: 0 2px 30px rgba(0,0,0,.6); }
 .hero .kicker { font-family: var(--sans); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: rgba(214,224,255,.7); margin-bottom: 16px; }

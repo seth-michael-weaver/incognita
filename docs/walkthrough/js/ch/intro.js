@@ -75,8 +75,8 @@
   let imp = { x: 0, y: 0, t: -99 };
   const geo = () => {
     const phone = W < 720;
-    const zoom = 1 + scrollP * 2.2, R = Math.min(W, H) * (phone ? 0.25 : 0.24) * zoom;
-    const cx = lerp(W * (phone ? 0.5 : 0.64), W * 0.5, scrollP), cy = lerp(H * (phone ? 0.36 : 0.47), H * 0.5, scrollP);
+    // the nucleus stays put while the page scrolls (no zoom or drift): the hero is what visitors see on arrival
+    const R = Math.min(W, H) * (phone ? 0.25 : 0.24), cx = W * (phone ? 0.5 : 0.64), cy = H * (phone ? 0.36 : 0.47);
     return { R, cx, cy, phone };
   };
 
