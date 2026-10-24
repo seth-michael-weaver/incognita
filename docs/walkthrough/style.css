@@ -42,14 +42,15 @@ a { color: var(--accent); }
 .hero .hero-hint[data-i18n="hero_aud"] a { color: rgba(214,224,255,.92); text-underline-offset: 2px; }
 /* scroll cue: part of the hero's fade into the page. Small spaced capitals in the dark band, and a thin line that runs
    down through the fade into the page below; after a neutron is fired the line brightens and quickens */
-.scrollcue { position: absolute; z-index: 2; left: 50%; bottom: calc(9vh - 74px); transform: translateX(-50%); display: block; padding: 0 0 92px; font-family: var(--sans); font-size: 14.5px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #a9b7ff; text-decoration: none; white-space: nowrap; transition: color .3s, text-shadow .3s; }
+.scrollcue { position: absolute; z-index: 2; left: 50%; bottom: calc(9vh - 74px); transform: translateX(-50%); display: block; padding: 0 0 92px; font-family: var(--sans); font-size: 14.5px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #a9b7ff; text-decoration: none; white-space: nowrap; animation: cueflash 2.4s ease-in-out infinite; transition: text-shadow .3s; }
 .scrollcue::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 1.5px; height: 82px; margin-left: -.75px; border-radius: 1px; background: linear-gradient(to bottom, #a9b7ff, rgba(140, 156, 230, .8) 45%, rgba(60, 72, 130, .55) 85%, rgba(60, 72, 130, 0)); transform-origin: top; animation: cueline 2.6s cubic-bezier(.6, 0, .3, 1) infinite; }
 .scrollcue:hover, .scrollcue:focus-visible { color: #fff; outline: none; }
 .scrollcue:focus-visible { text-decoration: underline; text-underline-offset: 6px; }
-.scrollcue.hot { color: #fff; text-shadow: 0 0 18px rgba(150, 170, 255, .75); }
+.scrollcue.hot { text-shadow: 0 0 18px rgba(255, 214, 120, .55); animation-duration: 1.2s; }
 .scrollcue.hot::after { width: 2px; margin-left: -1px; background: linear-gradient(to bottom, #fff, rgba(150, 168, 255, .9) 45%, rgba(70, 86, 170, .7) 85%, rgba(70, 86, 170, 0)); animation-duration: 1.5s; }
+@keyframes cueflash { 0%, 100% { color: #a9b7ff; } 50% { color: #ffd36b; } }
 @keyframes cueline { 0% { transform: scaleY(0); opacity: 0; } 25% { opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1) translateY(12px); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .scrollcue::after, .scrollcue.hot::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .scrollcue, .scrollcue.hot, .scrollcue::after, .scrollcue.hot::after { animation: none; } }
 @media (max-width: 720px) { .hero .hero-copy { bottom: calc(9vh + 64px); } }
 .intro-text { max-width: 60rem; margin: 0 auto; padding: 9vh 20px 3vh; }
 .intro-text p { margin: 0 0 20px; font-family: var(--serif); font-size: clamp(21px, 1.75vw, 27px); line-height: 1.6; color: var(--soft); }
