@@ -10,7 +10,7 @@
     document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
     WT.keepLang();
   }
-  const LV = [T("lvl0", "Intro"), T("lvl1", "Intermediate"), T("lvl2", "Advanced")];
+  const LV = [T("lvl0", "Intro"), T("lvl1", "Intermediate"), T("lvl2", "Advanced"), T("lvl3", "Expert")];
   // id, number, level, minutes, steps, English title / topic / what it teaches (Spanish in js/i18n/es-instructors.js)
   const CH = [
     ["structure", 1, 0, 12, 6, "What a nucleus is made of", "Structure", "Masses and separation energies, discrete levels and their γ branchings, isomers, nuclear shapes, and the resonance averages D₀, S₀, ⟨Γγ⟩."],
@@ -25,6 +25,12 @@
     ["resonance", 10, 2, 15, 6, "Sharp peaks", "Resonances", "Resonances as statistics: level repulsion, Porter–Thomas widths, ladders built from four averages, thermal values."],
     ["measure", 11, 1, 15, 7, "What comes out", "Observables", "From the nucleus to measured numbers: excitation functions, spectra, angular distributions, stellar capture (MACS), Total Monte Carlo uncertainty."],
     ["layers", 12, 2, 12, 5, "How the model is layered", "Layers", "How the data product is built on the engine: one global rule, each nucleus's own data, anchoring to good data (TERRA), calibrated error bars."],
+    ["hauser", 13, 3, 18, 5, "Hauser–Feshbach, channel by channel", "Hauser–Feshbach", "The Hauser–Feshbach formula one spin and parity at a time, transmission per channel, width fluctuations (Moldauer, HRTW) and their effect when few channels are open."],
+    ["optical", 14, 3, 20, 6, "The optical model, solved", "Optical model, solved", "The Koning–Delaroche potential, Numerov integration of the radial equation, matching to S and T, spin–orbit splitting, cross sections and the s-wave strength function."],
+    ["densities", 15, 3, 18, 5, "Level densities, matched", "Level densities", "Gilbert–Cameron with Ignatyuk's damping, the tangent constant-temperature law, finding the matching energy from counted levels, the empirical fallback, and D₀ as a check."],
+    ["strength", 16, 3, 18, 5, "Photon strength, in detail", "Photon strength", "E1 (SLO and SMLO) and M1 (spin-flip, scissors, upbend), the Brink–Axel hypothesis, the average radiative width ⟨Γγ⟩ and the γ cascade."],
+    ["exciton", 17, 3, 20, 6, "The exciton model, in numbers", "Exciton model", "Particle–hole state densities, transition and emission rates, the exciton chain in time, the hard tail of spectra, the pre-equilibrium share and the two-component model."],
+    ["averages", 18, 3, 18, 5, "From resonances to averages", "Resonances to averages", "The R-matrix formula, the statistics of resonance parameters, Doppler broadening, the energy average that becomes Hauser–Feshbach, and resolved, unresolved and smooth ranges."],
   ].map(([id, n, lv, min, steps, title, topic, what]) => ({ id, n, lv, min, steps, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
   const byId = Object.fromEntries(CH.map((c) => [c.id, c]));
   const lang = WT.langQ();
@@ -35,7 +41,7 @@
   // ---------- chapter list with a level filter ----------
   const list = $("#in-list"), chips = $("#in-filter");
   list.innerHTML = CH.map((c) => `<li class="in-ch" data-lv="${c.lv}"><a class="in-ch-a" href="${href(c.id)}"><span class="in-n">${c.n}</span><span class="in-body"><span class="in-top"><b>${c.title}</b><span class="in-topic">${c.topic}</span></span><span class="in-what">${c.what}</span><span class="in-meta">${pill(c.lv)}<span>${mins(c.min)}</span><span>${c.steps} ${T("in_steps", "steps")}</span><code>#${c.id}</code></span></span></a></li>`).join("");
-  const opts = [["all", T("in_all", "All")], ["0", LV[0]], ["1", LV[1]], ["2", LV[2]]];
+  const opts = [["all", T("in_all", "All")], ["0", LV[0]], ["1", LV[1]], ["2", LV[2]], ["3", LV[3]]];
   chips.innerHTML = opts.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${v === "all"}">${t}</button>`).join("");
   const total = $("#in-total");
   const filt = (v) => {

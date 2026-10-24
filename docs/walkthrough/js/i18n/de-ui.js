@@ -81,7 +81,14 @@ Object.assign(WT.L.ui, { pause_sweep: "Durchlauf anhalten", play_sweep: "Durchla
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>Für wen:</b> für alle, die neugierig sind. Die ersten Kapitel brauchen keine Physikkenntnisse; spätere gehen bis auf Forschungsniveau. Jedes Kapitel trägt eine Marke: <span class="lvl l0">Einstieg</span>, <span class="lvl l1">Mittelstufe</span> oder <span class="lvl l2">Fortgeschritten</span>. Du willst damit unterrichten? Sieh dir den <a href="instructors.html" data-keep-lang>Leitfaden für Lehrende</a> an.',
-  lvl0: "Einstieg", lvl1: "Mittelstufe", lvl2: "Fortgeschritten", lvl_title: "Niveau",
+  audience: '<b>Für wen:</b> für alle, die neugierig sind. Die ersten Kapitel brauchen keine Physikkenntnisse; spätere gehen bis auf Forschungsniveau. Jedes Kapitel trägt eine Marke: <span class="lvl l0">Einstieg</span>, <span class="lvl l1">Mittelstufe</span>, <span class="lvl l2">Fortgeschritten</span> oder <span class="lvl l3">Experte</span>. Du willst damit unterrichten? Sieh dir den <a href="instructors.html" data-keep-lang>Leitfaden für Lehrende</a> an.',
+  lvl0: "Einstieg", lvl1: "Mittelstufe", lvl2: "Fortgeschritten", lvl3: "Experte", lvl_title: "Niveau",
   step_link: "Link zu diesem Schritt kopieren", link_copied: "Link kopiert",
+});
+
+/* part divider before the Expert chapters (index.html) */
+Object.assign(WT.L.ui, {
+  xp_kicker: "Teil zwei · Experte",
+  xp_h: "Ins Detail",
+  xp_p: "Bisher wurde jeder Schritt als Bild erzählt. Die sechs folgenden Kapitel öffnen dieselben Schritte: die Formeln, die die Engine auswertet, die Näherungen darin und die Stellen, an denen sie an ihre Grenzen stoßen. Sie richten sich an Evaluatoren, Modellentwickler und Doktoranden. Die Zeichnungen werten die Formeln live aus, mit illustrativen Eingabewerten.",
 });

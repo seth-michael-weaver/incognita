@@ -436,8 +436,9 @@
     const navH = () => { const t = document.querySelector(".toc"); document.documentElement.style.setProperty("--navh", (t ? t.offsetHeight : 0) + "px"); };
     navH(); window.addEventListener("resize", navH);
     const chapters = [];
-    const LEVELS = ["Intro", "Intermediate", "Advanced"]; // course level of each chapter (also listed on instructors.html)
-    const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, measure: 1, layers: 2 };
+    const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
+    const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, measure: 1, layers: 2,
+      hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3 }; // the Expert part (chapters 13-18)
     document.querySelectorAll("[data-ch]").forEach((el) => {
       const id = el.dataset.ch, mod = WT.mods[id]; if (!mod) return;
       const esm = WT.tl && WT.L.ch[id]; if (esm) Object.assign(mod, esm);

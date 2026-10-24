@@ -81,7 +81,10 @@ Object.assign(WT.L.ui, { pause_sweep: "Mettre le balayage en pause", play_sweep:
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>Pour qui :</b> toute personne curieuse. Les premiers chapitres ne demandent aucune connaissance en physique ; les derniers vont jusqu\'au niveau de la recherche. Chaque chapitre porte une étiquette : <span class="lvl l0">Initiation</span>, <span class="lvl l1">Intermédiaire</span> ou <span class="lvl l2">Avancé</span>. Vous enseignez ? Consultez le <a href="instructors.html" data-keep-lang>guide pour les enseignants</a>.',
-  lvl0: "Initiation", lvl1: "Intermédiaire", lvl2: "Avancé", lvl_title: "Niveau",
+  audience: '<b>Pour qui :</b> toute personne curieuse. Les premiers chapitres ne demandent aucune connaissance en physique ; les derniers vont jusqu\'au niveau de la recherche. Chaque chapitre porte une étiquette : <span class="lvl l0">Initiation</span>, <span class="lvl l1">Intermédiaire</span>, <span class="lvl l2">Avancé</span> ou <span class="lvl l3">Expert</span>. Vous enseignez ? Consultez le <a href="instructors.html" data-keep-lang>guide pour les enseignants</a>.',
+  lvl0: "Initiation", lvl1: "Intermédiaire", lvl2: "Avancé", lvl3: "Expert", lvl_title: "Niveau",
   step_link: "Copier un lien vers cette étape", link_copied: "Lien copié",
+  xp_kicker: "Deuxième partie · Expert",
+  xp_h: "Dans le détail",
+  xp_p: "Jusqu'ici, chaque étape a été racontée par une image. Les six chapitres qui suivent ouvrent ces mêmes étapes : les formules que le moteur évalue, les approximations qu'elles contiennent et les endroits où elles atteignent leurs limites. Ils s'adressent aux évaluateurs, aux développeurs de modèles et aux doctorants. Les schémas évaluent les formules en direct, avec des entrées indicatives.",
 });

@@ -81,7 +81,10 @@ Object.assign(WT.L.ui, { pause_sweep: "Doorloop pauzeren", play_sweep: "Doorloop
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>Voor wie:</b> voor iedereen die nieuwsgierig is. Voor de eerste hoofdstukken heb je geen natuurkunde nodig; de latere gaan tot onderzoeksniveau. Elk hoofdstuk heeft een label: <span class="lvl l0">Inleidend</span>, <span class="lvl l1">Halfgevorderd</span> of <span class="lvl l2">Gevorderd</span>. Wil je het in de les gebruiken? Bekijk de <a href="instructors.html" data-keep-lang>handleiding voor docenten</a>.',
-  lvl0: "Inleidend", lvl1: "Halfgevorderd", lvl2: "Gevorderd", lvl_title: "Niveau",
+  audience: '<b>Voor wie:</b> voor iedereen die nieuwsgierig is. Voor de eerste hoofdstukken heb je geen natuurkunde nodig; de latere gaan tot onderzoeksniveau. Elk hoofdstuk heeft een label: <span class="lvl l0">Inleidend</span>, <span class="lvl l1">Halfgevorderd</span>, <span class="lvl l2">Gevorderd</span> of <span class="lvl l3">Expert</span>. Wil je het in de les gebruiken? Bekijk de <a href="instructors.html" data-keep-lang>handleiding voor docenten</a>.',
+  lvl0: "Inleidend", lvl1: "Halfgevorderd", lvl2: "Gevorderd", lvl3: "Expert", lvl_title: "Niveau",
+  xp_kicker: "Deel twee · Expert",
+  xp_h: "De diepte in",
+  xp_p: "De hoofdstukken tot nu toe vertelden elke stap als een plaatje. De zes die volgen, openen dezelfde stappen: de formules die de motor uitrekent, de benaderingen die erin zitten en waar die knellen. Ze zijn geschreven voor evaluatoren, modelontwikkelaars, masterstudenten en promovendi. De tekeningen rekenen de formules live uit, met illustratieve invoer.",
   step_link: "Kopieer een link naar deze stap", link_copied: "Link gekopieerd",
 });

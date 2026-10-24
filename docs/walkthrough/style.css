@@ -618,6 +618,8 @@ body.og .hero-credit { display: none; }
 .dx-dl-note { flex-basis: 100%; font-size: 13px; color: var(--faint); margin: 0; }
 /* a nuclide's file is fetched when it is opened: dim the old one meanwhile (after a beat, so fast loads don't flicker); first open shows just the head */
 .dx-status { font: 500 15px var(--sans); color: var(--soft); margin: 0 0 16px; }
+.dx-mf { font: 400 14px/1.5 var(--sans); color: var(--soft); margin: 0 0 16px; padding: 8px 14px; border-inline-start: 3px solid var(--warm); background: color-mix(in srgb, var(--warm) 7%, transparent); border-radius: 0 6px 6px 0; max-width: 78ch; }
+[dir="rtl"] .dx-mf { border-radius: 6px 0 0 6px; }
 .dx-nuc > :not(.dx-nuc-head):not(.dx-status) { transition: opacity .15s; }
 .dx-nuc.dx-loading > :not(.dx-nuc-head):not(.dx-status) { opacity: .35; pointer-events: none; transition-delay: .15s; }
 .dx-nuc.dx-empty > :not(.dx-nuc-head):not(.dx-status) { display: none; }
@@ -684,3 +686,24 @@ canvas { direction: ltr; }
   .ch-now .lvl { writing-mode: horizontal-tb; padding: 1px 7px 2px; }
   [dir="rtl"] .ch-now { left: auto; right: 12px; }
 }
+/* === expert chapters (EXPERTCH) === */
+/* the Expert level tag (chapters 13-18) and the divider that opens the part */
+.lvl.l3 { --c: var(--alpha); }
+.ch-rail i.l3 { --c: var(--alpha); }
+.part-head { position: relative; padding: 14vh max(20px, 5vw) 10vh; border-top: 1px solid var(--line); overflow: hidden; }
+.part-head::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60rem 22rem at 20% 0%, color-mix(in srgb, var(--alpha) 10%, transparent), transparent 70%); pointer-events: none; }
+.part-in { position: relative; max-width: 46rem; }
+.part-kicker { font: 600 13px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--alpha); }
+.part-head h2 { font-family: var(--display); font-weight: 600; font-size: clamp(40px, 5vw, 68px); line-height: 1.02; margin: 8px 0 18px; letter-spacing: -0.01em; }
+.part-head p { margin: 0; font-size: clamp(19px, 1.5vw, 22px); line-height: 1.6; color: var(--soft); }
+.part-head + .chapter { border-top: 1px solid var(--line); }
+body.shot .part-head { display: none; }
+/* expert chapters carry two or three formulas per step: let long ones wrap on phones instead of scrolling sideways */
+.chapter[data-ch="hauser"] .formula, .chapter[data-ch="optical"] .formula, .chapter[data-ch="densities"] .formula,
+.chapter[data-ch="strength"] .formula, .chapter[data-ch="exciton"] .formula, .chapter[data-ch="averages"] .formula { font-size: 14px; line-height: 1.55; }
+@media (max-width: 860px) {
+  .chapter[data-ch="hauser"] .formula, .chapter[data-ch="optical"] .formula, .chapter[data-ch="densities"] .formula,
+  .chapter[data-ch="strength"] .formula, .chapter[data-ch="exciton"] .formula, .chapter[data-ch="averages"] .formula { white-space: normal; font-size: 13px; }
+  .part-head { padding: 9vh 20px 6vh; }
+}
+/* === end expert chapters === */

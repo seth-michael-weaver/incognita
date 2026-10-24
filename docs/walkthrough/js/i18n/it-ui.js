@@ -81,7 +81,10 @@ Object.assign(WT.L.ui, { pause_sweep: "Metti in pausa la scansione", play_sweep:
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>A chi si rivolge:</b> a chiunque sia curioso. I primi capitoli non richiedono conoscenze di fisica; gli ultimi arrivano al livello della ricerca. Ogni capitolo porta un\'etichetta: <span class="lvl l0">Introduzione</span>, <span class="lvl l1">Intermedio</span> o <span class="lvl l2">Avanzato</span>. Vuoi usarlo a lezione? Consulta la <a href="instructors.html" data-keep-lang>guida per i docenti</a>.',
-  lvl0: "Introduzione", lvl1: "Intermedio", lvl2: "Avanzato", lvl_title: "Livello",
+  audience: '<b>A chi si rivolge:</b> a chiunque sia curioso. I primi capitoli non richiedono conoscenze di fisica; gli ultimi arrivano al livello della ricerca. Ogni capitolo porta un\'etichetta: <span class="lvl l0">Introduzione</span>, <span class="lvl l1">Intermedio</span>, <span class="lvl l2">Avanzato</span> o <span class="lvl l3">Esperto</span>. Vuoi usarlo a lezione? Consulta la <a href="instructors.html" data-keep-lang>guida per i docenti</a>.',
+  lvl0: "Introduzione", lvl1: "Intermedio", lvl2: "Avanzato", lvl3: "Esperto", lvl_title: "Livello",
+  xp_kicker: "Parte seconda · Esperto",
+  xp_h: "Nel dettaglio",
+  xp_p: "Finora i capitoli hanno raccontato ogni passo con un'immagine. I sei che seguono aprono gli stessi passi: le formule che il motore calcola, le approssimazioni che contengono e i punti in cui vanno in difficoltà. Sono scritti per valutatori di dati nucleari, sviluppatori di modelli e studenti di dottorato. I disegni calcolano le formule in tempo reale, con dati d'ingresso illustrativi.",
   step_link: "Copia un link a questo passo", link_copied: "Link copiato",
 });

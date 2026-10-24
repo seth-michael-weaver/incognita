@@ -81,7 +81,9 @@ Object.assign(WT.L.ui, { pause_sweep: "掃引を一時停止", play_sweep: "掃�
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>対象：</b>好奇心のあるすべての人。最初の章は物理の知識がなくても読めます。後の章は研究レベルまで進みます。各章には<span class="lvl l0">入門</span>、<span class="lvl l1">中級</span>、<span class="lvl l2">上級</span>のタグがついています。授業で使いたい方は<a href="instructors.html" data-keep-lang>教員向けガイド</a>をご覧ください。',
-  lvl0: "入門", lvl1: "中級", lvl2: "上級", lvl_title: "レベル",
+  audience: '<b>対象：</b>好奇心のあるすべての人。最初の章は物理の知識がなくても読めます。後の章は研究レベルまで進みます。各章には<span class="lvl l0">入門</span>、<span class="lvl l1">中級</span>、<span class="lvl l2">上級</span>、<span class="lvl l3">専門</span>のタグがついています。授業で使いたい方は<a href="instructors.html" data-keep-lang>教員向けガイド</a>をご覧ください。',
+  lvl0: "入門", lvl1: "中級", lvl2: "上級", lvl3: "専門", lvl_title: "レベル",
+  xp_kicker: "第2部 · 専門", xp_h: "細部に分け入る",
+  xp_p: "ここまでの章は、各段階を1枚の絵として語ってきました。続く6つの章では、同じ段階の中を開いて見せます。エンジンが計算する式、その中にある近似、そしてそれらが無理をきたすところです。評価者、模型の開発者、大学院生に向けて書いています。図は説明用の入力を使って、式をその場で計算しています。",
   step_link: "このステップへのリンクをコピー", link_copied: "リンクをコピーしました",
 });

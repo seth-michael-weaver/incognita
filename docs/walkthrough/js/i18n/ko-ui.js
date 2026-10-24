@@ -81,7 +81,10 @@ Object.assign(WT.L.ui, { pause_sweep: "훑기 일시정지", play_sweep: "훑기
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>대상:</b> 호기심 있는 누구나. 앞의 장들은 물리 지식이 필요 없고, 뒤의 장들은 연구 수준까지 다룹니다. 각 장에는 <span class="lvl l0">입문</span>, <span class="lvl l1">중급</span>, <span class="lvl l2">고급</span> 꼬리표가 붙어 있습니다. 수업에 쓰시려면 <a href="instructors.html" data-keep-lang>교수자용 안내서</a>를 보세요.',
-  lvl0: "입문", lvl1: "중급", lvl2: "고급", lvl_title: "수준",
+  audience: '<b>대상:</b> 호기심 있는 누구나. 앞의 장들은 물리 지식이 필요 없고, 뒤의 장들은 연구 수준까지 다룹니다. 각 장에는 <span class="lvl l0">입문</span>, <span class="lvl l1">중급</span>, <span class="lvl l2">고급</span>, <span class="lvl l3">전문가</span> 가운데 하나의 꼬리표가 붙어 있습니다. 수업에 쓰시려면 <a href="instructors.html" data-keep-lang>교수자용 안내서</a>를 보세요.',
+  lvl0: "입문", lvl1: "중급", lvl2: "고급", lvl3: "전문가", lvl_title: "수준",
   step_link: "이 단계로 가는 링크 복사", link_copied: "링크 복사됨",
+  xp_kicker: "2부 · 전문가",
+  xp_h: "깊숙이 들어가기",
+  xp_p: "지금까지의 장들은 각 단계를 그림으로 이야기했습니다. 이어지는 여섯 장은 같은 단계들을 열어 봅니다. 엔진이 계산하는 공식, 그 안에 든 근사, 그리고 그 근사가 한계에 부딪히는 곳입니다. 평가자, 모형 개발자, 대학원생을 위해 썼습니다. 그림은 예시용 입력으로 공식을 실시간으로 계산합니다.",
 });

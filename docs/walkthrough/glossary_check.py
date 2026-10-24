@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 D = Path(__file__).resolve().parent
-ORDER = ["intro", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "layers"]
+ORDER = ["intro", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "layers", "hauser", "optical", "densities", "strength", "exciton", "averages"]
 
 IGNORE = {
     # single-letter variables and symbols the text defines on the spot
@@ -42,6 +42,15 @@ IGNORE = {
     "product of averages", "forgotten how it was formed", "near-coincidences", "best-known", "swing distance", "Niels Bohr's",
     "ripple", "ripples", "phonons", "pickup", "knockout", "spin-flip", "upbend", "scissors", "sum rule",
     "measured-structure", "nucleus-by-nucleus", "R072w", "R073",
+    # Expert chapters 13-18: symbols and variables defined in their own formulas
+    "Ex", "E₀", "Jπ", "C₁", "NL", "NP", "T0", "XL", "fXL", "ΣT", "ΣTc", "Eγ³f", "Eλ", "Slj", "Tn", "Va", "Wa", "Wab", "WD", "WV", "EF",
+    "ρF", "2π", "2π²", "2πS0", "Ap,h", "gJT", "hν", "hπ", "pν", "pπ", "iωt", "kR", "M²", "Re", "Γn0", "γδW", "νc", "χ²",
+    "⟨Γa²⟩", "⟨Γa⟩²", "⟨ΓnΓγ", "⟨Γn⁰⟩",
+    # Expert chapters: names, acronyms and shapes explained where they appear; plain compounds
+    "Lorentzian", "SLO", "SMLO", "SMLO-2019", "IAEA", "RIPL", "Gaussian", "Gauss–Laguerre", "Koning–Duijvestijn", "Oslo-method",
+    "Oslo-type", "Fermi's", "Doppler", "Doppler-broadened", "spin-0", "one-dimensional", "iron-57-like", "lead-like",
+    "uranium-238-like", "long-known", "many-channel", "self-shielded", "self-shielding", "shell-model", "single-level",
+    "single-particle", "three-exciton", "three-point", "time-of-flight",
 }
 
 
@@ -79,7 +88,8 @@ def text_of(raw):
 
 
 def aliases():
-    src = (D / "js" / "glossary.js").read_text()
+    # js/glossary.js, plus the entries chapters add themselves (Object.assign(WT.glossary, ...) in js/ch/*.js)
+    src = chr(10).join(p.read_text(encoding="utf-8") for p in [D / "js" / "glossary.js", *sorted((D / "js" / "ch").glob("*.js"))])
     out = []
     for m in re.finditer(r"aliases:\s*\[(.*?)\]", src, re.S):
         out += [a.replace('\\"', '"') for a in re.findall(r'"((?:[^"\\]|\\.)*)"', m.group(1))]

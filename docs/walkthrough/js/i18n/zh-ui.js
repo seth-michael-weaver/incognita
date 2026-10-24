@@ -81,7 +81,10 @@ Object.assign(WT.L.ui, { pause_sweep: "暂停扫描", play_sweep: "继续扫描"
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>适合谁读：</b>任何有好奇心的人。前几章不需要物理基础，后面几章则达到研究水平。每一章都带有一个标签：<span class="lvl l0">入门</span>、<span class="lvl l1">中级</span>或<span class="lvl l2">高级</span>。想用于教学？请看<a href="instructors.html" data-keep-lang>教师指南</a>。',
-  lvl0: "入门", lvl1: "中级", lvl2: "高级", lvl_title: "难度",
+  audience: '<b>适合谁读：</b>任何有好奇心的人。前几章不需要物理基础，后面几章则达到研究水平。每一章都带有一个标签：<span class="lvl l0">入门</span>、<span class="lvl l1">中级</span>、<span class="lvl l2">高级</span>或<span class="lvl l3">专家</span>。想用于教学？请看<a href="instructors.html" data-keep-lang>教师指南</a>。',
+  lvl0: "入门", lvl1: "中级", lvl2: "高级", lvl3: "专家", lvl_title: "难度",
+  xp_kicker: "第二部分 · 专家",
+  xp_h: "深入细节",
+  xp_p: "前面各章把每一步都讲成一幅图。接下来的六章把同样的步骤逐一展开：引擎计算的公式、公式中包含的近似，以及这些近似力不从心的地方。它们是为评价工作者、模型开发者和研究生写的。图中的公式是实时计算的，所用输入仅作示意。",
   step_link: "复制指向此步骤的链接", link_copied: "链接已复制",
 });

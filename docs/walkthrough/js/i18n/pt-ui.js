@@ -81,7 +81,9 @@ Object.assign(WT.L.ui, { pause_sweep: "Pausar o varrimento", play_sweep: "Retoma
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>Para quem é:</b> para qualquer pessoa curiosa. Os primeiros capítulos não exigem conhecimentos de física; os últimos chegam ao nível de investigação. Cada capítulo tem uma etiqueta: <span class="lvl l0">Introdutório</span>, <span class="lvl l1">Intermédio</span> ou <span class="lvl l2">Avançado</span>. Queres usá-lo nas aulas? Consulta o <a href="instructors.html" data-keep-lang>guia para docentes</a>.',
-  lvl0: "Introdutório", lvl1: "Intermédio", lvl2: "Avançado", lvl_title: "Nível",
+  audience: '<b>Para quem é:</b> para qualquer pessoa curiosa. Os primeiros capítulos não exigem conhecimentos de física; os últimos chegam ao nível de investigação. Cada capítulo tem uma etiqueta: <span class="lvl l0">Introdutório</span>, <span class="lvl l1">Intermédio</span>, <span class="lvl l2">Avançado</span> ou <span class="lvl l3">Especialista</span>. Queres usá-lo nas aulas? Consulta o <a href="instructors.html" data-keep-lang>guia para docentes</a>.',
+  lvl0: "Introdutório", lvl1: "Intermédio", lvl2: "Avançado", lvl3: "Especialista", lvl_title: "Nível",
+  xp_kicker: "Segunda parte · Especialista", xp_h: "A fundo",
+  xp_p: "Até aqui, os capítulos contaram cada etapa como uma imagem. Os seis que se seguem abrem essas mesmas etapas: as fórmulas que o motor avalia, as aproximações que contêm e os pontos onde cedem. Foram escritos para avaliadores, autores de modelos e estudantes de pós-graduação. Os desenhos avaliam as fórmulas em tempo real, com dados de entrada ilustrativos.",
   step_link: "Copiar uma ligação para este passo", link_copied: "Ligação copiada",
 });

@@ -4,7 +4,7 @@ Live at <https://www.incognitanuclear.org/>. Three pages, in English and Spanish
 
 | Page | What it is |
 |---|---|
-| `index.html` | **The physics**: an explorable explanation of what the engine computes, in the order it computes it. A live, full-screen hero (a neutron hitting a nucleus), then twelve chapters: a pinned drawing beside the text that changes as you read, with controls in the text that drag the physics. |
+| `index.html` | **The physics**: an explorable explanation of what the engine computes, in the order it computes it. A live, full-screen hero (a neutron hitting a nucleus), then eighteen chapters (twelve, then six Expert chapters in part two): a pinned drawing beside the text that changes as you read, with controls in the text that drag the physics. |
 | `data.html` | **Every nuclide**: a chart of nuclides; for any nuclide, the v0.1 library's predicted curves (68 / 95 % bands) beside every curated EXFOR measurement, with dataset links, a table view and the command that reproduces the numbers. |
 | `scoreboard.html` | **Scoreboard**: how the engine and the data product compare with other codes and libraries, losses first. |
 

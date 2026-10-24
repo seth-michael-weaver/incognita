@@ -81,7 +81,10 @@ Object.assign(WT.L.ui, { pause_sweep: "Sæt gennemløbet på pause", play_sweep:
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.L.ui, {
-  audience: '<b>Hvem det er til:</b> alle, der er nysgerrige. De første kapitler kræver ingen fysik; de senere går helt op på forskningsniveau. Hvert kapitel har et mærke: <span class="lvl l0">Intro</span>, <span class="lvl l1">Mellem</span> eller <span class="lvl l2">Avanceret</span>. Vil du bruge det i undervisningen? Se <a href="instructors.html" data-keep-lang>vejledningen for undervisere</a>.',
-  lvl0: "Intro", lvl1: "Mellem", lvl2: "Avanceret", lvl_title: "Niveau",
+  audience: '<b>Hvem det er til:</b> alle, der er nysgerrige. De første kapitler kræver ingen fysik; de senere går helt op på forskningsniveau. Hvert kapitel har et mærke: <span class="lvl l0">Intro</span>, <span class="lvl l1">Mellem</span>, <span class="lvl l2">Avanceret</span> eller <span class="lvl l3">Ekspert</span>. Vil du bruge det i undervisningen? Se <a href="instructors.html" data-keep-lang>vejledningen for undervisere</a>.',
+  lvl0: "Intro", lvl1: "Mellem", lvl2: "Avanceret", lvl3: "Ekspert", lvl_title: "Niveau",
   step_link: "Kopiér et link til dette trin", link_copied: "Link kopieret",
+  xp_kicker: "Del to · Ekspert",
+  xp_h: "Ned i detaljerne",
+  xp_p: "Indtil nu er hvert trin blevet fortalt som et billede. De seks følgende kapitler åbner de samme trin: formlerne, som motoren evaluerer, approksimationerne i dem, og hvor de kommer under pres. De er skrevet til evaluatorer, modeludviklere og ph.d.-studerende. Tegningerne evaluerer formlerne live, med illustrative inputværdier.",
 });

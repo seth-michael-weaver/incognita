@@ -81,7 +81,9 @@ Object.assign(WT.es.ui, { pause_sweep: "Pausar el barrido", play_sweep: "Reanuda
 
 /* course mode: audience note, chapter level tags, per-step links */
 Object.assign(WT.es.ui, {
-  audience: '<b>Para quién es:</b> para cualquier persona con curiosidad. Los primeros capítulos no exigen saber física; los últimos llegan al nivel de investigación. Cada capítulo lleva una etiqueta: <span class="lvl l0">Introducción</span>, <span class="lvl l1">Intermedio</span> o <span class="lvl l2">Avanzado</span>. ¿Quieres usarlo en clase? Consulta la <a href="instructors.html" data-keep-lang>guía para docentes</a>.',
-  lvl0: "Introducción", lvl1: "Intermedio", lvl2: "Avanzado", lvl_title: "Nivel",
+  audience: '<b>Para quién es:</b> para cualquier persona con curiosidad. Los primeros capítulos no exigen saber física; los últimos llegan al nivel de investigación. Cada capítulo lleva una etiqueta: <span class="lvl l0">Introducción</span>, <span class="lvl l1">Intermedio</span>, <span class="lvl l2">Avanzado</span> o <span class="lvl l3">Experto</span>. ¿Quieres usarlo en clase? Consulta la <a href="instructors.html" data-keep-lang>guía para docentes</a>.',
+  lvl0: "Introducción", lvl1: "Intermedio", lvl2: "Avanzado", lvl3: "Experto", lvl_title: "Nivel",
+  xp_kicker: "Segunda parte · Experto", xp_h: "A fondo",
+  xp_p: "Hasta aquí, cada capítulo contaba un paso como una imagen. Los seis que siguen abren esos mismos pasos: las fórmulas que evalúa el motor, las aproximaciones que contienen y dónde flaquean. Están escritos para evaluadores, desarrolladores de modelos y estudiantes de posgrado. Los dibujos evalúan las fórmulas en directo, con entradas ilustrativas.",
   step_link: "Copiar un enlace a este paso", link_copied: "Enlace copiado",
 });
