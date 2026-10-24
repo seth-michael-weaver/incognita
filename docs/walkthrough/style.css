@@ -40,17 +40,20 @@ a { color: var(--accent); }
 .hero .hero-hint { font-family: var(--sans); font-size: 13px; color: rgba(214,224,255,.55); margin: 0; }
 .hero .hero-hint[data-i18n="hero_aud"] { font-size: 14px; line-height: 1.5; color: rgba(214,224,255,.72); margin: 0 0 14px; pointer-events: auto; }
 .hero .hero-hint[data-i18n="hero_aud"] a { color: rgba(214,224,255,.92); text-underline-offset: 2px; }
-.scrollcue { position: absolute; z-index: 2; left: 50%; bottom: 26px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 15px; font-weight: 600; letter-spacing: .01em; color: #fff; background: linear-gradient(135deg, #5b78ff 0%, #8a63ff 100%); border: 0; border-radius: 999px; padding: 12px 22px; text-decoration: none; white-space: nowrap; box-shadow: 0 10px 28px rgba(76, 96, 255, .38), inset 0 1px 0 rgba(255,255,255,.25); animation: cue 2.4s ease-in-out infinite; transition: transform .2s, box-shadow .25s, filter .2s; }
-.scrollcue:hover, .scrollcue:focus-visible { filter: brightness(1.08); box-shadow: 0 14px 34px rgba(76, 96, 255, .5), inset 0 1px 0 rgba(255,255,255,.3); outline: none; }
-.scrollcue:focus-visible { box-shadow: 0 0 0 3px #fff, 0 14px 34px rgba(76, 96, 255, .5); }
-/* after a neutron is fired: a soft ring pulses around the cue, so the reader sees there is more below */
-.scrollcue.hot { animation: cue 1.4s ease-in-out infinite, cuering 1.6s ease-out infinite; }
-@keyframes cuering { 0% { box-shadow: 0 10px 28px rgba(76,96,255,.38), 0 0 0 0 rgba(120,140,255,.55); } 100% { box-shadow: 0 10px 28px rgba(76,96,255,.38), 0 0 0 16px rgba(120,140,255,0); } }
-@keyframes cue { 0%, 100% { translate: 0 0; } 50% { translate: 0 4px; } }
+/* scroll cue: part of the hero's fade into the page. Small spaced capitals in the dark band, and a thin line that runs
+   down through the fade into the page below; after a neutron is fired the line brightens and quickens */
+.scrollcue { position: absolute; z-index: 2; left: 50%; bottom: calc(9vh - 74px); transform: translateX(-50%); display: block; padding: 0 0 92px; font-family: var(--sans); font-size: 11.5px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: rgba(214, 224, 255, .72); text-decoration: none; white-space: nowrap; transition: color .3s, text-shadow .3s; }
+.scrollcue::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 1.5px; height: 82px; margin-left: -.75px; border-radius: 1px; background: linear-gradient(to bottom, rgba(214, 224, 255, .95), rgba(140, 156, 220, .75) 45%, rgba(60, 72, 130, .55) 85%, rgba(60, 72, 130, 0)); transform-origin: top; animation: cueline 2.6s cubic-bezier(.6, 0, .3, 1) infinite; }
+.scrollcue:hover, .scrollcue:focus-visible { color: #fff; outline: none; }
+.scrollcue:focus-visible { text-decoration: underline; text-underline-offset: 6px; }
+.scrollcue.hot { color: #fff; text-shadow: 0 0 18px rgba(150, 170, 255, .75); }
+.scrollcue.hot::after { width: 2px; margin-left: -1px; background: linear-gradient(to bottom, #fff, rgba(150, 168, 255, .9) 45%, rgba(70, 86, 170, .7) 85%, rgba(70, 86, 170, 0)); animation-duration: 1.5s; }
+@keyframes cueline { 0% { transform: scaleY(0); opacity: 0; } 25% { opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1) translateY(12px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .scrollcue::after, .scrollcue.hot::after { animation: none; } }
+@media (max-width: 720px) { .hero .hero-copy { bottom: calc(9vh + 64px); } }
 .intro-text { max-width: 60rem; margin: 0 auto; padding: 9vh 20px 3vh; }
 .intro-text p { margin: 0 0 20px; font-family: var(--serif); font-size: clamp(21px, 1.75vw, 27px); line-height: 1.6; color: var(--soft); }
 @media (max-width: 720px) { .hero-copy { max-width: none; right: 20px; bottom: 64px; } .hero .hero-hint span { display: none; } .intro-text p { font-size: 19px; } }
-@media (prefers-reduced-motion: reduce) { .scrollcue, .scrollcue.hot { animation: none; } }
 
 /* ---------- table of contents ---------- */
 .toc { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
