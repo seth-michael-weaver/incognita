@@ -27,7 +27,8 @@ benchmark and a registry of predictions made before the data.**
   2026-10-23 for measurements not yet published, with a fixed scoring rule; 16 of the targets are blind and decide the
   headline verdict.
 - **Engine:** release tag [`engine-2026-10-22`](https://github.com/seth-michael-weaver/incognita/tree/engine-2026-10-22).
-- **Library:** [`library/v0.1/`](library/v0.1/) is the current release; v0.2 is in preparation.
+- **Library:** [`library/v0.2/`](library/v0.2/) is the latest version, built with the scored engine (what changed:
+  [`CHANGELOG.md`](library/v0.2/CHANGELOG.md)); [`library/v0.1/`](library/v0.1/) stays available unchanged.
 - **Citing:** [`CITATION.cff`](CITATION.cff) (see [Citing](#citing)).
 
 ## What is this
@@ -66,7 +67,7 @@ Running the engine itself needs the TALYS structure database: see [Running the e
 
 | path | content |
 |---|---|
-| [`library/v0.1/`](library/v0.1/) | the predictions (CC-BY-4.0) |
+| [`library/v0.2/`](library/v0.2/), [`library/v0.1/`](library/v0.1/) | the predictions (CC-BY-4.0): v0.2 latest, v0.1 kept unchanged |
 | [`incognita/`](incognita/) | library reader, benchmark scorer and tracks, calibration and curation tools |
 | [`physics/`](physics/) | the Hauser–Feshbach engine |
 | [`scripts/`](scripts/) | `reproduce.sh`, scorers, engine driver, native-kernel builds |

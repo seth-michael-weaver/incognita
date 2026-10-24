@@ -5,7 +5,7 @@ Live at <https://www.incognitanuclear.org/>. Three pages, in English and Spanish
 | Page | What it is |
 |---|---|
 | `index.html` | **The physics**: an explorable explanation of what the engine computes, in the order it computes it. A live, full-screen hero (a neutron hitting a nucleus), then eighteen chapters (twelve, then six Expert chapters in part two): a pinned drawing beside the text that changes as you read, with controls in the text that drag the physics. |
-| `data.html` | **Every nuclide**: a chart of nuclides; for any nuclide, the v0.1 library's predicted curves (68 / 95 % bands) beside every curated EXFOR measurement, with dataset links, a table view and the command that reproduces the numbers. |
+| `data.html` | **Every nuclide**: a chart of nuclides; for any nuclide, the v0.2 library's predicted curves (68 / 95 % bands) beside every curated EXFOR measurement, with dataset links, a table view and the command that reproduces the numbers. |
 | `scoreboard.html` | **Scoreboard**: how the engine and the data product compare with other codes and libraries, losses first. |
 
 Plain static files: no build step, no framework. Fonts come from Google Fonts and fall back to system fonts offline.
@@ -35,7 +35,7 @@ cd docs/walkthrough && python3 serve.py 8765    # then open http://localhost:876
 ## Updating the data
 
 - **Every nuclide:** `uv run --no-project --with pyarrow python scripts/build_site_data.py` (from the repo root) rebuilds
-  `data/` from `library/v0.1`, `data/curation/inputs` and `incognita/bench/data/exam_rows`. Re-run it when any of those change.
+  `data/` from `library/v0.2`, `data/curation/inputs` and `incognita/bench/data/exam_rows`. Re-run it when any of those change.
 - **Scoreboard and Chapter 12:** regenerate `js/scoreboard-data.js` from the research ledger.
 - After changing any JS or CSS, bump the `?v=` asset version in all three HTML files so returning visitors fetch the new files.
 

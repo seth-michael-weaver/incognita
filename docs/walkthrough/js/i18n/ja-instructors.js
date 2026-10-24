@@ -30,7 +30,7 @@ Object.assign(WT.L.ui, {
   in_b_ch: "章", in_b_st: "ステップ", in_b_lang: "言語", in_b_copy: "コピー", in_b_open: "開く", in_b_whole: "章全体", in_b_step: "ステップ",
   in_ln_data: "データエクスプローラーも同じようにリンクできます。<code>data.html#Au-197</code>で金197、<code>data.html#Fe-56</code>で鉄56が開きます。",
   in_dt_h: "演習用のデータ",
-  in_dt_p: "<a href=\"data.html\" data-keep-lang>全核種</a>のページでは、任意の核種の予測曲線と精査済みの測定値をCSVかJSONでダウンロードでき、単位、出典、EXFOR IDがファイル内に記載されています。ライブラリ全体はリポジトリの<code>library/v0.1</code>にあります。うまくいく演習の例：クラスで選んだ核種について予測と測定値を比べる。68%の帯が最も広いところを探し、その理由を問う。同位体の連なりに沿って30 keVでの捕獲を追う。",
+  in_dt_p: "<a href=\"data.html\" data-keep-lang>全核種</a>のページでは、任意の核種の予測曲線と精査済みの測定値をCSVかJSONでダウンロードでき、単位、出典、EXFOR IDがファイル内に記載されています。ライブラリ全体はリポジトリの<code>library/v0.2</code>にあります（以前のv0.1は<code>library/v0.1</code>に残してあります）。うまくいく演習の例：クラスで選んだ核種について予測と測定値を比べる。68%の帯が最も広いところを探し、その理由を問う。同位体の連なりに沿って30 keVでの捕獲を追う。",
   in_cr_h: "クレジットとフィードバック",
   in_cr_p: "コードはApache-2.0、データはCC-BY-4.0です。このサイトやそのデータを教材に使う場合は、プロジェクト（<a href=\"https://github.com/seth-michael-weaver/incognita/blob/main/CITATION.cff\">CITATION.cff</a>）とTALYS（A. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131）を引用してください。修正や授業での経験は、<a href=\"https://github.com/seth-michael-weaver/incognita/issues\">GitHubのissue</a>としてお寄せください。",
   // chapters: title, topic, what it teaches

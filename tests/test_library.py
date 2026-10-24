@@ -38,3 +38,13 @@ def test_capture_curve_bands_are_ordered():
     c = c[ok]
     assert (c.lo95_b <= c.lo68_b).all() and (c.lo68_b <= c.sigma_b).all()
     assert (c.sigma_b <= c.hi68_b).all() and (c.hi68_b <= c.hi95_b).all()
+
+
+def test_v02_reads_and_bands_are_ordered():
+    t = L.load_capture(version="v0.2")
+    assert t.nuclide_id.is_unique and set(t.tier) <= set(L.TIERS)
+    c = L.capture_curve("Fe-56", table=t)
+    assert (c.lo95_b <= c.lo68_b).all() and (c.lo68_b <= c.sigma_b).all()
+    assert (c.sigma_b <= c.hi68_b).all() and (c.hi68_b <= c.hi95_b).all()
+    with pytest.raises(ValueError):
+        L.load_capture(version="v9")

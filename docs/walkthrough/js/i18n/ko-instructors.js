@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   in_b_ch: "장", in_b_st: "단계", in_b_lang: "언어", in_b_copy: "복사", in_b_open: "열기", in_b_whole: "장 전체", in_b_step: "단계",
   in_ln_data: "데이터 탐색기도 같은 방식으로 링크됩니다. <code>data.html#Au-197</code>은 금-197을, <code>data.html#Fe-56</code>은 철-56을 엽니다.",
   in_dt_h: "연습 문제용 데이터",
-  in_dt_p: "<a href=\"data.html\" data-keep-lang>모든 핵종</a>에서 어느 핵종이든 예측 곡선과 정리된 측정값을 CSV나 JSON으로 내려받을 수 있으며, 파일에 단위, 출처, EXFOR 식별자가 들어 있습니다. 라이브러리 전체는 저장소의 <code>library/v0.1</code>에 있습니다. 효과가 좋은 연습 문제: 수업에서 고른 핵종에 대해 예측과 측정값을 비교하기, 68% 띠가 가장 넓은 곳을 찾고 그 이유를 묻기, 동위원소 사슬을 따라 30 keV 포획을 추적하기.",
+  in_dt_p: "<a href=\"data.html\" data-keep-lang>모든 핵종</a>에서 어느 핵종이든 예측 곡선과 정리된 측정값을 CSV나 JSON으로 내려받을 수 있으며, 파일에 단위, 출처, EXFOR 식별자가 들어 있습니다. 라이브러리 전체는 저장소의 <code>library/v0.2</code>에 있습니다(이전 버전 v0.1은 <code>library/v0.1</code>에 그대로 있습니다). 효과가 좋은 연습 문제: 수업에서 고른 핵종에 대해 예측과 측정값을 비교하기, 68% 띠가 가장 넓은 곳을 찾고 그 이유를 묻기, 동위원소 사슬을 따라 30 keV 포획을 추적하기.",
   in_cr_h: "출처 표기와 의견",
   in_cr_p: "코드는 Apache-2.0, 데이터는 CC-BY-4.0입니다. 이 사이트나 데이터를 교육 자료에 쓰신다면 프로젝트(<a href=\"https://github.com/seth-michael-weaver/incognita/blob/main/CITATION.cff\">CITATION.cff</a>)와 TALYS(A. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131)를 인용해 주세요. 수정 사항과 수업 경험은 <a href=\"https://github.com/seth-michael-weaver/incognita/issues\">GitHub 이슈</a>로 환영합니다.",
   // chapters: title, topic, what it teaches

@@ -6,8 +6,8 @@ Object.assign(WT.L.ui, {
   site_nav: "Websted", nav_walk: "Gennemgangen", nav_board: "Resultattavle", nav_data: "Alle nuklider", nav_repo: "Kode på GitHub",
   dx_kicker: "INCOGNITA · dataudforsker",
   dx_h1: "Alle nuklider",
-  dx_lede: "Motorens forudsagte neutrontværsnit for hver nuklid i biblioteket, ved siden af hver kurateret måling bag dem. Vælg en nuklid på kortet, eller søg efter en.",
-  dx_lede_ver: "Kurverne er biblioteket v0.1 (september 2026), bygget med en ældre motor: de er ikke den motorversion eller den TERRA-kandidat, der scores på Resultattavlen. De fleste nuklider er ekstrapolerede (kun motoren). Hvor en nuklid er markeret som målt, kommer dens indfangningskurve fra en model trænet på de målinger, der vises ved siden af, så overensstemmelse dér er ikke en test.",
+  dx_lede: "Motorens forudsagte neutrontværsnit for hver nuklid i biblioteket, ved siden af de kuraterede målinger af hver nuklid. Vælg en nuklid på kortet, eller søg efter en.",
+  dx_lede_ver: "Kurverne er biblioteket v0.2 (oktober 2026), lavet med den samme motorversion, som Resultattavlen scorer (motoren fra 22. oktober 2026). De er ikke TERRA, Resultattavlens dataprodukt, der er tilpasset målinger. Hver kurve er motorens egen forudsigelse: ingen er tilpasset de målinger, der vises ved siden af, bortset fra at en nuklid markeret som forankret har sin kurve skaleret med én faktor, så dens stellare gennemsnit ved 30 keV svarer til den målte værdi. Motorens generelle indstillinger blev valgt én gang for alle nuklider ud fra mange målinger (også disse), så overensstemmelse for en målt nuklid er en rimelig test af modellen, men ikke en helt uafhængig. De fleste nuklider er aldrig blevet målt (ekstrapolerede), og deres bånd er brede.",
   dx_controls: "Kortets knapper", dx_search_label: "Find en nuklid", dx_search_ph: "Søg: U-235, Fe56, Au…",
   dx_colour: "Farv kortet efter", dx_m_tier: "Hvordan den kendes", dx_m_macs: "Indfangning ved 30 keV", dx_m_meas: "Målte data",
   dx_chart_h: "Nuklidkort",
@@ -21,8 +21,8 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITA-motoren er en portering af <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) og bruger TALYS' database over kernestruktur. Det, INCOGNITA tilføjer, er <a href=\"./?lang=da#code\" data-keep-lang>listet, kontakt for kontakt, nederst på undervisningssiden</a>.",
   dx_repo_p2: "For at køre selve motoren skal du også have TALYS' strukturdatabase; README-filen forklarer, hvordan du henter den.",
   dx_repo_link: "seth-michael-weaver/incognita på GitHub →",
-  dx_src: "Kilder: forudsigelser fra v0.1-biblioteket (<code>library/v0.1</code>); indfangningsmålinger fra EXFOR som kurateret i <code>data/curation</code>; (n,2n)-, (n,p)- og (n,α)-målinger fra benchmarkrækkerne i <code>incognita/bench</code>. Målinger, som kurateringen udelukkede, er skjult, medmindre du beder om dem. Det valgfri stiplede overlag med evaluerede biblioteker (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) bygges af <code>scripts/build_site_overlay.py</code> udelukkende til visning; INCOGNITA læser det aldrig.",
-  dx_t0: "Målt", dx_t1: "Forankret i en målt MACS", dx_t2: "Interpoleret fra naboer", dx_t3: "Ekstrapoleret (kun motoren)",
+  dx_src: "Kilder: forudsigelser fra v0.2-biblioteket (<code>library/v0.2</code>); indfangningsmålinger fra EXFOR som kurateret i <code>data/curation</code>; (n,2n)-, (n,p)- og (n,α)-målinger fra benchmarkrækkerne i <code>incognita/bench</code>. Målinger, som kurateringen udelukkede, er skjult, medmindre du beder om dem. Det valgfri stiplede overlag med evaluerede biblioteker (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) bygges af <code>scripts/build_site_overlay.py</code> udelukkende til visning; INCOGNITA læser det aldrig.",
+  dx_t0: "Målt", dx_t1: "Forankret i en målt MACS", dx_t2: "Interpoleret (tæt på målte nuklider)", dx_t3: "Ekstrapoleret",
   dx_ts0: "målt", dx_ts1: "forankret", dx_ts2: "interpoleret", dx_ts3: "ekstrapoleret",
   dx_keep: "beholdt", dx_down: "nedvægtet", dx_excl: "udelukket", dx_fix: "enhed rettet",
   dx_cap: "Indfangning (n,γ)", dx_macs: "Stellart gennemsnit (MACS)", dx_nat: "naturlig",
@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   dx_capsets: "indfangningsdatasæt", dx_measured: "Målt",
   dx_outside: "uden for det validerede område (Z 26–83)", dx_flag: "opløste resonanser når ind i MACS-vinduet: foretræk en målt MACS",
   dx_nocurve: "ingen bibliotekskurve for denne post; målingerne kommer fra",
-  dx_xE: "neutronenergi", dx_pred: "forudsigelse (bibliotek v0.1)", dx_recipe: "motor, opskrift uden data", dx_learned: "lært korrektion, 68 %-bånd",
+  dx_xE: "neutronenergi", dx_pred: "forudsigelse (bibliotek v0.2)",
   dx_res: "opløste resonanser: kurven er her et gennemsnit",
   dx_empty: "Intet at vise for denne reaktion.", dx_bands: "bånd: 68 % og 95 %", dx_band68: "bånd: 68 %",
   dx_meas_pts: "målt", dx_table_hint: "Brug »Vis som tabel« for at se værdierne.", dx_ds_h: "Målinger", dx_pts: "pkt.",
@@ -45,7 +45,7 @@ Object.assign(WT.L.ui, {
 Object.assign(WT.L.ui, {
   dx_dl: "Download denne nuklid:",
   dx_dl_note: "Alle kurver og målte punkter for denne nuklid, alle reaktioner, med enheder, kilder og EXFOR-id'er skrevet ind i filen.",
-  dx_access: "<b>Adgang til data.</b> Alt, hvad der vises her, ligger i repositoriet under <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.1\"><code>library/v0.1</code></a>: indfangningskurver med 68 / 95 %-bånd (<code>capture_v01_indep.parquet</code>), maxwellske gennemsnit (<code>macs30_v01_indep.csv</code>, <code>macs_kt_v01_indep.csv</code>), stellare rater (<code>rates_v01_indep.csv</code>, <code>reaclib_v01_indep.dat</code>) og kanalerne (n,2n), (n,p), (n,α) (<code>channels_recipe_v01_indep.parquet</code>, <code>grid_np_v01_indep.parquet</code>), kontrolleret med <code>SHA256SUMS</code>. For en enkelt nuklid er CSV- og JSON-downloadene ovenfor nok. De kuraterede målinger ligger i <code>data/curation</code>; de stammer fra EXFOR (IAEA's Nuclear Data Section) og beholder deres EXFOR-id'er. Biblioteksdataene er CC-BY-4.0.",
+  dx_access: "<b>Adgang til data.</b> Alt, hvad der vises her, ligger i repositoriet under <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2\"><code>library/v0.2</code></a>: indfangningskurver med 68 / 95 %-bånd (<code>capture_v02.parquet</code>), maxwellske gennemsnit (<code>macs30_v02.csv</code>, <code>macs_kt_v02.csv</code>), stellare rater (<code>rates_v02.csv</code>, <code>reaclib_v02.dat</code>) og kanalerne (n,2n), (n,p), (n,α) (<code>channels_v02.parquet</code>, <code>grid_np_v02.parquet</code>), kontrolleret med <code>SHA256SUMS</code>. For en enkelt nuklid er CSV- og JSON-downloadene ovenfor nok. De kuraterede målinger ligger i <code>data/curation</code>; de stammer fra EXFOR (IAEA's Nuclear Data Section) og beholder deres EXFOR-id'er. Biblioteksdataene er CC-BY-4.0. Den tidligere version v0.1 bliver i <code>library/v0.1</code>; <code>CHANGELOG.md</code> i <code>library/v0.2</code> fortæller, hvad der er ændret.",
 });
 Object.assign(WT.L.ui, {
   dx_lib: "Læg evaluerede biblioteker ovenpå (kun til sammenligning — bruges ikke af INCOGNITA)",
@@ -54,4 +54,17 @@ Object.assign(WT.L.ui, {
   dx_lib_note: "De stiplede linjer er evaluerede kernedatabiblioteker, vist kun til sammenligning: INCOGNITA bruger dem ikke, og de er ikke med i downloadene. Hvert bibliotek rekonstrueres ved 0 K ud fra bibliotekets ENDF-6-fil (NJOY) og midles over de samme energiintervaller som kurven (gennemsnit i logaritmen af energien, så resonanserne udglattes); MACS bruger den fulde punktvise kurve.",
   dx_lib_none: "Ingen fil for denne nuklid i", dx_lib_notab: "Ingen separat værdi for denne reaktion i",
   dx_lib_held: "JENDL-5 tilføjes, når dets betingelser for at videredistribuere afledte tabeller er bekræftet.",
+});
+
+/* library v0.2: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
+Object.assign(WT.L.ui, {
+  dx_mf_pe_lo: "Usikkert modelvalg: denne motor lader ved alle energier en partikel slippe ud, før kernen falder til ro (præligevægtsemission), mens TALYS først gør det over omkring 1 MeV; TALYS-valget giver omkring {n} gange mindre indfangning ved 30 keV, og 95 %-båndet under 1 MeV dækker begge.",
+  dx_mf_pe_hi: "Usikkert modelvalg: denne motor lader ved alle energier en partikel slippe ud, før kernen falder til ro (præligevægtsemission), mens TALYS først gør det over omkring 1 MeV; TALYS-valget giver omkring {n} gange mere indfangning ved 30 keV, og 95 %-båndet under 1 MeV dækker begge.",
+  dx_mf_pe_near: "Usikkert modelvalg: denne motor lader ved alle energier en partikel slippe ud, før kernen falder til ro (præligevægtsemission), mens TALYS først gør det over omkring 1 MeV; TALYS-valget stemmer ved 30 keV, men afviger mere end en faktor 2 andre steder under 1 MeV, og 95 %-båndet dækker dér begge.",
+  dx_mf_fi_lo: "Usikkert modelvalg: under 1 MeV afhænger denne kurve af én motorindstilling for, hvordan kernen passerer sine fissionsbarrierer; det andet valg giver omkring {n} gange mindre indfangning ved 30 keV, og 95 %-båndet under 1 MeV dækker begge.",
+  dx_mf_fi_hi: "Usikkert modelvalg: under 1 MeV afhænger denne kurve af én motorindstilling for, hvordan kernen passerer sine fissionsbarrierer; det andet valg giver omkring {n} gange mere indfangning ved 30 keV, og 95 %-båndet under 1 MeV dækker begge.",
+  dx_mf_fi_near: "Usikkert modelvalg: under 1 MeV afhænger denne kurve af én motorindstilling for, hvordan kernen passerer sine fissionsbarrierer; det andet valg stemmer ved 30 keV, men afviger mere end en faktor 2 andre steder under 1 MeV, og 95 %-båndet dækker dér begge.",
+  dx_mf_gg_lo: "Denne kurve bruger en korrektion af kernens gammahenfald, som TALYS og TENDL ikke anvender; uden den ville indfangningen ved 30 keV være omkring {n} gange mindre.",
+  dx_mf_gg_hi: "Denne kurve bruger en korrektion af kernens gammahenfald, som TALYS og TENDL ikke anvender; uden den ville indfangningen ved 30 keV være omkring {n} gange større.",
+  dx_mf_gg_near: "Denne kurve bruger en korrektion af kernens gammahenfald, som TALYS og TENDL ikke anvender; uden den ville indfangningen ved 30 keV være omtrent den samme.",
 });

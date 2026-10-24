@@ -1,8 +1,11 @@
-"""Read the shipped v0.1 library (library/v0.1/) without any other tooling.
+"""Read the shipped libraries (library/v0.1/, library/v0.2/) without any other tooling.
 
     uv run python -m incognita.library summary            # nuclei per regime tier, energy grid
     uv run python -m incognita.library show Fe-56          # capture curve with 68 / 95 % intervals, MACS at 30 keV
+    uv run python -m incognita.library show Fe-56 --version v0.2   # the same from library v0.2
     uv run python -m incognita.library show Z026N030M0 --every 4
+
+`--version` (or `version=` in Python) picks the library; the default stays v0.1.
 
 The capture table holds one row per nuclide; `energy_ev`, `sigma_b`, `unc68_log10` and `unc95_log10` are arrays on a
 common grid (1 keV to 20 MeV). An interval is multiplicative: sigma * 10**(+-unc68_log10) is the 68 % band.
@@ -19,6 +22,7 @@ import pandas as pd
 
 LIBRARY = Path(__file__).resolve().parents[1] / "library" / "v0.1"
 CAPTURE = "capture_v01_indep.parquet"
+VERSIONS = {"v0.1": CAPTURE, "v0.2": "capture_v02.parquet"}  # library/<version>/<capture file>
 TIERS = ("MEASURED", "ANCHORED", "INTERPOLATED", "EXTRAPOLATED")
 
 _SYMBOLS = (
@@ -49,13 +53,18 @@ def nuclide_id(name: str) -> str:
     return f"Z{z:03d}N{a - z:03d}M0"
 
 
-def load_capture(root: Path | str = LIBRARY) -> pd.DataFrame:
-    return pd.read_parquet(Path(root) / CAPTURE)
+def load_capture(root: Path | str = LIBRARY, version: str | None = None) -> pd.DataFrame:
+    """The capture table of library `version` ("v0.1" or "v0.2"); without a version, CAPTURE under `root`."""
+    if version is None:
+        return pd.read_parquet(Path(root) / CAPTURE)
+    if version not in VERSIONS:
+        raise ValueError(f"unknown library version {version!r}; use one of {sorted(VERSIONS)}")
+    return pd.read_parquet(LIBRARY.parent / version / VERSIONS[version])
 
 
-def capture_curve(nid: str, table: pd.DataFrame | None = None) -> pd.DataFrame:
+def capture_curve(nid: str, table: pd.DataFrame | None = None, version: str | None = None) -> pd.DataFrame:
     """One nuclide's capture curve as a flat table with its 68 / 95 % bands (barns)."""
-    t = load_capture() if table is None else table
+    t = load_capture(version=version) if table is None else table
     rows = t[t.nuclide_id == nuclide_id(nid)]
     if rows.empty:
         raise KeyError(f"{nid} is not in the library")
@@ -82,12 +91,14 @@ def summary(table: pd.DataFrame | None = None) -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m incognita.library", description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("summary")
+    sm = sub.add_parser("summary")
     sh = sub.add_parser("show")
     sh.add_argument("nuclide")
     sh.add_argument("--every", type=int, default=1, help="print every n-th energy")
+    for p in (sm, sh):
+        p.add_argument("--version", choices=sorted(VERSIONS), default="v0.1", help="library version (default v0.1)")
     a = ap.parse_args(argv)
-    t = load_capture()
+    t = load_capture(version=a.version)
     if a.cmd == "summary":
         print(summary(t))
         return 0

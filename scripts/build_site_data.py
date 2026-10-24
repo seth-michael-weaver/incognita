@@ -1,6 +1,6 @@
 """Build the data files of the website's Data explorer (docs/walkthrough/data/).
 
-Reads the v0.1 library (engine/library curves for every nuclide) and the curated EXFOR capture cells, plus the benchmark
+Reads the v0.2 library (production-engine curves for every nuclide) and the curated EXFOR capture cells, plus the benchmark
 rows for (n,2n), (n,p) and (n,alpha), and writes:
   data/index.json      one row per nuclide (chart of nuclides: tier, MACS at 30 keV, counts of measured data)
   data/n/<Z>/<A>.json  everything about one nuclide (<A> is "nat" for a natural element), fetched only when that
@@ -14,7 +14,7 @@ from collections import defaultdict
 import pyarrow.parquet as pq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LIB = os.path.join(ROOT, "library", "v0.1")
+LIB = os.path.join(ROOT, "library", "v0.2")
 OUT = os.path.join(ROOT, "docs", "walkthrough", "data")
 
 SYM = ("n H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr "
@@ -62,7 +62,7 @@ def main():
     nucs = {}  # (Z, A) -> dict
 
     # ---- library curves ----
-    cap = pq.read_table(os.path.join(LIB, "capture_v01_indep.parquet")).to_pylist()
+    cap = pq.read_table(os.path.join(LIB, "capture_v02.parquet")).to_pylist()
     grid = [sig(e, 5) for e in cap[0]["energy_ev"]]
     for r in cap:
         assert [sig(e, 5) for e in r["energy_ev"]] == grid, "capture grids differ"
@@ -72,21 +72,27 @@ def main():
             "res": sig(r["resolved_upper_ev"], 3), "macs30": sig(r["macs30_mb"]), "flag": r["macs30_flag"] or "",
             "src": r["value_source"] or "", "unc": r["unc_kind"] or "",
         }
-    ch = pq.read_table(os.path.join(LIB, "channels_recipe_v01_indep.parquet")).to_pylist()
+        mf = r.get("model_form_flag") or "none"
+        if mf != "none":  # model-form note (v0.2): alternate deck choice at 30 keV; keys only, the page writes the text
+            v30 = r["sigma_b"][min(range(len(r["energy_ev"])), key=lambda i: abs(math.log(r["energy_ev"][i] / 3e4)))]
+            a30 = r.get("alt_value_30keV_b")
+            ok = a30 is not None and not (isinstance(a30, float) and math.isnan(a30)) and v30 > 0
+            nucs[(r["Z"], r["A"])]["mform"] = {"kind": mf, "alt30": sig(a30) if ok else None, "ratio": sig(a30 / v30, 3) if ok else None}
+    ch = pq.read_table(os.path.join(LIB, "channels_v02.parquet")).to_pylist()
     for r in ch:
         n = nucs.get((r["Z"], r["A"]))
         if n is None:
             continue
         n["ch"] = {k: sigl(r[f"sigma_{k}_mb"]) for k in ("np", "n2n", "na") if r[f"sigma_{k}_mb"] is not None}
     npl = defaultdict(list)
-    for r in pq.read_table(os.path.join(LIB, "grid_np_v01_indep.parquet")).to_pylist():
+    for r in pq.read_table(os.path.join(LIB, "grid_np_v02.parquet")).to_pylist():
         if r["pred_mb"] is not None:
             npl[(r["Z"], r["A"])].append((r["E_MeV"] * 1e6, r["pred_mb"], r["lo68_mb"], r["hi68_mb"]))
     for k, rows in npl.items():
         if k in nucs:
             rows.sort()
             nucs[k]["npL"] = [[sig(a, 5), sig(b), sig(c), sig(d)] for a, b, c, d in rows]
-    with open(os.path.join(LIB, "macs_kt_v01_indep.csv"), newline="") as f:
+    with open(os.path.join(LIB, "macs_kt_v02.csv"), newline="") as f:
         for r in csv.DictReader(f):
             n = nucs.get((int(r["Z"]), int(r["A"])))
             if n is None:

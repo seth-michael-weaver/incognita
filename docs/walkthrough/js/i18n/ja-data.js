@@ -6,8 +6,8 @@ Object.assign(WT.L.ui, {
   site_nav: "サイト", nav_walk: "解説", nav_board: "スコアボード", nav_data: "全核種", nav_repo: "GitHubのコード",
   dx_kicker: "INCOGNITA · データエクスプローラー",
   dx_h1: "全核種",
-  dx_lede: "ライブラリ内のすべての核種についてエンジンが予測した中性子断面積を、その裏づけとなる精査済みの測定値すべてとともに示します。核図表で核種を選ぶか、検索してください。",
-  dx_lede_ver: "これらの曲線はライブラリv0.1（2026年9月）のもので、古いエンジンで作られています。スコアボードで採点しているエンジンのバージョンやTERRA候補ではありません。ほとんどの核種は外挿（エンジンのみ）です。測定済みと記された核種では、捕獲曲線は横に示した測定値で学習したモデルから来ているので、そこで一致しても検証にはなりません。",
+  dx_lede: "ライブラリ内のすべての核種についてエンジンが予測した中性子断面積を、各核種の精査済みの測定値とともに示します。核図表で核種を選ぶか、検索してください。",
+  dx_lede_ver: "これらの曲線はライブラリv0.2（2026年10月）で、スコアボードで採点しているのと同じエンジンのバージョン（2026年10月22日のエンジン）で作られています。測定値に合わせたスコアボードのデータ製品TERRAではありません。どの曲線もエンジン自身の予測で、横に示した測定値に合わせたものはありません。例外は「固定」と記された核種で、30 keVでの恒星内平均が測定値と一致するよう、曲線を一つの係数で拡大縮小しています。エンジンの全体的な設定は、すべての核種に対して一度だけ、多くの測定値（ここに示したものも含む）を使って選ばれたので、測定済み核種での一致はモデルの公正な確認ですが、完全に独立した検証ではありません。ほとんどの核種は一度も測定されておらず（外挿）、その帯は広くなっています。",
   dx_controls: "核図表の操作", dx_search_label: "核種を探す", dx_search_ph: "検索：U-235、Fe56、Au…",
   dx_colour: "核図表の色分け", dx_m_tier: "わかり方", dx_m_macs: "30 keVでの捕獲", dx_m_meas: "測定データ",
   dx_chart_h: "核図表",
@@ -21,8 +21,8 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITAエンジンは<a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely）を移植したもので、TALYSの原子核構造データベースを使っています。INCOGNITAが追加したものは、<a href=\"./#code\" data-keep-lang>解説ページの最後にスイッチごとに一覧</a>しています。",
   dx_repo_p2: "エンジン自体を実行するには、TALYSの構造データベースも必要です。入手方法はREADMEに書かれています。",
   dx_repo_link: "GitHub上のseth-michael-weaver/incognita →",
-  dx_src: "出典：予測はv0.1ライブラリ（<code>library/v0.1</code>）、捕獲の測定値は<code>data/curation</code>で精査したEXFOR、(n,2n)、(n,p)、(n,α)の測定値は<code>incognita/bench</code>のベンチマーク行から。精査で除外された測定値は、要求しないかぎり表示されません。評価済みライブラリ（ENDF/B-VIII.1、JEFF-4.0、TENDL-2025）の任意の点線オーバーレイは、表示専用に<code>scripts/build_site_overlay.py</code>で作成しており、INCOGNITAがそれを読むことはありません。",
-  dx_t0: "測定済み", dx_t1: "測定MACSに固定", dx_t2: "近傍から内挿", dx_t3: "外挿（エンジンのみ）",
+  dx_src: "出典：予測はv0.2ライブラリ（<code>library/v0.2</code>）、捕獲の測定値は<code>data/curation</code>で精査したEXFOR、(n,2n)、(n,p)、(n,α)の測定値は<code>incognita/bench</code>のベンチマーク行から。精査で除外された測定値は、要求しないかぎり表示されません。評価済みライブラリ（ENDF/B-VIII.1、JEFF-4.0、TENDL-2025）の任意の点線オーバーレイは、表示専用に<code>scripts/build_site_overlay.py</code>で作成しており、INCOGNITAがそれを読むことはありません。",
+  dx_t0: "測定済み", dx_t1: "測定MACSに固定", dx_t2: "内挿（測定済み核種の近く）", dx_t3: "外挿",
   dx_ts0: "測定", dx_ts1: "固定", dx_ts2: "内挿", dx_ts3: "外挿",
   dx_keep: "採用", dx_down: "重み低減", dx_excl: "除外", dx_fix: "単位修正",
   dx_cap: "捕獲 (n,γ)", dx_macs: "恒星内平均（MACS）", dx_nat: "天然",
@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   dx_capsets: "捕獲データセット", dx_measured: "測定済み",
   dx_outside: "検証範囲外（Z 26–83）", dx_flag: "分離共鳴がMACSの窓に達している：測定MACSを推奨",
   dx_nocurve: "この項目にはライブラリ曲線がありません。測定値の出典：",
-  dx_xE: "中性子エネルギー", dx_pred: "予測（ライブラリv0.1）", dx_recipe: "エンジン、データなしレシピ", dx_learned: "学習した補正、68%の帯",
+  dx_xE: "中性子エネルギー", dx_pred: "予測（ライブラリv0.2）",
   dx_res: "分離共鳴：ここでの曲線は平均値",
   dx_empty: "この反応には表示するものがありません。", dx_bands: "帯：68%と95%", dx_band68: "帯：68%",
   dx_meas_pts: "測定", dx_table_hint: "値は「表で表示」で確認できます。", dx_ds_h: "測定値", dx_pts: "点",
@@ -45,7 +45,7 @@ Object.assign(WT.L.ui, {
 Object.assign(WT.L.ui, {
   dx_dl: "この核種をダウンロード：",
   dx_dl_note: "この核種のすべての曲線と測定点、全反応。単位、出典、EXFOR IDをファイルに記載しています。",
-  dx_access: "<b>データへのアクセス。</b>ここに表示しているものはすべて、リポジトリの<a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.1\"><code>library/v0.1</code></a>にあります。68 / 95%の帯つきの捕獲曲線（<code>capture_v01_indep.parquet</code>）、マクスウェル平均（<code>macs30_v01_indep.csv</code>、<code>macs_kt_v01_indep.csv</code>）、恒星内反応率（<code>rates_v01_indep.csv</code>、<code>reaclib_v01_indep.dat</code>）、そして(n,2n)、(n,p)、(n,α)チャネル（<code>channels_recipe_v01_indep.parquet</code>、<code>grid_np_v01_indep.parquet</code>）で、<code>SHA256SUMS</code>で検証できます。1核種だけなら、上のCSVとJSONのダウンロードで十分です。精査済みの測定値は<code>data/curation</code>にあり、EXFOR（IAEA核データセクション）に由来し、EXFOR IDを保持しています。ライブラリのデータはCC-BY-4.0です。",
+  dx_access: "<b>データへのアクセス。</b>ここに表示しているものはすべて、リポジトリの<a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2\"><code>library/v0.2</code></a>にあります。68 / 95%の帯つきの捕獲曲線（<code>capture_v02.parquet</code>）、マクスウェル平均（<code>macs30_v02.csv</code>、<code>macs_kt_v02.csv</code>）、恒星内反応率（<code>rates_v02.csv</code>、<code>reaclib_v02.dat</code>）、そして(n,2n)、(n,p)、(n,α)チャネル（<code>channels_v02.parquet</code>、<code>grid_np_v02.parquet</code>）で、<code>SHA256SUMS</code>で検証できます。1核種だけなら、上のCSVとJSONのダウンロードで十分です。精査済みの測定値は<code>data/curation</code>にあり、EXFOR（IAEA核データセクション）に由来し、EXFOR IDを保持しています。ライブラリのデータはCC-BY-4.0です。以前のv0.1は<code>library/v0.1</code>に残してあります。変更点は<code>library/v0.2</code>の<code>CHANGELOG.md</code>にあります。",
 });
 Object.assign(WT.L.ui, {
   dx_lib: "評価済みライブラリを重ねて表示（比較専用 — INCOGNITAは使用しません）",
@@ -54,4 +54,17 @@ Object.assign(WT.L.ui, {
   dx_lib_note: "点線は評価済み核データライブラリで、比較のためだけに表示しています。INCOGNITAはこれらを使わず、ダウンロードにも含まれません。それぞれライブラリのENDF-6ファイルから0 Kで再構成し（NJOY）、曲線と同じエネルギービンで平均しています（対数エネルギーでのビン平均なので、共鳴はならされます）。MACSには点ごとの曲線全体を使っています。",
   dx_lib_none: "この核種のファイルがありません：", dx_lib_notab: "この反応の個別の値がありません：",
   dx_lib_held: "JENDL-5は、派生した表の再配布条件が確認されしだい追加します。",
+});
+
+/* library v0.2: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
+Object.assign(WT.L.ui, {
+  dx_mf_pe_lo: "モデル選択に不確かさがあります：このエンジンはすべてのエネルギーで、原子核が落ち着く前に粒子が飛び出す過程（前平衡放出）を含めますが、TALYSは約1 MeV以上でしか含めません。TALYS方式では30 keVの捕獲が約{n}分の1になり、1 MeV未満の95%の帯は両方を含みます。",
+  dx_mf_pe_hi: "モデル選択に不確かさがあります：このエンジンはすべてのエネルギーで、原子核が落ち着く前に粒子が飛び出す過程（前平衡放出）を含めますが、TALYSは約1 MeV以上でしか含めません。TALYS方式では30 keVの捕獲が約{n}倍になり、1 MeV未満の95%の帯は両方を含みます。",
+  dx_mf_pe_near: "モデル選択に不確かさがあります：このエンジンはすべてのエネルギーで、原子核が落ち着く前に粒子が飛び出す過程（前平衡放出）を含めますが、TALYSは約1 MeV以上でしか含めません。TALYS方式は30 keVでは一致しますが、1 MeV未満の他のエネルギーでは2倍以上違い、そこでの95%の帯は両方を含みます。",
+  dx_mf_fi_lo: "モデル選択に不確かさがあります：1 MeV未満では、この曲線は原子核が核分裂障壁を越える扱いについてのエンジン設定一つに左右されます。もう一方の選択では30 keVの捕獲が約{n}分の1になり、1 MeV未満の95%の帯は両方を含みます。",
+  dx_mf_fi_hi: "モデル選択に不確かさがあります：1 MeV未満では、この曲線は原子核が核分裂障壁を越える扱いについてのエンジン設定一つに左右されます。もう一方の選択では30 keVの捕獲が約{n}倍になり、1 MeV未満の95%の帯は両方を含みます。",
+  dx_mf_fi_near: "モデル選択に不確かさがあります：1 MeV未満では、この曲線は原子核が核分裂障壁を越える扱いについてのエンジン設定一つに左右されます。もう一方の選択は30 keVでは一致しますが、1 MeV未満の他のエネルギーでは2倍以上違い、そこでの95%の帯は両方を含みます。",
+  dx_mf_gg_lo: "この曲線は、TALYSとTENDLが適用しない、原子核のガンマ崩壊への補正を使っています。補正がなければ、30 keVの捕獲は約{n}分の1になります。",
+  dx_mf_gg_hi: "この曲線は、TALYSとTENDLが適用しない、原子核のガンマ崩壊への補正を使っています。補正がなければ、30 keVの捕獲は約{n}倍になります。",
+  dx_mf_gg_near: "この曲線は、TALYSとTENDLが適用しない、原子核のガンマ崩壊への補正を使っています。補正がなくても、30 keVの捕獲はほぼ同じです。",
 });

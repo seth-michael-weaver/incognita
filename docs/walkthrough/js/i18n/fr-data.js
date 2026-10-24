@@ -6,8 +6,8 @@ Object.assign(WT.L.ui, {
   site_nav: "Site", nav_walk: "Le parcours", nav_board: "Tableau des scores", nav_data: "Tous les nucléides", nav_repo: "Code sur GitHub",
   dx_kicker: "INCOGNITA · explorateur de données",
   dx_h1: "Tous les nucléides",
-  dx_lede: "Les sections efficaces neutroniques prédites par le moteur pour chaque nucléide de la bibliothèque, à côté de chaque mesure sélectionnée qui les étaye. Choisissez un nucléide sur la carte, ou cherchez-le.",
-  dx_lede_ver: "Les courbes sont celles de la bibliothèque v0.1 (septembre 2026), construite avec un moteur plus ancien : ce ne sont ni la version du moteur ni le candidat TERRA notés dans le Tableau des scores. La plupart des nucléides sont extrapolés (moteur seul). Lorsqu'un nucléide est marqué comme mesuré, sa courbe de capture vient d'un modèle entraîné sur les mesures affichées à côté ; l'accord avec elles n'est donc pas un test.",
+  dx_lede: "Les sections efficaces neutroniques prédites par le moteur pour chaque nucléide de la bibliothèque, à côté des mesures sélectionnées de chaque nucléide. Choisissez un nucléide sur la carte, ou cherchez-le.",
+  dx_lede_ver: "Les courbes sont la bibliothèque v0.2 (octobre 2026), produite avec la même version du moteur que celle notée dans le Tableau des scores (le moteur du 22 octobre 2026). Ce n'est pas TERRA, le produit de données du Tableau des scores, ajusté aux mesures. Chaque courbe est la prédiction du moteur lui-même : aucune n'a été ajustée aux mesures affichées à côté, sauf pour un nucléide marqué ancré, dont la courbe est multipliée par un seul facteur afin que sa moyenne stellaire à 30 keV égale la valeur mesurée. Les réglages généraux du moteur ont été choisis une fois pour tous les nucléides, à l'aide de nombreuses mesures (dont celles-ci) ; un accord sur un nucléide mesuré est donc une vérification honnête du modèle, mais pas entièrement indépendante. La plupart des nucléides n'ont jamais été mesurés (extrapolés), et leurs bandes sont larges.",
   dx_controls: "Commandes de la carte", dx_search_label: "Trouver un nucléide", dx_search_ph: "Rechercher : U-235, Fe56, Au…",
   dx_colour: "Colorer la carte selon", dx_m_tier: "Comment on le connaît", dx_m_macs: "Capture à 30 keV", dx_m_meas: "Données mesurées",
   dx_chart_h: "Carte des nucléides",
@@ -21,8 +21,8 @@ Object.assign(WT.L.ui, {
   credit_sub: "Le moteur INCOGNITA est un portage de <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) et utilise la base de données de structure nucléaire de TALYS. Ce qu'INCOGNITA ajoute est <a href=\"./?lang=fr#code\">détaillé, option par option, à la fin de la page pédagogique</a>.",
   dx_repo_p2: "Pour exécuter le moteur lui-même, il faut aussi la base de données de structure de TALYS ; le README explique comment la récupérer.",
   dx_repo_link: "seth-michael-weaver/incognita sur GitHub →",
-  dx_src: "Sources : prédictions de la bibliothèque v0.1 (<code>library/v0.1</code>) ; mesures de capture issues d'EXFOR, sélectionnées dans <code>data/curation</code> ; mesures (n,2n), (n,p) et (n,α) issues des lignes de référence de <code>incognita/bench</code>. Les mesures écartées par la sélection sont masquées, sauf si vous les demandez. La superposition facultative (en tirets) des bibliothèques évaluées (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) est produite par <code>scripts/build_site_overlay.py</code> uniquement pour l'affichage ; INCOGNITA ne la lit jamais.",
-  dx_t0: "Mesuré", dx_t1: "Ancré sur une MACS mesurée", dx_t2: "Interpolé à partir des voisins", dx_t3: "Extrapolé (moteur seul)",
+  dx_src: "Sources : prédictions de la bibliothèque v0.2 (<code>library/v0.2</code>) ; mesures de capture issues d'EXFOR, sélectionnées dans <code>data/curation</code> ; mesures (n,2n), (n,p) et (n,α) issues des lignes de référence de <code>incognita/bench</code>. Les mesures écartées par la sélection sont masquées, sauf si vous les demandez. La superposition facultative (en tirets) des bibliothèques évaluées (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) est produite par <code>scripts/build_site_overlay.py</code> uniquement pour l'affichage ; INCOGNITA ne la lit jamais.",
+  dx_t0: "Mesuré", dx_t1: "Ancré sur une MACS mesurée", dx_t2: "Interpolé (proche de nucléides mesurés)", dx_t3: "Extrapolé",
   dx_ts0: "mesuré", dx_ts1: "ancré", dx_ts2: "interpolé", dx_ts3: "extrapolé",
   dx_keep: "conservé", dx_down: "sous-pondéré", dx_excl: "exclu", dx_fix: "unité corrigée",
   dx_cap: "Capture (n,γ)", dx_macs: "Moyenne stellaire (MACS)", dx_nat: "naturel",
@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   dx_capsets: "jeux de données de capture", dx_measured: "Mesuré",
   dx_outside: "hors du domaine validé (Z 26–83)", dx_flag: "les résonances résolues atteignent la fenêtre de la MACS : préférez une MACS mesurée",
   dx_nocurve: "pas de courbe de bibliothèque pour cette entrée ; les mesures proviennent de",
-  dx_xE: "énergie du neutron", dx_pred: "prédiction (bibliothèque v0.1)", dx_recipe: "moteur, recette sans données", dx_learned: "correction apprise, bande à 68 %",
+  dx_xE: "énergie du neutron", dx_pred: "prédiction (bibliothèque v0.2)",
   dx_res: "résonances résolues : ici, la courbe est une moyenne",
   dx_empty: "Rien à afficher pour cette réaction.", dx_bands: "bandes : 68 % et 95 %", dx_band68: "bande : 68 %",
   dx_meas_pts: "mesurés", dx_table_hint: "Utilisez « Afficher sous forme de tableau » pour les valeurs.", dx_ds_h: "Mesures", dx_pts: "pts",
@@ -45,7 +45,7 @@ Object.assign(WT.L.ui, {
 Object.assign(WT.L.ui, {
   dx_dl: "Télécharger ce nucléide :",
   dx_dl_note: "Chaque courbe et chaque point mesuré de ce nucléide, toutes réactions confondues, avec les unités, les sources et les identifiants EXFOR inscrits dans le fichier.",
-  dx_access: "<b>Accès aux données.</b> Tout ce qui est affiché ici se trouve dans le dépôt, sous <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.1\"><code>library/v0.1</code></a> : courbes de capture avec bandes à 68 / 95 % (<code>capture_v01_indep.parquet</code>), moyennes maxwelliennes (<code>macs30_v01_indep.csv</code>, <code>macs_kt_v01_indep.csv</code>), taux stellaires (<code>rates_v01_indep.csv</code>, <code>reaclib_v01_indep.dat</code>) et les voies (n,2n), (n,p), (n,α) (<code>channels_recipe_v01_indep.parquet</code>, <code>grid_np_v01_indep.parquet</code>), vérifiés par <code>SHA256SUMS</code>. Pour un seul nucléide, les téléchargements CSV et JSON ci-dessus suffisent. Les mesures sélectionnées se trouvent dans <code>data/curation</code> ; elles proviennent d'EXFOR (Section des données nucléaires de l'AIEA) et conservent leurs identifiants EXFOR. Les données de la bibliothèque sont sous licence CC-BY-4.0.",
+  dx_access: "<b>Accès aux données.</b> Tout ce qui est affiché ici se trouve dans le dépôt, sous <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2\"><code>library/v0.2</code></a> : courbes de capture avec bandes à 68 / 95 % (<code>capture_v02.parquet</code>), moyennes maxwelliennes (<code>macs30_v02.csv</code>, <code>macs_kt_v02.csv</code>), taux stellaires (<code>rates_v02.csv</code>, <code>reaclib_v02.dat</code>) et les voies (n,2n), (n,p), (n,α) (<code>channels_v02.parquet</code>, <code>grid_np_v02.parquet</code>), vérifiés par <code>SHA256SUMS</code>. Pour un seul nucléide, les téléchargements CSV et JSON ci-dessus suffisent. Les mesures sélectionnées se trouvent dans <code>data/curation</code> ; elles proviennent d'EXFOR (Section des données nucléaires de l'AIEA) et conservent leurs identifiants EXFOR. Les données de la bibliothèque sont sous licence CC-BY-4.0. La version précédente, v0.1, reste dans <code>library/v0.1</code> ; le fichier <code>CHANGELOG.md</code> de <code>library/v0.2</code> indique ce qui a changé.",
 });
 Object.assign(WT.L.ui, {
   dx_lib: "Superposer des bibliothèques évaluées (comparaison seulement — INCOGNITA ne les utilise pas)",
@@ -54,4 +54,17 @@ Object.assign(WT.L.ui, {
   dx_lib_note: "Les lignes en tirets sont des bibliothèques évaluées de données nucléaires, affichées uniquement pour comparaison : INCOGNITA ne les utilise pas et elles ne figurent pas dans les téléchargements. Chacune est reconstruite à 0 K à partir du fichier ENDF-6 de la bibliothèque (NJOY) et moyennée sur les mêmes intervalles d'énergie que la courbe (moyennes en logarithme de l'énergie, si bien que les résonances sont lissées) ; la MACS utilise la courbe ponctuelle complète.",
   dx_lib_none: "Pas de fichier pour ce nucléide dans", dx_lib_notab: "Pas de valeur distincte pour cette réaction dans",
   dx_lib_held: "JENDL-5 sera ajoutée dès que ses conditions de redistribution des tables dérivées seront confirmées.",
+});
+
+/* library v0.2: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
+Object.assign(WT.L.ui, {
+  dx_mf_pe_lo: "Choix de modèle incertain : ce moteur laisse une particule s'échapper avant que le noyau ne se stabilise (émission de prééquilibre) à toutes les énergies, alors que TALYS ne le fait qu'au-dessus d'environ 1 MeV ; le choix de TALYS donne environ {n} fois moins de capture à 30 keV, et la bande à 95 % sous 1 MeV couvre les deux.",
+  dx_mf_pe_hi: "Choix de modèle incertain : ce moteur laisse une particule s'échapper avant que le noyau ne se stabilise (émission de prééquilibre) à toutes les énergies, alors que TALYS ne le fait qu'au-dessus d'environ 1 MeV ; le choix de TALYS donne environ {n} fois plus de capture à 30 keV, et la bande à 95 % sous 1 MeV couvre les deux.",
+  dx_mf_pe_near: "Choix de modèle incertain : ce moteur laisse une particule s'échapper avant que le noyau ne se stabilise (émission de prééquilibre) à toutes les énergies, alors que TALYS ne le fait qu'au-dessus d'environ 1 MeV ; le choix de TALYS concorde à 30 keV mais diffère de plus d'un facteur 2 ailleurs sous 1 MeV, et la bande à 95 % y couvre les deux.",
+  dx_mf_fi_lo: "Choix de modèle incertain : sous 1 MeV, cette courbe dépend d'un réglage du moteur sur la façon dont le noyau franchit ses barrières de fission ; l'autre choix donne environ {n} fois moins de capture à 30 keV, et la bande à 95 % sous 1 MeV couvre les deux.",
+  dx_mf_fi_hi: "Choix de modèle incertain : sous 1 MeV, cette courbe dépend d'un réglage du moteur sur la façon dont le noyau franchit ses barrières de fission ; l'autre choix donne environ {n} fois plus de capture à 30 keV, et la bande à 95 % sous 1 MeV couvre les deux.",
+  dx_mf_fi_near: "Choix de modèle incertain : sous 1 MeV, cette courbe dépend d'un réglage du moteur sur la façon dont le noyau franchit ses barrières de fission ; l'autre choix concorde à 30 keV mais diffère de plus d'un facteur 2 ailleurs sous 1 MeV, et la bande à 95 % y couvre les deux.",
+  dx_mf_gg_lo: "Cette courbe utilise une correction de la désexcitation gamma du noyau que TALYS et TENDL n'appliquent pas ; sans elle, la capture à 30 keV serait environ {n} fois plus faible.",
+  dx_mf_gg_hi: "Cette courbe utilise une correction de la désexcitation gamma du noyau que TALYS et TENDL n'appliquent pas ; sans elle, la capture à 30 keV serait environ {n} fois plus forte.",
+  dx_mf_gg_near: "Cette courbe utilise une correction de la désexcitation gamma du noyau que TALYS et TENDL n'appliquent pas ; sans elle, la capture à 30 keV serait à peu près la même.",
 });

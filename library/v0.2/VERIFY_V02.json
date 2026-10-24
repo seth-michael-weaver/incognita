@@ -1,0 +1,210 @@
+{
+ "capture_finite": true,
+ "capture_positive": true,
+ "capture_min_b": 1.0038761276979715e-10,
+ "bands_finite": true,
+ "bands_ordered_0_le_u68_le_u95": true,
+ "macs30_finite_positive": true,
+ "floor_leak": 0,
+ "curves_with_repaired_points": 275,
+ "repaired_points_total": 1982,
+ "carried_v01": 18,
+ "nuclides": 6168,
+ "same_universe_as_v01": true,
+ "same_tiers_as_v01": true,
+ "channels_finite": true,
+ "channels_nonnegative": true,
+ "grid_np_ordered": true,
+ "grid_np_finite_nonneg": true,
+ "grid_np_rows": 60287,
+ "grid_np_targets": 361,
+ "anchored_macs_eq_anchor_maxrel": 6.661338147750939e-16,
+ "tier_compare": [
+  {
+   "tier": "MEASURED",
+   "n": 220,
+   "f68_v01": 1.2406304507998318,
+   "f68_v02": 1.3185906746596612,
+   "f95_v01": 1.649959175766326,
+   "f95_v02": 2.1733516440277056,
+   "dmacs_median": -0.018155204107758408,
+   "dmacs_p05": -0.15472173913816326,
+   "dmacs_p25": -0.0770824436793772,
+   "dmacs_p75": 0.031524700886613494,
+   "dmacs_p95": 0.1371056326501524,
+   "dmacs_rms": 0.10038353365663805,
+   "frac_abs_gt_0p3": 0.00909090909090909,
+   "frac_abs_gt_1": 0.0,
+   "d1MeV_median": -0.02722909443275095,
+   "d1MeV_rms": 0.1651702115552463,
+   "inside_v01_68": 0.6818181818181818,
+   "in_valid_range_dmacs_rms": 0.09318093816461624
+  },
+  {
+   "tier": "ANCHORED",
+   "n": 21,
+   "f68_v01": 1.1604670883868113,
+   "f68_v02": 1.3185906746596612,
+   "f95_v01": 1.4774301413499793,
+   "f95_v02": 2.1733516440277056,
+   "dmacs_median": 0.0,
+   "dmacs_p05": -1.4464911998299308e-16,
+   "dmacs_p25": -9.643274665532873e-17,
+   "dmacs_p75": 9.64327466553287e-17,
+   "dmacs_p95": 1.9286549331065737e-16,
+   "dmacs_rms": 1.2270276461640514e-16,
+   "frac_abs_gt_0p3": 0.0,
+   "frac_abs_gt_1": 0.0,
+   "d1MeV_median": -0.058274558501068524,
+   "d1MeV_rms": 0.14730400116460254,
+   "inside_v01_68": 1.0,
+   "in_valid_range_dmacs_rms": 1.2270276461640514e-16
+  },
+  {
+   "tier": "INTERPOLATED",
+   "n": 316,
+   "f68_v01": 1.3433388812466474,
+   "f68_v02": 1.3911393757489678,
+   "f95_v01": 1.8028742755513223,
+   "f95_v02": 2.1733516440277056,
+   "dmacs_median": -0.15831759133486428,
+   "dmacs_p05": -0.502214909734215,
+   "dmacs_p25": -0.26439708893788805,
+   "dmacs_p75": -0.07854183705519506,
+   "dmacs_p95": 0.039006447708087824,
+   "dmacs_rms": 0.26975619046381105,
+   "frac_abs_gt_0p3": 0.1962025316455696,
+   "frac_abs_gt_1": 0.00949367088607595,
+   "d1MeV_median": -0.31494151191963404,
+   "d1MeV_rms": 0.3914356598442616,
+   "inside_v01_68": 0.37341772151898733,
+   "in_valid_range_dmacs_rms": 0.26975619046381105
+  },
+  {
+   "tier": "EXTRAPOLATED",
+   "n": 5611,
+   "f68_v01": 1.5789361749849435,
+   "f68_v02": 1.5992781349632887,
+   "f95_v01": 2.4247533351619417,
+   "f95_v02": 2.4875368792415724,
+   "dmacs_median": 0.048806985063843226,
+   "dmacs_p05": -0.13170018576625386,
+   "dmacs_p25": -0.001958581983120577,
+   "dmacs_p75": 0.12770307193937586,
+   "dmacs_p95": 1.108869260260755,
+   "dmacs_rms": 0.5066474424044499,
+   "frac_abs_gt_0p3": 0.13936909641775086,
+   "frac_abs_gt_1": 0.056139725539119584,
+   "d1MeV_median": 0.06193286596833937,
+   "d1MeV_rms": 0.6023055891093483,
+   "inside_v01_68": 0.830689716628052,
+   "in_valid_range_dmacs_rms": 0.5307876936603065
+  }
+ ],
+ "library_comparator_check": {
+  "note": "30 keV capture vs TENDL-2025 (else ENDF/B-VIII.1) from the site overlay; comparators only, never an input",
+  "per_tier": {
+   "ANCHORED": {
+    "n": 21,
+    "median_abs_dex_v01": 0.0335143615062421,
+    "median_abs_dex_v02": 0.0332492100889079
+   },
+   "EXTRAPOLATED": {
+    "n": 1695,
+    "median_abs_dex_v01": 0.0649732105041237,
+    "median_abs_dex_v02": 0.1134375265282001
+   },
+   "INTERPOLATED": {
+    "n": 315,
+    "median_abs_dex_v01": 0.0846633263681637,
+    "median_abs_dex_v02": 0.0999886625850012
+   },
+   "MEASURED": {
+    "n": 220,
+    "median_abs_dex_v01": 0.03324610413504875,
+    "median_abs_dex_v02": 0.06704020045583306
+   }
+  },
+  "movers_gt1dex_with_lib": 15
+ },
+ "movers_gt1dex_vs_v01": {
+  "n": 318,
+  "causes": {
+   "pre-equilibrium emission at keV energies (production deck)": 276,
+   "fission transmission (production fists2)": 22,
+   "radiative dead-end fix (production GGDEADEND) + pre-equilibrium emission at keV energies (production deck)": 8,
+   "other production physics (none of the three switches moves it > 0.3 dex)": 6,
+   "partly pre-equilibrium emission at keV energies (production deck); rest other production physics": 2,
+   "radiative dead-end fix (production GGDEADEND)": 2,
+   "partly radiative dead-end fix (production GGDEADEND); rest other production physics": 1,
+   "partly fission transmission (production fists2); rest other production physics": 1
+  },
+  "proton_rich_N_lt_Z": 183,
+  "up": 308,
+  "down": 10
+ },
+ "model_form": {
+  "counts": {
+   "none": 5034,
+   "pe_kev": 1108,
+   "fists2": 23,
+   "gg_deadend": 3
+  },
+  "flagged_by_tier": [
+   {
+    "model_form_flag": "fists2",
+    "tier": "EXTRAPOLATED",
+    "n": 23
+   },
+   {
+    "model_form_flag": "pe_kev",
+    "tier": "EXTRAPOLATED",
+    "n": 1108
+   }
+  ],
+  "flagged_30keV_only_gt0p3": 552,
+  "u95_factor_30keV_flagged": {
+   "before_median": 2.660656235542233,
+   "after_median": 4.326609734788541,
+   "before_p90": 13.57623128066028,
+   "after_p90": 81.55554504786076,
+   "after_max": 73360.42383803327
+  },
+  "u68_factor_30keV_flagged": {
+   "before_median": 1.661921584336203,
+   "after_median": 2.114977156031132
+  },
+  "tendl": {
+   "per_tier_median_abs_dex_v02_vs_tendl": {
+    "ANCHORED": {
+     "before": 0.0332492100889079,
+     "after": 0.033249210088907924,
+     "n": 21
+    },
+    "EXTRAPOLATED": {
+     "before": 0.11339407585854885,
+     "after": 0.11339407585854887,
+     "n": 1694
+    },
+    "INTERPOLATED": {
+     "before": 0.0999886625850012,
+     "after": 0.09998866258500125,
+     "n": 315
+    },
+    "MEASURED": {
+     "before": 0.0674967771123736,
+     "after": 0.0674967771123736,
+     "n": 219
+    }
+   },
+   "centrals_unchanged": true,
+   "flagged_with_tendl": 72,
+   "flagged_tendl_inside_95_before": 27,
+   "flagged_tendl_inside_95_after": 28,
+   "flagged_with_tendl_by_kind": {
+    "pe_kev": 69,
+    "fists2": 3
+   }
+  }
+ }
+}

@@ -30,7 +30,7 @@ Object.assign(WT.L.ui, {
   in_b_ch: "章节", in_b_st: "步骤", in_b_lang: "语言", in_b_copy: "复制", in_b_open: "打开", in_b_whole: "整章", in_b_step: "步骤",
   in_ln_data: "数据浏览器的链接方式相同：<code>data.html#Au-197</code> 打开金-197，<code>data.html#Fe-56</code> 打开铁-56。",
   in_dt_h: "习题用数据",
-  in_dt_p: "在<a href=\"data.html\" data-keep-lang>全部核素</a>页面，任何核素的预测曲线及其经过整理的测量数据都可以下载为 CSV 或 JSON，文件中注明单位、来源和 EXFOR 编号。完整的数据库位于代码仓库的 <code>library/v0.1</code> 下。效果较好的练习：针对全班选定的一个核素，比较预测值与测量数据；找出 68 % 区间最宽的地方，并追问原因；沿一条同位素链追踪 30 keV 的俘获。",
+  in_dt_p: "在<a href=\"data.html\" data-keep-lang>全部核素</a>页面，任何核素的预测曲线及其经过整理的测量数据都可以下载为 CSV 或 JSON，文件中注明单位、来源和 EXFOR 编号。完整的数据库位于代码仓库的 <code>library/v0.2</code> 下（较早的 v0.1 保留在 <code>library/v0.1</code>）。效果较好的练习：针对全班选定的一个核素，比较预测值与测量数据；找出 68 % 区间最宽的地方，并追问原因；沿一条同位素链追踪 30 keV 的俘获。",
   in_cr_h: "引用与反馈",
   in_cr_p: "代码采用 Apache-2.0 许可，数据采用 CC-BY-4.0 许可。如果你在教学材料中使用本网站或其数据，请引用本项目（<a href=\"https://github.com/seth-michael-weaver/incognita/blob/main/CITATION.cff\">CITATION.cff</a>）和 TALYS（A. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131）。欢迎以 <a href=\"https://github.com/seth-michael-weaver/incognita/issues\">GitHub issue</a> 的形式提交勘误和课堂使用体会。",
   // chapters: title, topic, what it teaches

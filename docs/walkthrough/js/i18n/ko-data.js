@@ -6,8 +6,8 @@ Object.assign(WT.L.ui, {
   site_nav: "사이트", nav_walk: "둘러보기", nav_board: "점수판", nav_data: "모든 핵종", nav_repo: "GitHub의 코드",
   dx_kicker: "INCOGNITA · 데이터 탐색기",
   dx_h1: "모든 핵종",
-  dx_lede: "라이브러리에 있는 모든 핵종에 대해 엔진이 예측한 중성자 단면적을, 그 뒤에 있는 정리된 측정값과 함께 보여 줍니다. 도표에서 핵종을 고르거나 검색하세요.",
-  dx_lede_ver: "이 곡선들은 v0.1 라이브러리(2026년 9월)로, 이전 엔진으로 만들었습니다. 점수판에서 점수를 매기는 엔진 버전이나 TERRA 후보가 아닙니다. 대부분의 핵종은 외삽(엔진만)입니다. 측정됨으로 표시된 핵종의 포획 곡선은 옆에 보이는 측정값으로 학습한 모형에서 나오므로, 거기서 일치하는 것은 검증이 아닙니다.",
+  dx_lede: "라이브러리에 있는 모든 핵종에 대해 엔진이 예측한 중성자 단면적을, 각 핵종의 정리된 측정값과 함께 보여 줍니다. 도표에서 핵종을 고르거나 검색하세요.",
+  dx_lede_ver: "이 곡선들은 라이브러리 v0.2(2026년 10월)로, 점수판에서 점수를 매기는 것과 같은 엔진 버전(2026년 10월 22일 엔진)으로 만들었습니다. 측정값에 맞춘 점수판의 데이터 제품인 TERRA가 아닙니다. 모든 곡선은 엔진 자체의 예측이며, 옆에 보이는 측정값에 맞춘 곡선은 없습니다. 예외는 고정으로 표시된 핵종으로, 30 keV에서의 항성 평균이 측정값과 같아지도록 곡선에 하나의 배율을 곱했습니다. 엔진의 전반적인 설정은 모든 핵종에 대해 한 번, 많은 측정값(이 측정값들도 포함)을 써서 정했으므로, 측정된 핵종에서 일치하는 것은 모형에 대한 공정한 확인이지만 완전히 독립적인 검증은 아닙니다. 대부분의 핵종은 한 번도 측정된 적이 없으며(외삽), 그 띠는 넓습니다.",
   dx_controls: "도표 조작", dx_search_label: "핵종 찾기", dx_search_ph: "검색: U-235, Fe56, Au…",
   dx_colour: "도표 색칠 기준", dx_m_tier: "알려진 방식", dx_m_macs: "30 keV 포획", dx_m_meas: "측정 데이터",
   dx_chart_h: "핵종 도표",
@@ -21,8 +21,8 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITA 엔진은 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>(A. J. Koning, S. Hilaire, S. Goriely)를 이식한 것으로, TALYS 핵구조 데이터베이스를 사용합니다. INCOGNITA가 더한 것은 <a href=\"./?lang=ko#code\">해설 페이지 끝에 스위치별로 정리되어 있습니다</a>.",
   dx_repo_p2: "엔진 자체를 실행하려면 TALYS 구조 데이터베이스도 필요합니다. 받는 방법은 README에 있습니다.",
   dx_repo_link: "GitHub의 seth-michael-weaver/incognita →",
-  dx_src: "출처: v0.1 라이브러리의 예측(<code>library/v0.1</code>), <code>data/curation</code>에서 정리한 EXFOR의 포획 측정값, <code>incognita/bench</code>의 벤치마크 행에서 가져온 (n,2n), (n,p), (n,α) 측정값. 정리 과정에서 제외된 측정값은 요청하지 않으면 숨겨집니다. 평가 라이브러리(ENDF/B-VIII.1, JEFF-4.0, TENDL-2025)의 선택적 점선 겹쳐 보기는 표시용으로만 <code>scripts/build_site_overlay.py</code>가 만들며, INCOGNITA는 이를 결코 읽지 않습니다.",
-  dx_t0: "측정됨", dx_t1: "측정된 MACS에 고정", dx_t2: "이웃 핵종에서 보간", dx_t3: "외삽 (엔진만)",
+  dx_src: "출처: v0.2 라이브러리의 예측(<code>library/v0.2</code>), <code>data/curation</code>에서 정리한 EXFOR의 포획 측정값, <code>incognita/bench</code>의 벤치마크 행에서 가져온 (n,2n), (n,p), (n,α) 측정값. 정리 과정에서 제외된 측정값은 요청하지 않으면 숨겨집니다. 평가 라이브러리(ENDF/B-VIII.1, JEFF-4.0, TENDL-2025)의 선택적 점선 겹쳐 보기는 표시용으로만 <code>scripts/build_site_overlay.py</code>가 만들며, INCOGNITA는 이를 결코 읽지 않습니다.",
+  dx_t0: "측정됨", dx_t1: "측정된 MACS에 고정", dx_t2: "보간 (측정된 핵종 근처)", dx_t3: "외삽",
   dx_ts0: "측정", dx_ts1: "고정", dx_ts2: "보간", dx_ts3: "외삽",
   dx_keep: "유지", dx_down: "가중치 낮춤", dx_excl: "제외", dx_fix: "단위 수정",
   dx_cap: "포획 (n,γ)", dx_macs: "항성 평균 (MACS)", dx_nat: "천연",
@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   dx_capsets: "건의 포획 데이터 세트", dx_measured: "측정값",
   dx_outside: "검증 범위(Z 26–83) 밖", dx_flag: "분리 공명이 MACS 창까지 닿음: 측정된 MACS를 쓰는 편이 나음",
   dx_nocurve: "이 항목에는 라이브러리 곡선이 없음. 측정값 출처:",
-  dx_xE: "중성자 에너지", dx_pred: "예측 (라이브러리 v0.1)", dx_recipe: "엔진, 무데이터 레시피", dx_learned: "학습된 보정, 68% 띠",
+  dx_xE: "중성자 에너지", dx_pred: "예측 (라이브러리 v0.2)",
   dx_res: "분리 공명: 여기서 곡선은 평균값",
   dx_empty: "이 반응에는 보여 줄 것이 없습니다.", dx_bands: "띠: 68%와 95%", dx_band68: "띠: 68%",
   dx_meas_pts: "측정점", dx_table_hint: "값은 ‘표로 보기’를 사용하세요.", dx_ds_h: "측정값", dx_pts: "점",
@@ -45,7 +45,7 @@ Object.assign(WT.L.ui, {
 Object.assign(WT.L.ui, {
   dx_dl: "이 핵종 내려받기:",
   dx_dl_note: "이 핵종의 모든 곡선과 측정점, 모든 반응이 단위, 출처, EXFOR 식별자와 함께 파일에 담깁니다.",
-  dx_access: "<b>데이터 이용.</b> 여기 보이는 모든 것은 저장소의 <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.1\"><code>library/v0.1</code></a>에 있습니다. 68 / 95% 띠가 있는 포획 곡선(<code>capture_v01_indep.parquet</code>), 맥스웰 평균(<code>macs30_v01_indep.csv</code>, <code>macs_kt_v01_indep.csv</code>), 항성 반응률(<code>rates_v01_indep.csv</code>, <code>reaclib_v01_indep.dat</code>), 그리고 (n,2n), (n,p), (n,α) 채널(<code>channels_recipe_v01_indep.parquet</code>, <code>grid_np_v01_indep.parquet</code>)이며, <code>SHA256SUMS</code>로 검증됩니다. 핵종 하나라면 위의 CSV와 JSON 내려받기로 충분합니다. 정리된 측정값은 <code>data/curation</code>에 있습니다. 이들은 EXFOR(IAEA 핵데이터과)에서 왔으며 EXFOR 식별자를 그대로 유지합니다. 라이브러리 데이터는 CC-BY-4.0입니다.",
+  dx_access: "<b>데이터 이용.</b> 여기 보이는 모든 것은 저장소의 <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2\"><code>library/v0.2</code></a>에 있습니다. 68 / 95% 띠가 있는 포획 곡선(<code>capture_v02.parquet</code>), 맥스웰 평균(<code>macs30_v02.csv</code>, <code>macs_kt_v02.csv</code>), 항성 반응률(<code>rates_v02.csv</code>, <code>reaclib_v02.dat</code>), 그리고 (n,2n), (n,p), (n,α) 채널(<code>channels_v02.parquet</code>, <code>grid_np_v02.parquet</code>)이며, <code>SHA256SUMS</code>로 검증됩니다. 핵종 하나라면 위의 CSV와 JSON 내려받기로 충분합니다. 정리된 측정값은 <code>data/curation</code>에 있습니다. 이들은 EXFOR(IAEA 핵데이터과)에서 왔으며 EXFOR 식별자를 그대로 유지합니다. 라이브러리 데이터는 CC-BY-4.0입니다. 이전 버전 v0.1은 <code>library/v0.1</code>에 그대로 있습니다. 바뀐 내용은 <code>library/v0.2</code>의 <code>CHANGELOG.md</code>에 있습니다.",
 });
 Object.assign(WT.L.ui, {
   dx_lib: "평가 라이브러리 겹쳐 보기 (비교용 — INCOGNITA는 사용하지 않음)",
@@ -54,4 +54,17 @@ Object.assign(WT.L.ui, {
   dx_lib_note: "점선은 평가 핵데이터 라이브러리로, 비교용으로만 표시합니다. INCOGNITA는 이를 사용하지 않으며 내려받기 파일에도 들어 있지 않습니다. 각 라이브러리는 그 ENDF-6 파일에서 0 K로 재구성(NJOY)한 뒤 곡선과 같은 에너지 구간에 대해 평균했습니다(로그 에너지 구간 평균이므로 공명이 매끄럽게 펴집니다). MACS에는 점별 곡선 전체를 사용합니다.",
   dx_lib_none: "이 핵종의 파일이 없는 라이브러리:", dx_lib_notab: "이 반응의 별도 값이 없는 라이브러리:",
   dx_lib_held: "JENDL-5는 파생 표의 재배포 조건이 확인되면 추가할 예정입니다.",
+});
+
+/* library v0.2: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
+Object.assign(WT.L.ui, {
+  dx_mf_pe_lo: "모형 선택이 불확실합니다: 이 엔진은 모든 에너지에서 원자핵이 안정되기 전에 입자가 빠져나가는 과정(전평형 방출)을 넣지만, TALYS는 약 1 MeV 이상에서만 넣습니다. TALYS 방식은 30 keV에서 포획을 약 {n}배 적게 주며, 1 MeV 아래의 95% 띠는 두 경우를 모두 포함합니다.",
+  dx_mf_pe_hi: "모형 선택이 불확실합니다: 이 엔진은 모든 에너지에서 원자핵이 안정되기 전에 입자가 빠져나가는 과정(전평형 방출)을 넣지만, TALYS는 약 1 MeV 이상에서만 넣습니다. TALYS 방식은 30 keV에서 포획을 약 {n}배 많게 주며, 1 MeV 아래의 95% 띠는 두 경우를 모두 포함합니다.",
+  dx_mf_pe_near: "모형 선택이 불확실합니다: 이 엔진은 모든 에너지에서 원자핵이 안정되기 전에 입자가 빠져나가는 과정(전평형 방출)을 넣지만, TALYS는 약 1 MeV 이상에서만 넣습니다. TALYS 방식은 30 keV에서는 일치하지만 1 MeV 아래의 다른 에너지에서는 2배 넘게 다르며, 그곳의 95% 띠는 두 경우를 모두 포함합니다.",
+  dx_mf_fi_lo: "모형 선택이 불확실합니다: 1 MeV 아래에서 이 곡선은 원자핵이 핵분열 장벽을 넘는 방식에 관한 엔진 설정 하나에 좌우됩니다. 다른 선택은 30 keV에서 포획을 약 {n}배 적게 주며, 1 MeV 아래의 95% 띠는 두 경우를 모두 포함합니다.",
+  dx_mf_fi_hi: "모형 선택이 불확실합니다: 1 MeV 아래에서 이 곡선은 원자핵이 핵분열 장벽을 넘는 방식에 관한 엔진 설정 하나에 좌우됩니다. 다른 선택은 30 keV에서 포획을 약 {n}배 많게 주며, 1 MeV 아래의 95% 띠는 두 경우를 모두 포함합니다.",
+  dx_mf_fi_near: "모형 선택이 불확실합니다: 1 MeV 아래에서 이 곡선은 원자핵이 핵분열 장벽을 넘는 방식에 관한 엔진 설정 하나에 좌우됩니다. 다른 선택은 30 keV에서는 일치하지만 1 MeV 아래의 다른 에너지에서는 2배 넘게 다르며, 그곳의 95% 띠는 두 경우를 모두 포함합니다.",
+  dx_mf_gg_lo: "이 곡선은 TALYS와 TENDL이 적용하지 않는, 원자핵의 감마 붕괴에 대한 보정을 씁니다. 보정이 없으면 30 keV에서 포획은 약 {n}배 작아집니다.",
+  dx_mf_gg_hi: "이 곡선은 TALYS와 TENDL이 적용하지 않는, 원자핵의 감마 붕괴에 대한 보정을 씁니다. 보정이 없으면 30 keV에서 포획은 약 {n}배 커집니다.",
+  dx_mf_gg_near: "이 곡선은 TALYS와 TENDL이 적용하지 않는, 원자핵의 감마 붕괴에 대한 보정을 씁니다. 보정이 없어도 30 keV에서 포획은 거의 같습니다.",
 });

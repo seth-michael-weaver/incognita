@@ -13,7 +13,7 @@ abstract: >-
 license:
   - Apache-2.0
   - CC-BY-4.0
-version: 0.1.0
+version: 0.2.0  # library v0.2 (library/v0.2, engine-20261022-3); library/v0.1 stays in the repository
 references:
   - type: article
     title: "TALYS: modeling of nuclear reactions"
