@@ -121,15 +121,19 @@
   // ---------- pointer: tilt and fire ----------
   hero.addEventListener("pointermove", (e) => { const r = cv.getBoundingClientRect(); tgtX = ((e.clientX - r.left) / r.width - 0.5) * 2; tgtY = ((e.clientY - r.top) / r.height - 0.5) * 2; });
   hero.addEventListener("pointerleave", () => { tgtX = 0; tgtY = 0; });
+  // after the first neutron the scroll cue lights up: readers who keep firing should see that the page goes on below
+  const cue = document.querySelector(".scrollcue");
+  const nudge = () => { if (cue) cue.classList.add("hot"); };
   hero.addEventListener("pointerdown", (e) => {
     if (e.target.closest("a, button")) return;
     const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, { cx, cy } = geo();
     shots.push({ x, y, sx: x, sy: y, t0: time, trail: [], dx: cx, dy: cy });
+    nudge();
     if (reduce) frame(0);
   });
   // the same for keyboard and screen-reader users: a real button fires a neutron in from the left
   const fire = hero.querySelector(".fire-btn");
-  if (fire) fire.addEventListener("click", () => { const { cy } = geo(), y = cy + (Math.random() - 0.5) * H * 0.3; shots.push({ x: 0, y, sx: -20, sy: y, t0: time, trail: [] }); if (reduce) frame(0); });
+  if (fire) fire.addEventListener("click", () => { const { cy } = geo(), y = cy + (Math.random() - 0.5) * H * 0.3; shots.push({ x: 0, y, sx: -20, sy: y, t0: time, trail: [] }); nudge(); if (reduce) frame(0); });
 
   // ---------- drawing ----------
   // performance: the backdrop gradient is painted once per size into its own canvas, and the drifting streaks are one
