@@ -498,7 +498,8 @@
     }
     // chapter rail: which chapter is on screen and its level, always visible while reading. Wide screens: a column of dots
     // (coloured by level) in the left margin with the current chapter written beneath it; it opens into the full list on
-    // hover or focus. Phones: a small chip with the current chapter. Hidden over the hero and the end of the page.
+    // hover or focus. Phones: a small chip with the current chapter. Shown from the top of the page: over the hero it
+    // points at chapter 1, and past the last chapter it keeps the last one.
     const rchs = chapters.filter((c) => c.mod.title);
     if (rchs.length) {
       const lvName = (lv) => (lv == null ? "" : WT.ui ? WT.ui("lvl" + lv, LEVELS[lv]) : LEVELS[lv]);
@@ -509,9 +510,9 @@
       const rlinks = [...rail.querySelectorAll("a")], now = rail.querySelector(".ch-now"), seen = new Set();
       const setNow = (c) => { const lv = LEVEL[c.id]; rlinks.forEach((a) => a.classList.toggle("here", a.dataset.id === c.id));
         now.innerHTML = `<i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span>`; };
+      setNow(rchs[0]); rail.classList.add("on");
       rchs.forEach((c) => new IntersectionObserver((ents) => ents.forEach((en) => {
         if (en.isIntersecting) { seen.add(c.id); setNow(c); } else seen.delete(c.id);
-        rail.classList.toggle("on", seen.size > 0);
       }), { rootMargin: "-50% 0px -50% 0px" }).observe(c.el));
     }
     function resize() {
