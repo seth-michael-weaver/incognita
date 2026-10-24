@@ -646,3 +646,36 @@ canvas { direction: ltr; }
 /* formulas and number ranges inside right-to-left prose keep their left-to-right order */
 [dir="rtl"] .formula, [dir="rtl"] code, [dir="rtl"] sub, [dir="rtl"] sup { unicode-bidi: isolate; direction: ltr; }
 @media (max-width: 860px) { [dir="rtl"] .step-link { right: auto; left: -6px; } }
+/* chapter rail (kit.js): current chapter and its level, always in view while reading */
+.ch-rail { position: fixed; z-index: 4; left: 12px; top: 50%; transform: translateY(-50%); font-family: var(--sans); display: flex; flex-direction: column; align-items: flex-start; gap: 14px; opacity: 0; pointer-events: none; transition: opacity .35s; }
+.ch-rail.on { opacity: 1; pointer-events: auto; }
+.ch-rail ol { list-style: none; margin: 0; padding: 8px 6px; display: flex; flex-direction: column; gap: 1px; border-radius: 14px; transition: background .2s, box-shadow .2s; }
+.ch-rail a { display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 6px; border-radius: 8px; color: var(--faint); text-decoration: none; white-space: nowrap; font-size: 13px; }
+.ch-rail i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--c) 30%, transparent); box-shadow: 0 0 0 1.5px var(--c); transition: transform .25s, background .25s, box-shadow .25s; }
+.ch-rail i.l0 { --c: var(--fission); } .ch-rail i.l1 { --c: var(--accent); } .ch-rail i.l2 { --c: var(--proton); }
+.ch-rail a.here i { background: var(--c); transform: scale(1.4); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }
+.ch-rail a .n { font: 600 11px var(--mono); min-width: 1.4em; color: var(--faint); }
+.ch-rail a .n, .ch-rail a .t, .ch-rail a .lvl { display: none; }
+.ch-rail a .lvl { margin-left: 2px; font-size: 10px; padding: 1px 7px 2px; }
+.ch-rail a.here .n, .ch-rail a.here .t { color: var(--ink); font-weight: 600; }
+.ch-rail:hover ol, .ch-rail:focus-within ol { background: var(--card); box-shadow: 0 10px 32px rgba(10, 16, 40, .14), 0 0 0 1px var(--line); }
+.ch-rail:hover a .n, .ch-rail:focus-within a .n, .ch-rail:hover a .t, .ch-rail:focus-within a .t { display: inline; }
+.ch-rail:hover a .lvl, .ch-rail:focus-within a .lvl { display: inline-block; }
+.ch-rail a:hover, .ch-rail a:focus-visible { background: color-mix(in srgb, var(--accent) 9%, transparent); color: var(--ink); outline: none; }
+/* the current chapter, written up the margin beneath the dots */
+.ch-now { writing-mode: vertical-rl; transform: rotate(180deg); align-self: center; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .06em; color: var(--soft); white-space: nowrap; transition: opacity .2s; }
+.ch-now i { display: none; }
+.ch-now .n { font-family: var(--mono); color: var(--faint); }
+.ch-now .lvl { writing-mode: vertical-rl; margin: 0; padding: 7px 2px; font-size: 10px; }
+.ch-rail:hover .ch-now, .ch-rail:focus-within .ch-now { opacity: 0; }
+/* narrow screens: no rail; a small chip with the current chapter and its level */
+@media (max-width: 900px) {
+  .ch-rail { left: 10px; top: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); transform: none; }
+  .ch-rail ol { display: none; }
+  .ch-now { writing-mode: horizontal-tb; transform: none; align-self: auto; gap: 6px; padding: 6px 10px 6px 9px; border-radius: 999px; background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(6px); box-shadow: 0 4px 16px rgba(10, 16, 40, .12), 0 0 0 1px var(--line); font-size: 12px; letter-spacing: 0; }
+  .ch-now i { display: inline-block; width: 7px; height: 7px; background: var(--c); box-shadow: none; transform: none; }
+  .ch-now .lvl { writing-mode: horizontal-tb; padding: 1px 7px 2px; }
+}
+[dir="rtl"] .ch-rail { left: auto; right: 12px; align-items: flex-end; }
+@media (max-width: 900px) { [dir="rtl"] .ch-rail { right: 10px; } }
+@media (prefers-reduced-motion: reduce) { .ch-rail, .ch-rail i, .ch-now { transition: none; } }

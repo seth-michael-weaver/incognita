@@ -495,6 +495,24 @@
       new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) links.forEach((a) => a.classList.toggle("here", a.getAttribute("href") === "#" + en.target.id)); }), { rootMargin: "-50% 0px -50% 0px" })
         && chapters.forEach((c) => c.mod.title && links.length && new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { links.forEach((a) => a.classList.toggle("here", a.getAttribute("href") === "#" + c.id)); const h = toc.querySelector("a.here"); if (h && toc.offsetParent && toc.scrollWidth > toc.clientWidth) h.scrollIntoView({ block: "nearest", inline: "center" }); } }), { rootMargin: "-50% 0px -50% 0px" }).observe(c.el));
     }
+    // chapter rail: which chapter is on screen and its level, always visible while reading. Wide screens: a column of dots
+    // (coloured by level) in the left margin with the current chapter written beneath it; it opens into the full list on
+    // hover or focus. Phones: a small chip with the current chapter. Hidden over the hero and the end of the page.
+    const rchs = chapters.filter((c) => c.mod.title);
+    if (rchs.length) {
+      const lvName = (lv) => (lv == null ? "" : WT.ui ? WT.ui("lvl" + lv, LEVELS[lv]) : LEVELS[lv]);
+      const numOf = (c) => (c.mod.num || "").replace(/[^0-9]/g, "");
+      const rail = document.createElement("nav"); rail.className = "ch-rail"; rail.setAttribute("aria-label", WT.ui ? WT.ui("chapters", "Chapters") : "Chapters");
+      rail.innerHTML = `<ol>${rchs.map((c) => { const lv = LEVEL[c.id]; return `<li><a href="#${c.id}" data-id="${c.id}"><i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span></a></li>`; }).join("")}</ol><div class="ch-now" aria-live="polite"></div>`;
+      document.body.appendChild(rail);
+      const rlinks = [...rail.querySelectorAll("a")], now = rail.querySelector(".ch-now"), seen = new Set();
+      const setNow = (c) => { const lv = LEVEL[c.id]; rlinks.forEach((a) => a.classList.toggle("here", a.dataset.id === c.id));
+        now.innerHTML = `<i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span>`; };
+      rchs.forEach((c) => new IntersectionObserver((ents) => ents.forEach((en) => {
+        if (en.isIntersecting) { seen.add(c.id); setNow(c); } else seen.delete(c.id);
+        rail.classList.toggle("on", seen.size > 0);
+      }), { rootMargin: "-50% 0px -50% 0px" }).observe(c.el));
+    }
     function resize() {
       chapters.forEach((ch) => {
         const r = ch.stage.getBoundingClientRect(), dpr = Math.min(PHONE ? 1.5 : 2, window.devicePixelRatio || 1); // phones: 1.5x keeps lines sharp with ~45 % fewer pixels
