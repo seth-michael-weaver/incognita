@@ -84,3 +84,28 @@ Object.assign(WT.L.ui, {
   dx_th_mean: "vægtet gennemsnit af {n} EXFOR-poster",
   dx_th_abs: "absorption minus fission",
 });
+
+/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+Object.assign(WT.L.ui, {
+  dx_rr_b1k: "Under 1 keV",
+  dx_rr_own: "INCOGNITAs egen resonanstilpasning til målte data (op til 300 eV; statistiske resonanser fra 300 eV til 1 keV)",
+  dx_rr_stat: "statistiske resonanser ud fra INCOGNITAs egne gennemsnitlige parametre, ikke de målte resonanser: toppenes placering er én tilfældig stikprøve; over mange nuklider ligger resonansintegralet typisk inden for en faktor 2 af målingen",
+  dx_rr_anch: "; går gennem den målte termiske indfangning",
+  dx_rr_sm_a: "INCOGNITAs glatte skøn gennem den målte termiske indfangning; ingen resonanser tegnet",
+  dx_rr_sm: "INCOGNITAs glatte skøn; de rigtige termiske værdier kan afvige med flere størrelsesordener",
+  dx_rr_k_own: "egen resonanstilpasning",
+  dx_rr_k_stat: "statistiske resonanser (ikke de rigtige toppe)",
+  dx_rr_k_sm: "glat skøn (uden resonanser)",
+  dx_below_rr: "under 1 keV: INCOGNITAs {k}",
+  dx_below_own: "Under 1 keV er den fuldt optrukne linje INCOGNITAs egen resonanstilpasning til målte indfangningsdata op til 300 eV; fra 300 eV til 1 keV bruger den statistiske resonanser. Ved 1 keV møder den forudsigelsen.",
+  dx_below_stat: "Under 1 keV er streg-prik-linjen INCOGNITAs statistiske skøn: resonanser med INCOGNITAs egen gennemsnitlige afstand og bredder, placeret tilfældigt, så de enkelte toppe passer ikke med de rigtige. Testet på nuklider, hvis resonansintegral blev holdt tilbage, lå det typisk inden for en faktor 2 af målingen og ikke bedre: medianafvigelse ×1,9, 54 % inden for ×2.",
+  dx_below_sm_a: "Under 1 keV er den prikkede linje INCOGNITAs glatte skøn: en 1/v-kurve gennem den målte termiske indfangning, forbundet med værdien ved 1 keV. Der er ikke tegnet resonanser, så mellem ca. 1 eV og 1 keV kan det rigtige tværsnit være langt højere i sine toppe.",
+  dx_below_sm: "Under 1 keV er den prikkede linje INCOGNITAs glatte skøn: værdien ved 1 keV forlænget som 1/v, uden resonanser og uden en måling, der fastlægger den. De rigtige termiske værdier kan afvige fra den med flere størrelsesordener.",
+  dx_below_anch: "Den er tvunget gennem en målt termisk indfangningsværdi, {v} b.",
+  dx_rr_anch_diff: "Ruden er et separat gennemsnit af EXFOR-poster og afviger fra den.",
+  dx_rr_ri: "Resonansintegral for indfangning over 0,5 eV for denne nuklide: INCOGNITA {m} b, målt {e} b.",
+  dx_rr_ri_used: "Den målte værdi blev brugt til at vælge denne tilfældige stikprøve, så overensstemmelsen er ikke en test.",
+  dx_rr_ri_hold: "Den målte værdi blev holdt tilbage: den blev ikke brugt til at lave denne kurve.",
+  dx_pw_tip_rr: "evaluerede biblioteker (til sammenligning), punktvis ved 0 K",
+  dx_lib_pw_rr: "Under 1 keV tegnes de samme biblioteker punktvis som tynde, fuldt optrukne linjer: rekonstrueret ved 0 K (NJOY RECONR, tolerance 0,01 %) og udtyndet til højst {n} punkter pr. kurve, valgt så resonansernes toppe og dale bevares. De er også kun til sammenligning, ikke INCOGNITA.",
+});

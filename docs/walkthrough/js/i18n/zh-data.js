@@ -84,3 +84,28 @@ Object.assign(WT.L.ui, {
   dx_th_mean: "{n} 个 EXFOR 条目的加权平均",
   dx_th_abs: "吸收减去裂变",
 });
+
+/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+Object.assign(WT.L.ui, {
+  dx_rr_b1k: "1 keV 以下",
+  dx_rr_own: "INCOGNITA 自己对测量数据的共振拟合（至 300 eV；300 eV 至 1 keV 为统计共振）",
+  dx_rr_stat: "由 INCOGNITA 自己的平均参数生成的统计共振，并非测得的共振：峰的位置只是一次随机抽样；在许多核素上，共振积分通常与测量值相差在 2 倍以内",
+  dx_rr_anch: "；经过测得的热中子俘获值",
+  dx_rr_sm_a: "INCOGNITA 经过测得热中子俘获值的平滑估计；未画共振",
+  dx_rr_sm: "INCOGNITA 的平滑估计；真实的热中子值可能相差几个数量级",
+  dx_rr_k_own: "自己的共振拟合",
+  dx_rr_k_stat: "统计共振（不是真实的峰）",
+  dx_rr_k_sm: "平滑估计（无共振）",
+  dx_below_rr: "1 keV 以下：INCOGNITA 的{k}",
+  dx_below_own: "1 keV 以下的实线是 INCOGNITA 自己对 300 eV 以下测得俘获数据的共振拟合；300 eV 至 1 keV 使用统计共振。它在 1 keV 处与预测相接。",
+  dx_below_stat: "1 keV 以下的点划线是 INCOGNITA 的统计估计：共振采用 INCOGNITA 自己的平均间距和宽度，位置随机，因此单个峰与真实的峰不对应。在共振积分被留作检验的核素上，它通常与测量值相差在 2 倍以内，并不更好：中位偏差 ×1.9，54 % 在 ×2 以内。",
+  dx_below_sm_a: "1 keV 以下的点线是 INCOGNITA 的平滑估计：一条经过测得热中子俘获值的 1/v 曲线，与 1 keV 处的值相连。未画共振，因此在约 1 eV 至 1 keV 之间，真实截面在其峰处可能高得多。",
+  dx_below_sm: "1 keV 以下的点线是 INCOGNITA 的平滑估计：把 1 keV 处的值按 1/v 延伸，没有共振，也没有测量值加以约束。真实的热中子值可能与它相差几个数量级。",
+  dx_below_anch: "它被强制经过一个测得的热中子俘获值 {v} b。",
+  dx_rr_anch_diff: "菱形是 EXFOR 条目的另一种平均，与该值不同。",
+  dx_rr_ri: "该核素 0.5 eV 以上俘获的共振积分：INCOGNITA {m} b，测量 {e} b。",
+  dx_rr_ri_used: "这个测量值被用来挑选这次随机抽样，所以两者一致并不是检验。",
+  dx_rr_ri_hold: "这个测量值被留作检验：没有用来制作这条曲线。",
+  dx_pw_tip_rr: "评价库（作比较），0 K 逐点值",
+  dx_lib_pw_rr: "1 keV 以下，同样的评价库以细实线逐点绘出：在 0 K 下重建（NJOY RECONR，容差 0.01 %），每条曲线精简至最多 {n} 个点，所选的点保留共振的峰和谷。它们同样仅作比较，并非 INCOGNITA。",
+});

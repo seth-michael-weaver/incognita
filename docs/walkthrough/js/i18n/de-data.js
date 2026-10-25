@@ -84,3 +84,28 @@ Object.assign(WT.L.ui, {
   dx_th_mean: "gewichtetes Mittel aus {n} EXFOR-Einträgen",
   dx_th_abs: "Absorption minus Spaltung",
 });
+
+/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+Object.assign(WT.L.ui, {
+  dx_rr_b1k: "Unter 1 keV",
+  dx_rr_own: "INCOGNITAs eigene Resonanzanpassung an Messdaten (bis 300 eV; statistische Resonanzen von 300 eV bis 1 keV)",
+  dx_rr_stat: "statistische Resonanzen aus INCOGNITAs eigenen mittleren Parametern, nicht die gemessenen Resonanzen: die Lage der Spitzen ist eine Zufallsstichprobe; über viele Nuklide liegt das Resonanzintegral typischerweise innerhalb eines Faktors 2 an der Messung",
+  dx_rr_anch: "; geht durch den gemessenen thermischen Einfang",
+  dx_rr_sm_a: "INCOGNITAs glatte Schätzung durch den gemessenen thermischen Einfang; keine Resonanzen gezeichnet",
+  dx_rr_sm: "INCOGNITAs glatte Schätzung; echte thermische Werte können um Größenordnungen abweichen",
+  dx_rr_k_own: "eigene Resonanzanpassung",
+  dx_rr_k_stat: "statistische Resonanzen (nicht die echten Spitzen)",
+  dx_rr_k_sm: "glatte Schätzung (ohne Resonanzen)",
+  dx_below_rr: "unter 1 keV: INCOGNITAs {k}",
+  dx_below_own: "Unter 1 keV ist die durchgezogene Linie INCOGNITAs eigene Resonanzanpassung an gemessene Einfangdaten bis 300 eV; von 300 eV bis 1 keV verwendet sie statistische Resonanzen. Bei 1 keV schließt sie an die Vorhersage an.",
+  dx_below_stat: "Unter 1 keV ist die Strich-Punkt-Linie INCOGNITAs statistische Schätzung: Resonanzen mit INCOGNITAs eigenem mittlerem Abstand und eigenen mittleren Breiten, zufällig gesetzt, sodass einzelne Spitzen nicht zu den echten passen. Getestet an Nukliden, deren Resonanzintegral zurückgehalten wurde, lag sie typischerweise innerhalb eines Faktors 2 an der Messung, nicht besser: Median-Abweichung ×1,9, 54 % innerhalb ×2.",
+  dx_below_sm_a: "Unter 1 keV ist die gepunktete Linie INCOGNITAs glatte Schätzung: eine 1/v-Kurve durch den gemessenen thermischen Einfang, zum Wert bei 1 keV überbrückt. Resonanzen sind nicht gezeichnet; zwischen etwa 1 eV und 1 keV kann der echte Wirkungsquerschnitt an seinen Spitzen daher weit höher liegen.",
+  dx_below_sm: "Unter 1 keV ist die gepunktete Linie INCOGNITAs glatte Schätzung: der Wert bei 1 keV als 1/v fortgesetzt, ohne Resonanzen und ohne Messung, die ihn festlegt. Echte thermische Werte können um Größenordnungen davon abweichen.",
+  dx_below_anch: "Sie ist durch einen gemessenen thermischen Einfangwert gezwungen, {v} b.",
+  dx_rr_anch_diff: "Die Raute ist ein eigener Mittelwert aus EXFOR-Einträgen und weicht davon ab.",
+  dx_rr_ri: "Resonanzintegral des Einfangs oberhalb 0,5 eV für dieses Nuklid: INCOGNITA {m} b, gemessen {e} b.",
+  dx_rr_ri_used: "Dieser Messwert wurde benutzt, um diese Zufallsstichprobe auszuwählen; die Übereinstimmung ist also kein Test.",
+  dx_rr_ri_hold: "Dieser Messwert wurde zurückgehalten: er wurde für diese Kurve nicht benutzt.",
+  dx_pw_tip_rr: "evaluierte Bibliotheken (Vergleich), punktweise bei 0 K",
+  dx_lib_pw_rr: "Unter 1 keV werden dieselben Bibliotheken punktweise als dünne durchgezogene Linien gezeichnet: bei 0 K rekonstruiert (NJOY RECONR, Toleranz 0,01 %) und auf höchstens {n} Punkte je Kurve ausgedünnt, so gewählt, dass die Spitzen und Täler der Resonanzen erhalten bleiben. Auch sie dienen nur dem Vergleich, nicht INCOGNITA.",
+});

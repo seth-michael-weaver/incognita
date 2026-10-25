@@ -68,6 +68,11 @@
     if (!pwcache.has(k)) pwcache.set(k, fetch(`data/lib/pw/${k}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)); return pwcache.get(k); });
   // measured thermal capture σγ(0.0253 eV) from EXFOR (scripts/build_site_thermal.py): data/thermal.json, fetched once.
   // A measurement, not a library value: it is drawn as a diamond whether or not the overlay is ticked
+  // INCOGNITA's own capture below the 1 keV join (RESFILL, scripts/build_site_rr.py): data/rr/<Z>/<A>.json, one per isotope
+  // row (none for natural elements); kind own-fit, statistical or smooth, each drawn and labelled differently
+  const rrcache = new Map();
+  const loadRr = (Z, A) => { if (!A) return Promise.resolve(null); const k = nkey(Z, A);
+    if (!rrcache.has(k)) rrcache.set(k, fetch(`data/rr/${k}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)); return rrcache.get(k); };
   let TH = null, thLoad = null;
   const loadTh = () => thLoad || (thLoad = fetch("data/thermal.json").then((r) => (r.ok ? r.json() : null)).then((j) => { TH = j && j.th; }, () => {}));
   // Q-values of (n,p), (n,α) and (n,2n) per nuclide, from the engine's mass tables (scripts/build_site_q.py); they place the
@@ -310,10 +315,10 @@
     setHash(r);
     if (!ndata.has(nkey(r.Z, r.A)) || (libOn && !lcache.has(r.Z))) busy(r);
     let d0, lz; // the nuclide's file and, if the overlay is ticked, its element's library file
-    let pw;
-    try { [d0, lz, , , pw] = await Promise.all([loadNuc(r.Z, r.A), libOn ? loadLib(r.Z) : null, loadQ(), loadTh(), libOn ? loadPw(r.Z, r.A) : null]); } catch (e) { if (sel === r) busy(r, e); return; }
+    let pw, rr;
+    try { [d0, lz, , , pw, rr] = await Promise.all([loadNuc(r.Z, r.A), libOn ? loadLib(r.Z) : null, loadQ(), loadTh(), libOn ? loadPw(r.Z, r.A) : null, loadRr(r.Z, r.A)]); } catch (e) { if (sel === r) busy(r, e); return; }
     if (sel !== r) return;
-    cur = { r, d: d0, lib: libOf(lz, r, pw) }; busy(null);
+    cur = { r, d: d0, lib: libOf(lz, r, pw), rr }; busy(null);
     buildTabs(); setHash(r);
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
@@ -393,10 +398,36 @@
     const LAB = { "endfb8.1": "ENDF/B-VIII.1", "jeff4.0": "JEFF-4.0", "tendl2025": "TENDL-2025" };
     const lic = (s) => (s === "US public domain" ? T("dx_lib_pd", "US public domain") : s);
     box.innerHTML = `<p>${T("dx_lib_note", "Dashed lines are evaluated nuclear-data libraries, shown only for comparison: INCOGNITA does not use them and they are not in the downloads. Each is reconstructed at 0 K from the library’s ENDF-6 file (NJOY) and averaged over the same energy bins as the curve (log-energy bin averages, so resonances are smoothed out); the MACS uses the full pointwise curve.")}</p>`
-      + (have.some((k) => L.pw && L.pw[k] && L.pw[k][tab]) ? `<p>${T("dx_lib_pw", "Below 1 keV the same libraries are drawn pointwise, as thin solid lines: reconstructed at 0 K (NJOY RECONR, 0.01 % tolerance) and thinned to at most {n} points per curve, choosing the points that keep the resonance peaks and dips. They are comparators too: INCOGNITA has no curve below 1 keV.").replace("{n}", Math.max(500, ...have.map((k) => (L.pw[k] && L.pw[k][tab] && L.pw[k][tab].nmax) || 500)))}${have.some((k) => L.pw[k] && L.pw[k][tab] && L.pw[k][tab].nmax > 500) ? " " + T("dx_lib_pw_dense", "This nuclide has many resonances below 1 keV, so it keeps more points: five per resonance peak, up to 5000 (with 500, a fixed budget, many peaks of U-235 or Pu-239 would be cut).") : ""}</p>` : "")
+      + (have.some((k) => L.pw && L.pw[k] && L.pw[k][tab]) ? `<p>${(tab === "cap" && cur.rr ? T("dx_lib_pw_rr", "Below 1 keV the same libraries are drawn pointwise, as thin solid lines: reconstructed at 0 K (NJOY RECONR, 0.01 % tolerance) and thinned to at most {n} points per curve, choosing the points that keep the resonance peaks and dips. They are comparators too, not INCOGNITA.")
+        : T("dx_lib_pw", "Below 1 keV the same libraries are drawn pointwise, as thin solid lines: reconstructed at 0 K (NJOY RECONR, 0.01 % tolerance) and thinned to at most {n} points per curve, choosing the points that keep the resonance peaks and dips. They are comparators too: INCOGNITA has no curve below 1 keV.")).replace("{n}", Math.max(500, ...have.map((k) => (L.pw[k] && L.pw[k][tab] && L.pw[k][tab].nmax) || 500)))}${have.some((k) => L.pw[k] && L.pw[k][tab] && L.pw[k][tab].nmax > 500) ? " " + T("dx_lib_pw_dense", "This nuclide has many resonances below 1 keV, so it keeps more points: five per resonance peak, up to 5000 (with 500, a fixed budget, many peaks of U-235 or Pu-239 would be cut).") : ""}</p>` : "")
       + (have.length ? `<ul>${have.map((k) => `<li><i style="color:${C["l" + (LIBS.indexOf(k) + 1)]}"></i><span><b>${esc(L.libs[k].label)}</b> · ${esc(lic(L.libs[k].lic))} · ${esc(L.libs[k].cite)}</span></li>`).join("")}</ul>` : "")
       + `<p>${miss.length ? `${T("dx_lib_none", "No file for this nuclide in")} ${miss.map((k) => LAB[k]).join(", ")}. ` : ""}${(() => { const no = have.filter((k) => !L.n[k][tab]); return no.length ? `${T("dx_lib_notab", "No separate value for this reaction in")} ${no.map((k) => LAB[k]).join(", ")}. ` : ""; })()}${T("dx_lib_held", "JENDL-5 will be added once its terms for redistributing derived tables are confirmed.")}</p>`;
   }
+
+  // INCOGNITA's own curve below 1 keV (RESFILL): what it is, in plain words, by kind; and how it is drawn
+  const RR_STYLE = { "own-fit": { w: 2.2, halo: 0, dash: [] }, statistical: { w: 1.8, halo: 0, dash: [6, 3, 1.5, 3] }, smooth: { w: 1.4, halo: 0, dash: [1.5, 3] } };
+  const rrSty = (k) => RR_STYLE[k] || RR_STYLE.smooth;
+  const rrAnch = (rr) => !!(rr.thermal && rr.thermal.anchored);
+  function rrLabel(rr) {
+    if (rr.kind === "own-fit") return T("dx_rr_own", "INCOGNITA’s own resonance fit to measured data (up to 300 eV; statistical resonances from 300 eV to 1 keV)");
+    if (rr.kind === "statistical") return T("dx_rr_stat", "statistical resonances from INCOGNITA’s own average parameters, not the measured resonances: the peak positions are one random sample; over many nuclides the resonance integral is typically within a factor of 2 of measurement") + (rrAnch(rr) ? T("dx_rr_anch", "; passes through the measured thermal capture") : "");
+    return rrAnch(rr) ? T("dx_rr_sm_a", "INCOGNITA’s smooth estimate through the measured thermal capture; no resonances drawn") : T("dx_rr_sm", "INCOGNITA’s smooth estimate; real thermal values can differ by orders of magnitude");
+  }
+  const rrShort = (rr) => rr.kind === "own-fit" ? T("dx_rr_k_own", "own resonance fit") : rr.kind === "statistical" ? T("dx_rr_k_stat", "statistical resonances (not the real peaks)") : T("dx_rr_k_sm", "smooth estimate (no resonances)");
+  function rrSentence(rr, th) {
+    let s = rr.kind === "own-fit" ? T("dx_below_own", "Below 1 keV the solid line is INCOGNITA’s own resonance fit to measured capture data up to 300 eV; from 300 eV to 1 keV it uses statistical resonances. It joins the prediction at 1 keV.")
+      : rr.kind === "statistical" ? T("dx_below_stat", "Below 1 keV the dash-dot line is INCOGNITA’s statistical estimate: resonances with INCOGNITA’s own average spacing and widths, placed at random, so single peaks do not match the real ones. Tested on nuclides whose resonance integral was held out, it was typically within a factor of 2 of measurement, and no better: median off by ×1.9, 54 % within ×2.") 
+      : rrAnch(rr) ? T("dx_below_sm_a", "Below 1 keV the dotted line is INCOGNITA’s smooth estimate: a 1/v curve through the measured thermal capture, bridged to the 1 keV value. No resonances are drawn, so between about 1 eV and 1 keV the real cross section can be far higher at its peaks.")
+      : T("dx_below_sm", "Below 1 keV the dotted line is INCOGNITA’s smooth estimate: the 1 keV value continued as 1/v, with no resonances and no measurement to pin it. Real thermal values can differ from it by orders of magnitude.");
+    const te = rr.thermal && rr.thermal.exp;
+    if (rrAnch(rr) && te && te.value > 0) { s += " " + T("dx_below_anch", "It is forced through a measured thermal capture value, {v} b.").replace("{v}", num(te.value, 3));
+      if (th && th.y > 0 && Math.abs(th.y / te.value - 1) > 0.05) s += " " + T("dx_rr_anch_diff", "The diamond is a separate average of EXFOR entries and differs from it."); }
+    const ri = rr.ri; if (ri && ri.exp && ri.exp.value > 0 && ri.model_b > 0) { s += " " + T("dx_rr_ri", "Resonance integral of capture above 0.5 eV for this nuclide: INCOGNITA {m} b, measured {e} b.").replace("{m}", num(ri.model_b, 3)).replace("{e}", num(ri.exp.value, 3));
+      if (/^used/.test(ri.role || "")) s += " " + T("dx_rr_ri_used", "That measured value was used to pick this random sample, so the agreement is not a test.");
+      else if (/^HOLD/.test(ri.role || "")) s += " " + T("dx_rr_ri_hold", "That measured value was held out: it was not used to make this curve."); }
+    return s;
+  }
+  const rrSwatch = (c) => { const s = rrSty(c.rr); return `<svg class="dx-rrsw" width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="21" y2="4" stroke="${c.col}" stroke-width="${s.w}" stroke-dasharray="${s.dash.join(" ")}" stroke-linecap="round"/></svg>`; };
 
   // series for the current tab: { unit, curves:[{name,col,pts:[[x,y]],band68:[[x,lo,hi]],band95}], points:[{x,y,lo,hi,xlo,xhi,ds,dec,kind}], ds:[...] }
   function series() {
@@ -404,6 +435,10 @@
     const band = (ys, us) => grid.map((x, i) => (ys[i] > 0 && us && us[i] != null ? [x, ys[i] / 10 ** us[i], ys[i] * 10 ** us[i]] : null)).filter(Boolean);
     if (tab === "cap") {
       if (d.cap) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2)"), col: C.curve, pts: grid.map((x, i) => [x, d.cap[i]]), b68: band(d.cap, d.u68), b95: band(d.cap, d.u95) });
+      // below 1 keV, INCOGNITA's own curve (RESFILL, 0 K), joined to the prediction's first point (1 keV, cap[0])
+      const rr = cur.rr;
+      if (d.cap && d.cap[0] > 0 && rr && rr.E && rr.cap && rr.E.length > 1) out.curves.push({ name: `${T("dx_rr_b1k", "Below 1 keV")}: ${rrLabel(rr)}`, short: rrShort(rr), col: C.curve, rr: rr.kind, rrd: rr,
+        pts: [...rr.E.map((x, j) => [x, rr.cap[j]]).filter(([x]) => x < grid[0] * 0.9999), [grid[0], d.cap[0]]] });
       const th = TH && cur.r.A && TH[`${cur.r.Z}-${cur.r.A}`]; // [value b, 1σ b, n entries, tier, [EXFOR subentries], note]
       if (th) out.th = { x: 0.0253, y: th[0], u: th[1], n: th[2], tier: th[3], subs: th[4] || [], abs: th[5] === "abs" };
       if (d.meas) { out.ds = d.meas.ds;
@@ -488,7 +523,7 @@
     if (xf > 0) ax(xf);
     // a pointwise library curve's deepest interference dips do not stretch the y-axis: it reaches at most 9 decades below the top
     const ytop = Math.max(0, ...S.curves.flatMap((c) => c.pts.map(([, y]) => y || 0))), ypw = Math.max(yf, ytop * 1e-9);
-    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > (c.pw ? ypw : yf) && x >= xf) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (x < xf) return; if (lo > yf) ay(lo); if (hi > yf) ay(hi); }); });
+    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > (c.pw || c.rr ? ypw : yf) && x >= xf) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (x < xf) return; if (lo > yf) ay(lo); if (hi > yf) ay(hi); }); });
     shown.forEach((p) => { if (p.y > 0) { ax(p.xlo || p.x); ax(p.xhi || p.x); ay(p.y); } });
     if (S.th && S.th.y > 0) { ax(S.th.x); ay(S.th.y); }
     for (const c of [LAY.p, LAY.c]) layer(c);
@@ -515,13 +550,14 @@
       for (const w of text.split(" ")) { const t = ln ? ln + " " + w : w; if (ln && ctx.measureText(t).width > maxW) { out.push(ln); ln = w; } else ln = t; }
       out.push(ln); return out; };
     ctx.font = `500 12px ${SANS}`;
-    // capture below 1 keV: INCOGNITA has no curve there, only the evaluated libraries (comparators) and measurements;
-    // a dotted line marks 1 keV and a label on the left says so
+    // capture below 1 keV: INCOGNITA's own RESFILL curve where there is one (its kind named on the left), else only the
+    // evaluated libraries (comparators) and measurements; a dotted line marks 1 keV
     const own = tab === "cap" && S.curves.some((c) => !c.dash && !c.pw), split = own && 10 ** x0 < PW_E && 10 ** x1 > PW_E ? X(PW_E) : null;
+    const rrC = S.curves.find((c) => c.rr);
     let below = null;
     if (split != null) {
       ctx.strokeStyle = rgba(C.soft, 0.7); ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(split, m.t); ctx.lineTo(split, H - m.b); ctx.stroke(); ctx.setLineDash([]); ctx.strokeStyle = C.grid;
-      if (split - m.l >= 220) below = wrap(T("dx_below_cv", "below 1 keV: no INCOGNITA curve, only evaluated libraries and measurements"), split - m.l - 16); // a narrow (phone) plot leaves it to the sentence under the plot
+      if (split - m.l >= 220) below = wrap(rrC ? T("dx_below_rr", "below 1 keV: INCOGNITA’s {k}").replace("{k}", rrC.short) : T("dx_below_cv", "below 1 keV: no INCOGNITA curve, only evaluated libraries and measurements"), split - m.l - 16); // a narrow (phone) plot leaves it to the sentence under the plot
     }
     const nx = split != null ? split : m.l; // the resolved-resonance note covers INCOGNITA's own range only
     if (S.note && S.note.upto > Math.max(10 ** x0, split != null ? PW_E : 0)) { const xe = Math.min(X(S.note.upto), W - m.r); ctx.fillStyle = rgba(C.soft, 0.07); ctx.fillRect(nx, m.t, xe - nx, H - m.t - m.b);
@@ -538,9 +574,12 @@
     ctx.restore();
     drawPoints(false);
     const cc = LAY.c.getContext("2d"); cc.save(); cc.beginPath(); cc.rect(m.l, m.t, W - m.l - m.r, H - m.t - m.b); cc.clip();
-    const lib = (c) => !!(c.dash || c.pw);
-    for (const c of [...S.curves].sort((a, b) => lib(a) - lib(b))) for (const [w, col] of c.pw ? [[1.15, c.col]] : c.dash ? [[1.7, c.col]] : [[5, C.surface], [2.2, c.col]]) { // library lines go on top, thin and without a halo, so they never hide the prediction; pointwise ones solid, so the resonances stay readable
-      cc.strokeStyle = col; cc.lineWidth = w; cc.shadowColor = w > 3 || lib(c) ? "transparent" : col; cc.shadowBlur = w > 3 || lib(c) ? 0 : 12; cc.lineJoin = "round"; cc.setLineDash(c.dash ? [7, 5] : []); cc.globalAlpha = c.pw ? 0.9 : 1; cc.beginPath(); let on = false;
+    const lib = (c) => !!(c.dash || c.pw), zOf = (c) => (c.rr ? 2 : lib(c) ? 1 : 0); // INCOGNITA's own below-1-keV curve last, over the comparators
+    // INCOGNITA's own curve below 1 keV: solid for its own resonance fit, dash-dot for statistical resonances, thin dotted for the smooth estimate
+    const sty = (c) => { if (c.pw) return [[1.15, c.col]]; if (c.dash) return [[1.7, c.col]]; if (c.rr) { const s = rrSty(c.rr); return s.halo ? [[s.halo, C.surface], [s.w, c.col]] : [[s.w, c.col]]; } return [[5, C.surface], [2.2, c.col]]; };
+    for (const c of [...S.curves].sort((a, b) => zOf(a) - zOf(b))) for (const [w, col] of sty(c)) { // library lines go on top, thin and without a halo, so they never hide the prediction; pointwise ones solid, so the resonances stay readable
+      const glow = !(w > 3 || lib(c) || (c.rr && c.rr !== "own-fit"));
+      cc.strokeStyle = col; cc.lineWidth = w; cc.shadowColor = glow ? col : "transparent"; cc.shadowBlur = glow ? 12 : 0; cc.lineJoin = "round"; cc.setLineDash(c.dash ? [7, 5] : c.rr ? rrSty(c.rr).dash : []); cc.globalAlpha = c.pw ? 0.9 : 1; cc.beginPath(); let on = false;
       for (const [x, y] of c.pts) { if (!(y > 0)) { on = false; continue; } on ? cc.lineTo(X(x), Y(y)) : cc.moveTo(X(x), Y(y)); on = true; }
       cc.stroke(); cc.globalAlpha = 1;
     }
@@ -594,14 +633,15 @@
     $("#dx-full").parentElement.hidden = tab === "cap" || tab === "macs";
     libNote();
     const pws = pwOf(S);
-    const leg = S.curves.filter((c) => !c.pw).map((c) => c.dash ? `<span class="dx-key">${pws.some((q) => q.short === c.short) ? `<i class="ln thin" style="background:${c.col}"></i>` : ""}<i class="dash" style="color:${c.col}"></i>${esc(c.name)}${pws.some((q) => q.short === c.short) ? ` · ${T("dx_pw_leg2", "solid below 1 keV: pointwise, 0 K")}` : ""}</span>` : `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);
+    const leg = S.curves.filter((c) => !c.pw).map((c) => c.dash ? `<span class="dx-key">${pws.some((q) => q.short === c.short) ? `<i class="ln thin" style="background:${c.col}"></i>` : ""}<i class="dash" style="color:${c.col}"></i>${esc(c.name)}${pws.some((q) => q.short === c.short) ? ` · ${T("dx_pw_leg2", "solid below 1 keV: pointwise, 0 K")}` : ""}</span>` : c.rr ? `<span class="dx-key dx-rrkey">${rrSwatch(c)}<span>${esc(c.name)}</span></span>` : `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);
     if (nPts) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas}"></i>${T("dx_meas_pts", "measured")} (${nPts}${nEx ? `, ${nEx} ${T("dx_excl", "excluded")}` : ""})</span>`);
     if (S.th) leg.push(`<span class="dx-key"><i class="dia" style="background:${C.meas};border-color:${C.ink}"></i>${T("dx_th", "measured thermal value (EXFOR)")}</span>`);
     $("#dx-plegend").innerHTML = leg.join("");
     // under the plot, in plain words: where INCOGNITA's own curve starts, and what the diamond is (with its EXFOR entries)
     const bl = $("#dx-below"), xl = P && P.X ? 10 ** P.x0 : Infinity, ownC = S.curves.some((c) => !c.dash && !c.pw);
     if (bl) { const parts = [];
-      if (tab === "cap" && ownC && xl < PW_E) parts.push(T("dx_below", "INCOGNITA’s own curve starts at 1 keV; below that only comparators and measurements are shown."));
+      const rrC = S.curves.find((c) => c.rr);
+      if (tab === "cap" && ownC && xl < PW_E) parts.push(rrC ? rrSentence(rrC.rrd, S.th) : T("dx_below", "INCOGNITA’s own curve starts at 1 keV; below that only comparators and measurements are shown."));
       if (S.th) { const t = S.th, links = t.subs.map((s) => { const ex = exforOf(s); return ex ? `<a href="${ex.url}" target="_blank" rel="noopener">${ex.id}</a>` : esc(s); }).join(", ");
         parts.push(`${T("dx_th_sent", "Diamond: measured thermal capture cross section σγ(0.0253 eV)")} = <b>${num(t.y, 4)} ± ${num(t.u, 2)} b</b>, ${T("dx_th_mean", "weighted mean of {n} EXFOR entries").replace("{n}", t.n)}${t.abs ? ` (${T("dx_th_abs", "absorption minus fission")})` : ""}: ${links}.`); }
       bl.innerHTML = parts.join(" "); bl.hidden = !parts.length; }
@@ -646,17 +686,19 @@
       if (ex) html += lastPT === "mouse" ? `<br><span class="dx-exhint">${T("dx_exfor_click", "click the point to open")} EXFOR ${ex.id} ↗</span>`
         : `<br><a class="dx-exhint" href="${ex.url}" target="_blank" rel="noopener">${T("dx_exfor_tap", "tap again, or here, to open")} EXFOR ${ex.id} ↗</a>`;
       return { html, url: ex && ex.url, p: best }; }
-    const pws = pwOf(P.S);
-    if (pws.length && x > P.m.l && x < P.W - P.m.r) { // below 1 keV: the pointwise library values at this energy
+    const pws = pwOf(P.S), rrC = P.S.curves.find((c) => c.rr);
+    if ((pws.length || rrC) && x > P.m.l && x < P.W - P.m.r) { // below 1 keV: INCOGNITA's own curve (if any), then the pointwise library values at this energy
       const xv = 10 ** (P.x0 + (x - P.m.l) / (P.W - P.m.l - P.m.r) * (P.x1 - P.x0));
       if (xv < PW_E) { const lines = pws.map((c) => [c, pwAt(c, xv)]).filter(([, v]) => v > 0).map(([c, v]) => `<span class="dx-faint"><i class="dx-sw" style="background:${c.col}"></i>${esc(c.short)}: ${num(v)} ${P.S.unit}</span>`);
+        const ov = rrC ? pwAt(rrC, xv) : null;
+        if (ov > 0) return { html: `${fmtE(xv)}<br>${rrSwatch(rrC)} <b>${num(ov)} ${P.S.unit}</b> <span class="dx-faint">· INCOGNITA, ${esc(rrC.short)}</span>${lines.length ? `<br><span class="dx-faint">${T("dx_pw_tip_rr", "evaluated libraries (comparators), pointwise 0 K")}:</span><br>${lines.join("<br>")}` : ""}`, url: null, p: null };
         if (lines.length) return { html: `${fmtE(xv)} <span class="dx-faint">· ${T("dx_pw_tip", "evaluated libraries (comparators), pointwise 0 K; no INCOGNITA curve below 1 keV")}</span><br>${lines.join("<br>")}`, url: null, p: null }; }
     }
     const c = P.S.curves[0];
     if (c && x > P.m.l && x < P.W - P.m.r) {
       const xv = 10 ** (P.x0 + (x - P.m.l) / (P.W - P.m.l - P.m.r) * (P.x1 - P.x0)); let j = -1, jd = Infinity; c.pts.forEach(([px], i) => { const dd = Math.abs(log10(px) - log10(xv)); if (dd < jd) { jd = dd; j = i; } });
-      if (j >= 0 && jd < 0.2 && (!pws.length || xv >= PW_E * 0.98)) { const xe = c.pts[j][0], lines = [], anyLib = P.S.curves.some((cc) => cc.dash);
-        for (const cc of P.S.curves) { if (cc.pw) continue; const q =cc.pts.find((p) => p[0] === xe); if (!q || !(q[1] > 0)) continue; const b = cc.b68 && cc.b68.find((r) => r[0] === xe);
+      if (j >= 0 && jd < 0.2 && (!(pws.length || rrC) || xv >= PW_E * 0.98)) { const xe = c.pts[j][0], lines = [], anyLib = P.S.curves.some((cc) => cc.dash);
+        for (const cc of P.S.curves) { if (cc.pw || cc.rr) continue; const q =cc.pts.find((p) => p[0] === xe); if (!q || !(q[1] > 0)) continue; const b = cc.b68 && cc.b68.find((r) => r[0] === xe);
           lines.push(cc.dash ? `<span class="dx-faint">${esc(cc.short)}: ${num(q[1])} ${P.S.unit}</span>` : `<b>${num(q[1])} ${P.S.unit}</b>${b ? ` <span class="dx-faint">(68 %: ${num(b[1])}–${num(b[2])})</span>` : ""}${anyLib ? ` <span class="dx-faint">· ${esc(cc.name)}</span>` : ""}`); }
         if (lines.length) return { html: `${fmtE(xe)}${anyLib && tab !== "macs" ? ` <span class="dx-faint">· ${T("dx_lib_bin", "libraries: bin averages")}</span>` : ""}<br>${lines.join("<br>")}`, url: null, p: null }; } }
     return null;

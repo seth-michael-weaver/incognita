@@ -84,3 +84,28 @@ Object.assign(WT.L.ui, {
   dx_th_mean: "media ponderada de {n} entradas de EXFOR",
   dx_th_abs: "absorción menos fisión",
 });
+
+/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+Object.assign(WT.L.ui, {
+  dx_rr_b1k: "Por debajo de 1 keV",
+  dx_rr_own: "ajuste de resonancias propio de INCOGNITA a datos medidos (hasta 300 eV; resonancias estadísticas de 300 eV a 1 keV)",
+  dx_rr_stat: "resonancias estadísticas a partir de los parámetros medios propios de INCOGNITA, no las resonancias medidas: las posiciones de los picos son una muestra al azar; en muchos núclidos, la integral de resonancia suele quedar dentro de un factor 2 de la medida",
+  dx_rr_anch: "; pasa por la captura térmica medida",
+  dx_rr_sm_a: "estimación suave de INCOGNITA que pasa por la captura térmica medida; sin resonancias dibujadas",
+  dx_rr_sm: "estimación suave de INCOGNITA; los valores térmicos reales pueden diferir en órdenes de magnitud",
+  dx_rr_k_own: "ajuste de resonancias propio",
+  dx_rr_k_stat: "resonancias estadísticas (no los picos reales)",
+  dx_rr_k_sm: "estimación suave (sin resonancias)",
+  dx_below_rr: "por debajo de 1 keV: {k} de INCOGNITA",
+  dx_below_own: "Por debajo de 1 keV, la línea continua es el ajuste de resonancias propio de INCOGNITA a datos de captura medidos, hasta 300 eV; de 300 eV a 1 keV usa resonancias estadísticas. Se une a la predicción en 1 keV.",
+  dx_below_stat: "Por debajo de 1 keV, la línea de trazo y punto es la estimación estadística de INCOGNITA: resonancias con el espaciado y las anchuras medios propios de INCOGNITA, colocadas al azar, así que un pico concreto no coincide con los reales. Probada en núclidos cuya integral de resonancia se reservó, solía quedar dentro de un factor 2 de la medida, y no mejor: desviación mediana ×1,9, 54 % dentro de ×2.",
+  dx_below_sm_a: "Por debajo de 1 keV, la línea de puntos es la estimación suave de INCOGNITA: una curva 1/v que pasa por la captura térmica medida, enlazada con el valor en 1 keV. No se dibujan resonancias, así que entre 1 eV y 1 keV, aproximadamente, la sección eficaz real puede ser mucho mayor en sus picos.",
+  dx_below_sm: "Por debajo de 1 keV, la línea de puntos es la estimación suave de INCOGNITA: el valor en 1 keV prolongado como 1/v, sin resonancias ni medida que lo fije. Los valores térmicos reales pueden diferir de ella en órdenes de magnitud.",
+  dx_below_anch: "Está forzada a pasar por un valor medido de captura térmica, {v} b.",
+  dx_rr_anch_diff: "El rombo es un promedio aparte de entradas EXFOR y difiere de ese valor.",
+  dx_rr_ri: "Integral de resonancia de la captura por encima de 0,5 eV para este núclido: INCOGNITA {m} b, medida {e} b.",
+  dx_rr_ri_used: "Ese valor medido se usó para elegir esta muestra al azar, así que el acuerdo no es una prueba.",
+  dx_rr_ri_hold: "Ese valor medido se reservó: no se usó para hacer esta curva.",
+  dx_pw_tip_rr: "bibliotecas evaluadas (comparadores), puntuales a 0 K",
+  dx_lib_pw_rr: "Por debajo de 1 keV las mismas bibliotecas se dibujan punto a punto, con líneas finas continuas: reconstruidas a 0 K (NJOY RECONR, tolerancia del 0,01 %) y reducidas a un máximo de {n} puntos por curva, elegidos para conservar los picos y los valles de las resonancias. También son comparadores, no INCOGNITA.",
+});

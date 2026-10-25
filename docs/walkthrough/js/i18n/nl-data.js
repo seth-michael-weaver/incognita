@@ -84,3 +84,28 @@ Object.assign(WT.L.ui, {
   dx_th_mean: "gewogen gemiddelde van {n} EXFOR-gegevens",
   dx_th_abs: "absorptie min splijting",
 });
+
+/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+Object.assign(WT.L.ui, {
+  dx_rr_b1k: "Onder 1 keV",
+  dx_rr_own: "INCOGNITA's eigen resonantiefit aan gemeten data (tot 300 eV; statistische resonanties van 300 eV tot 1 keV)",
+  dx_rr_stat: "statistische resonanties uit INCOGNITA's eigen gemiddelde parameters, niet de gemeten resonanties: de plaatsen van de pieken zijn één willekeurige trekking; over veel nucliden ligt de resonantie-integraal doorgaans binnen een factor 2 van de meting",
+  dx_rr_anch: "; gaat door de gemeten thermische vangst",
+  dx_rr_sm_a: "INCOGNITA's gladde schatting door de gemeten thermische vangst; geen resonanties getekend",
+  dx_rr_sm: "INCOGNITA's gladde schatting; echte thermische waarden kunnen ordes van grootte verschillen",
+  dx_rr_k_own: "eigen resonantiefit",
+  dx_rr_k_stat: "statistische resonanties (niet de echte pieken)",
+  dx_rr_k_sm: "gladde schatting (zonder resonanties)",
+  dx_below_rr: "onder 1 keV: INCOGNITA's {k}",
+  dx_below_own: "Onder 1 keV is de doorgetrokken lijn INCOGNITA's eigen resonantiefit aan gemeten vangstdata tot 300 eV; van 300 eV tot 1 keV gebruikt ze statistische resonanties. Bij 1 keV sluit ze aan op de voorspelling.",
+  dx_below_stat: "Onder 1 keV is de streep-punt-lijn INCOGNITA's statistische schatting: resonanties met INCOGNITA's eigen gemiddelde afstand en breedtes, willekeurig geplaatst, dus losse pieken vallen niet samen met de echte. Getest op nucliden waarvan de resonantie-integraal achtergehouden was, lag ze doorgaans binnen een factor 2 van de meting, en niet beter: mediane afwijking ×1,9, 54 % binnen ×2.",
+  dx_below_sm_a: "Onder 1 keV is de gestippelde lijn INCOGNITA's gladde schatting: een 1/v-kromme door de gemeten thermische vangst, overbrugd naar de waarde bij 1 keV. Er zijn geen resonanties getekend, dus tussen ongeveer 1 eV en 1 keV kan de echte werkzame doorsnede in haar pieken veel hoger zijn.",
+  dx_below_sm: "Onder 1 keV is de gestippelde lijn INCOGNITA's gladde schatting: de waarde bij 1 keV doorgetrokken als 1/v, zonder resonanties en zonder meting die haar vastlegt. Echte thermische waarden kunnen er ordes van grootte van verschillen.",
+  dx_below_anch: "Ze is gedwongen door een gemeten thermische vangstwaarde te gaan, {v} b.",
+  dx_rr_anch_diff: "De ruit is een apart gemiddelde van EXFOR-ingangen en wijkt daarvan af.",
+  dx_rr_ri: "Resonantie-integraal van de vangst boven 0,5 eV voor dit nuclide: INCOGNITA {m} b, gemeten {e} b.",
+  dx_rr_ri_used: "Die gemeten waarde is gebruikt om deze willekeurige trekking te kiezen, dus de overeenkomst is geen test.",
+  dx_rr_ri_hold: "Die gemeten waarde is achtergehouden: ze is niet gebruikt om deze kromme te maken.",
+  dx_pw_tip_rr: "geëvalueerde bibliotheken (vergelijking), puntsgewijs bij 0 K",
+  dx_lib_pw_rr: "Onder 1 keV worden dezelfde bibliotheken puntsgewijs getekend, als dunne doorgetrokken lijnen: gereconstrueerd bij 0 K (NJOY RECONR, tolerantie 0,01 %) en uitgedund tot hooguit {n} punten per kromme, zo gekozen dat de pieken en dalen van de resonanties blijven. Ook dit is alleen ter vergelijking, niet INCOGNITA.",
+});

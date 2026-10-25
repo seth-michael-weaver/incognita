@@ -450,6 +450,9 @@ body.og .hero-copy { bottom: 64px; }
 .dx-key i.thin { height: 1.5px; width: 18px; border-radius: 1px; }
 .dx-key i.dia { width: 9px; height: 9px; border-radius: 1px; border: 1.5px solid; transform: rotate(45deg); margin: 0 2px; }
 .dx-sw { display: inline-block; width: 10px; height: 2px; margin: 0 6px 3px 0; vertical-align: middle; }
+/* INCOGNITA's own curve below 1 keV (RESFILL): its line style as a small SVG swatch; the long label wraps beside it */
+.dx-rrsw { flex: none; vertical-align: middle; }
+.dx-key.dx-rrkey { align-items: flex-start; max-width: 100%; } .dx-rrkey .dx-rrsw { margin-top: 0.3em; } .dx-rrkey span { min-width: 0; }
 .dx-below { margin: 8px 0 4px; font: 500 13px/1.5 var(--sans); color: var(--soft); overflow-wrap: anywhere; }
 .dx-below b { color: var(--ink); font-weight: 600; } .dx-below a { color: var(--accent); }
 .dx-libbar { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font: 500 13px var(--sans); color: var(--soft); }

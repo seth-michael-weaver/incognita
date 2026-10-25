@@ -84,3 +84,28 @@ Object.assign(WT.L.ui, {
   dx_th_mean: "EXFOR 항목 {n}개의 가중 평균",
   dx_th_abs: "흡수에서 핵분열을 뺀 값",
 });
+
+/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+Object.assign(WT.L.ui, {
+  dx_rr_b1k: "1 keV 미만",
+  dx_rr_own: "측정 데이터에 대한 INCOGNITA 자체 공명 맞춤(300 eV까지; 300 eV~1 keV는 통계적 공명)",
+  dx_rr_stat: "INCOGNITA 자체 평균 매개변수로 만든 통계적 공명이며, 측정된 공명이 아닙니다. 봉우리 위치는 무작위 표본 하나입니다. 많은 핵종에서 공명 적분은 보통 측정값의 2배 이내입니다",
+  dx_rr_anch: "; 측정된 열중성자 포획값을 지납니다",
+  dx_rr_sm_a: "측정된 열중성자 포획값을 지나는 INCOGNITA의 매끄러운 추정; 공명은 그리지 않음",
+  dx_rr_sm: "INCOGNITA의 매끄러운 추정; 실제 열중성자 값은 자릿수 단위로 다를 수 있음",
+  dx_rr_k_own: "자체 공명 맞춤",
+  dx_rr_k_stat: "통계적 공명(실제 봉우리 아님)",
+  dx_rr_k_sm: "매끄러운 추정(공명 없음)",
+  dx_below_rr: "1 keV 미만: INCOGNITA의 {k}",
+  dx_below_own: "1 keV 미만의 실선은 300 eV까지 측정된 포획 데이터에 대한 INCOGNITA 자체 공명 맞춤입니다. 300 eV부터 1 keV까지는 통계적 공명을 씁니다. 1 keV에서 예측과 이어집니다.",
+  dx_below_stat: "1 keV 미만의 일점쇄선은 INCOGNITA의 통계적 추정입니다. INCOGNITA 자체의 평균 간격과 폭을 가진 공명을 무작위로 놓았으므로, 개별 봉우리는 실제와 맞지 않습니다. 공명 적분을 따로 남겨 둔 핵종으로 시험하면 보통 측정값의 2배 이내였고 그보다 낫지는 않았습니다(중앙값 차이 ×1.9, ×2 이내 54 %).",
+  dx_below_sm_a: "1 keV 미만의 점선은 INCOGNITA의 매끄러운 추정입니다. 측정된 열중성자 포획값을 지나는 1/v 곡선을 1 keV 값에 이은 것입니다. 공명은 그리지 않았으므로, 약 1 eV에서 1 keV 사이에서는 실제 단면적이 봉우리에서 훨씬 높을 수 있습니다.",
+  dx_below_sm: "1 keV 미만의 점선은 INCOGNITA의 매끄러운 추정입니다. 1 keV 값을 1/v로 이어 늘린 것으로, 공명도 없고 값을 고정할 측정도 없습니다. 실제 열중성자 값은 이와 자릿수 단위로 다를 수 있습니다.",
+  dx_below_anch: "측정된 열중성자 포획값 {v} b를 반드시 지나도록 했습니다.",
+  dx_rr_anch_diff: "마름모는 EXFOR 항목의 별도 평균이며 이 값과 다릅니다.",
+  dx_rr_ri: "이 핵종의 0.5 eV 이상 포획 공명 적분: INCOGNITA {m} b, 측정 {e} b.",
+  dx_rr_ri_used: "이 측정값은 이 무작위 표본을 고르는 데 쓰였으므로, 일치는 검증이 아닙니다.",
+  dx_rr_ri_hold: "이 측정값은 따로 남겨 둔 것으로, 이 곡선을 만드는 데 쓰지 않았습니다.",
+  dx_pw_tip_rr: "평가 라이브러리(비교용), 0 K 점별 값",
+  dx_lib_pw_rr: "1 keV 미만에서는 같은 라이브러리를 가는 실선으로 점별로 그립니다. 0 K에서 재구성하고(NJOY RECONR, 허용 오차 0.01 %), 공명의 봉우리와 골이 남도록 고른 점으로 곡선마다 최대 {n}개 점까지 줄였습니다. 이것도 비교용입니다. INCOGNITA의 곡선이 아닙니다.",
+});

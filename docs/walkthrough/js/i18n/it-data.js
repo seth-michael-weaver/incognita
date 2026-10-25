@@ -84,3 +84,28 @@ Object.assign(WT.L.ui, {
   dx_th_mean: "media pesata di {n} voci EXFOR",
   dx_th_abs: "assorbimento meno fissione",
 });
+
+/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+Object.assign(WT.L.ui, {
+  dx_rr_b1k: "Sotto 1 keV",
+  dx_rr_own: "fit delle risonanze proprio di INCOGNITA ai dati misurati (fino a 300 eV; risonanze statistiche da 300 eV a 1 keV)",
+  dx_rr_stat: "risonanze statistiche dai parametri medi propri di INCOGNITA, non le risonanze misurate: le posizioni dei picchi sono un campione casuale; su molti nuclidi l'integrale di risonanza è tipicamente entro un fattore 2 dalla misura",
+  dx_rr_anch: "; passa per la cattura termica misurata",
+  dx_rr_sm_a: "stima liscia di INCOGNITA che passa per la cattura termica misurata; nessuna risonanza disegnata",
+  dx_rr_sm: "stima liscia di INCOGNITA; i veri valori termici possono differire di ordini di grandezza",
+  dx_rr_k_own: "fit delle risonanze proprio",
+  dx_rr_k_stat: "risonanze statistiche (non i veri picchi)",
+  dx_rr_k_sm: "stima liscia (senza risonanze)",
+  dx_below_rr: "sotto 1 keV: {k} di INCOGNITA",
+  dx_below_own: "Sotto 1 keV la linea continua è il fit delle risonanze proprio di INCOGNITA ai dati di cattura misurati, fino a 300 eV; da 300 eV a 1 keV usa risonanze statistiche. Si raccorda alla previsione a 1 keV.",
+  dx_below_stat: "Sotto 1 keV la linea tratto-punto è la stima statistica di INCOGNITA: risonanze con la spaziatura e le larghezze medie proprie di INCOGNITA, messe a caso, quindi un singolo picco non coincide con quelli veri. Provata su nuclidi il cui integrale di risonanza era stato tenuto da parte, era tipicamente entro un fattore 2 dalla misura, e non meglio: scarto mediano ×1,9, 54 % entro ×2.",
+  dx_below_sm_a: "Sotto 1 keV la linea punteggiata è la stima liscia di INCOGNITA: una curva 1/v che passa per la cattura termica misurata, raccordata al valore a 1 keV. Non sono disegnate risonanze, quindi tra circa 1 eV e 1 keV la vera sezione d'urto può essere molto più alta nei suoi picchi.",
+  dx_below_sm: "Sotto 1 keV la linea punteggiata è la stima liscia di INCOGNITA: il valore a 1 keV prolungato come 1/v, senza risonanze e senza una misura che la fissi. I veri valori termici possono differirne di ordini di grandezza.",
+  dx_below_anch: "È forzata a passare per un valore misurato di cattura termica, {v} b.",
+  dx_rr_anch_diff: "Il rombo è una media a parte di voci EXFOR e ne differisce.",
+  dx_rr_ri: "Integrale di risonanza della cattura sopra 0,5 eV per questo nuclide: INCOGNITA {m} b, misura {e} b.",
+  dx_rr_ri_used: "Quel valore misurato è servito a scegliere questo campione casuale, quindi l'accordo non è una prova.",
+  dx_rr_ri_hold: "Quel valore misurato è stato tenuto da parte: non è servito a fare questa curva.",
+  dx_pw_tip_rr: "librerie valutate (termini di confronto), puntuali a 0 K",
+  dx_lib_pw_rr: "Sotto 1 keV le stesse librerie sono tracciate punto per punto, con linee sottili continue: ricostruite a 0 K (NJOY RECONR, tolleranza 0,01 %) e ridotte ad al più {n} punti per curva, scelti per conservare i picchi e le valli delle risonanze. Anche queste servono solo al confronto, non INCOGNITA.",
+});

@@ -84,3 +84,28 @@ Object.assign(WT.L.ui, {
   dx_th_mean: "moyenne pondérée de {n} entrées EXFOR",
   dx_th_abs: "absorption moins fission",
 });
+
+/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+Object.assign(WT.L.ui, {
+  dx_rr_b1k: "Sous 1 keV",
+  dx_rr_own: "ajustement des résonances propre à INCOGNITA sur des données mesurées (jusqu'à 300 eV ; résonances statistiques de 300 eV à 1 keV)",
+  dx_rr_stat: "résonances statistiques tirées des paramètres moyens propres à INCOGNITA, pas les résonances mesurées : la position des pics est un tirage au hasard ; sur de nombreux nucléides, l'intégrale de résonance est typiquement à un facteur 2 près de la mesure",
+  dx_rr_anch: " ; passe par la capture thermique mesurée",
+  dx_rr_sm_a: "estimation lisse d'INCOGNITA passant par la capture thermique mesurée ; aucune résonance tracée",
+  dx_rr_sm: "estimation lisse d'INCOGNITA ; les vraies valeurs thermiques peuvent différer de plusieurs ordres de grandeur",
+  dx_rr_k_own: "propre ajustement des résonances",
+  dx_rr_k_stat: "résonances statistiques (pas les vrais pics)",
+  dx_rr_k_sm: "estimation lisse (sans résonances)",
+  dx_below_rr: "sous 1 keV : {k} d'INCOGNITA",
+  dx_below_own: "Sous 1 keV, le trait plein est l'ajustement des résonances propre à INCOGNITA sur des données de capture mesurées, jusqu'à 300 eV ; de 300 eV à 1 keV, il utilise des résonances statistiques. Il rejoint la prédiction à 1 keV.",
+  dx_below_stat: "Sous 1 keV, le trait mixte est l'estimation statistique d'INCOGNITA : des résonances avec l'espacement et les largeurs moyens propres à INCOGNITA, placées au hasard ; un pic isolé ne correspond donc pas aux vrais. Testée sur des nucléides dont l'intégrale de résonance avait été mise de côté, elle était typiquement à un facteur 2 près de la mesure, pas mieux : écart médian ×1,9, 54 % à moins de ×2.",
+  dx_below_sm_a: "Sous 1 keV, le pointillé est l'estimation lisse d'INCOGNITA : une courbe en 1/v passant par la capture thermique mesurée, raccordée à la valeur à 1 keV. Aucune résonance n'est tracée ; entre environ 1 eV et 1 keV, la vraie section efficace peut donc être bien plus haute à ses pics.",
+  dx_below_sm: "Sous 1 keV, le pointillé est l'estimation lisse d'INCOGNITA : la valeur à 1 keV prolongée en 1/v, sans résonances et sans mesure pour la fixer. Les vraies valeurs thermiques peuvent en différer de plusieurs ordres de grandeur.",
+  dx_below_anch: "Elle est forcée à passer par une valeur de capture thermique mesurée, {v} b.",
+  dx_rr_anch_diff: "Le losange est une moyenne distincte d'entrées EXFOR et en diffère.",
+  dx_rr_ri: "Intégrale de résonance de la capture au-dessus de 0,5 eV pour ce nucléide : INCOGNITA {m} b, mesure {e} b.",
+  dx_rr_ri_used: "Cette valeur mesurée a servi à choisir ce tirage au hasard : l'accord n'est donc pas un test.",
+  dx_rr_ri_hold: "Cette valeur mesurée a été mise de côté : elle n'a pas servi à faire cette courbe.",
+  dx_pw_tip_rr: "bibliothèques évaluées (comparateurs), ponctuelles à 0 K",
+  dx_lib_pw_rr: "Sous 1 keV, les mêmes bibliothèques sont tracées point par point, en traits fins continus : reconstruites à 0 K (NJOY RECONR, tolérance 0,01 %) et réduites à au plus {n} points par courbe, choisis pour garder les pics et les creux des résonances. Ce sont aussi des comparateurs : pas INCOGNITA.",
+});
