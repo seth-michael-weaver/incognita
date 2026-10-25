@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "Questa curva usa una correzione del decadimento gamma del nucleo che TALYS e TENDL non applicano; senza, la cattura a 30 keV sarebbe circa {n} volte maggiore.",
   dx_mf_gg_near: "Questa curva usa una correzione del decadimento gamma del nucleo che TALYS e TENDL non applicano; senza, la cattura a 30 keV sarebbe più o meno la stessa.",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "libreria valutata · confronto, non INCOGNITA",
+  dx_pw_leg2: "linea continua sotto 1 keV: puntuale, 0 K",
+  dx_lib_pw_dense: "Questo nuclide ha molte risonanze sotto 1 keV, quindi conserva più punti: cinque per picco di risonanza, fino a 5000 (con un budget fisso di 500 molti picchi di U-235 o Pu-239 verrebbero tagliati).",
+  dx_pw_short: "puntuale a 0 K, sotto 1 keV",
+  dx_lib_pw: "Sotto 1 keV le stesse librerie sono tracciate punto per punto, con linee sottili continue: ricostruite a 0 K (NJOY RECONR, tolleranza 0,01 %) e ridotte ad al più {n} punti per curva, scelti per conservare i picchi e le valli delle risonanze. Anche queste servono solo al confronto: INCOGNITA non ha una curva sotto 1 keV.",
+  dx_below_cv: "sotto 1 keV: nessuna curva INCOGNITA, solo librerie valutate e misure",
+  dx_below: "La curva propria di INCOGNITA parte da 1 keV; sotto sono mostrati solo confronti e misure.",
+  dx_pw_tip: "librerie valutate (confronto), puntuali a 0 K; nessuna curva INCOGNITA sotto 1 keV",
+  dx_th: "valore termico misurato (EXFOR)",
+  dx_th_sent: "Rombo: sezione d'urto di cattura termica misurata σγ(0,0253 eV)",
+  dx_th_mean: "media pesata di {n} voci EXFOR",
+  dx_th_abs: "assorbimento meno fissione",
+});

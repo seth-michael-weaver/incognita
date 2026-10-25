@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "Denne kurve bruger en korrektion af kernens gammahenfald, som TALYS og TENDL ikke anvender; uden den ville indfangningen ved 30 keV være omkring {n} gange større.",
   dx_mf_gg_near: "Denne kurve bruger en korrektion af kernens gammahenfald, som TALYS og TENDL ikke anvender; uden den ville indfangningen ved 30 keV være omtrent den samme.",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "evalueret bibliotek · sammenligning, ikke INCOGNITA",
+  dx_pw_leg2: "fuldt optrukket under 1 keV: punktvis, 0 K",
+  dx_lib_pw_dense: "Denne nuklid har mange resonanser under 1 keV og beholder derfor flere punkter: fem pr. resonanstop, op til 5000 (med et fast budget på 500 ville mange toppe i U-235 eller Pu-239 blive skåret af).",
+  dx_pw_short: "punktvis ved 0 K, under 1 keV",
+  dx_lib_pw: "Under 1 keV tegnes de samme biblioteker punktvis som tynde, fuldt optrukne linjer: rekonstrueret ved 0 K (NJOY RECONR, tolerance 0,01 %) og udtyndet til højst {n} punkter pr. kurve, valgt så resonansernes toppe og dale bevares. De er også kun til sammenligning: INCOGNITA har ingen kurve under 1 keV.",
+  dx_below_cv: "under 1 keV: ingen INCOGNITA-kurve, kun evaluerede biblioteker og målinger",
+  dx_below: "INCOGNITAs egen kurve begynder ved 1 keV; derunder vises kun sammenligninger og målinger.",
+  dx_pw_tip: "evaluerede biblioteker (sammenligning), punktvis ved 0 K; ingen INCOGNITA-kurve under 1 keV",
+  dx_th: "målt termisk værdi (EXFOR)",
+  dx_th_sent: "Rombe: målt termisk indfangningstværsnit σγ(0,0253 eV)",
+  dx_th_mean: "vægtet gennemsnit af {n} EXFOR-poster",
+  dx_th_abs: "absorption minus fission",
+});

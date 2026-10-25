@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "Deze curve gebruikt een correctie op het gammaverval van de kern die TALYS en TENDL niet toepassen; zonder die correctie zou de vangst bij 30 keV ongeveer {n} keer groter zijn.",
   dx_mf_gg_near: "Deze curve gebruikt een correctie op het gammaverval van de kern die TALYS en TENDL niet toepassen; zonder die correctie zou de vangst bij 30 keV ongeveer gelijk zijn.",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "geëvalueerde bibliotheek · vergelijking, niet INCOGNITA",
+  dx_pw_leg2: "doorgetrokken onder 1 keV: puntsgewijs, 0 K",
+  dx_lib_pw_dense: "Deze nuclide heeft veel resonanties onder 1 keV en houdt daarom meer punten: vijf per resonantiepiek, tot 5000 (met een vast budget van 500 zouden veel pieken van U-235 of Pu-239 worden afgekapt).",
+  dx_pw_short: "puntsgewijs bij 0 K, onder 1 keV",
+  dx_lib_pw: "Onder 1 keV worden dezelfde bibliotheken puntsgewijs getekend, als dunne doorgetrokken lijnen: gereconstrueerd bij 0 K (NJOY RECONR, tolerantie 0,01 %) en uitgedund tot hooguit {n} punten per kromme, zo gekozen dat de pieken en dalen van de resonanties blijven. Ook dit is alleen ter vergelijking: INCOGNITA heeft onder 1 keV geen kromme.",
+  dx_below_cv: "onder 1 keV: geen INCOGNITA-kromme, alleen geëvalueerde bibliotheken en metingen",
+  dx_below: "De eigen kromme van INCOGNITA begint bij 1 keV; daaronder staan alleen vergelijkingen en metingen.",
+  dx_pw_tip: "geëvalueerde bibliotheken (vergelijking), puntsgewijs bij 0 K; geen INCOGNITA-kromme onder 1 keV",
+  dx_th: "gemeten thermische waarde (EXFOR)",
+  dx_th_sent: "Ruit: gemeten thermische vangstdoorsnede σγ(0,0253 eV)",
+  dx_th_mean: "gewogen gemiddelde van {n} EXFOR-gegevens",
+  dx_th_abs: "absorptie min splijting",
+});

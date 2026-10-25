@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "Esta curva usa una corrección de la desexcitación gamma del núcleo que TALYS y TENDL no aplican; sin ella, la captura a 30 keV sería unas {n} veces mayor.",
   dx_mf_gg_near: "Esta curva usa una corrección de la desexcitación gamma del núcleo que TALYS y TENDL no aplican; sin ella, la captura a 30 keV sería más o menos la misma.",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "biblioteca evaluada · comparador, no INCOGNITA",
+  dx_pw_leg2: "línea continua por debajo de 1 keV: puntual, 0 K",
+  dx_lib_pw_dense: "Este nucleido tiene muchas resonancias por debajo de 1 keV, así que conserva más puntos: cinco por pico de resonancia, hasta 5000 (con un presupuesto fijo de 500 se cortarían muchos picos de U-235 o Pu-239).",
+  dx_pw_short: "puntual a 0 K, por debajo de 1 keV",
+  dx_lib_pw: "Por debajo de 1 keV las mismas bibliotecas se dibujan punto a punto, con líneas finas continuas: reconstruidas a 0 K (NJOY RECONR, tolerancia del 0,01 %) y reducidas a un máximo de {n} puntos por curva, elegidos para conservar los picos y los valles de las resonancias. También son comparadores: INCOGNITA no tiene curva por debajo de 1 keV.",
+  dx_below_cv: "por debajo de 1 keV: no hay curva de INCOGNITA, solo bibliotecas evaluadas y mediciones",
+  dx_below: "La curva propia de INCOGNITA empieza en 1 keV; por debajo solo se muestran comparadores y mediciones.",
+  dx_pw_tip: "bibliotecas evaluadas (comparadores), puntuales a 0 K; sin curva de INCOGNITA por debajo de 1 keV",
+  dx_th: "valor térmico medido (EXFOR)",
+  dx_th_sent: "Rombo: sección eficaz de captura térmica medida σγ(0,0253 eV)",
+  dx_th_mean: "media ponderada de {n} entradas de EXFOR",
+  dx_th_abs: "absorción menos fisión",
+});

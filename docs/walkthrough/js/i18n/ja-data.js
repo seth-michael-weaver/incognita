@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "この曲線は、TALYSとTENDLが適用しない、原子核のガンマ崩壊への補正を使っています。補正がなければ、30 keVの捕獲は約{n}倍になります。",
   dx_mf_gg_near: "この曲線は、TALYSとTENDLが適用しない、原子核のガンマ崩壊への補正を使っています。補正がなくても、30 keVの捕獲はほぼ同じです。",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "評価済みライブラリ · 比較用、INCOGNITA ではない",
+  dx_pw_leg2: "1 keV 未満は実線：点ごと、0 K",
+  dx_lib_pw_dense: "この核種は 1 keV 未満に共鳴が多いため、より多くの点を残しています。共鳴ピーク 1 つにつき 5 点、最大 5000 点です（500 点に固定すると、U-235 や Pu-239 の多くのピークが欠けます）。",
+  dx_pw_short: "0 K の点ごとのデータ、1 keV 未満",
+  dx_lib_pw: "1 keV 未満では同じライブラリを点ごとに細い実線で描いています。0 K で再構成し（NJOY RECONR、許容誤差 0.01 %）、共鳴の山と谷が残るように選んだ点で、曲線ごとに最大 {n} 点まで間引いています。これも比較用です。INCOGNITA には 1 keV 未満の曲線はありません。",
+  dx_below_cv: "1 keV 未満：INCOGNITA の曲線はなく、評価済みライブラリと測定値のみ",
+  dx_below: "INCOGNITA 自身の曲線は 1 keV から始まります。それより下には比較用のデータと測定値だけを表示しています。",
+  dx_pw_tip: "評価済みライブラリ（比較用）、0 K の点ごとの値。1 keV 未満に INCOGNITA の曲線はありません",
+  dx_th: "測定された熱中性子値（EXFOR）",
+  dx_th_sent: "ひし形：測定された熱中性子捕獲断面積 σγ(0.0253 eV)",
+  dx_th_mean: "EXFOR の {n} 件のエントリの加重平均",
+  dx_th_abs: "吸収から核分裂を引いた値",
+});

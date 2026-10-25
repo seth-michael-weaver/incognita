@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "Cette courbe utilise une correction de la désexcitation gamma du noyau que TALYS et TENDL n'appliquent pas ; sans elle, la capture à 30 keV serait environ {n} fois plus forte.",
   dx_mf_gg_near: "Cette courbe utilise une correction de la désexcitation gamma du noyau que TALYS et TENDL n'appliquent pas ; sans elle, la capture à 30 keV serait à peu près la même.",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "bibliothèque évaluée · comparateur, pas INCOGNITA",
+  dx_pw_leg2: "en trait plein sous 1 keV : ponctuel, 0 K",
+  dx_lib_pw_dense: "Ce nucléide a beaucoup de résonances sous 1 keV ; il garde donc plus de points : cinq par pic de résonance, jusqu'à 5000 (avec un budget fixe de 500, beaucoup de pics de U-235 ou de Pu-239 seraient coupés).",
+  dx_pw_short: "ponctuel à 0 K, sous 1 keV",
+  dx_lib_pw: "Sous 1 keV, les mêmes bibliothèques sont tracées point par point, en traits fins continus : reconstruites à 0 K (NJOY RECONR, tolérance 0,01 %) et réduites à au plus {n} points par courbe, choisis pour garder les pics et les creux des résonances. Ce sont aussi des comparateurs : INCOGNITA n'a pas de courbe sous 1 keV.",
+  dx_below_cv: "sous 1 keV : pas de courbe INCOGNITA, seulement des bibliothèques évaluées et des mesures",
+  dx_below: "La courbe propre d'INCOGNITA commence à 1 keV ; en dessous, seuls les comparateurs et les mesures sont affichés.",
+  dx_pw_tip: "bibliothèques évaluées (comparateurs), ponctuelles à 0 K ; pas de courbe INCOGNITA sous 1 keV",
+  dx_th: "valeur thermique mesurée (EXFOR)",
+  dx_th_sent: "Losange : section efficace de capture thermique mesurée σγ(0,0253 eV)",
+  dx_th_mean: "moyenne pondérée de {n} entrées EXFOR",
+  dx_th_abs: "absorption moins fission",
+});

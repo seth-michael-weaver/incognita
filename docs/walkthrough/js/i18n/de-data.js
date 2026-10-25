@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "Diese Kurve verwendet eine Korrektur des Gammazerfalls des Kerns, die TALYS und TENDL nicht anwenden; ohne sie wäre der Einfang bei 30 keV etwa {n}-mal größer.",
   dx_mf_gg_near: "Diese Kurve verwendet eine Korrektur des Gammazerfalls des Kerns, die TALYS und TENDL nicht anwenden; ohne sie wäre der Einfang bei 30 keV ungefähr gleich.",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "evaluierte Bibliothek · Vergleich, nicht INCOGNITA",
+  dx_pw_leg2: "durchgezogen unter 1 keV: punktweise, 0 K",
+  dx_lib_pw_dense: "Dieses Nuklid hat unter 1 keV viele Resonanzen und behält daher mehr Punkte: fünf je Resonanzspitze, bis zu 5000 (mit festen 500 Punkten würden viele Spitzen von U-235 oder Pu-239 abgeschnitten).",
+  dx_pw_short: "punktweise bei 0 K, unter 1 keV",
+  dx_lib_pw: "Unter 1 keV werden dieselben Bibliotheken punktweise als dünne durchgezogene Linien gezeichnet: bei 0 K rekonstruiert (NJOY RECONR, Toleranz 0,01 %) und auf höchstens {n} Punkte je Kurve ausgedünnt, so gewählt, dass die Spitzen und Täler der Resonanzen erhalten bleiben. Auch sie dienen nur dem Vergleich: INCOGNITA hat unter 1 keV keine Kurve.",
+  dx_below_cv: "unter 1 keV: keine INCOGNITA-Kurve, nur evaluierte Bibliotheken und Messungen",
+  dx_below: "INCOGNITAs eigene Kurve beginnt bei 1 keV; darunter werden nur Vergleichsdaten und Messungen gezeigt.",
+  dx_pw_tip: "evaluierte Bibliotheken (Vergleich), punktweise bei 0 K; unter 1 keV keine INCOGNITA-Kurve",
+  dx_th: "gemessener thermischer Wert (EXFOR)",
+  dx_th_sent: "Raute: gemessener thermischer Einfangquerschnitt σγ(0,0253 eV)",
+  dx_th_mean: "gewichtetes Mittel aus {n} EXFOR-Einträgen",
+  dx_th_abs: "Absorption minus Spaltung",
+});

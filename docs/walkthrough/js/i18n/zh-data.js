@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "这条曲线使用了 TALYS 和 TENDL 不采用的一项原子核伽马衰变修正；若不修正，30 keV 处的俘获约为现值的 {n} 倍。",
   dx_mf_gg_near: "这条曲线使用了 TALYS 和 TENDL 不采用的一项原子核伽马衰变修正；若不修正，30 keV 处的俘获大致相同。",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "评价库 · 仅作比较，非 INCOGNITA",
+  dx_pw_leg2: "1 keV 以下为实线：逐点、0 K",
+  dx_lib_pw_dense: "该核素在 1 keV 以下共振很多，因此保留更多的点：每个共振峰 5 个点，最多 5000 个（若固定为 500 个点，U-235 或 Pu-239 的许多峰会被截掉）。",
+  dx_pw_short: "0 K 逐点，1 keV 以下",
+  dx_lib_pw: "1 keV 以下，同样的评价库以细实线逐点绘出：在 0 K 下重建（NJOY RECONR，容差 0.01 %），每条曲线精简至最多 {n} 个点，所选的点保留共振的峰和谷。它们同样仅作比较：INCOGNITA 在 1 keV 以下没有曲线。",
+  dx_below_cv: "1 keV 以下：没有 INCOGNITA 曲线，只有评价库和测量值",
+  dx_below: "INCOGNITA 自己的曲线从 1 keV 开始；低于 1 keV 只显示比较用的评价库和测量值。",
+  dx_pw_tip: "评价库（仅作比较），0 K 逐点值；1 keV 以下没有 INCOGNITA 曲线",
+  dx_th: "测量的热中子值（EXFOR）",
+  dx_th_sent: "菱形：测量的热中子俘获截面 σγ(0.0253 eV)",
+  dx_th_mean: "{n} 个 EXFOR 条目的加权平均",
+  dx_th_abs: "吸收减去裂变",
+});

@@ -68,3 +68,19 @@ Object.assign(WT.L.ui, {
   dx_mf_gg_hi: "이 곡선은 TALYS와 TENDL이 적용하지 않는, 원자핵의 감마 붕괴에 대한 보정을 씁니다. 보정이 없으면 30 keV에서 포획은 약 {n}배 커집니다.",
   dx_mf_gg_near: "이 곡선은 TALYS와 TENDL이 적용하지 않는, 원자핵의 감마 붕괴에 대한 보정을 씁니다. 보정이 없어도 30 keV에서 포획은 거의 같습니다.",
 });
+
+/* pointwise library comparators below 1 keV and the measured thermal value (KONINGOVERLAY) */
+Object.assign(WT.L.ui, {
+  dx_eval_cmp: "평가 라이브러리 · 비교용, INCOGNITA 아님",
+  dx_pw_leg2: "1 keV 미만은 실선: 점별, 0 K",
+  dx_lib_pw_dense: "이 핵종은 1 keV 미만에 공명이 많아 점을 더 많이 남깁니다. 공명 봉우리마다 5개, 최대 5000개입니다(500개로 고정하면 U-235나 Pu-239의 많은 봉우리가 잘립니다).",
+  dx_pw_short: "0 K 점별 값, 1 keV 미만",
+  dx_lib_pw: "1 keV 미만에서는 같은 라이브러리를 가는 실선으로 점별로 그립니다. 0 K에서 재구성하고(NJOY RECONR, 허용 오차 0.01 %), 공명의 봉우리와 골이 남도록 고른 점으로 곡선마다 최대 {n}개 점까지 줄였습니다. 이것도 비교용입니다. INCOGNITA에는 1 keV 미만의 곡선이 없습니다.",
+  dx_below_cv: "1 keV 미만: INCOGNITA 곡선 없음, 평가 라이브러리와 측정값만",
+  dx_below: "INCOGNITA 자체 곡선은 1 keV에서 시작합니다. 그 아래에는 비교용 자료와 측정값만 보입니다.",
+  dx_pw_tip: "평가 라이브러리(비교용), 0 K 점별 값. 1 keV 미만에는 INCOGNITA 곡선이 없습니다",
+  dx_th: "측정된 열중성자 값(EXFOR)",
+  dx_th_sent: "마름모: 측정된 열중성자 포획 단면적 σγ(0.0253 eV)",
+  dx_th_mean: "EXFOR 항목 {n}개의 가중 평균",
+  dx_th_abs: "흡수에서 핵분열을 뺀 값",
+});
