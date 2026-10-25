@@ -676,6 +676,7 @@ canvas { direction: ltr; }
 [dir="rtl"] .ch-rail { left: auto; right: 12px; align-items: flex-end; }
 @media (max-width: 900px) { [dir="rtl"] .ch-rail { right: 10px; } }
 @media (prefers-reduced-motion: reduce) { .ch-rail, .ch-rail i, .ch-now { transition: none; } }
+.ch-now:empty { display: none; }
 /* desktop: bigger dots, and the current chapter as a readable pill at the bottom left (the same pill as on phones) */
 @media (min-width: 901px) {
   .ch-rail { top: 0; bottom: 0; transform: none; justify-content: center; }
