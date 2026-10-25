@@ -333,6 +333,7 @@
     if (d.flag) f.push(`<span class="dx-warn">${T("dx_flag", "resolved resonances reach the MACS window: prefer a measured MACS")}</span>`);
     $("#dx-facts").innerHTML = f.join("");
     const mf = mformNote(d.mform), mfb = $("#dx-mf"); if (mfb) { mfb.hidden = !mf; mfb.innerHTML = mf || ""; }
+    trustPanel();
     const st =[[r.Z, T("dx_s_p", "protons")], [r.A ? r.A - r.Z : "–", T("dx_s_n", "neutrons")]];
     if (d.macs30) st.push([num(d.macs30) + " mb", T("dx_s_macs", "capture in a star at 30 keV")]);
     if (d.meas) st.push([d.meas.cap.length + d.meas.mxw.length, T("dx_s_pts", "measured capture points")]);
@@ -371,6 +372,7 @@
     for (const k of ["n2n", "np", "na"]) if ((d.ch && d.ch[k]) || (d.thr && d.thr[k]) || libHas(k)) tabs.push(k);
     if (d.macs || (d.meas && d.meas.mxw.some((p) => p[0] >= 1000)) || libHas("macs")) tabs.push("macs");
     if (!tabs.includes(tab)) tab = "cap";
+    cur.tabs = tabs;
     $("#dx-tabs").innerHTML = tabs.map((k) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${CH[k]}</button>`).join("");
     $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; setHash(cur.r); $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); sweep(); }));
   }
@@ -422,10 +424,61 @@
     const te = rr.thermal && rr.thermal.exp;
     if (rrAnch(rr) && te && te.value > 0) { s += " " + T("dx_below_anch", "It is forced through a measured thermal capture value, {v} b.").replace("{v}", num(te.value, 3));
       if (th && th.y > 0 && Math.abs(th.y / te.value - 1) > 0.05) s += " " + T("dx_rr_anch_diff", "The diamond is a separate average of EXFOR entries and differs from it."); }
-    const ri = rr.ri; if (ri && ri.exp && ri.exp.value > 0 && ri.model_b > 0) { s += " " + T("dx_rr_ri", "Resonance integral of capture above 0.5 eV for this nuclide: INCOGNITA {m} b, measured {e} b.").replace("{m}", num(ri.model_b, 3)).replace("{e}", num(ri.exp.value, 3));
-      if (/^used/.test(ri.role || "")) s += " " + T("dx_rr_ri_used", "That measured value was used to pick this random sample, so the agreement is not a test.");
-      else if (/^HOLD/.test(ri.role || "")) s += " " + T("dx_rr_ri_hold", "That measured value was held out: it was not used to make this curve."); }
+    const ri = riText(rr); if (ri) s += " " + ri;
     return s;
+  }
+  // the resonance-integral comparison for one nuclide (RESFILL rr/<Z>/<A>.json "ri"), or "" when there is no measured RI
+  function riText(rr) {
+    const ri = rr && rr.ri; if (!(ri && ri.exp && ri.exp.value > 0 && ri.model_b > 0)) return "";
+    let s = T("dx_rr_ri", "Resonance integral of capture above 0.5 eV for this nuclide: INCOGNITA {m} b, measured {e} b.").replace("{m}", num(ri.model_b, 3)).replace("{e}", num(ri.exp.value, 3));
+    if (/^used/.test(ri.role || "")) s += " " + T("dx_rr_ri_used", "That measured value was used to pick this random sample, so the agreement is not a test.");
+    else if (/^HOLD/.test(ri.role || "")) s += " " + T("dx_rr_ri_hold", "That measured value was held out: it was not used to make this curve.");
+    return s;
+  }
+
+  /** "How far to trust this": only checked results, no new claims.
+   *  Tier meanings, the validated range (Z 26–83), model_form_flag: library/v0.2/README.md and CHANGELOG.md.
+   *  Bands: the pre-registered coverage check of 2026-10-24 (research reports/COVAR.md, 5 test nuclides; caveat in
+   *  library/v0.2/README.md): capture, fission, elastic covered as stated; (n,p), (n,α), (n,2n) and total under-covered.
+   *  Capture "if anything, wide": library/v0.2/README.md ("the bands are on the wide side").
+   *  Engine errors: data/board/cells.csv, engine section (scoring "in-sample (development)", not blind), score_ours of the
+   *  row with the most nuclei: [view, nuclei, Z from, Z to (nuclei in d_pernuc.csv / band name), rms dex]. */
+  const BOARD = {
+    cap: [["capture_all", 41, 26, 82, 0.1299289503]],
+    macs: [["K185 Z20-39", 20, 20, 39, 0.1608116676], ["K185 Z40-59", 15, 40, 59, 0.1538501219], ["K185 Z60-83", 69, 60, 83, 0.1141666319]],
+    n2n: [["thrA1_n2n", 35, 28, 92, 0.08696570963]], np: [["thrA1_np", 41, 26, 92, 0.1691835923]], na: [["thrA1_na", 25, 26, 82, 0.1860277146]],
+  };
+  function trustPanel() {
+    const box = $("#dx-trust"); if (!box) return;
+    const d = cur.d, r = cur.r, rr = cur.rr;
+    if (d.tier == null || !r.A) { box.hidden = true; box.innerHTML = ""; return; }
+    const TT = [
+      T("dx_tr_t0", "Measured nucleus. The curve is still the engine’s own prediction, not fitted to these measurements; but the engine’s global settings were chosen using many nuclei, this one among them, so a match here is a check, not an independent test."),
+      T("dx_tr_t1", "Anchored. No measured cross sections, but a measured stellar average at 30 keV: the engine’s curve is scaled by one factor to match it, so its shape is still the model’s."),
+      T("dx_tr_t2", "Interpolated. Not measured, but within two neutrons or protons of measured nuclei; the curve is the model’s prediction."),
+      T("dx_tr_t3", "Extrapolated. Not measured and not close to measured nuclei (or without structure data): the curve is the model alone, with no measurement to check it.")];
+    const h = [`<h3>${T("dx_tr_h", "How far to trust this")}</h3>`, `<p><span class="dx-chip t${d.tier}">${TIER_SHORT[d.tier]}</span> ${TT[d.tier]}</p>`];
+    if (!d.valid) h.push(`<p>${T("dx_tr_out", "Outside Z 26–83, the range the library’s validation covers.")}</p>`);
+    const mk = d.mform && d.mform.kind;
+    if (mk === "pe_kev" || mk === "fists2") h.push(`<p>${T("dx_tr_mf", "Model-form flag: one engine setting changes capture here by more than a factor of 2 (see the note above). No measurement can decide between the two choices; the bands below 1 MeV are widened to contain both.")}</p>`);
+    else if (mk === "gg_deadend") h.push(`<p>${T("dx_tr_mf_gg", "Model-form flag: the value relies on the engine’s fix of a missing gamma-decay width (see the note above); the band is not widened for it.")}</p>`);
+    const tabs = cur.tabs || ["cap"], li = [];
+    for (const k of tabs) {
+      // the coverage check scored measured nuclei only, so for an unmeasured nucleus (tier 2, 3) it says nothing
+      const band = k === "cap" ? (!d.u68 ? "" : d.tier >= 2 ? T("dx_tr_b_unm", "bands checked only on measured nuclei, not on nuclei like this one") : T("dx_tr_b_ok", "bands cover as stated (if anything, wide)"))
+        : k === "macs" ? (d.macsU ? T("dx_tr_b_macs", "band not checked on its own") : "")
+        : k === "np" && d.npL && d.npL.some((p) => p[2] != null) ? T("dx_tr_b_narrow", "band likely too narrow: it under-covered")
+        : T("dx_tr_b_none", "no band shown");
+      const tested = k === "cap" ? d.tier === 0 : k === "macs" ? d.tier <= 1 : !!(d.thr && d.thr[k] && d.thr[k].length);
+      const b = tested && (BOARD[k] || []).find((x) => r.Z >= x[2] && r.Z <= x[3]);
+      const err = b ? T("dx_tr_e", "Scoreboard error typically ×{f} ({n} measured nuclei, Z {z}; not blind)").replace("{f}", num(10 ** b[4], 3)).replace("{n}", b[1]).replace("{z}", `${b[2]}–${b[3]}`)
+        : T("dx_tr_e_none", "no held-out test for this region");
+      li.push(`<li><b>${CH[k]}</b> <span>${[band, err].filter(Boolean).join(" · ")}</span></li>`);
+    }
+    if (d.cap && rr && rr.kind) { const ri = riText(rr); li.push(`<li><b>${T("dx_rr_b1k", "Below 1 keV")}</b> <span>${rrShort(rr)}${ri ? " · " + ri : ""}</span></li>`); }
+    h.push(`<ul>${li.join("")}</ul>`);
+    h.push(`<p class="dx-tr-src">${T("dx_tr_src", "Tier and flags: library/v0.2 README. Bands: a pre-registered coverage check against measurements (5 test nuclides, October 2026), in which capture, fission and elastic bands covered as stated and the threshold channels and total under-covered. Errors: the <a href=\"scoreboard.html\" data-keep-lang>Scoreboard</a>, root-mean-square of log10(engine / measured); it is not a blind test, because the engine’s rules were chosen while watching it.")}</p>`);
+    box.innerHTML = h.join(""); box.hidden = false; WT.keepLang();
   }
   const rrSwatch = (c) => { const s = rrSty(c.rr); return `<svg class="dx-rrsw" width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="21" y2="4" stroke="${c.col}" stroke-width="${s.w}" stroke-dasharray="${s.dash.join(" ")}" stroke-linecap="round"/></svg>`; };
 

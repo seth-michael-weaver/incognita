@@ -628,6 +628,16 @@ body.og .hero-credit { display: none; }
 .dx-status { font: 500 15px var(--sans); color: var(--soft); margin: 0 0 16px; }
 .dx-mf { font: 400 14px/1.5 var(--sans); color: var(--soft); margin: 0 0 16px; padding: 8px 14px; border-inline-start: 3px solid var(--warm); background: color-mix(in srgb, var(--warm) 7%, transparent); border-radius: 0 6px 6px 0; max-width: 78ch; }
 [dir="rtl"] .dx-mf { border-radius: 6px 0 0 6px; }
+/* data.html "How far to trust this": tier, band calibration and engine error per channel, below the plot */
+.dx-trust { margin: 14px 0 4px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 8px; font: 400 14px/1.5 var(--sans); color: var(--soft); max-width: 86ch; overflow-wrap: anywhere; }
+.dx-trust h3 { margin: 0 0 6px; font: 600 15px var(--sans); color: var(--ink); }
+.dx-trust p { margin: 0 0 8px; }
+.dx-trust .dx-chip { font-size: 12px; padding: 2px 8px; margin-inline-end: 4px; }
+.dx-trust ul { margin: 0 0 8px; padding: 0; list-style: none; }
+.dx-trust li { padding: 4px 0; border-top: 1px solid var(--line); }
+.dx-trust li b { color: var(--ink); font-weight: 600; margin-inline-end: 6px; }
+.dx-trust a { color: var(--accent); }
+.dx-trust .dx-tr-src { font-size: 12.5px; margin: 0; }
 .dx-nuc > :not(.dx-nuc-head):not(.dx-status) { transition: opacity .15s; }
 .dx-nuc.dx-loading > :not(.dx-nuc-head):not(.dx-status) { opacity: .35; pointer-events: none; transition-delay: .15s; }
 .dx-nuc.dx-empty > :not(.dx-nuc-head):not(.dx-status) { display: none; }
