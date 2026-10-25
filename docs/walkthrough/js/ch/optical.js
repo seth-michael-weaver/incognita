@@ -226,7 +226,7 @@
     g.label(`real well, depth ${d.VV.toFixed(1)} MeV`, F.X(0.4), Y(-d.VV) - 14, { color: c.neutron, size: phone ? 11 : 12, weight: 600, align: "left", bg: true });
     g.label(`surface absorption, peak ${d.WD.toFixed(1)} MeV`, F.X(KD.RD) + 14, Y(-d.WD) + 16, { color: c.proton, size: phone ? 11 : 12, weight: 600, align: "left", bg: true });
     g.label(`volume absorption ${d.WV.toFixed(1)} MeV`, F.X(0.4), Y(-d.WV) + 16, { color: c.proton, size: phone ? 10 : 11, align: "left", bg: true });
-    if (!phone) { const v = potAt(KD.RS + 0.4, d, 3).soR; g.label(`spin–orbit for l = 3, j = 7/2: ${(-v).toFixed(1)} MeV`, F.X(KD.RS + 0.4) + 14, Y(v) + 38, { color: c.alpha, size: 11, align: "left", bg: true }); }
+    if (!phone) { const v = potAt(KD.RS + 0.4, d, 3).soR; g.label(`spin–orbit for l = 3, j = 7/2: ${(-v).toFixed(1)} MeV`, F.X(KD.RS + 0.4) + 14, Math.max(Y(v) + 38, Y(-d.WD) + 40), { color: c.alpha, size: 11, align: "left", bg: true }); }
     // probe neutrons at the incident energy: speed from E - Re U, survival from the local mean free path hbar v / 2|W|
     const yE = y0 - 16 - Math.min(E, 40) / 40 * (y0 - F.top - 26); g.line(F.x0, yE, F.x1, yE, c.warm, 1, 0.6, [4, 4]);
     g.label(`E = ${E.toFixed(1)} MeV`, F.x0, yE - 12, { color: c.warm, size: 11, align: "left", bg: true });
