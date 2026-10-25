@@ -76,7 +76,9 @@
   const geo = () => {
     const phone = W < 720;
     // the nucleus stays put while the page scrolls (no zoom or drift): the hero is what visitors see on arrival
-    const R = Math.min(W, H) * (phone ? 0.25 : 0.24), cx = W * (phone ? 0.5 : 0.64), cy = H * (phone ? 0.36 : 0.47);
+    // phones: the nucleus fills the band above the text, never behind the title
+    const room = phone ? Math.max(120, copy.offsetTop + (copy.firstElementChild ? copy.firstElementChild.offsetTop : 0)) : 0; // the copy box is bottom-aligned: its first line is where the text starts
+    const R = phone ? Math.min(W * 0.13, room * 0.3) : Math.min(W, H) * 0.24, cx = W * (phone ? 0.5 : 0.64), cy = phone ? room * 0.56 : H * 0.47;
     return { R, cx, cy, phone };
   };
 
@@ -309,9 +311,10 @@
     if (cap && ca > 0.01 && scrollP < 0.5 && !document.body.classList.contains("og")) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = ca * (1 - scrollP * 2);
       let fs = phone ? 15 : 18; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`;
-      while (ctx.measureText(tr(cap)).width > W - 28 && fs > 10) { fs -= 0.5; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`; } // fit narrow screens ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      while (ctx.measureText(tr(cap)).width > W - 28 && fs > 10) { fs -= 0.5; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`; } // fit narrow screens
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillStyle = "rgba(230,236,250,0.92)"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12;
-      ctx.fillText(tr(cap), cx, Math.min(H - 30, cy + R * (phone ? 1.42 : 1.5))); ctx.shadowBlur = 0;
+      ctx.fillText(tr(cap), cx, phone ? Math.max(18, cy - R * 1.5) : Math.min(H - 30, cy + R * 1.5)); // phones: above the nucleus, clear of the title ctx.shadowBlur = 0;
     }
     // left-side shade so the title stays readable over the picture
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1;
