@@ -726,3 +726,11 @@ body.shot .part-head { display: none; }
   .part-head { padding: 9vh 20px 6vh; }
 }
 /* === end expert chapters === */
+/* phones: the chapter dots too, as a slim column in the left margin (tap to jump); the current-chapter chip stays at the bottom */
+@media (max-width: 900px) {
+  .ch-rail ol { display: flex; position: fixed; left: 1px; top: 50%; transform: translateY(-50%); padding: 4px 1px; gap: 0; border-radius: 10px; }
+  .ch-rail ol a { height: 15px; padding: 0 3px; gap: 6px; }
+  .ch-rail ol i { width: 6px; height: 6px; }
+  .ch-rail a.here i { transform: scale(1.35); }
+  [dir="rtl"] .ch-rail ol { left: auto; right: 1px; }
+}
