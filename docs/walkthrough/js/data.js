@@ -336,6 +336,7 @@
     if (d.meas) f.push(`<span>${d.meas.ds.length} ${T("dx_capsets", "capture datasets")}</span>`);
     if (d.tier != null && !d.valid) f.push(`<span class="dx-warn">${T("dx_outside", "outside the validated range (Z 26–83)")}</span>`);
     if (d.flag) f.push(`<span class="dx-warn">${T("dx_flag", "resolved resonances reach the MACS window: prefer a measured MACS")}</span>`);
+    if (cur.rr && cur.rr.caveat_short) f.push(`<span class="dx-warn" title="${esc(cur.rr.caveat || "")}">${esc(cur.rr.caveat_short)}</span>`);
     $("#dx-facts").innerHTML = f.join("");
     const mf = mformNote(d.mform), mfb = $("#dx-mf"); if (mfb) { mfb.hidden = !mf; mfb.innerHTML = mf || ""; }
     trustPanel();
@@ -430,6 +431,7 @@
     if (rrAnch(rr) && te && te.value > 0) { s += " " + T("dx_below_anch", "It is forced through a measured thermal capture value, {v} b.").replace("{v}", num(te.value, 3));
       if (th && th.y > 0 && Math.abs(th.y / te.value - 1) > 0.05) s += " " + T("dx_rr_anch_diff", "The diamond is a separate average of EXFOR entries and differs from it."); }
     const ri = riText(rr); if (ri) s += " " + ri;
+    if (rr.caveat) s += " " + esc(rr.caveat); // per-nuclide known defect, written by hand from a research report
     return s;
   }
   // the resonance-integral comparison for one nuclide (RESFILL rr/<Z>/<A>.json "ri"), or "" when there is no measured RI
