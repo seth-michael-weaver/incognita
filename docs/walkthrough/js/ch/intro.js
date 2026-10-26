@@ -331,7 +331,12 @@
     const r = hero.getBoundingClientRect(); scrollP = clamp(-r.top / Math.max(1, r.height), 0, 1);
     if (copy) { copy.style.opacity = String(clamp(1 - scrollP * 2.2, 0, 1)); copy.style.transform = `translateY(${-scrollP * 60}px)`; }
   }
-  let visible = true, last = 0, running = false, frozen = false, rafId = 0; let maxDpr = 2; const iv = [];
+  let visible = true, last = 0, running = false, frozen = false, rafId = 0; const iv = [];
+  // Probe first at low resolution: the hero starts at 0.5x (a quarter of the pixels of 1x). With software compositing the
+  // frames look quick but pile up, and the page stalls ~2.5 s in (Edge 1920x1080 at 150 %: 2 s stalls at 1x, 0.55 s at 0.5x).
+  // So the probe runs 3.5 s: a stall over 400 ms, or two over 150 ms, keeps a still frame at 0.5x; a clean probe (and the last
+  // 8 frames under 40 ms) lifts the hero to full resolution.
+  let maxDpr = 0.5, probing = true, good = 0, tProbe = 0, probeStalls = 0; // one start-up hiccup (< 400 ms) is forgiven; compositing stalls repeat
   // schedule frames only while the hero is on screen and the tab is visible (no idle rAF churn)
   const resume = () => { if (!running && visible && !document.hidden && !frozen && !reduce) { running = true; last = 0; rafId = requestAnimationFrame(loop); } };
   new IntersectionObserver((ents) => ents.forEach((en) => { visible = en.isIntersecting; resume(); })).observe(hero);
@@ -351,18 +356,24 @@
   // browser then spends seconds per frame compositing it (Edge, 1920x1080 at 150 %: 2-4.6 s long tasks, growing). So watch
   // the page itself: a timer that fires late, and long tasks where the browser reports them. Two stalls over 250 ms while the hero runs:
   // step the backing store down once, then a still frame if they recur; one stall over 1 s: a still frame at once.
-  let stalls = 0, stepped = false; const t0j = performance.now(); // page start-up (script parsing, first layout) is not judged
-  const jank = (ms) => { if (frozen || !running || performance.now() - t0j < 2000) return; if (ms > 1000) stalls = 99; else if (ms > 250) stalls++; else return;
+  let stalls = 0, stepped = false;
+  const jank = (ms, at) => { if (frozen || !running || !tProbe || (at != null && at < tProbe)) return; // start-up before the first hero frame is not judged
+    if (probing) { if (ms > 400 || (ms > 150 && ++probeStalls >= 2)) { frozen = true; running = false; cancelAnimationFrame(rafId); window.__heroPerf = { probe: "stall", jank: ms, dpr, frozen: true }; } return; } if (ms > 1000) stalls = 99; else if (ms > 250) stalls++; else return;
     if (stalls < 2) return; const hard = stalls > 2; stalls = 0;
     if (!hard && !stepped && dpr > 0.6) { stepped = true; maxDpr = 0.6; resize(); window.__heroPerf = { jank: ms, dpr, stepped: true }; return; }
     frozen = true; running = false; cancelAnimationFrame(rafId); window.__heroPerf = { jank: ms, dpr, frozen: true }; };
-  { let due = performance.now() + 250; const tick = () => { const now = performance.now(); jank(now - due); due = now + 250; if (!frozen) setTimeout(tick, 250); }; setTimeout(tick, 250); }
-  try { new PerformanceObserver((l) => l.getEntries().forEach((e) => jank(e.duration))).observe({ entryTypes: ["longtask"] }); } catch (e) { /* not in Safari/Firefox: the timer covers them */ }
+  { let due = performance.now() + 250; const tick = () => { const now = performance.now(); jank(now - due, due); due = now + 250; if (!frozen) setTimeout(tick, 250); }; setTimeout(tick, 250); }
+  try { new PerformanceObserver((l) => l.getEntries().forEach((e) => jank(e.duration, e.startTime))).observe({ entryTypes: ["longtask"] }); } catch (e) { /* not in Safari/Firefox: the timer covers them */ }
   // Slow device or software rendering (e.g. a browser without GPU raster): judge the REAL frame interval, which includes
   // raster/composite, over a short window, and step down fast: 2x -> 1x -> 0.6x backing store, then a still frame.
   function loop(now) {
     const raw = (now - (last || now)) / 1000, dt = Math.min(0.05, raw); last = now;
-    if (visible && !document.hidden && raw > 0 && raw < 2) {
+    if (!tProbe) tProbe = now;
+    if (probing && visible && !document.hidden && raw > 0) {
+      good = raw < 0.04 ? good + 1 : 0;
+      if (good >= 8 && now - tProbe >= 3500) { probing = false; maxDpr = 2; resize(); window.__heroPerf = { probe: "pass", dpr }; }
+      else if (now - tProbe > 6000) { frozen = true; running = false; window.__heroPerf = { probe: "fail", dpr, frozen: true }; return; }
+    } else if (visible && !document.hidden && raw > 0 && raw < 2) {
       iv.push(raw);
       if (iv.length >= 6) {
         const med = iv.slice().sort((a, b) => a - b)[3]; iv.length = 0; window.__heroPerf = { med, dpr, maxDpr };
