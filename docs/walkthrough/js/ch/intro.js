@@ -5,7 +5,7 @@
  * scrolling zooms into the nucleus. Standalone (own canvas and frame loop), not a kit chapter. Illustrative, not computed. */
 (function () {
   "use strict";
-  const CALM = true; // Seth 2026-10-26: for now only the floating nucleus (no neutrons, impacts, emissions or fission)
+  const CALM = false; // Seth 2026-10-26: for now only the floating nucleus (no neutrons, impacts, emissions or fission)
   const hero = document.querySelector(".hero"), cv = hero && hero.querySelector(".hero-cv");
   if (!cv) return;
   if (CALM) { const f = hero.querySelector(".fire-btn"); if (f && f.parentElement) f.parentElement.style.display = "none"; } // nothing to fire
@@ -324,7 +324,8 @@
       while (ctx.measureText(tr(cap)).width > W - 28 && fs > 10) { fs -= 0.5; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`; } // fit narrow screens
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillStyle = "rgba(230,236,250,0.92)"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12;
-      ctx.fillText(tr(cap), cx, phone ? Math.max(18, cy - R * 1.5) : Math.min(H - 30, cy + R * 1.5)); // phones: above the nucleus, clear of the title ctx.shadowBlur = 0;
+      ctx.fillText(tr(cap), cx, phone ? Math.max(18, cy - R * 1.5) : Math.min(H - 30, cy + R * 1.5)); // phones: above the nucleus, clear of the title
+      ctx.shadowBlur = 0; ctx.shadowColor = "transparent"; // was inside the comment above: the caption's shadow stayed on for every later sprite (seconds per frame without a GPU canvas)
     }
     // left-side shade so the title stays readable over the picture
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1;
