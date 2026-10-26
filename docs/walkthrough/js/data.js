@@ -298,7 +298,7 @@
   if (atom.cv) atom.cv.parentElement.addEventListener("pointermove", (e) => { const r = atom.cv.getBoundingClientRect(); atom.tx = (e.clientX - r.left) / r.width - 0.5; atom.ty = (e.clientY - r.top) / r.height - 0.5; });
 
   // ---------- one nuclide ----------
-  let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false, full = false;
+  let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false, full = false, ez = null; // ez: zoomed energy band [lo, hi] (eV), capture tab
   /** Loading state while nuclide r's file is on its way (r null: done); with err, say it failed and offer a retry. */
   function busy(r, err) {
     const box = $("#dx-nuc"), s = $("#dx-status"), on = !!r && !err;
@@ -322,7 +322,7 @@
     let pw, rr;
     try { [d0, lz, , , pw, rr] = await Promise.all([loadNuc(r.Z, r.A), libOn ? loadLib(r.Z) : null, loadQ(), loadTh(), libOn ? loadPw(r.Z, r.A) : null, loadRr(r.Z, r.A)]); } catch (e) { if (sel === r) busy(r, e); return; }
     if (sel !== r) return;
-    cur = { r, d: d0, lib: libOf(lz, r, pw), rr }; busy(null);
+    cur = { r, d: d0, lib: libOf(lz, r, pw), rr }; ez = null; busy(null);
     buildTabs(); setHash(r);
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
@@ -380,7 +380,7 @@
     if (!tabs.includes(tab)) tab = "cap";
     cur.tabs = tabs;
     $("#dx-tabs").innerHTML = tabs.map((k) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${CH[k]}</button>`).join("");
-    $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; setHash(cur.r); $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); sweep(); }));
+    $("#dx-tabs").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; hl = null; ez = null; setHash(cur.r); $("#dx-tabs").querySelectorAll("button").forEach((x) => x.setAttribute("aria-selected", String(x === b))); sweep(); }));
   }
   // evaluated-library curves for the current tab: dashed, thin, one muted colour per library
   function libCurves(out) {
@@ -574,28 +574,40 @@
     for (const p of shown) if (p.y > 0 && (p.xlo || p.x) < x0) x0 = p.xlo || p.x;
     return { x0, yf: ref * 1e-4, marks };
   }
+  // capture energy bands: what physics (and which INCOGNITA source) governs each range; a tap on a band zooms into it
+  function capBands() {
+    const rr = cur && cur.rr, res = rr && rr.kind && rr.kind !== "smooth";
+    return [
+      { lo: 1e-5, hi: 0.5, lab: T("dx_band_th", "thermal"), sh: T("dx_band_th_s", "thermal"), xs: T("dx_band_th_x", "therm.") },
+      { lo: 0.5, hi: PW_E, lab: res ? T("dx_band_rr", "resonances") : T("dx_band_rr0", "resonance region"), sh: T("dx_band_rr_s", "resonances"), xs: T("dx_band_rr_x", "res.") },
+      { lo: PW_E, hi: 1e5, lab: T("dx_band_ur", "averaged resonances"), sh: T("dx_band_ur_s", "averaged"), xs: T("dx_band_ur_x", "avg.") },
+      { lo: 1e5, hi: 3e7, lab: T("dx_band_f", "fast"), sh: T("dx_band_f_s", "fast"), xs: T("dx_band_f_x", "fast") }];
+  }
   function buildNuc() {
     if (!cur) return;
     const S = series(), shown = S.points.filter((p) => showExcl || p.dec !== "x");
     const W = pcv.parentElement.clientWidth, H = Math.round(clamp(W * 0.55, 300, 460));
     P = { ...setupCanvas(pcv, H), S, shown };
-    const ctx = layer(LAY.a), m = { l: 62, r: 16, t: 16, b: 44 };
+    const bands = tab === "cap" ? capBands() : null, zw = bands && ez, ctx = layer(LAY.a), m = { l: 62, r: 16, t: bands ? 34 : 16, b: 44 };
+    const inZ = (x) => !zw || (x >= ez[0] && x <= ez[1]);
     // ranges (log-log)
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-    const ax = (x) => { if (x < x0) x0 = x; if (x > x1) x1 = x; }, ay = (y) => { if (y < y0) y0 = y; if (y > y1) y1 = y; };
+    const ax0 = (x) => { if (x < x0) x0 = x; if (x > x1) x1 = x; }, ay0 = (y) => { if (y < y0) y0 = y; if (y > y1) y1 = y; };
+    let lastX = 0; const ax = (x) => { lastX = x; if (inZ(x)) ax0(x); }, ay = (y) => { if (inZ(lastX)) ay0(y); };
     // (n,2n), (n,p), (n,α): the window from thrWindow unless "full energy range" is ticked; measured points always stay in range
     const tw = tab !== "cap" && tab !== "macs" ? thrWindow(S, shown) : null, win = full ? null : tw, xf = win ? win.x0 : 0, yf = win ? win.yf : 0;
     if (xf > 0) ax(xf);
     // a pointwise library curve's deepest interference dips do not stretch the y-axis: it reaches at most 9 decades below the top
     const ytop = Math.max(0, ...S.curves.flatMap((c) => c.pts.map(([, y]) => y || 0))), ypw = Math.max(yf, ytop * 1e-9);
-    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > (c.pw || c.rr ? ypw : yf) && x >= xf) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (x < xf) return; if (lo > yf) ay(lo); if (hi > yf) ay(hi); }); });
+    S.curves.forEach((c) => { c.pts.forEach(([x, y]) => { if (y > (c.pw || c.rr ? ypw : yf) && x >= xf) { ax(x); ay(y); } }); (c.b68 || []).forEach(([x, lo, hi]) => { if (x < xf) return; lastX = x; if (lo > yf) ay(lo); if (hi > yf) ay(hi); }); });
     shown.forEach((p) => { if (p.y > 0) { ax(p.xlo || p.x); ax(p.xhi || p.x); ay(p.y); } });
     if (S.th && S.th.y > 0) { ax(S.th.x); ay(S.th.y); }
+    if (zw) { x0 = ez[0]; x1 = ez[1]; if (!(y1 > 0)) { y0 = 1e-3; y1 = 1; } }
     for (const c of [LAY.p, LAY.c]) layer(c);
     if (!(x1 > 0)) { ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H); ctx.fillStyle = C.soft; ctx.font = `500 14px ${SANS}`; ctx.textAlign = "center"; ctx.fillText(T("dx_empty", "Nothing to show for this reaction."), W / 2, H / 2); finishNuc(S); return; }
     x0 = log10(x0); x1 = log10(x1); y0 = log10(y0); y1 = log10(y1);
     if (x1 - x0 < 1 && !win) { x0 -= 0.5; x1 += 0.5; } // a threshold window keeps its edge: it may span under a decade if (y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; }
-    x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0);
+    if (!zw) { x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); } y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0);
     const X = (x) => m.l + (log10(x) - x0) / (x1 - x0) * (W - m.l - m.r), Y = (y) => H - m.b - (log10(y) - y0) / (y1 - y0) * (H - m.t - m.b);
     Object.assign(P, { X, Y, m, x0, x1, y0, y1, W, H });
     ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
@@ -609,6 +621,19 @@
     ctx.textAlign = "right"; ctx.textBaseline = "middle";
     for (let k = Math.ceil(y0); k <= Math.floor(y1); k++) { const y = Y(10 ** k); ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke(); ctx.fillText(decY(k, S.unit), m.l - 8, y); }
     ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(S.xlab + " →", m.l, H - 6);
+    // energy bands (capture): a strip of tappable labels above the plot, faint boundaries inside it; tap = zoom, tap again = all energies
+    P.hits = [];
+    if (bands) { const yT = 6, hT = 20, pw = W - m.l - m.r; ctx.font = `600 11px ${SANS}`; ctx.textBaseline = "middle"; ctx.textAlign = "center";
+      let left = m.l;
+      if (zw) { const lab = "← " + T("dx_band_all", "all energies"), w = ctx.measureText(lab).width + 16;
+        ctx.fillStyle = rgba(C.curve, 0.18); ctx.fillRect(m.l, yT, w, hT); ctx.fillStyle = C.ink || C.soft; ctx.fillText(lab, m.l + w / 2, yT + hT / 2); P.hits.push({ x0: m.l, x1: m.l + w, y0: yT, y1: yT + hT, z: null }); left = m.l + w + 6; }
+      for (const b of bands) { const a = Math.max(left, X(Math.max(b.lo, 10 ** x0))), z = Math.min(W - m.r, X(Math.min(b.hi, 10 ** x1))); if (z - a < 18) continue;
+        const on = zw && ez[0] === b.lo; ctx.fillStyle = on ? rgba(C.curve, 0.28) : rgba(C.soft, 0.09); ctx.fillRect(a + 1, yT, z - a - 2, hT);
+        const lab = [b.lab, b.sh, b.xs].find((t) => ctx.measureText(t).width + 8 <= z - a) || "";
+        if (lab) { ctx.fillStyle = on ? (C.ink || C.soft) : C.soft; ctx.fillText(lab, (a + z) / 2, yT + hT / 2); }
+        P.hits.push({ x0: a, x1: z, y0: yT, y1: yT + hT, z: on ? null : [b.lo, b.hi] });
+        if (!zw && b.lo > 10 ** x0 && b.lo !== PW_E) { ctx.strokeStyle = rgba(C.soft, 0.25); ctx.setLineDash([1, 4]); ctx.beginPath(); ctx.moveTo(X(b.lo), m.t); ctx.lineTo(X(b.lo), H - m.b); ctx.stroke(); ctx.setLineDash([]); ctx.strokeStyle = C.grid; } }
+      ctx.font = `500 12px ${SANS}`; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; }
     let note = null; // drawn last, over the points, with a dark halo so it stays readable
     ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, W - m.l - m.r, H - m.t - m.b); ctx.clip();
     const wrap = (text, maxW) => { if (maxW < 60) return null; const out = []; let ln = ""; // wrapped to the room it has, so a narrow (phone) plot shows the whole note
@@ -624,9 +649,9 @@
       ctx.strokeStyle = rgba(C.soft, 0.7); ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(split, m.t); ctx.lineTo(split, H - m.b); ctx.stroke(); ctx.setLineDash([]); ctx.strokeStyle = C.grid;
       if (split - m.l >= 220) below = wrap(rrC ? T("dx_below_rr", "below 1 keV: INCOGNITA’s {k}").replace("{k}", rrC.short) : T("dx_below_cv", "below 1 keV: no INCOGNITA curve, only evaluated libraries and measurements"), split - m.l - 16); // a narrow (phone) plot leaves it to the sentence under the plot
     }
-    const nx = split != null ? split : m.l; // the resolved-resonance note covers INCOGNITA's own range only
-    if (S.note && S.note.upto > Math.max(10 ** x0, split != null ? PW_E : 0)) { const xe = Math.min(X(S.note.upto), W - m.r); ctx.fillStyle = rgba(C.soft, 0.07); ctx.fillRect(nx, m.t, xe - nx, H - m.t - m.b);
-      if (xe - nx > 120) note = wrap(S.note.text, W - m.r - nx - 16); }
+    const nx = split != null ? split : own ? Math.max(m.l, X(PW_E)) : m.l; // the resolved-resonance note covers INCOGNITA’s own range only (above 1 keV when INCOGNITA has its own curve below)
+    if (S.note && S.note.upto > Math.max(10 ** x0, split != null || own ? PW_E : 0)) { const xe = Math.min(X(S.note.upto), W - m.r); if (xe - nx > 4) { ctx.fillStyle = rgba(C.soft, 0.07); ctx.fillRect(nx, m.t, xe - nx, H - m.t - m.b);
+      if (xe - nx > 120) note = wrap(S.note.text, W - m.r - nx - 16); } }
     // bands, then measured points, then the curves on top
     for (const c of S.curves) {
       for (const [b, a] of [[c.b95, 0.1], [c.b68, 0.2]]) if (b && b.length > 1) { ctx.fillStyle = rgba(c.col, a); ctx.beginPath(); b.forEach(([x, , hi], i) => (i ? ctx.lineTo(X(x), Y(hi)) : ctx.moveTo(X(x), Y(hi)))); for (let i = b.length - 1; i >= 0; i--) ctx.lineTo(X(b[i][0]), Y(Math.max(b[i][1], 10 ** (y0 - 1)))); ctx.closePath(); ctx.fill(); }
@@ -795,7 +820,7 @@
     return null;
   }
   function showTip(h, x, y) {
-    pcv.style.cursor = h && h.url ? "pointer" : "";
+    pcv.style.cursor = (h && h.url) || bandHit(x, y) ? "pointer" : "";
     ptip.style.pointerEvents = h && h.url && lastPT !== "mouse" ? "auto" : "";
     if (!h) { ptip.hidden = true; return; }
     ptip.innerHTML = h.html; ptip.hidden = false; place(ptip, x, y, pcv);
@@ -803,7 +828,9 @@
   const openEx = (url) => { try { window.open(url, "_blank", "noopener"); } catch (err) {} };
   pcv.addEventListener("pointerdown", (e) => { lastPT = e.pointerType || "mouse"; });
   pcv.addEventListener("pointermove", (e) => { if ((e.pointerType || "mouse") !== "mouse") return; lastPT = "mouse"; tipPin = null; showTip(tipAt(e.offsetX, e.offsetY), e.offsetX, e.offsetY); });
+  const bandHit = (x, y) => P && P.hits && P.hits.find((b) => x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1);
   pcv.addEventListener("click", (e) => {
+    const bh = bandHit(e.offsetX, e.offsetY); if (bh) { ez = bh.z; tipPin = null; showTip(null); renderNuc(); return; }
     const h = tipAt(e.offsetX, e.offsetY);
     if (lastPT === "mouse") { if (h && h.url) openEx(h.url); return; }
     if (h && h.url && h.p === tipPin) { openEx(h.url); return; } // second tap on the same point
