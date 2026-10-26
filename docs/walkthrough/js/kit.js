@@ -518,29 +518,45 @@
         if (!seen.size && c === rchs[0] && en.boundingClientRect.top > 0) clearNow();
       }), { rootMargin: "-50% 0px -50% 0px" }).observe(c.el));
     }
-    function resize() {
+    // Performance: a canvas gets its backing store only once its chapter has been on screen (lazy), readouts are
+    // updated only for visible chapters and only when their text changes, and on a slow device or software rendering
+    // (frame interval incl. raster) the backing-store scale steps down 1 -> 0.75 -> 0.5.
+    let dprScale = 1;
+    function sizeOne(ch) {
+      const r = ch.stage.getBoundingClientRect(), dpr = Math.min(PHONE ? 1.5 : 2, window.devicePixelRatio || 1) * dprScale; // phones: 1.5x keeps lines sharp with ~45 % fewer pixels
+      ch.cv.width = Math.max(1, Math.round(r.width * dpr)); ch.cv.height = Math.max(1, Math.round(r.height * dpr));
+      ch.cv.style.width = r.width + "px"; ch.cv.style.height = r.height + "px";
+      ch.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ch.g = makeG(ch.ctx, r.width, r.height); ch.sized = true;
+    }
+    function resize() { chapters.forEach((ch) => { if (ch.visible || ch.sized) sizeOne(ch); }); }
+    function outputs() {
       chapters.forEach((ch) => {
-        const r = ch.stage.getBoundingClientRect(), dpr = Math.min(PHONE ? 1.5 : 2, window.devicePixelRatio || 1); // phones: 1.5x keeps lines sharp with ~45 % fewer pixels
-        ch.cv.width = Math.round(r.width * dpr); ch.cv.height = Math.round(r.height * dpr);
-        ch.cv.style.width = r.width + "px"; ch.cv.style.height = r.height + "px";
-        ch.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ch.g = makeG(ch.ctx, r.width, r.height);
+        if (!ch.visible) return;
+        if (!ch.outs) ch.outs = [...ch.el.querySelectorAll("[data-show]")];
+        ch.outs.forEach((o) => {
+          const v = ch.S[o.dataset.show]; if (typeof v !== "number") return;
+          const d = parseInt(o.dataset.fmt ?? "1", 10), t = WT.dec ? WT.dec(v.toFixed(d)) : v.toFixed(d);
+          if (o._t !== t) { o.textContent = t; o._t = t; }
+        });
       });
     }
-    function outputs() {
-      chapters.forEach((ch) => ch.el.querySelectorAll("[data-show]").forEach((o) => {
-        const v = ch.S[o.dataset.show]; if (typeof v !== "number") return;
-        const d = parseInt(o.dataset.fmt ?? "1", 10); o.textContent = WT.dec ? WT.dec(v.toFixed(d)) : v.toFixed(d);
-      }));
-    }
-    let last = performance.now();
+    let last = performance.now(); const iv = [];
     function loop(now) {
-      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      const raw = (now - last) / 1000, dt = Math.min(0.05, raw); last = now;
+      let any = false;
       chapters.forEach((ch) => {
-        if (!ch.visible || !ch.g) return;
+        if (!ch.visible) return;
+        any = true;
+        if (!ch.sized) sizeOne(ch);
         ch.S.time += reduce ? 0 : dt; ch.S.ease(reduce ? 1 : dt);
         try { ch.g.clear(); ch.mod.frame(ch.g, ch.S, reduce ? 0 : dt); } catch (e) { console.error(ch.id, e); }
       });
-      outputs(); requestAnimationFrame(loop);
+      if (any && !document.hidden && raw > 0 && raw < 2) {
+        iv.push(raw);
+        if (iv.length >= 12) { const med = iv.slice().sort((a, b) => a - b)[6]; iv.length = 0; if (med > 0.045 && dprScale > 0.5) { dprScale = dprScale > 0.75 ? 0.75 : 0.5; resize(); } }
+      }
+      if (any) outputs();
+      requestAnimationFrame(loop);
     }
     window.addEventListener("resize", resize);
     const mq = window.matchMedia("(prefers-color-scheme: dark)");

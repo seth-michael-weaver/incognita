@@ -331,8 +331,11 @@
     const r = hero.getBoundingClientRect(); scrollP = clamp(-r.top / Math.max(1, r.height), 0, 1);
     if (copy) { copy.style.opacity = String(clamp(1 - scrollP * 2.2, 0, 1)); copy.style.transform = `translateY(${-scrollP * 60}px)`; }
   }
-  let visible = true, last = 0; let maxDpr = 2, slowAcc = 0, slowN = 0;
-  new IntersectionObserver((ents) => ents.forEach((en) => (visible = en.isIntersecting))).observe(hero);
+  let visible = true, last = 0, running = false, frozen = false; let maxDpr = 2; const iv = [];
+  // schedule frames only while the hero is on screen and the tab is visible (no idle rAF churn)
+  const resume = () => { if (!running && visible && !document.hidden && !frozen && !reduce) { running = true; last = 0; requestAnimationFrame(loop); } };
+  new IntersectionObserver((ents) => ents.forEach((en) => { visible = en.isIntersecting; resume(); })).observe(hero);
+  document.addEventListener("visibilitychange", resume);
   window.addEventListener("resize", () => { resize(); if (reduce) frame(0); });
   window.addEventListener("scroll", onScroll, { passive: true });
   resize(); onScroll(); startCycle();
@@ -344,11 +347,22 @@
     ct = T_IMP + 0.6; impact(geo().cx - geo().R * 0.9, geo().cy, 1); time += 0.6; parts.length = 0; impacted = true; frame(0);
     return;
   }
+  // Slow device or software rendering (e.g. a browser without GPU raster): judge the REAL frame interval, which includes
+  // raster/composite, over a short window, and step down fast: 2x -> 1x -> 0.6x backing store, then a still frame.
   function loop(now) {
-    const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
-    if (visible && dt > 0) { slowAcc += dt; slowN++; if (slowN >= 90) { if (slowAcc / slowN > 0.019 && maxDpr > 1) { maxDpr = Math.max(1, dpr - 0.5); resize(); } slowAcc = 0; slowN = 0; } } // slow device: step the resolution down
-    if (visible && !document.hidden) frame(ff ? 0 : dt); // a fast-forwarded screenshot holds still
+    const raw = (now - (last || now)) / 1000, dt = Math.min(0.05, raw); last = now;
+    if (visible && !document.hidden && raw > 0 && raw < 2) {
+      iv.push(raw);
+      if (iv.length >= 6) {
+        const med = iv.slice().sort((a, b) => a - b)[3]; iv.length = 0; window.__heroPerf = { med, dpr, maxDpr };
+        // > 150 ms per frame: hopeless (software raster), keep a still frame at once; > 40 ms: step the backing store down
+        if (med > 0.15 || (med > 0.04 && dpr <= 0.6)) { frozen = true; running = false; window.__heroPerf = { med, dpr, frozen: true }; return; } // keep the last drawn frame
+        if (med > 0.04) { maxDpr = dpr > 1 ? 1 : 0.6; resize(); }
+      }
+    }
+    if (!visible || document.hidden || frozen) { running = false; return; } // resumes via resume()
+    frame(ff ? 0 : dt); // a fast-forwarded screenshot holds still
     requestAnimationFrame(loop);
   }
-  requestAnimationFrame(loop);
+  resume();
 })();
