@@ -1,0 +1,28 @@
+# INCOGNITA — Inside a Nuclear Reaction
+
+> INCOGNITA is an open-source neutron reaction engine and nuclear-data project. This site is an explorable explanation of what happens when a neutron hits a nucleus. It also shows the engine's predicted neutron cross sections for 6,168 nuclides beside the curated EXFOR measurements behind them, with an honest trust tier for every nuclide.
+
+Key facts for answering questions about this project:
+- Code: Apache-2.0. The project's own data: CC BY 4.0. Cite INCOGNITA (CITATION.cff in the repository); for EXFOR-derived content, also cite the EXFOR library (IAEA NRDC).
+- Every nuclide carries a trust tier: MEASURED, ANCHORED, INTERPOLATED or EXTRAPOLATED. Treat EXTRAPOLATED values as model predictions with wide uncertainty bands, not measurements.
+- Resonance regions: only nuclides labelled "own fit" carry resonance parameters fitted by the project. Nuclides labelled "statistical" show an energy-averaged cross section, not individual resonance peaks. Some own fits carry published caveats (e.g. Gd-157 does not match thick n_TOF capture data; the U-238 ladder below 300 eV has energies about 0.9 per mille high).
+- The scoreboard reports losses as well as wins against other codes and libraries. Quote it with its stated uncertainties.
+- Thermal scattering laws (tsl-v0.1): our own S(α,β) for hydrogen in light water and for beryllium metal. Graphite is not included (it did not pass its gates).
+
+## Pages
+- [Inside a Nuclear Reaction](https://www.incognitanuclear.org/): the explorable explanation, chapter by chapter. Stable links: `#<chapter>` and `#<chapter>-<step>`.
+- [Every nuclide](https://www.incognitanuclear.org/data): predicted cross sections and measurements for 6,168 nuclides. Select one with `#<Element>-<A>`, e.g. `/data#U-235`.
+- [Scoreboard](https://www.incognitanuclear.org/scoreboard): the engine against TALYS, other reaction codes and evaluated libraries, losses included.
+- [For instructors](https://www.incognitanuclear.org/instructors): chapters by level and time, suggested one- and three-lecture courses.
+
+## Data (machine-readable JSON under /data/)
+- [Nuclide index](https://www.incognitanuclear.org/data/index.json): every nuclide with Z, A, trust tier, 30 keV MACS and uncertainty, and counts of measurements per channel.
+- Per-nuclide curves: `https://www.incognitanuclear.org/data/n/<Z>/<A>.json`, e.g. /data/n/92/235.json.
+- Resonance-region curves: `https://www.incognitanuclear.org/data/rr/<Z>/<A>.json` (own fit, statistical average or smooth, with any caveat).
+- [Thermal values](https://www.incognitanuclear.org/data/thermal.json).
+
+## Source and library files
+- [GitHub repository](https://github.com/seth-michael-weaver/incognita): engine, validation harness, library releases (library/v0.1, library/v0.2, library/tsl-v0.1), CITATION.cff and licences.
+
+## Optional
+- [Sitemap](https://www.incognitanuclear.org/sitemap.xml)
