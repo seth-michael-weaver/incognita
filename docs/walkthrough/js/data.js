@@ -641,8 +641,16 @@
     // INCOGNITA's own curve below 1 keV: solid for its own resonance fit, dash-dot for statistical resonances, thin dotted for the smooth estimate
     const sty = (c) => { if (c.pw) return [[1.15, c.col]]; if (c.dash) return [[1.7, c.col]]; if (c.rr) { const s = rrSty(c.rr); return s.halo ? [[s.halo, C.surface], [s.w, c.col]] : [[s.w, c.col]]; } return [[5, C.surface], [2.2, c.col]]; };
     // pointwise curves with many resonances per pixel: 4-px columns holding ≥ 2 peaks are drawn as a faint min-max band with the
-    // energy-averaged cross section as the line (a wall of overlapping peaks says nothing); isolated resonances stay pointwise
-    const thin = (c) => { if (!(c.rr || c.pw) || c.pts.length < 400) return null;
+    // energy-averaged cross section as the line (a wall of overlapping peaks says nothing); isolated resonances stay pointwise.
+    // Statistical resonances (random peak positions, one sample) show only what the model predicts: the energy average over ≥ 5 resonances
+    const avg = (c) => { const P = c.pts.filter(([, y]) => y > 0), n = P.length, pk = (i) => i > 0 && i < n - 1 && P[i][1] > P[i - 1][1] && P[i][1] >= P[i + 1][1];
+      let s0 = 0; while (s0 < n && !pk(s0)) s0++; while (s0 > 0 && P[s0 - 1][1] < P[s0][1]) s0--; // smooth part below the first resonance stays as is
+      const line = P.slice(0, s0 + 1); let i0 = s0, k = 0;
+      for (let i = s0 + 1; i < n; i++) { if (pk(i)) k++;
+        if ((k >= 5 && P[i][0] >= P[i0][0] * 10 ** 0.04) || i === n - 1) { let area = 0; for (let j = i0 + 1; j <= i; j++) area += (P[j][0] - P[j - 1][0]) * (P[j][1] + P[j - 1][1]) / 2;
+          line.push([Math.sqrt(P[i0][0] * P[i][0]), area / (P[i][0] - P[i0][0])]); i0 = i; k = 0; } }
+      return { line, band: [] }; };
+    const thin = (c) => { if (c.rr === "statistical") return avg(c); if (!(c.rr || c.pw) || c.pts.length < 400) return null;
       const P = c.pts.filter(([, y]) => y > 0), cols = new Map();
       for (let i = 0; i < P.length; i++) { const k = Math.floor(X(P[i][0]) / 4); let b = cols.get(k); if (!b) cols.set(k, (b = { i0: i, i1: i, pk: 0 })); b.i1 = i;
         if (i > 0 && i < P.length - 1 && P[i][1] > P[i - 1][1] && P[i][1] >= P[i + 1][1]) b.pk++; }
