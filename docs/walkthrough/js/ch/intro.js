@@ -5,8 +5,10 @@
  * scrolling zooms into the nucleus. Standalone (own canvas and frame loop), not a kit chapter. Illustrative, not computed. */
 (function () {
   "use strict";
+  const CALM = true; // Seth 2026-10-26: for now only the floating nucleus (no neutrons, impacts, emissions or fission)
   const hero = document.querySelector(".hero"), cv = hero && hero.querySelector(".hero-cv");
   if (!cv) return;
+  if (CALM) { const f = hero.querySelector(".fire-btn"); if (f && f.parentElement) f.parentElement.style.display = "none"; } // nothing to fire
   // Performance: on the page, hand the canvas to a Web Worker (OffscreenCanvas) that runs this same file, so a slow
   // raster (a browser without GPU canvas, e.g. Edge in software mode) can never freeze the page. The page keeps only
   // input, scroll and the title fade. Fallback: everything on the main thread (old browsers, dev aids, reduced motion).
@@ -91,6 +93,7 @@
 
   function startCycle() {
     ct = 0; kind = SEQ[cyc % SEQ.length]; cyc++; impacted = false; emitted = false; ang = (rng(cyc * 31 + 7))() * TAU;
+    if (CALM) { kind = "neutron"; emitted = true; return; }
     fis = { e: 0, sep: 0, done: false, rot: 0, alpha: 1, away: 0 }; for (const a of nuc) a.side = 0;
     const { R, cx, cy } = geo(), r = rng(cyc * 13 + 3), off = (r() - 0.5) * R * 0.9;
     // the projectile: from far off-screen left, aimed at the nucleus's left side
@@ -134,7 +137,7 @@
   const cue = document.querySelector(".scrollcue");
   const nudge = () => { if (cue) cue.classList.add("hot"); };
   hero.addEventListener("pointerdown", (e) => {
-    if (e.target.closest("a, button")) return;
+    if (CALM || e.target.closest("a, button")) return;
     const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, { cx, cy } = geo();
     shots.push({ x, y, sx: x, sy: y, t0: time, trail: [], dx: cx, dy: cy });
     nudge();
@@ -142,7 +145,7 @@
   });
   // the same for keyboard and screen-reader users: a real button fires a neutron in from the left
   const fire = hero.querySelector(".fire-btn");
-  if (fire) fire.addEventListener("click", () => { const { cy } = geo(), y = cy + (Math.random() - 0.5) * H * 0.3; shots.push({ x: 0, y, sx: -20, sy: y, t0: time, trail: [] }); nudge(); if (reduce) frame(0); });
+  if (fire && !CALM) fire.addEventListener("click", () => { const { cy } = geo(), y = cy + (Math.random() - 0.5) * H * 0.3; shots.push({ x: 0, y, sx: -20, sy: y, t0: time, trail: [] }); nudge(); if (reduce) frame(0); });
 
   // ---------- drawing ----------
   // performance: the backdrop gradient is painted once per size into its own canvas, and the drifting streaks are one
@@ -314,7 +317,7 @@
     let cap = null, ca = 0;
     if (impacted && !emitted && time - imp.t > 0.15) { cap = CAP.absorbed; ca = smooth(0.15, 0.5, time - imp.t); }
     if (!isF && !emitted && ct >= T_EMIT) { emitted = true; emit(kind, cx, cy, R); }
-    if (emitted || (isF && ct > F_SCISSION - 0.2)) { cap = CAP[kind]; ca = smooth(isF ? F_SCISSION - 0.2 : T_EMIT, (isF ? F_SCISSION : T_EMIT) + 0.3, ct) * (1 - smooth(end - 0.7, end - 0.1, ct)); }
+    if (!CALM && (emitted || (isF && ct > F_SCISSION - 0.2))) { cap = CAP[kind]; ca = smooth(isF ? F_SCISSION - 0.2 : T_EMIT, (isF ? F_SCISSION : T_EMIT) + 0.3, ct) * (1 - smooth(end - 0.7, end - 0.1, ct)); }
     if (cap && ca > 0.01 && scrollP < 0.5 && !document.body.classList.contains("og")) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = ca * (1 - scrollP * 2);
       let fs = phone ? 15 : 18; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`;
