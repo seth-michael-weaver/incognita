@@ -7,6 +7,13 @@
   "use strict";
   const hero = document.querySelector(".hero"), cv = hero && hero.querySelector(".hero-cv");
   if (!cv) return;
+  // Performance: on the page, hand the canvas to a Web Worker (OffscreenCanvas) that runs this same file, so a slow
+  // raster (a browser without GPU canvas, e.g. Edge in software mode) can never freeze the page. The page keeps only
+  // input, scroll and the title fade. Fallback: everything on the main thread (old browsers, dev aids, reduced motion).
+  if (!self.__heroWorker && cv.transferControlToOffscreen && typeof Worker !== "undefined" && typeof OffscreenCanvas !== "undefined"
+      && !/[?&](og=1|herot=|hero=main)/.test(location.search) && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    try { if (heroWorker(hero, cv)) return; } catch (e) { console.error("hero worker", e); }
+  }
   const ctx = cv.getContext("2d"), copy = hero.querySelector(".hero-copy");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const TAU = Math.PI * 2, clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, s) => a + (b - a) * s;
@@ -351,4 +358,36 @@
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
+
+  // ---------- main-thread side of the worker hero (see the top of this file) ----------
+  function heroWorker(hero, cv) {
+    const copy = hero.querySelector(".hero-copy"), cue = document.querySelector(".scrollcue");
+    const v = (/[?&]v=(\d+)/.exec((document.currentScript && document.currentScript.src) || "") || [])[1] || "0";
+    const w = new Worker("js/ch/intro_worker.js?v=" + v + (location.search ? "&" + location.search.slice(1) : ""));
+    const off = cv.transferControlToOffscreen();
+    const caps = ["a neutron comes back out", "a gamma ray: a burst of light", "a proton escapes", "two neutrons come out",
+      "an alpha particle: 2 protons + 2 neutrons", "fission: the nucleus splits in two", "absorbed: its energy spreads through the whole nucleus"];
+    const tr = {}; caps.forEach((c) => { tr[c] = window.WT && WT.tr ? WT.tr(c) : c; });
+    const fonts = [...document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]')].map((l) => l.href);
+    const size = () => { const r = cv.getBoundingClientRect();
+      return { w: r.width, h: r.height, dpr: window.devicePixelRatio || 1, copyTop: copy ? copy.offsetTop : 0,
+        firstTop: copy && copy.firstElementChild ? copy.firstElementChild.offsetTop : 0 }; };
+    const scroll = () => { const r = hero.getBoundingClientRect(), p = Math.max(0, Math.min(1, -r.top / Math.max(1, r.height)));
+      if (copy) { copy.style.opacity = String(Math.max(0, Math.min(1, 1 - p * 2.2))); copy.style.transform = `translateY(${-p * 60}px)`; }
+      return { heroTop: r.top, heroH: r.height }; };
+    w.onerror = (e) => { console.error("hero worker", e.message || e); cv.style.visibility = "hidden"; }; // the dark hero background stays
+    w.postMessage({ t: "init", canvas: off, size: size(), scroll: scroll(), tr, fonts, og: document.body.classList.contains("og") }, [off]);
+    const rel = (e) => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height }; };
+    const nudge = () => { if (cue) cue.classList.add("hot"); };
+    hero.addEventListener("pointermove", (e) => w.postMessage({ t: "move", ...rel(e) }));
+    hero.addEventListener("pointerleave", () => w.postMessage({ t: "leave" }));
+    hero.addEventListener("pointerdown", (e) => { if (e.target.closest("a, button")) return; w.postMessage({ t: "down", ...rel(e) }); nudge(); });
+    const fire = hero.querySelector(".fire-btn");
+    if (fire) fire.addEventListener("click", () => { w.postMessage({ t: "fire" }); nudge(); });
+    window.addEventListener("resize", () => w.postMessage({ t: "resize", size: size() }));
+    window.addEventListener("scroll", () => w.postMessage({ t: "scroll", scroll: scroll() }), { passive: true });
+    new IntersectionObserver((ents) => ents.forEach((en) => w.postMessage({ t: "vis", v: en.isIntersecting }))).observe(hero);
+    document.addEventListener("visibilitychange", () => w.postMessage({ t: "hidden", v: document.hidden }));
+    return true;
+  }
 })();
