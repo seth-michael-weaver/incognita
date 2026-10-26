@@ -331,7 +331,8 @@
     const r = hero.getBoundingClientRect(); scrollP = clamp(-r.top / Math.max(1, r.height), 0, 1);
     if (copy) { copy.style.opacity = String(clamp(1 - scrollP * 2.2, 0, 1)); copy.style.transform = `translateY(${-scrollP * 60}px)`; }
   }
-  let visible = true, last = 0; let maxDpr = 2, slowAcc = 0, slowN = 0;
+  const DIAG = (/[?&]hero=(\w+)/.exec(location.search) || [])[1] || ""; // preview-only diagnostic switch
+  let visible = true, last = 0; let maxDpr = DIAG === "dpr1" ? 1 : 2, slowAcc = 0, slowN = 0;
   new IntersectionObserver((ents) => ents.forEach((en) => (visible = en.isIntersecting))).observe(hero);
   window.addEventListener("resize", () => { resize(); if (reduce) frame(0); });
   window.addEventListener("scroll", onScroll, { passive: true });
@@ -350,5 +351,7 @@
     if (visible && !document.hidden) frame(ff ? 0 : dt); // a fast-forwarded screenshot holds still
     requestAnimationFrame(loop);
   }
+  if (DIAG === "off") { cv.style.display = "none"; return; }
+  if (DIAG === "still") { ct = T_IMP + 0.6; impact(geo().cx - geo().R * 0.9, geo().cy, 1); time += 0.6; parts.length = 0; impacted = true; frame(0); return; }
   requestAnimationFrame(loop);
 })();

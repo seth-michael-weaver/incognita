@@ -545,7 +545,7 @@
     window.addEventListener("resize", resize);
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     if (mq.addEventListener) mq.addEventListener("change", readColors);
-    resize(); requestAnimationFrame(loop);
+    resize(); if (!/[?&]chapters=off/.test(location.search)) requestAnimationFrame(loop); // ?chapters=off: preview-only diagnostic
     WT.applyStatic(document, "title");
     langToggle();
     WT.keepLang();
