@@ -640,10 +640,24 @@
     const lib = (c) => !!(c.dash || c.pw), zOf = (c) => (c.rr ? 2 : lib(c) ? 1 : 0); // INCOGNITA's own below-1-keV curve last, over the comparators
     // INCOGNITA's own curve below 1 keV: solid for its own resonance fit, dash-dot for statistical resonances, thin dotted for the smooth estimate
     const sty = (c) => { if (c.pw) return [[1.15, c.col]]; if (c.dash) return [[1.7, c.col]]; if (c.rr) { const s = rrSty(c.rr); return s.halo ? [[s.halo, C.surface], [s.w, c.col]] : [[s.w, c.col]]; } return [[5, C.surface], [2.2, c.col]]; };
+    // pointwise curves with many resonances per pixel: 4-px columns holding ≥ 2 peaks are drawn as a faint min-max band with the
+    // energy-averaged cross section as the line (a wall of overlapping peaks says nothing); isolated resonances stay pointwise
+    const thin = (c) => { if (!(c.rr || c.pw) || c.pts.length < 400) return null;
+      const P = c.pts.filter(([, y]) => y > 0), cols = new Map();
+      for (let i = 0; i < P.length; i++) { const k = Math.floor(X(P[i][0]) / 4); let b = cols.get(k); if (!b) cols.set(k, (b = { i0: i, i1: i, pk: 0 })); b.i1 = i;
+        if (i > 0 && i < P.length - 1 && P[i][1] > P[i - 1][1] && P[i][1] >= P[i + 1][1]) b.pk++; }
+      const line = [], band = []; let run = null;
+      for (const b of [...cols.values()].sort((a, b) => a.i0 - b.i0)) {
+        if (b.pk < 2) { if (run) { band.push(run); run = null; } for (let i = b.i0; i <= b.i1; i++) line.push(P[i]); continue; }
+        let lo = Infinity, hi = 0, area = 0; for (let i = b.i0; i <= b.i1; i++) { lo = Math.min(lo, P[i][1]); hi = Math.max(hi, P[i][1]); if (i > b.i0) area += (P[i][0] - P[i - 1][0]) * (P[i][1] + P[i - 1][1]) / 2; }
+        const de = P[b.i1][0] - P[b.i0][0], xm = Math.sqrt(P[b.i0][0] * P[b.i1][0]); line.push([xm, de > 0 ? area / de : hi]); (run || (run = [])).push([xm, lo, hi]); }
+      if (run) band.push(run); return { line, band }; };
+    const TH = new Map(); for (const c of S.curves) { const t = thin(c); if (t) TH.set(c, t); }
+    for (const [c, t] of TH) for (const r of t.band) if (r.length > 1) { cc.fillStyle = rgba(c.col, c.pw ? 0.12 : 0.22); cc.beginPath(); r.forEach(([x, , hi], i) => (i ? cc.lineTo(X(x), Y(hi)) : cc.moveTo(X(x), Y(hi)))); for (let i = r.length - 1; i >= 0; i--) cc.lineTo(X(r[i][0]), Y(r[i][1])); cc.closePath(); cc.fill(); }
     for (const c of [...S.curves].sort((a, b) => zOf(a) - zOf(b))) for (const [w, col] of sty(c)) { // library lines go on top, thin and without a halo, so they never hide the prediction; pointwise ones solid, so the resonances stay readable
-      const glow = !(w > 3 || lib(c) || (c.rr && c.rr !== "own-fit"));
+      const glow = !(w > 3 || lib(c) || c.rr);
       cc.strokeStyle = col; cc.lineWidth = w; cc.shadowColor = glow ? col : "transparent"; cc.shadowBlur = glow ? 12 : 0; cc.lineJoin = "round"; cc.setLineDash(c.dash ? [7, 5] : c.rr ? rrSty(c.rr).dash : []); cc.globalAlpha = c.pw ? 0.9 : 1; cc.beginPath(); let on = false;
-      for (const [x, y] of c.pts) { if (!(y > 0)) { on = false; continue; } on ? cc.lineTo(X(x), Y(y)) : cc.moveTo(X(x), Y(y)); on = true; }
+      for (const [x, y] of TH.has(c) ? TH.get(c).line : c.pts) { if (!(y > 0)) { on = false; continue; } on ? cc.lineTo(X(x), Y(y)) : cc.moveTo(X(x), Y(y)); on = true; }
       cc.stroke(); cc.globalAlpha = 1;
     }
     cc.shadowBlur = 0; cc.setLineDash([]); cc.font = `500 12px ${SANS}`; cc.textAlign = "left"; cc.textBaseline = "alphabetic"; cc.lineJoin = "round"; cc.lineWidth = 3; cc.strokeStyle = document.documentElement.dataset.theme === "light" ? C.surface : "rgba(8,13,28,.85)"; cc.fillStyle = C.soft;

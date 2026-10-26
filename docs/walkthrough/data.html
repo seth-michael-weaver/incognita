@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=77">
+<link rel="stylesheet" href="style.css?v=79">
 <link rel="preload" href="data/index.json" as="fetch" crossorigin>
 <link rel="preload" href="data/n/92/238.json" as="fetch" crossorigin>
 <link rel="preload" href="data/lib/92.json" as="fetch" crossorigin>
@@ -106,6 +106,19 @@
     </div>
   </section>
 
+  <section class="dx-repo dx-tsl" aria-labelledby="dx-tsl-h">
+    <h2 id="dx-tsl-h">Moderators: thermal scattering</h2>
+    <p>Slow neutrons scatter off whole molecules and crystal lattices, not free atoms. INCOGNITA's own scattering laws, S(α,β), are built from our own physics: molecular dynamics for water, DFT phonons for beryllium. No evaluated library goes in. Both <b>tie</b> ENDF/B-VIII.1 on criticality benchmarks; neither is shown to be better.</p>
+    <div class="dx-tsl-wrap"><table class="dx-tsl-t">
+      <thead><tr><th>Material</th><th>Passes</th><th>Losses</th></tr></thead>
+      <tbody>
+        <tr><td><b>H in H₂O</b><br><span>molecular dynamics</span></td><td>12/12 criticality cases within ±35 pcm of VIII.1 (6 held out, mean +38 ± 14 pcm); total cross section C/E 1.004–1.036 (VIII.1 1.000–1.037)</td><td>diffusion 8–11 % slow; +3–4 % above measurement below 10 meV (VIII.1 too); table ends at 4.9 eV</td></tr>
+        <tr><td><b>Be metal</b><br><span>DFT phonons</span></td><td>14/14 ICSBEP Be cases within 3σ, Δk vs VIII.1 −17 ± 17 pcm; ultracold up-scattering C/E 0.93</td><td>double-differential spectra R 0.57 (VIII.1 0.58); Bragg-edge positions fail, VIII.1 too; C/E 0.76 below 200 K</td></tr>
+        <tr><td><b>Graphite</b></td><td>—</td><td>not released: every own law so far fails a pre-registered gate</td></tr>
+      </tbody></table></div>
+    <p>Download the ENDF-6 tapes from <a href="https://github.com/seth-michael-weaver/incognita/tree/main/library/tsl-v0.1"><code>library/tsl-v0.1</code></a>, where the README lists every gate.</p>
+  </section>
+
   <section class="dx-repo" aria-labelledby="dx-repo-h">
     <h2 id="dx-repo-h" data-i18n="dx_repo_h">Run it yourself</h2>
     <p data-i18n="dx_repo_p">Everything on this page comes from the open repository: the engine, the library and the curated measurements. You need Linux or macOS, Python 3.12 and <a href="https://docs.astral.sh/uv/">uv</a>.</p>
@@ -120,9 +133,9 @@ uv run python -m incognita.library show Au-197 --version v0.2    # one capture c
   </section>
 </main>
 
-<script src="js/i18n.js?v=77"></script>
+<script src="js/i18n.js?v=79"></script>
 <script>WT.load(["data"], 77);</script>
-<script src="js/nav.js?v=77"></script>
-<script src="js/data.js?v=77"></script>
+<script src="js/nav.js?v=79"></script>
+<script src="js/data.js?v=79"></script>
 </body>
 </html>

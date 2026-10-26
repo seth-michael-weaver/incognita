@@ -477,6 +477,20 @@ body.og .hero-copy { bottom: 64px; }
 .dx-repo { margin-top: 64px; padding-top: 28px; border-top: 1px solid var(--line); }
 .dx-repo h2 { font-family: var(--display); font-weight: 600; font-size: 32px; margin: 0 0 10px; }
 .dx-repo p { max-width: 44rem; color: var(--soft); }
+.dx-tsl + .dx-repo { margin-top: 40px; }
+.dx-tsl-wrap { overflow-x: auto; margin: 14px 0; }
+.dx-tsl-t { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+.dx-tsl-t th, .dx-tsl-t td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.dx-tsl-t th { font-weight: 600; color: var(--soft); }
+.dx-tsl-t td span { color: var(--soft); font-size: 12px; }
+@media (max-width: 600px) {
+  .dx-tsl-t { min-width: 0; }
+  .dx-tsl-t thead { display: none; }
+  .dx-tsl-t tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .dx-tsl-t td { display: block; border: 0; padding: 3px 0; }
+  .dx-tsl-t td:nth-child(2)::before { content: "Passes: "; font-weight: 600; }
+  .dx-tsl-t td:nth-child(3)::before { content: "Losses: "; font-weight: 600; }
+}
 .dx-gh { font: 600 15px var(--sans); color: var(--accent); }
 .dx-src { font-size: 15px; }
 @media (max-width: 640px) { .dx { padding-top: 24px; } .dx-ds li { grid-template-columns: minmax(0, 1fr) auto; } .dx-ds li > :nth-child(2), .dx-ds li > :nth-child(3) { display: none; } }
