@@ -331,9 +331,9 @@
     const r = hero.getBoundingClientRect(); scrollP = clamp(-r.top / Math.max(1, r.height), 0, 1);
     if (copy) { copy.style.opacity = String(clamp(1 - scrollP * 2.2, 0, 1)); copy.style.transform = `translateY(${-scrollP * 60}px)`; }
   }
-  let visible = true, last = 0, running = false, frozen = false; let maxDpr = 2; const iv = [];
+  let visible = true, last = 0, running = false, frozen = false, rafId = 0; let maxDpr = 2; const iv = [];
   // schedule frames only while the hero is on screen and the tab is visible (no idle rAF churn)
-  const resume = () => { if (!running && visible && !document.hidden && !frozen && !reduce) { running = true; last = 0; requestAnimationFrame(loop); } };
+  const resume = () => { if (!running && visible && !document.hidden && !frozen && !reduce) { running = true; last = 0; rafId = requestAnimationFrame(loop); } };
   new IntersectionObserver((ents) => ents.forEach((en) => { visible = en.isIntersecting; resume(); })).observe(hero);
   document.addEventListener("visibilitychange", resume);
   window.addEventListener("resize", () => { resize(); if (reduce) frame(0); });
@@ -347,6 +347,17 @@
     ct = T_IMP + 0.6; impact(geo().cx - geo().R * 0.9, geo().cy, 1); time += 0.6; parts.length = 0; impacted = true; frame(0);
     return;
   }
+  // Jank watchdog. With software compositing the canvas costs nothing in frame() and the rAF intervals look fine, but the
+  // browser then spends seconds per frame compositing it (Edge, 1920x1080 at 150 %: 2-4.6 s long tasks, growing). So watch
+  // the page itself: a timer that fires late, and long tasks where the browser reports them. Two stalls over 250 ms while the hero runs:
+  // step the backing store down once, then a still frame if they recur; one stall over 1 s: a still frame at once.
+  let stalls = 0, stepped = false; const t0j = performance.now(); // page start-up (script parsing, first layout) is not judged
+  const jank = (ms) => { if (frozen || !running || performance.now() - t0j < 2000) return; if (ms > 1000) stalls = 99; else if (ms > 250) stalls++; else return;
+    if (stalls < 2) return; const hard = stalls > 2; stalls = 0;
+    if (!hard && !stepped && dpr > 0.6) { stepped = true; maxDpr = 0.6; resize(); window.__heroPerf = { jank: ms, dpr, stepped: true }; return; }
+    frozen = true; running = false; cancelAnimationFrame(rafId); window.__heroPerf = { jank: ms, dpr, frozen: true }; };
+  { let due = performance.now() + 250; const tick = () => { const now = performance.now(); jank(now - due); due = now + 250; if (!frozen) setTimeout(tick, 250); }; setTimeout(tick, 250); }
+  try { new PerformanceObserver((l) => l.getEntries().forEach((e) => jank(e.duration))).observe({ entryTypes: ["longtask"] }); } catch (e) { /* not in Safari/Firefox: the timer covers them */ }
   // Slow device or software rendering (e.g. a browser without GPU raster): judge the REAL frame interval, which includes
   // raster/composite, over a short window, and step down fast: 2x -> 1x -> 0.6x backing store, then a still frame.
   function loop(now) {
@@ -362,7 +373,7 @@
     }
     if (!visible || document.hidden || frozen) { running = false; return; } // resumes via resume()
     frame(ff ? 0 : dt); // a fast-forwarded screenshot holds still
-    requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(loop);
   }
   resume();
 })();
