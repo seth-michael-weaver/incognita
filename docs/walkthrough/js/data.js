@@ -73,7 +73,7 @@
   // measured thermal capture σγ(0.0253 eV) from EXFOR (scripts/build_site_thermal.py): data/thermal.json, fetched once.
   // A measurement, not a library value: it is drawn as a diamond whether or not the overlay is ticked
   // INCOGNITA's own capture below the 1 keV join (RESFILL, scripts/build_site_rr.py): data/rr/<Z>/<A>.json, one per isotope
-  // row (none for natural elements); kind own-fit, statistical or smooth, each drawn and labelled differently
+  // row (none for natural elements); kind own-fit, measured-params (EXFOR-reported resonance parameters, RESPEAKS2), statistical or smooth, each drawn and labelled differently
   const rrcache = new Map();
   const loadRr = (Z, A) => { if (!A) return Promise.resolve(null); const k = nkey(Z, A);
     if (!rrcache.has(k)) rrcache.set(k, fetch(`data/rr/${k}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)); return rrcache.get(k); };
@@ -413,17 +413,19 @@
   }
 
   // INCOGNITA's own curve below 1 keV (RESFILL): what it is, in plain words, by kind; and how it is drawn
-  const RR_STYLE = { "own-fit": { w: 2.2, halo: 0, dash: [] }, statistical: { w: 1.8, halo: 0, dash: [6, 3, 1.5, 3] }, smooth: { w: 1.4, halo: 0, dash: [1.5, 3] } };
+  const RR_STYLE = { "own-fit": { w: 2.2, halo: 0, dash: [] }, "measured-params": { w: 2.2, halo: 0, dash: [] }, statistical: { w: 1.8, halo: 0, dash: [6, 3, 1.5, 3] }, smooth: { w: 1.4, halo: 0, dash: [1.5, 3] } };
   const rrSty = (k) => RR_STYLE[k] || RR_STYLE.smooth;
   const rrAnch = (rr) => !!(rr.thermal && rr.thermal.anchored);
   function rrLabel(rr) {
+    if (rr.kind === "measured-params") return T("dx_rr_meas", "resonances measured by experimenters (EXFOR resonance parameters), assembled by INCOGNITA; spins, radiation widths and weak levels not measured come from INCOGNITA’s own statistics");
     if (rr.kind === "own-fit") return T("dx_rr_own", "INCOGNITA’s own resonance fit to measured data (up to 300 eV; statistical resonances from 300 eV to 1 keV)");
     if (rr.kind === "statistical") return T("dx_rr_stat", "statistical resonances from INCOGNITA’s own average parameters, not the measured resonances: the peak positions are one random sample; over many nuclides the resonance integral is typically within a factor of 2 of measurement") + (rrAnch(rr) ? T("dx_rr_anch", "; passes through the measured thermal capture") : "");
     return rrAnch(rr) ? T("dx_rr_sm_a", "INCOGNITA’s smooth estimate through the measured thermal capture; no resonances drawn") : T("dx_rr_sm", "INCOGNITA’s smooth estimate; real thermal values can differ by orders of magnitude");
   }
-  const rrShort = (rr) => rr.kind === "own-fit" ? T("dx_rr_k_own", "own resonance fit") : rr.kind === "statistical" ? T("dx_rr_k_stat", "statistical resonances (not the real peaks)") : T("dx_rr_k_sm", "smooth estimate (no resonances)");
+  const rrShort = (rr) => rr.kind === "measured-params" ? T("dx_rr_k_meas", "measured resonances (EXFOR parameters)") : rr.kind === "own-fit" ? T("dx_rr_k_own", "own resonance fit") : rr.kind === "statistical" ? T("dx_rr_k_stat", "statistical resonances (not the real peaks)") : T("dx_rr_k_sm", "smooth estimate (no resonances)");
   function rrSentence(rr, th) {
-    let s = rr.kind === "own-fit" ? T("dx_below_own", "Below 1 keV the solid line is INCOGNITA’s own resonance fit to measured capture data up to 300 eV; from 300 eV to 1 keV it uses statistical resonances. It joins the prediction at 1 keV.")
+    let s = rr.kind === "measured-params" ? T("dx_below_meas", "Below 1 keV the solid line uses resonance energies and widths that experimenters measured and reported in EXFOR, merged across experiments; it is not a fit by INCOGNITA. Where a spin or radiation width was not measured, INCOGNITA’s own statistics supply it, and weak levels the experiments could not see are added statistically (their positions are not predictions). It joins the prediction at 1 keV.")
+      : rr.kind === "own-fit" ? T("dx_below_own", "Below 1 keV the solid line is INCOGNITA’s own resonance fit to measured capture data up to 300 eV; from 300 eV to 1 keV it uses statistical resonances. It joins the prediction at 1 keV.")
       : rr.kind === "statistical" ? T("dx_below_stat", "Below 1 keV the dash-dot line is INCOGNITA’s statistical estimate: resonances with INCOGNITA’s own average spacing and widths, placed at random, so single peaks do not match the real ones. Tested on nuclides whose resonance integral was held out, it was typically within a factor of 2 of measurement, and no better: median off by ×1.9, 54 % within ×2.") 
       : rrAnch(rr) ? T("dx_below_sm_a", "Below 1 keV the dotted line is INCOGNITA’s smooth estimate: a 1/v curve through the measured thermal capture, bridged to the 1 keV value. No resonances are drawn, so between about 1 eV and 1 keV the real cross section can be far higher at its peaks.")
       : T("dx_below_sm", "Below 1 keV the dotted line is INCOGNITA’s smooth estimate: the 1 keV value continued as 1/v, with no resonances and no measurement to pin it. Real thermal values can differ from it by orders of magnitude.");
@@ -643,11 +645,15 @@
     // pointwise curves with many resonances per pixel: 4-px columns holding ≥ 2 peaks are drawn as a faint min-max band with the
     // energy-averaged cross section as the line (a wall of overlapping peaks says nothing); isolated resonances stay pointwise.
     // Statistical resonances (random peak positions, one sample) show only what the model predicts: the energy average over ≥ 5 resonances
+    // area of one segment drawn straight on log-log axes (a power law), so averages agree with the line the reader sees;
+    // the linear trapezoid overstates the area under thinned resonance tails by 5-20 %
+    const segA = (x0, y0, x1, y1) => { if (!(y0 > 0 && y1 > 0 && x1 > x0 && x0 > 0)) return (x1 - x0) * (y0 + y1) / 2; const r = x1 / x0, b = Math.log(y1 / y0) / Math.log(r);
+      return Math.abs(b + 1) < 1e-9 ? y0 * x0 * Math.log(r) : y0 * x0 / (b + 1) * (r ** (b + 1) - 1); };
     const avg = (c) => { const P = c.pts.filter(([, y]) => y > 0), n = P.length, pk = (i) => i > 0 && i < n - 1 && P[i][1] > P[i - 1][1] && P[i][1] >= P[i + 1][1];
       let s0 = 0; while (s0 < n && !pk(s0)) s0++; while (s0 > 0 && P[s0 - 1][1] < P[s0][1]) s0--; // smooth part below the first resonance stays as is
       const line = P.slice(0, s0 + 1); let i0 = s0, k = 0;
       for (let i = s0 + 1; i < n; i++) { if (pk(i)) k++;
-        if ((k >= 5 && P[i][0] >= P[i0][0] * 10 ** 0.04) || i === n - 1) { let area = 0; for (let j = i0 + 1; j <= i; j++) area += (P[j][0] - P[j - 1][0]) * (P[j][1] + P[j - 1][1]) / 2;
+        if ((k >= 5 && P[i][0] >= P[i0][0] * 10 ** 0.04) || i === n - 1) { let area = 0; for (let j = i0 + 1; j <= i; j++) area += segA(P[j - 1][0], P[j - 1][1], P[j][0], P[j][1]);
           line.push([Math.sqrt(P[i0][0] * P[i][0]), area / (P[i][0] - P[i0][0])]); i0 = i; k = 0; } }
       return { line, band: [] }; };
     const thin = (c) => { if (c.rr === "statistical") return avg(c); if (!(c.rr || c.pw) || c.pts.length < 400) return null;
@@ -657,7 +663,7 @@
       const line = [], band = []; let run = null;
       for (const b of [...cols.values()].sort((a, b) => a.i0 - b.i0)) {
         if (b.pk < 2) { if (run) { band.push(run); run = null; } for (let i = b.i0; i <= b.i1; i++) line.push(P[i]); continue; }
-        let lo = Infinity, hi = 0, area = 0; for (let i = b.i0; i <= b.i1; i++) { lo = Math.min(lo, P[i][1]); hi = Math.max(hi, P[i][1]); if (i > b.i0) area += (P[i][0] - P[i - 1][0]) * (P[i][1] + P[i - 1][1]) / 2; }
+        let lo = Infinity, hi = 0, area = 0; for (let i = b.i0; i <= b.i1; i++) { lo = Math.min(lo, P[i][1]); hi = Math.max(hi, P[i][1]); if (i > b.i0) area += segA(P[i - 1][0], P[i - 1][1], P[i][0], P[i][1]); }
         const de = P[b.i1][0] - P[b.i0][0], xm = Math.sqrt(P[b.i0][0] * P[b.i1][0]); line.push([xm, de > 0 ? area / de : hi]); (run || (run = [])).push([xm, lo, hi]); }
       if (run) band.push(run); return { line, band }; };
     const TH = new Map(); for (const c of S.curves) { const t = thin(c); if (t) TH.set(c, t); }
