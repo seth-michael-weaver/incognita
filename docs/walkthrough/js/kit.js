@@ -437,7 +437,7 @@
     navH(); window.addEventListener("resize", navH);
     const chapters = [];
     const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
-    const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, measure: 1, layers: 2,
+    const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, critical: 0, layers: 2,
       hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3 }; // the Expert part (chapters 13-18)
     document.querySelectorAll("[data-ch]").forEach((el) => {
       const id = el.dataset.ch, mod = WT.mods[id]; if (!mod) return;
