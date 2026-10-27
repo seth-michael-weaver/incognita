@@ -16,7 +16,7 @@
     ["structure", 1, 0, 12, 6, "What a nucleus is made of", "Structure", "Masses and separation energies, discrete levels and their γ branchings, isomers, nuclear shapes, and the resonance averages D₀, S₀, ⟨Γγ⟩."],
     ["xsec", 2, 0, 6, 3, "What is a cross section?", "Cross section", "The cross section as a target area in barns: a beam on a slab of nuclei, transmission, 1/v at low energy and a resonance."],
     ["binding", 3, 0, 8, 3, "Why nuclei hold together", "Binding", "Binding energy per nucleon from measured masses (AME2020): the iron peak, energy from splitting uranium and from fusing light nuclei."],
-    ["neutrons", 4, 0, 6, 2, "Why neutrons?", "Why neutrons", "The Coulomb barrier: a proton turned back or tunnelling, a neutron entering at any energy."],
+    ["neutrons", 4, 0, 6, 3, "Why reactors run on neutrons", "Why neutrons", "The Coulomb barrier: a proton turned back or tunnelling; a neutron entering at any energy, down to thermal; so slow neutrons can start fission."],
     ["omp", 5, 0, 12, 6, "A cloudy crystal ball", "Optical model", "The optical model: a complex potential that bends and absorbs; aim and partial waves; transmission coefficients and the total cross section."],
     ["direct", 6, 0, 12, 7, "A glancing blow", "Direct reactions", "Inelastic scattering to collective levels (rotors, vibrators), coupled channels and DWBA, giant resonances, direct capture, and the flux direct reactions take first."],
     ["preeq", 7, 1, 15, 7, "Collisions before calm", "Pre-equilibrium", "The exciton model: particle–hole states, emission before equilibrium, the fast tail of spectra, cluster emission, multiple pre-equilibrium."],
