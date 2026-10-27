@@ -57,17 +57,6 @@
    "valid": true,
    "no_integral_test": true
   },
-  "Pu240": {
-   "arm": "Pu240_RP2",
-   "tier": "STRICT",
-   "src": "desk:resinteg/arms/Pu240_RP2/proc/Pu240.h5",
-   "fit": "RESPEAKS2",
-   "verdict": "PASS",
-   "dev": "MCT2pnl-30:+47±35(worsen -47);MCT2pnl-33:+32±35(worsen +32);MCT2pnl-35:-24±35(worsen -24);PCI1:+96±35(worsen -96);PMF1:-23±35(worsen +23);PMF6:+40±35(worsen -40)",
-   "gate_v3": "FAIL",
-   "valid": true,
-   "no_integral_test": false
-  },
   "F19": {
    "arm": "F19_TF",
    "tier": "STRICT",
@@ -93,6 +82,7 @@
  },
  "released": "res-v0.1: the 9 files with a differential/physics judge",
  "withdrawn": {
-  "Zr94": "2026-10-27: fails EXFOR-only judge, thermal capture 1.10x"
+  "Zr94": "2026-10-27: fails EXFOR-only judge, thermal capture 1.10x",
+  "Pu240": "2026-10-27: fails EXFOR-only judge, thermal fission 1.22x (one n_TOF 2015 set)"
  }
 }

@@ -1,6 +1,6 @@
 # INCOGNITA resonance-region hybrids res-v0.1 (OpenMC HDF5)
 
-8 nuclides (9 at first release; Zr-94 withdrawn 2026-10-27, see below) whose resonance region is INCOGNITA's own **and passed a physics judge** (differential data, pre-registered). Built 2026-10-27.
+7 nuclides (9 at first release; Zr-94 and Pu-240 withdrawn 2026-10-27, see below) whose resonance region is INCOGNITA's own **and passed a physics judge** (differential data, pre-registered). Built 2026-10-27.
 
 **These are HYBRIDS, not full own evaluations.** Only the resolved resonance range is INCOGNITA's own. Everything else (unresolved range,
 fast-region cross sections, angular and energy distributions, nu-bar, fission spectra) is ENDF/B-VIII.1, used as a carrier.
@@ -33,7 +33,7 @@ Processed with NJOY 2016 and OpenMC 0.16 at 293.6/600/900 K.
 | Zr90 | STRICT | own Reich–Moore fit to EXFOR transmission (ZRFIT) | PASS-provisional — provisional; held-out check cannot tell it from ENDF/B-VIII.1 | MCT2pnl-30:-68±35(worsen +68); MCT2pnl-33:+4±35(worsen +4); MCT2pnl-35:-103±35(worsen -95) | `e32d7da3746bd4a0…` |
 | Cu65 | PROVISIONAL | own Reich–Moore fit to EXFOR transmission (STRUCT2) | PASS-provisional — provisional; elastic ~10 % high below 1 keV; worse than ENDF/B-VIII.1 in 10–100 eV hold-out | no DEV case | `d68662f4eba8d61a…` |
 | Gd155 | STRICT | own Reich–Moore fit to EXFOR (GELINA + J-PARC) (GD155FIT) | no-harm PASS — no-harm PASS: capture RI 1495 b vs 1532 ± 8.5 b measured (misses 2σ by 2.7 b; old own file 535 b) | no DEV case | `03f75e9a075fe581…` |
-| Pu240 | STRICT | EXFOR-reported resonance parameters, assembled by INCOGNITA (RESPEAKS2) | PASS — experimenter parameters; Explorer peaks live since 10-26 | MCT2pnl-30:+47±35(worsen -47); MCT2pnl-33:+32±35(worsen +32); MCT2pnl-35:-24±35(worsen -24); PCI1:+96±35(worsen -96); PMF1:-23±35(worsen +23); PMF6:+40±35(worsen -40) | `164e24a239854fc7…` |
+| ~~Pu240~~ | WITHDRAWN | — | **withdrawn 2026-10-27:** fails the EXFOR-only judge on thermal fission (1.22× the n_TOF 2015 measurement 0.0680 ± 0.0052 b; ENDF/B-VIII.1 is 1.10×) | — | — |
 | F19 | STRICT | own statistical ladder, bound level refitted to EXFOR thermal constants (THERMFIX) | PASS — thermal σ_el 4.70 → 3.63 b (measured 3.70); hold-out σ_tot C/E 1.24 → 0.96 | no DEV case | `c235b4ce0aeb6cb1…` |
 | Na23 | STRICT | own statistical ladder, bound level refitted to EXFOR thermal constants (THERMFIX) | PASS — thermal σ_el 8.31 → 3.27 b (measured 3.26); b_coh not met | LCT8c5:+33±35(worsen +33) | `dc030292ad7afb82…` |
 | ~~Zr94~~ | WITHDRAWN | — | **withdrawn 2026-10-27:** fails the EXFOR-only judge (thermal capture 1.10× the EXFOR value 0.0475 ± 0.0018 b; limit ±9.7 %) | — | — |
@@ -48,20 +48,20 @@ a reference. They are replaced above by EXFOR-based statements. No file in this 
 
 ## EXFOR-only judge verdicts (2026-10-27)
 On 2026-10-27 we rebuilt the differential judge from individual EXFOR entries and IAEA standards measurements only (no compilations,
-no evaluated values), calibrated it on ENDF/B-VIII.1, and counted a missing reference as **not cleared** (never as a pass).
-Results for the files released here (value = file ÷ reference; * = reference that ENDF/B-VIII.1 also fails, treated as suspect):
+no evaluated values), calibrated it on ENDF/B-VIII.1, and counted a missing reference as **not cleared** (never as a pass). A
+pre-registered rule also derives thermal values from EXFOR σ(E) points between 0.01 and 0.1 eV where no direct thermal value exists
+(marked "derived"). Value = file ÷ reference; * = a reference that ENDF/B-VIII.1 also fails, treated as suspect.
 
-| file | verdict | thermal σγ | thermal σ_el | capture RI | notes |
-|---|---|---|---|---|---|
-| Na23 | **PASS** | 0.975 | 1.04 | 0.996 | |
-| Zr94 | **FAIL → withdrawn** | 1.10 | no reference | 1.02 (derived) | |
-| Cu65 | not cleared | 1.00 | 1.40* | 0.957 | σ_el reference suspect |
-| F19 | not cleared | 0.926 | no reference | no reference | |
-| Fe56 | not cleared | 0.934 | 0.963 | no reference | |
-| Ni58 | not cleared | 0.999 | no reference | no reference | |
-| Pu240 | not cleared | no reference | 0.97* | 0.924 | fission quantities: no reference |
-| Gd155 | not cleared | no reference | no reference | no reference | |
-| Zr90 | not cleared | no reference | no reference | no reference | |
+| file | verdict | thermal σγ | thermal σf | thermal σ_el | capture RI | notes |
+|---|---|---|---|---|---|---|
+| Na23 | **PASS** | 0.975 | — | 1.04 | 0.996 | |
+| Zr94 | **FAIL → withdrawn** | 1.10 | — | no reference | 1.02 (derived) | |
+| Pu240 | **FAIL → withdrawn** | no reference | 1.22 (derived, one n_TOF set) | 0.97* | 0.924 | fission RI: no reference |
+| Gd155 | not cleared | 1.02 (derived) | — | no reference | no reference | |
+| Cu65 | not cleared | 1.00 | — | 1.40* | 0.957 | σ_el reference suspect |
+| F19 | not cleared | 0.926 | — | no reference | no reference | |
+| Fe56 | not cleared | 0.934 | — | 0.963 | no reference | |
+| Ni58 | not cleared | 0.999 | — | no reference | no reference | |
+| Zr90 | not cleared | no reference | — | no reference | no reference | no usable EXFOR σ(E) data near thermal either |
 
-"Not cleared" means a quantity has no usable EXFOR reference yet, not that the file is wrong. A pre-registered rule deriving thermal
-values from energy-dependent EXFOR data is being added; this table will be updated when it lands.
+"Not cleared" means a quantity has no usable EXFOR reference yet, not that the file is wrong.
