@@ -23,15 +23,18 @@
     ["cascade", 8, 1, 10, 5, "Down the chart", "Cascade", "Multiple emission across the chart of nuclides, bin-by-bin bookkeeping, exclusive channels and residual production."],
     ["fission", 9, 1, 12, 6, "Splitting", "Fission", "The barrier as a landscape of shapes, tunnelling, transition states, double-humped barriers, multiple-chance channels."],
     ["resonance", 10, 2, 15, 6, "Sharp peaks", "Resonances", "Resonances as statistics: level repulsion, Porter–Thomas widths, ladders built from four averages, thermal values."],
-    ["measure", 11, 1, 15, 7, "What comes out", "Observables", "From the nucleus to measured numbers: excitation functions, spectra, angular distributions, stellar capture (MACS), Total Monte Carlo uncertainty."],
-    ["layers", 12, 2, 12, 5, "How the model is layered", "Layers", "How the data product is built on the engine: one global rule, each nucleus's own data, anchoring to good data (TERRA), calibrated error bars."],
-    ["hauser", 13, 3, 18, 5, "Hauser–Feshbach, channel by channel", "Hauser–Feshbach", "The Hauser–Feshbach formula one spin and parity at a time, transmission per channel, width fluctuations (Moldauer, HRTW) and their effect when few channels are open."],
-    ["optical", 14, 3, 20, 6, "The optical model, solved", "Optical model, solved", "The Koning–Delaroche potential, Numerov integration of the radial equation, matching to S and T, spin–orbit splitting, cross sections and the s-wave strength function."],
-    ["densities", 15, 3, 18, 5, "Level densities, matched", "Level densities", "Gilbert–Cameron with Ignatyuk's damping, the tangent constant-temperature law, finding the matching energy from counted levels, the empirical fallback, and D₀ as a check."],
-    ["strength", 16, 3, 18, 5, "Photon strength, in detail", "Photon strength", "E1 (SLO and SMLO) and M1 (spin-flip, scissors, upbend), the Brink–Axel hypothesis, the average radiative width ⟨Γγ⟩ and the γ cascade."],
-    ["exciton", 17, 3, 20, 6, "The exciton model, in numbers", "Exciton model", "Particle–hole state densities, transition and emission rates, the exciton chain in time, the hard tail of spectra, the pre-equilibrium share and the two-component model."],
-    ["averages", 18, 3, 18, 5, "From resonances to averages", "Resonances to averages", "The R-matrix formula, the statistics of resonance parameters, Doppler broadening, the energy average that becomes Hauser–Feshbach, and resolved, unresolved and smooth ranges."],
-  ].map(([id, n, lv, min, steps, title, topic, what]) => ({ id, n, lv, min, steps, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
+    ["tof", 11, 1, 10, 5, "Catching a resonance", "Measuring peaks", "Time of flight: a pulsed source, a flight path and a sample; transmission dips, self-shielding in thick samples, and resolution broadening."],
+    ["measure", 12, 1, 15, 7, "What comes out", "Observables", "From the nucleus to measured numbers: excitation functions, spectra, angular distributions, stellar capture (MACS), Total Monte Carlo uncertainty."],
+    ["slowing", 13, 1, 10, 3, "Slowing down", "Slowing down", "Moderation: energy lost per collision with hydrogen and oxygen, thermal neutrons, chemical binding and the scattering law S(α,β)."],
+    ["critical", 14, 1, 10, 3, "Keeping it critical", "Criticality", "The chain reaction: the multiplication factor k, delayed neutrons and why a reactor can be controlled, critical experiments."],
+    ["layers", 15, 2, 12, 5, "How the model is layered", "Layers", "How the data product is built on the engine: one global rule, each nucleus's own data, anchoring to good data (TERRA), calibrated error bars."],
+    ["hauser", 16, 3, 18, 5, "Hauser–Feshbach, channel by channel", "Hauser–Feshbach", "The Hauser–Feshbach formula one spin and parity at a time, transmission per channel, width fluctuations (Moldauer, HRTW) and their effect when few channels are open."],
+    ["optical", 17, 3, 20, 6, "The optical model, solved", "Optical model, solved", "The Koning–Delaroche potential, Numerov integration of the radial equation, matching to S and T, spin–orbit splitting, cross sections and the s-wave strength function."],
+    ["densities", 18, 3, 18, 5, "Level densities, matched", "Level densities", "Gilbert–Cameron with Ignatyuk's damping, the tangent constant-temperature law, finding the matching energy from counted levels, the empirical fallback, and D₀ as a check."],
+    ["strength", 19, 3, 18, 5, "Photon strength, in detail", "Photon strength", "E1 (SLO and SMLO) and M1 (spin-flip, scissors, upbend), the Brink–Axel hypothesis, the average radiative width ⟨Γγ⟩ and the γ cascade."],
+    ["exciton", 20, 3, 20, 6, "The exciton model, in numbers", "Exciton model", "Particle–hole state densities, transition and emission rates, the exciton chain in time, the hard tail of spectra, the pre-equilibrium share and the two-component model."],
+    ["averages", 21, 3, 18, 5, "From resonances to averages", "Resonances to averages", "The R-matrix formula, the statistics of resonance parameters, Doppler broadening, the energy average that becomes Hauser–Feshbach, and resolved, unresolved and smooth ranges."],
+  ].map(([id, n, lv, min, steps, title, topic, what], i) => ({ id, n: i + 1, lv, min, steps, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
   const byId = Object.fromEntries(CH.map((c) => [c.id, c]));
   const lang = WT.langQ();
   const href = (id) => "./" + lang + "#" + id;

@@ -1,4 +1,4 @@
-/* Korean: layers (12장). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Korean: layers (15장). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -22,7 +22,7 @@
   const terraScore = TT ? `${libs}와 비교하면 ${TT.d}건 중 ${TT.w}건에서 앞서고, ${TT.t}건에서 대등하며, ${TT.l}건에서 뒤집니다.` : `${libs}와 비교합니다.`;
 
   WT.L.ch.layers = {
-    num: "12장", title: "모형은 어떻게 층을 이루는가", short: "층",
+    num: "15장", title: "모형은 어떻게 층을 이루는가", short: "층",
     lead: "우리가 내놓는 결과는 엔진 위에 층층이 쌓아 만든 것이며, 각 층은 측정값 앞에서 제자리를 스스로 증명해야 합니다.",
     html: `
 <div class="step">

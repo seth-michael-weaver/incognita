@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>دالة قوة غاما ونفاذ γ؛ المستويات المنفصلة والأيزومرات</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>شلال انبعاث الجسيمات وأشعة γ، القنوات الحصرية، النوى المتبقية</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>حواجز الانشطار والنفاذ</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>أطياف الانبعاث، التوزيعات الزاوية والمقاطع العرضية التفاضلية المزدوجة (اختياري، للإخراج فقط)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>الأسر في أهداف مثارة حراريًا والمعدلات النجمية (اختياري)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>عدم اليقين عبر متغيرات عشوائية كثيرة (مونت كارلو الشامل)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>أطياف الانبعاث، التوزيعات الزاوية والمقاطع العرضية التفاضلية المزدوجة (اختياري، للإخراج فقط)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>الأسر في أهداف مثارة حراريًا والمعدلات النجمية (اختياري)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>عدم اليقين عبر متغيرات عشوائية كثيرة (مونت كارلو الشامل)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>البرنامج الذي ينفّذ المراحل بالترتيب، ونوى حسابية اختيارية مكتوبة بلغة C لزيادة السرعة</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>كل القيم الافتراضية والخيارات، تُقرأ مرة واحدة عند البدء؛ وكذلك بارامترات TENDL المضبوطة لكل نويدة، تُطبَّق كما يطبّقها TALYS (اختياري)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "خارج المحرك",
-  coda_p_outside: "بعض أجزاء القصة تعمل إلى جانب المحرك لا داخله. سلالم الرنينات الإحصائية في <a href=\"#resonance\">الفصل 10</a> موجودة في <code>physics/resonance/</code>. ومتوسطات ماكسويل (MACS) في <a href=\"#measure\">الفصل 11</a> تُحسب بعد التشغيل من منحنيات الأسر التي يعطيها المحرك، في <code>validation/differential/core.py</code>؛ أما الأسر في الأهداف المثارة حراريًا والمعدل النجمي فيحسبهما المحرك نفسه (<code>astro/stellar.py</code>، اختياري). وطبقة الربط في <a href=\"#layers\">الفصل 12</a> موجودة في <code>incognita/terra/</code>.",
+  coda_p_outside: "بعض أجزاء القصة تعمل إلى جانب المحرك لا داخله. سلالم الرنينات الإحصائية في <a href=\"#resonance\">الفصل 10</a> موجودة في <code>physics/resonance/</code>. ومتوسطات ماكسويل (MACS) في <a href=\"#measure\">الفصل 12</a> تُحسب بعد التشغيل من منحنيات الأسر التي يعطيها المحرك، في <code>validation/differential/core.py</code>؛ أما الأسر في الأهداف المثارة حراريًا والمعدل النجمي فيحسبهما المحرك نفسه (<code>astro/stellar.py</code>، اختياري). وطبقة الربط في <a href=\"#layers\">الفصل 15</a> موجودة في <code>incognita/terra/</code>.",
   close: "إغلاق",
   chapters: "الفصول",
   nav_board: "لوحة النتائج", nav_data_short: "البيانات",

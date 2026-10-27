@@ -1,6 +1,6 @@
-/* Portuguese (pt-PT): densities (Capítulo 15, Especialista) */
+/* Portuguese (pt-PT): densities (Capítulo 18, Especialista) */
 WT.L.ch.densities = {
-  num: "Capítulo 15", title: "Densidades de níveis, unidas", short: "Densidades de níveis",
+  num: "Capítulo 18", title: "Densidades de níveis, unidas", short: "Densidades de níveis",
   lead: "O Capítulo 5 uniu uma prancha reta a uma encosta. Este capítulo escreve as duas, mostra como se encontra a junção a partir dos níveis contados e o que acontece quando não existe junção.",
   html: `
 <div class="step">

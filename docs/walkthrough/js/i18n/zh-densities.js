@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): densities (chapter 15, 能级密度的拼接) */
 WT.L.ch.densities = {
-  num: "第 15 章", title: "能级密度的拼接", short: "能级密度",
+  num: "第 18 章", title: "能级密度的拼接", short: "能级密度",
   lead: "第 5 章把一块笔直的木板接到一片山坡上。本章把两者都写成公式，说明接点如何由计数的能级确定，以及接点不存在时会发生什么。",
   html: `
 <div class="step">

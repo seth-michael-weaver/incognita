@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): optical (Hoofdstuk 14, het optisch model, opgelost) */
+/* Dutch (Nederlands): optical (Hoofdstuk 17, het optisch model, opgelost) */
 WT.L.ch.optical = {
-  num: "Hoofdstuk 14", title: "Het optisch model, opgelost", short: "Optisch model, opgelost",
+  num: "Hoofdstuk 17", title: "Het optisch model, opgelost", short: "Optisch model, opgelost",
   lead: "Hoofdstuk 2 tekende de optische potentiaal als een troebele glazen bol. Hier staat ze zoals de motor haar gebruikt: een globale parametrisatie, een radiale schrödingervergelijking die stap voor stap wordt geïntegreerd, en een aansluitvoorwaarde die de golf omzet in transmissiecoëfficiënten.",
   html: `
 <div class="step">
@@ -30,7 +30,7 @@ WT.L.ch.optical = {
   <p>De <b>spin-baanterm</b> is aantrekkend voor <i>j</i> = <i>l</i> + ½ en afstotend voor <i>j</i> = <i>l</i> − ½. Hij is klein, een paar MeV aan het oppervlak, maar hij drijft de twee transmissies van elke <i>l</i> uit elkaar, het sterkst bij de partiële golf die het oppervlak schampt.</p>
   <div class="ctl"><label for="op-e3">Neutronenergie (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">Zet spin-baan uit</button></div>
-  <p>Hauser–Feshbach (hoofdstuk 13) gebruikt de twee afzonderlijk; opgeteld met hun gewichten, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, geven ze een vrijwel ongewijzigde werkzame doorsnede voor reactie. Daarom leggen totale werkzame doorsneden de sterkte van de spin-baanterm nauwelijks vast en zijn polarisatiedata nodig.</p>
+  <p>Hauser–Feshbach (hoofdstuk 16) gebruikt de twee afzonderlijk; opgeteld met hun gewichten, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, geven ze een vrijwel ongewijzigde werkzame doorsnede voor reactie. Daarom leggen totale werkzame doorsneden de sterkte van de spin-baanterm nauwelijks vast en zijn polarisatiedata nodig.</p>
 </div>
 <div class="step">
   <h3>De werkzame doorsneden</h3>

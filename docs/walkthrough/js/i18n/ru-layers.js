@@ -1,4 +1,4 @@
-/* Russian: layers (глава 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Russian: layers (глава 15). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -22,7 +22,7 @@
   const terraScore = TT ? `В сравнении с ${libs} она впереди в ${TT.w} из ${TT.d} сравнений, вничью в ${TT.t} и позади в ${TT.l}.` : `Она сравнивается с ${libs}.`;
 
   WT.L.ch.layers = {
-    num: "Глава 12", title: "Как модель устроена по слоям", short: "Слои",
+    num: "Глава 15", title: "Как модель устроена по слоям", short: "Слои",
     lead: "То, что мы выдаём, строится слоями поверх расчётной программы, и каждый слой должен заслужить своё место в сравнении с измерениями.",
     html: `
 <div class="step">

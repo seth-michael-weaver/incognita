@@ -1,6 +1,6 @@
-/* Portuguese (pt-PT): exciton (Capítulo 17, Especialista) */
+/* Portuguese (pt-PT): exciton (Capítulo 20, Especialista) */
 WT.L.ch.exciton = {
-  num: "Capítulo 17", title: "O modelo de excitões, em números", short: "Modelo de excitões",
+  num: "Capítulo 20", title: "O modelo de excitões, em números", short: "Modelo de excitões",
   lead: "O Capítulo 4 seguiu um neutrão rápido ao longo de umas poucas colisões. Eis as taxas que decidem, em cada etapa, se o que vem a seguir é outra colisão ou uma fuga, e o espectro que elas formam no total.",
   html: `
 <div class="step">

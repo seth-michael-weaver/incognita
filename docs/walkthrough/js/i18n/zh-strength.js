@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): strength (chapter 16, 光子强度详解) */
 WT.L.ch.strength = {
-  num: "第 16 章", title: "光子强度详解", short: "光子强度",
+  num: "第 19 章", title: "光子强度详解", short: "光子强度",
   lead: "第 7 章展示了热的原子核偏爱哪些光子。本章写出强度函数，把它们一路推到穿透系数和平均辐射宽度，并运行由它们驱动的级联。",
   html: `
 <div class="step">

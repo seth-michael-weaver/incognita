@@ -1,6 +1,6 @@
-/* Portuguese (pt-PT): hauser (Capítulo 13, Especialista) */
+/* Portuguese (pt-PT): hauser (Capítulo 16, Especialista) */
 WT.L.ch.hauser = {
-  num: "Capítulo 13", title: "Hauser–Feshbach, canal a canal", short: "Hauser–Feshbach",
+  num: "Capítulo 16", title: "Hauser–Feshbach, canal a canal", short: "Hauser–Feshbach",
   lead: "O Capítulo 6 contou a competição entre as saídas como um jogo de portas. Eis a fórmula por trás das portas, um canal de cada vez, e a correção de que precisa quando só há poucos canais abertos.",
   html: `
 <div class="step">

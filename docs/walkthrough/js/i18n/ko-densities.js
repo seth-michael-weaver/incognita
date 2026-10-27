@@ -1,6 +1,6 @@
-/* Korean: densities (15장, 준위 밀도 접속하기) */
+/* Korean: densities (18장, 준위 밀도 접속하기) */
 WT.L.ch.densities = {
-  num: "15장", title: "준위 밀도, 접속하기", short: "준위 밀도",
+  num: "18장", title: "준위 밀도, 접속하기", short: "준위 밀도",
   lead: "5장에서는 곧은 널빤지를 비탈에 이어 붙였습니다. 이 장에서는 둘을 식으로 적고, 세어 낸 준위로부터 이음매를 찾는 방법과 이음매가 없을 때 어떤 일이 일어나는지를 보여 줍니다.",
   html: `
 <div class="step">

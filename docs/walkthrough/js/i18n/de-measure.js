@@ -1,6 +1,6 @@
-/* German (Deutsch): measure (Kapitel 11, Observablen) */
+/* German (Deutsch): measure (Kapitel 12, Observablen) */
 WT.L.ch.measure = {
-  num: "Kapitel 11", title: "Was herauskommt", short: "Observablen",
+  num: "Kapitel 12", title: "Was herauskommt", short: "Observablen",
   lead: "Ein Experiment, ein Reaktor oder ein Stern sieht nur eine Handvoll Zahlen. Dieses Kapitel zeigt, wie die Engine das, was im Kern geschieht, in diese Zahlen übersetzt.",
   html: `
 <div class="step">

@@ -1,6 +1,6 @@
-/* French: strength (Chapitre 16, expert: photon strength, transmission, <Gamma_gamma> and the cascade) */
+/* French: strength (Chapitre 19, expert: photon strength, transmission, <Gamma_gamma> and the cascade) */
 WT.L.ch.strength = {
-  num: "Chapitre 16", title: "La force gamma en détail", short: "Force gamma",
+  num: "Chapitre 19", title: "La force gamma en détail", short: "Force gamma",
   lead: "Le chapitre 7 montrait quels photons un noyau chaud préfère. Ce chapitre écrit les fonctions de force, les suit jusqu'aux coefficients de transmission et à la largeur radiative moyenne, et fait tourner la cascade qu'elles gouvernent.",
   html: `
 <div class="step">

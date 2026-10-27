@@ -1,4 +1,4 @@
-/* Chapter 17 (Expert): the exciton model in numbers (preeq/exciton.py, density/particle_hole.py, preeq/multi.py).
+/* Chapter 20 (Expert): the exciton model in numbers (preeq/exciton.py, density/particle_hole.py, preeq/multi.py).
  * Scenes (S.mode): "omega"  = particle-hole state densities omega(p, h, E) with and without the Pauli correction; a Fermi-sea
  *                              sketch resamples one configuration of the chosen exciton number;
  *                   "rates"  = per stage n: the internal transition rate lambda+ and the neutron emission rate W, log scale;
@@ -61,7 +61,7 @@
   });
 
   WT.chapter("exciton", {
-    num: "Chapter 17", title: "The exciton model, in numbers", short: "Exciton model",
+    num: "Chapter 20", title: "The exciton model, in numbers", short: "Exciton model",
     lead: "Chapter 4 followed one fast neutron through a few collisions. Here are the rates that decide, at each stage, whether the next thing is another collision or an escape, and the spectrum they add up to.",
     html: `
 <div class="step">

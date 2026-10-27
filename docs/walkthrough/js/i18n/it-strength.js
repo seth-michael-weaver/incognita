@@ -1,6 +1,6 @@
-/* Italian: strength (Capitolo 16, funzioni di forza fotonica in dettaglio) */
+/* Italian: strength (Capitolo 19, funzioni di forza fotonica in dettaglio) */
 WT.L.ch.strength = {
-  num: "Capitolo 16", title: "Forza fotonica, in dettaglio", short: "Forza fotonica",
+  num: "Capitolo 19", title: "Forza fotonica, in dettaglio", short: "Forza fotonica",
   lead: "Il capitolo 7 ha mostrato quali fotoni preferisce un nucleo caldo. Questo capitolo scrive le funzioni di forza, le segue fino ai coefficienti di trasmissione e alla larghezza radiativa media, e fa girare la cascata che esse governano.",
   html: `
 <div class="step">

@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): measure (Hoofdstuk 11, wat eruit komt) */
+/* Dutch (Nederlands): measure (Hoofdstuk 12, wat eruit komt) */
 WT.L.ch.measure = {
-  num: "Hoofdstuk 11", title: "Wat eruit komt", short: "Observabelen",
+  num: "Hoofdstuk 12", title: "Wat eruit komt", short: "Observabelen",
   lead: "Een experiment, een reactor of een ster ziet maar een handvol getallen. Dit hoofdstuk laat zien hoe de motor wat er in de kern gebeurt in die getallen omzet.",
   html: `
 <div class="step">

@@ -1,6 +1,6 @@
-/* German (Deutsch): strength (Kapitel 16, Photonenstärke im Detail) */
+/* German (Deutsch): strength (Kapitel 19, Photonenstärke im Detail) */
 WT.L.ch.strength = {
-  num: "Kapitel 16", title: "Photonenstärke im Detail", short: "Photonenstärke",
+  num: "Kapitel 19", title: "Photonenstärke im Detail", short: "Photonenstärke",
   lead: "Kapitel 7 hat gezeigt, welche Photonen ein heißer Kern bevorzugt. Dieses Kapitel schreibt die Stärkefunktionen hin, verfolgt sie bis zu den Transmissionskoeffizienten und der mittleren Strahlungsbreite und lässt die Kaskade ablaufen, die sie antreiben.",
   html: `
 <div class="step">

@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "Capítulo 11", title: "O que sai", short: "Observáveis",
+  num: "Capítulo 12", title: "O que sai", short: "Observáveis",
   lead: "Uma experiência, um reator ou uma estrela só veem um punhado de números. Este capítulo mostra como o motor transforma o que acontece dentro do núcleo nesses números.",
   html: `
 <div class="step">

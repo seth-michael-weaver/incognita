@@ -1,6 +1,6 @@
-/* French: exciton (Chapitre 17, Expert : le modèle d'excitons en chiffres) */
+/* French: exciton (Chapitre 20, Expert : le modèle d'excitons en chiffres) */
 WT.L.ch.exciton = {
-  num: "Chapitre 17", title: "Le modèle d'excitons, en chiffres", short: "Modèle d'excitons",
+  num: "Chapitre 20", title: "Le modèle d'excitons, en chiffres", short: "Modèle d'excitons",
   lead: "Le chapitre 4 a suivi un neutron rapide au fil de quelques collisions. Voici les taux qui décident, à chaque étape, si la suite sera une nouvelle collision ou une émission, et le spectre qu'ils produisent ensemble.",
   html: `
 <div class="step">

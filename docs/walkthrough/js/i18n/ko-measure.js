@@ -1,6 +1,6 @@
-/* Korean: measure (11장, 관측량) */
+/* Korean: measure (12장, 관측량) */
 WT.L.ch.measure = {
-  num: "11장", title: "밖으로 나오는 것", short: "관측량",
+  num: "12장", title: "밖으로 나오는 것", short: "관측량",
   lead: "실험이든 원자로든 별이든, 보는 것은 몇 개의 수뿐입니다. 이 장에서는 엔진이 원자핵 안에서 일어나는 일을 어떻게 그런 수로 바꾸는지 보여 드립니다.",
   html: `
 <div class="step">

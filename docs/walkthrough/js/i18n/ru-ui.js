@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>Гамма-силовая функция и γ-проницаемость; дискретные уровни и изомеры</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>Каскад испускания частиц и γ, эксклюзивные каналы, остаточные ядра</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>Барьеры деления и проницаемость</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Спектры испускания, угловые распределения и дважды дифференциальные сечения (опционально, только вывод)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Захват на термически возбуждённых мишенях и звёздные скорости реакций (опционально)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Неопределённость по множеству случайных вариантов (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Спектры испускания, угловые распределения и дважды дифференциальные сечения (опционально, только вывод)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Захват на термически возбуждённых мишенях и звёздные скорости реакций (опционально)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Неопределённость по множеству случайных вариантов (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>Программа, выполняющая этапы по порядку, и опциональные вычислительные ядра на C для ускорения</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>Все значения по умолчанию и опции, считываемые один раз при запуске; также подогнанные для каждого нуклида параметры TENDL, применяемые так же, как в TALYS (опционально)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "Вне программы",
-  coda_p_outside: "Некоторые части этой истории работают рядом с программой, а не внутри неё. Статистические лестницы резонансов из <a href=\"#resonance\">главы 10</a> находятся в <code>physics/resonance/</code>. Максвелловские средние (MACS) из <a href=\"#measure\">главы 11</a> получаются после расчёта из кривых захвата программы, в <code>validation/differential/core.py</code>; а вот захват на термически возбуждённых мишенях и звёздную скорость реакции рассчитывает сама программа (<code>astro/stellar.py</code>, опционально). Слой привязки из <a href=\"#layers\">главы 12</a> находится в <code>incognita/terra/</code>.",
+  coda_p_outside: "Некоторые части этой истории работают рядом с программой, а не внутри неё. Статистические лестницы резонансов из <a href=\"#resonance\">главы 10</a> находятся в <code>physics/resonance/</code>. Максвелловские средние (MACS) из <a href=\"#measure\">главы 12</a> получаются после расчёта из кривых захвата программы, в <code>validation/differential/core.py</code>; а вот захват на термически возбуждённых мишенях и звёздную скорость реакции рассчитывает сама программа (<code>astro/stellar.py</code>, опционально). Слой привязки из <a href=\"#layers\">главы 15</a> находится в <code>incognita/terra/</code>.",
   close: "Закрыть",
   chapters: "Главы",
   nav_board: "Таблица результатов", nav_data_short: "Данные",

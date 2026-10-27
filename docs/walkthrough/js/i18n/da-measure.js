@@ -1,6 +1,6 @@
 /* Danish: measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "Kapitel 11", title: "Hvad der kommer ud", short: "Observabler",
+  num: "Kapitel 12", title: "Hvad der kommer ud", short: "Observabler",
   lead: "Et eksperiment, en reaktor eller en stjerne ser kun en håndfuld tal. Dette kapitel viser, hvordan motoren omsætter det, der sker inde i kernen, til dem.",
   html: `
 <div class="step">

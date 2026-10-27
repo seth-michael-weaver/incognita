@@ -1,6 +1,6 @@
-/* Japanese: densities (第15章、準位密度の接続) */
+/* Japanese: densities (第18章、準位密度の接続) */
 WT.L.ch.densities = {
-  num: "第15章", title: "準位密度をつなぐ", short: "準位密度",
+  num: "第18章", title: "準位密度をつなぐ", short: "準位密度",
   lead: "第5章では、まっすぐな板を丘の斜面につなぎました。この章では両方を式で書き下し、数え上げた準位からつなぎ目をどう見つけるか、そしてつなぎ目が存在しないときに何が起こるかを示します。",
   html: `
 <div class="step">

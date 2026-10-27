@@ -1,6 +1,6 @@
-/* German (Deutsch): averages (Kapitel 18, von Resonanzen zu Mittelwerten) */
+/* German (Deutsch): averages (Kapitel 21, von Resonanzen zu Mittelwerten) */
 WT.L.ch.averages = {
-  num: "Kapitel 18", title: "Von Resonanzen zu Mittelwerten", short: "Resonanzen zu Mittelwerten",
+  num: "Kapitel 21", title: "Von Resonanzen zu Mittelwerten", short: "Resonanzen zu Mittelwerten",
   lead: "Kapitel 10 hat Resonanzleitern gezeichnet. Hier erscheinen sie als Wirkungsquerschnitte: die R-Matrix-Formel, die Statistik hinter den Parametern, der Einfluss der Temperatur und wie ein Mittel über viele Resonanzen zu Hauser–Feshbach wird.",
   html: `
 <div class="step">

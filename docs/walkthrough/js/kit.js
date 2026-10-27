@@ -437,11 +437,15 @@
     navH(); window.addEventListener("resize", navH);
     const chapters = [];
     const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
-    const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, critical: 0, layers: 2,
-      hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3 }; // the Expert part (chapters 13-18)
+    const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, critical: 1, layers: 2,
+      hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3 }; // the Expert part (chapters 16-21)
+    // chapter numbers follow page order (1..N), in the reader's language: "Chapter 1" (or its translation) with the number replaced
+    const order = [...document.querySelectorAll("[data-ch]")].map((el) => el.dataset.ch).filter((id) => WT.mods[id] && WT.mods[id].title);
+    const numTpl = (order.length && ((WT.tl && WT.L.ch[order[0]] && WT.L.ch[order[0]].num) || WT.mods[order[0]].num)) || "Chapter 1";
     document.querySelectorAll("[data-ch]").forEach((el) => {
       const id = el.dataset.ch, mod = WT.mods[id]; if (!mod) return;
       const esm = WT.tl && WT.L.ch[id]; if (esm) Object.assign(mod, esm);
+      { const k = order.indexOf(id); if (k >= 0) mod.num = /\d/.test(numTpl) ? numTpl.replace(/\d+/, String(k + 1)) : `${numTpl} ${k + 1}`; }
       if (!el.querySelector(".stage") && mod.html) {
         el.id = id;
         const lv = LEVEL[id], lvt = lv == null ? "" : ` <span class="lvl l${lv}" title="${WT.ui ? WT.ui("lvl_title", "Level") : "Level"}">${WT.ui ? WT.ui("lvl" + lv, LEVELS[lv]) : LEVELS[lv]}</span>`;
@@ -508,7 +512,9 @@
       rail.innerHTML = `<ol>${rchs.map((c) => { const lv = LEVEL[c.id]; return `<li><a href="#${c.id}" data-id="${c.id}"><i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span></a></li>`; }).join("")}</ol><div class="ch-now" aria-live="polite"></div>`;
       document.body.appendChild(rail);
       const rlinks = [...rail.querySelectorAll("a")], now = rail.querySelector(".ch-now"), seen = new Set();
+      const rol = rail.querySelector("ol");
       const setNow = (c) => { const lv = LEVEL[c.id]; rlinks.forEach((a) => a.classList.toggle("here", a.dataset.id === c.id));
+        { const a = rail.querySelector("a.here"); if (a && rol.scrollHeight > rol.clientHeight + 2) { const ar = a.getBoundingClientRect(), orr = rol.getBoundingClientRect(); rol.scrollTop += ar.top + ar.height / 2 - (orr.top + rol.clientHeight / 2); } } // a list taller than the screen keeps the current chapter in view
         now.innerHTML = `<i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span>`; };
       rail.classList.add("on");
       const clearNow = () => { rlinks.forEach((a) => a.classList.remove("here")); now.innerHTML = ""; };

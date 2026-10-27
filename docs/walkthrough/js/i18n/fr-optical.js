@@ -1,6 +1,6 @@
-/* French: optical (Chapitre 14, Expert) */
+/* French: optical (Chapitre 17, Expert) */
 WT.L.ch.optical = {
-  num: "Chapitre 14", title: "Le modèle optique, résolu", short: "Modèle optique résolu",
+  num: "Chapitre 17", title: "Le modèle optique, résolu", short: "Modèle optique résolu",
   lead: "Le chapitre 2 a dessiné le potentiel optique comme une boule de verre trouble. Le voici tel que le moteur l'utilise : une paramétrisation globale, une équation de Schrödinger radiale intégrée pas à pas, et une condition de raccordement qui transforme l'onde en coefficients de transmission.",
   html: `
 <div class="step">
@@ -30,7 +30,7 @@ WT.L.ch.optical = {
   <p>Le terme de <b>spin-orbite</b> est attractif pour <i>j</i> = <i>l</i> + ½ et répulsif pour <i>j</i> = <i>l</i> − ½. Il est faible, quelques MeV à la surface, mais il écarte les deux transmissions de chaque <i>l</i>, surtout près de l'onde partielle qui rase la surface.</p>
   <div class="ctl"><label for="op-e3">Énergie du neutron (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">Couper le spin-orbite</button></div>
-  <p>Hauser–Feshbach (chapitre 13) les utilise séparément ; additionnées avec leurs poids, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, elles donnent une section efficace de réaction presque inchangée. C'est pourquoi les sections efficaces totales contraignent à peine l'intensité du spin-orbite et qu'il faut des données de polarisation.</p>
+  <p>Hauser–Feshbach (chapitre 16) les utilise séparément ; additionnées avec leurs poids, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, elles donnent une section efficace de réaction presque inchangée. C'est pourquoi les sections efficaces totales contraignent à peine l'intensité du spin-orbite et qu'il faut des données de polarisation.</p>
 </div>
 <div class="step">
   <h3>Les sections efficaces</h3>

@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): hauser (chapter 13, Hauser–Feshbach 逐道计算，含宽度涨落修正) */
 WT.L.ch.hauser = {
-  num: "第 13 章", title: "Hauser–Feshbach，逐道计算", short: "Hauser–Feshbach",
+  num: "第 16 章", title: "Hauser–Feshbach，逐道计算", short: "Hauser–Feshbach",
   lead: "第 6 章把各出口之间的竞争讲成一扇扇门。这里给出门背后的公式，一次一个道，以及只有少数几个道开放时它所需要的修正。",
   html: `
 <div class="step">

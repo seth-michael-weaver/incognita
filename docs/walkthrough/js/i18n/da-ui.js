@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>Fotonstyrke og γ-transmission; diskrete niveauer og isomerer</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>Kaskaden af partikel- og γ-emissioner, eksklusive kanaler, restkerner</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>Fissionsbarrierer og transmission</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Emissionsspektre, vinkelfordelinger og dobbeltdifferentielle tværsnit (valgfri, kun output)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Indfangning på termisk exciterede targetkerner og stellare rater (valgfri)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Usikkerhed via mange tilfældige varianter (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Emissionsspektre, vinkelfordelinger og dobbeltdifferentielle tværsnit (valgfri, kun output)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Indfangning på termisk exciterede targetkerner og stellare rater (valgfri)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Usikkerhed via mange tilfældige varianter (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>Styreprogrammet, der kører trinnene i rækkefølge, og valgfrie C-kerner for hastighedens skyld</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>Alle standardværdier og indstillinger, læst én gang ved start; også TENDL's tilpassede parametre pr. nuklid, anvendt sådan som TALYS anvender dem (valgfri)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "Uden for motoren",
-  coda_p_outside: "Nogle dele af historien kører ved siden af motoren i stedet for inde i den. De statistiske resonansstiger fra <a href=\"#resonance\">kapitel 10</a> ligger i <code>physics/resonance/</code>. De maxwellske middelværdier (MACS) fra <a href=\"#measure\">kapitel 11</a> foldes ud fra motorens indfangningskurver efter kørslen, i <code>validation/differential/core.py</code>; indfangning på termisk exciterede targetkerner og den stellare rate kommer derimod fra motoren selv (<code>astro/stellar.py</code>, valgfri). Forankringslaget fra <a href=\"#layers\">kapitel 12</a> ligger i <code>incognita/terra/</code>.",
+  coda_p_outside: "Nogle dele af historien kører ved siden af motoren i stedet for inde i den. De statistiske resonansstiger fra <a href=\"#resonance\">kapitel 10</a> ligger i <code>physics/resonance/</code>. De maxwellske middelværdier (MACS) fra <a href=\"#measure\">kapitel 12</a> foldes ud fra motorens indfangningskurver efter kørslen, i <code>validation/differential/core.py</code>; indfangning på termisk exciterede targetkerner og den stellare rate kommer derimod fra motoren selv (<code>astro/stellar.py</code>, valgfri). Forankringslaget fra <a href=\"#layers\">kapitel 15</a> ligger i <code>incognita/terra/</code>.",
   close: "Luk",
   chapters: "Kapitler",
   nav_board: "Resultattavle", nav_data_short: "Data",

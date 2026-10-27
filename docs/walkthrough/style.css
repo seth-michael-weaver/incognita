@@ -681,7 +681,12 @@ canvas { direction: ltr; }
 .ch-rail { position: fixed; z-index: 4; left: 12px; top: 50%; transform: translateY(-50%); font-family: var(--sans); display: flex; flex-direction: column; align-items: flex-start; gap: 14px; opacity: 0; pointer-events: none; transition: opacity .35s; }
 .ch-rail.on { opacity: 1; pointer-events: auto; }
 .ch-rail ol { list-style: none; margin: 0; padding: 8px 6px; display: flex; flex-direction: column; gap: 1px; border-radius: 14px; transition: background .2s, box-shadow .2s; }
-.ch-rail a { display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 6px; border-radius: 8px; color: var(--faint); text-decoration: none; white-space: nowrap; font-size: 13px; }
+/* the rail lives between the site header and the bottom edge: a long chapter list scrolls inside itself, never under the header */
+.ch-rail { top: calc(var(--navh, 56px) + 10px); bottom: 10px; transform: none; justify-content: center; }
+.ch-rail.on { pointer-events: none; }
+.ch-rail.on ol, .ch-rail.on .ch-now { pointer-events: auto; }
+.ch-rail ol { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.ch-rail .ch-now { flex: none; }.ch-rail a { display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 6px; border-radius: 8px; color: var(--faint); text-decoration: none; white-space: nowrap; font-size: 13px; }
 .ch-rail i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--c) 30%, transparent); box-shadow: 0 0 0 1.5px var(--c); transition: transform .25s, background .25s, box-shadow .25s; }
 .ch-rail i.l0 { --c: var(--fission); } .ch-rail i.l1 { --c: var(--accent); } .ch-rail i.l2 { --c: var(--proton); }
 .ch-rail a.here i { background: var(--c); transform: scale(1.4); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }

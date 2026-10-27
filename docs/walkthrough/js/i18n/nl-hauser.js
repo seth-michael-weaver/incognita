@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): hauser (Hoofdstuk 13, Hauser–Feshbach kanaal voor kanaal) */
+/* Dutch (Nederlands): hauser (Hoofdstuk 16, Hauser–Feshbach kanaal voor kanaal) */
 WT.L.ch.hauser = {
-  num: "Hoofdstuk 13", title: "Hauser–Feshbach, kanaal voor kanaal", short: "Hauser–Feshbach",
+  num: "Hoofdstuk 16", title: "Hauser–Feshbach, kanaal voor kanaal", short: "Hauser–Feshbach",
   lead: "Hoofdstuk 6 vertelde de competitie tussen de uitgangen als deuren. Hier staat de formule achter die deuren, kanaal voor kanaal, en de correctie die ze nodig heeft wanneer maar een paar kanalen open zijn.",
   html: `
 <div class="step">

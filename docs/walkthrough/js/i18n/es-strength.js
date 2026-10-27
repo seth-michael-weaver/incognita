@@ -1,6 +1,6 @@
-/* Spanish: strength (Capítulo 16, experto: la función de fuerza fotónica, en detalle) */
+/* Spanish: strength (Capítulo 19, experto: la función de fuerza fotónica, en detalle) */
 WT.L.ch.strength = {
-  num: "Capítulo 16", title: "La fuerza fotónica, en detalle", short: "Fuerza fotónica",
+  num: "Capítulo 19", title: "La fuerza fotónica, en detalle", short: "Fuerza fotónica",
   lead: "El capítulo 7 mostró qué fotones prefiere un núcleo caliente. Este capítulo escribe las funciones de fuerza, las sigue hasta los coeficientes de transmisión y la anchura radiativa media, y ejecuta la cascada que ponen en marcha.",
   html: `
 <div class="step">

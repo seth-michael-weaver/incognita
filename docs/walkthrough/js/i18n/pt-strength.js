@@ -1,6 +1,6 @@
-/* Portuguese (pt-PT): strength (Capítulo 16, Especialista) */
+/* Portuguese (pt-PT): strength (Capítulo 19, Especialista) */
 WT.L.ch.strength = {
-  num: "Capítulo 16", title: "Intensidade fotónica, em pormenor", short: "Intensidade fotónica",
+  num: "Capítulo 19", title: "Intensidade fotónica, em pormenor", short: "Intensidade fotónica",
   lead: "O Capítulo 7 mostrou que fotões prefere um núcleo quente. Este capítulo escreve as funções de intensidade, segue-as até aos coeficientes de transmissão e à largura radiativa média, e põe a correr a cascata que elas comandam.",
   html: `
 <div class="step">

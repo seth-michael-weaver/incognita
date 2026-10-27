@@ -1,6 +1,6 @@
-/* German (Deutsch): hauser (Kapitel 13, Hauser–Feshbach Kanal für Kanal, mit Breitenfluktuationen) */
+/* German (Deutsch): hauser (Kapitel 16, Hauser–Feshbach Kanal für Kanal, mit Breitenfluktuationen) */
 WT.L.ch.hauser = {
-  num: "Kapitel 13", title: "Hauser–Feshbach, Kanal für Kanal", short: "Hauser–Feshbach",
+  num: "Kapitel 16", title: "Hauser–Feshbach, Kanal für Kanal", short: "Hauser–Feshbach",
   lead: "Kapitel 6 hat den Wettbewerb der Ausgänge als Türen erzählt. Hier steht die Formel hinter den Türen, ein Kanal nach dem anderen, und die Korrektur, die sie braucht, wenn nur wenige Kanäle offen sind.",
   html: `
 <div class="step">

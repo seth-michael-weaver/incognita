@@ -1,6 +1,6 @@
 /* French: measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "Chapitre 11", title: "Ce qui en ressort", short: "Observables",
+  num: "Chapitre 12", title: "Ce qui en ressort", short: "Observables",
   lead: "Une expérience, un réacteur ou une étoile ne voient qu'une poignée de nombres. Ce chapitre montre comment le moteur transforme ce qui se passe dans le noyau en ces nombres.",
   html: `
 <div class="step">

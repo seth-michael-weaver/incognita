@@ -1,6 +1,6 @@
 /* Danish: hauser (chapter 13, Expert) */
 WT.L.ch.hauser = {
-  num: "Kapitel 13", title: "Hauser–Feshbach, kanal for kanal", short: "Hauser–Feshbach",
+  num: "Kapitel 16", title: "Hauser–Feshbach, kanal for kanal", short: "Hauser–Feshbach",
   lead: "Kapitel 6 fortalte konkurrencen mellem udgangene som døre. Her er formlen bag dørene, én kanal ad gangen, og den korrektion, den har brug for, når kun få kanaler er åbne.",
   html: `
 <div class="step">

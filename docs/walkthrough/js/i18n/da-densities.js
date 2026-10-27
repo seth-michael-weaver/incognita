@@ -1,6 +1,6 @@
 /* Danish: densities (chapter 15, Expert) */
 WT.L.ch.densities = {
-  num: "Kapitel 15", title: "Niveautætheder, tilpasset", short: "Niveautætheder",
+  num: "Kapitel 18", title: "Niveautætheder, tilpasset", short: "Niveautætheder",
   lead: "Kapitel 5 satte en lige planke sammen med en skråning. Dette kapitel skriver begge op, viser, hvordan samlingen findes ud fra de optalte niveauer, og hvad der sker, når der ikke findes nogen samling.",
   html: `
 <div class="step">

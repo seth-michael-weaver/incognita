@@ -1,6 +1,6 @@
-/* Italian: measure (Capitolo 11, osservabili) */
+/* Italian: measure (Capitolo 12, osservabili) */
 WT.L.ch.measure = {
-  num: "Capitolo 11", title: "Che cosa esce", short: "Osservabili",
+  num: "Capitolo 12", title: "Che cosa esce", short: "Osservabili",
   lead: "Un esperimento, un reattore o una stella vedono solo una manciata di numeri. Questo capitolo mostra come il motore trasforma in quei numeri ciò che accade dentro il nucleo.",
   html: `
 <div class="step">

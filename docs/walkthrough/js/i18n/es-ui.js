@@ -31,9 +31,9 @@ Object.assign(WT.es.ui, {
       <tr><td><a href="#gamma">7</a></td><td>Función de fuerza gamma y transmisión γ; niveles discretos e isómeros</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>La cascada de emisiones de partículas y γ, canales exclusivos, residuales</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>Barreras de fisión y transmisión</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Espectros de emisión, distribuciones angulares y secciones eficaces doblemente diferenciales (opcional, solo de salida)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Captura en blancos excitados térmicamente y tasas estelares (opcional)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Incertidumbre con muchas variantes aleatorias (Monte Carlo total)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Espectros de emisión, distribuciones angulares y secciones eficaces doblemente diferenciales (opcional, solo de salida)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Captura en blancos excitados térmicamente y tasas estelares (opcional)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Incertidumbre con muchas variantes aleatorias (Monte Carlo total)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>El programa que ejecuta las etapas en orden, y núcleos de cálculo opcionales en C para ganar velocidad</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>Todos los valores por defecto y opciones, leídos una vez al inicio; también los parámetros ajustados por núclido de TENDL, aplicados como los aplica TALYS (opcional)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.es.ui, {
     </tbody>
   `,
   coda_h3_outside: "Fuera del motor",
-  coda_p_outside: "Algunas partes de la historia funcionan junto al motor y no dentro de él. Las escaleras estadísticas de resonancias del <a href=\"#resonance\">capítulo 10</a> viven en <code>physics/resonance/</code>. Los promedios maxwellianos (MACS) del <a href=\"#measure\">capítulo 11</a> se obtienen después de la ejecución a partir de las curvas de captura del motor, en <code>validation/differential/core.py</code>; en cambio, la captura en blancos excitados térmicamente y la tasa estelar las calcula el propio motor (<code>astro/stellar.py</code>, opcional). La capa de anclaje del <a href=\"#layers\">capítulo 12</a> vive en <code>incognita/terra/</code>.",
+  coda_p_outside: "Algunas partes de la historia funcionan junto al motor y no dentro de él. Las escaleras estadísticas de resonancias del <a href=\"#resonance\">capítulo 10</a> viven en <code>physics/resonance/</code>. Los promedios maxwellianos (MACS) del <a href=\"#measure\">capítulo 12</a> se obtienen después de la ejecución a partir de las curvas de captura del motor, en <code>validation/differential/core.py</code>; en cambio, la captura en blancos excitados térmicamente y la tasa estelar las calcula el propio motor (<code>astro/stellar.py</code>, opcional). La capa de anclaje del <a href=\"#layers\">capítulo 15</a> vive en <code>incognita/terra/</code>.",
   close: "Cerrar",
   chapters: "Capítulos",
   nav_board: "Marcador", nav_data_short: "Datos",

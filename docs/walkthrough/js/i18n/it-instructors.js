@@ -24,7 +24,7 @@ Object.assign(WT.L.ui, {
   in_l3_1: "Il nucleo e il primo contatto",
   in_l3_2: "Il nucleo composto",
   in_l3_3: "Oltre le medie, e i dati",
-  in_co_note: "Per un pubblico generale, i capitoli introduttivi (1–3) e il capitolo 11 formano una sessione completa. I capitoli 9, 10 e 12 si possono togliere o scambiare senza compromettere il resto.",
+  in_co_note: "Per un pubblico generale, i capitoli introduttivi (1–3) e il capitolo 12 formano una sessione completa. I capitoli 9, 10 e 12 si possono togliere o scambiare senza compromettere il resto.",
   in_ln_h: "Collegarsi a un capitolo o a un passo",
   in_ln_p: "Ogni capitolo e ogni passo ha un indirizzo stabile. Un capitolo è <code>#omp</code>; un passo aggiunge il suo numero, contando da 1: <code>#omp-3</code> è il terzo passo del capitolo 2. Aggiungi un codice di lingua come <code>?lang=it</code> prima del <code>#</code> per quella lingua. Nella pagina didattica, il simbolo di link accanto a ogni passo ne copia l'indirizzo.",
   in_b_ch: "Capitolo", in_b_st: "Passo", in_b_lang: "Lingua", in_b_copy: "Copia", in_b_open: "Apri", in_b_whole: "capitolo intero", in_b_step: "passo",

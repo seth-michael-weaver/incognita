@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>Photonenstärke und γ-Transmission; diskrete Niveaus und Isomere</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>Die Kaskade aus Teilchen- und γ-Emissionen, exklusive Kanäle, Restkerne</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>Spaltbarrieren und Transmission</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Emissionsspektren, Winkelverteilungen und doppelt differentielle Wirkungsquerschnitte (optional, nur Ausgabe)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Einfang an thermisch angeregten Targets und stellare Raten (optional)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Unsicherheit über viele zufällige Varianten (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Emissionsspektren, Winkelverteilungen und doppelt differentielle Wirkungsquerschnitte (optional, nur Ausgabe)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Einfang an thermisch angeregten Targets und stellare Raten (optional)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Unsicherheit über viele zufällige Varianten (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>Das Steuerprogramm, das die Stufen der Reihe nach ausführt, und optionale C-Kernels für mehr Tempo</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>Alle Standardwerte und Optionen, einmal zu Beginn eingelesen; außerdem die pro Nuklid angepassten Parameter von TENDL, angewandt wie in TALYS (optional)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "Außerhalb der Engine",
-  coda_p_outside: "Einige Teile der Geschichte laufen neben der Engine statt in ihr. Die statistischen Resonanzleitern aus <a href=\"#resonance\">Kapitel 10</a> liegen in <code>physics/resonance/</code>. Die Maxwell-Mittelwerte (MACS) aus <a href=\"#measure\">Kapitel 11</a> werden nach dem Lauf aus den Einfangkurven der Engine gefaltet, in <code>validation/differential/core.py</code>; der Einfang an thermisch angeregten Targets und die stellare Rate stammen dagegen aus der Engine selbst (<code>astro/stellar.py</code>, optional). Die Verankerungsschicht aus <a href=\"#layers\">Kapitel 12</a> liegt in <code>incognita/terra/</code>.",
+  coda_p_outside: "Einige Teile der Geschichte laufen neben der Engine statt in ihr. Die statistischen Resonanzleitern aus <a href=\"#resonance\">Kapitel 10</a> liegen in <code>physics/resonance/</code>. Die Maxwell-Mittelwerte (MACS) aus <a href=\"#measure\">Kapitel 12</a> werden nach dem Lauf aus den Einfangkurven der Engine gefaltet, in <code>validation/differential/core.py</code>; der Einfang an thermisch angeregten Targets und die stellare Rate stammen dagegen aus der Engine selbst (<code>astro/stellar.py</code>, optional). Die Verankerungsschicht aus <a href=\"#layers\">Kapitel 15</a> liegt in <code>incognita/terra/</code>.",
   close: "Schließen",
   chapters: "Kapitel",
   nav_board: "Rangliste", nav_data_short: "Daten",

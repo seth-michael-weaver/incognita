@@ -1,6 +1,6 @@
 /* Danish: strength (chapter 16, Expert) */
 WT.L.ch.strength = {
-  num: "Kapitel 16", title: "Fotonstyrke i detaljer", short: "Fotonstyrke",
+  num: "Kapitel 19", title: "Fotonstyrke i detaljer", short: "Fotonstyrke",
   lead: "Kapitel 7 viste, hvilke fotoner en varm kerne foretrækker. Dette kapitel skriver styrkefunktionerne op, følger dem ind i transmissionskoefficienter og den gennemsnitlige strålingsbredde og kører den kaskade, de driver.",
   html: `
 <div class="step">

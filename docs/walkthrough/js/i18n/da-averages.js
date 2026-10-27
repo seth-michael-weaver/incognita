@@ -1,6 +1,6 @@
 /* Danish: averages (chapter 18, Expert) */
 WT.L.ch.averages = {
-  num: "Kapitel 18", title: "Fra resonanser til gennemsnit", short: "Resonanser til gennemsnit",
+  num: "Kapitel 21", title: "Fra resonanser til gennemsnit", short: "Resonanser til gennemsnit",
   lead: "Kapitel 10 tegnede resonansstiger. Her er de som tværsnit: R-matrixformlen, statistikken bag parametrene, temperaturens virkning, og hvordan et gennemsnit over mange resonanser bliver til Hauser–Feshbach.",
   html: `
 <div class="step">

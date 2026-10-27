@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): strength (Hoofdstuk 16, fotonsterkte in detail) */
+/* Dutch (Nederlands): strength (Hoofdstuk 19, fotonsterkte in detail) */
 WT.L.ch.strength = {
-  num: "Hoofdstuk 16", title: "Fotonsterkte in detail", short: "Fotonsterkte",
+  num: "Hoofdstuk 19", title: "Fotonsterkte in detail", short: "Fotonsterkte",
   lead: "Hoofdstuk 7 liet zien welke fotonen een hete kern verkiest. Dit hoofdstuk schrijft de sterktefuncties uit, volgt ze tot in de transmissiecoëfficiënten en de gemiddelde stralingsbreedte, en draait de cascade die ze aandrijven.",
   html: `
 <div class="step">

@@ -1,4 +1,4 @@
-/* Chapter 13 (Expert): Hauser-Feshbach channel by channel, with width fluctuations (compound/prepare.py, compound/wfc.py).
+/* Chapter 16 (Expert): Hauser-Feshbach channel by channel, with width fluctuations (compound/prepare.py, compound/wfc.py).
  * Scenes (S.mode): "tlj"    = incident transmission T_lj per (l, j) as lit columns; neutrons enter through them into the compound nucleus;
  *                   "group"  = one J^pi: the incident channel, every exit (log T, summed per level), the flux split T_b / sum T;
  *                   "wfc"    = summed over J^pi: compound elastic, inelastic to the first 2+, to higher levels and the continuum, capture;
@@ -133,7 +133,7 @@
   });
 
   WT.chapter("hauser", {
-    num: "Chapter 13", title: "Hauser–Feshbach, channel by channel", short: "Hauser–Feshbach",
+    num: "Chapter 16", title: "Hauser–Feshbach, channel by channel", short: "Hauser–Feshbach",
     lead: "Chapter 6 told the competition between exits as doors. Here is the formula behind the doors, one channel at a time, and the correction it needs when only a few channels are open.",
     html: `
 <div class="step">

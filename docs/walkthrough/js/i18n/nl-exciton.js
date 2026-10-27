@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): exciton (Hoofdstuk 17, het excitonmodel in getallen) */
+/* Dutch (Nederlands): exciton (Hoofdstuk 20, het excitonmodel in getallen) */
 WT.L.ch.exciton = {
-  num: "Hoofdstuk 17", title: "Het excitonmodel in getallen", short: "Excitonmodel",
+  num: "Hoofdstuk 20", title: "Het excitonmodel in getallen", short: "Excitonmodel",
   lead: "Hoofdstuk 4 volgde één snel neutron door een paar botsingen. Hier staan de snelheden die in elk stadium beslissen of het volgende een nieuwe botsing is of een ontsnapping, en het spectrum dat ze samen opleveren.",
   html: `
 <div class="step">

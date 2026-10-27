@@ -1,6 +1,6 @@
-/* Italian: hauser (Capitolo 13, Hauser–Feshbach canale per canale) */
+/* Italian: hauser (Capitolo 16, Hauser–Feshbach canale per canale) */
 WT.L.ch.hauser = {
-  num: "Capitolo 13", title: "Hauser–Feshbach, canale per canale", short: "Hauser–Feshbach",
+  num: "Capitolo 16", title: "Hauser–Feshbach, canale per canale", short: "Hauser–Feshbach",
   lead: "Il capitolo 6 ha raccontato la competizione fra le uscite come una serie di porte. Ecco la formula che sta dietro le porte, un canale alla volta, e la correzione che le serve quando i canali aperti sono pochi.",
   html: `
 <div class="step">

@@ -1,4 +1,4 @@
-/* Chapter 11: what comes out. Scenes (S.mode):
+/* Chapter 12: what comes out. Scenes (S.mode):
  *   "area"    = cross section as the effective target area: a beam through a foil of nuclei, each with its disc;
  *   "doors"   = a ring of exit doors round the nucleus, one per channel, padlocked below threshold; particles spray out at
  *               rates set by the channel shares and fall into buckets; a threshold strip with the energy marker;
@@ -45,7 +45,7 @@
   const tmc = { knobs: { psf: 1, ld: 0, omp: 0 }, show: { psf: 0, ld: 0, omp: 0 }, queue: 0, qT: 0, grow: [] };
 
   WT.chapter("measure", {
-    num: "Chapter 11", title: "What comes out", short: "Observables",
+    num: "Chapter 12", title: "What comes out", short: "Observables",
     lead: "An experiment, a reactor or a star sees only a handful of numbers. This chapter shows how the engine turns what happens inside the nucleus into them.",
     html: `
 <div class="step">

@@ -22,7 +22,7 @@
   const terraScore = TT ? `Frente a ${libs}, va por delante en ${TT.w} de ${TT.d} comparaciones, empata en ${TT.t} y va por detrás en ${TT.l}.` : `Se compara con ${libs}.`;
 
   WT.es.ch.layers = {
-    num: "Capítulo 12", title: "Cómo se organiza el modelo en capas", short: "Capas",
+    num: "Capítulo 15", title: "Cómo se organiza el modelo en capas", short: "Capas",
     lead: "Lo que entregamos se construye en capas sobre el motor, y cada capa tiene que ganarse su sitio frente a las mediciones.",
     html: `
 <div class="step">

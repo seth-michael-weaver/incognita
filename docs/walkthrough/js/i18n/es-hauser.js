@@ -1,6 +1,6 @@
-/* Spanish: hauser (Capítulo 13, experto: Hauser–Feshbach canal a canal, con fluctuaciones de anchura) */
+/* Spanish: hauser (Capítulo 16, experto: Hauser–Feshbach canal a canal, con fluctuaciones de anchura) */
 WT.L.ch.hauser = {
-  num: "Capítulo 13", title: "Hauser–Feshbach, canal a canal", short: "Hauser–Feshbach",
+  num: "Capítulo 16", title: "Hauser–Feshbach, canal a canal", short: "Hauser–Feshbach",
   lead: "El capítulo 6 contó la competición entre salidas como puertas. Aquí está la fórmula que hay detrás de las puertas, canal a canal, y la corrección que necesita cuando solo hay unos pocos canales abiertos.",
   html: `
 <div class="step">

@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>光子強度関数とγ線透過、離散準位と核異性体</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>粒子とγ線の放出カスケード、排他的チャネル、残留核</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>核分裂障壁と透過</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>放出スペクトル、角度分布、二重微分断面積（任意、出力のみ）</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>熱的に励起された標的での捕獲と恒星内反応率（任意）</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>多数のランダムな変種による不確かさ（トータル・モンテカルロ）</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>放出スペクトル、角度分布、二重微分断面積（任意、出力のみ）</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>熱的に励起された標的での捕獲と恒星内反応率（任意）</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>多数のランダムな変種による不確かさ（トータル・モンテカルロ）</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>各段階を順に実行するプログラムと、高速化のための任意のC言語計算コア</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>すべての既定値とオプション（起動時に1回読み込み）。TENDLの核種別調整パラメータも、TALYSと同じ方法で適用（任意）</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "エンジンの外側",
-  coda_p_outside: "この物語の一部は、エンジンの内部ではなくその横で動きます。<a href=\"#resonance\">第10章</a>の統計的な共鳴列は<code>physics/resonance/</code>にあります。<a href=\"#measure\">第11章</a>のマクスウェル平均（MACS）は、実行後にエンジンの捕獲曲線を畳み込んで<code>validation/differential/core.py</code>で求めます。一方、熱的に励起された標的での捕獲と恒星内反応率は、エンジン自身が計算します（<code>astro/stellar.py</code>、任意）。<a href=\"#layers\">第12章</a>のデータに固定する層は<code>incognita/terra/</code>にあります。",
+  coda_p_outside: "この物語の一部は、エンジンの内部ではなくその横で動きます。<a href=\"#resonance\">第10章</a>の統計的な共鳴列は<code>physics/resonance/</code>にあります。<a href=\"#measure\">第12章</a>のマクスウェル平均（MACS）は、実行後にエンジンの捕獲曲線を畳み込んで<code>validation/differential/core.py</code>で求めます。一方、熱的に励起された標的での捕獲と恒星内反応率は、エンジン自身が計算します（<code>astro/stellar.py</code>、任意）。<a href=\"#layers\">第15章</a>のデータに固定する層は<code>incognita/terra/</code>にあります。",
   close: "閉じる",
   chapters: "章",
   nav_board: "スコアボード", nav_data_short: "データ",

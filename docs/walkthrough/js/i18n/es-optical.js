@@ -1,6 +1,6 @@
-/* Spanish: optical (Capítulo 14, experto: el modelo óptico, resuelto) */
+/* Spanish: optical (Capítulo 17, experto: el modelo óptico, resuelto) */
 WT.L.ch.optical = {
-  num: "Capítulo 14", title: "El modelo óptico, resuelto", short: "Modelo óptico, resuelto",
+  num: "Capítulo 17", title: "El modelo óptico, resuelto", short: "Modelo óptico, resuelto",
   lead: "El capítulo 2 dibujó el potencial óptico como una bola de vidrio turbio. Aquí aparece tal como lo usa el motor: una parametrización global, una ecuación de Schrödinger radial integrada paso a paso y una condición de empalme que convierte la onda en coeficientes de transmisión.",
   html: `
 <div class="step">
@@ -30,7 +30,7 @@ WT.L.ch.optical = {
   <p>El término de <b>espín–órbita</b> es atractivo para <i>j</i> = <i>l</i> + ½ y repulsivo para <i>j</i> = <i>l</i> − ½. Es pequeño, unos pocos MeV en la superficie, pero separa las dos transmisiones de cada <i>l</i>, sobre todo cerca de la onda parcial que roza la superficie.</p>
   <div class="ctl"><label for="op-e3">Energía del neutrón (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">Desactivar el espín–órbita</button></div>
-  <p>Hauser–Feshbach (capítulo 13) usa las dos por separado; sumadas con sus pesos, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, dan una sección eficaz de reacción casi sin cambios. Por eso las secciones eficaces totales apenas restringen la intensidad del espín–órbita y hacen falta datos de polarización.</p>
+  <p>Hauser–Feshbach (capítulo 16) usa las dos por separado; sumadas con sus pesos, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, dan una sección eficaz de reacción casi sin cambios. Por eso las secciones eficaces totales apenas restringen la intensidad del espín–órbita y hacen falta datos de polarización.</p>
 </div>
 <div class="step">
   <h3>Las secciones eficaces</h3>

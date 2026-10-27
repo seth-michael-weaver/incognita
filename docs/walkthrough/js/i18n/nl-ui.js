@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>Fotonsterkte en γ-transmissie; discrete niveaus en isomeren</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>De cascade van deeltjes- en γ-emissies, exclusieve kanalen, restkernen</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>Splijtingsbarrières en transmissie</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Emissiespectra, hoekverdelingen en dubbel-differentiële werkzame doorsneden (optioneel, alleen uitvoer)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Vangst op thermisch aangeslagen trefkernen en stellaire snelheden (optioneel)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>Onzekerheid via vele willekeurige varianten (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Emissiespectra, hoekverdelingen en dubbel-differentiële werkzame doorsneden (optioneel, alleen uitvoer)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Vangst op thermisch aangeslagen trefkernen en stellaire snelheden (optioneel)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>Onzekerheid via vele willekeurige varianten (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>Het stuurprogramma dat de stappen op volgorde uitvoert, en optionele C-kernels voor snelheid</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>Alle standaardwaarden en opties, één keer aan het begin ingelezen; ook de per nuclide gefitte parameters van TENDL, toegepast zoals TALYS ze toepast (optioneel)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "Buiten de motor",
-  coda_p_outside: "Sommige delen van het verhaal draaien naast de motor in plaats van erin. De statistische resonantieladders van <a href=\"#resonance\">hoofdstuk 10</a> staan in <code>physics/resonance/</code>. De maxwelliaanse gemiddelden (MACS) van <a href=\"#measure\">hoofdstuk 11</a> worden na de run uit de vangstcurven van de motor berekend, in <code>validation/differential/core.py</code>; vangst op thermisch aangeslagen trefkernen en de stellaire snelheid komen daarentegen uit de motor zelf (<code>astro/stellar.py</code>, optioneel). De verankeringslaag van <a href=\"#layers\">hoofdstuk 12</a> staat in <code>incognita/terra/</code>.",
+  coda_p_outside: "Sommige delen van het verhaal draaien naast de motor in plaats van erin. De statistische resonantieladders van <a href=\"#resonance\">hoofdstuk 10</a> staan in <code>physics/resonance/</code>. De maxwelliaanse gemiddelden (MACS) van <a href=\"#measure\">hoofdstuk 12</a> worden na de run uit de vangstcurven van de motor berekend, in <code>validation/differential/core.py</code>; vangst op thermisch aangeslagen trefkernen en de stellaire snelheid komen daarentegen uit de motor zelf (<code>astro/stellar.py</code>, optioneel). De verankeringslaag van <a href=\"#layers\">hoofdstuk 15</a> staat in <code>incognita/terra/</code>.",
   close: "Sluiten",
   chapters: "Hoofdstukken",
   nav_board: "Scorebord", nav_data_short: "Data",

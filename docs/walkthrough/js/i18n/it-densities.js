@@ -1,6 +1,6 @@
-/* Italian: densities (Capitolo 15, densità dei livelli raccordate) */
+/* Italian: densities (Capitolo 18, densità dei livelli raccordate) */
 WT.L.ch.densities = {
-  num: "Capitolo 15", title: "Densità dei livelli, raccordate", short: "Densità dei livelli",
+  num: "Capitolo 18", title: "Densità dei livelli, raccordate", short: "Densità dei livelli",
   lead: "Il capitolo 5 univa un'asse dritta a un pendio. Questo capitolo scrive le due formule, mostra come si trova il punto di raccordo a partire dai livelli contati e che cosa succede quando un raccordo non esiste.",
   html: `
 <div class="step">

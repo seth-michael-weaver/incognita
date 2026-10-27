@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>光子强度与 γ 穿透；分立能级与同质异能态</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>粒子与 γ 发射的级联、排他反应道、剩余核</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>裂变势垒与穿透</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>发射谱、角分布与双微分截面（可选，仅输出）</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>热激发靶核上的俘获与恒星反应率（可选）</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>通过大量随机变体评估不确定度（全蒙特卡罗）</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>发射谱、角分布与双微分截面（可选，仅输出）</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>热激发靶核上的俘获与恒星反应率（可选）</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>通过大量随机变体评估不确定度（全蒙特卡罗）</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>按顺序运行各阶段的主控程序，以及用于加速的可选 C 内核</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>所有默认值和选项，在开始时读取一次；还有 TENDL 逐核素拟合的参数，按 TALYS 的方式使用（可选）</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "引擎之外",
-  coda_p_outside: "故事中有些部分在引擎旁边运行，而不在引擎内部。<a href=\"#resonance\">第 10 章</a>的统计共振序列位于 <code>physics/resonance/</code>。<a href=\"#measure\">第 11 章</a>的麦克斯韦平均（MACS）是在运行结束后，由引擎给出的俘获曲线在 <code>validation/differential/core.py</code> 中折算得到的；而热激发靶核上的俘获和恒星反应率则由引擎本身计算（<code>astro/stellar.py</code>，可选）。<a href=\"#layers\">第 12 章</a>的锚定层位于 <code>incognita/terra/</code>。",
+  coda_p_outside: "故事中有些部分在引擎旁边运行，而不在引擎内部。<a href=\"#resonance\">第 10 章</a>的统计共振序列位于 <code>physics/resonance/</code>。<a href=\"#measure\">第 12 章</a>的麦克斯韦平均（MACS）是在运行结束后，由引擎给出的俘获曲线在 <code>validation/differential/core.py</code> 中折算得到的；而热激发靶核上的俘获和恒星反应率则由引擎本身计算（<code>astro/stellar.py</code>，可选）。<a href=\"#layers\">第 15 章</a>的锚定层位于 <code>incognita/terra/</code>。",
   close: "关闭",
   chapters: "章节",
   nav_board: "记分板", nav_data_short: "数据",

@@ -1,6 +1,6 @@
 /* Danish: exciton (chapter 17, Expert) */
 WT.L.ch.exciton = {
-  num: "Kapitel 17", title: "Excitonmodellen i tal", short: "Excitonmodel",
+  num: "Kapitel 20", title: "Excitonmodellen i tal", short: "Excitonmodel",
   lead: "Kapitel 4 fulgte én hurtig neutron gennem nogle få kollisioner. Her er de rater, der på hvert trin afgør, om det næste bliver endnu en kollision eller en udsendelse, og det spektrum, de lægges sammen til.",
   html: `
 <div class="step">

@@ -1,6 +1,6 @@
-/* Italian: averages (Capitolo 18, dalle risonanze alle medie) */
+/* Italian: averages (Capitolo 21, dalle risonanze alle medie) */
 WT.L.ch.averages = {
-  num: "Capitolo 18", title: "Dalle risonanze alle medie", short: "Dalle risonanze alle medie",
+  num: "Capitolo 21", title: "Dalle risonanze alle medie", short: "Dalle risonanze alle medie",
   lead: "Il capitolo 10 ha disegnato scale di risonanze. Qui diventano sezioni d'urto: la formula della matrice R, la statistica dietro i parametri, l'effetto della temperatura e il modo in cui una media su molte risonanze diventa Hauser–Feshbach.",
   html: `
 <div class="step">

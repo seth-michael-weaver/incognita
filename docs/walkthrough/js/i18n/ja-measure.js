@@ -1,6 +1,6 @@
-/* Japanese: measure (第11章、観測量) */
+/* Japanese: measure (第12章、観測量) */
 WT.L.ch.measure = {
-  num: "第11章", title: "出てくるもの", short: "観測量",
+  num: "第12章", title: "出てくるもの", short: "観測量",
   lead: "実験も原子炉も恒星も、目にするのはほんの一握りの数値だけです。この章では、エンジンが原子核の内部で起きることをどのようにそれらの数値に変えるかを示します。",
   html: `
 <div class="step">

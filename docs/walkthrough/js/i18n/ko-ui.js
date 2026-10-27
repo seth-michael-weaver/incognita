@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>감마 세기 함수와 γ 투과, 불연속 준위와 핵이성질체</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>입자와 γ 방출의 캐스케이드, 배타적 채널, 잔류핵</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>핵분열 장벽과 투과</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>방출 스펙트럼, 각분포, 이중 미분 단면적 (선택 사항, 출력 전용)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>열적으로 들뜬 표적에서의 포획과 항성 반응률 (선택 사항)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>여러 무작위 변종에 의한 불확도 (전체 몬테카를로)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>방출 스펙트럼, 각분포, 이중 미분 단면적 (선택 사항, 출력 전용)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>열적으로 들뜬 표적에서의 포획과 항성 반응률 (선택 사항)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>여러 무작위 변종에 의한 불확도 (전체 몬테카를로)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>단계들을 순서대로 실행하는 구동기, 그리고 속도를 위한 선택적 C 커널</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>시작할 때 한 번 읽는 모든 기본값과 옵션, 그리고 TALYS와 같은 방식으로 적용하는 TENDL의 핵종별 조정 매개변수 (선택 사항)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "엔진 바깥",
-  coda_p_outside: "이야기의 일부는 엔진 안이 아니라 그 옆에서 실행됩니다. <a href=\"#resonance\">10장</a>의 통계적 공명 사다리는 <code>physics/resonance/</code>에 있습니다. <a href=\"#measure\">11장</a>의 맥스웰 평균(MACS)은 실행이 끝난 뒤 <code>validation/differential/core.py</code>에서 엔진의 포획 곡선을 접어 얻습니다. 반면 열적으로 들뜬 표적에서의 포획과 항성 반응률은 엔진 자체가 계산합니다(<code>astro/stellar.py</code>, 선택 사항). <a href=\"#layers\">12장</a>의 고정 층은 <code>incognita/terra/</code>에 있습니다.",
+  coda_p_outside: "이야기의 일부는 엔진 안이 아니라 그 옆에서 실행됩니다. <a href=\"#resonance\">10장</a>의 통계적 공명 사다리는 <code>physics/resonance/</code>에 있습니다. <a href=\"#measure\">12장</a>의 맥스웰 평균(MACS)은 실행이 끝난 뒤 <code>validation/differential/core.py</code>에서 엔진의 포획 곡선을 접어 얻습니다. 반면 열적으로 들뜬 표적에서의 포획과 항성 반응률은 엔진 자체가 계산합니다(<code>astro/stellar.py</code>, 선택 사항). <a href=\"#layers\">15장</a>의 고정 층은 <code>incognita/terra/</code>에 있습니다.",
   close: "닫기",
   chapters: "장",
   nav_board: "점수판", nav_data_short: "데이터",

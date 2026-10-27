@@ -1,6 +1,6 @@
-/* Italian: optical (Capitolo 14, il modello ottico risolto) */
+/* Italian: optical (Capitolo 17, il modello ottico risolto) */
 WT.L.ch.optical = {
-  num: "Capitolo 14", title: "Il modello ottico, risolto", short: "Modello ottico, risolto",
+  num: "Capitolo 17", title: "Il modello ottico, risolto", short: "Modello ottico, risolto",
   lead: "Il capitolo 2 ha disegnato il potenziale ottico come una sfera di cristallo offuscata. Qui lo vediamo come lo usa il motore: una parametrizzazione globale, un'equazione di Schrödinger radiale integrata passo dopo passo e una condizione di raccordo che trasforma l'onda in coefficienti di trasmissione.",
   html: `
 <div class="step">
@@ -30,7 +30,7 @@ WT.L.ch.optical = {
   <p>Il termine di <b>spin–orbita</b> è attrattivo per <i>j</i> = <i>l</i> + ½ e repulsivo per <i>j</i> = <i>l</i> − ½. È piccolo, qualche MeV sulla superficie, ma separa le due trasmissioni di ogni <i>l</i>, soprattutto vicino all'onda parziale che sfiora la superficie.</p>
   <div class="ctl"><label for="op-e3">Energia del neutrone (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">Spegni lo spin–orbita</button></div>
-  <p>Hauser–Feshbach (capitolo 13) le usa separatamente; sommate con i loro pesi, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, danno una sezione d'urto di reazione quasi invariata: per questo le sezioni d'urto totali vincolano poco l'intensità dello spin–orbita e servono dati di polarizzazione.</p>
+  <p>Hauser–Feshbach (capitolo 16) le usa separatamente; sommate con i loro pesi, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, danno una sezione d'urto di reazione quasi invariata: per questo le sezioni d'urto totali vincolano poco l'intensità dello spin–orbita e servono dati di polarizzazione.</p>
 </div>
 <div class="step">
   <h3>Le sezioni d'urto</h3>

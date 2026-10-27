@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): averages (chapter 18, 从共振到平均) */
 WT.L.ch.averages = {
-  num: "第 18 章", title: "从共振到平均", short: "共振到平均",
+  num: "第 21 章", title: "从共振到平均", short: "共振到平均",
   lead: "第 10 章画出了共振序列。这里把它们变成截面：R 矩阵公式、参数背后的统计规律、温度的影响，以及对许多共振的平均如何变成 Hauser–Feshbach。",
   html: `
 <div class="step">

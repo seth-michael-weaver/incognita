@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "第 11 章", title: "最终产出", short: "可观测量",
+  num: "第 12 章", title: "最终产出", short: "可观测量",
   lead: "实验、反应堆或恒星能“看到”的只有寥寥几个数字。本章展示引擎如何把原子核内部发生的事情转化为这些数字。",
   html: `
 <div class="step">

@@ -1,6 +1,6 @@
 /* Danish: optical (chapter 14, Expert) */
 WT.L.ch.optical = {
-  num: "Kapitel 14", title: "Den optiske model, løst", short: "Optisk model, løst",
+  num: "Kapitel 17", title: "Den optiske model, løst", short: "Optisk model, løst",
   lead: "Kapitel 2 tegnede det optiske potential som en tåget glaskugle. Her er det, som motoren bruger det: en global parametrisering, en radial Schrödingerligning integreret skridt for skridt og en tilpasningsbetingelse, der gør bølgen til transmissionskoefficienter.",
   html: `
 <div class="step">
@@ -30,7 +30,7 @@ WT.L.ch.optical = {
   <p><b>Spin–bane</b>-leddet er tiltrækkende for <i>j</i> = <i>l</i> + ½ og frastødende for <i>j</i> = <i>l</i> − ½. Det er lille, nogle få MeV ved overfladen, men det skubber de to transmissioner for hvert <i>l</i> fra hinanden, mest nær den partialbølge, der strejfer overfladen.</p>
   <div class="ctl"><label for="op-e3">Neutronenergi (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">Slå spin–bane fra</button></div>
-  <p>Hauser–Feshbach (kapitel 13) bruger de to hver for sig; summeret med deres vægte, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, giver de reaktionstværsnittet næsten uændret, og derfor begrænser totale tværsnit knap spin–bane-styrken, så der er brug for polarisationsdata.</p>
+  <p>Hauser–Feshbach (kapitel 16) bruger de to hver for sig; summeret med deres vægte, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, giver de reaktionstværsnittet næsten uændret, og derfor begrænser totale tværsnit knap spin–bane-styrken, så der er brug for polarisationsdata.</p>
 </div>
 <div class="step">
   <h3>Tværsnittene</h3>

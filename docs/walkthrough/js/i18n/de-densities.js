@@ -1,6 +1,6 @@
-/* German (Deutsch): densities (Kapitel 15, Niveaudichten, angeschlossen) */
+/* German (Deutsch): densities (Kapitel 18, Niveaudichten, angeschlossen) */
 WT.L.ch.densities = {
-  num: "Kapitel 15", title: "Niveaudichten, angeschlossen", short: "Niveaudichten",
+  num: "Kapitel 18", title: "Niveaudichten, angeschlossen", short: "Niveaudichten",
   lead: "Kapitel 5 hat eine gerade Planke an einen Hang angesetzt. Dieses Kapitel schreibt beide hin, zeigt, wie die Anschlussstelle aus den gezählten Niveaus bestimmt wird, und was geschieht, wenn es keine gibt.",
   html: `
 <div class="step">

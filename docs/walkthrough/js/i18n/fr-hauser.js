@@ -1,6 +1,6 @@
-/* French: hauser (Chapitre 13, Expert) */
+/* French: hauser (Chapitre 16, Expert) */
 WT.L.ch.hauser = {
-  num: "Chapitre 13", title: "Hauser–Feshbach, voie par voie", short: "Hauser–Feshbach",
+  num: "Chapitre 16", title: "Hauser–Feshbach, voie par voie", short: "Hauser–Feshbach",
   lead: "Le chapitre 6 a raconté la compétition entre les sorties sous la forme de portes. Voici la formule derrière les portes, une voie à la fois, et la correction dont elle a besoin quand seules quelques voies sont ouvertes.",
   html: `
 <div class="step">

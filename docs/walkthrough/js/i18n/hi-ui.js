@@ -31,9 +31,9 @@ Object.assign(WT.L.ui, {
       <tr><td><a href="#gamma">7</a></td><td>फोटॉन सामर्थ्य और γ पारगमन; विविक्त स्तर और समावयवी</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
       <tr><td><a href="#cascade">8</a></td><td>कण और γ उत्सर्जनों का कैस्केड, अनन्य चैनल, अवशिष्ट नाभिक</td><td><code>emission/</code></td></tr>
       <tr><td><a href="#fission">9</a></td><td>विखंडन अवरोध और पारगमन</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>उत्सर्जन स्पेक्ट्रम, कोणीय वितरण और द्वि-अवकलित अनुप्रस्थ काट (वैकल्पिक, केवल आउटपुट)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>तापीय रूप से उत्तेजित लक्ष्यों पर प्रग्रहण और तारकीय दरें (वैकल्पिक)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">11</a></td><td>कई यादृच्छिक रूपांतरों से अनिश्चितता (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>उत्सर्जन स्पेक्ट्रम, कोणीय वितरण और द्वि-अवकलित अनुप्रस्थ काट (वैकल्पिक, केवल आउटपुट)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>तापीय रूप से उत्तेजित लक्ष्यों पर प्रग्रहण और तारकीय दरें (वैकल्पिक)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">12</a></td><td>कई यादृच्छिक रूपांतरों से अनिश्चितता (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>वह ड्राइवर जो चरणों को क्रम से चलाता है, और गति के लिए वैकल्पिक C कर्नेल</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>हर डिफॉल्ट और विकल्प, शुरू में एक बार पढ़ा जाता है; साथ ही TENDL के प्रति-न्यूक्लाइड फिट किए गए प्राचल, जैसे TALYS उन्हें लागू करता है (वैकल्पिक)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -69,7 +69,7 @@ Object.assign(WT.L.ui, {
     </tbody>
   `,
   coda_h3_outside: "इंजन के बाहर",
-  coda_p_outside: "कहानी के कुछ भाग इंजन के भीतर नहीं, उसके साथ-साथ चलते हैं। <a href=\"#resonance\">अध्याय 10</a> की सांख्यिकीय अनुनाद सीढ़ियां <code>physics/resonance/</code> में हैं। <a href=\"#measure\">अध्याय 11</a> के मैक्सवेल औसत (MACS) रन के बाद इंजन के प्रग्रहण वक्रों से <code>validation/differential/core.py</code> में निकाले जाते हैं; इसके विपरीत, तापीय रूप से उत्तेजित लक्ष्यों पर प्रग्रहण और तारकीय दर स्वयं इंजन से आते हैं (<code>astro/stellar.py</code>, वैकल्पिक)। <a href=\"#layers\">अध्याय 12</a> की एंकरिंग परत <code>incognita/terra/</code> में है।",
+  coda_p_outside: "कहानी के कुछ भाग इंजन के भीतर नहीं, उसके साथ-साथ चलते हैं। <a href=\"#resonance\">अध्याय 10</a> की सांख्यिकीय अनुनाद सीढ़ियां <code>physics/resonance/</code> में हैं। <a href=\"#measure\">अध्याय 12</a> के मैक्सवेल औसत (MACS) रन के बाद इंजन के प्रग्रहण वक्रों से <code>validation/differential/core.py</code> में निकाले जाते हैं; इसके विपरीत, तापीय रूप से उत्तेजित लक्ष्यों पर प्रग्रहण और तारकीय दर स्वयं इंजन से आते हैं (<code>astro/stellar.py</code>, वैकल्पिक)। <a href=\"#layers\">अध्याय 15</a> की एंकरिंग परत <code>incognita/terra/</code> में है।",
   close: "बंद करें",
   chapters: "अध्याय",
   nav_board: "स्कोरबोर्ड", nav_data_short: "डेटा",

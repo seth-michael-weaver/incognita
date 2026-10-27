@@ -1,6 +1,6 @@
-/* German (Deutsch): exciton (Kapitel 17, das Exzitonenmodell in Zahlen) */
+/* German (Deutsch): exciton (Kapitel 20, das Exzitonenmodell in Zahlen) */
 WT.L.ch.exciton = {
-  num: "Kapitel 17", title: "Das Exzitonenmodell in Zahlen", short: "Exzitonenmodell",
+  num: "Kapitel 20", title: "Das Exzitonenmodell in Zahlen", short: "Exzitonenmodell",
   lead: "Kapitel 4 hat ein schnelles Neutron durch einige Stöße begleitet. Hier sind die Raten, die auf jeder Stufe entscheiden, ob als Nächstes ein weiterer Stoß oder ein Entkommen folgt, und das Spektrum, das sich aus ihnen ergibt.",
   html: `
 <div class="step">
