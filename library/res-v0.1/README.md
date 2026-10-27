@@ -68,4 +68,4 @@ pre-registered rule also derives thermal values from EXFOR σ(E) points between 
 
 ## Archived at
 Zenodo (CC BY 4.0):
-- DOI [10.5281/zenodo.23700447](https://doi.org/10.5281/zenodo.23700447) (reserved; record not yet published)
+- DOI [10.5281/zenodo.23700447](https://doi.org/10.5281/zenodo.23700447)

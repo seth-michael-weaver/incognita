@@ -41,4 +41,4 @@ Every number above comes from the pre-registered validation cards TSLWATER, LIGH
 
 ## Archived at
 Zenodo (CC BY 4.0):
-- DOI [10.5281/zenodo.23701483](https://doi.org/10.5281/zenodo.23701483) (reserved; record not yet published)
+- DOI [10.5281/zenodo.23701483](https://doi.org/10.5281/zenodo.23701483)
