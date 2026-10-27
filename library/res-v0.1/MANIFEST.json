@@ -1,0 +1,106 @@
+{
+ "name": "lib_res_v0",
+ "label": "HYBRID resonance-region set: own RRR/URR spliced into ENDF/B-VIII.1 carriers (VIII.1 = carrier only; NOT an own full evaluation)",
+ "nuclides": {
+  "Fe56": {
+   "arm": "Fe56_S2",
+   "tier": "STRICT",
+   "src": "desk:resinteg/arms/Fe56_S2/proc/Fe56.h5",
+   "fit": "STRUCTRRR",
+   "verdict": "PASS",
+   "dev": "LCT8c1:-65±35(worsen -12);LCT8c5:-4±35(worsen -2);LCT8c11:+22±35(worsen +22);MCT2pnl-30:+43±35(worsen -43);MCT2pnl-33:-22±35(worsen -22);MCT2pnl-35:-45±35(worsen -45)",
+   "gate_v3": "PASS",
+   "valid": true,
+   "no_integral_test": false
+  },
+  "Ni58": {
+   "arm": "Ni58_S2",
+   "tier": "STRICT",
+   "src": "desk:resinteg/arms/Ni58_S2/proc/Ni58.h5",
+   "fit": "STRUCTRRR",
+   "verdict": "PASS-provisional",
+   "dev": "MCT2pnl-30:+12±35(worsen -12);MCT2pnl-33:-6±35(worsen -6);MCT2pnl-35:-93±35(worsen -93)",
+   "gate_v3": "FAIL",
+   "valid": true,
+   "no_integral_test": false
+  },
+  "Zr90": {
+   "arm": "Zr90_ZF",
+   "tier": "STRICT",
+   "src": "desk:resinteg/arms/Zr90_ZF/proc/Zr90.h5",
+   "fit": "ZRFIT",
+   "verdict": "PASS-provisional",
+   "dev": "MCT2pnl-30:-68±35(worsen +68);MCT2pnl-33:+4±35(worsen +4);MCT2pnl-35:-103±35(worsen -95)",
+   "gate_v3": "PASS",
+   "valid": true,
+   "no_integral_test": false
+  },
+  "Cu65": {
+   "arm": "Cu65_S2X",
+   "tier": "PROVISIONAL",
+   "src": "desk:resinteg/arms/Cu65_S2X/proc/Cu65.h5",
+   "fit": "STRUCT2",
+   "verdict": "PASS-provisional",
+   "dev": "",
+   "gate_v3": "FAIL",
+   "valid": true,
+   "no_integral_test": true
+  },
+  "Gd155": {
+   "arm": "Gd155_GF",
+   "tier": "STRICT",
+   "src": "desk:resinteg/arms/Gd155_GF/proc/Gd155.h5",
+   "fit": "GD155FIT",
+   "verdict": "no-harm PASS",
+   "dev": "",
+   "gate_v3": "FAIL",
+   "valid": true,
+   "no_integral_test": true
+  },
+  "Pu240": {
+   "arm": "Pu240_RP2",
+   "tier": "STRICT",
+   "src": "desk:resinteg/arms/Pu240_RP2/proc/Pu240.h5",
+   "fit": "RESPEAKS2",
+   "verdict": "PASS",
+   "dev": "MCT2pnl-30:+47±35(worsen -47);MCT2pnl-33:+32±35(worsen +32);MCT2pnl-35:-24±35(worsen -24);PCI1:+96±35(worsen -96);PMF1:-23±35(worsen +23);PMF6:+40±35(worsen -40)",
+   "gate_v3": "FAIL",
+   "valid": true,
+   "no_integral_test": false
+  },
+  "F19": {
+   "arm": "F19_TF",
+   "tier": "STRICT",
+   "src": "desk:resinteg/arms/F19_TF/proc/F19.h5",
+   "fit": "THERMFIX",
+   "verdict": "PASS",
+   "dev": "",
+   "gate_v3": "PASS",
+   "valid": true,
+   "no_integral_test": true
+  },
+  "Na23": {
+   "arm": "Na23_TF",
+   "tier": "STRICT",
+   "src": "desk:resinteg/arms/Na23_TF/proc/Na23.h5",
+   "fit": "THERMFIX",
+   "verdict": "PASS",
+   "dev": "LCT8c5:+33±35(worsen +33)",
+   "gate_v3": "FAIL",
+   "valid": true,
+   "no_integral_test": false
+  },
+  "Zr94": {
+   "arm": "Zr94_TF",
+   "tier": "STRICT",
+   "src": "desk:resinteg/arms/Zr94_TF/proc/Zr94.h5",
+   "fit": "THERMFIX",
+   "verdict": "PASS",
+   "dev": "MCT2pnl-30:-41±35(worsen +41);MCT2pnl-33:+29±35(worsen +29);MCT2pnl-35:-42±35(worsen -42)",
+   "gate_v3": "PASS",
+   "valid": true,
+   "no_integral_test": false
+  }
+ },
+ "released": "res-v0.1: the 9 files with a differential/physics judge"
+}
