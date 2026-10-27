@@ -148,8 +148,8 @@
         [[0.95, c.cool], [1, c.soft], [1.05, c.warm]].forEach(([k, col]) => { const pts = []; for (let gg = 0; gg <= GMAX; gg++) pts.push([X(gg), Y(k ** gg)]); g.poly(pts, col, Math.abs(k - S.k) < 1e-6 ? 2.6 : 1.4, Math.abs(k - S.k) < 1e-6 ? 1 : 0.35, Math.abs(k - S.k) < 1e-6 ? null : [4, 4]); });
         sim.hist.forEach((N, gg) => g.dot(X(gg), Y(Math.max(N, 0.02) / N0), phone ? 2.2 : 3, c.ink, 0.85));
         g.ctx.restore();
-        [0, 20, 40, 60].forEach((gg) => g.label(String(gg), X(gg), py1 + 12, { color: c.faint, size: fs - 2 }));
-        g.label("generations →", px1, py1 + 28, { color: c.soft, size: fs - 1, align: "right" });
+        [0, 20, 40, 60].forEach((gg) => g.label(phone && gg === 60 ? "60 gen." : String(gg), X(gg), py1 + 12, { color: c.faint, size: fs - 2 }));
+        if (!phone) g.label("generations →", px1, py1 + 28, { color: c.soft, size: fs - 1, align: "right" });
         [[0.95, "k = 0.95: dies away", c.cool], [1, "k = 1: steady", c.soft], [1.05, "k = 1.05: grows", c.warm]].forEach(([k, s, col], i) => g.label(s, px1 - 4, Y(k ** GMAX) + (k === 1 ? -11 : k > 1 ? 12 : -12), { color: col, size: fs - 1, align: "right", weight: Math.abs(k - S.k) < 1e-6 ? 600 : 500, bg: true }));
         g.label(phone ? "60 generations: under 0.01 s" : "60 generations last under 0.01 s in a water reactor", W * 0.5, H * 0.93, { color: c.ink, size: fs + 1, weight: 600, serif: true });
       } else {
@@ -161,13 +161,13 @@
         if (vc < 10 ** (HI + 0.2)) { g.line(X(tc), py0, X(tc), py1, c.ink, 1, 0.25); g.dot(X(tc), Y(vc), 4.5, del ? c.accent : c.warm); }
         g.ctx.restore();
         [0, 20, 40, 60].forEach((t) => g.label(`${t} s`, X(t), py1 + 12, { color: c.faint, size: fs - 2 }));
-        g.label("time →", px1, py1 + 28, { color: c.soft, size: fs - 1, align: "right" });
+        if (!phone) g.label("time →", px1, py1 + 28, { color: c.soft, size: fs - 1, align: "right" });
         const wD = omega(rho, 1), wP = omega(rho, 0), dbl = (w) => Math.log(2) / Math.abs(w);
         const desc = (w) => (Math.abs(w) < 1e-5 ? "flat" : w > 0 ? `doubles every ${fmtT(dbl(w))}` : `halves every ${fmtT(dbl(w))}`);
         if (mode === "time") {
           g.label(`with delayed: ${desc(wD)}`, px1 - 4, py0 + 10, { color: c.accent, size: fs, weight: 600, align: "right", bg: true });
           g.label(`prompt only: ${desc(wP)}`, px1 - 4, py0 + 32, { color: c.warm, size: fs, weight: 600, align: "right", bg: true });
-          g.label(`k = ${kNow.toFixed(4)} · 0.65 % of neutrons delayed ~13 s on average`, W * 0.5, H * 0.93, { color: c.ink, size: fs + 1, weight: 600, serif: true });
+          g.label(phone ? `k = ${kNow.toFixed(4)} · 0.65 % delayed ~13 s` : `k = ${kNow.toFixed(4)} · 0.65 % of neutrons delayed ~13 s on average`, W * 0.5, H * 0.93, { color: c.ink, size: fs + 1, weight: 600, serif: true });
         } else {
           const crit = Math.abs(S.ins - CRIT_INS) < 0.5;
           g.label(crit ? "critical: k = 1.0000, power flat" : `k = ${kNow.toFixed(4)} · ${desc(wD)}`, W * 0.5, H * 0.93, { color: crit ? c.fission : c.ink, size: fs + 2, weight: 600, serif: true });

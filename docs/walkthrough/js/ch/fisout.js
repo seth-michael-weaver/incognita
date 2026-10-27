@@ -1,7 +1,7 @@
 /* What fission throws out (thermal-neutron fission of U-235). Each event: two fragments and nu prompt neutrons, nu drawn from
  * the measured multiplicity distribution P(nu) = 0.032, 0.172, 0.336, 0.304, 0.127, 0.027, 0.003, 0.0002 (nu = 0..7, mean
  * 2.41); energies from the Watt spectrum f(E) ~ exp(-E/a) sinh(sqrt(b E)), a = 0.988 MeV, b = 2.249 /MeV (mean 2.03 MeV),
- * sampled by the Everett-Cashwell method; delayed neutrons 0.0158 per fission (0.65 % of all), their delays drawn from the
+ * sampled as in OpenMC (a Maxwellian, then shifted); delayed neutrons 0.0158 per fission (0.65 % of all), their delays drawn from the
  * six Keepin groups (half-lives 55.7, 22.7, 6.22, 2.30, 0.610, 0.230 s; abundances 0.033, 0.219, 0.196, 0.395, 0.115, 0.042). */
 (function () {
   const { TAU, clamp, lerp, smooth, rng } = WT.util;
@@ -11,8 +11,8 @@
   const nuMean = PNU.reduce((s, p, i) => s + p * i, 0);
   const watt = (E) => Math.exp(-E / WA) * Math.sinh(Math.sqrt(WB * E));
   let wNorm = 0; for (let i = 0; i < 4000; i++) { const e = (i + 0.5) * 0.005; wNorm += watt(e) * 0.005; }
-  const K = 1 + WA * WB / 8, L = (K + Math.sqrt(K * K - 1)) / WA, M = WA * L - 1;
-  function sampleWatt() { for (;;) { const x = -Math.log(1 - r()), y = -Math.log(1 - r()); if ((y - M * (x + 1)) ** 2 <= WB * L * x) return L * x; } }
+  // OpenMC watt_spectrum: a Maxwellian w (temperature a), then E = w + a^2 b / 4 + (2u - 1) sqrt(a^2 b w)
+  function sampleWatt() { const c = Math.cos(Math.PI * r() / 2), w = -WA * (Math.log(1 - r()) + Math.log(1 - r()) * c * c); return w + WA * WA * WB / 4 + (2 * r() - 1) * Math.sqrt(WA * WA * WB * w); }
   function sampleNu() { let u = r(), k = 0; while (k < 7 && u > PNU[k]) { u -= PNU[k]; k++; } return k; }
   function sampleDelay() { let u = r(), k = 0; while (k < 5 && u > GRP[k][1]) { u -= GRP[k][1]; k++; } return -Math.log(1 - r()) * GRP[k][0] / Math.LN2; }
   const ST = { n: 0, nuH: new Array(8).fill(0), eH: new Array(30).fill(0), nP: 0, sumE: 0, del: [], ev: [] };
@@ -61,7 +61,7 @@
         e.es.forEach((en, k) => { const dd = 20 + f * (90 + 70 * Math.sqrt(en)), x = cx + Math.cos(e.ang[k]) * dd * 1.4, y = cy + Math.sin(e.ang[k]) * dd * 0.6; g.line(x - Math.cos(e.ang[k]) * 12, y - Math.sin(e.ang[k]) * 5, x, y, c.neutron, 2, 0.3 * al); g.ball(x, y, 4, c.neutron, al); });
       }
       if (!ST.ev.length) g.nucleus(cx, cy, Rn, { N: 60, Z: 24, t: S.time, jiggle: 0.4 });
-      g.label(phone ? "n + U-235 → fission" : "n + U-235 → two fragments + neutrons", cx, cy + Rn + (phone ? 52 : 62), { color: c.soft, size: fs - 1 });
+      if (!phone) g.label("n + U-235 → two fragments + neutrons", cx, cy + Rn + 62, { color: c.soft, size: fs - 1 });
       // ---------- multiplicity histogram ----------
       const hy1 = H * (phone ? 0.6 : 0.62), hy0 = H * (phone ? 0.38 : 0.38), focus = (i) => (st === i ? 1 : 0.4);
       { const x0 = W * 0.05, x1 = W * (phone ? 0.46 : 0.45), bw = (x1 - x0) / 8, mx = Math.max(1, ...ST.nuH), al = focus(0);
@@ -79,14 +79,14 @@
         g.label(`mean ${ST.nP ? (ST.sumE / ST.nP).toFixed(2) : "–"} MeV`, x1, hy0 - 6, { color: c.ink, size: fs, weight: 600, align: "right", alpha: Math.max(al, 0.6) });
         if (!phone) g.label("line: Watt spectrum", x1, hy0 + 12, { color: c.soft, size: fs - 2, align: "right", alpha: al }); }
       // ---------- timeline: when the neutrons come ----------
-      const ty = H * 0.82, tx0 = W * 0.16, tx1 = W * 0.95, L0 = -2, L1 = 2.5, TX = (t) => tx0 + (tx1 - tx0) * (Math.log10(clamp(t, 10 ** L0, 10 ** L1)) - L0) / (L1 - L0), al = focus(2);
+      const ty = H * (phone ? 0.8 : 0.82), tx0 = W * 0.16, tx1 = W * 0.95, L0 = -2, L1 = 2.5, TX = (t) => tx0 + (tx1 - tx0) * (Math.log10(clamp(t, 10 ** L0, 10 ** L1)) - L0) / (L1 - L0), al = focus(2);
       g.line(tx0, ty, tx1, ty, c.line, 2);
       [[0.01, "0.01 s"], [0.1, "0.1"], [1, "1"], [10, "10"], [100, "100 s"]].forEach(([t, s]) => { g.line(TX(t), ty - 4, TX(t), ty + 4, c.faint, 1); g.label(s, TX(t), ty + 14, { color: c.faint, size: fs - 2 }); });
       const pxp = W * 0.07; g.glow(pxp, ty, 18 + Math.min(14, Math.log10(1 + ST.nP) * 4), c.neutron, 0.5); g.ball(pxp, ty, 6, c.neutron);
       g.label("prompt", pxp, ty - 16, { color: c.neutron, size: fs - 1, weight: 600 }); g.label(String(ST.nP), pxp, ty + 16, { color: c.ink, size: fs - 1, weight: 600 });
       const cnt = {}; for (const d of ST.del) { const x = TX(d.t), k = Math.round(x / 7); cnt[k] = (cnt[k] || 0) + 1; const yy = ty - 8 - (cnt[k] - 1) * 7, f = smooth(0, 0.5, S.time - d.born); if (yy > ty - H * 0.1) g.dot(x, lerp(ty - 60, yy, f), 3, c.photon, al * 0.6 + 0.4); }
-      g.label(`delayed ${ST.del.length} of ${ST.nP + ST.del.length} (${ST.nP ? (100 * ST.del.length / (ST.nP + ST.del.length)).toFixed(2) : "–"} %)`, tx1, ty - H * 0.1 - 8, { color: c.photon, size: fs, weight: 600, align: "right", alpha: Math.max(al, 0.7) });
-      g.label(`${ST.n} fissions`, W * 0.5, H * 0.95, { color: c.ink, size: fs + 1, weight: 600, serif: true });
+      g.label(`delayed ${ST.del.length} of ${ST.nP + ST.del.length} (${ST.nP ? (100 * ST.del.length / (ST.nP + ST.del.length)).toFixed(2) : "–"} %)`, tx1, phone ? ty + 30 : ty - H * 0.1 - 8, { color: c.photon, size: fs, weight: 600, align: "right", alpha: Math.max(al, 0.7) });
+      g.label(`${ST.n} fissions`, phone ? W * 0.05 : W * 0.5, H * 0.95, { color: c.ink, size: fs + 1, weight: 600, serif: true, align: phone ? "left" : "center" });
     },
   });
 })();

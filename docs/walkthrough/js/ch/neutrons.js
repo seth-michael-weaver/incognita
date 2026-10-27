@@ -59,7 +59,7 @@
         } else if (S.time - b.inT > 1.15) { b.r = RMAX; b.dir = -1; }
         const inside = S.time - b.inT < 1.2;
         if (inside) { const a = S.time - b.inT; g.glow(X(0) + 12, Y(-V0) - 18, 30 + 40 * a, c.warm, 0.6 * (1 - a / 1.2)); }
-        else { g.glow(X(b.r), Y(E) - 8, 14, L.col, 0.4); g.ball(X(b.r), Y(E) - 8, 7, L.col); }
+        else { const bx = X(Math.min(b.r, RMAX - 0.4)); g.glow(bx, Y(E) - 8, 14, L.col, 0.4); g.ball(bx, Y(E) - 8, 7, L.col); }
         // verdict
         const vy = L.y1 - 6;
         if (L.k === "p") {

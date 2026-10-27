@@ -29,7 +29,7 @@
     steps: [(S) => S.set("mode", 0), (S) => S.set("mode", 1), (S) => S.set("mode", 2)],
     frame(g, S) {
       const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13;
-      const x0 = W * (phone ? 0.12 : 0.09), x1 = W * 0.96, y0 = H * 0.08, y1 = H * (phone ? 0.7 : 0.72), BMIN = 0, BMAX = 9.2;
+      const x0 = W * (phone ? 0.12 : 0.09), x1 = W * 0.96, y0 = H * (phone ? 0.14 : 0.08), y1 = H * (phone ? 0.7 : 0.72), BMIN = 0, BMAX = 9.2;
       const X = (a) => x0 + (x1 - x0) * a / 270, Y = (b) => lerp(y1, y0, (b - BMIN) / (BMAX - BMIN));
       // axes
       for (let b = 0; b <= 9; b += 3) { g.line(x0, Y(b), x1, Y(b), c.line, 1, 0.6, b ? [2, 5] : null); g.label(String(b), x0 - 7, Y(b), { color: c.faint, size: fs - 2, align: "right" }); }
@@ -41,8 +41,7 @@
       g.ground(pts.filter((p, i) => BA[i][0] >= 12), c.fission, H * 0.12, 0.16);
       g.poly(pts.filter((p, i) => BA[i][0] >= 12), c.fission, 2, 0.8);
       BA.forEach((d, i) => { if (d[0] < 12) g.dot(pts[i][0], pts[i][1], 2.6, c.fission, 0.9); });
-      g.label("He-4", X(4) + 8, Y(7.07) - 2, { color: c.soft, size: fs - 2, align: "left" });
-      const peak = Y(8.79); g.glow(X(60), peak, 30, c.fission, 0.3); g.label("iron, nickel: most tightly bound", X(60), peak + 24, { color: c.fission, size: fs - 1, weight: 600, bg: true });
+      const peak = Y(8.79); g.glow(X(60), peak, 30, c.fission, 0.3); g.label(phone ? "iron, nickel: most bound" : "iron, nickel: most tightly bound", X(60), peak + (phone ? 34 : 24), { color: c.fission, size: fs - 1, weight: 600, bg: true });
       g.label("measured masses (AME2020)", x1, Y(1.2), { color: c.faint, size: fs - 2, align: "right" });
       const marker = (a, col, lab, up) => { const b = bOf(a); g.glow(X(a), Y(b), 18, col, 0.4); g.ball(X(a), Y(b), 6, col); if (lab) g.label(lab, X(a), Y(b) + (up ? -18 : 18), { color: col, size: fs - 1, weight: 600, bg: true }); return b; };
       const ry = H * 0.92;

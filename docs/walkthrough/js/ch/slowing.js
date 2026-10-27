@@ -139,7 +139,7 @@
     // the water: a lit pool whose edges fade into the page
     ctx.save(); const gr = ctx.createLinearGradient(0, bx.y, 0, bx.y + bx.h); gr.addColorStop(0, g.rgba(c.cool, 0.03)); gr.addColorStop(0.5, g.rgba(c.cool, 0.11)); gr.addColorStop(1, g.rgba(c.cool, 0.03));
     ctx.fillStyle = gr; if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(bx.x, bx.y, bx.w, bx.h, 18); ctx.fill(); } else ctx.fillRect(bx.x, bx.y, bx.w, bx.h); ctx.restore();
-    g.label(S.A === 1 ? "water · neutron hits hydrogen" : "water · neutron hits oxygen", bx.x + 10, bx.y + 12, { color: c.cool, size: fs - 1, align: "left", weight: 600 });
+    g.label(S.A === 1 ? "water · neutron hits hydrogen" : "water · neutron hits oxygen", bx.x + 10, bx.y + 12, { color: c.cool, size: fs - 1, align: "left", weight: 600, bg: true });
     // bonds, then atoms
     const bOn = 1 - S.looseV, hCol = mix(c.faint, c.card, 0.3);
     if (bOn > 0.02) for (const a of at.list) if (a.el === "H") g.line(a.ox, a.oy, a.x, a.y, S.bindV > 0.5 ? c.photon : c.soft, 1.6, (0.35 + 0.35 * S.bindV) * bOn);
@@ -195,8 +195,8 @@
     g.line(tx0, ty0, tx0, ty1, c.line, 1); g.line(tx0, ty1, tx1, ty1, c.line, 1);
     [[1e6, "1 MeV"], [1e3, "1 keV"], [1, "1 eV"], [1e-3, "1 meV"]].forEach(([e, s]) => { g.line(tx0 - 4, Y(e), tx0, Y(e), c.faint, 1); g.label(s, tx0 - 7, Y(e), { color: c.faint, size: fs - 2, align: "right" }); });
     const nt = S.A === 1 ? [0, 10, 20, 30, 40] : [0, 50, 100, 150, 200];
-    nt.forEach((n) => g.label(String(n), X(n), ty1 + 12, { color: c.faint, size: fs - 2 }));
-    g.label("collisions →", tx1, ty1 + 27, { color: c.soft, size: fs - 1, align: "right" });
+    nt.forEach((n, i) => g.label(phone && i === nt.length - 1 ? `${n} hits` : String(n), X(n), ty1 + 12, { color: c.faint, size: fs - 2 }));
+    if (!phone) g.label("collisions →", tx1, ty1 + 27, { color: c.soft, size: fs - 1, align: "right" });
     g.label("energy", tx0, ty0 - 12, { color: c.soft, size: fs - 1, align: phone ? "left" : "center" });
     // expected: ln E drops by xi per collision
     const ex = []; for (let n = 0; n <= nExp + 0.01; n += nExp / 40) ex.push([X(n), Y(E0 * Math.exp(-n * xi))]);

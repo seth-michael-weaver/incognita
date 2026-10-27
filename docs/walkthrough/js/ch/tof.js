@@ -143,8 +143,8 @@
       g.line(px0, py1, px1, py1, c.line, 1); g.line(px0, py0, px0, py1, c.line, 1);
       g.line(px0, Y(1), px1, Y(1), c.line, 1, 0.9, [3, 4]);
       [[0, "0"], [0.5, "0.5"], [1, "1"]].forEach(([t, s]) => g.label(s, px0 - 7, Y(t), { color: c.faint, size: fs - 2, align: "right" }));
-      [6, 6.5, 7, 7.5].forEach((e) => g.label(`${e}`, X(e), py1 + 12, { color: c.faint, size: fs - 2 }));
-      g.label("neutron energy (eV) →", px1, py1 + 28, { color: c.soft, size: fs - 1, align: "right" });
+      [6, 6.5, 7, 7.5].forEach((e) => g.label(phone && e === 7.5 ? "7.5 eV" : `${e}`, X(e), py1 + 12, { color: c.faint, size: fs - 2 }));
+      if (!phone) g.label("neutron energy (eV) →", px1, py1 + 28, { color: c.soft, size: fs - 1, align: "right" });
       g.label("transmission", px0, py0 - 12, { color: c.soft, size: fs - 1, align: "left" });
       // cross-section shape, scaled to the dip's depth
       const cur = mc.cur; let tmin = 1; for (let i = 0; i < NG; i++) tmin = Math.min(tmin, cur[i]);

@@ -35,7 +35,7 @@
       const nx = phone ? 5 : 7, ny = phone ? 4 : 5, cw = sw / nx, chh = sh / ny, K = Math.min(cw, chh) * 0.085;   // px per sqrt(barn)
       ctx.save(); const sg = ctx.createRadialGradient(sx + sw / 2, sy + sh / 2, 10, sx + sw / 2, sy + sh / 2, sw * 0.6); sg.addColorStop(0, g.rgba(c.soft, 0.1)); sg.addColorStop(1, g.rgba(c.soft, 0.02)); ctx.fillStyle = sg;
       if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(sx, sy, sw, sh, 18); ctx.fill(); } else ctx.fillRect(sx, sy, sw, sh); ctx.restore();
-      const rD = K * Math.sqrt(s / Math.PI), nuc = [], q = rng(9);
+      const rD = Math.min(K * Math.sqrt(s / Math.PI), Math.max(cw, chh) * 0.9), nuc = [], q = rng(9);   // beyond this the discs already cover the slab
       for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) nuc.push([sx + cw * (i + 0.5 + (j % 2 ? 0.25 : -0.25) + (q() - 0.5) * 0.2), sy + chh * (j + 0.5 + (q() - 0.5) * 0.2)]);
       g.clip(sx, sy, sw, sh); for (const [x, y] of nuc) { g.dot(x, y, rD, c.neutron, 0.16); g.ring(x, y, rD, c.neutron, 1.4, 0.75); g.nucleus(x, y, Math.max(3, Math.min(7, K * 0.9)), { N: 14, Z: 6, t: S.time, jiggle: 0.25, seed: Math.round(x + y) }); } ctx.restore();
       // rain

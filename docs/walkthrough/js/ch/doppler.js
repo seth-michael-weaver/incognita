@@ -73,14 +73,14 @@
       dial(g, g2, gy, gR, (1 - k) / 0.04, c.accent, "k", k.toFixed(4), fs);
       g.ctx.restore();
       // ---------- the resonance ----------
-      const x0 = W * (phone ? 0.1 : 0.08), x1 = W * 0.96, y0 = H * 0.46, y1 = H * 0.84, X = (e) => x0 + (x1 - x0) * (e - ELO) / (EHI - ELO), Y = (s) => lerp(y1, y0, s / (R0.peak * 1.05));
+      const x0 = W * (phone ? 0.1 : 0.08), x1 = W * 0.96, y0 = H * (phone ? 0.52 : 0.46), y1 = H * 0.84, X = (e) => x0 + (x1 - x0) * (e - ELO) / (EHI - ELO), Y = (s) => lerp(y1, y0, s / (R0.peak * 1.05));
       const cur = [], ref = []; for (let i = 0; i < NG; i += 2) { cur.push([X(ELO + i * dE), Y(R.s[i])]); ref.push([X(ELO + i * dE), Y(R0.s[i])]); }
       g.line(x0, y1, x1, y1, c.line, 1);
       g.area([[x0, y1], ...cur, [x1, y1]], c.photon, 0.22); g.poly(cur, c.photon, 2.6, 1);
       if (T > 320) { g.poly(ref, c.soft, 1.4, 0.7, [4, 4]); g.label("300 K", X(E0) + 10, Y(R0.peak) + 2, { color: c.soft, size: fs - 1, align: "left" }); }
       g.label(`${T.toFixed(0)} K`, X(E0) + (T > 320 ? -10 : 10), Y(R.peak) - 12, { color: c.photon, size: fs, weight: 600, align: T > 320 ? "right" : "left" });
-      [6.2, 6.4, 6.6, 6.8, 7.0, 7.2].forEach((e) => g.label(e.toFixed(1), X(e), y1 + 12, { color: c.faint, size: fs - 2 }));
-      g.label("neutron energy (eV) →", x1, y1 + 28, { color: c.soft, size: fs - 1, align: "right" });
+      [6.2, 6.4, 6.6, 6.8, 7.0, 7.2].forEach((e) => g.label(phone && e === 7.2 ? "7.2 eV" : e.toFixed(1), X(e), y1 + 12, { color: c.faint, size: fs - 2 }));
+      if (!phone) g.label("neutron energy (eV) →", x1, y1 + 28, { color: c.soft, size: fs - 1, align: "right" });
       g.label("capture cross section", x0, y0 - 10, { color: c.soft, size: fs - 1, align: "left" });
       g.label(`peak ${(R.peak / 1000).toFixed(1)}k b · Doppler width ${(1000 * R.D).toFixed(0)} meV · area unchanged`, W * 0.5, H * 0.93, { color: c.ink, size: fs + 1, weight: 600, serif: true });
       g.label("illustration", W - 6, H - 10, { color: c.faint, size: 10, align: "right" });
