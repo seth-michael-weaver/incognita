@@ -509,7 +509,7 @@
       const lvName = (lv) => (lv == null ? "" : WT.ui ? WT.ui("lvl" + lv, LEVELS[lv]) : LEVELS[lv]);
       const numOf = (c) => (c.mod.num || "").replace(/[^0-9]/g, "");
       const rail = document.createElement("nav"); rail.className = "ch-rail"; rail.setAttribute("aria-label", WT.ui ? WT.ui("chapters", "Chapters") : "Chapters");
-      rail.innerHTML = `<ol>${rchs.map((c) => { const lv = LEVEL[c.id]; return `<li><a href="#${c.id}" data-id="${c.id}"><i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span></a></li>`; }).join("")}</ol><div class="ch-now" aria-live="polite"></div>`;
+      rail.innerHTML = `<button type="button" class="rail-more up" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 14 8" width="14" height="8" aria-hidden="true"><path d="M1.5 6.5L7 1.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ol>${rchs.map((c) => { const lv = LEVEL[c.id]; return `<li><a href="#${c.id}" data-id="${c.id}"><i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span></a></li>`; }).join("")}</ol><button type="button" class="rail-more down" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 14 8" width="14" height="8" aria-hidden="true"><path d="M1.5 1.5L7 6.5l5.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="ch-now" aria-live="polite"></div>`;
       document.body.appendChild(rail);
       const rlinks = [...rail.querySelectorAll("a")], now = rail.querySelector(".ch-now"), seen = new Set();
       const rol = rail.querySelector("ol");
@@ -518,7 +518,10 @@
         now.innerHTML = `<i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span>`; };
       rail.classList.add("on");
       // wide screens show about 15 rows and scroll the rest (no scrollbar): fade the edge that has more beyond it
-      const edges = () => { const more = rol.scrollHeight > rol.clientHeight + 2; rol.classList.toggle("more-up", more && rol.scrollTop > 2); rol.classList.toggle("more-down", more && rol.scrollTop + rol.clientHeight < rol.scrollHeight - 2); };
+      const edges = () => { const more = rol.scrollHeight > rol.clientHeight + 2; rol.classList.toggle("more-up", more && rol.scrollTop > 2); rol.classList.toggle("more-down", more && rol.scrollTop + rol.clientHeight < rol.scrollHeight - 2);
+        rail.classList.toggle("more-up", rol.classList.contains("more-up")); rail.classList.toggle("more-down", rol.classList.contains("more-down")); };
+      // the small arrows at the ends (shown only when there is more that way) scroll the list by a few rows
+      rail.querySelectorAll(".rail-more").forEach((b) => b.addEventListener("click", () => rol.scrollBy({ top: (b.classList.contains("up") ? -1 : 1) * 4 * 29, behavior: reduce ? "auto" : "smooth" })));
       rol.addEventListener("scroll", edges, { passive: true }); window.addEventListener("resize", edges); if (window.ResizeObserver) new ResizeObserver(edges).observe(rol); edges();
       const clearNow = () => { rlinks.forEach((a) => a.classList.remove("here")); now.innerHTML = ""; };
       rchs.forEach((c) => new IntersectionObserver((ents) => ents.forEach((en) => {
