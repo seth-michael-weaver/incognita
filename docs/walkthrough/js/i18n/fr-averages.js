@@ -1,7 +1,7 @@
-/* French: averages (Chapitre 21, Expert : des résonances aux moyennes) */
+/* French: averages (Chapitre 27, Expert : des résonances aux moyennes) */
 WT.L.ch.averages = {
-  num: "Chapitre 21", title: "Des résonances aux moyennes", short: "Des résonances aux moyennes",
-  lead: "Le chapitre 10 a tiré des séries de résonances. Les voici sous forme de sections efficaces : la formule de la matrice R, la statistique derrière les paramètres, l'effet de la température, et comment une moyenne sur de nombreuses résonances devient Hauser–Feshbach.",
+  num: "Chapitre 27", title: "Des résonances aux moyennes", short: "Des résonances aux moyennes",
+  lead: "Le chapitre 15 a tiré des séries de résonances. Les voici sous forme de sections efficaces : la formule de la matrice R, la statistique derrière les paramètres, l'effet de la température, et comment une moyenne sur de nombreuses résonances devient Hauser–Feshbach.",
   html: `
 <div class="step">
   <h3>La matrice R, niveau par niveau</h3>

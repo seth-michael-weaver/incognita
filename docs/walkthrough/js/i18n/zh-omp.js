@@ -1,6 +1,6 @@
-/* Simplified Chinese: omp (第 2 章，光学模型) */
+/* Simplified Chinese: omp (第 5 章，光学模型) */
 WT.L.ch.omp = {
-  num: "第 2 章", title: "一颗朦胧的水晶球", short: "光学模型",
+  num: "第 5 章", title: "一颗朦胧的水晶球", short: "光学模型",
   lead: "在做任何其他事情之前，程序先问一个更简单的问题：在入射中子看来，原子核是什么样子？",
   html: `
 <div class="step">

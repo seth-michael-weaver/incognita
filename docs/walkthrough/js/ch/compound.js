@@ -1,4 +1,4 @@
-/* Chapter 5: the compound nucleus and its level density (density/).
+/* Chapter 8: the compound nucleus and its level density (density/).
  * Scenes (S.mode): "bohr"   = a neutron hits, the heat spreads until the nucleus forgets where it was hit;
  *                   "ladder" = the ladder of levels, with a 1-MeV magnifier whose rungs multiply as energy rises;
  *                   "join"   = terrain: counted rungs, a constant-temperature plank, a Fermi-gas hillside, one joint;
@@ -91,7 +91,7 @@
   const NBD = 10; let casc = { t0: 0, path: [] };
 
   WT.chapter("compound", {
-    num: "Chapter 5", title: "Sharing the energy", short: "Compound nucleus",
+    num: "Chapter 8", title: "Sharing the energy", short: "Compound nucleus",
     lead: "Once the first fast collisions are over, all the nucleons share the energy. This settled state is the compound nucleus. To predict what it does next, the engine needs to know how many ways it can hold its energy.",
     html: `
 <div class="step">

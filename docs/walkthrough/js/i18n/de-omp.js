@@ -1,6 +1,6 @@
-/* German (Deutsch): omp (Kapitel 2, das optische Modell) */
+/* German (Deutsch): omp (Kapitel 5, das optische Modell) */
 WT.L.ch.omp = {
-  num: "Kapitel 2", title: "Eine trübe Kristallkugel", short: "Optisches Modell",
+  num: "Kapitel 5", title: "Eine trübe Kristallkugel", short: "Optisches Modell",
   lead: "Vor allem anderen stellt die Engine eine einfachere Frage: Wie sieht der Kern für ein ankommendes Neutron aus?",
   html: `
 <div class="step">

@@ -1,12 +1,12 @@
 /* French: gamma (Chapter 7, photon emission) */
 WT.L.ch.gamma = {
-  num: "Chapitre 7", title: "Émettre de la lumière", short: "Photons",
+  num: "Chapitre 10", title: "Émettre de la lumière", short: "Photons",
   lead: "Quand aucune particule ne sort, le noyau se refroidit en émettant des photons : des rayons gamma, des particules de lumière de haute énergie. Cette sortie est ouverte à toutes les énergies.",
   html: `
 <div class="step">
   <p>Un état chaud à 8 MeV (millions d'électronvolts) émet des photons (γ) ; la pile à côté de l'échelle recueille les endroits où ils aboutissent. Sous 2 MeV, les états sont quelques barreaux nommés ; au-dessus, une foule qui s'épaissit très vite avec l'énergie (points gris). Chaque photon emporte l'énergie de sa chute, <i>E<sub>γ</sub></i>, et il est dessiné d'autant plus brillant que <i>E<sub>γ</sub></i>³ est grand.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> est le coefficient de transmission du photon (la porte du chapitre 6), <i>l</i> = 1 pour les photons dipolaires, et <i>f</i> est la <b>fonction de force gamma</b> : la facilité avec laquelle le noyau rayonne à cette énergie. La probabilité d'une chute est <i>T<sub>γ</sub></i> multiplié par la foule d'états où elle aboutit : les petites chutes trouvent beaucoup d'états mais sont faibles ; les grandes sont brillantes mais en trouvent peu.</p>
+  <p><i>T<sub>γ</sub></i> est le coefficient de transmission du photon (la porte du chapitre 9), <i>l</i> = 1 pour les photons dipolaires, et <i>f</i> est la <b>fonction de force gamma</b> : la facilité avec laquelle le noyau rayonne à cette énergie. La probabilité d'une chute est <i>T<sub>γ</sub></i> multiplié par la foule d'états où elle aboutit : les petites chutes trouvent beaucoup d'états mais sont faibles ; les grandes sont brillantes mais en trouvent peu.</p>
   <div class="ctl"><label for="gm-e0">Énergie de départ</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">En émettre 100</button></div>
   <p>La pile culmine quelques MeV sous le départ : la plupart des photons emportent de 2 à 4 MeV. Déplacez l'énergie de départ, et le pic suit.</p>
@@ -25,7 +25,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>En descendant l'échelle</h3>
-  <p>Une cascade, ce sont des photons émis l'un après l'autre, depuis les intervalles du haut (des états trop denses pour être listés, chapitre 5) jusqu'aux niveaux nommés, étirés pour être lisibles (barreau plein parité +, creux −). Là, le moteur cesse d'estimer et suit les <b>rapports d'embranchement</b> tabulés : les probabilités mesurées que chaque niveau se désexcite vers chacun des niveaux inférieurs.</p>
+  <p>Une cascade, ce sont des photons émis l'un après l'autre, depuis les intervalles du haut (des états trop denses pour être listés, chapitre 8) jusqu'aux niveaux nommés, étirés pour être lisibles (barreau plein parité +, creux −). Là, le moteur cesse d'estimer et suit les <b>rapports d'embranchement</b> tabulés : les probabilités mesurées que chaque niveau se désexcite vers chacun des niveaux inférieurs.</p>
   <div class="btns"><button class="btn" data-act="drop">Lâcher une cascade</button></div>
   <p>Appuyez plusieurs fois sur le bouton : la partie haute change à chaque fois ; la fin suit l'un des quelques chemins mesurés.</p>
 </div>
@@ -37,7 +37,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Capture</h3>
-  <p>Un noyau qui vient d'absorber un neutron lent a deux portes de sortie (chapitre 6) : les photons (en haut) et le neutron qui ressort (à droite). L'ouverture de chaque porte est sa <b>largeur</b>, en eV : la rapidité avec laquelle le noyau se désexcite par cette voie. La largeur photon varie à peine ; la largeur neutron croît avec la vitesse du neutron.</p>
+  <p>Un noyau qui vient d'absorber un neutron lent a deux portes de sortie (chapitre 9) : les photons (en haut) et le neutron qui ressort (à droite). L'ouverture de chaque porte est sa <b>largeur</b>, en eV : la rapidité avec laquelle le noyau se désexcite par cette voie. La largeur photon varie à peine ; la largeur neutron croît avec la vitesse du neutron.</p>
   <div class="ctl"><label for="gm-e">Énergie du neutron</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
   <p>Faites glisser l'énergie du neutron, de 10 eV à 2 MeV. La <b>capture</b>, (n,γ), signifie que le neutron reste et qu'un photon sort : elle l'emporte presque toujours à 10 eV et ne représente plus qu'une petite fraction au-delà de quelques keV. La largeur photon au seuil est mesurée pour des centaines de noyaux, ce qui permet de vérifier la fonction de force gamma. Par défaut, le moteur utilise la sienne ; une option ajuste la fonction de force de chaque noyau mesuré jusqu'à ce que les deux concordent.</p>
   <div class="aside">Dans le code : <code>gamma/parameters.py</code> (forces E1 tabulées ; systématiques de la résonance géante, du spin-flip, des ciseaux et de l'upbend), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) pour chaque multipôle), <code>gamma/transmission.py</code> (T<sub>γ</sub> et la largeur radiative moyenne), <code>structure/levels.py</code> (rapports d'embranchement, isomères), <code>emission/multiple.py</code> (la cascade). Facultatifs, désactivés par défaut : <code>gamma/scissors.py</code> (ciseaux plus intenses), <code>gamma/ggnorm.py</code> (ajuster au ⟨Γγ⟩ mesuré, jusqu'au plomb), <code>gamma/actphys.py</code> (les deux, pour les actinides).</div>

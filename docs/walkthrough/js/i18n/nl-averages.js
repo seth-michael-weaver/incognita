@@ -1,7 +1,7 @@
-/* Dutch (Nederlands): averages (Hoofdstuk 21, van resonanties naar gemiddelden) */
+/* Dutch (Nederlands): averages (Hoofdstuk 27, van resonanties naar gemiddelden) */
 WT.L.ch.averages = {
-  num: "Hoofdstuk 21", title: "Van resonanties naar gemiddelden", short: "Resonanties naar gemiddelden",
-  lead: "Hoofdstuk 10 tekende resonantieladders. Hier verschijnen ze als werkzame doorsneden: de formule van de R-matrix, de statistiek achter de parameters, het effect van de temperatuur, en hoe een gemiddelde over veel resonanties overgaat in Hauser–Feshbach.",
+  num: "Hoofdstuk 27", title: "Van resonanties naar gemiddelden", short: "Resonanties naar gemiddelden",
+  lead: "Hoofdstuk 15 tekende resonantieladders. Hier verschijnen ze als werkzame doorsneden: de formule van de R-matrix, de statistiek achter de parameters, het effect van de temperatuur, en hoe een gemiddelde over veel resonanties overgaat in Hauser–Feshbach.",
   html: `
 <div class="step">
   <h3>R-matrix, niveau voor niveau</h3>

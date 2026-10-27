@@ -25,7 +25,7 @@
   function batch(S, n) { for (let i = 0; i < n; i++) fission(S, false); }
 
   WT.chapter("fisout", {
-    num: "Fission", title: "What fission throws out", short: "Fission neutrons",
+    num: "Chapter 13", title: "What fission throws out", short: "Fission neutrons",
     html: `
 <div class="step">
   <p>Each fission frees two or three neutrons: 2.4 on average.</p>

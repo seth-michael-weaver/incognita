@@ -1,12 +1,12 @@
-/* Dutch (Nederlands): decay (Hoofdstuk 6, een uitgang kiezen) */
+/* Dutch (Nederlands): decay (Hoofdstuk 9, een uitgang kiezen) */
 WT.L.ch.decay = {
-  num: "Hoofdstuk 6", title: "Een uitgang kiezen", short: "Verval",
+  num: "Hoofdstuk 9", title: "Een uitgang kiezen", short: "Verval",
   lead: "De compoundkern moet haar energie kwijt door een deeltje of een foton uit te zenden. Dit hoofdstuk tekent elke uitweg als een deur. De taak van de motor is te zeggen welk deel van de flux (de stroom reacties die hier aankomt) door elke deur vertrekt.",
   html: `
 <div class="step">
   <p>Eén deur per uitgang: een <em class="g">foton</em> (γ), een <em class="n">neutron</em> (n), een <em class="p">proton</em> (p), een <em class="a">alfadeeltje</em> (α: twee protonen en twee neutronen) en, alleen voor zware kernen, <em class="f">splijting</em> (in tweeën splitsen). De verlichte opening in elke deur is het aandeel van die uitgang, en de bolletjes stromen in hetzelfde tempo naar buiten; grijze deuren zijn dicht. Omdat de kern vergeten is hoe ze ontstond, gebruikt ze elke deur b naar verhouding van een gewicht:</p>
   <div class="formula">aandeel<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p>De <b>transmissiecoëfficiënt</b> <i>T</i> is de kans dat een deeltje dat de rand bereikt erdoor komt; voor deeltjes komt hij uit het optisch model van hoofdstuk 2, achterstevoren gedraaid. De <b>niveaudichtheid</b> ρ, naast elke deur geschreven, telt de toestanden waarin de overgebleven kern terecht kan komen. Verdelen volgens <i>T</i> maal ρ is de regel van <b>Hauser–Feshbach</b>. Bij 10 MeV neemt de neutrondeur bijna alles.</p>
+  <p>De <b>transmissiecoëfficiënt</b> <i>T</i> is de kans dat een deeltje dat de rand bereikt erdoor komt; voor deeltjes komt hij uit het optisch model van hoofdstuk 5, achterstevoren gedraaid. De <b>niveaudichtheid</b> ρ, naast elke deur geschreven, telt de toestanden waarin de overgebleven kern terecht kan komen. Verdelen volgens <i>T</i> maal ρ is de regel van <b>Hauser–Feshbach</b>. Bij 10 MeV neemt de neutrondeur bijna alles.</p>
 </div>
 <div class="step">
   <h3>Waarom de meeste deeltjes langzaam naar buiten komen</h3>
@@ -31,7 +31,7 @@ WT.L.ch.decay = {
   <h3>Spin en pariteit moeten kloppen</h3>
   <p>De compoundkern (boven) heeft spin <i>J</i>; de toestanden van de overgebleven kern zitten eronder in laden naar spin <i>J</i>′. Het neutron neemt het verschil in spin en pariteit mee: als het vertrekt met baanimpulsmoment <i>l</i>, verandert het de spin met hoogstens <i>l</i> + ½ en keert het de pariteit om als <i>l</i> oneven is. Een grotere <i>l</i> betekent een smallere deur; de deur van elke la is de kleinste <i>l</i> die haar bereikt. Dichte landingen behouden de pariteit; holle keren haar om.</p>
   <div class="ctl"><label for="dc-j">Compoundspin J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>Sleep <i>J</i> omhoog. De open deuren schuiven naar laden met hoge spin, die weinig toestanden bevatten, terwijl de volle laden achter dichte deuren zitten. Een compoundkern met hoge spin zendt traag deeltjes uit, en dat geeft fotonen, en isomeren (langlevende toestanden, hoofdstuk 7), hun kans.</p>
+  <p>Sleep <i>J</i> omhoog. De open deuren schuiven naar laden met hoge spin, die weinig toestanden bevatten, terwijl de volle laden achter dichte deuren zitten. Een compoundkern met hoge spin zendt traag deeltjes uit, en dat geeft fotonen, en isomeren (langlevende toestanden, hoofdstuk 10), hun kans.</p>
 </div>
 <div class="step">
   <h3>De weg waarlangs je binnenkwam</h3>
@@ -43,7 +43,7 @@ WT.L.ch.decay = {
 </div>
 <div class="step">
   <h3>Wat er overblijft om te verdelen</h3>
-  <p>Niet elk geabsorbeerd neutron vormt een compoundkern. Sommige maken één schampende treffer en vliegen weg (directe reacties, hoofdstuk 3); sommige botsen een of twee keer rond en schieten er snel uit (pre-evenwicht, hoofdstuk 4). Alleen de rest blijft en verhit de kern. De tellers houden elk lot bij.</p>
+  <p>Niet elk geabsorbeerd neutron vormt een compoundkern. Sommige maken één schampende treffer en vliegen weg (directe reacties, hoofdstuk 6); sommige botsen een of twee keer rond en schieten er snel uit (pre-evenwicht, hoofdstuk 7). Alleen de rest blijft en verhit de kern. De tellers houden elk lot bij.</p>
   <div class="ctl"><label for="dc-einc">Neutronenergie</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Alleen de neutronen die blijven, doen mee aan de deurencompetitie. Sleep de neutronenergie: bij een paar MeV blijven ze bijna allemaal; bij 30 MeV is ongeveer de helft vertrokken voordat het evenwicht bereikt is.</p>
   <div class="aside">In de code: <code>compound/prepare.py</code> (uitganggewichten T·ρ per spin en pariteit, selectieregels), <code>compound/target.py</code> (eerste verval met breedtefluctuaties), <code>compound/continuum.py</code> (verval van elke latere bin), <code>compound/wfc.py</code> (correcties van Moldauer, HRTW, GOE), <code>compound/normalization.py</code> (flux die overblijft voor de compoundkern), <code>omp/inverse.py</code> (deuren achterstevoren gedraaid).</div>

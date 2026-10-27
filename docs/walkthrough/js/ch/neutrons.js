@@ -18,7 +18,7 @@
   const balls = { p: { r: RMAX, dir: -1, t: 0, inT: -9 }, n: { r: RMAX, dir: -1, t: 0, inT: -9 } };
 
   WT.chapter("neutrons", {
-    num: "Basics", title: "Why neutrons?", short: "Why neutrons",
+    num: "Chapter 4", title: "Why neutrons?", short: "Why neutrons",
     html: `
 <div class="step">
   <p>A proton is pushed back by the nucleus's charge.</p>
@@ -39,7 +39,7 @@
         // landscape
         const pts = []; for (let i = 0; i <= 300; i++) { const r = RMAX * i / 300; pts.push([X(r), Y(L.V(r))]); }
         g.ground(pts, L.col, (L.y1 - L.y0) * 0.35, 0.2 * on); g.poly(pts, L.col, 2.4, on);
-        g.line(x0, Y(0), x1, Y(0), c.line, 1, 0.8, [3, 4]);
+        g.line(x0, Y(0), x1, Y(0), c.line, 1, 0.8, [3, 4]); g.label("0", x0 - 6, Y(0), { color: c.faint, size: fs - 2, align: "right" }); g.label("−50", x0 - 6, Y(-50), { color: c.faint, size: fs - 2, align: "right" }); if (li === 0) g.label("energy (MeV)", x0 - 4, L.y0 - 2, { color: c.soft, size: fs - 2, align: "right" });
         g.label(L.name, x0 + 4, L.y0 + 10, { color: L.col, size: fs + 1, weight: 600, align: "left", alpha: Math.max(on, 0.8) });
         // nucleus at r = 0
         g.nucleus(X(0) + 12, Y(-V0) - 18, phone ? 10 : 14, { N: 40, Z: 16, t: S.time, jiggle: 0.4, alpha: 0.9 });

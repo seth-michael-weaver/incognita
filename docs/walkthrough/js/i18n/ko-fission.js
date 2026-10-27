@@ -1,6 +1,6 @@
-/* Korean: fission (9장, 핵분열) */
+/* Korean: fission (12장, 핵분열) */
 WT.L.ch.fission = {
-  num: "9장", title: "쪼개지기", short: "핵분열",
+  num: "12장", title: "쪼개지기", short: "핵분열",
   lead: "가장 무거운 원자핵에는 가벼운 원자핵에 없는 출구가 있습니다. 입자 하나를 내던지는 대신 원자핵 전체가 둘로 찢어지는 것입니다. 이것이 핵분열입니다.",
   html: `
 <div class="step">

@@ -1,7 +1,7 @@
-/* Portuguese (pt-PT): averages (Capítulo 21, Especialista) */
+/* Portuguese (pt-PT): averages (Capítulo 27, Especialista) */
 WT.L.ch.averages = {
-  num: "Capítulo 21", title: "Das ressonâncias às médias", short: "Ressonâncias e médias",
-  lead: "O Capítulo 10 desenhou escadas de ressonâncias. Aqui aparecem como secções eficazes: a fórmula da matriz R, a estatística por trás dos parâmetros, o efeito da temperatura e a forma como uma média sobre muitas ressonâncias se transforma em Hauser–Feshbach.",
+  num: "Capítulo 27", title: "Das ressonâncias às médias", short: "Ressonâncias e médias",
+  lead: "O Capítulo 15 desenhou escadas de ressonâncias. Aqui aparecem como secções eficazes: a fórmula da matriz R, a estatística por trás dos parâmetros, o efeito da temperatura e a forma como uma média sobre muitas ressonâncias se transforma em Hauser–Feshbach.",
   html: `
 <div class="step">
   <h3>Matriz R, nível a nível</h3>

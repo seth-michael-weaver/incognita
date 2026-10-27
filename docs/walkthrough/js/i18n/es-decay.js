@@ -1,12 +1,12 @@
-/* Spanish: decay (Capítulo 6) */
+/* Spanish: decay (Capítulo 9) */
 WT.es.ch.decay = {
-  num: "Capítulo 6", title: "Elegir una salida", short: "Desintegración",
+  num: "Capítulo 9", title: "Elegir una salida", short: "Desintegración",
   lead: "El núcleo compuesto tiene que soltar su energía emitiendo una partícula o un fotón. Este capítulo dibuja cada salida como una puerta. El trabajo del motor es decir qué parte del flujo (la corriente de reacciones que llega aquí) sale por cada puerta.",
   html: `
 <div class="step">
   <p>Una puerta por salida: un <em class="g">fotón</em> (γ), un <em class="n">neutrón</em> (n), un <em class="p">protón</em> (p), una <em class="a">partícula alfa</em> (α: dos protones y dos neutrones) y, solo en núcleos pesados, la <em class="f">fisión</em> (partirse en dos). El hueco iluminado de cada puerta es la fracción de esa salida, y las bolas salen al mismo ritmo; las puertas grises están cerradas. Como ha olvidado cómo se formó, el núcleo usa cada puerta b en proporción a un peso:</p>
   <div class="formula">fracción<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p>El <b>coeficiente de transmisión</b> <i>T</i> es la probabilidad de que una partícula que llega al borde lo atraviese; para las partículas sale del modelo óptico del Capítulo 2, aplicado al revés. La <b>densidad de niveles</b> ρ, escrita junto a cada puerta, cuenta los estados en los que puede acabar el núcleo restante. Repartir según <i>T</i> por ρ es la regla de <b>Hauser–Feshbach</b>. A 10 MeV la puerta del neutrón se lleva casi todo.</p>
+  <p>El <b>coeficiente de transmisión</b> <i>T</i> es la probabilidad de que una partícula que llega al borde lo atraviese; para las partículas sale del modelo óptico del Capítulo 5, aplicado al revés. La <b>densidad de niveles</b> ρ, escrita junto a cada puerta, cuenta los estados en los que puede acabar el núcleo restante. Repartir según <i>T</i> por ρ es la regla de <b>Hauser–Feshbach</b>. A 10 MeV la puerta del neutrón se lleva casi todo.</p>
 </div>
 <div class="step">
   <h3>Por qué casi todas las partículas salen lentas</h3>
@@ -31,7 +31,7 @@ WT.es.ch.decay = {
   <h3>Espín y paridad deben cuadrar</h3>
   <p>El núcleo compuesto (arriba) tiene espín <i>J</i>; debajo, los estados del núcleo restante están en cajones según su espín <i>J</i>′. El neutrón se lleva la diferencia de espín y paridad: si sale con momento angular orbital <i>l</i>, cambia el espín hasta <i>l</i> + ½ e invierte la paridad cuando <i>l</i> es impar. Mayor <i>l</i> significa puerta más estrecha; la puerta de cada cajón es la de menor <i>l</i> que lo alcanza. Las caídas macizas conservan la paridad; las huecas la invierten.</p>
   <div class="ctl"><label for="dc-j">Espín compuesto J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>Sube <i>J</i>. Las puertas abiertas se desplazan hacia los cajones de espín alto, que guardan pocos estados, mientras los cajones llenos quedan tras puertas cerradas. Un núcleo compuesto de espín alto tarda en emitir partículas, lo que da su oportunidad a los fotones y a los isómeros (estados de vida larga, Capítulo 7).</p>
+  <p>Sube <i>J</i>. Las puertas abiertas se desplazan hacia los cajones de espín alto, que guardan pocos estados, mientras los cajones llenos quedan tras puertas cerradas. Un núcleo compuesto de espín alto tarda en emitir partículas, lo que da su oportunidad a los fotones y a los isómeros (estados de vida larga, Capítulo 10).</p>
 </div>
 <div class="step">
   <h3>El camino por el que entraste</h3>
@@ -43,7 +43,7 @@ WT.es.ch.decay = {
 </div>
 <div class="step">
   <h3>Lo que queda por repartir</h3>
-  <p>No todo neutrón absorbido forma un núcleo compuesto. Algunos dan un golpe rasante y salen despedidos (reacciones directas, Capítulo 3); otros chocan una o dos veces y salen disparados (preequilibrio, Capítulo 4). Solo el resto se queda y calienta el núcleo. Los contadores registran cada destino.</p>
+  <p>No todo neutrón absorbido forma un núcleo compuesto. Algunos dan un golpe rasante y salen despedidos (reacciones directas, Capítulo 6); otros chocan una o dos veces y salen disparados (preequilibrio, Capítulo 7). Solo el resto se queda y calienta el núcleo. Los contadores registran cada destino.</p>
   <div class="ctl"><label for="dc-einc">Energía del neutrón</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Solo los que se quedan entran en la competición de puertas. Arrastra la energía del neutrón: a pocos MeV casi todos se quedan; a 30 MeV cerca de la mitad se ha ido antes de llegar al equilibrio.</p>
   <div class="aside">En el código: <code>compound/prepare.py</code> (pesos de salida T·ρ por espín y paridad, reglas de selección), <code>compound/target.py</code> (primera desintegración con fluctuaciones de anchura), <code>compound/continuum.py</code> (desintegración de cada intervalo posterior), <code>compound/wfc.py</code> (correcciones de Moldauer, HRTW, GOE), <code>compound/normalization.py</code> (flujo que queda para el núcleo compuesto), <code>omp/inverse.py</code> (puertas al revés).</div>

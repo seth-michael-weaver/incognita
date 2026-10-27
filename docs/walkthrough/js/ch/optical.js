@@ -1,4 +1,4 @@
-/* Chapter 17 (Expert): the optical model, solved (omp/parameters.py, omp/potential.py, omp/schrodinger.py).
+/* Chapter 23 (Expert): the optical model, solved (omp/parameters.py, omp/potential.py, omp/schrodinger.py).
  * Scenes (S.mode): "pot"    = the Koning-Delaroche potential against r: real volume well, imaginary volume and surface terms,
  *                              spin-orbit; probe neutrons cross at the incident energy, fading with the local mean free path;
  *                              a strip shows how the depths V_V, W_V, W_D change with energy;
@@ -135,8 +135,8 @@
   });
 
   WT.chapter("optical", {
-    num: "Chapter 17", title: "The optical model, solved", short: "Optical model, solved",
-    lead: "Chapter 2 drew the optical potential as a cloudy glass ball. Here it is as the engine uses it: a global parameterisation, a radial Schrödinger equation integrated step by step, and a matching condition that turns the wave into transmission coefficients.",
+    num: "Chapter 23", title: "The optical model, solved", short: "Optical model, solved",
+    lead: "Chapter 5 drew the optical potential as a cloudy glass ball. Here it is as the engine uses it: a global parameterisation, a radial Schrödinger equation integrated step by step, and a matching condition that turns the wave into transmission coefficients.",
     html: `
 <div class="step">
   <h3>The Koning–Delaroche potential</h3>
@@ -165,7 +165,7 @@
   <p>The <b>spin–orbit</b> term is attractive for <i>j</i> = <i>l</i> + ½ and repulsive for <i>j</i> = <i>l</i> − ½. It is small, a few MeV at the surface, but it moves the two transmissions of each <i>l</i> apart, most near the partial wave that grazes the surface.</p>
   <div class="ctl"><label for="op-e3">Neutron energy (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">Switch off spin–orbit</button></div>
-  <p>Hauser–Feshbach (Chapter 16) uses the two separately; summed with their weights, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, they give the reaction cross section almost unchanged, which is why total cross sections barely constrain the spin–orbit strength and polarisation data are needed.</p>
+  <p>Hauser–Feshbach (Chapter 22) uses the two separately; summed with their weights, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, they give the reaction cross section almost unchanged, which is why total cross sections barely constrain the spin–orbit strength and polarisation data are needed.</p>
 </div>
 <div class="step">
   <h3>The cross sections</h3>

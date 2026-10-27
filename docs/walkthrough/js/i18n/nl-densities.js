@@ -1,7 +1,7 @@
-/* Dutch (Nederlands): densities (Hoofdstuk 18, niveaudichtheden, aangesloten) */
+/* Dutch (Nederlands): densities (Hoofdstuk 24, niveaudichtheden, aangesloten) */
 WT.L.ch.densities = {
-  num: "Hoofdstuk 18", title: "Niveaudichtheden, aangesloten", short: "Niveaudichtheden",
-  lead: "Hoofdstuk 5 verbond een rechte plank met een heuvelhelling. Dit hoofdstuk schrijft beide uit, laat zien hoe het verbindingspunt uit de getelde niveaus wordt gevonden, en wat er gebeurt als er geen verbindingspunt bestaat.",
+  num: "Hoofdstuk 24", title: "Niveaudichtheden, aangesloten", short: "Niveaudichtheden",
+  lead: "Hoofdstuk 8 verbond een rechte plank met een heuvelhelling. Dit hoofdstuk schrijft beide uit, laat zien hoe het verbindingspunt uit de getelde niveaus wordt gevonden, en wat er gebeurt als er geen verbindingspunt bestaat.",
   html: `
 <div class="step">
   <h3>Het fermigas met gedempte schileffecten</h3>

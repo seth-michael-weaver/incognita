@@ -1,6 +1,6 @@
-/* Japanese: omp (第2章、光学模型) */
+/* Japanese: omp (第5章、光学模型) */
 WT.L.ch.omp = {
-  num: "第2章", title: "曇った水晶玉", short: "光学模型",
+  num: "第5章", title: "曇った水晶玉", short: "光学模型",
   lead: "エンジンはまず、もっと単純な問いを立てます。やって来る中性子には、原子核はどう見えるのでしょうか。",
   html: `
 <div class="step">

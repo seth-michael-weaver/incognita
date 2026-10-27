@@ -1,11 +1,11 @@
 /* Simplified Chinese (简体中文): hauser (chapter 13, Hauser–Feshbach 逐道计算，含宽度涨落修正) */
 WT.L.ch.hauser = {
-  num: "第 16 章", title: "Hauser–Feshbach，逐道计算", short: "Hauser–Feshbach",
-  lead: "第 6 章把各出口之间的竞争讲成一扇扇门。这里给出门背后的公式，一次一个道，以及只有少数几个道开放时它所需要的修正。",
+  num: "第 22 章", title: "Hauser–Feshbach，逐道计算", short: "Hauser–Feshbach",
+  lead: "第 9 章把各出口之间的竞争讲成一扇扇门。这里给出门背后的公式，一次一个道，以及只有少数几个道开放时它所需要的修正。",
   html: `
 <div class="step">
   <h3>每个道一个穿透系数</h3>
-  <p>一个<b>道</b>是一个完整的出口地址：哪种粒子，剩余核留在哪个状态，粒子的轨道角动量 <i>l</i> 和总角动量 <i>j</i> = <i>l</i> ± ½。第 2 章的光学模型给每个道一个<b>穿透系数</b> <i>T<sub>lj</sub></i>。图中的柱是入射中子的穿透系数，靶核自旋为 0。</p>
+  <p>一个<b>道</b>是一个完整的出口地址：哪种粒子，剩余核留在哪个状态，粒子的轨道角动量 <i>l</i> 和总角动量 <i>j</i> = <i>l</i> ± ½。第 5 章的光学模型给每个道一个<b>穿透系数</b> <i>T<sub>lj</sub></i>。图中的柱是入射中子的穿透系数，靶核自旋为 0。</p>
   <div class="ctl"><label for="hf-e">中子能量 (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>在 1 keV 时只有 <i>l</i> = 0 开放，<i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>，只有百分之几。在低能下，<i>l</i> 每增加一个单位，大约要付出 (<i>kR</i>)² 的因子，所以随着能量升高，柱子一根接一根地打开。每根柱以权重 g<sub>J</sub><i>T</i> 向复合核输送通量：</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -20,7 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>宽度涨落</h3>
-  <p>当 <i>W<sub>ab</sub></i> = 1 时，公式乘的是平均值。平均值背后的共振，其宽度是涨落的（Porter–Thomas，第 10 章）；而对弹性散射，让中子进来的宽度正是让它出去的宽度，所以二者是关联的。于是对弹性道，乘积的平均大于平均的乘积，弹性道多得的部分由其他出口让出。</p>
+  <p>当 <i>W<sub>ab</sub></i> = 1 时，公式乘的是平均值。平均值背后的共振，其宽度是涨落的（Porter–Thomas，第 15 章）；而对弹性散射，让中子进来的宽度正是让它出去的宽度，所以二者是关联的。于是对弹性道，乘积的平均大于平均的乘积，弹性道多得的部分由其他出口让出。</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">不加修正</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">中子能量 (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>标签给出有修正的 σ 除以无修正的 σ。在第一个非弹性阈以下，弹性已经拿走几乎全部通量，几乎不变，而俘获减少 10% 到 25%。在 1 到 1.5 MeV 之间，复合弹性增加 15% 到 35%，第一个 2⁺ 能级减少约三分之一。随着更多能级和连续区打开，复合弹性在通量中只占很小的份额：它自己的因子向 2 增大，但它从其他道拿走的部分变少，其他道的因子回到 1 附近。在 Moldauer 的方案中，每个道有一个自由度数 ν<sub>c</sub>，<i>W</i> 是一个一维积分，用 TALYS 的 32 点 Gauss–Laguerre 求积计算。</p>

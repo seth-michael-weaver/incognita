@@ -92,7 +92,7 @@
   }
 
   WT.chapter("slowing", {
-    num: "Chapter 13", title: "Slowing down", short: "Slowing down",
+    num: "Chapter 18", title: "Slowing down", short: "Slowing down",
     html: `
 <div class="step">
   <p>Each bounce off hydrogen costs about half the energy.</p>

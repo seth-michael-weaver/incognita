@@ -1,12 +1,12 @@
 /* Spanish: gamma (Chapter 7, photon emission) */
 WT.es.ch.gamma = {
-  num: "Capítulo 7", title: "Desprender luz", short: "Fotones",
+  num: "Capítulo 10", title: "Desprender luz", short: "Fotones",
   lead: "Cuando no sale ninguna partícula, el núcleo se enfría emitiendo fotones: rayos gamma, partículas de luz de alta energía. Esta salida está abierta a cualquier energía.",
   html: `
 <div class="step">
   <p>Un estado caliente a 8 MeV (millones de electronvoltios) desprende fotones (γ); el montón junto a la escalera recoge dónde caen. Por debajo de 2 MeV los estados son unos pocos peldaños con nombre; por encima, una multitud que se espesa rápidamente con la energía (puntos grises). Cada fotón se lleva la energía de su salto, <i>E<sub>γ</sub></i>, y se dibuja más brillante en proporción a <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> es el coeficiente de transmisión del fotón (la puerta del capítulo 6), <i>l</i> = 1 para fotones dipolares, y <i>f</i> es la <b>función de fuerza gamma</b>: la facilidad con que el núcleo radia a esa energía. La probabilidad de un salto es <i>T<sub>γ</sub></i> por la multitud de estados donde cae: los saltos pequeños encuentran muchos estados pero son tenues; los grandes son brillantes pero encuentran pocos.</p>
+  <p><i>T<sub>γ</sub></i> es el coeficiente de transmisión del fotón (la puerta del capítulo 9), <i>l</i> = 1 para fotones dipolares, y <i>f</i> es la <b>función de fuerza gamma</b>: la facilidad con que el núcleo radia a esa energía. La probabilidad de un salto es <i>T<sub>γ</sub></i> por la multitud de estados donde cae: los saltos pequeños encuentran muchos estados pero son tenues; los grandes son brillantes pero encuentran pocos.</p>
   <div class="ctl"><label for="gm-e0">Energía inicial</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Emitir 100</button></div>
   <p>El montón alcanza su máximo unos MeV por debajo del inicio: la mayoría de los fotones llevan de 2 a 4 MeV. Mueve la energía inicial y el máximo la sigue.</p>
@@ -25,7 +25,7 @@ WT.es.ch.gamma = {
 </div>
 <div class="step">
   <h3>Escalera abajo</h3>
-  <p>Una cascada son fotones emitidos uno tras otro, desde los intervalos de arriba (estados demasiado densos para listarlos, capítulo 5) hasta los niveles con nombre, estirados para que se puedan leer (peldaño macizo paridad +, hueco −). Ahí el motor deja de estimar y sigue las <b>razones de ramificación</b> tabuladas: las probabilidades medidas de que cada nivel decaiga a cada uno de los inferiores.</p>
+  <p>Una cascada son fotones emitidos uno tras otro, desde los intervalos de arriba (estados demasiado densos para listarlos, capítulo 8) hasta los niveles con nombre, estirados para que se puedan leer (peldaño macizo paridad +, hueco −). Ahí el motor deja de estimar y sigue las <b>razones de ramificación</b> tabuladas: las probabilidades medidas de que cada nivel decaiga a cada uno de los inferiores.</p>
   <div class="btns"><button class="btn" data-act="drop">Soltar una cascada</button></div>
   <p>Pulsa el botón unas cuantas veces: la parte de arriba cambia cada vez; el final sigue uno de unos pocos caminos medidos.</p>
 </div>
@@ -37,7 +37,7 @@ WT.es.ch.gamma = {
 </div>
 <div class="step">
   <h3>Captura</h3>
-  <p>Un núcleo que acaba de absorber un neutrón lento tiene dos puertas de salida (capítulo 6): fotones (arriba) y el neutrón que vuelve a salir (derecha). La abertura de cada puerta es su <b>anchura</b>, en eV: lo rápido que el núcleo decae por ella. La anchura del fotón apenas cambia; la del neutrón crece con la velocidad del neutrón.</p>
+  <p>Un núcleo que acaba de absorber un neutrón lento tiene dos puertas de salida (capítulo 9): fotones (arriba) y el neutrón que vuelve a salir (derecha). La abertura de cada puerta es su <b>anchura</b>, en eV: lo rápido que el núcleo decae por ella. La anchura del fotón apenas cambia; la del neutrón crece con la velocidad del neutrón.</p>
   <div class="ctl"><label for="gm-e">Energía del neutrón</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
   <p>Arrastra la energía del neutrón, de 10 eV a 2 MeV. La <b>captura</b>, (n,γ), significa que el neutrón se queda y sale un fotón: a 10 eV gana casi siempre y por encima de unos pocos keV pasa a ser una fracción pequeña. La anchura del fotón en el umbral está medida para cientos de núcleos, y sirve para comprobar la función de fuerza gamma. Por defecto el motor usa la suya; una opción escala la función de fuerza de cada núcleo medido hasta que coincidan.</p>
   <div class="aside">En el código: <code>gamma/parameters.py</code> (fuerzas E1 tabuladas; sistemáticas de la resonancia gigante, spin-flip, tijera y upbend), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) para cada multipolo), <code>gamma/transmission.py</code> (T<sub>γ</sub> y la anchura radiativa media), <code>structure/levels.py</code> (razones de ramificación, isómeros), <code>emission/multiple.py</code> (la cascada). Opcionales, desactivadas por defecto: <code>gamma/scissors.py</code> (tijera más intensa), <code>gamma/ggnorm.py</code> (ajustar al ⟨Γγ⟩ medido, hasta el plomo), <code>gamma/actphys.py</code> (ambas, para actínidos).</div>

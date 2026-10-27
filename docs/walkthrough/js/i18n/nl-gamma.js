@@ -1,12 +1,12 @@
-/* Dutch (Nederlands): gamma (Hoofdstuk 7, fotonemissie) */
+/* Dutch (Nederlands): gamma (Hoofdstuk 10, fotonemissie) */
 WT.L.ch.gamma = {
-  num: "Hoofdstuk 7", title: "Licht afgeven", short: "Fotonen",
+  num: "Hoofdstuk 10", title: "Licht afgeven", short: "Fotonen",
   lead: "Als er geen deeltje vertrekt, koelt de kern af door fotonen uit te zenden: gammastralen, deeltjes van hoogenergetisch licht. Deze uitgang staat bij elke energie open.",
   html: `
 <div class="step">
   <p>Een hete toestand bij 8 MeV (miljoen elektronvolt) zendt fotonen (γ) uit; de stapel naast de ladder verzamelt waar ze landen. Onder 2 MeV zijn de toestanden een paar benoemde sporten; daarboven een menigte die met de energie steil dichter wordt (grijze stippen). Elk foton neemt de energie van zijn val mee, <i>E<sub>γ</sub></i>, en wordt helderder getekend naar verhouding van <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> is de transmissiecoëfficiënt van het foton (de deur uit hoofdstuk 6), <i>l</i> = 1 voor dipoolfotonen, en <i>f</i> is de <b>fotonsterkte</b>: hoe makkelijk de kern bij die energie straalt. De kans op een val is <i>T<sub>γ</sub></i> maal de menigte toestanden waar hij landt: kleine vallen vinden veel toestanden maar zijn zwak; grote vallen zijn helder maar vinden er weinig.</p>
+  <p><i>T<sub>γ</sub></i> is de transmissiecoëfficiënt van het foton (de deur uit hoofdstuk 9), <i>l</i> = 1 voor dipoolfotonen, en <i>f</i> is de <b>fotonsterkte</b>: hoe makkelijk de kern bij die energie straalt. De kans op een val is <i>T<sub>γ</sub></i> maal de menigte toestanden waar hij landt: kleine vallen vinden veel toestanden maar zijn zwak; grote vallen zijn helder maar vinden er weinig.</p>
   <div class="ctl"><label for="gm-e0">Beginenergie</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Zend er 100 uit</button></div>
   <p>De stapel piekt een paar MeV onder het begin: de meeste fotonen dragen 2 tot 4 MeV. Verschuif de beginenergie en de piek volgt.</p>
@@ -25,7 +25,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>De ladder af</h3>
-  <p>Een cascade is een reeks fotonen die na elkaar worden uitgezonden, van de bins bovenaan (toestanden te dicht om op te sommen, hoofdstuk 5) tot de benoemde niveaus, uitgerekt zodat je ze kunt lezen (dichte sport pariteit +, holle −). Daar stopt de motor met schatten en volgt hij de getabelleerde <b>vertakkingsverhoudingen</b>: de gemeten kansen dat elk niveau naar elk lager niveau vervalt.</p>
+  <p>Een cascade is een reeks fotonen die na elkaar worden uitgezonden, van de bins bovenaan (toestanden te dicht om op te sommen, hoofdstuk 8) tot de benoemde niveaus, uitgerekt zodat je ze kunt lezen (dichte sport pariteit +, holle −). Daar stopt de motor met schatten en volgt hij de getabelleerde <b>vertakkingsverhoudingen</b>: de gemeten kansen dat elk niveau naar elk lager niveau vervalt.</p>
   <div class="btns"><button class="btn" data-act="drop">Laat een cascade vallen</button></div>
   <p>Druk een paar keer op de knop: het bovenste deel verandert elke keer; het einde volgt een van een paar gemeten paden.</p>
 </div>
@@ -37,7 +37,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Vangst</h3>
-  <p>Een kern die net een langzaam neutron heeft geabsorbeerd, heeft twee uitgangsdeuren (hoofdstuk 6): fotonen (boven) en het neutron dat weer naar buiten gaat (rechts). De opening van elke deur is haar <b>breedte</b>, in eV: hoe snel de kern erdoor vervalt. De fotonbreedte verandert nauwelijks; de neutronbreedte groeit met de snelheid van het neutron.</p>
+  <p>Een kern die net een langzaam neutron heeft geabsorbeerd, heeft twee uitgangsdeuren (hoofdstuk 9): fotonen (boven) en het neutron dat weer naar buiten gaat (rechts). De opening van elke deur is haar <b>breedte</b>, in eV: hoe snel de kern erdoor vervalt. De fotonbreedte verandert nauwelijks; de neutronbreedte groeit met de snelheid van het neutron.</p>
   <div class="ctl"><label for="gm-e">Neutronenergie</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1,0 keV</output></div>
   <p>Sleep de neutronenergie, van 10 eV tot 2 MeV. <b>Vangst</b>, (n,γ), betekent dat het neutron blijft en er een foton vertrekt: bij 10 eV wint ze meestal, boven een paar keV wordt ze een klein aandeel. De fotonbreedte bij de drempel is voor honderden kernen gemeten, een controle op de fotonsterkte. Standaard gebruikt de motor zijn eigen; een optionele schakelaar schaalt de fotonsterkte van elke gemeten kern tot de twee overeenkomen.</p>
   <div class="aside">In de code: <code>gamma/parameters.py</code> (getabelleerde E1-sterkten; systematiek voor gigantische resonantie, spin-flip, schaar en upbend), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) voor elke multipool), <code>gamma/transmission.py</code> (T<sub>γ</sub> en de gemiddelde stralingsbreedte), <code>structure/levels.py</code> (vertakkingsverhoudingen, isomeren), <code>emission/multiple.py</code> (de cascade). Optioneel, standaard uit: <code>gamma/scissors.py</code> (sterkere schaar), <code>gamma/ggnorm.py</code> (de gemeten ⟨Γγ⟩ halen, tot lood), <code>gamma/actphys.py</code> (beide, voor actiniden).</div>

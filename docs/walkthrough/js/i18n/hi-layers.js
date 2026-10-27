@@ -1,4 +1,4 @@
-/* Hindi: layers (अध्याय 15). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Hindi: layers (अध्याय 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -22,7 +22,7 @@
   const terraScore = TT ? `${libs} के विरुद्ध यह ${TT.d} तुलनाओं में से ${TT.w} में आगे है, ${TT.t} में बराबर है और ${TT.l} में पीछे है।` : `इसकी तुलना ${libs} से की जाती है।`;
 
   WT.L.ch.layers = {
-    num: "अध्याय 15", title: "मॉडल की परतें कैसे बनी हैं", short: "परतें",
+    num: "अध्याय 21", title: "मॉडल की परतें कैसे बनी हैं", short: "परतें",
     lead: "हम जो देते हैं, वह इंजन के ऊपर परतों में बना है, और हर परत को मापनों के विरुद्ध अपनी जगह कमानी होती है।",
     html: `
 <div class="step">

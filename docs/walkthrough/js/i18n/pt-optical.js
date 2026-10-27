@@ -1,7 +1,7 @@
-/* Portuguese (pt-PT): optical (Capítulo 17, Especialista) */
+/* Portuguese (pt-PT): optical (Capítulo 23, Especialista) */
 WT.L.ch.optical = {
-  num: "Capítulo 17", title: "O modelo ótico, resolvido", short: "Modelo ótico, resolvido",
-  lead: "O Capítulo 2 desenhou o potencial ótico como uma bola de vidro baço. Aqui aparece como o motor o usa: uma parametrização global, uma equação de Schrödinger radial integrada passo a passo e uma condição de ajuste que transforma a onda em coeficientes de transmissão.",
+  num: "Capítulo 23", title: "O modelo ótico, resolvido", short: "Modelo ótico, resolvido",
+  lead: "O Capítulo 5 desenhou o potencial ótico como uma bola de vidro baço. Aqui aparece como o motor o usa: uma parametrização global, uma equação de Schrödinger radial integrada passo a passo e uma condição de ajuste que transforma a onda em coeficientes de transmissão.",
   html: `
 <div class="step">
   <h3>O potencial de Koning–Delaroche</h3>
@@ -30,7 +30,7 @@ WT.L.ch.optical = {
   <p>O termo de <b>spin–órbita</b> é atrativo para <i>j</i> = <i>l</i> + ½ e repulsivo para <i>j</i> = <i>l</i> − ½. É pequeno, uns poucos MeV à superfície, mas afasta as duas transmissões de cada <i>l</i>, sobretudo perto da onda parcial que roça a superfície.</p>
   <div class="ctl"><label for="op-e3">Energia do neutrão (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">Desligar o spin–órbita</button></div>
-  <p>O Hauser–Feshbach (Capítulo 16) usa as duas em separado; somadas com os seus pesos, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, dão uma secção eficaz de reação quase inalterada, e é por isso que as secções eficazes totais quase não restringem a intensidade do spin–órbita e são precisos dados de polarização.</p>
+  <p>O Hauser–Feshbach (Capítulo 22) usa as duas em separado; somadas com os seus pesos, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, dão uma secção eficaz de reação quase inalterada, e é por isso que as secções eficazes totais quase não restringem a intensidade do spin–órbita e são precisos dados de polarização.</p>
 </div>
 <div class="step">
   <h3>As secções eficazes</h3>

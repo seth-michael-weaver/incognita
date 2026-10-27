@@ -1,7 +1,7 @@
-/* Spanish: exciton (Capítulo 20, experto: el modelo de excitones, en números) */
+/* Spanish: exciton (Capítulo 26, experto: el modelo de excitones, en números) */
 WT.L.ch.exciton = {
-  num: "Capítulo 20", title: "El modelo de excitones, en números", short: "Modelo de excitones",
-  lead: "El capítulo 4 siguió a un neutrón rápido a través de unas pocas colisiones. Aquí están las tasas que deciden, en cada etapa, si lo siguiente es otra colisión o una fuga, y el espectro que resulta de sumarlas.",
+  num: "Capítulo 26", title: "El modelo de excitones, en números", short: "Modelo de excitones",
+  lead: "El capítulo 7 siguió a un neutrón rápido a través de unas pocas colisiones. Aquí están las tasas que deciden, en cada etapa, si lo siguiente es otra colisión o una fuga, y el espectro que resulta de sumarlas.",
   html: `
 <div class="step">
   <h3>Contar estados partícula–hueco</h3>

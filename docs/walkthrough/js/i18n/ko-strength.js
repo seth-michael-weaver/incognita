@@ -1,7 +1,7 @@
-/* Korean: strength (19장, 광자 세기 자세히 보기) */
+/* Korean: strength (25장, 광자 세기 자세히 보기) */
 WT.L.ch.strength = {
-  num: "19장", title: "광자 세기, 자세히", short: "광자 세기",
-  lead: "7장에서는 뜨거운 원자핵이 어떤 광자를 선호하는지 보았습니다. 이 장에서는 세기 함수를 식으로 적고, 그것이 투과 계수와 평균 복사 폭으로 이어지는 과정을 따라간 뒤, 그 세기 함수가 이끄는 캐스케이드를 직접 돌려 봅니다.",
+  num: "25장", title: "광자 세기, 자세히", short: "광자 세기",
+  lead: "10장에서는 뜨거운 원자핵이 어떤 광자를 선호하는지 보았습니다. 이 장에서는 세기 함수를 식으로 적고, 그것이 투과 계수와 평균 복사 폭으로 이어지는 과정을 따라간 뒤, 그 세기 함수가 이끄는 캐스케이드를 직접 돌려 봅니다.",
   html: `
 <div class="step">
   <h3>E1: 거대 쌍극자 공명의 꼬리</h3>
@@ -35,7 +35,7 @@ WT.L.ch.strength = {
   <h3>캐스케이드</h3>
   <p>첫 광자 아래에서도 같은 규칙이 되풀이됩니다. 새 에너지마다 다음 광자를 <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>)에서 뽑고, 원자핵이 알려진 준위에 닿을 때까지 계속합니다. 이력 하나는 광자 몇 개로 이루어지며, 이들을 합한 스펙트럼이 포획 뒤에 열량계가 보는 것입니다.</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">상향 굴곡</button><button class="btn ghost" data-act="clear">다시 시작</button></div>
-  <p>상향 굴곡은 부드러운 광자를 더하고 다중도를 조금 늘립니다. 엔진은 이력을 뽑지 않습니다. 개체군을 구간별로 위에서 아래로 옮기며(8장), 표본 잡음 없이 같은 평균을 얻습니다.</p>
+  <p>상향 굴곡은 부드러운 광자를 더하고 다중도를 조금 늘립니다. 엔진은 이력을 뽑지 않습니다. 개체군을 구간별로 위에서 아래로 옮기며(11장), 표본 잡음 없이 같은 평균을 얻습니다.</p>
   <div class="aside">코드에서: <code>gamma/strength.py</code>(TALYS가 지원하는 모든 세기 모형. 기본값은 SMLO-2019 표와 상향 굴곡을 포함한 IAEA M1), <code>gamma/parameters.py</code>(거대 공명 계통성, 표), <code>gamma/transmission.py</code>(T = 2π E<sup>2L+1</sup> f), <code>gamma/ggnorm.py</code>(선택 사항: ⟨Γγ⟩ 규격화), <code>emission/</code>(캐스케이드). 그림은 철-57과 비슷한 원자핵에 대해 닫힌 형태 식과 계통성을 씁니다. 측정된 ⟨Γγ⟩는 ⁵⁷Fe에 대한 RIPL 값입니다.</div>
 </div>`,
 };

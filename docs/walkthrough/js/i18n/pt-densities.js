@@ -1,7 +1,7 @@
-/* Portuguese (pt-PT): densities (Capítulo 18, Especialista) */
+/* Portuguese (pt-PT): densities (Capítulo 24, Especialista) */
 WT.L.ch.densities = {
-  num: "Capítulo 18", title: "Densidades de níveis, unidas", short: "Densidades de níveis",
-  lead: "O Capítulo 5 uniu uma prancha reta a uma encosta. Este capítulo escreve as duas, mostra como se encontra a junção a partir dos níveis contados e o que acontece quando não existe junção.",
+  num: "Capítulo 24", title: "Densidades de níveis, unidas", short: "Densidades de níveis",
+  lead: "O Capítulo 8 uniu uma prancha reta a uma encosta. Este capítulo escreve as duas, mostra como se encontra a junção a partir dos níveis contados e o que acontece quando não existe junção.",
   html: `
 <div class="step">
   <h3>O gás de Fermi com efeitos de camadas amortecidos</h3>

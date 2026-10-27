@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>Um núcleo esticado pode rodar, e dá os níveis 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> com espaçamentos que crescem como <i>J</i>(<i>J</i>+1): um <b>rotor</b>. Um redondo pode ondular; cada unidade de ondulação, um <b>fonão</b>, acrescenta a mesma energia, por isso os seus níveis são igualmente espaçados: um <b>vibrador</b>.</p>
   <div class="ctl"><label for="st-beta">Deformação β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Parado</button><button class="btn ghost" data-act="vib">A vibrar</button><button class="btn ghost" data-act="rot">A rodar</button></div>
-  <p>Arrasta <i>β₂</i> e carrega nos botões: um alongamento maior aproxima os níveis do rotor. O motor guarda deformações por núcleo e uma etiqueta: esférico, vibrador ou rotor. O capítulo 3 mostra como um neutrão que passa as usa.</p>
+  <p>Arrasta <i>β₂</i> e carrega nos botões: um alongamento maior aproxima os níveis do rotor. O motor guarda deformações por núcleo e uma etiqueta: esférico, vibrador ou rotor. O capítulo 6 mostra como um neutrão que passa as usa.</p>
 </div>
 <div class="step">
   <h3>Impressões digitais logo acima do limiar</h3>

@@ -1,12 +1,12 @@
-/* Portuguese (pt-PT): gamma (Capítulo 7, emissão de fotões) */
+/* Portuguese (pt-PT): gamma (Capítulo 10, emissão de fotões) */
 WT.L.ch.gamma = {
-  num: "Capítulo 7", title: "Libertar luz", short: "Fotões",
+  num: "Capítulo 10", title: "Libertar luz", short: "Fotões",
   lead: "Quando nenhuma partícula sai, o núcleo arrefece emitindo fotões: raios gama, partículas de luz de alta energia. Esta saída está aberta a qualquer energia.",
   html: `
 <div class="step">
   <p>Um estado quente a 8 MeV (milhões de eletrão-volts) liberta fotões (γ); o monte junto à escada recolhe onde caem. Abaixo de 2 MeV, os estados são uns poucos degraus com nome; acima, uma multidão que se adensa rapidamente com a energia (pontos cinzentos). Cada fotão leva a energia do seu salto, <i>E<sub>γ</sub></i>, e é desenhado mais brilhante em proporção a <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> é o coeficiente de transmissão do fotão (a porta do capítulo 6), <i>l</i> = 1 para fotões dipolares, e <i>f</i> é a <b>função de intensidade gama</b>: a facilidade com que o núcleo radia a essa energia. A probabilidade de um salto é <i>T<sub>γ</sub></i> vezes a multidão de estados onde cai: os saltos pequenos encontram muitos estados mas são ténues; os grandes são brilhantes mas encontram poucos.</p>
+  <p><i>T<sub>γ</sub></i> é o coeficiente de transmissão do fotão (a porta do capítulo 9), <i>l</i> = 1 para fotões dipolares, e <i>f</i> é a <b>função de intensidade gama</b>: a facilidade com que o núcleo radia a essa energia. A probabilidade de um salto é <i>T<sub>γ</sub></i> vezes a multidão de estados onde cai: os saltos pequenos encontram muitos estados mas são ténues; os grandes são brilhantes mas encontram poucos.</p>
   <div class="ctl"><label for="gm-e0">Energia inicial</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Emitir 100</button></div>
   <p>O monte atinge o máximo uns MeV abaixo do início: a maioria dos fotões leva de 2 a 4 MeV. Muda a energia inicial e o máximo acompanha-a.</p>
@@ -25,7 +25,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Escada abaixo</h3>
-  <p>Uma cascata são fotões emitidos uns atrás dos outros, desde os intervalos no topo (estados demasiado densos para listar, capítulo 5) até aos níveis com nome, esticados para se poderem ler (degrau cheio paridade +, oco −). Aí o motor deixa de estimar e segue as <b>razões de ramificação</b> tabeladas: as probabilidades medidas de cada nível decair para cada um dos inferiores.</p>
+  <p>Uma cascata são fotões emitidos uns atrás dos outros, desde os intervalos no topo (estados demasiado densos para listar, capítulo 8) até aos níveis com nome, esticados para se poderem ler (degrau cheio paridade +, oco −). Aí o motor deixa de estimar e segue as <b>razões de ramificação</b> tabeladas: as probabilidades medidas de cada nível decair para cada um dos inferiores.</p>
   <div class="btns"><button class="btn" data-act="drop">Largar uma cascata</button></div>
   <p>Carrega no botão algumas vezes: a parte de cima muda de cada vez; o final segue um de poucos caminhos medidos.</p>
 </div>
@@ -37,7 +37,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Captura</h3>
-  <p>Um núcleo que acabou de absorver um neutrão lento tem duas portas de saída (capítulo 6): fotões (em cima) e o neutrão que volta a sair (à direita). A abertura de cada porta é a sua <b>largura</b>, em eV: a rapidez com que o núcleo decai por ela. A largura radiativa quase não muda; a do neutrão cresce com a velocidade do neutrão.</p>
+  <p>Um núcleo que acabou de absorver um neutrão lento tem duas portas de saída (capítulo 9): fotões (em cima) e o neutrão que volta a sair (à direita). A abertura de cada porta é a sua <b>largura</b>, em eV: a rapidez com que o núcleo decai por ela. A largura radiativa quase não muda; a do neutrão cresce com a velocidade do neutrão.</p>
   <div class="ctl"><label for="gm-e">Energia do neutrão</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
   <p>Arrasta a energia do neutrão, de 10 eV a 2 MeV. A <b>captura</b>, (n,γ), significa que o neutrão fica e sai um fotão: a 10 eV ganha quase sempre e acima de alguns keV passa a ser uma fração pequena. A largura radiativa no limiar está medida para centenas de núcleos, e serve para verificar a função de intensidade gama. Por defeito o motor usa a sua; uma opção escala a função de intensidade de cada núcleo medido até as duas coincidirem.</p>
   <div class="aside">No código: <code>gamma/parameters.py</code> (intensidades E1 tabeladas; sistemáticas da ressonância gigante, spin-flip, tesoura e upbend), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) para cada multipolo), <code>gamma/transmission.py</code> (T<sub>γ</sub> e a largura radiativa média), <code>structure/levels.py</code> (razões de ramificação, isómeros), <code>emission/multiple.py</code> (a cascata). Opcionais, desligadas por defeito: <code>gamma/scissors.py</code> (tesoura mais intensa), <code>gamma/ggnorm.py</code> (ajustar ao ⟨Γγ⟩ medido, até ao chumbo), <code>gamma/actphys.py</code> (ambas, para actinídeos).</div>

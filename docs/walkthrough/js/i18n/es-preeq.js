@@ -1,6 +1,6 @@
 /* Spanish: preeq (Chapter 4, pre-equilibrium) */
 WT.es.ch.preeq = {
-  num: "Capítulo 4", title: "Choques antes de la calma", short: "Preequilibrio",
+  num: "Capítulo 7", title: "Choques antes de la calma", short: "Preequilibrio",
   lead: "Un neutrón que entra en un núcleo no comparte su energía con todos a la vez. Durante los primeros choques una sola partícula conserva casi toda la energía, y esa partícula puede salir disparada de vuelta. Esto es el preequilibrio: emisión “antes de que la energía se reparta por igual”.",
   html: `
 <div class="step">
@@ -15,13 +15,13 @@ WT.es.ch.preeq = {
 </div>
 <div class="step">
   <h3>La bifurcación en cada etapa</h3>
-  <p>En cada etapa el neutrón de arriba o bien escapa (flecha hacia arriba, solo si está por encima de la línea libre) o vuelve a chocar (flecha hacia abajo); el grosor indica la probabilidad. La tasa de escape sale del <b>balance detallado</b>: de la probabilidad del proceso inverso, que esa misma partícula sea absorbida, que calcula el Capítulo 2. La tasa de choque es la intensidad de un choque nucleón-nucleón por el número de nuevas configuraciones a las que puede llevar.</p>
+  <p>En cada etapa el neutrón de arriba o bien escapa (flecha hacia arriba, solo si está por encima de la línea libre) o vuelve a chocar (flecha hacia abajo); el grosor indica la probabilidad. La tasa de escape sale del <b>balance detallado</b>: de la probabilidad del proceso inverso, que esa misma partícula sea absorbida, que calcula el Capítulo 5. La tasa de choque es la intensidad de un choque nucleón-nucleón por el número de nuevas configuraciones a las que puede llevar.</p>
   <div class="ctl"><label for="pe-n">Etapa (excitones n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Sube la etapa. Al principio una partícula tiene casi toda la energía, así que lo que escapa es rápido. Más tarde la energía está muy repartida y sale poco.</p>
 </div>
 <div class="step">
   <h3>De dónde sale la cola rápida</h3>
-  <p>El montón de la derecha es el <b>espectro</b>: cuántos neutrones salen con cada energía, los lentos a la izquierda, los rápidos a la derecha. Cada reacción recorre la cadena hasta que el neutrón de arriba escapa, y su color dice cuándo: <em style="font-style:normal;color:var(--warm);font-weight:600">naranja intenso</em> en la etapa 3, más pálido después, <em class="n">azul</em> si salió solo cuando el núcleo ya estaba en calma (Capítulo 5).</p>
+  <p>El montón de la derecha es el <b>espectro</b>: cuántos neutrones salen con cada energía, los lentos a la izquierda, los rápidos a la derecha. Cada reacción recorre la cadena hasta que el neutrón de arriba escapa, y su color dice cuándo: <em style="font-style:normal;color:var(--warm);font-weight:600">naranja intenso</em> en la etapa 3, más pálido después, <em class="n">azul</em> si salió solo cuando el núcleo ya estaba en calma (Capítulo 8).</p>
   <div class="btns"><button class="btn" data-act="run">Lanzar 300 reacciones</button></div>
   <p>La etapa 3 forma una meseta ancha, casi plana, que llega hasta la energía máxima. Las etapas posteriores se amontonan más abajo. La joroba azul es la <b>evaporación</b>: cuando todos comparten la energía, solo se escapan neutrones lentos, como el vapor de un líquido caliente.</p>
   <div class="ctl"><label for="pe-e">Energía del neutrón</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

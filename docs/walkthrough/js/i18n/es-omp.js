@@ -1,6 +1,6 @@
-/* Spanish: omp (Capítulo 2, el modelo óptico) */
+/* Spanish: omp (Capítulo 5, el modelo óptico) */
 WT.es.ch.omp = {
-  num: "Capítulo 2", title: "Una bola de cristal nublada", short: "Modelo óptico",
+  num: "Capítulo 5", title: "Una bola de cristal nublada", short: "Modelo óptico",
   lead: "Antes que nada, el motor se hace una pregunta más sencilla: ¿cómo ve el núcleo un neutrón que llega?",
   html: `
 <div class="step">

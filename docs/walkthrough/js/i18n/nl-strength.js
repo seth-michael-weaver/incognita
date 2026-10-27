@@ -1,7 +1,7 @@
-/* Dutch (Nederlands): strength (Hoofdstuk 19, fotonsterkte in detail) */
+/* Dutch (Nederlands): strength (Hoofdstuk 25, fotonsterkte in detail) */
 WT.L.ch.strength = {
-  num: "Hoofdstuk 19", title: "Fotonsterkte in detail", short: "Fotonsterkte",
-  lead: "Hoofdstuk 7 liet zien welke fotonen een hete kern verkiest. Dit hoofdstuk schrijft de sterktefuncties uit, volgt ze tot in de transmissiecoëfficiënten en de gemiddelde stralingsbreedte, en draait de cascade die ze aandrijven.",
+  num: "Hoofdstuk 25", title: "Fotonsterkte in detail", short: "Fotonsterkte",
+  lead: "Hoofdstuk 10 liet zien welke fotonen een hete kern verkiest. Dit hoofdstuk schrijft de sterktefuncties uit, volgt ze tot in de transmissiecoëfficiënten en de gemiddelde stralingsbreedte, en draait de cascade die ze aandrijven.",
   html: `
 <div class="step">
   <h3>E1: de staart van de gigantische dipoolresonantie</h3>
@@ -35,7 +35,7 @@ WT.L.ch.strength = {
   <h3>De cascade</h3>
   <p>Onder het eerste foton herhaalt dezelfde regel zich: vanuit elke nieuwe energie wordt het volgende foton getrokken uit <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>), tot de kern haar bekende niveaus bereikt. Elke geschiedenis telt een paar fotonen; hun opgetelde spectrum is wat een calorimeter na vangst ziet.</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">Upbend</button><button class="btn ghost" data-act="clear">Opnieuw beginnen</button></div>
-  <p>De upbend voegt zachte fotonen toe en verhoogt de multipliciteit een beetje. De motor trekt geen geschiedenissen: hij verplaatst populaties bin voor bin, van boven naar beneden (hoofdstuk 8), wat dezelfde gemiddelden geeft zonder steekproefruis.</p>
+  <p>De upbend voegt zachte fotonen toe en verhoogt de multipliciteit een beetje. De motor trekt geen geschiedenissen: hij verplaatst populaties bin voor bin, van boven naar beneden (hoofdstuk 11), wat dezelfde gemiddelden geeft zonder steekproefruis.</p>
   <div class="aside">In de code: <code>gamma/strength.py</code> (elk sterktemodel dat TALYS ondersteunt; standaard de SMLO-2019-tabellen en de IAEA-M1 met upbend), <code>gamma/parameters.py</code> (systematiek en tabellen voor gigantische resonanties), <code>gamma/transmission.py</code> (T = 2π E<sup>2L+1</sup> f), <code>gamma/ggnorm.py</code> (optionele ⟨Γγ⟩-normalisatie), <code>emission/</code> (de cascade). De afbeelding gebruikt gesloten vormen en systematiek voor een kern zoals ijzer-57; de gemeten ⟨Γγ⟩ is de RIPL-waarde voor ⁵⁷Fe.</div>
 </div>`,
 };

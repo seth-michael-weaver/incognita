@@ -37,7 +37,7 @@ WT.es.ch.structure = {
   <p>Un núcleo estirado puede rotar, y da los niveles 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> con separaciones que crecen como <i>J</i>(<i>J</i>+1): un <b>rotor</b>. Uno redondo puede ondular; cada unidad de ondulación, un <b>fonón</b>, añade la misma energía, así que sus niveles están igualmente espaciados: un <b>vibrador</b>.</p>
   <div class="ctl"><label for="st-beta">Deformación β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Quieto</button><button class="btn ghost" data-act="vib">Vibrando</button><button class="btn ghost" data-act="rot">Rotando</button></div>
-  <p>Arrastra <i>β₂</i> y pulsa los botones: un estiramiento mayor junta más los niveles del rotor. El motor guarda deformaciones por núcleo y una etiqueta: esférico, vibrador o rotor. El capítulo 3 muestra cómo las usa un neutrón que pasa.</p>
+  <p>Arrastra <i>β₂</i> y pulsa los botones: un estiramiento mayor junta más los niveles del rotor. El motor guarda deformaciones por núcleo y una etiqueta: esférico, vibrador o rotor. El capítulo 6 muestra cómo las usa un neutrón que pasa.</p>
 </div>
 <div class="step">
   <h3>Huellas justo por encima del umbral</h3>

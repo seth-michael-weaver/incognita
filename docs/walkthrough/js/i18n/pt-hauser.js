@@ -1,11 +1,11 @@
-/* Portuguese (pt-PT): hauser (Capítulo 16, Especialista) */
+/* Portuguese (pt-PT): hauser (Capítulo 22, Especialista) */
 WT.L.ch.hauser = {
-  num: "Capítulo 16", title: "Hauser–Feshbach, canal a canal", short: "Hauser–Feshbach",
-  lead: "O Capítulo 6 contou a competição entre as saídas como um jogo de portas. Eis a fórmula por trás das portas, um canal de cada vez, e a correção de que precisa quando só há poucos canais abertos.",
+  num: "Capítulo 22", title: "Hauser–Feshbach, canal a canal", short: "Hauser–Feshbach",
+  lead: "O Capítulo 9 contou a competição entre as saídas como um jogo de portas. Eis a fórmula por trás das portas, um canal de cada vez, e a correção de que precisa quando só há poucos canais abertos.",
   html: `
 <div class="step">
   <h3>Uma transmissão para cada canal</h3>
-  <p>Um <b>canal</b> é um endereço de saída completo: que partícula sai, em que estado fica o núcleo residual, o momento angular orbital <i>l</i> e o momento angular total <i>j</i> = <i>l</i> ± ½ da partícula. O modelo ótico do Capítulo 2 dá a cada um um <b>coeficiente de transmissão</b> <i>T<sub>lj</sub></i>. As colunas são as do neutrão incidente, para um alvo de spin 0.</p>
+  <p>Um <b>canal</b> é um endereço de saída completo: que partícula sai, em que estado fica o núcleo residual, o momento angular orbital <i>l</i> e o momento angular total <i>j</i> = <i>l</i> ± ½ da partícula. O modelo ótico do Capítulo 5 dá a cada um um <b>coeficiente de transmissão</b> <i>T<sub>lj</sub></i>. As colunas são as do neutrão incidente, para um alvo de spin 0.</p>
   <div class="ctl"><label for="hf-e">Energia do neutrão (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>A 1 keV só está aberto <i>l</i> = 0, com <i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>, uns poucos por cento. Cada unidade extra de <i>l</i> custa, a baixa energia, cerca de um fator (<i>kR</i>)², por isso as colunas abrem-se uma a uma à medida que a energia sobe. Cada coluna alimenta o núcleo composto com o peso g<sub>J</sub><i>T</i>:</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -20,7 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Flutuações de larguras</h3>
-  <p>Com <i>W<sub>ab</sub></i> = 1, a fórmula multiplica médias. Mas as ressonâncias por trás das médias têm larguras dispersas (Porter–Thomas, Capítulo 10) e, na dispersão elástica, a largura que deixa o neutrão entrar é a mesma que o deixa sair, pelo que as duas estão correlacionadas. Para a elástica, a média dos produtos excede então o produto das médias, e as outras saídas perdem o que a elástica ganha.</p>
+  <p>Com <i>W<sub>ab</sub></i> = 1, a fórmula multiplica médias. Mas as ressonâncias por trás das médias têm larguras dispersas (Porter–Thomas, Capítulo 15) e, na dispersão elástica, a largura que deixa o neutrão entrar é a mesma que o deixa sair, pelo que as duas estão correlacionadas. Para a elástica, a média dos produtos excede então o produto das médias, e as outras saídas perdem o que a elástica ganha.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Sem correção</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Energia do neutrão (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>Os distintivos dão σ com a correção dividida por σ sem ela. Abaixo do primeiro limiar inelástico, a elástica já leva quase todo o fluxo e quase não muda, enquanto a captura perde 10 a 25 por cento. Entre 1 e 1,5 MeV, a elástica composta ganha 15 a 35 por cento, e o primeiro nível 2⁺ perde cerca de um terço. À medida que se abrem mais níveis e o contínuo, a elástica composta passa a ser uma fração pequena do fluxo: o seu próprio fator sobe em direção a 2, mas o que tira às outras diminui, e os fatores destas regressam a 1. Na receita de Moldauer cada canal recebe um número de graus de liberdade ν<sub>c</sub>, e <i>W</i> é um integral a uma dimensão, calculado com a regra de Gauss–Laguerre de 32 pontos do TALYS.</p>

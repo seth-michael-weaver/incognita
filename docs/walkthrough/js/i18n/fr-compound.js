@@ -1,6 +1,6 @@
-/* French: compound (Chapitre 5) */
+/* French: compound (Chapitre 8) */
 WT.L.ch.compound = {
-  num: "Chapitre 5", title: "Partager l'énergie", short: "Noyau composé",
+  num: "Chapitre 8", title: "Partager l'énergie", short: "Noyau composé",
   lead: "Une fois les premières collisions rapides terminées, tous les nucléons partagent l'énergie. Cet état apaisé est le noyau composé. Pour prédire ce qu'il fera ensuite, le moteur doit savoir de combien de façons il peut stocker son énergie.",
   html: `
 <div class="step">

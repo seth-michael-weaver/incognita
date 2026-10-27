@@ -1,4 +1,4 @@
-/* Chapter 4: pre-equilibrium (preeq/, density/particle_hole.py). Fast collisions before the nucleus calms down.
+/* Chapter 7: pre-equilibrium (preeq/, density/particle_hole.py). Fast collisions before the nucleus calms down.
  * Scenes (S.mode): "sea"   = two filled wells (protons, neutrons), Fermi surface, the incoming neutron above;
  *                   "pairs" = each collision lifts a nucleon and leaves a hole: excitons n = 1, 3, 5, ...;
  *                   "fork"  = at stage n the top particle escapes or collides again;
@@ -20,7 +20,7 @@
   function resetChain(S) { chain = [{ kind: "n", y: 1, hole: false }]; S.n = 1; S.set("n", 1); }
 
   WT.chapter("preeq", {
-    num: "Chapter 4", title: "Collisions before calm", short: "Pre-equilibrium",
+    num: "Chapter 7", title: "Collisions before calm", short: "Pre-equilibrium",
     lead: "A neutron that enters a nucleus does not share its energy with everyone at once. For the first few collisions one particle holds most of it, and that particle can fly straight back out. This is pre-equilibrium: emission “before the energy evens out”.",
     html: `
 <div class="step">
@@ -35,13 +35,13 @@
 </div>
 <div class="step">
   <h3>The fork at every stage</h3>
-  <p>At each stage the top neutron either escapes (arrow up, only if it is above the free line) or collides again (arrow down); thickness shows the odds. The escape rate follows from <b>detailed balance</b>: from the chance of the reverse process, the same particle being absorbed, which Chapter 2 computes. The collision rate is the strength of one nucleon–nucleon collision times the number of new arrangements it can reach.</p>
+  <p>At each stage the top neutron either escapes (arrow up, only if it is above the free line) or collides again (arrow down); thickness shows the odds. The escape rate follows from <b>detailed balance</b>: from the chance of the reverse process, the same particle being absorbed, which Chapter 5 computes. The collision rate is the strength of one nucleon–nucleon collision times the number of new arrangements it can reach.</p>
   <div class="ctl"><label for="pe-n">Stage (excitons n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Drag the stage up. Early on one particle holds most of the energy, so what escapes is fast. Later the energy is spread thin, and little gets out.</p>
 </div>
 <div class="step">
   <h3>Where the fast tail comes from</h3>
-  <p>The pile on the right is the <b>spectrum</b>: how many neutrons come out at each energy, slow on the left, fast on the right. Each reaction runs the chain until the top neutron escapes, and its colour says when: <em style="font-style:normal;color:var(--warm);font-weight:600">deep orange</em> at stage 3, paler later, <em class="n">blue</em> if it came out only after the nucleus calmed down (Chapter 5).</p>
+  <p>The pile on the right is the <b>spectrum</b>: how many neutrons come out at each energy, slow on the left, fast on the right. Each reaction runs the chain until the top neutron escapes, and its colour says when: <em style="font-style:normal;color:var(--warm);font-weight:600">deep orange</em> at stage 3, paler later, <em class="n">blue</em> if it came out only after the nucleus calmed down (Chapter 8).</p>
   <div class="btns"><button class="btn" data-act="run">Run 300 reactions</button></div>
   <p>Stage 3 builds a broad, nearly flat shelf that reaches the maximum energy. Later stages pile up lower. The blue hump is <b>evaporation</b>: once everyone shares the energy, only slow neutrons trickle out, like steam from a hot liquid.</p>
   <div class="ctl"><label for="pe-e">Neutron energy</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

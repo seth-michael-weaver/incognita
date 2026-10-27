@@ -1,4 +1,4 @@
-/* Chapter 3: direct reactions (ecis/, direct/). One-step reactions at the surface.
+/* Chapter 6: direct reactions (ecis/, direct/). One-step reactions at the surface.
  * Scenes (S.mode): "graze" = a neutron at impact parameter b: swallowed, grazing kick, or miss;
  *                   "rotor" = a football spun up its rotational band, coupled channels drawn as a web of couplings;
  *                   "vib"   = surface ripples (phonons) of a round nucleus, one or two quanta;
@@ -36,7 +36,7 @@
 
 
   WT.chapter("direct", {
-    num: "Chapter 3", title: "A glancing blow", short: "Direct reactions",
+    num: "Chapter 6", title: "A glancing blow", short: "Direct reactions",
     lead: "Not every neutron that reaches the nucleus is swallowed. Some brush its surface, give it one push, and fly on.",
     html: `
 <div class="step">
@@ -60,7 +60,7 @@
 </div>
 <div class="step">
   <h3>One push, once</h3>
-  <p>For most levels the link is weak, and one push is enough: <b>DWBA</b> (distorted-wave Born approximation). The incoming wave of Chapter 2 pushes the nucleus once, at the rim, where the potential drops from deep to zero; the rim glows where the crests strike. The circular wave spreading out is the neutrons that left the nucleus excited.</p>
+  <p>For most levels the link is weak, and one push is enough: <b>DWBA</b> (distorted-wave Born approximation). The incoming wave of Chapter 5 pushes the nucleus once, at the rim, where the potential drops from deep to zero; the rim glows where the crests strike. The circular wave spreading out is the neutrons that left the nucleus excited.</p>
   <div class="ctl"><label for="di-bd">Level's deformation β</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>Drag <i>β</i>: the rim wobbles harder and the circles brighten, as <i>β</i>²: twice the deformation, four times as many. The engine takes each level's <i>β</i> from measured values, or from systematics where none is known. How the scattered neutrons spread over angles is an optional extra output.</p>
 </div>
@@ -69,17 +69,17 @@
   <p>All the nucleons can move together: breathe, squash and stretch, or swing into a pear shape. These are <b>giant resonances</b>. In this medium-mass nucleus they sit about 7 to 25 MeV up, each several MeV wide, too broad to count as one level; the humps mark each one's <b>excitation energy</b>.</p>
   <p>The engine sets each one's total strength from a <b>sum rule</b>, a limit from basic physics on how strongly a nucleus can respond, and spreads it as a hump above the last known level. These humps, plus pushes to high levels, make up the <b>collective continuum</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Breathing</button><button class="btn ghost" data-act="quad">Squash</button><button class="btn ghost" data-act="oct">Pear</button></div>
-  <p>The best-known one, protons sloshing against neutrons (the giant dipole resonance), mainly absorbs and emits light, so it belongs to Chapter 7.</p>
+  <p>The best-known one, protons sloshing against neutrons (the giant dipole resonance), mainly absorbs and emits light, so it belongs to Chapter 10.</p>
 </div>
 <div class="step">
   <h3>Straight into an orbit</h3>
-  <p>A free neutron can drop straight into an empty <b>orbit</b> of the well (an allowed energy for one neutron inside) and send the spare energy out as a <em class="g">photon</em>. The nucleus never heats up. This is <b>direct capture</b>. The engine can compute it from the same well as Chapter 2: the free wave outside, the bound orbit inside, the photon linking them. It is optional and off by default.</p>
+  <p>A free neutron can drop straight into an empty <b>orbit</b> of the well (an allowed energy for one neutron inside) and send the spare energy out as a <em class="g">photon</em>. The nucleus never heats up. This is <b>direct capture</b>. The engine can compute it from the same well as Chapter 5: the free wave outside, the bound orbit inside, the photon linking them. It is optional and off by default.</p>
   <div class="btns"><button class="btn" data-act="drop">Drop a neutron in</button></div>
   <p>Direct capture matters most where the usual route, sharing the neutron's energy, is weak: light nuclei and nuclei far from stability, with few, widely spaced levels.</p>
 </div>
 <div class="step">
   <h3>Direct takes its share first</h3>
-  <p>The engine splits the reaction cross section of Chapter 2 in order: direct reactions first, then fast collisions, and only the remainder forms a compound nucleus. In the picture each neutron meets one of three fates: <b>direct</b> (grazes and flies on), fast (knocks a nucleon out before the energy spreads: <b>pre-equilibrium</b>, Chapter 4) or swallowed (a <b>compound nucleus</b>, Chapter 5). The piles count them.</p>
+  <p>The engine splits the reaction cross section of Chapter 5 in order: direct reactions first, then fast collisions, and only the remainder forms a compound nucleus. In the picture each neutron meets one of three fates: <b>direct</b> (grazes and flies on), fast (knocks a nucleon out before the energy spreads: <b>pre-equilibrium</b>, Chapter 7) or swallowed (a <b>compound nucleus</b>, Chapter 8). The piles count them.</p>
   <div class="ctl"><label for="di-e">Neutron energy (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>Drag the energy and watch the piles refill. At a few MeV almost every neutron is swallowed. At tens of MeV, direct reactions and fast collisions together take a large part.</p>
   <div class="aside">In the code: <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (deformed potential, coupled channels for rotors and vibrators), <code>ecis/dwba.py</code> and <code>direct/dwba.py</code> (single push, giant resonances, collective continuum), <code>direct/racapcalc.py</code> (direct capture, optional, off by default), <code>compound/normalization.py</code> (the ledger).</div>
@@ -224,7 +224,7 @@
     const k = TAU / (R * 0.62), om = 2.4, t = S.time;
     const wob = Math.sin(t * 3.1);
     const rim = (th) => R * (1 + bd * 0.9 * (1.5 * Math.cos(th) ** 2 - 0.5) * (0.55 + 0.45 * wob));
-    // incoming plane wave as a field (like Chapter 2), slightly faster crests inside the nucleus
+    // incoming plane wave as a field (like Chapter 5), slightly faster crests inside the nucleus
     const NX = 170, NY = Math.round(170 * H / W);
     if (!dfield || dfield.width !== NX || dfield.height !== NY) { dfield = document.createElement("canvas"); dfield.width = NX; dfield.height = NY; dfctx = dfield.getContext("2d"); }
     const img = dfctx.createImageData(NX, NY), d = img.data, col = hexRgb(c.neutron), bg = hexRgb(c.paper);

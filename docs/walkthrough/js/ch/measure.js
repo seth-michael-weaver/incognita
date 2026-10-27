@@ -1,4 +1,4 @@
-/* Chapter 12: what comes out. Scenes (S.mode):
+/* Chapter 17: what comes out. Scenes (S.mode):
  *   "area"    = cross section as the effective target area: a beam through a foil of nuclei, each with its disc;
  *   "doors"   = a ring of exit doors round the nucleus, one per channel, padlocked below threshold; particles spray out at
  *               rates set by the channel shares and fall into buckets; a threshold strip with the energy marker;
@@ -45,7 +45,7 @@
   const tmc = { knobs: { psf: 1, ld: 0, omp: 0 }, show: { psf: 0, ld: 0, omp: 0 }, queue: 0, qT: 0, grow: [] };
 
   WT.chapter("measure", {
-    num: "Chapter 12", title: "What comes out", short: "Observables",
+    num: "Chapter 17", title: "What comes out", short: "Observables",
     lead: "An experiment, a reactor or a star sees only a handful of numbers. This chapter shows how the engine turns what happens inside the nucleus into them.",
     html: `
 <div class="step">
@@ -57,7 +57,7 @@
   <h3>New exits open with energy</h3>
   <p>Each door is one exit, or <b>channel</b>: the neutron bounces out (elastic), leaves the target excited (n′), knocks out more neutrons (2n, 3n), is captured with only photons leaving (γ), or a proton or α particle leaves instead. A padlocked door has a <b>threshold</b>: the reaction costs more energy than the neutron brings.</p>
   <div class="ctl"><label for="mea-e2">Neutron energy (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Drag the energy past a threshold and that door flashes open; the buckets fill to each channel's share, and every new door takes share from the others. The thresholds come from the masses of the nuclei; the shares from the competition of Chapter 6.</p>
+  <p>Drag the energy past a threshold and that door flashes open; the buckets fill to each channel's share, and every new door takes share from the others. The thresholds come from the masses of the nuclei; the shares from the competition of Chapter 9.</p>
 </div>
 <div class="step">
   <h3>What a detector sees</h3>

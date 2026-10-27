@@ -1,6 +1,6 @@
-/* Italian: compound (Capitolo 5, nucleo composto) */
+/* Italian: compound (Capitolo 8, nucleo composto) */
 WT.L.ch.compound = {
-  num: "Capitolo 5", title: "Spartire l'energia", short: "Nucleo composto",
+  num: "Capitolo 8", title: "Spartire l'energia", short: "Nucleo composto",
   lead: "Finiti i primi urti rapidi, tutti i nucleoni condividono l'energia. Questo stato assestato è il nucleo composto. Per prevedere che cosa farà dopo, il motore deve sapere in quanti modi può contenere la sua energia.",
   html: `
 <div class="step">

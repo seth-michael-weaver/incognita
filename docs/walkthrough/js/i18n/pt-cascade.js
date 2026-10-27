@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): cascade (chapter 8) */
 WT.L.ch.cascade = {
-  num: "Capítulo 8", title: "Descendo pela carta", short: "Cascata",
+  num: "Capítulo 11", title: "Descendo pela carta", short: "Cascata",
   lead: "Uma emissão raramente é o fim: o núcleo que fica está muitas vezes quente o suficiente para voltar a emitir.",
   html: `
 <div class="step">
@@ -19,7 +19,7 @@ WT.L.ch.cascade = {
 <div class="step">
   <h3>De cima para baixo, intervalo a intervalo</h3>
   <p>O motor esvazia cada núcleo de cima para baixo, uma fatia de energia, ou <b>intervalo</b>, de cada vez. À direita, o residual da primeira emissão; à esquerda, o seu filho, com um neutrão a menos. As bolas laranja são reações à espera em cada intervalo. Aqui os intervalos medem 1 MeV; o motor usa cerca de 40 por núcleo, ajustados à energia disponível.</p>
-  <p>Quando o marcador varre um intervalo, cada bola toma uma saída segundo a competição do capítulo 6: um fotão (<em class="g">γ</em>) desce-a para um intervalo inferior, um <em class="n">neutrão</em> leva-a para o filho, um protão ou uma alfa tiram-na da figura. Abaixo de todos os limiares, os fotões levam o resto para o estado fundamental (cinzento). Depois varre-se o filho.</p>
+  <p>Quando o marcador varre um intervalo, cada bola toma uma saída segundo a competição do capítulo 9: um fotão (<em class="g">γ</em>) desce-a para um intervalo inferior, um <em class="n">neutrão</em> leva-a para o filho, um protão ou uma alfa tiram-na da figura. Abaixo de todos os limiares, os fotões levam o resto para o estado fundamental (cinzento). Depois varre-se o filho.</p>
   <div class="ctl"><label for="cs-e3">Energia do neutrão</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Recomeçar</button></div>
   <p>Os fotões só descem, e cada núcleo fica terminado antes dos seus filhos, por isso nada cai num intervalo já esvaziado.</p>

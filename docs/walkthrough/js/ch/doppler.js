@@ -33,7 +33,7 @@
   }
 
   WT.chapter("doppler", {
-    num: "In a reactor", title: "Hotter means less reactive", short: "Doppler",
+    num: "Chapter 19", title: "Hotter means less reactive", short: "Doppler",
     html: `
 <div class="step">
   <p>Hotter fuel: its atoms jiggle faster.</p>

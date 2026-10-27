@@ -1,4 +1,4 @@
-/* Chapter 15: how the model is layered. One reaction's cross section drawn as a landscape over neutron energy; four layers
+/* Chapter 21: how the model is layered. One reaction's cross section drawn as a landscape over neutron energy; four layers
  * stack up on it (a small stack of slabs shows which are on):
  *   1 the engine (global rules, nothing fitted per nucleus; the measurements it is compared with: hollow dots revealed on demand),
  *   2 the measured-structure tier (own D0, S0/S1, <Gg>, levels): the line barely moves (tests found no gain),
@@ -47,7 +47,7 @@
   ];
 
   WT.chapter("layers", {
-    num: "Chapter 15", title: "How the model is layered", short: "Layers",
+    num: "Chapter 21", title: "How the model is layered", short: "Layers",
     lead: "What we deliver is built in layers on top of the engine, and each layer has to earn its place against measurements.",
     html: `
 <div class="step">

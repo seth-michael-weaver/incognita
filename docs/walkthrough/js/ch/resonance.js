@@ -1,4 +1,4 @@
-/* Chapter 10: the resonance peaks (physics/resonance/). Scenes (S.mode):
+/* Chapter 15: the resonance peaks (physics/resonance/). Scenes (S.mode):
  *   "forest"  = one statistical ladder drawn as Breit-Wigner peaks (at E_i, width = Gamma, height = log of the
  *               peak capture cross section); a neutron hops along in energy and is caught with probability set by sigma;
  *   "spacing" = three rows of peaks: Poisson, random-matrix (Wigner/GOE), two GOE sequences mixed;
@@ -123,7 +123,7 @@
   const ens = { rows: [], pile: [], ri: [], queue: 0, qT: 0, auto: 0, k: 0 };
 
   WT.chapter("resonance", {
-    num: "Chapter 10", title: "Sharp peaks", short: "Resonances",
+    num: "Chapter 15", title: "Sharp peaks", short: "Resonances",
     lead: "At low enough energy a neutron no longer sees a smooth, averaged nucleus. It sees the compound nucleus's individual energy levels, one at a time.",
     html: `
 <div class="step">

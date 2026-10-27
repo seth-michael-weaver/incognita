@@ -1,7 +1,7 @@
-/* French: strength (Chapitre 19, expert: photon strength, transmission, <Gamma_gamma> and the cascade) */
+/* French: strength (Chapitre 25, expert: photon strength, transmission, <Gamma_gamma> and the cascade) */
 WT.L.ch.strength = {
-  num: "Chapitre 19", title: "La force gamma en détail", short: "Force gamma",
-  lead: "Le chapitre 7 montrait quels photons un noyau chaud préfère. Ce chapitre écrit les fonctions de force, les suit jusqu'aux coefficients de transmission et à la largeur radiative moyenne, et fait tourner la cascade qu'elles gouvernent.",
+  num: "Chapitre 25", title: "La force gamma en détail", short: "Force gamma",
+  lead: "Le chapitre 10 montrait quels photons un noyau chaud préfère. Ce chapitre écrit les fonctions de force, les suit jusqu'aux coefficients de transmission et à la largeur radiative moyenne, et fait tourner la cascade qu'elles gouvernent.",
   html: `
 <div class="step">
   <h3>E1 : la queue de la résonance dipolaire géante</h3>
@@ -35,7 +35,7 @@ WT.L.ch.strength = {
   <h3>La cascade</h3>
   <p>Sous le premier photon, la même règle se répète : depuis chaque nouvelle énergie, le photon suivant est tiré selon <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>), jusqu'à ce que le noyau atteigne ses niveaux connus. Chaque histoire compte quelques photons ; leur spectre sommé est ce que voit un calorimètre après une capture.</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">Upbend</button><button class="btn ghost" data-act="clear">Recommencer</button></div>
-  <p>L'upbend ajoute des photons mous et augmente un peu la multiplicité. Le moteur ne tire pas d'histoires : il déplace des populations d'intervalle en intervalle, de haut en bas (chapitre 8), ce qui donne les mêmes moyennes sans bruit d'échantillonnage.</p>
+  <p>L'upbend ajoute des photons mous et augmente un peu la multiplicité. Le moteur ne tire pas d'histoires : il déplace des populations d'intervalle en intervalle, de haut en bas (chapitre 11), ce qui donne les mêmes moyennes sans bruit d'échantillonnage.</p>
   <div class="aside">Dans le code : <code>gamma/strength.py</code> (tous les modèles de force pris en charge par TALYS ; par défaut, les tables SMLO-2019 et la M1 de l'AIEA avec upbend), <code>gamma/parameters.py</code> (systématiques des résonances géantes, tables), <code>gamma/transmission.py</code> (T = 2π E<sup>2L+1</sup> f), <code>gamma/ggnorm.py</code> (normalisation facultative de ⟨Γγ⟩), <code>emission/</code> (la cascade). L'image utilise des formes analytiques et des systématiques pour un noyau de type fer 57 ; le ⟨Γγ⟩ mesuré est la valeur RIPL pour ⁵⁷Fe.</div>
 </div>`,
 };

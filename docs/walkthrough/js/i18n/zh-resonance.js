@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): resonance (chapter 10) */
 WT.L.ch.resonance = {
-  num: "第 10 章", title: "尖锐的峰", short: "共振",
+  num: "第 15 章", title: "尖锐的峰", short: "共振",
   lead: "当能量足够低时，中子看到的不再是一个光滑的、平均化的原子核，而是复合核的一个个单独能级。",
   html: `
 <div class="step">

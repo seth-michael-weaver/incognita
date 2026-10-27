@@ -1,6 +1,6 @@
-/* Italian: measure (Capitolo 12, osservabili) */
+/* Italian: measure (Capitolo 17, osservabili) */
 WT.L.ch.measure = {
-  num: "Capitolo 12", title: "Che cosa esce", short: "Osservabili",
+  num: "Capitolo 17", title: "Che cosa esce", short: "Osservabili",
   lead: "Un esperimento, un reattore o una stella vedono solo una manciata di numeri. Questo capitolo mostra come il motore trasforma in quei numeri ciò che accade dentro il nucleo.",
   html: `
 <div class="step">
@@ -12,7 +12,7 @@ WT.L.ch.measure = {
   <h3>Con l'energia si aprono nuove uscite</h3>
   <p>Ogni porta è un'uscita, o <b>canale</b>: il neutrone rimbalza fuori (elastico), lascia il bersaglio eccitato (n′), fa uscire altri neutroni (2n, 3n), viene catturato ed escono solo fotoni (γ), oppure esce al suo posto un protone o una particella α. Una porta col lucchetto ha una <b>soglia</b>: la reazione costa più energia di quella che porta il neutrone.</p>
   <div class="ctl"><label for="mea-e2">Energia del neutrone (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Trascina l'energia oltre una soglia e quella porta si apre con un lampo; i secchi si riempiono secondo la quota di ogni canale, e ogni nuova porta toglie quota alle altre. Le soglie vengono dalle masse dei nuclei; le quote, dalla competizione del capitolo 6.</p>
+  <p>Trascina l'energia oltre una soglia e quella porta si apre con un lampo; i secchi si riempiono secondo la quota di ogni canale, e ogni nuova porta toglie quota alle altre. Le soglie vengono dalle masse dei nuclei; le quote, dalla competizione del capitolo 9.</p>
 </div>
 <div class="step">
   <h3>Che cosa vede un rivelatore</h3>

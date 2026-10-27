@@ -1,6 +1,6 @@
-/* French: omp (Chapitre 2, le modèle optique) */
+/* French: omp (Chapitre 5, le modèle optique) */
 WT.L.ch.omp = {
-  num: "Chapitre 2", title: "Une boule de cristal trouble", short: "Modèle optique",
+  num: "Chapitre 5", title: "Une boule de cristal trouble", short: "Modèle optique",
   lead: "Avant toute chose, le moteur se pose une question plus simple : à quoi ressemble le noyau pour un neutron qui arrive ?",
   html: `
 <div class="step">

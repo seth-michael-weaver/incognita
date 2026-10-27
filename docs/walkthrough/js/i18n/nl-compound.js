@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): compound (Hoofdstuk 5, de compoundkern) */
+/* Dutch (Nederlands): compound (Hoofdstuk 8, de compoundkern) */
 WT.L.ch.compound = {
-  num: "Hoofdstuk 5", title: "De energie delen", short: "Compoundkern",
+  num: "Hoofdstuk 8", title: "De energie delen", short: "Compoundkern",
   lead: "Zodra de eerste snelle botsingen voorbij zijn, delen alle nucleonen de energie. Deze tot rust gekomen toestand is de compoundkern. Om te voorspellen wat die daarna doet, moet de motor weten op hoeveel manieren ze haar energie kan vasthouden.",
   html: `
 <div class="step">

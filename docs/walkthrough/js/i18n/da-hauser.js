@@ -1,11 +1,11 @@
 /* Danish: hauser (chapter 13, Expert) */
 WT.L.ch.hauser = {
-  num: "Kapitel 16", title: "Hauser–Feshbach, kanal for kanal", short: "Hauser–Feshbach",
-  lead: "Kapitel 6 fortalte konkurrencen mellem udgangene som døre. Her er formlen bag dørene, én kanal ad gangen, og den korrektion, den har brug for, når kun få kanaler er åbne.",
+  num: "Kapitel 22", title: "Hauser–Feshbach, kanal for kanal", short: "Hauser–Feshbach",
+  lead: "Kapitel 9 fortalte konkurrencen mellem udgangene som døre. Her er formlen bag dørene, én kanal ad gangen, og den korrektion, den har brug for, når kun få kanaler er åbne.",
   html: `
 <div class="step">
   <h3>En transmission for hver kanal</h3>
-  <p>En <b>kanal</b> er en fuldstændig udgangsadresse: hvilken partikel, hvilken tilstand restkernen efterlades i, partiklens baneimpulsmoment <i>l</i> og dens totale <i>j</i> = <i>l</i> ± ½. Den optiske model fra kapitel 2 giver hver af dem en <b>transmissionskoefficient</b> <i>T<sub>lj</sub></i>. Søjlerne er den indkommende neutrons, for en targetkerne med spin 0.</p>
+  <p>En <b>kanal</b> er en fuldstændig udgangsadresse: hvilken partikel, hvilken tilstand restkernen efterlades i, partiklens baneimpulsmoment <i>l</i> og dens totale <i>j</i> = <i>l</i> ± ½. Den optiske model fra kapitel 5 giver hver af dem en <b>transmissionskoefficient</b> <i>T<sub>lj</sub></i>. Søjlerne er den indkommende neutrons, for en targetkerne med spin 0.</p>
   <div class="ctl"><label for="hf-e">Neutronenergi (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>Ved 1 keV er kun <i>l</i> = 0 åben, med <i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>, nogle få procent. Hver ekstra enhed af <i>l</i> koster omtrent en faktor (<i>kR</i>)² ved lav energi, så søjlerne åbner én efter én, når energien stiger. Hver søjle fører flux ind i compoundkernen med vægten g<sub>J</sub><i>T</i>:</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -20,7 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Breddefluktuationer</h3>
-  <p>Med <i>W<sub>ab</sub></i> = 1 ganger formlen gennemsnit. Resonanserne bag gennemsnittene har bredder, der spreder sig (Porter–Thomas, kapitel 10), og ved elastisk spredning er den bredde, der lukker neutronen ind, den samme, som lukker den ud, så de to er korrelerede. Gennemsnittet af produkterne overstiger da produktet af gennemsnittene for den elastiske kanal, og de andre udgange mister, hvad den elastiske vinder.</p>
+  <p>Med <i>W<sub>ab</sub></i> = 1 ganger formlen gennemsnit. Resonanserne bag gennemsnittene har bredder, der spreder sig (Porter–Thomas, kapitel 15), og ved elastisk spredning er den bredde, der lukker neutronen ind, den samme, som lukker den ud, så de to er korrelerede. Gennemsnittet af produkterne overstiger da produktet af gennemsnittene for den elastiske kanal, og de andre udgange mister, hvad den elastiske vinder.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Uden korrektion</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Neutronenergi (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>Mærkerne viser σ med korrektionen divideret med σ uden. Under den første uelastiske tærskel tager den elastiske kanal allerede næsten hele fluxen og ændrer sig knap, mens indfangning taber 10 til 25 procent. Mellem 1 og 1,5 MeV vinder compound-elastisk spredning 15 til 35 procent, og det første 2⁺-niveau taber omkring en tredjedel. Efterhånden som flere niveauer og kontinuet åbner, bliver compound-elastisk spredning en lille del af fluxen: dens egen faktor stiger mod 2, men det, den tager fra de andre, skrumper, og deres faktorer vender tilbage mod 1. I Moldauers opskrift får hver kanal et antal frihedsgrader ν<sub>c</sub>, og <i>W</i> er et endimensionalt integral, beregnet med TALYS' 32-punkts Gauss–Laguerre-regel.</p>

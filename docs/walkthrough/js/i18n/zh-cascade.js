@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): cascade (chapter 8) */
 WT.L.ch.cascade = {
-  num: "第 8 章", title: "沿核素图而下", short: "级联",
+  num: "第 11 章", title: "沿核素图而下", short: "级联",
   lead: "一次发射很少就是终点：留下的原子核往往仍然足够热，可以再次发射。",
   html: `
 <div class="step">
@@ -19,7 +19,7 @@ WT.L.ch.cascade = {
 <div class="step">
   <h3>自上而下，逐个区间</h3>
   <p>程序从上到下清空每个原子核，每次处理一个能量切片，即一个<b>能量区间</b>。右边是第一次发射后的剩余核；左边是它的子核，少一个中子。橙色小球是在各区间中等待的反应。这里每个区间宽 1 MeV；程序每个原子核大约用 40 个区间，大小按可用能量确定。</p>
-  <p>标记扫过一个区间时，每个小球按第 6 章的竞争选择一个出口：一个光子（<em class="g">γ</em>）使它落到更低的区间，一个<em class="n">中子</em>把它移入子核，一个质子或 α 粒子则把它带出画面。低于所有阈能时，光子把剩下的部分带到基态（灰色）。随后再扫子核。</p>
+  <p>标记扫过一个区间时，每个小球按第 9 章的竞争选择一个出口：一个光子（<em class="g">γ</em>）使它落到更低的区间，一个<em class="n">中子</em>把它移入子核，一个质子或 α 粒子则把它带出画面。低于所有阈能时，光子把剩下的部分带到基态（灰色）。随后再扫子核。</p>
   <div class="ctl"><label for="cs-e3">中子能量</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">重新开始</button></div>
   <p>光子只会向下落，而且每个原子核都在它的子核之前处理完，所以不会有东西落入已经清空的区间。</p>

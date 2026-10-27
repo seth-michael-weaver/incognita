@@ -21,7 +21,7 @@
   const terraScore = TT ? `与${libs}相比，它在 ${TT.d} 项比较中领先 ${TT.w} 项，持平 ${TT.t} 项，落后 ${TT.l} 项。` : `它与${libs}进行比较。`;
 
   WT.L.ch.layers = {
-    num: "第 15 章", title: "模型如何分层", short: "分层",
+    num: "第 21 章", title: "模型如何分层", short: "分层",
     lead: "我们交付的成果是在引擎之上一层一层搭建起来的，而每一层都必须在测量数据面前证明自己的价值。",
     html: `
 <div class="step">

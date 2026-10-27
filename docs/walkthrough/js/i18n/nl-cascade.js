@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): cascade (Hoofdstuk 8, de kaart af) */
+/* Dutch (Nederlands): cascade (Hoofdstuk 11, de kaart af) */
 WT.L.ch.cascade = {
-  num: "Hoofdstuk 8", title: "De kaart af", short: "Cascade",
+  num: "Hoofdstuk 11", title: "De kaart af", short: "Cascade",
   lead: "Eén emissie is zelden het einde: de kern die achterblijft, is vaak heet genoeg om opnieuw iets uit te zenden.",
   html: `
 <div class="step">
@@ -19,7 +19,7 @@ WT.L.ch.cascade = {
 <div class="step">
   <h3>Van boven naar beneden, bin voor bin</h3>
   <p>De motor leegt elke kern van boven naar beneden, één energieplak, of <b>bin</b>, tegelijk. Rechts: de restkern van de eerste emissie; links: haar dochter, met één neutron minder. Oranje bolletjes zijn reacties die in elke bin wachten. De bins zijn hier 1 MeV; de motor gebruikt er ongeveer 40 per kern, afgestemd op de beschikbare energie.</p>
-  <p>Terwijl de markering een bin doorloopt, neemt elk bolletje een uitgang volgens de competitie van hoofdstuk 6: een foton (<em class="g">γ</em>) laat het naar een lagere bin zakken, een <em class="n">neutron</em> verplaatst het naar de dochter, een proton of alfa haalt het uit beeld. Onder elke drempel brengen fotonen de rest naar de grondtoestand (grijs). Dan wordt de dochter doorlopen.</p>
+  <p>Terwijl de markering een bin doorloopt, neemt elk bolletje een uitgang volgens de competitie van hoofdstuk 9: een foton (<em class="g">γ</em>) laat het naar een lagere bin zakken, een <em class="n">neutron</em> verplaatst het naar de dochter, een proton of alfa haalt het uit beeld. Onder elke drempel brengen fotonen de rest naar de grondtoestand (grijs). Dan wordt de dochter doorlopen.</p>
   <div class="ctl"><label for="cs-e3">Neutronenergie</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Opnieuw beginnen</button></div>
   <p>Fotonen vallen alleen omlaag, en elke kern is klaar voordat haar dochters aan de beurt zijn, dus niets landt op een bin die al geleegd is.</p>

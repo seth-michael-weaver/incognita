@@ -1,12 +1,12 @@
-/* German (Deutsch): gamma (Kapitel 7, Photonen) */
+/* German (Deutsch): gamma (Kapitel 10, Photonen) */
 WT.L.ch.gamma = {
-  num: "Kapitel 7", title: "Licht abgeben", short: "Photonen",
+  num: "Kapitel 10", title: "Licht abgeben", short: "Photonen",
   lead: "Wenn kein Teilchen hinausgeht, kühlt der Kern ab, indem er Photonen aussendet: Gammastrahlen, Teilchen hochenergetischen Lichts. Dieser Ausgang ist bei jeder Energie offen.",
   html: `
 <div class="step">
   <p>Ein heißer Zustand bei 8 MeV (Millionen Elektronenvolt) gibt Photonen (γ) ab; der Stapel neben der Leiter sammelt, wo sie landen. Unterhalb von 2 MeV sind die Zustände einige benannte Sprossen; darüber ein Gedränge, das mit der Energie steil dichter wird (graue Punkte). Jedes Photon trägt die Energie seines Sprungs fort, <i>E<sub>γ</sub></i>, und wird proportional zu <i>E<sub>γ</sub></i>³ heller gezeichnet.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> ist der Transmissionskoeffizient des Photons (die Tür aus Kapitel 6), <i>l</i> = 1 für Dipolphotonen, und <i>f</i> ist die <b>Photonenstärke</b>: wie bereitwillig der Kern bei dieser Energie strahlt. Die Wahrscheinlichkeit eines Sprungs ist <i>T<sub>γ</sub></i> mal das Gedränge der Zustände, in denen er landet: Kleine Sprünge finden viele Zustände, sind aber schwach; große Sprünge sind hell, finden aber wenige.</p>
+  <p><i>T<sub>γ</sub></i> ist der Transmissionskoeffizient des Photons (die Tür aus Kapitel 9), <i>l</i> = 1 für Dipolphotonen, und <i>f</i> ist die <b>Photonenstärke</b>: wie bereitwillig der Kern bei dieser Energie strahlt. Die Wahrscheinlichkeit eines Sprungs ist <i>T<sub>γ</sub></i> mal das Gedränge der Zustände, in denen er landet: Kleine Sprünge finden viele Zustände, sind aber schwach; große Sprünge sind hell, finden aber wenige.</p>
   <div class="ctl"><label for="gm-e0">Startenergie</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">100 aussenden</button></div>
   <p>Der Stapel hat sein Maximum einige MeV unterhalb des Starts: Die meisten Photonen tragen 2 bis 4 MeV. Verschieb die Startenergie, und das Maximum folgt.</p>
@@ -25,7 +25,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Die Leiter hinab</h3>
-  <p>Eine Kaskade sind Photonen, die nacheinander ausgesendet werden, von den Intervallen oben (Zustände, die zu dicht zum Auflisten sind, Kapitel 5) hinunter zu den benannten Niveaus, gestreckt, damit man sie lesen kann (volle Sprosse Parität +, hohle −). Dort hört die Engine auf zu schätzen und folgt den tabellierten <b>Verzweigungsverhältnissen</b>: den gemessenen Wahrscheinlichkeiten jedes Niveaus, in jedes tiefere zu zerfallen.</p>
+  <p>Eine Kaskade sind Photonen, die nacheinander ausgesendet werden, von den Intervallen oben (Zustände, die zu dicht zum Auflisten sind, Kapitel 8) hinunter zu den benannten Niveaus, gestreckt, damit man sie lesen kann (volle Sprosse Parität +, hohle −). Dort hört die Engine auf zu schätzen und folgt den tabellierten <b>Verzweigungsverhältnissen</b>: den gemessenen Wahrscheinlichkeiten jedes Niveaus, in jedes tiefere zu zerfallen.</p>
   <div class="btns"><button class="btn" data-act="drop">Eine Kaskade fallen lassen</button></div>
   <p>Drück den Knopf ein paarmal: Der obere Teil ändert sich jedes Mal; das Ende folgt einem von wenigen gemessenen Wegen.</p>
 </div>
@@ -37,7 +37,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Einfang</h3>
-  <p>Ein Kern, der gerade ein langsames Neutron absorbiert hat, hat zwei Ausgangstüren (Kapitel 6): Photonen (oben) und das Neutron, das wieder hinausgeht (rechts). Der Spalt jeder Tür ist ihre <b>Breite</b>, in eV: wie schnell der Kern durch sie zerfällt. Die Photonenbreite ändert sich kaum; die Neutronenbreite wächst mit der Geschwindigkeit des Neutrons.</p>
+  <p>Ein Kern, der gerade ein langsames Neutron absorbiert hat, hat zwei Ausgangstüren (Kapitel 9): Photonen (oben) und das Neutron, das wieder hinausgeht (rechts). Der Spalt jeder Tür ist ihre <b>Breite</b>, in eV: wie schnell der Kern durch sie zerfällt. Die Photonenbreite ändert sich kaum; die Neutronenbreite wächst mit der Geschwindigkeit des Neutrons.</p>
   <div class="ctl"><label for="gm-e">Neutronenenergie</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
   <p>Ändere die Neutronenenergie, von 10 eV bis 2 MeV. <b>Einfang</b>, (n,γ), heißt: Das Neutron bleibt, und ein Photon geht: Bei 10 eV gewinnt er meistens, oberhalb einiger keV wird er zu einem kleinen Anteil. Die Photonenbreite an der Schwelle ist für Hunderte von Kernen gemessen, eine Kontrolle der Photonenstärke. Standardmäßig verwendet die Engine ihre eigene; ein optionaler Schalter skaliert die Photonenstärke jedes gemessenen Kerns, bis beide übereinstimmen.</p>
   <div class="aside">Im Code: <code>gamma/parameters.py</code> (tabellierte E1-Stärken; Systematiken für Riesenresonanz, Spin-Flip, Schere und Upbend), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) für jede Multipolordnung), <code>gamma/transmission.py</code> (T<sub>γ</sub> und die mittlere Strahlungsbreite), <code>structure/levels.py</code> (Verzweigungsverhältnisse, Isomere), <code>emission/multiple.py</code> (die Kaskade). Optional, standardmäßig aus: <code>gamma/scissors.py</code> (stärkere Schere), <code>gamma/ggnorm.py</code> (Anpassung an das gemessene ⟨Γγ⟩, bis Blei), <code>gamma/actphys.py</code> (beides, für Aktiniden).</div>

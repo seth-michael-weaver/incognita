@@ -1,11 +1,11 @@
-/* Spanish: hauser (Capítulo 16, experto: Hauser–Feshbach canal a canal, con fluctuaciones de anchura) */
+/* Spanish: hauser (Capítulo 22, experto: Hauser–Feshbach canal a canal, con fluctuaciones de anchura) */
 WT.L.ch.hauser = {
-  num: "Capítulo 16", title: "Hauser–Feshbach, canal a canal", short: "Hauser–Feshbach",
-  lead: "El capítulo 6 contó la competición entre salidas como puertas. Aquí está la fórmula que hay detrás de las puertas, canal a canal, y la corrección que necesita cuando solo hay unos pocos canales abiertos.",
+  num: "Capítulo 22", title: "Hauser–Feshbach, canal a canal", short: "Hauser–Feshbach",
+  lead: "El capítulo 9 contó la competición entre salidas como puertas. Aquí está la fórmula que hay detrás de las puertas, canal a canal, y la corrección que necesita cuando solo hay unos pocos canales abiertos.",
   html: `
 <div class="step">
   <h3>Una transmisión para cada canal</h3>
-  <p>Un <b>canal</b> es una dirección de salida completa: qué partícula sale, en qué estado queda el núcleo residual, el momento angular orbital <i>l</i> y el momento angular total <i>j</i> = <i>l</i> ± ½ de la partícula. El modelo óptico del capítulo 2 asigna a cada uno un <b>coeficiente de transmisión</b> <i>T<sub>lj</sub></i>. Las columnas son las del neutrón incidente, para un blanco de espín 0.</p>
+  <p>Un <b>canal</b> es una dirección de salida completa: qué partícula sale, en qué estado queda el núcleo residual, el momento angular orbital <i>l</i> y el momento angular total <i>j</i> = <i>l</i> ± ½ de la partícula. El modelo óptico del capítulo 5 asigna a cada uno un <b>coeficiente de transmisión</b> <i>T<sub>lj</sub></i>. Las columnas son las del neutrón incidente, para un blanco de espín 0.</p>
   <div class="ctl"><label for="hf-e">Energía del neutrón (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>A 1 keV solo está abierta <i>l</i> = 0, con <i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>, unos pocos por ciento. Cada unidad adicional de <i>l</i> cuesta a baja energía un factor de aproximadamente (<i>kR</i>)², así que las columnas se abren una a una a medida que sube la energía. Cada columna alimenta el núcleo compuesto con el peso g<sub>J</sub><i>T</i>:</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -20,7 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Fluctuaciones de anchura</h3>
-  <p>Con <i>W<sub>ab</sub></i> = 1 la fórmula multiplica promedios. Las resonancias que hay detrás de esos promedios tienen anchuras que fluctúan (Porter–Thomas, capítulo 10), y en la dispersión elástica la anchura que deja entrar al neutrón es la misma que lo deja salir, así que ambas están correlacionadas. Para el elástico, el promedio de los productos supera entonces al producto de los promedios, y las demás salidas pierden lo que gana el elástico.</p>
+  <p>Con <i>W<sub>ab</sub></i> = 1 la fórmula multiplica promedios. Las resonancias que hay detrás de esos promedios tienen anchuras que fluctúan (Porter–Thomas, capítulo 15), y en la dispersión elástica la anchura que deja entrar al neutrón es la misma que lo deja salir, así que ambas están correlacionadas. Para el elástico, el promedio de los productos supera entonces al producto de los promedios, y las demás salidas pierden lo que gana el elástico.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Sin corrección</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Energía del neutrón (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>Las etiquetas dan σ con la corrección dividida por σ sin ella. Por debajo del primer umbral inelástico, el elástico ya se lleva casi todo el flujo y apenas cambia, mientras que la captura pierde entre un 10 y un 25 %. Entre 1 y 1,5 MeV, el elástico compuesto gana entre un 15 y un 35 %, y el primer nivel 2⁺ pierde alrededor de un tercio. A medida que se abren más niveles y el continuo, el elástico compuesto pasa a ser una parte pequeña del flujo: su propio factor sube hacia 2, pero lo que quita a los demás se reduce, y sus factores vuelven hacia 1. En la receta de Moldauer cada canal recibe un número de grados de libertad ν<sub>c</sub>, y <i>W</i> es una integral unidimensional, que se evalúa con la regla de Gauss–Laguerre de 32 puntos de TALYS.</p>

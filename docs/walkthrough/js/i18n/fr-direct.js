@@ -1,6 +1,6 @@
-/* French: direct (Chapitre 3, réactions directes) */
+/* French: direct (Chapitre 6, réactions directes) */
 WT.L.ch.direct = {
-  num: "Chapitre 3", title: "Un coup en passant", short: "Réactions directes",
+  num: "Chapitre 6", title: "Un coup en passant", short: "Réactions directes",
   lead: "Tous les neutrons qui atteignent le noyau ne sont pas avalés. Certains effleurent sa surface, lui donnent une seule poussée et poursuivent leur route.",
   html: `
 <div class="step">
@@ -24,7 +24,7 @@ WT.L.ch.direct = {
 </div>
 <div class="step">
   <h3>Une poussée, une seule fois</h3>
-  <p>Pour la plupart des niveaux, le couplage est faible et une seule poussée suffit : c'est la <b>DWBA</b> (approximation de Born en ondes distordues). L'onde incidente du chapitre 2 pousse le noyau une fois, au bord, là où le potentiel passe de profond à zéro ; le bord s'illumine là où frappent les crêtes. L'onde circulaire qui s'étend représente les neutrons qui ont laissé le noyau excité.</p>
+  <p>Pour la plupart des niveaux, le couplage est faible et une seule poussée suffit : c'est la <b>DWBA</b> (approximation de Born en ondes distordues). L'onde incidente du chapitre 5 pousse le noyau une fois, au bord, là où le potentiel passe de profond à zéro ; le bord s'illumine là où frappent les crêtes. L'onde circulaire qui s'étend représente les neutrons qui ont laissé le noyau excité.</p>
   <div class="ctl"><label for="di-bd">Déformation β du niveau</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>Faites varier <i>β</i> : le bord oscille plus fort et les cercles s'éclairent, comme <i>β</i>² : deux fois plus de déformation, quatre fois plus de neutrons. Le moteur prend le <i>β</i> de chaque niveau dans les valeurs mesurées, ou dans des systématiques quand aucune n'est connue. La distribution angulaire des neutrons diffusés est une sortie supplémentaire facultative.</p>
 </div>
@@ -33,17 +33,17 @@ WT.L.ch.direct = {
   <p>Tous les nucléons peuvent bouger ensemble : respirer, s'aplatir et s'étirer, ou osciller en forme de poire. Ce sont les <b>résonances géantes</b>. Dans ce noyau de masse moyenne, elles se situent entre environ 7 et 25 MeV, chacune large de plusieurs MeV, trop large pour compter comme un seul niveau ; les bosses marquent l'<b>énergie d'excitation</b> de chacune.</p>
   <p>Le moteur fixe l'intensité totale de chacune grâce à une <b>règle de somme</b>, une limite issue de la physique fondamentale sur la force avec laquelle un noyau peut répondre, et la répartit en une bosse au-dessus du dernier niveau connu. Ces bosses, plus les poussées vers des niveaux élevés, forment le <b>continuum collectif</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Respiration</button><button class="btn ghost" data-act="quad">Aplatissement</button><button class="btn ghost" data-act="oct">Poire</button></div>
-  <p>La plus connue, où les protons oscillent contre les neutrons (la résonance dipolaire géante), absorbe et émet surtout de la lumière ; elle relève donc du chapitre 7.</p>
+  <p>La plus connue, où les protons oscillent contre les neutrons (la résonance dipolaire géante), absorbe et émet surtout de la lumière ; elle relève donc du chapitre 10.</p>
 </div>
 <div class="step">
   <h3>Directement sur une orbite</h3>
-  <p>Un neutron libre peut tomber directement sur une <b>orbite</b> vide du puits (une énergie permise pour un neutron à l'intérieur) et évacuer l'énergie en trop sous forme de <em class="g">photon</em>. Le noyau ne s'échauffe jamais. C'est la <b>capture directe</b>. Le moteur peut la calculer à partir du même puits qu'au chapitre 2 : l'onde libre à l'extérieur, l'orbite liée à l'intérieur, le photon qui les relie. Elle est facultative et désactivée par défaut.</p>
+  <p>Un neutron libre peut tomber directement sur une <b>orbite</b> vide du puits (une énergie permise pour un neutron à l'intérieur) et évacuer l'énergie en trop sous forme de <em class="g">photon</em>. Le noyau ne s'échauffe jamais. C'est la <b>capture directe</b>. Le moteur peut la calculer à partir du même puits qu'au chapitre 5 : l'onde libre à l'extérieur, l'orbite liée à l'intérieur, le photon qui les relie. Elle est facultative et désactivée par défaut.</p>
   <div class="btns"><button class="btn" data-act="drop">Faire tomber un neutron</button></div>
   <p>La capture directe compte surtout là où la voie habituelle, le partage de l'énergie du neutron, est faible : noyaux légers et noyaux loin de la stabilité, avec peu de niveaux, très espacés.</p>
 </div>
 <div class="step">
   <h3>Le direct se sert en premier</h3>
-  <p>Le moteur répartit la section efficace de réaction du chapitre 2 dans l'ordre : d'abord les réactions directes, puis les collisions rapides, et seul le reste forme un noyau composé. Dans l'image, chaque neutron connaît l'un de trois sorts : <b>direct</b> (il effleure et poursuit sa route), rapide (il éjecte un nucléon avant que l'énergie ne se répartisse : le <b>prééquilibre</b>, chapitre 4) ou avalé (un <b>noyau composé</b>, chapitre 5). Les piles les comptent.</p>
+  <p>Le moteur répartit la section efficace de réaction du chapitre 5 dans l'ordre : d'abord les réactions directes, puis les collisions rapides, et seul le reste forme un noyau composé. Dans l'image, chaque neutron connaît l'un de trois sorts : <b>direct</b> (il effleure et poursuit sa route), rapide (il éjecte un nucléon avant que l'énergie ne se répartisse : le <b>prééquilibre</b>, chapitre 7) ou avalé (un <b>noyau composé</b>, chapitre 8). Les piles les comptent.</p>
   <div class="ctl"><label for="di-e">Énergie du neutron (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>Faites varier l'énergie et regardez les piles se remplir à nouveau. À quelques MeV, presque tous les neutrons sont avalés. À plusieurs dizaines de MeV, réactions directes et collisions rapides en prennent ensemble une grande partie.</p>
   <div class="aside">Dans le code : <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (potentiel déformé, voies couplées pour rotors et vibrateurs), <code>ecis/dwba.py</code> et <code>direct/dwba.py</code> (poussée unique, résonances géantes, continuum collectif), <code>direct/racapcalc.py</code> (capture directe, facultative, désactivée par défaut), <code>compound/normalization.py</code> (le bilan).</div>

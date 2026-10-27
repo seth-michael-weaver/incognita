@@ -1,6 +1,6 @@
 /* Simplified Chinese: compound (chapter 5) */
 WT.L.ch.compound = {
-  num: "第 5 章", title: "能量的共享", short: "复合核",
+  num: "第 8 章", title: "能量的共享", short: "复合核",
   lead: "最初的快速碰撞结束后，所有核子共同分享能量。这种安定下来的状态就是复合核。要预言它接下来会做什么，引擎需要知道它有多少种方式来容纳自己的能量。",
   html: `
 <div class="step">

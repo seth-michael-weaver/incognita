@@ -23,17 +23,17 @@ Object.assign(WT.L.ui, {
     <thead><tr><th>장</th><th>하는 일</th><th>코드</th></tr></thead>
     <tbody>
       <tr><td><a href="#structure">1</a></td><td>질량, 준위, 변형, 공명 데이터</td><td><code>structure/</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>광학 모형, 투과 계수 (입자가 얼마나 쉽게 들어오고 나가는지)</td><td><code>omp/</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>결합 채널, DWBA, 거대 공명, 직접 포획 (선택 사항)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
-      <tr><td><a href="#preeq">4</a></td><td>전평형: 엑시톤 모형, 픽업과 녹아웃, 다중 방출</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>준위 밀도 (MeV당 상태 수), 스핀 분포</td><td><code>density/</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td>출구 고르기 (하우저–페시바흐), 폭 요동</td><td><code>compound/</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>감마 세기 함수와 γ 투과, 불연속 준위와 핵이성질체</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
-      <tr><td><a href="#cascade">8</a></td><td>입자와 γ 방출의 캐스케이드, 배타적 채널, 잔류핵</td><td><code>emission/</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>핵분열 장벽과 투과</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>방출 스펙트럼, 각분포, 이중 미분 단면적 (선택 사항, 출력 전용)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>열적으로 들뜬 표적에서의 포획과 항성 반응률 (선택 사항)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>여러 무작위 변종에 의한 불확도 (전체 몬테카를로)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>광학 모형, 투과 계수 (입자가 얼마나 쉽게 들어오고 나가는지)</td><td><code>omp/</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>결합 채널, DWBA, 거대 공명, 직접 포획 (선택 사항)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
+      <tr><td><a href="#preeq">7</a></td><td>전평형: 엑시톤 모형, 픽업과 녹아웃, 다중 방출</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>준위 밀도 (MeV당 상태 수), 스핀 분포</td><td><code>density/</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td>출구 고르기 (하우저–페시바흐), 폭 요동</td><td><code>compound/</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>감마 세기 함수와 γ 투과, 불연속 준위와 핵이성질체</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td>입자와 γ 방출의 캐스케이드, 배타적 채널, 잔류핵</td><td><code>emission/</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>핵분열 장벽과 투과</td><td><code>fission/</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>방출 스펙트럼, 각분포, 이중 미분 단면적 (선택 사항, 출력 전용)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>열적으로 들뜬 표적에서의 포획과 항성 반응률 (선택 사항)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>여러 무작위 변종에 의한 불확도 (전체 몬테카를로)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>단계들을 순서대로 실행하는 구동기, 그리고 속도를 위한 선택적 C 커널</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>시작할 때 한 번 읽는 모든 기본값과 옵션, 그리고 TALYS와 같은 방식으로 적용하는 TENDL의 핵종별 조정 매개변수 (선택 사항)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -43,33 +43,33 @@ Object.assign(WT.L.ui, {
   coda_table_added: `
     <thead><tr><th>장</th><th>바뀌는 것</th><th>코드</th></tr></thead>
     <tbody>
-      <tr><td><a href="#cascade">8</a></td><td><b>켜짐.</b> 선속 장부를 닫음: 잔류핵을 10⁻⁹ mb까지 유지(TALYS: 10⁻³ mb), TALYS 캐스케이드 창보다 한 단계 더 나아간 잔류핵 유지, 배타적 채널에서 방출 입자 종류별로 최대 8개, 한 준위의 반복되는 붕괴 갈래를 모두 셈</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>켜짐.</b> 첫 번째 복합핵의 맨 위 구간을 고르게 채우지 않고, 1차 광자가 채우는 방식대로(E<sub>γ</sub>³ 가중치로) 채움</td><td><code>compound/nnleak.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>켜짐.</b> 첫 공명들보다 아래(1 keV 미만)에서는 평균 복합핵 탄성 산란을 넣지 않음. 그곳의 탄성 산란은 퍼텐셜 산란임</td><td><code>lowepot.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>켜짐.</b> 핵분열하지 않는 변형 표적: 결합된 띠 밖의 준위로 가는 중성자 출구에 결합 채널 투과를 사용</td><td><code>compound/ccexitnb.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td><b>켜짐.</b> 알파 방출은 잔류핵의 온도에 의존하는 퍼텐셜을 봄. 입사 알파는 알파 모형 6으로 들어옴. 삼중양성자와 헬륨-3 퍼텐셜에 입사 입자의 크기를 포함</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td><b>켜짐.</b> 장벽의 각 봉우리를 지나는 정확한 1차원 투과</td><td><code>fission/wkb.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td><b>켜짐.</b> 실행에서 원자핵별 E1/M1 세기 인자를 주는 경우, 이를 변형에 대한 하나의 전역 함수로 대체</td><td><code>gamma/ftglobal.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td><b>켜짐.</b> 자체 측정된 공명 간격 D₀가 없는 표적: max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV 위에서 표적의 연속 영역 준위 밀도를, 홀짝성·껍질·변형 특징에 기반한 하나의 전역 규칙이 주는 인자만큼 높입니다. TALYS-2 기본 입력에 대한 문턱 근처 (n,p)의 패배를 무승부로 바꾸려고 추가했으며, 포획·(n,2n)·(n,α)의 몇몇 관점을 조금 나쁘게 만드는 손해는 받아들이고 기록해 두었습니다</td><td><code>density/npwindow.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>오슬로 측정에 맞는 새 계통성에 따른, 변형된 원자핵의 더 강한 가위 모드(악티늄족에서 약 4–5배). 또는 그 에너지와 세기를 변형에 따라 조정하는 변종</td><td><code>gamma/scissors.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>첫 번째 원자핵만이 아니라 캐스케이드의 모든 원자핵이 측정된 복사 세기 ⟨Γγ⟩/D₀와 일치하도록 감마 세기 함수를 재조정</td><td><code>gamma/ggnorm.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>가장 무거운 원자핵(Z ≥ 88)에만 적용하는 더 강한 가위 모드와 ⟨Γγ⟩ 규격화. keV 에너지에서의 포획이 목표</td><td><code>gamma/actphys.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>TENDL에서 유도한 TALYS의 표 대신 자체 E1 폭 상수 사용(함께 배포하는 무데이터 레시피가 이를 설정)</td><td><code>gamma/e1_width.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>준연속 영역에서 회전 띠의 집단 E2 세기</td><td><code>gamma/isoe2.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>변형된 희토류 표적에 대한 광학 우물의 지역적 조정. 포획 데이터 없이 측정된 S₀와 S₁에 맞춤</td><td><code>omp/regional.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>측정된 중성자 세기 함수 S₀, S₁이 저에너지 중성자 투과를 정함</td><td><code>omp/sfunc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>속박 궤도로의 직접 포획, 원본에 대한 수정 포함: 기본 TALYS에서는 광학 모형 출력을 모두 함께 요청하지 않으면 0을 반환함</td><td><code>direct/racapcalc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>표적의 결합 방식(회전체, 진동체, 구형)을 측정된 준위로부터 선택</td><td><code>structure/collrule.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td><b>켜짐.</b> 선속 장부를 닫음: 잔류핵을 10⁻⁹ mb까지 유지(TALYS: 10⁻³ mb), TALYS 캐스케이드 창보다 한 단계 더 나아간 잔류핵 유지, 배타적 채널에서 방출 입자 종류별로 최대 8개, 한 준위의 반복되는 붕괴 갈래를 모두 셈</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>켜짐.</b> 첫 번째 복합핵의 맨 위 구간을 고르게 채우지 않고, 1차 광자가 채우는 방식대로(E<sub>γ</sub>³ 가중치로) 채움</td><td><code>compound/nnleak.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>켜짐.</b> 첫 공명들보다 아래(1 keV 미만)에서는 평균 복합핵 탄성 산란을 넣지 않음. 그곳의 탄성 산란은 퍼텐셜 산란임</td><td><code>lowepot.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>켜짐.</b> 핵분열하지 않는 변형 표적: 결합된 띠 밖의 준위로 가는 중성자 출구에 결합 채널 투과를 사용</td><td><code>compound/ccexitnb.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td><b>켜짐.</b> 알파 방출은 잔류핵의 온도에 의존하는 퍼텐셜을 봄. 입사 알파는 알파 모형 6으로 들어옴. 삼중양성자와 헬륨-3 퍼텐셜에 입사 입자의 크기를 포함</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td><b>켜짐.</b> 장벽의 각 봉우리를 지나는 정확한 1차원 투과</td><td><code>fission/wkb.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td><b>켜짐.</b> 실행에서 원자핵별 E1/M1 세기 인자를 주는 경우, 이를 변형에 대한 하나의 전역 함수로 대체</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td><b>켜짐.</b> 자체 측정된 공명 간격 D₀가 없는 표적: max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV 위에서 표적의 연속 영역 준위 밀도를, 홀짝성·껍질·변형 특징에 기반한 하나의 전역 규칙이 주는 인자만큼 높입니다. TALYS-2 기본 입력에 대한 문턱 근처 (n,p)의 패배를 무승부로 바꾸려고 추가했으며, 포획·(n,2n)·(n,α)의 몇몇 관점을 조금 나쁘게 만드는 손해는 받아들이고 기록해 두었습니다</td><td><code>density/npwindow.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>오슬로 측정에 맞는 새 계통성에 따른, 변형된 원자핵의 더 강한 가위 모드(악티늄족에서 약 4–5배). 또는 그 에너지와 세기를 변형에 따라 조정하는 변종</td><td><code>gamma/scissors.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>첫 번째 원자핵만이 아니라 캐스케이드의 모든 원자핵이 측정된 복사 세기 ⟨Γγ⟩/D₀와 일치하도록 감마 세기 함수를 재조정</td><td><code>gamma/ggnorm.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>가장 무거운 원자핵(Z ≥ 88)에만 적용하는 더 강한 가위 모드와 ⟨Γγ⟩ 규격화. keV 에너지에서의 포획이 목표</td><td><code>gamma/actphys.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>TENDL에서 유도한 TALYS의 표 대신 자체 E1 폭 상수 사용(함께 배포하는 무데이터 레시피가 이를 설정)</td><td><code>gamma/e1_width.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>준연속 영역에서 회전 띠의 집단 E2 세기</td><td><code>gamma/isoe2.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>변형된 희토류 표적에 대한 광학 우물의 지역적 조정. 포획 데이터 없이 측정된 S₀와 S₁에 맞춤</td><td><code>omp/regional.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>측정된 중성자 세기 함수 S₀, S₁이 저에너지 중성자 투과를 정함</td><td><code>omp/sfunc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>속박 궤도로의 직접 포획, 원본에 대한 수정 포함: 기본 TALYS에서는 광학 모형 출력을 모두 함께 요청하지 않으면 0을 반환함</td><td><code>direct/racapcalc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>표적의 결합 방식(회전체, 진동체, 구형)을 측정된 준위로부터 선택</td><td><code>structure/collrule.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>측정된 준위 도식이 더 이상 완전하지 않은 곳에서 연속 영역이 시작</td><td><code>structure/levcomplete.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>목록의 스핀이 그 원자핵에 불가능한(홀수 A인데 정수인) 준위를 스핀을 모르는 준위로 취급</td><td><code>structure/levjpar.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>불연속 준위 중 완전한 부분에 고정한 일정 온도 준위 밀도</td><td><code>density/ctwindow2.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>핵분열 안장점에서 전이 상태의 회전 띠</td><td><code>fission/barriers.py</code></td></tr>
-      <tr><td><a href="#resonance">10</a></td><td>항성 창에 공명이 몇 개만 들어오는 경우의 포획: 평균 대신 공명 사다리 하나의 전형적인 값</td><td><code>fewres.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>불연속 준위 중 완전한 부분에 고정한 일정 온도 준위 밀도</td><td><code>density/ctwindow2.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>핵분열 안장점에서 전이 상태의 회전 띠</td><td><code>fission/barriers.py</code></td></tr>
+      <tr><td><a href="#resonance">15</a></td><td>항성 창에 공명이 몇 개만 들어오는 경우의 포획: 평균 대신 공명 사다리 하나의 전형적인 값</td><td><code>fewres.py</code></td></tr>
       <tr><td></td><td>안정성에서 먼 곳을 위한 네 가지 안전장치: 유니터리성으로 제한한 직접 선속, 페르미 에너지의 한계, 홀수–홀수 원자핵에는 기본 집단성 없음, 전평형 스핀 분포의 규격화</td><td><code>engphys.py</code></td></tr>
     </tbody>
   `,
   coda_h3_outside: "엔진 바깥",
-  coda_p_outside: "이야기의 일부는 엔진 안이 아니라 그 옆에서 실행됩니다. <a href=\"#resonance\">10장</a>의 통계적 공명 사다리는 <code>physics/resonance/</code>에 있습니다. <a href=\"#measure\">12장</a>의 맥스웰 평균(MACS)은 실행이 끝난 뒤 <code>validation/differential/core.py</code>에서 엔진의 포획 곡선을 접어 얻습니다. 반면 열적으로 들뜬 표적에서의 포획과 항성 반응률은 엔진 자체가 계산합니다(<code>astro/stellar.py</code>, 선택 사항). <a href=\"#layers\">15장</a>의 고정 층은 <code>incognita/terra/</code>에 있습니다.",
+  coda_p_outside: "이야기의 일부는 엔진 안이 아니라 그 옆에서 실행됩니다. <a href=\"#resonance\">15장</a>의 통계적 공명 사다리는 <code>physics/resonance/</code>에 있습니다. <a href=\"#measure\">17장</a>의 맥스웰 평균(MACS)은 실행이 끝난 뒤 <code>validation/differential/core.py</code>에서 엔진의 포획 곡선을 접어 얻습니다. 반면 열적으로 들뜬 표적에서의 포획과 항성 반응률은 엔진 자체가 계산합니다(<code>astro/stellar.py</code>, 선택 사항). <a href=\"#layers\">21장</a>의 고정 층은 <code>incognita/terra/</code>에 있습니다.",
   close: "닫기",
   chapters: "장",
   nav_board: "점수판", nav_data_short: "데이터",

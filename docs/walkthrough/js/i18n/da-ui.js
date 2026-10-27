@@ -23,17 +23,17 @@ Object.assign(WT.L.ui, {
     <thead><tr><th>Kapitel</th><th>Hvad det gør</th><th>Kode</th></tr></thead>
     <tbody>
       <tr><td><a href="#structure">1</a></td><td>Masser, niveauer, deformation, resonansdata</td><td><code>structure/</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>Optisk model, transmissionskoefficienter (hvor let partikler kommer ind og ud)</td><td><code>omp/</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>Koblede kanaler, DWBA, kæmperesonanser, direkte indfangning (valgfri)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
-      <tr><td><a href="#preeq">4</a></td><td>Præligevægt: excitonmodel, pickup og knockout, multipel emission</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>Niveautætheder (tilstande pr. MeV), spinfordeling</td><td><code>density/</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td>Valg af udgang (Hauser–Feshbach), breddefluktuationer</td><td><code>compound/</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Fotonstyrke og γ-transmission; diskrete niveauer og isomerer</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
-      <tr><td><a href="#cascade">8</a></td><td>Kaskaden af partikel- og γ-emissioner, eksklusive kanaler, restkerner</td><td><code>emission/</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>Fissionsbarrierer og transmission</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>Emissionsspektre, vinkelfordelinger og dobbeltdifferentielle tværsnit (valgfri, kun output)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>Indfangning på termisk exciterede targetkerner og stellare rater (valgfri)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>Usikkerhed via mange tilfældige varianter (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>Optisk model, transmissionskoefficienter (hvor let partikler kommer ind og ud)</td><td><code>omp/</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>Koblede kanaler, DWBA, kæmperesonanser, direkte indfangning (valgfri)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
+      <tr><td><a href="#preeq">7</a></td><td>Præligevægt: excitonmodel, pickup og knockout, multipel emission</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>Niveautætheder (tilstande pr. MeV), spinfordeling</td><td><code>density/</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td>Valg af udgang (Hauser–Feshbach), breddefluktuationer</td><td><code>compound/</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Fotonstyrke og γ-transmission; diskrete niveauer og isomerer</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td>Kaskaden af partikel- og γ-emissioner, eksklusive kanaler, restkerner</td><td><code>emission/</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>Fissionsbarrierer og transmission</td><td><code>fission/</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>Emissionsspektre, vinkelfordelinger og dobbeltdifferentielle tværsnit (valgfri, kun output)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>Indfangning på termisk exciterede targetkerner og stellare rater (valgfri)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>Usikkerhed via mange tilfældige varianter (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>Styreprogrammet, der kører trinnene i rækkefølge, og valgfrie C-kerner for hastighedens skyld</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>Alle standardværdier og indstillinger, læst én gang ved start; også TENDL's tilpassede parametre pr. nuklid, anvendt sådan som TALYS anvender dem (valgfri)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -43,33 +43,33 @@ Object.assign(WT.L.ui, {
   coda_table_added: `
     <thead><tr><th>Kapitel</th><th>Hvad det ændrer</th><th>Kode</th></tr></thead>
     <tbody>
-      <tr><td><a href="#cascade">8</a></td><td><b>Til.</b> Fluxregnskabet lukket: restkerner beholdt ned til 10⁻⁹ mb (TALYS: 10⁻³ mb), restkerner ét trin ud over TALYS' kaskadevindue beholdt, op til 8 af hver udsendt partikel i eksklusive kanaler, alle et niveaus gentagne henfaldsgrene talt med</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>Til.</b> Det øverste interval i den første compoundkerne fyldes, sådan som primære fotoner fylder det (vægtet med E<sub>γ</sub>³), ikke jævnt</td><td><code>compound/nnleak.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>Til.</b> Ingen midlet compound-elastisk under de første resonanser (under 1 keV), hvor den elastiske del er potentialspredning</td><td><code>lowepot.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>Til.</b> Deformerede targetkerner uden fission: neutronudgange til niveauer uden for det koblede bånd bruger transmissionen fra koblede kanaler</td><td><code>compound/ccexitnb.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td><b>Til.</b> Alfaemission ser et potential, der afhænger af restkernens temperatur; alfaprojektiler kommer ind via alfamodel 6; triton- og helionpotentialer medtager projektilets størrelse</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td><b>Til.</b> Eksakt endimensional transmission gennem hver pukkel i barrieren</td><td><code>fission/wkb.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td><b>Til.</b> Styrkefaktorer for E1/M1 pr. kerne, hvor en kørsel angiver dem, erstattes af én global funktion af deformationen</td><td><code>gamma/ftglobal.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td><b>Til.</b> Targets uden deres egen målte resonansafstand D₀: targetets niveautæthed i kontinuet over max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV hæves med en faktor fra én global regel ud fra paritet, skaller og deformation. Tilføjet for at gøre nederlaget i (n,p) nær tærsklen over for TALYS-2’s standardinput til uafgjort; den gør nogle få visninger af indfangning, (n,2n) og (n,α) en smule dårligere, en accepteret og registreret skade</td><td><code>density/npwindow.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>En stærkere saksetilstand i deformerede kerner, fra nyere systematik, der stemmer med Oslo-målinger (omkring 4–5× i aktinider); eller en variant, der skalerer dens energi og styrke med deformationen</td><td><code>gamma/scissors.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Fotonstyrken skaleret, så hver kerne rammer sin målte strålingsstyrke ⟨Γγ⟩/D₀, for alle kerner i kaskaden, ikke kun den første</td><td><code>gamma/ggnorm.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Stærkere saksetilstand og ⟨Γγ⟩-normering kun for de tungeste kerner (Z ≥ 88), rettet mod indfangning ved keV-energier</td><td><code>gamma/actphys.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Vores egen E1-breddekonstant i stedet for TALYS' tabel afledt af TENDL (den medfølgende opskrift uden data sætter den)</td><td><code>gamma/e1_width.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Kollektiv E2-styrke fra rotationsbånd i kvasikontinuet</td><td><code>gamma/isoe2.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>En regional justering af den optiske brønd for deformerede targetkerner blandt de sjældne jordarter, tilpasset målte S₀ og S₁ uden indfangningsdata</td><td><code>omp/regional.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>Målte neutronstyrkefunktioner S₀, S₁ fastlægger neutrontransmissionen ved lav energi</td><td><code>omp/sfunc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>Direkte indfangning i bundne baner, med en rettelse af originalen: i standard-TALYS giver den nul, medmindre alle output fra den optiske model også bestilles</td><td><code>direct/racapcalc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>Targetkernens koblingsskema (rotor, vibrator, sfærisk) valgt ud fra dens målte niveauer</td><td><code>structure/collrule.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td><b>Til.</b> Fluxregnskabet lukket: restkerner beholdt ned til 10⁻⁹ mb (TALYS: 10⁻³ mb), restkerner ét trin ud over TALYS' kaskadevindue beholdt, op til 8 af hver udsendt partikel i eksklusive kanaler, alle et niveaus gentagne henfaldsgrene talt med</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>Til.</b> Det øverste interval i den første compoundkerne fyldes, sådan som primære fotoner fylder det (vægtet med E<sub>γ</sub>³), ikke jævnt</td><td><code>compound/nnleak.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>Til.</b> Ingen midlet compound-elastisk under de første resonanser (under 1 keV), hvor den elastiske del er potentialspredning</td><td><code>lowepot.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>Til.</b> Deformerede targetkerner uden fission: neutronudgange til niveauer uden for det koblede bånd bruger transmissionen fra koblede kanaler</td><td><code>compound/ccexitnb.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td><b>Til.</b> Alfaemission ser et potential, der afhænger af restkernens temperatur; alfaprojektiler kommer ind via alfamodel 6; triton- og helionpotentialer medtager projektilets størrelse</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td><b>Til.</b> Eksakt endimensional transmission gennem hver pukkel i barrieren</td><td><code>fission/wkb.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td><b>Til.</b> Styrkefaktorer for E1/M1 pr. kerne, hvor en kørsel angiver dem, erstattes af én global funktion af deformationen</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td><b>Til.</b> Targets uden deres egen målte resonansafstand D₀: targetets niveautæthed i kontinuet over max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV hæves med en faktor fra én global regel ud fra paritet, skaller og deformation. Tilføjet for at gøre nederlaget i (n,p) nær tærsklen over for TALYS-2’s standardinput til uafgjort; den gør nogle få visninger af indfangning, (n,2n) og (n,α) en smule dårligere, en accepteret og registreret skade</td><td><code>density/npwindow.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>En stærkere saksetilstand i deformerede kerner, fra nyere systematik, der stemmer med Oslo-målinger (omkring 4–5× i aktinider); eller en variant, der skalerer dens energi og styrke med deformationen</td><td><code>gamma/scissors.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Fotonstyrken skaleret, så hver kerne rammer sin målte strålingsstyrke ⟨Γγ⟩/D₀, for alle kerner i kaskaden, ikke kun den første</td><td><code>gamma/ggnorm.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Stærkere saksetilstand og ⟨Γγ⟩-normering kun for de tungeste kerner (Z ≥ 88), rettet mod indfangning ved keV-energier</td><td><code>gamma/actphys.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Vores egen E1-breddekonstant i stedet for TALYS' tabel afledt af TENDL (den medfølgende opskrift uden data sætter den)</td><td><code>gamma/e1_width.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Kollektiv E2-styrke fra rotationsbånd i kvasikontinuet</td><td><code>gamma/isoe2.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>En regional justering af den optiske brønd for deformerede targetkerner blandt de sjældne jordarter, tilpasset målte S₀ og S₁ uden indfangningsdata</td><td><code>omp/regional.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>Målte neutronstyrkefunktioner S₀, S₁ fastlægger neutrontransmissionen ved lav energi</td><td><code>omp/sfunc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>Direkte indfangning i bundne baner, med en rettelse af originalen: i standard-TALYS giver den nul, medmindre alle output fra den optiske model også bestilles</td><td><code>direct/racapcalc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>Targetkernens koblingsskema (rotor, vibrator, sfærisk) valgt ud fra dens målte niveauer</td><td><code>structure/collrule.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>Kontinuet begynder, hvor det målte niveauskema holder op med at være komplet</td><td><code>structure/levcomplete.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>Et niveau, hvis listede spin er umuligt for dets kerne (heltalligt ved ulige A), behandles som et niveau med ukendt spin</td><td><code>structure/levjpar.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>Niveautæthed med konstant temperatur forankret i den komplette del af de diskrete niveauer</td><td><code>density/ctwindow2.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>Rotationsbånd af overgangstilstande ved fissionens sadelpunkter</td><td><code>fission/barriers.py</code></td></tr>
-      <tr><td><a href="#resonance">10</a></td><td>Indfangning, hvor kun få resonanser falder i det stellare vindue: den typiske værdi for én resonansstige i stedet for gennemsnittet</td><td><code>fewres.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>Niveautæthed med konstant temperatur forankret i den komplette del af de diskrete niveauer</td><td><code>density/ctwindow2.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>Rotationsbånd af overgangstilstande ved fissionens sadelpunkter</td><td><code>fission/barriers.py</code></td></tr>
+      <tr><td><a href="#resonance">15</a></td><td>Indfangning, hvor kun få resonanser falder i det stellare vindue: den typiske værdi for én resonansstige i stedet for gennemsnittet</td><td><code>fewres.py</code></td></tr>
       <tr><td></td><td>Fire sikkerhedsværn langt fra stabilitet: direkte flux begrænset af unitaritet, en grænse for Fermienergien, ingen standardkollektivitet for ulige-ulige kerner, præligevægtens spinfordeling normeret</td><td><code>engphys.py</code></td></tr>
     </tbody>
   `,
   coda_h3_outside: "Uden for motoren",
-  coda_p_outside: "Nogle dele af historien kører ved siden af motoren i stedet for inde i den. De statistiske resonansstiger fra <a href=\"#resonance\">kapitel 10</a> ligger i <code>physics/resonance/</code>. De maxwellske middelværdier (MACS) fra <a href=\"#measure\">kapitel 12</a> foldes ud fra motorens indfangningskurver efter kørslen, i <code>validation/differential/core.py</code>; indfangning på termisk exciterede targetkerner og den stellare rate kommer derimod fra motoren selv (<code>astro/stellar.py</code>, valgfri). Forankringslaget fra <a href=\"#layers\">kapitel 15</a> ligger i <code>incognita/terra/</code>.",
+  coda_p_outside: "Nogle dele af historien kører ved siden af motoren i stedet for inde i den. De statistiske resonansstiger fra <a href=\"#resonance\">kapitel 15</a> ligger i <code>physics/resonance/</code>. De maxwellske middelværdier (MACS) fra <a href=\"#measure\">kapitel 17</a> foldes ud fra motorens indfangningskurver efter kørslen, i <code>validation/differential/core.py</code>; indfangning på termisk exciterede targetkerner og den stellare rate kommer derimod fra motoren selv (<code>astro/stellar.py</code>, valgfri). Forankringslaget fra <a href=\"#layers\">kapitel 21</a> ligger i <code>incognita/terra/</code>.",
   close: "Luk",
   chapters: "Kapitler",
   nav_board: "Resultattavle", nav_data_short: "Data",

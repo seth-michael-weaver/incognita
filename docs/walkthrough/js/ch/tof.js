@@ -57,7 +57,7 @@
   const fly = [], flash = []; let pulseT = -9, pulseN = 0;
 
   WT.chapter("tof", {
-    num: "Chapter 11", title: "Catching a resonance", short: "Measuring peaks",
+    num: "Chapter 16", title: "Catching a resonance", short: "Measuring peaks",
     html: `
 <div class="step">
   <p>A neutron's flight time tells its energy.</p>

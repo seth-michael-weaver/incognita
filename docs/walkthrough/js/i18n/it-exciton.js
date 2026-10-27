@@ -1,7 +1,7 @@
-/* Italian: exciton (Capitolo 20, il modello a eccitoni in numeri) */
+/* Italian: exciton (Capitolo 26, il modello a eccitoni in numeri) */
 WT.L.ch.exciton = {
-  num: "Capitolo 20", title: "Il modello a eccitoni, in numeri", short: "Modello a eccitoni",
-  lead: "Il capitolo 4 ha seguito un neutrone veloce attraverso poche collisioni. Ecco i tassi che decidono, a ogni stadio, se il passo successivo sarà un'altra collisione o una fuga, e lo spettro che ne risulta sommandoli.",
+  num: "Capitolo 26", title: "Il modello a eccitoni, in numeri", short: "Modello a eccitoni",
+  lead: "Il capitolo 7 ha seguito un neutrone veloce attraverso poche collisioni. Ecco i tassi che decidono, a ogni stadio, se il passo successivo sarà un'altra collisione o una fuga, e lo spettro che ne risulta sommandoli.",
   html: `
 <div class="step">
   <h3>Contare gli stati particella–lacuna</h3>

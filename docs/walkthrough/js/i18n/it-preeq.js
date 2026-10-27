@@ -1,6 +1,6 @@
-/* Italian: preeq (Capitolo 4, pre-equilibrio) */
+/* Italian: preeq (Capitolo 7, pre-equilibrio) */
 WT.L.ch.preeq = {
-  num: "Capitolo 4", title: "Urti prima della quiete", short: "Pre-equilibrio",
+  num: "Capitolo 7", title: "Urti prima della quiete", short: "Pre-equilibrio",
   lead: "Un neutrone che entra in un nucleo non spartisce la sua energia con tutti in una volta. Durante i primi urti una sola particella ne conserva la maggior parte, e quella particella può schizzare di nuovo fuori. Questo è il pre-equilibrio: emissione “prima che l'energia si distribuisca in modo uniforme”.",
   html: `
 <div class="step">
@@ -15,13 +15,13 @@ WT.L.ch.preeq = {
 </div>
 <div class="step">
   <h3>Il bivio a ogni stadio</h3>
-  <p>A ogni stadio il neutrone più in alto o sfugge (freccia verso l'alto, solo se è sopra la linea libera) o urta di nuovo (freccia verso il basso); lo spessore indica la probabilità. Il tasso di fuga discende dal <b>bilancio dettagliato</b>: dalla probabilità del processo inverso, che la stessa particella venga assorbita, calcolata nel capitolo 2. Il tasso d'urto è l'intensità di un urto nucleone–nucleone per il numero di nuove configurazioni che può raggiungere.</p>
+  <p>A ogni stadio il neutrone più in alto o sfugge (freccia verso l'alto, solo se è sopra la linea libera) o urta di nuovo (freccia verso il basso); lo spessore indica la probabilità. Il tasso di fuga discende dal <b>bilancio dettagliato</b>: dalla probabilità del processo inverso, che la stessa particella venga assorbita, calcolata nel capitolo 5. Il tasso d'urto è l'intensità di un urto nucleone–nucleone per il numero di nuove configurazioni che può raggiungere.</p>
   <div class="ctl"><label for="pe-n">Stadio (eccitoni n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Fai salire lo stadio. All'inizio una particella ha quasi tutta l'energia, quindi ciò che sfugge è veloce. Più tardi l'energia è molto diluita, ed esce poco.</p>
 </div>
 <div class="step">
   <h3>Da dove viene la coda veloce</h3>
-  <p>Il mucchio a destra è lo <b>spettro</b>: quanti neutroni escono a ogni energia, i lenti a sinistra, i veloci a destra. Ogni reazione percorre la catena finché il neutrone più in alto sfugge, e il suo colore dice quando: <em style="font-style:normal;color:var(--warm);font-weight:600">arancione intenso</em> allo stadio 3, più pallido dopo, <em class="n">blu</em> se è uscito solo dopo che il nucleo si è calmato (capitolo 5).</p>
+  <p>Il mucchio a destra è lo <b>spettro</b>: quanti neutroni escono a ogni energia, i lenti a sinistra, i veloci a destra. Ogni reazione percorre la catena finché il neutrone più in alto sfugge, e il suo colore dice quando: <em style="font-style:normal;color:var(--warm);font-weight:600">arancione intenso</em> allo stadio 3, più pallido dopo, <em class="n">blu</em> se è uscito solo dopo che il nucleo si è calmato (capitolo 8).</p>
   <div class="btns"><button class="btn" data-act="run">Esegui 300 reazioni</button></div>
   <p>Lo stadio 3 forma un ripiano ampio, quasi piatto, che arriva fino all'energia massima. Gli stadi successivi si accumulano più in basso. La gobba blu è l'<b>evaporazione</b>: quando tutti condividono l'energia, escono solo neutroni lenti, come il vapore da un liquido caldo.</p>
   <div class="ctl"><label for="pe-e">Energia del neutrone</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

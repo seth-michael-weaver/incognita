@@ -1,6 +1,6 @@
-/* Korean: omp (2장, 광학 모형) */
+/* Korean: omp (5장, 광학 모형) */
 WT.L.ch.omp = {
-  num: "2장", title: "흐린 수정 구슬", short: "광학 모형",
+  num: "5장", title: "흐린 수정 구슬", short: "광학 모형",
   lead: "엔진은 무엇보다 먼저 더 단순한 질문을 던집니다. 들어오는 중성자에게 원자핵은 어떻게 보일까요?",
   html: `
 <div class="step">

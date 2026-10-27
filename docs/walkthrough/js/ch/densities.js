@@ -1,4 +1,4 @@
-/* Chapter 18 (Expert): level densities, matched (density/parameters.py, density/models.py, density/matching.py).
+/* Chapter 24 (Expert): level densities, matched (density/parameters.py, density/models.py, density/matching.py).
  * Scenes (S.mode): "fg"    = Ignatyuk's a(U) for several shell corrections, and the Fermi-gas ln rho(E) it gives;
  *                   "ct"    = ln rho against E: the Fermi gas, the constant-temperature line tangent at Ex (slider), its T and E0;
  *                   "root"  = the cumulative count N(E): counted levels as a staircase, the CT count for the trial Ex, and the
@@ -63,8 +63,8 @@
   });
 
   WT.chapter("densities", {
-    num: "Chapter 18", title: "Level densities, matched", short: "Level densities",
-    lead: "Chapter 5 joined a straight plank to a hillside. This chapter writes down both, shows how the joint is found from the counted levels, and what happens when no joint exists.",
+    num: "Chapter 24", title: "Level densities, matched", short: "Level densities",
+    lead: "Chapter 8 joined a straight plank to a hillside. This chapter writes down both, shows how the joint is found from the counted levels, and what happens when no joint exists.",
     html: `
 <div class="step">
   <h3>The Fermi gas with damped shell effects</h3>

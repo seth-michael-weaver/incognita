@@ -1,11 +1,11 @@
-/* French: hauser (Chapitre 16, Expert) */
+/* French: hauser (Chapitre 22, Expert) */
 WT.L.ch.hauser = {
-  num: "Chapitre 16", title: "Hauser–Feshbach, voie par voie", short: "Hauser–Feshbach",
-  lead: "Le chapitre 6 a raconté la compétition entre les sorties sous la forme de portes. Voici la formule derrière les portes, une voie à la fois, et la correction dont elle a besoin quand seules quelques voies sont ouvertes.",
+  num: "Chapitre 22", title: "Hauser–Feshbach, voie par voie", short: "Hauser–Feshbach",
+  lead: "Le chapitre 9 a raconté la compétition entre les sorties sous la forme de portes. Voici la formule derrière les portes, une voie à la fois, et la correction dont elle a besoin quand seules quelques voies sont ouvertes.",
   html: `
 <div class="step">
   <h3>Une transmission pour chaque voie</h3>
-  <p>Une <b>voie</b> est une adresse de sortie complète : quelle particule, dans quel état reste le noyau résiduel, le moment angulaire orbital <i>l</i> et le moment total <i>j</i> = <i>l</i> ± ½ de la particule. Le modèle optique du chapitre 2 attribue à chacune un <b>coefficient de transmission</b> <i>T<sub>lj</sub></i>. Les colonnes sont celles du neutron incident, pour une cible de spin 0.</p>
+  <p>Une <b>voie</b> est une adresse de sortie complète : quelle particule, dans quel état reste le noyau résiduel, le moment angulaire orbital <i>l</i> et le moment total <i>j</i> = <i>l</i> ± ½ de la particule. Le modèle optique du chapitre 5 attribue à chacune un <b>coefficient de transmission</b> <i>T<sub>lj</sub></i>. Les colonnes sont celles du neutron incident, pour une cible de spin 0.</p>
   <div class="ctl"><label for="hf-e">Énergie du neutron (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>À 1 keV, seul <i>l</i> = 0 est ouvert, avec <i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>, quelques pour cent. Chaque unité supplémentaire de <i>l</i> coûte à basse énergie un facteur (<i>kR</i>)² environ : les colonnes s'ouvrent donc une à une quand l'énergie monte. Chaque colonne alimente le noyau composé avec le poids g<sub>J</sub><i>T</i> :</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -20,7 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Fluctuations des largeurs</h3>
-  <p>Avec <i>W<sub>ab</sub></i> = 1, la formule multiplie des moyennes. Or les résonances qui se cachent derrière ces moyennes ont des largeurs dispersées (Porter–Thomas, chapitre 10) et, pour la diffusion élastique, la largeur qui laisse entrer le neutron est celle-là même qui le laisse sortir : les deux sont corrélées. Pour l'élastique, la moyenne des produits dépasse alors le produit des moyennes, et les autres sorties perdent ce que l'élastique gagne.</p>
+  <p>Avec <i>W<sub>ab</sub></i> = 1, la formule multiplie des moyennes. Or les résonances qui se cachent derrière ces moyennes ont des largeurs dispersées (Porter–Thomas, chapitre 15) et, pour la diffusion élastique, la largeur qui laisse entrer le neutron est celle-là même qui le laisse sortir : les deux sont corrélées. Pour l'élastique, la moyenne des produits dépasse alors le produit des moyennes, et les autres sorties perdent ce que l'élastique gagne.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Sans correction</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Énergie du neutron (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>Les étiquettes donnent σ avec correction divisée par σ sans correction. Sous le premier seuil inélastique, l'élastique prend déjà presque tout le flux et ne change guère, tandis que la capture perd de 10 à 25 %. Entre 1 et 1,5 MeV, l'élastique composé gagne de 15 à 35 % et le premier niveau 2⁺ perd environ un tiers. À mesure que s'ouvrent d'autres niveaux puis le continuum, l'élastique composé devient une petite part du flux : son propre facteur monte vers 2, mais ce qu'il prend aux autres diminue, et leurs facteurs reviennent vers 1. Dans la recette de Moldauer, chaque voie reçoit un nombre de degrés de liberté ν<sub>c</sub>, et <i>W</i> est une intégrale à une dimension, évaluée avec la quadrature de Gauss–Laguerre à 32 points de TALYS.</p>

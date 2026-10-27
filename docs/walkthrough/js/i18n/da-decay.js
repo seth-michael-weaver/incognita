@@ -1,12 +1,12 @@
 /* Danish: decay (chapter 6) */
 WT.L.ch.decay = {
-  num: "Kapitel 6", title: "Valget af en udgang", short: "Henfald",
+  num: "Kapitel 9", title: "Valget af en udgang", short: "Henfald",
   lead: "Compoundkernen skal af med sin energi ved at udsende en partikel eller en foton. Dette kapitel tegner hver vej ud som en dør. Motorens opgave er at sige, hvor stor en del af fluxen (strømmen af reaktioner, der når hertil) der går ud gennem hver dør.",
   html: `
 <div class="step">
   <p>Én dør pr. udgang: en <em class="g">foton</em> (γ), en <em class="n">neutron</em> (n), en <em class="p">proton</em> (p), en <em class="a">alfapartikel</em> (α: to protoner og to neutroner) og, kun for tunge kerner, <em class="f">fission</em> (spaltning i to). Den oplyste åbning i hver dør er den udgangs andel, og kuglerne strømmer ud i samme takt; grå døre er lukkede. Da kernen har glemt, hvordan den blev dannet, bruger den hver dør b i forhold til en vægt:</p>
   <div class="formula">andel<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p><b>Transmissionskoefficienten</b> <i>T</i> er sandsynligheden for, at en partikel, der når kanten, slipper igennem; for partikler kommer den fra den optiske model i kapitel 2, kørt baglæns. <b>Niveautætheden</b> ρ, skrevet ved siden af hver dør, tæller de tilstande, den tilbageværende kerne kan ende i. At dele efter <i>T</i> gange ρ er <b>Hauser–Feshbach</b>-reglen. Ved 10 MeV tager neutrondøren næsten det hele.</p>
+  <p><b>Transmissionskoefficienten</b> <i>T</i> er sandsynligheden for, at en partikel, der når kanten, slipper igennem; for partikler kommer den fra den optiske model i kapitel 5, kørt baglæns. <b>Niveautætheden</b> ρ, skrevet ved siden af hver dør, tæller de tilstande, den tilbageværende kerne kan ende i. At dele efter <i>T</i> gange ρ er <b>Hauser–Feshbach</b>-reglen. Ved 10 MeV tager neutrondøren næsten det hele.</p>
 </div>
 <div class="step">
   <h3>Hvorfor de fleste partikler kommer langsomt ud</h3>
@@ -31,7 +31,7 @@ WT.L.ch.decay = {
   <h3>Spin og paritet skal gå op</h3>
   <p>Compoundkernen (øverst) har spin <i>J</i>; den tilbageværende kernes tilstande ligger nedenfor i skuffer efter spin <i>J</i>′. Neutronen tager forskellen i spin og paritet med sig: når den forlader kernen med baneimpulsmoment <i>l</i>, ændrer den spinnet med op til <i>l</i> + ½ og vender pariteten, når <i>l</i> er ulige. Større <i>l</i> betyder en smallere dør; hver skuffes dør er det mindste <i>l</i>, der når den. Fyldte landinger bevarer pariteten; hule vender den.</p>
   <div class="ctl"><label for="dc-j">Compoundspin J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>Træk <i>J</i> op. De åbne døre glider mod skufferne med højt spin, som rummer få tilstande, mens de fulde skuffer står bag lukkede døre. En compoundkerne med højt spin er langsom til at udsende partikler, hvilket giver fotoner og isomerer (langlivede tilstande, kapitel 7) deres chance.</p>
+  <p>Træk <i>J</i> op. De åbne døre glider mod skufferne med højt spin, som rummer få tilstande, mens de fulde skuffer står bag lukkede døre. En compoundkerne med højt spin er langsom til at udsende partikler, hvilket giver fotoner og isomerer (langlivede tilstande, kapitel 10) deres chance.</p>
 </div>
 <div class="step">
   <h3>Den vej, du kom ind</h3>
@@ -43,7 +43,7 @@ WT.L.ch.decay = {
 </div>
 <div class="step">
   <h3>Hvad der er tilbage at dele</h3>
-  <p>Ikke hver absorberet neutron danner en compoundkerne. Nogle giver ét strejfende stød og flyver videre (direkte reaktioner, kapitel 3); nogle støder rundt en eller to gange og skyder hurtigt ud (præligevægt, kapitel 4). Kun resten bliver og opvarmer kernen. Tællerne holder regnskab med hver skæbne.</p>
+  <p>Ikke hver absorberet neutron danner en compoundkerne. Nogle giver ét strejfende stød og flyver videre (direkte reaktioner, kapitel 6); nogle støder rundt en eller to gange og skyder hurtigt ud (præligevægt, kapitel 7). Kun resten bliver og opvarmer kernen. Tællerne holder regnskab med hver skæbne.</p>
   <div class="ctl"><label for="dc-einc">Neutronenergi</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Kun de, der bliver, går med i konkurrencen om dørene. Træk i neutronenergien: ved nogle få MeV bliver næsten alle; ved 30 MeV er omkring halvdelen væk, før ligevægten nås.</p>
   <div class="aside">I koden: <code>compound/prepare.py</code> (udgangsvægte T·ρ pr. spin og paritet, udvælgelsesregler), <code>compound/target.py</code> (første henfald med breddefluktuationer), <code>compound/continuum.py</code> (henfald af hvert senere interval), <code>compound/wfc.py</code> (Moldauer-, HRTW-, GOE-korrektioner), <code>compound/normalization.py</code> (flux tilbage til compoundkernen), <code>omp/inverse.py</code> (døre kørt baglæns).</div>

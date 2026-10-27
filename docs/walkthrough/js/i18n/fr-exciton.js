@@ -1,7 +1,7 @@
-/* French: exciton (Chapitre 20, Expert : le modèle d'excitons en chiffres) */
+/* French: exciton (Chapitre 26, Expert : le modèle d'excitons en chiffres) */
 WT.L.ch.exciton = {
-  num: "Chapitre 20", title: "Le modèle d'excitons, en chiffres", short: "Modèle d'excitons",
-  lead: "Le chapitre 4 a suivi un neutron rapide au fil de quelques collisions. Voici les taux qui décident, à chaque étape, si la suite sera une nouvelle collision ou une émission, et le spectre qu'ils produisent ensemble.",
+  num: "Chapitre 26", title: "Le modèle d'excitons, en chiffres", short: "Modèle d'excitons",
+  lead: "Le chapitre 7 a suivi un neutron rapide au fil de quelques collisions. Voici les taux qui décident, à chaque étape, si la suite sera une nouvelle collision ou une émission, et le spectre qu'ils produisent ensemble.",
   html: `
 <div class="step">
   <h3>Compter les états particule–trou</h3>

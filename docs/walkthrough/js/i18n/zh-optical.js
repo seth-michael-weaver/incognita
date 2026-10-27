@@ -1,7 +1,7 @@
 /* Simplified Chinese (简体中文): optical (chapter 14, 光学模型的求解) */
 WT.L.ch.optical = {
-  num: "第 17 章", title: "求解光学模型", short: "光学模型求解",
-  lead: "第 2 章把光学势画成一个半透明的玻璃球。这里展示引擎实际使用它的方式：一套全局参数化，一个逐步积分的径向薛定谔方程，以及把波转化为穿透系数的匹配条件。",
+  num: "第 23 章", title: "求解光学模型", short: "光学模型求解",
+  lead: "第 5 章把光学势画成一个半透明的玻璃球。这里展示引擎实际使用它的方式：一套全局参数化，一个逐步积分的径向薛定谔方程，以及把波转化为穿透系数的匹配条件。",
   html: `
 <div class="step">
   <h3>Koning–Delaroche 势</h3>
@@ -30,7 +30,7 @@ WT.L.ch.optical = {
   <p><b>自旋–轨道</b>项对 <i>j</i> = <i>l</i> + ½ 是吸引的，对 <i>j</i> = <i>l</i> − ½ 是排斥的。它很小，在表面处只有几 MeV，但它把每个 <i>l</i> 的两个穿透系数分开，在擦过表面的那个分波附近分开得最多。</p>
   <div class="ctl"><label for="op-e3">中子能量 (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">关闭自旋–轨道</button></div>
-  <p>Hauser–Feshbach（第 16 章）分别使用这两个穿透系数；按权重求和，(<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>，得到的反应截面几乎不变。这就是为什么总截面几乎不能约束自旋–轨道强度，而需要极化数据。</p>
+  <p>Hauser–Feshbach（第 22 章）分别使用这两个穿透系数；按权重求和，(<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>，得到的反应截面几乎不变。这就是为什么总截面几乎不能约束自旋–轨道强度，而需要极化数据。</p>
 </div>
 <div class="step">
   <h3>截面</h3>

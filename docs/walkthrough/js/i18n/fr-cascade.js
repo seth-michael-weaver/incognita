@@ -1,6 +1,6 @@
 /* French: cascade (chapter 8) */
 WT.L.ch.cascade = {
-  num: "Chapitre 8", title: "En descendant la carte", short: "Cascade",
+  num: "Chapitre 11", title: "En descendant la carte", short: "Cascade",
   lead: "Une émission est rarement la fin : le noyau laissé derrière est souvent assez chaud pour émettre à nouveau.",
   html: `
 <div class="step">
@@ -19,7 +19,7 @@ WT.L.ch.cascade = {
 <div class="step">
   <h3>De haut en bas, intervalle par intervalle</h3>
   <p>Le moteur vide chaque noyau de haut en bas, une tranche d'énergie, ou <b>intervalle</b>, à la fois. À droite, le résiduel de la première émission ; à gauche, son noyau fils, avec un neutron de moins. Les billes orange sont des réactions en attente dans chaque intervalle. Ici, les intervalles font 1 MeV ; le moteur en utilise environ 40 par noyau, dimensionnés selon l'énergie disponible.</p>
-  <p>Quand le marqueur balaie un intervalle, chaque bille prend une sortie selon la compétition du chapitre 6 : un photon (<em class="g">γ</em>) la fait descendre dans un intervalle inférieur, un <em class="n">neutron</em> la fait passer dans le noyau fils, un proton ou une alpha la fait sortir de l'image. Sous tous les seuils, les photons conduisent le reste à l'état fondamental (gris). Puis le noyau fils est balayé à son tour.</p>
+  <p>Quand le marqueur balaie un intervalle, chaque bille prend une sortie selon la compétition du chapitre 9 : un photon (<em class="g">γ</em>) la fait descendre dans un intervalle inférieur, un <em class="n">neutron</em> la fait passer dans le noyau fils, un proton ou une alpha la fait sortir de l'image. Sous tous les seuils, les photons conduisent le reste à l'état fondamental (gris). Puis le noyau fils est balayé à son tour.</p>
   <div class="ctl"><label for="cs-e3">Énergie du neutron</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Recommencer</button></div>
   <p>Les photons ne font que descendre, et chaque noyau est traité avant ses fils : rien n'arrive donc dans un intervalle déjà vidé.</p>

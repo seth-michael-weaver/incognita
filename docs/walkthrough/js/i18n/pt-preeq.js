@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): preeq (Chapter 4, pre-equilibrium) */
 WT.L.ch.preeq = {
-  num: "Capítulo 4", title: "Colisões antes da calma", short: "Pré-equilíbrio",
+  num: "Capítulo 7", title: "Colisões antes da calma", short: "Pré-equilíbrio",
   lead: "Um neutrão que entra num núcleo não partilha a sua energia com todos ao mesmo tempo. Durante as primeiras colisões uma só partícula guarda quase toda a energia, e essa partícula pode sair disparada de volta. Isto é o pré-equilíbrio: emissão “antes de a energia se repartir por igual”.",
   html: `
 <div class="step">
@@ -15,13 +15,13 @@ WT.L.ch.preeq = {
 </div>
 <div class="step">
   <h3>A bifurcação em cada etapa</h3>
-  <p>Em cada etapa o neutrão de cima ou escapa (seta para cima, só se estiver acima da linha livre) ou volta a colidir (seta para baixo); a espessura indica a probabilidade. A taxa de escape vem do <b>balanço detalhado</b>: da probabilidade do processo inverso, essa mesma partícula ser absorvida, que o Capítulo 2 calcula. A taxa de colisão é a intensidade de uma colisão nucleão-nucleão vezes o número de novas configurações a que pode levar.</p>
+  <p>Em cada etapa o neutrão de cima ou escapa (seta para cima, só se estiver acima da linha livre) ou volta a colidir (seta para baixo); a espessura indica a probabilidade. A taxa de escape vem do <b>balanço detalhado</b>: da probabilidade do processo inverso, essa mesma partícula ser absorvida, que o Capítulo 5 calcula. A taxa de colisão é a intensidade de uma colisão nucleão-nucleão vezes o número de novas configurações a que pode levar.</p>
   <div class="ctl"><label for="pe-n">Etapa (excitões n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Sobe a etapa. No início uma partícula tem quase toda a energia, por isso o que escapa é rápido. Mais tarde a energia está muito repartida e sai pouco.</p>
 </div>
 <div class="step">
   <h3>De onde vem a cauda rápida</h3>
-  <p>O monte da direita é o <b>espectro</b>: quantos neutrões saem com cada energia, os lentos à esquerda, os rápidos à direita. Cada reação percorre a cadeia até o neutrão de cima escapar, e a sua cor diz quando: <em style="font-style:normal;color:var(--warm);font-weight:600">laranja intenso</em> na etapa 3, mais pálido depois, <em class="n">azul</em> se só saiu quando o núcleo já estava calmo (Capítulo 5).</p>
+  <p>O monte da direita é o <b>espectro</b>: quantos neutrões saem com cada energia, os lentos à esquerda, os rápidos à direita. Cada reação percorre a cadeia até o neutrão de cima escapar, e a sua cor diz quando: <em style="font-style:normal;color:var(--warm);font-weight:600">laranja intenso</em> na etapa 3, mais pálido depois, <em class="n">azul</em> se só saiu quando o núcleo já estava calmo (Capítulo 8).</p>
   <div class="btns"><button class="btn" data-act="run">Lançar 300 reações</button></div>
   <p>A etapa 3 forma um planalto largo, quase plano, que chega até à energia máxima. As etapas seguintes amontoam-se mais abaixo. A bossa azul é a <b>evaporação</b>: quando todos partilham a energia, só escapam neutrões lentos, como o vapor de um líquido quente.</p>
   <div class="ctl"><label for="pe-e">Energia do neutrão</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

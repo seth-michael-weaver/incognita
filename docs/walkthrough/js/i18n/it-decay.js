@@ -1,12 +1,12 @@
-/* Italian: decay (Capitolo 6, decadimento) */
+/* Italian: decay (Capitolo 9, decadimento) */
 WT.L.ch.decay = {
-  num: "Capitolo 6", title: "Scegliere un'uscita", short: "Decadimento",
+  num: "Capitolo 9", title: "Scegliere un'uscita", short: "Decadimento",
   lead: "Il nucleo composto deve liberarsi della sua energia emettendo una particella o un fotone. Questo capitolo disegna ogni via d'uscita come una porta. Il compito del motore è dire quale parte del flusso (la corrente di reazioni che arriva qui) esce da ciascuna porta.",
   html: `
 <div class="step">
   <p>Una porta per ogni uscita: un <em class="g">fotone</em> (γ), un <em class="n">neutrone</em> (n), un <em class="p">protone</em> (p), una <em class="a">particella alfa</em> (α: due protoni e due neutroni) e, solo per i nuclei pesanti, la <em class="f">fissione</em> (la scissione in due). Il varco illuminato in ogni porta è la quota di quell'uscita, e le palline escono con gli stessi ritmi; le porte grigie sono chiuse. Avendo dimenticato come si è formato, il nucleo usa ogni porta b in proporzione a un peso:</p>
   <div class="formula">quota<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p>Il <b>coefficiente di trasmissione</b> <i>T</i> è la probabilità che una particella che arriva al bordo lo attraversi; per le particelle viene dal modello ottico del capitolo 2, applicato al contrario. La <b>densità dei livelli</b> ρ, scritta accanto a ogni porta, conta gli stati in cui può finire il nucleo residuo. Ripartire secondo <i>T</i> per ρ è la regola di <b>Hauser–Feshbach</b>. A 10 MeV la porta del neutrone prende quasi tutto.</p>
+  <p>Il <b>coefficiente di trasmissione</b> <i>T</i> è la probabilità che una particella che arriva al bordo lo attraversi; per le particelle viene dal modello ottico del capitolo 5, applicato al contrario. La <b>densità dei livelli</b> ρ, scritta accanto a ogni porta, conta gli stati in cui può finire il nucleo residuo. Ripartire secondo <i>T</i> per ρ è la regola di <b>Hauser–Feshbach</b>. A 10 MeV la porta del neutrone prende quasi tutto.</p>
 </div>
 <div class="step">
   <h3>Perché la maggior parte delle particelle esce lenta</h3>
@@ -31,7 +31,7 @@ WT.L.ch.decay = {
   <h3>Spin e parità devono tornare</h3>
   <p>Il nucleo composto (in alto) ha spin <i>J</i>; sotto, gli stati del nucleo residuo stanno in cassetti secondo lo spin <i>J</i>′. Il neutrone porta via la differenza di spin e parità: uscendo con momento angolare orbitale <i>l</i>, cambia lo spin fino a <i>l</i> + ½ e inverte la parità quando <i>l</i> è dispari. Un <i>l</i> maggiore significa una porta più stretta; la porta di ogni cassetto è quella con il più piccolo <i>l</i> che lo raggiunge. Gli arrivi pieni conservano la parità; quelli vuoti la invertono.</p>
   <div class="ctl"><label for="dc-j">Spin del composto J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>Fai salire <i>J</i>. Le porte aperte scivolano verso i cassetti ad alto spin, che contengono pochi stati, mentre i cassetti pieni restano dietro porte chiuse. Un nucleo composto ad alto spin è lento a emettere particelle, e questo dà una possibilità ai fotoni e agli isomeri (stati a vita lunga, capitolo 7).</p>
+  <p>Fai salire <i>J</i>. Le porte aperte scivolano verso i cassetti ad alto spin, che contengono pochi stati, mentre i cassetti pieni restano dietro porte chiuse. Un nucleo composto ad alto spin è lento a emettere particelle, e questo dà una possibilità ai fotoni e agli isomeri (stati a vita lunga, capitolo 10).</p>
 </div>
 <div class="step">
   <h3>La strada da cui sei entrato</h3>
@@ -43,7 +43,7 @@ WT.L.ch.decay = {
 </div>
 <div class="step">
   <h3>Che cosa resta da spartire</h3>
-  <p>Non ogni neutrone assorbito forma un nucleo composto. Alcuni danno un colpo di striscio e volano via (reazioni dirette, capitolo 3); altri urtano una o due volte e schizzano fuori veloci (pre-equilibrio, capitolo 4). Solo i rimanenti restano e riscaldano il nucleo. I contatori registrano ogni destino.</p>
+  <p>Non ogni neutrone assorbito forma un nucleo composto. Alcuni danno un colpo di striscio e volano via (reazioni dirette, capitolo 6); altri urtano una o due volte e schizzano fuori veloci (pre-equilibrio, capitolo 7). Solo i rimanenti restano e riscaldano il nucleo. I contatori registrano ogni destino.</p>
   <div class="ctl"><label for="dc-einc">Energia del neutrone</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Solo quelli che restano entrano nella competizione fra le porte. Trascina l'energia del neutrone: a pochi MeV restano quasi tutti; a 30 MeV circa la metà se n'è andata prima di raggiungere l'equilibrio.</p>
   <div class="aside">Nel codice: <code>compound/prepare.py</code> (pesi d'uscita T·ρ per spin e parità, regole di selezione), <code>compound/target.py</code> (primo decadimento con fluttuazioni delle larghezze), <code>compound/continuum.py</code> (decadimento di ogni intervallo successivo), <code>compound/wfc.py</code> (correzioni di Moldauer, HRTW, GOE), <code>compound/normalization.py</code> (flusso rimasto per il nucleo composto), <code>omp/inverse.py</code> (porte percorse al contrario).</div>

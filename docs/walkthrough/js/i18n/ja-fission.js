@@ -1,6 +1,6 @@
-/* Japanese: fission (第9章、核分裂) */
+/* Japanese: fission (第12章、核分裂) */
 WT.L.ch.fission = {
-  num: "第9章", title: "2つに割れる", short: "核分裂",
+  num: "第12章", title: "2つに割れる", short: "核分裂",
   lead: "最も重い原子核には、軽い原子核にはない出口があります。粒子を1個放り出す代わりに、原子核全体が2つに裂けるのです。これが核分裂です。",
   html: `
 <div class="step">

@@ -1,4 +1,4 @@
-/* Italian: layers (Capitolo 15). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Italian: layers (Capitolo 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -22,7 +22,7 @@
   const terraScore = TT ? `Contro ${libs}, è avanti in ${TT.w} confronti su ${TT.d}, pareggia in ${TT.t} ed è indietro in ${TT.l}.` : `Viene confrontato con ${libs}.`;
 
   WT.L.ch.layers = {
-    num: "Capitolo 15", title: "Come è stratificato il modello", short: "Strati",
+    num: "Capitolo 21", title: "Come è stratificato il modello", short: "Strati",
     lead: "Ciò che forniamo è costruito a strati sopra il motore, e ogni strato deve guadagnarsi il suo posto confrontandosi con le misure.",
     html: `
 <div class="step">

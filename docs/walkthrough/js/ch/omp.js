@@ -25,7 +25,7 @@
   const resetTally = () => { tally.hit.fill(0); tally.tot.fill(0); };
 
   WT.chapter("omp", {
-    num: "Chapter 2", title: "A cloudy crystal ball", short: "Optical model",
+    num: "Chapter 5", title: "A cloudy crystal ball", short: "Optical model",
     lead: "Before anything else, the engine asks a simpler question: what does the nucleus look like to an incoming neutron?",
     html: `
 <div class="step">

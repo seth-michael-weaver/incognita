@@ -1,7 +1,7 @@
-/* German (Deutsch): strength (Kapitel 19, Photonenstärke im Detail) */
+/* German (Deutsch): strength (Kapitel 25, Photonenstärke im Detail) */
 WT.L.ch.strength = {
-  num: "Kapitel 19", title: "Photonenstärke im Detail", short: "Photonenstärke",
-  lead: "Kapitel 7 hat gezeigt, welche Photonen ein heißer Kern bevorzugt. Dieses Kapitel schreibt die Stärkefunktionen hin, verfolgt sie bis zu den Transmissionskoeffizienten und der mittleren Strahlungsbreite und lässt die Kaskade ablaufen, die sie antreiben.",
+  num: "Kapitel 25", title: "Photonenstärke im Detail", short: "Photonenstärke",
+  lead: "Kapitel 10 hat gezeigt, welche Photonen ein heißer Kern bevorzugt. Dieses Kapitel schreibt die Stärkefunktionen hin, verfolgt sie bis zu den Transmissionskoeffizienten und der mittleren Strahlungsbreite und lässt die Kaskade ablaufen, die sie antreiben.",
   html: `
 <div class="step">
   <h3>E1: der Ausläufer der Dipol-Riesenresonanz</h3>
@@ -35,7 +35,7 @@ WT.L.ch.strength = {
   <h3>Die Kaskade</h3>
   <p>Unterhalb des ersten Photons wiederholt sich dieselbe Regel: Von jeder neuen Energie aus wird das nächste Photon aus <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>) gezogen, bis der Kern seine bekannten Niveaus erreicht. Jede Historie besteht aus wenigen Photonen; ihr Summenspektrum ist das, was ein Kalorimeter nach dem Einfang sieht.</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">Upbend</button><button class="btn ghost" data-act="clear">Neu beginnen</button></div>
-  <p>Der Upbend fügt weiche Photonen hinzu und erhöht die Multiplizität ein wenig. Die Engine zieht keine Historien: Sie verschiebt Besetzungen Intervall für Intervall, von oben nach unten (Kapitel 8), was dieselben Mittelwerte ohne Stichprobenrauschen liefert.</p>
+  <p>Der Upbend fügt weiche Photonen hinzu und erhöht die Multiplizität ein wenig. Die Engine zieht keine Historien: Sie verschiebt Besetzungen Intervall für Intervall, von oben nach unten (Kapitel 11), was dieselben Mittelwerte ohne Stichprobenrauschen liefert.</p>
   <div class="aside">Im Code: <code>gamma/strength.py</code> (jedes Stärkemodell, das TALYS unterstützt; voreingestellt die SMLO-2019-Tabellen und das IAEA-M1 mit Upbend), <code>gamma/parameters.py</code> (Systematiken der Riesenresonanzen, Tabellen), <code>gamma/transmission.py</code> (T = 2π E<sup>2L+1</sup> f), <code>gamma/ggnorm.py</code> (optionale ⟨Γγ⟩-Normierung), <code>emission/</code> (die Kaskade). Das Bild verwendet geschlossene Formeln und Systematiken für einen eisen-57-artigen Kern; das gemessene ⟨Γγ⟩ ist der RIPL-Wert für ⁵⁷Fe.</div>
 </div>`,
 };

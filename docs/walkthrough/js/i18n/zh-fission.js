@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): fission (chapter 9) */
 WT.L.ch.fission = {
-  num: "第 9 章", title: "一分为二", short: "裂变",
+  num: "第 12 章", title: "一分为二", short: "裂变",
   lead: "最重的原子核拥有较轻原子核所没有的出口：不是抛出一个粒子，而是整个原子核撕裂成两半。这就是裂变。",
   html: `
 <div class="step">

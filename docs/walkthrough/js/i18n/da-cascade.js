@@ -1,6 +1,6 @@
 /* Danish: cascade (chapter 8) */
 WT.L.ch.cascade = {
-  num: "Kapitel 8", title: "Ned ad kortet", short: "Kaskade",
+  num: "Kapitel 11", title: "Ned ad kortet", short: "Kaskade",
   lead: "Én emission er sjældent enden: den kerne, der bliver tilbage, er ofte varm nok til at udsende igen.",
   html: `
 <div class="step">
@@ -19,7 +19,7 @@ WT.L.ch.cascade = {
 <div class="step">
   <h3>Oppefra og ned, interval for interval</h3>
   <p>Motoren tømmer hver kerne oppefra og ned, én energiskive, eller ét <b>interval</b>, ad gangen. Til højre: restkernen fra den første emission; til venstre: dens datterkerne, med én neutron mindre. Orange kugler er reaktioner, der venter i hvert interval. Intervallerne er 1 MeV her; motoren bruger omkring 40 pr. kerne, afpasset efter den tilgængelige energi.</p>
-  <p>Når markøren fejer hen over et interval, tager hver kugle en udgang efter konkurrencen fra kapitel 6: en foton (<em class="g">γ</em>) sænker den til et lavere interval, en <em class="n">neutron</em> flytter den over i datterkernen, en proton eller alfapartikel fjerner den fra billedet. Under alle tærskler fører fotoner resten ned til grundtilstanden (grå). Derefter fejes datterkernen.</p>
+  <p>Når markøren fejer hen over et interval, tager hver kugle en udgang efter konkurrencen fra kapitel 9: en foton (<em class="g">γ</em>) sænker den til et lavere interval, en <em class="n">neutron</em> flytter den over i datterkernen, en proton eller alfapartikel fjerner den fra billedet. Under alle tærskler fører fotoner resten ned til grundtilstanden (grå). Derefter fejes datterkernen.</p>
   <div class="ctl"><label for="cs-e3">Neutronenergi</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Start forfra</button></div>
   <p>Fotoner falder kun nedad, og hver kerne er færdig før sine datterkerner, så intet lander i et interval, der allerede er tømt.</p>

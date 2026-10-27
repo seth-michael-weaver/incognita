@@ -1,6 +1,6 @@
 /* Spanish: compound (chapter 5) */
 WT.es.ch.compound = {
-  num: "Capítulo 5", title: "Repartir la energía", short: "Núcleo compuesto",
+  num: "Capítulo 8", title: "Repartir la energía", short: "Núcleo compuesto",
   lead: "Cuando terminan los primeros choques rápidos, todos los nucleones comparten la energía. Este estado asentado es el núcleo compuesto. Para predecir qué hará después, el motor necesita saber de cuántas formas puede guardar su energía.",
   html: `
 <div class="step">

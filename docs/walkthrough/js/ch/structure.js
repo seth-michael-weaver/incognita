@@ -104,7 +104,7 @@
   <p>A stretched nucleus can rotate, giving levels 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> with gaps growing like <i>J</i>(<i>J</i>+1): a <b>rotor</b>. A round one can ripple; each unit of ripple, a <b>phonon</b>, adds the same energy, so its levels are evenly spaced: a <b>vibrator</b>.</p>
   <div class="ctl"><label for="st-beta">Deformation β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Still</button><button class="btn ghost" data-act="vib">Vibrating</button><button class="btn ghost" data-act="rot">Rotating</button></div>
-  <p>Drag <i>β₂</i> and press the buttons: a bigger stretch pulls the rotor's levels closer. The engine stores deformations per nucleus and a tag: spherical, vibrator or rotor. Chapter 3 shows how a passing neutron uses them.</p>
+  <p>Drag <i>β₂</i> and press the buttons: a bigger stretch pulls the rotor's levels closer. The engine stores deformations per nucleus and a tag: spherical, vibrator or rotor. Chapter 6 shows how a passing neutron uses them.</p>
 </div>
 <div class="step">
   <h3>Fingerprints just above the threshold</h3>

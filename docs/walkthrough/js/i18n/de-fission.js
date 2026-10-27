@@ -1,6 +1,6 @@
-/* German (Deutsch): fission (Kapitel 9, Kernspaltung) */
+/* German (Deutsch): fission (Kapitel 12, Kernspaltung) */
 WT.L.ch.fission = {
-  num: "Kapitel 9", title: "Spaltung", short: "Spaltung",
+  num: "Kapitel 12", title: "Spaltung", short: "Spaltung",
   lead: "Die schwersten Kerne haben einen Ausgang, der leichteren fehlt: Statt ein Teilchen hinauszuwerfen, reißt der ganze Kern in zwei Teile. Das ist die Kernspaltung.",
   html: `
 <div class="step">

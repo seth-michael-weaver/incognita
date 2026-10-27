@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): preeq (Hoofdstuk 4, pre-evenwicht) */
+/* Dutch (Nederlands): preeq (Hoofdstuk 7, pre-evenwicht) */
 WT.L.ch.preeq = {
-  num: "Hoofdstuk 4", title: "Botsingen voor de rust", short: "Pre-evenwicht",
+  num: "Hoofdstuk 7", title: "Botsingen voor de rust", short: "Pre-evenwicht",
   lead: "Een neutron dat een kern binnenkomt, verdeelt zijn energie niet in één keer over iedereen. Tijdens de eerste paar botsingen houdt één deeltje het meeste ervan vast, en dat deeltje kan rechtstreeks weer naar buiten vliegen. Dit is pre-evenwicht: emissie “voordat de energie gelijk verdeeld is”.",
   html: `
 <div class="step">
@@ -15,13 +15,13 @@ WT.L.ch.preeq = {
 </div>
 <div class="step">
   <h3>De splitsing in elke fase</h3>
-  <p>In elke fase ontsnapt het bovenste neutron (pijl omhoog, alleen als het boven de vrije lijn zit) of botst het opnieuw (pijl omlaag); de dikte toont de kansen. De ontsnappingssnelheid volgt uit <b>gedetailleerd evenwicht</b>: uit de kans op het omgekeerde proces, dat hetzelfde deeltje wordt geabsorbeerd, die hoofdstuk 2 berekent. De botsingssnelheid is de sterkte van één nucleon-nucleonbotsing maal het aantal nieuwe configuraties dat ze kan bereiken.</p>
+  <p>In elke fase ontsnapt het bovenste neutron (pijl omhoog, alleen als het boven de vrije lijn zit) of botst het opnieuw (pijl omlaag); de dikte toont de kansen. De ontsnappingssnelheid volgt uit <b>gedetailleerd evenwicht</b>: uit de kans op het omgekeerde proces, dat hetzelfde deeltje wordt geabsorbeerd, die hoofdstuk 5 berekent. De botsingssnelheid is de sterkte van één nucleon-nucleonbotsing maal het aantal nieuwe configuraties dat ze kan bereiken.</p>
   <div class="ctl"><label for="pe-n">Fase (excitonen n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Sleep de fase omhoog. In het begin houdt één deeltje het meeste van de energie vast, dus wat ontsnapt is snel. Later is de energie dun uitgesmeerd en komt er weinig uit.</p>
 </div>
 <div class="step">
   <h3>Waar de snelle staart vandaan komt</h3>
-  <p>De stapel rechts is het <b>spectrum</b>: hoeveel neutronen er bij elke energie uitkomen, langzaam links, snel rechts. Elke reactie doorloopt de keten tot het bovenste neutron ontsnapt, en de kleur zegt wanneer: <em style="font-style:normal;color:var(--warm);font-weight:600">diep oranje</em> in fase 3, bleker later, <em class="n">blauw</em> als het pas naar buiten kwam nadat de kern tot rust was gekomen (hoofdstuk 5).</p>
+  <p>De stapel rechts is het <b>spectrum</b>: hoeveel neutronen er bij elke energie uitkomen, langzaam links, snel rechts. Elke reactie doorloopt de keten tot het bovenste neutron ontsnapt, en de kleur zegt wanneer: <em style="font-style:normal;color:var(--warm);font-weight:600">diep oranje</em> in fase 3, bleker later, <em class="n">blauw</em> als het pas naar buiten kwam nadat de kern tot rust was gekomen (hoofdstuk 8).</p>
   <div class="btns"><button class="btn" data-act="run">Draai 300 reacties</button></div>
   <p>Fase 3 bouwt een brede, bijna vlakke plank op die tot de maximale energie reikt. Latere fasen stapelen lager op. De blauwe bult is <b>verdamping</b>: zodra iedereen de energie deelt, sijpelen alleen langzame neutronen naar buiten, zoals stoom uit een hete vloeistof.</p>
   <div class="ctl"><label for="pe-e">Neutronenergie</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

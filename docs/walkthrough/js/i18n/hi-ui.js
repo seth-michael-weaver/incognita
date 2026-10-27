@@ -23,17 +23,17 @@ Object.assign(WT.L.ui, {
     <thead><tr><th>अध्याय</th><th>यह क्या करता है</th><th>कोड</th></tr></thead>
     <tbody>
       <tr><td><a href="#structure">1</a></td><td>द्रव्यमान, स्तर, विरूपण, अनुनाद डेटा</td><td><code>structure/</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>प्रकाशीय मॉडल, पारगमन गुणांक (कण कितनी आसानी से भीतर आते और बाहर जाते हैं)</td><td><code>omp/</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>युग्मित चैनल, DWBA, विशाल अनुनाद, प्रत्यक्ष प्रग्रहण (वैकल्पिक)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
-      <tr><td><a href="#preeq">4</a></td><td>पूर्व-साम्य: एक्साइटॉन मॉडल, पिकअप और नॉकआउट, बहु-उत्सर्जन</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>स्तर घनत्व (प्रति MeV अवस्थाएं), प्रचक्रण वितरण</td><td><code>density/</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td>निकास चुनना (हाउजर–फेशबाख), चौड़ाई उतार-चढ़ाव</td><td><code>compound/</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>फोटॉन सामर्थ्य और γ पारगमन; विविक्त स्तर और समावयवी</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
-      <tr><td><a href="#cascade">8</a></td><td>कण और γ उत्सर्जनों का कैस्केड, अनन्य चैनल, अवशिष्ट नाभिक</td><td><code>emission/</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>विखंडन अवरोध और पारगमन</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>उत्सर्जन स्पेक्ट्रम, कोणीय वितरण और द्वि-अवकलित अनुप्रस्थ काट (वैकल्पिक, केवल आउटपुट)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>तापीय रूप से उत्तेजित लक्ष्यों पर प्रग्रहण और तारकीय दरें (वैकल्पिक)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>कई यादृच्छिक रूपांतरों से अनिश्चितता (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>प्रकाशीय मॉडल, पारगमन गुणांक (कण कितनी आसानी से भीतर आते और बाहर जाते हैं)</td><td><code>omp/</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>युग्मित चैनल, DWBA, विशाल अनुनाद, प्रत्यक्ष प्रग्रहण (वैकल्पिक)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
+      <tr><td><a href="#preeq">7</a></td><td>पूर्व-साम्य: एक्साइटॉन मॉडल, पिकअप और नॉकआउट, बहु-उत्सर्जन</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>स्तर घनत्व (प्रति MeV अवस्थाएं), प्रचक्रण वितरण</td><td><code>density/</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td>निकास चुनना (हाउजर–फेशबाख), चौड़ाई उतार-चढ़ाव</td><td><code>compound/</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>फोटॉन सामर्थ्य और γ पारगमन; विविक्त स्तर और समावयवी</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td>कण और γ उत्सर्जनों का कैस्केड, अनन्य चैनल, अवशिष्ट नाभिक</td><td><code>emission/</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>विखंडन अवरोध और पारगमन</td><td><code>fission/</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>उत्सर्जन स्पेक्ट्रम, कोणीय वितरण और द्वि-अवकलित अनुप्रस्थ काट (वैकल्पिक, केवल आउटपुट)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>तापीय रूप से उत्तेजित लक्ष्यों पर प्रग्रहण और तारकीय दरें (वैकल्पिक)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>कई यादृच्छिक रूपांतरों से अनिश्चितता (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>वह ड्राइवर जो चरणों को क्रम से चलाता है, और गति के लिए वैकल्पिक C कर्नेल</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>हर डिफॉल्ट और विकल्प, शुरू में एक बार पढ़ा जाता है; साथ ही TENDL के प्रति-न्यूक्लाइड फिट किए गए प्राचल, जैसे TALYS उन्हें लागू करता है (वैकल्पिक)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -43,33 +43,33 @@ Object.assign(WT.L.ui, {
   coda_table_added: `
     <thead><tr><th>अध्याय</th><th>यह क्या बदलता है</th><th>कोड</th></tr></thead>
     <tbody>
-      <tr><td><a href="#cascade">8</a></td><td><b>चालू।</b> फ्लक्स का पूरा हिसाब: अवशिष्ट नाभिक 10⁻⁹ mb तक रखे जाते हैं (TALYS: 10⁻³ mb), TALYS की कैस्केड खिड़की से एक कदम आगे के अवशिष्ट नाभिक भी रखे जाते हैं, अनन्य चैनलों में हर उत्सर्जित कण के 8 तक, किसी स्तर की दोहराई गई सभी क्षय शाखाएं गिनी जाती हैं</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>चालू।</b> पहले यौगिक नाभिक का सबसे ऊपरी बिन वैसे भरा जाता है जैसे प्राथमिक फोटॉन उसे भरते हैं (E<sub>γ</sub>³ भार के साथ), समान रूप से नहीं</td><td><code>compound/nnleak.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>चालू।</b> पहले अनुनादों के नीचे (1 keV से कम) कोई औसत यौगिक प्रत्यास्थ नहीं, जहाँ प्रत्यास्थ प्रकीर्णन विभव प्रकीर्णन है</td><td><code>lowepot.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>चालू।</b> विखंडन रहित विरूपित लक्ष्य: युग्मित बैंड से बाहर के स्तरों तक न्यूट्रॉन निकास युग्मित-चैनल पारगमन का उपयोग करते हैं</td><td><code>compound/ccexitnb.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td><b>चालू।</b> अल्फा उत्सर्जन ऐसा विभव देखता है जो अवशिष्ट नाभिक के ताप पर निर्भर करता है; अल्फा प्रक्षेप्य अल्फा मॉडल 6 से प्रवेश करते हैं; ट्राइटॉन और हीलियॉन विभवों में प्रक्षेप्य का आकार शामिल है</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td><b>चालू।</b> अवरोध के हर कूबड़ से होकर सटीक एक-विमीय पारगमन</td><td><code>fission/wkb.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td><b>चालू।</b> प्रति-नाभिक E1/M1 सामर्थ्य गुणक, जहाँ कोई रन उन्हें देता है, विरूपण के एक वैश्विक फलन से बदल दिए जाते हैं</td><td><code>gamma/ftglobal.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td><b>चालू।</b> वे लक्ष्य जिनका अपना मापा गया अनुनाद-अंतराल D₀ नहीं है: लक्ष्य के सतत भाग का स्तर घनत्व max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV से ऊपर एक गुणक से बढ़ाया जाता है, जो समता, कोश और विरूपण के लक्षणों पर आधारित एक ही वैश्विक नियम से आता है। TALYS-2 के डिफ़ॉल्ट इनपुट के विरुद्ध देहली के पास (n,p) की हार को बराबरी में बदलने के लिए जोड़ा गया; यह प्रग्रहण, (n,2n) और (n,α) के कुछ दृश्यों को थोड़ा बिगाड़ता है, एक स्वीकृत और दर्ज नुकसान</td><td><code>density/npwindow.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>विरूपित नाभिकों में अधिक प्रबल कैंची मोड, नए व्यवस्थित नियमों से जो Oslo मापनों से मेल खाते हैं (ऐक्टिनाइडों में लगभग 4–5×); या एक रूपांतर जो इसकी ऊर्जा और सामर्थ्य को विरूपण के साथ बदलता है</td><td><code>gamma/scissors.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>फोटॉन सामर्थ्य को पुनः स्केल किया जाता है ताकि हर नाभिक अपनी मापी गई विकिरणी सामर्थ्य ⟨Γγ⟩/D₀ से मेल खाए, कैस्केड के हर नाभिक के लिए, केवल पहले के लिए नहीं</td><td><code>gamma/ggnorm.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>अधिक प्रबल कैंची मोड और ⟨Γγ⟩ सामान्यीकरण केवल सबसे भारी नाभिकों (Z ≥ 88) के लिए, keV ऊर्जाओं पर प्रग्रहण के लिए</td><td><code>gamma/actphys.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>TALYS की TENDL से ली गई तालिका के स्थान पर हमारा अपना E1-चौड़ाई स्थिरांक (वितरित बिना-डेटा नुस्खा इसे तय करता है)</td><td><code>gamma/e1_width.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>अर्ध-सातत्य में घूर्णी बैंडों की सामूहिक E2 सामर्थ्य</td><td><code>gamma/isoe2.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>विरूपित दुर्लभ-मृदा लक्ष्यों के लिए प्रकाशीय कूप का एक क्षेत्रीय समायोजन, बिना प्रग्रहण डेटा के मापे गए S₀ और S₁ पर फिट किया गया</td><td><code>omp/regional.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>मापे गए न्यूट्रॉन सामर्थ्य फलन S₀, S₁ निम्न-ऊर्जा न्यूट्रॉन पारगमन तय करते हैं</td><td><code>omp/sfunc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>बद्ध कक्षाओं में प्रत्यक्ष प्रग्रहण, मूल कोड के एक सुधार के साथ: सामान्य TALYS में यह शून्य लौटाता है जब तक प्रकाशीय मॉडल का हर आउटपुट भी न मांगा जाए</td><td><code>direct/racapcalc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>लक्ष्य की युग्मन योजना (घूर्णक, कंपनशील, गोलीय) उसके मापे गए स्तरों से चुनी जाती है</td><td><code>structure/collrule.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td><b>चालू।</b> फ्लक्स का पूरा हिसाब: अवशिष्ट नाभिक 10⁻⁹ mb तक रखे जाते हैं (TALYS: 10⁻³ mb), TALYS की कैस्केड खिड़की से एक कदम आगे के अवशिष्ट नाभिक भी रखे जाते हैं, अनन्य चैनलों में हर उत्सर्जित कण के 8 तक, किसी स्तर की दोहराई गई सभी क्षय शाखाएं गिनी जाती हैं</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>चालू।</b> पहले यौगिक नाभिक का सबसे ऊपरी बिन वैसे भरा जाता है जैसे प्राथमिक फोटॉन उसे भरते हैं (E<sub>γ</sub>³ भार के साथ), समान रूप से नहीं</td><td><code>compound/nnleak.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>चालू।</b> पहले अनुनादों के नीचे (1 keV से कम) कोई औसत यौगिक प्रत्यास्थ नहीं, जहाँ प्रत्यास्थ प्रकीर्णन विभव प्रकीर्णन है</td><td><code>lowepot.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>चालू।</b> विखंडन रहित विरूपित लक्ष्य: युग्मित बैंड से बाहर के स्तरों तक न्यूट्रॉन निकास युग्मित-चैनल पारगमन का उपयोग करते हैं</td><td><code>compound/ccexitnb.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td><b>चालू।</b> अल्फा उत्सर्जन ऐसा विभव देखता है जो अवशिष्ट नाभिक के ताप पर निर्भर करता है; अल्फा प्रक्षेप्य अल्फा मॉडल 6 से प्रवेश करते हैं; ट्राइटॉन और हीलियॉन विभवों में प्रक्षेप्य का आकार शामिल है</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td><b>चालू।</b> अवरोध के हर कूबड़ से होकर सटीक एक-विमीय पारगमन</td><td><code>fission/wkb.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td><b>चालू।</b> प्रति-नाभिक E1/M1 सामर्थ्य गुणक, जहाँ कोई रन उन्हें देता है, विरूपण के एक वैश्विक फलन से बदल दिए जाते हैं</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td><b>चालू।</b> वे लक्ष्य जिनका अपना मापा गया अनुनाद-अंतराल D₀ नहीं है: लक्ष्य के सतत भाग का स्तर घनत्व max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV से ऊपर एक गुणक से बढ़ाया जाता है, जो समता, कोश और विरूपण के लक्षणों पर आधारित एक ही वैश्विक नियम से आता है। TALYS-2 के डिफ़ॉल्ट इनपुट के विरुद्ध देहली के पास (n,p) की हार को बराबरी में बदलने के लिए जोड़ा गया; यह प्रग्रहण, (n,2n) और (n,α) के कुछ दृश्यों को थोड़ा बिगाड़ता है, एक स्वीकृत और दर्ज नुकसान</td><td><code>density/npwindow.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>विरूपित नाभिकों में अधिक प्रबल कैंची मोड, नए व्यवस्थित नियमों से जो Oslo मापनों से मेल खाते हैं (ऐक्टिनाइडों में लगभग 4–5×); या एक रूपांतर जो इसकी ऊर्जा और सामर्थ्य को विरूपण के साथ बदलता है</td><td><code>gamma/scissors.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>फोटॉन सामर्थ्य को पुनः स्केल किया जाता है ताकि हर नाभिक अपनी मापी गई विकिरणी सामर्थ्य ⟨Γγ⟩/D₀ से मेल खाए, कैस्केड के हर नाभिक के लिए, केवल पहले के लिए नहीं</td><td><code>gamma/ggnorm.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>अधिक प्रबल कैंची मोड और ⟨Γγ⟩ सामान्यीकरण केवल सबसे भारी नाभिकों (Z ≥ 88) के लिए, keV ऊर्जाओं पर प्रग्रहण के लिए</td><td><code>gamma/actphys.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>TALYS की TENDL से ली गई तालिका के स्थान पर हमारा अपना E1-चौड़ाई स्थिरांक (वितरित बिना-डेटा नुस्खा इसे तय करता है)</td><td><code>gamma/e1_width.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>अर्ध-सातत्य में घूर्णी बैंडों की सामूहिक E2 सामर्थ्य</td><td><code>gamma/isoe2.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>विरूपित दुर्लभ-मृदा लक्ष्यों के लिए प्रकाशीय कूप का एक क्षेत्रीय समायोजन, बिना प्रग्रहण डेटा के मापे गए S₀ और S₁ पर फिट किया गया</td><td><code>omp/regional.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>मापे गए न्यूट्रॉन सामर्थ्य फलन S₀, S₁ निम्न-ऊर्जा न्यूट्रॉन पारगमन तय करते हैं</td><td><code>omp/sfunc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>बद्ध कक्षाओं में प्रत्यक्ष प्रग्रहण, मूल कोड के एक सुधार के साथ: सामान्य TALYS में यह शून्य लौटाता है जब तक प्रकाशीय मॉडल का हर आउटपुट भी न मांगा जाए</td><td><code>direct/racapcalc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>लक्ष्य की युग्मन योजना (घूर्णक, कंपनशील, गोलीय) उसके मापे गए स्तरों से चुनी जाती है</td><td><code>structure/collrule.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>सातत्य वहाँ शुरू होता है जहाँ मापी गई स्तर योजना पूर्ण होना बंद हो जाती है</td><td><code>structure/levcomplete.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>जिस स्तर का सूचीबद्ध प्रचक्रण उसके नाभिक के लिए असंभव है (विषम A में पूर्णांक), उसे अज्ञात प्रचक्रण का स्तर माना जाता है</td><td><code>structure/levjpar.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>विविक्त स्तरों के पूर्ण भाग पर टिका हुआ स्थिर-ताप स्तर घनत्व</td><td><code>density/ctwindow2.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>विखंडन के सैडल बिंदुओं पर संक्रमण अवस्थाओं के घूर्णी बैंड</td><td><code>fission/barriers.py</code></td></tr>
-      <tr><td><a href="#resonance">10</a></td><td>प्रग्रहण जहाँ तारकीय खिड़की में केवल कुछ अनुनाद आते हैं: औसत के स्थान पर एक अनुनाद सीढ़ी का विशिष्ट मान</td><td><code>fewres.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>विविक्त स्तरों के पूर्ण भाग पर टिका हुआ स्थिर-ताप स्तर घनत्व</td><td><code>density/ctwindow2.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>विखंडन के सैडल बिंदुओं पर संक्रमण अवस्थाओं के घूर्णी बैंड</td><td><code>fission/barriers.py</code></td></tr>
+      <tr><td><a href="#resonance">15</a></td><td>प्रग्रहण जहाँ तारकीय खिड़की में केवल कुछ अनुनाद आते हैं: औसत के स्थान पर एक अनुनाद सीढ़ी का विशिष्ट मान</td><td><code>fewres.py</code></td></tr>
       <tr><td></td><td>स्थायित्व से दूर चार सुरक्षा उपाय: एकात्मकता से सीमित प्रत्यक्ष फ्लक्स, फर्मी ऊर्जा पर एक सीमा, विषम-विषम नाभिकों के लिए कोई डिफॉल्ट सामूहिकता नहीं, पूर्व-साम्य प्रचक्रण फैलाव सामान्यीकृत</td><td><code>engphys.py</code></td></tr>
     </tbody>
   `,
   coda_h3_outside: "इंजन के बाहर",
-  coda_p_outside: "कहानी के कुछ भाग इंजन के भीतर नहीं, उसके साथ-साथ चलते हैं। <a href=\"#resonance\">अध्याय 10</a> की सांख्यिकीय अनुनाद सीढ़ियां <code>physics/resonance/</code> में हैं। <a href=\"#measure\">अध्याय 12</a> के मैक्सवेल औसत (MACS) रन के बाद इंजन के प्रग्रहण वक्रों से <code>validation/differential/core.py</code> में निकाले जाते हैं; इसके विपरीत, तापीय रूप से उत्तेजित लक्ष्यों पर प्रग्रहण और तारकीय दर स्वयं इंजन से आते हैं (<code>astro/stellar.py</code>, वैकल्पिक)। <a href=\"#layers\">अध्याय 15</a> की एंकरिंग परत <code>incognita/terra/</code> में है।",
+  coda_p_outside: "कहानी के कुछ भाग इंजन के भीतर नहीं, उसके साथ-साथ चलते हैं। <a href=\"#resonance\">अध्याय 15</a> की सांख्यिकीय अनुनाद सीढ़ियां <code>physics/resonance/</code> में हैं। <a href=\"#measure\">अध्याय 17</a> के मैक्सवेल औसत (MACS) रन के बाद इंजन के प्रग्रहण वक्रों से <code>validation/differential/core.py</code> में निकाले जाते हैं; इसके विपरीत, तापीय रूप से उत्तेजित लक्ष्यों पर प्रग्रहण और तारकीय दर स्वयं इंजन से आते हैं (<code>astro/stellar.py</code>, वैकल्पिक)। <a href=\"#layers\">अध्याय 21</a> की एंकरिंग परत <code>incognita/terra/</code> में है।",
   close: "बंद करें",
   chapters: "अध्याय",
   nav_board: "स्कोरबोर्ड", nav_data_short: "डेटा",

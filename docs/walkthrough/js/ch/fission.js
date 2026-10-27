@@ -1,4 +1,4 @@
-/* Chapter 9: fission (fission/). Scenes (S.mode):
+/* Chapter 12: fission (fission/). Scenes (S.mode):
  *   "drop"   = a charged liquid drop stretched by the reader until it necks and splits;
  *   "path"   = the deformation-energy landscape (one liquid-drop hill, then the shell-carved double hump);
  *   "tunnel" = a nucleus at excitation E tunnelling the inner hump; Hill-Wheeler parabola vs the real shape (WKB);
@@ -65,7 +65,7 @@
   const dots = []; let spawnAcc = 0; const tally = { through: 0, back: 0 };
 
   WT.chapter("fission", {
-    num: "Chapter 9", title: "Splitting", short: "Fission",
+    num: "Chapter 12", title: "Splitting", short: "Fission",
     lead: "The heaviest nuclei have an exit lighter ones lack: instead of throwing out one particle, the whole nucleus tears in two. This is fission.",
     html: `
 <div class="step">

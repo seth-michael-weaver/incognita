@@ -1,11 +1,11 @@
-/* Dutch (Nederlands): hauser (Hoofdstuk 16, Hauser–Feshbach kanaal voor kanaal) */
+/* Dutch (Nederlands): hauser (Hoofdstuk 22, Hauser–Feshbach kanaal voor kanaal) */
 WT.L.ch.hauser = {
-  num: "Hoofdstuk 16", title: "Hauser–Feshbach, kanaal voor kanaal", short: "Hauser–Feshbach",
-  lead: "Hoofdstuk 6 vertelde de competitie tussen de uitgangen als deuren. Hier staat de formule achter die deuren, kanaal voor kanaal, en de correctie die ze nodig heeft wanneer maar een paar kanalen open zijn.",
+  num: "Hoofdstuk 22", title: "Hauser–Feshbach, kanaal voor kanaal", short: "Hauser–Feshbach",
+  lead: "Hoofdstuk 9 vertelde de competitie tussen de uitgangen als deuren. Hier staat de formule achter die deuren, kanaal voor kanaal, en de correctie die ze nodig heeft wanneer maar een paar kanalen open zijn.",
   html: `
 <div class="step">
   <h3>Een transmissie voor elk kanaal</h3>
-  <p>Een <b>kanaal</b> is een volledig uitgangsadres: welk deeltje, in welke toestand de restkern achterblijft, het baanimpulsmoment <i>l</i> en het totale impulsmoment <i>j</i> = <i>l</i> ± ½ van het deeltje. Het optisch model van hoofdstuk 2 geeft elk kanaal een <b>transmissiecoëfficiënt</b> <i>T<sub>lj</sub></i>. De kolommen zijn die van het invallende neutron, voor een trefkern met spin 0.</p>
+  <p>Een <b>kanaal</b> is een volledig uitgangsadres: welk deeltje, in welke toestand de restkern achterblijft, het baanimpulsmoment <i>l</i> en het totale impulsmoment <i>j</i> = <i>l</i> ± ½ van het deeltje. Het optisch model van hoofdstuk 5 geeft elk kanaal een <b>transmissiecoëfficiënt</b> <i>T<sub>lj</sub></i>. De kolommen zijn die van het invallende neutron, voor een trefkern met spin 0.</p>
   <div class="ctl"><label for="hf-e">Neutronenergie (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>Bij 1 keV is alleen <i>l</i> = 0 open, met <i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>, een paar procent. Elke extra eenheid <i>l</i> kost bij lage energie ongeveer een factor (<i>kR</i>)², dus de kolommen gaan één voor één open naarmate de energie stijgt. Elke kolom voedt de compoundkern met het gewicht g<sub>J</sub><i>T</i>:</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -20,7 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Breedtefluctuaties</h3>
-  <p>Met <i>W<sub>ab</sub></i> = 1 vermenigvuldigt de formule gemiddelden. De resonanties achter die gemiddelden hebben breedten die spreiden (Porter–Thomas, hoofdstuk 10), en bij elastische verstrooiing is de breedte die het neutron binnenlaat dezelfde breedte die het weer naar buiten laat, dus de twee zijn gecorreleerd. Voor elastisch is het gemiddelde van de producten dan groter dan het product van de gemiddelden, en de andere uitgangen verliezen wat elastisch wint.</p>
+  <p>Met <i>W<sub>ab</sub></i> = 1 vermenigvuldigt de formule gemiddelden. De resonanties achter die gemiddelden hebben breedten die spreiden (Porter–Thomas, hoofdstuk 15), en bij elastische verstrooiing is de breedte die het neutron binnenlaat dezelfde breedte die het weer naar buiten laat, dus de twee zijn gecorreleerd. Voor elastisch is het gemiddelde van de producten dan groter dan het product van de gemiddelden, en de andere uitgangen verliezen wat elastisch wint.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Zonder correctie</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Neutronenergie (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>De labels geven σ met de correctie gedeeld door σ zonder. Onder de eerste inelastische drempel neemt elastisch al bijna de hele flux en verandert het nauwelijks, terwijl vangst 10 tot 25 procent verliest. Tussen 1 en 1,5 MeV wint de compound-elastische verstrooiing 15 tot 35 procent en verliest het eerste 2⁺-niveau ongeveer een derde. Naarmate meer niveaus en het continuüm opengaan, wordt de compound-elastische verstrooiing een klein deel van de flux: haar eigen factor stijgt naar 2, maar wat ze van de andere uitgangen afneemt krimpt, en hun factoren keren terug naar 1. In het recept van Moldauer krijgt elk kanaal een aantal vrijheidsgraden ν<sub>c</sub>, en is <i>W</i> een eendimensionale integraal, uitgerekend met de 32-puntskwadratuur van Gauss–Laguerre uit TALYS.</p>

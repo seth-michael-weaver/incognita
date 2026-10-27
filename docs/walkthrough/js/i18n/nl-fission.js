@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): fission (Hoofdstuk 9, splijting) */
+/* Dutch (Nederlands): fission (Hoofdstuk 12, splijting) */
 WT.L.ch.fission = {
-  num: "Hoofdstuk 9", title: "Splijten", short: "Splijting",
+  num: "Hoofdstuk 12", title: "Splijten", short: "Splijting",
   lead: "De zwaarste kernen hebben een uitgang die lichtere missen: in plaats van één deeltje uit te stoten, scheurt de hele kern in tweeën. Dit is splijting.",
   html: `
 <div class="step">

@@ -45,7 +45,7 @@
   }
 
   WT.chapter("critical", {
-    num: "Chapter 14", title: "Keeping it critical", short: "Criticality",
+    num: "Chapter 20", title: "Keeping it critical", short: "Criticality",
     html: `
 <div class="step">
   <p>Each generation multiplies the neutrons by <i>k</i>.</p>

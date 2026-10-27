@@ -1,6 +1,6 @@
-/* Italian: resonance (Capitolo 10, risonanze) */
+/* Italian: resonance (Capitolo 15, risonanze) */
 WT.L.ch.resonance = {
-  num: "Capitolo 10", title: "Picchi stretti", short: "Risonanze",
+  num: "Capitolo 15", title: "Picchi stretti", short: "Risonanze",
   lead: "A energia abbastanza bassa un neutrone non vede più un nucleo liscio e mediato. Vede i singoli livelli di energia del nucleo composto, uno alla volta.",
   html: `
 <div class="step">

@@ -1,12 +1,12 @@
 /* Simplified Chinese: gamma (chapter 7, photon emission) */
 WT.L.ch.gamma = {
-  num: "第 7 章", title: "释放光", short: "光子",
+  num: "第 10 章", title: "释放光", short: "光子",
   lead: "当没有粒子离开时，原子核通过发射光子来冷却：光子即γ射线，高能光的粒子。这个出口在任何能量下都是开放的。",
   html: `
 <div class="step">
   <p>一个处于 8 MeV（百万电子伏特）的热态不断发射光子（γ）；梯子旁边的堆积记录它们落在哪里。2 MeV 以下的状态是少数几个有名称的梯级；2 MeV 以上则是随能量急剧变密的状态群（灰点）。每个光子带走它跃迁的能量 <i>E<sub>γ</sub></i>，画面亮度与 <i>E<sub>γ</sub></i>³ 成正比。</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> 是光子的穿透系数（第 6 章中的门），偶极光子的 <i>l</i> = 1，<i>f</i> 是<b>光子强度函数</b>：原子核在该能量下辐射的难易程度。一次跃迁的概率等于 <i>T<sub>γ</sub></i> 乘以它落入处的状态数：小跃迁能找到很多状态，但很暗淡；大跃迁很明亮，但能找到的状态很少。</p>
+  <p><i>T<sub>γ</sub></i> 是光子的穿透系数（第 9 章中的门），偶极光子的 <i>l</i> = 1，<i>f</i> 是<b>光子强度函数</b>：原子核在该能量下辐射的难易程度。一次跃迁的概率等于 <i>T<sub>γ</sub></i> 乘以它落入处的状态数：小跃迁能找到很多状态，但很暗淡；大跃迁很明亮，但能找到的状态很少。</p>
   <div class="ctl"><label for="gm-e0">初始能量</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">发射 100 个</button></div>
   <p>堆积的峰值位于初始能量以下几 MeV 处：大多数光子携带 2 到 4 MeV。移动初始能量，峰值随之移动。</p>
@@ -25,7 +25,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>沿梯而下</h3>
-  <p>级联是一个接一个发射的光子，从顶部的能量区间（状态太密而无法逐一列出，第 5 章）一直到有名称的能级，这些能级被拉开以便阅读（实心梯级为宇称 +，空心为 −）。到了这里，引擎不再估算，而是遵循列表给出的<b>分支比</b>：每个能级衰变到每个更低能级的实测概率。</p>
+  <p>级联是一个接一个发射的光子，从顶部的能量区间（状态太密而无法逐一列出，第 8 章）一直到有名称的能级，这些能级被拉开以便阅读（实心梯级为宇称 +，空心为 −）。到了这里，引擎不再估算，而是遵循列表给出的<b>分支比</b>：每个能级衰变到每个更低能级的实测概率。</p>
   <div class="btns"><button class="btn" data-act="drop">释放一次级联</button></div>
   <p>多按几次按钮：上半部分每次都不同；结尾则沿着少数几条测量过的路径之一。</p>
 </div>
@@ -37,7 +37,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>俘获</h3>
-  <p>刚吸收一个慢中子的原子核有两扇出口之门（第 6 章）：光子（上方）和重新出射的中子（右方）。每扇门的缝隙就是它的<b>宽度</b>，单位 eV：原子核经由这扇门衰变的快慢。光子宽度几乎不变；中子宽度随中子速度增大。</p>
+  <p>刚吸收一个慢中子的原子核有两扇出口之门（第 9 章）：光子（上方）和重新出射的中子（右方）。每扇门的缝隙就是它的<b>宽度</b>，单位 eV：原子核经由这扇门衰变的快慢。光子宽度几乎不变；中子宽度随中子速度增大。</p>
   <div class="ctl"><label for="gm-e">中子能量</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
   <p>拖动中子能量，从 10 eV 到 2 MeV。<b>俘获</b>，即 (n,γ)，指中子留下而一个光子离开：在 10 eV 时它几乎总是胜出，而在几 keV 以上只占很小的份额。阈能处的光子宽度已对数百个原子核测量过，可用于检验光子强度函数。默认情况下引擎使用自己的计算值；一个可选开关会对每个已测原子核的光子强度函数进行缩放，直到两者一致。</p>
   <div class="aside">代码位置：<code>gamma/parameters.py</code>（列表 E1 强度；巨共振、自旋翻转、剪刀模式和低能上翘的系统学），<code>gamma/strength.py</code>（各多极性的 <i>f</i>(E<sub>γ</sub>)），<code>gamma/transmission.py</code>（T<sub>γ</sub> 与平均辐射宽度），<code>structure/levels.py</code>（分支比、同质异能态），<code>emission/multiple.py</code>（级联）。可选，默认关闭：<code>gamma/scissors.py</code>（更强的剪刀模式），<code>gamma/ggnorm.py</code>（拟合实测 ⟨Γγ⟩，直到铅），<code>gamma/actphys.py</code>（两者兼用，适用于锕系核）。</div>

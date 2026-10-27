@@ -1,12 +1,12 @@
-/* Portuguese (pt-PT): decay (Capítulo 6) */
+/* Portuguese (pt-PT): decay (Capítulo 9) */
 WT.L.ch.decay = {
-  num: "Capítulo 6", title: "Escolher uma saída", short: "Decaimento",
+  num: "Capítulo 9", title: "Escolher uma saída", short: "Decaimento",
   lead: "O núcleo composto tem de libertar a sua energia emitindo uma partícula ou um fotão. Este capítulo desenha cada saída como uma porta. O trabalho do motor é dizer que parte do fluxo (a corrente de reações que aqui chega) sai por cada porta.",
   html: `
 <div class="step">
   <p>Uma porta por saída: um <em class="g">fotão</em> (γ), um <em class="n">neutrão</em> (n), um <em class="p">protão</em> (p), uma <em class="a">partícula alfa</em> (α: dois protões e dois neutrões) e, só em núcleos pesados, a <em class="f">fissão</em> (partir-se em dois). A abertura iluminada de cada porta é a fração dessa saída, e as bolas saem ao mesmo ritmo; as portas cinzentas estão fechadas. Como esqueceu a forma como se formou, o núcleo usa cada porta b em proporção a um peso:</p>
   <div class="formula">fração<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p>O <b>coeficiente de transmissão</b> <i>T</i> é a probabilidade de uma partícula que chega à borda a atravessar; para as partículas, vem do modelo ótico do Capítulo 2, aplicado ao contrário. A <b>densidade de níveis</b> ρ, escrita junto a cada porta, conta os estados em que o núcleo restante pode acabar. Repartir segundo <i>T</i> vezes ρ é a regra de <b>Hauser–Feshbach</b>. A 10 MeV, a porta do neutrão leva quase tudo.</p>
+  <p>O <b>coeficiente de transmissão</b> <i>T</i> é a probabilidade de uma partícula que chega à borda a atravessar; para as partículas, vem do modelo ótico do Capítulo 5, aplicado ao contrário. A <b>densidade de níveis</b> ρ, escrita junto a cada porta, conta os estados em que o núcleo restante pode acabar. Repartir segundo <i>T</i> vezes ρ é a regra de <b>Hauser–Feshbach</b>. A 10 MeV, a porta do neutrão leva quase tudo.</p>
 </div>
 <div class="step">
   <h3>Porque é que quase todas as partículas saem lentas</h3>
@@ -31,7 +31,7 @@ WT.L.ch.decay = {
   <h3>Spin e paridade têm de bater certo</h3>
   <p>O núcleo composto (em cima) tem spin <i>J</i>; em baixo, os estados do núcleo restante estão em gavetas segundo o seu spin <i>J</i>′. O neutrão leva a diferença de spin e paridade: se sai com momento angular orbital <i>l</i>, muda o spin até <i>l</i> + ½ e inverte a paridade quando <i>l</i> é ímpar. Maior <i>l</i> significa porta mais estreita; a porta de cada gaveta é a de menor <i>l</i> que lá chega. As descidas cheias conservam a paridade; as ocas invertem-na.</p>
   <div class="ctl"><label for="dc-j">Spin composto J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>Aumenta <i>J</i>. As portas abertas deslocam-se para as gavetas de spin alto, que guardam poucos estados, enquanto as gavetas cheias ficam atrás de portas fechadas. Um núcleo composto de spin alto demora a emitir partículas, o que dá uma oportunidade aos fotões e aos isómeros (estados de vida longa, Capítulo 7).</p>
+  <p>Aumenta <i>J</i>. As portas abertas deslocam-se para as gavetas de spin alto, que guardam poucos estados, enquanto as gavetas cheias ficam atrás de portas fechadas. Um núcleo composto de spin alto demora a emitir partículas, o que dá uma oportunidade aos fotões e aos isómeros (estados de vida longa, Capítulo 10).</p>
 </div>
 <div class="step">
   <h3>O caminho por onde entraste</h3>
@@ -43,7 +43,7 @@ WT.L.ch.decay = {
 </div>
 <div class="step">
   <h3>O que resta para repartir</h3>
-  <p>Nem todo o neutrão absorvido forma um núcleo composto. Alguns dão um toque rasante e saem disparados (reações diretas, Capítulo 3); outros chocam uma ou duas vezes e saem a grande velocidade (pré-equilíbrio, Capítulo 4). Só os restantes ficam e aquecem o núcleo. Os contadores registam cada destino.</p>
+  <p>Nem todo o neutrão absorvido forma um núcleo composto. Alguns dão um toque rasante e saem disparados (reações diretas, Capítulo 6); outros chocam uma ou duas vezes e saem a grande velocidade (pré-equilíbrio, Capítulo 7). Só os restantes ficam e aquecem o núcleo. Os contadores registam cada destino.</p>
   <div class="ctl"><label for="dc-einc">Energia do neutrão</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Só os que ficam entram na competição das portas. Arrasta a energia do neutrão: a poucos MeV quase todos ficam; a 30 MeV cerca de metade já saiu antes de chegar ao equilíbrio.</p>
   <div class="aside">No código: <code>compound/prepare.py</code> (pesos de saída T·ρ por spin e paridade, regras de seleção), <code>compound/target.py</code> (primeiro decaimento com flutuações de larguras), <code>compound/continuum.py</code> (decaimento de cada intervalo posterior), <code>compound/wfc.py</code> (correções de Moldauer, HRTW, GOE), <code>compound/normalization.py</code> (fluxo que resta para o núcleo composto), <code>omp/inverse.py</code> (portas ao contrário).</div>

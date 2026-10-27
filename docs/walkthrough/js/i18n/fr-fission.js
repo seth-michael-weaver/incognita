@@ -1,6 +1,6 @@
 /* French: fission (chapter 9) */
 WT.L.ch.fission = {
-  num: "Chapitre 9", title: "Se casser en deux", short: "Fission",
+  num: "Chapitre 12", title: "Se casser en deux", short: "Fission",
   lead: "Les noyaux les plus lourds disposent d'une sortie qui manque aux plus légers : au lieu d'expulser une particule, le noyau tout entier se déchire en deux. C'est la fission.",
   html: `
 <div class="step">

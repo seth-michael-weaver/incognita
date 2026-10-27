@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>拉长的原子核可以转动，产生 0<sup>+</sup>、2<sup>+</sup>、4<sup>+</sup>、6<sup>+</sup> 能级，间距按 <i>J</i>(<i>J</i>+1) 增大：这是<b>转动核</b>。球形原子核可以振动；每一份振动能量即一个<b>声子</b>，增加相同的能量，所以能级等间距排列：这是<b>振动核</b>。</p>
   <div class="ctl"><label for="st-beta">形变 β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">静止</button><button class="btn ghost" data-act="vib">振动</button><button class="btn ghost" data-act="rot">转动</button></div>
-  <p>拖动 <i>β₂</i> 并按按钮：拉伸越大，转动核的能级越靠拢。程序为每个原子核存储形变值和一个标签：球形、振动核或转动核。第 3 章展示了经过的中子如何利用它们。</p>
+  <p>拖动 <i>β₂</i> 并按按钮：拉伸越大，转动核的能级越靠拢。程序为每个原子核存储形变值和一个标签：球形、振动核或转动核。第 6 章展示了经过的中子如何利用它们。</p>
 </div>
 <div class="step">
   <h3>阈能之上的指纹</h3>

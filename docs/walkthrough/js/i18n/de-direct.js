@@ -1,6 +1,6 @@
-/* German (Deutsch): direct (Kapitel 3, direkte Reaktionen) */
+/* German (Deutsch): direct (Kapitel 6, direkte Reaktionen) */
 WT.L.ch.direct = {
-  num: "Kapitel 3", title: "Ein Streifschuss", short: "Direkte Reaktionen",
+  num: "Kapitel 6", title: "Ein Streifschuss", short: "Direkte Reaktionen",
   lead: "Nicht jedes Neutron, das den Kern erreicht, wird verschluckt. Manche streifen seine Oberfläche, geben ihm einen einzigen Stoß und fliegen weiter.",
   html: `
 <div class="step">
@@ -24,7 +24,7 @@ WT.L.ch.direct = {
 </div>
 <div class="step">
   <h3>Ein Stoß, ein einziges Mal</h3>
-  <p>Für die meisten Niveaus ist die Kopplung schwach, und ein Stoß reicht: <b>DWBA</b> (Bornsche Näherung mit verzerrten Wellen). Die einlaufende Welle aus Kapitel 2 stößt den Kern einmal an, am Rand, wo das Potential von tief auf null abfällt; der Rand leuchtet, wo die Wellenberge auftreffen. Die sich ausbreitende Kreiswelle sind die Neutronen, die den Kern angeregt zurückgelassen haben.</p>
+  <p>Für die meisten Niveaus ist die Kopplung schwach, und ein Stoß reicht: <b>DWBA</b> (Bornsche Näherung mit verzerrten Wellen). Die einlaufende Welle aus Kapitel 5 stößt den Kern einmal an, am Rand, wo das Potential von tief auf null abfällt; der Rand leuchtet, wo die Wellenberge auftreffen. Die sich ausbreitende Kreiswelle sind die Neutronen, die den Kern angeregt zurückgelassen haben.</p>
   <div class="ctl"><label for="di-bd">Deformation β des Niveaus</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>Zieh an <i>β</i>: Der Rand wackelt stärker, und die Kreise werden heller, wie <i>β</i>²: doppelte Deformation, viermal so viele. Die Engine nimmt das <i>β</i> jedes Niveaus aus Messwerten oder, wo keiner bekannt ist, aus Systematiken. Wie sich die gestreuten Neutronen über die Winkel verteilen, ist eine optionale Zusatzausgabe.</p>
 </div>
@@ -33,17 +33,17 @@ WT.L.ch.direct = {
   <p>Alle Nukleonen können sich gemeinsam bewegen: atmen, sich stauchen und strecken oder in eine Birnenform schwingen. Das sind <b>Riesenresonanzen</b>. In diesem mittelschweren Kern liegen sie etwa 7 bis 25 MeV hoch, jede mehrere MeV breit, zu breit, um als ein Niveau zu zählen; die Buckel markieren die <b>Anregungsenergie</b> jeder einzelnen.</p>
   <p>Die Engine legt die Gesamtstärke jeder Resonanz über eine <b>Summenregel</b> fest, eine Grenze aus der Grundlagenphysik dafür, wie stark ein Kern reagieren kann, und verteilt sie als Buckel oberhalb des letzten bekannten Niveaus. Diese Buckel bilden zusammen mit Stößen in hohe Niveaus das <b>kollektive Kontinuum</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Atmen</button><button class="btn ghost" data-act="quad">Stauchen</button><button class="btn ghost" data-act="oct">Birne</button></div>
-  <p>Die bekannteste, bei der Protonen gegen Neutronen schwappen (die Dipol-Riesenresonanz), absorbiert und emittiert vor allem Licht und gehört deshalb in Kapitel 7.</p>
+  <p>Die bekannteste, bei der Protonen gegen Neutronen schwappen (die Dipol-Riesenresonanz), absorbiert und emittiert vor allem Licht und gehört deshalb in Kapitel 10.</p>
 </div>
 <div class="step">
   <h3>Direkt in ein Orbital</h3>
-  <p>Ein freies Neutron kann direkt in ein leeres <b>Orbital</b> des Topfs fallen (eine erlaubte Energie für ein einzelnes Neutron darin) und die überschüssige Energie als <em class="g">Photon</em> abgeben. Der Kern heizt sich dabei nie auf. Das ist der <b>direkte Einfang</b>. Die Engine kann ihn mit demselben Topf wie in Kapitel 2 berechnen: die freie Welle außen, das gebundene Orbital innen, das Photon als Verbindung. Er ist optional und standardmäßig aus.</p>
+  <p>Ein freies Neutron kann direkt in ein leeres <b>Orbital</b> des Topfs fallen (eine erlaubte Energie für ein einzelnes Neutron darin) und die überschüssige Energie als <em class="g">Photon</em> abgeben. Der Kern heizt sich dabei nie auf. Das ist der <b>direkte Einfang</b>. Die Engine kann ihn mit demselben Topf wie in Kapitel 5 berechnen: die freie Welle außen, das gebundene Orbital innen, das Photon als Verbindung. Er ist optional und standardmäßig aus.</p>
   <div class="btns"><button class="btn" data-act="drop">Ein Neutron hineinfallen lassen</button></div>
   <p>Der direkte Einfang zählt vor allem dort, wo der übliche Weg, das Verteilen der Neutronenenergie, schwach ist: bei leichten Kernen und bei Kernen fern der Stabilität, mit wenigen, weit auseinanderliegenden Niveaus.</p>
 </div>
 <div class="step">
   <h3>Direkte Reaktionen nehmen sich zuerst ihren Anteil</h3>
-  <p>Die Engine teilt den Reaktionsquerschnitt aus Kapitel 2 der Reihe nach auf: zuerst direkte Reaktionen, dann schnelle Stöße, und nur der Rest bildet einen Compoundkern. Im Bild erleidet jedes Neutron eines von drei Schicksalen: <b>direkt</b> (streift und fliegt weiter), schnell (schlägt ein Nukleon heraus, bevor sich die Energie verteilt: <b>Präequilibrium</b>, Kapitel 4) oder verschluckt (ein <b>Compoundkern</b>, Kapitel 5). Die Stapel zählen sie.</p>
+  <p>Die Engine teilt den Reaktionsquerschnitt aus Kapitel 5 der Reihe nach auf: zuerst direkte Reaktionen, dann schnelle Stöße, und nur der Rest bildet einen Compoundkern. Im Bild erleidet jedes Neutron eines von drei Schicksalen: <b>direkt</b> (streift und fliegt weiter), schnell (schlägt ein Nukleon heraus, bevor sich die Energie verteilt: <b>Präequilibrium</b>, Kapitel 7) oder verschluckt (ein <b>Compoundkern</b>, Kapitel 8). Die Stapel zählen sie.</p>
   <div class="ctl"><label for="di-e">Neutronenenergie (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>Ändere die Energie und sieh zu, wie sich die Stapel neu füllen. Bei einigen MeV wird fast jedes Neutron verschluckt. Bei einigen zehn MeV nehmen direkte Reaktionen und schnelle Stöße zusammen einen großen Teil ein.</p>
   <div class="aside">Im Code: <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (deformiertes Potential, gekoppelte Kanäle für Rotoren und Vibratoren), <code>ecis/dwba.py</code> und <code>direct/dwba.py</code> (einzelner Stoß, Riesenresonanzen, kollektives Kontinuum), <code>direct/racapcalc.py</code> (direkter Einfang, optional, standardmäßig aus), <code>compound/normalization.py</code> (die Bilanz).</div>

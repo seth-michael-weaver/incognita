@@ -1,6 +1,6 @@
-/* Danish: direct (Kapitel 3, direkte reaktioner) */
+/* Danish: direct (Kapitel 6, direkte reaktioner) */
 WT.L.ch.direct = {
-  num: "Kapitel 3", title: "Et strejfende stød", short: "Direkte reaktioner",
+  num: "Kapitel 6", title: "Et strejfende stød", short: "Direkte reaktioner",
   lead: "Ikke alle neutroner, der når kernen, bliver slugt. Nogle strejfer dens overflade, giver den ét skub og flyver videre.",
   html: `
 <div class="step">
@@ -24,7 +24,7 @@ WT.L.ch.direct = {
 </div>
 <div class="step">
   <h3>Ét skub, én gang</h3>
-  <p>For de fleste niveauer er koblingen svag, og ét skub er nok: <b>DWBA</b> (Born-approksimationen med forvrængede bølger). Den indkommende bølge fra kapitel 2 skubber kernen én gang, ved kanten, hvor potentialet falder fra dybt til nul; kanten lyser, hvor bølgetoppene rammer. Den cirkulære bølge, der breder sig udad, er de neutroner, der efterlod kernen exciteret.</p>
+  <p>For de fleste niveauer er koblingen svag, og ét skub er nok: <b>DWBA</b> (Born-approksimationen med forvrængede bølger). Den indkommende bølge fra kapitel 5 skubber kernen én gang, ved kanten, hvor potentialet falder fra dybt til nul; kanten lyser, hvor bølgetoppene rammer. Den cirkulære bølge, der breder sig udad, er de neutroner, der efterlod kernen exciteret.</p>
   <div class="ctl"><label for="di-bd">Niveauets deformation β</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>Træk i <i>β</i>: kanten vugger kraftigere, og cirklerne bliver lysere, som <i>β</i>²: dobbelt deformation, fire gange så mange. Motoren tager hvert niveaus <i>β</i> fra målte værdier eller fra systematik, hvor ingen kendes. Hvordan de spredte neutroner fordeler sig på vinkler, er et valgfrit ekstra output.</p>
 </div>
@@ -33,17 +33,17 @@ WT.L.ch.direct = {
   <p>Alle nukleonerne kan bevæge sig sammen: ånde, trykkes flad og strækkes eller svinge ud i en pæreform. Det er <b>kæmperesonanser</b>. I denne mellemtunge kerne ligger de ca. 7 til 25 MeV oppe, hver flere MeV bred, for bred til at tælle som ét niveau; puklerne markerer hver enkelts <b>excitationsenergi</b>.</p>
   <p>Motoren fastsætter hver enkelts samlede styrke ud fra en <b>sumregel</b>, en grænse fra grundlæggende fysik for, hvor kraftigt en kerne kan reagere, og fordeler den som en pukkel over det sidste kendte niveau. Disse pukler plus skub til høje niveauer udgør det <b>kollektive kontinuum</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Ånding</button><button class="btn ghost" data-act="quad">Fladtrykning</button><button class="btn ghost" data-act="oct">Pære</button></div>
-  <p>Den mest kendte, hvor protoner skvulper mod neutroner (kæmpedipolresonansen), absorberer og udsender hovedsageligt lys, så den hører til kapitel 7.</p>
+  <p>Den mest kendte, hvor protoner skvulper mod neutroner (kæmpedipolresonansen), absorberer og udsender hovedsageligt lys, så den hører til kapitel 10.</p>
 </div>
 <div class="step">
   <h3>Lige ind i en bane</h3>
-  <p>En fri neutron kan falde direkte ned i en tom <b>bane</b> i brønden (en tilladt energi for én neutron indeni) og sende den overskydende energi ud som en <em class="g">foton</em>. Kernen bliver aldrig opvarmet. Det er <b>direkte indfangning</b>. Motoren kan beregne den ud fra samme brønd som i kapitel 2: den frie bølge udenfor, den bundne bane indeni og fotonen, der forbinder dem. Den er valgfri og slået fra som standard.</p>
+  <p>En fri neutron kan falde direkte ned i en tom <b>bane</b> i brønden (en tilladt energi for én neutron indeni) og sende den overskydende energi ud som en <em class="g">foton</em>. Kernen bliver aldrig opvarmet. Det er <b>direkte indfangning</b>. Motoren kan beregne den ud fra samme brønd som i kapitel 5: den frie bølge udenfor, den bundne bane indeni og fotonen, der forbinder dem. Den er valgfri og slået fra som standard.</p>
   <div class="btns"><button class="btn" data-act="drop">Slip en neutron ned</button></div>
   <p>Direkte indfangning betyder mest, hvor den sædvanlige vej, hvor neutronens energi deles, er svag: lette kerner og kerner langt fra stabilitet, med få niveauer langt fra hinanden.</p>
 </div>
 <div class="step">
   <h3>Direkte tager sin andel først</h3>
-  <p>Motoren deler reaktionstværsnittet fra kapitel 2 i rækkefølge: først direkte reaktioner, så hurtige kollisioner, og kun resten danner en compoundkerne. På billedet møder hver neutron én af tre skæbner: <b>direkte</b> (strejfer og flyver videre), hurtig (slår en nukleon ud, før energien fordeles: <b>præligevægt</b>, kapitel 4) eller slugt (en <b>compoundkerne</b>, kapitel 5). Bunkerne tæller dem.</p>
+  <p>Motoren deler reaktionstværsnittet fra kapitel 5 i rækkefølge: først direkte reaktioner, så hurtige kollisioner, og kun resten danner en compoundkerne. På billedet møder hver neutron én af tre skæbner: <b>direkte</b> (strejfer og flyver videre), hurtig (slår en nukleon ud, før energien fordeles: <b>præligevægt</b>, kapitel 7) eller slugt (en <b>compoundkerne</b>, kapitel 8). Bunkerne tæller dem.</p>
   <div class="ctl"><label for="di-e">Neutronenergi (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>Træk i energien og se bunkerne fyldes igen. Ved nogle få MeV bliver næsten alle neutroner slugt. Ved flere titals MeV tager direkte reaktioner og hurtige kollisioner tilsammen en stor del.</p>
   <div class="aside">I koden: <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (deformeret potential, koblede kanaler for rotorer og vibratorer), <code>ecis/dwba.py</code> og <code>direct/dwba.py</code> (enkelt skub, kæmperesonanser, kollektivt kontinuum), <code>direct/racapcalc.py</code> (direkte indfangning, valgfri, slået fra som standard), <code>compound/normalization.py</code> (regnskabet).</div>

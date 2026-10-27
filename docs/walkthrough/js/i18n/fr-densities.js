@@ -1,7 +1,7 @@
-/* French: densities (Chapitre 18, expert: level densities, matched) */
+/* French: densities (Chapitre 24, expert: level densities, matched) */
 WT.L.ch.densities = {
-  num: "Chapitre 18", title: "Densités de niveaux : le raccordement", short: "Densités de niveaux",
-  lead: "Le chapitre 5 raccordait une planche droite à un versant. Ce chapitre écrit les deux lois, montre comment le point de raccordement se déduit des niveaux dénombrés, et ce qui se passe quand ce point n'existe pas.",
+  num: "Chapitre 24", title: "Densités de niveaux : le raccordement", short: "Densités de niveaux",
+  lead: "Le chapitre 8 raccordait une planche droite à un versant. Ce chapitre écrit les deux lois, montre comment le point de raccordement se déduit des niveaux dénombrés, et ce qui se passe quand ce point n'existe pas.",
   html: `
 <div class="step">
   <h3>Le gaz de Fermi aux effets de couches amortis</h3>

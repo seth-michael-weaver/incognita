@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): compound (chapter 5) */
 WT.L.ch.compound = {
-  num: "Capítulo 5", title: "Partilhar a energia", short: "Núcleo composto",
+  num: "Capítulo 8", title: "Partilhar a energia", short: "Núcleo composto",
   lead: "Quando terminam as primeiras colisões rápidas, todos os nucleões partilham a energia. Este estado assente é o núcleo composto. Para prever o que fará a seguir, o motor precisa de saber de quantas maneiras pode guardar a sua energia.",
   html: `
 <div class="step">

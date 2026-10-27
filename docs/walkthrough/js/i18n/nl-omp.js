@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): omp (Hoofdstuk 2, het optisch model) */
+/* Dutch (Nederlands): omp (Hoofdstuk 5, het optisch model) */
 WT.L.ch.omp = {
-  num: "Hoofdstuk 2", title: "Een troebele glazen bol", short: "Optisch model",
+  num: "Hoofdstuk 5", title: "Een troebele glazen bol", short: "Optisch model",
   lead: "Voor alles stelt de motor een eenvoudigere vraag: hoe ziet de kern eruit voor een binnenkomend neutron?",
   html: `
 <div class="step">

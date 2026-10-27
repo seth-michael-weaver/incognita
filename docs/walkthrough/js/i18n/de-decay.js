@@ -1,12 +1,12 @@
-/* German (Deutsch): decay (Kapitel 6, einen Ausgang wählen) */
+/* German (Deutsch): decay (Kapitel 9, einen Ausgang wählen) */
 WT.L.ch.decay = {
-  num: "Kapitel 6", title: "Einen Ausgang wählen", short: "Zerfall",
+  num: "Kapitel 9", title: "Einen Ausgang wählen", short: "Zerfall",
   lead: "Der Compoundkern muss seine Energie loswerden, indem er ein Teilchen oder ein Photon aussendet. Dieses Kapitel zeichnet jeden Ausweg als Tür. Die Aufgabe der Engine ist es, anzugeben, welcher Anteil des Flusses (des Stroms der hier ankommenden Reaktionen) durch jede Tür hinausgeht.",
   html: `
 <div class="step">
   <p>Eine Tür pro Ausgang: ein <em class="g">Photon</em> (γ), ein <em class="n">Neutron</em> (n), ein <em class="p">Proton</em> (p), ein <em class="a">Alphateilchen</em> (α: zwei Protonen und zwei Neutronen) und, nur bei schweren Kernen, die <em class="f">Spaltung</em> (Teilung in zwei). Der helle Spalt in jeder Tür ist der Anteil dieses Ausgangs, und die Kugeln strömen mit denselben Raten hinaus; graue Türen sind zu. Da der Kern vergessen hat, wie er entstanden ist, nutzt er jede Tür b im Verhältnis zu einem Gewicht:</p>
   <div class="formula">Anteil<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p>Der <b>Transmissionskoeffizient</b> <i>T</i> ist die Wahrscheinlichkeit, dass ein Teilchen, das den Rand erreicht, hindurchkommt; für Teilchen stammt er aus dem optischen Modell aus Kapitel 2, rückwärts angewandt. Die <b>Niveaudichte</b> ρ, neben jeder Tür notiert, zählt die Zustände, in denen der zurückbleibende Kern landen kann. Die Aufteilung nach <i>T</i> mal ρ ist die <b>Hauser–Feshbach</b>-Regel. Bei 10 MeV nimmt die Neutronentür fast alles.</p>
+  <p>Der <b>Transmissionskoeffizient</b> <i>T</i> ist die Wahrscheinlichkeit, dass ein Teilchen, das den Rand erreicht, hindurchkommt; für Teilchen stammt er aus dem optischen Modell aus Kapitel 5, rückwärts angewandt. Die <b>Niveaudichte</b> ρ, neben jeder Tür notiert, zählt die Zustände, in denen der zurückbleibende Kern landen kann. Die Aufteilung nach <i>T</i> mal ρ ist die <b>Hauser–Feshbach</b>-Regel. Bei 10 MeV nimmt die Neutronentür fast alles.</p>
 </div>
 <div class="step">
   <h3>Warum die meisten Teilchen langsam herauskommen</h3>
@@ -31,7 +31,7 @@ WT.L.ch.decay = {
   <h3>Spin und Parität müssen aufgehen</h3>
   <p>Der Compoundkern (oben) hat den Spin <i>J</i>; die Zustände des zurückbleibenden Kerns liegen darunter in Schubladen nach Spin <i>J</i>′. Das Neutron trägt die Differenz von Spin und Parität fort: Verlässt es den Kern mit Bahndrehimpuls <i>l</i>, ändert es den Spin um bis zu <i>l</i> + ½ und kehrt die Parität um, wenn <i>l</i> ungerade ist. Größeres <i>l</i> bedeutet eine schmalere Tür; die Tür jeder Schublade ist das kleinste <i>l</i>, das sie erreicht. Volle Landungen behalten die Parität; hohle kehren sie um.</p>
   <div class="ctl"><label for="dc-j">Compoundspin J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>Erhöhe <i>J</i>. Die offenen Türen rutschen zu Schubladen mit hohem Spin, die wenige Zustände enthalten, während die vollen Schubladen hinter geschlossenen Türen liegen. Ein Compoundkern mit hohem Spin sendet nur zögerlich Teilchen aus, und das gibt Photonen und Isomeren (langlebigen Zuständen, Kapitel 7) ihre Chance.</p>
+  <p>Erhöhe <i>J</i>. Die offenen Türen rutschen zu Schubladen mit hohem Spin, die wenige Zustände enthalten, während die vollen Schubladen hinter geschlossenen Türen liegen. Ein Compoundkern mit hohem Spin sendet nur zögerlich Teilchen aus, und das gibt Photonen und Isomeren (langlebigen Zuständen, Kapitel 10) ihre Chance.</p>
 </div>
 <div class="step">
   <h3>Der Weg, auf dem du hereinkamst</h3>
@@ -43,7 +43,7 @@ WT.L.ch.decay = {
 </div>
 <div class="step">
   <h3>Was zum Verteilen übrig bleibt</h3>
-  <p>Nicht jedes absorbierte Neutron bildet einen Compoundkern. Manche treffen einmal streifend und fliegen davon (direkte Reaktionen, Kapitel 3); manche stoßen ein- oder zweimal herum und schießen schnell hinaus (Präequilibrium, Kapitel 4). Nur der Rest bleibt und heizt den Kern auf. Die Zähler verbuchen jedes Schicksal.</p>
+  <p>Nicht jedes absorbierte Neutron bildet einen Compoundkern. Manche treffen einmal streifend und fliegen davon (direkte Reaktionen, Kapitel 6); manche stoßen ein- oder zweimal herum und schießen schnell hinaus (Präequilibrium, Kapitel 7). Nur der Rest bleibt und heizt den Kern auf. Die Zähler verbuchen jedes Schicksal.</p>
   <div class="ctl"><label for="dc-einc">Neutronenenergie</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Nur die, die bleiben, nehmen am Wettbewerb der Türen teil. Ändere die Neutronenenergie: Bei einigen MeV bleiben fast alle; bei 30 MeV ist etwa die Hälfte gegangen, bevor das Gleichgewicht erreicht ist.</p>
   <div class="aside">Im Code: <code>compound/prepare.py</code> (Ausgangsgewichte T·ρ pro Spin und Parität, Auswahlregeln), <code>compound/target.py</code> (erster Zerfall mit Breitenfluktuationen), <code>compound/continuum.py</code> (Zerfall jedes späteren Intervalls), <code>compound/wfc.py</code> (Korrekturen nach Moldauer, HRTW, GOE), <code>compound/normalization.py</code> (für den Compoundkern verbleibender Fluss), <code>omp/inverse.py</code> (Türen rückwärts).</div>

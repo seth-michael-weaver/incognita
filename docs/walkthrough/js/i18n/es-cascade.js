@@ -1,6 +1,6 @@
 /* Spanish: cascade (chapter 8) */
 WT.es.ch.cascade = {
-  num: "Capítulo 8", title: "Bajando por la carta", short: "Cascada",
+  num: "Capítulo 11", title: "Bajando por la carta", short: "Cascada",
   lead: "Una emisión rara vez es el final: el núcleo que queda suele seguir lo bastante caliente para volver a emitir.",
   html: `
 <div class="step">
@@ -19,7 +19,7 @@ WT.es.ch.cascade = {
 <div class="step">
   <h3>De arriba abajo, intervalo a intervalo</h3>
   <p>El motor vacía cada núcleo de arriba abajo, una rebanada de energía, o <b>intervalo</b>, cada vez. A la derecha, el residual de la primera emisión; a la izquierda, su hijo, con un neutrón menos. Las bolas naranjas son reacciones que esperan en cada intervalo. Aquí los intervalos miden 1 MeV; el motor usa unos 40 por núcleo, ajustados a la energía disponible.</p>
-  <p>Cuando el marcador barre un intervalo, cada bola toma una salida según la competencia del capítulo 6: un fotón (<em class="g">γ</em>) la baja a un intervalo inferior, un <em class="n">neutrón</em> la lleva al hijo, un protón o una alfa la sacan del dibujo. Por debajo de todos los umbrales, los fotones llevan el resto al estado fundamental (gris). Después se barre el hijo.</p>
+  <p>Cuando el marcador barre un intervalo, cada bola toma una salida según la competencia del capítulo 9: un fotón (<em class="g">γ</em>) la baja a un intervalo inferior, un <em class="n">neutrón</em> la lleva al hijo, un protón o una alfa la sacan del dibujo. Por debajo de todos los umbrales, los fotones llevan el resto al estado fundamental (gris). Después se barre el hijo.</p>
   <div class="ctl"><label for="cs-e3">Energía del neutrón</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Empezar de nuevo</button></div>
   <p>Los fotones solo bajan, y cada núcleo se termina antes que sus hijos, así que nada cae en un intervalo ya vaciado.</p>

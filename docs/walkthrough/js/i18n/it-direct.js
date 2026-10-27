@@ -1,6 +1,6 @@
-/* Italian: direct (Capitolo 3, reazioni dirette) */
+/* Italian: direct (Capitolo 6, reazioni dirette) */
 WT.L.ch.direct = {
-  num: "Capitolo 3", title: "Un colpo di striscio", short: "Reazioni dirette",
+  num: "Capitolo 6", title: "Un colpo di striscio", short: "Reazioni dirette",
   lead: "Non ogni neutrone che raggiunge il nucleo viene inghiottito. Alcuni ne sfiorano la superficie, gli danno una spinta e proseguono il volo.",
   html: `
 <div class="step">
@@ -24,7 +24,7 @@ WT.L.ch.direct = {
 </div>
 <div class="step">
   <h3>Una spinta, una volta</h3>
-  <p>Per la maggior parte dei livelli il collegamento è debole e basta una spinta: la <b>DWBA</b> (approssimazione di Born a onde distorte). L'onda entrante del capitolo 2 spinge il nucleo una volta, sul bordo, dove il potenziale scende da profondo a zero; il bordo si illumina dove lo colpiscono le creste. L'onda circolare che si allarga sono i neutroni che hanno lasciato il nucleo eccitato.</p>
+  <p>Per la maggior parte dei livelli il collegamento è debole e basta una spinta: la <b>DWBA</b> (approssimazione di Born a onde distorte). L'onda entrante del capitolo 5 spinge il nucleo una volta, sul bordo, dove il potenziale scende da profondo a zero; il bordo si illumina dove lo colpiscono le creste. L'onda circolare che si allarga sono i neutroni che hanno lasciato il nucleo eccitato.</p>
   <div class="ctl"><label for="di-bd">Deformazione del livello β</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>Trascina <i>β</i>: il bordo oscilla di più e i cerchi si illuminano, come <i>β</i>²: doppia deformazione, quattro volte tanti. Il motore prende il <i>β</i> di ogni livello da valori misurati, o da sistematiche dove non se ne conosce nessuno. Come si distribuiscono in angolo i neutroni diffusi è un'uscita aggiuntiva opzionale.</p>
 </div>
@@ -33,17 +33,17 @@ WT.L.ch.direct = {
   <p>Tutti i nucleoni possono muoversi insieme: respirare, schiacciarsi e allungarsi, oppure oscillare verso una forma a pera. Sono le <b>risonanze giganti</b>. In questo nucleo di massa media si trovano tra circa 7 e 25 MeV, ciascuna larga diversi MeV, troppo ampia per contare come un solo livello; le gobbe segnano l'<b>energia di eccitazione</b> di ciascuna.</p>
   <p>Il motore fissa l'intensità totale di ciascuna con una <b>regola di somma</b>, un limite dato dalla fisica di base a quanto fortemente un nucleo può rispondere, e la distribuisce come una gobba sopra l'ultimo livello noto. Queste gobbe, più le spinte verso livelli alti, formano il <b>continuo collettivo</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Respiro</button><button class="btn ghost" data-act="quad">Schiacciamento</button><button class="btn ghost" data-act="oct">Pera</button></div>
-  <p>La più nota, i protoni che oscillano contro i neutroni (la risonanza gigante di dipolo), soprattutto assorbe ed emette luce, quindi appartiene al capitolo 7.</p>
+  <p>La più nota, i protoni che oscillano contro i neutroni (la risonanza gigante di dipolo), soprattutto assorbe ed emette luce, quindi appartiene al capitolo 10.</p>
 </div>
 <div class="step">
   <h3>Dritto in un'orbita</h3>
-  <p>Un neutrone libero può cadere direttamente in un'<b>orbita</b> vuota della buca (un'energia permessa per un neutrone all'interno) ed emettere l'energia in eccesso come un <em class="g">fotone</em>. Il nucleo non si riscalda mai. Questa è la <b>cattura diretta</b>. Il motore può calcolarla con la stessa buca del capitolo 2: l'onda libera fuori, l'orbita legata dentro, il fotone che le collega. È opzionale e disattivata per impostazione predefinita.</p>
+  <p>Un neutrone libero può cadere direttamente in un'<b>orbita</b> vuota della buca (un'energia permessa per un neutrone all'interno) ed emettere l'energia in eccesso come un <em class="g">fotone</em>. Il nucleo non si riscalda mai. Questa è la <b>cattura diretta</b>. Il motore può calcolarla con la stessa buca del capitolo 5: l'onda libera fuori, l'orbita legata dentro, il fotone che le collega. È opzionale e disattivata per impostazione predefinita.</p>
   <div class="btns"><button class="btn" data-act="drop">Fai cadere un neutrone</button></div>
   <p>La cattura diretta conta soprattutto dove la via abituale, spartire l'energia del neutrone, è debole: nuclei leggeri e nuclei lontani dalla stabilità, con pochi livelli molto distanziati.</p>
 </div>
 <div class="step">
   <h3>Il diretto prende per primo la sua parte</h3>
-  <p>Il motore ripartisce in ordine la sezione d'urto di reazione del capitolo 2: prima le reazioni dirette, poi le collisioni rapide, e solo ciò che resta forma un nucleo composto. Nell'immagine ogni neutrone va incontro a uno di tre destini: <b>diretto</b> (sfiora e prosegue), rapido (fa uscire un nucleone prima che l'energia si distribuisca: <b>pre-equilibrio</b>, capitolo 4) o inghiottito (un <b>nucleo composto</b>, capitolo 5). I mucchi li contano.</p>
+  <p>Il motore ripartisce in ordine la sezione d'urto di reazione del capitolo 5: prima le reazioni dirette, poi le collisioni rapide, e solo ciò che resta forma un nucleo composto. Nell'immagine ogni neutrone va incontro a uno di tre destini: <b>diretto</b> (sfiora e prosegue), rapido (fa uscire un nucleone prima che l'energia si distribuisca: <b>pre-equilibrio</b>, capitolo 7) o inghiottito (un <b>nucleo composto</b>, capitolo 8). I mucchi li contano.</p>
   <div class="ctl"><label for="di-e">Energia del neutrone (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>Trascina l'energia e guarda i mucchi riempirsi di nuovo. A pochi MeV quasi ogni neutrone viene inghiottito. A decine di MeV, reazioni dirette e collisioni rapide insieme ne prendono una grossa parte.</p>
   <div class="aside">Nel codice: <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (potenziale deformato, canali accoppiati per rotori e vibratori), <code>ecis/dwba.py</code> e <code>direct/dwba.py</code> (spinta singola, risonanze giganti, continuo collettivo), <code>direct/racapcalc.py</code> (cattura diretta, opzionale, disattivata per impostazione predefinita), <code>compound/normalization.py</code> (la contabilità).</div>

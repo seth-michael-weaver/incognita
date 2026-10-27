@@ -1,6 +1,6 @@
-/* German (Deutsch): measure (Kapitel 12, Observablen) */
+/* German (Deutsch): measure (Kapitel 17, Observablen) */
 WT.L.ch.measure = {
-  num: "Kapitel 12", title: "Was herauskommt", short: "Observablen",
+  num: "Kapitel 17", title: "Was herauskommt", short: "Observablen",
   lead: "Ein Experiment, ein Reaktor oder ein Stern sieht nur eine Handvoll Zahlen. Dieses Kapitel zeigt, wie die Engine das, was im Kern geschieht, in diese Zahlen übersetzt.",
   html: `
 <div class="step">
@@ -12,7 +12,7 @@ WT.L.ch.measure = {
   <h3>Mit der Energie öffnen sich neue Ausgänge</h3>
   <p>Jede Tür ist ein Ausgang, ein <b>Kanal</b>: Das Neutron prallt ab (elastisch), lässt das Target angeregt zurück (n′), schlägt weitere Neutronen heraus (2n, 3n), wird eingefangen, wobei nur Photonen hinausgehen (γ), oder stattdessen geht ein Proton oder ein α-Teilchen. Eine Tür mit Vorhängeschloss hat eine <b>Schwelle</b>: Die Reaktion kostet mehr Energie, als das Neutron mitbringt.</p>
   <div class="ctl"><label for="mea-e2">Neutronenenergie (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Zieh die Energie über eine Schwelle, und diese Tür springt auf; die Eimer füllen sich bis zum Anteil jedes Kanals, und jede neue Tür nimmt den anderen Anteile ab. Die Schwellen ergeben sich aus den Massen der Kerne; die Anteile aus dem Wettbewerb aus Kapitel 6.</p>
+  <p>Zieh die Energie über eine Schwelle, und diese Tür springt auf; die Eimer füllen sich bis zum Anteil jedes Kanals, und jede neue Tür nimmt den anderen Anteile ab. Die Schwellen ergeben sich aus den Massen der Kerne; die Anteile aus dem Wettbewerb aus Kapitel 9.</p>
 </div>
 <div class="step">
   <h3>Was ein Detektor sieht</h3>

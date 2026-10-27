@@ -1,6 +1,6 @@
-/* Italian: fission (Capitolo 9, fissione) */
+/* Italian: fission (Capitolo 12, fissione) */
 WT.L.ch.fission = {
-  num: "Capitolo 9", title: "Spezzarsi in due", short: "Fissione",
+  num: "Capitolo 12", title: "Spezzarsi in due", short: "Fissione",
   lead: "I nuclei più pesanti hanno un'uscita che a quelli leggeri manca: invece di espellere una particella, l'intero nucleo si strappa in due. Questa è la fissione.",
   html: `
 <div class="step">

@@ -1,4 +1,4 @@
-/* Chapter 19 (Expert): photon strength, transmission, <Gamma_gamma> and the cascade (gamma/strength.py, gamma/transmission.py).
+/* Chapter 25 (Expert): photon strength, transmission, <Gamma_gamma> and the cascade (gamma/strength.py, gamma/transmission.py).
  * Scenes (S.mode): "e1"     = f_E1(E_gamma): the standard Lorentzian (SLO) against SMLO at a final-state temperature T;
  *                              a small proton/neutron dipole oscillation for the giant resonance;
  *                   "m1"     = f_M1: spin-flip Lorentzian, scissors (strength ~ beta^2), low-energy upbend; E1 faint behind;
@@ -13,7 +13,7 @@
  * T_XL = 2 pi E^(2L+1) f_XL.
  * The engine's default E1 is the tabulated SMLO-2019 strength (strength 9) and the IAEA-CRP M1 with upbend (strengthM1 3);
  * the closed forms here stand in for those tables. Illustrative compound nucleus: A = 57 (iron-57-like), S_n = 7.65 MeV,
- * level density as in Chapter 18 with a~ scaled by 0.918 (D0 ~ 28 keV); measured <Gamma_gamma> = 0.92 eV (RIPL, 57Fe). */
+ * level density as in Chapter 24 with a~ scaled by 0.918 (D0 ~ 28 keV); measured <Gamma_gamma> = 0.92 eV (RIPL, 57Fe). */
 (function () {
   const { TAU, clamp, lerp, smooth, rng } = WT.util;
   const log10 = (x) => Math.log(x) / Math.LN10;
@@ -30,7 +30,7 @@
   const fSF = (E) => slo(E, EM, GM, SM1);
   const fSC = (E, beta) => (beta > 0 ? slo(E, 3.0, 1.5, 1) * 1.0e-9 / slo(3, 3.0, 1.5, 1) * (beta / 0.25) ** 2 : 0);
   const fUP = (E, on) => (on ? 3.6e-9 * Math.exp(-0.9 * E) : 0);
-  // level density of the compound nucleus (Chapter 18 formulas; a~ scaled so that D0 ~ 25 keV)
+  // level density of the compound nucleus (Chapter 24 formulas; a~ scaled so that D0 ~ 25 keV)
   const AT = (0.0692559 * A + 0.282769 * Math.pow(A, 2 / 3)) * 0.918, DEL = 12 / Math.sqrt(A), SIG2C = (U) => Math.hypot(2, 0.01389 * Math.pow(A, 5 / 3) / AT * Math.sqrt(AT * Math.max(U, 0.01)));   // smooth floor near 2 at low energy
   const lnFG = (E) => { const U = Math.max(E - DEL, 0.05); return 2 * Math.sqrt(AT * U) - Math.log(12 * Math.SQRT2 * Math.sqrt(SIG2C(U)) * Math.pow(AT, 0.25) * Math.pow(U, 1.25)); };
   const EXM = 5.0, TCT = (() => { const h = 0.01; return 1 / ((lnFG(EXM + h) - lnFG(EXM - h)) / (2 * h)); })(), E0CT = EXM - TCT * (Math.log(TCT) + lnFG(EXM));
@@ -67,8 +67,8 @@
   });
 
   WT.chapter("strength", {
-    num: "Chapter 19", title: "Photon strength, in detail", short: "Photon strength",
-    lead: "Chapter 7 showed which photons a hot nucleus prefers. This chapter writes the strength functions down, follows them into transmission coefficients and the average radiative width, and runs the cascade they drive.",
+    num: "Chapter 25", title: "Photon strength, in detail", short: "Photon strength",
+    lead: "Chapter 10 showed which photons a hot nucleus prefers. This chapter writes the strength functions down, follows them into transmission coefficients and the average radiative width, and runs the cascade they drive.",
     html: `
 <div class="step">
   <h3>E1: the tail of the giant dipole resonance</h3>
@@ -102,7 +102,7 @@
   <h3>The cascade</h3>
   <p>Below the first photon the same rule repeats: from each new energy the next photon is drawn from <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>), until the nucleus reaches its known levels. Each history is a few photons; their summed spectrum is what a calorimeter sees after capture.</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">Upbend</button><button class="btn ghost" data-act="clear">Start again</button></div>
-  <p>The upbend adds soft photons and a little to the multiplicity. The engine does not draw histories: it moves populations bin by bin, top down (Chapter 8), which gives the same averages without sampling noise.</p>
+  <p>The upbend adds soft photons and a little to the multiplicity. The engine does not draw histories: it moves populations bin by bin, top down (Chapter 11), which gives the same averages without sampling noise.</p>
   <div class="aside">In the code: <code>gamma/strength.py</code> (every strength model TALYS supports; default SMLO-2019 tables and the IAEA M1 with upbend), <code>gamma/parameters.py</code> (giant-resonance systematics, tables), <code>gamma/transmission.py</code> (T = 2π E<sup>2L+1</sup> f), <code>gamma/ggnorm.py</code> (optional ⟨Γγ⟩ normalisation), <code>emission/</code> (the cascade). The picture uses closed forms and systematics for an iron-57-like nucleus; the measured ⟨Γγ⟩ is the RIPL value for ⁵⁷Fe.</div>
 </div>`,
     setup(S) {

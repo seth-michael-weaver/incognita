@@ -23,17 +23,17 @@ Object.assign(WT.L.ui, {
     <thead><tr><th>章节</th><th>功能</th><th>代码</th></tr></thead>
     <tbody>
       <tr><td><a href="#structure">1</a></td><td>质量、能级、形变、共振数据</td><td><code>structure/</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>光学模型、穿透系数（粒子进出原子核的难易程度）</td><td><code>omp/</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>耦合道、DWBA、巨共振、直接俘获（可选）</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
-      <tr><td><a href="#preeq">4</a></td><td>预平衡：激子模型、拾取与敲出、多次发射</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>能级密度（每 MeV 的状态数）、自旋分布</td><td><code>density/</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td>选择出射道（Hauser–Feshbach）、宽度涨落</td><td><code>compound/</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>光子强度与 γ 穿透；分立能级与同质异能态</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
-      <tr><td><a href="#cascade">8</a></td><td>粒子与 γ 发射的级联、排他反应道、剩余核</td><td><code>emission/</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>裂变势垒与穿透</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>发射谱、角分布与双微分截面（可选，仅输出）</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>热激发靶核上的俘获与恒星反应率（可选）</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>通过大量随机变体评估不确定度（全蒙特卡罗）</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>光学模型、穿透系数（粒子进出原子核的难易程度）</td><td><code>omp/</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>耦合道、DWBA、巨共振、直接俘获（可选）</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
+      <tr><td><a href="#preeq">7</a></td><td>预平衡：激子模型、拾取与敲出、多次发射</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>能级密度（每 MeV 的状态数）、自旋分布</td><td><code>density/</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td>选择出射道（Hauser–Feshbach）、宽度涨落</td><td><code>compound/</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>光子强度与 γ 穿透；分立能级与同质异能态</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td>粒子与 γ 发射的级联、排他反应道、剩余核</td><td><code>emission/</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>裂变势垒与穿透</td><td><code>fission/</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>发射谱、角分布与双微分截面（可选，仅输出）</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>热激发靶核上的俘获与恒星反应率（可选）</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>通过大量随机变体评估不确定度（全蒙特卡罗）</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>按顺序运行各阶段的主控程序，以及用于加速的可选 C 内核</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>所有默认值和选项，在开始时读取一次；还有 TENDL 逐核素拟合的参数，按 TALYS 的方式使用（可选）</td><td><code>input/</code></td></tr>
     </tbody>
@@ -43,33 +43,33 @@ Object.assign(WT.L.ui, {
   coda_table_added: `
     <thead><tr><th>章节</th><th>改动内容</th><th>代码</th></tr></thead>
     <tbody>
-      <tr><td><a href="#cascade">8</a></td><td><b>开启。</b>通量记账闭合：剩余核保留到 10⁻⁹ mb（TALYS：10⁻³ mb），保留超出 TALYS 级联窗口一步的剩余核，排他反应道中每种出射粒子最多计 8 个，一个能级重复出现的退激分支全部计入</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>开启。</b>第一个复合核的最高能量区间按初级光子的填充方式（以 E<sub>γ</sub>³ 加权）填充，而不是均匀填充</td><td><code>compound/nnleak.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>开启。</b>在最低的几个共振以下（低于 1 keV）不计平均复合弹性散射，那里的弹性散射是势散射</td><td><code>lowepot.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>开启。</b>无裂变的形变靶核：通往耦合带以外能级的中子出射道采用耦合道穿透系数</td><td><code>compound/ccexitnb.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td><b>开启。</b>α发射所见的势依赖于剩余核的温度；α入射粒子通过 α 模型 6 进入；氚核与氦-3 的势计入入射粒子的尺寸</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td><b>开启。</b>精确计算穿过每个势垒峰的一维穿透</td><td><code>fission/wkb.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td><b>开启。</b>运行中若提供了逐核的 E1/M1 强度因子，则以一个关于形变的全局函数取代</td><td><code>gamma/ftglobal.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td><b>开启。</b>对没有自身实测共振间距 D₀ 的靶核：在 max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV 以上，将靶核连续区的能级密度乘以一个因子，该因子由一条基于宇称、壳层和形变特征的全局规则给出。加入它是为了把阈能附近 (n,p) 对 TALYS-2 默认输入的落后变为持平；它使俘获、(n,2n) 和 (n,α) 的几个视角略有变差，这一代价已被接受并记录</td><td><code>density/npwindow.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>形变核中更强的剪刀模式，采用与 Oslo 测量相符的较新系统学（在锕系核中约为 4–5 倍）；或一种按形变缩放其能量和强度的变体</td><td><code>gamma/scissors.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>重新标定光子强度，使每个原子核与其测得的辐射强度 ⟨Γγ⟩/D₀ 一致，适用于级联中的每个原子核，而不仅是第一个</td><td><code>gamma/ggnorm.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>仅对最重的原子核（Z ≥ 88）采用更强的剪刀模式和 ⟨Γγ⟩ 归一化，面向 keV 能区的俘获</td><td><code>gamma/actphys.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>用我们自己的 E1 宽度常数取代 TALYS 由 TENDL 导出的表格（随附的无数据配方会设定它）</td><td><code>gamma/e1_width.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>准连续区中转动带的集体 E2 强度</td><td><code>gamma/isoe2.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>针对形变稀土靶核的光学势阱区域性调整，拟合测得的 S₀ 和 S₁，不使用俘获数据</td><td><code>omp/regional.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>由测得的中子强度函数 S₀、S₁ 确定低能中子穿透</td><td><code>omp/sfunc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>直接俘获到束缚轨道，并修复了上游问题：在原版 TALYS 中，除非同时要求输出光学模型的全部结果，否则它返回零</td><td><code>direct/racapcalc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>根据靶核测得的能级选择其耦合方案（转动核、振动核、球形核）</td><td><code>structure/collrule.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td><b>开启。</b>通量记账闭合：剩余核保留到 10⁻⁹ mb（TALYS：10⁻³ mb），保留超出 TALYS 级联窗口一步的剩余核，排他反应道中每种出射粒子最多计 8 个，一个能级重复出现的退激分支全部计入</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>开启。</b>第一个复合核的最高能量区间按初级光子的填充方式（以 E<sub>γ</sub>³ 加权）填充，而不是均匀填充</td><td><code>compound/nnleak.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>开启。</b>在最低的几个共振以下（低于 1 keV）不计平均复合弹性散射，那里的弹性散射是势散射</td><td><code>lowepot.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>开启。</b>无裂变的形变靶核：通往耦合带以外能级的中子出射道采用耦合道穿透系数</td><td><code>compound/ccexitnb.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td><b>开启。</b>α发射所见的势依赖于剩余核的温度；α入射粒子通过 α 模型 6 进入；氚核与氦-3 的势计入入射粒子的尺寸</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td><b>开启。</b>精确计算穿过每个势垒峰的一维穿透</td><td><code>fission/wkb.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td><b>开启。</b>运行中若提供了逐核的 E1/M1 强度因子，则以一个关于形变的全局函数取代</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td><b>开启。</b>对没有自身实测共振间距 D₀ 的靶核：在 max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV 以上，将靶核连续区的能级密度乘以一个因子，该因子由一条基于宇称、壳层和形变特征的全局规则给出。加入它是为了把阈能附近 (n,p) 对 TALYS-2 默认输入的落后变为持平；它使俘获、(n,2n) 和 (n,α) 的几个视角略有变差，这一代价已被接受并记录</td><td><code>density/npwindow.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>形变核中更强的剪刀模式，采用与 Oslo 测量相符的较新系统学（在锕系核中约为 4–5 倍）；或一种按形变缩放其能量和强度的变体</td><td><code>gamma/scissors.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>重新标定光子强度，使每个原子核与其测得的辐射强度 ⟨Γγ⟩/D₀ 一致，适用于级联中的每个原子核，而不仅是第一个</td><td><code>gamma/ggnorm.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>仅对最重的原子核（Z ≥ 88）采用更强的剪刀模式和 ⟨Γγ⟩ 归一化，面向 keV 能区的俘获</td><td><code>gamma/actphys.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>用我们自己的 E1 宽度常数取代 TALYS 由 TENDL 导出的表格（随附的无数据配方会设定它）</td><td><code>gamma/e1_width.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>准连续区中转动带的集体 E2 强度</td><td><code>gamma/isoe2.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>针对形变稀土靶核的光学势阱区域性调整，拟合测得的 S₀ 和 S₁，不使用俘获数据</td><td><code>omp/regional.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>由测得的中子强度函数 S₀、S₁ 确定低能中子穿透</td><td><code>omp/sfunc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>直接俘获到束缚轨道，并修复了上游问题：在原版 TALYS 中，除非同时要求输出光学模型的全部结果，否则它返回零</td><td><code>direct/racapcalc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>根据靶核测得的能级选择其耦合方案（转动核、振动核、球形核）</td><td><code>structure/collrule.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>连续区从实测能级纲图不再完整的位置开始</td><td><code>structure/levcomplete.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>若某能级列出的自旋对该原子核不可能（奇 A 核却为整数），则按自旋未知的能级处理</td><td><code>structure/levjpar.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>恒温能级密度锚定在分立能级的完整部分上</td><td><code>density/ctwindow2.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>裂变鞍点上过渡态的转动带</td><td><code>fission/barriers.py</code></td></tr>
-      <tr><td><a href="#resonance">10</a></td><td>恒星窗口中只有少数几个共振时的俘获：取一个共振序列的典型值，而不是平均值</td><td><code>fewres.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>恒温能级密度锚定在分立能级的完整部分上</td><td><code>density/ctwindow2.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>裂变鞍点上过渡态的转动带</td><td><code>fission/barriers.py</code></td></tr>
+      <tr><td><a href="#resonance">15</a></td><td>恒星窗口中只有少数几个共振时的俘获：取一个共振序列的典型值，而不是平均值</td><td><code>fewres.py</code></td></tr>
       <tr><td></td><td>远离稳定线时的四项防护：直接通量受幺正性限制，费米能设上限，奇奇核默认不加集体性，预平衡自旋分布归一化</td><td><code>engphys.py</code></td></tr>
     </tbody>
   `,
   coda_h3_outside: "引擎之外",
-  coda_p_outside: "故事中有些部分在引擎旁边运行，而不在引擎内部。<a href=\"#resonance\">第 10 章</a>的统计共振序列位于 <code>physics/resonance/</code>。<a href=\"#measure\">第 12 章</a>的麦克斯韦平均（MACS）是在运行结束后，由引擎给出的俘获曲线在 <code>validation/differential/core.py</code> 中折算得到的；而热激发靶核上的俘获和恒星反应率则由引擎本身计算（<code>astro/stellar.py</code>，可选）。<a href=\"#layers\">第 15 章</a>的锚定层位于 <code>incognita/terra/</code>。",
+  coda_p_outside: "故事中有些部分在引擎旁边运行，而不在引擎内部。<a href=\"#resonance\">第 15 章</a>的统计共振序列位于 <code>physics/resonance/</code>。<a href=\"#measure\">第 17 章</a>的麦克斯韦平均（MACS）是在运行结束后，由引擎给出的俘获曲线在 <code>validation/differential/core.py</code> 中折算得到的；而热激发靶核上的俘获和恒星反应率则由引擎本身计算（<code>astro/stellar.py</code>，可选）。<a href=\"#layers\">第 21 章</a>的锚定层位于 <code>incognita/terra/</code>。",
   close: "关闭",
   chapters: "章节",
   nav_board: "记分板", nav_data_short: "数据",

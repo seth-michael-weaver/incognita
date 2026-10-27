@@ -1,11 +1,11 @@
-/* Italian: hauser (Capitolo 16, Hauser–Feshbach canale per canale) */
+/* Italian: hauser (Capitolo 22, Hauser–Feshbach canale per canale) */
 WT.L.ch.hauser = {
-  num: "Capitolo 16", title: "Hauser–Feshbach, canale per canale", short: "Hauser–Feshbach",
-  lead: "Il capitolo 6 ha raccontato la competizione fra le uscite come una serie di porte. Ecco la formula che sta dietro le porte, un canale alla volta, e la correzione che le serve quando i canali aperti sono pochi.",
+  num: "Capitolo 22", title: "Hauser–Feshbach, canale per canale", short: "Hauser–Feshbach",
+  lead: "Il capitolo 9 ha raccontato la competizione fra le uscite come una serie di porte. Ecco la formula che sta dietro le porte, un canale alla volta, e la correzione che le serve quando i canali aperti sono pochi.",
   html: `
 <div class="step">
   <h3>Una trasmissione per ogni canale</h3>
-  <p>Un <b>canale</b> è un indirizzo d'uscita completo: quale particella, in quale stato resta il nucleo residuo, il momento angolare orbitale <i>l</i> e il momento totale <i>j</i> = <i>l</i> ± ½ della particella. Il modello ottico del capitolo 2 assegna a ciascuno un <b>coefficiente di trasmissione</b> <i>T<sub>lj</sub></i>. Le colonne sono quelle del neutrone incidente, per un bersaglio di spin 0.</p>
+  <p>Un <b>canale</b> è un indirizzo d'uscita completo: quale particella, in quale stato resta il nucleo residuo, il momento angolare orbitale <i>l</i> e il momento totale <i>j</i> = <i>l</i> ± ½ della particella. Il modello ottico del capitolo 5 assegna a ciascuno un <b>coefficiente di trasmissione</b> <i>T<sub>lj</sub></i>. Le colonne sono quelle del neutrone incidente, per un bersaglio di spin 0.</p>
   <div class="ctl"><label for="hf-e">Energia del neutrone (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>A 1 keV è aperto solo <i>l</i> = 0, con <i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>, qualche per cento. A bassa energia ogni unità in più di <i>l</i> costa circa un fattore (<i>kR</i>)², quindi le colonne si aprono una dopo l'altra al crescere dell'energia. Ogni colonna alimenta il nucleo composto con il peso g<sub>J</sub><i>T</i>:</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -20,7 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Fluttuazioni delle larghezze</h3>
-  <p>Con <i>W<sub>ab</sub></i> = 1 la formula moltiplica delle medie. Ma le risonanze dietro quelle medie hanno larghezze che si disperdono (Porter–Thomas, capitolo 10), e nella diffusione elastica la larghezza che fa entrare il neutrone è la stessa che lo fa uscire: le due sono correlate. Per l'elastico la media dei prodotti supera allora il prodotto delle medie, e le altre uscite perdono ciò che l'elastico guadagna.</p>
+  <p>Con <i>W<sub>ab</sub></i> = 1 la formula moltiplica delle medie. Ma le risonanze dietro quelle medie hanno larghezze che si disperdono (Porter–Thomas, capitolo 15), e nella diffusione elastica la larghezza che fa entrare il neutrone è la stessa che lo fa uscire: le due sono correlate. Per l'elastico la media dei prodotti supera allora il prodotto delle medie, e le altre uscite perdono ciò che l'elastico guadagna.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Senza correzione</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Energia del neutrone (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>I riquadri riportano σ con la correzione divisa per σ senza. Sotto la prima soglia anelastica l'elastico prende già quasi tutto il flusso e cambia appena, mentre la cattura perde dal 10 al 25 per cento. Fra 1 e 1,5 MeV, l'elastico composto guadagna dal 15 al 35 per cento e il primo livello 2⁺ perde circa un terzo. Man mano che si aprono altri livelli e il continuo, l'elastico composto diventa una piccola quota del flusso: il suo fattore sale verso 2, ma ciò che sottrae agli altri si riduce, e i loro fattori tornano verso 1. Nella ricetta di Moldauer ogni canale riceve un numero di gradi di libertà ν<sub>c</sub>, e <i>W</i> è un integrale unidimensionale, calcolato con la regola di Gauss–Laguerre a 32 punti di TALYS.</p>

@@ -1,6 +1,6 @@
 /* Spanish: resonance (chapter 10) */
 WT.es.ch.resonance = {
-  num: "Capítulo 10", title: "Picos agudos", short: "Resonancias",
+  num: "Capítulo 15", title: "Picos agudos", short: "Resonancias",
   lead: "A energía suficientemente baja, un neutrón ya no ve un núcleo liso y promediado. Ve los niveles de energía individuales del núcleo compuesto, uno a uno.",
   html: `
 <div class="step">

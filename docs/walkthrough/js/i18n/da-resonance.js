@@ -1,6 +1,6 @@
 /* Danish: resonance (chapter 10) */
 WT.L.ch.resonance = {
-  num: "Kapitel 10", title: "Skarpe toppe", short: "Resonanser",
+  num: "Kapitel 15", title: "Skarpe toppe", short: "Resonanser",
   lead: "Ved lav nok energi ser en neutron ikke længere en glat, gennemsnitlig kerne. Den ser compoundkernens enkelte energiniveauer, ét ad gangen.",
   html: `
 <div class="step">

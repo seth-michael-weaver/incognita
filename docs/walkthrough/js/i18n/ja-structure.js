@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>引き伸ばされた原子核は回転でき、0<sup>+</sup>、2<sup>+</sup>、4<sup>+</sup>、6<sup>+</sup>の準位を、<i>J</i>(<i>J</i>+1)のように広がる間隔でつくります。これが<b>回転体</b>です。丸い原子核は表面を波打たせることができます。波打ちの1単位、すなわち<b>フォノン</b>は毎回同じエネルギーを加えるので、準位は等間隔に並びます。これが<b>振動体</b>です。</p>
   <div class="ctl"><label for="st-beta">変形 β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">静止</button><button class="btn ghost" data-act="vib">振動</button><button class="btn ghost" data-act="rot">回転</button></div>
-  <p><i>β₂</i>を動かしてボタンを押してみましょう。伸びが大きいほど、回転体の準位は互いに近づきます。エンジンは原子核ごとの変形と、球形・振動体・回転体のいずれかという分類を保存しています。第3章では、通りすがりの中性子がそれをどう使うかを示します。</p>
+  <p><i>β₂</i>を動かしてボタンを押してみましょう。伸びが大きいほど、回転体の準位は互いに近づきます。エンジンは原子核ごとの変形と、球形・振動体・回転体のいずれかという分類を保存しています。第6章では、通りすがりの中性子がそれをどう使うかを示します。</p>
 </div>
 <div class="step">
   <h3>しきい値のすぐ上の指紋</h3>

@@ -1,11 +1,11 @@
-/* German (Deutsch): hauser (Kapitel 16, Hauser–Feshbach Kanal für Kanal, mit Breitenfluktuationen) */
+/* German (Deutsch): hauser (Kapitel 22, Hauser–Feshbach Kanal für Kanal, mit Breitenfluktuationen) */
 WT.L.ch.hauser = {
-  num: "Kapitel 16", title: "Hauser–Feshbach, Kanal für Kanal", short: "Hauser–Feshbach",
-  lead: "Kapitel 6 hat den Wettbewerb der Ausgänge als Türen erzählt. Hier steht die Formel hinter den Türen, ein Kanal nach dem anderen, und die Korrektur, die sie braucht, wenn nur wenige Kanäle offen sind.",
+  num: "Kapitel 22", title: "Hauser–Feshbach, Kanal für Kanal", short: "Hauser–Feshbach",
+  lead: "Kapitel 9 hat den Wettbewerb der Ausgänge als Türen erzählt. Hier steht die Formel hinter den Türen, ein Kanal nach dem anderen, und die Korrektur, die sie braucht, wenn nur wenige Kanäle offen sind.",
   html: `
 <div class="step">
   <h3>Eine Transmission für jeden Kanal</h3>
-  <p>Ein <b>Kanal</b> ist eine vollständige Ausgangsadresse: welches Teilchen, in welchem Zustand der Restkern zurückbleibt, der Bahndrehimpuls <i>l</i> und der Gesamtdrehimpuls <i>j</i> = <i>l</i> ± ½ des Teilchens. Das optische Modell aus Kapitel 2 gibt jedem Kanal einen <b>Transmissionskoeffizienten</b> <i>T<sub>lj</sub></i>. Die Säulen gehören zum einlaufenden Neutron, für ein Target mit Spin 0.</p>
+  <p>Ein <b>Kanal</b> ist eine vollständige Ausgangsadresse: welches Teilchen, in welchem Zustand der Restkern zurückbleibt, der Bahndrehimpuls <i>l</i> und der Gesamtdrehimpuls <i>j</i> = <i>l</i> ± ½ des Teilchens. Das optische Modell aus Kapitel 5 gibt jedem Kanal einen <b>Transmissionskoeffizienten</b> <i>T<sub>lj</sub></i>. Die Säulen gehören zum einlaufenden Neutron, für ein Target mit Spin 0.</p>
   <div class="ctl"><label for="hf-e">Neutronenenergie (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>Bei 1 keV ist nur <i>l</i> = 0 offen, mit <i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>, einige Prozent. Jede weitere Einheit von <i>l</i> kostet bei niedriger Energie etwa einen Faktor (<i>kR</i>)², daher öffnen sich die Säulen mit steigender Energie eine nach der anderen. Jede Säule speist den Compoundkern mit dem Gewicht g<sub>J</sub><i>T</i>:</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -20,7 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Breitenfluktuationen</h3>
-  <p>Mit <i>W<sub>ab</sub></i> = 1 multipliziert die Formel Mittelwerte. Die Resonanzen hinter den Mittelwerten haben streuende Breiten (Porter–Thomas, Kapitel 10), und bei elastischer Streuung ist die Breite, die das Neutron hereinlässt, dieselbe, die es wieder hinauslässt; beide sind also korreliert. Für den elastischen Kanal übersteigt dann der Mittelwert der Produkte das Produkt der Mittelwerte, und die übrigen Ausgänge verlieren, was der elastische gewinnt.</p>
+  <p>Mit <i>W<sub>ab</sub></i> = 1 multipliziert die Formel Mittelwerte. Die Resonanzen hinter den Mittelwerten haben streuende Breiten (Porter–Thomas, Kapitel 15), und bei elastischer Streuung ist die Breite, die das Neutron hereinlässt, dieselbe, die es wieder hinauslässt; beide sind also korreliert. Für den elastischen Kanal übersteigt dann der Mittelwert der Produkte das Produkt der Mittelwerte, und die übrigen Ausgänge verlieren, was der elastische gewinnt.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Ohne Korrektur</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Neutronenenergie (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>Die Marken geben σ mit Korrektur geteilt durch σ ohne an. Unterhalb der ersten inelastischen Schwelle nimmt der elastische Kanal schon fast den ganzen Fluss und ändert sich kaum, während der Einfang 10 bis 25 Prozent verliert. Zwischen 1 und 1,5 MeV gewinnt die compound-elastische Streuung 15 bis 35 Prozent, und das erste 2⁺-Niveau verliert etwa ein Drittel. Wenn sich weitere Niveaus und das Kontinuum öffnen, wird der compound-elastische Anteil am Fluss klein: Sein eigener Faktor steigt in Richtung 2, doch was er den anderen wegnimmt, schrumpft, und deren Faktoren kehren in Richtung 1 zurück. In Moldauers Rezept erhält jeder Kanal eine Zahl von Freiheitsgraden ν<sub>c</sub>, und <i>W</i> ist ein eindimensionales Integral, ausgewertet mit der 32-Punkte-Gauß–Laguerre-Regel von TALYS.</p>

@@ -11,7 +11,7 @@
   const nameOf = (A) => (B[A] ? `${B[A][3]}-${A}` : `A = ${A}`);
 
   WT.chapter("binding", {
-    num: "Basics", title: "Why nuclei hold together", short: "Binding",
+    num: "Chapter 3", title: "Why nuclei hold together", short: "Binding",
     html: `
 <div class="step">
   <p>Higher on the curve means more tightly bound.</p>

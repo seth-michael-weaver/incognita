@@ -1,4 +1,4 @@
-/* German (Deutsch): layers (Kapitel 15). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* German (Deutsch): layers (Kapitel 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -22,7 +22,7 @@
   const terraScore = TT ? `Im Vergleich mit ${libs} liegt sie in ${TT.w} von ${TT.d} Vergleichen vorn, in ${TT.t} gleichauf und in ${TT.l} zurück.` : `Sie wird mit ${libs} verglichen.`;
 
   WT.L.ch.layers = {
-    num: "Kapitel 15", title: "Wie das Modell geschichtet ist", short: "Schichten",
+    num: "Kapitel 21", title: "Wie das Modell geschichtet ist", short: "Schichten",
     lead: "Was wir liefern, ist in Schichten auf der Engine aufgebaut, und jede Schicht muss sich ihren Platz gegenüber Messungen verdienen.",
     html: `
 <div class="step">

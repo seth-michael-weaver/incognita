@@ -1,6 +1,6 @@
-/* German (Deutsch): cascade (Kapitel 8, über die Nuklidkarte hinab) */
+/* German (Deutsch): cascade (Kapitel 11, über die Nuklidkarte hinab) */
 WT.L.ch.cascade = {
-  num: "Kapitel 8", title: "Über die Karte hinab", short: "Kaskade",
+  num: "Kapitel 11", title: "Über die Karte hinab", short: "Kaskade",
   lead: "Eine Emission ist selten das Ende: Der zurückbleibende Kern ist oft heiß genug, um erneut zu emittieren.",
   html: `
 <div class="step">
@@ -19,7 +19,7 @@ WT.L.ch.cascade = {
 <div class="step">
   <h3>Von oben nach unten, Intervall für Intervall</h3>
   <p>Die Engine leert jeden Kern von oben nach unten, eine Energiescheibe, ein <b>Intervall</b>, nach der anderen. Rechts: der Restkern der ersten Emission; links: sein Tochterkern, mit einem Neutron weniger. Orange Kugeln sind Reaktionen, die in jedem Intervall warten. Die Intervalle sind hier 1 MeV breit; die Engine verwendet etwa 40 pro Kern, bemessen nach der verfügbaren Energie.</p>
-  <p>Während die Markierung ein Intervall überstreicht, nimmt jede Kugel einen Ausgang nach dem Wettbewerb aus Kapitel 6: Ein Photon (<em class="g">γ</em>) lässt sie in ein tieferes Intervall fallen, ein <em class="n">Neutron</em> bringt sie in den Tochterkern, ein Proton oder Alpha nimmt sie aus dem Bild. Unterhalb aller Schwellen tragen Photonen den Rest in den Grundzustand (grau). Dann wird der Tochterkern abgearbeitet.</p>
+  <p>Während die Markierung ein Intervall überstreicht, nimmt jede Kugel einen Ausgang nach dem Wettbewerb aus Kapitel 9: Ein Photon (<em class="g">γ</em>) lässt sie in ein tieferes Intervall fallen, ein <em class="n">Neutron</em> bringt sie in den Tochterkern, ein Proton oder Alpha nimmt sie aus dem Bild. Unterhalb aller Schwellen tragen Photonen den Rest in den Grundzustand (grau). Dann wird der Tochterkern abgearbeitet.</p>
   <div class="ctl"><label for="cs-e3">Neutronenenergie</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Neu beginnen</button></div>
   <p>Photonen fallen nur nach unten, und jeder Kern ist fertig, bevor seine Töchter drankommen, also landet nichts in einem bereits geleerten Intervall.</p>

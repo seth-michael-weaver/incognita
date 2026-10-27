@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>Un nucleo allungato può ruotare, e dà livelli 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> con distanze che crescono come <i>J</i>(<i>J</i>+1): un <b>rotore</b>. Uno rotondo può incresparsi; ogni unità di increspatura, un <b>fonone</b>, aggiunge la stessa energia, quindi i suoi livelli sono equidistanti: un <b>vibratore</b>.</p>
   <div class="ctl"><label for="st-beta">Deformazione β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Fermo</button><button class="btn ghost" data-act="vib">Vibrante</button><button class="btn ghost" data-act="rot">Rotante</button></div>
-  <p>Trascina <i>β₂</i> e premi i pulsanti: un allungamento maggiore avvicina i livelli del rotore. Il motore conserva le deformazioni nucleo per nucleo e un'etichetta: sferico, vibratore o rotore. Il capitolo 3 mostra come le usa un neutrone di passaggio.</p>
+  <p>Trascina <i>β₂</i> e premi i pulsanti: un allungamento maggiore avvicina i livelli del rotore. Il motore conserva le deformazioni nucleo per nucleo e un'etichetta: sferico, vibratore o rotore. Il capitolo 6 mostra come le usa un neutrone di passaggio.</p>
 </div>
 <div class="step">
   <h3>Impronte appena sopra la soglia</h3>

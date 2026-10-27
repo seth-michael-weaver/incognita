@@ -1,6 +1,6 @@
-/* French: preeq (Chapitre 4, prééquilibre) */
+/* French: preeq (Chapitre 7, prééquilibre) */
 WT.L.ch.preeq = {
-  num: "Chapitre 4", title: "Des collisions avant le calme", short: "Prééquilibre",
+  num: "Chapitre 7", title: "Des collisions avant le calme", short: "Prééquilibre",
   lead: "Un neutron qui entre dans un noyau ne partage pas son énergie avec tout le monde d'un coup. Pendant les premières collisions, une seule particule en détient l'essentiel, et cette particule peut ressortir aussitôt. C'est le prééquilibre : une émission « avant que l'énergie ne s'égalise ».",
   html: `
 <div class="step">
@@ -15,13 +15,13 @@ WT.L.ch.preeq = {
 </div>
 <div class="step">
   <h3>La bifurcation à chaque étape</h3>
-  <p>À chaque étape, le neutron du haut soit s'échappe (flèche vers le haut, seulement s'il est au-dessus de la ligne libre), soit subit une nouvelle collision (flèche vers le bas) ; l'épaisseur indique les probabilités. Le taux d'émission découle du <b>bilan détaillé</b> : de la probabilité du processus inverse, l'absorption de cette même particule, que calcule le chapitre 2. Le taux de collision est l'intensité d'une collision nucléon–nucléon multipliée par le nombre de nouvelles configurations qu'elle peut atteindre.</p>
+  <p>À chaque étape, le neutron du haut soit s'échappe (flèche vers le haut, seulement s'il est au-dessus de la ligne libre), soit subit une nouvelle collision (flèche vers le bas) ; l'épaisseur indique les probabilités. Le taux d'émission découle du <b>bilan détaillé</b> : de la probabilité du processus inverse, l'absorption de cette même particule, que calcule le chapitre 5. Le taux de collision est l'intensité d'une collision nucléon–nucléon multipliée par le nombre de nouvelles configurations qu'elle peut atteindre.</p>
   <div class="ctl"><label for="pe-n">Étape (excitons n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Faites monter l'étape. Au début, une particule détient l'essentiel de l'énergie, donc ce qui s'échappe est rapide. Plus tard, l'énergie est diluée et peu de chose sort.</p>
 </div>
 <div class="step">
   <h3>D'où vient la queue rapide</h3>
-  <p>La pile de droite est le <b>spectre</b> : combien de neutrons sortent à chaque énergie, les lents à gauche, les rapides à droite. Chaque réaction déroule la chaîne jusqu'à ce que le neutron du haut s'échappe, et sa couleur indique quand : <em style="font-style:normal;color:var(--warm);font-weight:600">orange foncé</em> à l'étape 3, plus pâle ensuite, <em class="n">bleu</em> s'il n'est sorti qu'après que le noyau s'est calmé (chapitre 5).</p>
+  <p>La pile de droite est le <b>spectre</b> : combien de neutrons sortent à chaque énergie, les lents à gauche, les rapides à droite. Chaque réaction déroule la chaîne jusqu'à ce que le neutron du haut s'échappe, et sa couleur indique quand : <em style="font-style:normal;color:var(--warm);font-weight:600">orange foncé</em> à l'étape 3, plus pâle ensuite, <em class="n">bleu</em> s'il n'est sorti qu'après que le noyau s'est calmé (chapitre 8).</p>
   <div class="btns"><button class="btn" data-act="run">Lancer 300 réactions</button></div>
   <p>L'étape 3 construit un large plateau presque plat qui atteint l'énergie maximale. Les étapes suivantes s'empilent plus bas. La bosse bleue est l'<b>évaporation</b> : une fois que tous partagent l'énergie, seuls des neutrons lents s'échappent au compte-gouttes, comme la vapeur d'un liquide chaud.</p>
   <div class="ctl"><label for="pe-e">Énergie du neutron</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

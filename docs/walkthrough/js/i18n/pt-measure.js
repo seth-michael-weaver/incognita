@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "Capítulo 12", title: "O que sai", short: "Observáveis",
+  num: "Capítulo 17", title: "O que sai", short: "Observáveis",
   lead: "Uma experiência, um reator ou uma estrela só veem um punhado de números. Este capítulo mostra como o motor transforma o que acontece dentro do núcleo nesses números.",
   html: `
 <div class="step">
@@ -12,7 +12,7 @@ WT.L.ch.measure = {
   <h3>Com a energia abrem-se novas saídas</h3>
   <p>Cada porta é uma saída, ou <b>canal</b>: o neutrão ressalta para fora (elástico), deixa o alvo excitado (n′), arranca mais neutrões (2n, 3n), é capturado e só saem fotões (γ), ou sai em vez disso um protão ou uma partícula α. Uma porta com cadeado tem um <b>limiar</b>: a reação custa mais energia do que a que o neutrão traz.</p>
   <div class="ctl"><label for="mea-e2">Energia do neutrão (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Arrasta a energia para lá de um limiar e essa porta abre-se com um clarão; os baldes enchem-se conforme a fração de cada canal, e cada porta nova tira parte às outras. Os limiares vêm das massas dos núcleos; as frações, da competição do capítulo 6.</p>
+  <p>Arrasta a energia para lá de um limiar e essa porta abre-se com um clarão; os baldes enchem-se conforme a fração de cada canal, e cada porta nova tira parte às outras. Os limiares vêm das massas dos núcleos; as frações, da competição do capítulo 9.</p>
 </div>
 <div class="step">
   <h3>O que um detetor vê</h3>

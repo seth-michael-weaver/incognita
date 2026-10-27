@@ -1,6 +1,6 @@
 /* French: resonance (chapter 10) */
 WT.L.ch.resonance = {
-  num: "Chapitre 10", title: "Des pics étroits", short: "Résonances",
+  num: "Chapitre 15", title: "Des pics étroits", short: "Résonances",
   lead: "À énergie suffisamment basse, un neutron ne voit plus un noyau lisse et moyenné. Il voit les niveaux d'énergie individuels du noyau composé, un par un.",
   html: `
 <div class="step">

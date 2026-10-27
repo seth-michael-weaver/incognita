@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): direct (Hoofdstuk 3, directe reacties) */
+/* Dutch (Nederlands): direct (Hoofdstuk 6, directe reacties) */
 WT.L.ch.direct = {
-  num: "Hoofdstuk 3", title: "Een schampschot", short: "Directe reacties",
+  num: "Hoofdstuk 6", title: "Een schampschot", short: "Directe reacties",
   lead: "Niet elk neutron dat de kern bereikt, wordt opgeslokt. Sommige strijken langs het oppervlak, geven de kern één duw en vliegen verder.",
   html: `
 <div class="step">
@@ -24,7 +24,7 @@ WT.L.ch.direct = {
 </div>
 <div class="step">
   <h3>Eén duw, één keer</h3>
-  <p>Voor de meeste niveaus is de koppeling zwak en is één duw genoeg: <b>DWBA</b> (de Born-benadering met vervormde golven). De binnenkomende golf uit hoofdstuk 2 duwt de kern één keer, aan de rand, waar de potentiaal van diep naar nul zakt; de rand gloeit waar de golftoppen inslaan. De cirkelvormige golf die zich uitbreidt, zijn de neutronen die de kern aangeslagen achterlieten.</p>
+  <p>Voor de meeste niveaus is de koppeling zwak en is één duw genoeg: <b>DWBA</b> (de Born-benadering met vervormde golven). De binnenkomende golf uit hoofdstuk 5 duwt de kern één keer, aan de rand, waar de potentiaal van diep naar nul zakt; de rand gloeit waar de golftoppen inslaan. De cirkelvormige golf die zich uitbreidt, zijn de neutronen die de kern aangeslagen achterlieten.</p>
   <div class="ctl"><label for="di-bd">Vervorming β van het niveau</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>Sleep <i>β</i>: de rand wiebelt harder en de cirkels worden helderder, als <i>β</i>²: twee keer zoveel vervorming, vier keer zoveel neutronen. De motor haalt de <i>β</i> van elk niveau uit gemeten waarden, of uit systematiek waar er geen bekend is. Hoe de verstrooide neutronen zich over de hoeken verdelen, is een optionele extra uitvoer.</p>
 </div>
@@ -33,17 +33,17 @@ WT.L.ch.direct = {
   <p>Alle nucleonen kunnen samen bewegen: ademen, platdrukken en uitrekken, of in een peervorm zwaaien. Dit zijn <b>gigantische resonanties</b>. In deze kern van middelzware massa liggen ze ongeveer 7 tot 25 MeV hoger, elk enkele MeV breed, te breed om als één niveau te tellen; de bulten markeren de <b>excitatie-energie</b> van elk ervan.</p>
   <p>De motor legt de totale sterkte van elk vast met een <b>somregel</b>, een grens uit de basisnatuurkunde voor hoe sterk een kern kan reageren, en spreidt die als een bult boven het laatst bekende niveau. Deze bulten, plus duwen naar hoge niveaus, vormen het <b>collectieve continuüm</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Ademen</button><button class="btn ghost" data-act="quad">Platdrukken</button><button class="btn ghost" data-act="oct">Peer</button></div>
-  <p>De bekendste, protonen die tegen neutronen in heen en weer klotsen (de gigantische dipoolresonantie), absorbeert en zendt vooral licht uit, dus die hoort bij hoofdstuk 7.</p>
+  <p>De bekendste, protonen die tegen neutronen in heen en weer klotsen (de gigantische dipoolresonantie), absorbeert en zendt vooral licht uit, dus die hoort bij hoofdstuk 10.</p>
 </div>
 <div class="step">
   <h3>Rechtstreeks een baan in</h3>
-  <p>Een vrij neutron kan rechtstreeks in een <b>lege baan</b> van de put vallen (een toegestane energie voor één neutron binnenin) en de overtollige energie uitzenden als een <em class="g">foton</em>. De kern wordt nooit warm. Dit is <b>directe vangst</b>. De motor kan haar berekenen uit dezelfde put als in hoofdstuk 2: de vrije golf buiten, de gebonden baan binnen, en het foton dat ze verbindt. Ze is optioneel en staat standaard uit.</p>
+  <p>Een vrij neutron kan rechtstreeks in een <b>lege baan</b> van de put vallen (een toegestane energie voor één neutron binnenin) en de overtollige energie uitzenden als een <em class="g">foton</em>. De kern wordt nooit warm. Dit is <b>directe vangst</b>. De motor kan haar berekenen uit dezelfde put als in hoofdstuk 5: de vrije golf buiten, de gebonden baan binnen, en het foton dat ze verbindt. Ze is optioneel en staat standaard uit.</p>
   <div class="btns"><button class="btn" data-act="drop">Laat een neutron erin vallen</button></div>
   <p>Directe vangst telt het zwaarst waar de gewone route, het verdelen van de energie van het neutron, zwak is: lichte kernen en kernen ver van de stabiliteit, met weinig niveaus die ver uit elkaar liggen.</p>
 </div>
 <div class="step">
   <h3>Direct neemt eerst zijn deel</h3>
-  <p>De motor verdeelt de werkzame doorsnede voor reactie uit hoofdstuk 2 op volgorde: eerst directe reacties, dan snelle botsingen, en alleen de rest vormt een compoundkern. In de afbeelding ondergaat elk neutron een van drie lotgevallen: <b>direct</b> (schampt en vliegt verder), snel (stoot een nucleon eruit voordat de energie zich verspreidt: <b>pre-evenwicht</b>, hoofdstuk 4) of opgeslokt (een <b>compoundkern</b>, hoofdstuk 5). De stapels tellen ze.</p>
+  <p>De motor verdeelt de werkzame doorsnede voor reactie uit hoofdstuk 5 op volgorde: eerst directe reacties, dan snelle botsingen, en alleen de rest vormt een compoundkern. In de afbeelding ondergaat elk neutron een van drie lotgevallen: <b>direct</b> (schampt en vliegt verder), snel (stoot een nucleon eruit voordat de energie zich verspreidt: <b>pre-evenwicht</b>, hoofdstuk 7) of opgeslokt (een <b>compoundkern</b>, hoofdstuk 8). De stapels tellen ze.</p>
   <div class="ctl"><label for="di-e">Neutronenergie (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>Sleep de energie en kijk hoe de stapels zich opnieuw vullen. Bij een paar MeV wordt bijna elk neutron opgeslokt. Bij tientallen MeV nemen directe reacties en snelle botsingen samen een groot deel voor hun rekening.</p>
   <div class="aside">In de code: <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (vervormde potentiaal, gekoppelde kanalen voor rotoren en vibratoren), <code>ecis/dwba.py</code> en <code>direct/dwba.py</code> (enkele duw, gigantische resonanties, collectief continuüm), <code>direct/racapcalc.py</code> (directe vangst, optioneel, standaard uit), <code>compound/normalization.py</code> (de boekhouding).</div>

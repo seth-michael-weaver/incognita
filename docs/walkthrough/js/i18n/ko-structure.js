@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>길쭉한 원자핵은 회전할 수 있어서 간격이 <i>J</i>(<i>J</i>+1)처럼 커지는 준위 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup>를 만듭니다. 이것이 <b>회전체</b>입니다. 둥근 원자핵은 표면이 출렁일 수 있습니다. 출렁임의 한 단위인 <b>포논</b>은 매번 같은 에너지를 더하므로 준위 간격이 고릅니다. 이것이 <b>진동체</b>입니다.</p>
   <div class="ctl"><label for="st-beta">변형 β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">정지</button><button class="btn ghost" data-act="vib">진동</button><button class="btn ghost" data-act="rot">회전</button></div>
-  <p><i>β₂</i>를 바꾸고 버튼을 눌러 보세요. 더 많이 늘어날수록 회전체의 준위들이 서로 가까워집니다. 엔진은 원자핵마다 변형값과 함께 구형, 진동체, 회전체 중 하나의 꼬리표를 저장합니다. 지나가는 중성자가 이를 어떻게 이용하는지는 3장에서 보여 드립니다.</p>
+  <p><i>β₂</i>를 바꾸고 버튼을 눌러 보세요. 더 많이 늘어날수록 회전체의 준위들이 서로 가까워집니다. 엔진은 원자핵마다 변형값과 함께 구형, 진동체, 회전체 중 하나의 꼬리표를 저장합니다. 지나가는 중성자가 이를 어떻게 이용하는지는 6장에서 보여 드립니다.</p>
 </div>
 <div class="step">
   <h3>문턱 바로 위의 지문</h3>

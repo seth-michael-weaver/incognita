@@ -1,7 +1,7 @@
 /* Danish: strength (chapter 16, Expert) */
 WT.L.ch.strength = {
-  num: "Kapitel 19", title: "Fotonstyrke i detaljer", short: "Fotonstyrke",
-  lead: "Kapitel 7 viste, hvilke fotoner en varm kerne foretrækker. Dette kapitel skriver styrkefunktionerne op, følger dem ind i transmissionskoefficienter og den gennemsnitlige strålingsbredde og kører den kaskade, de driver.",
+  num: "Kapitel 25", title: "Fotonstyrke i detaljer", short: "Fotonstyrke",
+  lead: "Kapitel 10 viste, hvilke fotoner en varm kerne foretrækker. Dette kapitel skriver styrkefunktionerne op, følger dem ind i transmissionskoefficienter og den gennemsnitlige strålingsbredde og kører den kaskade, de driver.",
   html: `
 <div class="step">
   <h3>E1: halen af kæmpedipolresonansen</h3>
@@ -35,7 +35,7 @@ WT.L.ch.strength = {
   <h3>Kaskaden</h3>
   <p>Under den første foton gentager den samme regel sig: fra hver ny energi trækkes den næste foton ud fra <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>), indtil kernen når sine kendte niveauer. Hver historie er nogle få fotoner; deres summerede spektrum er det, et kalorimeter ser efter indfangning.</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">Upbend</button><button class="btn ghost" data-act="clear">Start forfra</button></div>
-  <p>Upbendet tilføjer bløde fotoner og en smule til multipliciteten. Motoren trækker ikke historier: den flytter populationer interval for interval, oppefra og ned (kapitel 8), hvilket giver de samme gennemsnit uden stikprøvestøj.</p>
+  <p>Upbendet tilføjer bløde fotoner og en smule til multipliciteten. Motoren trækker ikke historier: den flytter populationer interval for interval, oppefra og ned (kapitel 11), hvilket giver de samme gennemsnit uden stikprøvestøj.</p>
   <div class="aside">I koden: <code>gamma/strength.py</code> (alle styrkemodeller, TALYS understøtter; som standard SMLO-2019-tabeller og IAEA's M1 med upbend), <code>gamma/parameters.py</code> (systematik for kæmperesonanser, tabeller), <code>gamma/transmission.py</code> (T = 2π E<sup>2L+1</sup> f), <code>gamma/ggnorm.py</code> (valgfri normering til ⟨Γγ⟩), <code>emission/</code> (kaskaden). Billedet bruger lukkede udtryk og systematik for en jern-57-lignende kerne; den målte ⟨Γγ⟩ er RIPL-værdien for ⁵⁷Fe.</div>
 </div>`,
 };

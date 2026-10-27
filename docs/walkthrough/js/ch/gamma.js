@@ -1,4 +1,4 @@
-/* Chapter 7: photon emission (gamma/), the cascade through discrete levels and isomers.
+/* Chapter 10: photon emission (gamma/), the cascade through discrete levels and isomers.
  * Scenes (S.mode): "emit"    = a hot state sheds photons (streak weight ~ E^3) that land in a crowd of states; a pile of landings builds;
  *                   "gdr"     = the giant dipole resonance: proton (hatched) and neutron (filled) clouds sloshing, and the strength landscape;
  *                   "m1"      = deformed nuclei: scissors (clouds rocking, vigour ~ beta), spin-flip arrows, upbend soft photons;
@@ -110,13 +110,13 @@
   const CAP = { key: null, g: 0, n: 0, balls: [], acc: 0 };
 
   WT.chapter("gamma", {
-    num: "Chapter 7", title: "Shedding light", short: "Photons",
+    num: "Chapter 10", title: "Shedding light", short: "Photons",
     lead: "When no particle leaves, the nucleus cools by emitting photons: gamma rays, particles of high-energy light. This exit is open at every energy.",
     html: `
 <div class="step">
   <p>A hot state at 8 MeV (million electron-volts) sheds photons (γ); the pile beside the ladder collects where they land. Below 2 MeV the states are a few named rungs; above, a crowd that thickens steeply with energy (grey dots). Each photon carries off the energy of its drop, <i>E<sub>γ</sub></i>, and is drawn brighter in proportion to <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> is the photon's transmission coefficient (Chapter 6's door), <i>l</i> = 1 for dipole photons, and <i>f</i> is the <b>photon strength</b>: how readily the nucleus radiates at that energy. A drop's chance is <i>T<sub>γ</sub></i> times the crowd of states where it lands: small drops find many states but are faint; big drops are bright but find few.</p>
+  <p><i>T<sub>γ</sub></i> is the photon's transmission coefficient (Chapter 9's door), <i>l</i> = 1 for dipole photons, and <i>f</i> is the <b>photon strength</b>: how readily the nucleus radiates at that energy. A drop's chance is <i>T<sub>γ</sub></i> times the crowd of states where it lands: small drops find many states but are faint; big drops are bright but find few.</p>
   <div class="ctl"><label for="gm-e0">Start energy</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Emit 100</button></div>
   <p>The pile peaks a few MeV below the start: most photons carry 2 to 4 MeV. Move the start energy and the peak follows.</p>
@@ -135,7 +135,7 @@
 </div>
 <div class="step">
   <h3>Down the ladder</h3>
-  <p>A cascade is photons emitted one after another, from the bins at the top (states too dense to list, Chapter 5) down to the named levels, stretched so they can be read (solid rung parity +, hollow −). There the engine stops estimating and follows the tabulated <b>branching ratios</b>: each level's measured odds of decaying to each lower one.</p>
+  <p>A cascade is photons emitted one after another, from the bins at the top (states too dense to list, Chapter 8) down to the named levels, stretched so they can be read (solid rung parity +, hollow −). There the engine stops estimating and follows the tabulated <b>branching ratios</b>: each level's measured odds of decaying to each lower one.</p>
   <div class="btns"><button class="btn" data-act="drop">Drop a cascade</button></div>
   <p>Press the button a few times: the upper part changes every time; the ending follows one of a few measured paths.</p>
 </div>
@@ -147,7 +147,7 @@
 </div>
 <div class="step">
   <h3>Capture</h3>
-  <p>A nucleus that has just absorbed a slow neutron has two exit doors (Chapter 6): photons (top) and the neutron going back out (right). Each door's gap is its <b>width</b>, in eV: how fast the nucleus decays through it. The photon width hardly changes; the neutron width grows with the neutron's speed.</p>
+  <p>A nucleus that has just absorbed a slow neutron has two exit doors (Chapter 9): photons (top) and the neutron going back out (right). Each door's gap is its <b>width</b>, in eV: how fast the nucleus decays through it. The photon width hardly changes; the neutron width grows with the neutron's speed.</p>
   <div class="ctl"><label for="gm-e">Neutron energy</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
   <p>Drag the neutron energy, from 10 eV to 2 MeV. <b>Capture</b>, (n,γ), means the neutron stays and a photon leaves: it wins most of the time at 10 eV and becomes a small share above a few keV. The photon width at threshold is measured for hundreds of nuclei, a check on the photon strength. By default the engine uses its own; an optional switch scales each measured nucleus's photon strength until the two agree.</p>
   <div class="aside">In the code: <code>gamma/parameters.py</code> (tabulated E1 strengths; giant resonance, spin-flip, scissors and upbend systematics), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) for every multipole), <code>gamma/transmission.py</code> (T<sub>γ</sub> and the average radiative width), <code>structure/levels.py</code> (branching ratios, isomers), <code>emission/multiple.py</code> (the cascade). Optional, off by default: <code>gamma/scissors.py</code> (stronger scissors), <code>gamma/ggnorm.py</code> (match the measured ⟨Γγ⟩, up to lead), <code>gamma/actphys.py</code> (both, for actinides).</div>

@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>Un noyau étiré peut tourner, ce qui donne les niveaux 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> avec des écarts qui croissent comme <i>J</i>(<i>J</i>+1) : un <b>rotor</b>. Un noyau rond peut onduler ; chaque quantum d'ondulation, un <b>phonon</b>, ajoute la même énergie, donc ses niveaux sont régulièrement espacés : un <b>vibrateur</b>.</p>
   <div class="ctl"><label for="st-beta">Déformation β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Immobile</button><button class="btn ghost" data-act="vib">En vibration</button><button class="btn ghost" data-act="rot">En rotation</button></div>
-  <p>Faites varier <i>β₂</i> et appuyez sur les boutons : un étirement plus grand resserre les niveaux du rotor. Le moteur stocke les déformations de chaque noyau et une étiquette : sphérique, vibrateur ou rotor. Le chapitre 3 montre comment un neutron qui passe s'en sert.</p>
+  <p>Faites varier <i>β₂</i> et appuyez sur les boutons : un étirement plus grand resserre les niveaux du rotor. Le moteur stocke les déformations de chaque noyau et une étiquette : sphérique, vibrateur ou rotor. Le chapitre 6 montre comment un neutron qui passe s'en sert.</p>
 </div>
 <div class="step">
   <h3>Des empreintes juste au-dessus du seuil</h3>

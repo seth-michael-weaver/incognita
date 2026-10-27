@@ -1,6 +1,6 @@
 /* Danish: fission (chapter 9) */
 WT.L.ch.fission = {
-  num: "Kapitel 9", title: "Kernen flækkes", short: "Fission",
+  num: "Kapitel 12", title: "Kernen flækkes", short: "Fission",
   lead: "De tungeste kerner har en udgang, som lettere kerner mangler: i stedet for at kaste én partikel ud river hele kernen sig over i to. Det er fission.",
   html: `
 <div class="step">

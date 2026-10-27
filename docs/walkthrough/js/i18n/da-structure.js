@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>En aflang kerne kan rotere og giver niveauerne 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> med afstande, der vokser som <i>J</i>(<i>J</i>+1): en <b>rotor</b>. En rund kerne kan kruse; hver enhed krusning, en <b>fonon</b>, tilføjer samme energi, så dens niveauer ligger med lige store afstande: en <b>vibrator</b>.</p>
   <div class="ctl"><label for="st-beta">Deformation β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">I ro</button><button class="btn ghost" data-act="vib">Vibrerende</button><button class="btn ghost" data-act="rot">Roterende</button></div>
-  <p>Træk i <i>β₂</i> og tryk på knapperne: en større strækning trækker rotorens niveauer tættere sammen. Motoren gemmer deformationer per kerne og en mærkat: sfærisk, vibrator eller rotor. Kapitel 3 viser, hvordan en forbipasserende neutron bruger dem.</p>
+  <p>Træk i <i>β₂</i> og tryk på knapperne: en større strækning trækker rotorens niveauer tættere sammen. Motoren gemmer deformationer per kerne og en mærkat: sfærisk, vibrator eller rotor. Kapitel 6 viser, hvordan en forbipasserende neutron bruger dem.</p>
 </div>
 <div class="step">
   <h3>Fingeraftryk lige over tærsklen</h3>

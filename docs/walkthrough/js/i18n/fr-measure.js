@@ -1,6 +1,6 @@
 /* French: measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "Chapitre 12", title: "Ce qui en ressort", short: "Observables",
+  num: "Chapitre 17", title: "Ce qui en ressort", short: "Observables",
   lead: "Une expérience, un réacteur ou une étoile ne voient qu'une poignée de nombres. Ce chapitre montre comment le moteur transforme ce qui se passe dans le noyau en ces nombres.",
   html: `
 <div class="step">
@@ -12,7 +12,7 @@ WT.L.ch.measure = {
   <h3>De nouvelles sorties s'ouvrent avec l'énergie</h3>
   <p>Chaque porte est une sortie, ou <b>voie</b> : le neutron rebondit (élastique), laisse la cible excitée (n′), arrache d'autres neutrons (2n, 3n), est capturé et seuls des photons sortent (γ), ou bien c'est un proton ou une particule α qui sort. Une porte cadenassée a un <b>seuil</b> : la réaction coûte plus d'énergie que le neutron n'en apporte.</p>
   <div class="ctl"><label for="mea-e2">Énergie du neutron (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Faites glisser l'énergie au-delà d'un seuil et cette porte s'ouvre dans un éclair ; les seaux se remplissent selon la part de chaque voie, et chaque nouvelle porte prend une part aux autres. Les seuils viennent des masses des noyaux ; les parts, de la compétition du chapitre 6.</p>
+  <p>Faites glisser l'énergie au-delà d'un seuil et cette porte s'ouvre dans un éclair ; les seaux se remplissent selon la part de chaque voie, et chaque nouvelle porte prend une part aux autres. Les seuils viennent des masses des noyaux ; les parts, de la compétition du chapitre 9.</p>
 </div>
 <div class="step">
   <h3>Ce que voit un détecteur</h3>

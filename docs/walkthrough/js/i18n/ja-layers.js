@@ -1,4 +1,4 @@
-/* Japanese: layers (第15章). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Japanese: layers (第21章). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -21,7 +21,7 @@
   const terraScore = TT ? `${libs}と比べて、${TT.d}件の比較のうち${TT.w}件で上回り、${TT.t}件で引き分け、${TT.l}件で下回っています。` : `${libs}と比較しています。`;
 
   WT.L.ch.layers = {
-    num: "第15章", title: "模型はどのように層をなすか", short: "層",
+    num: "第21章", title: "模型はどのように層をなすか", short: "層",
     lead: "私たちが提供するものは、エンジンの上に層を重ねてつくられています。どの層も、測定と照らし合わせて自分の居場所を勝ち取らなければなりません。",
     html: `
 <div class="step">

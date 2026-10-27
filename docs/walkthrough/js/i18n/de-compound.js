@@ -1,6 +1,6 @@
-/* German (Deutsch): compound (Kapitel 5, der Compoundkern) */
+/* German (Deutsch): compound (Kapitel 8, der Compoundkern) */
 WT.L.ch.compound = {
-  num: "Kapitel 5", title: "Die Energie teilen", short: "Compoundkern",
+  num: "Kapitel 8", title: "Die Energie teilen", short: "Compoundkern",
   lead: "Sobald die ersten schnellen Stöße vorbei sind, teilen sich alle Nukleonen die Energie. Dieser beruhigte Zustand ist der Compoundkern. Um vorherzusagen, was er als Nächstes tut, muss die Engine wissen, auf wie viele Arten er seine Energie halten kann.",
   html: `
 <div class="step">

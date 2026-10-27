@@ -22,7 +22,7 @@
   const terraScore = TT ? `Over for ${libs} ligger den foran i ${TT.w} af ${TT.d} sammenligninger, lige i ${TT.t} og bagud i ${TT.l}.` : `Den sammenlignes med ${libs}.`;
 
   WT.L.ch.layers = {
-    num: "Kapitel 15", title: "Hvordan modellen er bygget i lag", short: "Lag",
+    num: "Kapitel 21", title: "Hvordan modellen er bygget i lag", short: "Lag",
     lead: "Det, vi leverer, er bygget i lag oven på motoren, og hvert lag skal gøre sig fortjent til sin plads over for målinger.",
     html: `
 <div class="step">

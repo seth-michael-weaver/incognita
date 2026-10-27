@@ -1,6 +1,6 @@
 /* Danish: compound (chapter 5) */
 WT.L.ch.compound = {
-  num: "Kapitel 5", title: "Energien deles", short: "Compoundkerne",
+  num: "Kapitel 8", title: "Energien deles", short: "Compoundkerne",
   lead: "Når de første hurtige stød er overstået, deler alle nukleonerne energien. Denne rolige tilstand er compoundkernen. For at forudsige, hvad den gør bagefter, skal motoren vide, på hvor mange måder den kan rumme sin energi.",
   html: `
 <div class="step">

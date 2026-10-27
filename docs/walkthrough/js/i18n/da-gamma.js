@@ -1,12 +1,12 @@
 /* Danish: gamma (chapter 7) */
 WT.L.ch.gamma = {
-  num: "Kapitel 7", title: "Kernen lyser", short: "Fotoner",
+  num: "Kapitel 10", title: "Kernen lyser", short: "Fotoner",
   lead: "Når ingen partikel slipper ud, køler kernen af ved at udsende fotoner: gammastråler, partikler af højenergetisk lys. Denne udgang er åben ved alle energier.",
   html: `
 <div class="step">
   <p>En varm tilstand ved 8 MeV (millioner elektronvolt) udsender fotoner (γ); bunken ved siden af stigen samler, hvor de lander. Under 2 MeV er tilstandene nogle få navngivne trin; derover en mængde, der bliver stejlt tættere med energien (grå prikker). Hver foton tager energien fra sit fald, <i>E<sub>γ</sub></i>, med sig og tegnes lysere i forhold til <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> er fotonens transmissionskoefficient (døren fra kapitel 6), <i>l</i> = 1 for dipolfotoner, og <i>f</i> er <b>fotonstyrken</b>: hvor villigt kernen stråler ved den energi. Et falds chance er <i>T<sub>γ</sub></i> gange mængden af tilstande, hvor det lander: små fald finder mange tilstande, men er svage; store fald er lysstærke, men finder få.</p>
+  <p><i>T<sub>γ</sub></i> er fotonens transmissionskoefficient (døren fra kapitel 9), <i>l</i> = 1 for dipolfotoner, og <i>f</i> er <b>fotonstyrken</b>: hvor villigt kernen stråler ved den energi. Et falds chance er <i>T<sub>γ</sub></i> gange mængden af tilstande, hvor det lander: små fald finder mange tilstande, men er svage; store fald er lysstærke, men finder få.</p>
   <div class="ctl"><label for="gm-e0">Startenergi</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Udsend 100</button></div>
   <p>Bunken topper nogle få MeV under starten: de fleste fotoner bærer 2 til 4 MeV. Flyt startenergien, og toppen følger med.</p>
@@ -25,7 +25,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Ned ad stigen</h3>
-  <p>En kaskade er fotoner udsendt én efter én, fra intervallerne øverst (tilstande for tætte til at liste, kapitel 5) ned til de navngivne niveauer, strakt ud så de kan læses (fyldt trin paritet +, hult −). Dér holder motoren op med at estimere og følger de tabellerede <b>forgreningsforhold</b>: hvert niveaus målte sandsynlighed for at henfalde til hvert lavere niveau.</p>
+  <p>En kaskade er fotoner udsendt én efter én, fra intervallerne øverst (tilstande for tætte til at liste, kapitel 8) ned til de navngivne niveauer, strakt ud så de kan læses (fyldt trin paritet +, hult −). Dér holder motoren op med at estimere og følger de tabellerede <b>forgreningsforhold</b>: hvert niveaus målte sandsynlighed for at henfalde til hvert lavere niveau.</p>
   <div class="btns"><button class="btn" data-act="drop">Slip en kaskade</button></div>
   <p>Tryk på knappen et par gange: den øverste del ændrer sig hver gang; slutningen følger en af nogle få målte veje.</p>
 </div>
@@ -37,7 +37,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Indfangning</h3>
-  <p>En kerne, der lige har absorberet en langsom neutron, har to udgangsdøre (kapitel 6): fotoner (øverst) og neutronen, der går ud igen (til højre). Hver dørs åbning er dens <b>bredde</b>, i eV: hvor hurtigt kernen henfalder gennem den. Fotonbredden ændrer sig næsten ikke; neutronbredden vokser med neutronens fart.</p>
+  <p>En kerne, der lige har absorberet en langsom neutron, har to udgangsdøre (kapitel 9): fotoner (øverst) og neutronen, der går ud igen (til højre). Hver dørs åbning er dens <b>bredde</b>, i eV: hvor hurtigt kernen henfalder gennem den. Fotonbredden ændrer sig næsten ikke; neutronbredden vokser med neutronens fart.</p>
   <div class="ctl"><label for="gm-e">Neutronenergi</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1,0 keV</output></div>
   <p>Træk i neutronenergien, fra 10 eV til 2 MeV. <b>Indfangning</b>, (n,γ), betyder, at neutronen bliver, og en foton forlader kernen: den vinder for det meste ved 10 eV og bliver en lille andel over nogle få keV. Fotonbredden ved tærsklen er målt for hundredvis af kerner, et tjek af fotonstyrken. Som standard bruger motoren sin egen; en valgfri indstilling skalerer hver målt kernes fotonstyrke, til de to stemmer overens.</p>
   <div class="aside">I koden: <code>gamma/parameters.py</code> (tabellerede E1-styrker; systematik for kæmperesonans, spin-flip, saks og upbend), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) for hver multipol), <code>gamma/transmission.py</code> (T<sub>γ</sub> og den gennemsnitlige strålingsbredde), <code>structure/levels.py</code> (forgreningsforhold, isomerer), <code>emission/multiple.py</code> (kaskaden). Valgfrit, slået fra som standard: <code>gamma/scissors.py</code> (stærkere saks), <code>gamma/ggnorm.py</code> (tilpas til den målte ⟨Γγ⟩, op til bly), <code>gamma/actphys.py</code> (begge, for actinider).</div>

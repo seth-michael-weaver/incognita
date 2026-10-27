@@ -1,6 +1,6 @@
-/* German (Deutsch): preeq (Kapitel 4, Präequilibrium) */
+/* German (Deutsch): preeq (Kapitel 7, Präequilibrium) */
 WT.L.ch.preeq = {
-  num: "Kapitel 4", title: "Stöße vor der Ruhe", short: "Präequilibrium",
+  num: "Kapitel 7", title: "Stöße vor der Ruhe", short: "Präequilibrium",
   lead: "Ein Neutron, das in einen Kern eindringt, teilt seine Energie nicht sofort mit allen. In den ersten Stößen trägt ein einzelnes Teilchen den Großteil davon, und dieses Teilchen kann direkt wieder hinausfliegen. Das ist das Präequilibrium: Emission, „bevor sich die Energie ausgleicht“.",
   html: `
 <div class="step">
@@ -15,13 +15,13 @@ WT.L.ch.preeq = {
 </div>
 <div class="step">
   <h3>Die Weggabelung auf jeder Stufe</h3>
-  <p>Auf jeder Stufe entkommt das oberste Neutron entweder (Pfeil nach oben, nur wenn es über der Linie „frei“ liegt) oder stößt erneut (Pfeil nach unten); die Dicke zeigt die Wahrscheinlichkeit. Die Emissionsrate folgt aus dem <b>detaillierten Gleichgewicht</b>: aus der Wahrscheinlichkeit des umgekehrten Prozesses, der Absorption desselben Teilchens, die Kapitel 2 berechnet. Die Stoßrate ist die Stärke eines einzelnen Nukleon-Nukleon-Stoßes mal die Zahl der neuen Anordnungen, die er erreichen kann.</p>
+  <p>Auf jeder Stufe entkommt das oberste Neutron entweder (Pfeil nach oben, nur wenn es über der Linie „frei“ liegt) oder stößt erneut (Pfeil nach unten); die Dicke zeigt die Wahrscheinlichkeit. Die Emissionsrate folgt aus dem <b>detaillierten Gleichgewicht</b>: aus der Wahrscheinlichkeit des umgekehrten Prozesses, der Absorption desselben Teilchens, die Kapitel 5 berechnet. Die Stoßrate ist die Stärke eines einzelnen Nukleon-Nukleon-Stoßes mal die Zahl der neuen Anordnungen, die er erreichen kann.</p>
   <div class="ctl"><label for="pe-n">Stufe (Exzitonen n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Zieh die Stufe nach oben. Am Anfang trägt ein Teilchen den Großteil der Energie, also ist das, was entkommt, schnell. Später ist die Energie dünn verteilt, und kaum etwas kommt heraus.</p>
 </div>
 <div class="step">
   <h3>Woher der schnelle Ausläufer kommt</h3>
-  <p>Der Stapel rechts ist das <b>Spektrum</b>: wie viele Neutronen bei jeder Energie herauskommen, langsame links, schnelle rechts. Jede Reaktion durchläuft die Kette, bis das oberste Neutron entkommt, und seine Farbe sagt, wann: <em style="font-style:normal;color:var(--warm);font-weight:600">tiefes Orange</em> auf Stufe 3, später blasser, <em class="n">Blau</em>, wenn es erst herauskam, nachdem sich der Kern beruhigt hatte (Kapitel 5).</p>
+  <p>Der Stapel rechts ist das <b>Spektrum</b>: wie viele Neutronen bei jeder Energie herauskommen, langsame links, schnelle rechts. Jede Reaktion durchläuft die Kette, bis das oberste Neutron entkommt, und seine Farbe sagt, wann: <em style="font-style:normal;color:var(--warm);font-weight:600">tiefes Orange</em> auf Stufe 3, später blasser, <em class="n">Blau</em>, wenn es erst herauskam, nachdem sich der Kern beruhigt hatte (Kapitel 8).</p>
   <div class="btns"><button class="btn" data-act="run">300 Reaktionen ablaufen lassen</button></div>
   <p>Stufe 3 baut ein breites, fast flaches Plateau auf, das bis zur Maximalenergie reicht. Spätere Stufen häufen sich tiefer an. Der blaue Buckel ist die <b>Verdampfung</b>: Sobald alle die Energie teilen, sickern nur noch langsame Neutronen heraus, wie Dampf aus einer heißen Flüssigkeit.</p>
   <div class="ctl"><label for="pe-e">Neutronenenergie</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

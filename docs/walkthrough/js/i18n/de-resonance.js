@@ -1,6 +1,6 @@
-/* German (Deutsch): resonance (Kapitel 10, Resonanzen) */
+/* German (Deutsch): resonance (Kapitel 15, Resonanzen) */
 WT.L.ch.resonance = {
-  num: "Kapitel 10", title: "Scharfe Peaks", short: "Resonanzen",
+  num: "Kapitel 15", title: "Scharfe Peaks", short: "Resonanzen",
   lead: "Bei genügend niedriger Energie sieht ein Neutron keinen glatten, gemittelten Kern mehr. Es sieht die einzelnen Energieniveaus des Compoundkerns, eines nach dem anderen.",
   html: `
 <div class="step">

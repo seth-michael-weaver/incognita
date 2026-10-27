@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): measure (Hoofdstuk 12, wat eruit komt) */
+/* Dutch (Nederlands): measure (Hoofdstuk 17, wat eruit komt) */
 WT.L.ch.measure = {
-  num: "Hoofdstuk 12", title: "Wat eruit komt", short: "Observabelen",
+  num: "Hoofdstuk 17", title: "Wat eruit komt", short: "Observabelen",
   lead: "Een experiment, een reactor of een ster ziet maar een handvol getallen. Dit hoofdstuk laat zien hoe de motor wat er in de kern gebeurt in die getallen omzet.",
   html: `
 <div class="step">
@@ -12,7 +12,7 @@ WT.L.ch.measure = {
   <h3>Met de energie gaan nieuwe uitgangen open</h3>
   <p>Elke deur is één uitgang, of <b>kanaal</b>: het neutron kaatst eruit (elastisch), laat de trefkern aangeslagen achter (n′), stoot meer neutronen uit (2n, 3n), wordt ingevangen terwijl alleen fotonen vertrekken (γ), of er vertrekt in plaats daarvan een proton of α-deeltje. Een deur met een hangslot heeft een <b>drempel</b>: de reactie kost meer energie dan het neutron meebrengt.</p>
   <div class="ctl"><label for="mea-e2">Neutronenergie (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Sleep de energie voorbij een drempel en die deur flitst open; de emmers vullen zich tot het aandeel van elk kanaal, en elke nieuwe deur neemt aandeel af van de andere. De drempels komen uit de massa's van de kernen; de aandelen uit de competitie van hoofdstuk 6.</p>
+  <p>Sleep de energie voorbij een drempel en die deur flitst open; de emmers vullen zich tot het aandeel van elk kanaal, en elke nieuwe deur neemt aandeel af van de andere. De drempels komen uit de massa's van de kernen; de aandelen uit de competitie van hoofdstuk 9.</p>
 </div>
 <div class="step">
   <h3>Wat een detector ziet</h3>

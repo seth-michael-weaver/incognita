@@ -1,6 +1,6 @@
-/* Portuguese (pt-PT): omp (Capítulo 2, o modelo ótico) */
+/* Portuguese (pt-PT): omp (Capítulo 5, o modelo ótico) */
 WT.L.ch.omp = {
-  num: "Capítulo 2", title: "Uma bola de cristal enevoada", short: "Modelo ótico",
+  num: "Capítulo 5", title: "Uma bola de cristal enevoada", short: "Modelo ótico",
   lead: "Antes de mais nada, o motor faz uma pergunta mais simples: como é que o núcleo se apresenta a um neutrão que chega?",
   html: `
 <div class="step">

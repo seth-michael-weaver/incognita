@@ -1,6 +1,6 @@
-/* Spanish: direct (Capítulo 3, reacciones directas) */
+/* Spanish: direct (Capítulo 6, reacciones directas) */
 WT.es.ch.direct = {
-  num: "Capítulo 3", title: "Un golpe de refilón", short: "Reacciones directas",
+  num: "Capítulo 6", title: "Un golpe de refilón", short: "Reacciones directas",
   lead: "No todo neutrón que llega al núcleo es engullido. Algunos rozan su superficie, le dan un empujón y siguen volando.",
   html: `
 <div class="step">
@@ -24,7 +24,7 @@ WT.es.ch.direct = {
 </div>
 <div class="step">
   <h3>Un empujón, una vez</h3>
-  <p>Para la mayoría de los niveles la conexión es débil y basta un empujón: la <b>DWBA</b> (aproximación de Born de ondas distorsionadas). La onda entrante del capítulo 2 empuja el núcleo una vez, en el borde, donde el potencial cae de profundo a cero; el borde brilla donde lo golpean las crestas. La onda circular que sale son los neutrones que dejaron el núcleo excitado.</p>
+  <p>Para la mayoría de los niveles la conexión es débil y basta un empujón: la <b>DWBA</b> (aproximación de Born de ondas distorsionadas). La onda entrante del capítulo 5 empuja el núcleo una vez, en el borde, donde el potencial cae de profundo a cero; el borde brilla donde lo golpean las crestas. La onda circular que sale son los neutrones que dejaron el núcleo excitado.</p>
   <div class="ctl"><label for="di-bd">Deformación del nivel β</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>Arrastra <i>β</i>: el borde tiembla más y los círculos brillan más, como <i>β</i>²: el doble de deformación, cuatro veces más. El motor toma el <i>β</i> de cada nivel de valores medidos, o de sistemáticas donde no se conoce. Cómo se reparten en ángulo los neutrones dispersados es una salida extra opcional.</p>
 </div>
@@ -33,17 +33,17 @@ WT.es.ch.direct = {
   <p>Todos los nucleones pueden moverse juntos: respirar, aplastarse y estirarse, u oscilar hacia una forma de pera. Son las <b>resonancias gigantes</b>. En este núcleo de masa media se sitúan entre unos 7 y 25 MeV, cada una con varios MeV de ancho, demasiado anchas para contar como un solo nivel; las jorobas marcan la <b>energía de excitación</b> de cada una.</p>
   <p>El motor fija la intensidad total de cada una con una <b>regla de suma</b>, un límite de la física básica a la fuerza con que un núcleo puede responder, y la reparte como una joroba por encima del último nivel conocido. Estas jorobas, más los empujones a niveles altos, forman el <b>continuo colectivo</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Respiración</button><button class="btn ghost" data-act="quad">Aplastamiento</button><button class="btn ghost" data-act="oct">Pera</button></div>
-  <p>La más conocida, los protones oscilando contra los neutrones (la resonancia gigante dipolar), sobre todo absorbe y emite luz, así que pertenece al capítulo 7.</p>
+  <p>La más conocida, los protones oscilando contra los neutrones (la resonancia gigante dipolar), sobre todo absorbe y emite luz, así que pertenece al capítulo 10.</p>
 </div>
 <div class="step">
   <h3>Directo a una órbita</h3>
-  <p>Un neutrón libre puede caer directamente en una <b>órbita</b> vacía del pozo (una energía permitida para un neutrón dentro) y enviar la energía sobrante como un <em class="g">fotón</em>. El núcleo nunca se calienta. Esto es la <b>captura directa</b>. El motor puede calcularla con el mismo pozo del capítulo 2: la onda libre fuera, la órbita ligada dentro y el fotón que las conecta. Es opcional y está desactivada por defecto.</p>
+  <p>Un neutrón libre puede caer directamente en una <b>órbita</b> vacía del pozo (una energía permitida para un neutrón dentro) y enviar la energía sobrante como un <em class="g">fotón</em>. El núcleo nunca se calienta. Esto es la <b>captura directa</b>. El motor puede calcularla con el mismo pozo del capítulo 5: la onda libre fuera, la órbita ligada dentro y el fotón que las conecta. Es opcional y está desactivada por defecto.</p>
   <div class="btns"><button class="btn" data-act="drop">Dejar caer un neutrón</button></div>
   <p>La captura directa importa sobre todo donde la ruta habitual, repartir la energía del neutrón, es débil: núcleos ligeros y núcleos lejos de la estabilidad, con pocos niveles y muy separados.</p>
 </div>
 <div class="step">
   <h3>Lo directo se lleva su parte primero</h3>
-  <p>El motor reparte la sección eficaz de reacción del capítulo 2 en orden: primero las reacciones directas, luego las colisiones rápidas, y solo lo que queda forma un núcleo compuesto. En la imagen cada neutrón acaba en uno de tres destinos: <b>directo</b> (roza y sigue), rápido (arranca un nucleón antes de que la energía se reparta: <b>preequilibrio</b>, capítulo 4) o engullido (un <b>núcleo compuesto</b>, capítulo 5). Los montones los cuentan.</p>
+  <p>El motor reparte la sección eficaz de reacción del capítulo 5 en orden: primero las reacciones directas, luego las colisiones rápidas, y solo lo que queda forma un núcleo compuesto. En la imagen cada neutrón acaba en uno de tres destinos: <b>directo</b> (roza y sigue), rápido (arranca un nucleón antes de que la energía se reparta: <b>preequilibrio</b>, capítulo 7) o engullido (un <b>núcleo compuesto</b>, capítulo 8). Los montones los cuentan.</p>
   <div class="ctl"><label for="di-e">Energía del neutrón (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>Arrastra la energía y mira cómo se vuelven a llenar los montones. A unos pocos MeV casi todos los neutrones son engullidos. A decenas de MeV, las reacciones directas y las colisiones rápidas juntas se llevan una gran parte.</p>
   <div class="aside">En el código: <code>ecis/formfactor.py</code>, <code>ecis/coupling.py</code>, <code>ecis/solver.py</code> (potencial deformado, canales acoplados para rotores y vibradores), <code>ecis/dwba.py</code> y <code>direct/dwba.py</code> (empujón único, resonancias gigantes, continuo colectivo), <code>direct/racapcalc.py</code> (captura directa, opcional, desactivada por defecto), <code>compound/normalization.py</code> (la contabilidad).</div>

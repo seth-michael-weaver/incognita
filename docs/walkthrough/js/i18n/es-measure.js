@@ -1,6 +1,6 @@
 /* Spanish: measure (chapter 11) */
 WT.es.ch.measure = {
-  num: "Capítulo 12", title: "Lo que sale", short: "Observables",
+  num: "Capítulo 17", title: "Lo que sale", short: "Observables",
   lead: "Un experimento, un reactor o una estrella solo ven un puñado de números. Este capítulo muestra cómo el motor convierte lo que pasa dentro del núcleo en esos números.",
   html: `
 <div class="step">
@@ -12,7 +12,7 @@ WT.es.ch.measure = {
   <h3>Con la energía se abren nuevas salidas</h3>
   <p>Cada puerta es una salida, o <b>canal</b>: el neutrón rebota hacia fuera (elástico), deja el blanco excitado (n′), arranca más neutrones (2n, 3n), es capturado y solo salen fotones (γ), o en su lugar sale un protón o una partícula α. Una puerta con candado tiene un <b>umbral</b>: la reacción cuesta más energía de la que trae el neutrón.</p>
   <div class="ctl"><label for="mea-e2">Energía del neutrón (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Arrastra la energía más allá de un umbral y esa puerta se abre con un destello; los cubos se llenan según la fracción de cada canal, y cada puerta nueva les quita parte a las demás. Los umbrales salen de las masas de los núcleos; las fracciones, de la competencia del capítulo 6.</p>
+  <p>Arrastra la energía más allá de un umbral y esa puerta se abre con un destello; los cubos se llenan según la fracción de cada canal, y cada puerta nueva les quita parte a las demás. Los umbrales salen de las masas de los núcleos; las fracciones, de la competencia del capítulo 9.</p>
 </div>
 <div class="step">
   <h3>Lo que ve un detector</h3>

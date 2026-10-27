@@ -1,6 +1,6 @@
-/* Japanese: resonance (第10章、共鳴) */
+/* Japanese: resonance (第15章、共鳴) */
 WT.L.ch.resonance = {
-  num: "第10章", title: "鋭いピーク", short: "共鳴",
+  num: "第15章", title: "鋭いピーク", short: "共鳴",
   lead: "エネルギーが十分に低くなると、中性子にはもう、なめらかに平均された原子核は見えません。見えるのは複合核の個々のエネルギー準位で、それも1つずつです。",
   html: `
 <div class="step">

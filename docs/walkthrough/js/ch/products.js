@@ -14,7 +14,7 @@
   let lay = null, bound = false;
 
   WT.chapter("products", {
-    num: "Fission", title: "After the split", short: "Fission products",
+    num: "Chapter 14", title: "After the split", short: "Fission products",
     html: `
 <div class="step">
   <p>The pieces are unequal: one light, one heavy. Tap a bar.</p>

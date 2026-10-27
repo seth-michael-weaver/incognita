@@ -1,7 +1,7 @@
-/* Portuguese (pt-PT): strength (Capítulo 19, Especialista) */
+/* Portuguese (pt-PT): strength (Capítulo 25, Especialista) */
 WT.L.ch.strength = {
-  num: "Capítulo 19", title: "Intensidade fotónica, em pormenor", short: "Intensidade fotónica",
-  lead: "O Capítulo 7 mostrou que fotões prefere um núcleo quente. Este capítulo escreve as funções de intensidade, segue-as até aos coeficientes de transmissão e à largura radiativa média, e põe a correr a cascata que elas comandam.",
+  num: "Capítulo 25", title: "Intensidade fotónica, em pormenor", short: "Intensidade fotónica",
+  lead: "O Capítulo 10 mostrou que fotões prefere um núcleo quente. Este capítulo escreve as funções de intensidade, segue-as até aos coeficientes de transmissão e à largura radiativa média, e põe a correr a cascata que elas comandam.",
   html: `
 <div class="step">
   <h3>E1: a cauda da ressonância dipolar gigante</h3>
@@ -35,7 +35,7 @@ WT.L.ch.strength = {
   <h3>A cascata</h3>
   <p>Abaixo do primeiro fotão a mesma regra repete-se: a partir de cada nova energia, o fotão seguinte é sorteado de <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>), até o núcleo chegar aos seus níveis conhecidos. Cada história são uns poucos fotões; o seu espectro somado é o que um calorímetro vê depois da captura.</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">Upbend</button><button class="btn ghost" data-act="clear">Recomeçar</button></div>
-  <p>O upbend acrescenta fotões suaves e um pouco de multiplicidade. O motor não sorteia histórias: desloca populações intervalo a intervalo, de cima para baixo (Capítulo 8), o que dá as mesmas médias sem ruído de amostragem.</p>
+  <p>O upbend acrescenta fotões suaves e um pouco de multiplicidade. O motor não sorteia histórias: desloca populações intervalo a intervalo, de cima para baixo (Capítulo 11), o que dá as mesmas médias sem ruído de amostragem.</p>
   <div class="aside">No código: <code>gamma/strength.py</code> (todos os modelos de intensidade que o TALYS suporta; por defeito, as tabelas SMLO-2019 e a M1 da IAEA com upbend), <code>gamma/parameters.py</code> (sistemáticas das ressonâncias gigantes, tabelas), <code>gamma/transmission.py</code> (T = 2π E<sup>2L+1</sup> f), <code>gamma/ggnorm.py</code> (normalização opcional de ⟨Γγ⟩), <code>emission/</code> (a cascata). A imagem usa formas fechadas e sistemáticas para um núcleo semelhante ao ferro-57; o ⟨Γγ⟩ medido é o valor do RIPL para ⁵⁷Fe.</div>
 </div>`,
 };

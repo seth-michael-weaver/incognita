@@ -112,17 +112,17 @@
     <thead><tr><th>Chapter</th><th>What it does</th><th>Code</th></tr></thead>
     <tbody>
       <tr><td><a href="#structure">1</a></td><td>Masses, levels, deformation, resonance data</td><td><code>structure/</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>Optical model, transmission coefficients (how easily particles get in and out)</td><td><code>omp/</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>Coupled channels, DWBA, giant resonances, direct capture (optional)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
-      <tr><td><a href="#preeq">4</a></td><td>Pre-equilibrium: exciton model, pickup and knockout, multiple emission</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>Level densities (states per MeV), spin distribution</td><td><code>density/</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td>Choosing an exit (Hauser–Feshbach), width fluctuations</td><td><code>compound/</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Photon strength and γ transmission; discrete levels and isomers</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
-      <tr><td><a href="#cascade">8</a></td><td>The cascade of particle and γ emissions, exclusive channels, residuals</td><td><code>emission/</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>Fission barriers and transmission</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>Emission spectra, angular distributions and double-differential cross sections (optional, output only)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>Capture on thermally excited targets and stellar rates (optional)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>Uncertainty by many random variants (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>Optical model, transmission coefficients (how easily particles get in and out)</td><td><code>omp/</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>Coupled channels, DWBA, giant resonances, direct capture (optional)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
+      <tr><td><a href="#preeq">7</a></td><td>Pre-equilibrium: exciton model, pickup and knockout, multiple emission</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>Level densities (states per MeV), spin distribution</td><td><code>density/</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td>Choosing an exit (Hauser–Feshbach), width fluctuations</td><td><code>compound/</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Photon strength and γ transmission; discrete levels and isomers</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td>The cascade of particle and γ emissions, exclusive channels, residuals</td><td><code>emission/</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>Fission barriers and transmission</td><td><code>fission/</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>Emission spectra, angular distributions and double-differential cross sections (optional, output only)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>Capture on thermally excited targets and stellar rates (optional)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>Uncertainty by many random variants (Total Monte Carlo)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>The driver that runs the stages in order, and optional C kernels for speed</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>Every default and option, read once at the start; also TENDL's per-nuclide fitted parameters, applied as TALYS applies them (optional)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -133,34 +133,34 @@
   <table class="code-map" data-i18n="coda_table_added">
     <thead><tr><th>Chapter</th><th>What it changes</th><th>Code</th></tr></thead>
     <tbody>
-      <tr><td><a href="#cascade">8</a></td><td><b>On.</b> Flux bookkeeping closed: residuals kept down to 10⁻⁹ mb (TALYS: 10⁻³ mb), residuals one step past TALYS's cascade window kept, up to 8 of each ejectile in exclusive channels, a level's repeated decay branches all counted</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>On.</b> The top bin of the first compound nucleus is filled as primary photons fill it (weighted by E<sub>γ</sub>³), not evenly</td><td><code>compound/nnleak.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>On.</b> No averaged compound elastic below the first resonances (under 1 keV), where elastic is potential scattering</td><td><code>lowepot.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>On.</b> Deformed targets without fission: neutron exits to levels outside the coupled band use the coupled-channel transmission</td><td><code>compound/ccexitnb.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td><b>On.</b> Alpha emission sees a potential that depends on the residual's temperature; alpha projectiles enter through alpha model 6; triton and helion potentials include the projectile's size</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td><b>On.</b> Exact one-dimensional transmission through each barrier hump</td><td><code>fission/wkb.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td><b>On.</b> Per-nucleus E1/M1 strength factors, where a run supplies them, replaced by one global function of deformation</td><td><code>gamma/ftglobal.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td><b>On.</b> Targets with no measured resonance spacing D₀ of their own: the target's continuum level density above max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV is raised by a factor from one global rule of parity, shell and deformation features. Added to turn the (n,p)-near-threshold loss against TALYS-2's default input into a tie; it makes a few capture, (n,2n) and (n,α) views slightly worse, a harm accepted and recorded</td><td><code>density/npwindow.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>A stronger scissors mode in deformed nuclei, from newer systematics that match Oslo measurements (about 4–5× in actinides); or a variant that scales its energy and strength with deformation</td><td><code>gamma/scissors.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Photon strength rescaled so each nucleus matches its measured radiative strength ⟨Γγ⟩/D₀, for every nucleus in the cascade, not only the first</td><td><code>gamma/ggnorm.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Stronger scissors and ⟨Γγ⟩ normalisation for the heaviest nuclei (Z ≥ 88) only, aimed at capture at keV energies</td><td><code>gamma/actphys.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Our own E1-width constant in place of TALYS's TENDL-derived table (the shipped no-data recipe sets it)</td><td><code>gamma/e1_width.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>Collective E2 strength of rotational bands in the quasi-continuum</td><td><code>gamma/isoe2.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>A regional adjustment of the optical well for deformed rare-earth targets, fitted to measured S₀ and S₁ with no capture data</td><td><code>omp/regional.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>Measured neutron strength functions S₀, S₁ set the low-energy neutron transmission</td><td><code>omp/sfunc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>Direct capture into bound orbits, with an upstream fix: in stock TALYS it returns zero unless every optical-model output is also requested</td><td><code>direct/racapcalc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>The target's coupling scheme (rotor, vibrator, spherical) chosen from its measured levels</td><td><code>structure/collrule.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td><b>On.</b> Flux bookkeeping closed: residuals kept down to 10⁻⁹ mb (TALYS: 10⁻³ mb), residuals one step past TALYS's cascade window kept, up to 8 of each ejectile in exclusive channels, a level's repeated decay branches all counted</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>On.</b> The top bin of the first compound nucleus is filled as primary photons fill it (weighted by E<sub>γ</sub>³), not evenly</td><td><code>compound/nnleak.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>On.</b> No averaged compound elastic below the first resonances (under 1 keV), where elastic is potential scattering</td><td><code>lowepot.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>On.</b> Deformed targets without fission: neutron exits to levels outside the coupled band use the coupled-channel transmission</td><td><code>compound/ccexitnb.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td><b>On.</b> Alpha emission sees a potential that depends on the residual's temperature; alpha projectiles enter through alpha model 6; triton and helion potentials include the projectile's size</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td><b>On.</b> Exact one-dimensional transmission through each barrier hump</td><td><code>fission/wkb.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td><b>On.</b> Per-nucleus E1/M1 strength factors, where a run supplies them, replaced by one global function of deformation</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td><b>On.</b> Targets with no measured resonance spacing D₀ of their own: the target's continuum level density above max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV is raised by a factor from one global rule of parity, shell and deformation features. Added to turn the (n,p)-near-threshold loss against TALYS-2's default input into a tie; it makes a few capture, (n,2n) and (n,α) views slightly worse, a harm accepted and recorded</td><td><code>density/npwindow.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>A stronger scissors mode in deformed nuclei, from newer systematics that match Oslo measurements (about 4–5× in actinides); or a variant that scales its energy and strength with deformation</td><td><code>gamma/scissors.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Photon strength rescaled so each nucleus matches its measured radiative strength ⟨Γγ⟩/D₀, for every nucleus in the cascade, not only the first</td><td><code>gamma/ggnorm.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Stronger scissors and ⟨Γγ⟩ normalisation for the heaviest nuclei (Z ≥ 88) only, aimed at capture at keV energies</td><td><code>gamma/actphys.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Our own E1-width constant in place of TALYS's TENDL-derived table (the shipped no-data recipe sets it)</td><td><code>gamma/e1_width.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>Collective E2 strength of rotational bands in the quasi-continuum</td><td><code>gamma/isoe2.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>A regional adjustment of the optical well for deformed rare-earth targets, fitted to measured S₀ and S₁ with no capture data</td><td><code>omp/regional.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>Measured neutron strength functions S₀, S₁ set the low-energy neutron transmission</td><td><code>omp/sfunc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>Direct capture into bound orbits, with an upstream fix: in stock TALYS it returns zero unless every optical-model output is also requested</td><td><code>direct/racapcalc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>The target's coupling scheme (rotor, vibrator, spherical) chosen from its measured levels</td><td><code>structure/collrule.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>The continuum starts where the measured level scheme stops being complete</td><td><code>structure/levcomplete.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>A level whose listed spin is impossible for its nucleus (integer in odd-A) is treated as a level of unknown spin</td><td><code>structure/levjpar.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>Constant-temperature level density anchored on the complete part of the discrete levels</td><td><code>density/ctwindow2.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>Rotational bands of transition states at the fission saddles</td><td><code>fission/barriers.py</code></td></tr>
-      <tr><td><a href="#resonance">10</a></td><td>Capture where only a few resonances fall in the stellar window: the typical value of one resonance ladder instead of the average</td><td><code>fewres.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>Constant-temperature level density anchored on the complete part of the discrete levels</td><td><code>density/ctwindow2.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>Rotational bands of transition states at the fission saddles</td><td><code>fission/barriers.py</code></td></tr>
+      <tr><td><a href="#resonance">15</a></td><td>Capture where only a few resonances fall in the stellar window: the typical value of one resonance ladder instead of the average</td><td><code>fewres.py</code></td></tr>
       <tr><td></td><td>Four guards far from stability: direct flux capped by unitarity, a limit on the Fermi energy, no default collectivity for odd-odd nuclei, pre-equilibrium spin spread normalised</td><td><code>engphys.py</code></td></tr>
     </tbody>
   </table>
 
   <h3 data-i18n="coda_h3_outside">Outside the engine</h3>
-  <p data-i18n="coda_p_outside">Some parts of the story run beside the engine rather than inside it. The statistical resonance ladders of <a href="#resonance">Chapter 10</a> live in <code>physics/resonance/</code>. The Maxwellian averages (MACS) of <a href="#measure">Chapter 12</a> are folded from the engine's capture curves after the run, in <code>validation/differential/core.py</code>; capture on thermally excited targets and the stellar rate, by contrast, come from the engine itself (<code>astro/stellar.py</code>, optional). The anchoring layer of <a href="#layers">Chapter 15</a> lives in <code>incognita/terra/</code>.</p>
+  <p data-i18n="coda_p_outside">Some parts of the story run beside the engine rather than inside it. The statistical resonance ladders of <a href="#resonance">Chapter 15</a> live in <code>physics/resonance/</code>. The Maxwellian averages (MACS) of <a href="#measure">Chapter 17</a> are folded from the engine's capture curves after the run, in <code>validation/differential/core.py</code>; capture on thermally excited targets and the stellar rate, by contrast, come from the engine itself (<code>astro/stellar.py</code>, optional). The anchoring layer of <a href="#layers">Chapter 21</a> lives in <code>incognita/terra/</code>.</p>
   <p data-i18n="coda_repo">The code, the library and the curated measurements are open: <a href="https://github.com/seth-michael-weaver/incognita">seth-michael-weaver/incognita on GitHub</a>. You can look up any prediction yourself on the <a href="data.html" data-keep-lang>Every nuclide</a> page, or clone the repository and run it.</p>
 </section>
 

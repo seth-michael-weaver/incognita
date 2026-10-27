@@ -1,4 +1,4 @@
-/* Chapter 6: Hauser-Feshbach decay as a competition between exits (compound/).
+/* Chapter 9: Hauser-Feshbach decay as a competition between exits (compound/).
  * Scenes (S.mode): "doors" = the hot nucleus and one door per exit (g.door: lit gap = share = T x rooms beyond); balls stream out at the shares;
  *                   "hump"  = a door per emission energy (gap = T) over a crowd of residual states (rho); neutrons fall through both onto a pile;
  *                   "coul"  = a charged particle rattling in the well, tunnelling the Coulomb hill (1/r tail, tunnel width shown);
@@ -76,13 +76,13 @@
   }
 
   WT.chapter("decay", {
-    num: "Chapter 6", title: "Choosing an exit", short: "Decay",
+    num: "Chapter 9", title: "Choosing an exit", short: "Decay",
     lead: "The compound nucleus must shed its energy by emitting a particle or a photon. This chapter draws each way out as a door. The engine's job is to say what share of the flux (the stream of reactions arriving here) leaves through each door.",
     html: `
 <div class="step">
   <p>One door per exit: a <em class="g">photon</em> (γ), a <em class="n">neutron</em> (n), a <em class="p">proton</em> (p), an <em class="a">alpha particle</em> (α: two protons and two neutrons) and, for heavy nuclei only, <em class="f">fission</em> (splitting in two). The lit gap in each door is that exit's share, and the balls stream out at the same rates; grey doors are shut. Having forgotten how it formed, the nucleus uses each door b in proportion to a weight:</p>
   <div class="formula">share<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p>The <b>transmission coefficient</b> <i>T</i> is the chance that a particle reaching the edge gets through; for particles it comes from the optical model of Chapter 2, run backwards. The <b>level density</b> ρ, written beside each door, counts the states the leftover nucleus can end up in. Sharing by <i>T</i> times ρ is the <b>Hauser–Feshbach</b> rule. At 10 MeV the neutron door takes nearly everything.</p>
+  <p>The <b>transmission coefficient</b> <i>T</i> is the chance that a particle reaching the edge gets through; for particles it comes from the optical model of Chapter 5, run backwards. The <b>level density</b> ρ, written beside each door, counts the states the leftover nucleus can end up in. Sharing by <i>T</i> times ρ is the <b>Hauser–Feshbach</b> rule. At 10 MeV the neutron door takes nearly everything.</p>
 </div>
 <div class="step">
   <h3>Why most particles come out slow</h3>
@@ -107,7 +107,7 @@
   <h3>Spin and parity must balance</h3>
   <p>The compound nucleus (top) has spin <i>J</i>; the leftover nucleus's states sit below in drawers by spin <i>J</i>′. The neutron carries off the difference in spin and parity: leaving with orbital angular momentum <i>l</i>, it changes the spin by up to <i>l</i> + ½ and flips the parity when <i>l</i> is odd. Larger <i>l</i> means a narrower door; each drawer's door is the smallest <i>l</i> that reaches it. Solid landings keep parity; hollow ones flip it.</p>
   <div class="ctl"><label for="dc-j">Compound spin J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>Drag <i>J</i> up. The open doors slide toward high-spin drawers, which hold few states, while the full drawers sit behind shut doors. A high-spin compound nucleus is slow to emit particles, which gives photons, and isomers (long-lived states, Chapter 7), their chance.</p>
+  <p>Drag <i>J</i> up. The open doors slide toward high-spin drawers, which hold few states, while the full drawers sit behind shut doors. A high-spin compound nucleus is slow to emit particles, which gives photons, and isomers (long-lived states, Chapter 10), their chance.</p>
 </div>
 <div class="step">
   <h3>The way you came in</h3>
@@ -119,7 +119,7 @@
 </div>
 <div class="step">
   <h3>What is left to share</h3>
-  <p>Not every absorbed neutron forms a compound nucleus. Some make one glancing hit and fly off (direct reactions, Chapter 3); some knock about once or twice and shoot out fast (pre-equilibrium, Chapter 4). Only the rest stay and heat the nucleus. The counters tally each fate.</p>
+  <p>Not every absorbed neutron forms a compound nucleus. Some make one glancing hit and fly off (direct reactions, Chapter 6); some knock about once or twice and shoot out fast (pre-equilibrium, Chapter 7). Only the rest stay and heat the nucleus. The counters tally each fate.</p>
   <div class="ctl"><label for="dc-einc">Neutron energy</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Only those that stay enter the door competition. Drag the neutron energy: at a few MeV nearly all stay; by 30 MeV about half have left before reaching equilibrium.</p>
   <div class="aside">In the code: <code>compound/prepare.py</code> (exit weights T·ρ per spin and parity, selection rules), <code>compound/target.py</code> (first decay with width fluctuations), <code>compound/continuum.py</code> (decay of every later bin), <code>compound/wfc.py</code> (Moldauer, HRTW, GOE corrections), <code>compound/normalization.py</code> (flux left for the compound nucleus), <code>omp/inverse.py</code> (doors run backwards).</div>

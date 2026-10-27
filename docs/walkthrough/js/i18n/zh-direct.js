@@ -1,6 +1,6 @@
-/* Simplified Chinese: direct (第 3 章，直接反应) */
+/* Simplified Chinese: direct (第 6 章，直接反应) */
 WT.L.ch.direct = {
-  num: "第 3 章", title: "擦边一击", short: "直接反应",
+  num: "第 6 章", title: "擦边一击", short: "直接反应",
   lead: "并不是每个到达原子核的中子都会被吞没。有些只擦过它的表面，推它一下，然后继续飞走。",
   html: `
 <div class="step">
@@ -24,7 +24,7 @@ WT.L.ch.direct = {
 </div>
 <div class="step">
   <h3>只推一次</h3>
-  <p>对大多数能级来说耦合很弱，推一次就够了：这就是 <b>DWBA</b>（扭曲波玻恩近似）。第 2 章的入射波在边缘处推原子核一次，那里的势从很深降到零；波峰撞击之处边缘会发光。向外扩散的圆形波，就是使原子核留在激发态后离开的中子。</p>
+  <p>对大多数能级来说耦合很弱，推一次就够了：这就是 <b>DWBA</b>（扭曲波玻恩近似）。第 5 章的入射波在边缘处推原子核一次，那里的势从很深降到零；波峰撞击之处边缘会发光。向外扩散的圆形波，就是使原子核留在激发态后离开的中子。</p>
   <div class="ctl"><label for="di-bd">能级的形变 β</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>拖动 <i>β</i>：边缘晃动得更厉害，圆圈也更亮，强度正比于 <i>β</i>²：形变加倍，散射的中子变为四倍。程序从实测值中获取每个能级的 <i>β</i>，没有实测值时则取自系统学。散射中子的角分布是可选的附加输出。</p>
 </div>
@@ -33,17 +33,17 @@ WT.L.ch.direct = {
   <p>所有核子可以一起运动：呼吸式胀缩、压扁和拉长，或摆成梨形。这些就是<b>巨共振</b>。在这个中等质量的原子核中，它们位于约 7 到 25 MeV 处，每个宽达数 MeV，宽得无法算作一个能级；图中的峰标出了每个巨共振的<b>激发能</b>。</p>
   <p>程序根据<b>求和规则</b>确定每个巨共振的总强度（这是由基本物理给出的原子核响应强度上限），并把它铺成最后一个已知能级之上的一个峰。这些峰加上推向高能级的激发，构成了<b>集体连续区</b>。</p>
   <div class="btns"><button class="btn ghost" data-act="mono">呼吸</button><button class="btn ghost" data-act="quad">压扁</button><button class="btn ghost" data-act="oct">梨形</button></div>
-  <p>最著名的一个是质子相对于中子来回振荡（巨偶极共振），它主要吸收和发射光，因此留到第 7 章再讲。</p>
+  <p>最著名的一个是质子相对于中子来回振荡（巨偶极共振），它主要吸收和发射光，因此留到第 10 章再讲。</p>
 </div>
 <div class="step">
   <h3>直接落入轨道</h3>
-  <p>一个自由中子可以直接落入势阱中一个空的<b>轨道</b>（单个中子在核内允许具有的能量），并把多余的能量以<em class="g">光子</em>形式放出。原子核根本没有被加热。这就是<b>直接俘获</b>。程序可以用第 2 章的同一个势阱来计算它：外面是自由波，里面是束缚轨道，光子把两者联系起来。这一计算是可选的，默认关闭。</p>
+  <p>一个自由中子可以直接落入势阱中一个空的<b>轨道</b>（单个中子在核内允许具有的能量），并把多余的能量以<em class="g">光子</em>形式放出。原子核根本没有被加热。这就是<b>直接俘获</b>。程序可以用第 5 章的同一个势阱来计算它：外面是自由波，里面是束缚轨道，光子把两者联系起来。这一计算是可选的，默认关闭。</p>
   <div class="btns"><button class="btn" data-act="drop">放入一个中子</button></div>
   <p>当通常的途径（分享中子的能量）很弱时，直接俘获最为重要：例如轻核和远离稳定线的原子核，它们的能级少且间隔大。</p>
 </div>
 <div class="step">
   <h3>直接反应先分一份</h3>
-  <p>程序按顺序分配第 2 章的反应截面：先是直接反应，再是快速碰撞，剩下的部分才形成复合核。图中每个中子都会遇到三种命运之一：<b>直接</b>（擦边后飞走）、快速（在能量扩散之前打出一个核子：<b>预平衡</b>，第 4 章）或被吞没（形成<b>复合核</b>，第 5 章）。各堆分别计数。</p>
+  <p>程序按顺序分配第 5 章的反应截面：先是直接反应，再是快速碰撞，剩下的部分才形成复合核。图中每个中子都会遇到三种命运之一：<b>直接</b>（擦边后飞走）、快速（在能量扩散之前打出一个核子：<b>预平衡</b>，第 7 章）或被吞没（形成<b>复合核</b>，第 8 章）。各堆分别计数。</p>
   <div class="ctl"><label for="di-e">中子能量 (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>拖动能量，看各堆重新累积。在几 MeV 时几乎每个中子都被吞没。在几十 MeV 时，直接反应和快速碰撞合起来占了很大一部分。</p>
   <div class="aside">代码位置：<code>ecis/formfactor.py</code>、<code>ecis/coupling.py</code>、<code>ecis/solver.py</code>（形变势，转动核和振动核的耦合道），<code>ecis/dwba.py</code> 和 <code>direct/dwba.py</code>（单次推动、巨共振、集体连续区），<code>direct/racapcalc.py</code>（直接俘获，可选，默认关闭），<code>compound/normalization.py</code>（总账）。</div>

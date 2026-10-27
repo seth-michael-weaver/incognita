@@ -1,12 +1,12 @@
-/* French: decay (Chapitre 6) */
+/* French: decay (Chapitre 9) */
 WT.L.ch.decay = {
-  num: "Chapitre 6", title: "Choisir une sortie", short: "Désexcitation",
+  num: "Chapitre 9", title: "Choisir une sortie", short: "Désexcitation",
   lead: "Le noyau composé doit se débarrasser de son énergie en émettant une particule ou un photon. Ce chapitre représente chaque issue par une porte. Le rôle du moteur est de dire quelle part du flux (le courant de réactions qui arrivent ici) sort par chaque porte.",
   html: `
 <div class="step">
   <p>Une porte par sortie : un <em class="g">photon</em> (γ), un <em class="n">neutron</em> (n), un <em class="p">proton</em> (p), une <em class="a">particule alpha</em> (α : deux protons et deux neutrons) et, pour les noyaux lourds seulement, la <em class="f">fission</em> (la cassure en deux). L'ouverture éclairée de chaque porte est la part de cette sortie, et les boules s'en échappent au même rythme ; les portes grises sont fermées. Ayant oublié comment il s'est formé, le noyau emprunte chaque porte b en proportion d'un poids :</p>
   <div class="formula">part<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p>Le <b>coefficient de transmission</b> <i>T</i> est la probabilité qu'une particule arrivée au bord passe ; pour les particules, il provient du modèle optique du chapitre 2, utilisé à l'envers. La <b>densité de niveaux</b> ρ, écrite à côté de chaque porte, compte les états dans lesquels le noyau restant peut se retrouver. Répartir selon <i>T</i> fois ρ, c'est la règle de <b>Hauser–Feshbach</b>. À 10 MeV, la porte du neutron prend presque tout.</p>
+  <p>Le <b>coefficient de transmission</b> <i>T</i> est la probabilité qu'une particule arrivée au bord passe ; pour les particules, il provient du modèle optique du chapitre 5, utilisé à l'envers. La <b>densité de niveaux</b> ρ, écrite à côté de chaque porte, compte les états dans lesquels le noyau restant peut se retrouver. Répartir selon <i>T</i> fois ρ, c'est la règle de <b>Hauser–Feshbach</b>. À 10 MeV, la porte du neutron prend presque tout.</p>
 </div>
 <div class="step">
   <h3>Pourquoi la plupart des particules sortent lentes</h3>
@@ -31,7 +31,7 @@ WT.L.ch.decay = {
   <h3>Spin et parité doivent s'équilibrer</h3>
   <p>Le noyau composé (en haut) a un spin <i>J</i> ; les états du noyau restant sont rangés en dessous dans des tiroirs selon leur spin <i>J</i>′. Le neutron emporte la différence de spin et de parité : en partant avec un moment angulaire orbital <i>l</i>, il change le spin d'au plus <i>l</i> + ½ et inverse la parité quand <i>l</i> est impair. Un <i>l</i> plus grand signifie une porte plus étroite ; la porte de chaque tiroir correspond au plus petit <i>l</i> qui l'atteint. Les arrivées pleines conservent la parité ; les creuses l'inversent.</p>
   <div class="ctl"><label for="dc-j">Spin du noyau composé J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>Augmentez <i>J</i>. Les portes ouvertes glissent vers les tiroirs de haut spin, qui contiennent peu d'états, tandis que les tiroirs pleins sont derrière des portes fermées. Un noyau composé de haut spin émet lentement des particules, ce qui laisse leur chance aux photons et aux isomères (états de longue durée de vie, chapitre 7).</p>
+  <p>Augmentez <i>J</i>. Les portes ouvertes glissent vers les tiroirs de haut spin, qui contiennent peu d'états, tandis que les tiroirs pleins sont derrière des portes fermées. Un noyau composé de haut spin émet lentement des particules, ce qui laisse leur chance aux photons et aux isomères (états de longue durée de vie, chapitre 10).</p>
 </div>
 <div class="step">
   <h3>Par où vous êtes entré</h3>
@@ -43,7 +43,7 @@ WT.L.ch.decay = {
 </div>
 <div class="step">
   <h3>Ce qui reste à partager</h3>
-  <p>Tous les neutrons absorbés ne forment pas un noyau composé. Certains font un seul coup rasant et repartent (réactions directes, chapitre 3) ; d'autres s'entrechoquent une ou deux fois et ressortent vite (prééquilibre, chapitre 4). Seul le reste demeure et chauffe le noyau. Les compteurs totalisent chaque sort.</p>
+  <p>Tous les neutrons absorbés ne forment pas un noyau composé. Certains font un seul coup rasant et repartent (réactions directes, chapitre 6) ; d'autres s'entrechoquent une ou deux fois et ressortent vite (prééquilibre, chapitre 7). Seul le reste demeure et chauffe le noyau. Les compteurs totalisent chaque sort.</p>
   <div class="ctl"><label for="dc-einc">Énergie du neutron</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Seuls ceux qui restent entrent dans la compétition des portes. Faites varier l'énergie du neutron : à quelques MeV, presque tous restent ; à 30 MeV, environ la moitié est partie avant d'atteindre l'équilibre.</p>
   <div class="aside">Dans le code : <code>compound/prepare.py</code> (poids de sortie T·ρ par spin et parité, règles de sélection), <code>compound/target.py</code> (première désexcitation avec fluctuations des largeurs), <code>compound/continuum.py</code> (désexcitation de chaque intervalle suivant), <code>compound/wfc.py</code> (corrections Moldauer, HRTW, GOE), <code>compound/normalization.py</code> (flux restant pour le noyau composé), <code>omp/inverse.py</code> (les portes utilisées à l'envers).</div>

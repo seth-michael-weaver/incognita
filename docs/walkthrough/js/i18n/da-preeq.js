@@ -1,6 +1,6 @@
-/* Danish: preeq (Kapitel 4, præligevægt) */
+/* Danish: preeq (Kapitel 7, præligevægt) */
 WT.L.ch.preeq = {
-  num: "Kapitel 4", title: "Kollisioner før roen", short: "Præligevægt",
+  num: "Kapitel 7", title: "Kollisioner før roen", short: "Præligevægt",
   lead: "En neutron, der trænger ind i en kerne, deler ikke sin energi med alle på én gang. I de første par kollisioner har én partikel det meste af den, og den partikel kan flyve lige ud igen. Det er præligevægt: emission “før energien udjævnes”.",
   html: `
 <div class="step">
@@ -15,13 +15,13 @@ WT.L.ch.preeq = {
 </div>
 <div class="step">
   <h3>Forgreningen ved hvert trin</h3>
-  <p>På hvert trin undslipper den øverste neutron enten (pil op, kun hvis den er over fri-linjen) eller kolliderer igen (pil ned); tykkelsen viser oddsene. Undslipningsraten følger af <b>detaljeret balance</b>: af sandsynligheden for den omvendte proces, at samme partikel absorberes, som kapitel 2 beregner. Kollisionsraten er styrken af én nukleon–nukleon-kollision gange antallet af nye konfigurationer, den kan nå.</p>
+  <p>På hvert trin undslipper den øverste neutron enten (pil op, kun hvis den er over fri-linjen) eller kolliderer igen (pil ned); tykkelsen viser oddsene. Undslipningsraten følger af <b>detaljeret balance</b>: af sandsynligheden for den omvendte proces, at samme partikel absorberes, som kapitel 5 beregner. Kollisionsraten er styrken af én nukleon–nukleon-kollision gange antallet af nye konfigurationer, den kan nå.</p>
   <div class="ctl"><label for="pe-n">Trin (excitoner n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Træk trinnet op. Tidligt har én partikel det meste af energien, så det, der slipper ud, er hurtigt. Senere er energien spredt tyndt, og lidt kommer ud.</p>
 </div>
 <div class="step">
   <h3>Hvor den hurtige hale kommer fra</h3>
-  <p>Bunken til højre er <b>spektret</b>: hvor mange neutroner der kommer ud ved hver energi, langsomme til venstre, hurtige til højre. Hver reaktion kører kæden, indtil den øverste neutron undslipper, og dens farve fortæller hvornår: <em style="font-style:normal;color:var(--warm);font-weight:600">dyb orange</em> på trin 3, blegere senere, <em class="n">blå</em>, hvis den først kom ud, efter at kernen var faldet til ro (kapitel 5).</p>
+  <p>Bunken til højre er <b>spektret</b>: hvor mange neutroner der kommer ud ved hver energi, langsomme til venstre, hurtige til højre. Hver reaktion kører kæden, indtil den øverste neutron undslipper, og dens farve fortæller hvornår: <em style="font-style:normal;color:var(--warm);font-weight:600">dyb orange</em> på trin 3, blegere senere, <em class="n">blå</em>, hvis den først kom ud, efter at kernen var faldet til ro (kapitel 8).</p>
   <div class="btns"><button class="btn" data-act="run">Kør 300 reaktioner</button></div>
   <p>Trin 3 bygger en bred, næsten flad hylde, der når den maksimale energi. Senere trin hober sig op lavere. Den blå pukkel er <b>fordampning</b>: når alle deler energien, siver kun langsomme neutroner ud, som damp fra en varm væske.</p>
   <div class="ctl"><label for="pe-e">Neutronenergi</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

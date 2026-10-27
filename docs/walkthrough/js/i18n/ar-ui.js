@@ -23,17 +23,17 @@ Object.assign(WT.L.ui, {
     <thead><tr><th>الفصل</th><th>ما يفعله</th><th>الشيفرة</th></tr></thead>
     <tbody>
       <tr><td><a href="#structure">1</a></td><td>الكتل، المستويات، التشوه، بيانات الرنين</td><td><code>structure/</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>النموذج البصري، معاملات النفاذ (مدى سهولة دخول الجسيمات وخروجها)</td><td><code>omp/</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>القنوات المقترنة، DWBA، الرنينات العملاقة، الأسر المباشر (اختياري)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
-      <tr><td><a href="#preeq">4</a></td><td>ما قبل التوازن: نموذج الإكسيتونات، التقاط النيوكليونات والإطاحة بها، الانبعاث المتعدد</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>كثافات المستويات (حالات لكل MeV)، توزيع السبين</td><td><code>density/</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td>اختيار مخرج (هاوزر–فيشباخ)، تقلبات العرض</td><td><code>compound/</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>دالة قوة غاما ونفاذ γ؛ المستويات المنفصلة والأيزومرات</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
-      <tr><td><a href="#cascade">8</a></td><td>شلال انبعاث الجسيمات وأشعة γ، القنوات الحصرية، النوى المتبقية</td><td><code>emission/</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>حواجز الانشطار والنفاذ</td><td><code>fission/</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>أطياف الانبعاث، التوزيعات الزاوية والمقاطع العرضية التفاضلية المزدوجة (اختياري، للإخراج فقط)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>الأسر في أهداف مثارة حراريًا والمعدلات النجمية (اختياري)</td><td><code>astro/stellar.py</code></td></tr>
-      <tr><td><a href="#measure">12</a></td><td>عدم اليقين عبر متغيرات عشوائية كثيرة (مونت كارلو الشامل)</td><td><code>tmc.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>النموذج البصري، معاملات النفاذ (مدى سهولة دخول الجسيمات وخروجها)</td><td><code>omp/</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>القنوات المقترنة، DWBA، الرنينات العملاقة، الأسر المباشر (اختياري)</td><td><code>ecis/</code>, <code>direct/</code></td></tr>
+      <tr><td><a href="#preeq">7</a></td><td>ما قبل التوازن: نموذج الإكسيتونات، التقاط النيوكليونات والإطاحة بها، الانبعاث المتعدد</td><td><code>preeq/</code>, <code>density/particle_hole.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>كثافات المستويات (حالات لكل MeV)، توزيع السبين</td><td><code>density/</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td>اختيار مخرج (هاوزر–فيشباخ)، تقلبات العرض</td><td><code>compound/</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>دالة قوة غاما ونفاذ γ؛ المستويات المنفصلة والأيزومرات</td><td><code>gamma/</code><br><code>structure/levels.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td>شلال انبعاث الجسيمات وأشعة γ، القنوات الحصرية، النوى المتبقية</td><td><code>emission/</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>حواجز الانشطار والنفاذ</td><td><code>fission/</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>أطياف الانبعاث، التوزيعات الزاوية والمقاطع العرضية التفاضلية المزدوجة (اختياري، للإخراج فقط)</td><td><code>specout.py</code><br><code>specang.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>الأسر في أهداف مثارة حراريًا والمعدلات النجمية (اختياري)</td><td><code>astro/stellar.py</code></td></tr>
+      <tr><td><a href="#measure">17</a></td><td>عدم اليقين عبر متغيرات عشوائية كثيرة (مونت كارلو الشامل)</td><td><code>tmc.py</code></td></tr>
       <tr><td></td><td>البرنامج الذي ينفّذ المراحل بالترتيب، ونوى حسابية اختيارية مكتوبة بلغة C لزيادة السرعة</td><td><code>engine.py</code><br><code>engine_c.py</code>, <code>native/</code></td></tr>
       <tr><td></td><td>كل القيم الافتراضية والخيارات، تُقرأ مرة واحدة عند البدء؛ وكذلك بارامترات TENDL المضبوطة لكل نويدة، تُطبَّق كما يطبّقها TALYS (اختياري)</td><td><code>input/</code></td></tr>
     </tbody>
@@ -43,33 +43,33 @@ Object.assign(WT.L.ui, {
   coda_table_added: `
     <thead><tr><th>الفصل</th><th>ما الذي يتغير</th><th>الشيفرة</th></tr></thead>
     <tbody>
-      <tr><td><a href="#cascade">8</a></td><td><b>مفعّل.</b> محاسبة مغلقة للتدفق: النوى المتبقية محفوظة حتى 10⁻⁹ mb (في TALYS: 10⁻³ mb)، والنوى المتبقية الواقعة بعد نافذة الشلال في TALYS بخطوة محفوظة، وحتى 8 من كل جسيم منبعث في القنوات الحصرية، وتُحتسب كل فروع إزالة الإثارة المتكررة لمستوى ما</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>مفعّل.</b> تُملأ الفترة العليا للنواة المركبة الأولى كما تملؤها الفوتونات الأولية (بوزن E<sub>γ</sub>³)، لا بشكل منتظم</td><td><code>compound/nnleak.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>مفعّل.</b> لا تشتت مرن مركب متوسط تحت الرنينات الأولى (أقل من 1 keV)، حيث يكون التشتت المرن تشتت جهد</td><td><code>lowepot.py</code></td></tr>
-      <tr><td><a href="#decay">6</a></td><td><b>مفعّل.</b> الأهداف المشوهة غير الانشطارية: مخارج النيوترونات إلى مستويات خارج الحزمة المقترنة تستخدم نفاذ القنوات المقترنة</td><td><code>compound/ccexitnb.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td><b>مفعّل.</b> انبعاث ألفا يرى جهدًا يعتمد على درجة حرارة النواة المتبقية؛ وقذائف ألفا تدخل بنموذج ألفا 6؛ وجهود التريتون والهيليون تتضمن حجم القذيفة</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td><b>مفعّل.</b> نفاذ أحادي البعد دقيق عبر كل حدبة من حدبات الحاجز</td><td><code>fission/wkb.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td><b>مفعّل.</b> معاملات شدة E1/M1 الخاصة بكل نواة، حين يوفرها التشغيل، تُستبدل بدالة عامة واحدة للتشوه</td><td><code>gamma/ftglobal.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td><b>مفعّل.</b> الأهداف التي ليس لها تباعد رنيني D₀ مقيس خاص بها: تُرفع كثافة مستويات المتصل للهدف فوق max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV بمعامل تحدده قاعدة عامة واحدة مبنية على سمات الزوجية والقشرة والتشوه. أُضيفت لتحويل خسارة (n,p) قرب العتبة مقابل المُدخَل الافتراضي لـ TALYS-2 إلى تعادل؛ وهي تزيد بعض منظورات الأسر و(n,2n) و(n,α) سوءًا بقدر طفيف، وهو ضرر مقبول ومسجَّل</td><td><code>density/npwindow.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>نمط مقص أقوى في الأنوية المشوهة، بمنهجيات أحدث تطابق قياسات أوسلو (نحو 4 إلى 5 أضعاف في الأكتينيدات)؛ أو صيغة بديلة تُقيِّس طاقته وشدته بالتشوه</td><td><code>gamma/scissors.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>دالة قوة غاما معاد تقييسها لتطابق كل نواة شدتها الإشعاعية المقيسة ⟨Γγ⟩/D₀، في كل أنوية الشلال لا الأولى فقط</td><td><code>gamma/ggnorm.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>نمط مقص أقوى وتقييس ⟨Γγ⟩ للأنوية الأثقل فقط (Z ≥ 88)، موجّهان للأسر عند طاقات keV</td><td><code>gamma/actphys.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>ثابت عرض E1 خاص بنا بدلًا من جدول TALYS المشتق من TENDL (تثبّته الوصفة الخالية من البيانات التي ننشرها)</td><td><code>gamma/e1_width.py</code></td></tr>
-      <tr><td><a href="#gamma">7</a></td><td>شدة E2 الجماعية للحزم الدورانية في شبه المتصل</td><td><code>gamma/isoe2.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>ضبط إقليمي للبئر البصري للأهداف المشوهة من العناصر الأرضية النادرة، مضبوط على S₀ وS₁ المقيسين دون بيانات أسر</td><td><code>omp/regional.py</code></td></tr>
-      <tr><td><a href="#omp">2</a></td><td>دالتا القوة النيوترونية المقيستان S₀ وS₁ تحددان نفاذ النيوترونات عند الطاقات المنخفضة</td><td><code>omp/sfunc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>الأسر المباشر إلى مدارات مقيدة، مع تصحيح للأصل: في TALYS القياسي يعيد صفرًا ما لم تُطلب أيضًا كل مخرجات النموذج البصري</td><td><code>direct/racapcalc.py</code></td></tr>
-      <tr><td><a href="#direct">3</a></td><td>مخطط اقتران الهدف (دوّار، مهتز، كروي) مختار انطلاقًا من مستوياته المقيسة</td><td><code>structure/collrule.py</code></td></tr>
+      <tr><td><a href="#cascade">11</a></td><td><b>مفعّل.</b> محاسبة مغلقة للتدفق: النوى المتبقية محفوظة حتى 10⁻⁹ mb (في TALYS: 10⁻³ mb)، والنوى المتبقية الواقعة بعد نافذة الشلال في TALYS بخطوة محفوظة، وحتى 8 من كل جسيم منبعث في القنوات الحصرية، وتُحتسب كل فروع إزالة الإثارة المتكررة لمستوى ما</td><td><code>emission/fluxclose.py</code><br><code>emission/channels.py</code><br><code>kevleak2.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>مفعّل.</b> تُملأ الفترة العليا للنواة المركبة الأولى كما تملؤها الفوتونات الأولية (بوزن E<sub>γ</sub>³)، لا بشكل منتظم</td><td><code>compound/nnleak.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>مفعّل.</b> لا تشتت مرن مركب متوسط تحت الرنينات الأولى (أقل من 1 keV)، حيث يكون التشتت المرن تشتت جهد</td><td><code>lowepot.py</code></td></tr>
+      <tr><td><a href="#decay">9</a></td><td><b>مفعّل.</b> الأهداف المشوهة غير الانشطارية: مخارج النيوترونات إلى مستويات خارج الحزمة المقترنة تستخدم نفاذ القنوات المقترنة</td><td><code>compound/ccexitnb.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td><b>مفعّل.</b> انبعاث ألفا يرى جهدًا يعتمد على درجة حرارة النواة المتبقية؛ وقذائف ألفا تدخل بنموذج ألفا 6؛ وجهود التريتون والهيليون تتضمن حجم القذيفة</td><td><code>omp/alphatemp.py</code><br><code>alphaentr.py</code><br><code>omp/tfold.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td><b>مفعّل.</b> نفاذ أحادي البعد دقيق عبر كل حدبة من حدبات الحاجز</td><td><code>fission/wkb.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td><b>مفعّل.</b> معاملات شدة E1/M1 الخاصة بكل نواة، حين يوفرها التشغيل، تُستبدل بدالة عامة واحدة للتشوه</td><td><code>gamma/ftglobal.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td><b>مفعّل.</b> الأهداف التي ليس لها تباعد رنيني D₀ مقيس خاص بها: تُرفع كثافة مستويات المتصل للهدف فوق max(E<sub>cut</sub> + 2, S<sub>n</sub> − 6) MeV بمعامل تحدده قاعدة عامة واحدة مبنية على سمات الزوجية والقشرة والتشوه. أُضيفت لتحويل خسارة (n,p) قرب العتبة مقابل المُدخَل الافتراضي لـ TALYS-2 إلى تعادل؛ وهي تزيد بعض منظورات الأسر و(n,2n) و(n,α) سوءًا بقدر طفيف، وهو ضرر مقبول ومسجَّل</td><td><code>density/npwindow.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>نمط مقص أقوى في الأنوية المشوهة، بمنهجيات أحدث تطابق قياسات أوسلو (نحو 4 إلى 5 أضعاف في الأكتينيدات)؛ أو صيغة بديلة تُقيِّس طاقته وشدته بالتشوه</td><td><code>gamma/scissors.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>دالة قوة غاما معاد تقييسها لتطابق كل نواة شدتها الإشعاعية المقيسة ⟨Γγ⟩/D₀، في كل أنوية الشلال لا الأولى فقط</td><td><code>gamma/ggnorm.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>نمط مقص أقوى وتقييس ⟨Γγ⟩ للأنوية الأثقل فقط (Z ≥ 88)، موجّهان للأسر عند طاقات keV</td><td><code>gamma/actphys.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>ثابت عرض E1 خاص بنا بدلًا من جدول TALYS المشتق من TENDL (تثبّته الوصفة الخالية من البيانات التي ننشرها)</td><td><code>gamma/e1_width.py</code></td></tr>
+      <tr><td><a href="#gamma">10</a></td><td>شدة E2 الجماعية للحزم الدورانية في شبه المتصل</td><td><code>gamma/isoe2.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>ضبط إقليمي للبئر البصري للأهداف المشوهة من العناصر الأرضية النادرة، مضبوط على S₀ وS₁ المقيسين دون بيانات أسر</td><td><code>omp/regional.py</code></td></tr>
+      <tr><td><a href="#omp">5</a></td><td>دالتا القوة النيوترونية المقيستان S₀ وS₁ تحددان نفاذ النيوترونات عند الطاقات المنخفضة</td><td><code>omp/sfunc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>الأسر المباشر إلى مدارات مقيدة، مع تصحيح للأصل: في TALYS القياسي يعيد صفرًا ما لم تُطلب أيضًا كل مخرجات النموذج البصري</td><td><code>direct/racapcalc.py</code></td></tr>
+      <tr><td><a href="#direct">6</a></td><td>مخطط اقتران الهدف (دوّار، مهتز، كروي) مختار انطلاقًا من مستوياته المقيسة</td><td><code>structure/collrule.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>يبدأ المتصل حيث يتوقف مخطط المستويات المقيس عن أن يكون مكتملًا</td><td><code>structure/levcomplete.py</code></td></tr>
       <tr><td><a href="#structure">1</a></td><td>المستوى الذي يكون سبينه المُدرَج مستحيلًا لنواته (عدد صحيح عند A فردي) يُعامَل كمستوى مجهول السبين</td><td><code>structure/levjpar.py</code></td></tr>
-      <tr><td><a href="#compound">5</a></td><td>كثافة مستويات بدرجة حرارة ثابتة مثبّتة على الجزء المكتمل من المستويات المنفصلة</td><td><code>density/ctwindow2.py</code></td></tr>
-      <tr><td><a href="#fission">9</a></td><td>حزم دورانية لحالات الانتقال عند نقاط السرج في الانشطار</td><td><code>fission/barriers.py</code></td></tr>
-      <tr><td><a href="#resonance">10</a></td><td>الأسر حيث لا يقع في النافذة النجمية سوى عدد قليل من الرنينات: القيمة النموذجية لسلّم الرنينات بدلًا من المتوسط</td><td><code>fewres.py</code></td></tr>
+      <tr><td><a href="#compound">8</a></td><td>كثافة مستويات بدرجة حرارة ثابتة مثبّتة على الجزء المكتمل من المستويات المنفصلة</td><td><code>density/ctwindow2.py</code></td></tr>
+      <tr><td><a href="#fission">12</a></td><td>حزم دورانية لحالات الانتقال عند نقاط السرج في الانشطار</td><td><code>fission/barriers.py</code></td></tr>
+      <tr><td><a href="#resonance">15</a></td><td>الأسر حيث لا يقع في النافذة النجمية سوى عدد قليل من الرنينات: القيمة النموذجية لسلّم الرنينات بدلًا من المتوسط</td><td><code>fewres.py</code></td></tr>
       <tr><td></td><td>أربع ضمانات بعيدًا عن الاستقرار: تدفق مباشر محدود بالأحادية (unitarity)، وحد لطاقة فيرمي، ولا جماعية افتراضية في الأنوية فردية-فردية، وتوزيع سبين ما قبل التوازن مُقيَّس</td><td><code>engphys.py</code></td></tr>
     </tbody>
   `,
   coda_h3_outside: "خارج المحرك",
-  coda_p_outside: "بعض أجزاء القصة تعمل إلى جانب المحرك لا داخله. سلالم الرنينات الإحصائية في <a href=\"#resonance\">الفصل 10</a> موجودة في <code>physics/resonance/</code>. ومتوسطات ماكسويل (MACS) في <a href=\"#measure\">الفصل 12</a> تُحسب بعد التشغيل من منحنيات الأسر التي يعطيها المحرك، في <code>validation/differential/core.py</code>؛ أما الأسر في الأهداف المثارة حراريًا والمعدل النجمي فيحسبهما المحرك نفسه (<code>astro/stellar.py</code>، اختياري). وطبقة الربط في <a href=\"#layers\">الفصل 15</a> موجودة في <code>incognita/terra/</code>.",
+  coda_p_outside: "بعض أجزاء القصة تعمل إلى جانب المحرك لا داخله. سلالم الرنينات الإحصائية في <a href=\"#resonance\">الفصل 15</a> موجودة في <code>physics/resonance/</code>. ومتوسطات ماكسويل (MACS) في <a href=\"#measure\">الفصل 17</a> تُحسب بعد التشغيل من منحنيات الأسر التي يعطيها المحرك، في <code>validation/differential/core.py</code>؛ أما الأسر في الأهداف المثارة حراريًا والمعدل النجمي فيحسبهما المحرك نفسه (<code>astro/stellar.py</code>، اختياري). وطبقة الربط في <a href=\"#layers\">الفصل 21</a> موجودة في <code>incognita/terra/</code>.",
   close: "إغلاق",
   chapters: "الفصول",
   nav_board: "لوحة النتائج", nav_data_short: "البيانات",

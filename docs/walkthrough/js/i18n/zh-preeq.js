@@ -1,6 +1,6 @@
-/* Simplified Chinese: preeq (第 4 章，预平衡) */
+/* Simplified Chinese: preeq (第 7 章，预平衡) */
 WT.L.ch.preeq = {
-  num: "第 4 章", title: "平静之前的碰撞", short: "预平衡",
+  num: "第 7 章", title: "平静之前的碰撞", short: "预平衡",
   lead: "进入原子核的中子并不会立刻把能量分给所有核子。在最初几次碰撞中，能量大部分集中在一个粒子上，而这个粒子可能直接飞出去。这就是预平衡：“在能量均匀分配之前”的发射。",
   html: `
 <div class="step">
@@ -15,13 +15,13 @@ WT.L.ch.preeq = {
 </div>
 <div class="step">
   <h3>每一阶段的岔路</h3>
-  <p>在每个阶段，最上面的中子要么逃逸（向上箭头，仅当它在自由线之上时），要么再次碰撞（向下箭头）；箭头粗细表示概率。逃逸率由<b>细致平衡</b>得出：即由逆过程（同一粒子被吸收）的概率求得，这正是第 2 章计算的内容。碰撞率等于一次核子-核子碰撞的强度乘以它能到达的新组态的数目。</p>
+  <p>在每个阶段，最上面的中子要么逃逸（向上箭头，仅当它在自由线之上时），要么再次碰撞（向下箭头）；箭头粗细表示概率。逃逸率由<b>细致平衡</b>得出：即由逆过程（同一粒子被吸收）的概率求得，这正是第 5 章计算的内容。碰撞率等于一次核子-核子碰撞的强度乘以它能到达的新组态的数目。</p>
   <div class="ctl"><label for="pe-n">阶段（激子数 n）</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>把阶段往上拖。早期一个粒子握有大部分能量，所以逃出的粒子很快。后期能量被摊得很薄，能出来的就很少了。</p>
 </div>
 <div class="step">
   <h3>快速尾巴从何而来</h3>
-  <p>右边的堆积就是<b>能谱</b>：在每个能量上出射多少中子，左边慢，右边快。每个反应沿着链条进行，直到最上面的中子逃逸，颜色表示逃逸的时机：阶段 3 为<em style="font-style:normal;color:var(--warm);font-weight:600">深橙色</em>，越往后越浅；如果是在原子核平静下来之后才出来（第 5 章），则为<em class="n">蓝色</em>。</p>
+  <p>右边的堆积就是<b>能谱</b>：在每个能量上出射多少中子，左边慢，右边快。每个反应沿着链条进行，直到最上面的中子逃逸，颜色表示逃逸的时机：阶段 3 为<em style="font-style:normal;color:var(--warm);font-weight:600">深橙色</em>，越往后越浅；如果是在原子核平静下来之后才出来（第 8 章），则为<em class="n">蓝色</em>。</p>
   <div class="btns"><button class="btn" data-act="run">运行 300 次反应</button></div>
   <p>阶段 3 堆出一个宽而几乎平坦的台阶，一直延伸到最大能量。后面的阶段堆在较低处。蓝色的峰是<b>蒸发</b>：一旦所有核子分享了能量，就只有慢中子零星漏出，就像热液体冒出的蒸汽。</p>
   <div class="ctl"><label for="pe-e">中子能量</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>

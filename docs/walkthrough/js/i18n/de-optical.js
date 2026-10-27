@@ -1,7 +1,7 @@
-/* German (Deutsch): optical (Kapitel 17, das optische Modell, gelöst) */
+/* German (Deutsch): optical (Kapitel 23, das optische Modell, gelöst) */
 WT.L.ch.optical = {
-  num: "Kapitel 17", title: "Das optische Modell, gelöst", short: "Optisches Modell, gelöst",
-  lead: "Kapitel 2 hat das optische Potential als trübe Glaskugel gezeichnet. Hier erscheint es so, wie die Engine es verwendet: eine globale Parametrisierung, eine radiale Schrödinger-Gleichung, Schritt für Schritt integriert, und eine Anschlussbedingung, die aus der Welle Transmissionskoeffizienten macht.",
+  num: "Kapitel 23", title: "Das optische Modell, gelöst", short: "Optisches Modell, gelöst",
+  lead: "Kapitel 5 hat das optische Potential als trübe Glaskugel gezeichnet. Hier erscheint es so, wie die Engine es verwendet: eine globale Parametrisierung, eine radiale Schrödinger-Gleichung, Schritt für Schritt integriert, und eine Anschlussbedingung, die aus der Welle Transmissionskoeffizienten macht.",
   html: `
 <div class="step">
   <h3>Das Koning–Delaroche-Potential</h3>
@@ -30,7 +30,7 @@ WT.L.ch.optical = {
   <p>Der <b>Spin–Bahn-Term</b> ist anziehend für <i>j</i> = <i>l</i> + ½ und abstoßend für <i>j</i> = <i>l</i> − ½. Er ist klein, einige MeV an der Oberfläche, schiebt aber die beiden Transmissionen jedes <i>l</i> auseinander, am stärksten nahe der Partialwelle, die die Oberfläche streift.</p>
   <div class="ctl"><label for="op-e3">Neutronenenergie (MeV)</label><input id="op-e3" type="range" data-bind="E" min="0.1" max="80" step="0.1" value="5"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="so" aria-pressed="false">Spin–Bahn ausschalten</button></div>
-  <p>Hauser–Feshbach (Kapitel 16) verwendet beide getrennt; mit ihren Gewichten summiert, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, ergeben sie den Reaktionsquerschnitt nahezu unverändert. Deshalb schränken totale Wirkungsquerschnitte die Stärke des Spin–Bahn-Terms kaum ein, und man braucht Polarisationsdaten.</p>
+  <p>Hauser–Feshbach (Kapitel 22) verwendet beide getrennt; mit ihren Gewichten summiert, (<i>l</i>+1)<i>T</i><sub>l,l+½</sub> + <i>l</i> <i>T</i><sub>l,l−½</sub>, ergeben sie den Reaktionsquerschnitt nahezu unverändert. Deshalb schränken totale Wirkungsquerschnitte die Stärke des Spin–Bahn-Terms kaum ein, und man braucht Polarisationsdaten.</p>
 </div>
 <div class="step">
   <h3>Die Wirkungsquerschnitte</h3>

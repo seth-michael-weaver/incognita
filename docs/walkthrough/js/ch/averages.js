@@ -1,4 +1,4 @@
-/* Chapter 21 (Expert): from resonances to averages (physics/resonance/, compound/wfc.py).
+/* Chapter 27 (Expert): from resonances to averages (physics/resonance/, compound/wfc.py).
  * Scenes (S.mode): "rmat"   = one sampled s-wave ladder: total and capture cross sections, Reich-Moore against single-level
  *                              Breit-Wigner (interference between levels only in Reich-Moore); a probe sweeps the energy;
  *                   "stats"  = spacing and reduced-width histograms that fill as ladders are drawn (Wigner, Porter-Thomas);
@@ -120,8 +120,8 @@
   });
 
   WT.chapter("averages", {
-    num: "Chapter 21", title: "From resonances to averages", short: "Resonances to averages",
-    lead: "Chapter 10 drew resonance ladders. Here they are as cross sections: the R-matrix formula, the statistics behind the parameters, the effect of temperature, and how an average over many resonances turns into Hauser–Feshbach.",
+    num: "Chapter 27", title: "From resonances to averages", short: "Resonances to averages",
+    lead: "Chapter 15 drew resonance ladders. Here they are as cross sections: the R-matrix formula, the statistics behind the parameters, the effect of temperature, and how an average over many resonances turns into Hauser–Feshbach.",
     html: `
 <div class="step">
   <h3>R-matrix, level by level</h3>

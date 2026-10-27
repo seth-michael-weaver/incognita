@@ -1,6 +1,6 @@
-/* Danish: omp (Kapitel 2, den optiske model) */
+/* Danish: omp (Kapitel 5, den optiske model) */
 WT.L.ch.omp = {
-  num: "Kapitel 2", title: "En tåget krystalkugle", short: "Optisk model",
+  num: "Kapitel 5", title: "En tåget krystalkugle", short: "Optisk model",
   lead: "Før alt andet stiller motoren et enklere spørgsmål: hvordan ser kernen ud for en indkommende neutron?",
   html: `
 <div class="step">

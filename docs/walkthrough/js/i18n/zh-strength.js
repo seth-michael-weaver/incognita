@@ -1,7 +1,7 @@
 /* Simplified Chinese (简体中文): strength (chapter 16, 光子强度详解) */
 WT.L.ch.strength = {
-  num: "第 19 章", title: "光子强度详解", short: "光子强度",
-  lead: "第 7 章展示了热的原子核偏爱哪些光子。本章写出强度函数，把它们一路推到穿透系数和平均辐射宽度，并运行由它们驱动的级联。",
+  num: "第 25 章", title: "光子强度详解", short: "光子强度",
+  lead: "第 10 章展示了热的原子核偏爱哪些光子。本章写出强度函数，把它们一路推到穿透系数和平均辐射宽度，并运行由它们驱动的级联。",
   html: `
 <div class="step">
   <h3>E1：巨偶极共振的尾部</h3>
@@ -35,7 +35,7 @@ WT.L.ch.strength = {
   <h3>级联</h3>
   <p>第一个光子之后，同样的规则重复进行：从每个新的能量出发，下一个光子按 <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>) 抽取，直到原子核到达已知能级。每段历史只有几个光子；它们的总谱就是俘获后量能器看到的谱。</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">低能上翘</button><button class="btn ghost" data-act="clear">重新开始</button></div>
-  <p>低能上翘增加了软光子，也使多重数略有增加。引擎并不抽取历史：它自上而下、逐个能量区间地转移布居（第 8 章），这样得到同样的平均值，却没有抽样噪声。</p>
+  <p>低能上翘增加了软光子，也使多重数略有增加。引擎并不抽取历史：它自上而下、逐个能量区间地转移布居（第 11 章），这样得到同样的平均值，却没有抽样噪声。</p>
   <div class="aside">代码位置：<code>gamma/strength.py</code>（TALYS 支持的所有强度模型；默认为 SMLO-2019 表格和带低能上翘的 IAEA M1），<code>gamma/parameters.py</code>（巨共振系统学、表格），<code>gamma/transmission.py</code>（T = 2π E<sup>2L+1</sup> f），<code>gamma/ggnorm.py</code>（可选的 ⟨Γγ⟩ 归一化），<code>emission/</code>（级联）。图中对一个类铁-57 原子核使用解析形式和系统学；实测 ⟨Γγ⟩ 是 ⁵⁷Fe 的 RIPL 值。</div>
 </div>`,
 };

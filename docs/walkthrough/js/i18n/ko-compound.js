@@ -1,6 +1,6 @@
-/* Korean: compound (5장, 복합핵) */
+/* Korean: compound (8장, 복합핵) */
 WT.L.ch.compound = {
-  num: "5장", title: "에너지 나눠 갖기", short: "복합핵",
+  num: "8장", title: "에너지 나눠 갖기", short: "복합핵",
   lead: "처음의 빠른 충돌이 끝나면 모든 핵자가 에너지를 나눠 갖습니다. 이렇게 자리 잡은 상태가 복합핵입니다. 복합핵이 다음에 무엇을 할지 예측하려면, 엔진은 복합핵이 에너지를 담을 수 있는 방법이 몇 가지인지 알아야 합니다.",
   html: `
 <div class="step">

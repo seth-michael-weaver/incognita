@@ -1,4 +1,4 @@
-/* Dutch (Nederlands): layers (hoofdstuk 15). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Dutch (Nederlands): layers (hoofdstuk 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -22,7 +22,7 @@
   const terraScore = TT ? `Tegenover ${libs} ligt het in ${TT.w} van ${TT.d} vergelijkingen voor, in ${TT.t} gelijk en in ${TT.l} achter.` : `Het wordt vergeleken met ${libs}.`;
 
   WT.L.ch.layers = {
-    num: "Hoofdstuk 15", title: "Hoe het model in lagen is opgebouwd", short: "Lagen",
+    num: "Hoofdstuk 21", title: "Hoe het model in lagen is opgebouwd", short: "Lagen",
     lead: "Wat we leveren, is in lagen bovenop de motor gebouwd, en elke laag moet haar plaats verdienen tegenover metingen.",
     html: `
 <div class="step">

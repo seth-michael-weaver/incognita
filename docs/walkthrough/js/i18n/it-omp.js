@@ -1,6 +1,6 @@
-/* Italian: omp (Capitolo 2, il modello ottico) */
+/* Italian: omp (Capitolo 5, il modello ottico) */
 WT.L.ch.omp = {
-  num: "Capitolo 2", title: "Una sfera di cristallo offuscata", short: "Modello ottico",
+  num: "Capitolo 5", title: "Una sfera di cristallo offuscata", short: "Modello ottico",
   lead: "Prima di tutto, il motore si pone una domanda più semplice: come appare il nucleo a un neutrone in arrivo?",
   html: `
 <div class="step">

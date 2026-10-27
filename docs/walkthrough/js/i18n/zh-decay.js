@@ -1,12 +1,12 @@
 /* Simplified Chinese: decay (chapter 6) */
 WT.L.ch.decay = {
-  num: "第 6 章", title: "选择出口", short: "衰变",
+  num: "第 9 章", title: "选择出口", short: "衰变",
   lead: "复合核必须通过发射一个粒子或一个光子来释放能量。本章把每一种出路画成一扇门。引擎的任务是算出通量（到达这里的反应流）中有多大份额从每扇门离开。",
   html: `
 <div class="step">
   <p>每个出口一扇门：<em class="g">光子</em>（γ）、<em class="n">中子</em>（n）、<em class="p">质子</em>（p）、<em class="a">α粒子</em>（α：两个质子加两个中子），以及仅对重核开放的<em class="f">裂变</em>（一分为二）。每扇门中亮起的缝隙就是该出口的份额，小球也以同样的比例涌出；灰色的门是关闭的。由于已经忘记了自己的形成方式，原子核按一个权重成比例地使用每扇门 b：</p>
   <div class="formula">份额<sub>b</sub> = T<sub>b</sub> · ρ<sub>b</sub> / Σ<sub>c</sub> T<sub>c</sub> · ρ<sub>c</sub></div>
-  <p><b>穿透系数</b> <i>T</i> 是到达边缘的粒子能够穿出的概率；对粒子而言，它来自第 2 章的光学模型，只是反过来运行。写在每扇门旁的<b>能级密度</b> ρ 计算剩余核最终可以处于的状态数。按 <i>T</i> 乘以 ρ 分配份额，就是 <b>Hauser–Feshbach</b> 规则。在 10 MeV 时，中子之门几乎包揽一切。</p>
+  <p><b>穿透系数</b> <i>T</i> 是到达边缘的粒子能够穿出的概率；对粒子而言，它来自第 5 章的光学模型，只是反过来运行。写在每扇门旁的<b>能级密度</b> ρ 计算剩余核最终可以处于的状态数。按 <i>T</i> 乘以 ρ 分配份额，就是 <b>Hauser–Feshbach</b> 规则。在 10 MeV 时，中子之门几乎包揽一切。</p>
 </div>
 <div class="step">
   <h3>为什么大多数粒子出射时很慢</h3>
@@ -31,7 +31,7 @@ WT.L.ch.decay = {
   <h3>自旋和宇称必须平衡</h3>
   <p>复合核（上方）的自旋为 <i>J</i>；剩余核的状态在下方按自旋 <i>J</i>′ 放在不同的抽屉里。中子带走自旋和宇称的差别：以轨道角动量 <i>l</i> 离开时，它最多改变自旋 <i>l</i> + ½，并在 <i>l</i> 为奇数时翻转宇称。<i>l</i> 越大，门越窄；每个抽屉的门对应能到达它的最小 <i>l</i>。实心落点保持宇称；空心落点翻转宇称。</p>
   <div class="ctl"><label for="dc-j">复合核自旋 J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
-  <p>把 <i>J</i> 调高。打开的门移向高自旋抽屉，而那里的状态很少，装满状态的抽屉则被关在门后。高自旋复合核发射粒子很慢，这就给了光子和同质异能态（长寿命状态，第 7 章）机会。</p>
+  <p>把 <i>J</i> 调高。打开的门移向高自旋抽屉，而那里的状态很少，装满状态的抽屉则被关在门后。高自旋复合核发射粒子很慢，这就给了光子和同质异能态（长寿命状态，第 10 章）机会。</p>
 </div>
 <div class="step">
   <h3>来时的路</h3>
@@ -43,7 +43,7 @@ WT.L.ch.decay = {
 </div>
 <div class="step">
   <h3>剩下来要分配的部分</h3>
-  <p>并非每个被吸收的中子都会形成复合核。有些只是擦边撞一下就飞走（直接反应，第 3 章）；有些碰撞一两次后快速射出（预平衡，第 4 章）。只有其余的中子留下来加热原子核。计数器记录每一种结局。</p>
+  <p>并非每个被吸收的中子都会形成复合核。有些只是擦边撞一下就飞走（直接反应，第 6 章）；有些碰撞一两次后快速射出（预平衡，第 7 章）。只有其余的中子留下来加热原子核。计数器记录每一种结局。</p>
   <div class="ctl"><label for="dc-einc">中子能量</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>只有留下的中子才参加门之间的竞争。拖动中子能量：在几 MeV 时几乎全部留下；到 30 MeV 时，约有一半在达到平衡之前就已离开。</p>
   <div class="aside">代码位置：<code>compound/prepare.py</code>（按自旋和宇称的出口权重 T·ρ、选择定则），<code>compound/target.py</code>（含宽度涨落的首次衰变），<code>compound/continuum.py</code>（之后每个能量区间的衰变），<code>compound/wfc.py</code>（Moldauer、HRTW、GOE 修正），<code>compound/normalization.py</code>（留给复合核的通量），<code>omp/inverse.py</code>（反向运行的门）。</div>

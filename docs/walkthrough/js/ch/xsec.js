@@ -11,7 +11,7 @@
   const drops = [], hist = []; let acc = 0;
 
   WT.chapter("xsec", {
-    num: "Basics", title: "What is a cross section?", short: "Cross section",
+    num: "Chapter 2", title: "What is a cross section?", short: "Cross section",
     html: `
 <div class="step">
   <p>Each disc is a nucleus's target area: its cross section.</p>
@@ -31,13 +31,13 @@
       const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13, snap = document.body.classList.contains("shot");
       const E = Math.pow(10, S.lgE), s = sig(E); S.Eshow = E;
       // the slab, face-on
-      const sx = W * 0.05, sy = H * 0.05, sw = W * 0.9, sh = H * (phone ? 0.6 : 0.62);
+      const sx = W * 0.05, sy = H * 0.05, sw = W * 0.9, sh = H * (phone ? 0.5 : 0.55);
       const nx = phone ? 5 : 7, ny = phone ? 4 : 5, cw = sw / nx, chh = sh / ny, K = Math.min(cw, chh) * 0.085;   // px per sqrt(barn)
       ctx.save(); const sg = ctx.createRadialGradient(sx + sw / 2, sy + sh / 2, 10, sx + sw / 2, sy + sh / 2, sw * 0.6); sg.addColorStop(0, g.rgba(c.soft, 0.1)); sg.addColorStop(1, g.rgba(c.soft, 0.02)); ctx.fillStyle = sg;
       if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(sx, sy, sw, sh, 18); ctx.fill(); } else ctx.fillRect(sx, sy, sw, sh); ctx.restore();
       const rD = K * Math.sqrt(s / Math.PI), nuc = [], q = rng(9);
       for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) nuc.push([sx + cw * (i + 0.5 + (j % 2 ? 0.25 : -0.25) + (q() - 0.5) * 0.2), sy + chh * (j + 0.5 + (q() - 0.5) * 0.2)]);
-      for (const [x, y] of nuc) { g.dot(x, y, rD, c.neutron, 0.16); g.ring(x, y, rD, c.neutron, 1.4, 0.75); g.nucleus(x, y, Math.max(3, Math.min(7, K * 0.9)), { N: 14, Z: 6, t: S.time, jiggle: 0.25, seed: Math.round(x + y) }); }
+      g.clip(sx, sy, sw, sh); for (const [x, y] of nuc) { g.dot(x, y, rD, c.neutron, 0.16); g.ring(x, y, rD, c.neutron, 1.4, 0.75); g.nucleus(x, y, Math.max(3, Math.min(7, K * 0.9)), { N: 14, Z: 6, t: S.time, jiggle: 0.25, seed: Math.round(x + y) }); } ctx.restore();
       // rain
       const inside = (x, y) => nuc.some(([a, b]) => (x - a) ** 2 + (y - b) ** 2 < rD * rD);
       const N = snap ? 0 : dt * 26; acc += N;
@@ -55,7 +55,7 @@
       ctx.save(); ctx.fillStyle = g.rgba(c.ink, 0.75); ctx.fillRect(bx, by - K / 2, K, K); ctx.restore();
       g.label(phone ? "1 barn = 10⁻²⁴ cm²" : "this square: 1 barn = 10⁻²⁴ cm²", bx - 8, by, { color: c.soft, size: fs - 1, align: "right" });
       // sigma(E) strip: where we are on the energy axis
-      const ex0 = sx + 4, ex1 = phone ? sx + sw * 0.52 : sx + sw * 0.55, eY = sy + sh + (phone ? 52 : 62), eH = H * 0.08, L0 = -2.3, L1 = 2;
+      const ex0 = sx + 4, ex1 = phone ? sx + sw * 0.52 : sx + sw * 0.55, eY = sy + sh + (phone ? 70 : 90), eH = H * 0.08, L0 = -2.3, L1 = 2;
       const EX = (e) => ex0 + (ex1 - ex0) * (log10(e) - L0) / (L1 - L0), SY = (v) => eY - eH * clamp(log10(v / 4) / log10(120), 0, 1);
       const pts = []; for (let i = 0; i <= 200; i++) { const e = Math.pow(10, L0 + (L1 - L0) * i / 200); pts.push([EX(e), SY(sig(e))]); }
       g.ground(pts, c.neutron, eH * 0.5, 0.18); g.poly(pts, c.neutron, 1.8, 0.9);

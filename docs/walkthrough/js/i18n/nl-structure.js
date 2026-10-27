@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>Een uitgerekte kern kan roteren en geeft dan niveaus 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> met afstanden die groeien als <i>J</i>(<i>J</i>+1): een <b>rotor</b>. Een ronde kern kan rimpelen; elke eenheid rimpeling, een <b>fonon</b>, voegt dezelfde energie toe, dus zijn niveaus liggen op gelijke afstanden: een <b>vibrator</b>.</p>
   <div class="ctl"><label for="st-beta">Vervorming β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Stil</button><button class="btn ghost" data-act="vib">Trillend</button><button class="btn ghost" data-act="rot">Roterend</button></div>
-  <p>Sleep <i>β₂</i> en druk op de knoppen: een grotere uitrekking trekt de niveaus van de rotor dichter naar elkaar. De motor slaat per kern vervormingen op en een label: sferisch, vibrator of rotor. Hoofdstuk 3 laat zien hoe een passerend neutron die gebruikt.</p>
+  <p>Sleep <i>β₂</i> en druk op de knoppen: een grotere uitrekking trekt de niveaus van de rotor dichter naar elkaar. De motor slaat per kern vervormingen op en een label: sferisch, vibrator of rotor. Hoofdstuk 6 laat zien hoe een passerend neutron die gebruikt.</p>
 </div>
 <div class="step">
   <h3>Vingerafdrukken net boven de drempel</h3>

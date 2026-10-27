@@ -37,7 +37,7 @@ WT.L.ch.structure = {
   <p>Ein gestreckter Kern kann rotieren und liefert dann Niveaus 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> mit Abständen, die wie <i>J</i>(<i>J</i>+1) wachsen: ein <b>Rotor</b>. Ein runder Kern kann schwingen; jedes Schwingungsquant, ein <b>Phonon</b>, fügt dieselbe Energie hinzu, also liegen seine Niveaus in gleichen Abständen: ein <b>Vibrator</b>.</p>
   <div class="ctl"><label for="st-beta">Deformation β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Ruhend</button><button class="btn ghost" data-act="vib">Schwingend</button><button class="btn ghost" data-act="rot">Rotierend</button></div>
-  <p>Zieh an <i>β₂</i> und drück die Knöpfe: Eine stärkere Streckung rückt die Niveaus des Rotors enger zusammen. Die Engine speichert für jeden Kern die Deformationen und eine Kennung: sphärisch, Vibrator oder Rotor. Kapitel 3 zeigt, wie ein vorbeifliegendes Neutron sie nutzt.</p>
+  <p>Zieh an <i>β₂</i> und drück die Knöpfe: Eine stärkere Streckung rückt die Niveaus des Rotors enger zusammen. Die Engine speichert für jeden Kern die Deformationen und eine Kennung: sphärisch, Vibrator oder Rotor. Kapitel 6 zeigt, wie ein vorbeifliegendes Neutron sie nutzt.</p>
 </div>
 <div class="step">
   <h3>Fingerabdrücke knapp über der Schwelle</h3>

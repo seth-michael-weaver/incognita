@@ -1,6 +1,6 @@
-/* Korean: resonance (10장, 공명) */
+/* Korean: resonance (15장, 공명) */
 WT.L.ch.resonance = {
-  num: "10장", title: "날카로운 봉우리", short: "공명",
+  num: "15장", title: "날카로운 봉우리", short: "공명",
   lead: "에너지가 충분히 낮으면 중성자는 더 이상 매끄럽게 평균된 원자핵을 보지 않습니다. 복합핵의 개별 에너지 준위를 하나씩 보게 됩니다.",
   html: `
 <div class="step">

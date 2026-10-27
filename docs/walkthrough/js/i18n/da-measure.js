@@ -1,6 +1,6 @@
 /* Danish: measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "Kapitel 12", title: "Hvad der kommer ud", short: "Observabler",
+  num: "Kapitel 17", title: "Hvad der kommer ud", short: "Observabler",
   lead: "Et eksperiment, en reaktor eller en stjerne ser kun en håndfuld tal. Dette kapitel viser, hvordan motoren omsætter det, der sker inde i kernen, til dem.",
   html: `
 <div class="step">
@@ -12,7 +12,7 @@ WT.L.ch.measure = {
   <h3>Nye udgange åbner med energien</h3>
   <p>Hver dør er én udgang, eller <b>kanal</b>: neutronen preller af (elastisk), efterlader targetkernen exciteret (n′), slår flere neutroner ud (2n, 3n), indfanges, så kun fotoner forlader kernen (γ), eller en proton eller α-partikel forlader den i stedet. En dør med hængelås har en <b>tærskel</b>: reaktionen koster mere energi, end neutronen bringer med.</p>
   <div class="ctl"><label for="mea-e2">Neutronenergi (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
-  <p>Træk energien forbi en tærskel, og døren springer op; spandene fyldes til hver kanals andel, og hver ny dør tager en andel fra de andre. Tærsklerne kommer fra kernernes masser; andelene fra konkurrencen i kapitel 6.</p>
+  <p>Træk energien forbi en tærskel, og døren springer op; spandene fyldes til hver kanals andel, og hver ny dør tager en andel fra de andre. Tærsklerne kommer fra kernernes masser; andelene fra konkurrencen i kapitel 9.</p>
 </div>
 <div class="step">
   <h3>Hvad en detektor ser</h3>

@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): fission (chapter 9) */
 WT.L.ch.fission = {
-  num: "Capítulo 9", title: "Partir-se em dois", short: "Fissão",
+  num: "Capítulo 12", title: "Partir-se em dois", short: "Fissão",
   lead: "Os núcleos mais pesados têm uma saída que falta aos mais leves: em vez de lançar uma partícula, o núcleo inteiro rasga-se em dois. Isto é a fissão.",
   html: `
 <div class="step">

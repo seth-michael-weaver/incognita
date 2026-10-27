@@ -1,6 +1,6 @@
-/* Dutch (Nederlands): resonance (Hoofdstuk 10, scherpe pieken) */
+/* Dutch (Nederlands): resonance (Hoofdstuk 15, scherpe pieken) */
 WT.L.ch.resonance = {
-  num: "Hoofdstuk 10", title: "Scherpe pieken", short: "Resonanties",
+  num: "Hoofdstuk 15", title: "Scherpe pieken", short: "Resonanties",
   lead: "Bij een laag genoeg energie ziet een neutron geen gladde, uitgemiddelde kern meer. Het ziet de afzonderlijke energieniveaus van de compoundkern, één voor één.",
   html: `
 <div class="step">

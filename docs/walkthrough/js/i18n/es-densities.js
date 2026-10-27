@@ -1,7 +1,7 @@
-/* Spanish: densities (Capítulo 18, experto: densidades de niveles, empalmadas) */
+/* Spanish: densities (Capítulo 24, experto: densidades de niveles, empalmadas) */
 WT.L.ch.densities = {
-  num: "Capítulo 18", title: "Densidades de niveles, empalmadas", short: "Densidades de niveles",
-  lead: "El capítulo 5 unió un tablón recto a una ladera. Este capítulo escribe las dos, muestra cómo se encuentra el punto de unión a partir de los niveles contados y qué ocurre cuando no existe.",
+  num: "Capítulo 24", title: "Densidades de niveles, empalmadas", short: "Densidades de niveles",
+  lead: "El capítulo 8 unió un tablón recto a una ladera. Este capítulo escribe las dos, muestra cómo se encuentra el punto de unión a partir de los niveles contados y qué ocurre cuando no existe.",
   html: `
 <div class="step">
   <h3>El gas de Fermi con efectos de capas amortiguados</h3>

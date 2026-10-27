@@ -1,6 +1,6 @@
-/* Italian: cascade (Capitolo 8, la cascata) */
+/* Italian: cascade (Capitolo 11, la cascata) */
 WT.L.ch.cascade = {
-  num: "Capitolo 8", title: "Giù per la carta", short: "Cascata",
+  num: "Capitolo 11", title: "Giù per la carta", short: "Cascata",
   lead: "Un'emissione raramente è la fine: il nucleo che resta è spesso ancora abbastanza caldo da emettere di nuovo.",
   html: `
 <div class="step">
@@ -19,7 +19,7 @@ WT.L.ch.cascade = {
 <div class="step">
   <h3>Dall'alto in basso, intervallo per intervallo</h3>
   <p>Il motore svuota ogni nucleo dall'alto in basso, una fetta di energia, o <b>intervallo</b>, alla volta. A destra, il residuo della prima emissione; a sinistra, suo figlio, con un neutrone in meno. Le palle arancioni sono reazioni in attesa in ogni intervallo. Qui gli intervalli sono di 1 MeV; il motore ne usa circa 40 per nucleo, dimensionati sull'energia disponibile.</p>
-  <p>Quando l'indicatore passa su un intervallo, ogni palla prende un'uscita secondo la competizione del capitolo 6: un fotone (<em class="g">γ</em>) la fa scendere a un intervallo più basso, un <em class="n">neutrone</em> la porta nel figlio, un protone o un'alfa la portano fuori dall'immagine. Sotto tutte le soglie, i fotoni portano il resto allo stato fondamentale (grigio). Poi tocca al figlio.</p>
+  <p>Quando l'indicatore passa su un intervallo, ogni palla prende un'uscita secondo la competizione del capitolo 9: un fotone (<em class="g">γ</em>) la fa scendere a un intervallo più basso, un <em class="n">neutrone</em> la porta nel figlio, un protone o un'alfa la portano fuori dall'immagine. Sotto tutte le soglie, i fotoni portano il resto allo stato fondamentale (grigio). Poi tocca al figlio.</p>
   <div class="ctl"><label for="cs-e3">Energia del neutrone</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Ricomincia</button></div>
   <p>I fotoni scendono soltanto, e ogni nucleo viene completato prima dei suoi figli, quindi niente arriva su un intervallo già svuotato.</p>

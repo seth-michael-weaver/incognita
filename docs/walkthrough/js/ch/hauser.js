@@ -1,4 +1,4 @@
-/* Chapter 16 (Expert): Hauser-Feshbach channel by channel, with width fluctuations (compound/prepare.py, compound/wfc.py).
+/* Chapter 22 (Expert): Hauser-Feshbach channel by channel, with width fluctuations (compound/prepare.py, compound/wfc.py).
  * Scenes (S.mode): "tlj"    = incident transmission T_lj per (l, j) as lit columns; neutrons enter through them into the compound nucleus;
  *                   "group"  = one J^pi: the incident channel, every exit (log T, summed per level), the flux split T_b / sum T;
  *                   "wfc"    = summed over J^pi: compound elastic, inelastic to the first 2+, to higher levels and the continuum, capture;
@@ -133,12 +133,12 @@
   });
 
   WT.chapter("hauser", {
-    num: "Chapter 16", title: "Hauser–Feshbach, channel by channel", short: "Hauser–Feshbach",
-    lead: "Chapter 6 told the competition between exits as doors. Here is the formula behind the doors, one channel at a time, and the correction it needs when only a few channels are open.",
+    num: "Chapter 22", title: "Hauser–Feshbach, channel by channel", short: "Hauser–Feshbach",
+    lead: "Chapter 9 told the competition between exits as doors. Here is the formula behind the doors, one channel at a time, and the correction it needs when only a few channels are open.",
     html: `
 <div class="step">
   <h3>A transmission for every channel</h3>
-  <p>A <b>channel</b> is a complete exit address: which particle, which state the residual nucleus is left in, the orbital angular momentum <i>l</i> and the total <i>j</i> = <i>l</i> ± ½ of the particle. The optical model of Chapter 2 gives each one a <b>transmission coefficient</b> <i>T<sub>lj</sub></i>. The columns are the incident neutron's, for a spin-0 target.</p>
+  <p>A <b>channel</b> is a complete exit address: which particle, which state the residual nucleus is left in, the orbital angular momentum <i>l</i> and the total <i>j</i> = <i>l</i> ± ½ of the particle. The optical model of Chapter 5 gives each one a <b>transmission coefficient</b> <i>T<sub>lj</sub></i>. The columns are the incident neutron's, for a spin-0 target.</p>
   <div class="ctl"><label for="hf-e">Neutron energy (MeV)</label><input id="hf-e" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>At 1 keV only <i>l</i> = 0 is open, with <i>T</i> ≈ 2π<i>S</i><sub>0</sub>√<i>E</i>, a few per cent. Each extra unit of <i>l</i> costs about a factor (<i>kR</i>)² at low energy, so the columns open one by one as the energy rises. Every column feeds the compound nucleus with the weight g<sub>J</sub><i>T</i>:</p>
   <div class="formula">σ<sub>CN</sub> = (π/k²) Σ<sub>J,π</sub> g<sub>J</sub> Σ<sub>lj</sub> T<sub>lj</sub> ,  g<sub>J</sub> = (2J+1) / [(2s+1)(2I+1)]</div>
@@ -153,7 +153,7 @@
 </div>
 <div class="step">
   <h3>Width fluctuations</h3>
-  <p>With <i>W<sub>ab</sub></i> = 1 the formula multiplies averages. The resonances behind the averages have widths that scatter (Porter–Thomas, Chapter 10), and for elastic scattering the width that lets the neutron in is the same width that lets it out, so the two are correlated. The average of the products then exceeds the product of the averages for elastic, and the other exits lose what elastic gains.</p>
+  <p>With <i>W<sub>ab</sub></i> = 1 the formula multiplies averages. The resonances behind the averages have widths that scatter (Porter–Thomas, Chapter 15), and for elastic scattering the width that lets the neutron in is the same width that lets it out, so the two are correlated. The average of the products then exceeds the product of the averages for elastic, and the other exits lose what elastic gains.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Without correction</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Neutron energy (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
   <p>The badges give σ with the correction divided by σ without. Below the first inelastic threshold, elastic already takes nearly all the flux and barely changes, while capture loses 10 to 25 per cent. Between 1 and 1.5 MeV, compound elastic gains 15 to 35 per cent and the first 2⁺ level loses about a third. As more levels and the continuum open, compound elastic becomes a small share of the flux: its own factor rises toward 2, but what it takes from the others shrinks, and their factors return toward 1. In Moldauer's recipe each channel gets a number of degrees of freedom ν<sub>c</sub>, and <i>W</i> is a one-dimensional integral, done with TALYS's 32-point Gauss–Laguerre rule.</p>

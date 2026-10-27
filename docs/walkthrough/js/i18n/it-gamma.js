@@ -1,12 +1,12 @@
-/* Italian: gamma (Capitolo 7, emissione di fotoni) */
+/* Italian: gamma (Capitolo 10, emissione di fotoni) */
 WT.L.ch.gamma = {
-  num: "Capitolo 7", title: "Emettere luce", short: "Fotoni",
+  num: "Capitolo 10", title: "Emettere luce", short: "Fotoni",
   lead: "Quando nessuna particella esce, il nucleo si raffredda emettendo fotoni: raggi gamma, particelle di luce ad alta energia. Questa uscita è aperta a qualsiasi energia.",
   html: `
 <div class="step">
   <p>Uno stato caldo a 8 MeV (milioni di elettronvolt) emette fotoni (γ); il mucchio accanto alla scala raccoglie dove arrivano. Sotto 2 MeV gli stati sono pochi pioli con un nome; sopra, una folla che si infittisce rapidamente con l'energia (punti grigi). Ogni fotone porta via l'energia del suo salto, <i>E<sub>γ</sub></i>, ed è disegnato più luminoso in proporzione a <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> è il coefficiente di trasmissione del fotone (la porta del capitolo 6), <i>l</i> = 1 per i fotoni di dipolo, e <i>f</i> è la <b>funzione di forza fotonica</b>: con quale facilità il nucleo irraggia a quell'energia. La probabilità di un salto è <i>T<sub>γ</sub></i> per la folla di stati dove arriva: i salti piccoli trovano molti stati ma sono deboli; quelli grandi sono luminosi ma ne trovano pochi.</p>
+  <p><i>T<sub>γ</sub></i> è il coefficiente di trasmissione del fotone (la porta del capitolo 9), <i>l</i> = 1 per i fotoni di dipolo, e <i>f</i> è la <b>funzione di forza fotonica</b>: con quale facilità il nucleo irraggia a quell'energia. La probabilità di un salto è <i>T<sub>γ</sub></i> per la folla di stati dove arriva: i salti piccoli trovano molti stati ma sono deboli; quelli grandi sono luminosi ma ne trovano pochi.</p>
   <div class="ctl"><label for="gm-e0">Energia iniziale</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Emetti 100</button></div>
   <p>Il mucchio ha il massimo qualche MeV sotto il punto di partenza: la maggior parte dei fotoni porta da 2 a 4 MeV. Sposta l'energia iniziale e il massimo la segue.</p>
@@ -25,7 +25,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Giù per la scala</h3>
-  <p>Una cascata è una serie di fotoni emessi uno dopo l'altro, dagli intervalli in alto (stati troppo fitti per elencarli, capitolo 5) fino ai livelli con un nome, allargati perché si possano leggere (piolo pieno parità +, vuoto −). Lì il motore smette di stimare e segue i <b>rapporti di diramazione</b> tabulati: le probabilità misurate che ogni livello decada verso ciascuno di quelli più bassi.</p>
+  <p>Una cascata è una serie di fotoni emessi uno dopo l'altro, dagli intervalli in alto (stati troppo fitti per elencarli, capitolo 8) fino ai livelli con un nome, allargati perché si possano leggere (piolo pieno parità +, vuoto −). Lì il motore smette di stimare e segue i <b>rapporti di diramazione</b> tabulati: le probabilità misurate che ogni livello decada verso ciascuno di quelli più bassi.</p>
   <div class="btns"><button class="btn" data-act="drop">Fai partire una cascata</button></div>
   <p>Premi il pulsante qualche volta: la parte alta cambia ogni volta; il finale segue uno di pochi percorsi misurati.</p>
 </div>
@@ -37,7 +37,7 @@ WT.L.ch.gamma = {
 </div>
 <div class="step">
   <h3>Cattura</h3>
-  <p>Un nucleo che ha appena assorbito un neutrone lento ha due porte d'uscita (capitolo 6): i fotoni (in alto) e il neutrone che torna fuori (a destra). Il varco di ogni porta è la sua <b>larghezza</b>, in eV: quanto velocemente il nucleo decade attraverso di essa. La larghezza radiativa cambia appena; quella neutronica cresce con la velocità del neutrone.</p>
+  <p>Un nucleo che ha appena assorbito un neutrone lento ha due porte d'uscita (capitolo 9): i fotoni (in alto) e il neutrone che torna fuori (a destra). Il varco di ogni porta è la sua <b>larghezza</b>, in eV: quanto velocemente il nucleo decade attraverso di essa. La larghezza radiativa cambia appena; quella neutronica cresce con la velocità del neutrone.</p>
   <div class="ctl"><label for="gm-e">Energia del neutrone</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
   <p>Trascina l'energia del neutrone, da 10 eV a 2 MeV. La <b>cattura</b>, (n,γ), significa che il neutrone resta ed esce un fotone: a 10 eV vince quasi sempre e sopra pochi keV diventa una piccola quota. La larghezza radiativa alla soglia è misurata per centinaia di nuclei, ed è una verifica della funzione di forza fotonica. Per impostazione predefinita il motore usa la propria; un'opzione riscala la funzione di forza di ogni nucleo misurato finché le due concordano.</p>
   <div class="aside">Nel codice: <code>gamma/parameters.py</code> (intensità E1 tabulate; sistematiche di risonanza gigante, spin-flip, forbice e upbend), <code>gamma/strength.py</code> (<i>f</i>(E<sub>γ</sub>) per ogni multipolo), <code>gamma/transmission.py</code> (T<sub>γ</sub> e la larghezza radiativa media), <code>structure/levels.py</code> (rapporti di diramazione, isomeri), <code>emission/multiple.py</code> (la cascata). Opzionali, disattivati per impostazione predefinita: <code>gamma/scissors.py</code> (forbice più intensa), <code>gamma/ggnorm.py</code> (accordo con il ⟨Γγ⟩ misurato, fino al piombo), <code>gamma/actphys.py</code> (entrambi, per gli attinidi).</div>

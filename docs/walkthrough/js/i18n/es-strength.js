@@ -1,7 +1,7 @@
-/* Spanish: strength (Capítulo 19, experto: la función de fuerza fotónica, en detalle) */
+/* Spanish: strength (Capítulo 25, experto: la función de fuerza fotónica, en detalle) */
 WT.L.ch.strength = {
-  num: "Capítulo 19", title: "La fuerza fotónica, en detalle", short: "Fuerza fotónica",
-  lead: "El capítulo 7 mostró qué fotones prefiere un núcleo caliente. Este capítulo escribe las funciones de fuerza, las sigue hasta los coeficientes de transmisión y la anchura radiativa media, y ejecuta la cascada que ponen en marcha.",
+  num: "Capítulo 25", title: "La fuerza fotónica, en detalle", short: "Fuerza fotónica",
+  lead: "El capítulo 10 mostró qué fotones prefiere un núcleo caliente. Este capítulo escribe las funciones de fuerza, las sigue hasta los coeficientes de transmisión y la anchura radiativa media, y ejecuta la cascada que ponen en marcha.",
   html: `
 <div class="step">
   <h3>E1: la cola de la resonancia gigante dipolar</h3>
@@ -35,7 +35,7 @@ WT.L.ch.strength = {
   <h3>La cascada</h3>
   <p>Por debajo del primer fotón se repite la misma regla: desde cada nueva energía el siguiente fotón se sortea a partir de <i>T</i>(<i>E</i><sub>γ</sub>) ρ(<i>E<sub>x</sub></i> − <i>E</i><sub>γ</sub>), hasta que el núcleo llega a sus niveles conocidos. Cada historia consta de unos pocos fotones; su espectro sumado es lo que ve un calorímetro tras una captura.</p>
   <div class="btns"><button class="btn ghost" data-act="up2" aria-pressed="true">Upbend</button><button class="btn ghost" data-act="clear">Empezar de nuevo</button></div>
-  <p>El upbend añade fotones blandos y un poco de multiplicidad. El motor no sortea historias: traslada poblaciones intervalo a intervalo, de arriba abajo (capítulo 8), lo que da los mismos promedios sin ruido de muestreo.</p>
+  <p>El upbend añade fotones blandos y un poco de multiplicidad. El motor no sortea historias: traslada poblaciones intervalo a intervalo, de arriba abajo (capítulo 11), lo que da los mismos promedios sin ruido de muestreo.</p>
   <div class="aside">En el código: <code>gamma/strength.py</code> (todos los modelos de fuerza que admite TALYS; por defecto, las tablas SMLO-2019 y la M1 del OIEA con upbend), <code>gamma/parameters.py</code> (sistemáticas de resonancias gigantes, tablas), <code>gamma/transmission.py</code> (T = 2π E<sup>2L+1</sup> f), <code>gamma/ggnorm.py</code> (normalización opcional a ⟨Γγ⟩), <code>emission/</code> (la cascada). La imagen usa formas cerradas y sistemáticas para un núcleo parecido al hierro-57; la ⟨Γγ⟩ medida es el valor de RIPL para el ⁵⁷Fe.</div>
 </div>`,
 };

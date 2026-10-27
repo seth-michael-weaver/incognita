@@ -1,4 +1,4 @@
-/* Chapter 8: the multi-chance cascade down the chart of nuclides (emission/).
+/* Chapter 11: the multi-chance cascade down the chart of nuclides (emission/).
  * Scenes (S.mode): "second"  = one neutron leaves the compound; the residual's excitation is a ball that drops by the
  *                              neutron's kinetic energy and lands on the residual's levels; landings stack up;
  *                   "chart"   = a corner of the chart of nuclides with the flux flowing square to square as streams;
@@ -94,7 +94,7 @@
   const CHANNELS = ["(n,2n)", "(n,n′)", "(n,p)", "(n,np)", "(n,α)", "(n,3n)", "(n,γ)"];
 
   WT.chapter("cascade", {
-    num: "Chapter 8", title: "Down the chart", short: "Cascade",
+    num: "Chapter 11", title: "Down the chart", short: "Cascade",
     lead: "One emission is rarely the end: the nucleus left behind is often hot enough to emit again.",
     html: `
 <div class="step">
@@ -113,7 +113,7 @@
 <div class="step">
   <h3>Top down, bin by bin</h3>
   <p>The engine empties each nucleus from the top down, one energy slice, or <b>bin</b>, at a time. Right: the residual from the first emission; left: its daughter, one neutron fewer. Orange balls are reactions waiting in each bin. Bins are 1 MeV here; the engine uses about 40 per nucleus, sized to the energy available.</p>
-  <p>As the marker sweeps a bin, each ball takes an exit by the competition of Chapter 6: a photon (<em class="g">γ</em>) drops it to a lower bin, a <em class="n">neutron</em> moves it into the daughter, a proton or alpha takes it off the picture. Below every threshold, photons carry the rest to the ground state (grey). Then the daughter is swept.</p>
+  <p>As the marker sweeps a bin, each ball takes an exit by the competition of Chapter 9: a photon (<em class="g">γ</em>) drops it to a lower bin, a <em class="n">neutron</em> moves it into the daughter, a proton or alpha takes it off the picture. Below every threshold, photons carry the rest to the ground state (grey). Then the daughter is swept.</p>
   <div class="ctl"><label for="cs-e3">Neutron energy</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="restart">Start again</button></div>
   <p>Photons only fall, and each nucleus is finished before its daughters, so nothing lands on a bin already emptied.</p>
