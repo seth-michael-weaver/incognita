@@ -730,7 +730,15 @@ canvas { direction: ltr; }
   .ch-rail ol.more-up.more-down { -webkit-mask-image: linear-gradient(transparent, #000 34px, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(transparent, #000 34px, #000 calc(100% - 34px), transparent); }
   /* small arrows at the ends of the list, only when there is more that way; a tap scrolls a few rows */
   .ch-rail.more-up .rail-more.up, .ch-rail.more-down .rail-more.down { display: grid; }
-  .ch-rail .rail-more { place-items: center; width: 28px; height: 18px; margin: -10px 0 -10px 3px; padding: 0; border: 0; border-radius: 9px; background: var(--card); box-shadow: 0 0 0 1px var(--line), 0 2px 8px rgba(10, 16, 40, .12); color: var(--soft); cursor: pointer; position: relative; z-index: 1; }
+  .ch-rail .rail-box { position: relative; display: flex; flex-direction: column; flex: 0 1 auto; min-height: 0; }
+  .ch-rail .rail-more { position: absolute; left: 4px; z-index: 2; place-items: center; width: 28px; height: 18px; padding: 0; border: 0; border-radius: 9px; background: var(--card); box-shadow: 0 0 0 1px var(--line), 0 2px 8px rgba(10, 16, 40, .12); color: var(--soft); cursor: pointer; }
+  .ch-rail .rail-more.up { top: 2px; } .ch-rail .rail-more.down { bottom: 2px; }
+  /* the panel is the box around the list, so the arrows sit inside it in their own band (not over the rows); open, it is
+     solid with no edge fade */
+  .ch-rail .rail-box { border-radius: 14px; transition: background .2s, box-shadow .2s; }
+  .ch-rail.more-up .rail-box { padding-top: 22px; } .ch-rail.more-down .rail-box { padding-bottom: 22px; }
+  .ch-rail:hover .rail-box, .ch-rail:focus-within .rail-box { background: var(--card); box-shadow: 0 10px 32px rgba(10, 16, 40, .14), 0 0 0 1px var(--line); }
+  .ch-rail:hover ol, .ch-rail:focus-within ol { background: none; box-shadow: none; -webkit-mask-image: none; mask-image: none; }
   .ch-rail .rail-more:hover { color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 2px 8px rgba(10, 16, 40, .12); }
   .ch-rail.more-down .rail-more.down { animation: rail-nudge 1.1s ease-in-out 0.6s 1; }
   .ch-rail.more-up .rail-more.up { animation: rail-nudge-up 1.1s ease-in-out 0.6s 1; }
