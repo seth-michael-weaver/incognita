@@ -718,7 +718,8 @@ canvas { direction: ltr; }
 .ch-now:empty { display: none; }
 /* desktop: bigger dots, and the current chapter as a readable pill at the bottom left (the same pill as on phones) */
 @media (min-width: 901px) {
-  .ch-rail { top: 0; bottom: 0; transform: none; justify-content: center; }
+  .ch-rail { top: calc(var(--navh, 56px) + 12px); bottom: 64px; transform: none; justify-content: center; } /* below the site header, above the current-chapter pill */
+  .ch-rail ol { padding-block: 10px; }
   .ch-rail i { width: 10px; height: 10px; }
   .ch-rail ol { gap: 3px; }
   .ch-now { position: fixed; left: 12px; bottom: 14px; writing-mode: horizontal-tb; transform: none; align-self: auto; gap: 7px; padding: 7px 12px 7px 10px; border-radius: 999px; background: color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter: blur(6px); box-shadow: 0 4px 16px rgba(10, 16, 40, .12), 0 0 0 1px var(--line); font-size: 13px; letter-spacing: 0; color: var(--ink); }

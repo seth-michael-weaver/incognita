@@ -433,8 +433,8 @@
     readColors();
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const PHONE = window.matchMedia("(max-width: 860px)").matches; // stacked layout: picture pinned on top, text below
-    const navH = () => { const t = document.querySelector(".toc"); document.documentElement.style.setProperty("--navh", (t ? t.offsetHeight : 0) + "px"); };
-    navH(); window.addEventListener("resize", navH);
+    const navH = () => { const t = document.querySelector(".toc"); document.documentElement.style.setProperty("--navh", (t ? Math.max(t.offsetHeight, Math.ceil(t.getBoundingClientRect().bottom)) : 0) + "px"); };
+    navH(); window.addEventListener("resize", navH); if (document.fonts && document.fonts.ready) document.fonts.ready.then(navH); { const t = document.querySelector(".toc"); if (t && window.ResizeObserver) new ResizeObserver(navH).observe(t); } // the header settles after fonts load
     const chapters = [];
     const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
     const LEVEL = { structure: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, critical: 1, layers: 2,
