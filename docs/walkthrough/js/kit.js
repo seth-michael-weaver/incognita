@@ -509,7 +509,7 @@
       const lvName = (lv) => (lv == null ? "" : WT.ui ? WT.ui("lvl" + lv, LEVELS[lv]) : LEVELS[lv]);
       const numOf = (c) => (c.mod.num || "").replace(/[^0-9]/g, "");
       const rail = document.createElement("nav"); rail.className = "ch-rail"; rail.setAttribute("aria-label", WT.ui ? WT.ui("chapters", "Chapters") : "Chapters");
-      rail.innerHTML = `<div class="rail-box"><button type="button" class="rail-more up" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 14 8" width="14" height="8" aria-hidden="true"><path d="M1.5 6.5L7 1.5l5.5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ol>${rchs.map((c) => { const lv = LEVEL[c.id]; return `<li><a href="#${c.id}" data-id="${c.id}"><i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span></a></li>`; }).join("")}</ol><button type="button" class="rail-more down" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 14 8" width="14" height="8" aria-hidden="true"><path d="M1.5 1.5L7 6.5l5.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="ch-now" aria-live="polite"></div>`;
+      rail.innerHTML = `<div class="rail-box"><button type="button" class="rail-more up" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 14 8" width="14" height="8" aria-hidden="true"><path d="M1.5 6.5L7 1.5l5.5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><ol>${rchs.map((c) => { const lv = LEVEL[c.id]; return `<li><a href="#${c.id}" data-id="${c.id}"><i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span></a></li>`; }).join("")}</ol><button type="button" class="rail-more down" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 14 8" width="14" height="8" aria-hidden="true"><path d="M1.5 1.5L7 6.5l5.5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="ch-now" aria-live="polite"></div>`;
       document.body.appendChild(rail);
       const rlinks = [...rail.querySelectorAll("a")], now = rail.querySelector(".ch-now"), seen = new Set();
       const rol = rail.querySelector("ol");
@@ -522,14 +522,14 @@
         rail.classList.toggle("more-up", rol.classList.contains("more-up")); rail.classList.toggle("more-down", rol.classList.contains("more-down")); };
       // the small arrows at the ends (shown only when there is more that way) scroll the list by a few rows
       rail.querySelectorAll(".rail-more").forEach((b) => {
-        const dir = b.classList.contains("up") ? -1 : 1; let raf = 0, last = 0;
+        const dir = b.classList.contains("up") ? -1 : 1; let raf = 0, last = 0, held = 0;
         const stop = () => { cancelAnimationFrame(raf); raf = 0; };
-        const step = (t) => { const dt = last ? Math.min(0.05, (t - last) / 1000) : 0; last = t; rol.scrollTop += dir * 260 * dt;
+        const step = (t) => { const dt = last ? Math.min(0.05, (t - last) / 1000) : 0; last = t; held += dt; rol.scrollTop += dir * 90 * Math.min(1, held / 0.6) * dt; // gentle: eases in to 90 px/s
           if ((dir < 0 && rol.scrollTop <= 0) || (dir > 0 && rol.scrollTop + rol.clientHeight >= rol.scrollHeight - 1)) return stop(); raf = requestAnimationFrame(step); };
         // a mouse resting on the arrow scrolls the list smoothly until it leaves; a tap (touch) scrolls a few rows
-        b.addEventListener("pointerenter", (e) => { if (e.pointerType !== "mouse" && e.pointerType !== "pen") return; stop(); last = 0; raf = requestAnimationFrame(step); });
+        b.addEventListener("pointerenter", (e) => { if (e.pointerType !== "mouse" && e.pointerType !== "pen") return; stop(); last = 0; held = 0; raf = requestAnimationFrame(step); });
         b.addEventListener("pointerleave", stop);
-        b.addEventListener("click", (e) => { if (raf) return; rol.scrollBy({ top: dir * 4 * 29, behavior: reduce ? "auto" : "smooth" }); });
+        b.addEventListener("click", (e) => { if (raf) return; rol.scrollBy({ top: dir * 3 * 29, behavior: reduce ? "auto" : "smooth" }); });
       });
       rol.addEventListener("scroll", edges, { passive: true }); window.addEventListener("resize", edges); if (window.ResizeObserver) new ResizeObserver(edges).observe(rol); edges();
       const clearNow = () => { rlinks.forEach((a) => a.classList.remove("here")); now.innerHTML = ""; };
