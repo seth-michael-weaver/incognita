@@ -100,3 +100,5 @@ body.pl-page { background: radial-gradient(1400px 700px at 50% -12%, #1a2a5e 0%,
 @media (max-width: 900px) { .pl-have { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .pl-have { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .pl-have li:last-child { grid-column: span 2; } .pl-have a, .pl-have div { padding: 12px 12px 10px; } }
 @media (prefers-reduced-motion: reduce) { .pl-have a { transition: none; } .pl-have a:hover { transform: none; } }
+/* phones: the corner tag sits just above the drawing, clear of the legend */
+@media (max-width: 560px) { .pl-st-head { margin-bottom: 30px; } .pl-tag { top: auto; bottom: calc(100% + 6px); right: 2px; } }
