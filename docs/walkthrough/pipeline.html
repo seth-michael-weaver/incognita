@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>From measurement to reactor · Inside a Nuclear Reaction</title>
+<meta name="description" content="How measured neutron resonances become a library a reactor code can use: measurements, the R-matrix fit, the ENDF-6 file, NJOY processing, the OpenMC library, criticality benchmarks and the pre-registered judges, with INCOGNITA's current status and losses.">
+<link rel="canonical" href="https://www.incognitanuclear.org/pipeline">
+<meta name="robots" content="index, follow">
+<meta property="og:url" content="https://www.incognitanuclear.org/pipeline">
+<meta property="og:title" content="From measurement to reactor · Inside a Nuclear Reaction">
+<meta property="og:description" content="The reactor-physics data pipeline, stage by stage, with live drawings and the checks that stop a bad file.">
+<meta property="og:image" content="https://www.incognitanuclear.org/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=91">
+<link rel="stylesheet" href="pipeline.css?v=92">
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body class="pl-page">
+
+<nav class="toc site" aria-label="Site" data-i18n-aria="site_nav">
+  <a class="brand" href="./" data-keep-lang><img src="favicon.svg" alt="" width="26" height="26"><span data-i18n="brand">Inside a Nuclear Reaction</span></a>
+  <div class="site-links">
+    <a href="./" data-keep-lang data-i18n="nav_physics">The physics</a>
+    <a href="data.html" data-keep-lang data-i18n="nav_data">Every nuclide</a>
+    <a href="scoreboard.html" data-keep-lang data-i18n="nav_board">Scoreboard</a>
+    <a class="gh" href="https://github.com/seth-michael-weaver/incognita"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
+  </div>
+  <button type="button" class="site-burger" aria-expanded="false" aria-label="Menu" data-i18n-aria="menu">☰</button>
+</nav>
+
+<main class="pl">
+  <header class="pl-head">
+    <div class="kicker" data-i18n="pl_kicker">INCOGNITA · reactor data</div>
+    <h1 data-i18n="pl_h1">From measurement to reactor</h1>
+    <p class="pl-sum" data-i18n="pl_sum">A cross section inside a reactor code is the end of a long pipeline: experiments, a fit, a file, processing, a library, benchmarks, and judges that send failures back. Pick a stage to see what happens there and to try it.</p>
+  </header>
+
+  <section class="pl-flow" aria-labelledby="pl-flow-h">
+    <h2 id="pl-flow-h" class="sr" data-i18n="pl_flow_h">The pipeline, stage by stage</h2>
+    <div class="pl-flowwrap">
+      <canvas id="pl-flow" tabindex="0" role="img" aria-label="The pipeline: 1 measurements, 2 fit, 3 evaluated file, 4 processing, 5 library, 6 benchmarks, 7 judges; failures go back to the fit. Use the arrow keys or the stage buttons to pick a stage." data-i18n-aria="pl_flow_aria"></canvas>
+    </div>
+    <div class="pl-tabs sr" role="tablist" id="pl-tabs" aria-label="Stages" data-i18n-aria="pl_tabs"></div>
+  </section>
+
+  <section class="pl-stage" id="pl-stage" aria-live="polite">
+    <header class="pl-st-head">
+      <div class="pl-st-num" id="pl-num"></div>
+      <h2 id="pl-title"></h2>
+      <p class="pl-lead" id="pl-lead"></p>
+    </header>
+    <div class="pl-viz">
+      <div class="pl-vizwrap"><canvas id="pl-viz" role="img"></canvas><div class="pl-tip" id="pl-tip" hidden></div></div>
+      <div class="pl-ctl" id="pl-ctl"></div>
+      <p class="pl-cap" id="pl-cap"></p>
+    </div>
+    <div class="pl-body" id="pl-body"></div>
+    <div class="pl-pn">
+      <button type="button" class="pl-step" id="pl-prev">← <span></span></button>
+      <button type="button" class="pl-step" id="pl-next"><span></span> →</button>
+    </div>
+  </section>
+
+  <section class="pl-now" aria-labelledby="pl-now-h">
+    <h2 id="pl-now-h" data-i18n="pl_now_h">Where it stands</h2>
+    <p class="pl-asof" data-i18n="pl_asof">As of 27 October 2026. Losses first.</p>
+    <ul class="pl-list">
+      <li data-i18n="pl_now_pu"><b class="pl-l">Caught.</b> INCOGNITA's earlier Pu-239 resonance file was a statistical ladder whose fission is about 2× too weak at 20–1000 eV compared with every EXFOR fission set. It puts the PCI-001 plutonium benchmark about 22 % low. It is not released. Five refits to raw EXFOR data also failed their pre-registered gates; the diagnosis points at our model of the experiments (detector normalisations, a thick-sample transmission defect, one capture set modelled as the wrong quantity), not at the measurements.</li>
+      <li data-i18n="pl_now_zr"><b class="pl-l">Withdrawn.</b> Zr-94 and Pu-240 were released and withdrawn the same day after failing our EXFOR-only judge: Zr-94's thermal capture is 1.10× the EXFOR value (0.0475 ± 0.0018 b), outside the ±9.7 % limit; Pu-240's thermal fission is 1.22× the n_TOF 2015 measurement (0.0680 ± 0.0052 b), where ENDF/B-VIII.1 is 1.10×.</li>
+      <li data-i18n="pl_now_u"><b class="pl-l">Not released.</b> The own U-238 and O-16 files make benchmark cases worse (U-238 PMF-006 by 90 pcm, beyond 2σ; O-16 four cases by 141–172 pcm).</li>
+      <li data-i18n="pl_now_rel"><b class="pl-w">Released.</b> res-v0.1: 7 nuclides (Fe-56, Ni-58, Zr-90, Cu-65, Gd-155, F-19, Na-23) whose resolved resonance region is INCOGNITA's own. Everything else in each file is ENDF/B-VIII.1, so these are hybrids, not full own evaluations.</li>
+      <li data-i18n="pl_now_j"><b class="pl-n">Judged.</b> Na-23 passes the EXFOR-only judge. The other 6 are <i>not cleared</i>: EXFOR has no usable reference yet for at least one of their quantities. That is not a pass.</li>
+      <li data-i18n="pl_now_next"><b class="pl-n">Next.</b> Before any new fit, the fitting chain is being made to reproduce ENDF/B-VIII.1 on the raw data. For Pu-239 the registered test is ENDF/B-VIII.1's own resonance parameters, run through the corrected experiment models, reaching χ²/point ≤ 2 on at least two thirds of the data sets.</li>
+    </ul>
+    <p class="pl-src" data-i18n="pl_src">Sources: <a href="https://github.com/seth-michael-weaver/incognita/tree/main/library/res-v0.1"><code>library/res-v0.1/README.md</code></a> (release, judge verdicts, benchmark changes) and the project's research reports RESINTEG (integration and development benchmarks), PU239DIAG (the Pu-239 diagnosis), JUDGEFIX (the EXFOR-only judge) and DOPPLER (temperature checks), all of 27 October 2026. The drawings marked “illustration” are simulated to show an effect; every other number on this page is from those sources.</p>
+  </section>
+</main>
+
+<script src="js/i18n.js?v=91"></script>
+<script>WT.load(["data"], 77);</script>
+<script src="js/nav.js?v=92"></script>
+<script src="js/pipeline.js?v=92"></script>
+</body>
+</html>
