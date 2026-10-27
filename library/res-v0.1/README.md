@@ -7,9 +7,12 @@ fast-region cross sections, angular and energy distributions, nu-bar, fission sp
 Processed with NJOY 2016 and OpenMC 0.16 at 293.6/600/900 K.
 
 ## Losses and limits first
-- **Pu-239: no passing own resonance file.** INCOGNITA's earlier Pu-239 file fails its own gates (fission resonance integral 387.5 b vs
-  301 ± 10 b measured; thermal elastic 15.3 b vs 7.7 ± 0.5 b) and puts the PCI-001 benchmark 22 % low. Five refits to raw EXFOR data
-  failed their pre-registered gates. A diagnosis is under way.
+- **Pu-239: no passing own resonance file.** INCOGNITA's earlier Pu-239 resonance file is a random statistical ladder whose
+  fission is about 2× too weak at 20–1000 eV compared with every EXFOR fission set (those sets agree with each other and with
+  ENDF/B-VIII.1 to within 0.96–1.07); that puts the PCI-001 benchmark 22 % low. Its fission resonance integral, 387.5 b, is also above
+  the EXFOR mean (341.5 ± 16.6 b, from 7 entries that disagree among themselves). Five refits to raw EXFOR data failed their
+  pre-registered gates; the diagnosis points at our data model (detector normalisations, a thick-sample transmission defect,
+  one capture set modelled as the wrong observable), not at the measurements. Fixes are under test.
 - **U-238 and O-16:** the own files make benchmark cases worse (U-238 PMF6 +90 pcm beyond 2σ; O-16 four cases by 141–172 pcm), and the
   new U-238 refit failed its held-out transmission check. Not released.
 - **Not released, no physics judge yet (15):** Cr52, Gd157, Hf177, Hf178, Pu241, Ta181, Th232, U235, W182, W183, W184, W186, Zr91, Zr92, Zr96. These are earlier INCOGNITA resonance files (COVERAGE/URRPROD
@@ -25,7 +28,7 @@ Processed with NJOY 2016 and OpenMC 0.16 at 293.6/600/900 K.
 ## Files
 | nuclide | tier | own part (card) | judge | DEV Δk vs ENDF/B-VIII.1 (pcm) | sha256 |
 |---|---|---|---|---|---|
-| Fe56 | STRICT | own Reich–Moore fit to EXFOR transmission (STRUCTRRR) | PASS — held-out transmission χ²/pt 2.60 vs ENDF/B-VIII.1 2.99; thermal elastic fixed (old own file 21.9 b, measured 12.9 b) | LCT8c1:-65±35(worsen -12); LCT8c5:-4±35(worsen -2); LCT8c11:+22±35(worsen +22); MCT2pnl-30:+43±35(worsen -43); MCT2pnl-33:-22±35(worsen -22); MCT2pnl-35:-45±35(worsen -45) | `de6802208fbf9f8f…` |
+| Fe56 | STRICT | own Reich–Moore fit to EXFOR transmission (STRUCTRRR) | PASS — held-out transmission χ²/pt 2.60 vs ENDF/B-VIII.1 2.99; thermal elastic brought into line (old own file 21.9 b; the 12.9 b check value is a compilation figure, an EXFOR check is pending) | LCT8c1:-65±35(worsen -12); LCT8c5:-4±35(worsen -2); LCT8c11:+22±35(worsen +22); MCT2pnl-30:+43±35(worsen -43); MCT2pnl-33:-22±35(worsen -22); MCT2pnl-35:-45±35(worsen -45) | `de6802208fbf9f8f…` |
 | Ni58 | STRICT | own Reich–Moore fit to EXFOR transmission (STRUCTRRR) | PASS-provisional — provisional (one training set); G1 1.28 after one added level | MCT2pnl-30:+12±35(worsen -12); MCT2pnl-33:-6±35(worsen -6); MCT2pnl-35:-93±35(worsen -93) | `59c908d8afbb68c5…` |
 | Zr90 | STRICT | own Reich–Moore fit to EXFOR transmission (ZRFIT) | PASS-provisional — provisional; held-out check cannot tell it from ENDF/B-VIII.1 | MCT2pnl-30:-68±35(worsen +68); MCT2pnl-33:+4±35(worsen +4); MCT2pnl-35:-103±35(worsen -95) | `e32d7da3746bd4a0…` |
 | Cu65 | PROVISIONAL | own Reich–Moore fit to EXFOR transmission (STRUCT2) | PASS-provisional — provisional; elastic ~10 % high below 1 keV; worse than ENDF/B-VIII.1 in 10–100 eV hold-out | no DEV case | `d68662f4eba8d61a…` |
@@ -38,3 +41,7 @@ Processed with NJOY 2016 and OpenMC 0.16 at 293.6/600/900 K.
 Tier STRICT = every RESINTEG selection rule met and no finished DEV case worsens; Cu-65 is capped at PROVISIONAL by its card (STRUCT2 PASS-provisional, no DEV case).
 Inside names match ENDF/B-VIII.1's (e.g. `Fe56`). To use one, replace that entry in your `cross_sections.xml`
 (`openmc.data.DataLibrary`: remove the existing entry, then `register_file` ours). `MANIFEST.json` here lists arm, tier and verdict per file.
+
+_Corrected 2026-10-27 ~12:10: the first version quoted Pu-239 reference values (fission RI 301 ± 10 b, thermal elastic 7.7 ± 0.5 b) and
+an Fe-56 thermal elastic (12.9 b) as "measured". They come from the BNL-325 (1973) compilation, which our data rules do not accept as
+a reference. They are replaced above by EXFOR-based statements. No file in this release changed._
