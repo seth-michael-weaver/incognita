@@ -517,6 +517,9 @@
         { const a = rail.querySelector("a.here"); if (a && rol.scrollHeight > rol.clientHeight + 2) { const ar = a.getBoundingClientRect(), orr = rol.getBoundingClientRect(); rol.scrollTop += ar.top + ar.height / 2 - (orr.top + rol.clientHeight / 2); } } // a list taller than the screen keeps the current chapter in view
         now.innerHTML = `<i class="l${lv}"></i><span class="n">${numOf(c)}</span><span class="t">${c.mod.short || c.mod.title}</span><span class="lvl l${lv}">${lvName(lv)}</span>`; };
       rail.classList.add("on");
+      // wide screens show about 15 rows and scroll the rest (no scrollbar): fade the edge that has more beyond it
+      const edges = () => { const more = rol.scrollHeight > rol.clientHeight + 2; rol.classList.toggle("more-up", more && rol.scrollTop > 2); rol.classList.toggle("more-down", more && rol.scrollTop + rol.clientHeight < rol.scrollHeight - 2); };
+      rol.addEventListener("scroll", edges, { passive: true }); window.addEventListener("resize", edges); if (window.ResizeObserver) new ResizeObserver(edges).observe(rol); edges();
       const clearNow = () => { rlinks.forEach((a) => a.classList.remove("here")); now.innerHTML = ""; };
       rchs.forEach((c) => new IntersectionObserver((ents) => ents.forEach((en) => {
         if (en.isIntersecting) { seen.add(c.id); setNow(c); } else seen.delete(c.id);
