@@ -89,18 +89,10 @@
    "gate_v3": "FAIL",
    "valid": true,
    "no_integral_test": false
-  },
-  "Zr94": {
-   "arm": "Zr94_TF",
-   "tier": "STRICT",
-   "src": "desk:resinteg/arms/Zr94_TF/proc/Zr94.h5",
-   "fit": "THERMFIX",
-   "verdict": "PASS",
-   "dev": "MCT2pnl-30:-41±35(worsen +41);MCT2pnl-33:+29±35(worsen +29);MCT2pnl-35:-42±35(worsen -42)",
-   "gate_v3": "PASS",
-   "valid": true,
-   "no_integral_test": false
   }
  },
- "released": "res-v0.1: the 9 files with a differential/physics judge"
+ "released": "res-v0.1: the 9 files with a differential/physics judge",
+ "withdrawn": {
+  "Zr94": "2026-10-27: fails EXFOR-only judge, thermal capture 1.10x"
+ }
 }

@@ -1,6 +1,6 @@
 # INCOGNITA resonance-region hybrids res-v0.1 (OpenMC HDF5)
 
-9 nuclides whose resonance region is INCOGNITA's own **and passed a physics judge** (differential data, pre-registered). Built 2026-10-27.
+8 nuclides (9 at first release; Zr-94 withdrawn 2026-10-27, see below) whose resonance region is INCOGNITA's own **and passed a physics judge** (differential data, pre-registered). Built 2026-10-27.
 
 **These are HYBRIDS, not full own evaluations.** Only the resolved resonance range is INCOGNITA's own. Everything else (unresolved range,
 fast-region cross sections, angular and energy distributions, nu-bar, fission spectra) is ENDF/B-VIII.1, used as a carrier.
@@ -36,7 +36,7 @@ Processed with NJOY 2016 and OpenMC 0.16 at 293.6/600/900 K.
 | Pu240 | STRICT | EXFOR-reported resonance parameters, assembled by INCOGNITA (RESPEAKS2) | PASS — experimenter parameters; Explorer peaks live since 10-26 | MCT2pnl-30:+47±35(worsen -47); MCT2pnl-33:+32±35(worsen +32); MCT2pnl-35:-24±35(worsen -24); PCI1:+96±35(worsen -96); PMF1:-23±35(worsen +23); PMF6:+40±35(worsen -40) | `164e24a239854fc7…` |
 | F19 | STRICT | own statistical ladder, bound level refitted to EXFOR thermal constants (THERMFIX) | PASS — thermal σ_el 4.70 → 3.63 b (measured 3.70); hold-out σ_tot C/E 1.24 → 0.96 | no DEV case | `c235b4ce0aeb6cb1…` |
 | Na23 | STRICT | own statistical ladder, bound level refitted to EXFOR thermal constants (THERMFIX) | PASS — thermal σ_el 8.31 → 3.27 b (measured 3.26); b_coh not met | LCT8c5:+33±35(worsen +33) | `dc030292ad7afb82…` |
-| Zr94 | STRICT | own statistical ladder, bound level refitted to EXFOR thermal constants (THERMFIX) | PASS — thermal σ_el 6.30 → 8.03 b (measured 8.48) | MCT2pnl-30:-41±35(worsen +41); MCT2pnl-33:+29±35(worsen +29); MCT2pnl-35:-42±35(worsen -42) | `2ff7a23fe1dadb22…` |
+| ~~Zr94~~ | WITHDRAWN | — | **withdrawn 2026-10-27:** fails the EXFOR-only judge (thermal capture 1.10× the EXFOR value 0.0475 ± 0.0018 b; limit ±9.7 %) | — | — |
 
 Tier STRICT = every RESINTEG selection rule met and no finished DEV case worsens; Cu-65 is capped at PROVISIONAL by its card (STRUCT2 PASS-provisional, no DEV case).
 Inside names match ENDF/B-VIII.1's (e.g. `Fe56`). To use one, replace that entry in your `cross_sections.xml`
@@ -45,3 +45,23 @@ Inside names match ENDF/B-VIII.1's (e.g. `Fe56`). To use one, replace that entry
 _Corrected 2026-10-27 ~12:10: the first version quoted Pu-239 reference values (fission RI 301 ± 10 b, thermal elastic 7.7 ± 0.5 b) and
 an Fe-56 thermal elastic (12.9 b) as "measured". They come from the BNL-325 (1973) compilation, which our data rules do not accept as
 a reference. They are replaced above by EXFOR-based statements. No file in this release changed._
+
+## EXFOR-only judge verdicts (2026-10-27)
+On 2026-10-27 we rebuilt the differential judge from individual EXFOR entries and IAEA standards measurements only (no compilations,
+no evaluated values), calibrated it on ENDF/B-VIII.1, and counted a missing reference as **not cleared** (never as a pass).
+Results for the files released here (value = file ÷ reference; * = reference that ENDF/B-VIII.1 also fails, treated as suspect):
+
+| file | verdict | thermal σγ | thermal σ_el | capture RI | notes |
+|---|---|---|---|---|---|
+| Na23 | **PASS** | 0.975 | 1.04 | 0.996 | |
+| Zr94 | **FAIL → withdrawn** | 1.10 | no reference | 1.02 (derived) | |
+| Cu65 | not cleared | 1.00 | 1.40* | 0.957 | σ_el reference suspect |
+| F19 | not cleared | 0.926 | no reference | no reference | |
+| Fe56 | not cleared | 0.934 | 0.963 | no reference | |
+| Ni58 | not cleared | 0.999 | no reference | no reference | |
+| Pu240 | not cleared | no reference | 0.97* | 0.924 | fission quantities: no reference |
+| Gd155 | not cleared | no reference | no reference | no reference | |
+| Zr90 | not cleared | no reference | no reference | no reference | |
+
+"Not cleared" means a quantity has no usable EXFOR reference yet, not that the file is wrong. A pre-registered rule deriving thermal
+values from energy-dependent EXFOR data is being added; this table will be updated when it lands.
