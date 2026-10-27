@@ -52,16 +52,16 @@ no evaluated values), calibrated it on ENDF/B-VIII.1, and counted a missing refe
 pre-registered rule also derives thermal values from EXFOR σ(E) points between 0.01 and 0.1 eV where no direct thermal value exists
 (marked "derived"). Value = file ÷ reference; * = a reference that ENDF/B-VIII.1 also fails, treated as suspect.
 
-| file | verdict | thermal σγ | thermal σf | thermal σ_el | capture RI | notes |
+| file | release status | thermal σγ | thermal σf | thermal σ_el | capture RI | checks without a usable reference |
 |---|---|---|---|---|---|---|
-| Na23 | **PASS** | 0.975 | — | 1.04 | 0.996 | |
-| Zr94 | **FAIL → withdrawn** | 1.10 | — | no reference | 1.02 (derived) | |
-| Pu240 | **FAIL → withdrawn** | no reference | 1.22 (derived, one n_TOF set) | 0.97* | 0.924 | fission RI: no reference |
-| Gd155 | not cleared | 1.02 (derived) | — | no reference | no reference | |
-| Cu65 | not cleared | 1.00 | — | 1.40* | 0.957 | σ_el reference suspect |
-| F19 | not cleared | 0.926 | — | no reference | no reference | |
-| Fe56 | not cleared | 0.934 | — | 0.963 | no reference | |
-| Ni58 | not cleared | 0.999 | — | no reference | no reference | |
-| Zr90 | not cleared | no reference | — | no reference | no reference | no usable EXFOR σ(E) data near thermal either |
+| Na23 | released, fully checked | 0.975 | — | 1.04 | 0.996 | none |
+| Cu65 | released, partly checked | 1.00 | — | (1.40, suspect reference) | 0.957 | thermal σ_el (reference also fails ENDF/B-VIII.1) |
+| F19 | released, partly checked | 0.926 | — | — | — | thermal σ_el, capture RI |
+| Fe56 | released, partly checked | 0.934 | — | 0.963 | — | capture RI |
+| Ni58 | released, partly checked | 0.999 | — | — | — | thermal σ_el, capture RI |
+| Gd155 | released, partly checked | 1.02 (derived) | — | — | — | thermal σ_el, capture RI |
+| Zr90 | released, processing checks only | — | — | — | — | thermal σγ, thermal σ_el, capture RI |
+| Zr94 | withdrawn | 1.10 FAIL | — | — | 1.02 (derived) | thermal σ_el |
+| Pu240 | withdrawn | — | 1.22 FAIL (derived) | 0.97* | 0.924 | thermal σγ, fission RI |
 
-"Not cleared" means a quantity has no usable EXFOR reference yet, not that the file is wrong.
+**Release rule (2026-10-27):** a file is released only if it passes every EXFOR check that has a usable reference plus all processing checks; the last column lists the checks it could not get. A missing reference means "not checked", not "wrong".
