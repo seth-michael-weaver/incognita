@@ -24,7 +24,7 @@ Object.assign(WT.L.ui, {
   in_l3_1: "Le noyau et le premier contact",
   in_l3_2: "Le noyau composé",
   in_l3_3: "Au-delà des moyennes, et les données",
-  in_co_note: "Pour un public non spécialiste, les chapitres d'initiation (1–3) et le chapitre 12 forment une séance autonome. Les chapitres 9, 10 et 12 peuvent chacun être omis ou déplacés sans casser le reste.",
+  in_co_note: "Pour un public non spécialiste, les chapitres d'initiation (1–3) et le chapitre 12 forment une séance autonome. Les chapitres 9, 10 et 15 peuvent chacun être omis ou déplacés sans casser le reste.",
   in_ln_h: "Créer un lien vers un chapitre ou une étape",
   in_ln_p: "Chaque chapitre et chaque étape a une adresse stable. Un chapitre s'écrit <code>#omp</code> ; une étape ajoute son numéro, compté à partir de 1 : <code>#omp-3</code> est la troisième étape du chapitre 2. Ajoutez un code de langue comme <code>?lang=es</code> avant le <code>#</code> pour cette langue. Sur la page pédagogique, le symbole de lien à côté de chaque étape copie son adresse.",
   in_b_ch: "Chapitre", in_b_st: "Étape", in_b_lang: "Langue", in_b_copy: "Copier", in_b_open: "Ouvrir", in_b_whole: "chapitre entier", in_b_step: "étape",

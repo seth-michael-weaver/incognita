@@ -24,7 +24,7 @@ Object.assign(WT.es.ui, {
   in_l3_1: "El núcleo y el primer contacto",
   in_l3_2: "El núcleo compuesto",
   in_l3_3: "Más allá de los promedios, y los datos",
-  in_co_note: "Para un público general, los capítulos de introducción (1–3) y el capítulo 12 forman una sesión completa. Los capítulos 9, 10 y 12 pueden quitarse o cambiarse de orden sin romper el resto.",
+  in_co_note: "Para un público general, los capítulos de introducción (1–3) y el capítulo 12 forman una sesión completa. Los capítulos 9, 10 y 15 pueden quitarse o cambiarse de orden sin romper el resto.",
   in_ln_h: "Enlazar a un capítulo o a un paso",
   in_ln_p: "Cada capítulo y cada paso tiene una dirección estable. Un capítulo es <code>#omp</code>; un paso añade su número, contando desde 1: <code>#omp-3</code> es el tercer paso del capítulo 2. Añade un código de idioma como <code>?lang=es</code> antes de <code>#</code> para ese idioma. En la página didáctica, la marca de enlace junto a cada paso copia su dirección.",
   in_b_ch: "Capítulo", in_b_st: "Paso", in_b_lang: "Idioma", in_b_copy: "Copiar", in_b_open: "Abrir", in_b_whole: "capítulo entero", in_b_step: "paso",

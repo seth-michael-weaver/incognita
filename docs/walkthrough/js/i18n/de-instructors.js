@@ -24,7 +24,7 @@ Object.assign(WT.L.ui, {
   in_l3_1: "Der Kern und der erste Kontakt",
   in_l3_2: "Der Compoundkern",
   in_l3_3: "Jenseits der Mittelwerte, und die Daten",
-  in_co_note: "Für ein allgemeines Publikum ergeben die Einstiegskapitel (1–3) und Kapitel 12 eine in sich geschlossene Einheit. Die Kapitel 9, 10 und 12 lassen sich jeweils weglassen oder umstellen, ohne den Rest zu beschädigen.",
+  in_co_note: "Für ein allgemeines Publikum ergeben die Einstiegskapitel (1–3) und Kapitel 12 eine in sich geschlossene Einheit. Die Kapitel 9, 10 und 15 lassen sich jeweils weglassen oder umstellen, ohne den Rest zu beschädigen.",
   in_ln_h: "Auf ein Kapitel oder einen Schritt verlinken",
   in_ln_p: "Jedes Kapitel und jeder Schritt hat eine feste Adresse. Ein Kapitel ist <code>#omp</code>; ein Schritt hängt seine Nummer an, gezählt ab 1: <code>#omp-3</code> ist der dritte Schritt von Kapitel 2. Füge <code>?lang=de</code> vor dem <code>#</code> ein, um die deutsche Fassung zu erhalten. Auf der Lehrseite kopiert das Link-Symbol neben jedem Schritt dessen Adresse.",
   in_b_ch: "Kapitel", in_b_st: "Schritt", in_b_lang: "Sprache", in_b_copy: "Kopieren", in_b_open: "Öffnen", in_b_whole: "ganzes Kapitel", in_b_step: "Schritt",
