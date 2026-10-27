@@ -130,33 +130,19 @@
   // ===================================================================================================================
   const STAGES = [
     { id: "meas", col: C.meas, t: T("pl_s1_t", "Measurements"), sub: T("pl_s1_s", "EXFOR experiments + IAEA standards"), viz: "meas",
-      lead: T("pl_s1_lead", "Everything starts with experiments that fired neutrons at a sample and counted what came out."),
-      body: T("pl_s1_body", "<p>Each experiment in EXFOR, the international database of nuclear reaction measurements kept by the IAEA, records one quantity against neutron energy: how many neutrons pass through a sample (<b>transmission</b>), how many are captured, how many cause fission. A few reactions are measured so well that they serve as <b>standards</b> (the IAEA standards), and other experiments are normalised to them.</p><p>No experiment sees the cross section directly. Each has its own <b>detector resolution, normalisation, background and sample thickness</b>, and each changes what is recorded. Switch them on and off in the drawing: resolution smears the dip, background lifts it, normalisation scales it, and in a thick sample the dip bottoms out, so its depth no longer says how strong the resonance is.</p>"),
-      cap: T("pl_s1_cap", "<b>Illustration:</b> simulated data for one resonance, not a real measurement. Dashed: what a perfect experiment would record. Lower panel: the cross section itself.") },
-    { id: "fit", col: C.fit, t: T("pl_s2_t", "Data model + fit"), sub: T("pl_s2_s", "R-matrix, through a model of each experiment"), viz: "fit",
-      lead: T("pl_s2_lead", "The resonances are described by an R-matrix model (Reich–Moore) and fitted to the raw data of many experiments at once."),
-      body: T("pl_s2_body", "<p>The fit does not compare the model with the cross section. It compares it with what each detector would have recorded, so a model of every experiment is part of the fit: its <b>resolution function</b>, <b>Doppler broadening</b> from the thermal motion of the sample's atoms, <b>multiple scattering</b> in thick samples, its <b>normalisation</b> and its <b>background</b>.</p><p>The output is a set of <b>resonance parameters</b>: for each resonance its energy, its widths (how readily it decays by each route) and its spin.</p><p>Try it: press <b>Fit</b> with the experiment model on, then turn the model off and fit again. Without it the fit has to explain the smearing and the raised floor with the resonance itself, and it gets the width and strength wrong.</p><p class=\"pl-loss\">In the real fits the same failure is subtler. Our diagnosis of Pu-239 found that defects in how the chain modelled three experiments (detector normalisations left free, a thick-sample transmission defect, one capture set modelled as the wrong quantity) had been absorbed into the resonance parameters.</p>"),
-      cap: T("pl_s2_cap", "<b>Illustration:</b> the same simulated thin- and thick-sample data, both fitted at once. Doppler broadening and multiple scattering, which real fits model, are left out of this drawing.") },
+      lead: T("pl_s1_lead", "Raw EXFOR experiments and IAEA standards"), tag: T("pl_s1_tag", "illustration · simulated data"), },
+    { id: "fit", col: C.fit, t: T("pl_s2_t", "Data model + fit"), sub: T("pl_s2_s", "R-matrix, through our model of each experiment"), viz: "fit",
+      lead: T("pl_s2_lead", "Fit raw data through our experiment model"), tag: T("pl_s2_tag", "illustration · simulated data"), },
     { id: "file", col: C.file, t: T("pl_s3_t", "Evaluated file"), sub: T("pl_s3_s", "ENDF-6 tape"), viz: "endf",
-      lead: T("pl_s3_lead", "The fitted parameters are written into an ENDF-6 file, the format every reactor code reads its nuclear data from."),
-      body: T("pl_s3_body", "<p>An ENDF-6 file holds everything about one nuclide. In the <b>resolved resonance region</b> it stores resonance parameters, not a curve. Above it, in the <b>unresolved region</b>, resonances overlap too closely to be measured one by one, so the file stores their averages. Then come cross sections up to 20 MeV, the angles and energies of outgoing particles, and the neutrons released per fission.</p><p>Our released files are <b>hybrids</b>: only the resolved resonance region is INCOGNITA's own. Everything else is spliced in from ENDF/B-VIII.1, which serves as a carrier. Tap a row to see what it holds.</p>"),
-      cap: T("pl_s3_cap", "Schematic: the energy boundaries between regions differ from nuclide to nuclide.") },
+      lead: T("pl_s3_lead", "Parameters written to an ENDF-6 file"), tag: T("pl_s3_tag", "schematic"), },
     { id: "proc", col: C.proc, t: T("pl_s4_t", "Processing"), sub: T("pl_s4_s", "NJOY: reconstruct, broaden, tabulate"), viz: "dop",
-      lead: T("pl_s4_lead", "NJOY turns the file into tables that a Monte Carlo code can use."),
-      body: T("pl_s4_body", "<p>Resonance parameters are a recipe, not a table. NJOY <b>reconstructs</b> the pointwise cross section from them and <b>Doppler-broadens</b> it to reactor temperatures (293.6, 600 and 900 K for our files). The nuclei in hot material move, so to a neutron a narrow resonance looks lower and wider. The area under the peak stays the same: drag the temperature and watch. In thick fuel the wider resonance absorbs more neutrons as the fuel heats, which is one reason a hotter reactor becomes less reactive.</p><p>For the unresolved region NJOY builds <b>probability tables</b>, which keep the self-shielding effect of resonances too dense to resolve. Then it writes OpenMC's HDF5 format.</p><p class=\"pl-loss\">The temperature checks on all 24 of our resonance files passed, but they found a defect: in 9 unreleased files the second unresolved range was written with negative table energies, so OpenMC silently never uses those probability tables. No released file is affected.</p>"),
-      cap: T("pl_s4_cap", "<b>Illustration:</b> one single-level resonance, roughly the shape of U-238's at 6.67 eV (total width 25 meV, mass 238), broadened with the Gaussian (ψ-function) approximation. Not library data.") },
+      lead: T("pl_s4_lead", "NJOY reconstructs and broadens to reactor temperatures"), tag: T("pl_s4_tag", "illustration"), },
     { id: "lib", col: C.lib, t: T("pl_s5_t", "Library"), sub: T("pl_s5_s", "OpenMC HDF5 + cross_sections.xml"), viz: "lib",
-      lead: T("pl_s5_lead", "The HDF5 files plus an index, cross_sections.xml, make an OpenMC library."),
-      body: T("pl_s5_body", "<p>Our first resonance-region release, <b>res-v0.1</b> (27 October 2026), now holds 7 nuclides. An OpenMC user can swap one into their own library by replacing that nuclide's line in <code>cross_sections.xml</code>. Tap a file to see which part of it is ours.</p><p class=\"pl-loss\">Zr-94 and Pu-240 were in the first release and were withdrawn the same day, after failing the EXFOR-only judge (stage 7).</p><p>Files are on GitHub in <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/res-v0.1\"><code>library/res-v0.1</code></a>, with every verdict in its README.</p>"),
-      cap: T("pl_s5_cap", "STRICT: every selection rule met and no finished development benchmark worsens by more than 2σ. PROVISIONAL: capped by its fit's own verdict.") },
+      lead: T("pl_s5_lead", "res-v0.1: seven own resonance-region files"), tag: T("pl_s5_tag", ""), },
     { id: "bench", col: C.bench, t: T("pl_s6_t", "Benchmarks"), sub: T("pl_s6_s", "ICSBEP critical experiments, k-eff"), viz: "bench",
-      lead: T("pl_s6_lead", "A library is tested by simulating real critical experiments."),
-      body: T("pl_s6_body", "<p>The ICSBEP handbook documents experiments that were assembled to be exactly critical: <b>k-effective</b>, the ratio of neutrons in one generation to the one before, was 1 within a stated uncertainty. OpenMC follows many neutron histories through a model of each experiment and computes k. The comparison is <b>C/E</b>, calculated over experimental k, quoted in pcm (1 pcm = 0.001 %).</p><p>The cases are split in advance. <b>Development</b> cases may be looked at while files are chosen. <b>Held-out</b> cases are read once, at the end, and never used to choose; they have not been run on this release.</p><p>The bars show how much each file moves k compared with ENDF/B-VIII.1 on the development cases (same model, same random seed, ±35 pcm). Most moves are inside that noise. Green: C/E moved closer to the experiment; red: farther.</p><p class=\"pl-loss\">Pick the old Pu-239 file. It was a statistical ladder (random resonances with the right average spacing and widths) and its fission was about 2× too weak at 20–1000 eV. Swapped into ENDF/B-VIII.1 one energy band at a time, it shows where the damage comes from: the PCI-001 plutonium benchmark ends up about 22 % low. Pu-240 shows the opposite lesson: its benchmark changes were small or helpful, yet it failed the judge on thermal fission and was withdrawn.</p>"),
-      cap: T("pl_s6_cap", "Δk = k(file in ENDF/B-VIII.1) − k(ENDF/B-VIII.1), same seed. Cu-65, Gd-155 and F-19: no development case is sensitive to them. Sources: res-v0.1 README; Pu-239 bands from PU239DIAG.") },
-    { id: "judge", col: C.judge, t: T("pl_s7_t", "Judges"), sub: T("pl_s7_s", "checks fixed in advance; failures go back"), viz: "judge",
-      lead: T("pl_s7_lead", "Every file must pass checks that were written down before it was judged. Failures go back to the fit."),
-      body: T("pl_s7_body", "<p>Each file is compared with measured <b>thermal cross sections</b> (capture, fission, elastic) and <b>resonance integrals</b>. The references come only from individual EXFOR experiments and the IAEA standards; compilations and other evaluations are never used. The tolerances were fixed in advance and calibrated on ENDF/B-VIII.1. A quantity with no usable EXFOR reference is <b>not cleared</b>, never a pass. Processing checks run too: NJOY must rebuild the file cleanly, with no negative or missing values, and its temperature behaviour must be sane.</p><p>A failure sends the nuclide back to stage 2: the loop in the diagram.</p><p class=\"pl-loss\">When the judge was rebuilt this way on 27 October 2026 and the released files were judged again, Na-23 passed, Zr-94 and Pu-240 failed and were withdrawn, and 6 are not yet cleared because EXFOR lacks a usable reference for at least one quantity.</p>"),
-      cap: T("pl_s7_cap", "Value = file ÷ EXFOR reference. derived: thermal value derived by a pre-registered rule from EXFOR points between 0.01 and 0.1 eV. *: a reference that ENDF/B-VIII.1 also fails, treated as suspect. Source: res-v0.1 README.") },
+      lead: T("pl_s6_lead", "62 critical experiments, k against measurement"), tag: T("pl_s6_tag", ""), },
+    { id: "judge", col: C.judge, t: T("pl_s7_t", "Judges"), sub: T("pl_s7_s", "fixed checks; failures go back"), viz: "judge",
+      lead: T("pl_s7_lead", "Every file checked against EXFOR alone"), tag: T("pl_s7_tag", ""), },
   ];
 
   // ===================================================================================================================
@@ -281,7 +267,7 @@
   // ===================================================================================================================
   // the stage panel and its live drawing
   // ===================================================================================================================
-  const stEl = document.getElementById("pl-stage"), vcv = document.getElementById("pl-viz"), viz = surf(vcv), ctl = document.getElementById("pl-ctl"), cap = document.getElementById("pl-cap"), tip = document.getElementById("pl-tip");
+  const stEl = document.getElementById("pl-stage"), vcv = document.getElementById("pl-viz"), viz = surf(vcv), ctl = document.getElementById("pl-ctl"), tagEl = document.getElementById("pl-tag"), tip = document.getElementById("pl-tip");
   const VIZ = {};
   let V = null;
   const vW = () => Math.max(260, vcv.parentElement.clientWidth);
@@ -294,8 +280,7 @@
     document.getElementById("pl-num").textContent = T("pl_stage_n", "Stage {i} of 7").replace("{i}", i + 1);
     document.getElementById("pl-title").textContent = s.t;
     document.getElementById("pl-lead").textContent = s.lead;
-    document.getElementById("pl-body").innerHTML = s.body;
-    cap.innerHTML = s.cap;
+    tagEl.textContent = s.tag; tagEl.hidden = !s.tag;
     const pv = document.getElementById("pl-prev"), nx = document.getElementById("pl-next");
     pv.hidden = i === 0; nx.hidden = i === 6; if (i > 0) pv.querySelector("span").textContent = STAGES[i - 1].t; if (i < 6) nx.querySelector("span").textContent = i === 6 ? "" : STAGES[i + 1].t;
     [...tabs.children].forEach((b, k) => b.setAttribute("aria-selected", String(k === i)));
@@ -367,14 +352,14 @@
     let lx = narrow ? 8 : A1.x0 + 8; const ly = 14;
     show.forEach((key) => { ctx.fillStyle = C[key]; ctx.beginPath(); ctx.arc(lx + 4, ly, 3, 0, 7); ctx.fill(); lx += 12 + text(ctx, key === "thin" ? (narrow ? T("pl_thin_b", "Thin") : T("pl_thin", "thin sample")) : (narrow ? T("pl_thick_b", "Thick") : T("pl_thick", "thick sample")), lx + 12, ly, { size: 12, color: C.soft }) + 14; });
     if (mode === "meas") { line(ctx, [[lx, ly], [lx + 18, ly]], C.soft, 1.4, [5, 4]); text(ctx, narrow ? T("pl_perfect_s", "perfect experiment") : T("pl_perfect", "what a perfect experiment would record"), lx + 24, ly, { size: 12, color: C.soft }); }
-    else { line(ctx, [[lx, ly], [lx + 18, ly]], C.ink, 2.2); text(ctx, narrow ? (FIT.model ? T("pl_model_on_s", "model, via experiment") : T("pl_model_off_s", "model, no experiment")) : FIT.model ? T("pl_model_on", "model, through each experiment") : T("pl_model_off", "model, experiment ignored"), lx + 24, ly, { size: 12, color: C.soft, max: W - lx - 30 }); }
+    else { line(ctx, [[lx, ly], [lx + 18, ly]], C.ink, 2.2); text(ctx, narrow ? (FIT.model ? T("pl_model_on_s", "fit, with our model") : T("pl_model_off_s", "fit, no experiment")) : FIT.model ? T("pl_model_on", "fit, through our experiment model") : T("pl_model_off", "fit, experiment ignored"), lx + 24, ly, { size: 12, color: C.soft, max: W - lx - 30 }); }
     // lower panel: the cross section
     if (mode === "meas") { ctx.save(); ctx.shadowColor = rgba("#ffffff", 0.5); ctx.shadowBlur = 10; line(ctx, sigTrue, "#f2f5ff", 2); ctx.restore(); text(ctx, T("pl_sig_true", "the cross section we want"), A2.x(10.06) + 4, A2.y(2500), { size: 12, color: C.ink }); }
     else {
       line(ctx, sigTrue, C.soft, 1.4, [4, 4], 0.8);
       ctx.save(); ctx.shadowColor = rgba(C.fit, 0.7); ctx.shadowBlur = 10; line(ctx, EFINE.map((E) => [A2.x(E), A2.y(P.sig(E, FIT.p))]), C.fit, 2.2); ctx.restore();
       const yy = A2.y0 + 10; line(ctx, [[A2.x1 - (narrow ? 150 : 300), yy], [A2.x1 - (narrow ? 132 : 282), yy]], C.soft, 1.4, [4, 4]);
-      text(ctx, narrow ? T("pl_true_s", "true (simulated)") : T("pl_true", "true: known only because the data are simulated"), A2.x1 - (narrow ? 126 : 276), yy, { size: 11.5, color: C.soft });
+      text(ctx, T("pl_true_s", "true (simulated)"), A2.x1 - (narrow ? 126 : 276), yy, { size: 11.5, color: C.soft });
     }
   }
   VIZ.meas = {
@@ -396,7 +381,7 @@
       this.bFit = el("button", "pl-btn", T("pl_fitbtn", "Fit")); this.bFit.type = "button"; this.bFit.addEventListener("click", () => this.run());
       const bReset = el("button", "pl-btn ghost", T("pl_reset", "Reset")); bReset.type = "button"; bReset.addEventListener("click", () => { this.stop(); FIT.p = { E0: 9.93, G: 0.16, S0: 1500, SP: TRUE.SP }; this.sync(); this.upd(); });
       this.read = el("div", "pl-read");
-      box.append(this.bFit, bReset, chk(T("pl_model_chk", "Model the experiment (resolution, background, normalisation)"), FIT.model, (v) => { FIT.model = v; this.upd(); }), this.rE, this.rG, this.rS, this.read);
+      box.append(this.bFit, bReset, chk(T("pl_model_chk", "Our experiment model (here: resolution, background, normalisation)"), FIT.model, (v) => { FIT.model = v; this.upd(); }), this.rE, this.rG, this.rS, this.read);
       this.upd(true);
     },
     sync() { this.rE.set(FIT.p.E0); this.rG.set(FIT.p.G); this.rS.set(Math.log10(FIT.p.S0)); },
@@ -422,12 +407,12 @@
 
   // ---------- stage 3: anatomy of an ENDF-6 file (hybrid) ----------
   const ENDF = [
-    { k: "MF2", t: T("pl_e_rrr", "Resolved resonances"), span: [0, 0.42], own: true, d: T("pl_e_rrr_d", "<b>MF2, resolved range: INCOGNITA's own.</b> Resonance parameters (energy, widths, spin of each resonance) from the fit in stage 2. Codes rebuild the cross section from them.") },
-    { k: "MF2", t: T("pl_e_urr", "Unresolved resonances"), span: [0.42, 0.62], d: T("pl_e_urr_d", "<b>MF2, unresolved range: ENDF/B-VIII.1 carrier</b> in the released files. Average resonance parameters where resonances are too dense to resolve one by one; NJOY turns them into probability tables.") },
-    { k: "MF3", t: T("pl_e_mf3", "Cross sections"), span: [0, 1], soft: [0, 0.62], d: T("pl_e_mf3_d", "<b>MF3: ENDF/B-VIII.1 carrier.</b> Pointwise cross sections for every reaction up to 20 MeV. In the resonance regions it can hold a background that is added to what the resonance parameters give.") },
-    { k: "MF4", t: T("pl_e_mf4", "Angular distributions"), span: [0, 1], d: T("pl_e_mf4_d", "<b>MF4: ENDF/B-VIII.1 carrier.</b> Which direction neutrons go after scattering.") },
-    { k: "MF5/6", t: T("pl_e_mf5", "Energy distributions"), span: [0, 1], d: T("pl_e_mf5_d", "<b>MF5 and MF6: ENDF/B-VIII.1 carrier.</b> The energies of outgoing particles, including the fission neutron spectrum.") },
-    { k: "MF1", t: T("pl_e_mf1", "General information, ν̄"), span: [0, 1], d: T("pl_e_mf1_d", "<b>MF1: ENDF/B-VIII.1 carrier</b> (with our description). Neutrons released per fission (ν̄) and the file's header.") },
+    { k: "MF2", t: T("pl_e_rrr", "Resolved resonances"), span: [0, 0.42], own: true, d: T("pl_e_rrr_d", "<b>MF2 · resolved resonances</b> · ours") },
+    { k: "MF2", t: T("pl_e_urr", "Unresolved resonances"), span: [0.42, 0.62], d: T("pl_e_urr_d", "<b>MF2 · unresolved resonances</b> · ENDF/B-VIII.1") },
+    { k: "MF3", t: T("pl_e_mf3", "Cross sections"), span: [0, 1], soft: [0, 0.62], d: T("pl_e_mf3_d", "<b>MF3 · cross sections</b> · ENDF/B-VIII.1") },
+    { k: "MF4", t: T("pl_e_mf4", "Angular distributions"), span: [0, 1], d: T("pl_e_mf4_d", "<b>MF4 · angular distributions</b> · ENDF/B-VIII.1") },
+    { k: "MF5/6", t: T("pl_e_mf5", "Energy distributions"), span: [0, 1], d: T("pl_e_mf5_d", "<b>MF5/6 · energy distributions</b> · ENDF/B-VIII.1") },
+    { k: "MF1", t: T("pl_e_mf1", "General information, ν̄"), span: [0, 1], d: T("pl_e_mf1_d", "<b>MF1 · ν̄ and header</b> · ENDF/B-VIII.1") },
   ];
   const EN = { sel: 0, hov: -1 };
   function endfGeom(W) { const narrow = W < 560, lab = narrow ? 118 : 196, top = 40, rh = narrow ? 34 : 38, x0 = lab + 8, x1 = W - 14; return { narrow, lab, top, rh, x0, x1 }; }
@@ -506,36 +491,34 @@
 
   // ---------- stage 5: the res-v0.1 files ----------
   const LIB = [
-    { s: "Fe", a: 56, m: "Fe56", tier: "STRICT", own: T("pl_l_fe", "Own Reich–Moore fit to EXFOR transmission data. Held-out transmission χ²/point 2.60, against 2.99 for ENDF/B-VIII.1.") },
-    { s: "Ni", a: 58, m: "Ni58", tier: "STRICT", own: T("pl_l_ni", "Own Reich–Moore fit to EXFOR transmission data. Provisional fit verdict: one training set.") },
-    { s: "Zr", a: 90, m: "Zr90", tier: "STRICT", own: T("pl_l_zr90", "Own Reich–Moore fit to EXFOR transmission data. Provisional: the held-out check cannot tell it from ENDF/B-VIII.1.") },
-    { s: "Cu", a: 65, m: "Cu65", tier: "PROVISIONAL", own: T("pl_l_cu", "Own Reich–Moore fit to EXFOR transmission data. Elastic about 10 % high below 1 keV; worse than ENDF/B-VIII.1 in the 10–100 eV hold-out.") },
-    { s: "Gd", a: 155, m: "Gd155", tier: "STRICT", own: T("pl_l_gd", "Own Reich–Moore fit to EXFOR data (GELINA and J-PARC). Capture resonance integral 1495 b against 1532 ± 8.5 b measured: misses 2σ by 2.7 b (old own file: 535 b).") },
-    { s: "F", a: 19, m: "F19", tier: "STRICT", own: T("pl_l_f", "Own statistical resonances; bound level refitted to EXFOR thermal values. Thermal elastic 4.70 → 3.63 b (measured 3.70).") },
-    { s: "Na", a: 23, m: "Na23", tier: "STRICT", own: T("pl_l_na", "Own statistical resonances; bound level refitted to EXFOR thermal values. Thermal elastic 8.31 → 3.27 b (measured 3.26). The only file that passes every EXFOR-only check.") },
-    { s: "Zr", a: 94, m: "Zr94", tier: "WITHDRAWN", own: T("pl_l_zr94", "Withdrawn 27 October 2026: thermal capture 1.10× the EXFOR value (0.0475 ± 0.0018 b), outside the ±9.7 % limit.") },
-    { s: "Pu", a: 240, m: "Pu240", tier: "WITHDRAWN", own: T("pl_l_pu240", "Withdrawn 27 October 2026: thermal fission 1.22× the n_TOF 2015 measurement (0.0680 ± 0.0052 b); ENDF/B-VIII.1 is 1.10×. Its resonances were EXFOR-reported parameters assembled by INCOGNITA.") },
+    { s: "Fe", a: 56, m: "Fe56", tier: "STRICT", own: T("pl_l_fe", "own Reich–Moore fit to raw EXFOR") },
+    { s: "Ni", a: 58, m: "Ni58", tier: "STRICT", own: T("pl_l_ni", "own Reich–Moore fit to raw EXFOR") },
+    { s: "Zr", a: 90, m: "Zr90", tier: "STRICT", own: T("pl_l_zr90", "own Reich–Moore fit to raw EXFOR") },
+    { s: "Cu", a: 65, m: "Cu65", tier: "PROVISIONAL", own: T("pl_l_cu", "own Reich–Moore fit to raw EXFOR") },
+    { s: "Gd", a: 155, m: "Gd155", tier: "STRICT", own: T("pl_l_gd", "own Reich–Moore fit to raw GELINA + J-PARC data") },
+    { s: "F", a: 19, m: "F19", tier: "STRICT", own: T("pl_l_f", "own statistical resonances, thermal refit") },
+    { s: "Na", a: 23, m: "Na23", tier: "STRICT", own: T("pl_l_na", "own statistical resonances, thermal refit") },
   ];
   const LS = { sel: 0, hov: -1 };
-  function libGeom(W) { const cols = W < 520 ? 3 : 5, m = 14, gap = W < 520 ? 10 : 14, tw = (W - 2 * m - (cols - 1) * gap) / cols, th = W < 520 ? 82 : 96; return { cols, m, gap, tw, th, top: 14 }; }
+  function libGeom(W) { const cols = W < 640 ? 4 : 7, m = 14, gap = W < 520 ? 10 : 14, tw = (W - 2 * m - (cols - 1) * gap) / cols, th = W < 520 ? 82 : 96; return { cols, m, gap, tw, th, top: 14 }; }
   VIZ.lib = {
     height: (W) => { const g = libGeom(W); return g.top * 2 + Math.ceil(LIB.length / g.cols) * (g.th + g.gap) - g.gap; },
     init(box) { this.note = el("p", "pl-note"); this.pre = el("pre", "pl-pre"); box.append(this.note, this.pre); this.setNote(); },
     setNote() {
-      const f = LIB[LS.sel], wd = f.tier === "WITHDRAWN";
-      this.note.innerHTML = `<b>${f.s}-${f.a}</b> · ${f.tier}. ${esc(f.own)}`;
-      this.pre.textContent = wd ? T("pl_l_none", "<!-- not in the library: withdrawn -->") : `<library materials="${f.m}" path="${f.m}.h5" type="neutron" />   <!-- 293.6, 600, 900 K -->`;
+      const f = LIB[LS.sel];
+      this.note.innerHTML = `<b>${f.s}-${f.a}</b> · ${f.tier} · ${esc(f.own)}`;
+      this.pre.textContent = `<library materials="${f.m}" path="${f.m}.h5" type="neutron" />`;
     },
     rect(i, W) { const g = libGeom(W), c = i % g.cols, r = Math.floor(i / g.cols); return { x: g.m + c * (g.tw + g.gap), y: g.top + r * (g.th + g.gap), w: g.tw, h: g.th }; },
     draw() {
       const { ctx, W, H } = viz; ctx.clearRect(0, 0, W, H); const small = W < 520;
       LIB.forEach((f, i) => {
-        const b = this.rect(i, W), wd = f.tier === "WITHDRAWN", sel = i === LS.sel, hov = i === LS.hov, col = wd ? C.judge : f.tier === "STRICT" ? C.lib : C.proc;
+        const b = this.rect(i, W), wd = false, sel = i === LS.sel, hov = i === LS.hov, col = wd ? C.judge : f.tier === "STRICT" ? C.lib : C.proc;
         ctx.save(); if (sel) { ctx.shadowColor = rgba(col, 0.6); ctx.shadowBlur = 18; }
         rrect(ctx, b.x, b.y, b.w, b.h, 12); const gr = ctx.createLinearGradient(b.x, b.y, b.x + b.w, b.y + b.h);
         gr.addColorStop(0, wd ? "rgba(60,40,52,.55)" : rgba(col, sel ? 0.42 : 0.24)); gr.addColorStop(1, "rgba(10,16,34,.9)"); ctx.fillStyle = gr; ctx.fill(); ctx.restore();
         rrect(ctx, b.x, b.y, b.w, b.h, 12); ctx.strokeStyle = sel ? col : hov ? rgba(col, 0.75) : C.panel; ctx.lineWidth = sel ? 2 : 1.2; ctx.stroke();
-        const cx = b.x + b.w / 2, sz = small ? 26 : 32;
+        const cx = b.x + b.w / 2, sz = small ? 22 : 28;
         ctx.font = font(sz, 600); const sw = ctx.measureText(f.s).width; ctx.font = font(small ? 11 : 12, 500, true); const aw = ctx.measureText(String(f.a)).width;
         const x0 = cx - (sw + aw + 2) / 2, yb = b.y + b.h * 0.46;
         text(ctx, String(f.a), x0, yb - sz * 0.38, { size: small ? 11 : 12, mono: true, color: wd ? C.faint : C.soft });
@@ -557,17 +540,14 @@
     "Ni-58": [["MCT-002 pnl-30", 12, -12], ["MCT-002 pnl-33", -6, -6], ["MCT-002 pnl-35", -93, -93]],
     "Zr-90": [["MCT-002 pnl-30", -68, 68], ["MCT-002 pnl-33", 4, 4], ["MCT-002 pnl-35", -103, -95]],
     "Na-23": [["LCT-008 c5", 33, 33]],
-    "Pu-240": [["MCT-002 pnl-30", 47, -47], ["MCT-002 pnl-33", 32, 32], ["MCT-002 pnl-35", -24, -24], ["PCI-001", 96, -96], ["PMF-001", -23, 23], ["PMF-006", 40, -40]],
-    // the old statistical Pu-239 file on PCI-001, one energy band swapped into ENDF/B-VIII.1 at a time (PU239DIAG Q1, ±35 pcm)
-    "Pu-239": [["below 1 eV", -641], ["1–20 eV", 2169], ["20–100 eV", -16427], ["0.1–1 keV", -6132], ["1–30 keV", -1615], ["all bands", -22885]],
   };
   const BS = { pick: "Fe-56", lo: -150, hi: 150, raf: 0, hov: -1 };
-  const range = (k) => (k === "Pu-239" ? [-25000, 5000] : [-150, 150]);
+  const range = () => [-150, 150];
   function benchGeom(W, H) { const narrow = W < 520, L = narrow ? 104 : 150, R = 16, top = 58, rows = BENCH[BS.pick].length, bot = 36, rh = Math.min(42, (H - top - bot) / rows); return { narrow, L, R, top, rh, bot, x: (v) => L + ((v - BS.lo) / (BS.hi - BS.lo)) * (W - L - R) }; }
   VIZ.bench = {
     height: (W) => (W < 520 ? 330 : 340),
     init(box) {
-      const items = [["Fe-56", "Fe-56"], ["Ni-58", "Ni-58"], ["Zr-90", "Zr-90"], ["Na-23", "Na-23"], ["Pu-240", T("pl_b_pu240", "Pu-240 (withdrawn)")], ["Pu-239", T("pl_b_pu239", "old Pu-239 file")]];
+      const items = [["Fe-56", "Fe-56"], ["Ni-58", "Ni-58"], ["Zr-90", "Zr-90"], ["Na-23", "Na-23"]];
       box.append(seg(items, BS.pick, (v) => this.pick(v), C.bench));
     },
     pick(v) {
@@ -580,7 +560,7 @@
     stop() { if (BS.raf) cancelAnimationFrame(BS.raf); BS.raf = 0; const [lo, hi] = range(BS.pick); BS.lo = lo; BS.hi = hi; },
     draw() {
       const { ctx, W, H } = viz; ctx.clearRect(0, 0, W, H); const g = benchGeom(W, H), rows = BENCH[BS.pick], pu = BS.pick === "Pu-239";
-      text(ctx, pu ? T("pl_b_t239", "PCI-001: change in k when one energy band of the old Pu-239 file replaces ENDF/B-VIII.1") : T("pl_b_t", "Change in k against ENDF/B-VIII.1, development cases"), 14, 18, { size: 12.5, weight: 600, color: C.ink, max: W - 28 });
+      text(ctx, pu ? T("pl_b_t239", "PCI-001: change in k when one energy band of the old Pu-239 file replaces ENDF/B-VIII.1") : T("pl_b_t", "Δk vs ENDF/B-VIII.1 · development cases"), 14, 18, { size: 12.5, weight: 600, color: C.ink, max: W - 28 });
       // ticks
       const span = BS.hi - BS.lo, stepT = [25, 50, 100, 250, 500, 1000, 2500, 5000, 10000].find((s) => span / s <= (g.narrow ? 5 : 7)) || 10000;
       ctx.save(); for (let v = Math.ceil(BS.lo / stepT) * stepT; v <= BS.hi; v += stepT) { const x = g.x(v); ctx.strokeStyle = v === 0 ? "rgba(220,228,250,.55)" : C.grid; ctx.lineWidth = v === 0 ? 1.4 : 1; ctx.beginPath(); ctx.moveTo(x, g.top - 6); ctx.lineTo(x, g.top + rows.length * g.rh); ctx.stroke(); text(ctx, v === 0 ? "0" : sgn(v), x, g.top + rows.length * g.rh + 12, { size: 10.5, mono: true, color: C.faint, align: "center" }); }
@@ -613,68 +593,31 @@
     down(x, y) { this.move(x, y); },
   };
 
-  // ---------- stage 7: the EXFOR-only judge on the released files ----------
-  // [file, verdict, [thermal σγ, thermal σf, thermal σel, capture RI]]: "ratio" = file ÷ EXFOR, as printed in the README; null = no reference; "-" = not applicable
-  // flags: f = the failing quantity, d = derived from EXFOR σ(E) points, s = suspect reference (ENDF/B-VIII.1 also fails it)
-  const JUDGE = [
-    ["Na-23", "pass", ["0.975", "-", "1.04", "0.996"], {}],
-    ["Zr-94", "fail", ["1.10", "-", null, "1.02"], { 0: "f", 3: "d" }],
-    ["Pu-240", "fail", [null, "1.22", "0.97", "0.924"], { 1: "fd", 2: "s" }],
-    ["Gd-155", "nc", ["1.02", "-", null, null], { 0: "d" }],
-    ["Cu-65", "nc", ["1.00", "-", "1.40", "0.957"], { 2: "s" }],
-    ["F-19", "nc", ["0.926", "-", null, null], {}],
-    ["Fe-56", "nc", ["0.934", "-", "0.963", null], {}],
-    ["Ni-58", "nc", ["0.999", "-", null, null], {}],
-    ["Zr-90", "nc", [null, "-", null, null], {}],
-  ];
-  const JNOTE = {
-    "Na-23": T("pl_j_na", "Passes on all three quantities that apply."),
-    "Zr-94": T("pl_j_zr94", "Thermal capture 1.10× the EXFOR value (0.0475 ± 0.0018 b, two entries); the limit was ±9.7 %. Withdrawn."),
-    "Pu-240": T("pl_j_pu240", "Thermal fission 1.22× the n_TOF 2015 measurement (0.0680 ± 0.0052 b), derived from one EXFOR set; ENDF/B-VIII.1 is 1.10×. Fission resonance integral: no reference. Withdrawn."),
-    "Gd-155": T("pl_j_gd", "Thermal capture derived from EXFOR σ(E) points: 1.02. Elastic and resonance integral: no usable EXFOR reference, so not cleared."),
-    "Cu-65": T("pl_j_cu", "The elastic reference (1.40×) is one that ENDF/B-VIII.1 also fails, so it is treated as suspect: not cleared."),
-    "F-19": T("pl_j_f", "Only thermal capture has a usable reference."),
-    "Fe-56": T("pl_j_fe", "No usable EXFOR resonance integral."),
-    "Ni-58": T("pl_j_ni", "Only thermal capture has a usable reference."),
-    "Zr-90": T("pl_j_zr90", "No usable EXFOR reference at all, not even σ(E) points near thermal."),
-  };
-  const VD = { pass: [T("pl_pass", "PASS"), C.win], fail: [T("pl_fail", "FAIL · withdrawn"), C.loss], nc: [T("pl_nc", "NOT CLEARED"), C.nc] };
-  const JS = { hov: -1, sel: 0 };
-  function judgeGeom(W) { const narrow = W < 600, name = narrow ? 64 : 84, chip = narrow ? 0 : 150, top = narrow ? 50 : 40, rh = narrow ? 34 : 30, x0 = 12 + name + chip, cw = (W - x0 - 10) / 4; return { narrow, name, chip, top, rh, x0, cw }; }
+  // ---------- stage 7: the EXFOR-only judge, worked example Na-23 (res-v0.1 README: PASS; value = file ÷ EXFOR) ----------
+  const NA23 = [[T("pl_j_cap", "thermal capture"), "0.975"], [T("pl_j_el", "thermal elastic"), "1.04"], [T("pl_j_ri", "capture resonance integral"), "0.996"]];
   VIZ.judge = {
-    height: (W) => { const g = judgeGeom(W); return g.top + JUDGE.length * g.rh + 14; },
-    init(box) { this.note = el("p", "pl-note"); box.append(this.note); this.setNote(); },
-    setNote() { const r = JUDGE[JS.sel]; this.note.innerHTML = `<b>${r[0]}</b> · ${VD[r[1]][0]}. ${esc(JNOTE[r[0]])}`; },
+    height: (W) => (W < 560 ? 344 : 284),
+    init() {},
     draw() {
-      const { ctx, W, H } = viz; ctx.clearRect(0, 0, W, H); const g = judgeGeom(W);
-      const heads = g.narrow ? ["σγ", "σf", "σel", "RI"] : [T("pl_j_cap", "thermal capture"), T("pl_j_fis", "thermal fission"), T("pl_j_el", "thermal elastic"), T("pl_j_ri", "capture RI")];
-      heads.forEach((h, k) => text(ctx, h, g.x0 + (k + 0.5) * g.cw, g.top - 18, { size: 11.5, weight: 600, color: C.soft, align: "center", max: g.cw - 4 }));
-      if (g.narrow) text(ctx, T("pl_j_hint", "file ÷ EXFOR · dot: green pass, red fail, grey not cleared"), 12, 14, { size: 11, color: C.faint });
-      JUDGE.forEach(([nm, vd, vals, fl], i) => {
-        const y = g.top + i * g.rh, cy = y + g.rh / 2, on = i === JS.sel || i === JS.hov, [vt, vc] = VD[vd];
-        if (on) { ctx.fillStyle = "rgba(150,170,230,.08)"; rrect(ctx, 4, y + 1, W - 8, g.rh - 2, 7); ctx.fill(); }
-        if (g.narrow) { ctx.fillStyle = vc; ctx.beginPath(); ctx.arc(14, cy, 4, 0, 7); ctx.fill(); }
-        text(ctx, nm, g.narrow ? 24 : 12, cy, { size: 13, weight: 600, color: vd === "fail" ? rgba(C.ink, 0.7) : C.ink });
-        if (!g.narrow) pill(ctx, vt, 12 + g.name, cy, vc, { size: 10.5 });
-        vals.forEach((v, k) => {
-          const cx = g.x0 + (k + 0.5) * g.cw, f = fl[k] || "";
-          if (v === "-") return text(ctx, "—", cx, cy, { size: 12, color: "rgba(150,165,200,.35)", align: "center" });
-          if (v == null) { ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = "rgba(150,165,200,.45)"; rrect(ctx, cx - (g.narrow ? 20 : 34), cy - 9, g.narrow ? 40 : 68, 18, 9); ctx.stroke(); ctx.restore(); return text(ctx, g.narrow ? "none" : T("pl_j_noref", "no reference"), cx, cy, { size: g.narrow ? 10 : 11, color: C.faint, align: "center" }); }
-          const vs = v; v = parseFloat(v); const bad = f.includes("f"), col = bad ? C.loss : f.includes("s") ? C.faint : C.ink;
-          if (!g.narrow) { // a small ratio gauge: 0.85 … 1.45 (log), 1.00 marked
-            const gx0 = cx - g.cw * 0.4, gx1 = cx + g.cw * 0.4, gx = (r) => gx0 + ((Math.log(r) - Math.log(0.85)) / (Math.log(1.45) - Math.log(0.85))) * (gx1 - gx0);
-            ctx.strokeStyle = "rgba(150,170,220,.22)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(gx0, cy + 7); ctx.lineTo(gx1, cy + 7); ctx.stroke();
-            ctx.strokeStyle = "rgba(220,228,250,.5)"; ctx.beginPath(); ctx.moveTo(gx(1), cy + 3); ctx.lineTo(gx(1), cy + 11); ctx.stroke();
-            ctx.save(); ctx.shadowColor = rgba(bad ? C.loss : C.accent, 0.8); ctx.shadowBlur = 6; ctx.fillStyle = bad ? C.loss : f.includes("s") ? C.faint : C.accent; ctx.beginPath(); ctx.arc(gx(clamp(v, 0.85, 1.45)), cy + 7, 3.2, 0, 7); ctx.fill(); ctx.restore();
-          }
-          text(ctx, vs + (f.includes("s") ? "*" : "") + (f.includes("d") ? (g.narrow ? "ᵈ" : " d") : ""), cx, g.narrow ? cy : cy - 5, { size: g.narrow ? 11.5 : 11.5, mono: true, weight: bad ? 600 : 500, color: col, align: "center" });
-        });
+      const { ctx, W, H } = viz; ctx.clearRect(0, 0, W, H); const narrow = W < 560;
+      text(ctx, T("pl_j_head", "Na-23 in res-v0.1"), 16, 24, { size: 15, weight: 600, color: "#fff" });
+      pill(ctx, T("pl_pass", "PASS"), W - 16, 24, C.win, { align: "right", size: 11.5 });
+      text(ctx, T("pl_j_sub", "file ÷ EXFOR reference"), 16, 46, { size: 12, color: C.soft });
+      const rh = narrow ? 90 : 68, top = 64, lab = narrow ? 0 : 210, gx0 = narrow ? 30 : 16 + lab, gx1 = W - (narrow ? 30 : 150);
+      const gx = (r) => gx0 + ((r - 0.9) / 0.2) * (gx1 - gx0);
+      NA23.forEach(([name, vs], i) => {
+        const y = top + i * rh, v = parseFloat(vs), gy = narrow ? y + 46 : y + rh / 2 - 4;
+        ctx.fillStyle = "rgba(150,170,230,.05)"; rrect(ctx, 8, y + 4, W - 16, rh - 8, 10); ctx.fill();
+        text(ctx, name, 18, narrow ? y + 22 : gy, { size: 13, weight: 600, color: C.ink, max: narrow ? W - 110 : lab - 10 });
+        // the ratio axis 0.90 … 1.10, exact agreement marked
+        const g = ctx.createLinearGradient(gx0, 0, gx1, 0); g.addColorStop(0, "rgba(63,211,168,0)"); g.addColorStop(0.5, "rgba(63,211,168,.3)"); g.addColorStop(1, "rgba(63,211,168,0)");
+        ctx.fillStyle = g; rrect(ctx, gx0, gy - 3, gx1 - gx0, 6, 3); ctx.fill();
+        [0.9, 0.95, 1, 1.05, 1.1].forEach((t) => { const x = gx(t); ctx.strokeStyle = t === 1 ? "rgba(235,240,255,.75)" : "rgba(150,170,220,.3)"; ctx.lineWidth = t === 1 ? 1.5 : 1; ctx.beginPath(); ctx.moveTo(x, gy - (t === 1 ? 9 : 5)); ctx.lineTo(x, gy + (t === 1 ? 9 : 5)); ctx.stroke(); text(ctx, t.toFixed(2), x, gy + 17, { size: 10, mono: true, color: C.faint, align: "center" }); });
+        glowDot(ctx, gx(v), gy, 4, C.win);
+        if (narrow) text(ctx, vs + "  ✓", W - 18, y + 22, { size: 14, mono: true, weight: 600, color: "#fff", align: "right" });
+        else { text(ctx, vs, W - 64, gy, { size: 15, mono: true, weight: 600, color: "#fff", align: "right" }); text(ctx, "✓", W - 32, gy, { size: 16, weight: 600, color: C.win, align: "center" }); }
       });
     },
-    rowAt(y) { const g = judgeGeom(viz.W), i = Math.floor((y - g.top) / g.rh); return i >= 0 && i < JUDGE.length ? i : -1; },
-    move(x, y) { const i = this.rowAt(y); if (i !== JS.hov) { JS.hov = i; vcv.style.cursor = i >= 0 ? "pointer" : "default"; this.draw(); } },
-    leave() { JS.hov = -1; this.draw(); },
-    down(x, y) { const i = this.rowAt(y); if (i >= 0) { JS.sel = i; this.setNote(); this.draw(); } },
   };
 
   // ===================================================================================================================
