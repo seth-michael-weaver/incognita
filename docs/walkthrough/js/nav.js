@@ -5,13 +5,13 @@
   const head = document.querySelector(".site"); if (!head) return;
   // "Instructors" link (every page): the teaching guide, placed before GitHub
   const sl = head.querySelector(".site-links");
-  // "Pipeline" link (every page): how measurements become a reactor library, placed after Scoreboard
-  if (sl && !sl.querySelector('a[href^="pipeline.html"]')) {
-    const a = document.createElement("a"); a.href = "pipeline.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_pipe"; a.textContent = WT.ui("nav_pipe", "Pipeline");
-    if (/\/pipeline(\.html)?$/.test(location.pathname)) { a.className = "here"; a.setAttribute("aria-current", "page"); }
-    const b = sl.querySelector('a[href^="scoreboard.html"]');
-    sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
-  }
+  // "Pipeline" link hidden for now (Seth, 2026-10-27); pipeline.html stays reachable by URL. Uncomment to restore.
+  // if (sl && !sl.querySelector('a[href^="pipeline.html"]')) {
+  //   const a = document.createElement("a"); a.href = "pipeline.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_pipe"; a.textContent = WT.ui("nav_pipe", "Pipeline");
+  //   if (/\/pipeline(\.html)?$/.test(location.pathname)) { a.className = "here"; a.setAttribute("aria-current", "page"); }
+  //   const b = sl.querySelector('a[href^="scoreboard.html"]');
+  //   sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
+  // }
   if (sl && !sl.querySelector('a[href^="instructors.html"]')) {
     const a = document.createElement("a"); a.href = "instructors.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_teach"; a.textContent = WT.ui("nav_teach", "Instructors");
     if (/\/instructors(\.html)?$/.test(location.pathname)) { a.className = "here"; a.setAttribute("aria-current", "page"); }

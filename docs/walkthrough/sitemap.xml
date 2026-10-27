@@ -3,6 +3,6 @@
   <url><loc>https://www.incognitanuclear.org/</loc><lastmod>2026-10-26</lastmod><priority>1.0</priority></url>
   <url><loc>https://www.incognitanuclear.org/data</loc><lastmod>2026-10-26</lastmod><priority>0.9</priority></url>
   <url><loc>https://www.incognitanuclear.org/scoreboard</loc><lastmod>2026-10-26</lastmod><priority>0.7</priority></url>
-  <url><loc>https://www.incognitanuclear.org/pipeline</loc><lastmod>2026-10-27</lastmod><priority>0.7</priority></url>
+  <!--   <url><loc>https://www.incognitanuclear.org/pipeline</loc><lastmod>2026-10-27</lastmod><priority>0.7</priority></url> hidden 2026-10-27 -->
   <url><loc>https://www.incognitanuclear.org/instructors</loc><lastmod>2026-10-26</lastmod><priority>0.6</priority></url>
 </urlset>
