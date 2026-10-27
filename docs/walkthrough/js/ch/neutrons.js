@@ -1,14 +1,16 @@
-/* Why neutrons? The potential energy of a proton and of a neutron against distance r from a lead-208 nucleus (Z = 82):
- * nuclear attraction as a Woods-Saxon well (depth 50 MeV, R = 1.25 A^(1/3) fm, diffuseness 0.65 fm) for both; the proton
- * also feels the Coulomb repulsion 1.44 Z / r MeV fm (a uniformly charged sphere inside R). A ball at the chosen energy rolls
- * in: below the barrier top the proton turns back classically; quantum tunnelling (WKB, s-wave,
- * P = exp(-2 int sqrt(2 mu (V - E)) / hbar dr)) lets about 1 in 10^N through. The neutron (s-wave) has no barrier. */
+/* Why neutrons? The textbook picture of the potential energy of a proton and of a neutron against distance r from a lead-208
+ * nucleus (Z = 82): a square nuclear well 50 MeV deep, with the Coulomb repulsion 1.44 Z / r MeV fm outside for the proton
+ * (a uniformly charged sphere inside). The proton's well ends at the touching radius R_c = r0 (A^(1/3) + 1^(1/3)), r0 = 1.3 fm
+ * (9.0 fm), so the barrier top is the standard Coulomb barrier V_B = 1.44 Z / R_c = 13 MeV; the neutron's well ends at
+ * r0 A^(1/3) (7.7 fm). A ball at the chosen energy rolls in: below the barrier top the proton turns back classically; quantum
+ * tunnelling (WKB, s-wave, P = exp(-2 int sqrt(2 mu (V - E)) / hbar dr)) lets about 1 in 10^N through. The neutron (s-wave)
+ * has no barrier. */
 (function () {
   const { TAU, clamp, lerp, smooth } = WT.util;
-  const Z = 82, A = 208, R = 1.25 * Math.cbrt(A), AD = 0.65, V0 = 50, MU = 938.27 * A / (A + 1), HC = 197.327, RMAX = 30;
-  const vN = (r) => -V0 / (1 + Math.exp((r - R) / AD));
+  const Z = 82, A = 208, R0 = 1.3, R = R0 * (Math.cbrt(A) + 1), RN = R0 * Math.cbrt(A), V0 = 50, MU = 938.27 * A / (A + 1), HC = 197.327, RMAX = 30;
+  const vN = (r) => (r < RN ? -V0 : 0);                                     // neutron: square well, no barrier
   const vC = (r) => (r >= R ? 1.44 * Z / r : 1.44 * Z / (2 * R) * (3 - (r * r) / (R * R)));
-  const vP = (r) => vN(r) + vC(r);
+  const vP = (r) => (r < R ? -V0 : 0) + vC(r);                              // proton: square well to the touching radius, Coulomb outside
   let BTOP = 0, RTOP = R; for (let r = R; r < 20; r += 0.01) { const v = vP(r); if (v > BTOP) { BTOP = v; RTOP = r; } }
   function tunnel(E) {
     if (E >= BTOP) return 1; let ri = RTOP, ro = RTOP; while (ri > 0.1 && vP(ri) > E) ri -= 0.01; while (ro < 400 && vP(ro) > E) ro += 0.01;
@@ -43,7 +45,7 @@
         g.label(L.name, x0 + 4, L.y0 + 10, { color: L.col, size: fs + 1, weight: 600, align: "left", alpha: Math.max(on, 0.8) });
         // nucleus at r = 0
         g.nucleus(X(0) + 12, Y(-V0) - 18, phone ? 10 : 14, { N: 40, Z: 16, t: S.time, jiggle: 0.4, alpha: 0.9 });
-        if (li === 0) { g.label(`barrier ≈ ${BTOP.toFixed(0)} MeV`, X(RTOP) + 8, Y(BTOP) - 12, { color: c.proton, size: fs - 1, weight: 600, align: "left", bg: true }); }
+        if (li === 0) { g.label(`Coulomb barrier ≈ ${BTOP.toFixed(0)} MeV`, X(RTOP) + 8, Y(BTOP) - 12, { color: c.proton, size: fs - 1, weight: 600, align: "left", bg: true }); }
         // energy line
         g.line(x0, Y(E), x1, Y(E), c.ink, 1, 0.35 * on + 0.1, [6, 5]);
         g.label(`${E.toFixed(1)} MeV`, x1, Y(E) - 10, { color: c.ink, size: fs - 1, align: "right" });

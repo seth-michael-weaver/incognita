@@ -167,7 +167,7 @@
         if (mode === "time") {
           g.label(`with delayed: ${desc(wD)}`, px1 - 4, py0 + 10, { color: c.accent, size: fs, weight: 600, align: "right", bg: true });
           g.label(`prompt only: ${desc(wP)}`, px1 - 4, py0 + 32, { color: c.warm, size: fs, weight: 600, align: "right", bg: true });
-          g.label(phone ? `k = ${kNow.toFixed(4)} · 0.65 % delayed ~13 s` : `k = ${kNow.toFixed(4)} · 0.65 % of neutrons delayed ~13 s on average`, W * 0.5, H * 0.93, { color: c.ink, size: fs + 1, weight: 600, serif: true });
+          g.label(phone ? `k = ${kNow.toFixed(4)} · 0.65 % delayed ≈ 13 s` : `k = ${kNow.toFixed(4)} · 0.65 % of neutrons delayed about 13 s (one-group average)`, W * 0.5, H * 0.93, { color: c.ink, size: fs + 1, weight: 600, serif: true });
         } else {
           const crit = Math.abs(S.ins - CRIT_INS) < 0.5;
           g.label(crit ? "critical: k = 1.0000, power flat" : `k = ${kNow.toFixed(4)} · ${desc(wD)}`, W * 0.5, H * 0.93, { color: crit ? c.fission : c.ink, size: fs + 2, weight: 600, serif: true });
