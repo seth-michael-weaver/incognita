@@ -22,7 +22,7 @@
   <div class="ctl"><label for="bi-f">Lighter fragment A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>Fuse light nuclei: energy too, up to nickel.</p>
+  <p>Fuse light nuclei: energy out only if the product sits higher.</p>
   <div class="ctl"><label for="bi-u">Each light nucleus A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
 </div>`,
     setup(S) { S.set("mode", 0); S.set("pick", 56); S.set("frag", 95); S.set("fuse", 2); },
