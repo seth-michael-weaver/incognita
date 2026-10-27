@@ -1,0 +1,26 @@
+{
+ "release": "res-v0.1",
+ "sandbox": false,
+ "records": [
+  {
+   "part": 1,
+   "id": 23700447,
+   "draft": "https://zenodo.org/deposit/23700447",
+   "doi": "10.5281/zenodo.23700447",
+   "host": "https://zenodo.org",
+   "files": [
+    "Cu65_INCOGNITA_res-v0.1.h5",
+    "F19_INCOGNITA_res-v0.1.h5",
+    "Fe56_INCOGNITA_res-v0.1.h5",
+    "Gd155_INCOGNITA_res-v0.1.h5",
+    "Na23_INCOGNITA_res-v0.1.h5",
+    "Ni58_INCOGNITA_res-v0.1.h5",
+    "Zr90_INCOGNITA_res-v0.1.h5",
+    "README.md",
+    "SHA256SUMS",
+    "MANIFEST.json"
+   ],
+   "published": false
+  }
+ ]
+}

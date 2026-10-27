@@ -38,3 +38,7 @@ See `SHA256SUMS`. Each law ships as an ENDF-6 MF7 tape (water 3.2 MB, Be 9.5 MB)
 for git. Rebuild them with `openmc.data.njoy.make_ace_thermal` (error 0.001, nbin 16), then `openmc.data.ThermalScattering.from_ace`.
 Our build hashes: water b6085fe5…, Be 5e2c3cb6….
 Every number above comes from the pre-registered validation cards TSLWATER, LIGHTEVAL1 §2 and TSLSOLID3. Those cards are not yet in this repository.
+
+## Archived at
+Zenodo (CC BY 4.0):
+- DOI [10.5281/zenodo.23701483](https://doi.org/10.5281/zenodo.23701483) (reserved; record not yet published)

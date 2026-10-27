@@ -1,0 +1,22 @@
+{
+ "release": "tsl-v0.1",
+ "sandbox": false,
+ "records": [
+  {
+   "part": 1,
+   "id": 23701483,
+   "draft": "https://zenodo.org/deposit/23701483",
+   "doi": "10.5281/zenodo.23701483",
+   "host": "https://zenodo.org",
+   "files": [
+    "tsl-Be-metal_INCOGNITA_v0.1.endf",
+    "c_Be_INCOGNITA_tsl-v0.1.h5",
+    "c_H_in_H2O_INCOGNITA_tsl-v0.1.h5",
+    "tsl-HinH2O_INCOGNITA_v0.1.endf",
+    "README.md",
+    "SHA256SUMS"
+   ],
+   "published": false
+  }
+ ]
+}

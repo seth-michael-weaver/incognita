@@ -65,3 +65,7 @@ pre-registered rule also derives thermal values from EXFOR σ(E) points between 
 | Pu240 | withdrawn | — | 1.22 FAIL (derived) | 0.97* | 0.924 | thermal σγ, fission RI |
 
 **Release rule (2026-10-27):** a file is released only if it passes every EXFOR check that has a usable reference plus all processing checks; the last column lists the checks it could not get. A missing reference means "not checked", not "wrong".
+
+## Archived at
+Zenodo (CC BY 4.0):
+- DOI [10.5281/zenodo.23700447](https://doi.org/10.5281/zenodo.23700447) (reserved; record not yet published)
