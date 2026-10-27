@@ -102,3 +102,5 @@ body.pl-page { background: radial-gradient(1400px 700px at 50% -12%, #1a2a5e 0%,
 @media (prefers-reduced-motion: reduce) { .pl-have a { transition: none; } .pl-have a:hover { transform: none; } }
 /* phones: the corner tag sits just above the drawing, clear of the legend */
 @media (max-width: 560px) { .pl-st-head { margin-bottom: 30px; } .pl-tag { top: auto; bottom: calc(100% + 6px); right: 2px; } }
+.pl-ctlrow { flex: 1 1 100%; }
+.pl-seg .pl-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 6px; vertical-align: 1px; box-shadow: 0 0 6px currentColor; }

@@ -140,7 +140,7 @@
     { id: "lib", col: C.lib, t: T("pl_s5_t", "Library"), sub: T("pl_s5_s", "OpenMC HDF5 + cross_sections.xml"), viz: "lib",
       lead: T("pl_s5_lead", "res-v0.1: seven own resonance-region files"), tag: T("pl_s5_tag", ""), },
     { id: "bench", col: C.bench, t: T("pl_s6_t", "Benchmarks"), sub: T("pl_s6_s", "ICSBEP critical experiments, k-eff"), viz: "bench",
-      lead: T("pl_s6_lead", "62 critical experiments, k against measurement"), tag: T("pl_s6_tag", ""), },
+      lead: T("pl_s6_lead", "Real experiments: does simulation hit the measured answer?"), tag: T("pl_s6_tag", ""), },
     { id: "judge", col: C.judge, t: T("pl_s7_t", "Judges"), sub: T("pl_s7_s", "fixed checks; failures go back"), viz: "judge",
       lead: T("pl_s7_lead", "Every file checked against EXFOR alone"), tag: T("pl_s7_tag", ""), },
   ];
@@ -299,7 +299,7 @@
   // small control builders
   function seg(items, val, on, col) {
     const box = document.createElement("div"); box.className = "pl-seg"; box.setAttribute("role", "group"); if (col) box.style.setProperty("--c", col);
-    items.forEach(([v, label]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label; b.setAttribute("aria-pressed", String(v === val)); b.addEventListener("click", () => { [...box.children].forEach((c) => c.setAttribute("aria-pressed", String(c === b))); on(v); }); box.appendChild(b); });
+    items.forEach(([v, label, title, dot]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label; if (title) b.title = title; if (dot) { const i = document.createElement("i"); i.className = "pl-dot"; i.style.background = dot; b.prepend(i); } b.setAttribute("aria-pressed", String(v === val)); b.addEventListener("click", () => { [...box.children].forEach((c) => c.setAttribute("aria-pressed", String(c === b))); on(v); }); box.appendChild(b); });
     return box;
   }
   function chk(label, val, on) { const l = document.createElement("label"); l.className = "pl-chk"; const i = document.createElement("input"); i.type = "checkbox"; i.checked = val; i.addEventListener("change", () => on(i.checked)); l.append(i, document.createTextNode(label)); return l; }
@@ -533,64 +533,85 @@
     down(x, y) { const i = this.at(x, y); if (i >= 0) { LS.sel = i; this.setNote(); this.draw(); } },
   };
 
-  // ---------- stage 6: development benchmarks ----------
-  // [case, Δk pcm, change in |C/E| pcm (negative = closer to experiment)], from library/res-v0.1/README.md (±35 pcm)
+  // ---------- stage 6: one real critical experiment, measured vs simulated ----------
+  // Per case, from research/rl/resinteg/out/arms/<arm>.json (the source of the res-v0.1 README's DEV column):
+  // [plain name, kind (u uranium / m plutonium-uranium oxide), E (measured k), sE (pcm), standard library k − E (pcm, same-machine
+  //  control), with our file k − E (pcm), change in |k − E| (pcm; ±35 pcm is the simulation's own noise), ICSBEP case, moderator]
   const BENCH = {
-    "Fe-56": [["LCT-008 c1", -65, -12], ["LCT-008 c5", -4, -2], ["LCT-008 c11", 22, 22], ["MCT-002 pnl-30", 43, -43], ["MCT-002 pnl-33", -22, -22], ["MCT-002 pnl-35", -45, -45]],
-    "Ni-58": [["MCT-002 pnl-30", 12, -12], ["MCT-002 pnl-33", -6, -6], ["MCT-002 pnl-35", -93, -93]],
-    "Zr-90": [["MCT-002 pnl-30", -68, 68], ["MCT-002 pnl-33", 4, 4], ["MCT-002 pnl-35", -103, -95]],
-    "Na-23": [["LCT-008 c5", 33, 33]],
+    "Fe-56": [["Uranium rods #1", "u", 1.0007, 120, 38.6, -26.4, -12, "LEU-COMP-THERM-008 case 1", "water with 1511 ppm boron"], ["Uranium rods #2", "u", 1.0007, 120, 3.0, -0.9, -2, "LEU-COMP-THERM-008 case 5", "water with 1182 ppm boron"], ["Uranium rods #3", "u", 1.0007, 120, 99.7, 122.0, 22, "LEU-COMP-THERM-008 case 11", "water with 1384 ppm boron"],
+      ["Plutonium-uranium rods #1", "m", 1.0024, 600, -377.8, -334.8, -43, "MIX-COMP-THERM-002 PNL-30", "water, almost no boron"], ["Plutonium-uranium rods #2", "m", 1.0024, 240, 116.5, 94.0, -22, "MIX-COMP-THERM-002 PNL-33", "borated water"], ["Plutonium-uranium rods #3", "m", 1.0029, 270, 99.2, 54.7, -45, "MIX-COMP-THERM-002 PNL-35", "borated water"]],
+    "Ni-58": [["Plutonium-uranium rods #1", "m", 1.0024, 600, -373.1, -361.2, -12, "MIX-COMP-THERM-002 PNL-30", "water, almost no boron"], ["Plutonium-uranium rods #2", "m", 1.0024, 240, 125.6, 119.3, -6, "MIX-COMP-THERM-002 PNL-33", "borated water"], ["Plutonium-uranium rods #3", "m", 1.0029, 270, 99.2, 6.2, -93, "MIX-COMP-THERM-002 PNL-35", "borated water"]],
+    "Zr-90": [["Plutonium-uranium rods #1", "m", 1.0024, 600, -373.1, -441.3, 68, "MIX-COMP-THERM-002 PNL-30", "water, almost no boron"], ["Plutonium-uranium rods #2", "m", 1.0024, 240, 125.6, 129.6, 4, "MIX-COMP-THERM-002 PNL-33", "borated water"], ["Plutonium-uranium rods #3", "m", 1.0029, 270, 99.2, -4.2, -95, "MIX-COMP-THERM-002 PNL-35", "borated water"]],
+    "Na-23": [["Uranium rods #2", "u", 1.0007, 120, 0.4, 33.2, 33, "LEU-COMP-THERM-008 case 5", "water with 1182 ppm boron"]],
   };
-  const BS = { pick: "Fe-56", lo: -150, hi: 150, raf: 0, hov: -1 };
-  const range = () => [-150, 150];
-  function benchGeom(W, H) { const narrow = W < 520, L = narrow ? 104 : 150, R = 16, top = 58, rows = BENCH[BS.pick].length, bot = 36, rh = Math.min(42, (H - top - bot) / rows); return { narrow, L, R, top, rh, bot, x: (v) => L + ((v - BS.lo) / (BS.hi - BS.lo)) * (W - L - R) }; }
+  const BS = { nuc: "Fe-56", ci: 0, std: 38.6, own: -26.4, span: 200, raf: 0 };
+  const verdict = (w) => (Math.abs(w) <= 35 ? ["same", C.nc] : w < 0 ? ["closer", C.win] : ["farther", C.loss]);
+  const spanFor = (r) => { const need = Math.max(r[3] * 1.35, Math.abs(r[4]) * 1.3, Math.abs(r[5]) * 1.3, 60); return [100, 150, 200, 300, 400, 500, 600, 800].find((s) => s >= need) || 1000; };
+  function rods(ctx, cx, cy, R, kind) { // a top view of a lattice of fuel rods in a water tank
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7);
+    const w = ctx.createRadialGradient(cx, cy - R * 0.3, R * 0.1, cx, cy, R); w.addColorStop(0, "rgba(95,176,255,.30)"); w.addColorStop(1, "rgba(30,70,140,.18)");
+    ctx.fillStyle = w; ctx.fill(); ctx.strokeStyle = "rgba(95,176,255,.55)"; ctx.lineWidth = 1.5; ctx.stroke(); ctx.clip();
+    const p = R / 4.2, col = kind === "m" ? "#f5c04d" : "#ff9b55";
+    for (let i = -4; i <= 4; i++) for (let j = -4; j <= 4; j++) {
+      const x = cx + i * p, y = cy + j * p; if (Math.hypot(x - cx, y - cy) > R * 0.72) continue;
+      const g = ctx.createRadialGradient(x - p * 0.12, y - p * 0.12, 0, x, y, p * 0.36); g.addColorStop(0, "#fff"); g.addColorStop(0.35, col); g.addColorStop(1, rgba(col, 0.55));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, p * 0.34, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  }
   VIZ.bench = {
-    height: (W) => (W < 520 ? 330 : 340),
+    height: (W) => (W < 600 ? 336 : 260),
     init(box) {
-      const items = [["Fe-56", "Fe-56"], ["Ni-58", "Ni-58"], ["Zr-90", "Zr-90"], ["Na-23", "Na-23"]];
-      box.append(seg(items, BS.pick, (v) => this.pick(v), C.bench));
+      const cases = el("div", "pl-ctlrow");
+      const fill = () => { cases.innerHTML = ""; cases.append(seg(BENCH[BS.nuc].map((r, i) => [i, r[0], r[7], r[1] === "m" ? "#f5c04d" : "#ff9b55"]), BS.ci, (i) => this.go(i), C.bench)); };
+      box.append(seg(Object.keys(BENCH).map((n) => [n, n]), BS.nuc, (n) => { BS.nuc = n; fill(); this.go(0); }, C.lib), cases);
+      fill(); this.go(BS.ci, true);
     },
-    pick(v) {
-      BS.pick = v; const [lo1, hi1] = range(v), lo0 = BS.lo, hi0 = BS.hi; if (BS.raf) cancelAnimationFrame(BS.raf);
-      if (RM || (lo0 === lo1 && hi0 === hi1)) { BS.lo = lo1; BS.hi = hi1; return this.draw(); }
-      const t0 = performance.now(), dur = 650, ln = (a, b, t) => -Math.exp(Math.log(-a) + (Math.log(-b) - Math.log(-a)) * t);
-      const step = (now) => { const t = clamp((now - t0) / dur, 0, 1), e = t * t * (3 - 2 * t); BS.lo = ln(lo0, lo1, e); BS.hi = hi0 * Math.pow(hi1 / hi0, e); this.draw(); if (t < 1) BS.raf = requestAnimationFrame(step); else BS.raf = 0; };
+    go(i, now) {
+      BS.ci = i; const r = BENCH[BS.nuc][i], to = { std: r[4], own: r[5], span: spanFor(r) }, from = { std: BS.std, own: BS.own, span: BS.span };
+      if (BS.raf) cancelAnimationFrame(BS.raf);
+      if (now || RM) { Object.assign(BS, to); return now ? null : this.draw(); }
+      const t0 = performance.now();
+      const step = (tn) => { const t = clamp((tn - t0) / 450, 0, 1), e = t * t * (3 - 2 * t); ["std", "own", "span"].forEach((k) => (BS[k] = from[k] + (to[k] - from[k]) * e)); this.draw(); BS.raf = t < 1 ? requestAnimationFrame(step) : 0; };
       BS.raf = requestAnimationFrame(step);
     },
-    stop() { if (BS.raf) cancelAnimationFrame(BS.raf); BS.raf = 0; const [lo, hi] = range(BS.pick); BS.lo = lo; BS.hi = hi; },
+    stop() { if (BS.raf) cancelAnimationFrame(BS.raf); BS.raf = 0; const r = BENCH[BS.nuc][BS.ci]; BS.std = r[4]; BS.own = r[5]; BS.span = spanFor(r); },
     draw() {
-      const { ctx, W, H } = viz; ctx.clearRect(0, 0, W, H); const g = benchGeom(W, H), rows = BENCH[BS.pick], pu = BS.pick === "Pu-239";
-      text(ctx, pu ? T("pl_b_t239", "PCI-001: change in k when one energy band of the old Pu-239 file replaces ENDF/B-VIII.1") : T("pl_b_t", "Δk vs ENDF/B-VIII.1 · development cases"), 14, 18, { size: 12.5, weight: 600, color: C.ink, max: W - 28 });
-      // ticks
-      const span = BS.hi - BS.lo, stepT = [25, 50, 100, 250, 500, 1000, 2500, 5000, 10000].find((s) => span / s <= (g.narrow ? 5 : 7)) || 10000;
-      ctx.save(); for (let v = Math.ceil(BS.lo / stepT) * stepT; v <= BS.hi; v += stepT) { const x = g.x(v); ctx.strokeStyle = v === 0 ? "rgba(220,228,250,.55)" : C.grid; ctx.lineWidth = v === 0 ? 1.4 : 1; ctx.beginPath(); ctx.moveTo(x, g.top - 6); ctx.lineTo(x, g.top + rows.length * g.rh); ctx.stroke(); text(ctx, v === 0 ? "0" : sgn(v), x, g.top + rows.length * g.rh + 12, { size: 10.5, mono: true, color: C.faint, align: "center" }); }
-      ctx.restore();
-      text(ctx, "Δk (pcm)", W - g.R, g.top + rows.length * g.rh + 27, { size: 11, color: C.faint, align: "right" });
-      if (!pu) { let lx = W - 14; [[T("pl_b_far", "farther from experiment"), C.loss], [T("pl_b_close", "closer"), C.win]].forEach(([s, c]) => { ctx.font = font(11.5); lx -= ctx.measureText(WT.tr ? WT.tr(s) : s).width; text(ctx, s, lx, 36, { size: 11.5, color: C.soft }); lx -= 16; ctx.fillStyle = c; rrect(ctx, lx, 31, 10, 10, 2); ctx.fill(); lx -= 14; }); }
-      text(ctx, T("pl_b_noise", "shaded: ±35 pcm noise"), 14, 36, { size: 11.5, color: C.faint });
-      // ±35 pcm noise band
-      { const a = g.x(-35), b = g.x(35); ctx.fillStyle = "rgba(200,210,240,.07)"; ctx.fillRect(a, g.top - 6, Math.max(1, b - a), rows.length * g.rh + 6); }
-      rows.forEach(([name, dk, w], i) => {
-        const y = g.top + i * g.rh + g.rh / 2, bh = Math.min(16, g.rh * 0.42), x0 = g.x(0), x1 = g.x(dk), tot = pu && i === rows.length - 1;
-        const col = pu ? C.loss : w < 0 ? C.win : C.loss;
-        text(ctx, name, g.L - 10, y, { size: g.narrow ? 11 : 12.5, color: i === BS.hov ? "#fff" : tot ? C.ink : C.soft, weight: tot ? 600 : 500, align: "right", max: g.L - 14 });
-        ctx.save(); ctx.shadowColor = rgba(col, 0.6); ctx.shadowBlur = i === BS.hov ? 14 : 6; rrect(ctx, Math.min(x0, x1), y - bh / 2, Math.max(2, Math.abs(x1 - x0)), bh, 4);
-        const gr = ctx.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, rgba(col, 0.35)); gr.addColorStop(1, rgba(col, tot ? 1 : 0.9)); ctx.fillStyle = gr; ctx.fill(); ctx.restore();
-        // ±35 pcm error bar
-        const ea = g.x(dk - 35), eb = g.x(dk + 35); ctx.strokeStyle = "rgba(235,240,255,.85)"; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(ea, y); ctx.lineTo(eb, y); ctx.moveTo(ea, y - 5); ctx.lineTo(ea, y + 5); ctx.moveTo(eb, y - 5); ctx.lineTo(eb, y + 5); ctx.stroke();
-        const lab = sgn(dk), lx = dk < 0 ? Math.min(x1, ea) - 6 : Math.max(x1, eb) + 6;
-        const fits = dk < 0 ? lx > g.L + 40 : lx < W - g.R - 40;
-        text(ctx, lab, fits ? lx : dk < 0 ? Math.max(x0, eb) + 6 : Math.min(x0, ea) - 6, y, { size: 11, mono: true, color: C.ink, align: (dk < 0) === fits ? "right" : "left" });
-      });
+      const { ctx, W, H } = viz; ctx.clearRect(0, 0, W, H); const narrow = W < 600, r = BENCH[BS.nuc][BS.ci];
+      // the experiment
+      const R = narrow ? 50 : 66, icx = narrow ? W / 2 : 34 + R, icy = narrow ? 16 + R : H / 2 - 22;
+      rods(ctx, icx, icy, R, r[1]);
+      text(ctx, r[0], icx, icy + R + 16, { size: 12.5, weight: 600, color: C.ink, align: "center" });
+      text(ctx, r[1] === "m" ? T("pl_b_mox", "plutonium-uranium oxide fuel rods") : T("pl_b_leu", "uranium fuel rods, 2.46 % U-235"), icx, icy + R + 33, { size: 11.5, color: C.soft, align: "center" });
+      text(ctx, T("pl_b_mod_" + r[7].replace(/\W+/g, ""), "in " + r[8]), icx, icy + R + 49, { size: 11.5, color: C.soft, align: "center" });
+      // the gauge: simulated k − measured k, in % of k
+      const gx0 = narrow ? 24 : icx + R + 90, gx1 = W - 24, gy = narrow ? icy + R + 124 : H / 2 - 4, mid = (gx0 + gx1) / 2;
+      const gx = (pcm) => mid + (pcm / BS.span) * ((gx1 - gx0) / 2);
+      const [vt, vc] = verdict(r[6]);
+      pill(ctx, vt, gx1, narrow ? 18 : 26, vc, { align: "right", size: 13 });
+      // experiment's own uncertainty
+      const b0 = gx(-r[3]), b1 = gx(r[3]); const bg = ctx.createLinearGradient(b0, 0, b1, 0);
+      bg.addColorStop(0, "rgba(235,240,255,0)"); bg.addColorStop(0.5, "rgba(235,240,255,.16)"); bg.addColorStop(1, "rgba(235,240,255,0)");
+      ctx.fillStyle = bg; rrect(ctx, Math.max(gx0, b0), gy - 16, Math.min(gx1, b1) - Math.max(gx0, b0), 32, 8); ctx.fill();
+      ctx.strokeStyle = "rgba(235,240,255,.28)"; ctx.lineWidth = 1; [b0, b1].forEach((x) => { if (x > gx0 && x < gx1) { ctx.beginPath(); ctx.moveTo(x, gy - 14); ctx.lineTo(x, gy + 14); ctx.stroke(); } });
+      text(ctx, T("pl_b_unc", "shaded: measurement uncertainty"), mid, gy + (narrow ? 72 : 54), { size: 10.5, color: C.faint, align: "center" });
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(gx0, gy); ctx.lineTo(gx1, gy); ctx.stroke();
+      const st = BS.span / 2; [-BS.span, -st, 0, st, BS.span].forEach((v) => { const x = gx(v); ctx.strokeStyle = v === 0 ? "rgba(235,240,255,.9)" : "rgba(150,170,220,.35)"; ctx.lineWidth = v === 0 ? 2 : 1; ctx.beginPath(); ctx.moveTo(x, gy - (v === 0 ? 10 : 5)); ctx.lineTo(x, gy + (v === 0 ? 10 : 5)); ctx.stroke();
+        if (v !== 0) text(ctx, (v > 0 ? "+" : "−") + fmt(Math.abs(v) / 1000, Math.abs(v) / 1000 < 0.1 ? 3 : 2) + " %", x, gy + 36, { size: 10.5, mono: true, color: C.faint, align: "center" }); });
+      text(ctx, T("pl_b_meas", "measured"), mid, gy - 38, { size: 12.5, weight: 600, color: "#fff", align: "center" });
+      text(ctx, T("pl_b_low", "simulation too low"), gx0, gy + 54, { size: 11, color: C.faint });
+      text(ctx, T("pl_b_high", "too high"), gx1, gy + 54, { size: 11, color: C.faint, align: "right" });
+      // the two markers
+      const xs = gx(clamp(BS.std, -BS.span, BS.span)), xo = gx(clamp(BS.own, -BS.span, BS.span));
+      ctx.save(); ctx.strokeStyle = rgba(C.lib, 0.6); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(xs, gy); ctx.lineTo(xo, gy); ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.translate(xs, gy); ctx.rotate(Math.PI / 4); ctx.fillStyle = "#c9d2e6"; ctx.fillRect(-5, -5, 10, 10); ctx.restore();
+      glowDot(ctx, xo, gy, 5, C.lib);
+      const lo = narrow ? 11 : 12, labS = T("pl_b_std", "standard library"), labO = T("pl_b_own", "with our file");
+      // our file's label above the line, the standard library's below it (different rows, so they never collide)
+      const cl = (x) => clamp(x, gx0 + 56, gx1 - 56);
+      text(ctx, labO, cl(xo), gy - 19, { size: lo, weight: 600, color: C.lib, align: "center" });
+      text(ctx, labS, cl(xs), gy + 20, { size: lo, color: "#c9d2e6", align: "center" });
     },
-    move(x, y) { const g = benchGeom(viz.W, viz.H), rows = BENCH[BS.pick], i = Math.floor((y - g.top) / g.rh); const h = i >= 0 && i < rows.length ? i : -1;
-      if (h !== BS.hov) { BS.hov = h; this.draw(); }
-      if (h < 0) return showTip(null);
-      const [name, dk, w] = rows[h];
-      showTip(BS.pick === "Pu-239" ? `<b>${esc(name)}</b>: Δk ${sgn(dk)} ± 35 pcm${h === rows.length - 1 ? " (" + T("pl_b_sum", "sum of the bands; about 22 % low") + ")" : ""}` : `<b>${esc(BS.pick)} · ${esc(name)}</b><br>Δk ${sgn(dk)} ± 35 pcm<br>|C/E| ${sgn(w)} pcm: ${w < 0 ? T("pl_b_closer", "closer to the experiment") : T("pl_b_farther", "farther from the experiment")}`, x, y);
-    },
-    leave() { BS.hov = -1; this.draw(); },
-    down(x, y) { this.move(x, y); },
   };
 
   // ---------- stage 7: the EXFOR-only judge, worked example Na-23 (res-v0.1 README: PASS; value = file ÷ EXFOR) ----------
