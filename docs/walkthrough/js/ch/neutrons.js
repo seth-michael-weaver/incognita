@@ -5,7 +5,8 @@
  * (9.0 fm), so the barrier top is the standard Coulomb barrier V_B = 1.44 Z / R_c = 13 MeV; the neutron's well ends at
  * r0 A^(1/3) (7.7 fm). A ball at the chosen energy rolls in: below the barrier top the proton turns back classically; quantum
  * tunnelling (WKB, s-wave, P = exp(-2 int sqrt(2 mu (V - E)) / hbar dr)) lets about 1 in 10^N through. The neutron (s-wave)
- * has no barrier. */
+ * has no barrier. Scenes A and B draw the nucleus itself with the particle flying at it (the potential is an inset graph);
+ * scene C shows a slow neutron absorbed by U-235, the compound U-236 stretching to a neck and splitting (Ba-141 + Kr-92 + 3 n). */
 (function () {
   const { TAU, clamp, lerp, smooth } = WT.util;
   const Z = 82, A = 208, R0 = 1.3, R = R0 * (Math.cbrt(A) + 1), RN = R0 * Math.cbrt(A), V0 = 50, MU = 938.27 * A / (A + 1), HC = 197.327, RMAX = 30;
@@ -26,7 +27,7 @@
     num: "Chapter 4", title: "Why reactors run on neutrons", short: "Why neutrons",
     html: `
 <div class="step">
-  <p>A proton is pushed back by the nucleus's charge.</p>
+  <p>A proton is pushed back by the nucleus's charge. The small graph shows the same push as an energy hill.</p>
   <div class="ctl"><label for="wn-e1">Proton energy (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
 </div>
 <div class="step">
@@ -42,65 +43,101 @@
       if (S.mode === "f") return sceneFission(g, S, dt);
       const { W, H, c } = g, phone = W < 600, fs = phone ? 11 : 13, snap = document.body.classList.contains("shot");
       const isP = S.mode === "p", E = isP ? S.Ep : Math.pow(10, S.lgEn) * 1e-6, V = isP ? vP : vN, col = isP ? c.proton : c.neutron;
-      if (ball.k !== S.mode) { ball.k = S.mode; ball.r = RMAX; ball.dir = -1; ball.inT = -9; }
-      const x0 = W * (phone ? 0.12 : 0.1), x1 = W * 0.95, y0 = H * 0.1, y1 = H * 0.78, X = (r) => x0 + (x1 - x0) * r / RMAX;
-      const VL = -55, VH = 20, Y = (v) => lerp(y1, y0, (v - VL) / (VH - VL));
-      const pts = []; for (let i = 0; i <= 300; i++) { const r = RMAX * i / 300; pts.push([X(r), Y(V(r))]); }
-      g.ground(pts, col, (y1 - y0) * 0.3, 0.2); g.poly(pts, col, 2.6, 1);
-      g.line(x0, Y(0), x1, Y(0), c.line, 1, 0.8, [3, 4]);
-      g.label("0", x0 - 6, Y(0), { color: c.faint, size: fs - 2, align: "right" }); g.label("−50", x0 - 6, Y(-50), { color: c.faint, size: fs - 2, align: "right" });
-      g.label("energy (MeV)", x0, y0 - 16, { color: c.soft, size: fs - 1, align: "left" });
-      g.label(isP ? "proton" : "neutron", x0 + 6, y0 + 6, { color: col, size: fs + 2, weight: 600, align: "left" });
-      g.nucleus(X(0) + 14, Y(-V0) - 20, phone ? 12 : 17, { N: 46, Z: 18, t: S.time, jiggle: 0.4 });
-      if (isP) g.label(`Coulomb barrier ≈ ${BTOP.toFixed(0)} MeV`, X(RTOP) + 8, Y(BTOP) - 12, { color: c.proton, size: fs, weight: 600, align: "left", bg: true });
-      else g.label("no charge, no barrier", X(RN) + 12, Y(0) - 18, { color: c.neutron, size: fs, weight: 600, align: "left", bg: true });
-      // energy line and the rolling ball (its speed grows as the square root of its kinetic energy)
-      g.line(x0, Y(E), x1, Y(E), c.ink, 1, 0.45, [6, 5]); g.label(fmtE(E), x1, Y(E) - 12, { color: c.ink, size: fs, weight: 600, align: "right" });
-      let rTurn = 0; if (isP && E < BTOP) { let r = RMAX; while (r > RTOP && V(r) < E) r -= 0.02; rTurn = r; }
-      if (snap) { ball.r = isP ? Math.min(RMAX - 0.5, Math.max(rTurn + 2, 16)) : 18; ball.inT = -9; }
+      // the nucleus itself, to scale with the distance the particle flies (px per fm from the drawn radius)
+      const cxN = W * (phone ? 0.72 : 0.66), cyN = H * (phone ? 0.56 : 0.52), Rpx = Math.min(W, H) * (phone ? 0.085 : 0.08), PX = Rpx / RN;
+      const xStart = W * 0.03, rStart = (cxN - xStart) / PX;
+      if (ball.k !== S.mode) { ball.k = S.mode; ball.r = rStart; ball.dir = -1; ball.inT = -9; ball.tun = false; }
+      let rTurn = 0; if (isP && E < BTOP) { let r = 400; while (r > RTOP && V(r) < E) r -= 0.05; rTurn = r; }
+      if (isP) {                                       // the nucleus's +82 charge: a red haze that pushes protons away
+        g.glow(cxN, cyN, Rpx * 3.4, c.proton, 0.16);
+        g.label("+82 charge pushes protons away", cxN, cyN - Rpx * 2.2, { color: c.proton, size: fs, weight: 600, bg: true });
+        if (rTurn > 0 && rTurn * PX < cxN - xStart - 10) {
+          g.ring(cxN, cyN, rTurn * PX, c.proton, 1.3, 0.55, [4, 5]);
+          g.label(phone ? "turns back" : "turns back here", cxN - rTurn * PX * 0.72, cyN + rTurn * PX * 0.72 + 12, { color: c.proton, size: fs - 1, bg: true });
+        }
+      } else g.label("no charge, no push", cxN, cyN - Rpx * 2.0, { color: c.neutron, size: fs, weight: 600, bg: true });
+      g.nucleus(cxN, cyN, Rpx, { N: 60, Z: 24, t: S.time, jiggle: 0.4, seed: 3 });
+      g.label("lead-208", cxN, cyN + Rpx + (phone ? 14 : 18), { color: c.soft, size: fs, weight: 600 });
+      // motion: a few seconds per pass; the proton slows as it climbs the hill (speed ~ sqrt of its kinetic energy)
+      const T = isP ? lerp(4.2, 2.0, clamp(E / 20, 0, 1)) : lerp(9, 1.6, clamp((S.lgEn + 1.6) / 8.9, 0, 1)), v0 = rStart / T;
+      const rIn = RN * 0.55;
+      if (snap) { ball.r = isP && rTurn ? Math.min(rStart, rTurn + 6) : rStart * 0.45; ball.inT = -9; ball.dir = -1; }
       else if (S.time - ball.inT > 1.3) {
-        const v = isP ? 5 + 5 * Math.sqrt(Math.max(0.1, E - V(ball.r))) : clamp(3 + 9 * Math.sqrt(Math.max(E, 1e-9)), 2.2, 30);
+        const ke = Math.max(0, E - V(ball.r)), v = isP ? v0 * Math.max(0.22, Math.sqrt(ke / Math.max(E, 1e-9))) : v0;
         ball.r += ball.dir * v * dt;
-        if (ball.dir < 0 && rTurn > 0 && ball.r <= rTurn) { ball.r = rTurn; ball.dir = 1; }
-        const rIn = (isP ? R : RN) * 0.6; if (ball.dir < 0 && ball.r <= rIn) { ball.inT = S.time; ball.r = rIn; }
-        if (ball.r > RMAX + 1) { ball.r = RMAX; ball.dir = -1; }
-      } else if (S.time - ball.inT > 1.25) { ball.r = RMAX; ball.dir = -1; }
-      if (S.time - ball.inT < 1.3) { const a = S.time - ball.inT; g.glow(X(0) + 14, Y(-V0) - 20, 30 + 50 * a, c.warm, 0.6 * (1 - a / 1.3)); }
-      else { const bx = X(Math.min(ball.r, RMAX - 0.4)), by = Y(E) - 9; g.glow(bx, by, 16, col, 0.4); g.ball(bx, by, 8, col); }
+        if (ball.dir < 0 && rTurn > 0 && ball.r <= rTurn) {
+          const P = tunnel(E);
+          if (P > 0.002 && Math.random() < P) { ball.tun = true; ball.inT = S.time; ball.r = rIn; } else { ball.r = rTurn; ball.dir = 1; ball.tun = false; }
+        }
+        if (ball.dir < 0 && ball.r <= rIn) { ball.inT = S.time; ball.r = rIn; }
+        if (ball.r > rStart + 2) { ball.r = rStart; ball.dir = -1; ball.tun = false; }
+      } else if (S.time - ball.inT > 1.25) { ball.r = rStart; ball.dir = -1; }
+      if (S.time - ball.inT < 1.3) {                   // absorbed: a flash in the nucleus
+        const a = S.time - ball.inT; g.glow(cxN, cyN, Rpx * (1.2 + 2.2 * a), c.warm, 0.6 * (1 - a / 1.3));
+        g.label(ball.tun ? "tunnelled through!" : "in!", cxN, cyN - Rpx - 16, { color: c.warm, size: fs + 1, weight: 700, bg: true });
+      } else {                                         // in flight: head-on in, deflected upward on the way back out
+        const bx = cxN - ball.r * PX, by = cyN - (ball.dir > 0 ? (ball.r - rTurn) * PX * 0.45 : 0);
+        g.glow(bx, by, 14, col, 0.45); g.ball(bx, by, 7, col);
+        g.label(`${isP ? "proton" : "neutron"} · ${fmtE(E)}`, bx, by - 18, { color: col, size: fs, weight: 600, bg: true });
+      }
+      // inset: the same physics as energy against distance, with a dot where the particle is now
+      const ix = W * (phone ? 0.04 : 0.03), iy = H * 0.05, iw = W * (phone ? 0.42 : 0.27), ih = H * (phone ? 0.2 : 0.25), RI = 30;
+      const IX = (r) => ix + iw * clamp(r, 0, RI) / RI, VL = -55, VH = 20, IY = (u) => lerp(iy + ih, iy, (clamp(u, VL, VH) - VL) / (VH - VL));
+      g.ctx.save(); g.ctx.fillStyle = g.rgba(c.card, 0.85); g.ctx.strokeStyle = g.rgba(c.line, 0.9); g.ctx.lineWidth = 1;
+      g.ctx.beginPath(); g.ctx.rect(ix - 6, iy - 18, iw + 12, ih + 30); g.ctx.fill(); g.ctx.stroke(); g.ctx.restore();
+      const ipts = []; for (let k = 0; k <= 150; k++) { const r = RI * k / 150; ipts.push([IX(r), IY(V(r))]); }
+      g.poly(ipts, col, 2, 1); g.line(ix, IY(0), ix + iw, IY(0), c.line, 1, 0.8, [3, 4]);
+      g.line(ix, IY(E), ix + iw, IY(E), c.ink, 1, 0.5, [5, 4]);
+      g.label("energy vs distance", ix, iy - 9, { color: c.soft, size: fs - 2, align: "left" });
+      if (isP) g.label(`hill ≈ ${BTOP.toFixed(0)} MeV`, IX(RTOP) + 4, IY(BTOP) - 9, { color: c.proton, size: fs - 2, align: "left" });
+      if (S.time - ball.inT >= 1.3 && ball.r <= RI) g.dot(IX(ball.r), IY(E), 4, col, 1);
       // verdict
       let msg;
-      if (isP) { const P = tunnel(E); msg = E >= BTOP ? "over the barrier: it gets in" : P > 0.01 ? `mostly turned back · ${(100 * P).toFixed(0)} % tunnel through` : `turned back · about 1 in 10${sup(Math.round(-Math.log10(Math.max(P, 1e-300))))} tunnels through`; }
+      if (isP) { const P = tunnel(E); msg = E >= BTOP ? "over the hill: it gets in" : P > 0.01 ? `mostly pushed back · ${(100 * P).toFixed(0)} % tunnel through` : `pushed back · about 1 in 10${sup(Math.round(-Math.log10(Math.max(P, 1e-300))))} tunnels through`; }
       else msg = E < 1e-6 ? "even this crawling neutron gets in" : "it gets in";
-      g.label(msg, W * 0.55, y1 + (phone ? 22 : 30), { color: c.ink, size: fs + 2, weight: 600, serif: true, bg: true });
-      [0, 10, 20, 30].forEach((r) => g.label(String(r), X(r), H * 0.9, { color: c.faint, size: fs - 2 }));
-      g.label(phone ? "distance from lead-208 (fm) →" : "distance from the centre of lead-208 (fm) →", x1, H * 0.95, { color: c.soft, size: fs - 1, align: "right" });
+      g.label(msg, W * 0.5, H * 0.9, { color: c.ink, size: fs + 3, weight: 600, serif: true, bg: true });
       g.label("illustration", W - 6, 12, { color: c.faint, size: 10, align: "right" });
     },
   });
 
-  // ---------- scene C: a slow neutron starts fission (a sketch, not to scale) ----------
+  // ---------- scene C: a slow neutron is absorbed by U-235; U-236 stretches, necks and splits ----------
   const fis = { t0: 0 };
   function sceneFission(g, S, dt) {
-    const { W, H, c } = g, phone = W < 600, fs = phone ? 11 : 13, snap = document.body.classList.contains("shot");
-    const cx = W * 0.55, cy = H * 0.42, Rn = Math.min(W, H) * (phone ? 0.1 : 0.09), CYC = 5.2;
-    let a = (S.time - fis.t0) % CYC; if (snap) a = 3.4;
-    const sx = W * 0.06;
+    const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13, snap = document.body.classList.contains("shot");
+    const cx = W * 0.55, cy = H * 0.44, Rn = Math.min(W, H) * (phone ? 0.11 : 0.1), CYC = 6.6;
+    let a = (S.time - fis.t0) % CYC; if (snap) a = 4.4;
+    const sx = W * 0.05, rBa = Rn * 0.842, rKr = Rn * 0.731;   // fragment radii ~ A^(1/3): Ba-141 and Kr-92 against U-236
+    let cap = "";
     if (a < 2.2) {                                   // the slow neutron drifts in
       const f = smooth(0, 2.2, a), x = lerp(sx, cx - Rn - 6, f), y = cy + Math.sin(a * 3) * 4;
       g.nucleus(cx, cy, Rn, { N: 70, Z: 28, t: S.time, jiggle: 0.4, seed: 4 });
       g.glow(x, y, 14, c.neutron, 0.45); g.ball(x, y, 6, c.neutron);
-      g.label("0.025 eV neutron", x, y - 20, { color: c.neutron, size: fs, weight: 600, bg: true });
-    } else if (a < 3.0) {                            // absorbed: the new nucleus wobbles and stretches
-      const f = (a - 2.2) / 0.8; g.glow(cx, cy, Rn * 2.2, c.warm, 0.35 * f);
-      g.nucleus(cx, cy, Rn, { N: 70, Z: 28, t: S.time, jiggle: 0.9, heat: 2, beta: 0.15 + 0.35 * f + 0.08 * Math.sin(a * 18), seed: 4 });
-    } else {                                         // it splits: two fragments and 2-3 neutrons fly apart
-      const f = smooth(3.0, 4.6, a), d = Rn * (0.6 + 2.4 * f), al = 1 - smooth(4.6, 5.2, a);
-      g.glow(cx, cy, Rn * (1.5 + 2.5 * f), "#ffffff", 0.5 * (1 - f));
-      g.nucleus(cx - d, cy - d * 0.12, Rn * 0.78, { N: 34, Z: 13, t: S.time, jiggle: 0.6, heat: 1.5, seed: 7, alpha: al });
-      g.nucleus(cx + d, cy + d * 0.12, Rn * 0.85, { N: 40, Z: 15, t: S.time, jiggle: 0.6, heat: 1.5, seed: 9, alpha: al });
-      [-1.9, 0.4, 2.3].forEach((ang, k) => { const dd = Rn * (0.8 + 4.2 * f), x = cx + Math.cos(ang + k) * dd, y = cy + Math.sin(ang + k) * dd * 0.8; g.line(x - Math.cos(ang + k) * 14, y - Math.sin(ang + k) * 11, x, y, c.neutron, 2, 0.3 * al); g.ball(x, y, 5, c.neutron, al); });
+      g.label("slow neutron, 0.025 eV", x, y - 20, { color: c.neutron, size: fs, weight: 600, bg: true });
+      cap = "U-235";
+    } else if (a < 3.0) {                            // absorbed: U-236 is hot and wobbles
+      const f = (a - 2.2) / 0.8; g.glow(cx, cy, Rn * 2.1, c.warm, 0.35 * f);
+      g.nucleus(cx, cy, Rn, { N: 70, Z: 28, t: S.time, jiggle: 0.9, heat: 2, beta: 0.12 + 0.22 * f + 0.08 * Math.sin(a * 18), seed: 4 });
+      cap = "U-236, hot and wobbling";
+    } else if (a < 3.7) {                            // it stretches into two lobes joined by a thinning neck
+      const f = smooth(3.0, 3.7, a), d = Rn * lerp(0.35, 0.95, f), neck = Rn * lerp(0.75, 0.12, f);
+      ctx.save(); ctx.fillStyle = g.rgba(c.warm, 0.32); ctx.beginPath(); ctx.rect(cx - d, cy - neck, 2 * d, 2 * neck); ctx.fill(); ctx.restore();
+      g.glow(cx, cy, Rn * 1.8, c.warm, 0.3);
+      g.nucleus(cx - d, cy, lerp(Rn * 0.9, rBa, f), { N: 35, Z: 23, t: S.time, jiggle: 0.8, heat: 1.8, seed: 7 });
+      g.nucleus(cx + d, cy, lerp(Rn * 0.85, rKr, f), { N: 23, Z: 15, t: S.time, jiggle: 0.8, heat: 1.8, seed: 9 });
+      cap = "stretching: a neck forms";
+    } else {                                         // split: two fragments and 3 neutrons fly apart, ~200 MeV
+      const f = smooth(3.7, 5.4, a), d = Rn * (0.95 + 2.6 * f), al = 1 - smooth(6.0, 6.6, a);
+      g.glow(cx, cy, Rn * (1.4 + 2.6 * f), "#ffffff", 0.55 * (1 - f));
+      const xa = cx - d, xb = cx + d * 1.25;         // the lighter fragment moves faster (momentum balance)
+      g.nucleus(xa, cy - d * 0.08, rBa, { N: 35, Z: 23, t: S.time, jiggle: 0.6, heat: 1.4, seed: 7, alpha: al });
+      g.nucleus(xb, cy + d * 0.1, rKr, { N: 23, Z: 15, t: S.time, jiggle: 0.6, heat: 1.4, seed: 9, alpha: al });
+      g.label("Ba-141", xa, cy - d * 0.08 + rBa + 14, { color: c.soft, size: fs, weight: 600, alpha: al });
+      g.label("Kr-92", xb, cy + d * 0.1 + rKr + 14, { color: c.soft, size: fs, weight: 600, alpha: al });
+      [-1.25, 1.6, 3.6].forEach((ang) => { const dd = Rn * (0.6 + 4.4 * f), x = cx + Math.cos(ang) * dd, y = cy + Math.sin(ang) * dd * 0.85; g.line(x - Math.cos(ang) * 16, y - Math.sin(ang) * 13, x, y, c.neutron, 2, 0.35 * al); g.ball(x, y, 5, c.neutron, al); });
+      if (f > 0.15) g.label("≈ 200 MeV released", cx, cy - Rn * 1.9, { color: c.warm, size: fs + 2, weight: 700, bg: true, alpha: al });
+      cap = "two fragments + 3 new neutrons";
     }
-    g.label(a < 3.0 ? (a < 2.2 ? "U-235" : "U-236, wobbling") : "two fragments", cx, cy + Rn * 1.7, { color: c.soft, size: fs, weight: 600 });
+    g.label(cap, cx, H * 0.74, { color: c.soft, size: fs + 1, weight: 600 });
     g.label(phone ? "slow neutron + U-235 → fission" : "a slow neutron + U-235 → two fragments, 2–3 new neutrons, about 200 MeV", W * 0.5, H * 0.84, { color: c.ink, size: fs + 1, weight: 600, serif: true });
     g.label("a proton this slow could never get in", W * 0.5, H * 0.84 + fs + 12, { color: c.soft, size: fs, serif: true, italic: true });
     g.label("illustration", W - 6, 12, { color: c.faint, size: 10, align: "right" });
