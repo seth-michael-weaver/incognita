@@ -437,7 +437,7 @@
     navH(); window.addEventListener("resize", navH); if (document.fonts && document.fonts.ready) document.fonts.ready.then(navH); { const t = document.querySelector(".toc"); if (t && window.ResizeObserver) new ResizeObserver(navH).observe(t); } // the header settles after fonts load
     const chapters = [];
     const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
-    const LEVEL = { structure: 0, xsec: 0, binding: 0, neutrons: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, fisout: 1, products: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, doppler: 1, critical: 1, layers: 2,
+    const LEVEL = { structure: 0, xsec: 0, binding: 0, landscape: 0, neutrons: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, fisout: 1, products: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, doppler: 1, critical: 1, layers: 2,
       hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3 }; // the Expert part (chapters 22-27)
     // chapter numbers follow page order (1..N), in the reader's language: "Chapter 1" (or its translation) with the number replaced
     const order = [...document.querySelectorAll("[data-ch]")].map((el) => el.dataset.ch).filter((id) => WT.mods[id] && WT.mods[id].title);
