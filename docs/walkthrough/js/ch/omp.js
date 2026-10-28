@@ -174,7 +174,12 @@
     if (S.target.E !== tally.E) { tally.E = S.target.E; resetTally(); shots.length = 0; tally.refireAt = S.time + 0.5; }
     if (tally.refireAt && S.time > tally.refireAt) { tally.refireAt = 0; S.handlers.fire(); }
     // per-ring tally of the last volley: filled bar = share of that ring's neutrons absorbed; dark tick = the model's T_l
-    const n = 7, phone = W < 600, bw = phone ? 15 : 20, gap = phone ? 9 : 10, bh = phone ? 54 : 84;
+    const n = 7, phone = W < 600, bw = phone ? 15 : 20, bh = phone ? 54 : 84;
+    // fixed column pitch wide enough for the text under the bars at the size g.label really draws (min 10 px phone, 12 px desktop):
+    // counts alternate between two rows (a big count like "150/200" at low energy still never touches its neighbour)
+    g.ctx.save(); g.ctx.font = `500 ${phone ? 10 : 12}px "IBM Plex Sans", "Segoe UI", system-ui, sans-serif`;
+    const tw = g.ctx.measureText(phone ? "l=6" : "88/88").width; g.ctx.restore();
+    const gap = Math.max(phone ? 9 : 10, Math.ceil(tw + (phone ? 6 : 10) - bw));
     const x0 = phone ? 14 : cx - (n * (bw + gap) - gap) / 2, y0 = phone ? 34 : 44;
     g.label("absorbed, ring by ring", x0 + (n * (bw + gap) - gap) / 2, y0 - 26, { color: c.ink, size: 12, weight: 600 });
     g.label("bar: your neutrons · tick: model Tₗ", x0 + (n * (bw + gap) - gap) / 2, y0 - 11, { color: c.faint, size: 11 });
@@ -184,7 +189,7 @@
       if (tot) { g.ctx.fillStyle = g.rgba(c.warm, 0.85); g.ctx.fillRect(xb, y0 + bh * (1 - f), bw, bh * f); }
       g.line(xb - 3, y0 + bh * (1 - T), xb + bw + 3, y0 + bh * (1 - T), c.ink, 2);
       g.label(`l=${l}`, xb + bw / 2, y0 + bh + 12, { color: c.soft, size: 11 });
-      g.label(tot ? `${tally.hit[l]}/${tot}` : "–", xb + bw / 2, y0 + bh + 26, { color: c.faint, size: 10 });
+      g.label(tot ? `${tally.hit[l]}/${tot}` : "–", xb + bw / 2, y0 + bh + 26 + (l % 2 ? 12 : 0), { color: c.faint, size: 10 });
     }
   }
 
