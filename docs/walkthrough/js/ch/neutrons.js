@@ -20,6 +20,7 @@
     return Math.exp(-2 * s / HC);
   }
   const ball = { r: RMAX, dir: -1, inT: -9, k: "" };
+  const pr = { k: "", E: -1, st: "wait", t0: -9, x: 0, y: 0, vx: 0, vy: 0, tun: false };   // the proton on its Coulomb path
   const fmtE = (mev) => (mev >= 1 ? `${mev.toFixed(1)} MeV` : mev >= 1e-3 ? `${(mev * 1000).toFixed(0)} keV` : mev >= 1e-6 ? `${(mev * 1e6).toFixed(mev < 1e-5 ? 1 : 0)} eV` : `${(mev * 1e6).toFixed(3)} eV`);
   const sup = (d) => [...String(d)].map((x) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[x]).join("");
 
@@ -27,7 +28,7 @@
     num: "Chapter 4", title: "Why reactors run on neutrons", short: "Why neutrons",
     html: `
 <div class="step">
-  <p>A proton is pushed back by the nucleus's charge. The small graph shows the same push as an energy hill.</p>
+  <p>A proton is positive, and so are the nucleus's 82 protons. Like charges repel, so the proton is pushed away, and the push grows fast as it gets closer (the arrow). A slow proton stops short and turns back without touching. Only above about 13 MeV does it get over the push; just below, it sometimes slips through anyway (<b>tunnelling</b>). The small graph shows the same push as an energy hill.</p>
   <div class="ctl"><label for="wn-e1">Proton energy (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
 </div>
 <div class="step">
@@ -47,38 +48,73 @@
       const cxN = W * (phone ? 0.72 : 0.66), cyN = H * (phone ? 0.56 : 0.52), Rpx = Math.min(W, H) * (phone ? 0.085 : 0.08), PX = Rpx / RN;
       const xStart = W * 0.03, rStart = (cxN - xStart) / PX;
       if (ball.k !== S.mode) { ball.k = S.mode; ball.r = rStart; ball.dir = -1; ball.inT = -9; ball.tun = false; }
-      let rTurn = 0; if (isP && E < BTOP) { let r = 400; while (r > RTOP && V(r) < E) r -= 0.05; rTurn = r; }
-      if (isP) {                                       // the nucleus's +82 charge: a red haze that pushes protons away
-        g.glow(cxN, cyN, Rpx * 3.4, c.proton, 0.16);
-        g.label("+82 charge pushes protons away", cxN, cyN - Rpx * 2.2, { color: c.proton, size: fs, weight: 600, bg: true });
-        if (rTurn > 0 && rTurn * PX < cxN - xStart - 10) {
-          g.ring(cxN, cyN, rTurn * PX, c.proton, 1.3, 0.55, [4, 5]);
-          g.label(phone ? "turns back" : "turns back here", cxN - rTurn * PX * 0.72, cyN + rTurn * PX * 0.72 + 12, { color: c.proton, size: fs - 1, bg: true });
-        }
+      const ZE = 1.44 * Z, MP = 938.27;                 // Coulomb strength (MeV fm) and proton mass (MeV)
+      if (isP) {
+        // the nucleus's +82 charge: the push weakens as 1/r^2, drawn as rings that fade with distance
+        for (let k = 0; k < 7; k++) { const rr = R * Math.pow(1.38, k); g.ring(cxN, cyN, rr * PX, c.proton, 2.2, 0.05 + 0.5 * Math.pow(R / rr, 2)); }
+        g.label(phone ? "+82 charge: pushes protons" : "+82 charge: the push grows as the proton gets closer", cxN, cyN - Rpx * 2.6, { color: c.proton, size: fs, weight: 600, bg: true });
       } else g.label("no charge, no push", cxN, cyN - Rpx * 2.0, { color: c.neutron, size: fs, weight: 600, bg: true });
       g.nucleus(cxN, cyN, Rpx, { N: 60, Z: 24, t: S.time, jiggle: 0.4, seed: 3 });
       g.label("lead-208", cxN, cyN + Rpx + (phone ? 14 : 18), { color: c.soft, size: fs, weight: 600 });
-      // motion: a few seconds per pass; the proton slows as it climbs the hill (speed ~ sqrt of its kinetic energy)
-      const T = isP ? lerp(4.2, 2.0, clamp(E / 20, 0, 1)) : lerp(9, 1.6, clamp((S.lgEn + 1.6) / 8.9, 0, 1)), v0 = rStart / T;
-      const rIn = RN * 0.55;
-      if (snap) { ball.r = isP && rTurn ? Math.min(rStart, rTurn + 6) : rStart * 0.45; ball.inT = -9; ball.dir = -1; }
-      else if (S.time - ball.inT > 1.3) {
-        const ke = Math.max(0, E - V(ball.r)), v = isP ? v0 * Math.max(0.22, Math.sqrt(ke / Math.max(E, 1e-9))) : v0;
-        ball.r += ball.dir * v * dt;
-        if (ball.dir < 0 && rTurn > 0 && ball.r <= rTurn) {
-          const P = tunnel(E);
-          if (P > 0.002 && Math.random() < P) { ball.tun = true; ball.inT = S.time; ball.r = rIn; } else { ball.r = rTurn; ball.dir = 1; ball.tun = false; }
+      let rNow = -1;                                   // the particle's distance (fm) for the inset dot
+      if (isP) {
+        // a real Coulomb (Rutherford) path, aimed a little off-centre so its way in and out can be told apart; time is slowed so
+        // a pass takes a few seconds. Closest approach d/2 (1 + sqrt(1 + (2b/d)^2)), d = 1.44 Z / E; below the barrier it tunnels
+        // in with the WKB probability, above it it reaches the surface and is absorbed.
+        const d = ZE / E, bImp = clamp(0.32 * d, 1.5, 0.55 * R), rmin = 0.5 * d * (1 + Math.sqrt(1 + Math.pow(2 * bImp / d, 2)));
+        const far = rmin > rStart * 0.92;               // so slow it turns back before it even reaches the picture
+        if (pr.k !== S.mode || Math.abs(pr.E - E) > 1e-6) { pr.k = S.mode; pr.E = E; pr.st = "wait"; pr.t0 = S.time - 9; }
+        if (!far && pr.st === "wait" && S.time - pr.t0 > 0.4) {
+          const ke0 = E - ZE / rStart; pr.x = -rStart; pr.y = bImp; pr.vx = Math.sqrt(2 * Math.max(ke0, 1e-6) / MP); pr.vy = 0; pr.st = "in"; pr.tun = false;
         }
-        if (ball.dir < 0 && ball.r <= rIn) { ball.inT = S.time; ball.r = rIn; }
-        if (ball.r > rStart + 2) { ball.r = rStart; ball.dir = -1; ball.tun = false; }
-      } else if (S.time - ball.inT > 1.25) { ball.r = rStart; ball.dir = -1; }
-      if (S.time - ball.inT < 1.3) {                   // absorbed: a flash in the nucleus
-        const a = S.time - ball.inT; g.glow(cxN, cyN, Rpx * (1.2 + 2.2 * a), c.warm, 0.6 * (1 - a / 1.3));
-        g.label(ball.tun ? "tunnelled through!" : "in!", cxN, cyN - Rpx - 16, { color: c.warm, size: fs + 1, weight: 700, bg: true });
-      } else {                                         // in flight: head-on in, deflected upward on the way back out
-        const bx = cxN - ball.r * PX, by = cyN - (ball.dir > 0 ? (ball.r - rTurn) * PX * 0.45 : 0);
-        g.glow(bx, by, 14, col, 0.45); g.ball(bx, by, 7, col);
-        g.label(`${isP ? "proton" : "neutron"} · ${fmtE(E)}`, bx, by - 18, { color: col, size: fs, weight: 600, bg: true });
+        if (!far && (pr.st === "in" || pr.st === "out")) {
+          const tPhys = rStart / Math.sqrt(2 * E / MP), Tshow = lerp(4.6, 2.2, clamp(E / 20, 0, 1)), steps = 24;
+          const h = (snap ? 0 : dt) * tPhys / Tshow / steps;
+          for (let k = 0; k < steps; k++) {
+            const r = Math.hypot(pr.x, pr.y), a = ZE / (r * r) / MP;   // repulsive, along r
+            pr.vx += a * pr.x / r * h; pr.vy += a * pr.y / r * h; pr.x += pr.vx * h; pr.y += pr.vy * h;
+            const r2 = Math.hypot(pr.x, pr.y), radial = pr.x * pr.vx + pr.y * pr.vy;
+            if (r2 <= R) { pr.st = "abs"; pr.t0 = S.time; break; }                 // over the barrier: it touches and is absorbed
+            if (pr.st === "in" && radial > 0) {                                     // closest approach: tunnel or turn back
+              pr.st = "out"; const P = tunnel(E); if (P > 0.002 && Math.random() < P) { pr.st = "abs"; pr.tun = true; pr.t0 = S.time; break; }
+            }
+          }
+          if (pr.st === "out" && Math.hypot(pr.x, pr.y) > rStart + 4) { pr.st = "wait"; pr.t0 = S.time; }
+        }
+        if (snap && !far) { const ang = 2.6; pr.x = Math.cos(ang) * (rmin + 6); pr.y = Math.sin(ang) * (rmin + 6); pr.st = "in"; }
+        if (rmin < rStart * 0.92 && E < BTOP) {       // the closest-approach circle for this energy and aim
+          g.ring(cxN, cyN, rmin * PX, c.proton, 1.3, 0.6, [4, 5]);
+          g.label("closest approach", cxN - rmin * PX * 0.7, cyN + rmin * PX * 0.7 + 12, { color: c.proton, size: fs - 1, bg: true });
+        }
+        if (far) {
+          g.label(`too slow: it turns back about ${rmin.toFixed(0)} fm away, off this picture`, W * 0.36, cyN, { color: c.proton, size: fs, weight: 600, bg: true });
+        } else if (pr.st === "abs" && S.time - pr.t0 < 1.3) {
+          const a = S.time - pr.t0; g.glow(cxN, cyN, Rpx * (1.2 + 2.2 * a), c.warm, 0.6 * (1 - a / 1.3));
+          g.label(pr.tun ? "tunnelled through!" : "over the barrier: in!", cxN, cyN - Rpx - 16, { color: c.warm, size: fs + 1, weight: 700, bg: true });
+          if (a >= 1.25) { pr.st = "wait"; pr.t0 = S.time; }
+        } else if (pr.st === "in" || pr.st === "out") {
+          const r = Math.hypot(pr.x, pr.y), bx = cxN + pr.x * PX, by = cyN - pr.y * PX; rNow = r;
+          // the push on the proton: an arrow away from the nucleus, longer as 1/r^2
+          const L = clamp(34 * Math.pow(RTOP / r, 2) * 2.2, 6, phone ? 48 : 70), ux = pr.x / r, uy = -pr.y / r;
+          g.arrow(bx, by, bx + ux * L, by + uy * L, c.proton, 2.4, 0.9, 8);
+          if (L > 14) g.label("push", bx + ux * (L + 14), by + uy * (L + 14), { color: c.proton, size: fs - 1, weight: 600 });
+          g.glow(bx, by, 14, col, 0.45); g.ball(bx, by, 7, col);
+          g.label(`proton · ${fmtE(E)}`, bx, by - 18, { color: col, size: fs, weight: 600, bg: true });
+        }
+      } else {
+        // the neutron: no charge, so no push; it flies straight in at any energy
+        const T = lerp(9, 1.6, clamp((S.lgEn + 1.6) / 8.9, 0, 1)), v0 = rStart / T, rIn = RN * 0.55;
+        if (snap) { ball.r = rStart * 0.45; ball.inT = -9; }
+        else if (S.time - ball.inT > 1.3) { ball.r -= v0 * dt; if (ball.r <= rIn) { ball.inT = S.time; ball.r = rIn; } }
+        else if (S.time - ball.inT > 1.25) ball.r = rStart;
+        if (S.time - ball.inT < 1.3) {
+          const a = S.time - ball.inT; g.glow(cxN, cyN, Rpx * (1.2 + 2.2 * a), c.warm, 0.6 * (1 - a / 1.3));
+          g.label("in!", cxN, cyN - Rpx - 16, { color: c.warm, size: fs + 1, weight: 700, bg: true });
+        } else {
+          const bx = cxN - ball.r * PX, by = cyN; rNow = ball.r;
+          g.glow(bx, by, 14, col, 0.45); g.ball(bx, by, 7, col);
+          g.label(`neutron · ${fmtE(E)}`, bx, by - 18, { color: col, size: fs, weight: 600, bg: true });
+        }
       }
       // inset: the same physics as energy against distance, with a dot where the particle is now
       const ix = W * (phone ? 0.04 : 0.03), iy = H * 0.05, iw = W * (phone ? 0.42 : 0.27), ih = H * (phone ? 0.2 : 0.25), RI = 30;
@@ -90,7 +126,7 @@
       g.line(ix, IY(E), ix + iw, IY(E), c.ink, 1, 0.5, [5, 4]);
       g.label("energy vs distance", ix, iy - 9, { color: c.soft, size: fs - 2, align: "left" });
       if (isP) g.label(`hill ≈ ${BTOP.toFixed(0)} MeV`, IX(RTOP) + 4, IY(BTOP) - 9, { color: c.proton, size: fs - 2, align: "left" });
-      if (S.time - ball.inT >= 1.3 && ball.r <= RI) g.dot(IX(ball.r), IY(E), 4, col, 1);
+      if (rNow >= 0 && rNow <= RI) g.dot(IX(rNow), IY(E), 4, col, 1);
       // verdict
       let msg;
       if (isP) { const P = tunnel(E); msg = E >= BTOP ? "over the hill: it gets in" : P > 0.01 ? `mostly pushed back · ${(100 * P).toFixed(0)} % tunnel through` : `pushed back · about 1 in 10${sup(Math.round(-Math.log10(Math.max(P, 1e-300))))} tunnels through`; }

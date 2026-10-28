@@ -17,7 +17,7 @@
   let chain = []; // particle/hole bookkeeping for the pairs scene
   let clusterT = -10, clusterKind = "d";
 
-  function resetChain(S) { chain = [{ kind: "n", y: 1, hole: false }]; S.n = 1; S.set("n", 1); }
+  function resetChain(S) { chain = [{ kind: "n", y: 1, hole: false }]; S.n = 1; S.set("n", 1); S.bumps = 0; S.collideT = -10; }
 
   WT.chapter("preeq", {
     num: "Chapter 7", title: "Collisions before calm", short: "Pre-equilibrium",
@@ -29,9 +29,9 @@
 </div>
 <div class="step">
   <h3>Lifting pairs</h3>
-  <p>Each collision lifts a nucleon onto an empty rung and leaves a <b>hole</b> (an open ring) behind. Particles above the surface and holes below it are both called <b>excitons</b>. The first collision makes 2 particles and 1 hole (n = 3); each later one adds another pair.</p>
+  <p>The fast neutron bumps into a nucleon in the sea and hands it some of its energy. That nucleon jumps up to an empty rung, and the spot it left is now empty: a <b>hole</b> (the open ring). So every bump makes a <b>pair</b>: one more lifted nucleon and one hole. Physicists count the lifted nucleons and the holes together and call them <b>excitons</b>: after the first bump there are 3 (2 lifted, 1 hole).</p>
   <div class="btns"><button class="btn" data-act="collide">Collide</button><button class="btn ghost" data-act="reset">Start again</button></div>
-  <p>Press Collide a few times. The lifted nucleon may be a proton or a neutron, and the engine counts each kind. With every pair the energy is split more ways, so the top particle sits lower.</p>
+  <p>Press Collide and watch one bump: the dive, the jump, the hole. Do it a few times. The one that gets hit may be a proton or a neutron. With every bump the energy is shared by more nucleons, so each lifted one sits lower, and the fast one gets less likely to escape.</p>
 </div>
 <div class="step">
   <h3>The fork at every stage</h3>
@@ -74,10 +74,11 @@
         if (chain.filter((x) => !x.hole).length >= 6) return;
         const r = rng((performance.now() | 0) + 3); const kind = r() < 0.5 ? "p" : "n";
         const n = chain.length + 2;
-        // energy shares: the top particle sinks as the pair count rises
+        // energy shares: the top particle sinks as the pair count rises (keep the old heights to animate the drop)
+        let top = -1; chain.forEach((x, i) => { delete x.born; x.y0 = x.y; if (!x.hole && (top < 0 || x.y > chain[top].y)) top = i; });
         chain.forEach((x) => { if (!x.hole) x.y *= 0.72; else x.y *= 0.9; });
-        chain.push({ kind, y: 0.4 * Math.pow(0.8, (n - 3) / 2), hole: false }, { kind, y: -0.12 - 0.1 * r() - 0.03 * n, hole: true });
-        S.set("n", n); S.collideT = S.time;
+        chain.push({ kind, y: 0.4 * Math.pow(0.8, (n - 3) / 2), hole: false, born: true }, { kind, y: -0.12 - 0.1 * r() - 0.03 * n, hole: true, born: true });
+        S.set("n", n); S.collideT = S.time; S.striker = top; S.bumps = (S.bumps || 0) + 1; S.bumpKind = kind;
       });
       S.on("reset", () => resetChain(S));
       S.on("pickup", () => { clusterT = S.time; clusterKind = "d"; });
@@ -175,7 +176,7 @@
   }
   function drawWells(g, S, mode) {
     const { W, H, c } = g; const L = wells(g); const { yFermi, yFree, yTop, ww, px0, nx0, phone } = L;
-    const holes = {}; chain.forEach((it, i) => { if (it.hole) { placeAt(L, it, i); holes[it.cell] = 1; } });
+    const holes = {}; chain.forEach((it, i) => { if (it.hole) { placeAt(L, it, i); if (!(it.born && S.time - (S.collideT ?? -10) < 0.55)) holes[it.cell] = 1; } });   // a new hole opens only when its nucleon jumps
     drawWellBase(g, L, true, S.time, mode === "pairs" ? holes : null);
     if (mode === "sea") {
       // the incoming neutron hovering above the neutron well, with its energy marked
@@ -186,16 +187,35 @@
       g.label("1 particle, 0 holes", W / 2, H * 0.97, { color: c.ink, size: phone ? 13 : 16, weight: 600, serif: true });
       return;
     }
-    // pairs: draw the chain
-    const flash = Math.max(0, 1 - (S.time - (S.collideT || -10)) / 0.7);
-    let slot = 0; const counts = { p: [0, 0], n: [0, 0] };
+    // pairs: draw the chain. A bump animates in three beats: the hitter dives at a nucleon in the sea (0-0.55 s), that nucleon jumps
+    // up to an empty rung and leaves a hole (0.55-1.4 s), and everyone already lifted sinks a little (energy now shared more ways).
+    const a = S.time - (S.collideT ?? -10), anim = a < 1.6 && chain.length > 1, f1 = smooth(0, 0.55, a), f2 = smooth(0.55, 1.4, a);
+    let slot = 0; const counts = { p: [0, 0], n: [0, 0] }, nb = chain.length - 2;
+    const pos = chain.map((it, i) => { const p1 = placeAt(L, it, i); const p0 = it.y0 !== undefined && !it.born ? placeAt(L, { ...it, y: it.y0 }, i) : p1; return [p0, p1]; });
+    const holeXY = pos[nb + 1] ? pos[nb + 1][1] : null;
     chain.forEach((it, i) => {
-      const [x, y] = placeAt(L, it, slot++); const col = it.kind === "p" ? c.proton : c.neutron;
+      const [p0, p1] = pos[i], col = it.kind === "p" ? c.proton : c.neutron; slot++;
       counts[it.kind][it.hole ? 1 : 0]++;
-      if (it.hole) g.ring(x, y - 6, 6, col, 2, 0.9);
-      else { if (i >= chain.length - 2 && flash > 0) g.glow(x, y, 28, c.warm, flash * 0.6); g.ball(x, y, 8, col); }
+      let x = p1[0], y = p1[1];
+      if (anim && it.born && !it.hole) {               // the bumped nucleon jumps from its old spot (now the hole) to its rung
+        if (a < 0.55) return; const t = f2; x = lerp(holeXY[0], p1[0], t); y = lerp(holeXY[1] - 6, p1[1], t) - Math.sin(Math.PI * t) * 30;
+      } else if (anim && it.born && it.hole) {         // the hole appears when the nucleon leaves
+        if (a < 0.55) return;
+      } else if (anim && i === S.striker && holeXY) {  // the hitter dives at the sea, then settles a little lower
+        const dip = [lerp(p0[0], holeXY[0], 0.85), lerp(p0[1], holeXY[1] - 26, 1)];
+        if (a < 0.55) { x = lerp(p0[0], dip[0], f1); y = lerp(p0[1], dip[1], f1); } else { x = lerp(dip[0], p1[0], f2); y = lerp(dip[1], p1[1], f2); }
+      } else if (anim && !it.hole) { x = lerp(p0[0], p1[0], f2); y = lerp(p0[1], p1[1], f2); }
+      if (it.hole) {
+        g.ring(x, y - 6, 7, col, 2.2, 0.95);
+        if (anim && it.born) g.label("hole", x + 26, y - 6, { color: col, size: phone ? 11 : 12, weight: 600, bg: true, alpha: Math.min(1, (a - 0.55) * 3) });
+      } else {
+        if (anim && (it.born || i === S.striker)) g.glow(x, y, 26, c.warm, 0.5 * (1 - smooth(1.2, 1.6, a)));
+        g.ball(x, y, 8, col);
+        if (anim && it.born && a > 1.0) g.label("lifted", x + 30, y, { color: col, size: phone ? 11 : 12, weight: 600, bg: true });
+      }
     });
-    if (flash > 0 && chain.length > 1) { const a = chain[chain.length - 2], h = chain[chain.length - 1]; const [xa, ya] = placeAt(L, a, chain.length - 2), [xh, yh] = placeAt(L, h, chain.length - 1); g.arrow(xh, yh - 6, xa, ya + 10, c.warm, 2, flash * 0.8); }
+    if (anim && holeXY && a > 0.45 && a < 0.9) g.label("bump!", holeXY[0], holeXY[1] - 40, { color: c.warm, size: phone ? 13 : 15, weight: 700, bg: true });
+    if ((S.bumps || 0) > 0) g.label(`bump ${S.bumps}: a ${S.bumpKind === "p" ? "proton" : "neutron"} in the sea was hit, jumped up, and left a hole`, W / 2, H * 0.97 - (phone ? 34 : 26), { color: c.soft, size: phone ? 11 : 13, serif: true });
     const n = chain.length;
     const P = counts.p[0] + counts.n[0], Hh = counts.p[1] + counts.n[1];
     g.label(`${P} particle${P > 1 ? "s" : ""}, ${Hh} hole${Hh !== 1 ? "s" : ""}: n = ${n}`, W / 2, H * 0.97, { color: c.ink, size: phone ? 13 : 16, weight: 600, serif: true });
