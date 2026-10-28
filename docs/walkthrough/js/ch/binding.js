@@ -22,8 +22,9 @@
   <div class="ctl"><label for="bi-f">Lighter fragment A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>Fuse light nuclei: energy out only if the product sits higher.</p>
+  <p>Join two light nuclei into one. If the new nucleus sits higher on the curve, energy is released. Past the peak, joining costs energy instead.</p>
   <div class="ctl"><label for="bi-u">Each light nucleus A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
+  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
     setup(S) { S.set("mode", 0); S.set("pick", 56); S.set("frag", 95); S.set("fuse", 2); },
     steps: [(S) => S.set("mode", 0), (S) => S.set("mode", 1), (S) => S.set("mode", 2)],
@@ -62,7 +63,14 @@
         const a1 = Math.round(S.fuse), a2 = 2 * a1, b1 = bOf(a1), b2 = bOf(a2), Q = a2 * b2 - a2 * b1;
         g.arrow(X(a1), Y(b1), X(a2) - 4, Y(b2) + (b2 >= b1 ? 6 : -6), Q > 0 ? c.warm : c.cool, 2, 0.9);
         marker(a1, c.accent, nameOf(a1), false); marker(a2, Q > 0 ? c.warm : c.cool, nameOf(a2), true);
-        g.label(`${nameOf(a1)} + ${nameOf(a1)} → ${nameOf(a2)}: ${Q >= 0 ? "about " + Q.toFixed(1) + " MeV released" : "costs " + (-Q).toFixed(1) + " MeV"}`, W * 0.5, ry, { color: Q > 0 ? c.ink : c.cool, size: fs + 2, weight: 600, serif: true });
+      }
+      // the fusion result is HTML under its slider (bigger and next to the control, Seth 2026-10-28), not a canvas line
+      const fa = Math.round(S.fuse);
+      if (fa !== S.fuseShown) {
+        S.fuseShown = fa; const o = document.getElementById("bi-fuse-out");
+        if (o) { const fq = 2 * fa * (bOf(2 * fa) - bOf(fa));
+          o.textContent = `${nameOf(fa)} + ${nameOf(fa)} → ${nameOf(2 * fa)}: ${fq >= 0 ? "about " + fq.toFixed(1) + " MeV released" : "costs " + (-fq).toFixed(1) + " MeV"}`;
+          o.classList.toggle("cost", fq < 0); }
       }
     },
   });
