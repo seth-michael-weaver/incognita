@@ -62,7 +62,7 @@
 </div>
 <div class="step">
   <h3>A second fast one</h3>
-  <p>At high energy, a second lifted nucleon can still sit above the free line when the first neutron leaves, and escape too, as a fast neutron or proton. The wells replay one reaction at a time, with the energy scale squeezed.</p>
+  <p>At high energy the first bump can hand the hit nucleon a lot of energy too. When the fast neutron leaves, that second nucleon may still have more than the 8 MeV it needs to get out (the free line), and then it flies out as well: two fast particles from one reaction. The picture replays one reaction at a time and says what happens at each moment; the number next to each ball is its energy.</p>
   <div class="ctl"><label for="pe-e2">Neutron energy</label><input id="pe-e2" type="range" data-bind="E" min="5" max="80" step="0.5" value="40"><output data-show="E" data-fmt="1"></output></div>
   <p>Drag the energy. Below about 20 MeV the second nucleon rarely clears the line; above, more and more reactions shed two fast particles. This is <b>multiple pre-equilibrium</b>, which the engine includes from 20 MeV up. Whatever has not left becomes the compound nucleus of the next chapter. Below a few MeV (the target's highest discrete level in use) the engine skips the chain entirely.</p>
   <div class="aside">In the code: <code>preeq/exciton.py</code> (two-component exciton chain, collision and escape rates), <code>density/particle_hole.py</code> (particle–hole state densities with Pauli and finite-well corrections), <code>preeq/complex.py</code> (Kalbach pickup, stripping and α knockout), <code>preeq/multi.py</code> (multiple pre-equilibrium), <code>compound/normalization.py</code> (hand-off to the compound nucleus).</div>
@@ -428,41 +428,54 @@
   }
 
   // ---------- scene 7: a second fast particle from the residual's excitons ----------
+  // One reaction per cycle, told in beats with a caption: the fast neutron dives in; it bumps a nucleon in the sea, which jumps up
+  // and leaves a hole; each ball shows its energy against the free line (SEP MeV needed to escape); the top neutron escapes; the
+  // second nucleon escapes too only if it still has more than SEP; the rest settles into the compound nucleus.
   function drawSecond(g, S) {
-    const { W, H, c } = g; const phone = W < 600;
+    const { W, H, c } = g; const phone = W < 600, fs = phone ? 11 : 12;
     const E = S.target.E, E0 = E + SEP;                    // energy above the Fermi surface carried in
     const L = wells(g); const { yFermi, yFloor, yTop, ww, px0, nx0 } = L;
     const k = (yFermi - yTop - 26) / Math.max(E0, 30), Ym = (e) => yFermi - e * k;
     L.yFree = Ym(SEP);
     drawWellBase(g, L, true, S.time);
-    const P = 4.6, cyc = Math.floor((S.time - (S.secT || 0)) / P), t = (S.time - (S.secT || 0)) % P;
-    // one reaction per cycle: the top neutron takes ~55 %, the other lifted nucleon a random part of the rest
+    const P = 6.4, cyc = Math.floor((S.time - (S.secT || 0)) / P), t = (S.time - (S.secT || 0)) % P;
+    // one reaction per cycle: the top neutron keeps ~55 %, the bumped nucleon a random part of the rest, the hole the remainder
     const r = rng(cyc * 7919 + 13); r();
     const eA = 0.55 * E0, uB = r(), eB = 0.45 * E0 * (0.1 + 0.55 * uB), eH = 0.45 * E0 - eB, kindB = r() < 0.5 ? "p" : "n";
-    const second = eB > SEP;
-    // tally over the last 12 reactions (seeded with the previous ones so it is never empty)
+    const second = eB > SEP, nmB = kindB === "p" ? "proton" : "neutron";
     let n2 = 0; for (let q = cyc - 11; q <= cyc; q++) { const rq = rng(q * 7919 + 13); rq(); const e = 0.45 * E0 * (0.1 + 0.55 * rq()); if (e > SEP) n2++; }
     const xA = nx0 + ww * 0.55, xB = (kindB === "p" ? px0 : nx0) + ww * (kindB === "p" ? 0.5 : 0.3), xH = (kindB === "p" ? px0 : nx0) + ww * 0.62;
     const yA = Ym(eA), yB = Ym(eB), yH = yFermi + Math.min(yFloor - yFermi - 8, eH * k * 0.6);
     const colB = kindB === "p" ? c.proton : c.neutron;
-    const enter = smooth(0, 0.7, t), hit = smooth(0.7, 1.1, t), outA = smooth(1.3, 2.3, t), outB = second ? smooth(2.3, 3.3, t) : 0, calm = smooth(3.4, 4.2, t), fade = 1 - smooth(4.2, 4.6, t);
-    const far = W * 0.6;
-    if (hit < 1) { const y = lerp(yTop - 30, yA, enter); g.glow(xA, y, 22, c.warm, 0.45); g.ball(xA, y, 8, c.neutron); }
-    else {
-      // the hole left by the lifted nucleon
+    const dive = smooth(0, 0.9, t), bump = smooth(0.9, 1.7, t), outA = smooth(2.6, 3.5, t), outB = second ? smooth(3.7, 4.6, t) : 0;
+    const calm = smooth(4.8, 5.6, t), fade = 1 - smooth(6.0, 6.4, t), far = W * 0.6;
+    // the free line, said in words
+    g.label(`free line: more than ${SEP} MeV needed to get out`, (px0 + nx0 + ww) / 2, L.yFree - 10, { color: c.soft, size: fs, bg: true });
+    // the caption for the current beat
+    const cap = t < 0.9 ? `a fast neutron comes in with ${E0.toFixed(0)} MeV` : t < 2.6 ? `bump: it hits a ${nmB} in the sea, which jumps up and leaves a hole`
+      : t < 3.7 ? "the top neutron has the most energy: it escapes first" : t < 4.8 ? (second ? `the ${nmB} still has more than ${SEP} MeV: it escapes too!` : `the ${nmB} has less than ${SEP} MeV: it stays`)
+      : "whatever is left settles into the compound nucleus";
+    g.label(cap, W / 2, yTop - (phone ? 6 : 14), { color: c.ink, size: phone ? 12 : 15, weight: 600, serif: true, bg: true });
+    // the incoming neutron dives, then sits at its share after the bump
+    const yIn = t < 0.9 ? lerp(yTop - 20, yH - 30, dive) : lerp(yH - 30, yA, bump);
+    if (outA <= 0) { g.glow(xA, yIn, 22, c.warm, 0.45); g.ball(xA, yIn, 8, c.neutron); }
+    if (t > 0.9) {
+      if (t > 1.0 && t < 1.6) g.label("bump!", xH, yH - 40, { color: c.warm, size: phone ? 13 : 15, weight: 700, bg: true });
+      // the hole left behind
       g.dot(xH, yH, 7, c.paper, fade); g.ring(xH, yH, 6.5, colB, 2, fade);
-      // top neutron: escapes first
+      if (t > 1.2 && t < 4.8) g.label("hole", xH + 24, yH, { color: colB, size: fs, weight: 600, bg: true, alpha: fade });
+      // the bumped nucleon jumps from the hole to its new rung
+      const bx0 = lerp(xH, xB, bump), by0 = lerp(yH, yB, bump) - Math.sin(Math.PI * bump) * 26;
+      const bx = bx0 + outB * far, by = by0 - outB * H * 0.25 + (second ? 0 : Math.sin(S.time * 3) * 1.2 * smooth(3.7, 4.0, t));
+      if (outB < 1) { g.glow(bx, by, 16, c.warm, second ? 0.4 : 0.22); g.ball(bx, by, 7, colB, (1 - smooth(0.85, 1, outB)) * (second ? 1 : fade)); }
+      if (t > 1.7 && outB < 0.1) g.label(`${nmB}: ${eB.toFixed(0)} MeV`, bx - 14, by, { color: colB, size: fs, weight: 600, align: "right", bg: true, alpha: fade });
+      if (second && outB > 0.1 && outB < 0.95) g.label(`second fast ${nmB}`, Math.min(bx, W - 80), by + 20, { color: c.warm, size: fs, weight: 600, bg: true });
+      // the top neutron with its energy, then its escape
+      if (t > 1.7 && outA <= 0) g.label(`neutron: ${eA.toFixed(0)} MeV`, xA + 14, yA, { color: c.neutron, size: fs, weight: 600, align: "left", bg: true });
       const ax = xA + outA * far, ay = yA - outA * H * 0.25;
-      if (outA < 1) { g.glow(ax, ay, 20, c.warm, 0.4 * (1 - outA)); g.ball(ax, ay, 8, c.neutron, 1 - smooth(0.85, 1, outA)); }
-      if (outA > 0.1 && outA < 0.95) g.label("first fast neutron", Math.min(ax, W - 70), ay - 18, { color: c.ink, size: 12, bg: true });
-      // the second lifted nucleon: escapes only if it still sits above the free line
-      const bx = xB + outB * far, by = yB - outB * H * 0.25 + (second ? 0 : Math.sin(S.time * 3) * 1.5);
-      if (outB < 1) { g.glow(bx, by, 16 + 8 * (1 - calm), c.warm, (second ? 0.4 : 0.25) * (1 - calm * (second ? 0 : 0.6))); g.ball(bx, by, 7, colB, (1 - smooth(0.85, 1, outB)) * (second ? 1 : fade)); }
-      if (second && outB > 0.1 && outB < 0.95) g.label(`second fast ${kindB === "p" ? "proton" : "neutron"}`, Math.min(bx, W - 80), by + 20, { color: c.warm, size: 12, bg: true });
-      if (!second && t > 2.3 && t < 4.2) g.label(phone ? "below the free line: stays" : "below the free line: it stays", xB, yB - 16, { color: c.soft, size: 11, bg: true });
-      if (calm > 0) { g.glow((px0 + nx0 + ww) / 2, yFermi, ww * 1.1, c.warm, 0.18 * calm * fade); g.label("the rest settles: compound nucleus", (px0 + nx0 + ww) / 2, yTop + 6, { color: c.soft, size: phone ? 11 : 13, italic: true, serif: true, alpha: calm * fade, bg: true }); }
+      if (outA > 0 && outA < 1) { g.glow(ax, ay, 20, c.warm, 0.4 * (1 - outA)); g.ball(ax, ay, 8, c.neutron, 1 - smooth(0.85, 1, outA)); g.label("first fast neutron", Math.min(ax, W - 70), ay - 18, { color: c.ink, size: fs, bg: true }); }
+      if (calm > 0) g.glow((px0 + nx0 + ww) / 2, yFermi, ww * 1.1, c.warm, 0.18 * calm * fade);
     }
-    g.label(`${E0.toFixed(0)} MeV carried in`, xA - 14, Ym(E0) - 4, { color: c.warm, size: 11, align: "right", bg: true, alpha: 1 - hit });
     g.label(`second fast particle in ${n2} of the last 12 reactions`, W / 2, H * 0.965, { color: n2 ? c.warm : c.ink, size: phone ? 13 : 15, weight: 600, serif: true });
   }
 })();
