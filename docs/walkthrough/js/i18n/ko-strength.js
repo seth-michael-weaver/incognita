@@ -28,7 +28,7 @@ WT.L.ch.strength = {
   <h3>평균 복사 폭</h3>
   <p>s파 공명(스핀 0 표적에서 <i>J</i><sup>π</sup> = ½⁺)에서 E1이나 M1으로 닿을 수 있는 모든 나중 상태에 대해 합하면, 그 공명들의 평균 전체 광자 폭이 나옵니다. 이 값은 공명 모양으로부터 수백 개 원자핵에서 측정되었으며, <i>S<sub>n</sub></i>에서의 세기를 점검하는 주된 수단입니다.</p>
   <div class="formula">⟨Γ<sub>γ</sub>⟩ = D₀/2π · Σ<sub>XL</sub> Σ<sub>J′π′</sub> ∫₀^{S<sub>n</sub>} T<sub>XL</sub>(E<sub>γ</sub>) ρ(S<sub>n</sub> − E<sub>γ</sub>, J′, π′) dE<sub>γ</sub></div>
-  <div class="ctl"><label for="ps-s">세기에 곱하는 배율</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="5" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
+  <div class="ctl"><label for="ps-s">세기에 곱하는 배율</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="8" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
   <p>곡선은 폭이 어디서 오는지를 광자별로 보여 줍니다. 대부분 3–7 MeV이고 대부분 E1이며, M1이 약 15%를 더합니다. 여기서는 엔진의 표 대신 닫힌 형태 식과 도식적인 준위 밀도를 썼기 때문에 폭이 측정값 0.92 eV의 약 6분의 1로 나옵니다. 폭은 <i>S<sub>n</sub></i> 아래의 준위 밀도와 세기의 꼬리에 그만큼 민감합니다. 엔진이 따르는 TALYS의 기본값은 이 원자핵에 대해 약 1.3 eV를 줍니다. 슬라이더는 평가에서 맞출 법한 전체 배율 하나를 적용합니다. Γ<sub>γ</sub> ≪ Γ<sub>n</sub>일 때 keV 영역의 포획은 ⟨Γ<sub>γ</sub>⟩에 거의 비례하므로, 여기서의 배율은 곧 (n,γ)의 배율입니다. TALYS는 세기를 측정된 ⟨Γ<sub>γ</sub>⟩에 맞춰 다시 조정할 수 있습니다(<code>gnorm</code>). INCOGNITA에서는 캐스케이드의 모든 원자핵에 적용되는 이 재조정이 선택 스위치이며, 기본으로 꺼져 있습니다.</p>
 </div>
 <div class="step">

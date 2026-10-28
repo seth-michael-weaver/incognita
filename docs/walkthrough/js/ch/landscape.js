@@ -17,8 +17,10 @@
   const TIERN = ["not in the library", "model file, tier A (stable or > 1 year)", "model file, tier B (> 1 day)", "model file, tier C (shorter-lived)", "evaluated from measured resonances"];
 
   // world layout: N along x, Z along -z, B/A up; one unit = one nucleon number step * S
-  const S = 0.06, N0 = 80, Z0 = 55, HB = 0.32;
-  const X = (n) => (n - N0) * S, Zw = (z) => -(z - Z0) * S;
+  const SC = 0.06, N0 = 80, Z0 = 55, HB = 1.25, B0 = 6.8;   // world units per nucleon-number step (not S: frame()'s state is S)
+  const X = (n) => (n - N0) * SC, Zw = (z) => -(z - Z0) * SC;
+  // height: binding per nucleon above B0 MeV (nearly every nucleus holds 7-8.8 MeV per nucleon; the differences are what matter)
+  const hOf = (ba, rise) => Math.max(0.02, rise * Math.max(0, ba - B0) * HB);
 
   // per-chain data for the "roll" step: most-bound isobar of each A
   function chainOf(A) { return D().filter((d) => d[0] + d[1] === A).sort((a, b) => a[0] - b[0]); }
@@ -40,7 +42,7 @@
 </div>
 <div class="step">
   <h3>Rolling down to stability</h3>
-  <p>Nuclei with the same total number of nucleons (the same <b>mass number</b> A) form a chain across the chart. In <b>beta decay</b> a neutron turns into a proton (or the other way round), so the nucleus steps one place along its chain, always toward the more tightly bound end, until it reaches the top of the ridge and stops.</p>
+  <p>Nuclei with the same total number of nucleons (the same <b>mass number</b> A) form a chain across the chart. Start with too many neutrons, as the fragments of a split uranium nucleus do. In <b>beta decay</b> a neutron turns into a proton, so the nucleus steps one place along its chain toward the more tightly bound middle, again and again, until it reaches the top of the ridge and stops. (Nuclei with too many protons do the reverse, from the other side.) Try A = 137: the chain passes caesium-137, the long-lived product of reactor accidents.</p>
   <div class="ctl"><label for="ls-a">Mass number A</label><input id="ls-a" type="range" data-bind="aSel" data-instant min="8" max="250" step="1" value="137"><output data-show="aSel" data-fmt="0"></output></div>
   <p class="ctl-result" id="ls-a-out" aria-live="polite"></p>
 </div>
@@ -59,6 +61,7 @@
       const { W, H, c } = g, phone = W < 600, fs = phone ? 11 : 13;
       const data = D(); if (!data.length) { g.label("loading the chart…", W / 2, H / 2, { color: c.soft, size: fs }); return; }
       const v = WT.view3d ? WT.view3d("landscape", g, build) : { ok: false };
+      if (/[?&]v3ddebug\b/.test(location.search)) g.label(`rise ${(S.rise ?? 0).toFixed(2)} inst ${v.ok ? v.user.mesh.count : "-"} ` + "3D: " + (document.documentElement.dataset.v3d || "none") + (v.ok ? ` cam ${v.camera.position.x.toFixed(1)},${v.camera.position.y.toFixed(1)},${v.camera.position.z.toFixed(1)} canvas ${v.canvas.style.display} ${v.canvas.width}x${v.canvas.height}` : ""), W / 2, 24, { color: c.ink, size: 12, bg: true });
       if (S.aSel !== S.aShown) { S.aShown = S.aSel; S.rollT = S.time; }
       if (!v.ok) { draw2D(g, S, v.loading); captions(g, S, null); return; }
       // colours / heights for this frame (eased between steps)
@@ -67,14 +70,14 @@
         v.user.rise = rise; v.user.tm = tm; v.user.gen = v.gen; v.user.z = S.zSel; v.user.a = S.aSel; v.user.mode = S.mode;
         const ink = v.col("ink"), faint = v.col("line"), warm = v.col("warm"), acc = v.col("accent"), fis = v.col("fission"), sel = v.col("proton");
         data.forEach((d, i) => {
-          const h = Math.max(0.02, rise * d[2] * HB);
-          m.makeScale(S * 0.86, h, S * 0.86); m.setPosition(X(d[1]), h / 2, Zw(d[0])); mesh.setMatrixAt(i, m);
+          const onChain = S.mode === "roll" && d[0] + d[1] === Math.round(S.aSel), h = hOf(d[2], rise) + (onChain ? 0.03 : 0);
+          m.makeScale(SC * 0.86, h, SC * 0.86); m.setPosition(X(d[1]), h / 2, Zw(d[0])); mesh.setMatrixAt(i, m);
           // half-life colour: stable ink; long-lived accent; short warm
           if (d[4] === 99) cc.copy(ink); else if (d[4] == null) cc.copy(faint); else cc.copy(warm).lerp(acc, clamp((d[4] + 3) / 13, 0, 1));
           if (d[3]) cc.lerp(faint, 0.45);                               // estimated masses paler
           if (tm > 0) { const t = d[5], tc = t === 4 ? fis : t === 1 ? ink : t === 2 ? acc : t === 3 ? warm : faint; cc.lerp(tc, tm); }
           if (S.mode === "chart" && d[0] === Math.round(S.zSel)) cc.lerp(sel, 0.85);
-          if (S.mode === "roll" && d[0] + d[1] === Math.round(S.aSel)) cc.lerp(sel, 0.6);
+          if (onChain) cc.copy(sel);
           mesh.setColorAt(i, cc);
         });
         mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true;
@@ -88,24 +91,25 @@
         const ch = chainOf(Math.round(S.aSel));
         if (ch.length) {
           let top = 0; ch.forEach((d, i) => { if (d[2] > ch[top][2]) top = i; });
-          const start = ch[0][2] < ch[ch.length - 1][2] ? 0 : ch.length - 1, dir = start < top ? 1 : -1, hops = Math.abs(top - start);
+          // start at the neutron-rich end (lowest Z, the near side of the ridge): beta-minus decay, as fission products do
+          const start = top > 0 ? 0 : ch.length - 1, dir = start < top ? 1 : -1, hops = Math.abs(top - start);
           const tt = Math.max(0, S.time - (S.rollT || 0)) * 1.4, k = Math.min(hops, Math.floor(tt)), f = smooth(0, 1, tt - k);
           const a = ch[start + dir * k], b = ch[start + dir * Math.min(hops, k + 1)];
           const px = lerp(X(a[1]), X(b[1]), k < hops ? f : 0), pz = lerp(Zw(a[0]), Zw(b[0]), k < hops ? f : 0);
-          const py = lerp(a[2], b[2], k < hops ? f : 0) * HB + 0.06 + (k < hops ? Math.sin(Math.PI * f) * 0.12 : 0);
+          const py = lerp(hOf(a[2], 1), hOf(b[2], 1), k < hops ? f : 0) + 0.03 + 0.11 + (k < hops ? Math.sin(Math.PI * f) * 0.16 : 0);
           ball.position.set(px, py, pz); ball.material.color.copy(v.col("warm"));
           rollInfo = { now: k < hops ? a : ch[top], top: ch[top], hops, k, p: v.project(px, py + 0.12, pz), dir };
           if (tt > hops + 2.5) S.rollT = S.time;              // replay
         }
       }
       // camera: a wide orbit; closer on phones (narrow view)
-      v.target.set(0, (S.rise ?? 0) * 0.9, 0); v.orbit(phone ? 13 : 10.5, dt);
+      v.target.set(-0.7, (S.rise ?? 0) * 0.6, 0.1); v.orbit(phone ? 18 : 14.5, dt);
       v.render();
       // labels over the 3D picture
       const lab = (x, y, z, s, o) => { const [sx, sy, ok] = v.project(x, y, z); if (ok && sx > 10 && sx < W - 10 && sy > 10 && sy < H - 10) g.label(s, sx, sy, o); };
       lab(X(170), 0.05, Zw(Z0 - 12), "neutrons N →", { color: c.soft, size: fs - 1 });
       lab(X(-6), 0.05, Zw(118), "protons Z ↑", { color: c.soft, size: fs - 1 });
-      if (S.mode === "valley" || S.mode === "roll") lab(X(34), 8.7946 * HB * rise + 0.25, Zw(28), "nickel-62: most tightly bound", { color: c.fission, size: fs, weight: 600, bg: true });
+      if (S.mode === "valley" || S.mode === "roll") lab(X(34), hOf(8.7946, rise) + 0.25, Zw(28), "nickel-62: most tightly bound", { color: c.fission, size: fs, weight: 600, bg: true });
       if (S.mode === "valley" && !phone) MAGIC.slice(2).forEach((mg) => lab(X(mg), 0.05, Zw(-6), `N = ${mg}`, { color: c.faint, size: 11 }));
       if (rollInfo && rollInfo.p[2]) g.label(name(rollInfo.now[0], rollInfo.now[0] + rollInfo.now[1]), rollInfo.p[0], rollInfo.p[1] - 14, { color: c.warm, size: fs, weight: 600, bg: true });
       captions(g, S, rollInfo);
@@ -115,7 +119,7 @@
 
   function build(T, v) {
     const data = D(), geo = new T.BoxGeometry(1, 1, 1), mat = new T.MeshStandardMaterial({ roughness: 0.6, metalness: 0.0 });
-    const mesh = new T.InstancedMesh(geo, mat, data.length); mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    const mesh = new T.InstancedMesh(geo, mat, data.length); mesh.instanceMatrix.setUsage(T.DynamicDrawUsage); mesh.frustumCulled = false;   // instances move every step; never cull on a stale bound
     mesh.setColorAt(0, new T.Color(1, 1, 1));
     v.scene.add(mesh); v.user.mesh = mesh; v.user.m = new T.Matrix4(); v.user.cc = new T.Color();
     // magic-number lines on the ground: N = magic (across) and Z = magic (deep)
@@ -128,7 +132,7 @@
     });
     const ball = new T.Mesh(new T.SphereGeometry(0.11, 24, 16), new T.MeshStandardMaterial({ roughness: 0.3, emissive: 0x331100 }));
     v.scene.add(ball); v.user.ball = ball;
-    v.yaw = -0.5; v.pitch = 0.55; v.spin = 0.05;
+    v.yaw = -0.35; v.pitch = 0.62; v.spin = 0.05;
   }
 
   // HTML readouts under the sliders, and the canvas caption

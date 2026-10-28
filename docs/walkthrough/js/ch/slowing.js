@@ -95,15 +95,18 @@
     num: "Chapter 18", title: "Slowing down", short: "Slowing down",
     html: `
 <div class="step">
-  <p>Each bounce off hydrogen costs about half the energy.</p>
+  <p>Each bounce off hydrogen costs about half the energy. A fission neutron starts at 2 MeV and bounces through water. A hydrogen nucleus weighs the same as the neutron, so, like billiard balls, each bounce hands it on average half the neutron's energy.</p>
+  <p>The chart plots the neutron's energy after each bounce; each label down the side is a thousand times less energy. Losing the same share each time makes a straight slide, the dashed line. After about 18 bounces the neutron reaches the <b>thermal</b> energy, 0.025 eV, where the warm water kicks it up as often as it slows it down. Oxygen is 16 times heavier: each bounce takes only a little, and it needs over a hundred.</p>
   <div class="btns"><button class="btn ghost" data-act="tgtH" aria-pressed="true">Hydrogen</button><button class="btn ghost" data-act="tgtO" aria-pressed="false">Oxygen</button><button class="btn" data-act="again">Fire again</button></div>
 </div>
 <div class="step">
-  <p>Below about 1 eV, the molecule's bonds shape each bounce.</p>
+  <p>Below about 1 eV, the molecule's bonds shape each bounce. Each hydrogen is tied to its oxygen (the bright lines). A slow neutron no longer hits a free hydrogen: it hits a whole molecule, 18 times heavier, so a plain bounce takes almost nothing.</p>
+  <p>It can also make the molecule rock or vibrate, but only by handing over a fixed amount of energy at a time, 0.06, 0.2 or 0.45 eV (the bright flashes). Warm molecules sometimes hand such an amount back. On the chart, the shaded band below 1 eV is where this matters. Switch the binding off to compare with free hydrogen.</p>
   <div class="btns"><button class="btn ghost" data-act="bind" aria-pressed="true">Chemical binding</button><button class="btn" data-act="again">Fire again</button></div>
 </div>
 <div class="step">
-  <p>INCOGNITA's own laws for water and beryllium: <a href="https://github.com/seth-michael-weaver/incognita/tree/main/library/tsl-v0.1" style="white-space:nowrap">tsl-v0.1</a>.</p>
+  <p>A computer code needs all of this as a table: the <b>scattering law</b>, the map. Across: how hard the knock is, α (the push handed to the molecule; small for a glancing touch, large for a head-on hit). Up and down: the energy the neutron gains (up) or loses (down), β, counted in units of the water's thermal energy, 0.025 eV. Bright means likely, pale means rare.</p>
+  <p>The outline is what a neutron of the chosen energy can reach: it cannot lose more than it has, and each energy change allows only a range of knocks. Drag the energy and the outline grows or shrinks. Without binding the map is free hydrogen gas, one bright ridge along the dashed recoil line; with binding the molecule adds bright stripes, its fixed amounts of energy. INCOGNITA computes its own laws for water and beryllium: <a href="https://github.com/seth-michael-weaver/incognita/tree/main/library/tsl-v0.1" style="white-space:nowrap">tsl-v0.1</a>.</p>
   <div class="ctl"><label for="slo-e">Neutron energy (eV)</label><input id="slo-e" type="range" data-bind="lgE" data-instant min="-2.3" max="0" step="0.01" value="-1"><output data-show="Eshow" data-fmt="3"></output></div>
   <div class="btns"><button class="btn ghost" data-act="bind" aria-pressed="true">Chemical binding</button></div>
 </div>`,
@@ -149,6 +152,12 @@
       else g.ball(a.x, a.y, Rr * 0.8, hCol, S.A === 1 ? 1 : 0.7);
       if (hot && !run.done) g.ring(a.x, a.y, Rr * (a.el === "O" ? 1.9 : 1.5), c.ink, 1, 0.35);
     }
+    // what the bright marks mean (the bonds step)
+    if (S.mode === "bound") {
+      const lx = bx.x + bx.w - 10, ly = bx.y + 12;
+      g.label(phone ? "line: bond" : "bright line: a bond holding H to its O", lx, ly, { color: c.photon, size: fs - 2, align: "right", bg: true, alpha: 0.4 + 0.6 * S.bindV });
+      g.label(phone ? "flash: energy left in the molecule" : "bright flash: the neutron left a fixed amount of energy in the molecule", lx, ly + fs + 6, { color: c.photon, size: fs - 2, align: "right", bg: true, alpha: 0.4 + 0.6 * S.bindV });
+    }
     // decay recoil kicks
     for (const m of MOL) for (const k of m.k) { k[0] *= Math.exp(-3 * dt); k[1] *= Math.exp(-3 * dt); }
     // advance the neutron
@@ -188,7 +197,7 @@
     const tx0 = W * (phone ? 0.14 : 0.11), tx1 = W * 0.96, ty0 = H * (phone ? 0.5 : 0.52), ty1 = H * (phone ? 0.84 : 0.85);
     const nMax = S.A === 1 ? 40 : 230, X = (n) => tx0 + (tx1 - tx0) * n / nMax, Y = (E) => lerp(ty1, ty0, (log10(clamp(E, 10 ** LG0, 10 ** LG1)) - LG0) / (LG1 - LG0));
     // binding region and thermal band
-    if (S.bindV > 0.02 && S.A === 1) { ctx.save(); ctx.fillStyle = g.rgba(c.photon, 0.08 * S.bindV); ctx.fillRect(tx0, Y(1), tx1 - tx0, ty1 - Y(1)); ctx.restore(); g.label("bonds matter", tx1 - 4, Y(1) + 11, { color: c.photon, size: fs - 2, align: "right", alpha: S.bindV }); }
+    if (S.bindV > 0.02 && S.A === 1) { ctx.save(); ctx.fillStyle = g.rgba(c.photon, 0.08 * S.bindV); ctx.fillRect(tx0, Y(1), tx1 - tx0, ty1 - Y(1)); ctx.restore(); g.label(phone ? "below 1 eV: bonds matter" : "below 1 eV: the bonds shape each bounce", tx1 - 4, Y(1) + 11, { color: c.photon, size: fs - 2, align: "right", alpha: S.bindV }); }
     ctx.save(); const tb = ctx.createLinearGradient(0, Y(0.1), 0, Y(0.006)); tb.addColorStop(0, g.rgba(c.neutron, 0)); tb.addColorStop(0.5, g.rgba(c.neutron, 0.16)); tb.addColorStop(1, g.rgba(c.neutron, 0)); ctx.fillStyle = tb; ctx.fillRect(tx0, Y(0.1), tx1 - tx0, Y(0.006) - Y(0.1)); ctx.restore();
     g.line(tx0, Y(KT), tx1, Y(KT), c.neutron, 1.2, 0.7, [4, 4]);
     g.label("thermal · kT ≈ 0.025 eV", tx1 - 4, Y(KT) - 10, { color: c.neutron, size: fs - 1, align: "right", weight: 600, bg: true });
@@ -209,8 +218,9 @@
     // readouts
     const acc = xiAcc[S.A], xiM = acc[1] ? acc[0] / acc[1] : null, th = thAcc[S.A], thM = th.length ? th.reduce((a, b) => a + b, 0) / th.length : null;
     const ry = H * (phone ? 0.95 : 0.94);
-    g.label(`ξ per collision: ${xiM === null ? "…" : xiM.toFixed(2)}  (theory ${xi.toFixed(xi === 1 ? 2 : 3)})${thM ? ` · ${thM.toFixed(0)} collisions to thermal` : ""}`, W * 0.5, ry, { color: c.ink, size: fs + 1, weight: 600, serif: true });
-    if (!phone) g.label("ξ: average loss in ln E", W * 0.5, ry - fs - 9, { color: c.soft, size: fs - 1 });
+    const kept = (x) => Math.exp(-x).toFixed(2);
+    g.label(`typical bounce: energy × ${xiM === null ? "…" : kept(xiM)} (theory × ${kept(xi)})${thM ? ` · ${thM.toFixed(0)} bounces to thermal` : ""}`, W * 0.5, ry, { color: c.ink, size: fs + 1, weight: 600, serif: true });
+    g.label(phone ? "typical: the dashed line's step" : "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)", W * 0.5, ry - fs - 9, { color: c.soft, size: fs - 2 });
   }
 
   // ---------- scene: the scattering law S(alpha, beta) ----------
@@ -262,10 +272,15 @@
     g.line(x0, y1, x1, y1, c.line, 1); g.line(x0, y0, x0, y1, c.line, 1);
     [0, 10, 20, 30].forEach((a) => g.label(String(a), XA(a), y1 + 12, { color: c.faint, size: fs - 2 }));
     [-30, -20, -10, 0].forEach((b) => g.label(String(b).replace("-", "−"), x0 - 6, YB(b), { color: c.faint, size: fs - 2, align: "right" }));
-    g.label("momentum transfer α →", x1, y1 + 28, { color: c.soft, size: fs - 1, align: "right" });
-    g.label(phone ? "energy change β (kT)" : "energy change β (units of kT)", x0, y0 - 12, { color: c.soft, size: fs - 1, align: "left" });
+    g.label(phone ? "α: how hard the knock →" : "α: how hard the knock (momentum handed over) →", x1, y1 + 28, { color: c.soft, size: fs - 1, align: "right" });
+    g.label(phone ? "β: energy change (× 0.025 eV)" : "β: the neutron's energy change, in units of kT = 0.025 eV", x0, y0 - 12, { color: c.soft, size: fs - 1, align: "left" });
     g.label("gain ↑", x1 - 4, YB(0) - 10, { color: c.faint, size: fs - 2, align: "right" }); g.label("loss ↓", x1 - 4, YB(0) + 12, { color: c.faint, size: fs - 2, align: "right" });
     g.label(`outline: reachable from ${E < 0.1 ? (1000 * E).toFixed(0) + " meV" : E.toFixed(2) + " eV"}`, x1 - 6, YB(B1) + 16, { color: c.ink, size: fs, weight: 600, bg: true, align: "right" });
+    // colour key: pale = rare, bright = likely
+    { const kx = x0 + 8, ky = y1 - 16, kw = phone ? 60 : 90, gr = ctx.createLinearGradient(kx, 0, kx + kw, 0); gr.addColorStop(0, c.paper); gr.addColorStop(0.6, c.neutron); gr.addColorStop(1, c.photon);
+      ctx.save(); ctx.fillStyle = g.rgba(c.paper, 0.85); ctx.fillRect(kx - 6, ky - 12, kw + (phone ? 84 : 112), 24); ctx.fillStyle = gr; ctx.fillRect(kx, ky - 5, kw, 10); ctx.strokeStyle = c.line; ctx.strokeRect(kx, ky - 5, kw, 10); ctx.restore();
+      g.label("rare → likely", kx + kw + 6, ky, { color: c.soft, size: fs - 2, align: "left" }); }
+    if (S.bindV > 0.3) g.label(phone ? "stripes: fixed amounts lost" : "stripes: energy lost to the molecule in fixed amounts", XA(AM * 0.62), YB(-8.1), { color: c.ink, size: fs - 2, bg: true, alpha: S.bindV });
     g.label(S.bind ? "scattering law S(α,β) · hydrogen bound in water" : "scattering law S(α,β) · free hydrogen gas", W * 0.5, H * (phone ? 0.9 : 0.9), { color: c.ink, size: fs + 1, weight: 600, serif: true });
   }
 })();

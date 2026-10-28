@@ -103,7 +103,7 @@
   <h3>More than one chance</h3>
   <p>Uranium-238 absorbs the neutron and becomes uranium-239 with excitation <i>E</i>* (dashed line). If it does not split, it may emit a neutron instead; the line drops, and the uranium-238 left behind, still hot, tries its own barrier: <b>second-chance</b> fission, (n,n′f). The piles collect how each nucleus ended.</p>
   <div class="ctl"><label for="fis-en">Neutron energy</label><input id="fis-en" type="range" data-bind="En" min="0" max="25" step="0.1" value="7"><output data-show="En" data-fmt="1"></output></div>
-  <p>Raise the energy and later attempts start to succeed; a third chance opens near 12 MeV. Each new chance shows up as a step in the measured <b>fission cross section</b>, how likely the nucleus is to split. The engine computes how often it splits, not which pieces it splits into.</p>
+  <p>Raise the energy and later attempts start to succeed; a third chance opens near 12 MeV. Each new chance shows up as a step in the measured <b>fission cross section</b>, how likely the nucleus is to split: the small graph at the top right draws those steps, with your energy marked. The engine computes how often it splits, not which pieces it splits into.</p>
   <div class="aside">In the code: <code>fission/wkb.py</code> (the deformation-energy path and the WKB integrals), <code>fission/barriers.py</code> (Hill–Wheeler, transition states, the barrier level density), <code>fission/transmission.py</code> (humps in series, T<sub>fis</sub> per spin and parity), <code>fission/chain.py</code> (barriers for every nucleus of the cascade).</div>
 </div>`,
     setup(S) {
@@ -116,7 +116,7 @@
       (S) => { S.set("mode", "path"); S.to("shellMix", 1, snap()); S.to("Bb", B_OUT, snap()); },
       (S) => { S.set("mode", "tunnel"); S.to("shellMix", 1, snap()); S.to("Bb", B_OUT, snap()); S.to("E", 5, snap()); },
       (S) => { S.set("mode", "gates"); S.to("shellMix", 1, snap()); S.to("Bb", B_OUT, snap()); S.to("E", 6.5, snap()); },
-      (S) => { S.set("mode", "series"); S.to("shellMix", 1, snap()); },
+      (S) => { S.set("mode", "series"); S.to("shellMix", 1, snap()); tally.through = 0; tally.back = 0; S.tallyBb = S.target.Bb; },
       (S) => { S.set("mode", "chance"); S.to("shellMix", 1, snap()); S.to("Bb", B_OUT, snap()); },
     ],
     frame(g, S, dt) {
@@ -242,6 +242,7 @@
   function sceneSeries(g, S, dt) {
     const { W, H, c } = g, fs = W < 600 ? 11 : 13, F = frameOf(g), E = 5.8;
     const Ta = thill(E, B_IN), Tb = thill(E, S.Bb), T = Ta * Tb / (Ta + Tb);
+    if (Math.abs(S.target.Bb - (S.tallyBb ?? -1)) > 1e-6) { S.tallyBb = S.target.Bb; tally.through = 0; tally.back = 0; }   // a new hill: count afresh
     landscape(g, S, F, c.soft);
     const ey = F.Y(E); g.line(F.X(0), ey, F.X(X_OUT), ey, c.warm, 1.2, 0.5, [6, 4]);
     // doors: an aperture at each hilltop whose open area is T
@@ -258,7 +259,11 @@
       if (d.z === 2) d.v = Math.min(0.7, d.v + dt * 0.5);
     }
     for (let i = dots.length - 1; i >= 0; i--) if (dots[i].x < -0.02 || dots[i].x > 1.04) dots.splice(i, 1);
-    for (const d of dots) { const y = Math.min(ey, F.Y(Vof(S, d.x))) - 7 + Math.sin(d.x * 60) * 2; g.dot(F.X(d.x), y, 3.4, d.z === 2 ? c.fission : d.z === 1 ? c.warm : c.neutron, 0.9); if (d.z === 2) g.glow(F.X(d.x), y, 10, c.fission, 0.35); }
+    for (const d of dots) {
+      const yv = F.Y(Vof(S, d.x)), inside = yv < ey;                 // inside a hill: the energy line runs through it (tunnelling)
+      const y = (d.z === 2 && !inside ? Math.max(ey, yv - 7) : ey - 4) + Math.sin(d.x * 60) * 1.5;
+      g.dot(F.X(d.x), y, 3.4, d.z === 2 ? c.fission : d.z === 1 ? c.warm : c.neutron, inside ? 0.45 : 0.9); if (d.z === 2) g.glow(F.X(d.x), y, 10, c.fission, 0.35);
+    }
     g.label("nuclei arriving →", F.X(0.01), ey - 14, { color: c.neutron, size: fs, align: "left", bg: true });
     g.label("trapped in the well", F.X(X_W2), F.Y(2.6) + 24, { color: c.warm, size: fs, bg: true });
     g.label("fission", Math.min(F.X(0.9), W - 34), F.Y(-3) + 20, { color: c.fission, size: fs, bg: true });
@@ -267,10 +272,15 @@
   }
 
   // ---------- scene: multi-chance fission, one nucleus at a time ----------
-  const CH = [{ name: "²³⁹U*", Sn: 4.8, B: 6.2, lab: "1st chance (n,f)" }, { name: "²³⁸U*", Sn: 6.15, B: 6.0, lab: "2nd chance (n,n′f)" }, { name: "²³⁷U*", Sn: 5.1, B: 6.2, lab: "3rd chance (n,2nf)" }];
-  const EPS = 1.4; // about what an evaporated neutron carries away (MeV)
-  function chances(En) { const out = []; let ex = CH[0].Sn + En; for (let k = 0; k < 3; k++) { const f = smooth(CH[k].B - 1.6, CH[k].B + 0.8, ex); out.push({ ex, f, canEmit: ex > CH[k].Sn + 0.3 }); ex = ex - CH[k].Sn - EPS; } return out; }
   const PF = 0.62;  // illustrative fission share when the barrier is wide open (vs neutron emission)
+  const CH = [{ name: "²³⁹U*", Sn: 4.8, B: 6.2, lab: "1st chance (n,f)" }, { name: "²³⁸U*", Sn: 6.15, B: 6.0, lab: "2nd chance (n,n′f)" }, { name: "²³⁷U*", Sn: 5.1, B: 6.2, lab: "3rd chance (n,2nf)" }];
+  // kinetic energy an evaporated neutron takes (MeV): the slow end of the spectrum, which sets where each new chance
+  // starts (measured: the 2nd chance near 6 MeV, the 3rd near 12 MeV); never more than half of what is left above S_n,
+  // so the nucleus left behind always has E* > 0. A neutron can leave only when E* is above its separation energy.
+  const EPS = 0.7;
+  function chances(En) { const out = []; let ex = CH[0].Sn + En; for (let k = 0; k < 3; k++) { const f = smooth(CH[k].B - 1.6, CH[k].B + 0.8, ex), spare = ex - CH[k].Sn; out.push({ ex, f, canEmit: spare > 0.05 }); ex = spare > 0.05 ? spare - Math.min(EPS, 0.5 * spare) : 0; } return out; }
+  /** The chance that a nucleus splits at all (first, second or third chance): the shape of the fission cross section. */
+  function pFis(En) { const ch = chances(En); let alive = 1, p = 0; for (let k = 0; k < 3; k++) { const q = ch[k]; p += alive * PF * q.f; alive *= 1 - PF * q.f; if (!(q.canEmit && k < 2)) break; } return p; }
   /** One nucleus's history: list of {k, out: "fis" | "emit" | "gamma"}. */
   function history(En, r) { const ch = chances(En), h = []; for (let k = 0; k < 3; k++) { const q = ch[k]; if (r() < PF * q.f) { h.push({ k, out: "fis" }); return h; } if (q.canEmit && k < 2) h.push({ k, out: "emit" }); else { h.push({ k, out: "gamma" }); return h; } } return h; }
   const chRand = rng(2024); let piles = [0, 0, 0, 0], pileEn = -1, hist = null;
@@ -306,12 +316,23 @@
     // piles of outcomes, built from the nuclei fired
     const names = phone ? ["1st (n,f)", "2nd (n,n′f)", "3rd (n,2nf)", "no fission"] : [CH[0].lab, CH[1].lab, CH[2].lab, "no fission"];
     const tot = piles.reduce((a, b) => a + b, 0), yb = H * 0.86, dr = phone ? 2.6 : 4.2, per = phone ? 6 : 7, mxRows = Math.floor(H * 0.17 / (dr * 2.3));
+    const capN = per * mxRows, mxP = Math.max(...piles), psc = mxP > capN ? capN / mxP : 1;   // a full pile shrinks them all alike
     for (let k = 0; k < 4; k++) {
-      const px = W * (0.13 + 0.245 * k), n = piles[k], show = Math.min(n, per * mxRows), col = k < 3 ? c.fission : c.soft;
+      const px = W * (0.13 + 0.245 * k), n = piles[k], show = Math.round(n * psc), col = k < 3 ? c.fission : c.soft;
       for (let m = 0; m < show; m++) g.dot(px + (m % per - (per - 1) / 2) * dr * 2.3, yb - dr - Math.floor(m / per) * dr * 2.3, dr, col, 0.85);
       g.line(px - per * dr * 1.2, yb + 2, px + per * dr * 1.2, yb + 2, c.line, 2);
       g.label(names[k], px, yb + 16, { color: c.ink, size: phone ? 10 : 12, weight: 600 });
-      g.label(`${tot ? Math.round(100 * n / tot) : 0}%`, px, yb + 31, { color: c.soft, size: phone ? 10 : 11 });
+      g.label(`${n} · ${tot ? Math.round(100 * n / tot) : 0}%`, px, yb + 31, { color: c.soft, size: phone ? 10 : 11 });
     }
+    // the staircase: the chance to split at each neutron energy (the fission cross section's shape), with the slider's energy marked
+    const gx0 = W * (phone ? 0.6 : 0.68), gx1 = W * 0.95, gy0 = H * 0.08, gy1 = H * (phone ? 0.23 : 0.26);
+    const GX = (e) => gx0 + (gx1 - gx0) * e / 25, GY = (p) => gy1 - (gy1 - gy0) * p;
+    const sp = []; for (let i = 0; i <= 125; i++) { const e = i * 0.2; sp.push([GX(e), GY(pFis(e))]); }
+    g.line(gx0, gy1, gx1, gy1, c.line, 1); g.line(gx0, gy1, gx0, gy0, c.line, 1);
+    g.area([[gx0, gy1], ...sp, [gx1, gy1]], c.fission, 0.12); g.poly(sp, c.fission, 2);
+    g.line(GX(clamp(En, 0, 25)), gy1, GX(clamp(En, 0, 25)), gy0, c.warm, 1, 0.7, [3, 3]); g.dot(GX(clamp(En, 0, 25)), GY(pFis(En)), 4, c.warm);
+    g.label(phone ? "chance to split" : "chance to split vs neutron energy", gx0, gy0 - 10, { color: c.ink, size: phone ? 10 : 12, weight: 600, align: "left" });
+    g.label("0", gx0, gy1 + 10, { color: c.faint, size: 10 }); g.label("25 MeV", gx1, gy1 + 10, { color: c.faint, size: 10, align: "right" });
+    if (!phone) { g.label("2nd", GX(6.3), GY(pFis(9)) - 10, { color: c.fission, size: 10 }); g.label("3rd", GX(12.6), GY(pFis(15)) - 10, { color: c.fission, size: 10 }); }
   }
 })();

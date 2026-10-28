@@ -92,6 +92,10 @@
   const landed = [];                                   // step 0: where each residual's excitation landed
   let td = null;                                       // step 2: shelf simulation
   const CHANNELS = ["(n,2n)", "(n,n′)", "(n,p)", "(n,np)", "(n,α)", "(n,3n)", "(n,γ)"];
+  // each channel plays at an energy where it is really open: (n,3n) needs about 20.5 MeV here (three separation
+  // energies minus the compound's), and capture matters only for slow neutrons
+  const CH_E = { "(n,3n)": 25, "(n,γ)": 1 }, chanE = (ch) => CH_E[ch] || 14;
+  const pct = (f) => (f >= 0.01 ? `${(f * 100).toFixed(0)} %` : f >= 0.001 ? `${(f * 100).toFixed(1)} %` : "< 0.1 %");
 
   WT.chapter("cascade", {
     num: "Chapter 11", title: "Down the chart", short: "Cascade",
@@ -107,8 +111,9 @@
   <h3>A walk across the chart</h3>
   <p>The streams are reactions walking across a corner of the <b>chart of nuclides</b>, nuclei mapped by neutron number N (across) and proton number Z (up). Each starts in the outlined compound square; each square is named for the reaction that ends there.</p>
   <p>A <em class="n">neutron</em> out moves one square left, a <em class="p">proton</em> one down, an <em class="a">alpha particle</em> (two protons, two neutrons) two diagonally. Stream width is how much takes that step; shade and percentage are where reactions end.</p>
+  <div class="ctl"><label for="cs-e4">Neutron energy</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Fire 200 reactions</button></div>
-  <p>Each step costs 7 to 11 MeV of separation energy, so even at 30 MeV the walk is three or four steps at most.</p>
+  <p>Drag the energy: at a few MeV almost everything stops on the target square; higher up the streams reach further. Each step costs 7 to 11 MeV of separation energy, so even at 30 MeV the walk is three or four steps at most.</p>
 </div>
 <div class="step">
   <h3>Top down, bin by bin</h3>
@@ -120,7 +125,7 @@
 </div>
 <div class="step">
   <h3>Naming the history</h3>
-  <p>One reaction plays at a time: the marker hops across the chart and each particle emitted falls into the tray. The full tray names the <b>exclusive channel</b>, such as (n,2n); photons do not count. The engine gives each channel its own cross section (its likelihood, as an effective target area).</p>
+  <p>One reaction plays at a time: the marker hops across the chart and each particle emitted falls into the tray. Each channel plays at an energy where it really happens (top of the picture): (n,3n) at 25 MeV, since three neutrons cost more than 20 MeV here; capture, (n,γ), at 1 MeV. The full tray names the <b>exclusive channel</b>, such as (n,2n); photons do not count. The engine gives each channel its own cross section (its likelihood, as an effective target area).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Next channel</button></div>
   <p>Step through them. (n,np) plays twice, neutron first and proton first: same square, same tray, one channel. Then a ghost deuteron (a bound proton and neutron) reaches that square in one hop: its tray reads d, a different channel, (n,d).</p>
 </div>
@@ -144,9 +149,9 @@
     },
     steps: [
       (S) => { S.set("mode", "second"); S.to("E", 15); landed.length = 0; S.lastE0 = -1; },
-      (S) => { S.set("mode", "chart"); S.to("E", 14); hops.length = 0; const m = model(14), r = rng(7); for (let i = 0; i < 60; i++) hops.push(samplePath(m, r, S.time + 0.3 + i * 0.05)); },
+      (S) => { S.set("mode", "chart"); S.to("E", 14); S.chartE = null; hops.length = 0; const m = model(14), r = rng(7); for (let i = 0; i < 60; i++) hops.push(samplePath(m, r, S.time + 0.3 + i * 0.05)); },
       (S) => { S.set("mode", "topdown"); S.to("E", 18); td = null; },
-      (S) => { S.set("mode", "channels"); S.to("E", 16); S.chanT = S.time; },
+      (S) => { S.set("mode", "channels"); S.chanT = S.time; },
       (S) => { S.set("mode", "ends"); S.to("E", 14); drops.length = 0; batches.length = 0; fireBatch(S, 14, 200, true); S.lastBatchE = 14; S.lastTE = 14; S.lastTEt = S.time; },
     ],
     frame(g, S, dt) {
@@ -301,12 +306,13 @@
   // ---------- scene 2: the chart with the flux flowing ----------
   function drawChart(g, S) {
     const { W, H, c } = g;
-    const E = 14, m = model(E), G = grid(g, false);
+    const E = clamp(Math.round(S.target.E * 2) / 2, 1, 30), m = model(E), G = grid(g, false);
+    if (E !== S.chartE) { if (S.chartE != null) hops.length = 0; S.chartE = E; }
     let mxEnd = 0; for (const k in m.ends) mxEnd = Math.max(mxEnd, m.ends[k]);
     drawChartBase(g, G, (key) => [c.accent, mxEnd > 0 ? 0.04 + 0.42 * Math.sqrt(m.ends[key] / mxEnd) : 0]);
     for (const key of KEYS) {
       const [dz, dn] = key.split(",").map(Number), end = m.ends[key];
-      g.label(end >= 0.0005 ? `${(end * 100).toFixed(end < 0.01 ? 1 : 0)} %` : "", G.X(dn), G.Y(dz) + G.sq * 0.3, { color: c.ink, size: G.phone ? 11 : 14, serif: true, weight: 600 });
+      g.label(end >= 0.0005 ? pct(end) : "", G.X(dn), G.Y(dz) + G.sq * 0.3, { color: c.ink, size: G.phone ? 11 : 14, serif: true, weight: 600 });
     }
     // streams: width ~ sqrt(flow), particles drifting along them all the time (proton streams run right of centre, clear of the labels)
     G.vshift = 0.22;
@@ -327,7 +333,7 @@
     }
     G.vshift = 0;
     drawHops(g, S, G);
-    g.label(`incoming neutron: ${E.toFixed(0)} MeV`, W * 0.5, H * 0.05, { color: c.ink, size: G.phone ? 13 : 15, weight: 600, serif: true, bg: true });
+    g.label(`incoming neutron: ${E.toFixed(1)} MeV`, W * 0.5, H * 0.05, { color: c.ink, size: G.phone ? 13 : 15, weight: 600, serif: true, bg: true });
     g.label(G.phone ? "shade and % = where reactions end" : "stream width = flow · shade and % = share of reactions that end in that nucleus", W * 0.5, H - 18, { color: c.soft, size: 12, bg: true });
   }
   function drawHops(g, S, G) {
@@ -442,7 +448,7 @@
       if (phone) g.label(`now: ${k}–${k + 1} MeV`, xc, yTop - 14, { color: c.accent, size: 11, bg: true });
       else g.label(`${k}–${k + 1} MeV`, xm + dir * 26, y, { color: c.accent, size: 11, align: dir > 0 ? "left" : "right", bg: true });
     } else g.label(s.gone ? `done: ${s.gone} left by proton or alpha, the rest sit on ground states` : "done: everything sits on a ground state", W / 2, yTop - 14, { color: c.ink, size: 12, bg: true });
-    if (!phone) g.label("orange ball = reactions waiting in a bin · grey = settled on the ground state · pale bins = already emptied", W * 0.5, H - 14, { color: c.soft, size: 11, bg: true });
+    g.label(phone ? "orange: waiting · grey: settled · pale: emptied" : "orange ball = reactions waiting in a bin · grey = settled on the ground state · pale bins = already emptied", W * 0.5, H - 14, { color: c.soft, size: 11, bg: true });
   }
 
   // ---------- scene 4: exclusive channels, one history at a time ----------
@@ -465,7 +471,7 @@
     else if (k === "d") { g.ball(x - r * 0.55, y, r * 0.8, c.proton, alpha); g.ball(x + r * 0.55, y, r * 0.8, c.neutron, alpha); }
   }
   function drawChannels(g, S) {
-    const { W, H, c } = g; const G = grid(g, true), m = model(16), chan = CHANNELS[S.chan], plays = HIST[chan];
+    const { W, H, c } = g; const G = grid(g, true), chan = CHANNELS[S.chan], Ech = chanE(chan), m = model(Ech), plays = HIST[chan];
     const dest = KEYS.find((k) => NUC[k].ch === chan);
     const total = plays.reduce((a, p) => a + playDur(p), 0), t = (S.time - S.chanT) % total;
     let pi = 0, tp = t; while (pi < plays.length - 1 && tp >= playDur(plays[pi])) { tp -= playDur(plays[pi]); pi++; }
@@ -510,11 +516,11 @@
       // last photons off the final square
       const tg = th - nh * HOP; if (tg > 0 && tg < 1.2) { const p = play.p[nh]; for (let k = 0; k < 2; k++) g.photon(G.X(p[1]) + (k ? 1 : -1) * tg * 60, G.Y(p[0]) - tg * 70, k ? -0.9 : -2.2, 20, 1 - tg / 1.2); }
       const done = tg > 0.3, end = m.ends[dest];
-      if (done) g.label(`${(end * 100).toFixed(end < 0.01 ? 1 : 0)} %`, G.X(play.p[nh][1]), G.Y(play.p[nh][0]) + G.sq * 0.28, { color: c.accent, size: G.phone ? 12 : 15, serif: true, weight: 600 });
+      if (done) g.label(pct(end), G.X(play.p[nh][1]), G.Y(play.p[nh][0]) + G.sq * 0.28, { color: c.accent, size: G.phone ? 12 : 15, serif: true, weight: 600 });
       caption = done ? (em.length ? `tray: ${order.join(" ")}  →  ${chan}` : `tray empty, only photons: ${chan}, capture`) + (pi === 1 ? " · same square, same tray" : "") : em.length ? "each emitted particle falls into the tray" : "no particle gets out: only photons";
     }
     g.label(caption, W * 0.5, Math.min(ty + r + 30, H - 12), { color: c.accent, size: G.phone ? 12 : 14, weight: 600, bg: true });
-    g.label(`incoming neutron: 16 MeV · channel ${S.chan + 1} of ${CHANNELS.length}`, W * 0.5, H * 0.03 + 4, { color: c.soft, size: 12 });
+    g.label(`incoming neutron: ${Ech} MeV · channel ${S.chan + 1} of ${CHANNELS.length}`, W * 0.5, H * 0.03 + 4, { color: c.soft, size: 12 });
   }
 
   // ---------- scene 5: where everything ends ----------
@@ -550,8 +556,8 @@
       const n = h.path.length - 1, end = h.path[n], key = keyOf(end), HOPT = 0.42, tLand = n * HOPT + 0.35;
       if (h.slot == null && age >= tLand) { const sk = key + (h.iso ? "m" : "g"); h.slot = B.slots[sk] = (B.slots[sk] || 0) + 1; h.slot--; h.landT = h.t0 + tLand; }
       if (h.slot != null) {
-        const row = Math.floor(h.slot / per), col = h.slot % per, base = shelfY(key, h.iso), room = h.iso ? sq * 0.3 : sq * 0.38;
-        const rowH = Math.min(2 * r * 0.9, room / Math.max(1, Math.ceil(((B.slots[key + (h.iso ? "m" : "g")]) || 1) / per)));
+        const row = Math.floor(h.slot / per), col = h.slot % per, base = shelfY(key, h.iso);
+        const rowH = (sq * 0.3) / Math.ceil(200 / per);            // one fixed row height everywhere, so pile height is proportional to the count
         const off = (col + (row % 2) * 0.5) * (2 * r + 0.8), x = h.iso ? G.X(end[1]) + sq * 0.42 - r - off : G.X(end[1]) - sq * 0.42 + r + off, y = base - r - 1.5 - row * rowH;
         g.dot(x, y, r, h.iso ? c.fission : c.soft, 0.9 * B.alpha);
         const pa = S.time - h.landT; if (pa < 0.7 && B.alpha > 0.5) g.photon(x + pa * 50, y - pa * 70, -1.1, 14, 1 - pa / 0.7);

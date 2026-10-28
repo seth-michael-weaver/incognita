@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>Una passeggiata sulla carta</h3>
   <p>Le correnti sono reazioni che attraversano un angolo della <b>carta dei nuclidi</b>, i nuclei disposti secondo il numero di neutroni N (in orizzontale) e il numero di protoni Z (in verticale). Ciascuna parte dalla casella evidenziata del nucleo composto; ogni casella porta il nome della reazione che finisce lì.</p>
   <p>Un <em class="n">neutrone</em> emesso sposta di una casella a sinistra, un <em class="p">protone</em> di una in basso, una <em class="a">particella alfa</em> (due protoni, due neutroni) di due in diagonale. La larghezza della corrente è quanto compie quel passo; la tonalità e la percentuale indicano dove finiscono le reazioni.</p>
+  <div class="ctl"><label for="cs-e4">Energia del neutrone</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lancia 200 reazioni</button></div>
   <p>Ogni passo costa da 7 a 11 MeV di energia di separazione, quindi anche a 30 MeV il percorso conta al massimo tre o quattro passi.</p>
 </div>

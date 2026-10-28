@@ -5,7 +5,7 @@
  * scrolling zooms into the nucleus. Standalone (own canvas and frame loop), not a kit chapter. Illustrative, not computed. */
 (function () {
   "use strict";
-  const CALM = false; // Seth 2026-10-26: for now only the floating nucleus (no neutrons, impacts, emissions or fission)
+  const CALM = false; // true = only the floating nucleus (no neutrons, impacts, emissions or fission; Seth asked for that 2026-10-26); false = the full reaction loop
   const hero = document.querySelector(".hero"), cv = hero && hero.querySelector(".hero-cv");
   if (!cv) return;
   if (CALM) { const f = hero.querySelector(".fire-btn"); if (f && f.parentElement) f.parentElement.style.display = "none"; } // nothing to fire

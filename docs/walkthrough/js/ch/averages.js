@@ -234,7 +234,7 @@
       g.label(xlab, x1, yB + 26, { color: c.faint, size: 10, align: "right" });
     };
     const wig = (s) => Math.PI * s / 2 * Math.exp(-Math.PI * s * s / 4), pt = (y) => Math.exp(-y / 2) / Math.sqrt(TAU * Math.max(y, 1e-3));
-    if (phone) { panel(W * 0.08, W * 0.94, H * 0.1, H * 0.44, S.hs, 0.12, wig, "spacings: Wigner", c.neutron, "s = spacing / D₀"); panel(W * 0.08, W * 0.94, H * 0.58, H * 0.86, S.hw, 0.15, pt, "reduced neutron widths: Porter–Thomas", c.photon, "y = Γn⁰ / ⟨Γn⁰⟩"); }
+    if (phone) { panel(W * 0.08, W * 0.94, H * 0.1, H * 0.39, S.hs, 0.12, wig, "spacings: Wigner", c.neutron, "s = spacing / D₀"); panel(W * 0.08, W * 0.94, H * 0.58, H * 0.86, S.hw, 0.15, pt, "reduced neutron widths: Porter–Thomas", c.photon, "y = Γn⁰ / ⟨Γn⁰⟩"); }
     else { panel(W * 0.08, W * 0.47, H * 0.18, H * 0.7, S.hs, 0.12, wig, "spacings: Wigner", c.neutron, "s = spacing / D₀"); panel(W * 0.55, W * 0.95, H * 0.18, H * 0.7, S.hw, 0.15, pt, "reduced neutron widths: Porter–Thomas", c.photon, "y = Γn⁰ / ⟨Γn⁰⟩"); }
     let n = 0; for (const v of S.hs) n += v;
     g.label(`${S.nL} ladders · ${n} spacings`, W / 2, H * (phone ? 0.95 : 0.86), { color: c.ink, size: phone ? 12 : 14, weight: 600, serif: true, bg: true });
@@ -258,12 +258,22 @@
     [-1, 0, 1].forEach((k) => { const e = q.e + k * span * 0.6; g.label(`${e.toFixed(2)} eV`, X(e), yB + 12, { color: c.faint, size: 10 }); });
     g.label(`capture near the ${q.e.toFixed(2)} eV resonance`, x0, yT - 14, { color: c.ink, size: 12, weight: 600, align: "left" });
     const peak = T > 0 ? slbw(one, q.e, Delta).cap : cold;
-    g.label(`Γ = ${(Gt * 1000).toFixed(1)} meV · Δ = ${(Delta * 1000).toFixed(1)} meV · peak ${fmtB(peak)} (0 K: ${fmtB(cold)})`, W / 2, yB + (phone ? 34 : 38), { color: c.ink, size: phone ? 11 : 13, weight: 600, bg: true });
-    g.label(`area ${(area1).toFixed(0)} b·eV (0 K: ${(area0).toFixed(0)})`, W / 2, yB + (phone ? 52 : 58), { color: c.soft, size: 12, bg: true });
+    if (phone) { g.label(`Γ = ${(Gt * 1000).toFixed(1)} meV · Δ = ${(Delta * 1000).toFixed(1)} meV`, W / 2, yB + 26, { color: c.ink, size: 12, weight: 600, bg: true }); g.label(`peak ${fmtB(peak)} (0 K: ${fmtB(cold)})`, W / 2, yB + 44, { color: c.ink, size: 12, weight: 600, bg: true }); }
+    else g.label(`Γ = ${(Gt * 1000).toFixed(1)} meV · Δ = ${(Delta * 1000).toFixed(1)} meV · peak ${fmtB(peak)} (0 K: ${fmtB(cold)})`, W / 2, yB + 38, { color: c.ink, size: 13, weight: 600, bg: true });
+    { const k = `${q.e}|${T.toFixed(1)}`; if (!S.dpA || S.dpA.k !== k) S.dpA = { k, ...wideAreas(q, Delta) }; area0 = S.dpA.a0; area1 = S.dpA.a1; } // the drawn window cuts the wings: integrate wide
+    g.label(`area ${(area1).toFixed(0)} b·eV (0 K: ${(area0).toFixed(0)})`, W / 2, yB + (phone ? 62 : 58), { color: c.soft, size: 12, bg: true });
     // thermal motion: target nuclei jittering with speed ~ sqrt(T)
     const ny = H * (phone ? 0.92 : 0.92), amp = 2 + 10 * Math.sqrt(T / 3000);
     for (let i = 0; i < 9; i++) { const x = lerp(W * 0.2, W * 0.8, i / 8) + Math.sin(S.time * (4 + i) + i * 1.7) * amp, y = ny + Math.cos(S.time * (3.3 + i * 0.7) + i) * amp * 0.4; g.ball(x, y, 6, c.neutron, 0.85); }
     g.label(T > 0 ? `target nuclei at ${T.toFixed(0)} K` : "target nuclei at rest", W / 2, ny - 18 - amp, { color: c.soft, size: 11 });
+  }
+
+  /** capture areas of one level, cold and broadened, over +-400 widths (or to 0.9 E): a sinh grid, dense at the peak */
+  function wideAreas(q, Delta) {
+    const Gt = gnAt(q, q.e) + q.gg, w = Math.max(1e-4, Math.min(Gt, Delta > 0 ? Delta : Gt) / 2), reach = Math.min(400 * Math.max(Gt, Delta), 0.9 * q.e), umax = Math.asinh(reach / w), n = 1200, du = 2 * umax / n;
+    let a0 = 0, a1 = 0;
+    for (let i = 0; i <= n; i++) { const u = -umax + i * du, e = q.e + w * Math.sinh(u), jac = w * Math.cosh(u) * du * (i === 0 || i === n ? 0.5 : 1); const c0 = slbw([q], e, 0).cap; a0 += c0 * jac; a1 += (Delta > 0 ? slbw([q], e, Delta).cap : c0) * jac; }
+    return { a0, a1 };
   }
 
   // ---------- scene 4: window averages against Hauser-Feshbach ----------
@@ -292,7 +302,8 @@
     S.trace.forEach(([e, v]) => g.dot(X(e), Y(v), 2.6, c.warm, 0.85));
     g.glow(X(ec), Y(avg), 14, c.warm, 0.6); g.dot(X(ec), Y(avg), 5, c.warm);
     const h = hfCap(ec);
-    g.label(`${N} levels around ${ec.toFixed(0)} eV: ${avg.toFixed(2)} b · HF ${h.noW.toFixed(2)} b without, ${h.W.toFixed(2)} b with the correction`, W / 2, H * (phone ? 0.84 : 0.86), { color: c.ink, size: phone ? 10 : 12, weight: 600, bg: true });
+    if (phone) { g.label(`${N} levels around ${ec.toFixed(0)} eV: ${avg.toFixed(2)} b`, W / 2, H * 0.84, { color: c.warm, size: 12, weight: 600, bg: true }); g.label(`HF ${h.noW.toFixed(2)} b without, ${h.W.toFixed(2)} b with the correction`, W / 2, H * 0.84 + 18, { color: c.ink, size: 11, bg: true }); }
+    else g.label(`${N} levels around ${ec.toFixed(0)} eV: ${avg.toFixed(2)} b · HF ${h.noW.toFixed(2)} b without, ${h.W.toFixed(2)} b with the correction`, W / 2, H * 0.86, { color: c.ink, size: 12, weight: 600, bg: true });
   }
 
   // ---------- scene 5: resolution: resolved, unresolved, smooth ----------
@@ -317,7 +328,8 @@
     g.label("resolved", (F.x0 + xr) / 2, F.yT + 12, { color: c.fission, size: 12, weight: 600, bg: true });
     if (xu - xr > 50) g.label("unresolved", (xr + xu) / 2, F.yT + 12, { color: c.photon, size: 12, weight: 600, bg: true });
     if (F.x1 - xu > 50) g.label("averaged", (xu + F.x1) / 2, F.yT + 12, { color: c.accent, size: 12, weight: 600, bg: true });
-    g.label("capture as measured with finite resolution · dashed: Hauser–Feshbach with fluctuations", F.x0, F.yT - 14, { color: c.ink, size: phone ? 10 : 12, weight: 600, align: "left" });
+    if (phone) { g.label("capture as measured, finite resolution", F.x0, F.yT - 30, { color: c.ink, size: 12, weight: 600, align: "left" }); g.label("dashed: Hauser–Feshbach with fluctuations", F.x0, F.yT - 14, { color: c.soft, size: 11, align: "left" }); }
+    else g.label("capture as measured with finite resolution · dashed: Hauser–Feshbach with fluctuations", F.x0, F.yT - 14, { color: c.ink, size: 12, weight: 600, align: "left" });
     g.label(`resolution reaches D₀/3 at ${R.er < 1000 ? R.er.toFixed(0) + " eV" : (R.er / 1000).toFixed(1) + " keV"}`, W / 2, F.yB + (phone ? 34 : 38), { color: c.ink, size: phone ? 12 : 14, weight: 600, serif: true, bg: true });
     // a pulse of neutrons racing down a flight path: slow ones arrive late, spread in time = spread in energy
     const fy = H * 0.9, fx0 = W * 0.1, fx1 = W * 0.9, t = (((S.time % 2.4) + 2.4) % 2.4) / 2.4;

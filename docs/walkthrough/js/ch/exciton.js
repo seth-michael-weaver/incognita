@@ -60,6 +60,7 @@
     },
   });
 
+  const einBack = (S) => { if (S.einKeep != null) { S.to("Ein", S.einKeep); S.einKeep = null; } }; // undo step 6's forced energy
   WT.chapter("exciton", {
     num: "Chapter 26", title: "The exciton model, in numbers", short: "Exciton model",
     lead: "Chapter 7 followed one fast neutron through a few collisions. Here are the rates that decide, at each stage, whether the next thing is another collision or an escape, and the spectrum they add up to.",
@@ -70,14 +71,14 @@
   <div class="formula">ω(p,h,E) = g<sup>n</sup> (E − A<sub>p,h</sub>)<sup>n−1</sup> / (p! h! (n−1)!) ,  A<sub>p,h</sub> = max(p,h)²/g − (p² + h² + p + h)/4g</div>
   <div class="ctl"><label for="ex-n">Particles p (holes p − 1)</label><input id="ex-n" type="range" data-bind="pp" min="2" max="6" step="1" value="3" data-instant><output data-show="pp" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="pauli" aria-pressed="true">Pauli correction</button></div>
-  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ is the density of single-particle levels near the Fermi energy. <i>A<sub>p,h</sub></i> is the <b>Pauli</b> correction: two particles cannot share a level, so the lowest configurations cost energy and the density near the threshold drops. The sketch shows one configuration at a time with the chosen <i>p</i>, drawn at random.</p>
+  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ is the density of single-particle levels near the Fermi energy. <i>A<sub>p,h</sub></i> is the <b>Pauli</b> correction: two particles cannot share a level, so the lowest configurations cost energy and the density near the threshold drops. The curves are named by their counts: 3p2h means 3 particles and 2 holes. The sketch shows one configuration at a time with the chosen <i>p</i>, drawn at random: each hole is one nucleon missing from below the Fermi level.</p>
 </div>
 <div class="step">
   <h3>Going deeper or getting out</h3>
   <p>From each stage two things can happen. A collision creates another pair, at the rate λ<sup>+</sup>, which by Fermi's golden rule is the squared matrix element times the density of states it can reach. Or a particle leaves, at the rate <i>W</i>, given by detailed balance from the inverse cross section and the ratio of state densities with and without the escaping particle.</p>
   <div class="formula">λ<sup>+</sup>(n) = (2π/ħ) M² ω<sub>acc</sub> ,  W(p,h,ε) = (2s+1)/(π²ħ³) με σ<sub>inv</sub>(ε) ω(p−1,h,U) / ω(p,h,E)</div>
   <div class="ctl"><label for="ex-e">Neutron energy (MeV)</label><input id="ex-e" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
-  <p>The bars are the two rates at each stage, on a log scale: λ<sup>+</sup> of order 10²² s⁻¹, <i>W</i> about a tenth of it at the first stage and falling with every stage, since each new pair thins the energy the leading particle can carry. The engine takes M² from the Koning–Duijvestijn form, which falls with the energy per exciton:</p>
+  <p>Each stage is labelled by its counts (2p1h: 2 particles, 1 hole). The bars are the two rates at each stage, on a log scale: λ<sup>+</sup> of order 10²² s⁻¹, <i>W</i> about a tenth of it at the first stage and falling with every stage, since each new pair thins the energy the leading particle can carry. The engine takes M² from the Koning–Duijvestijn form, which falls with the energy per exciton:</p>
   <div class="formula">M² = (C₁ A<sub>p</sub> / A³) · [7.48 + 4.62×10⁵ / (E/(n A<sub>p</sub>) + 10.7)³]  MeV²</div>
 </div>
 <div class="step">
@@ -114,12 +115,12 @@
       S.on("pauli", () => { const on = S.target.pauliOn < 0.5; S.to("pauliOn", on ? 1 : 0); press(on); });
     },
     steps: [
-      (S) => { S.set("mode", "omega"); },
-      (S) => { S.set("mode", "rates"); },
-      (S) => { S.set("mode", "master"); S.t0 = S.time - (SHOT ? 2.2 : 0); },
-      (S) => { S.set("mode", "spec"); },
-      (S) => { S.set("mode", "frac"); },
-      (S) => { S.set("mode", "multi"); S.to("Ein", 30); },
+      (S) => { S.set("mode", "omega"); einBack(S); },
+      (S) => { S.set("mode", "rates"); einBack(S); },
+      (S) => { S.set("mode", "master"); einBack(S); S.t0 = S.time - (SHOT ? 2.2 : 0); },
+      (S) => { S.set("mode", "spec"); einBack(S); },
+      (S) => { S.set("mode", "frac"); einBack(S); },
+      (S) => { S.set("mode", "multi"); if (S.einKeep == null) S.einKeep = S.target.Ein; S.to("Ein", 30); }, // its own 30 MeV, given back on leaving
     ],
     frame(g, S, dt) {
       if (S.mode === "omega") drawOmega(g, S, dt);
@@ -153,15 +154,16 @@
     g.restore();
     if (on > 0.5) g.label("dashed: no Pauli correction", x1, yB - 14, { color: c.soft, size: 11, align: "right", bg: true });
     // a Fermi sea with one random configuration of pSel particles and pSel - 1 holes, resampled every 0.6 s
-    const fx = phone ? W * 0.5 : W * 0.82, fy = phone ? H * 0.8 : H * 0.5, rungs = 14, dy = (phone ? H * 0.019 : H * 0.045), hw = phone ? W * 0.32 : W * 0.12;
+    const fx = phone ? W * 0.5 : W * 0.82, fy = phone ? H * 0.79 : H * 0.5, rungs = 14, dy = (phone ? H * 0.025 : H * 0.045), hw = phone ? W * 0.26 : W * 0.12;
     S.cfgT += dt; if (!S.cfg || S.cfg.p !== pSel || S.cfgT > 0.6) {
       S.cfgT = 0; const r = Math.random, used = new Set(), pick = (lo, hi) => { let k; do { k = lo + Math.floor(r() * (hi - lo)); } while (used.has(k)); used.add(k); return k; };
       const parts = [], holes = []; for (let i = 0; i < pSel; i++) parts.push(pick(0, 7)); for (let i = 0; i < pSel - 1; i++) holes.push(pick(-7, 0));
       S.cfg = { p: pSel, parts, holes };
     }
     for (let k = -7; k < 7; k++) { const y = fy - (k + 0.5) * dy; g.line(fx - hw, y, fx + hw, y, c.soft, 1, 0.5); }
-    g.line(fx - hw - 8, fy, fx + hw + 8, fy, c.warm, 1.6, 0.8, [5, 4]); g.label("Fermi level", fx + hw + 10, fy, { color: c.warm, size: 11, align: phone ? "right" : "left" });
-    for (let k = -7; k < 0; k++) { if (S.cfg.holes.includes(k)) { g.ring(fx, fy - (k + 0.5) * dy, dy * 0.32, c.neutron, 1.6); continue; } g.dot(fx - hw * 0.4, fy - (k + 0.5) * dy, dy * 0.26, c.neutron, 0.7); g.dot(fx + hw * 0.4, fy - (k + 0.5) * dy, dy * 0.26, c.neutron, 0.7); g.dot(fx, fy - (k + 0.5) * dy, dy * 0.26, c.neutron, 0.7); }
+    g.line(fx - hw - 8, fy, fx + hw + 8, fy, c.warm, 1.6, 0.8, [5, 4]); g.label("Fermi level", phone ? fx - hw - 10 : fx + hw + 10, fy, { color: c.warm, size: 11, align: phone ? "right" : "left" });
+    // filled rungs below the Fermi level hold three nucleons each; a hole is ONE of them missing (the open ring), the other two stay
+    for (let k = -7; k < 0; k++) { const y = fy - (k + 0.5) * dy; g.dot(fx - hw * 0.4, y, dy * 0.26, c.neutron, 0.7); g.dot(fx + hw * 0.4, y, dy * 0.26, c.neutron, 0.7); if (S.cfg.holes.includes(k)) g.ring(fx, y, dy * 0.3, c.warm, 1.8); else g.dot(fx, y, dy * 0.26, c.neutron, 0.7); }
     for (const k of S.cfg.parts) { const y = fy - (k + 0.5) * dy; g.glow(fx, y, dy * 0.8, c.warm, 0.4); g.ball(fx, y, dy * 0.3, c.neutron); }
     g.label(`${pSel} particles, ${pSel - 1} holes`, fx, fy - 7.5 * dy - 14, { color: c.ink, size: 12, weight: 600, bg: true });
   }
@@ -211,7 +213,8 @@
     // the emitted share
     const em = out.reduce((s, v) => s + v, 0), ey = H * (phone ? 0.78 : 0.8), ew = (x1 - x0);
     g.ctx.save(); g.ctx.fillStyle = g.rgba(c.line, 0.8); g.ctx.fillRect(x0, ey, ew, 12); g.ctx.fillStyle = g.rgba(c.photon, 0.9); g.ctx.fillRect(x0, ey, ew * em / Math.max(C.emitted, 1e-9) * C.emitted, 12); g.ctx.restore();
-    g.label(`emitted before equilibrium: ${(100 * em).toFixed(1)} % (of ${(100 * C.emitted).toFixed(1)} % in the end)`, x0, ey - 12, { color: c.photon, size: 12, weight: 600, align: "left" });
+    if (phone) { g.label(`emitted before equilibrium: ${(100 * em).toFixed(1)} %`, x0, ey - 28, { color: c.photon, size: 12, weight: 600, align: "left" }); g.label(`(of ${(100 * C.emitted).toFixed(1)} % in the end)`, x0, ey - 12, { color: c.photon, size: 12, align: "left" }); }
+    else g.label(`emitted before equilibrium: ${(100 * em).toFixed(1)} % (of ${(100 * C.emitted).toFixed(1)} % in the end)`, x0, ey - 12, { color: c.photon, size: 12, weight: 600, align: "left" });
     g.label(`t = ${(tNow / tScale).toFixed(2)} × 10⁻²² s`, W / 2, H * 0.08, { color: c.ink, size: phone ? 14 : 16, weight: 600, serif: true, bg: true });
     // escaping neutrons from the bars, rate ~ W P
     if (!S.esc) S.esc = []; for (let i = 0; i < st.length; i++) if (Math.random() < st[i].W * P[i] * dt * 5e-21) S.esc.push({ x: x0 + (i + 0.5) * slot, y: yB - (yB - yT) * P[i], t0: S.time });
@@ -270,8 +273,8 @@
     g.label(`${E.toFixed(0)} MeV: ${(100 * f).toFixed(1)} %`, X(E), Y(f) - 18, { color: c.alpha, size: 12, weight: 600, bg: true });
     // the two-step picture above: residual with leftover excitons, a second neutron leaving
     const ty = H * 0.15, cx1 = W * 0.25, cx2 = W * 0.6, t = (((S.time % 3) + 3) % 3) / 3;
-    g.glow(cx1, ty, 26, c.warm, 0.45); g.ball(cx1, ty, 9, c.warm); g.label("2p1h", cx1, ty + 24, { color: c.soft, size: 11 });
-    g.glow(cx2, ty, 22, c.warm, 0.3); g.ball(cx2, ty, 8, c.warm); g.label("residual: 1p1h", cx2, ty + 24, { color: c.soft, size: 11 });
+    g.glow(cx1, ty, 26, c.warm, 0.45); g.ball(cx1, ty, 9, c.warm); g.label("2p1h", cx1, ty + 22, { color: c.soft, size: 12 }); g.label("(2 particles, 1 hole)", cx1, ty + 37, { color: c.soft, size: 11 });
+    g.glow(cx2, ty, 22, c.warm, 0.3); g.ball(cx2, ty, 8, c.warm); g.label("residual: 1p1h", cx2, ty + 22, { color: c.soft, size: 12 }); g.label("(1 particle, 1 hole)", cx2, ty + 37, { color: c.soft, size: 11 });
     const u1 = smooth(0, 0.45, t), u2 = smooth(0.5, 0.95, t);
     g.ball(lerp(cx1, cx2 - 30, u1), ty - 30 * Math.sin(Math.PI * u1), 5, c.neutron, 1 - smooth(0.4, 0.5, t));
     if (t > 0.5) g.ball(lerp(cx2, W * 0.92, u2), ty - 30 * Math.sin(Math.PI * u2), 5, c.neutron, 1 - smooth(0.9, 1, t));

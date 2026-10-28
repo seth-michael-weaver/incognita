@@ -145,7 +145,7 @@
 </div>
 <div class="step">
   <h3>A ladder from four numbers</h3>
-  <p>The peaks now come from four averages you can set. For an unmeasured nucleus only these averages can be predicted: the mean spacing <i>D</i><sub>0</sub>; the <b>strength functions</b> <i>S</i><sub>0</sub> and <i>S</i><sub>1</sub>, the average neutron width per unit spacing for s-wave (head-on) and p-wave (off-centre) neutrons; and the average γ width. From these the code builds a <b>ladder</b>: one random set of levels with those averages.</p>
+  <p>The peaks now come from four averages you can set. For an unmeasured nucleus only these averages can be predicted: the mean spacing <i>D</i><sub>0</sub>; the <b>strength functions</b> <i>S</i><sub>0</sub> and <i>S</i><sub>1</sub>, the average neutron width per unit spacing for s-wave (head-on) and p-wave (off-centre) neutrons; and the average γ width. From these the code builds a <b>ladder</b>: one random set of levels with those averages. Three have sliders here; <i>S</i><sub>1</sub> stays fixed (its value is written under the peaks).</p>
   <div class="ctl"><label for="res-d0">Spacing D₀ (eV)</label><input id="res-d0" type="range" data-bind="D0" min="3" max="60" step="0.5" value="20"><output data-show="D0" data-fmt="1"></output></div>
   <div class="ctl"><label for="res-s0">Strength S₀ (×10⁻⁴)</label><input id="res-s0" type="range" data-bind="S0" min="0.2" max="3" step="0.05" value="1"><output data-show="S0" data-fmt="2"></output></div>
   <div class="ctl"><label for="res-gg">γ width ⟨Γγ⟩ (meV)</label><input id="res-gg" type="range" data-bind="Gg" min="10" max="80" step="1" value="23"><output data-show="Gg" data-fmt="0"></output></div>
@@ -219,7 +219,7 @@
     }
     // the walking neutron
     if (walk.auto && S.target.En !== walk.last && !Number.isNaN(walk.last)) walk.auto = false;
-    if (walk.auto) { let e = S.En + 7 * dt; if (e > EMAX - 1) e = 1; S.set("En", e); walk.last = e; }
+    if (walk.auto) { let e = S.En + 7 * dt; if (e > EMAX - 1) e = 1; S.set("En", e); walk.last = e; const inp = document.getElementById("res-e"); if (inp) inp.value = e; }   // the slider's thumb follows the walk
     const E = clamp(S.En, 0.5, EMAX - 0.5), wx = X(E), HOP = 0.34, sv = sigVis(F, E, wx, fx, fw), P = sv / (sv + 300);
     walk.hop += dt;
     if (walk.hop >= HOP) { walk.hop -= HOP; if (S.time - walk.catchT > 0.9) { walk.nH++; if (walk.r() < P) { walk.catchT = S.time; walk.catchX = wx; walk.catchY = yG - 10; walk.nC++; } } }
@@ -245,8 +245,9 @@
       const y = H * (0.24 + 0.27 * i), hT = H * 0.09, px = (x1 - x0) / nShow, r = meanRatio(row.lv.slice(0, 300));
       groundStrip(g, x0 - 10, x1 + 10, y, H * 0.04);
       for (const v of row.lv) { const x = x0 + (v - row.lv[0]) * px; if (x > x1) break; peak(g, x, y, hT, 9, { col: row.col, sway: Math.sin(S.time * 1.1 + x * 0.07) * 0.8 }); }
-      g.label(row.name, x0, y - hT - 14, { color: row.col === c.faint ? c.soft : row.col, size: fs, align: "left", weight: 600 });
-      g.label(W < 600 ? `${row.expect} · ⟨r̃⟩ ≈ ${r.toFixed(2)}` : `${row.expect} · spacing ratio ⟨r̃⟩ ≈ ${r.toFixed(2)}`, x1, y - hT - 14, { color: c.soft, size: fs - 1, align: "right", bg: true });
+      const ph = W < 600;                                   // phones: name and result on two lines, so they never touch
+      g.label(row.name, x0, y - hT - (ph ? 30 : 14), { color: row.col === c.faint ? c.soft : row.col, size: fs, align: "left", weight: 600 });
+      g.label(ph ? `${row.expect} · ⟨r̃⟩ ≈ ${r.toFixed(2)}` : `${row.expect} · spacing ratio ⟨r̃⟩ ≈ ${r.toFixed(2)}`, ph ? x0 : x1, y - hT - 14, { color: c.soft, size: fs - 1, align: ph ? "left" : "right", bg: true });
     });
     g.label(W < 600 ? "⟨r̃⟩: 0.39 if random, 0.53 for random-matrix" : "same average spacing in every row · ⟨r̃⟩: 0.39 if random, 0.53 for random-matrix", W * 0.5, H * 0.93, { color: c.ink, size: fs + 1, serif: true, italic: true });
   }

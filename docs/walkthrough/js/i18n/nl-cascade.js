@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>Een tocht over de kaart</h3>
   <p>De stromen zijn reacties die over een hoek van de <b>nuclidenkaart</b> lopen, waarop kernen staan uitgezet naar neutronengetal N (horizontaal) en protonengetal Z (verticaal). Elke stroom begint in het omlijnde compoundvakje; elk vakje is genoemd naar de reactie die daar eindigt.</p>
   <p>Een <em class="n">neutron</em> eruit schuift één vakje naar links, een <em class="p">proton</em> één naar beneden, een <em class="a">alfadeeltje</em> (twee protonen, twee neutronen) twee schuin. De breedte van een stroom is hoeveel die stap zet; tint en percentage geven aan waar reacties eindigen.</p>
+  <div class="ctl"><label for="cs-e4">Neutronenergie</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Schiet 200 reacties af</button></div>
   <p>Elke stap kost 7 tot 11 MeV aan separatie-energie, dus zelfs bij 30 MeV is de tocht hooguit drie of vier stappen lang.</p>
 </div>

@@ -115,8 +115,9 @@
   <h3>Shells that melt</h3>
   <p>Single-nucleon levels, two nucleons each, for two nuclei. Left, a closed shell: everything below a big gap is full, so any move pays for the whole gap. Right, a mid-shell nucleus with a half-full top level, so cheap moves exist at once. Each counter shows how many arrangements hold the given heat.</p>
   <div class="ctl"><label for="cn-u">Heat (excitation)</label><input id="cn-u" type="range" data-bind="U" min="0" max="40" step="0.5" value="3"><output data-show="U" data-fmt="1"></output></div>
-  <p>Drag the heat up and watch nucleons hop. At low heat the closed shell is starved of arrangements; with enough heat the gap stops mattering and both counts grow alike. The <b>level-density parameter</b> <i>a</i> carries this: the needles start apart and converge on the smooth value <i>ã</i> over about 10 MeV. The engine fades the shell correction δW at a rate γ:</p>
-  <div class="formula">a(U) = ã · [1 + δW · (1 − e<sup>−γU</sup>) / U]</div>
+  <p>Drag the heat up and watch nucleons hop. At low heat the closed shell is starved of arrangements; with enough heat the gap stops mattering and both counts grow alike. The engine sums this up in one number per nucleus, the <b>level-density parameter</b> <i>a</i>: the bigger <i>a</i>, the faster the count of arrangements grows with heat. The needles show it for each nucleus: they start apart and, over about 10 MeV, both settle on the same smooth value (written <i>ã</i>, "a-tilde"), the one a nucleus with no shell gaps would have.</p>
+  <p>So the engine starts each nucleus with its shell effect, the extra energy its gaps are worth (written δW), and lets that effect fade as the heat rises.</p>
+  <div class="aside">The formula: <i>a</i>(<i>U</i>) = <i>ã</i> · [1 + δW · (1 − e<sup>−γ<i>U</i></sup>) / <i>U</i>], with <i>U</i> the heat and γ (gamma, about 0.1 per MeV here, less in heavier nuclei) how quickly the shell effect fades.</div>
 </div>
 <div class="step">
   <h3>Sorted by spin and parity</h3>
@@ -303,7 +304,7 @@
     const cxS = W * (phone ? 0.24 : 0.32);
     stack(cxS, WANT, c.ink, `${WANT} counted`);
     stack(cxS + W * (phone ? 0.36 : 0.3), got, ok ? c.fission : c.accent, `${got < 999 ? Math.round(got) : "999+"} predicted`);
-    g.label(ok ? "equal: the plank rests on the counted rungs" : got < WANT ? "too few: the plank is too steep and sinks" : "too many: the plank is too shallow and floats", W * 0.5, sy1 - sh - 6, { color: ok ? c.fission : c.soft, size: phone ? 12 : 14, weight: 600, serif: true, bg: true });
+    g.label(ok ? "equal: the plank rests on the counted rungs" : got < WANT ? "too few: the plank is too steep and sinks" : "too many: the plank is too shallow and floats", W * 0.5, sy1 + (phone ? 16 : 20), { color: ok ? c.fission : c.soft, size: phone ? 12 : 14, weight: 600, serif: true, bg: true });   // under the stacks, clear of "+N more"
   }
 
   // ---------- scene 4: shells that melt ----------
@@ -374,7 +375,7 @@
     const x0 = W * 0.04, x1 = W * (phone ? 0.96 : 0.75), yB = H * 0.9, yT = H * (phone ? 0.36 : 0.3);
     const colW = (x1 - x0) / NJ, dw = colW * 0.82, tr = Math.max(2.2, Math.min(dw / 5.2, 6.5));
     const perRow = Math.max(2, Math.floor((dw - 4) / (2.3 * tr))), rowH = tr * 2.3, rows = Math.floor((yB - yT - 6) / rowH), cap = perRow * rows;
-    const hop = [W * (phone ? 0.5 : 0.42), H * (phone ? 0.2 : 0.12)];
+    const hop = [W * (phone ? 0.5 : 0.42), phone ? H * 0.2 : Math.max(H * 0.12, H * 0.04 + 50)];   // its label stays under the title on short canvases
     const TOTAL = Math.min(200, cap * 0.85 / 0.285);
     const now = S.time, r = spinRand;
     // keep each drawer at its target: spawn into short drawers, retire tokens from full ones, churn a little at rest

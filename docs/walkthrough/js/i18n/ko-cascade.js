@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>핵종 도표를 가로지르는 걸음</h3>
   <p>흐름들은 <b>핵종 도표</b>의 한구석을 가로질러 걷는 반응들입니다. 핵종 도표는 원자핵을 중성자 수 N(가로)과 양성자 수 Z(세로)로 배치한 지도입니다. 각 반응은 테두리가 그려진 복합핵 칸에서 출발하며, 각 칸에는 그곳에서 끝나는 반응의 이름이 붙어 있습니다.</p>
   <p><em class="n">중성자</em>가 나가면 한 칸 왼쪽으로, <em class="p">양성자</em>가 나가면 한 칸 아래로, <em class="a">알파 입자</em>(양성자 둘, 중성자 둘)가 나가면 대각선으로 두 칸 움직입니다. 흐름의 폭은 그 걸음을 내딛는 양이고, 명암과 백분율은 반응이 끝나는 곳입니다.</p>
+  <div class="ctl"><label for="cs-e4">중성자 에너지</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">반응 200회 발사</button></div>
   <p>한 걸음마다 분리 에너지 7~11 MeV가 들기 때문에, 30 MeV에서도 걸음은 많아야 서너 번입니다.</p>
 </div>

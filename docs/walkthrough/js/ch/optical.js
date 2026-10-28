@@ -106,6 +106,7 @@
   }
   const log10 = (x) => Math.log(x) / Math.LN10;
   const SHOT = /[?&]shot=/.test(location.search);
+  const press = (act, on) => document.querySelectorAll(`#optical [data-act="${act}"]`).forEach((b) => b.setAttribute("aria-pressed", String(on)));
 
   Object.assign(WT.glossary || (WT.glossary = {}), {
     koningDelaroche: {
@@ -183,14 +184,13 @@
     setup(S) {
       S.set("mode", "pot"); S.to("E", 5, true); S.to("L", 1, true); S.to("absOn", 1, true); S.to("soOn", 1, true);
       S.probes = []; S.spawn = 0; S.sweep = 0;
-      const press = (act, on) => document.querySelectorAll(`#optical [data-act="${act}"]`).forEach((b) => b.setAttribute("aria-pressed", String(on)));
       S.on("abs", () => { const off = S.target.absOn > 0.5; S.to("absOn", off ? 0 : 1); press("abs", off); S.path = null; });
       S.on("so", () => { const off = S.target.soOn > 0.5; S.to("soOn", off ? 0 : 1); press("so", off); });
     },
     steps: [
       (S) => { S.set("mode", "pot"); },
-      (S) => { S.set("mode", "wave"); },
-      (S) => { S.set("mode", "smat"); if (SHOT) S.sweep = 0.35; },
+      (S) => { S.set("mode", "wave"); S.to("absOn", 1); press("abs", false); }, // step 3's switch must not carry back here
+      (S) => { S.set("mode", "smat"); S.set("L", 1); if (SHOT) S.sweep = 0.35; }, // its own wave: l = 1, not whatever step 2 left
       (S) => { S.set("mode", "so"); },
       (S) => { S.set("mode", "sums"); },
       (S) => { S.set("mode", "s0"); },
@@ -224,8 +224,9 @@
     g.area([[F.X(0), y0]].concat(im, [[F.X(RMAX), y0]]), c.proton, 0.2); g.poly(im, c.proton, 2.2); g.poly(ims, c.proton, 1.2, 0.6, [3, 3]);
     g.poly(so, c.alpha, 1.6, 0.9);
     g.label(`real well, depth ${d.VV.toFixed(1)} MeV`, F.X(0.4), Y(-d.VV) - 14, { color: c.neutron, size: phone ? 11 : 12, weight: 600, align: "left", bg: true });
-    g.label(`surface absorption, peak ${d.WD.toFixed(1)} MeV`, F.X(KD.RD) + 14, Y(-d.WD) + 16, { color: c.proton, size: phone ? 11 : 12, weight: 600, align: "left", bg: true });
-    g.label(`volume absorption ${d.WV.toFixed(1)} MeV`, F.X(0.4), Y(-d.WV) + 16, { color: c.proton, size: phone ? 10 : 11, align: "left", bg: true });
+    const ySurf = Y(-d.WD) + 16, yVol = Y(-d.WV) + 16 + (Math.abs(d.WV - d.WD) * sc < 20 ? (d.WV >= d.WD ? 18 : -18) : 0); // stack when the depths cross
+    g.label(phone ? `surface absorption ${d.WD.toFixed(1)} MeV` : `surface absorption, peak ${d.WD.toFixed(1)} MeV`, F.X(KD.RD) + 14, ySurf, { color: c.proton, size: phone ? 11 : 12, weight: 600, align: "left", bg: true });
+    g.label(`volume absorption ${d.WV.toFixed(1)} MeV`, F.X(0.4), yVol, { color: c.proton, size: phone ? 10 : 12, align: "left", bg: true });
     if (!phone) { const v = potAt(KD.RS + 0.4, d, 3).soR; g.label(`spin–orbit for l = 3, j = 7/2: ${(-v).toFixed(1)} MeV`, F.X(KD.RS + 0.4) + 14, Math.max(Y(v) + 38, Y(-d.WD) + 40), { color: c.alpha, size: 11, align: "left", bg: true }); }
     // probe neutrons at the incident energy: speed from E - Re U, survival from the local mean free path hbar v / 2|W|
     const yE = y0 - 16 - Math.min(E, 40) / 40 * (y0 - F.top - 26); g.line(F.x0, yE, F.x1, yE, c.warm, 1, 0.6, [4, 4]);
@@ -280,8 +281,15 @@
     g.label("nuclear surface", F.X(KD.RV), yc - amp - 16, { color: c.soft, size: 11 });
     rAxis(g, F, yc + amp + 22);
     const eta = Math.sqrt(s.Sr * s.Sr + s.Si * s.Si), del = 0.5 * Math.atan2(s.Si, s.Sr) * 180 / Math.PI;
-    g.label(`l = ${w.l}, j = ${w.l}+½ · E = ${w.E.toFixed(1)} MeV · |S| = ${eta.toFixed(3)} · δ = ${del.toFixed(0)}° · T = ${s.T.toFixed(3)}`, W / 2, H * (phone ? 0.96 : 0.95), { color: c.ink, size: phone ? 11 : 13, weight: 600, bg: true });
-    g.label("solid: the wave now · shaded: its size |u| · dashed: free wave", F.x1, yc - amp - 34, { color: c.soft, size: 11, align: "right" });
+    if (phone) { // 66 characters do not fit 375 px: two lines
+      g.label(`l = ${w.l}, j = ${w.l}+½ · E = ${w.E.toFixed(1)} MeV`, W / 2, H * 0.915, { color: c.ink, size: 12, weight: 600, bg: true });
+      g.label(`|S| = ${eta.toFixed(3)} · δ = ${del.toFixed(0)}° · T = ${s.T.toFixed(3)}`, W / 2, H * 0.96, { color: c.ink, size: 12, weight: 600, bg: true });
+      g.label("solid: the wave now · shaded: its size |u|", F.x1, yc - amp - 48, { color: c.soft, size: 11, align: "right" });
+      g.label("dashed: free wave", F.x1, yc - amp - 34, { color: c.soft, size: 11, align: "right" });
+    } else {
+      g.label(`l = ${w.l}, j = ${w.l}+½ · E = ${w.E.toFixed(1)} MeV · |S| = ${eta.toFixed(3)} · δ = ${del.toFixed(0)}° · T = ${s.T.toFixed(3)}`, W / 2, H * 0.95, { color: c.ink, size: 13, weight: 600, bg: true });
+      g.label("solid: the wave now · shaded: its size |u| · dashed: free wave", F.x1, yc - amp - 34, { color: c.soft, size: 12, align: "right" });
+    }
   }
 
   // ---------- scene 3: S in the complex plane ----------
@@ -340,7 +348,9 @@
     g.label("l", x0 - 4, yB + 13, { color: c.faint, size: 11, align: "right" });
     g.label(phone ? "hollow: j = l − ½ · solid: j = l + ½" : "hollow (purple): j = l − ½ · solid (blue): j = l + ½", W / 2, yB + 32, { color: c.soft, size: 12 });
     const rOn = on.sR, rOff = off.sR, rr = lerp(rOff, rOn, so);
-    g.label(`reaction cross section ${rr.toFixed(3)} b ${so > 0.5 ? `(without spin–orbit ${rOff.toFixed(3)} b)` : "(spin–orbit off)"}`, W / 2, H * (phone ? 0.88 : 0.88), { color: c.ink, size: phone ? 12 : 14, weight: 600, serif: true, bg: true });
+    const rTxt = `reaction cross section ${rr.toFixed(3)} b`, rSub = so > 0.5 ? `(without spin–orbit ${rOff.toFixed(3)} b)` : "(spin–orbit off)";
+    if (phone) { g.label(rTxt, W / 2, H * 0.875, { color: c.ink, size: 13, weight: 600, serif: true, bg: true }); g.label(rSub, W / 2, H * 0.875 + 20, { color: c.soft, size: 12, bg: true }); }
+    else g.label(`${rTxt} ${rSub}`, W / 2, H * 0.88, { color: c.ink, size: 14, weight: 600, serif: true, bg: true });
     // a grazing marker: l ~ kR
     const lg = kOf(E) * KD.RV; if (lg < n) { const x = x0 + lg * slot + slot * 0.5; g.line(x, yT, x, yB, c.warm, 1, 0.6, [2, 4]); g.label(`grazing l ≈ kR = ${lg.toFixed(1)}`, x + 4, yT + 12 + 6 * Math.sin(S.time * 2), { color: c.warm, size: 11, align: "left", bg: true }); }
   }

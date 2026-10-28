@@ -36,15 +36,18 @@
     num: "Chapter 19", title: "Hotter means less reactive", short: "Doppler",
     html: `
 <div class="step">
-  <p>Hotter fuel: its atoms jiggle faster.</p>
+  <h3>Hot fuel jiggles</h3>
+  <p>Hotter fuel: its atoms jiggle faster. Each uranium atom is no longer sitting still when a neutron arrives.</p>
   <div class="ctl"><label for="dop-t1">Fuel temperature (K)</label><input id="dop-t1" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="600"><output data-show="T" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>The peak spreads out; its area stays the same.</p>
+  <h3>The peak spreads out</h3>
+  <p>The curve is the chance that uranium-238 catches a neutron, plotted against the neutron's energy. Its height is a target area in <b>barns</b> (one barn is 10<sup>−24</sup> cm², roughly the size a nucleus shows a neutron). Because the atoms move, some meet the neutron head-on and some run away from it, so the narrow peak gets smeared: lower and wider. Its area stays the same.</p>
   <div class="ctl"><label for="dop-t2">Fuel temperature (K)</label><input id="dop-t2" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="1200"><output data-show="T" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>Thick fuel catches more neutrons, so <i>k</i> drops by itself.</p>
+  <h3>Wider wings catch more</h3>
+  <p>A fuel pellet is thick. The shaded band is the share of neutrons it stops at each energy. The peak's centre already stops everything, hot or cold, so a lower peak loses nothing there; the wider wings catch more. More neutrons are lost to capture instead of causing fission, so <i>k</i> drops by itself. (<i>k</i> is how many new fissions each fission leads to; Chapter 20 explains it.)</p>
   <div class="ctl"><label for="dop-t3">Fuel temperature (K)</label><input id="dop-t3" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="900"><output data-show="T" data-fmt="0"></output></div>
 </div>`,
     setup(S) { S.set("T", 600); },
@@ -76,13 +79,30 @@
       const x0 = W * (phone ? 0.1 : 0.08), x1 = W * 0.96, y0 = H * (phone ? 0.52 : 0.46), y1 = H * 0.84, X = (e) => x0 + (x1 - x0) * (e - ELO) / (EHI - ELO), Y = (s) => lerp(y1, y0, s / (R0.peak * 1.05));
       const cur = [], ref = []; for (let i = 0; i < NG; i += 2) { cur.push([X(ELO + i * dE), Y(R.s[i])]); ref.push([X(ELO + i * dE), Y(R0.s[i])]); }
       g.line(x0, y1, x1, y1, c.line, 1);
-      g.area([[x0, y1], ...cur, [x1, y1]], c.photon, 0.22); g.poly(cur, c.photon, 2.6, 1);
-      if (T > 320) { g.poly(ref, c.soft, 1.4, 0.7, [4, 4]); g.label("300 K", X(E0) + 10, Y(R0.peak) + 2, { color: c.soft, size: fs - 1, align: "left" }); }
-      g.label(`${T.toFixed(0)} K`, X(E0) + (T > 320 ? -10 : 10), Y(R.peak) - 12, { color: c.photon, size: fs, weight: 600, align: T > 320 ? "right" : "left" });
+      const shield = st >= 2; // step 3: shade the share stopped by a thick pellet, 1 - exp(-n sigma)
+      g.area([[x0, y1], ...cur, [x1, y1]], c.photon, shield ? 0.08 : 0.22); g.poly(cur, c.photon, shield ? 1.6 : 2.6, shield ? 0.45 : 1);
+      if (shield) {
+        const Ya = (f) => lerp(y1, y0, f), ab = [], ab0 = [];
+        for (let i = 0; i < NG; i += 2) { const x = X(ELO + i * dE); ab.push([x, Ya(1 - Math.exp(-NT * R.s[i]))]); ab0.push([x, Ya(1 - Math.exp(-NT * R0.s[i]))]); }
+        g.area([[x0, y1], ...ab, [x1, y1]], c.warm, 0.32); g.poly(ab, c.warm, 2.2, 0.95);
+        if (T > 320) g.poly(ab0, c.soft, 1.3, 0.8, [4, 4]);
+        g.line(x0, y0, x1, y0, c.warm, 1, 0.4, [2, 4]);
+        g.label("all stopped", x1, y0 - 10, { color: c.warm, size: fs - 1, align: "right" });
+        const wx = X(E0 + (phone ? 0.36 : 0.33)); g.label(phone ? "wings" : "wider wings catch more", wx, Ya(0.55), { color: c.warm, size: fs - 1, weight: 600, align: "left", bg: true });
+      }
+      if (T > 320 && !shield) { g.poly(ref, c.soft, 1.4, 0.7, [4, 4]); g.label("300 K", X(E0) + 10, Y(R0.peak) + 2, { color: c.soft, size: fs - 1, align: "left" }); }
+      if (!shield) g.label(`${T.toFixed(0)} K`, X(E0) + (T > 320 ? -10 : 10), Y(R.peak) - 12, { color: c.photon, size: fs, weight: 600, align: T > 320 ? "right" : "left" });
       [6.2, 6.4, 6.6, 6.8, 7.0, 7.2].forEach((e) => g.label(phone && e === 7.2 ? "7.2 eV" : e.toFixed(1), X(e), y1 + 12, { color: c.faint, size: fs - 2 }));
       if (!phone) g.label("neutron energy (eV) →", x1, y1 + 28, { color: c.soft, size: fs - 1, align: "right" });
-      g.label("capture cross section", x0, y0 - 10, { color: c.soft, size: fs - 1, align: "left" });
-      g.label(`peak ${(R.peak / 1000).toFixed(1)}k b · Doppler width ${(1000 * R.D).toFixed(0)} meV · area unchanged`, W * 0.5, H * 0.93, { color: c.ink, size: fs + 1, weight: 600, serif: true });
+      g.label(shield ? (phone ? "share stopped in the fuel" : "share of neutrons stopped in the fuel") : "capture cross section", x0, y0 - 10, { color: shield ? c.warm : c.soft, size: fs - 1, align: "left" });
+      const rd = { color: c.ink, size: fs + 1, weight: 600, serif: true };
+      if (shield) {
+        if (phone) { g.label("the centre already stops everything;", W * 0.5, H * 0.91, rd); g.label("the wider wings catch more", W * 0.5, H * 0.91 + fs + 6, rd); }
+        else g.label("the peak's centre already stops everything; the wider wings catch more", W * 0.5, H * 0.93, rd);
+      } else if (phone) {
+        g.label(`peak ${(R.peak / 1000).toFixed(1)}k barns · width ${(1000 * R.D).toFixed(0)} meV`, W * 0.5, H * 0.91, rd);
+        g.label("area unchanged", W * 0.5, H * 0.91 + fs + 6, rd);
+      } else g.label(`peak ${(R.peak / 1000).toFixed(1)}k barns · Doppler width ${(1000 * R.D).toFixed(0)} meV · area unchanged`, W * 0.5, H * 0.93, rd);
       g.label("illustration", W - 6, H - 10, { color: c.faint, size: 10, align: "right" });
     },
   });

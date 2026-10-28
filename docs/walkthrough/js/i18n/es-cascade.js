@@ -13,6 +13,7 @@ WT.es.ch.cascade = {
   <h3>Un paseo por la carta</h3>
   <p>Las corrientes son reacciones que recorren una esquina de la <b>carta de núclidos</b>, los núcleos ordenados por número de neutrones N (en horizontal) y de protones Z (en vertical). Todas empiezan en la casilla remarcada del núcleo compuesto; cada casilla lleva el nombre de la reacción que termina allí.</p>
   <p>Un <em class="n">neutrón</em> emitido mueve una casilla a la izquierda, un <em class="p">protón</em> una hacia abajo, una <em class="a">partícula alfa</em> (dos protones, dos neutrones) dos en diagonal. El ancho de la corriente es cuánto da ese paso; el tono y el porcentaje, dónde terminan las reacciones.</p>
+  <div class="ctl"><label for="cs-e4">Energía del neutrón</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lanzar 200 reacciones</button></div>
   <p>Cada paso cuesta de 7 a 11 MeV de energía de separación, así que incluso a 30 MeV el recorrido tiene como mucho tres o cuatro pasos.</p>
 </div>

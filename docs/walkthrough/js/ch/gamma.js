@@ -71,7 +71,7 @@
     return path;
   }
   const isoCache = {};
-  function isomerShare(j2) { if (isoCache[j2] !== undefined) return isoCache[j2]; const r = rng(1000 + j2); let n = 0; for (let i = 0; i < 300; i++) { const p = walk(ETOP, j2, r); if (LV[p[p.length - 1].lv].iso) n++; } return (isoCache[j2] = n / 300); }
+  function isomerCount(j2) { if (isoCache[j2] !== undefined) return isoCache[j2]; const r = rng(1000 + j2); let n = 0; for (let i = 0; i < 300; i++) { const p = walk(ETOP, j2, r); if (LV[p[p.length - 1].lv].iso) n++; } return (isoCache[j2] = n); } // of 300 cascades
   const paths = [];
   const sum = (a) => a.reduce((s, v) => s + v, 0);
   function pick(ws, r) { let u = r * sum(ws); for (let i = 0; i < ws.length; i++) { if (u < ws[i]) return i; u -= ws[i]; } return ws.length - 1; }
@@ -116,14 +116,14 @@
 <div class="step">
   <p>A hot state at 8 MeV (million electron-volts) sheds photons (γ); the pile beside the ladder collects where they land. Below 2 MeV the states are a few named rungs; above, a crowd that thickens steeply with energy (grey dots). Each photon carries off the energy of its drop, <i>E<sub>γ</sub></i>, and is drawn brighter in proportion to <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> is the photon's transmission coefficient (Chapter 9's door), <i>l</i> = 1 for dipole photons, and <i>f</i> is the <b>photon strength</b>: how readily the nucleus radiates at that energy. A drop's chance is <i>T<sub>γ</sub></i> times the crowd of states where it lands: small drops find many states but are faint; big drops are bright but find few.</p>
+  <p>In words: how easily a photon of energy <i>E<sub>γ</sub></i> gets out (<i>T<sub>γ</sub></i>, the photon's door from Chapter 9) grows like <i>E<sub>γ</sub></i>³ for the common kind of photon (dipole, <i>l</i> = 1), times the <b>photon strength</b> <i>f</i>: how readily this nucleus radiates at that energy. Then it must find a state to land on. Small drops have a crowd of states waiting but hardly get out; big drops get out easily but find few states. The winners sit in between.</p>
   <div class="ctl"><label for="gm-e0">Start energy</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Emit 100</button></div>
   <p>The pile peaks a few MeV below the start: most photons carry 2 to 4 MeV. Move the start energy and the peak follows.</p>
 </div>
 <div class="step">
   <h3>The whole nucleus rings</h3>
-  <p>The big peak on the right is the <b>giant dipole resonance</b>: all the protons (hatched, left) sloshing against all the neutrons (filled). Its frequency sets the photon energy the nucleus absorbs and emits most readily. The curve is the photon strength <i>f</i>, on a log scale (each step up is ten times more).</p>
+  <p>The big peak on the right is the <b>giant dipole resonance</b>: all the protons (hatched) sloshing back and forth against all the neutrons (filled). Its frequency sets the photon energy the nucleus absorbs and emits most readily. The curve is the photon strength <i>f</i>, on a log scale (each step up is ten times more).</p>
   <div class="ctl"><label for="gm-a">Mass number A</label><input id="gm-a" type="range" data-bind="A" min="40" max="240" step="1" value="112"><output data-show="A" data-fmt="0"></output></div>
   <p>Drag the mass number A (protons plus neutrons): heavy nuclei slosh more slowly, ringing near 12 to 14 MeV; light ones near 20. A decaying nucleus emits photons of only a few MeV, so what matters most is the shaded low-energy tail.</p>
 </div>
@@ -223,11 +223,12 @@
       EM.fly.push({ i, Eg, t: 0, x1: xc - hw * 0.3 + Math.random() * hw * 1.2 });
     }
     for (let k = EM.fly.length - 1; k >= 0; k--) {
-      const f = EM.fly[k]; f.t += dt; const u = f.t / 0.7, y1 = Y(E0 - f.Eg);
+      const f = EM.fly[k]; f.t += dt; const u = f.t / 1.1, y1 = Y(E0 - f.Eg), yb = Y(E0 - (f.i + 0.5) / NB * E0);
+      const slot = Math.min(cap - 1, Math.round(EM.cnt[f.i] * sc)), sx = px0 + slot * rd * 2.1;
       if (u >= 1) { EM.cnt[f.i]++; EM.fly.splice(k, 1); continue; }
-      const x = lerp(hx, f.x1, u), y = lerp(hy, y1, u), wgt = Math.min(1, (f.Eg / 5) ** 3);
-      streak(g, x, y, Math.atan2(y1 - hy, f.x1 - hx), 22, wgt);
-      if (u > 0.85) g.glow(f.x1, y1, 10, c.photon, 0.6);
+      const wgt = Math.min(1, (f.Eg / 5) ** 3);
+      if (u < 0.6) { const v = u / 0.6, x = lerp(hx, f.x1, v), y = lerp(hy, y1, v); streak(g, x, y, Math.atan2(y1 - hy, f.x1 - hx), 22, wgt); if (v > 0.8) g.glow(f.x1, y1, 10, c.photon, 0.6); }
+      else { const v = smooth(0, 1, (u - 0.6) / 0.4), x = lerp(f.x1, sx, v), y = lerp(y1, yb, v); g.glow(f.x1, y1, 8, c.photon, 0.4 * (1 - v)); g.dot(x, y, rd + 0.6, c.photon, 0.95); }
     }
   }
 
@@ -367,8 +368,8 @@
     const xc = W * (phone ? 0.55 : 0.5), hw = Math.min(W * (phone ? 0.17 : 0.14), 110);
     const Y = ladder2(g, xc, hw);
     const j2 = 2 * Math.round(clamp(S.target.J0, 0, 8)) + 1;
-    if (ISO.key !== j2) { ISO.key = j2; const r = rng(400 + j2); ISO.iso = 0; ISO.gs = 0; for (let k = 0; k < 30; k++) { const p = walk(ETOP, j2, r); if (LV[p[p.length - 1].lv].iso) ISO.iso++; else ISO.gs++; } ISO.balls.length = 0; }
-    const share = isomerShare(j2);
+    if (ISO.key !== j2) { ISO.key = j2; ISO.iso = isomerCount(j2); ISO.gs = 300 - ISO.iso; ISO.balls.length = 0; } // the piles start from the same 300 cascades as the headline
+    const share = ISO.iso / Math.max(1, ISO.iso + ISO.gs);
     // entrance
     const ex = pathX(xc, hw, 0), ey = Y(ETOP);
     g.glow(ex, ey, 24, c.warm, 0.6); g.dot(ex, ey, 6, c.warm);
@@ -381,7 +382,7 @@
     const tot = Math.max(1, ISO.iso + ISO.gs);
     g.label(`isomer: ${ISO.iso} (${Math.round(100 * ISO.iso / tot)} %)`, W * 0.03, Y(0.4) - rd * 7 - 12, { color: c.accent, size: 13, weight: 700, align: "left", bg: true });
     g.label(`ground state: ${ISO.gs} (${Math.round(100 * ISO.gs / tot)} %)`, W * 0.03, Y(0) + 18, { color: c.ink, size: 13, weight: 600, align: "left", bg: true });
-    g.label(phone ? `many cascades: ≈ ${Math.round(share * 100)} % isomer` : `over many cascades from J = ${j2}/2: ≈ ${Math.round(share * 100)} % end on the isomer`, W * 0.5, H * 0.035, { color: c.ink, size: phone ? 13 : 15, weight: 600, serif: true, bg: true });
+    g.label(phone ? `${ISO.iso + ISO.gs} cascades: ≈ ${Math.round(share * 100)} % isomer` : `${ISO.iso + ISO.gs} cascades from J = ${j2}/2: ≈ ${Math.round(share * 100)} % end on the isomer`, W * 0.5, H * 0.035, { color: c.ink, size: phone ? 13 : 15, weight: 600, serif: true, bg: true });
     // the balls
     ISO.acc += dt * 2.2;
     while (ISO.acc > 1) { ISO.acc -= 1; if (ISO.balls.length < 14) ISO.balls.push({ p: walk(ETOP, j2, Math.random), t: 0, off: (Math.random() - 0.5) * hw * 0.5 }); }
@@ -394,7 +395,7 @@
       g.ball(x, y, 5, i + 1 === n && LV[z.lv]?.iso ? c.accent : c.warm);
       if (u < 0.6) { const Eg = a.E - z.E; streak(g, x + 14 + u * 60, y - u * 10, -0.15, 16, Math.min(1, (Eg / 4) ** 3), 1 - u / 0.6); }
     }
-    if (tot > 600) { ISO.iso = Math.round(ISO.iso / 2); ISO.gs = Math.round(ISO.gs / 2); }
+    if (tot > 900) { ISO.iso = Math.round(ISO.iso / 2); ISO.gs = Math.round(ISO.gs / 2); }
   }
 
   // ---------- scene 6: capture against re-emission, through two doors ----------

@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>Ein Weg über die Karte</h3>
   <p>Die Ströme sind Reaktionen, die über eine Ecke der <b>Nuklidkarte</b> wandern, auf der die Kerne nach Neutronenzahl N (waagrecht) und Protonenzahl Z (senkrecht) angeordnet sind. Jede beginnt im umrandeten Compound-Feld; jedes Feld ist nach der Reaktion benannt, die dort endet.</p>
   <p>Ein ausgesandtes <em class="n">Neutron</em> bewegt sich ein Feld nach links, ein <em class="p">Proton</em> eines nach unten, ein <em class="a">Alphateilchen</em> (zwei Protonen, zwei Neutronen) zwei diagonal. Die Stromstärke zeigt, wie viel diesen Schritt nimmt; Tönung und Prozentwert zeigen, wo Reaktionen enden.</p>
+  <div class="ctl"><label for="cs-e4">Neutronenenergie</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">200 Reaktionen abfeuern</button></div>
   <p>Jeder Schritt kostet 7 bis 11 MeV Separationsenergie, also umfasst der Weg selbst bei 30 MeV höchstens drei oder vier Schritte.</p>
 </div>

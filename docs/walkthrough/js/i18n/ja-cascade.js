@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>核図表を歩く</h3>
   <p>流れは、<b>核図表</b>の一角を歩いていく反応です。核図表は原子核を中性子数N（横）と陽子数Z（縦）で並べた地図です。どの反応も枠で囲まれた複合核のマスから始まり、各マスにはそこで終わる反応の名前がついています。</p>
   <p><em class="n">中性子</em>が出ると1マス左へ、<em class="p">陽子</em>なら1マス下へ、<em class="a">アルファ粒子</em>（陽子2個と中性子2個）なら斜めに2マス動きます。流れの幅はその一歩をたどる量で、濃さとパーセントは反応がどこで終わるかを示します。</p>
+  <div class="ctl"><label for="cs-e4">中性子エネルギー</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">反応を200回実行</button></div>
   <p>一歩ごとに7〜11 MeVの分離エネルギーがかかるので、30 MeVでも歩けるのはせいぜい3、4歩です。</p>
 </div>

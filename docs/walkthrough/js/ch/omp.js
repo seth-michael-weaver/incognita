@@ -56,7 +56,7 @@
   <p>But each neutron is a wave, fuzzy over about one reduced wavelength λ̄ (the glow). Even when its path misses, the fuzzy edge can brush the surface and get in: <b>tunnelling</b>.</p>
   <div class="ctl"><label for="omp-l">Partial wave l</label><input id="omp-l" type="range" data-bind="L" min="0" max="8" step="1" value="3" data-instant><output data-show="L" data-fmt="0"></output></div>
   <div class="ctl"><label for="omp-e2">Energy (MeV)</label><input id="omp-e2" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
-  <p>Raise <i>l</i> and the path moves out: fewer get in. Raise the energy and the same <i>l</i> passes closer, with less fuzz. The engine finds each <i>T<sub>l</sub></i> exactly by solving the Schrödinger equation through the full potential; <i>S</i> measures how much wave comes back out.</p>
+  <p>Raise <i>l</i> and the path moves out: fewer get in. Raise the energy and the same <i>l</i> passes closer, with less fuzz. The engine finds each <i>T<sub>l</sub></i> exactly by solving the Schrödinger equation (the wave equation of quantum mechanics) through the full potential. It sends a wave in and measures how much of it comes back out, unabsorbed: the returning wave is called <i>S</i>, and its square, |<i>S</i>|², is the share that returns. Whatever does not come back was taken in by the nucleus, and that missing share is <i>T<sub>l</sub></i>.</p>
   <div class="formula">T<sub>lj</sub> = 1 − |S<sub>lj</sub>|²</div>
 </div>
 <div class="step">

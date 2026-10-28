@@ -343,16 +343,18 @@
   function sceneHot(g, S) {
     const { W, H, c } = g, fs = W < 600 ? 11 : 13, kT = S.kT / 1000, phone = W < 600;
     const w = LEVELS.map(([e, j]) => (2 * j + 1) * Math.exp(-e / kT)), G = w.reduce((a, b) => a + b, 0);
-    const x0 = W * (phone ? 0.3 : 0.32), yBot = H * 0.78, yTop = H * 0.1, Y = (e) => yBot - (yBot - yTop) * e / 0.85, shelf = Math.min(W * 0.5, 260);
+    const x0 = W * (phone ? 0.3 : 0.32), yBot = H * 0.78, yTop = H * 0.1, Y = (e) => yBot - (yBot - yTop) * Math.sqrt(e / 0.85), shelf = Math.min(W * 0.5, 260);   // energy stretched near the bottom, so close levels stay apart
     g.line(x0 - 20, yBot + 2, x0 - 20, yTop - 10, c.line, 1.5);
     LEVELS.forEach(([e, j], i) => {
       const y = Y(e), p = w[i] / G; g.line(x0 - 20, y, x0 + shelf, y, c.ink, 1.5, 0.8);
-      g.label(`${j}⁺  ${e === 0 ? "ground state" : (1000 * e).toFixed(0) + " keV"}`, x0 - 28, y, { color: c.soft, size: fs, align: "right" });
-      const n = Math.round(p * 40), r = phone ? 4 : 5, sp = phone ? 2 * r + 1 : 2 * r + 1.5; for (let k = 0; k < n; k++) g.ball(x0 + 8 + k * sp, y - r - 1, r, c.proton);
-      if (p > 0.004) g.label(`${(100 * p).toFixed(p < 0.1 ? 1 : 0)} %`, x0 + 8 + Math.max(n, 0) * sp + 8, y - r - 1, { color: c.ink, size: fs - 1, align: "left" });
+      g.label(`${j}⁺  ${e === 0 ? (phone ? "ground" : "ground state") : (1000 * e).toFixed(0) + " keV"}`, x0 - 28, y, { color: c.soft, size: fs, align: "right" });
+      // 40 nuclei shared out; a full shelf wraps into rows above it; the share is written at the shelf's end
+      const n = Math.round(p * 40), r = phone ? 4 : 5, sp = phone ? 2 * r + 1 : 2 * r + 1.5, cap = Math.max(4, Math.floor((shelf - 14) / sp));
+      for (let k = 0; k < n; k++) g.ball(x0 + 8 + (k % cap) * sp, y - r - 1 - Math.floor(k / cap) * (2 * r + 1), r, c.proton);
+      if (p > 0.004) g.label(`${(100 * p).toFixed(p < 0.1 ? 1 : 0)} %`, x0 + shelf + 8, y - r - 1, { color: c.ink, size: fs - 1, align: "left" });
     });
     g.label(`kT = ${(1000 * kT).toFixed(0)} keV`, x0 + shelf, yTop - 14, { color: c.warm, size: fs, align: "right", bg: true });
-    g.label("target levels, with the share of nuclei sitting on each", W * 0.5, yBot + 26, { color: c.soft, size: fs, bg: true });
+    g.label(phone ? "target levels (energy stretched at the bottom)" : "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)", W * 0.5, yBot + 26, { color: c.soft, size: fs, bg: true });
     g.label(`${(100 * w[0] / G).toFixed(0)} % start from the ground state · partition function G ≈ ${G.toFixed(2)}`, W * 0.5, H * 0.92, { color: c.ink, size: fs + 1, weight: 600, serif: true });
   }
 

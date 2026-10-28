@@ -28,7 +28,7 @@ WT.L.ch.strength = {
   <h3>平均放射幅</h3>
   <p>s波共鳴（スピン0の標的で<i>J</i><sup>π</sup> = ½⁺）からE1またはM1で到達できるすべての終状態について足し合わせると、それらの平均の全光子幅が得られます。これは数百の原子核について共鳴の形から測定されており、<i>S<sub>n</sub></i>での強度の主な検証手段です。</p>
   <div class="formula">⟨Γ<sub>γ</sub>⟩ = D₀/2π · Σ<sub>XL</sub> Σ<sub>J′π′</sub> ∫₀^{S<sub>n</sub>} T<sub>XL</sub>(E<sub>γ</sub>) ρ(S<sub>n</sub> − E<sub>γ</sub>, J′, π′) dE<sub>γ</sub></div>
-  <div class="ctl"><label for="ps-s">強度にかける倍率</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="5" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
+  <div class="ctl"><label for="ps-s">強度にかける倍率</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="8" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
   <p>曲線は、幅が光子ごとにどこから来るかを示しています。大部分は3〜7 MeVで、大部分はE1であり、M1は約15 %を加えます。ここではエンジンの表の代わりに閉じた式と模式的な準位密度を使っているので、幅は測定値0.92 eVの約6分の1になります。幅は<i>S<sub>n</sub></i>より下の準位密度と強度の裾にそれほど敏感なのです。エンジンが従うTALYSの既定では、この原子核に対して約1.3 eVになります。スライダーは、評価で当てはめるような単一の全体因子をかけます。Γ<sub>γ</sub> ≪ Γ<sub>n</sub>のとき、keV領域の捕獲は⟨Γ<sub>γ</sub>⟩にほぼ比例するので、ここでの因子はそのまま(n,γ)の因子になります。TALYSは強度を測定された⟨Γ<sub>γ</sub>⟩に合わせて再規格化できます（<code>gnorm</code>）。INCOGNITAでは、カスケードのすべての原子核に適用するその再規格化は任意のスイッチで、既定ではオフです。</p>
 </div>
 <div class="step">

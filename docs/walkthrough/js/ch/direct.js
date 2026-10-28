@@ -49,7 +49,7 @@
   <p>A push sets a stretched nucleus (Chapter 1) rotating, up the ladder of its <b>rotational band</b>: 0⁺, 2⁺, 4⁺, 6⁺, 8⁺. The neutron can push the nucleus up and the nucleus can push back, so no level can be worked out alone. The engine solves them all together: <b>coupled channels</b>, where each channel is one outcome, here one level of the band.</p>
   <div class="btns"><button class="btn" data-act="kick">Push it up a level</button><button class="btn ghost" data-act="rpause">Pause / resume</button></div>
   <div class="ctl"><label for="di-beta">Deformation β₂</label><input id="di-beta" type="range" data-bind="beta2" min="0.05" max="0.4" step="0.01" value="0.25"><output data-show="beta2" data-fmt="2"></output></div>
-  <p>The arcs show which levels are linked: <i>λ</i> = 2, the overall stretch, links neighbours; <i>λ</i> = 4, a finer bulge, jumps two. Drag <i>β₂</i>: a more stretched nucleus links its levels more strongly, and the arcs thicken. Since the band is solved with the incoming wave, the transmission coefficients already leave out what it takes.</p>
+  <p>The arcs show which levels are linked: <i>λ</i> = 2, the overall stretch, links neighbours; <i>λ</i> = 4, a finer bulge, jumps two. Drag <i>β₂</i>: a more stretched nucleus links its levels more strongly, and the arcs thicken. Because the band is worked out together with the incoming neutron, the engine knows exactly how many neutrons it takes, and it passes on only the rest to the slower routes of the next chapters.</p>
 </div>
 <div class="step">
   <h3>Ripples on a sphere</h3>
@@ -126,17 +126,22 @@
     const hit = smooth(0.42, 0.5, u);
     const heat = kind === "in" ? hit * (1 - smooth(0.85, 1, u)) : 0;
     const wob = kind === "graze" ? hit * Math.sin((u - 0.45) * 30) * Math.exp(-(u - 0.45) * 6) * 0.12 : 0;
-    g.nucleus(cx, cy, R, { N: 56, Z: 26, seed: 9, t: S.time, beta: wob, heat: 1 + 2.5 * heat, jiggle: 0.5, halo: c.warm, haloAlpha: 0.05 + heat * 0.4 });
+    // the dense core (out to about 0.82 R) and the thin skin around it, where density fades to zero by about 1.18 R:
+    // a grazing neutron passes through the skin only
+    { const ctx = g.ctx, gr = ctx.createRadialGradient(cx, cy, R * 0.8, cx, cy, R * 1.18); gr.addColorStop(0, g.rgba(c.soft, 0.22)); gr.addColorStop(1, g.rgba(c.soft, 0));
+      ctx.save(); ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(cx, cy, R * 1.18, 0, TAU); ctx.fill(); ctx.restore(); }
+    g.nucleus(cx, cy, R * 0.84, { N: 56, Z: 26, seed: 9, t: S.time, beta: wob, heat: 1 + 2.5 * heat, jiggle: 0.5, halo: c.warm, haloAlpha: 0.05 + heat * 0.4 });
     g.ring(cx, cy, R * 1.18, c.faint, 1, 0.5, [3, 5]);
     g.label("skin (surface)", cx + R * 1.18 * 0.72, cy - R * 1.18 * 0.72 - 8, { color: c.faint, size: 11 });
     // the aiming line
     const yb = cy - b * R;
     g.line(xs - 30, yb, cx - R * 1.3, yb, c.faint, 1, 0.5, [2, 6]);
     g.label(`b = ${b.toFixed(2)} R`, xs - 30, yb - 12, { color: c.faint, size: 11, align: "left" });
-    // the neutron's path
+    // the neutron's path; a grazing or missing neutron skims the core's edge, never crosses it
+    const rMin = R * 0.84 + 7, outside = (px, py) => { const ddx = px - cx, ddy = py - cy, d = Math.hypot(ddx, ddy); return d >= rMin || d < 1e-6 ? [px, py] : [cx + ddx / d * rMin, cy + ddy / d * rMin]; };
     let x, y, alpha = 1;
     if (kind === "in") {
-      const uu = Math.min(u, 0.46) / 0.46; x = lerp(xs, cx - Math.sqrt(Math.max(0, R * R - (b * R) ** 2)) * 0.6, uu); y = yb; alpha = 1 - hit;
+      const uu = Math.min(u, 0.46) / 0.46; x = lerp(xs, cx - Math.sqrt(Math.max(0, (R * 0.84) ** 2 - (b * R) ** 2)) * 0.6, uu); y = yb; alpha = 1 - hit;
       for (let i = 1; i < 8; i++) g.dot(x - i * 9, y, 5 - i * 0.5, c.neutron, alpha * (0.22 - i * 0.025));
       if (alpha > 0.02) g.ball(x, y, 7, c.neutron, alpha);
       g.label("absorbed: its energy is shared by all nucleons", cx, cy + R + 44, { color: c.warm, size: phone ? 13 : 15, serif: true, italic: true, alpha: hit });
@@ -144,8 +149,9 @@
       const bend = kind === "graze" ? 0.55 : clamp(0.25 - (b - 1.18) * 0.8, 0, 0.25);
       const dx = lerp(xs, xe, u); const past = smooth(0.42, 0.75, u);
       y = yb + past * bend * R * (kind === "graze" ? 1 : 0.5); x = dx;
+      [x, y] = outside(x, y);
       const slow = kind === "graze" ? 1 - 0.25 * past : 1;
-      for (let i = 1; i < 8; i++) { const uu = Math.max(0, u - i * 0.012); g.dot(lerp(xs, xe, uu), yb + smooth(0.42, 0.75, uu) * bend * R * (kind === "graze" ? 1 : 0.5), 5 - i * 0.5, c.neutron, 0.22 - i * 0.025); }
+      for (let i = 1; i < 8; i++) { const uu = Math.max(0, u - i * 0.012), [tx, ty] = outside(lerp(xs, xe, uu), yb + smooth(0.42, 0.75, uu) * bend * R * (kind === "graze" ? 1 : 0.5)); g.dot(tx, ty, 5 - i * 0.5, c.neutron, 0.22 - i * 0.025); }
       g.ball(x, y, 7 * slow + 0.5, c.neutron, 1);
       if (kind === "graze") {
         if (past > 0.05) g.label("2⁺ level", cx, cy - R - 16, { color: c.warm, size: 14, weight: 600, alpha: past });
@@ -168,7 +174,7 @@
     g.label(J === 0 ? "at rest: 0⁺" : `rotating: ${J}⁺${S.rotPaused ? " (paused)" : ""}`, cx, cy + R * 1.45 + 24, { color: c.ink, size: phone ? 13 : 16, weight: 600, serif: true });
     // band ladder + coupling web
     const x0 = phone ? W * 0.68 : W * 0.7, x1 = phone ? W * 0.84 : W * 0.86, yb = H * 0.86, yt = H * 0.12;
-    const k = (yb - yt) / 74 * clamp(0.25 / beta, 0.6, 1.6);
+    const k = (yb - yt) / 74 * lerp(1, 0.6, clamp((beta - 0.05) / 0.35, 0, 1));   // 8+ (J(J+1) = 72) always fits
     const ys = {}; for (let j = 0; j <= 8; j += 2) ys[j] = yb - k * j * (j + 1);
     const vis = (j) => ys[j] >= yt - 4;
     // couplings: lambda=2 neighbours (thick), lambda=4 skip-one (thin)
@@ -179,6 +185,9 @@
     g.label("λ = 2", x0 - 16 - 20 * beta, (ys[0] + ys[2]) / 2, { color: c.cool, size: 11, bg: true });
     if (vis(4)) g.label("λ = 4", x0 - 44 - 60 * beta, (ys[0] + ys[4]) / 2, { color: c.alpha, size: 11, bg: true });
     g.label("levels solved together", (x0 + x1) / 2, yt - 18, { color: c.soft, size: phone ? 11 : 12, bg: true });
+    // the real scale: E(2+) beta^2 ~ 1225 / A^(7/3) MeV (Grodzins), A = 150; the drawn ladder is squeezed to fit
+    const e2 = 1225 / Math.pow(150, 7 / 3) / (beta * beta) * 1000;
+    g.label(`2⁺ at about ${e2 >= 995 ? (e2 / 1000).toFixed(1) + " MeV" : e2.toFixed(0) + " keV"}`, (x0 + x1) / 2, yb + 18, { color: c.soft, size: phone ? 11 : 12 });
   }
   function arc(g, x, y0, y1, bulge, color, w, alpha) {
     const ctx = g.ctx; ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = "round";
@@ -191,11 +200,13 @@
     const lam = Math.round(S.lam), nph = S.nph;
     const cx = phone ? W * 0.23 : W * 0.3, cy = H * 0.48, R = Math.min(W, H) * (phone ? 0.15 : 0.18);
     const amp = 0.13 * Math.sqrt(nph) * Math.sin(S.time * 3.6);
-    const pts = []; for (let i = 0; i <= 120; i++) { const th = i / 120 * TAU; const r = R * (1 + amp * Math.cos(lam * th)); pts.push([cx + Math.cos(th) * r, cy + Math.sin(th) * r]); }
+    // surface r = R (1 + a P_lambda(cos theta)): lambda = 2 football/disc, lambda = 3 a pear (as in the giant-resonance scene)
+    const PL = (th) => { const ct = Math.cos(th); return lam === 2 ? (3 * ct * ct - 1) / 2 : (5 * ct ** 3 - 3 * ct) / 2; };
+    const pts = []; for (let i = 0; i <= 120; i++) { const th = i / 120 * TAU; const r = R * (1 + 1.4 * amp * PL(th)); pts.push([cx + Math.cos(th) * r, cy + Math.sin(th) * r]); }
     g.glow(cx, cy, R * 1.5, c.neutron, 0.12);
     g.area(pts, c.neutron, 0.22); g.poly(pts, c.ink, 2, 0.9, null, true);
     // a few nucleons inside that follow the surface motion
-    const r = rng(23); for (let i = 0; i < 28; i++) { const th = r() * TAU, rr = Math.sqrt(r()) * 0.85; const sc = 1 + amp * Math.cos(lam * th) * rr; g.ball(cx + Math.cos(th) * rr * R * sc, cy + Math.sin(th) * rr * R * sc, R * 0.11, i % 2 ? c.proton : c.neutron, 0.8); }
+    const r = rng(23); for (let i = 0; i < 28; i++) { const th = r() * TAU, rr = Math.sqrt(r()) * 0.85; const sc = 1 + 1.4 * amp * PL(th) * rr; g.ball(cx + Math.cos(th) * rr * R * sc, cy + Math.sin(th) * rr * R * sc, R * 0.11, i % 2 ? c.proton : c.neutron, 0.8); }
     g.ring(cx, cy, R, c.faint, 1, 0.6, [3, 5]);
     g.label(lam === 2 ? "quadrupole ripple: football ↔ disc" : "octupole ripple: pear ↔ pear", phone ? W / 2 : cx, phone ? H * 0.94 : cy + R * 1.3 + 26, { color: c.ink, size: phone ? 13 : 15, weight: 600, serif: true });
     // phonon ladder
@@ -318,9 +329,10 @@
     g.label("empty orbit", xm + hw * 0.6, yFree + (yFloor - yFree) * 0.4, { color: c.soft, size: 12, align: "left" });
     // the incoming free wave above, then the drop
     const age = S.time - capT, P = 4;
-    const t = age < 0 ? -1 : age % P;
+    const t = age < 0 ? -1 : age;   // once per press
     const yOrb = yFree + (yFloor - yFree) * 0.4 - 7;
-    if (t >= 0) {
+    if (t > P) { g.ball(xm, yOrb, 8, c.neutron, 0.7); g.label("bound in the orbit; press the button to drop another", xm, yFloor + 24, { color: c.soft, size: phone ? 11 : 13, italic: true }); }
+    else if (t >= 0) {
       const come = smooth(0, 1.2, t), drop = smooth(1.3, 2.0, t), gone = smooth(3.2, 4, t);
       const yArr = yFree - 40;
       // wave crests riding in from the right at height yArr

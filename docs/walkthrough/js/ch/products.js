@@ -10,6 +10,7 @@
   const ALO = 70, AHI = 164, TOP = 3.156e7, P0 = 3000;
   const ww = (t) => 0.0622 * (Math.pow(t, -0.2) - Math.pow(t + TOP, -0.2));
   const nm = (a) => { const z = Math.round(92 * a / 236); return `${EL[z] || "?"}-${a}`; };
+  const sig3 = (v) => (v >= 100 ? v.toFixed(0) : v.toPrecision(3));     // three significant figures
   const fmtT = (t) => (t < 60 ? `${t.toFixed(0)} s` : t < 3600 ? `${(t / 60).toFixed(0)} min` : t < 86400 ? `${(t / 3600).toFixed(t < 36000 ? 1 : 0)} h` : t < 3.156e7 ? `${(t / 86400).toFixed(0)} days` : `${(t / 3.156e7).toFixed(1)} years`);
   let lay = null, bound = false;
 
@@ -17,14 +18,16 @@
     num: "Chapter 14", title: "After the split", short: "Fission products",
     html: `
 <div class="step">
-  <p>The pieces are unequal: one light, one heavy. Tap a bar.</p>
+  <p>The pieces are unequal: one light, one heavy. The chart shows, for every fragment mass A (protons plus neutrons), the share of fissions that make it. Two humps: light pieces near A = 95, heavy ones near 139. An even split, near A = 117, is about a hundred times rarer.</p>
+  <p>Each dashed line is ten times higher than the one below it, so the rare masses still show. Tap a bar or drag the slider: below are the two pieces of that split. Their masses add up to 234, not 236 (uranium-235 plus the neutron), because about 2.4 neutrons fly off too.</p>
   <div class="ctl"><label for="pr-a">Light fragment A</label><input id="pr-a" type="range" data-bind="pick" data-instant min="${ALO}" max="117" step="1" value="95"><output data-show="pick" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>Their decays keep heating the fuel after shutdown.</p>
-  <div class="ctl"><label for="pr-t">Time after shutdown</label><input id="pr-t" type="range" data-bind="lgt" data-instant min="0" max="8.5" step="0.01" value="0"></div>
+  <p>Their decays keep heating the fuel after shutdown. The fragments are radioactive: they decay one after another, and every decay releases heat, whether the chain reaction runs or not.</p>
+  <div class="ctl"><label for="pr-t">Time after shutdown</label><input id="pr-t" type="range" data-bind="lgt" data-instant min="0" max="8.5" step="0.01" value="0"><output id="pr-tout">1 s</output></div>
+  <p>Drag the time. One second after the reactor stops, the decays still give about 6 % of full power; after a day, about half a percent; after a year, a few hundredths of a percent, still most of a megawatt in a large reactor. That is why spent fuel is kept in cooling pools for years. The curve is the Way–Wigner rule of thumb: one simple formula for all the fragments' decays together, after a year of running. Both scales jump by ten at each mark.</p>
 </div>`,
-    setup(S) { S.set("mode", "yield"); S.set("pick", 95); S.set("lgt", 0); S.tShow = 1; },
+    setup(S) { S.set("mode", "yield"); S.set("pick", 95); S.set("lgt", 0); S.tShow = 1; S.tOut = ""; },
     steps: [(S) => S.set("mode", "yield"), (S) => S.set("mode", "heat")],
     frame(g, S) {
       const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13;
@@ -41,7 +44,7 @@
         }
         [80, 100, 120, 140, 160].forEach((a) => g.label(String(a), x0 + (a - ALO + 0.5) * bw, y1 + 12, { color: c.faint, size: fs - 2 }));
         g.label("fragment mass number A →", x1, y1 + 28, { color: c.soft, size: fs - 1, align: "right" });
-        g.label(phone ? "yield per fission" : "yield per fission (log scale)", x0, y0 - 12 < 8 ? 10 : y0 - 12, { color: c.soft, size: fs - 1, align: "left" });
+        g.label(phone ? "share of fissions (×10 per line)" : "share of fissions that make it (each line ×10)", x0, y0 - 12 < 8 ? 10 : y0 - 12, { color: c.soft, size: fs - 1, align: "left" });
         // the pair
         const py = H * 0.8, rL = 10 + Math.cbrt(aL) * (phone ? 3 : 4), rH = 10 + Math.cbrt(aH) * (phone ? 3 : 4);
         g.nucleus(W * 0.3, py, rL, { N: Math.round(aL / 3), Z: Math.round(aL / 7.5), t: S.time, jiggle: 0.4, seed: aL, halo: c.cool, haloAlpha: 0.25 });
@@ -50,20 +53,21 @@
         g.label(`${nm(aH)} · ${yld(aH).toFixed(yld(aH) < 0.1 ? 3 : 1)} %`, W * 0.7, py + rH + 16, { color: c.warm, size: fs + 1, weight: 600 });
         g.label("+ about 2.4 neutrons", W * 0.5, py, { color: c.neutron, size: fs - 1 });
       } else {
-        const t = Math.pow(10, S.lgt), f = ww(t); S.tShow = t < 60 ? t : t < 3600 ? t / 60 : t < 86400 ? t / 3600 : t / 86400;
-        const x0 = W * (phone ? 0.14 : 0.1), x1 = W * 0.95, y0 = H * 0.34, y1 = H * 0.8, L0 = -4, L1 = -1, X = (tt) => x0 + (x1 - x0) * Math.log10(tt) / 8.5, Y = (v) => lerp(y1, y0, (Math.log10(v) - L0) / (L1 - L0));
+        const t = Math.pow(10, S.lgt), f = ww(t);
+        if (fmtT(t) !== S.tOut) { S.tOut = fmtT(t); const o = document.getElementById("pr-tout"); if (o) o.textContent = WT.dec ? WT.dec(S.tOut) : S.tOut; } S.tShow = t < 60 ? t : t < 3600 ? t / 60 : t < 86400 ? t / 3600 : t / 86400;
+        const x0 = W * (phone ? 0.18 : 0.11), x1 = W * 0.95, y0 = H * 0.34, y1 = H * 0.8, L0 = -6, L1 = -1, X = (tt) => x0 + (x1 - x0) * Math.log10(tt) / 8.5, Y = (v) => lerp(y1, y0, (Math.log10(v) - L0) / (L1 - L0));
         // the glow: heat still coming out
-        const hx = W * 0.5, hy = H * 0.15, lv = clamp((Math.log10(f) + 4) / 3, 0, 1);
+        const hx = W * 0.5, hy = H * 0.15, lv = clamp((Math.log10(f) + 5) / 4, 0, 1);
         g.glow(hx, hy, 40 + 90 * lv, c.warm, 0.25 + 0.55 * lv); g.glow(hx, hy, 20 + 30 * lv, c.photon, 0.4 * lv);
-        g.label(`${(100 * f).toFixed(f < 0.01 ? 2 : 1)} % of full power`, hx, hy - 10, { color: c.ink, size: fs + 8, weight: 600, serif: true });
-        g.label(`≈ ${(P0 * f).toFixed(P0 * f < 10 ? 1 : 0)} MW in a ${P0} MW reactor · ${fmtT(t)} after shutdown`, hx, hy + 18, { color: c.soft, size: fs });
-        for (let e = L0; e <= L1; e++) { g.line(x0, Y(10 ** e), x1, Y(10 ** e), c.line, 1, 0.6, [2, 5]); g.label(["0.01 %", "0.1 %", "1 %", "10 %"][e - L0], x0 - 6, Y(10 ** e), { color: c.faint, size: fs - 2, align: "right" }); }
+        g.label(`${sig3(100 * f)} % of full power`, hx, hy - 10, { color: c.ink, size: fs + 8, weight: 600, serif: true });
+        g.label(`≈ ${sig3(P0 * f)} MW in a ${P0} MW reactor · ${fmtT(t)} after shutdown`, hx, hy + 18, { color: c.soft, size: fs });
+        for (let e = L0; e <= L1; e++) { g.line(x0, Y(10 ** e), x1, Y(10 ** e), c.line, 1, 0.6, [2, 5]); g.label(["0.0001 %", "0.001 %", "0.01 %", "0.1 %", "1 %", "10 %"][e - L0], x0 - 6, Y(10 ** e), { color: c.faint, size: fs - 2, align: "right" }); }
         const pts = []; for (let i = 0; i <= 200; i++) { const tt = Math.pow(10, 8.5 * i / 200); pts.push([X(tt), Y(ww(tt))]); }
         g.clip(x0, y0 - 4, x1 - x0 + 4, y1 - y0 + 8); g.ground(pts, c.warm, H * 0.1, 0.18); g.poly(pts, c.warm, 2.6, 1); g.ctx.restore();
         g.line(X(t), y0, X(t), y1, c.ink, 1, 0.3); g.glow(X(t), Y(f), 16, c.warm, 0.6); g.ball(X(t), Y(f), 6, c.warm);
         [[1, "1 s"], [60, "1 min"], [3600, "1 h"], [86400, "1 day"], [3.156e7, "1 yr"]].forEach(([tt, s]) => g.label(s, X(tt), y1 + 12, { color: c.faint, size: fs - 2 }));
-        g.label("time after shutdown (log) →", x1, y1 + 28, { color: c.soft, size: fs - 1, align: "right" });
-        g.label("Way–Wigner approximation, after a year at full power", W * 0.5, H * 0.94, { color: c.soft, size: fs - 1 });
+        g.label(phone ? "time after shutdown →" : "time after shutdown (each mark much later) →", x1, y1 + 28, { color: c.soft, size: fs - 1, align: "right" });
+        g.label("Way–Wigner rule of thumb, after a year at full power", W * 0.5, H * 0.94, { color: c.soft, size: fs - 1 });
       }
       g.label("illustration", W - 6, H - 10, { color: c.faint, size: 10, align: "right" });
     },

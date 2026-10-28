@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>在核素图上漫步</h3>
   <p>这些流线是反应在<b>核素图</b>一角上的行走路线。核素图按中子数 N（横向）和质子数 Z（纵向）排列原子核。每条路线都从加框的复合核方格出发；每个方格以终止于此的反应命名。</p>
   <p>发射一个<em class="n">中子</em>向左移一格，一个<em class="p">质子</em>向下移一格，一个<em class="a">α粒子</em>（两个质子、两个中子）沿对角线移两格。流线的宽度表示走这一步的份额；色调和百分比表示反应在哪里终止。</p>
+  <div class="ctl"><label for="cs-e4">中子能量</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">发射 200 次反应</button></div>
   <p>每一步都要付出 7 到 11 MeV 的分离能，所以即使在 30 MeV，这段路最多也只有三四步。</p>
 </div>

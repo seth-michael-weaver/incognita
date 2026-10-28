@@ -63,7 +63,6 @@
     ctx.restore();
   }
 
-  const drops = []; // gamma cascade balls
   let seedCounter = 3;
 
   WT.chapter("structure", {
@@ -104,7 +103,7 @@
   <p>A stretched nucleus can rotate, giving levels 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> with gaps growing like <i>J</i>(<i>J</i>+1): a <b>rotor</b>. A round one can ripple; each unit of ripple, a <b>phonon</b>, adds the same energy, so its levels are evenly spaced: a <b>vibrator</b>.</p>
   <div class="ctl"><label for="st-beta">Deformation β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Still</button><button class="btn ghost" data-act="vib">Vibrating</button><button class="btn ghost" data-act="rot">Rotating</button></div>
-  <p>Drag <i>β₂</i> and press the buttons: a bigger stretch pulls the rotor's levels closer. The engine stores deformations per nucleus and a tag: spherical, vibrator or rotor. Chapter 6 shows how a passing neutron uses them.</p>
+  <p>Drag <i>β₂</i> and press the buttons: a bigger stretch pulls the rotor's levels closer. A vibrator is round on average, so the slider rests while it ripples; and a sphere cannot rotate in this sense (turning it changes nothing), so near <i>β₂</i> = 0 the rotor band disappears. The engine stores deformations per nucleus and a tag: spherical, vibrator or rotor. Chapter 6 shows how a passing neutron uses them.</p>
 </div>
 <div class="step">
   <h3>Fingerprints just above the threshold</h3>
@@ -119,13 +118,13 @@
 </div>`,
     setup(S) {
       S.set("mode", "build"); S.to("N", 30, true); S.to("dJ", 2, true); S.to("Eg", 0.3, true); S.to("beta", 0.28, true);
-      S.to("vibA", 0, true); S.to("rotW", 0, true); S.set("shapeKind", "still"); S.rotAng = 0; S.rotT = null; S.pullK = 0; S.pullT0 = -100; S.marks = [null, null, null]; S.popReq = false; fingerSetup(S);
+      S.drops = []; S.to("vibA", 0, true); S.to("rotW", 0, true); S.set("shapeKind", "still"); S.rotAng = 0; S.rotT = null; S.pullK = 0; S.pullT0 = -100; S.marks = [null, null, null]; S.popReq = false; fingerSetup(S); S.betaInp = document.getElementById("st-beta");
       S.on("pn", () => { S.pullK = 0; S.pullT0 = S.time; }); S.on("pp", () => { S.pullK = 1; S.pullT0 = S.time; }); S.on("pa", () => { S.pullK = 2; S.pullT0 = S.time; });
       S.on("excite", () => { S.popReq = true; });
       S.on("drop", () => {
         const r = rng(++seedCounter * 977); const path = [LV.length - 1];
         while (path[path.length - 1] !== 0 && path.length < 12) { const from = path[path.length - 1]; const br = BR[from] || [[0, 1]]; let u = r(), to = br[br.length - 1][0]; for (const [k, p] of br) { if (u < p) { to = k; break; } u -= p; } path.push(to); }
-        drops.push({ t0: S.time, r, path, photons: [], emitted: 0 }); if (drops.length > 3) drops.shift();
+        S.drops.push({ t0: S.time, r, path, photons: [], emitted: 0 }); if (S.drops.length > 3) S.drops.shift();
       });
       S.on("still", () => { S.set("shapeKind", "still"); S.to("vibA", 0); S.to("rotW", 0); });
       S.on("vib", () => { S.set("shapeKind", "vib"); S.to("vibA", 1); S.to("rotW", 0); });
@@ -134,7 +133,7 @@
     steps: [
       (S) => { S.set("mode", "build"); },
       (S) => { S.set("mode", "well"); if (/[?&]shot=/.test(location.search)) { S.marks = [Sn(Z0, Math.round(S.N)), Sp(Z0, Math.round(S.N)), null]; S.pullK = 2; S.pullT0 = S.time - 1.4; } else { S.pullK = 0; S.pullT0 = S.time; } },
-      (S) => { S.set("mode", "gamma"); if (!drops.length) S.handlers.drop(); },
+      (S) => { S.set("mode", "gamma"); S.drops = S.drops.filter((d) => d.t0 <= S.time); if (!S.drops.length) S.handlers.drop(); },
       (S) => { S.set("mode", "isomer"); S.popReq = true; },
       (S) => { S.set("mode", "shape"); if (S.shapeKind === "rot") S.to("rotW", 1); else if (S.shapeKind === "vib") S.to("vibA", 1); },
       (S) => { S.set("mode", "finger"); fingerEnter(S); },
@@ -179,7 +178,7 @@
   function drawWell(g, S) {
     const { W, H, c } = g; const N = Math.round(S.N), A = Z0 + N, phone = W < 600;
     const sn = Sn(Z0, N), sp = Sp(Z0, N), sa = Sa(Z0, N), costs = [sn, sp, Math.max(0.3, sa)];
-    const yFree = H * 0.22, yFloor = H * 0.82, DMAX = 17, ppm = (yFloor - yFree) / DMAX, Y = (d) => yFree + d * ppm;
+    const yFree = H * 0.22, yFloor = H * 0.82, DMAX = 19.5, ppm = (yFloor - yFree) / DMAX, Y = (d) => yFree + d * ppm;
     const x0 = W * 0.05, x1 = W * (phone ? 0.56 : 0.64), xm = (x0 + x1) / 2, hw = (x1 - x0) / 2;
     // auto-cycle n -> p -> alpha unless the reader picked one
     let u = (S.time - S.pullT0) / PULL_DUR;
@@ -275,20 +274,31 @@
     const { x0, x1, Y } = L; const xm = (x0 + x1) / 2;
     // branches of the top level drawn faintly as a reference (width = branching)
     const now = S.time;
+    const drops = S.drops || (S.drops = []), last = drops.length - 1;
     drops.forEach((d, di) => {
-      const r = d.r; const age = now - d.t0; const hop = 0.75;
-      const k = Math.min(Math.floor(age / hop), d.path.length - 1), f = clamp((age - k * hop) / (hop * 0.45), 0, 1);
+      const r = d.r; const age = Math.max(0, now - d.t0); const hop = 0.75;
+      const k = clamp(Math.floor(age / hop), 0, d.path.length - 1), f = clamp((age - k * hop) / (hop * 0.45), 0, 1);
       // each hop that has begun emits one photon
       while (d.emitted < k && d.emitted < d.path.length - 1) { const to = d.path[d.emitted + 1]; d.photons.push({ y1: Y(LV[to][0]), t: now, a: (r() - 0.5) * 1.2 + (di % 2 ? Math.PI : 0) }); d.emitted++; }
       const from = d.path[k], to = d.path[Math.min(k + 1, d.path.length - 1)];
-      const y = lerp(Y(LV[from][0]), Y(LV[to][0]), smooth(0, 1, f)), xoff = (di - 1) * 26;
-      // show the branches open from the current shelf, width = odds
-      if (k < d.path.length - 1) (BR[from] || []).forEach(([t, p], bi) => { const yf = Y(LV[from][0]), yt = Y(LV[t][0]); const bul = 34 + bi * 30; const ctx = g.ctx; ctx.save(); ctx.globalAlpha = 0.45; ctx.strokeStyle = c.photon; ctx.lineWidth = 1 + 7 * p; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(xm + xoff + 6, yf); ctx.quadraticCurveTo(xm + xoff + 6 + bul, (yf + yt) / 2, xm + xoff + 6, yt); ctx.stroke(); ctx.restore(); g.label(`${Math.round(p * 100)}%`, xm + xoff + 6 + bul * 0.55, (yf + yt) / 2, { color: c.photon, size: 10, bg: true }); });
-      g.glow(xm + xoff, y - 8, 22, c.warm, 0.4); g.ball(xm + xoff, y - 8, 9, c.warm, 1);
+      if (!LV[from] || !LV[to]) return;
+      const y = lerp(Y(LV[from][0]), Y(LV[to][0]), smooth(0, 1, f)), xoff = (di - last) * 26, newest = di === last;
+      // the branches open from the current shelf, width = odds; only the newest ball gets percentages (no stacked labels)
+      if (k < d.path.length - 1) {
+        const labs = [];
+        (BR[from] || []).forEach(([t, p], bi) => {
+          const yf = Y(LV[from][0]), yt = Y(LV[t][0]), bul = 34 + bi * 30, ctx = g.ctx;
+          ctx.save(); ctx.globalAlpha = newest ? 0.45 : 0.18; ctx.strokeStyle = c.photon; ctx.lineWidth = 1 + 7 * p; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(xm + xoff + 6, yf); ctx.quadraticCurveTo(xm + xoff + 6 + bul, (yf + yt) / 2, xm + xoff + 6, yt); ctx.stroke(); ctx.restore();
+          if (newest) labs.push({ x: xm + xoff + 6 + bul * 0.5, y: (yf + yt) / 2, s: `${Math.round(p * 100)}%` });
+        });
+        labs.sort((a, b) => a.y - b.y); for (let i = 1; i < labs.length; i++) if (labs[i].y - labs[i - 1].y < 16) labs[i].y = labs[i - 1].y + 16;
+        labs.forEach((l) => g.label(l.s, l.x, l.y, { color: c.photon, size: 10, bg: true }));
+      }
+      g.glow(xm + xoff, y - 8, 22, c.warm, newest ? 0.4 : 0.2); g.ball(xm + xoff, y - 8, 9, c.warm, newest ? 1 : 0.55);
     });
-    drops.forEach((d) => d.photons.forEach((p) => {
-      const age = now - p.t; if (age > 1.2) return; const u = smooth(0, 1.2, age);
-      const x = xm + Math.cos(p.a) * (30 + u * W * 0.3), y = p.y1 - 8 + Math.sin(p.a) * u * 80;
+    drops.forEach((d, di) => d.photons.forEach((p) => {
+      const age = now - p.t; if (age > 1.2 || age < 0) return; const u = smooth(0, 1.2, age);
+      const x = xm + (di - last) * 26 + Math.cos(p.a) * (30 + u * W * 0.3), y = p.y1 - 8 + Math.sin(p.a) * u * 80;
       g.photon(x, y, p.a, 24, 1 - u * 0.9);
     }));
     g.label("path width and % = measured odds of each hop", xm, Y(0) + 40, { color: c.soft, size: 13, serif: true, italic: true });
@@ -334,17 +344,21 @@
     const cx = phone ? W * 0.34 : W * 0.36, cy = H * 0.46, R = Math.min(W, H) * (phone ? 0.2 : 0.2);
     const vib = vibA * 0.22 * Math.sin(S.time * 4.2);
     // integrate the angle so easing rotW in/out never makes the spin jump
-    const dtr = S.rotT === null ? 0 : Math.min(0.1, Math.max(0, S.time - S.rotT)); S.rotT = S.time; S.rotAng += rotW * dtr * 1.1;
+    // a vibrator is round on average, so the stretch slider has nothing to set while it vibrates
+    if (S.betaInp) { const off = S.shapeKind === "vib"; if (S.betaInp.disabled !== off) { S.betaInp.disabled = off; const row = S.betaInp.closest && S.betaInp.closest(".ctl"); if (row) row.style.opacity = off ? "0.45" : ""; } }
+    // a sphere has no orientation to turn: collective rotation needs a stretch, so the spin fades out as beta goes to 0
+    const canRot = smooth(0.03, 0.07, Math.abs(beta)), sphereRot = S.shapeKind === "rot" && canRot < 0.5;
+    const dtr = S.rotT === null ? 0 : Math.min(0.1, Math.max(0, S.time - S.rotT)); S.rotT = S.time; S.rotAng += rotW * canRot * dtr * 1.1;
     const rot = S.rotAng;
     const b = beta * (1 - vibA) + vib;
     g.glow(cx, cy, R * 1.6, c.warm, 0.08);
     g.nucleus(cx, cy, R, { N: 150, Z: 62, seed: 5, t: S.time, beta: b, rot, jiggle: 0.35 });
     const kind = S.shapeKind;
-    const what = vibA > 0.5 ? "ripples at the surface: a vibrator" : rotW > 0.5 ? "stretched and rotating: a rotor" : Math.abs(beta) < 0.05 ? "round: a sphere" : beta > 0 ? "stretched (prolate): a football" : "squashed: an oblate disc";
+    const what = vibA > 0.5 ? "ripples at the surface: a vibrator" : sphereRot ? "a sphere cannot rotate: no turn to see" : rotW > 0.5 ? "stretched and rotating: a rotor" : Math.abs(beta) < 0.05 ? "round: a sphere" : beta > 0 ? "stretched (prolate): a football" : "squashed: an oblate disc";
     g.label(what, cx, cy + R * 1.5 + 30, { color: c.ink, size: phone ? 13 : 16, weight: 600, serif: true });
     // level pattern on the right
     const x0 = phone ? W * 0.62 : W * 0.62, x1 = phone ? W * 0.8 : W * 0.8, yb = H * 0.84, yt = H * 0.14;
-    const dom = rotW > 0.5 ? "rot" : vibA > 0.5 ? "vib" : "sph"; const rotMix = dom === "rot" ? rotW : 0, vibMix = dom === "vib" ? vibA : 0, sphMix = dom === "sph" ? clamp(1 - rotW - vibA, 0, 1) : 0;
+    const dom = rotW > 0.5 && !sphereRot ? "rot" : vibA > 0.5 ? "vib" : "sph"; const rotMix = dom === "rot" ? rotW * canRot : 0, vibMix = dom === "vib" ? vibA : 0, sphMix = dom === "sph" ? (sphereRot ? 1 : clamp(1 - rotW - vibA, 0, 1)) : 0;
     g.line(x0, yb, x1, yb, c.ink, 2.5); g.label("0⁺", x1 + 6, yb, { color: c.ink, size: 12, align: "left" });
     // rotor: E_J = k J(J+1), k set so that 6+ reaches ~80% height when beta is big; k shrinks with beta (larger moment of inertia)
     const kRot = (yb - yt) / 42 * clamp(0.3 / Math.max(Math.abs(beta), 0.08), 0.5, 2.2) * 0.9;
@@ -352,7 +366,7 @@
     if (vibMix > 0.02) { const dyv = (yb - yt) / 3.4; [[1, "2⁺"], [2, "0⁺ 2⁺ 4⁺"], [3, "3 phonons"]].forEach(([n, s]) => { const y = yb - dyv * n; for (let k = 0; k < (n === 2 ? 3 : 1); k++) g.line(x0, y + (k - 1) * 5, x1, y + (k - 1) * 5, c.soft, 1.6, vibMix); g.label(s, x1 + 6, y, { color: c.soft, size: 12, align: "left", alpha: vibMix }); }); }
     if (sphMix > 0.02) { g.label("no regular", (x0 + x1) / 2, (yb + yt) / 2 - 8, { color: c.faint, size: 12, alpha: sphMix }); g.label("level pattern", (x0 + x1) / 2, (yb + yt) / 2 + 10, { color: c.faint, size: 12, alpha: sphMix }); }
     g.label(rotMix > 0.5 ? "spacing grows like J(J+1)" : vibMix > 0.5 ? "equal steps, one phonon each" : "its lowest levels", (x0 + x1) / 2, yt - 16, { color: c.soft, size: phone ? 11 : 12, bg: true });
-    g.label(`β₂ = ${beta.toFixed(2)}`, cx, cy - R * 1.4 - 18, { color: c.soft, size: 13 });
+    g.label(vibA > 0.5 ? "β₂ set aside: round on average while it ripples" : `β₂ = ${beta.toFixed(2)}`, cx, cy - R * 1.4 - 18, { color: c.soft, size: 13 });
   }
 
   // ---------- scene 7: the resonance fingerprint, measured by sweeping a beam's energy ----------
@@ -526,10 +540,10 @@
       if (n.gam) g.photon(px, py, n.ang, 26, fa); else g.ball(px, py, 4, c.neutron, fa);
     }
     const nIn = S.flast.filter(Boolean).length;
-    const yTk = yB + R * 1.6 + 14;
+    const yTk = yB + R * 1.6 + 14, yL1 = Math.max(H * 0.335, yTk + fs * 1.6 + 2), yL2 = Math.max(H * 0.385, yL1 + fs * 1.6 + 2);
     g.label(`${T.tgt}: took in ${nIn} of the last ${S.flast.length}`, nx, yTk, { color: c.soft, size: fs, bg: true });
     // phones: no room under the nucleus; the step text says the same
-    if (!phone) g.label("swells on a peak: the size the neutron effectively “sees” (waves overlap), not a real size change", (ix0 + ix1) / 2, yTk + fs + 5, { color: c.soft, size: fs - 1, italic: true });
+    if (!phone && yTk + 2 * fs + 5 < yL1 - fs) g.label("swells on a peak: the size the neutron effectively “sees” (waves overlap), not a real size change", (ix0 + ix1) / 2, yTk + fs + 5, { color: c.soft, size: fs - 1, italic: true });
 
     // ---- right middle: the measured trace (share taken in vs energy) ----
     const tx = (i) => ix0 + (i + 0.5) / FNB * iw, ty = (v) => tBase - v * th;
@@ -580,7 +594,6 @@
       // S0: average strength of the peaks, a dashed level across the measured part
       const avgP = found.reduce((s, q) => s + q.P, 0) / found.length, yS = ty(avgP);
       g.line(ix0, yS, ix1, yS, ink, 1.3, 0.75 * A, [6, 4]);
-      const yL1 = H * 0.335, yL2 = H * 0.385;
       g.label(phone ? "S₀: average peak strength" : "S₀: how strong the peaks are on average (how easily a neutron gets in)", ix1, yL1, { color: ink, size: fs, weight: 600, align: "right", bg: true, alpha: A });
       g.line(ix1 - 24, yL1 + 9, ix1 - 24, yS - 2, ink, 1, 0.5 * A);
       // <Gg>: width of one clean, isolated peak (photon-dominated where that is true)

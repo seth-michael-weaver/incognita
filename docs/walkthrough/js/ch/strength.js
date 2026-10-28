@@ -75,7 +75,7 @@
   <p>The <b>photon strength function</b> <i>f<sub>XL</sub></i>(<i>E</i><sub>γ</sub>) is the average reduced probability for a photon of type <i>XL</i>: electric dipole E1, magnetic dipole M1 and so on. For E1 it is dominated by the giant dipole resonance near 18 MeV, but decay at <i>S<sub>n</sub></i> uses photons of 1 to 7 MeV, far down its tail, and the tail's shape is the whole question.</p>
   <div class="formula">f<sub>E1</sub> = K σ₀Γ₀ · E<sub>γ</sub> Γ(E<sub>γ</sub>,T) / [(E<sub>γ</sub>² − E₀²)² + E<sub>γ</sub>² Γ(E<sub>γ</sub>,T)²] / (1 − e<sup>−E<sub>γ</sub>/T</sup>) ,  Γ(E<sub>γ</sub>,T) = (Γ₀/E₀)(E<sub>γ</sub> + 4π²T²/E₀)</div>
   <div class="ctl"><label for="ps-t">Final-state temperature T (MeV)</label><input id="ps-t" type="range" data-bind="T" min="0" max="1.5" step="0.01" value="0.7"><output data-show="T" data-fmt="2"></output></div>
-  <p>The dashed line is the standard Lorentzian (SLO), the shape fitted to photoabsorption. With its constant width it overestimates the strength in the decay window by a factor of 2 to 5, a long-known failure for spherical nuclei. The solid line is the simplified modified Lorentzian (<b>SMLO</b>): its width grows with photon energy and with the temperature of the final states, which lowers the tail in the window but leaves a finite strength at zero photon energy, as decay data require. Drag <i>T</i> to 0 and that low-energy floor falls away.</p>
+  <p>The dashed line is the standard Lorentzian (SLO), the shape fitted to photoabsorption. With its constant width it overestimates the strength in the decay window by a factor of 2 to 5, a long-known failure for spherical nuclei. The solid line is the simplified modified Lorentzian (<b>SMLO</b>): its width grows with photon energy and with the temperature of the final states, which lowers the tail in the window but leaves a finite strength at zero photon energy, as decay data require. The zoom box shows that floor, below 2 MeV: drag <i>T</i> to 0 and it falls away.</p>
 </div>
 <div class="step">
   <h3>M1: spin-flip, scissors, upbend</h3>
@@ -95,8 +95,8 @@
   <h3>The average radiative width</h3>
   <p>Summing over every final state reachable by E1 or M1 from the s-wave resonances (<i>J</i><sup>π</sup> = ½⁺ on a spin-0 target) gives their average total photon width. It is measured, from resonance shapes, for a few hundred nuclei, and it is the main check on the strength at <i>S<sub>n</sub></i>.</p>
   <div class="formula">⟨Γ<sub>γ</sub>⟩ = D₀/2π · Σ<sub>XL</sub> Σ<sub>J′π′</sub> ∫₀^{S<sub>n</sub>} T<sub>XL</sub>(E<sub>γ</sub>) ρ(S<sub>n</sub> − E<sub>γ</sub>, J′, π′) dE<sub>γ</sub></div>
-  <div class="ctl"><label for="ps-s">Scale on the strength</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="5" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
-  <p>The curves show where the width comes from, photon by photon: mostly 3 to 7 MeV, and mostly E1, with M1 adding about 15 %. Here, with closed forms and a schematic level density standing in for the engine's tables, the width comes out at about a sixth of the measured 0.92 eV: it is that sensitive to the level density below <i>S<sub>n</sub></i> and to the tail of the strength. TALYS's defaults, which the engine follows, give about 1.3 eV for this nucleus. The slider applies the single overall factor an evaluation would fit. Capture in the keV range is nearly proportional to ⟨Γ<sub>γ</sub>⟩ when Γ<sub>γ</sub> ≪ Γ<sub>n</sub>, so a factor here is a factor in (n,γ). TALYS can rescale the strength to a measured ⟨Γ<sub>γ</sub>⟩ (<code>gnorm</code>); in INCOGNITA that rescaling, applied to every nucleus of the cascade, is an optional switch, off by default.</p>
+  <div class="ctl"><label for="ps-s">Scale on the strength</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="8" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
+  <p>The curves show where the width comes from, photon by photon: mostly 3 to 7 MeV, and mostly E1, with M1 adding about 15 %. Here, with closed forms and a schematic level density standing in for the engine's tables, the width comes out at about a sixth of the measured 0.92 eV: it is that sensitive to the level density below <i>S<sub>n</sub></i> and to the tail of the strength. TALYS's defaults, which the engine follows, give about 1.3 eV for this nucleus. The slider applies the single overall factor an evaluation would fit: about ×6 brings it into the measured band. Capture in the keV range is nearly proportional to ⟨Γ<sub>γ</sub>⟩ when Γ<sub>γ</sub> ≪ Γ<sub>n</sub>, so a factor here is a factor in (n,γ). TALYS can rescale the strength to a measured ⟨Γ<sub>γ</sub>⟩ (<code>gnorm</code>); in INCOGNITA that rescaling, applied to every nucleus of the cascade, is an optional switch, off by default.</p>
 </div>
 <div class="step">
   <h3>The cascade</h3>
@@ -158,6 +158,18 @@
     S.sweep = (((S.sweep + dt / 6) % 1) + 1) % 1; const e = 1 + 6.6 * (0.5 - 0.5 * Math.cos(TAU * S.sweep)), fs = fE1(e, T, 1), fl = fE1(e, 0, 0);
     g.line(F.X(e), F.Y(fl), F.X(e), F.Y(fs), c.warm, 1.4, 0.8, [2, 3]); g.glow(F.X(e), F.Y(fs), 12, c.photon, 0.6); g.dot(F.X(e), F.Y(fs), 4.5, c.photon);
     g.label(`at ${e.toFixed(1)} MeV: SMLO / SLO = ${(fs / fl).toFixed(2)}`, W / 2, H * (phone ? 0.93 : 0.93), { color: c.ink, size: phone ? 12 : 14, weight: 600, serif: true, bg: true });
+    // zoom inset: the lowest photon energies, where SMLO keeps a finite floor at T > 0 and SLO falls to zero
+    { const bx0 = phone ? F.X(12.5) : F.X(8.5), bx1 = phone ? F.X(24.6) : F.X(15.5), by0 = H * (phone ? 0.5 : 0.52), by1 = H * (phone ? 0.73 : 0.78), ctx = g.ctx;
+      ctx.save(); ctx.fillStyle = g.rgba(c.paper, 0.92); ctx.strokeStyle = g.rgba(c.soft, 0.6); ctx.lineWidth = 1; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(bx0, by0, bx1 - bx0, by1 - by0, 8); else ctx.rect(bx0, by0, bx1 - bx0, by1 - by0); ctx.fill(); ctx.stroke(); ctx.restore();
+      const ix0 = bx0 + 8, ix1 = bx1 - 8, iy0 = by0 + 24, iy1 = by1 - 20, IX = (e) => lerp(ix0, ix1, e / 2), IY = (f) => lerp(iy1, iy0, (log10(Math.max(f, 1e-30)) + 13) / 5);
+      const ip = (fn) => { const q = []; for (let i = 0; i <= 80; i++) { const e = 0.01 + 1.99 * i / 80; q.push([IX(e), IY(fn(e))]); } return q; };
+      g.clip(ix0, iy0 - 2, ix1 - ix0, iy1 - iy0 + 4); g.poly(ip((e) => fE1(e, 0, 0)), c.soft, 1.4, 0.9, [5, 4]); g.poly(ip((e) => fE1(e, T, 1)), c.photon, 2.4);
+      const floor = fE1(0.01, T, 1);
+      if (T > 0.05) { g.line(ix0, IY(floor), ix1, IY(floor), c.warm, 1, 0.7, [2, 3]); g.glow(IX(0.01), IY(floor), 10, c.warm, 0.6); }
+      g.restore(); g.line(ix0, iy1, ix1, iy1, c.soft, 1, 0.7);
+      g.label("zoom: Eγ from 0 to 2 MeV", (bx0 + bx1) / 2, by0 + 12, { color: c.ink, size: 12, weight: 600 });
+      [0, 1, 2].forEach((e) => g.label(`${e}`, IX(e), iy1 + 10, { color: c.faint, size: 10 }));
+      g.label(T > 0.05 ? "floor: stays above zero" : "T = 0: no floor", ix1, T > 0.05 ? clamp(IY(floor) - 10, iy0 + 6, iy1 - 8) : iy1 - 10, { color: c.warm, size: 12, weight: 600, align: "right", bg: true }); }
     // the dipole: proton and neutron clouds sloshing against each other
     if (!phone) {
       const cx = W * 0.84, cy = H * 0.66, R = Math.min(W, H) * 0.045, s = Math.sin(S.time * 5) * R * 0.28;
@@ -229,7 +241,8 @@
     g.poly(pt, c.alpha, 2); g.poly(pe, c.photon, 2.4);
     g.line(x0, yB, x1, yB, c.soft, 1.2, 0.8); for (let e = 0; e <= 7; e++) g.label(`${e}`, X(e), yB + 12, { color: c.faint, size: 10 });
     g.label("Eγ (MeV)", x1, yB + 26, { color: c.faint, size: 10, align: "right" });
-    g.label("contribution to ⟨Γγ⟩ per MeV of photon energy: E1 (yellow), M1 (purple, on top)", x0, yT - 14, { color: c.ink, size: phone ? 10 : 12, weight: 600, align: "left" });
+    if (phone) { g.label("share of ⟨Γγ⟩ per MeV of photon energy", x0, yT - 30, { color: c.ink, size: 12, weight: 600, align: "left" }); g.label("E1 (yellow), M1 (purple, on top)", x0, yT - 14, { color: c.soft, size: 12, align: "left" }); }
+    else g.label("contribution to ⟨Γγ⟩ per MeV of photon energy: E1 (yellow), M1 (purple, on top)", x0, yT - 14, { color: c.ink, size: 12, weight: 600, align: "left" });
     // the gauge
     const gy = H * 0.8, gx0 = W * 0.1, gx1 = W * 0.9, GX = (v) => lerp(gx0, gx1, (log10(v) - log10(0.1)) / (log10(5) - log10(0.1)));
     g.line(gx0, gy, gx1, gy, c.soft, 2, 0.8); [0.1, 0.2, 0.5, 1, 2, 5].forEach((v) => { g.line(GX(v), gy - 5, GX(v), gy + 5, c.soft, 1.2); g.label(`${v} eV`, GX(v), gy + 18, { color: c.faint, size: 10 }); });
@@ -259,7 +272,13 @@
     const lx = W * (phone ? 0.12 : 0.12), lw = W * (phone ? 0.1 : 0.08), yT = H * 0.1, yB = H * 0.88, Y = (e) => lerp(yB, yT, e / 8);
     for (let i = 0; i < 80; i++) { const e = 8 * i / 80; if (e < EDISC) continue; const d = clamp(log10(rho(e + 0.05)) / 5, 0, 1); g.ctx.fillStyle = g.rgba(c.ink, 0.05 + 0.4 * d); g.ctx.fillRect(lx - lw / 2, Y(e + 0.1), lw, Y(e) - Y(e + 0.1) + 0.5); }
     [0, 0.37, 0.71, 1.0].forEach((e) => g.line(lx - lw / 2, Y(e), lx + lw / 2, Y(e), c.ink, e ? 1.4 : 3, 0.9));
-    g.line(lx - lw / 2 - 6, Y(SN), lx + lw / 2 + 6, Y(SN), c.neutron, 2, 0.9); g.label("Sₙ", lx + lw / 2 + 10, Y(SN), { color: c.neutron, size: 11, align: "left" });
+    g.line(lx - lw / 2 - 6, Y(SN), lx + lw / 2 + 6, Y(SN), c.neutron, 2, 0.9); g.label("Sₙ", lx + lw / 2 + 10, Y(SN), { color: c.neutron, size: 12, align: "left" });
+    if (phone) { // no room beside the ladder: names above and below it
+      g.label("continuum", lx, yT - 12, { color: c.soft, size: 11, weight: 600 }); g.label("known levels", lx, yB + 14, { color: c.ink, size: 11, weight: 600 });
+    } else {
+      g.label("continuum:", lx + lw / 2 + 10, Y(4.2), { color: c.soft, size: 12, weight: 600, align: "left" }); g.label("dark = dense", lx + lw / 2 + 10, Y(4.2) + 16, { color: c.soft, size: 12, align: "left" });
+      g.label("known levels", lx + lw / 2 + 10, Y(0.55), { color: c.ink, size: 12, weight: 600, align: "left" });
+    }
     // play cascades: one shown slowly, many more counted in the background
     for (let k = 0; k < (S.nC < 4000 ? 6 : 0); k++) cascadeOnce(S);
     if (!S.casc || S.time - S.casc.t0 > S.casc.steps.length * 0.55 + 0.6) { const st = cascadeOnce(S); S.casc = { steps: st, t0: S.time }; }

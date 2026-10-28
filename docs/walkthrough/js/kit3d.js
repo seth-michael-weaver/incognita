@@ -70,19 +70,22 @@
     try { build(T, v); } catch (e) { console.error("3D build", key, e); kill(v, "build error"); }
     return v;
   }
-  function kill(v, why) { v.dead = true; v.ok = false; if (v.canvas) v.canvas.style.display = "none"; console.info("3D view", v.key, "off:", why); }
+  function kill(v, why) { v.dead = true; v.ok = false; if (v.canvas) v.canvas.style.display = "none"; console.info("3D view", v.key, "off:", why); mark(v.key, "off: " + why); }
+  // a small status note on <html data-v3d="key=state; ..."> for checking a page without devtools
+  const states = {}; function mark(key, st) { states[key] = st; document.documentElement.dataset.v3d = Object.entries(states).map(([k, s]) => k + "=" + s).join("; "); }
 
   WT.view3d = function (key, g, build) {
-    if (!supported || failed || off) return { ok: false };
+    if (!supported || failed || off) { if (!states[key]) mark(key, !supported ? "no WebGL" : failed ? "load failed" : "off by ?no3d"); return { ok: false }; }
     load(); if (!T) return { ok: false, loading: true };
     let v = views.get(key); const cv2 = g.ctx.canvas;
-    if (!v) { v = create(key, cv2, build); views.set(key, v); }
+    if (!v) { v = create(key, cv2, build); views.set(key, v); mark(key, v.ok ? "ok" : "failed"); }
     if (!v.ok || v.dead) return { ok: false };
     if (v.W !== g.W || v.H !== g.H) {
       v.W = g.W; v.H = g.H; v.renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1)); v.renderer.setSize(g.W, g.H, false);
       v.canvas.style.width = g.W + "px"; v.canvas.style.height = g.H + "px"; v.camera.aspect = g.W / Math.max(1, g.H); v.camera.updateProjectionMatrix();
     }
-    v.last = performance.now(); v.visible = true; v.canvas.style.display = "block";
+    v.last = performance.now(); v.visible = true; v.canvas.style.display = "block"; v.frames = (v.frames || 0) + 1;
+    if (v.frames % 30 === 1) mark(key, `ok ${v.W}x${v.H} frames ${v.frames} draw ${(v.times[v.times.length - 1] || 0).toFixed(1)} ms`);
     return v;
   };
   // hide views that their chapter stopped asking for (other step, off screen) so they cost nothing

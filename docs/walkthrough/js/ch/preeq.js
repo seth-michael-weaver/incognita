@@ -35,7 +35,7 @@
 </div>
 <div class="step">
   <h3>The fork at every stage</h3>
-  <p>At each stage the top neutron either escapes (arrow up, only if it is above the free line) or collides again (arrow down); thickness shows the odds. The escape rate follows from <b>detailed balance</b>: from the chance of the reverse process, the same particle being absorbed, which Chapter 5 computes. The collision rate is the strength of one nucleon–nucleon collision times the number of new arrangements it can reach.</p>
+  <p>At each stage the top neutron either escapes (arrow up, only if it is above the free line) or collides again (arrow down); thickness shows the odds. How fast it escapes is read off the reverse event: a nucleus that easily swallows a neutron of some energy also easily lets one of that energy go. Chapter 5 already worked out how easily it swallows (this two-way rule is called <b>detailed balance</b>). How fast it collides is how hard two nucleons hit each other, times how many new ways there are to share the energy after the hit.</p>
   <div class="ctl"><label for="pe-n">Stage (excitons n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Drag the stage up. Early on one particle holds most of the energy, so what escapes is fast. Later the energy is spread thin, and little gets out.</p>
 </div>
@@ -43,9 +43,9 @@
   <h3>Where the fast tail comes from</h3>
   <p>The pile on the right is the <b>spectrum</b>: how many neutrons come out at each energy, slow on the left, fast on the right. Each reaction runs the chain until the top neutron escapes, and its colour says when: <em style="font-style:normal;color:var(--warm);font-weight:600">deep orange</em> at stage 3, paler later, <em class="n">blue</em> if it came out only after the nucleus calmed down (Chapter 8).</p>
   <div class="btns"><button class="btn" data-act="run">Run 300 reactions</button></div>
-  <p>Stage 3 builds a broad, nearly flat shelf that reaches the maximum energy. Later stages pile up lower. The blue hump is <b>evaporation</b>: once everyone shares the energy, only slow neutrons trickle out, like steam from a hot liquid.</p>
+  <p>Stage 3 builds a broad, low dome that stretches almost to the maximum energy, the only stage that reaches that far. Later stages pile up lower. The blue hump is <b>evaporation</b>: once everyone shares the energy, only slow neutrons trickle out, like steam from a hot liquid.</p>
   <div class="ctl"><label for="pe-e">Neutron energy</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>
-  <p>Drag the incoming neutron's energy: a new batch runs and the shelf stretches further. Evaporation alone never makes fast neutrons.</p>
+  <p>Drag the incoming neutron's energy: a new batch runs and the dome stretches further. Evaporation alone never makes fast neutrons.</p>
 </div>
 <div class="step">
   <h3>Counting arrangements</h3>
@@ -91,7 +91,7 @@
     steps: [
       (S) => { S.set("mode", "sea"); },
       (S) => { S.set("mode", "pairs"); if (chain.length === 1) S.handlers.collide(); },
-      (S) => { S.set("mode", "fork"); if (S.n < 3) S.set("n", 3); },
+      (S) => { S.set("mode", "fork"); S.set("n", 3); },   // always start at the first stage, whatever Collide left behind
       (S) => { S.set("mode", "tail"); S.to("E", 20); startRun(S, 20, 150); S.runE = 20; },
       (S) => { S.set("mode", "pauli"); S.to("U", 8); S.cntT = S.time; },
       (S) => { S.set("mode", "cluster"); if (clusterT < 0) clusterT = S.time; },
@@ -302,7 +302,7 @@
     run.cols.forEach((col, k) => col.forEach((st, i) => { const [cl, a] = stageStyle(c, st); g.dot(x0 + (k + 0.5) * colW, yB - r - i * unit, r, cl, a); }));
     g.line(x0 - 4, yB + 1, x1 + 2, yB + 1, c.line, 1.5);
     g.line(X(run.E), yB + 1, X(run.E), yB + 12, c.ink, 1.2, 0.8); g.label(`max ${run.E.toFixed(0)} MeV`, X(run.E), yB + 22, { color: c.ink, size: 11, bg: true });
-    if (!phone || X(run.E) > x0 + 90) g.label("slow", x0, yB + 22, { color: c.faint, size: 11, align: "left" }); if (X(run.E) < x1 - 70) g.label("fast →", x1, yB + 22, { color: c.faint, size: 11, align: "right" });
+    if (X(run.E) > x0 + 90) g.label("slow", x0, yB + 22, { color: c.faint, size: 11, align: "left" }); if (X(run.E) < x1 - 70) g.label("fast →", x1, yB + 22, { color: c.faint, size: 11, align: "right" });
     // launches: one reaction every 35 ms; the well shows the latest chain's stage
     while (run.next < run.evs.length && S.time >= run.tNext) {
       const ev = run.evs[run.next++]; run.tNext += 0.035; run.last = ev; run.lastT = S.time;

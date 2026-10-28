@@ -28,7 +28,7 @@ WT.L.ch.strength = {
   <h3>平均辐射宽度</h3>
   <p>对 s 波共振（自旋为 0 的靶核上 <i>J</i><sup>π</sup> = ½⁺）经 E1 或 M1 可达的所有末态求和，就得到它们的平均总光子宽度。它已由共振形状对几百个原子核测出，是检验 <i>S<sub>n</sub></i> 处强度的主要手段。</p>
   <div class="formula">⟨Γ<sub>γ</sub>⟩ = D₀/2π · Σ<sub>XL</sub> Σ<sub>J′π′</sub> ∫₀^{S<sub>n</sub>} T<sub>XL</sub>(E<sub>γ</sub>) ρ(S<sub>n</sub> − E<sub>γ</sub>, J′, π′) dE<sub>γ</sub></div>
-  <div class="ctl"><label for="ps-s">强度的缩放因子</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="5" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
+  <div class="ctl"><label for="ps-s">强度的缩放因子</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="8" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
   <p>曲线逐个光子地显示宽度来自哪里：主要是 3 到 7 MeV，且主要是 E1，M1 约贡献 15%。在这里，用解析形式和示意性的能级密度代替引擎的表格，得到的宽度只有实测值 0.92 eV 的约六分之一：宽度对 <i>S<sub>n</sub></i> 以下的能级密度和强度的尾部就是这么敏感。引擎所遵循的 TALYS 默认设置对这个原子核给出约 1.3 eV。滑块施加的就是评价工作会拟合的那个整体因子。当 Γ<sub>γ</sub> ≪ Γ<sub>n</sub> 时，keV 能区的俘获几乎正比于 ⟨Γ<sub>γ</sub>⟩，所以这里的一个因子就是 (n,γ) 中的一个因子。TALYS 可以把强度重新标定到实测 ⟨Γ<sub>γ</sub>⟩（<code>gnorm</code>）；在 INCOGNITA 中，这种对级联中每个原子核都施加的重新标定是一个可选开关，默认关闭。</p>
 </div>
 <div class="step">

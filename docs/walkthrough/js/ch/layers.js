@@ -46,6 +46,8 @@
     { n: 4, name: "uncertainty band", col: "warm" },
   ];
 
+  const press = (act, on) => document.querySelectorAll(`#layers [data-act="${act}"]`).forEach((b) => b.setAttribute("aria-pressed", String(on)));
+  const revealOn = (S) => { S.to("reveal", 1); press("reveal", true); };
   WT.chapter("layers", {
     num: "Chapter 21", title: "How the model is layered", short: "Layers",
     lead: "What we deliver is built in layers on top of the engine, and each layer has to earn its place against measurements.",
@@ -89,17 +91,16 @@
     setup(S) {
       S.to("layer", 1, true); S.to("reveal", 0, true); S.to("ms", 0, true); S.to("anchor", 0, true); S.to("bandOn", 0, true);
       S.set("cov", 0.45); S.set("band", 1); S.covPct = 45; S.inside = 0;
-      const press = (act, on) => document.querySelectorAll(`#layers [data-act="${act}"]`).forEach((b) => b.setAttribute("aria-pressed", String(on)));
       S.on("reveal", () => { const on = S.target.reveal < 0.5; S.to("reveal", on ? 1 : 0); press("reveal", on); });
       S.on("ms0", () => { S.to("ms", 0); press("ms0", true); press("ms1", false); });
       S.on("ms1", () => { S.to("ms", 1); press("ms0", false); press("ms1", true); });
     },
     steps: [
       (S) => { S.set("layer", 1); S.to("anchor", 0); S.to("bandOn", 0); },
-      (S) => { S.set("layer", 2); S.to("reveal", 1); S.to("anchor", 0); S.to("bandOn", 0); },
-      (S) => { S.set("layer", 3); S.to("reveal", 1); S.to("anchor", 1); S.to("bandOn", 0); },
-      (S) => { S.set("layer", 4); S.to("reveal", 1); S.to("anchor", 1); S.to("bandOn", 1); },
-      (S) => { S.set("layer", 4); S.to("reveal", 1); S.to("anchor", 1); S.to("bandOn", 1); },
+      (S) => { S.set("layer", 2); revealOn(S); S.to("anchor", 0); S.to("bandOn", 0); },
+      (S) => { S.set("layer", 3); revealOn(S); S.to("anchor", 1); S.to("bandOn", 0); },
+      (S) => { S.set("layer", 4); revealOn(S); S.to("anchor", 1); S.to("bandOn", 1); if (S.target.cov < 0.45) S.to("cov", 0.45); }, // the band needs measurements to judge against
+      (S) => { S.set("layer", 4); revealOn(S); S.to("anchor", 1); S.to("bandOn", 1); if (S.target.cov < 0.45) S.to("cov", 0.45); },
     ],
     frame(g, S) {
       const { W, H, c } = g, phone = W < 600;

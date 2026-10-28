@@ -68,7 +68,7 @@
     html: `
 <div class="step">
   <h3>The Fermi gas with damped shell effects</h3>
-  <p>The engine's default level density, ldmodel 1, is the <b>Gilbert–Cameron</b> composite: a Fermi gas at high energy, a constant temperature below. The Fermi gas needs one number, the level-density parameter <i>a</i>, and at low energy that number feels the shells. <b>Ignatyuk</b>'s form lets the shell correction δW act fully at low excitation and fade with a damping rate γ, so that <i>a</i>(<i>U</i>) tends to the smooth <i>ã</i> once the nucleus is hot.</p>
+  <p>The engine's default level density is the <b>Gilbert–Cameron</b> composite: a Fermi gas at high energy, a constant temperature below. The Fermi gas needs one number, the level-density parameter <i>a</i>, and at low energy that number feels the shells. <b>Ignatyuk</b>'s form lets the shell correction δW act fully at low excitation and fade with a damping rate γ, so that <i>a</i>(<i>U</i>) tends to the smooth <i>ã</i> once the nucleus is hot.</p>
   <div class="formula">a(U) = ã [1 + δW (1 − e<sup>−γU</sup>) / U] ,  ã = αA + βA<sup>2/3</sup> ,  γ = γ₁ / A<sup>1/3</sup></div>
   <div class="ctl"><label for="ld-dw">Shell correction δW (MeV)</label><input id="ld-dw" type="range" data-bind="dW" min="-6" max="4" step="0.1" value="1"><output data-show="dW" data-fmt="1"></output></div>
   <div class="formula">ρ<sub>F</sub>(E) = exp(2√(aU)) / (12√2 σ a<sup>1/4</sup> U<sup>5/4</sup>) ,  U = E − Δ ,  σ² = 0.01389 A<sup>5/3</sup> √(aU) / ã</div>
@@ -90,9 +90,10 @@
 </div>
 <div class="step">
   <h3>When there is no joint</h3>
-  <p>For a doubly closed shell the low-energy Fermi gas is so suppressed that its temperature stays low everywhere, and <i>F</i> never changes sign: there is no matching energy. TALYS then takes the empirical temperature <i>T</i> = −0.25 + 10.2/√(<i>A</i>(1 + γδW)) and looks for the energy where the Fermi gas has that temperature. Near a doubly closed shell the Fermi gas reaches that temperature only far above any sensible joint, or never, so the joint also falls back on systematics, <i>E<sub>x</sub></i> = 2.33 + 253/<i>A</i> + Δ, and <i>E</i>₀ is fixed so that the value is continuous.</p>
+  <p>Sometimes the two curves cannot be joined smoothly. In a nucleus with closed shells of both protons and neutrons, like lead-208, the Fermi gas is held down so far that no tangent line meets the counted levels: there is no matching energy. The code then falls back on rules of thumb for the temperature and for the joint. The two pieces still meet, but with a kink: the values agree and the slopes do not.</p>
   <div class="btns"><button class="btn ghost" data-act="tang" aria-pressed="false">Tangent at the fallback energy</button></div>
-  <p>The value is continuous, but the empirical <i>T</i> is not the Fermi-gas temperature at that energy, so the slope jumps. With the default input this happens for ²⁰⁵,²⁰⁶Tl, ²⁰⁶⁻²⁰⁹Pb and ²¹⁰Bi, with slope jumps of 34 to 62 %; taking <i>T</i> from the Fermi gas there, as TALYS already does when <i>E<sub>x</sub></i> is given in the input, restores the tangent and moves capture in the lead region by up to 20 to 30 %. INCOGNITA reproduces TALYS here; the change has been reported to the TALYS developers. The picture is a lead-like illustration, with <i>ã</i> raised by 30 % so that its Fermi gas stays below the empirical temperature up to about 24 MeV, beyond the search; its slope jumps by 62 %.</p>
+  <p>Press the button to see the smooth tangent instead. With the default input the kink appears for seven nuclei around lead, and removing it moves their neutron capture by up to 20 to 30 %. INCOGNITA reproduces TALYS here; the change has been reported to the TALYS developers.</p>
+  <div class="aside">The details: for a doubly closed shell the low-energy Fermi gas stays cold everywhere, and <i>F</i> never changes sign. TALYS then takes the empirical temperature <i>T</i> = −0.25 + 10.2/√(<i>A</i>(1 + γδW)) and looks for the energy where the Fermi gas has that temperature. Near a doubly closed shell it reaches it only far above any sensible joint, or never, so the joint also falls back on systematics, <i>E<sub>x</sub></i> = 2.33 + 253/<i>A</i> + Δ, and <i>E</i>₀ is fixed so that the value is continuous. The empirical <i>T</i> is not the Fermi-gas temperature at that energy, so the slope jumps: with the default input for ²⁰⁵,²⁰⁶Tl, ²⁰⁶⁻²⁰⁹Pb and ²¹⁰Bi, by 34 to 62 %. Taking <i>T</i> from the Fermi gas there, as TALYS already does when <i>E<sub>x</sub></i> is given in the input, restores the tangent. The picture is a lead-like illustration, with <i>ã</i> raised by 30 % so that its Fermi gas stays below the empirical temperature up to about 24 MeV, beyond the search; its slope jumps by 62 %.</div>
 </div>
 <div class="step">
   <h3>The spacing D₀ as a check</h3>
@@ -208,7 +209,8 @@
     decades(g, F, 0, 2, 1, "E (MeV)");
     staircase(g, F, n, ct, ok ? c.fission : c.accent, phone);
     g.label("number of levels below E", F.x0, F.yT - 10, { color: c.ink, size: 12, weight: 600, align: "left" });
-    g.label(`trial Eₓ = ${Ex.toFixed(2)} MeV: the line gives ${(fv + want(n)).toFixed(1)} levels for ${want(n)} counted`, W / 2, F.yB + (phone ? 36 : 40), { color: ok ? c.fission : c.accent, size: phone ? 11 : 13, weight: 600, bg: true });
+    if (phone) { const o = { color: ok ? c.fission : c.accent, size: 12, weight: 600, bg: true }; g.label(`trial Eₓ = ${Ex.toFixed(2)} MeV:`, W / 2, F.yB + 32, o); g.label(`the line gives ${(fv + want(n)).toFixed(1)} levels for ${want(n)} counted`, W / 2, F.yB + 50, o); }
+    else g.label(`trial Eₓ = ${Ex.toFixed(2)} MeV: the line gives ${(fv + want(n)).toFixed(1)} levels for ${want(n)} counted`, W / 2, F.yB + 40, { color: ok ? c.fission : c.accent, size: 13, weight: 600, bg: true });
     // lower panel: F(Ex)
     const r = rootOf(n, dW), x1 = lowLim(n, dW), x2 = 14, gx0 = W * 0.1, gx1 = W * 0.95, gy0 = H * 0.62, gy1 = H * 0.92, X = (e) => lerp(gx0, gx1, (e - x1) / (x2 - x1));
     let fmin = 0, fmax = 0; const pts = []; for (let i = 0; i <= 120; i++) { const e = lerp(x1, x2, i / 120), f = Fmatch(n, e, dW); if (isFinite(f)) { pts.push([e, f]); fmin = Math.min(fmin, f); fmax = Math.max(fmax, f); } }
@@ -274,14 +276,15 @@
     g.label(`measured ${D0MEAS} ± ${D0ERR} keV`, X(D0MEAS), y - 26, { color: c.fission, size: 12, weight: 600, bg: true });
     const xd = X(clamp(d.D0, 3, 200)); g.glow(xd, y, 18, c.accent, 0.55); g.dot(xd, y, 7, c.accent);
     g.label(`computed D₀ = ${d.D0.toFixed(1)} keV`, xd, y + 38, { color: c.accent, size: phone ? 13 : 15, weight: 600, serif: true, bg: true });
-    g.label(`ã × ${as.toFixed(3)} = ${(C57.at * as).toFixed(2)} MeV⁻¹ · σ² = ${d.s2.toFixed(1)} · ρ(Sₙ) = ${fmtN(d.rho)} per MeV`, W / 2, y + (phone ? 60 : 64), { color: c.soft, size: phone ? 10 : 12, bg: true });
+    if (phone) { g.label(`ã × ${as.toFixed(3)} = ${(C57.at * as).toFixed(2)} MeV⁻¹ · σ² = ${d.s2.toFixed(1)}`, W / 2, y + 62, { color: c.soft, size: 11, bg: true }); g.label(`ρ(Sₙ) = ${fmtN(d.rho)} per MeV`, W / 2, y + 79, { color: c.soft, size: 11, bg: true }); }
+    else g.label(`ã × ${as.toFixed(3)} = ${(C57.at * as).toFixed(2)} MeV⁻¹ · σ² = ${d.s2.toFixed(1)} · ρ(Sₙ) = ${fmtN(d.rho)} per MeV`, W / 2, y + 64, { color: c.soft, size: 12, bg: true });
     // below: a slice of the resonance ladder at Sn with that spacing, scrolling (Wigner spacings)
     const ly = H * 0.78, lh = H * 0.2, lx0 = W * 0.06, lx1 = W * 0.94, win = 400; // keV shown
     if (!S.lad) { const L = []; let e = 0, sd = 9; const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647); for (let i = 0; i < 400; i++) { e += Math.sqrt(-4 / Math.PI * Math.log(1 - rnd())); const z = Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(TAU * rnd()); L.push({ u: e, h: z * z }); } S.lad = L; }
     const off = (S.time * 0.06) % 1, span = win / d.D0, XS = (u) => lerp(lx0, lx1, (u - off * 40) / span);
     g.line(lx0, ly, lx1, ly, c.soft, 1.2, 0.7);
     for (const q of S.lad) { const x = XS(q.u); if (x < lx0 || x > lx1) continue; const h = Math.min(1, 0.12 + 0.5 * q.h) * lh; const fade = smooth(lx0, lx0 + 30, x) * (1 - smooth(lx1 - 30, lx1, x)); g.line(x, ly, x, ly - h, c.neutron, 2, 0.85 * fade); }
-    g.label(`s-wave resonances above Sₙ, ${win} keV shown: about ${(win / d.D0).toFixed(0)} levels`, W / 2, ly + 16, { color: c.soft, size: 12, bg: true });
-    g.label("iron-57-like compound nucleus, Sₙ = 7.65 MeV, spin and parity ½⁺", x0, H * 0.08, { color: c.ink, size: 12, weight: 600, align: "left" });
+    g.label(phone ? `${win} keV of s-wave resonances: about ${(win / d.D0).toFixed(0)}` : `s-wave resonances above Sₙ, ${win} keV shown: about ${(win / d.D0).toFixed(0)} levels`, W / 2, ly + 16, { color: c.soft, size: 12, bg: true });
+    g.label(phone ? "iron-57-like nucleus, Sₙ = 7.65 MeV, ½⁺" : "iron-57-like compound nucleus, Sₙ = 7.65 MeV, spin and parity ½⁺", x0, H * 0.08, { color: c.ink, size: 12, weight: 600, align: "left" });
   }
 })();

@@ -114,6 +114,7 @@
   const fmtMb = (v) => (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v >= 1 ? v.toFixed(2) : v.toFixed(3));
   const COLS = (c) => [c.neutron, c.fission, c.alpha, c.photon];
   const EXIT = ["compound elastic", "first 2⁺ level", "higher levels", "capture"];
+  const EXIT2 = [["compound", "elastic"], ["first 2⁺", "level"], ["higher", "levels"], ["capture"]];
   const SHOT = /[?&]shot=/.test(location.search);
 
   // glossary terms introduced in this chapter (js/glossary.js holds the rest; translations add theirs in js/i18n/<lang>-hauser.js)
@@ -153,6 +154,7 @@
 </div>
 <div class="step">
   <h3>Width fluctuations</h3>
+  <p>The plain formula slightly underestimates elastic scattering, and the correction moves a little flux back into it from the other exits. Here is why.</p>
   <p>With <i>W<sub>ab</sub></i> = 1 the formula multiplies averages. The resonances behind the averages have widths that scatter (Porter–Thomas, Chapter 15), and for elastic scattering the width that lets the neutron in is the same width that lets it out, so the two are correlated. The average of the products then exceeds the product of the averages for elastic, and the other exits lose what elastic gains.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Without correction</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Neutron energy (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -169,9 +171,10 @@
 </div>
 <div class="step">
   <h3>Between 3 and 2</h3>
+  <p>How big can the elastic boost get? Between two and three times, depending on whether the resonances stand apart or overlap.</p>
   <p>The limits explain the size of the effect. Take <i>N</i> equal channels and no capture, and vary their total ΣT, which is 2π times the ratio of the average total width to the level spacing, Γ/<i>D</i>. With isolated resonances (ΣT ≪ 1) and many channels, each width follows Porter–Thomas with one degree of freedom and the elastic enhancement is ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3. When resonances overlap strongly (ΣT ≫ 2π) the cross section fluctuates like a random wave (Ericson fluctuations) and the enhancement falls to 2.</p>
   <div class="ctl"><label for="hf-n">Open channels N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>For <i>N</i> isolated channels the exact value is 3<i>N</i>/(<i>N</i>+2) (the diamond): with only two channels the enhancement cannot pass 1.5, because the total width then fluctuates as much as the elastic one. Moldauer's recipe reproduces this limit; HRTW falls short of it when many weak channels are open. The inset draws resonances with the width that goes with the moving point. In Moldauer's formula the many-channel limit is 1 + 2/ν: ν → 1 for isolated resonances, ν → 1.78 when they overlap (2.12, the fit's small error at full overlap).</p>
+  <p>For <i>N</i> isolated channels the exact value is 3<i>N</i>/(<i>N</i>+2) (the diamond): with only two channels the enhancement cannot pass 1.5, because the total width then fluctuates as much as the elastic one. Moldauer's recipe reproduces this limit; HRTW falls short of it when many weak channels are open. The inset draws resonances with the width that goes with the moving point. In Moldauer's formula the many-channel limit is 1 + 2/ν: ν → 1 for isolated resonances and ν → 1.78 when they overlap. That gives 2.12 at full overlap instead of 2: a small error of the fit.</p>
   <div class="aside">In the code: <code>compound/prepare.py</code> (exit channels and their transmissions per <i>J</i><sup>π</sup>), <code>compound/target.py</code> (the Hauser–Feshbach sums), <code>compound/wfc.py</code> (Moldauer, HRTW and GOE, ported from TALYS). The picture evaluates the same formulas with illustrative ingredients: hard-sphere transmissions for an iron-like target, seven levels, a constant-temperature continuum and one lumped capture channel.</div>
 </div>`,
     setup(S) {
@@ -235,7 +238,7 @@
         if (j < 0) return; const T = Tlj(l, j, E), x = xs + q * (bw + 3);
         column(g, x, yB, bw, T * hh, c.neutron, 1, q === 0 && l > 0);
         chans.push({ x: x + bw / 2, T, w: (2 * j + 1) * T }); tot += (2 * j + 1) * T;
-        if (T > 0.004 && !phone) g.label(T >= 0.1 ? T.toFixed(2) : T.toFixed(3), x + bw / 2, yB - T * hh - 10, { color: c.soft, size: 10 });
+        if (T > 0.004 && !phone) g.label(T >= 0.1 ? T.toFixed(2) : T.toFixed(3), x + bw / 2, yB - T * hh - (q === 0 ? 10 : 24), { color: c.soft, size: 12 }); // the j pair stands side by side: stagger their numbers
       });
       g.label(`l=${l}`, xs + bw + 1, yB + 14, { color: c.ink, size: 12, weight: 600 });
     }
@@ -254,7 +257,7 @@
     if (phone) g.label(`compound nucleus · σ(CN) ≈ ${sig.toFixed(2)} b`, cnx - R - 4, cny, { color: c.warm, size: 12, weight: 600, align: "right", bg: true });
     else { g.label("compound nucleus", cnx, cny + R + 12, { color: c.warm, size: 12, weight: 600, bg: true }); g.label(`σ(CN) ≈ ${sig.toFixed(2)} b`, cnx, cny + R + 32, { color: c.ink, size: 15, weight: 600, serif: true, bg: true }); }
     g.label(`E = ${eTxt(E)} · kR = ${(k * RF).toFixed(2)}`, x0, H * (phone ? 0.95 : 0.93), { color: c.soft, size: 12, align: "left" });
-    g.label("transmission Tₗⱼ of the incident neutron", x0, phone ? H * 0.24 : yT - 30, { color: c.ink, size: 13, weight: 600, align: "left" });
+    g.label("transmission Tₗⱼ of the incident neutron", x0, phone ? H * 0.24 : yT - 46, { color: c.ink, size: 13, weight: 600, align: "left" });
   }
 
   // ---------- scene 2: one J^pi block ----------
@@ -289,10 +292,10 @@
       else g.line(xc - bw / 2, yB, xc + bw / 2, yB, c.faint, 2, 0.6);
       const nm = q.L === 0 ? "elastic" : q.L === -1 ? "cont." : q.L === -2 ? "γ" : `${LEV[q.L].I}⁺`;
       g.label(nm, xc, yB + 13, { color: q.open ? colOf(q.L) : c.faint, size: phone ? 10 : 12, weight: 600 });
-      if (q.L > 0 && !phone) g.label(LEV[q.L].e.toFixed(2), xc, yB + 27, { color: c.faint, size: 10 });
+      if (q.L > 0) g.label(LEV[q.L].e.toFixed(2), xc, yB + 27, { color: c.faint, size: phone ? 10 : 12 });
       if (q.L > 0 && q.open && q.T > 0 && slot > 22) g.label(`${q.nc}×`, xc, yB - LT(q.T) * hh - 10, { color: c.soft, size: 10 });
     });
-    g.label(phone ? "level energy (MeV) under each column" : "residual level (energy in MeV) · n×: number of (l, j) channels summed", x0, yB + (phone ? 28 : 44), { color: c.faint, size: 10, align: "left" });
+    g.label(phone ? "level energy (MeV) under each column" : "residual level (energy in MeV) · n×: number of (l, j) channels summed", x0, yB + 44, { color: c.faint, size: phone ? 10 : 12, align: "left" });
     // the compound nucleus and particles leaving through the exits at the HF shares
     const cnx = W * (phone ? 0.12 : 0.1), cny = H * (phone ? 0.11 : 0.08);
     g.glow(cnx, cny, 30, c.warm, 0.4); g.ball(cnx, cny, 8, c.warm);
@@ -308,7 +311,9 @@
     const by = H * (phone ? 0.84 : 0.84), bx0 = x0 - 30, bx1 = x1 - 10, bh = phone ? 14 : 18; let acc = 0;
     const share = [0, 0, 0, 0]; cols2.forEach((q) => { const s = q.T / st; if (q.L === 0) share[0] += s; else if (q.L === 1) share[1] += s; else if (q.L === -2) share[3] += s; else share[2] += s; });
     share.forEach((s, L) => { if (s <= 0) return; const xa = lerp(bx0, bx1, acc), xb = lerp(bx0, bx1, acc + s); g.ctx.fillStyle = g.rgba(cols[L], 0.8); g.ctx.fillRect(xa, by, Math.max(1.5, xb - xa), bh); acc += s; });
-    let lx = bx0; share.forEach((s, L) => { if (s <= 0) return; const t = `${["elastic", "2⁺", "higher", "γ"][L]} ${s >= 0.1 ? (100 * s).toFixed(0) : s >= 0.001 ? (100 * s).toFixed(1) : (100 * s).toFixed(3)} %`; g.label(t, lx, by + bh + 14, { color: cols[L], size: 11, weight: 600, align: "left" }); g.ctx.font = "600 12px sans-serif"; lx += Math.max(phone ? 62 : 80, g.ctx.measureText(t).width + 18); });
+    let lx = bx0, ly = by + bh + 14; share.forEach((s, L) => { if (s <= 0) return; const t = `${["elastic", "2⁺", "higher", "γ"][L]} ${s >= 0.1 ? (100 * s).toFixed(0) : s >= 0.001 ? (100 * s).toFixed(1) : (100 * s).toFixed(3)} %`; g.ctx.font = "600 12px sans-serif"; const tw = g.ctx.measureText(WT.tr ? WT.tr(t) : t).width;
+      if (lx > bx0 && lx + tw > W - 6) { lx = bx0; ly += 16; } // wrap rather than run off a phone
+      g.label(t, lx, ly, { color: cols[L], size: 12, weight: 600, align: "left" }); lx += Math.max(phone ? 62 : 80, tw + 18); });
     g.label("Hauser–Feshbach split: T / ΣT for each exit", bx0, by - 12, { color: c.ink, size: 12, weight: 600, align: "left" });
   }
 
@@ -330,8 +335,9 @@
         g.ctx.save(); g.ctx.fillStyle = g.rgba(cols[L], 0.75); g.ctx.fillRect(xc - bw / 2, top, bw, Math.max(1.5, hgt)); g.ctx.restore();
         g.label(`×${rTrue.toFixed(2)}`, xc, yR + (rTrue >= 1 ? -14 : 14), { color: cols[L], size: phone ? 13 : 15, weight: 600, serif: true, bg: true, alpha: 0.25 + 0.75 * wv });
       } else g.label("closed", xc, yM - 14, { color: c.faint, size: 11 });
-      g.label(EXIT[L], xc, H * 0.08, { color: cols[L], size: phone ? 10 : 13, weight: 600 });
-      if (open) g.label(`${fmtMb(lerp(v0[L], v1[L], wv))} mb`, xc, H * 0.08 + 18, { color: c.ink, size: phone ? 11 : 12 });
+      const nm2 = phone ? EXIT2[L] : [EXIT[L]]; // phone columns are ~80 px wide: names on two short lines
+      nm2.forEach((t, i) => g.label(t, xc, H * 0.08 + i * 13, { color: cols[L], size: phone ? 11 : 13, weight: 600 }));
+      if (open) g.label(`${fmtMb(lerp(v0[L], v1[L], wv))} mb`, xc, H * 0.08 + (phone ? 30 : 18), { color: c.ink, size: 12 });
     }
     // particles: shares of the compound flux per exit, with or without the correction
     const shares = [0, 1, 2, 3].map((L) => lerp(v0[L], v1[L], wv)), tot = shares.reduce((s, v) => s + v, 0);

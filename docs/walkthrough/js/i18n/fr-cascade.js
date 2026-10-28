@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>Une promenade sur la carte</h3>
   <p>Les flux sont des réactions qui parcourent un coin de la <b>carte des nucléides</b>, les noyaux rangés par nombre de neutrons N (horizontalement) et nombre de protons Z (verticalement). Chacune part de la case encadrée du noyau composé ; chaque case porte le nom de la réaction qui s'y termine.</p>
   <p>Un <em class="n">neutron</em> émis déplace d'une case vers la gauche, un <em class="p">proton</em> d'une case vers le bas, une <em class="a">particule alpha</em> (deux protons, deux neutrons) de deux cases en diagonale. La largeur du flux indique combien de réactions font ce pas ; la teinte et le pourcentage, où elles se terminent.</p>
+  <div class="ctl"><label for="cs-e4">Énergie du neutron</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lancer 200 réactions</button></div>
   <p>Chaque pas coûte de 7 à 11 MeV d'énergie de séparation : même à 30 MeV, la promenade compte au plus trois ou quatre pas.</p>
 </div>

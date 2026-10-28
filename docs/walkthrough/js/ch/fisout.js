@@ -28,15 +28,18 @@
     num: "Chapter 13", title: "What fission throws out", short: "Fission neutrons",
     html: `
 <div class="step">
-  <p>Each fission frees two or three neutrons: 2.4 on average.</p>
+  <p>Each fission frees two or three neutrons: 2.4 on average. At the top, one fission at a time: the uranium nucleus tears into two fragments and the blue balls fly off. These are the <b>prompt</b> neutrons, out in far less than a millionth of a second.</p>
+  <p>The left chart counts how many fissions freed 0, 1, 2, 3 … neutrons. The bars are the fissions you fired; the thin line on each bar is the measured share. Fire more and the bars settle onto the lines.</p>
   <div class="btns"><button class="btn" data-act="f100">100 fissions</button><button class="btn ghost" data-act="f1000">1000 fissions</button></div>
 </div>
 <div class="step">
-  <p>They are born fast: about 2 MeV.</p>
+  <p>They are born fast: about 2 MeV on average, some 80 million times the energy of a slow neutron in a reactor at room temperature. The right chart sorts the prompt neutrons by energy. The line is the measured shape (the Watt spectrum): a hump near 1 MeV and a long tail out to 10 MeV.</p>
+  <p>Such fast neutrons rarely cause the next fission in uranium-235, so a reactor first slows them down, as a later chapter shows.</p>
   <div class="btns"><button class="btn" data-act="f100">100 fissions</button><button class="btn ghost" data-act="f1000">1000 fissions</button></div>
 </div>
 <div class="step">
-  <p>A few come seconds later: 0.65 %.</p>
+  <p>A few come seconds later: 0.65 % of all the neutrons. Some fragments are so neutron-rich that, when they later decay, the new nucleus cannot hold one of its neutrons and lets it go. That waits for the decay, often seconds.</p>
+  <p>The bottom line is a clock after the fission, from 0.01 s to 100 s; each tick is ten times later than the one before. The ball on the left is all the prompt neutrons, out at once. Each small dot is one delayed neutron: it rides along the line while its wait runs, on a clock sped up 20 times, and settles where it finally came out. These few late neutrons are what makes a reactor controllable: they slow the chain's response from thousandths of a second to seconds.</p>
   <div class="btns"><button class="btn" data-act="f1000">1000 fissions</button><button class="btn ghost" data-act="clear">Clear</button></div>
 </div>`,
     setup(S) {
@@ -47,7 +50,7 @@
     steps: [() => {}, () => {}, () => {}],
     frame(g, S, dt) {
       const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13, st = Math.max(0, S.step), snap = document.body.classList.contains("shot");
-      if (snap && ST.n < 3000) { batch(S, 3000); fission(S, true); ST.ev[ST.ev.length - 1].t0 = S.time - 0.45; }
+      if (snap && ST.n < 3000) { batch(S, 3000); ST.del.forEach((d) => (d.born = S.time - 400)); fission(S, true); ST.ev[ST.ev.length - 1].t0 = S.time - 0.45; }
       S.ft += dt; if (S.ft > 1.3) { S.ft = 0; fission(S, true); }
       // ---------- the event ----------
       const cx = W * 0.5, cy = H * 0.17, Rn = phone ? 13 : 17;
@@ -69,6 +72,7 @@
           if (ST.n) g.line(x + bw * 0.08, hy1 - (hy1 - hy0) * PNU[v] * ST.n / mx, x + bw * 0.92, hy1 - (hy1 - hy0) * PNU[v] * ST.n / mx, c.ink, 1.5, 0.6 * al);
           g.label(String(v), x + bw / 2, hy1 + 12, { color: c.faint, size: fs - 2, alpha: Math.max(al, 0.7) }); }
         g.label(phone ? "neutrons per fission" : "prompt neutrons per fission", (x0 + x1) / 2, hy1 + 28, { color: c.soft, size: fs - 1 });
+        g.label(phone ? "line: measured" : "lines: measured shares", x0, hy0 - 6, { color: c.soft, size: fs - 2, align: "left", alpha: al });
         g.label(`mean ${ST.n ? (ST.nP / ST.n).toFixed(2) : "–"}`, x1, hy0 - 6, { color: c.ink, size: fs, weight: 600, align: "right", alpha: Math.max(al, 0.6) }); }
       // ---------- energy histogram ----------
       { const x0 = W * (phone ? 0.54 : 0.55), x1 = W * 0.95, bw = (x1 - x0) / 30, tot = ST.eH.reduce((a, b) => a + b, 0), mx = Math.max(1, ...ST.eH), al = focus(1);
@@ -77,15 +81,23 @@
         [0, 5, 10].forEach((e) => g.label(String(e), x0 + (x1 - x0) * e / 10, hy1 + 12, { color: c.faint, size: fs - 2 }));
         g.label(phone ? "energy (MeV)" : "prompt-neutron energy (MeV)", (x0 + x1) / 2, hy1 + 28, { color: c.soft, size: fs - 1 });
         g.label(`mean ${ST.nP ? (ST.sumE / ST.nP).toFixed(2) : "–"} MeV`, x1, hy0 - 6, { color: c.ink, size: fs, weight: 600, align: "right", alpha: Math.max(al, 0.6) });
-        if (!phone) g.label("line: Watt spectrum", x1, hy0 + 12, { color: c.soft, size: fs - 2, align: "right", alpha: al }); }
+        g.label(phone ? "line: measured" : "line: measured shape", x1, hy0 + 12, { color: c.soft, size: fs - 2, align: "right", alpha: al }); }
       // ---------- timeline: when the neutrons come ----------
       const ty = H * (phone ? 0.8 : 0.82), tx0 = W * 0.16, tx1 = W * 0.95, L0 = -2, L1 = 2.5, TX = (t) => tx0 + (tx1 - tx0) * (Math.log10(clamp(t, 10 ** L0, 10 ** L1)) - L0) / (L1 - L0), al = focus(2);
       g.line(tx0, ty, tx1, ty, c.line, 2);
       [[0.01, "0.01 s"], [0.1, "0.1"], [1, "1"], [10, "10"], [100, "100 s"]].forEach(([t, s]) => { g.line(TX(t), ty - 4, TX(t), ty + 4, c.faint, 1); g.label(s, TX(t), ty + 14, { color: c.faint, size: fs - 2 }); });
       const pxp = W * 0.07; g.glow(pxp, ty, 18 + Math.min(14, Math.log10(1 + ST.nP) * 4), c.neutron, 0.5); g.ball(pxp, ty, 6, c.neutron);
       g.label("prompt", pxp, ty - 16, { color: c.neutron, size: fs - 1, weight: 600 }); g.label(String(ST.nP), pxp, ty + 16, { color: c.ink, size: fs - 1, weight: 600 });
-      const cnt = {}; for (const d of ST.del) { const x = TX(d.t), k = Math.round(x / 7); cnt[k] = (cnt[k] || 0) + 1; const yy = ty - 8 - (cnt[k] - 1) * 7, f = smooth(0, 0.5, S.time - d.born); if (yy > ty - H * 0.1) g.dot(x, lerp(ty - 60, yy, f), 3, c.photon, al * 0.6 + 0.4); }
-      g.label(`delayed ${ST.del.length} of ${ST.nP + ST.del.length} (${ST.nP ? (100 * ST.del.length / (ST.nP + ST.del.length)).toFixed(2) : "–"} %)`, tx1, phone ? ty + 30 : ty - H * 0.1 - 8, { color: c.photon, size: fs, weight: 600, align: "right", alpha: Math.max(al, 0.7) });
+      // delayed neutrons: each rides the clock (sped up SPD times) until its wait is over, then settles at its delay
+      const SPD = 20, cnt = {};
+      for (const d of ST.del) {
+        const el = (S.time - d.born) * SPD;
+        if (el < d.t) { const x = TX(Math.max(el, 0.01)); g.ring(x, ty, 4, c.photon, 1.5, al * 0.6 + 0.3); continue; }
+        const x = TX(d.t), k = Math.round(x / 7); cnt[k] = (cnt[k] || 0) + 1; const yy = ty - 8 - (cnt[k] - 1) * 7, f = smooth(0, 0.25, (el - d.t) / SPD);
+        if (yy > ty - H * 0.1) { g.dot(x, lerp(ty, yy, f), 3, c.photon, al * 0.6 + 0.4); if (f < 1) g.glow(x, ty, 12, c.photon, 0.5 * (1 - f)); }
+      }
+      g.label(`time after fission · clock sped up ${SPD}×`, tx0, ty + 32, { color: c.soft, size: fs - 2, align: "left", alpha: Math.max(al, 0.7) });
+      g.label(`delayed ${ST.del.length} of ${ST.nP + ST.del.length} (${ST.nP ? (100 * ST.del.length / (ST.nP + ST.del.length)).toFixed(2) : "–"} %)`, tx1, phone ? ty + 48 : ty - H * 0.1 - 8, { color: c.photon, size: fs, weight: 600, align: "right", alpha: Math.max(al, 0.7) });
       g.label(`${ST.n} fissions`, phone ? W * 0.05 : W * 0.5, H * 0.95, { color: c.ink, size: fs + 1, weight: 600, serif: true, align: phone ? "left" : "center" });
     },
   });

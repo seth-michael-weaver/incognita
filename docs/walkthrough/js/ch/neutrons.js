@@ -32,17 +32,22 @@
   <div class="ctl"><label for="wn-e1">Proton energy (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
 </div>
 <div class="step">
-  <p>A neutron has no charge: it gets in at any speed.</p>
-  <div class="ctl"><label for="wn-e2">Neutron energy (slow → fast)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"></div>
+  <p>A neutron has no charge: it gets in at any speed. Nothing pushes it away, so there is no hill to climb; it only has to reach the nucleus, and then the strong force pulls it in.</p>
+  <div class="ctl"><label for="wn-e2">Neutron energy (slow → fast)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"><output id="wn-en-out"></output></div>
+  <p>The slider runs from 0.025 eV, the speed of a neutron at room temperature, up to 20 MeV, nearly a billion times more. All the way down, the neutron still gets in.</p>
 </div>
 <div class="step">
-  <p>So even slow neutrons can split uranium in a reactor.</p>
+  <p>So even slow neutrons can split uranium in a reactor. A uranium-235 nucleus that swallows one becomes uranium-236 with a little extra energy, enough to wobble, stretch into a neck and break in two. The two pieces fly apart with about 200 MeV, and the two or three new neutrons they throw off can split the next nuclei: a chain reaction.</p>
 </div>`,
     setup(S) { S.set("Ep", 6); S.set("lgEn", -1.6); S.set("mode", "p"); },
     steps: [(S) => S.set("mode", "p"), (S) => S.set("mode", "n"), (S) => S.set("mode", "f")],
     frame(g, S, dt) {
       if (S.mode === "f") return sceneFission(g, S, dt);
       const { W, H, c } = g, phone = W < 600, fs = phone ? 11 : 13, snap = document.body.classList.contains("shot");
+      if (!isFinite(S.enShown) || Math.abs(S.enShown - S.lgEn) > 1e-4) {   // the neutron slider's readout, in friendly units
+        S.enShown = S.lgEn; const o = document.getElementById("wn-en-out"), en = Math.pow(10, S.lgEn) * 1e-6;
+        if (o) o.textContent = `${fmtE(en)} · ${en < 1e-6 ? "slow (thermal)" : en < 0.1 ? "medium" : "fast"}`;
+      }
       const isP = S.mode === "p", E = isP ? S.Ep : Math.pow(10, S.lgEn) * 1e-6, V = isP ? vP : vN, col = isP ? c.proton : c.neutron;
       // the nucleus itself, to scale with the distance the particle flies (px per fm from the drawn radius)
       const cxN = W * (phone ? 0.72 : 0.66), cyN = H * (phone ? 0.56 : 0.52), Rpx = Math.min(W, H) * (phone ? 0.085 : 0.08), PX = Rpx / RN;

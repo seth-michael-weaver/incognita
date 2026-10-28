@@ -92,7 +92,7 @@
 </div>
 <div class="step">
   <h3>Charged particles must climb</h3>
-  <p>A proton's energy at each distance r from the centre: a well inside, and outside a hill from the electric (Coulomb) repulsion, falling off as 1/r. Below the hilltop the proton, rattling in the well, can only <b>tunnel</b> through the shaded stretch, a quantum effect that succeeds once in many knocks on the wall.</p>
+  <p>A proton's energy at each distance r from the centre: a well inside, and outside a hill from the electric (Coulomb) repulsion, falling off as 1/r. Below the hilltop the proton, rattling in the well, can only <b>tunnel</b> through the shaded stretch, a quantum effect that succeeds once in many knocks on the wall. The odds are worked out as in Chapter 4: the wider and higher the stretch, the more zeros in "1 knock in 10<sup>N</sup>".</p>
   <div class="ctl"><label for="dc-ce">Particle energy</label><input id="dc-ce" type="range" data-bind="eps" min="0.5" max="12" step="0.1" value="3"><output data-show="eps" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="toggleAlpha">Switch proton / alpha</button></div>
   <p>Drag the energy down and watch the tunnel widen; then switch to the alpha, whose two charges face a hill about twice as high. That is why uncharged neutrons usually win once they can leave, and why proton and alpha exits matter mostly for light nuclei and high energies.</p>
@@ -101,7 +101,7 @@
   <h3>Doors open one by one</h3>
   <p>Each particle door opens only above its <b>separation energy</b>, the cost of pulling that particle out: here 8 MeV for a neutron, 9 for a proton, 7 for an alpha. Below the neutron's 8 MeV, nearly every decay gives off light.</p>
   <div class="ctl"><label for="dc-e">Excitation energy</label><input id="dc-e" type="range" data-bind="E" min="5" max="24" step="0.1" value="7"><output data-show="E" data-fmt="1"></output></div>
-  <p>Drag the excitation energy past 8 MeV. Within about 1 MeV the neutron door swings wide and the photon share drops a hundredfold. The proton and alpha doors light up later and stay narrow, held back by their Coulomb hills.</p>
+  <p>Drag the excitation energy past 8 MeV. Within about 1 MeV the neutron door swings wide and the photon share drops a hundredfold. The alpha door is unlocked first, at 7 MeV, yet barely opens: its Coulomb hill (Chapter 4) keeps it nearly shut until well above. The proton door unlocks at 9 MeV and also stays narrow, held back by its own hill.</p>
 </div>
 <div class="step">
   <h3>Spin and parity must balance</h3>
@@ -113,13 +113,15 @@
   <h3>The way you came in</h3>
   <p>At low energy the compound nucleus is a set of sharp <b>resonances</b>, energies where the neutron is easily absorbed; eight are drawn, one per row. Each has random door widths: the entrance (the neutron channel) on the left, width <i>x</i>, and the other doors, mostly photons here, on the right, widths <i>y</i>.</p>
   <div class="btns"><button class="btn" data-act="fire">Fire 40 neutrons</button><button class="btn ghost" data-act="reroll">New resonances</button></div>
-  <p>A neutron enters resonance <i>i</i> with probability proportional to <i>x<sub>i</sub></i> and leaves by the entrance with probability <i>x<sub>i</sub></i> / (<i>x<sub>i</sub></i> + Σ<i>y</i>). Rows with a wide entrance get more neutrons in and send more back out, so the true share back out (an <b>average of products</b>) beats the estimate from average widths (a <b>product of averages</b>). The ratio is the <b>elastic enhancement</b>, and the <b>width-fluctuation correction</b> moves that flux from the other doors to the entrance.</p>
+  <p>Press Fire and follow the neutrons. A neutron gets into a row in proportion to that row's entrance width <i>x</i>. Once inside, it picks a way out in proportion to the widths: back through the entrance with chance <i>x</i> / (<i>x</i> + Σ<i>y</i>), otherwise through one of the other doors. The trays count where they went.</p>
+  <p>The catch: a row with a wide entrance gets more neutrons in and also sends more of them back out. So more come back than you would guess from the average widths alone. The true share back out (an <b>average of products</b>) beats the simple estimate (a <b>product of averages</b>); both are written at the top.</p>
+  <p>Their ratio is the <b>elastic enhancement</b>. The engine's <b>width-fluctuation correction</b> applies it: it moves that extra flux from the other doors back to the entrance.</p>
   <div class="ctl"><label for="dc-n">Other doors</label><input id="dc-n" type="range" data-bind="Nch" min="1" max="12" step="1" value="2" data-instant><output data-show="Nch" data-fmt="0"></output></div>
   <p>Add doors. With many exits their total width stops fluctuating, so the correction matters most where few doors are open. The engine applies it, with Moldauer's formula, for incident neutrons up to the target's neutron separation energy, and leaves it out above.</p>
 </div>
 <div class="step">
   <h3>What is left to share</h3>
-  <p>Not every absorbed neutron forms a compound nucleus. Some make one glancing hit and fly off (direct reactions, Chapter 6); some knock about once or twice and shoot out fast (pre-equilibrium, Chapter 7). Only the rest stay and heat the nucleus. The counters tally each fate.</p>
+  <p>The doors of this chapter only share out the neutrons that actually stayed. Chapters 6 and 7 already took their cut: some neutrons make one glancing hit and fly off (direct), some knock about once or twice and shoot out fast (pre-equilibrium). Only the rest stay inside and heat the nucleus. The counters on the right tally each fate; the ones that stay never leave the nucleus, they are only counted.</p>
   <div class="ctl"><label for="dc-einc">Neutron energy</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Only those that stay enter the door competition. Drag the neutron energy: at a few MeV nearly all stay; by 30 MeV about half have left before reaching equilibrium.</p>
   <div class="aside">In the code: <code>compound/prepare.py</code> (exit weights T·ρ per spin and parity, selection rules), <code>compound/target.py</code> (first decay with width fluctuations), <code>compound/continuum.py</code> (decay of every later bin), <code>compound/wfc.py</code> (Moldauer, HRTW, GOE corrections), <code>compound/normalization.py</code> (flux left for the compound nucleus), <code>omp/inverse.py</code> (doors run backwards).</div>
@@ -278,7 +280,8 @@
     // the particle's energy line and the tunnel stretch
     const over = eps >= vTop, ey = Y(Math.min(eps, vMax));
     let rIn = Rn, rOut = rMax;
-    if (!over) { for (let r = 3; r < rTop; r += 0.02) if (V(r) >= eps) { rIn = r; break; } rOut = Math.min(rMax, B * Rc / eps); }
+    const rOutT = (e) => B * Rc / e;   // where the 1/r hill falls back to the particle's energy (may lie beyond the picture)
+    if (!over) { for (let r = 3; r < rTop; r += 0.02) if (V(r) >= eps) { rIn = r; break; } rOut = Math.min(rMax, rOutT(eps)); }
     g.line(X(0.6), ey, x1, ey, col, 1.5, 0.75, [6, 4]);
     if (!over) {
       g.line(X(rIn), ey, X(rOut), ey, col, 8, 0.25);
@@ -287,7 +290,9 @@
     const rightBelow = V(rMax) < eps;
     g.label(`${isA ? "alpha" : "proton"} energy ${eps.toFixed(1)} MeV${eps > vMax ? " ↑" : ""}`, x1, rightBelow && !phone ? ey - 14 : ey + 16, { color: col, size: phone ? 12 : 13, align: "right", bg: true });
     // the particle: rattles in the well, knocks on the wall, sometimes gets through
-    const T = Tc(eps, k);
+    // tunnelling odds by WKB through the drawn hill, as in Chapter 4: P = exp(-2/hbar-c * integral sqrt(2 mu (V - E)) dr)
+    let T = 1;
+    if (!over) { const MU = isA ? 3727.4 * 53 / 57 : 938.3 * 56 / 57, n = 400, h = (rOutT(eps) - rIn) / n; let sI = 0; for (let i = 0; i < n; i++) { const r = rIn + (i + 0.5) * h; sI += Math.sqrt(Math.max(0, 2 * MU * (V(r) - eps))) * h; } T = Math.exp(-2 * sI / 197.327); }
     if (!S.cb || S.cb.k !== k) S.cb = { k, ph: "in", r: 1, dir: 1, knocks: 0, t: 0, last: 0 };
     const cb = S.cb, wall = over ? Rn : rIn, sp = (wall - 0.8) / 0.32;
     if (cb.ph === "in") {
@@ -366,7 +371,7 @@
     if (WF.key !== key) {
       if (WF.key === null || WF.key.split(":")[0] !== String(WF.seed)) wfNew(WF.seed);
       WF.key = key; wfBalls.length = 0;
-      const st0 = wfStats(N); WF.tot = 40; WF.el = Math.round(40 * st0.avgProd);   // seed the tally with its expected value
+      WF.tot = 0; WF.el = 0; WF.queue = 0;   // a new set of doors is a new experiment: the trays start empty, counts come only from fired neutrons
     }
     const st = wfStats(N);
     const yS0 = H * (phone ? 0.13 : 0.12), yS1 = H * (phone ? 0.66 : 0.66), sh = (yS1 - yS0) / 8, Yc = (i) => yS0 + (i + 0.5) * sh;
@@ -391,13 +396,13 @@
     const mx = Math.max(back, on, rows * wide * 0.6);
     pile(g, tL, tY, back, mx, rows, wide, rd, c.neutron);
     pile(g, tR, tY, on, mx, rows, wide, rd, c.photon);
+    if (!WF.tot && !wfBalls.length && WF.queue <= 0) g.label("press Fire to send neutrons in", W * 0.5, (yS1 + tY) / 2 + 6, { color: c.soft, size: phone ? 12 : 13, italic: true });
     g.label(`back out the entrance: ${back} of ${WF.tot}`, tL, tY + 14, { color: c.neutron, size: phone ? 11 : 12, weight: 600, bg: true });
     g.label(`out another door: ${on}`, tR, tY + 14, { color: c.photon, size: phone ? 11 : 12, weight: 600, bg: true });
     // the comparison
     g.label(phone ? `back out ${pct(st.avgProd)}, not ${pct(st.prodAvg)}: × ${(st.avgProd / st.prodAvg).toFixed(1)}` : `share back out: average of products ${pct(st.avgProd)} · product of averages ${pct(st.prodAvg)} · × ${(st.avgProd / st.prodAvg).toFixed(1)}`, W * 0.5, H * 0.035, { color: c.ink, size: phone ? 12 : 14, weight: 600, serif: true, bg: true });
     g.label(phone ? `other doors ${pct(1 - st.avgProd)}, not ${pct(1 - st.prodAvg)}` : `other doors together: ${pct(1 - st.avgProd)} instead of ${pct(1 - st.prodAvg)}`, W * 0.5, yS1 + 20, { color: c.soft, size: 12, bg: true });
     // neutrons
-    WF.idle += dt; if (WF.idle > 0.45) { WF.idle = 0; WF.queue = Math.max(WF.queue, 1); }
     S.lastSpawn += dt * 16;
     while (S.lastSpawn > 1) {
       S.lastSpawn -= 1; if (WF.queue <= 0 || wfBalls.length > 50) continue; WF.queue--;
@@ -431,7 +436,7 @@
     g.nucleus(cx, cy, R, { N: 48, Z: 22, t: S.time, heat: 1 + 2 * fCn, jiggle: 0.6, alpha: 0.85 });
     g.label(`absorbed neutrons, ${E.toFixed(1)} MeV →`, W * 0.02, cy - R - 16, { color: c.neutron, size: 13, align: "left", bg: true });
     const mx = Math.max(...NORM.cnt, rows * wide * 0.5);
-    const names = [["direct", "one glancing hit on the surface"], ["pre-equilibrium", "a knock or two, then out fast"], ["compound nucleus", "stayed: on to the door competition"]];
+    const names = [["direct", "one glancing hit on the surface"], ["pre-equilibrium", "a knock or two, then out fast"], ["compound nucleus", "stayed inside: counted here, not moved"]];
     const tot = Math.max(1, sum(NORM.cnt));
     tys.forEach((ty, f) => {
       const top = pile(g, tx, ty, NORM.cnt[f], mx, rows, wide, rd, f === 2 ? c.warm : c.neutron);
@@ -445,7 +450,7 @@
       const y0 = cy + b.jit * R * 0.8, dest = [tx + b.jit * wide * rd * 1.6, tys[fate] - rd * 4];
       if (fate === 0) { const yh = cy - R * 0.98; b.pts = [[-20, yh], [cx - R * 0.2, yh], dest]; b.ts = [1.0, 0.7]; }
       else if (fate === 1) { b.pts = [[-20, y0], [cx - R * 0.85, y0], [cx - R * 0.1, cy - R * 0.4 * Math.sign(b.jit || 1)], [cx + R * 0.4, cy + R * 0.2], dest]; b.ts = [1.0, 0.12, 0.12, 0.45]; }
-      else { const r2 = rng(((Math.random() * 1e9) | 0) + 1); b.pts = [[-20, y0], [cx - R * 0.85, y0]]; for (let k = 0; k < 5; k++) { const a = r2() * TAU, rr = Math.sqrt(r2()) * R * 0.7; b.pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]); } b.pts.push(dest); b.ts = [1.0, 0.3, 0.35, 0.4, 0.4, 0.4, 0.9]; }
+      else { const r2 = rng(((Math.random() * 1e9) | 0) + 1); b.pts = [[-20, y0], [cx - R * 0.85, y0]]; for (let k = 0; k < 6; k++) { const a = r2() * TAU, rr = Math.sqrt(r2()) * R * 0.7; b.pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]); } b.ts = [1.0, 0.3, 0.35, 0.4, 0.4, 0.4, 0.5]; }   // stays inside: wanders, then melts into the heat
       normBalls.push(b);
     }
     for (let k = normBalls.length - 1; k >= 0; k--) {
@@ -453,8 +458,8 @@
       if (seg >= b.ts.length) { NORM.cnt[b.fate]++; normBalls.splice(k, 1); continue; }
       if (b.fate === 0 && seg === 1 && u < 0.25) g.glow(x, y, 16, c.neutron, 0.5);
       if (b.fate === 1 && seg === 3) g.line(x - 14, y, x, y, c.neutron, 2, 0.4);
-      if (b.fate === 2 && seg >= 1 && seg < b.ts.length - 1) { g.glow(x, y, 14, c.warm, 0.55); g.dot(x, y, 4.5, c.warm); }
-      else g.ball(x, y, 5, b.fate === 2 && seg === b.ts.length - 1 ? c.warm : c.neutron);
+      if (b.fate === 2 && seg >= 1) { const fa = seg === b.ts.length - 1 ? 1 - u : 1; g.glow(x, y, 14, c.warm, 0.55 * fa); g.dot(x, y, 4.5, c.warm, fa); }
+      else g.ball(x, y, 5, c.neutron);
     }
     if (tot > 900) NORM.cnt = NORM.cnt.map((v) => Math.round(v / 2));
   }

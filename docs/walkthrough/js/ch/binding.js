@@ -14,12 +14,14 @@
     num: "Chapter 3", title: "Why nuclei hold together", short: "Binding",
     html: `
 <div class="step">
-  <p>Higher on the curve means more tightly bound.</p>
+  <p>Higher on the curve means more tightly bound. Each point is one mass number A (the count of protons plus neutrons), and its height is the energy it would take, per nucleon, to pull that nucleus fully apart. Drag A and read the marker: the middle of the curve, around iron and nickel, is the top.</p>
   <div class="ctl"><label for="bi-a">Mass number A</label><input id="bi-a" type="range" data-bind="pick" data-instant min="2" max="260" step="1" value="56"><output data-show="pick" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>Split uranium: both pieces sit higher. About 200 MeV.</p>
+  <p>Split uranium: both pieces sit higher on the curve than the uranium they came from, so the same nucleons end up bound more tightly and the difference comes out as energy. Choose the lighter fragment; the heavier one is the rest of the 236 nucleons.</p>
   <div class="ctl"><label for="bi-f">Lighter fragment A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
+  <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
+  <p>Whatever the split, it is about 200 MeV: tens of millions of times the few electron-volts that burning one molecule of fuel gives.</p>
 </div>
 <div class="step">
   <p>Join two light nuclei into one. If the new nucleus sits higher on the curve, energy is released. Past the peak, joining costs energy instead.</p>
@@ -57,12 +59,19 @@
         g.line(X(a1), Y(bp), X(236), Y(bp), c.faint, 1, 0.7, [3, 4]);
         [a1, a2].forEach((a) => g.arrow(X(a), Y(bp), X(a), Y(bOf(a)) + 8, c.warm, 2, 0.9));
         marker(236, c.proton, "U-236", true); marker(a1, c.warm, nameOf(a1), true); marker(a2, c.warm, nameOf(a2), true);
-        g.label(`${nameOf(236)} → ${nameOf(a1)} + ${nameOf(a2)}: about ${Q.toFixed(0)} MeV released`, W * 0.5, ry, { color: Q > 0 ? c.ink : c.soft, size: fs + 2, weight: 600, serif: true });
 
       } else {
         const a1 = Math.round(S.fuse), a2 = 2 * a1, b1 = bOf(a1), b2 = bOf(a2), Q = a2 * b2 - a2 * b1;
         g.arrow(X(a1), Y(b1), X(a2) - 4, Y(b2) + (b2 >= b1 ? 6 : -6), Q > 0 ? c.warm : c.cool, 2, 0.9);
         marker(a1, c.accent, nameOf(a1), false); marker(a2, Q > 0 ? c.warm : c.cool, nameOf(a2), true);
+      }
+      // the split result likewise sits under its slider
+      const sa = Math.round(S.frag);
+      if (sa !== S.splitShown) {
+        S.splitShown = sa; const o = document.getElementById("bi-split-out");
+        if (o) { const sq = sa * bOf(sa) + (236 - sa) * bOf(236 - sa) - 236 * bOf(236);
+          o.textContent = `${nameOf(236)} → ${nameOf(sa)} + ${nameOf(236 - sa)}: ${sq >= 0 ? "about " + sq.toFixed(0) + " MeV released" : "costs " + (-sq).toFixed(0) + " MeV"}`;
+          o.classList.toggle("cost", sq < 0); }
       }
       // the fusion result is HTML under its slider (bigger and next to the control, Seth 2026-10-28), not a canvas line
       const fa = Math.round(S.fuse);

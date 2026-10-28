@@ -14,15 +14,18 @@
     num: "Chapter 2", title: "What is a cross section?", short: "Cross section",
     html: `
 <div class="step">
-  <p>Each disc is a nucleus's target area: its cross section.</p>
+  <p>Each disc is a nucleus's target area: its <b>cross section</b>, written σ (sigma). The picture looks straight down on a thin sheet of nuclei while neutrons rain onto it at random spots. A neutron that lands inside a disc reacts with that nucleus (an orange flash); one that lands between the discs passes straight through (it just fades).</p>
+  <p>So the share that reacts is simply the share of the sheet the discs cover. The small black square is the unit of area, one <b>barn</b>, 10⁻²⁴ cm²: the real face of a nucleus is about one barn.</p>
   <div class="ctl"><label for="xs-e1">Neutron energy (eV)</label><input id="xs-e1" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="2"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
-  <p>Slower neutrons see bigger targets.</p>
+  <p>Slower neutrons see bigger targets. The disc is not the nucleus's real size: it is how big the nucleus acts for a neutron at this energy, and a slow neutron lingers near the nucleus longer, so it is more likely to be caught. For capture this makes σ grow like 1/speed.</p>
+  <p>The curve under the sheet is σ across all energies (both scales are logarithmic); the orange dot marks the energy you chose. Drag down to the slowest neutrons and watch the discs grow and the reacted share climb.</p>
   <div class="ctl"><label for="xs-e2">Neutron energy (eV)</label><input id="xs-e2" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="-1.6"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
-  <p>At a resonance the target swells.</p>
+  <p>At a resonance the target swells. At 7 eV the neutron plus the nucleus have exactly the energy of one of the nucleus's own levels, so it is taken in far more easily: the disc grows about fifty times in area, here to about 400 barns.</p>
+  <p>Move a little off 7 eV and the disc shrinks back at once: the peak in the curve is narrow. Real nuclei have many such peaks; Chapter 1 showed their barcode.</p>
   <div class="ctl"><label for="xs-e3">Neutron energy (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
     setup(S) { S.set("lgE", 2); S.Eshow = 100; },
@@ -30,6 +33,8 @@
     frame(g, S, dt) {
       const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13, snap = document.body.classList.contains("shot");
       const E = Math.pow(10, S.lgE), s = sig(E); S.Eshow = E;
+      // a new energy is a new experiment: restart the tally so the share never lags the slider
+      if (S.histE == null || Math.abs(S.lgE - S.histE) > 0.004) { hist.length = 0; S.histE = S.lgE; }
       // the slab, face-on
       const sx = W * 0.05, sy = H * 0.05, sw = W * 0.9, sh = H * (phone ? 0.5 : 0.55);
       const nx = phone ? 5 : 7, ny = phone ? 4 : 5, cw = sw / nx, chh = sh / ny, K = Math.min(cw, chh) * 0.085;   // px per sqrt(barn)
@@ -61,11 +66,12 @@
       g.ground(pts, c.neutron, eH * 0.5, 0.18); g.poly(pts, c.neutron, 1.8, 0.9);
       g.dot(EX(E), SY(s), 5, c.warm); g.line(EX(E), SY(s), EX(E), eY + 4, c.warm, 1, 0.6, [2, 3]);
       [[0.01, "0.01"], [1, "1"], [100, "100 eV"]].forEach(([e, t]) => g.label(t, EX(e), eY + 12, { color: c.faint, size: fs - 2 }));
-      g.label("σ", ex0 - 2, eY - eH - 6, { color: c.neutron, size: fs, weight: 600, align: "left" });
+      g.label(phone ? "σ vs energy" : "σ: the target area at each energy", ex0 - 2, eY - eH - 6, { color: c.neutron, size: fs, weight: 600, align: "left" });
       // readouts
       const n = hist.length, h = hist.reduce((a, b) => a + b, 0);
       const ry = H * 0.94;
-      g.label(`σ ≈ ${s.toFixed(s < 10 ? 1 : 0)} b · reacted ${n ? Math.round(100 * h / n) : 0} % · transmitted ${n ? 100 - Math.round(100 * h / n) : 100} %`, W * 0.5, ry, { color: c.ink, size: fs + 2, weight: 600, serif: true });
+      g.label(n < 25 ? `σ ≈ ${s.toFixed(s < 10 ? 1 : 0)} b · counting the neutrons…` : `σ ≈ ${s.toFixed(s < 10 ? 1 : 0)} b · reacted ${Math.round(100 * h / n)} % · passed through ${100 - Math.round(100 * h / n)} %`, W * 0.5, ry, { color: c.ink, size: fs + 2, weight: 600, serif: true });
+      g.label(phone ? "orange flash = reacted · fading dot = passed through" : "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through", W * 0.5, ry - (phone ? 20 : 24), { color: c.soft, size: fs - 1, italic: true });
       g.label("illustration", W - 6, H - 10, { color: c.faint, size: 10, align: "right" });
     },
   });

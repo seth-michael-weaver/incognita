@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>En vandring hen over kortet</h3>
   <p>Strømmene er reaktioner, der vandrer hen over et hjørne af <b>nuklidkortet</b>, kerner afbildet efter neutrontal N (vandret) og protontal Z (lodret). Hver starter i det omkransede compoundfelt; hvert felt er opkaldt efter den reaktion, der ender dér.</p>
   <p>En <em class="n">neutron</em> ud flytter ét felt til venstre, en <em class="p">proton</em> ét ned, en <em class="a">alfapartikel</em> (to protoner, to neutroner) to diagonalt. Strømmens bredde er, hvor meget der tager det skridt; farvetone og procent viser, hvor reaktionerne ender.</p>
+  <div class="ctl"><label for="cs-e4">Neutronenergi</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Affyr 200 reaktioner</button></div>
   <p>Hvert skridt koster 7 til 11 MeV i separationsenergi, så selv ved 30 MeV er vandringen højst tre eller fire skridt.</p>
 </div>

@@ -13,6 +13,7 @@ WT.L.ch.cascade = {
   <h3>Um passeio pela carta</h3>
   <p>As correntes são reações que percorrem um canto da <b>carta de nuclídeos</b>, os núcleos dispostos por número de neutrões N (na horizontal) e número de protões Z (na vertical). Todas começam na casa contornada do núcleo composto; cada casa tem o nome da reação que aí termina.</p>
   <p>Um <em class="n">neutrão</em> emitido move uma casa para a esquerda, um <em class="p">protão</em> uma para baixo, uma <em class="a">partícula alfa</em> (dois protões, dois neutrões) duas na diagonal. A largura da corrente é quanto dá esse passo; o tom e a percentagem, onde terminam as reações.</p>
+  <div class="ctl"><label for="cs-e4">Energia do neutrão</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lançar 200 reações</button></div>
   <p>Cada passo custa de 7 a 11 MeV de energia de separação, por isso mesmo a 30 MeV o percurso tem no máximo três ou quatro passos.</p>
 </div>
