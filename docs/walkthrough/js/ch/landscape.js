@@ -21,11 +21,11 @@
 
   WT.chapter("landscape", {
     title: "The landscape of nuclei", short: "Landscape",
-    lead: "Every nucleus anyone has ever made and weighed, on one map: about 3,600 of them, and only 252 last forever.",
+    lead: "Every nucleus anyone has ever made, on one map: 3,338 of them so far, and only 252 last forever.",
     html: `
 <div class="step">
-  <h3>Every nucleus ever measured</h3>
-  <p>Each little square is one nucleus: neutrons count across, protons count up. The <b>dark</b> squares are the 252 that never decay. The others fall apart, orange ones in a blink, blue ones only after years. The <em style="font-style:normal;color:var(--proton);font-weight:600">red</em> row is the element you pick with the slider: all its known isotopes.</p>
+  <h3>Every nucleus ever made</h3>
+  <p>Each little square is one nucleus that has actually been seen in an experiment: neutrons count across, protons count up. Pale squares have been seen, but their mass has not been weighed yet, only estimated. The <b>dark</b> squares are the 252 that never decay. The others fall apart, orange ones in a blink, blue ones only after years. The <em style="font-style:normal;color:var(--proton);font-weight:600">red</em> row is the element you pick with the slider: all its known isotopes.</p>
   <div class="ctl"><label for="ls-z">Look at element (protons Z)</label><input id="ls-z" type="range" data-bind="zSel" data-instant min="1" max="110" step="1" value="26"><output data-show="zSel" data-fmt="0"></output></div>
   <p class="ctl-result" id="ls-z-out" aria-live="polite"></p>
 </div>
@@ -126,7 +126,7 @@
     if (S.mode === "chart") {
       const z = Math.round(S.zSel);
       if (z !== S.zShown) { S.zShown = z; const row = data.filter((d) => d[0] === z), st = row.filter((d) => d[4] === 99).length, o = document.getElementById("ls-z-out");
-        if (o) o.textContent = row.length ? `${EL[z] || "Z = " + z}: ${row.length} isotopes measured, ${st ? st + " stable" : "none stable"} (from ${name(z, z + row[0][1])} to ${name(z, z + row[row.length - 1][1])})` : `Z = ${z}: none measured`; }
+        if (o) o.textContent = row.length ? `${EL[z] || "Z = " + z}: ${row.length} isotopes seen, ${st ? st + " stable" : "none stable"} (from ${name(z, z + row[0][1])} to ${name(z, z + row[row.length - 1][1])})` : `Z = ${z}: none seen yet`; }
     }
     if (S.mode === "roll") {
       const ch = chainOf(A); if (!ch.length) return;
@@ -134,7 +134,7 @@
       const start = top > 0 ? 0 : ch.length - 1, hops = Math.abs(top - start), key = `${A}`;
       if (key !== S.aKey) { S.aKey = key; const o = document.getElementById("ls-a-out"), s0 = ch[start], t = ch[top];
         if (o) o.textContent = hops ? `A = ${A}: from ${name(s0[0], A)} (${fmtT(s0[4])}), ${hops} beta decay${hops > 1 ? "s" : ""} to ${name(t[0], A)}, the most tightly bound of the chain`
-          : `A = ${A}: only one nucleus measured in this chain`; }
+          : `A = ${A}: only one nucleus seen in this chain`; }
     }
   }
 })();
