@@ -79,9 +79,10 @@
       (S) => { S.set("mode", "wave"); S.to("V", 0); S.to("Wshow", 0); S.to("ringMix", 0); S.to("hillMix", 0); S.to("nucAlpha", 0.25); },
       (S) => { S.set("mode", "wave"); S.to("V", V0); S.to("Wshow", 0); S.to("ringMix", 0); S.to("hillMix", 0); S.to("nucAlpha", 0.45); },
       (S) => { S.set("mode", "wave"); S.to("V", V0); S.to("Wshow", 1); S.to("ringMix", 0); S.to("hillMix", 0); S.to("nucAlpha", 0.45); },
-      (S) => { S.set("mode", "rings"); S.to("ringMix", 1); S.to("hillMix", 0); if (!tally.tot.some((x) => x)) S.handlers.fire(); },
-      (S) => { S.set("mode", "hill"); S.to("ringMix", 0); S.to("hillMix", 1); },
-      (S) => { S.set("mode", "sum"); S.to("ringMix", 1); S.to("hillMix", 0); S.sumT0 = /[?&]shot=/.test(location.search) ? S.time - 2.2 : S.time; S.sumE = S.target.E; },
+      // the later scenes have no W slider: restore the standard absorption, or a reader who followed "drag W to 0" sees nothing absorbed
+      (S) => { const w0 = S.target.W; S.to("W", 7, true); S.set("mode", "rings"); S.to("ringMix", 1); S.to("hillMix", 0); if (w0 !== 7 || !tally.tot.some((x) => x)) S.handlers.fire(); },
+      (S) => { S.to("W", 7, true); S.set("mode", "hill"); S.to("ringMix", 0); S.to("hillMix", 1); },
+      (S) => { S.to("W", 7, true); S.set("mode", "sum"); S.to("ringMix", 1); S.to("hillMix", 0); S.sumT0 = /[?&]shot=/.test(location.search) ? S.time - 2.2 : S.time; S.sumE = S.target.E; },
     ],
     frame(g, S) {
       const { W: Wd, H: Hd, c } = g;
