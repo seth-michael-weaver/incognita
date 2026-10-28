@@ -25,7 +25,7 @@
     html: `
 <div class="step">
   <h3>Every nucleus ever measured</h3>
-  <p>Each little square is one nucleus: neutrons count across, protons count up. The <b>dark</b> squares are the 252 that never decay. The others fall apart, orange ones in a blink, blue ones only after years.</p>
+  <p>Each little square is one nucleus: neutrons count across, protons count up. The <b>dark</b> squares are the 252 that never decay. The others fall apart, orange ones in a blink, blue ones only after years. The <em style="font-style:normal;color:var(--proton);font-weight:600">red</em> row is the element you pick with the slider: all its known isotopes.</p>
   <div class="ctl"><label for="ls-z">Look at element (protons Z)</label><input id="ls-z" type="range" data-bind="zSel" data-instant min="1" max="110" step="1" value="26"><output data-show="zSel" data-fmt="0"></output></div>
   <p class="ctl-result" id="ls-z-out" aria-live="polite"></p>
 </div>
@@ -35,7 +35,7 @@
 </div>
 <div class="step">
   <h3>Rolling down to stability</h3>
-  <p>Nuclei with the same total number of nucleons (the same <b>mass number</b> A) lie on a diagonal line across the map. Start with too many neutrons, as the fragments of a split uranium nucleus do. In <b>beta decay</b> a neutron turns into a proton, so the nucleus steps one place along its line toward the more tightly bound middle, again and again, until it reaches the ridge and stops. The small graph shows the same chain as a valley the nucleus rolls down. Try A = 137: the chain passes caesium-137, the long-lived product of reactor accidents.</p>
+  <p>Nuclei with the same total number of nucleons (the same <b>mass number</b> A) lie on a diagonal line across the map, shown in <em style="font-style:normal;color:var(--proton);font-weight:600">red</em>. Start with too many neutrons, as the fragments of a split uranium nucleus do. In <b>beta decay</b> a neutron turns into a proton, so the nucleus steps one place along its line toward the more tightly bound middle, again and again, until it reaches the ridge and stops. The small graph shows the same chain as a valley the nucleus rolls down. Try A = 137: the chain passes caesium-137, the long-lived product of reactor accidents.</p>
   <div class="ctl"><label for="ls-a">Mass number A</label><input id="ls-a" type="range" data-bind="aSel" data-instant min="8" max="250" step="1" value="137"><output data-show="aSel" data-fmt="0"></output></div>
   <p class="ctl-result" id="ls-a-out" aria-live="polite"></p>
 </div>
@@ -85,8 +85,11 @@
       }
       // legend
       const leg = S.mode === "tiers" ? [[c.fission, "measured resonances"], [c.ink, "tier A"], [c.accent, "tier B"], [c.warm, "tier C"], [c.line, "not in library"]]
-        : S.mode === "chart" ? [[c.ink, "stable"], [c.accent, "lives years"], [c.warm, "gone in a blink"]]
+        : S.mode === "chart" ? [[c.ink, "stable"], [c.accent, "lives years"], [c.warm, "gone in a blink"], [c.proton, `red: ${EL[zSel] || "Z " + zSel} (your pick)`]]
+        : S.mode === "roll" ? [[c.fission, "held most tightly"], [c.accent, "middle"], [c.warm, "held least"], [c.proton, `red: the A = ${aSel} chain`]]
         : [[c.fission, "held most tightly"], [c.accent, "middle"], [c.warm, "held least"]];
+      // name the red highlight on the map itself
+      if (S.mode === "chart") { const row = data.filter((d) => d[0] === zSel); if (row.length) { const last = row[row.length - 1]; g.label(`${EL[zSel] || "Z " + zSel}: all its isotopes`, X(last[1]) + 10, Y(zSel) + cell * 0.45, { color: c.proton, size: fs, weight: 600, align: "left", bg: true }); } }
       if (!phone) leg.forEach(([col, t], i) => { const lx = X(100), ly = Y(28) + i * 18; ctx.fillStyle = col; ctx.fillRect(lx, ly - 5, 10, 10); g.label(t, lx + 16, ly, { color: c.soft, size: 12, align: "left" }); });
       else g.label(leg.map((l) => l[1]).join(" · "), W / 2, H - 8, { color: c.soft, size: 10 });
       // roll step: the ball hops along the chain; an inset draws the chain as a valley
