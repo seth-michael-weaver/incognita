@@ -786,3 +786,6 @@ body.shot .part-head { display: none; }
 @media (prefers-reduced-motion: reduce) { .ch-rail .rail-more { transition: none; } }
 /* phones (Seth 2026-10-28): no chapter-dot menu and no floating chapter chip (it sat over the text); the chapter headings say where you are */
 @media (max-width: 900px) { .ch-rail { display: none !important; } }
+/* hero text higher (Seth 2026-10-28): centred on wide screens; on phones raised, leaving the band above it for the nucleus */
+.hero-copy { justify-content: center; bottom: max(72px, 11vh); }
+@media (max-width: 720px) { .hero .hero-copy { justify-content: flex-end; bottom: calc(19vh + 64px); } }
