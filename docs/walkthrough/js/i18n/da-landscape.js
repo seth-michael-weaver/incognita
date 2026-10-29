@@ -24,3 +24,24 @@ WT.L.ch.landscape = {
   <p>Det samme kort, farvet efter, hvad vores bibliotek rummer for hver kerne. <em style="font-style:normal;color:var(--fission);font-weight:600">Grøn</em>: evalueret ud fra dens målte resonanser. De øvrige har en modelfil bygget af motoren alene: <b>mørk</b> for stabile eller langlivede (niveau A), <em style="font-style:normal;color:var(--accent);font-weight:600">blå</em> for mere end et døgn (niveau B), <em style="font-style:normal;color:var(--warm);font-weight:600">orange</em> for kortlivede (niveau C). Grå er ikke i biblioteket (mest de letteste kerner og nogle få, motoren ikke kan køre).</p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "neutrons N →": "neutroner N →",
+  "protons Z ↑": "protoner Z ↑",
+  "Fe: all its isotopes": "Fe: alle dets isotoper",
+  "stable": "stabil",
+  "lives years": "lever i år",
+  "gone in a blink": "væk på et øjeblik",
+  "red: Fe (your pick)": "rød: Fe (dit valg)",
+  "nickel{#}: most tightly bound": "nikkel-{#}: stærkest bundet",
+  "held most tightly": "holdt hårdest fast",
+  "middle": "midte",
+  "held least": "holdt mindst fast",
+  "red: the A = {#} chain": "rød: kæden A = {#}",
+  "A = {#}: deeper = more tightly bound": "A = {#}: dybere = stærkere bundet",
+  "protons Z →": "protoner Z →",
+  "measured resonances": "målte resonanser",
+  "tier A": "niveau A",
+  "tier B": "niveau B",
+  "tier C": "niveau C",
+  "not in library": "ikke i biblioteket",
+});

@@ -13,3 +13,18 @@ WT.L.ch.products = {
   <p>Sleep de tijd. Een seconde nadat de reactor stopt, geven de vervallen nog ongeveer 6 % van het volle vermogen; na een dag ongeveer een half procent; na een jaar een paar honderdsten van een procent, in een grote reactor nog steeds het grootste deel van een megawatt. Daarom wordt gebruikte brandstof jarenlang in koelbassins bewaard. De curve is de vuistregel van Way–Wigner: één eenvoudige formule voor het verval van alle brokstukken samen, na een jaar draaien. Beide schalen springen bij elk streepje met een factor tien.</p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "fragment mass number A →": "massagetal brokstuk A →",
+  "share of fissions that make it (each line ×{#})": "aandeel splijtingen dat het maakt (elke lijn ×{#})",
+  "Rb{#} · {#} %": "Rb{#} · {#} %",
+  "Xe{#} · {#} %": "Xe{#} · {#} %",
+  "+ about {#} neutrons": "+ ongeveer {#} neutronen",
+  "{#} % of full power": "{#} % van vol vermogen",
+  "≈ {#} MW in a {#} MW reactor · {#} s after shutdown": "≈ {#} MW in een reactor van {#} MW · {#} s na afschakelen",
+  "{#} min": "{#} min",
+  "{#} h": "{#} u",
+  "{#} day": "{#} dag",
+  "{#} yr": "{#} jr",
+  "time after shutdown (each mark much later) →": "tijd na afschakelen (elk streepje veel later) →",
+  "Way–Wigner rule of thumb, after a year at full power": "vuistregel van Way–Wigner, na een jaar op vol vermogen",
+});

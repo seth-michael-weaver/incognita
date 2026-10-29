@@ -24,3 +24,25 @@ WT.es.ch.landscape = {
   <p>El mismo mapa, coloreado según lo que contiene nuestra biblioteca para cada núcleo. <em style="font-style:normal;color:var(--fission);font-weight:600">Verde</em>: evaluado a partir de sus resonancias medidas. El resto tiene un archivo de modelo construido solo por el motor: <b>oscuro</b> para los estables o de vida larga (nivel A), <em style="font-style:normal;color:var(--accent);font-weight:600">azul</em> para más de un día (nivel B), <em style="font-style:normal;color:var(--warm);font-weight:600">naranja</em> para los de vida más corta (nivel C). Los grises no están en la biblioteca (sobre todo los núcleos más ligeros, y unos pocos que el motor no puede ejecutar).</p>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "neutrons N →": "neutrones N →",
+  "protons Z ↑": "protones Z ↑",
+  "Fe: all its isotopes": "Fe: todos sus isótopos",
+  "stable": "estable",
+  "lives years": "vive años",
+  "gone in a blink": "desaparece en un parpadeo",
+  "red: Fe (your pick)": "rojo: Fe (tu elección)",
+  "nickel{#}: most tightly bound": "níquel{#}: el más ligado",
+  "held most tightly": "el más ligado",
+  "middle": "intermedio",
+  "held least": "el menos ligado",
+  "red: the A = {#} chain": "rojo: la cadena A = {#}",
+  "A = {#}: deeper = more tightly bound": "A = {#}: más hondo = más ligado",
+  "protons Z →": "protones Z →",
+  "measured resonances": "resonancias medidas",
+  "tier A": "nivel A",
+  "tier B": "nivel B",
+  "tier C": "nivel C",
+  "not in library": "no está en la biblioteca",
+});

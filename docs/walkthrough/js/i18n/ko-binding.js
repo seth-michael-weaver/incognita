@@ -18,3 +18,12 @@ WT.L.ch.binding = {
   <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "mass number A →": "질량수 A →",
+  "binding energy per nucleon (MeV)": "핵자당 결합 에너지 (MeV)",
+  "Ni{#}: most tightly bound": "Ni{#}: 가장 단단히 결합",
+  "measured masses (AME{#})": "측정된 질량 (AME{#})",
+  "Fe{#}: {#} MeV per nucleon · {#} MeV in all": "Fe{#}: 핵자당 {#} MeV · 전체 {#} MeV",
+});

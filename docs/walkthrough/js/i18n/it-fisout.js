@@ -13,8 +13,22 @@ WT.L.ch.fisout = {
   <div class="btns"><button class="btn" data-act="f100">100 fissioni</button><button class="btn ghost" data-act="f1000">1000 fissioni</button></div>
 </div>
 <div class="step">
-  <p>Alcuni arrivano secondi dopo: lo 0,65 % di tutti i neutroni. Certi frammenti sono così ricchi di neutroni che, quando poi decadono, il nuovo nucleo non riesce a trattenere uno dei suoi neutroni e lo lascia andare. Questo aspetta il decadimento, spesso per secondi.</p>
-  <p>La linea in basso è un orologio dopo la fissione, da 0,01 s a 100 s; ogni tacca è dieci volte più tarda della precedente. La palla a sinistra sono tutti i neutroni pronti, emessi insieme. Ogni puntino è un neutrone ritardato: scorre lungo la linea mentre la sua attesa procede, su un orologio accelerato di 20 volte, e si ferma dove è uscito alla fine. Questi pochi neutroni tardivi rendono controllabile un reattore: rallentano la risposta della catena da millesimi di secondo a secondi.</p>
+  <p>Alcuni arrivano secondi dopo: lo 0,65 % di tutti i neutroni. Certi frammenti sono così ricchi di neutroni che, quando poi decadono, il nuovo nucleo non riesce a trattenere uno dei suoi neutroni e lo lascia andare. Quel neutrone deve attendere il decadimento, spesso per secondi.</p>
+  <p>La linea in basso è un orologio che parte dalla fissione, da 0,01 s a 100 s; ogni tacca è dieci volte più tarda della precedente. La palla a sinistra rappresenta tutti i neutroni pronti, emessi insieme. Ogni puntino è un neutrone ritardato: scorre lungo la linea mentre la sua attesa procede, su un orologio accelerato di 20 volte, e si ferma dove è uscito alla fine. Questi pochi neutroni tardivi rendono controllabile un reattore: rallentano la risposta della catena da millesimi di secondo a secondi.</p>
   <div class="btns"><button class="btn" data-act="f1000">1000 fissioni</button><button class="btn ghost" data-act="clear">Azzera</button></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "n + U{#} → two fragments + neutrons": "n + U{#} → due frammenti + neutroni",
+  "prompt neutrons per fission": "neutroni pronti per fissione",
+  "lines: measured shares": "linee: frazioni misurate",
+  "mean {#}": "media {#}",
+  "prompt-neutron energy (MeV)": "energia dei neutroni pronti (MeV)",
+  "mean {#} MeV": "media {#} MeV",
+  "line: measured shape": "linea: forma misurata",
+  "prompt": "pronti",
+  "time after fission · clock sped up {#}×": "tempo dopo la fissione · orologio accelerato {#}×",
+  "delayed {#} of {#} ({#} %)": "ritardati {#} su {#} ({#} %)",
+  "{#} fissions": "{#} fissioni",
+});

@@ -47,7 +47,7 @@
 </div>
 <div class="step">
   <h3>Resonance self-shielding</h3>
-  <p>A fuel pellet is thick. The shaded band is the share of neutrons it stops at each energy. The peak's centre already stops everything, hot or cold, so a lower peak loses nothing there; the wider wings catch more. More neutrons are lost to capture instead of causing fission, so <i>k</i> drops by itself. (<i>k</i> is how many new fissions each fission leads to; Chapter 20 explains it.)</p>
+  <p>A fuel pellet is thick. The shaded band is the share of neutrons it stops at each energy. The peak's centre already stops everything, hot or cold, so a lower peak loses nothing there; the wider wings catch more. More neutrons are lost to capture instead of causing fission, so <i>k</i> drops by itself. (<i>k</i> is how many new fissions each fission leads to; Chapter <a href="#critical">21</a> explains it.)</p>
   <div class="ctl"><label for="dop-t3">Fuel temperature (K)</label><input id="dop-t3" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="900"><output data-show="T" data-fmt="0"></output></div>
 </div>`,
     setup(S) { S.set("T", 600); },

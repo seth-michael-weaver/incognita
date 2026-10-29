@@ -18,3 +18,12 @@ WT.L.ch.binding = {
   <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "mass number A →": "質量数 A →",
+  "binding energy per nucleon (MeV)": "核子あたりの結合エネルギー (MeV)",
+  "Ni{#}: most tightly bound": "Ni{#}：最も強く結合",
+  "measured masses (AME{#})": "測定された質量（AME{#}）",
+  "Fe{#}: {#} MeV per nucleon · {#} MeV in all": "Fe{#}：核子あたり {#} MeV · 全体で {#} MeV",
+});

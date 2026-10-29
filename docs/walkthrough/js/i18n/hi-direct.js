@@ -107,3 +107,9 @@ Object.assign(WT.L.labels, {
   "{#}% seen · model {#}%": "{#}% देखा · मॉडल {#}%",
   "{#} MeV neutrons on a medium-mass nucleus (illustrative shares)": "{#} MeV न्यूट्रॉन, मध्यम-द्रव्यमान नाभिक पर (उदाहरणार्थ भाग)",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "{#}⁺ at about {#} keV": "{#}⁺ लगभग {#} keV पर",
+  "bound in the orbit; press the button to drop another": "कक्षा में बंधा; एक और गिराने के लिए बटन दबाएं",
+});

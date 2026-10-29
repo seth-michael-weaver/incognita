@@ -13,8 +13,22 @@ WT.es.ch.fisout = {
   <div class="btns"><button class="btn" data-act="f100">100 fisiones</button><button class="btn ghost" data-act="f1000">1000 fisiones</button></div>
 </div>
 <div class="step">
-  <p>Unos pocos llegan segundos después: el 0,65 % de todos los neutrones. Algunos fragmentos son tan ricos en neutrones que, cuando más tarde se desintegran, el núcleo nuevo no puede retener uno de sus neutrones y lo suelta. Eso espera a la desintegración, a menudo segundos.</p>
-  <p>La línea inferior es un reloj posterior a la fisión, de 0,01 s a 100 s; cada marca es diez veces posterior a la anterior. La bola de la izquierda son todos los neutrones instantáneos, salidos de golpe. Cada puntito es un neutrón retardado: viaja por la línea mientras dura su espera, en un reloj acelerado 20 veces, y se detiene donde por fin salió. Estos pocos neutrones tardíos son los que hacen controlable un reactor: ralentizan la respuesta de la cadena de milésimas de segundo a segundos.</p>
+  <p>Unos pocos llegan segundos después: el 0,65 % de todos los neutrones. Algunos fragmentos son tan ricos en neutrones que, cuando más tarde se desintegran, el núcleo nuevo no puede retener uno de sus neutrones y lo suelta. Ese neutrón tiene que esperar a la desintegración, a menudo segundos.</p>
+  <p>La línea inferior es un reloj que arranca en la fisión, de 0,01 s a 100 s; cada marca es diez veces posterior a la anterior. La bola de la izquierda son todos los neutrones instantáneos, salidos de golpe. Cada puntito es un neutrón retardado: viaja por la línea mientras dura su espera, en un reloj acelerado 20 veces, y se detiene donde por fin salió. Estos pocos neutrones tardíos son los que hacen controlable un reactor: ralentizan la respuesta de la cadena de milésimas de segundo a segundos.</p>
   <div class="btns"><button class="btn" data-act="f1000">1000 fisiones</button><button class="btn ghost" data-act="clear">Borrar</button></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "n + U{#} → two fragments + neutrons": "n + U{#} → dos fragmentos + neutrones",
+  "prompt neutrons per fission": "neutrones instantáneos por fisión",
+  "lines: measured shares": "líneas: fracciones medidas",
+  "mean {#}": "media {#}",
+  "prompt-neutron energy (MeV)": "energía del neutrón instantáneo (MeV)",
+  "mean {#} MeV": "media {#} MeV",
+  "line: measured shape": "línea: forma medida",
+  "prompt": "instantáneos",
+  "time after fission · clock sped up {#}×": "tiempo tras la fisión · reloj acelerado {#}×",
+  "delayed {#} of {#} ({#} %)": "retardados {#} de {#} ({#} %)",
+  "{#} fissions": "{#} fisiones",
+});

@@ -85,3 +85,11 @@ Object.assign(WT.L.glossary, {
   },
 });
 /* attributes referenced in the English chapter script (for the structure check): data-act="up" data-act="up2" */
+
+Object.assign(WT.L.labels, {
+  "zoom: Eγ from {#} to {#} MeV": "zoom : Eγ de {#} à {#} MeV",
+  "floor: stays above zero": "plancher : reste au-dessus de zéro",
+  "continuum:": "continuum :",
+  "dark = dense": "sombre = dense",
+  "known levels": "niveaux connus",
+});

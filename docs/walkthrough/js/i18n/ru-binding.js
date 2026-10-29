@@ -18,3 +18,10 @@ WT.L.ch.binding = {
   <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "mass number A →": "массовое число A →",
+  "binding energy per nucleon (MeV)": "энергия связи на нуклон (MeV)",
+  "Ni{#}: most tightly bound": "Ni{#}: связан прочнее всех",
+  "measured masses (AME{#})": "измеренные массы (AME{#})",
+  "Fe{#}: {#} MeV per nucleon · {#} MeV in all": "Fe{#}: {#} MeV на нуклон · всего {#} MeV",
+});

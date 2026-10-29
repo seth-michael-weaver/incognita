@@ -16,3 +16,19 @@ WT.L.ch.neutrons = {
 </div>
 `,
 };
+Object.assign(WT.L.labels, {
+  "+{#} charge: the push grows as the proton gets closer": "+{#} ladning: skubbet vokser, når protonen nærmer sig",
+  "lead{#}": "bly-{#}",
+  "closest approach": "nærmeste afstand",
+  "proton · {#} MeV": "proton · {#} MeV",
+  "energy vs distance": "energi mod afstand",
+  "hill ≈ {#} MeV": "bakke ≈ {#} MeV",
+  "pushed back · about {#} in {#}³ tunnels through": "skubbet tilbage · ca. {#} ud af {#}³ tunnelerer igennem",
+  "no charge, no push": "ingen ladning, intet skub",
+  "neutron · {#} eV": "neutron · {#} eV",
+  "even this crawling neutron gets in": "selv denne krybende neutron kommer ind",
+  "≈ {#} MeV released": "≈ {#} MeV frigjort",
+  "two fragments + {#} new neutrons": "to fragmenter + {#} nye neutroner",
+  "a slow neutron + U{#} → two fragments, {#}–{#} new neutrons, about {#} MeV": "langsom neutron + U{#} → to fragmenter, {#}–{#} nye neutroner, ca. {#} MeV",
+  "a proton this slow could never get in": "så langsom en proton kommer aldrig ind",
+});

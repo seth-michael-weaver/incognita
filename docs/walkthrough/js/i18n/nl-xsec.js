@@ -18,3 +18,9 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e3">Neutronenergie (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "dit vierkant: {#} barn = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ: het trefoppervlak bij elke energie",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · gereageerd {#} % · doorgelaten {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "elke vallende stip is een neutron: oranje flits = schijf geraakt en gereageerd, vervagende stip = erdoorheen",
+});

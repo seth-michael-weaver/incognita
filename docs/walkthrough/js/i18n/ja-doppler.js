@@ -14,7 +14,22 @@ WT.L.ch.doppler = {
 </div>
 <div class="step">
   <h3>共鳴の自己遮蔽</h3>
-  <p>燃料ペレットは厚いものです。影をつけた帯は、各エネルギーでペレットが止める中性子の割合です。ピークの中心は高温でも低温でもすでにすべてを止めているので、ピークが低くなってもそこでは何も失われませんが、広がった裾はより多くを捕らえます。より多くの中性子が核分裂を起こさずに捕獲で失われるため、<i>k</i>はひとりでに下がります。（<i>k</i>は、1回の核分裂が新たに何回の核分裂につながるかを表します。第21章で説明します。）</p>
+  <p>燃料ペレットは厚いものです。影をつけた帯は、各エネルギーでペレットが止める中性子の割合です。ピークの中心は高温でも低温でもすでにすべてを止めているので、ピークが低くなってもそこでは何も失われませんが、広がった裾はより多くを捕らえます。より多くの中性子が核分裂を起こさずに捕獲で失われるため、<i>k</i>はひとりでに下がります。（<i>k</i>は、1回の核分裂が新たに何回の核分裂につながるかを表します。第<a href="#critical">21</a>章で説明します。）</p>
   <div class="ctl"><label for="dop-t3">燃料温度（K）</label><input id="dop-t3" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="900"><output data-show="T" data-fmt="0"></output></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "uranium atoms in the fuel": "燃料中のウラン原子",
+  "{#} K": "{#} K",
+  "caught in the peak": "ピークで捕獲",
+  "k": "k",
+  "neutron energy (eV) →": "中性子エネルギー (eV) →",
+  "capture cross section": "捕獲断面積",
+  "peak {#}k barns · Doppler width {#} meV · area unchanged": "ピーク {#}k バーン · ドップラー幅 {#} meV · 面積は不変",
+  "all stopped": "すべて止まる",
+  "wider wings catch more": "広がった裾がより多く捕らえる",
+  "share of neutrons stopped in the fuel": "燃料で止まる中性子の割合",
+  "the peak's centre already stops everything; the wider wings catch more": "ピーク中心はすでにすべてを止める。広がった裾がより多く捕らえる",
+});

@@ -99,3 +99,8 @@ Object.assign(WT.L.labels, {
   "the neutron door wins; capture takes about {#} %": "中性子の扉が勝つ。捕獲は約{#}%",
   "fast: capture is a rare event": "速い：捕獲はまれ",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "{#} cascades from J = {#}/{#}: ≈ {#} % end on the isomer": "{#} 回のカスケード、J = {#}/{#} から：≈ {#} % が核異性体で終わる",
+});

@@ -31,3 +31,24 @@ WT.L.ch.tof = {
   <div class="ctl"><label for="tof-p2">Длительность импульса (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "pulsed source": "импульсный источник",
+  "detector": "детектор",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · часы: {#} ms после импульса",
+  "transmission": "пропускание",
+  "cross-section shape (scaled)": "форма сечения (в масштабе)",
+  "what the detector records": "что регистрирует детектор",
+  "simulated counts": "моделируемые отсчёты",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "быстрые нейтроны приходят первыми, медленные позже: часы сортируют их по энергии",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · часы: {#} µs после импульса",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "последний приход: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "последний приход: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "образец",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV приходит через {#} ms",
+  "sample {#} µm · dip {#} % deep": "образец {#} µm · провал глубиной {#} %",
+  "sample {#} µm · dip {#} % deep: black in the centre": "образец {#} µm · провал глубиной {#} %: чёрный в центре",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV приходит через {#} µs",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "ширина от времени {#} meV · от нагрева (Доплер) {#} meV · собственная {#} meV",
+  "the fit's current guess": "текущее предположение подгонки",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "подгонка: Γn = {#} meV (в моделировании: {#}) · невязка {#}",
+});

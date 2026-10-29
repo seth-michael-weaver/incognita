@@ -97,3 +97,6 @@ Object.assign(WT.L.labels, {
   "dashed ring: the best-value inputs · each energy drawn at its own scale (disc area ∝ σ)": "stiplet ring: input med bedste værdier · hver energi i sin egen skala (skivens areal ∝ σ)",
   "{#} runs of the engine, each with its inputs nudged at random": "{#} kørsler af motoren, hver med inputtene skubbet tilfældigt",
 });
+Object.assign(WT.L.labels, {
+  "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "targetniveauer med andelen af kerner på hvert (energiskala strakt nederst)",
+});

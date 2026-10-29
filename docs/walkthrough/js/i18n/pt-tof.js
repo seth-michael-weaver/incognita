@@ -25,9 +25,31 @@ WT.L.ch.tof = {
 </div>
 <div class="step">
   <p>A INCOGNITA trabalha ao contrário: pega em contagens medidas como estas e pergunta que ressonância, submetida a esta mesma experiência (espessura, calor, esbatimento temporal), as reproduz. Aqui o ajuste parte de uma estimativa cuja largura neutrónica Γ<sub>n</sub> (a força com que o nível retém neutrões) é quase quatro vezes demasiado grande (a curva azul), e altera-a passo a passo até a curva passar pelos pontos.</p>
-  <p>O painel mostra a estimativa atual e o <b>desajuste</b>: cerca de 1 significa que a curva está tão perto dos pontos quanto a dispersão das contagens permite. Muda a experiência e o ajuste recomeça, com novas contagens, e acaba perto da mesma largura; onde não consegue acompanhar bem os pontos, o desajuste di-lo.</p>
+  <p>O painel mostra a estimativa atual e o <b>desajuste</b>: cerca de 1 significa que a curva está tão perto dos pontos quanto a dispersão das contagens permite. Muda a experiência e o ajuste recomeça, com novas contagens, e chega quase à mesma largura; onde não consegue acompanhar bem os pontos, o desajuste assinala-o.</p>
   <div class="ctl"><label for="tof-l3">Percurso de voo (m)</label><input id="tof-l3" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="50"><output data-show="Lv" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-d3">Espessura da amostra (µm)</label><input id="tof-d3" type="range" data-bind="lgT" data-instant min="0" max="3.5" step="0.01" value="1.5"><output data-show="thk" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-p2">Largura do pulso (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "pulsed source": "fonte pulsada",
+  "detector": "detetor",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · relógio: {#} ms desde o pulso",
+  "transmission": "transmissão",
+  "cross-section shape (scaled)": "forma da secção eficaz (à escala)",
+  "what the detector records": "o que o detetor regista",
+  "simulated counts": "contagens simuladas",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "os neutrões rápidos chegam primeiro, os lentos depois: o relógio ordena-os por energia",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · relógio: {#} µs desde o pulso",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "última chegada: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "última chegada: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "amostra",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV chega após {#} ms",
+  "sample {#} µm · dip {#} % deep": "amostra {#} µm · vale de {#} %",
+  "sample {#} µm · dip {#} % deep: black in the centre": "amostra {#} µm · vale de {#} %: negro no centro",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV chega após {#} µs",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "largura do tempo {#} meV · do calor (Doppler) {#} meV · própria da ressonância {#} meV",
+  "the fit's current guess": "estimativa atual do ajuste",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "ajuste: Γn = {#} meV (na simulação: {#}) · desajuste {#}",
+});

@@ -13,8 +13,15 @@ WT.L.ch.binding = {
   <p>Uanset opdelingen er det omkring 200 MeV: snesevis af millioner gange de få elektronvolt, som afbrænding af ét brændstofmolekyle giver.</p>
 </div>
 <div class="step">
-  <p>Slå to lette kerner sammen til én. Hvis den nye kerne ligger højere på kurven, frigives der energi. Forbi toppen koster sammenslutning i stedet energi.</p>
+  <p>Slå to lette kerner sammen til én. Hvis den nye kerne ligger højere på kurven, frigives der energi. Forbi toppen koster sammensmeltning i stedet energi.</p>
   <div class="ctl"><label for="bi-u">Hver let kerne A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "mass number A →": "massetal A →",
+  "binding energy per nucleon (MeV)": "bindingsenergi pr. nukleon (MeV)",
+  "Ni{#}: most tightly bound": "Ni{#}: stærkest bundet",
+  "measured masses (AME{#})": "målte masser (AME{#})",
+  "Fe{#}: {#} MeV per nucleon · {#} MeV in all": "Fe{#}: {#} MeV pr. nukleon · {#} MeV i alt",
+});

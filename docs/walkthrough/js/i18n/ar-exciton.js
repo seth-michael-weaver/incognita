@@ -90,3 +90,7 @@ Object.assign(WT.L.glossary, {
     chapter: "exciton",
   },
 });
+Object.assign(WT.L.labels, {
+  "({#} particles, {#} hole)": "({#} جسيمات، {#} ثقب)",
+  "({#} particle, {#} hole)": "({#} جسيم، {#} ثقب)",
+});

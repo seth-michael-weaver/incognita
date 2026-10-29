@@ -13,8 +13,22 @@ WT.L.ch.fisout = {
   <div class="btns"><button class="btn" data-act="f100">100 Spaltungen</button><button class="btn ghost" data-act="f1000">1000 Spaltungen</button></div>
 </div>
 <div class="step">
-  <p>Einige kommen Sekunden später: 0,65 % aller Neutronen. Manche Bruchstücke sind so neutronenreich, dass der neue Kern bei ihrem späteren Zerfall eines seiner Neutronen nicht halten kann und es freigibt. Das wartet auf den Zerfall, oft Sekunden.</p>
-  <p>Die untere Linie ist eine Uhr nach der Spaltung, von 0,01 s bis 100 s; jeder Strich liegt zehnmal später als der vorige. Die Kugel links sind alle prompten Neutronen, auf einmal draußen. Jeder kleine Punkt ist ein verzögertes Neutron: Es wandert die Linie entlang, solange seine Wartezeit läuft, auf einer um das 20-Fache beschleunigten Uhr, und bleibt dort liegen, wo es schließlich herauskam. Diese wenigen späten Neutronen machen einen Reaktor steuerbar: Sie verlangsamen die Antwort der Kettenreaktion von Tausendstelsekunden auf Sekunden.</p>
+  <p>Einige kommen Sekunden später: 0,65 % aller Neutronen. Manche Bruchstücke sind so neutronenreich, dass der neue Kern bei ihrem späteren Zerfall eines seiner Neutronen nicht halten kann und es freigibt. Dieses Neutron muss auf den Zerfall warten, oft Sekunden.</p>
+  <p>Die untere Linie ist eine Uhr, die bei der Spaltung startet, von 0,01 s bis 100 s; jeder Strich liegt zehnmal später als der vorige. Die Kugel links steht für alle prompten Neutronen, auf einmal draußen. Jeder kleine Punkt ist ein verzögertes Neutron: Es wandert die Linie entlang, solange seine Wartezeit läuft, auf einer um das 20-Fache beschleunigten Uhr, und bleibt dort liegen, wo es schließlich herauskam. Diese wenigen späten Neutronen machen einen Reaktor steuerbar: Sie verlangsamen die Antwort der Kettenreaktion von Tausendstelsekunden auf Sekunden.</p>
   <div class="btns"><button class="btn" data-act="f1000">1000 Spaltungen</button><button class="btn ghost" data-act="clear">Löschen</button></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "n + U{#} → two fragments + neutrons": "n + U{#} → zwei Bruchstücke + Neutronen",
+  "prompt neutrons per fission": "prompte Neutronen pro Spaltung",
+  "lines: measured shares": "Linien: gemessene Anteile",
+  "mean {#}": "Mittel {#}",
+  "prompt-neutron energy (MeV)": "Energie prompter Neutronen (MeV)",
+  "mean {#} MeV": "Mittel {#} MeV",
+  "line: measured shape": "Linie: gemessene Form",
+  "prompt": "prompt",
+  "time after fission · clock sped up {#}×": "Zeit nach der Spaltung · Uhr {#}× beschleunigt",
+  "delayed {#} of {#} ({#} %)": "verzögert {#} von {#} ({#} %)",
+  "{#} fissions": "{#} Spaltungen",
+});

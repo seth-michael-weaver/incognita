@@ -24,3 +24,26 @@ WT.L.ch.landscape = {
   <p>同一张图，按我们的库为每种原子核提供的内容着色。<em style="font-style:normal;color:var(--fission);font-weight:600">绿色</em>：由实测共振评价得到。其余的只有仅由引擎生成的模型文件：<b>深色</b>表示稳定或长寿命（A 级），<em style="font-style:normal;color:var(--accent);font-weight:600">蓝色</em>表示寿命超过一天（B 级），<em style="font-style:normal;color:var(--warm);font-weight:600">橙色</em>表示寿命更短（C 级）。灰色的不在库中（大多是最轻的原子核，还有少数引擎无法计算的）。</p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "neutrons N →": "中子数 N →",
+  "protons Z ↑": "质子数 Z ↑",
+  "Fe: all its isotopes": "Fe：它的全部同位素",
+  "stable": "稳定",
+  "lives years": "寿命数年",
+  "gone in a blink": "转瞬即逝",
+  "red: Fe (your pick)": "红色：Fe（你的选择）",
+  "nickel{#}: most tightly bound": "镍{#}：结合最紧",
+  "held most tightly": "结合最紧",
+  "middle": "中等",
+  "held least": "结合最松",
+  "red: the A = {#} chain": "红色：A = {#} 衰变链",
+  "A = {#}: deeper = more tightly bound": "A = {#}：越深 = 结合越紧",
+  "protons Z →": "质子数 Z →",
+  "measured resonances": "实测共振",
+  "tier A": "A 级",
+  "tier B": "B 级",
+  "tier C": "C 级",
+  "not in library": "不在库中",
+});

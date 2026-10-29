@@ -13,3 +13,20 @@ WT.L.ch.products = {
   <p>時間をドラッグしてください。原子炉が止まって1秒後でも、崩壊は全出力の約6 %を出します。1日後で約0.5 %、1年後で100分の数%ですが、大型炉ではそれでも1メガワット近くになります。使用済み燃料を何年も冷却プールに置くのはこのためです。曲線はウェイ・ウィグナーの経験則で、1年間運転したあとの全破片の崩壊をまとめた、ひとつの簡単な式です。両軸とも、目盛り1つごとに10倍になります。</p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "fragment mass number A →": "破片の質量数 A →",
+  "share of fissions that make it (each line ×{#})": "その破片ができる核分裂の割合（線ごとに ×{#}）",
+  "Rb{#} · {#} %": "Rb{#} · {#} %",
+  "Xe{#} · {#} %": "Xe{#} · {#} %",
+  "+ about {#} neutrons": "+ 中性子約 {#} 個",
+  "{#} % of full power": "全出力の {#} %",
+  "≈ {#} MW in a {#} MW reactor · {#} s after shutdown": "≈ {#} MW（{#} MW の炉）· 停止後 {#} s",
+  "{#} min": "{#} 分",
+  "{#} h": "{#} 時間",
+  "{#} day": "{#} 日",
+  "{#} yr": "{#} 年",
+  "time after shutdown (each mark much later) →": "停止後の時間（目盛りごとにずっと後）→",
+  "Way–Wigner rule of thumb, after a year at full power": "ウェイ・ウィグナーの経験則（全出力で1年運転後）",
+});

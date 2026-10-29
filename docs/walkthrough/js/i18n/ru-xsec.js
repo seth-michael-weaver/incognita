@@ -13,8 +13,14 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e2">Энергия нейтрона (eV)</label><input id="xs-e2" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="-1.6"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
-  <p>В резонансе мишень «разбухает». При 7 eV нейтрон вместе с ядром обладает как раз энергией одного из собственных уровней ядра, и поглощается намного легче: площадь диска вырастает примерно в пятьдесят раз, здесь — до около 400 барн.</p>
+  <p>В резонансе мишень «разбухает». При 7 eV нейтрон вместе с ядром обладает как раз энергией одного из собственных уровней ядра, и поглощается намного легче: площадь диска вырастает примерно в пятьдесят раз, здесь — примерно до 400 барн.</p>
   <p>Чуть отойдите от 7 eV, и диск сразу сжимается обратно: пик на кривой узкий. У настоящих ядер таких пиков много; их «штрихкод» показан в главе 1.</p>
   <div class="ctl"><label for="xs-e3">Энергия нейтрона (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "этот квадрат: {#} барн = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ: площадь мишени при каждой энергии",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · прореагировало {#} % · прошло {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "каждая падающая точка — нейтрон: оранжевая вспышка — попал в диск и прореагировал, гаснущая точка — пролетел насквозь",
+});

@@ -14,7 +14,21 @@ WT.L.ch.doppler = {
 </div>
 <div class="step">
   <h3>Autoschermo delle risonanze</h3>
-  <p>Una pastiglia di combustibile è spessa. La fascia ombreggiata è la frazione di neutroni che ferma a ciascuna energia. Il centro del picco ferma già tutto, a caldo o a freddo, quindi un picco più basso non perde nulla lì; le ali più larghe ne catturano di più. Più neutroni vanno persi per cattura invece di provocare fissione, e così <i>k</i> scende da solo. (<i>k</i> è il numero di nuove fissioni a cui porta ogni fissione; lo spiega il capitolo 21.)</p>
+  <p>Una pastiglia di combustibile è spessa. La fascia ombreggiata è la frazione di neutroni che ferma a ciascuna energia. Il centro del picco ferma già tutto, a caldo o a freddo, quindi un picco più basso non perde nulla lì; le ali più larghe ne catturano di più. Più neutroni vanno persi per cattura invece di provocare fissione, e così <i>k</i> scende da solo. (<i>k</i> è il numero di nuove fissioni a cui porta ogni fissione; lo spiega il capitolo <a href="#critical">21</a>.)</p>
   <div class="ctl"><label for="dop-t3">Temperatura del combustibile (K)</label><input id="dop-t3" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="900"><output data-show="T" data-fmt="0"></output></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "uranium atoms in the fuel": "atomi di uranio nel combustibile",
+  "{#} K": "{#} K",
+  "caught in the peak": "catturati nel picco",
+  "k": "k",
+  "neutron energy (eV) →": "energia del neutrone (eV) →",
+  "capture cross section": "sezione d'urto di cattura",
+  "peak {#}k barns · Doppler width {#} meV · area unchanged": "picco {#}k barn · larghezza Doppler {#} meV · area invariata",
+  "all stopped": "tutti fermati",
+  "wider wings catch more": "le ali più larghe catturano di più",
+  "share of neutrons stopped in the fuel": "frazione di neutroni fermati nel combustibile",
+  "the peak's centre already stops everything; the wider wings catch more": "il centro del picco ferma già tutto; le ali più larghe catturano di più",
+});

@@ -18,3 +18,9 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e3">طاقة النيوترون (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "هذا المربع: {#} بارن = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ: مساحة الهدف عند كل طاقة",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · تفاعل {#} % · عبر {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "كل نقطة ساقطة نيوترون: الوميض البرتقالي = أصاب قرصًا وتفاعل، والنقطة المتلاشية = عبرت",
+});

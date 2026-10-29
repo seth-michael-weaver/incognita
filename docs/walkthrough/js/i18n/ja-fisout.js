@@ -18,3 +18,18 @@ WT.L.ch.fisout = {
   <div class="btns"><button class="btn" data-act="f1000">核分裂1000回</button><button class="btn ghost" data-act="clear">クリア</button></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "n + U{#} → two fragments + neutrons": "n + U{#} → 2つの破片 + 中性子",
+  "prompt neutrons per fission": "核分裂あたりの即発中性子数",
+  "lines: measured shares": "線：測定された割合",
+  "mean {#}": "平均 {#}",
+  "prompt-neutron energy (MeV)": "即発中性子のエネルギー (MeV)",
+  "mean {#} MeV": "平均 {#} MeV",
+  "line: measured shape": "線：測定された形",
+  "prompt": "即発",
+  "time after fission · clock sped up {#}×": "核分裂後の時間 · 時計は {#} 倍速",
+  "delayed {#} of {#} ({#} %)": "遅発 {#} / {#}（{#} %）",
+  "{#} fissions": "核分裂 {#} 回",
+});

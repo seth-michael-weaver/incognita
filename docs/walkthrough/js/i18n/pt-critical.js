@@ -15,8 +15,26 @@ WT.L.ch.critical = {
 </div>
 <div class="step">
   <h3>Criticalidade</h3>
-  <p>Uma experiência crítica: mova as barras de controlo até a potência se manter constante. Nessa posição <i>k</i> vale exatamente 1, e essa posição das barras é a medição. Encontra-a: o painel mostra <i>k</i> com cinco casas decimais.</p>
+  <p>Uma experiência crítica: move as barras de controlo até a potência se manter constante. Nessa posição <i>k</i> vale exatamente 1, e essa posição das barras é a medição. Encontra-a: o painel mostra <i>k</i> com cinco casas decimais.</p>
   <div class="ctl"><label for="cri-rod">Barras de controlo inseridas (%)</label><input id="cri-rod" type="range" data-bind="ins" data-instant min="35" max="75" step="1" value="45"><output data-show="ins" data-fmt="0"></output></div>
 </div>`,
 };
 /* i18n_check.sh counts these attribute strings found in the English script code (not in html): data-act="delayed" data-act="delayed" */
+
+Object.assign(WT.L.labels, {
+  "generations →": "gerações →",
+  "k = {#}: dies away": "k = {#}: extingue-se",
+  "k = {#}: steady": "k = {#}: estável",
+  "k = {#}: grows": "k = {#}: cresce",
+  "{#} generations last under {#} s in a water reactor": "{#} gerações duram menos de {#} s num reator de água",
+  "illustration": "ilustração",
+  "amber: fission fragments that emit a neutron seconds later": "âmbar: fragmentos de fissão que emitem um neutrão segundos depois",
+  "{#} s": "{#} s",
+  "time →": "tempo →",
+  "×{#} speed": "velocidade ×{#}",
+  "with delayed: doubles every {#} s": "com retardados: duplica a cada {#} s",
+  "prompt only: doubles every {#} ms": "só prontos: duplica a cada {#} ms",
+  "k = {#} · {#} % of neutrons delayed about {#} s (one-group average)": "k = {#} · {#} % dos neutrões retardados cerca de {#} s (média de um grupo)",
+  "rods {#} % in": "barras {#} % inseridas",
+  "k = {#} · doubles every {#} min": "k = {#} · duplica a cada {#} min",
+});

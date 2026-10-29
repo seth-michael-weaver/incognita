@@ -14,7 +14,21 @@ WT.L.ch.doppler = {
 </div>
 <div class="step">
   <h3>Resonanz-Selbstabschirmung</h3>
-  <p>Eine Brennstofftablette ist dick. Das schattierte Band ist der Anteil der Neutronen, den sie bei jeder Energie stoppt. Die Mitte des Peaks stoppt schon alles, heiß oder kalt, ein niedrigerer Peak verliert dort also nichts; die breiteren Flügel fangen mehr ein. Mehr Neutronen gehen durch Einfang verloren, statt Spaltungen auszulösen, und <i>k</i> sinkt von selbst. (<i>k</i> gibt an, zu wie vielen neuen Spaltungen jede Spaltung führt; Kapitel 21 erklärt es.)</p>
+  <p>Eine Brennstofftablette ist dick. Das schattierte Band ist der Anteil der Neutronen, den sie bei jeder Energie stoppt. Die Mitte des Peaks stoppt schon alles, heiß oder kalt, ein niedrigerer Peak verliert dort also nichts; die breiteren Flügel fangen mehr ein. Mehr Neutronen gehen durch Einfang verloren, statt Spaltungen auszulösen, und <i>k</i> sinkt von selbst. (<i>k</i> gibt an, zu wie vielen neuen Spaltungen jede Spaltung führt; Kapitel <a href="#critical">21</a> erklärt es.)</p>
   <div class="ctl"><label for="dop-t3">Brennstofftemperatur (K)</label><input id="dop-t3" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="900"><output data-show="T" data-fmt="0"></output></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "uranium atoms in the fuel": "Uranatome im Brennstoff",
+  "{#} K": "{#} K",
+  "caught in the peak": "im Peak eingefangen",
+  "k": "k",
+  "neutron energy (eV) →": "Neutronenenergie (eV) →",
+  "capture cross section": "Einfangquerschnitt",
+  "peak {#}k barns · Doppler width {#} meV · area unchanged": "Peak {#}k Barn · Doppler-Breite {#} meV · Fläche gleich",
+  "all stopped": "alle gestoppt",
+  "wider wings catch more": "breitere Flügel fangen mehr",
+  "share of neutrons stopped in the fuel": "Anteil der im Brennstoff gestoppten Neutronen",
+  "the peak's centre already stops everything; the wider wings catch more": "die Peakmitte stoppt schon alles; die breiteren Flügel fangen mehr",
+});

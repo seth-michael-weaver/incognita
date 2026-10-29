@@ -106,3 +106,9 @@ Object.assign(WT.L.labels, {
   "{#}% seen · model {#}%": "观测 {#}% · 模型 {#}%",
   "{#} MeV neutrons on a medium-mass nucleus (illustrative shares)": "{#} MeV 中子轰击中等质量原子核（示意比例）",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "{#}⁺ at about {#} keV": "{#}⁺ 约在 {#} keV",
+  "bound in the orbit; press the button to drop another": "束缚在轨道上；按按钮再放入一个",
+});

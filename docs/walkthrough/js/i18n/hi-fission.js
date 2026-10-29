@@ -104,3 +104,10 @@ Object.assign(WT.L.labels, {
     }
   }
 })();
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "chance to split vs neutron energy": "न्यूट्रॉन ऊर्जा के साथ विखंडन की संभावना",
+  "{#}nd": "#{#}",
+  "{#}rd": "#{#}",
+});

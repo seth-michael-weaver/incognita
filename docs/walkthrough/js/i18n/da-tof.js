@@ -3,7 +3,7 @@ WT.L.ch.tof = {
   num: "Kapitel 16", title: "Flyvetidsmålinger", short: "Måling af toppe",
   html: `
 <div class="step">
-  <p>En neutrons flyvetid afslører dens energi. Et kort pulsudbrud af neutroner med alle slags energier forlader kilden og suser ned ad et tomt rør til detektoren; de hurtige ankommer først. Rørets længde <i>L</i> er kendt, så hvert ankomsttidspunkt <i>t</i> giver neutronens hastighed, og hastigheden giver dens energi:</p>
+  <p>En neutrons flyvetid afslører dens energi. En kort puls af neutroner med alle slags energier forlader kilden og suser ned ad et tomt rør til detektoren; de hurtige ankommer først. Rørets længde <i>L</i> er kendt, så hvert ankomsttidspunkt <i>t</i> giver neutronens hastighed, og hastigheden giver dens energi:</p>
   <div class="formula">E = (72,3 · L / t)²   (E i eV, L i meter, t i mikrosekunder)</div>
   <p>Uret over røret tæller den virkelige tid siden pulsen; flyvningen er tegnet omkring 1400 gange langsommere. Under røret omregnes den seneste ankomst til en energi. Træk i flyvevejen: et længere rør spreder de samme energier over længere tid, så hver kan skelnes mere præcist.</p>
   <div class="ctl"><label for="tof-l1">Flyvevej (m)</label><input id="tof-l1" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="50"><output data-show="Lv" data-fmt="0"></output></div>
@@ -25,10 +25,31 @@ WT.L.ch.tof = {
 </div>
 <div class="step">
   <p>INCOGNITA arbejder baglæns: den tager målte tællinger som disse og spørger, hvilken resonans, sendt gennem præcis dette eksperiment (tykkelse, varme, tidsudtværing), der gengiver dem. Her starter tilpasningen fra et gæt, hvis neutronbredde Γ<sub>n</sub> (hvor stærkt niveauet holder fast i neutroner) er næsten fire gange for stor (den blå kurve), og ændrer den trin for trin, til kurven løber gennem prikkerne.</p>
-  <p>Aflæsningen viser det aktuelle gæt og <b>misfittet</b>: omkring 1 betyder, at kurven ligger så tæt på prikkerne, som deres tællespredning tillader. Ændrer du eksperimentet, starter tilpasningen forfra med nye tællinger og lander tæt på den samme bredde; hvor den ikke kan ramme prikkerne godt, siger misfittet det.</p>
+  <p>Aflæsningen viser det aktuelle gæt og <b>afvigelsen</b>: omkring 1 betyder, at kurven ligger så tæt på prikkerne, som deres tællespredning tillader. Ændrer du eksperimentet, starter tilpasningen forfra med nye tællinger og lander tæt på den samme bredde; hvor den ikke kan ramme prikkerne godt, viser afvigelsen det.</p>
   <div class="ctl"><label for="tof-l3">Flyvevej (m)</label><input id="tof-l3" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="50"><output data-show="Lv" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-d3">Prøvetykkelse (µm)</label><input id="tof-d3" type="range" data-bind="lgT" data-instant min="0" max="3.5" step="0.01" value="1.5"><output data-show="thk" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-p2">Pulsbredde (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>
 `,
 };
+Object.assign(WT.L.labels, {
+  "pulsed source": "pulseret kilde",
+  "detector": "detektor",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · ur: {#} ms siden pulsen",
+  "transmission": "transmission",
+  "cross-section shape (scaled)": "tværsnittets form (skaleret)",
+  "what the detector records": "hvad detektoren registrerer",
+  "simulated counts": "simulerede tællinger",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "hurtige neutroner først, langsomme senere: uret sorterer dem efter energi",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · ur: {#} µs siden pulsen",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "seneste ankomst: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "seneste ankomst: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "prøve",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV ankommer efter {#} ms",
+  "sample {#} µm · dip {#} % deep": "prøve {#} µm · dyk {#} % dybt",
+  "sample {#} µm · dip {#} % deep: black in the centre": "prøve {#} µm · dyk {#} % dybt: sort i midten",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV ankommer efter {#} µs",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "bredde fra timing {#} meV · fra varme (Doppler) {#} meV · resonansens egen {#} meV",
+  "the fit's current guess": "tilpasningens aktuelle gæt",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "tilpasning: Γn = {#} meV (i simuleringen: {#}) · afvigelse {#}",
+});

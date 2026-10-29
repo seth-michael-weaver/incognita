@@ -99,3 +99,7 @@ Object.assign(WT.L.labels, {
   "the neutron door wins; capture takes about {#} %": "vince la porta del neutrone; la cattura prende circa il {#} %",
   "fast: capture is a rare event": "veloci: la cattura è un evento raro",
 });
+
+Object.assign(WT.L.labels, {
+  "{#} cascades from J = {#}/{#}: ≈ {#} % end on the isomer": "{#} cascate da J = {#}/{#}: ≈ {#} % finiscono sull'isomero",
+});

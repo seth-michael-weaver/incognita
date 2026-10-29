@@ -25,9 +25,31 @@ WT.L.ch.tof = {
 </div>
 <div class="step">
   <p>INCOGNITA lavora a ritroso: prende conteggi misurati come questi e chiede quale risonanza, sottoposta a questo stesso esperimento (spessore, temperatura, sfocatura temporale), li riproduce. Qui l'adattamento parte da una stima la cui larghezza neutronica Γ<sub>n</sub> (quanto saldamente il livello trattiene i neutroni) è quasi quattro volte troppo grande (la curva blu), e la modifica passo dopo passo finché la curva passa per i punti.</p>
-  <p>L'indicatore mostra la stima corrente e il <b>disadattamento</b>: circa 1 significa che la curva è vicina ai punti quanto lo consente la loro dispersione di conteggio. Cambia l'esperimento e l'adattamento riparte, da nuovi conteggi, e approda a una larghezza vicina alla stessa; dove non riesce a combaciare bene con i punti, il disadattamento lo dice.</p>
+  <p>L'indicatore mostra la stima corrente e lo <b>scarto</b>: circa 1 significa che la curva è vicina ai punti quanto lo consente la loro dispersione di conteggio. Cambia l'esperimento e l'adattamento riparte, da nuovi conteggi, e approda quasi alla stessa larghezza; dove non riesce a combaciare bene con i punti, lo scarto lo segnala.</p>
   <div class="ctl"><label for="tof-l3">Percorso di volo (m)</label><input id="tof-l3" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="50"><output data-show="Lv" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-d3">Spessore del campione (µm)</label><input id="tof-d3" type="range" data-bind="lgT" data-instant min="0" max="3.5" step="0.01" value="1.5"><output data-show="thk" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-p2">Larghezza dell'impulso (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "pulsed source": "sorgente pulsata",
+  "detector": "rivelatore",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · orologio: {#} ms dall'impulso",
+  "transmission": "trasmissione",
+  "cross-section shape (scaled)": "forma della sezione d'urto (in scala)",
+  "what the detector records": "ciò che registra il rivelatore",
+  "simulated counts": "conteggi simulati",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "i neutroni veloci arrivano prima, i lenti dopo: l'orologio li ordina per energia",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · orologio: {#} µs dall'impulso",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "ultimo arrivo: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "ultimo arrivo: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "campione",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV arriva dopo {#} ms",
+  "sample {#} µm · dip {#} % deep": "campione {#} µm · buca profonda {#} %",
+  "sample {#} µm · dip {#} % deep: black in the centre": "campione {#} µm · buca profonda {#} %: nera al centro",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV arriva dopo {#} µs",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "larghezza da tempi {#} meV · da calore (Doppler) {#} meV · propria della risonanza {#} meV",
+  "the fit's current guess": "stima corrente dell'adattamento",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "adattamento: Γn = {#} meV (nella simulazione: {#}) · scarto {#}",
+});

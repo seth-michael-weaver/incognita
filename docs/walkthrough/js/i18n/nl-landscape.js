@@ -1,6 +1,7 @@
 /* Dutch (Nederlands): landscape (Hoofdstuk 4, het landschap van kernen) */
 WT.L.ch.landscape = {
   num: "Hoofdstuk 4", title: "Het landschap van kernen", short: "Landschap",
+  lead: "Elke kern die ooit iemand heeft gemaakt, op één kaart: tot nu toe 3.338, en maar 252 blijven eeuwig bestaan.",
   html: `
 <div class="step">
   <h3>De nuclidenkaart</h3>
@@ -23,3 +24,24 @@ WT.L.ch.landscape = {
   <p>Dezelfde kaart, gekleurd naar wat onze bibliotheek voor elke kern bevat. <em style="font-style:normal;color:var(--fission);font-weight:600">Groen</em>: geëvalueerd uit zijn gemeten resonanties. De rest heeft een modelbestand dat alleen door de motor is gebouwd: <b>donker</b> voor stabiel of langlevend (klasse A), <em style="font-style:normal;color:var(--accent);font-weight:600">blauw</em> voor meer dan een dag (klasse B), <em style="font-style:normal;color:var(--warm);font-weight:600">oranje</em> voor kortlevender (klasse C). Grijze staan niet in de bibliotheek (vooral de lichtste kernen, en enkele die de motor niet kan draaien).</p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "neutrons N →": "neutronen N →",
+  "protons Z ↑": "protonen Z ↑",
+  "Fe: all its isotopes": "Fe: al zijn isotopen",
+  "stable": "stabiel",
+  "lives years": "leeft jaren",
+  "gone in a blink": "weg in een oogwenk",
+  "red: Fe (your pick)": "rood: Fe (jouw keuze)",
+  "nickel{#}: most tightly bound": "nikkel-{#}: het sterkst gebonden",
+  "held most tightly": "het sterkst vastgehouden",
+  "middle": "midden",
+  "held least": "het zwakst vastgehouden",
+  "red: the A = {#} chain": "rood: de keten A = {#}",
+  "A = {#}: deeper = more tightly bound": "A = {#}: dieper = sterker gebonden",
+  "protons Z →": "protonen Z →",
+  "measured resonances": "gemeten resonanties",
+  "tier A": "klasse A",
+  "tier B": "klasse B",
+  "tier C": "klasse C",
+  "not in library": "niet in bibliotheek",
+});

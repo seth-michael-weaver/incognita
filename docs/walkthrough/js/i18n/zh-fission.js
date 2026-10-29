@@ -103,3 +103,10 @@ Object.assign(WT.L.labels, {
     }
   }
 })();
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "chance to split vs neutron energy": "裂变概率随中子能量的变化",
+  "{#}nd": "第 {#} 次",
+  "{#}rd": "第 {#} 次",
+});

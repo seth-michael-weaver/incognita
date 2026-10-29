@@ -13,3 +13,20 @@ WT.L.ch.products = {
   <p>시간을 끌어 보세요. 원자로가 멈춘 지 1초 뒤에도 붕괴는 여전히 전출력의 약 6%를 내고, 하루 뒤에는 약 0.5%, 1년 뒤에는 100분의 몇 퍼센트로, 큰 원자로에서는 그래도 1메가와트 가까이 됩니다. 사용 후 연료를 몇 년 동안 냉각 수조에 두는 이유입니다. 곡선은 Way–Wigner 어림 법칙으로, 1년간 가동한 뒤 모든 조각의 붕괴를 합친 간단한 식 하나입니다. 두 눈금 모두 표시마다 열 배씩 뜁니다.</p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "fragment mass number A →": "조각 질량수 A →",
+  "share of fissions that make it (each line ×{#})": "그 조각을 만드는 핵분열의 몫 (선마다 ×{#})",
+  "Rb{#} · {#} %": "Rb{#} · {#} %",
+  "Xe{#} · {#} %": "Xe{#} · {#} %",
+  "+ about {#} neutrons": "+ 중성자 약 {#}개",
+  "{#} % of full power": "전출력의 {#} %",
+  "≈ {#} MW in a {#} MW reactor · {#} s after shutdown": "≈ {#} MW ({#} MW 원자로) · 정지 후 {#} s",
+  "{#} min": "{#}분",
+  "{#} h": "{#}시간",
+  "{#} day": "{#}일",
+  "{#} yr": "{#}년",
+  "time after shutdown (each mark much later) →": "정지 후 시간 (눈금마다 훨씬 뒤) →",
+  "Way–Wigner rule of thumb, after a year at full power": "Way–Wigner 어림 법칙, 전출력 1년 가동 후",
+});

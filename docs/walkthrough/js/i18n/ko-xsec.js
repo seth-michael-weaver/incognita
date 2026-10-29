@@ -18,3 +18,11 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e3">중성자 에너지 (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "이 사각형: {#} 반 = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ: 에너지마다의 표적 넓이",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · 반응 {#} % · 통과 {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "떨어지는 점이 중성자: 주황 섬광은 원반에 맞아 반응, 흐려지는 점은 통과",
+});

@@ -97,3 +97,6 @@ Object.assign(WT.L.labels, {
   "dashed ring: the best-value inputs · each energy drawn at its own scale (disc area ∝ σ)": "штриховое кольцо: лучшие входные данные · каждая энергия в своём масштабе (площадь ∝ σ)",
   "{#} runs of the engine, each with its inputs nudged at random": "{#} прогонов программы, у каждого входные данные случайно сдвинуты",
 });
+Object.assign(WT.L.labels, {
+  "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "уровни мишени и доля ядер на каждом (шкала энергии растянута внизу)",
+});

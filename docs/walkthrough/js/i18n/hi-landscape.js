@@ -21,6 +21,29 @@ WT.L.ch.landscape = {
 </div>
 <div class="step">
   <h3>INCOGNITA का कवरेज</h3>
-  <p>वही नक्शा, पर रंग इस बात से तय होता है कि हमारे पुस्तकालय में हर नाभिक के लिए क्या है। <em style="font-style:normal;color:var(--fission);font-weight:600">हरा</em>: उसके मापे गए अनुनादों से मूल्यांकित। बाकी के लिए केवल इंजन से बनी मॉडल फ़ाइल है: स्थायी या दीर्घजीवी के लिए <b>गहरा</b> (स्तर A), एक दिन से अधिक के लिए <em style="font-style:normal;color:var(--accent);font-weight:600">नीला</em> (स्तर B), कम जीवनकाल वालों के लिए <em style="font-style:normal;color:var(--warm);font-weight:600">नारंगी</em> (स्तर C)। धूसर वाले पुस्तकालय में नहीं हैं (अधिकतर सबसे हल्के नाभिक, और कुछ जिन्हें इंजन चला नहीं सकता)।</p>
+  <p>वही नक्शा, पर रंग इस बात से तय होता है कि हमारी लाइब्रेरी में हर नाभिक के लिए क्या है। <em style="font-style:normal;color:var(--fission);font-weight:600">हरा</em>: उसके मापे गए अनुनादों से मूल्यांकित। बाकी के लिए केवल इंजन से बनी मॉडल फ़ाइल है: स्थायी या दीर्घजीवी के लिए <b>गहरा</b> (स्तर A), एक दिन से अधिक के लिए <em style="font-style:normal;color:var(--accent);font-weight:600">नीला</em> (स्तर B), कम जीवनकाल वालों के लिए <em style="font-style:normal;color:var(--warm);font-weight:600">नारंगी</em> (स्तर C)। धूसर वाले लाइब्रेरी में नहीं हैं (अधिकतर सबसे हल्के नाभिक, और कुछ जिन्हें इंजन चला नहीं सकता)।</p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "neutrons N →": "न्यूट्रॉन N →",
+  "protons Z ↑": "प्रोटॉन Z ↑",
+  "Fe: all its isotopes": "Fe: इसके सभी समस्थानिक",
+  "stable": "स्थायी",
+  "lives years": "वर्षों जीवित",
+  "gone in a blink": "पलक झपकते गायब",
+  "red: Fe (your pick)": "लाल: Fe (आपका चयन)",
+  "nickel{#}: most tightly bound": "निकल{#}: सबसे कसकर बंधा",
+  "held most tightly": "सबसे कसकर बंधे",
+  "middle": "मध्यम",
+  "held least": "सबसे ढीले बंधे",
+  "red: the A = {#} chain": "लाल: A = {#} श्रृंखला",
+  "A = {#}: deeper = more tightly bound": "A = {#}: जितना गहरा, उतना कसकर बंधा",
+  "protons Z →": "प्रोटॉन Z →",
+  "measured resonances": "मापे गए अनुनाद",
+  "tier A": "स्तर A",
+  "tier B": "स्तर B",
+  "tier C": "स्तर C",
+  "not in library": "लाइब्रेरी में नहीं",
+});

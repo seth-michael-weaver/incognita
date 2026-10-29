@@ -106,3 +106,6 @@ Object.assign(WT.L.labels, {
   "{#}% seen · model {#}%": "{#}% مرصود · النموذج {#}%",
   "{#} MeV neutrons on a medium-mass nucleus (illustrative shares)": "نيوترونات {#} MeV على نواة متوسطة الكتلة (حصص توضيحية)",
 });
+Object.assign(WT.L.labels, {
+  "{#}⁺ at about {#} keV": "{#}⁺ عند نحو {#} keV",
+});

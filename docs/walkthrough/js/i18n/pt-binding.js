@@ -3,7 +3,7 @@ WT.L.ch.binding = {
   num: "Capítulo 3", title: "Porque é que os núcleos se mantêm unidos", short: "Ligação",
   html: `
 <div class="step">
-  <p>Mais alto na curva significa mais fortemente ligado. Cada ponto é um número de massa A (o número de protões mais neutrões), e a sua altura é a energia necessária, por nucleão, para separar completamente esse núcleo. Arrasta A e leia o marcador: o meio da curva, à volta do ferro e do níquel, é o topo.</p>
+  <p>Mais alto na curva significa mais fortemente ligado. Cada ponto é um número de massa A (o número de protões mais neutrões), e a sua altura é a energia necessária, por nucleão, para separar completamente esse núcleo. Arrasta A e lê o marcador: o meio da curva, à volta do ferro e do níquel, é o topo.</p>
   <div class="ctl"><label for="bi-a">Número de massa A</label><input id="bi-a" type="range" data-bind="pick" data-instant min="2" max="260" step="1" value="56"><output data-show="pick" data-fmt="0"></output></div>
 </div>
 <div class="step">
@@ -18,3 +18,11 @@ WT.L.ch.binding = {
   <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "mass number A →": "número de massa A →",
+  "binding energy per nucleon (MeV)": "energia de ligação por nucleão (MeV)",
+  "Ni{#}: most tightly bound": "Ni{#}: o mais ligado",
+  "measured masses (AME{#})": "massas medidas (AME{#})",
+  "Fe{#}: {#} MeV per nucleon · {#} MeV in all": "Fe{#}: {#} MeV por nucleão · {#} MeV no total",
+});

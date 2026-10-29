@@ -15,3 +15,21 @@ WT.L.ch.neutrons = {
   <p>所以，即使是慢中子，也能在反应堆里使铀裂变。铀-235 原子核吞下一个中子后变成铀-236，并带有一点额外的能量，足以让它摆动、拉伸出颈部并断成两半。两块碎片带着约 200 MeV 的能量飞散，它们抛出的两三个新中子又能使下一批原子核裂变：这就是链式反应。</p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "+{#} charge: the push grows as the proton gets closer": "+{#} 电荷：质子越近，推力越大",
+  "lead{#}": "铅{#}",
+  "closest approach": "最近距离",
+  "proton · {#} MeV": "质子 · {#} MeV",
+  "energy vs distance": "能量随距离的变化",
+  "hill ≈ {#} MeV": "山丘 ≈ {#} MeV",
+  "pushed back · about {#} in {#}³ tunnels through": "被推回 · 约 {#}/{#}³ 隧穿进入",
+  "no charge, no push": "不带电，没有推力",
+  "neutron · {#} eV": "中子 · {#} eV",
+  "even this crawling neutron gets in": "即使这么慢的中子也能进入",
+  "≈ {#} MeV released": "放出 ≈ {#} MeV",
+  "two fragments + {#} new neutrons": "两块碎片 + {#} 个新中子",
+  "a slow neutron + U{#} → two fragments, {#}–{#} new neutrons, about {#} MeV": "慢中子 + U{#} → 两块碎片、{#}–{#} 个新中子、约 {#} MeV",
+  "a proton this slow could never get in": "这么慢的质子永远进不去",
+});

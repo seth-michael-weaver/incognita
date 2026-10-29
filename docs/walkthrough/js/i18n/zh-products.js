@@ -13,3 +13,20 @@ WT.L.ch.products = {
   <p>拖动时间。反应堆停止一秒后，这些衰变仍提供约 6 % 的满功率；一天后约为百分之零点五；一年后为万分之几，在大型反应堆里仍有将近一兆瓦。这就是乏燃料要在冷却池中存放数年的原因。曲线是 Way–Wigner 经验规则：用一个简单公式描述运行一年后全部碎片的总衰变。两个坐标轴在每个刻度处都跳升十倍。</p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "fragment mass number A →": "碎片质量数 A →",
+  "share of fissions that make it (each line ×{#})": "产生它的裂变份额（每条线 ×{#}）",
+  "Rb{#} · {#} %": "Rb{#} · {#} %",
+  "Xe{#} · {#} %": "Xe{#} · {#} %",
+  "+ about {#} neutrons": "+ 约 {#} 个中子",
+  "{#} % of full power": "满功率的 {#} %",
+  "≈ {#} MW in a {#} MW reactor · {#} s after shutdown": "≈ {#} MW（{#} MW 反应堆）· 停堆后 {#} s",
+  "{#} min": "{#} min",
+  "{#} h": "{#} h",
+  "{#} day": "{#} 天",
+  "{#} yr": "{#} 年",
+  "time after shutdown (each mark much later) →": "停堆后的时间（每个刻度晚得多）→",
+  "Way–Wigner rule of thumb, after a year at full power": "Way–Wigner 经验规则，满功率运行一年后",
+});

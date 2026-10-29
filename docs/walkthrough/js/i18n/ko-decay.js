@@ -139,3 +139,9 @@ WT.L.ch.decay = {
   }
   Object.assign(WT.L.labels, L);
 })();
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "press Fire to send neutrons in": "발사를 눌러 중성자를 보내세요",
+  "stayed inside: counted here, not moved": "안에 남음: 여기서 세고 옮기지 않음",
+});

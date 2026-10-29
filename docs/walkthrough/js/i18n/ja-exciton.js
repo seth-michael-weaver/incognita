@@ -92,3 +92,9 @@ Object.assign(WT.L.glossary, {
   },
 });
 /* attributes referenced in the English chapter script (for the structure check): data-act="pauli" */
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "({#} particles, {#} hole)": "（粒子 {#}、空孔 {#}）",
+  "({#} particle, {#} hole)": "（粒子 {#}、空孔 {#}）",
+});

@@ -88,3 +88,8 @@ Object.assign(WT.L.glossary, {
   },
 });
 /* i18n_check.sh counts these attribute strings found in the English script code (not in html): data-act="pauli" */
+
+Object.assign(WT.L.labels, {
+  "({#} particles, {#} hole)": "({#} partículas, {#} buraco)",
+  "({#} particle, {#} hole)": "({#} partícula, {#} buraco)",
+});

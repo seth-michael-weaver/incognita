@@ -7,7 +7,7 @@ WT.es.ch.binding = {
   <div class="ctl"><label for="bi-a">Número másico A</label><input id="bi-a" type="range" data-bind="pick" data-instant min="2" max="260" step="1" value="56"><output data-show="pick" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>Parte uranio: los dos fragmentos quedan más arriba en la curva que el uranio del que vienen, de modo que los mismos nucleones acaban ligados con más fuerza y la diferencia sale como energía. Elige el fragmento más ligero; el más pesado es el resto de los 236 nucleones.</p>
+  <p>Divide el uranio: los dos fragmentos quedan más arriba en la curva que el uranio del que vienen, de modo que los mismos nucleones acaban ligados con más fuerza y la diferencia sale como energía. Elige el fragmento más ligero; el más pesado es el resto de los 236 nucleones.</p>
   <div class="ctl"><label for="bi-f">A del fragmento más ligero</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Sea cual sea la división, son unos 200 MeV: decenas de millones de veces los pocos electronvoltios que da quemar una molécula de combustible.</p>
@@ -18,3 +18,11 @@ WT.es.ch.binding = {
   <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "mass number A →": "número másico A →",
+  "binding energy per nucleon (MeV)": "energía de ligadura por nucleón (MeV)",
+  "Ni{#}: most tightly bound": "Ni{#}: el más ligado",
+  "measured masses (AME{#})": "masas medidas (AME{#})",
+  "Fe{#}: {#} MeV per nucleon · {#} MeV in all": "Fe{#}: {#} MeV por nucleón · {#} MeV en total",
+});

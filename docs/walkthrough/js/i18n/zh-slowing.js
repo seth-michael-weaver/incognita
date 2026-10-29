@@ -4,7 +4,7 @@ WT.L.ch.slowing = {
   html: `
 <div class="step">
   <p>每次与氢碰撞要损失约一半的能量。裂变中子从 2 MeV 出发，在水中反复弹跳。氢原子核与中子质量相同，所以像台球一样，每次碰撞平均带走中子一半的能量。</p>
-  <p>图表画出每次碰撞后中子的能量；侧边每个标注的能量是上一个的千分之一。每次损失相同的份额，就形成一条直线下滑，即虚线。大约经过 18 次碰撞，中子达到<b>热</b>能量 0.025 eV，此时温热的水把它加速的次数与使它减速的次数一样多。氧要重 16 倍：每次碰撞只带走一点点，需要一百多次。</p>
+  <p>图表画出每次碰撞后中子的能量；侧边每个标注的能量是上一个的千分之一。每次损失相同的份额，就形成一条直线下滑，即虚线。大约经过 18 次碰撞，中子达到<b>热</b>能区的能量 0.025 eV，此时温热的水把它加速的次数与使它减速的次数一样多。氧要重 16 倍：每次碰撞只带走一点点，需要一百多次。</p>
   <div class="btns"><button class="btn ghost" data-act="tgtH" aria-pressed="true">氢</button><button class="btn ghost" data-act="tgtO" aria-pressed="false">氧</button><button class="btn" data-act="again">再来一次</button></div>
 </div>
 <div class="step">
@@ -20,3 +20,26 @@ WT.L.ch.slowing = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "water · neutron hits hydrogen": "水 · 中子撞击氢",
+  "thermal · kT ≈ {#} eV": "热能 · kT ≈ {#} eV",
+  "{#} meV": "{#} meV",
+  "collisions →": "碰撞次数 →",
+  "energy": "能量",
+  "typical bounce: energy × {#} (theory × {#}) · {#} bounces to thermal": "典型碰撞：能量 × {#}（理论 × {#}）· {#} 次碰撞到热能",
+  "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)": "典型：沿虚线的平均步长（能量份额相乘，所以在此刻度上取平均）",
+  "bright line: a bond holding H to its O": "亮线：把 H 连到其 O 上的化学键",
+  "bright flash: the neutron left a fixed amount of energy in the molecule": "亮闪光：中子在分子中留下一份固定能量",
+  "below {#} eV: the bonds shape each bounce": "{#} eV 以下：化学键决定每次碰撞",
+  "free-atom recoil": "自由原子反冲",
+  "α: how hard the knock (momentum handed over) →": "α：撞击多猛（传递的动量）→",
+  "β: the neutron's energy change, in units of kT = {#} eV": "β：中子的能量变化，以 kT = {#} eV 为单位",
+  "gain ↑": "获得 ↑",
+  "loss ↓": "损失 ↓",
+  "outline: reachable from {#} eV": "轮廓：从 {#} eV 可到达",
+  "rare → likely": "罕见 → 可能",
+  "scattering law S(α,β) · hydrogen bound in water": "散射律 S(α,β) · 水中束缚的氢",
+  "stripes: energy lost to the molecule in fixed amounts": "条纹：以固定份额交给分子的能量",
+});

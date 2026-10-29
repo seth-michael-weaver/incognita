@@ -19,7 +19,7 @@ WT.L.ch.tof = {
 </div>
 <div class="step">
   <p>نبضات أطول وطيران أقصر: ينطمس الانخفاض. ثلاثة أشياء تحدد عرض الانخفاض، وكلها مكتوبة تحت المخطط: عرض الرنين نفسه؛ واهتزاز ذرات العينة بالحرارة الذي يلطّخ طاقة كل تصادم قليلًا (توسيع <b>دوبلر</b>)؛ وضبابية التوقيت، لأن النبضة الأطول أو الأنبوب الأقصر يجعل كل زمن وصول، ومن ثم كل طاقة، أقل يقينًا.</p>
-  <p>أطِل النبضة أو اقصّر الأنبوب: يصبح الانخفاض أعرض وأضحل، مع أن حصة النيوترونات التي يزيلها تبقى تقريبًا كما هي.</p>
+  <p>أطِل النبضة أو قصِّر الأنبوب: يصبح الانخفاض أعرض وأضحل، مع أن حصة النيوترونات التي يزيلها تبقى تقريبًا كما هي.</p>
   <div class="ctl"><label for="tof-p1">عرض النبضة (µs)</label><input id="tof-p1" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="0.3"><output data-show="dt" data-fmt="2"></output></div>
   <div class="ctl"><label for="tof-l2">مسار الطيران (m)</label><input id="tof-l2" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="20"><output data-show="Lv" data-fmt="0"></output></div>
 </div>
@@ -31,3 +31,24 @@ WT.L.ch.tof = {
   <div class="ctl"><label for="tof-p2">عرض النبضة (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "pulsed source": "مصدر نبضي",
+  "detector": "الكاشف",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · الساعة: {#} ms منذ النبضة",
+  "transmission": "النفاذية",
+  "cross-section shape (scaled)": "شكل المقطع العرضي (مُقيَّس)",
+  "what the detector records": "ما يسجله الكاشف",
+  "simulated counts": "أعداد محاكاة",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "السريعة تصل أولًا والبطيئة لاحقًا: الساعة ترتّبها بحسب الطاقة",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · الساعة: {#} µs منذ النبضة",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "آخر وصول: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "آخر وصول: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "العينة",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV يصل بعد {#} ms",
+  "sample {#} µm · dip {#} % deep": "العينة {#} µm · عمق الانخفاض {#} %",
+  "sample {#} µm · dip {#} % deep: black in the centre": "العينة {#} µm · عمق الانخفاض {#} %: أسود في المركز",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV يصل بعد {#} µs",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "العرض من التوقيت {#} meV · من الحرارة (دوبلر) {#} meV · عرض الرنين نفسه {#} meV",
+  "the fit's current guess": "التخمين الحالي للضبط",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "الضبط: Γn = {#} meV (في المحاكاة: {#}) · عدم المطابقة {#}",
+});

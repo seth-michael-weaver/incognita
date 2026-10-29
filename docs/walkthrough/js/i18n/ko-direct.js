@@ -106,3 +106,9 @@ Object.assign(WT.L.labels, {
   "{#}% seen · model {#}%": "관측 {#}% · 모형 {#}%",
   "{#} MeV neutrons on a medium-mass nucleus (illustrative shares)": "중간 질량 원자핵에 입사한 {#} MeV 중성자 (예시용 비율)",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "{#}⁺ at about {#} keV": "{#}⁺ 약 {#} keV",
+  "bound in the orbit; press the button to drop another": "궤도에 속박됨. 버튼을 눌러 하나 더 떨어뜨리세요",
+});

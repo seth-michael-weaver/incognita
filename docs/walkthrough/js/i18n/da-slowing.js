@@ -3,12 +3,12 @@ WT.L.ch.slowing = {
   num: "Kapitel 18", title: "Neutronmoderation", short: "Opbremsning",
   html: `
 <div class="step">
-  <p>Hvert tilbagekast fra brint koster omkring halvdelen af energien. En fissionsneutron starter ved 2 MeV og preller gennem vand. En brintkerne vejer det samme som neutronen, så, som billardkugler, afgiver hvert tilbagekast i gennemsnit halvdelen af neutronens energi til den.</p>
-  <p>Grafen viser neutronens energi efter hvert tilbagekast; hver mærkat ned ad siden er tusind gange mindre energi. At miste den samme andel hver gang giver et lige glid, den stiplede linje. Efter omkring 18 tilbagekast når neutronen den <b>termiske</b> energi, 0,025 eV, hvor det varme vand sparker den op lige så ofte, som det bremser den. Ilt er 16 gange tungere: hvert tilbagekast tager kun lidt, og det kræver over hundrede.</p>
+  <p>Hvert stød mod brint koster omkring halvdelen af energien. En fissionsneutron starter ved 2 MeV og støder sig vej gennem vand. En brintkerne vejer det samme som neutronen, så neutronen afgiver, som billardkugler, i gennemsnit halvdelen af sin energi ved hvert stød.</p>
+  <p>Grafen viser neutronens energi efter hvert stød; hver mærkat ned ad siden er tusind gange mindre energi. At miste den samme andel hver gang giver et lige glid, den stiplede linje. Efter omkring 18 stød når neutronen den <b>termiske</b> energi, 0,025 eV, hvor det varme vand sparker den op lige så ofte, som det bremser den. Ilt er 16 gange tungere: hvert stød tager kun lidt, og det kræver over hundrede.</p>
   <div class="btns"><button class="btn ghost" data-act="tgtH" aria-pressed="true">Brint</button><button class="btn ghost" data-act="tgtO" aria-pressed="false">Ilt</button><button class="btn" data-act="again">Affyr igen</button></div>
 </div>
 <div class="step">
-  <p>Under omkring 1 eV former molekylets bindinger hvert tilbagekast. Hver brint er bundet til sin ilt (de lysende linjer). En langsom neutron rammer ikke længere en fri brint: den rammer et helt molekyle, 18 gange tungere, så et almindeligt tilbagekast tager næsten intet.</p>
+  <p>Under omkring 1 eV former molekylets bindinger hvert stød. Hver brint er bundet til sin ilt (de lysende linjer). En langsom neutron rammer ikke længere en fri brint: den rammer et helt molekyle, 18 gange tungere, så et almindeligt stød tager næsten intet.</p>
   <p>Den kan også få molekylet til at rotere eller vibrere, men kun ved at aflevere en fast mængde energi ad gangen, 0,06, 0,2 eller 0,45 eV (de lysende glimt). Varme molekyler giver nogle gange sådan en mængde tilbage. På grafen er det skraverede bånd under 1 eV, hvor det har betydning. Slå bindingen fra for at sammenligne med fri brint.</p>
   <div class="btns"><button class="btn ghost" data-act="bind" aria-pressed="true">Kemisk binding</button><button class="btn" data-act="again">Affyr igen</button></div>
 </div>
@@ -21,3 +21,24 @@ WT.L.ch.slowing = {
 `,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */
+Object.assign(WT.L.labels, {
+  "water · neutron hits hydrogen": "vand · neutron rammer brint",
+  "thermal · kT ≈ {#} eV": "termisk · kT ≈ {#} eV",
+  "{#} meV": "{#} meV",
+  "collisions →": "stød →",
+  "energy": "energi",
+  "typical bounce: energy × {#} (theory × {#}) · {#} bounces to thermal": "typisk stød: energi × {#} (teori × {#}) · {#} stød til termisk",
+  "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)": "typisk: middeltrinnet langs den stiplede linje (energiandele ganges, så middelværdien tages på denne skala)",
+  "bright line: a bond holding H to its O": "lys linje: en binding, der holder H til sin O",
+  "bright flash: the neutron left a fixed amount of energy in the molecule": "lyst glimt: neutronen efterlod en fast mængde energi i molekylet",
+  "below {#} eV: the bonds shape each bounce": "under {#} eV: bindingerne former hvert stød",
+  "free-atom recoil": "frit atoms tilbagestød",
+  "α: how hard the knock (momentum handed over) →": "α: hvor hårdt stødet er (overført impuls) →",
+  "β: the neutron's energy change, in units of kT = {#} eV": "β: neutronens energiændring i enheder af kT = {#} eV",
+  "gain ↑": "gevinst ↑",
+  "loss ↓": "tab ↓",
+  "outline: reachable from {#} eV": "omrids: kan nås fra {#} eV",
+  "rare → likely": "sjælden → sandsynlig",
+  "scattering law S(α,β) · hydrogen bound in water": "spredningslov S(α,β) · brint bundet i vand",
+  "stripes: energy lost to the molecule in fixed amounts": "striber: energi afgivet til molekylet i faste portioner",
+});

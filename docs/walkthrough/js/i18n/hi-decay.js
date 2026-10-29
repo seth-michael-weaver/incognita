@@ -140,3 +140,9 @@ WT.L.ch.decay = {
   }
   Object.assign(WT.L.labels, L);
 })();
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "press Fire to send neutrons in": "न्यूट्रॉन भेजने के लिए दागें दबाएं",
+  "stayed inside: counted here, not moved": "भीतर रहे: यहां गिने गए, हटाए नहीं",
+});

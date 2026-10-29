@@ -3,14 +3,14 @@ WT.L.ch.critical = {
   num: "21장", title: "임계와 원자로 제어", short: "임계",
   html: `
 <div class="step">
-  <h3>증배 인자</h3>
-  <p>핵분열은 한 번에 몇 개의 중성자를 풀어놓고, 그 가운데 일부는 다음 핵분열을 일으키며 나머지는 사라집니다. <b>증배 인자</b> <i>k</i>는 핵분열 한 번이 새로운 핵분열 몇 번으로 이어지는가입니다. 세대마다 중성자가 <i>k</i>배가 됩니다. 1보다 크면 연쇄 반응이 커지고, 1보다 작으면 잦아듭니다.</p>
-  <div class="ctl"><label for="cri-k">증배 k</label><input id="cri-k" type="range" data-bind="k" data-instant min="0.95" max="1.05" step="0.05" value="1.05"><output data-show="k" data-fmt="2"></output></div>
+  <h3>증배 계수</h3>
+  <p>핵분열은 한 번에 몇 개의 중성자를 풀어놓고, 그 가운데 일부는 다음 핵분열을 일으키며 나머지는 사라집니다. <b>증배 계수</b> <i>k</i>는 핵분열 한 번이 새로운 핵분열 몇 번으로 이어지는가입니다. 세대마다 중성자가 <i>k</i>배가 됩니다. 1보다 크면 연쇄 반응이 커지고, 1보다 작으면 잦아듭니다.</p>
+  <div class="ctl"><label for="cri-k">증배 계수 k</label><input id="cri-k" type="range" data-bind="k" data-instant min="0.95" max="1.05" step="0.05" value="1.05"><output data-show="k" data-fmt="2"></output></div>
 </div>
 <div class="step">
   <h3>지연 중성자</h3>
   <p>중성자의 작은 몫(0.65%)은 먼저 붕괴하는 핵분열 조각에서 나와 몇 초 늦게 도착합니다. 이 늦은 중성자들이 속도를 정하므로 증가는 눈 깜짝할 사이에서 몇 분으로 느려집니다. 그래프는 10배 빠르게 재생됩니다.</p>
-  <div class="ctl"><label for="cri-k2">증배 k</label><input id="cri-k2" type="range" data-bind="kd" data-instant min="0.998" max="1.002" step="0.0005" value="1.001"><output data-show="kd" data-fmt="4"></output></div>
+  <div class="ctl"><label for="cri-k2">증배 계수 k</label><input id="cri-k2" type="range" data-bind="kd" data-instant min="0.998" max="1.002" step="0.0005" value="1.001"><output data-show="kd" data-fmt="4"></output></div>
   <div class="btns"><button class="btn ghost" data-act="delayed" aria-pressed="true">지연 중성자</button></div>
 </div>
 <div class="step">
@@ -20,3 +20,22 @@ WT.L.ch.critical = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="delayed" data-act="delayed" */
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "generations →": "세대 →",
+  "k = {#}: dies away": "k = {#}: 잦아듦",
+  "k = {#}: steady": "k = {#}: 일정",
+  "k = {#}: grows": "k = {#}: 증가",
+  "{#} generations last under {#} s in a water reactor": "{#}세대가 경수로에서 {#} s 미만",
+  "illustration": "예시 그림",
+  "amber: fission fragments that emit a neutron seconds later": "호박색: 몇 초 뒤 중성자를 내는 핵분열 조각",
+  "{#} s": "{#} s",
+  "time →": "시간 →",
+  "×{#} speed": "×{#} 배속",
+  "with delayed: doubles every {#} s": "지연 중성자 포함: {#} s마다 두 배",
+  "prompt only: doubles every {#} ms": "즉발만: {#} ms마다 두 배",
+  "k = {#} · {#} % of neutrons delayed about {#} s (one-group average)": "k = {#} · 중성자의 {#} %가 약 {#} s 지연 (1군 평균)",
+  "rods {#} % in": "제어봉 {#} % 삽입",
+  "k = {#} · doubles every {#} min": "k = {#} · {#}분마다 두 배",
+});

@@ -97,3 +97,6 @@ Object.assign(WT.L.labels, {
   "dashed ring: the best-value inputs · each energy drawn at its own scale (disc area ∝ σ)": "الحلقة المتقطعة: أفضل قيم المدخلات · كل طاقة بمقياسها (المساحة ∝ σ)",
   "{#} runs of the engine, each with its inputs nudged at random": "{#} تشغيلًا للمحرك، لكلٍّ منها مدخلات محرّكة عشوائيًا",
 });
+Object.assign(WT.L.labels, {
+  "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "مستويات الهدف وحصة النوى في كلٍّ منها (مقياس الطاقة ممطوط قرب الأسفل)",
+});

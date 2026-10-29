@@ -18,3 +18,18 @@ WT.L.ch.fisout = {
   <div class="btns"><button class="btn" data-act="f1000">핵분열 1000회</button><button class="btn ghost" data-act="clear">지우기</button></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "n + U{#} → two fragments + neutrons": "n + U{#} → 조각 둘 + 중성자",
+  "prompt neutrons per fission": "핵분열당 즉발 중성자 수",
+  "lines: measured shares": "선: 측정된 몫",
+  "mean {#}": "평균 {#}",
+  "prompt-neutron energy (MeV)": "즉발 중성자 에너지 (MeV)",
+  "mean {#} MeV": "평균 {#} MeV",
+  "line: measured shape": "선: 측정된 모양",
+  "prompt": "즉발",
+  "time after fission · clock sped up {#}×": "핵분열 후 시간 · 시계 {#}배 빠르게",
+  "delayed {#} of {#} ({#} %)": "지연 {#} / {#} ({#} %)",
+  "{#} fissions": "핵분열 {#}회",
+});

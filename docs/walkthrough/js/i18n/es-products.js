@@ -13,3 +13,19 @@ WT.es.ch.products = {
   <p>Arrastra el tiempo. Un segundo después de que el reactor se detiene, las desintegraciones aún dan cerca del 6 % de la potencia plena; tras un día, cerca de medio por ciento; tras un año, unas centésimas de por ciento, que en un reactor grande siguen siendo casi un megavatio. Por eso el combustible gastado se guarda años en piscinas de enfriamiento. La curva es la regla práctica de Way–Wigner: una fórmula sencilla para las desintegraciones de todos los fragmentos juntos, tras un año de funcionamiento. Las dos escalas saltan un factor diez en cada marca.</p>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "fragment mass number A →": "número másico del fragmento A →",
+  "share of fissions that make it (each line ×{#})": "fracción de fisiones que lo producen (cada línea ×{#})",
+  "Rb{#} · {#} %": "Rb{#} · {#} %",
+  "Xe{#} · {#} %": "Xe{#} · {#} %",
+  "+ about {#} neutrons": "+ unos {#} neutrones",
+  "{#} % of full power": "{#} % de la potencia plena",
+  "≈ {#} MW in a {#} MW reactor · {#} s after shutdown": "≈ {#} MW en un reactor de {#} MW · {#} s tras la parada",
+  "{#} min": "{#} min",
+  "{#} h": "{#} h",
+  "{#} day": "{#} día",
+  "{#} yr": "{#} año",
+  "time after shutdown (each mark much later) →": "tiempo tras la parada (cada marca mucho después) →",
+  "Way–Wigner rule of thumb, after a year at full power": "regla práctica de Way–Wigner, tras un año a plena potencia",
+});

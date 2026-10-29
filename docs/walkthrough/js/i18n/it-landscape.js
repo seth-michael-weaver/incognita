@@ -24,3 +24,25 @@ WT.L.ch.landscape = {
   <p>La stessa mappa, colorata secondo ciò che la nostra libreria contiene per ogni nucleo. <em style="font-style:normal;color:var(--fission);font-weight:600">Verde</em>: valutato a partire dalle sue risonanze misurate. Gli altri hanno un file di modello costruito dal solo motore: <b>scuro</b> per i nuclei stabili o di lunga vita (livello A), <em style="font-style:normal;color:var(--accent);font-weight:600">blu</em> per più di un giorno (livello B), <em style="font-style:normal;color:var(--warm);font-weight:600">arancione</em> per quelli di vita più breve (livello C). I grigi non sono nella libreria (per lo più i nuclei più leggeri, e alcuni che il motore non riesce a calcolare).</p>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "neutrons N →": "neutroni N →",
+  "protons Z ↑": "protoni Z ↑",
+  "Fe: all its isotopes": "Fe: tutti i suoi isotopi",
+  "stable": "stabile",
+  "lives years": "vive anni",
+  "gone in a blink": "sparisce in un lampo",
+  "red: Fe (your pick)": "rosso: Fe (la tua scelta)",
+  "nickel{#}: most tightly bound": "nichel{#}: il più legato",
+  "held most tightly": "il più legato",
+  "middle": "intermedio",
+  "held least": "il meno legato",
+  "red: the A = {#} chain": "rosso: la catena A = {#}",
+  "A = {#}: deeper = more tightly bound": "A = {#}: più in basso = più legato",
+  "protons Z →": "protoni Z →",
+  "measured resonances": "risonanze misurate",
+  "tier A": "livello A",
+  "tier B": "livello B",
+  "tier C": "livello C",
+  "not in library": "non in libreria",
+});

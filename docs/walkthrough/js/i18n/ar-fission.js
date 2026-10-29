@@ -103,3 +103,8 @@ Object.assign(WT.L.labels, {
     }
   }
 })();
+Object.assign(WT.L.labels, {
+  "chance to split vs neutron energy": "احتمال الانشطار مقابل طاقة النيوترون",
+  "{#}nd": "الـ{#}",
+  "{#}rd": "الـ{#}",
+});

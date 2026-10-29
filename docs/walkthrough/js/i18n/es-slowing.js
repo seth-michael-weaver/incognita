@@ -4,7 +4,7 @@ WT.es.ch.slowing = {
   html: `
 <div class="step">
   <p>Cada rebote contra el hidrógeno cuesta cerca de la mitad de la energía. Un neutrón de fisión empieza con 2 MeV y rebota por el agua. Un núcleo de hidrógeno pesa lo mismo que el neutrón, así que, como las bolas de billar, cada rebote le quita en promedio la mitad de la energía al neutrón.</p>
-  <p>El gráfico traza la energía del neutrón tras cada rebote; cada rótulo a lo largo del lateral es mil veces menos energía. Perder la misma fracción cada vez da un descenso en línea recta, la línea discontinua. Tras unos 18 rebotes el neutrón alcanza la energía <b>térmica</b>, 0,025 eV, en la que el agua caliente lo acelera tantas veces como lo frena. El oxígeno es 16 veces más pesado: cada rebote quita solo un poco, y hacen falta más de cien.</p>
+  <p>El gráfico traza la energía del neutrón tras cada rebote; cada rótulo a lo largo del lateral es mil veces menos energía. Perder la misma fracción cada vez da un descenso en línea recta, la línea discontinua. Tras unos 18 rebotes el neutrón alcanza la energía <b>térmica</b>, 0,025 eV, en la que el agua tibia lo acelera tantas veces como lo frena. El oxígeno es 16 veces más pesado: cada rebote quita solo un poco, y hacen falta más de cien.</p>
   <div class="btns"><button class="btn ghost" data-act="tgtH" aria-pressed="true">Hidrógeno</button><button class="btn ghost" data-act="tgtO" aria-pressed="false">Oxígeno</button><button class="btn" data-act="again">Disparar otra vez</button></div>
 </div>
 <div class="step">
@@ -20,3 +20,25 @@ WT.es.ch.slowing = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */
+
+Object.assign(WT.L.labels, {
+  "water · neutron hits hydrogen": "agua · el neutrón choca con hidrógeno",
+  "thermal · kT ≈ {#} eV": "térmico · kT ≈ {#} eV",
+  "{#} meV": "{#} meV",
+  "collisions →": "colisiones →",
+  "energy": "energía",
+  "typical bounce: energy × {#} (theory × {#}) · {#} bounces to thermal": "rebote típico: energía × {#} (teoría × {#}) · {#} rebotes hasta térmico",
+  "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)": "típico: el paso medio a lo largo de la línea discontinua (las fracciones de energía se multiplican, así que la media se toma en esta escala)",
+  "bright line: a bond holding H to its O": "línea brillante: un enlace que une el H a su O",
+  "bright flash: the neutron left a fixed amount of energy in the molecule": "destello: el neutrón dejó una cantidad fija de energía en la molécula",
+  "below {#} eV: the bonds shape each bounce": "bajo {#} eV: los enlaces moldean cada rebote",
+  "free-atom recoil": "retroceso de átomo libre",
+  "α: how hard the knock (momentum handed over) →": "α: fuerza del golpe (momento transferido) →",
+  "β: the neutron's energy change, in units of kT = {#} eV": "β: cambio de energía del neutrón, en unidades de kT = {#} eV",
+  "gain ↑": "gana ↑",
+  "loss ↓": "pierde ↓",
+  "outline: reachable from {#} eV": "contorno: alcanzable desde {#} eV",
+  "rare → likely": "raro → probable",
+  "scattering law S(α,β) · hydrogen bound in water": "ley de dispersión S(α,β) · hidrógeno ligado en agua",
+  "stripes: energy lost to the molecule in fixed amounts": "franjas: energía cedida a la molécula en cantidades fijas",
+});

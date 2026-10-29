@@ -3,7 +3,7 @@ WT.L.ch.tof = {
   num: "第 17 章", title: "飞行时间测量", short: "测量共振峰",
   html: `
 <div class="step">
-  <p>中子的飞行时间决定它的能量。一个包含各种能量中子的短脉冲离开中子源，沿着一根空管飞向探测器；快中子最先到达。管长 <i>L</i> 已知，因此每个到达时间 <i>t</i> 给出中子的速度，速度再给出它的能量：</p>
+  <p>中子的飞行时间揭示它的能量。一个包含各种能量中子的短脉冲离开中子源，沿着一根空管飞向探测器；快中子最先到达。管长 <i>L</i> 已知，因此每个到达时间 <i>t</i> 给出中子的速度，速度再给出它的能量：</p>
   <div class="formula">E = (72.3 · L / t)²   （E 单位 eV，L 单位 m，t 单位 µs）</div>
   <p>管子上方的时钟显示脉冲发出后的真实时间；飞行过程大约被放慢了 1400 倍来绘制。管子下方，最后一个到达的中子被换算成能量。拖动飞行距离：管子越长，同样的能量散布在更长的时间上，每个能量就能分辨得更细。</p>
   <div class="ctl"><label for="tof-l1">飞行距离 (m)</label><input id="tof-l1" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="50"><output data-show="Lv" data-fmt="0"></output></div>
@@ -31,3 +31,26 @@ WT.L.ch.tof = {
   <div class="ctl"><label for="tof-p2">脉冲宽度 (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "pulsed source": "脉冲中子源",
+  "detector": "探测器",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · 时钟：脉冲后 {#} ms",
+  "transmission": "透射率",
+  "cross-section shape (scaled)": "截面形状（已缩放）",
+  "what the detector records": "探测器记录的结果",
+  "simulated counts": "模拟计数",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "快中子先到，慢中子后到：时钟按能量把它们分开",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · 时钟：脉冲后 {#} µs",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "最后到达：t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "最后到达：t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "样品",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV 在 {#} ms 后到达",
+  "sample {#} µm · dip {#} % deep": "样品 {#} µm · 凹陷深 {#} %",
+  "sample {#} µm · dip {#} % deep: black in the centre": "样品 {#} µm · 凹陷深 {#} %：中心全黑",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV 在 {#} µs 后到达",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "计时宽度 {#} meV · 热运动（多普勒）{#} meV · 共振本身 {#} meV",
+  "the fit's current guess": "拟合的当前猜测",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "拟合：Γn = {#} meV（模拟输入：{#}）· 失配度 {#}",
+});

@@ -97,3 +97,8 @@ Object.assign(WT.L.labels, {
   "dashed ring: the best-value inputs · each energy drawn at its own scale (disc area ∝ σ)": "점선 고리: 최적값 입력 · 에너지마다 고유한 축척 (원판 넓이 ∝ σ)",
   "{#} runs of the engine, each with its inputs nudged at random": "엔진 {#}회 실행, 매번 입력을 무작위로 살짝 바꿈",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "표적 준위와 각 준위에 있는 원자핵의 몫 (아래쪽은 에너지 눈금 확대)",
+});

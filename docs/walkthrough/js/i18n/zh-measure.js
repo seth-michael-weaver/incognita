@@ -97,3 +97,8 @@ Object.assign(WT.L.labels, {
   "dashed ring: the best-value inputs · each energy drawn at its own scale (disc area ∝ σ)": "虚线环：最佳值输入 · 各能量按各自比例绘制（圆盘面积 ∝ σ）",
   "{#} runs of the engine, each with its inputs nudged at random": "引擎运行 {#} 次，每次随机微调输入",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "靶核能级及各能级上原子核所占的份额（底部附近能量刻度已拉伸）",
+});

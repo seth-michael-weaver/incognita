@@ -103,3 +103,9 @@ Object.assign(WT.L.labels, {
     }
   }
 })();
+
+Object.assign(WT.L.labels, {
+  "chance to split vs neutron energy": "probabilidade de fissão vs energia do neutrão",
+  "{#}nd": "{#}.ª",
+  "{#}rd": "{#}.ª",
+});

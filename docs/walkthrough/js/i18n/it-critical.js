@@ -20,3 +20,21 @@ WT.L.ch.critical = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="delayed" data-act="delayed" */
+
+Object.assign(WT.L.labels, {
+  "generations →": "generazioni →",
+  "k = {#}: dies away": "k = {#}: si spegne",
+  "k = {#}: steady": "k = {#}: stabile",
+  "k = {#}: grows": "k = {#}: cresce",
+  "{#} generations last under {#} s in a water reactor": "{#} generazioni durano meno di {#} s in un reattore ad acqua",
+  "illustration": "illustrazione",
+  "amber: fission fragments that emit a neutron seconds later": "ambra: frammenti di fissione che emettono un neutrone secondi dopo",
+  "{#} s": "{#} s",
+  "time →": "tempo →",
+  "×{#} speed": "velocità ×{#}",
+  "with delayed: doubles every {#} s": "con i ritardati: raddoppia ogni {#} s",
+  "prompt only: doubles every {#} ms": "solo pronti: raddoppia ogni {#} ms",
+  "k = {#} · {#} % of neutrons delayed about {#} s (one-group average)": "k = {#} · {#} % dei neutroni ritardati di circa {#} s (media a un gruppo)",
+  "rods {#} % in": "barre inserite al {#} %",
+  "k = {#} · doubles every {#} min": "k = {#} · raddoppia ogni {#} min",
+});

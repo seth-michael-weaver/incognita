@@ -21,6 +21,29 @@ WT.L.ch.landscape = {
 </div>
 <div class="step">
   <h3>INCOGNITAがカバーする範囲</h3>
-  <p>同じ地図を、私たちのライブラリが各原子核について保持している内容で色分けしました。<em style="font-style:normal;color:var(--fission);font-weight:600">緑</em>は、測定された共鳴から評価したものです。それ以外はエンジンだけでつくった模型ファイルで、安定または長寿命のもの（ティアA）は<b>濃色</b>、半減期が1日より長いもの（ティアB）は<em style="font-style:normal;color:var(--accent);font-weight:600">青</em>、それより短いもの（ティアC）は<em style="font-style:normal;color:var(--warm);font-weight:600">オレンジ</em>です。灰色はライブラリにないもの（大部分は最も軽い原子核と、エンジンで計算できない少数の原子核）です。</p>
+  <p>同じ地図を、私たちのライブラリが各原子核について保持している内容で色分けしました。<em style="font-style:normal;color:var(--fission);font-weight:600">緑</em>は、測定された共鳴から評価したものです。それ以外はエンジンだけでつくったモデルファイルで、安定または長寿命のもの（ティアA）は<b>濃色</b>、半減期が1日より長いもの（ティアB）は<em style="font-style:normal;color:var(--accent);font-weight:600">青</em>、それより短いもの（ティアC）は<em style="font-style:normal;color:var(--warm);font-weight:600">オレンジ</em>です。灰色はライブラリにないもの（大部分は最も軽い原子核と、エンジンで計算できない少数の原子核）です。</p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "neutrons N →": "中性子数 N →",
+  "protons Z ↑": "陽子数 Z ↑",
+  "Fe: all its isotopes": "Fe：すべての同位体",
+  "stable": "安定",
+  "lives years": "寿命は数年",
+  "gone in a blink": "一瞬で崩壊",
+  "red: Fe (your pick)": "赤：Fe（選んだ元素）",
+  "nickel{#}: most tightly bound": "ニッケル{#}：最も強く結合",
+  "held most tightly": "最も強く結合",
+  "middle": "中程度",
+  "held least": "最も弱く結合",
+  "red: the A = {#} chain": "赤：A = {#} の崩壊系列",
+  "A = {#}: deeper = more tightly bound": "A = {#}：深いほど強く結合",
+  "protons Z →": "陽子数 Z →",
+  "measured resonances": "測定された共鳴",
+  "tier A": "ティアA",
+  "tier B": "ティアB",
+  "tier C": "ティアC",
+  "not in library": "ライブラリにない",
+});

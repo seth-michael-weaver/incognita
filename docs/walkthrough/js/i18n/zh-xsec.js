@@ -4,7 +4,7 @@ WT.L.ch.xsec = {
   html: `
 <div class="step">
   <p>每个圆盘是一个原子核的靶面积：它的<b>截面</b>，记作 σ（西格玛）。画面是从正上方俯视一层薄薄的原子核，中子则落在这层上的随机位置。落入圆盘内的中子与该原子核发生反应（橙色闪光）；落在圆盘之间的中子径直穿过（只是渐渐淡去）。</p>
-  <p>因此发生反应的份额，就是圆盘覆盖这层面积的份额。黑色小方块是面积单位，即 1 <b>靶恩</b>（barn），10⁻²⁴ cm²：原子核的真实截面大约就是一靶恩。</p>
+  <p>因此发生反应的份额，就是圆盘覆盖这层面积的份额。黑色小方块是面积单位，即 1 <b>靶恩</b>（barn），10⁻²⁴ cm²：原子核真实的横截面大约就是一靶恩。</p>
   <div class="ctl"><label for="xs-e1">中子能量 (eV)</label><input id="xs-e1" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="2"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
@@ -18,3 +18,11 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e3">中子能量 (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "这个方块：{#} 靶恩 = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ：各能量下的靶面积",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · 反应 {#} % · 穿过 {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "每个落下的圆点是一个中子：橙色闪光表示击中圆盘并反应，渐隐的圆点表示穿过",
+});

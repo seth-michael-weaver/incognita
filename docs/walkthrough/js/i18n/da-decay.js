@@ -139,3 +139,7 @@ WT.L.ch.decay = {
   }
   Object.assign(WT.L.labels, L);
 })();
+Object.assign(WT.L.labels, {
+  "press Fire to send neutrons in": "tryk Affyr for at sende neutroner ind",
+  "stayed inside: counted here, not moved": "blev inde: talt her, ikke flyttet",
+});

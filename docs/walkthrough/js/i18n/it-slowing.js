@@ -4,7 +4,7 @@ WT.L.ch.slowing = {
   html: `
 <div class="step">
   <p>Ogni rimbalzo sull'idrogeno costa circa metà dell'energia. Un neutrone di fissione parte da 2 MeV e rimbalza attraverso l'acqua. Un nucleo di idrogeno pesa quanto il neutrone, quindi, come le palle da biliardo, a ogni rimbalzo gli cede in media metà dell'energia del neutrone.</p>
-  <p>Il grafico mostra l'energia del neutrone dopo ogni rimbalzo; ogni etichetta lungo il lato ha mille volte meno energia. Perdere ogni volta la stessa frazione dà una discesa rettilinea, la linea tratteggiata. Dopo circa 18 rimbalzi il neutrone raggiunge l'energia <b>termica</b>, 0,025 eV, dove l'acqua calda lo risolleva tante volte quante lo rallenta. L'ossigeno è 16 volte più pesante: ogni rimbalzo sottrae poco, e ne servono più di cento.</p>
+  <p>Il grafico mostra l'energia del neutrone dopo ogni rimbalzo; ogni etichetta lungo il lato indica un'energia mille volte minore. Perdere ogni volta la stessa frazione dà una discesa rettilinea, la linea tratteggiata. Dopo circa 18 rimbalzi il neutrone raggiunge l'energia <b>termica</b>, 0,025 eV, dove l'acqua tiepida lo risolleva tante volte quante lo rallenta. L'ossigeno è 16 volte più pesante: ogni rimbalzo sottrae poco, e ne servono più di cento.</p>
   <div class="btns"><button class="btn ghost" data-act="tgtH" aria-pressed="true">Idrogeno</button><button class="btn ghost" data-act="tgtO" aria-pressed="false">Ossigeno</button><button class="btn" data-act="again">Lancia ancora</button></div>
 </div>
 <div class="step">
@@ -20,3 +20,25 @@ WT.L.ch.slowing = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */
+
+Object.assign(WT.L.labels, {
+  "water · neutron hits hydrogen": "acqua · il neutrone urta l'idrogeno",
+  "thermal · kT ≈ {#} eV": "termico · kT ≈ {#} eV",
+  "{#} meV": "{#} meV",
+  "collisions →": "collisioni →",
+  "energy": "energia",
+  "typical bounce: energy × {#} (theory × {#}) · {#} bounces to thermal": "rimbalzo tipico: energia × {#} (teoria × {#}) · {#} rimbalzi fino al termico",
+  "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)": "tipico: il passo medio lungo la linea tratteggiata (le frazioni di energia si moltiplicano, quindi la media si fa su questa scala)",
+  "bright line: a bond holding H to its O": "linea chiara: un legame che tiene H al suo O",
+  "bright flash: the neutron left a fixed amount of energy in the molecule": "lampo: il neutrone ha lasciato una quantità fissa di energia nella molecola",
+  "below {#} eV: the bonds shape each bounce": "sotto {#} eV: i legami determinano ogni rimbalzo",
+  "free-atom recoil": "rinculo dell'atomo libero",
+  "α: how hard the knock (momentum handed over) →": "α: forza dell'urto (quantità di moto trasferita) →",
+  "β: the neutron's energy change, in units of kT = {#} eV": "β: variazione di energia del neutrone, in unità di kT = {#} eV",
+  "gain ↑": "guadagno ↑",
+  "loss ↓": "perdita ↓",
+  "outline: reachable from {#} eV": "contorno: raggiungibile da {#} eV",
+  "rare → likely": "raro → probabile",
+  "scattering law S(α,β) · hydrogen bound in water": "legge di diffusione S(α,β) · idrogeno legato nell'acqua",
+  "stripes: energy lost to the molecule in fixed amounts": "strisce: energia ceduta alla molecola in quantità fisse",
+});

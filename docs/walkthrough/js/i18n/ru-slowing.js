@@ -20,3 +20,24 @@ WT.L.ch.slowing = {
   <div class="btns"><button class="btn ghost" data-act="bind" aria-pressed="true">Химическая связь</button></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "water · neutron hits hydrogen": "вода · нейтрон ударяет водород",
+  "thermal · kT ≈ {#} eV": "тепловая · kT ≈ {#} eV",
+  "{#} meV": "{#} meV",
+  "collisions →": "соударения →",
+  "energy": "энергия",
+  "typical bounce: energy × {#} (theory × {#}) · {#} bounces to thermal": "типичное соударение: энергия × {#} (теория × {#}) · {#} соударений до тепловой",
+  "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)": "типичное: средний шаг вдоль штриховой линии (доли энергии перемножаются, поэтому среднее берётся в этой шкале)",
+  "bright line: a bond holding H to its O": "яркая линия: связь, удерживающая H у своего O",
+  "bright flash: the neutron left a fixed amount of energy in the molecule": "яркая вспышка: нейтрон оставил в молекуле фиксированную порцию энергии",
+  "below {#} eV: the bonds shape each bounce": "ниже {#} eV: связи влияют на каждое соударение",
+  "free-atom recoil": "отдача свободного атома",
+  "α: how hard the knock (momentum handed over) →": "α: сила удара (переданный импульс) →",
+  "β: the neutron's energy change, in units of kT = {#} eV": "β: изменение энергии нейтрона в единицах kT = {#} eV",
+  "gain ↑": "прирост ↑",
+  "loss ↓": "потеря ↓",
+  "outline: reachable from {#} eV": "контур: достижимо из {#} eV",
+  "rare → likely": "редко → вероятно",
+  "scattering law S(α,β) · hydrogen bound in water": "закон рассеяния S(α,β) · водород, связанный в воде",
+  "stripes: energy lost to the molecule in fixed amounts": "полосы: энергия, отданная молекуле фиксированными порциями",
+});

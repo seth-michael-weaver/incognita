@@ -139,3 +139,6 @@ WT.L.ch.decay = {
   }
   Object.assign(WT.L.labels, L);
 })();
+Object.assign(WT.L.labels, {
+  "press Fire to send neutrons in": "اضغط «أطلق» لإرسال النيوترونات",
+});

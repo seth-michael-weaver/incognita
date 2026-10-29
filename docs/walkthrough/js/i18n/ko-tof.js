@@ -24,10 +24,33 @@ WT.L.ch.tof = {
   <div class="ctl"><label for="tof-l2">비행 거리 (m)</label><input id="tof-l2" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="20"><output data-show="Lv" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>INCOGNITA는 거꾸로 일합니다. 이런 측정 계수를 가지고, 같은 실험(두께, 열, 시간 흐림)을 거쳤을 때 이를 재현하는 공명이 무엇인지 묻습니다. 여기서 맞춤은 중성자 폭 Γ<sub>n</sub>(준위가 중성자를 얼마나 세게 붙드는가)이 거의 네 배 큰 추측(파란 곡선)에서 시작하여, 곡선이 점들을 지나갈 때까지 한 걸음씩 바꿔 나갑니다.</p>
-  <p>표시창은 현재의 추측과 <b>어긋남</b>을 보여 줍니다. 1 근처이면 곡선이 계수의 흩어짐이 허락하는 만큼 점들에 가깝다는 뜻입니다. 실험을 바꾸면 새 계수로 맞춤이 다시 시작되어 거의 같은 폭에 이릅니다. 점들에 잘 맞출 수 없는 곳에서는 어긋남이 그렇게 말해 줍니다.</p>
+  <p>INCOGNITA는 거꾸로 일합니다. 이런 측정 계수를 가지고, 같은 실험(두께, 열, 시간 흐림)을 거쳤을 때 이를 재현하는 공명이 무엇인지 묻습니다. 여기서 피팅은 중성자 폭 Γ<sub>n</sub>(준위가 중성자를 얼마나 세게 붙드는가)이 거의 네 배 큰 추측(파란 곡선)에서 시작하여, 곡선이 점들을 지나갈 때까지 한 걸음씩 바꿔 나갑니다.</p>
+  <p>표시창은 현재의 추측과 <b>어긋남</b>을 보여 줍니다. 1 근처이면 곡선이 계수의 흩어짐이 허락하는 만큼 점들에 가깝다는 뜻입니다. 실험을 바꾸면 새 계수로 피팅이 다시 시작되어 거의 같은 폭에 이릅니다. 점들에 잘 맞출 수 없는 곳에서는 어긋남이 그렇게 말해 줍니다.</p>
   <div class="ctl"><label for="tof-l3">비행 거리 (m)</label><input id="tof-l3" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="50"><output data-show="Lv" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-d3">시료 두께 (µm)</label><input id="tof-d3" type="range" data-bind="lgT" data-instant min="0" max="3.5" step="0.01" value="1.5"><output data-show="thk" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-p2">펄스 폭 (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "pulsed source": "펄스 중성자원",
+  "detector": "검출기",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · 시계: 펄스 후 {#} ms",
+  "transmission": "투과율",
+  "cross-section shape (scaled)": "단면적 모양 (축척 조정)",
+  "what the detector records": "검출기가 기록하는 것",
+  "simulated counts": "모의 계수",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "빠른 중성자가 먼저, 느린 것은 나중에 도착: 시계가 에너지별로 가름",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · 시계: 펄스 후 {#} µs",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "마지막 도착: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "마지막 도착: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "시료",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV는 {#} ms 후 도착",
+  "sample {#} µm · dip {#} % deep": "시료 {#} µm · 홈 깊이 {#} %",
+  "sample {#} µm · dip {#} % deep: black in the centre": "시료 {#} µm · 홈 깊이 {#} %: 가운데가 새까맘",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV는 {#} µs 후 도착",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "시간 흐림 폭 {#} meV · 열(도플러) {#} meV · 공명 자체 {#} meV",
+  "the fit's current guess": "피팅의 현재 추측",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "피팅: Γn = {#} meV (시뮬레이션 입력값: {#}) · 어긋남 {#}",
+});

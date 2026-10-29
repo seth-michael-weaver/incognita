@@ -15,3 +15,19 @@ WT.L.ch.neutrons = {
   <p>لذلك تستطيع حتى النيوترونات البطيئة شطر اليورانيوم في المفاعل. فنواة يورانيوم-235 التي تبتلع نيوترونًا تصير يورانيوم-236 بطاقة زائدة قليلة، تكفي لتتمايل وتتمدد إلى عنق ثم تنكسر إلى نصفين. يتطاير الجزءان بنحو 200 MeV، والنيوترونان أو الثلاثة الجديدة التي يقذفانها يمكنها شطر النوى التالية: تفاعل متسلسل.</p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "+{#} charge: the push grows as the proton gets closer": "شحنة +{#}: يشتد الدفع كلما اقترب البروتون",
+  "lead{#}": "الرصاص-{#}",
+  "closest approach": "أقرب اقتراب",
+  "proton · {#} MeV": "بروتون · {#} MeV",
+  "energy vs distance": "الطاقة مقابل المسافة",
+  "hill ≈ {#} MeV": "التلّ ≈ {#} MeV",
+  "pushed back · about {#} in {#}³ tunnels through": "يُدفع للخلف · نحو {#} من كل {#}³ ينفذ نفقيًا",
+  "no charge, no push": "لا شحنة، لا دفع",
+  "neutron · {#} eV": "نيوترون · {#} eV",
+  "even this crawling neutron gets in": "حتى هذا النيوترون الزاحف يدخل",
+  "≈ {#} MeV released": "تتحرر ≈ {#} MeV",
+  "two fragments + {#} new neutrons": "شظيتان + {#} نيوترونات جديدة",
+  "a slow neutron + U{#} → two fragments, {#}–{#} new neutrons, about {#} MeV": "نيوترون بطيء + U{#} → شظيتان، {#}–{#} نيوترونات جديدة، نحو {#} MeV",
+  "a proton this slow could never get in": "بروتون بهذا البطء لا يدخل أبدًا",
+});

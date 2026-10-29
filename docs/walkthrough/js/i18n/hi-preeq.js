@@ -115,3 +115,15 @@ Object.assign(WT.L.labels, {
   "{#} MeV carried in": "{#} MeV लाए गए",
   "second fast particle in {#} of the last {#} reactions": "दूसरा तेज कण: {#}, पिछली {#} अभिक्रियाओं में से",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "bump {#}: a proton in the sea was hit, jumped up, and left a hole": "टक्कर {#}: सागर का एक प्रोटॉन टकराकर ऊपर उछला और होल छोड़ गया",
+  "bump!": "टक्कर!",
+  "hole": "होल",
+  "lifted": "उठा",
+  "free line: more than {#} MeV needed to get out": "मुक्त रेखा: बाहर निकलने को {#} MeV से अधिक चाहिए",
+  "a fast neutron comes in with {#} MeV": "एक तेज न्यूट्रॉन {#} MeV के साथ आता है",
+  "bump: it hits a neutron in the sea, which jumps up and leaves a hole": "टक्कर: यह सागर के एक न्यूट्रॉन से टकराता है, जो उछलकर होल छोड़ता है",
+  "neutron: {#} MeV": "न्यूट्रॉन: {#} MeV",
+});

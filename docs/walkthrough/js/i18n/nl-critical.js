@@ -9,7 +9,7 @@ WT.L.ch.critical = {
 </div>
 <div class="step">
   <h3>Vertraagde neutronen</h3>
-  <p>Een klein deel van de neutronen (0,65 %) komt seconden te laat, van splijtingsbrokstukken die eerst vervallen. Die late bepalen het tempo, dus de groei vertraagt van een oogwenk tot minuten. De grafiek loopt op ×10 snelheid.</p>
+  <p>Een klein deel van de neutronen (0,65 %) komt seconden te laat, van splijtingsbrokstukken die eerst vervallen. Die late neutronen bepalen het tempo, dus de groei vertraagt van een oogwenk tot minuten. De grafiek loopt op ×10 snelheid.</p>
   <div class="ctl"><label for="cri-k2">Vermenigvuldiging k</label><input id="cri-k2" type="range" data-bind="kd" data-instant min="0.998" max="1.002" step="0.0005" value="1.001"><output data-show="kd" data-fmt="4"></output></div>
   <div class="btns"><button class="btn ghost" data-act="delayed" aria-pressed="true">Vertraagde neutronen</button></div>
 </div>
@@ -20,3 +20,20 @@ WT.L.ch.critical = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="delayed" data-act="delayed" */
+Object.assign(WT.L.labels, {
+  "generations →": "generaties →",
+  "k = {#}: dies away": "k = {#}: sterft uit",
+  "k = {#}: steady": "k = {#}: constant",
+  "k = {#}: grows": "k = {#}: groeit",
+  "{#} generations last under {#} s in a water reactor": "{#} generaties duren in een waterreactor minder dan {#} s",
+  "illustration": "illustratie",
+  "amber: fission fragments that emit a neutron seconds later": "amber: brokstukken die seconden later een neutron uitzenden",
+  "{#} s": "{#} s",
+  "time →": "tijd →",
+  "×{#} speed": "×{#} snelheid",
+  "with delayed: doubles every {#} s": "met vertraagde: verdubbelt elke {#} s",
+  "prompt only: doubles every {#} ms": "alleen prompt: verdubbelt elke {#} ms",
+  "k = {#} · {#} % of neutrons delayed about {#} s (one-group average)": "k = {#} · {#} % van de neutronen ca. {#} s vertraagd (één-groepsgemiddelde)",
+  "rods {#} % in": "staven {#} % in",
+  "k = {#} · doubles every {#} min": "k = {#} · verdubbelt elke {#} min",
+});

@@ -9,7 +9,7 @@ WT.L.ch.critical = {
 </div>
 <div class="step">
   <h3>Forsinkede neutroner</h3>
-  <p>En lille andel af neutronerne (0,65 %) kommer sekunder for sent, fra fissionsfragmenter, der først skal henfalde. Disse sene bestemmer tempoet, så væksten går fra et øjeblik til minutter. Grafen kører ti gange hurtigere.</p>
+  <p>En lille andel af neutronerne (0,65 %) kommer sekunder for sent, fra fissionsfragmenter, der først skal henfalde. Disse sene neutroner bestemmer tempoet, så væksten bremses fra et øjeblik til minutter. Grafen kører ti gange hurtigere.</p>
   <div class="ctl"><label for="cri-k2">Multiplikation k</label><input id="cri-k2" type="range" data-bind="kd" data-instant min="0.998" max="1.002" step="0.0005" value="1.001"><output data-show="kd" data-fmt="4"></output></div>
   <div class="btns"><button class="btn ghost" data-act="delayed" aria-pressed="true">Forsinkede neutroner</button></div>
 </div>
@@ -21,3 +21,20 @@ WT.L.ch.critical = {
 `,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="delayed" data-act="delayed" */
+Object.assign(WT.L.labels, {
+  "generations →": "generationer →",
+  "k = {#}: dies away": "k = {#}: dør ud",
+  "k = {#}: steady": "k = {#}: konstant",
+  "k = {#}: grows": "k = {#}: vokser",
+  "{#} generations last under {#} s in a water reactor": "{#} generationer varer under {#} s i en vandreaktor",
+  "illustration": "illustration",
+  "amber: fission fragments that emit a neutron seconds later": "rav: fissionsfragmenter, der udsender en neutron sekunder senere",
+  "{#} s": "{#} s",
+  "time →": "tid →",
+  "×{#} speed": "×{#} hastighed",
+  "with delayed: doubles every {#} s": "med forsinkede: fordobles på {#} s",
+  "prompt only: doubles every {#} ms": "kun prompte: fordobles på {#} ms",
+  "k = {#} · {#} % of neutrons delayed about {#} s (one-group average)": "k = {#} · {#} % af neutronerne forsinket ca. {#} s (en-gruppe-middel)",
+  "rods {#} % in": "stave {#} % inde",
+  "k = {#} · doubles every {#} min": "k = {#} · fordobles på {#} min",
+});

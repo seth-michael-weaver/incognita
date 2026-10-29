@@ -15,3 +15,19 @@ WT.L.ch.neutrons = {
   <p>Dus zelfs langzame neutronen kunnen in een reactor uranium splijten. Een uranium-235-kern die er een opslokt, wordt uranium-236 met een beetje extra energie, genoeg om te wiebelen, zich uit te rekken tot een hals en in tweeën te breken. De twee stukken vliegen met ongeveer 200 MeV uit elkaar, en de twee of drie nieuwe neutronen die ze uitwerpen kunnen de volgende kernen splijten: een kettingreactie.</p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "+{#} charge: the push grows as the proton gets closer": "+{#} lading: de duw groeit naarmate het proton nadert",
+  "lead{#}": "lood-{#}",
+  "closest approach": "kleinste afstand",
+  "proton · {#} MeV": "proton · {#} MeV",
+  "energy vs distance": "energie tegen afstand",
+  "hill ≈ {#} MeV": "heuvel ≈ {#} MeV",
+  "pushed back · about {#} in {#}³ tunnels through": "teruggeduwd · ongeveer {#} op de {#}³ tunnelt erdoor",
+  "no charge, no push": "geen lading, geen duw",
+  "neutron · {#} eV": "neutron · {#} eV",
+  "even this crawling neutron gets in": "zelfs dit kruipende neutron komt erin",
+  "≈ {#} MeV released": "≈ {#} MeV vrijgekomen",
+  "two fragments + {#} new neutrons": "twee brokstukken + {#} nieuwe neutronen",
+  "a slow neutron + U{#} → two fragments, {#}–{#} new neutrons, about {#} MeV": "langzaam neutron + U{#} → twee brokstukken, {#}–{#} nieuwe neutronen, ca. {#} MeV",
+  "a proton this slow could never get in": "zo'n langzaam proton komt er nooit in",
+});

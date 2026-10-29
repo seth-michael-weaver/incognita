@@ -14,7 +14,22 @@ WT.L.ch.doppler = {
 </div>
 <div class="step">
   <h3>共振自屏蔽</h3>
-  <p>燃料芯块很厚。阴影带是它在每个能量上阻挡的中子份额。无论冷热，峰中心已经阻挡了一切，所以更低的峰在那里并无损失；更宽的两翼则捕获更多。更多中子因被俘获而损失，而不是引起裂变，因此 <i>k</i> 自行下降。（<i>k</i> 是每次裂变引起的新裂变数；第 21 章会解释。）</p>
+  <p>燃料芯块很厚。阴影带是它在每个能量上阻挡的中子份额。无论冷热，峰中心已经阻挡了一切，所以更低的峰在那里并无损失；更宽的两翼则捕获更多。更多中子因被俘获而损失，而不是引起裂变，因此 <i>k</i> 自行下降。（<i>k</i> 是每次裂变引起的新裂变数；第 <a href="#critical">21</a> 章会解释。）</p>
   <div class="ctl"><label for="dop-t3">燃料温度 (K)</label><input id="dop-t3" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="900"><output data-show="T" data-fmt="0"></output></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "uranium atoms in the fuel": "燃料中的铀原子",
+  "{#} K": "{#} K",
+  "caught in the peak": "被峰俘获",
+  "k": "k",
+  "neutron energy (eV) →": "中子能量 (eV) →",
+  "capture cross section": "俘获截面",
+  "peak {#}k barns · Doppler width {#} meV · area unchanged": "峰值 {#}k 靶恩 · 多普勒宽度 {#} meV · 面积不变",
+  "all stopped": "全部被阻挡",
+  "wider wings catch more": "更宽的两翼俘获更多",
+  "share of neutrons stopped in the fuel": "燃料中被阻挡的中子份额",
+  "the peak's centre already stops everything; the wider wings catch more": "峰中心已经阻挡了一切；更宽的两翼俘获更多",
+});

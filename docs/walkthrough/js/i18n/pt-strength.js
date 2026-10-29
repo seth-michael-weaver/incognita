@@ -84,3 +84,11 @@ Object.assign(WT.L.glossary, {
   },
 });
 /* i18n_check.sh counts these attribute strings found in the English script code (not in html): data-act="up" data-act="up2" */
+
+Object.assign(WT.L.labels, {
+  "zoom: Eγ from {#} to {#} MeV": "zoom: Eγ de {#} a {#} MeV",
+  "floor: stays above zero": "chão: mantém-se acima de zero",
+  "continuum:": "contínuo:",
+  "dark = dense": "escuro = denso",
+  "known levels": "níveis conhecidos",
+});

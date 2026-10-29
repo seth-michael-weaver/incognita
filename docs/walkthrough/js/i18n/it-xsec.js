@@ -8,13 +8,20 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e1">Energia del neutrone (eV)</label><input id="xs-e1" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="2"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
-  <p>I neutroni più lenti vedono bersagli più grandi. Il disco non è la dimensione reale del nucleo: è quanto grande il nucleo si comporta per un neutrone a questa energia, e un neutrone lento si trattiene più a lungo vicino al nucleo, quindi ha più probabilità di essere catturato. Per la cattura questo fa crescere σ come 1/velocità.</p>
+  <p>I neutroni più lenti vedono bersagli più grandi. Il disco non è la dimensione reale del nucleo: è quanto grande appare il nucleo a un neutrone di questa energia, e un neutrone lento resta più a lungo vicino al nucleo, quindi ha più probabilità di essere catturato. Per la cattura questo fa crescere σ come 1/velocità.</p>
   <p>La curva sotto il foglio è σ a tutte le energie (entrambe le scale sono logaritmiche); il punto arancione segna l'energia scelta. Trascina verso il basso, fino ai neutroni più lenti, e osserva i dischi crescere e la parte che ha reagito salire.</p>
   <div class="ctl"><label for="xs-e2">Energia del neutrone (eV)</label><input id="xs-e2" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="-1.6"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
-  <p>A una risonanza il bersaglio si gonfia. A 7 eV il neutrone più il nucleo hanno esattamente l'energia di uno dei livelli del nucleo stesso, che viene quindi assorbito molto più facilmente: l'area del disco cresce di circa cinquanta volte, qui fino a circa 400 barn.</p>
+  <p>A una risonanza il bersaglio si gonfia. A 7 eV il neutrone più il nucleo hanno esattamente l'energia di uno dei livelli del nucleo stesso, quindi il neutrone viene assorbito molto più facilmente: l'area del disco cresce di circa cinquanta volte, qui fino a circa 400 barn.</p>
   <p>Spostati di poco da 7 eV e il disco si restringe subito: il picco della curva è stretto. I nuclei reali hanno molti picchi di questo tipo; il capitolo 1 ne ha mostrato il codice a barre.</p>
   <div class="ctl"><label for="xs-e3">Energia del neutrone (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "questo quadrato: {#} barn = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ: l'area bersaglio a ogni energia",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · reagiti {#} % · passati {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "ogni punto che cade è un neutrone: un lampo arancione significa che ha colpito un disco e ha reagito, un punto che sfuma è passato oltre",
+});

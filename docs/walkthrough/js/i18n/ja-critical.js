@@ -20,3 +20,22 @@ WT.L.ch.critical = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="delayed" data-act="delayed" */
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "generations →": "世代 →",
+  "k = {#}: dies away": "k = {#}：減衰",
+  "k = {#}: steady": "k = {#}：一定",
+  "k = {#}: grows": "k = {#}：成長",
+  "{#} generations last under {#} s in a water reactor": "{#} 世代は軽水炉で {#} s 未満",
+  "illustration": "イメージ図",
+  "amber: fission fragments that emit a neutron seconds later": "琥珀色：数秒後に中性子を出す核分裂片",
+  "{#} s": "{#} s",
+  "time →": "時間 →",
+  "×{#} speed": "×{#} 倍速",
+  "with delayed: doubles every {#} s": "遅発中性子あり：{#} s ごとに倍増",
+  "prompt only: doubles every {#} ms": "即発のみ：{#} ms ごとに倍増",
+  "k = {#} · {#} % of neutrons delayed about {#} s (one-group average)": "k = {#} · 中性子の {#} % が約 {#} s 遅れる（1群平均）",
+  "rods {#} % in": "制御棒 {#} % 挿入",
+  "k = {#} · doubles every {#} min": "k = {#} · {#} 分ごとに倍増",
+});

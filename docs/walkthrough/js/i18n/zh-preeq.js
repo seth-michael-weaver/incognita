@@ -114,3 +114,15 @@ Object.assign(WT.L.labels, {
   "{#} MeV carried in": "带入 {#} MeV",
   "second fast particle in {#} of the last {#} reactions": "第二个快粒子：{#} 次（最近 {#} 次反应）",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "bump {#}: a proton in the sea was hit, jumped up, and left a hole": "碰撞 {#}：海中一个质子被撞上跳，留下一个空穴",
+  "bump!": "碰！",
+  "hole": "空穴",
+  "lifted": "被抬升",
+  "free line: more than {#} MeV needed to get out": "自由线：逃出需超过 {#} MeV",
+  "a fast neutron comes in with {#} MeV": "一个快中子带着 {#} MeV 射入",
+  "bump: it hits a neutron in the sea, which jumps up and leaves a hole": "碰撞：它撞上海中一个中子，该中子上跳并留下空穴",
+  "neutron: {#} MeV": "中子：{#} MeV",
+});

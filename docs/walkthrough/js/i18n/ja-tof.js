@@ -31,3 +31,26 @@ WT.L.ch.tof = {
   <div class="ctl"><label for="tof-p2">パルス幅（μs）</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "pulsed source": "パルス中性子源",
+  "detector": "検出器",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · 時計：パルスから {#} ms",
+  "transmission": "透過率",
+  "cross-section shape (scaled)": "断面積の形（スケール調整）",
+  "what the detector records": "検出器が記録する値",
+  "simulated counts": "シミュレーションの計数",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "速い中性子が先、遅い中性子が後に着く：時計がエネルギー別に分ける",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · 時計：パルスから {#} µs",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "最後の到着：t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "最後の到着：t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "試料",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV は {#} ms 後に到着",
+  "sample {#} µm · dip {#} % deep": "試料 {#} µm · くぼみの深さ {#} %",
+  "sample {#} µm · dip {#} % deep: black in the centre": "試料 {#} µm · くぼみの深さ {#} %：中心は真っ黒",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV は {#} µs 後に到着",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "時間分解能の幅 {#} meV · 熱（ドップラー）{#} meV · 共鳴自身 {#} meV",
+  "the fit's current guess": "フィットの現在の推測",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "フィット：Γn = {#} meV（シミュレーションの入力値：{#}）· ミスフィット {#}",
+});

@@ -114,3 +114,14 @@ Object.assign(WT.L.labels, {
   "{#} MeV carried in": "{#} MeV trazidos",
   "second fast particle in {#} of the last {#} reactions": "segunda partícula rápida em {#} das últimas {#} reações",
 });
+
+Object.assign(WT.L.labels, {
+  "bump {#}: a proton in the sea was hit, jumped up, and left a hole": "choque {#}: um protão do mar foi atingido, subiu e deixou um buraco",
+  "bump!": "choque!",
+  "hole": "buraco",
+  "lifted": "elevado",
+  "free line: more than {#} MeV needed to get out": "linha livre: são precisos mais de {#} MeV para sair",
+  "a fast neutron comes in with {#} MeV": "entra um neutrão rápido com {#} MeV",
+  "bump: it hits a neutron in the sea, which jumps up and leaves a hole": "choque: atinge um neutrão do mar, que sobe e deixa um buraco",
+  "neutron: {#} MeV": "neutrão: {#} MeV",
+});

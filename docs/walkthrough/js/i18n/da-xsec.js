@@ -3,8 +3,8 @@ WT.L.ch.xsec = {
   num: "Kapitel 2", title: "Hvad er et tværsnit?", short: "Tværsnit",
   html: `
 <div class="step">
-  <p>Hver skive er en kernes målareal: dens <b>tværsnit</b>, skrevet σ (sigma). Billedet ser lige ned på et tyndt lag af kerner, mens neutroner regner ned over det på tilfældige steder. En neutron, der lander inde i en skive, reagerer med den kerne (et orange glimt); en, der lander mellem skiverne, går lige igennem (den bliver bare svagere).</p>
-  <p>Den andel, der reagerer, er altså blot den andel af laget, som skiverne dækker. Den lille sorte firkant er arealenheden, én <b>barn</b>, 10⁻²⁴ cm²: kernens virkelige forside er omkring én barn.</p>
+  <p>Hver skive er en kernes målareal: dens <b>tværsnit</b>, skrevet σ (sigma). Billedet ser lige ned på et tyndt lag af kerner, mens neutroner regner ned over det på tilfældige steder. En neutron, der lander inde i en skive, reagerer med den kerne (et orange glimt); en, der lander mellem skiverne, går lige igennem (den toner bare ud).</p>
+  <p>Den andel, der reagerer, er altså blot den andel af laget, som skiverne dækker. Den lille sorte firkant er arealenheden, én <b>barn</b>, 10⁻²⁴ cm²: en kernes virkelige areal set forfra er omkring én barn.</p>
   <div class="ctl"><label for="xs-e1">Neutronenergi (eV)</label><input id="xs-e1" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="2"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
@@ -18,3 +18,9 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e3">Neutronenergi (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "denne firkant: {#} barn = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ: målarealet ved hver energi",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · reagerede {#} % · gik igennem {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "hver faldende prik er en neutron: orange glimt = ramte en skive og reagerede; en prik, der toner ud, gik igennem",
+});

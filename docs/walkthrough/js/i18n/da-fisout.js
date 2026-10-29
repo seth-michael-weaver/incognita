@@ -13,8 +13,21 @@ WT.L.ch.fisout = {
   <div class="btns"><button class="btn" data-act="f100">100 fissioner</button><button class="btn ghost" data-act="f1000">1000 fissioner</button></div>
 </div>
 <div class="step">
-  <p>Nogle få kommer sekunder senere: 0,65 % af alle neutronerne. Nogle fragmenter er så neutronrige, at den nye kerne, når de senere henfalder, ikke kan holde på en af sine neutroner og slipper den. Det venter på henfaldet, ofte sekunder.</p>
+  <p>Nogle få kommer sekunder senere: 0,65 % af alle neutronerne. Nogle fragmenter er så neutronrige, at den nye kerne, når de senere henfalder, ikke kan holde på en af sine neutroner og slipper den. Den neutron må vente på henfaldet, ofte i sekunder.</p>
   <p>Den nederste linje er et ur efter fissionen, fra 0,01 s til 100 s; hvert mærke er ti gange senere end det forrige. Kuglen til venstre er alle de prompte neutroner, ude på én gang. Hver lille prik er én forsinket neutron: den følger linjen, mens dens ventetid løber, på et ur sat 20 gange hurtigere, og lægger sig, hvor den til sidst kom ud. Netop disse få sene neutroner gør en reaktor styrbar: de forlænger kædens reaktionstid fra tusindedele af et sekund til sekunder.</p>
   <div class="btns"><button class="btn" data-act="f1000">1000 fissioner</button><button class="btn ghost" data-act="clear">Ryd</button></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "n + U{#} → two fragments + neutrons": "n + U{#} → to fragmenter + neutroner",
+  "prompt neutrons per fission": "prompte neutroner pr. fission",
+  "lines: measured shares": "streger: målte andele",
+  "mean {#}": "middel {#}",
+  "prompt-neutron energy (MeV)": "prompte neutroners energi (MeV)",
+  "mean {#} MeV": "middel {#} MeV",
+  "line: measured shape": "linje: målt form",
+  "prompt": "prompte",
+  "time after fission · clock sped up {#}×": "tid efter fission · ur {#}× hurtigere",
+  "delayed {#} of {#} ({#} %)": "forsinkede {#} af {#} ({#} %)",
+  "{#} fissions": "{#} fissioner",
+});

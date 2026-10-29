@@ -55,7 +55,7 @@ Object.assign(WT.L.ui, {
   in_t_doppler: "多普勒展宽", in_s_doppler: "多普勒",
   in_w_doppler: "共振随燃料温度的多普勒展宽、厚燃料中的自屏蔽，以及 k 的负燃料温度反馈。",
   in_t_critical: "临界与反应堆控制", in_s_critical: "临界",
-  in_w_critical: "链式反应：倍增系数 k、缓发中子及反应堆为何可以控制，临界实验。",
+  in_w_critical: "链式反应：增殖因数 k、缓发中子及反应堆为何可以控制，临界实验。",
   in_t_omp: "光学模型", in_s_omp: "光学模型",
   in_w_omp: "光学模型：既偏折又吸收的复数势；瞄准与分波；穿透系数与总截面。",
   in_t_direct: "直接反应", in_s_direct: "直接反应",

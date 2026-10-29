@@ -99,3 +99,8 @@ Object.assign(WT.L.labels, {
   "the neutron door wins; capture takes about {#} %": "中子之门胜出；俘获约占 {#} %",
   "fast: capture is a rare event": "快中子：俘获很罕见",
 });
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "{#} cascades from J = {#}/{#}: ≈ {#} % end on the isomer": "{#} 次级联，从 J = {#}/{#} 出发：≈ {#} % 终止于同质异能态",
+});

@@ -97,3 +97,7 @@ Object.assign(WT.L.labels, {
   "dashed ring: the best-value inputs · each energy drawn at its own scale (disc area ∝ σ)": "anneau en tirets : entrées de meilleure valeur · chaque énergie à sa propre échelle (aire ∝ σ)",
   "{#} runs of the engine, each with its inputs nudged at random": "{#} calculs du moteur, chacun avec ses entrées perturbées au hasard",
 });
+
+Object.assign(WT.L.labels, {
+  "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "niveaux de la cible, avec la part des noyaux sur chacun (échelle d'énergie dilatée en bas)",
+});

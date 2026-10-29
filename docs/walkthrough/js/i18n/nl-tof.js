@@ -25,9 +25,30 @@ WT.L.ch.tof = {
 </div>
 <div class="step">
   <p>INCOGNITA werkt terug: het neemt gemeten tellingen als deze en vraagt welke resonantie, door ditzelfde experiment gehaald (dikte, warmte, tijdsonscherpte), ze reproduceert. Hier begint de fit bij een gok waarvan de neutronbreedte Γ<sub>n</sub> (hoe sterk het niveau neutronen vasthoudt) bijna vier keer te groot is (de blauwe curve), en verandert die stap voor stap tot de curve door de stippen loopt.</p>
-  <p>De uitlezing toont de huidige gok en de <b>misfit</b>: ongeveer 1 betekent dat de curve zo dicht bij de stippen ligt als hun telspreiding toelaat. Verander het experiment en de fit begint opnieuw, met nieuwe tellingen, en komt uit bij bijna dezelfde breedte; waar hij de stippen niet goed kan volgen, zegt de misfit dat.</p>
+  <p>De uitlezing toont de huidige gok en de <b>afwijking</b>: ongeveer 1 betekent dat de curve zo dicht bij de stippen ligt als hun telspreiding toelaat. Verander het experiment en de fit begint opnieuw, met nieuwe tellingen, en komt uit bij bijna dezelfde breedte; waar hij de stippen niet goed kan volgen, laat de afwijking dat zien.</p>
   <div class="ctl"><label for="tof-l3">Vluchtbaan (m)</label><input id="tof-l3" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="50"><output data-show="Lv" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-d3">Dikte van het monster (µm)</label><input id="tof-d3" type="range" data-bind="lgT" data-instant min="0" max="3.5" step="0.01" value="1.5"><output data-show="thk" data-fmt="0"></output></div>
   <div class="ctl"><label for="tof-p2">Pulsbreedte (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "pulsed source": "gepulste bron",
+  "detector": "detector",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · klok: {#} ms sinds de puls",
+  "transmission": "transmissie",
+  "cross-section shape (scaled)": "vorm werkzame doorsnede (geschaald)",
+  "what the detector records": "wat de detector registreert",
+  "simulated counts": "gesimuleerde tellingen",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "snelle neutronen komen eerst, langzame later: de klok sorteert ze op energie",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · klok: {#} µs sinds de puls",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "laatste aankomst: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "laatste aankomst: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "monster",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV komt aan na {#} ms",
+  "sample {#} µm · dip {#} % deep": "monster {#} µm · dip {#} % diep",
+  "sample {#} µm · dip {#} % deep: black in the centre": "monster {#} µm · dip {#} % diep: zwart in het midden",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV komt aan na {#} µs",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "breedte door timing {#} meV · door warmte (Doppler) {#} meV · eigen breedte {#} meV",
+  "the fit's current guess": "huidige gok van de fit",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "fit: Γn = {#} meV (in de simulatie: {#}) · afwijking {#}",
+});

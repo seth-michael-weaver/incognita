@@ -4,7 +4,7 @@ WT.L.ch.slowing = {
   html: `
 <div class="step">
   <p>Cada ressalto no hidrogénio custa cerca de metade da energia. Um neutrão de fissão parte com 2 MeV e ressalta pela água. Um núcleo de hidrogénio pesa o mesmo que o neutrão, pelo que, como bolas de bilhar, cada ressalto lhe tira em média metade da energia do neutrão.</p>
-  <p>O gráfico mostra a energia do neutrão após cada ressalto; cada marca ao longo do lado tem mil vezes menos energia. Perder a mesma fração de cada vez dá uma descida em linha reta, a tracejado. Ao fim de cerca de 18 ressaltos o neutrão atinge a energia <b>térmica</b>, 0,025 eV, onde a água quente o empurra para cima tantas vezes quantas o abranda. O oxigénio é 16 vezes mais pesado: cada ressalto tira pouco, e são precisos mais de cem.</p>
+  <p>O gráfico mostra a energia do neutrão após cada ressalto; cada marca ao longo do lado corresponde a mil vezes menos energia. Perder a mesma fração de cada vez dá uma descida em linha reta, a tracejado. Ao fim de cerca de 18 ressaltos o neutrão atinge a energia <b>térmica</b>, 0,025 eV, onde a água morna o empurra para cima tantas vezes quantas o abranda. O oxigénio é 16 vezes mais pesado: cada ressalto tira pouco, e são precisos mais de cem.</p>
   <div class="btns"><button class="btn ghost" data-act="tgtH" aria-pressed="true">Hidrogénio</button><button class="btn ghost" data-act="tgtO" aria-pressed="false">Oxigénio</button><button class="btn" data-act="again">Disparar de novo</button></div>
 </div>
 <div class="step">
@@ -20,3 +20,25 @@ WT.L.ch.slowing = {
 </div>`,
 };
 /* i18n_check.sh counts these attribute strings found in the English script code (not in html): data-act="${act}" */
+
+Object.assign(WT.L.labels, {
+  "water · neutron hits hydrogen": "água · neutrão choca com hidrogénio",
+  "thermal · kT ≈ {#} eV": "térmico · kT ≈ {#} eV",
+  "{#} meV": "{#} meV",
+  "collisions →": "colisões →",
+  "energy": "energia",
+  "typical bounce: energy × {#} (theory × {#}) · {#} bounces to thermal": "ressalto típico: energia × {#} (teoria × {#}) · {#} ressaltos até térmico",
+  "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)": "típico: o passo médio ao longo da linha tracejada (as frações de energia multiplicam-se, por isso a média é feita nesta escala)",
+  "bright line: a bond holding H to its O": "linha brilhante: uma ligação que prende o H ao seu O",
+  "bright flash: the neutron left a fixed amount of energy in the molecule": "clarão: o neutrão deixou uma quantidade fixa de energia na molécula",
+  "below {#} eV: the bonds shape each bounce": "abaixo de {#} eV: as ligações moldam cada ressalto",
+  "free-atom recoil": "recuo de átomo livre",
+  "α: how hard the knock (momentum handed over) →": "α: força da pancada (momento transferido) →",
+  "β: the neutron's energy change, in units of kT = {#} eV": "β: variação de energia do neutrão, em unidades de kT = {#} eV",
+  "gain ↑": "ganho ↑",
+  "loss ↓": "perda ↓",
+  "outline: reachable from {#} eV": "contorno: alcançável a partir de {#} eV",
+  "rare → likely": "raro → provável",
+  "scattering law S(α,β) · hydrogen bound in water": "lei de dispersão S(α,β) · hidrogénio ligado na água",
+  "stripes: energy lost to the molecule in fixed amounts": "riscas: energia cedida à molécula em quantidades fixas",
+});

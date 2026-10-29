@@ -8,13 +8,20 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e1">Energia do neutrão (eV)</label><input id="xs-e1" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="2"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
-  <p>Os neutrões mais lentos veem alvos maiores. O disco não é o tamanho real do núcleo: é o tamanho com que o núcleo atua para um neutrão a esta energia, e um neutrão lento demora-se mais perto do núcleo, pelo que é mais provável ser capturado. Na captura, isto faz σ crescer como 1/velocidade.</p>
+  <p>Os neutrões mais lentos veem alvos maiores. O disco não é o tamanho real do núcleo: é o tamanho que o núcleo aparenta para um neutrão desta energia, e um neutrão lento demora-se mais perto do núcleo, pelo que é mais provável ser capturado. Na captura, isto faz σ crescer como 1/velocidade.</p>
   <p>A curva sob a folha é σ em todas as energias (ambas as escalas são logarítmicas); o ponto laranja marca a energia escolhida. Arrasta até aos neutrões mais lentos e vê os discos crescerem e a fração que reage subir.</p>
   <div class="ctl"><label for="xs-e2">Energia do neutrão (eV)</label><input id="xs-e2" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.01" value="-1.6"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>
 <div class="step">
-  <p>Numa ressonância, o alvo incha. A 7 eV, o neutrão mais o núcleo têm exatamente a energia de um dos níveis do próprio núcleo, e por isso é absorvido com muito mais facilidade: o disco cresce cerca de cinquenta vezes em área, aqui até cerca de 400 barns.</p>
+  <p>Numa ressonância, o alvo incha. A 7 eV, o neutrão mais o núcleo têm exatamente a energia de um dos níveis do próprio núcleo, e por isso o neutrão é absorvido com muito mais facilidade: o disco cresce cerca de cinquenta vezes em área, aqui até cerca de 400 barns.</p>
   <p>Afasta-te um pouco dos 7 eV e o disco encolhe logo: o pico da curva é estreito. Os núcleos reais têm muitos picos destes; o Capítulo 1 mostrou o seu código de barras.</p>
   <div class="ctl"><label for="xs-e3">Energia do neutrão (eV)</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "este quadrado: {#} barn = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ: a área-alvo em cada energia",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · reagiram {#} % · passaram {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "cada ponto que cai é um neutrão: um clarão laranja indica que atingiu um disco e reagiu; um ponto que desvanece passou",
+});

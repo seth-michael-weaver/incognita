@@ -82,3 +82,10 @@ Object.assign(WT.L.glossary, {
     chapter: "strength",
   },
 });
+Object.assign(WT.L.labels, {
+  "zoom: Eγ from {#} to {#} MeV": "увеличение: Eγ от {#} до {#} MeV",
+  "floor: stays above zero": "нижний предел: остаётся выше нуля",
+  "continuum:": "континуум:",
+  "dark = dense": "темнее = плотнее",
+  "known levels": "известные уровни",
+});

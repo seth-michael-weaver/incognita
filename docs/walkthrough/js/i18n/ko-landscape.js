@@ -21,6 +21,29 @@ WT.L.ch.landscape = {
 </div>
 <div class="step">
   <h3>INCOGNITA가 다루는 범위</h3>
-  <p>같은 지도를 이번에는 우리 라이브러리가 각 원자핵에 대해 가진 것에 따라 칠했습니다. <em style="font-style:normal;color:var(--fission);font-weight:600">초록색</em>은 측정된 공명으로부터 평가한 것입니다. 나머지는 엔진만으로 만든 모형 파일을 가지고 있습니다. <b>짙은색</b>은 안정하거나 오래 사는 것(A 등급), <em style="font-style:normal;color:var(--accent);font-weight:600">파란색</em>은 하루가 넘는 것(B 등급), <em style="font-style:normal;color:var(--warm);font-weight:600">주황색</em>은 더 짧게 사는 것(C 등급)입니다. 회색은 라이브러리에 없는 것으로, 대부분 가장 가벼운 원자핵과 엔진이 돌릴 수 없는 몇 개입니다.</p>
+  <p>같은 지도를 이번에는 우리 라이브러리가 각 원자핵에 대해 가진 것에 따라 칠했습니다. <em style="font-style:normal;color:var(--fission);font-weight:600">초록색</em>은 측정된 공명으로부터 평가한 것입니다. 나머지는 엔진만으로 만든 모델 파일을 가지고 있습니다. <b>짙은색</b>은 안정하거나 오래 사는 것(A 등급), <em style="font-style:normal;color:var(--accent);font-weight:600">파란색</em>은 하루가 넘는 것(B 등급), <em style="font-style:normal;color:var(--warm);font-weight:600">주황색</em>은 더 짧게 사는 것(C 등급)입니다. 회색은 라이브러리에 없는 것으로, 대부분 가장 가벼운 원자핵과 엔진이 돌릴 수 없는 몇 개입니다.</p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "neutrons N →": "중성자 수 N →",
+  "protons Z ↑": "양성자 수 Z ↑",
+  "Fe: all its isotopes": "Fe: 모든 동위원소",
+  "stable": "안정",
+  "lives years": "수년 생존",
+  "gone in a blink": "눈 깜짝할 사이",
+  "red: Fe (your pick)": "빨강: Fe (선택한 원소)",
+  "nickel{#}: most tightly bound": "니켈{#}: 가장 단단히 결합",
+  "held most tightly": "가장 단단히 결합",
+  "middle": "중간",
+  "held least": "가장 약하게 결합",
+  "red: the A = {#} chain": "빨강: A = {#} 사슬",
+  "A = {#}: deeper = more tightly bound": "A = {#}: 깊을수록 더 단단히 결합",
+  "protons Z →": "양성자 수 Z →",
+  "measured resonances": "측정된 공명",
+  "tier A": "A 등급",
+  "tier B": "B 등급",
+  "tier C": "C 등급",
+  "not in library": "라이브러리에 없음",
+});

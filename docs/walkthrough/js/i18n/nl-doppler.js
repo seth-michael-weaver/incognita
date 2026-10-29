@@ -14,7 +14,20 @@ WT.L.ch.doppler = {
 </div>
 <div class="step">
   <h3>Zelfafscherming van resonanties</h3>
-  <p>Een brandstoftablet is dik. De gearceerde band is het aandeel neutronen dat ze bij elke energie tegenhoudt. Het midden van de piek houdt al alles tegen, heet of koud, dus een lagere piek verliest daar niets; de bredere flanken vangen meer. Er gaan meer neutronen verloren aan vangst in plaats van splijting te veroorzaken, dus <i>k</i> daalt vanzelf. (<i>k</i> is tot hoeveel nieuwe splijtingen elke splijting leidt; hoofdstuk 20 legt het uit.)</p>
+  <p>Een brandstoftablet is dik. De gearceerde band is het aandeel neutronen dat ze bij elke energie tegenhoudt. Het midden van de piek houdt al alles tegen, heet of koud, dus een lagere piek verliest daar niets; de bredere flanken vangen meer. Er gaan meer neutronen verloren aan vangst in plaats van splijting te veroorzaken, dus <i>k</i> daalt vanzelf. (<i>k</i> is tot hoeveel nieuwe splijtingen elke splijting leidt; hoofdstuk <a href="#critical">21</a> legt het uit.)</p>
   <div class="ctl"><label for="dop-t3">Brandstoftemperatuur (K)</label><input id="dop-t3" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="900"><output data-show="T" data-fmt="0"></output></div>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "uranium atoms in the fuel": "uraniumatomen in de brandstof",
+  "{#} K": "{#} K",
+  "caught in the peak": "gevangen in de piek",
+  "k": "k",
+  "neutron energy (eV) →": "neutronenergie (eV) →",
+  "capture cross section": "werkzame doorsnede voor vangst",
+  "peak {#}k barns · Doppler width {#} meV · area unchanged": "piek {#}k barn · Dopplerbreedte {#} meV · oppervlak gelijk",
+  "all stopped": "alles tegengehouden",
+  "wider wings catch more": "bredere flanken vangen meer",
+  "share of neutrons stopped in the fuel": "aandeel neutronen tegengehouden in de brandstof",
+  "the peak's centre already stops everything; the wider wings catch more": "het midden van de piek houdt al alles tegen; de bredere flanken vangen meer",
+});

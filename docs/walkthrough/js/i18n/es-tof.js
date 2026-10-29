@@ -9,7 +9,7 @@ WT.es.ch.tof = {
   <div class="ctl"><label for="tof-l1">Distancia de vuelo (m)</label><input id="tof-l1" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="50"><output data-show="Lv" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>Muestra delgada: la caída dibuja la sección eficaz. Ahora hay una muestra en el haz. Cerca de 6,7 eV sus núcleos tienen una resonancia y atrapan neutrones (los destellos), así que llegan menos a la hora correspondiente. El gráfico compara los recuentos con y sin muestra: la <b>transmisión</b>, que vale 1 cuando todos los neutrones pasan.</p>
+  <p>Muestra delgada: la caída dibuja la sección eficaz. Ahora hay una muestra en el haz. Cerca de 6,7 eV sus núcleos tienen una resonancia y atrapan neutrones (los destellos), así que llegan menos en el tiempo correspondiente. El gráfico compara los recuentos con y sin muestra: la <b>transmisión</b>, que vale 1 cuando todos los neutrones pasan.</p>
   <p>Los puntos son recuentos simulados, con su dispersión; la línea continua es lo que el detector registra en promedio; la línea discontinua es la forma de la propia sección eficaz. Con una muestra delgada, la caída copia esa forma.</p>
   <div class="ctl"><label for="tof-d1">Espesor de la muestra (µm)</label><input id="tof-d1" type="range" data-bind="lgT" data-instant min="0" max="3.5" step="0.01" value="0.5"><output data-show="thk" data-fmt="0"></output></div>
 </div>
@@ -18,7 +18,7 @@ WT.es.ch.tof = {
   <div class="ctl"><label for="tof-d2">Espesor de la muestra (µm)</label><input id="tof-d2" type="range" data-bind="lgT" data-instant min="0" max="3.5" step="0.01" value="3"><output data-show="thk" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <p>Pulsos más largos, vuelos más cortos: la caída se difumina. Tres cosas fijan la anchura de una caída, todas escritas bajo el gráfico: la anchura propia de la resonancia; los átomos de la muestra agitándose con el calor, que emborrona un poco la energía de cada colisión (ensanchamiento <b>Doppler</b>); y el borrón de la medida del tiempo, porque un pulso más largo o un tubo más corto hace cada tiempo de llegada, y por tanto cada energía, menos precisa.</p>
+  <p>Pulsos más largos, vuelos más cortos: la caída se difumina. Tres cosas fijan la anchura de una caída, todas escritas bajo el gráfico: la anchura propia de la resonancia; los átomos de la muestra agitándose con el calor, que emborrona un poco la energía de cada colisión (ensanchamiento <b>Doppler</b>); y el borrón de la medida del tiempo, porque un pulso más largo o un tubo más corto hace que cada tiempo de llegada, y por tanto cada energía, sea menos preciso.</p>
   <p>Alarga el pulso o acorta el tubo: la caída se hace más ancha y menos profunda, aunque la fracción de neutrones que retira se mantiene más o menos igual.</p>
   <div class="ctl"><label for="tof-p1">Anchura del pulso (µs)</label><input id="tof-p1" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="0.3"><output data-show="dt" data-fmt="2"></output></div>
   <div class="ctl"><label for="tof-l2">Distancia de vuelo (m)</label><input id="tof-l2" type="range" data-bind="Lv" data-instant min="5" max="200" step="1" value="20"><output data-show="Lv" data-fmt="0"></output></div>
@@ -31,3 +31,25 @@ WT.es.ch.tof = {
   <div class="ctl"><label for="tof-p2">Anchura del pulso (µs)</label><input id="tof-p2" type="range" data-bind="lgDt" data-instant min="-2" max="1" step="0.01" value="-1"><output data-show="dt" data-fmt="2"></output></div>
 </div>`,
 };
+
+Object.assign(WT.L.labels, {
+  "pulsed source": "fuente pulsada",
+  "detector": "detector",
+  "L = {#} m · clock: {#} ms since the pulse": "L = {#} m · reloj: {#} ms desde el pulso",
+  "transmission": "transmisión",
+  "cross-section shape (scaled)": "forma de la sección eficaz (escalada)",
+  "what the detector records": "lo que registra el detector",
+  "simulated counts": "recuentos simulados",
+  "fast neutrons arrive first, slow ones later: the clock sorts them by energy": "los neutrones rápidos llegan antes, los lentos después: el reloj los ordena por energía",
+  "L = {#} m · clock: {#} µs since the pulse": "L = {#} m · reloj: {#} µs desde el pulso",
+  "last arrival: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV": "última llegada: t = {#} µs → E = ({#} × {#} / {#})² = {#} eV",
+  "last arrival: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV": "última llegada: t = {#} ms → E = ({#} × {#} / {#})² = {#} eV",
+  "sample": "muestra",
+  "L = {#} m · {#} eV arrives after {#} ms": "L = {#} m · {#} eV llega a los {#} ms",
+  "sample {#} µm · dip {#} % deep": "muestra {#} µm · caída del {#} %",
+  "sample {#} µm · dip {#} % deep: black in the centre": "muestra {#} µm · caída del {#} %: negro en el centro",
+  "L = {#} m · {#} eV arrives after {#} µs": "L = {#} m · {#} eV llega a los {#} µs",
+  "width from timing {#} meV · from heat (Doppler) {#} meV · the resonance's own {#} meV": "anchura por tiempo {#} meV · por calor (Doppler) {#} meV · propia de la resonancia {#} meV",
+  "the fit's current guess": "suposición actual del ajuste",
+  "fit: Γn = {#} meV (put into the simulation: {#}) · misfit {#}": "ajuste: Γn = {#} meV (en la simulación: {#}) · desajuste {#}",
+});

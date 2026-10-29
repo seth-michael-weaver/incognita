@@ -90,3 +90,7 @@ Object.assign(WT.L.glossary, {
   },
 });
 /* attributes referenced in the English chapter script (for the structure check): data-act="pauli" */
+Object.assign(WT.L.labels, {
+  "({#} particles, {#} hole)": "({#} deeltjes, {#} gat)",
+  "({#} particle, {#} hole)": "({#} deeltje, {#} gat)",
+});

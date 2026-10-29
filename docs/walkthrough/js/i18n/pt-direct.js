@@ -106,3 +106,8 @@ Object.assign(WT.L.labels, {
   "{#}% seen · model {#}%": "{#}% visto · modelo {#}%",
   "{#} MeV neutrons on a medium-mass nucleus (illustrative shares)": "neutrões de {#} MeV num núcleo de massa média (frações ilustrativas)",
 });
+
+Object.assign(WT.L.labels, {
+  "{#}⁺ at about {#} keV": "{#}⁺ a cerca de {#} keV",
+  "bound in the orbit; press the button to drop another": "ligado na órbita; carrega no botão para largar outro",
+});

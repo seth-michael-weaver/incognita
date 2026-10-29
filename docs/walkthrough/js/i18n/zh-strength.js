@@ -86,3 +86,12 @@ Object.assign(WT.L.glossary, {
   },
 });
 /* attributes referenced in the English chapter script (for the structure check): data-act="up" data-act="up2" */
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "zoom: Eγ from {#} to {#} MeV": "放大：Eγ 从 {#} 到 {#} MeV",
+  "floor: stays above zero": "下限：保持在零以上",
+  "continuum:": "连续区：",
+  "dark = dense": "深色 = 密集",
+  "known levels": "已知能级",
+});

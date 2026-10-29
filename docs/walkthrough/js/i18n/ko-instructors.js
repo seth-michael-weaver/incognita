@@ -76,7 +76,7 @@ Object.assign(WT.L.ui, {
   in_t_doppler: "도플러 넓어짐", in_s_doppler: "도플러",
   in_w_doppler: "연료 온도에 따른 공명의 도플러 넓어짐, 두꺼운 연료에서의 자기 차폐, 그리고 k에 대한 음의 연료 온도 되먹임.",
   in_t_critical: "임계와 원자로 제어", in_s_critical: "임계",
-  in_w_critical: "연쇄 반응: 증배 인자 k, 지연 중성자와 원자로를 제어할 수 있는 이유, 임계 실험.",
+  in_w_critical: "연쇄 반응: 증배 계수 k, 지연 중성자와 원자로를 제어할 수 있는 이유, 임계 실험.",
   in_t_layers: "모형은 어떻게 층을 이루는가", in_s_layers: "층",
   in_w_layers: "엔진 위에 데이터 결과물을 쌓는 방법: 하나의 전역 규칙, 원자핵별 자체 데이터, 좋은 데이터에의 고정(TERRA), 보정된 오차 막대.",
   in_t_hauser: "채널 하나하나의 하우저–페시바흐", in_s_hauser: "하우저–페시바흐",

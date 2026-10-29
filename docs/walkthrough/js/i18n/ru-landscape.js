@@ -24,3 +24,24 @@ WT.L.ch.landscape = {
   <p>Та же карта, окрашенная по тому, что наша библиотека содержит для каждого ядра. <em style="font-style:normal;color:var(--fission);font-weight:600">Зелёным</em> показаны ядра, оценённые по измеренным резонансам. У остальных есть файл модели, построенный одной лишь программой расчёта: <b>тёмные</b> — стабильные или долгоживущие (уровень A), <em style="font-style:normal;color:var(--accent);font-weight:600">синие</em> — с периодом больше суток (уровень B), <em style="font-style:normal;color:var(--warm);font-weight:600">оранжевые</em> — более короткоживущие (уровень C). Серых в библиотеке нет (в основном это самые лёгкие ядра и несколько таких, которые программа не может рассчитать).</p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "neutrons N →": "нейтроны N →",
+  "protons Z ↑": "протоны Z ↑",
+  "Fe: all its isotopes": "Fe: все его изотопы",
+  "stable": "стабильные",
+  "lives years": "живёт годы",
+  "gone in a blink": "исчезает мгновенно",
+  "red: Fe (your pick)": "красным: Fe (ваш выбор)",
+  "nickel{#}: most tightly bound": "никель-{#}: связан прочнее всех",
+  "held most tightly": "держатся прочнее всего",
+  "middle": "середина",
+  "held least": "держатся слабее всего",
+  "red: the A = {#} chain": "красным: цепочка A = {#}",
+  "A = {#}: deeper = more tightly bound": "A = {#}: глубже = прочнее связано",
+  "protons Z →": "протоны Z →",
+  "measured resonances": "измеренные резонансы",
+  "tier A": "уровень A",
+  "tier B": "уровень B",
+  "tier C": "уровень C",
+  "not in library": "нет в библиотеке",
+});

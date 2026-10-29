@@ -24,3 +24,25 @@ WT.L.ch.landscape = {
   <p>Dieselbe Karte, gefärbt danach, was unsere Bibliothek für jeden Kern enthält. <em style="font-style:normal;color:var(--fission);font-weight:600">Grün</em>: aus seinen gemessenen Resonanzen evaluiert. Die übrigen haben eine Modelldatei, die allein von der Engine erzeugt wurde: <b>dunkel</b> für stabile oder langlebige (Stufe A), <em style="font-style:normal;color:var(--accent);font-weight:600">blau</em> für mehr als einen Tag (Stufe B), <em style="font-style:normal;color:var(--warm);font-weight:600">orange</em> für kurzlebigere (Stufe C). Graue sind nicht in der Bibliothek (meist die leichtesten Kerne und einige, die die Engine nicht rechnen kann).</p>
 </div>`
 };
+
+Object.assign(WT.L.labels, {
+  "neutrons N →": "Neutronen N →",
+  "protons Z ↑": "Protonen Z ↑",
+  "Fe: all its isotopes": "Fe: alle seine Isotope",
+  "stable": "stabil",
+  "lives years": "lebt Jahre",
+  "gone in a blink": "im Nu zerfallen",
+  "red: Fe (your pick)": "rot: Fe (deine Wahl)",
+  "nickel{#}: most tightly bound": "Nickel{#}: am festesten gebunden",
+  "held most tightly": "am festesten gebunden",
+  "middle": "mittel",
+  "held least": "am schwächsten gebunden",
+  "red: the A = {#} chain": "rot: die Kette A = {#}",
+  "A = {#}: deeper = more tightly bound": "A = {#}: tiefer = fester gebunden",
+  "protons Z →": "Protonen Z →",
+  "measured resonances": "gemessene Resonanzen",
+  "tier A": "Stufe A",
+  "tier B": "Stufe B",
+  "tier C": "Stufe C",
+  "not in library": "nicht in der Bibliothek",
+});

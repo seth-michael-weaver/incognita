@@ -3,8 +3,8 @@ WT.L.ch.slowing = {
   num: "19장", title: "중성자 감속", short: "감속",
   html: `
 <div class="step">
-  <p>수소에 한 번 튕길 때마다 에너지의 절반쯤을 잃습니다. 핵분열 중성자는 2 MeV에서 시작하여 물속에서 튕깁니다. 수소 원자핵은 중성자와 질량이 같으므로, 당구공처럼 한 번 튕길 때마다 평균적으로 중성자 에너지의 절반을 넘겨 받습니다.</p>
-  <p>차트는 튕길 때마다의 중성자 에너지를 그립니다. 옆으로 눈금 하나는 에너지가 천 배 줄었다는 뜻입니다. 매번 같은 몫을 잃으므로 점선처럼 곧은 미끄럼이 됩니다. 약 18번 튕기면 중성자는 <b>열</b> 에너지인 0.025 eV에 이르며, 거기서는 따뜻한 물이 중성자를 느리게 하는 만큼 자주 끌어올리기도 합니다. 산소는 16배 무거워서 한 번에 조금만 가져가고, 백 번이 넘게 필요합니다.</p>
+  <p>수소에 한 번 튕길 때마다 에너지의 절반쯤을 잃습니다. 핵분열 중성자는 2 MeV에서 시작하여 물속에서 튕깁니다. 수소 원자핵은 중성자와 질량이 같으므로, 당구공처럼 한 번 튕길 때마다 수소가 평균적으로 중성자 에너지의 절반을 넘겨받습니다.</p>
+  <p>차트는 튕길 때마다의 중성자 에너지를 그립니다. 세로축 눈금이 하나 내려갈 때마다 에너지는 천분의 일이 됩니다. 매번 같은 몫을 잃으므로 점선처럼 곧은 미끄럼이 됩니다. 약 18번 튕기면 중성자는 <b>열</b> 에너지인 0.025 eV에 이르며, 거기서는 따뜻한 물이 중성자를 느리게 하는 만큼 자주 끌어올리기도 합니다. 산소는 16배 무거워서 한 번에 조금만 가져가고, 백 번이 넘게 필요합니다.</p>
   <div class="btns"><button class="btn ghost" data-act="tgtH" aria-pressed="true">수소</button><button class="btn ghost" data-act="tgtO" aria-pressed="false">산소</button><button class="btn" data-act="again">다시 발사</button></div>
 </div>
 <div class="step">
@@ -20,3 +20,26 @@ WT.L.ch.slowing = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "water · neutron hits hydrogen": "물 · 중성자가 수소와 충돌",
+  "thermal · kT ≈ {#} eV": "열 에너지 · kT ≈ {#} eV",
+  "{#} meV": "{#} meV",
+  "collisions →": "충돌 횟수 →",
+  "energy": "에너지",
+  "typical bounce: energy × {#} (theory × {#}) · {#} bounces to thermal": "전형적 튕김: 에너지 × {#} (이론 × {#}) · 열 에너지까지 {#}번",
+  "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)": "전형값: 점선을 따른 평균 한 걸음 (에너지 비율은 곱해지므로 이 눈금에서 평균)",
+  "bright line: a bond holding H to its O": "밝은 선: H를 O에 잇는 결합",
+  "bright flash: the neutron left a fixed amount of energy in the molecule": "밝은 섬광: 중성자가 분자에 정해진 양의 에너지를 남김",
+  "below {#} eV: the bonds shape each bounce": "{#} eV 아래: 결합이 튕김의 모양을 정함",
+  "free-atom recoil": "자유 원자 반동",
+  "α: how hard the knock (momentum handed over) →": "α: 충돌의 세기 (넘겨 준 운동량) →",
+  "β: the neutron's energy change, in units of kT = {#} eV": "β: 중성자의 에너지 변화, 단위 kT = {#} eV",
+  "gain ↑": "얻음 ↑",
+  "loss ↓": "잃음 ↓",
+  "outline: reachable from {#} eV": "윤곽: {#} eV에서 닿을 수 있는 범위",
+  "rare → likely": "드묾 → 잦음",
+  "scattering law S(α,β) · hydrogen bound in water": "산란 법칙 S(α,β) · 물속에 결합된 수소",
+  "stripes: energy lost to the molecule in fixed amounts": "줄무늬: 정해진 양씩 분자에 넘긴 에너지",
+});

@@ -20,3 +20,24 @@ WT.L.ch.slowing = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */
+Object.assign(WT.L.labels, {
+  "water · neutron hits hydrogen": "water · neutron raakt waterstof",
+  "thermal · kT ≈ {#} eV": "thermisch · kT ≈ {#} eV",
+  "{#} meV": "{#} meV",
+  "collisions →": "botsingen →",
+  "energy": "energie",
+  "typical bounce: energy × {#} (theory × {#}) · {#} bounces to thermal": "typische botsing: energie × {#} (theorie × {#}) · {#} botsingen tot thermisch",
+  "typical: the average step along the dashed line (energy shares multiply, so the average is taken on this scale)": "typisch: de gemiddelde stap langs de stippellijn (energiefracties vermenigvuldigen, dus wordt op deze schaal gemiddeld)",
+  "bright line: a bond holding H to its O": "heldere lijn: een binding die H aan zijn O houdt",
+  "bright flash: the neutron left a fixed amount of energy in the molecule": "heldere flits: het neutron liet een vaste hoeveelheid energie in het molecuul achter",
+  "below {#} eV: the bonds shape each bounce": "onder {#} eV: de bindingen bepalen elke botsing",
+  "free-atom recoil": "terugslag vrij atoom",
+  "α: how hard the knock (momentum handed over) →": "α: hoe hard de klap (overgedragen impuls) →",
+  "β: the neutron's energy change, in units of kT = {#} eV": "β: energieverandering van het neutron, in eenheden kT = {#} eV",
+  "gain ↑": "winst ↑",
+  "loss ↓": "verlies ↓",
+  "outline: reachable from {#} eV": "omtrek: bereikbaar vanaf {#} eV",
+  "rare → likely": "zeldzaam → waarschijnlijk",
+  "scattering law S(α,β) · hydrogen bound in water": "verstrooiingswet S(α,β) · waterstof gebonden in water",
+  "stripes: energy lost to the molecule in fixed amounts": "strepen: energie in vaste porties aan het molecuul afgestaan",
+});

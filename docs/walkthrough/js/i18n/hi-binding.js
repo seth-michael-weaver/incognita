@@ -3,7 +3,7 @@ WT.L.ch.binding = {
   num: "अध्याय 3", title: "नाभिक एक साथ क्यों टिके रहते हैं", short: "बंधन",
   html: `
 <div class="step">
-  <p>वक्र पर जितना ऊपर, उतना अधिक कसकर बंधा। हर बिंदु एक द्रव्यमान संख्या A (प्रोटॉनों और न्यूट्रॉनों की कुल गिनती) है, और उसकी ऊंचाई वह ऊर्जा है जो उस नाभिक को प्रति न्यूक्लिऑन पूरी तरह तोड़कर अलग करने में लगेगी। A को खींचिए और चिह्न पढ़िए: वक्र का मध्य भाग, लोहे और निकल के आसपास, सबसे ऊपर है।</p>
+  <p>वक्र पर जितना ऊपर, उतना अधिक कसकर बंधा। हर बिंदु एक द्रव्यमान संख्या A (प्रोटॉनों और न्यूट्रॉनों की कुल गिनती) है, और उसकी ऊंचाई वह ऊर्जा है जो उस नाभिक को पूरी तरह तोड़कर अलग करने में प्रति न्यूक्लिऑन लगेगी। A को खींचिए और चिह्न पढ़िए: वक्र का मध्य भाग, लोहे और निकल के आसपास, सबसे ऊपर है।</p>
   <div class="ctl"><label for="bi-a">द्रव्यमान संख्या A</label><input id="bi-a" type="range" data-bind="pick" data-instant min="2" max="260" step="1" value="56"><output data-show="pick" data-fmt="0"></output></div>
 </div>
 <div class="step">
@@ -18,3 +18,12 @@ WT.L.ch.binding = {
   <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "mass number A →": "द्रव्यमान संख्या A →",
+  "binding energy per nucleon (MeV)": "प्रति न्यूक्लिऑन बंधन ऊर्जा (MeV)",
+  "Ni{#}: most tightly bound": "Ni{#}: सबसे कसकर बंधा",
+  "measured masses (AME{#})": "मापे गए द्रव्यमान (AME{#})",
+  "Fe{#}: {#} MeV per nucleon · {#} MeV in all": "Fe{#}: प्रति न्यूक्लिऑन {#} MeV · कुल {#} MeV",
+});

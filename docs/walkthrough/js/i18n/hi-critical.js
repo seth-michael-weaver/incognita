@@ -4,7 +4,7 @@ WT.L.ch.critical = {
   html: `
 <div class="step">
   <h3>गुणन गुणांक</h3>
-  <p>हर विखंडन कुछ न्यूट्रॉन मुक्त करता है; कुछ अगले विखंडन कराते हैं, बाकी खो जाते हैं। <b>गुणन गुणांक</b> <i>k</i> यह है कि एक विखंडन से कितने नए विखंडन होते हैं: हर पीढ़ी न्यूट्रॉनों को <i>k</i> से गुणा करती है। 1 से ऊपर श्रृंखला बढ़ती है, 1 से नीचे मंद पड़ जाती है।</p>
+  <p>हर विखंडन कुछ न्यूट्रॉन मुक्त करता है; कुछ अगले विखंडन कराते हैं, बाकी खो जाते हैं। <b>गुणन गुणांक</b> <i>k</i> यह है कि एक विखंडन से कितने नए विखंडन होते हैं: हर पीढ़ी न्यूट्रॉनों को <i>k</i> से गुणा करती है। 1 से ऊपर श्रृंखला बढ़ती है, 1 से नीचे समाप्त हो जाती है।</p>
   <div class="ctl"><label for="cri-k">गुणन k</label><input id="cri-k" type="range" data-bind="k" data-instant min="0.95" max="1.05" step="0.05" value="1.05"><output data-show="k" data-fmt="2"></output></div>
 </div>
 <div class="step">
@@ -20,3 +20,22 @@ WT.L.ch.critical = {
 </div>`,
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="delayed" data-act="delayed" */
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "generations →": "पीढ़ियां →",
+  "k = {#}: dies away": "k = {#}: समाप्त होती है",
+  "k = {#}: steady": "k = {#}: स्थिर",
+  "k = {#}: grows": "k = {#}: बढ़ती है",
+  "{#} generations last under {#} s in a water reactor": "{#} पीढ़ियां: जल रिएक्टर में {#} s से कम",
+  "illustration": "चित्रण",
+  "amber: fission fragments that emit a neutron seconds later": "पीला: विखंडन टुकड़े जो सेकंडों बाद न्यूट्रॉन छोड़ते हैं",
+  "{#} s": "{#} s",
+  "time →": "समय →",
+  "×{#} speed": "×{#} गति",
+  "with delayed: doubles every {#} s": "विलंबित सहित: हर {#} s में दोगुना",
+  "prompt only: doubles every {#} ms": "केवल तात्कालिक: हर {#} ms में दोगुना",
+  "k = {#} · {#} % of neutrons delayed about {#} s (one-group average)": "k = {#} · {#} % न्यूट्रॉन लगभग {#} s विलंबित (एक-समूह औसत)",
+  "rods {#} % in": "छड़ें {#} % भीतर",
+  "k = {#} · doubles every {#} min": "k = {#} · हर {#} मिनट में दोगुना",
+});

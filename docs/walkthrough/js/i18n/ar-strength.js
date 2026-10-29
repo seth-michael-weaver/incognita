@@ -85,3 +85,10 @@ Object.assign(WT.L.glossary, {
     chapter: "strength",
   },
 });
+Object.assign(WT.L.labels, {
+  "zoom: Eγ from {#} to {#} MeV": "تكبير: Eγ من {#} إلى {#} MeV",
+  "floor: stays above zero": "الأرضية: تبقى فوق الصفر",
+  "continuum:": "المتصل:",
+  "dark = dense": "الداكن = كثيف",
+  "known levels": "مستويات معروفة",
+});

@@ -103,3 +103,8 @@ Object.assign(WT.L.labels, {
     }
   }
 })();
+Object.assign(WT.L.labels, {
+  "chance to split vs neutron energy": "splijtingskans tegen neutronenergie",
+  "{#}nd": "{#}e",
+  "{#}rd": "{#}e",
+});

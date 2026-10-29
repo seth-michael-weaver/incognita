@@ -18,3 +18,10 @@ WT.L.ch.binding = {
   <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
 </div>`,
 };
+Object.assign(WT.L.labels, {
+  "mass number A →": "massagetal A →",
+  "binding energy per nucleon (MeV)": "bindingsenergie per nucleon (MeV)",
+  "Ni{#}: most tightly bound": "Ni{#}: het sterkst gebonden",
+  "measured masses (AME{#})": "gemeten massa's (AME{#})",
+  "Fe{#}: {#} MeV per nucleon · {#} MeV in all": "Fe{#}: {#} MeV per nucleon · {#} MeV totaal",
+});

@@ -18,3 +18,11 @@ WT.L.ch.xsec = {
   <div class="ctl"><label for="xs-e3">中性子のエネルギー（eV）</label><input id="xs-e3" type="range" data-bind="lgE" data-instant min="-2.3" max="2" step="0.005" value="0.845"><output data-show="Eshow" data-fmt="2"></output></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "this square: {#} barn = {#}⁻²⁴ cm²": "この正方形：{#} バーン = {#}⁻²⁴ cm²",
+  "σ: the target area at each energy": "σ：各エネルギーでの標的面積",
+  "σ ≈ {#} b · reacted {#} % · passed through {#} %": "σ ≈ {#} b · 反応 {#} % · 通過 {#} %",
+  "each falling dot is a neutron: an orange flash means it hit a disc and reacted, a fading dot passed through": "落ちる点が中性子：オレンジの閃光は円板に当たって反応、薄れる点は通過",
+});

@@ -18,3 +18,18 @@ WT.L.ch.fisout = {
   <div class="btns"><button class="btn" data-act="f1000">1000 次裂变</button><button class="btn ghost" data-act="clear">清除</button></div>
 </div>`,
 };
+
+// canvas labels added 2026-10-29 (I18NLABELS_B)
+Object.assign(WT.L.labels, {
+  "n + U{#} → two fragments + neutrons": "n + U{#} → 两块碎片 + 中子",
+  "prompt neutrons per fission": "每次裂变的瞬发中子数",
+  "lines: measured shares": "细线：实测份额",
+  "mean {#}": "平均 {#}",
+  "prompt-neutron energy (MeV)": "瞬发中子能量 (MeV)",
+  "mean {#} MeV": "平均 {#} MeV",
+  "line: measured shape": "曲线：实测形状",
+  "prompt": "瞬发",
+  "time after fission · clock sped up {#}×": "裂变后的时间 · 时钟加速 {#} 倍",
+  "delayed {#} of {#} ({#} %)": "缓发 {#} / {#}（{#} %）",
+  "{#} fissions": "{#} 次裂变",
+});
