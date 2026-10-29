@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   in_lv0: "Keine Physikkenntnisse nötig. Ideen, Bilder und Größenordnungen; geeignet für das erste Studienjahr oder ein allgemeines Publikum.",
   in_lv1: "Die Standardmodelle der Reaktionstheorie, auf dem Niveau einer Kernphysikvorlesung im Bachelor oder im ersten Masterjahr.",
   in_lv2: "Forschungsniveau: die Details, die über eine moderne Evaluierung entscheiden, und wie dieses Projekt seine Daten auf der Engine aufbaut.",
-  in_lv3: "Teil zwei, Kapitel 22 bis 27: die Formeln der Engine selbst, ausgeschrieben und aus ihrem Code gezeichnet, für Promovierende und Fachleute aus der Praxis.",
+  in_lv3: "Teil zwei, Kapitel 23 bis 28: die Formeln der Engine selbst, ausgeschrieben und aus ihrem Code gezeichnet, für Promovierende und Fachleute aus der Praxis.",
   in_ch_h: "Die Kapitel",
   in_ch_p: "Die Zeiten gelten für das Lesen eines Kapitels und das Ausprobieren seiner Regler; es im Unterricht vorzustellen dauert etwa genauso lange. Jedes Kapitel steht für sich, aber sie bauen der Reihe nach aufeinander auf.",
   in_filter: "Nach Niveau filtern", in_all: "Alle", in_chapters: "Kapitel", in_steps: "Schritte",

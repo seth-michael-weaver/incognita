@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   in_lv0: "Non servono conoscenze di fisica. Idee, immagini e ordini di grandezza; adatto al primo anno o a un pubblico generale.",
   in_lv1: "I modelli standard della teoria delle reazioni, al livello di un corso di fisica nucleare della laurea triennale o del primo anno di magistrale.",
   in_lv2: "Livello di ricerca: i dettagli che decidono una valutazione moderna, e come questo progetto costruisce i suoi dati sul motore.",
-  in_lv3: "Parte seconda, capitoli da 22 a 27: le formule del motore stesso, scritte e disegnate a partire dal suo codice, per dottorandi e professionisti.",
+  in_lv3: "Parte seconda, capitoli da 23 a 28: le formule del motore stesso, scritte e disegnate a partire dal suo codice, per dottorandi e professionisti.",
   in_ch_h: "I capitoli",
   in_ch_p: "I tempi sono per leggere un capitolo e provarne i comandi; presentarlo in classe richiede più o meno lo stesso tempo. Ogni capitolo sta in piedi da solo, ma si appoggiano l'uno sull'altro nell'ordine.",
   in_filter: "Filtra per livello", in_all: "Tutti", in_chapters: "capitoli", in_steps: "passi",

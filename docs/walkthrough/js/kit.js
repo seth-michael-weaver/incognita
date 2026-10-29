@@ -438,7 +438,7 @@
     const chapters = [];
     const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
     const LEVEL = { structure: 0, xsec: 0, binding: 0, landscape: 0, neutrons: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, fisout: 1, products: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, doppler: 1, critical: 1, layers: 2,
-      hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3 }; // the Expert part (chapters 22-27)
+      hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3 }; // the Expert part (chapters 23-28)
     // chapter numbers follow page order (1..N), in the reader's language: "Chapter 1" (or its translation) with the number replaced
     const order = [...document.querySelectorAll("[data-ch]")].map((el) => el.dataset.ch).filter((id) => WT.mods[id] && WT.mods[id].title);
     const numTpl = (order.length && ((WT.tl && WT.L.ch[order[0]] && WT.L.ch[order[0]].num) || WT.mods[order[0]].num)) || "Chapter 1";
@@ -568,6 +568,10 @@
     if (mq.addEventListener) mq.addEventListener("change", readColors);
     resize(); requestAnimationFrame(loop);
     WT.applyStatic(document, "title");
+    // cross-references written as a chapter number ("see 10", "Chapter 15") follow page order too, so adding a chapter can't stale them
+    { const order = chapters.filter((c) => c.mod.title).map((c) => c.id);
+      document.querySelectorAll('a[href^="#"]').forEach((a) => { const k = order.indexOf(a.getAttribute("href").slice(1));
+        if (k >= 0 && !a.closest(".toc, .ch-rail") && /^\D*\d+\D*$/.test(a.textContent)) a.textContent = a.textContent.replace(/\d+/, String(k + 1)); }); }
     langToggle();
     WT.keepLang();
     try { WT.termCount = glMark(); glCard(); } catch (e) { console.error("glossary", e); }

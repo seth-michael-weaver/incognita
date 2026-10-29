@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   in_lv0: "Ingen fysik nødvendig. Idéer, billeder og størrelsesordener; passer til første studieår eller et bredt publikum.",
   in_lv1: "Reaktionsteoriens standardmodeller på niveau med et kursus i kernefysik på bachelor- eller første kandidatår.",
   in_lv2: "Forskningsniveau: de detaljer, der afgør en moderne evaluering, og hvordan dette projekt bygger sine data oven på motoren.",
-  in_lv3: "Del to, kapitel 22 til 27: motorens egne formler, skrevet ud og tegnet ud fra dens kode, for ph.d.-studerende og fagfolk.",
+  in_lv3: "Del to, kapitel 23 til 28: motorens egne formler, skrevet ud og tegnet ud fra dens kode, for ph.d.-studerende og fagfolk.",
   in_ch_h: "Kapitlerne",
   in_ch_p: "Tiderne gælder for at læse et kapitel og prøve dets knapper og skydere; at gennemgå det i undervisningen tager omtrent lige så lang tid. Hvert kapitel kan stå alene, men de bygger videre på hinanden i rækkefølge.",
   in_filter: "Filtrér efter niveau", in_all: "Alle", in_chapters: "kapitler", in_steps: "trin",

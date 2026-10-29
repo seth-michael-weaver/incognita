@@ -11,7 +11,7 @@ Object.assign(WT.es.ui, {
   in_lv0: "No hace falta saber física. Ideas, imágenes y órdenes de magnitud; adecuado para primer curso o para público general.",
   in_lv1: "Los modelos estándar de la teoría de reacciones, al nivel de un curso de física nuclear de grado o de primer año de máster.",
   in_lv2: "Nivel de investigación: los detalles que deciden una evaluación moderna y cómo construye este proyecto sus datos sobre el motor.",
-  in_lv3: "Segunda parte, capítulos 22 a 27: las fórmulas del propio motor, escritas y dibujadas a partir de su código, para estudiantes de doctorado y profesionales.",
+  in_lv3: "Segunda parte, capítulos 23 a 28: las fórmulas del propio motor, escritas y dibujadas a partir de su código, para estudiantes de doctorado y profesionales.",
   in_ch_h: "Los capítulos",
   in_ch_p: "Los tiempos son para leer un capítulo y probar sus controles; presentarlo en clase lleva más o menos lo mismo. Cada capítulo se sostiene solo, pero se apoyan unos en otros en orden.",
   in_filter: "Filtrar por nivel", in_all: "Todos", in_chapters: "capítulos", in_steps: "pasos",

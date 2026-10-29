@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   in_lv0: "Não é preciso saber física. Ideias, imagens e ordens de grandeza; adequado ao primeiro ano ou ao público em geral.",
   in_lv1: "Os modelos padrão da teoria de reações, ao nível de uma unidade curricular de física nuclear de licenciatura ou do primeiro ano de mestrado.",
   in_lv2: "Nível de investigação: os pormenores que decidem uma avaliação moderna e a forma como este projeto constrói os seus dados sobre o motor.",
-  in_lv3: "Segunda parte, capítulos 22 a 27: as fórmulas do próprio motor, escritas e desenhadas a partir do seu código, para doutorandos e profissionais.",
+  in_lv3: "Segunda parte, capítulos 23 a 28: as fórmulas do próprio motor, escritas e desenhadas a partir do seu código, para doutorandos e profissionais.",
   in_ch_h: "Os capítulos",
   in_ch_p: "Os tempos são para ler um capítulo e experimentar os seus controlos; apresentá-lo numa aula leva mais ou menos o mesmo. Cada capítulo sustenta-se sozinho, mas apoiam-se uns nos outros pela ordem.",
   in_filter: "Filtrar por nível", in_all: "Todos", in_chapters: "capítulos", in_steps: "passos",

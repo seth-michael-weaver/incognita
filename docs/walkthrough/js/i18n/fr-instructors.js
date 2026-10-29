@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   in_lv0: "Aucune physique requise. Des idées, des images et des ordres de grandeur ; convient à une première année ou à un public non spécialiste.",
   in_lv1: "Les modèles standard de la théorie des réactions, au niveau d'un cours de physique nucléaire de licence ou de première année de master.",
   in_lv2: "Niveau recherche : les détails qui décident d'une évaluation moderne, et la façon dont ce projet construit ses données sur le moteur.",
-  in_lv3: "Deuxième partie, chapitres 22 à 27 : les formules du moteur lui-même, écrites et dessinées à partir de son code, pour les doctorants et les praticiens.",
+  in_lv3: "Deuxième partie, chapitres 23 à 28 : les formules du moteur lui-même, écrites et dessinées à partir de son code, pour les doctorants et les praticiens.",
   in_ch_h: "Les chapitres",
   in_ch_p: "Les durées correspondent à la lecture d'un chapitre et à l'essai de ses commandes ; le présenter en cours prend à peu près autant de temps. Chaque chapitre se suffit à lui-même, mais ils s'appuient les uns sur les autres dans l'ordre.",
   in_filter: "Filtrer par niveau", in_all: "Tous", in_chapters: "chapitres", in_steps: "étapes",

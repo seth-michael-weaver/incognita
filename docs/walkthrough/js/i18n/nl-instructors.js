@@ -11,7 +11,7 @@ Object.assign(WT.L.ui, {
   in_lv0: "Geen natuurkunde nodig. Ideeën, afbeeldingen en ordes van grootte; geschikt voor eerstejaars of een breed publiek.",
   in_lv1: "De standaardmodellen van de reactietheorie, op het niveau van een bachelorvak kernfysica of het eerste jaar van een master.",
   in_lv2: "Onderzoeksniveau: de details die een moderne evaluatie bepalen, en hoe dit project zijn data op de motor bouwt.",
-  in_lv3: "Deel twee, hoofdstukken 22 tot en met 27: de formules van de engine zelf, uitgeschreven en getekend vanuit de code, voor promovendi en vakmensen.",
+  in_lv3: "Deel twee, hoofdstukken 23 tot en met 28: de formules van de engine zelf, uitgeschreven en getekend vanuit de code, voor promovendi en vakmensen.",
   in_ch_h: "De hoofdstukken",
   in_ch_p: "De tijden gelden voor het lezen van een hoofdstuk en het uitproberen van de bediening; een hoofdstuk in de les presenteren duurt ongeveer even lang. Elk hoofdstuk staat op zichzelf, maar ze bouwen op volgorde op elkaar voort.",
   in_filter: "Filter op niveau", in_all: "Alle", in_chapters: "hoofdstukken", in_steps: "stappen",
