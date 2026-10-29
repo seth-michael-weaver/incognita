@@ -12,7 +12,7 @@ Object.assign(WT.es.ui, {
   hero1: "Lanza un neutrón contra un núcleo atómico y algo sale de vuelta. Puede ser el propio neutrón, que rebota. Puede ser un protón, una partícula alfa (un grupo compacto de 2 protones y 2 neutrones) o un destello de luz. Un núcleo pesado puede incluso partirse en dos.",
   hero2: "¿Cuál de estas cosas ocurre, y con qué frecuencia? Esta página recorre, paso a paso, cómo nuestro software responde a esa pregunta. Desplázate hacia abajo y prueba los controles por el camino. Las imágenes siguen la misma física que el motor; los números que muestran son ilustrativos.",
   scrollcue: "Desplázate para empezar ↓",
-  hero_tag: "Un neutrón. Un núcleo. Muchas maneras de terminar.",
+  hero_tag: "Una exploración visual de la física nuclear",
   hero_aud: "Para estudiantes y para quien se inicia en la física nuclear, y para los docentes que les enseñan. Profesionales: los datos de cada núclido están en <a href=\"data.html\" data-keep-lang>Todos los núclidos</a>.",
   hero_fire: "Dispara un neutrón",
   hero_hint: "o haz clic en cualquier parte de la imagen",

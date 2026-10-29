@@ -12,7 +12,7 @@ Object.assign(WT.L.ui, {
   hero1: "Lancia un neutrone contro un nucleo atomico e qualcosa torna fuori. Può essere il neutrone stesso, che rimbalza. Può essere un protone, una particella alfa (un gruppo compatto di 2 protoni e 2 neutroni) o un lampo di luce. Un nucleo pesante può perfino spezzarsi in due.",
   hero2: "Quale di queste cose succede, e con che frequenza? Questa pagina mostra, un passo alla volta, come il nostro software risponde a questa domanda. Scorri verso il basso e prova i comandi lungo la strada. Le immagini seguono la stessa fisica del motore; i numeri che mostrano sono illustrativi.",
   scrollcue: "Scorri per cominciare ↓",
-  hero_tag: "Un neutrone. Un nucleo. Molti modi di finire.",
+  hero_tag: "Un'esplorazione visiva della fisica nucleare",
   hero_aud: "Per gli studenti e per chi si avvicina alla fisica nucleare, e per i docenti che insegnano loro. Addetti ai lavori: i dati di ogni nuclide sono in <a href=\"data.html\" data-keep-lang>Tutti i nuclidi</a>.",
   hero_fire: "Lancia un neutrone",
   hero_hint: "o fai clic in un punto qualsiasi dell'immagine",

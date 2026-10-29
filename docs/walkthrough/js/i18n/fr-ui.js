@@ -12,7 +12,7 @@ Object.assign(WT.L.ui, {
   hero1: "Lancez un neutron sur un noyau atomique, et quelque chose en ressort. Ce peut être le neutron lui-même, qui rebondit. Ce peut être un proton, une particule alpha (un petit amas serré de 2 protons et 2 neutrons) ou un éclair de lumière. Un noyau lourd peut même se casser en deux.",
   hero2: "Lequel de ces événements se produit, et à quelle fréquence ? Cette page montre pas à pas comment notre logiciel répond à cette question. Faites défiler la page et essayez les commandes en chemin. Les images suivent la même physique que le moteur ; les nombres qu'elles affichent sont indicatifs.",
   scrollcue: "Faites défiler pour commencer ↓",
-  hero_tag: "Un neutron. Un noyau. Bien des façons d'en finir.",
+  hero_tag: "Une exploration visuelle de la physique nucléaire",
   hero_aud: "Pour les étudiants et toute personne qui découvre la physique nucléaire, et pour les enseignants qui les forment. Professionnels : les données de chaque nucléide sont dans <a href=\"data.html\" data-keep-lang>Tous les nucléides</a>.",
   hero_fire: "Lancer un neutron",
   hero_hint: "ou cliquez n'importe où sur l'image",

@@ -12,7 +12,7 @@ Object.assign(WT.L.ui, {
   hero1: "Schieß ein Neutron auf einen Atomkern, und etwas kommt wieder heraus. Vielleicht das Neutron selbst, abgeprallt. Vielleicht ein Proton, ein Alphateilchen (ein fest gebundenes Bündel aus 2 Protonen und 2 Neutronen) oder ein Lichtblitz. Ein schwerer Kern kann sich sogar in zwei Teile spalten.",
   hero2: "Was davon passiert, und wie oft? Diese Seite zeigt Schritt für Schritt, wie unsere Software diese Frage beantwortet. Scroll nach unten und probier unterwegs die Regler aus. Die Bilder folgen derselben Physik wie die Engine; die Zahlen darin dienen der Veranschaulichung.",
   scrollcue: "Scrollen, um zu beginnen ↓",
-  hero_tag: "Ein Neutron. Ein Kern. Viele Arten, wie es enden kann.",
+  hero_tag: "Eine visuelle Erkundung der Kernphysik",
   hero_aud: "Für Studierende und alle, die neu in der Kernphysik sind, und für die Lehrenden, die sie unterrichten. Fachleute: Die Daten zu jedem Nuklid stehen unter <a href=\"data.html\" data-keep-lang>Alle Nuklide</a>.",
   hero_fire: "Neutron abfeuern",
   hero_hint: "oder klick irgendwo ins Bild",

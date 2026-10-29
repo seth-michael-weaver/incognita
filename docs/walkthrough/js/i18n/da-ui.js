@@ -12,7 +12,7 @@ Object.assign(WT.L.ui, {
   hero1: "Skyd en neutron mod en atomkerne, og noget kommer ud igen. Det kan være neutronen selv, der preller af. Det kan være en proton, en alfapartikel (en tæt klump af 2 protoner og 2 neutroner) eller et glimt af lys. En tung kerne kan endda splitte i to.",
   hero2: "Hvad af det sker, og hvor ofte? Denne side gennemgår trin for trin, hvordan vores software besvarer det spørgsmål. Scroll ned, og prøv knapperne og skyderne undervejs. Billederne følger den samme fysik som motoren; tallene i dem er illustrative.",
   scrollcue: "Scroll for at begynde ↓",
-  hero_tag: "Én neutron. Én kerne. Mange måder, det kan ende på.",
+  hero_tag: "En visuel udforskning af kernefysik",
   hero_aud: "Til studerende og alle, der er nye i kernefysik, og til de undervisere, der underviser dem. Fagfolk: data for hver nuklid findes under <a href=\"data.html\" data-keep-lang>Alle nuklider</a>.",
   hero_fire: "Skyd en neutron",
   hero_hint: "eller klik et vilkårligt sted på billedet",
