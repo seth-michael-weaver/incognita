@@ -36,7 +36,7 @@
 
 
   WT.chapter("direct", {
-    num: "Chapter 6", title: "A glancing blow", short: "Direct reactions",
+    num: "Chapter 6", title: "Direct reactions", short: "Direct reactions",
     lead: "Not every neutron that reaches the nucleus is swallowed. Some brush its surface, give it one push, and fly on.",
     html: `
 <div class="step">
