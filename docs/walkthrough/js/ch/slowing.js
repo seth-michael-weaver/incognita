@@ -92,7 +92,7 @@
   }
 
   WT.chapter("slowing", {
-    num: "Chapter 18", title: "Slowing down", short: "Slowing down",
+    num: "Chapter 18", title: "Neutron moderation", short: "Slowing down",
     html: `
 <div class="step">
   <p>Each bounce off hydrogen costs about half the energy. A fission neutron starts at 2 MeV and bounces through water. A hydrogen nucleus weighs the same as the neutron, so, like billiard balls, each bounce hands it on average half the neutron's energy.</p>

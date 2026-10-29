@@ -123,7 +123,7 @@
   const ens = { rows: [], pile: [], ri: [], queue: 0, qT: 0, auto: 0, k: 0 };
 
   WT.chapter("resonance", {
-    num: "Chapter 15", title: "Sharp peaks", short: "Resonances",
+    num: "Chapter 15", title: "Resonances", short: "Resonances",
     lead: "At low enough energy a neutron no longer sees a smooth, averaged nucleus. It sees the compound nucleus's individual energy levels, one at a time.",
     html: `
 <div class="step">

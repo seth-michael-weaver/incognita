@@ -110,7 +110,7 @@
   const CAP = { key: null, g: 0, n: 0, balls: [], acc: 0 };
 
   WT.chapter("gamma", {
-    num: "Chapter 10", title: "Shedding light", short: "Photons",
+    num: "Chapter 10", title: "Gamma-ray emission", short: "Photons",
     lead: "When no particle leaves, the nucleus cools by emitting photons: gamma rays, particles of high-energy light. This exit is open at every energy.",
     html: `
 <div class="step">

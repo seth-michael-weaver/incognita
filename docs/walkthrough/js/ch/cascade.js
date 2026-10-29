@@ -98,7 +98,7 @@
   const pct = (f) => (f >= 0.01 ? `${(f * 100).toFixed(0)} %` : f >= 0.001 ? `${(f * 100).toFixed(1)} %` : "< 0.1 %");
 
   WT.chapter("cascade", {
-    num: "Chapter 11", title: "Down the chart", short: "Cascade",
+    num: "Chapter 11", title: "The emission cascade", short: "Cascade",
     lead: "One emission is rarely the end: the nucleus left behind is often hot enough to emit again.",
     html: `
 <div class="step">

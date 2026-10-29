@@ -33,7 +33,7 @@
   }
 
   WT.chapter("doppler", {
-    num: "Chapter 19", title: "Hotter means less reactive", short: "Doppler",
+    num: "Chapter 19", title: "Doppler broadening", short: "Doppler",
     html: `
 <div class="step">
   <h3>Thermal motion of the target</h3>

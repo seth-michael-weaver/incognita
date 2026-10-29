@@ -15,7 +15,7 @@
   let lay = null, bound = false;
 
   WT.chapter("products", {
-    num: "Chapter 14", title: "After the split", short: "Fission products",
+    num: "Chapter 14", title: "Fission products and decay heat", short: "Fission products",
     html: `
 <div class="step">
   <p>The pieces are unequal: one light, one heavy. The chart shows, for every fragment mass A (protons plus neutrons), the share of fissions that make it. Two humps: light pieces near A = 95, heavy ones near 139. An even split, near A = 117, is about a hundred times rarer.</p>

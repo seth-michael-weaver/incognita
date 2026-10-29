@@ -45,7 +45,7 @@
   }
 
   WT.chapter("critical", {
-    num: "Chapter 20", title: "Keeping it critical", short: "Criticality",
+    num: "Chapter 20", title: "Criticality and reactor control", short: "Criticality",
     html: `
 <div class="step">
   <h3>The multiplication factor</h3>

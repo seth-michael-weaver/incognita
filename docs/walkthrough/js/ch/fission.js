@@ -65,7 +65,7 @@
   const dots = []; let spawnAcc = 0; const tally = { through: 0, back: 0 };
 
   WT.chapter("fission", {
-    num: "Chapter 12", title: "Splitting", short: "Fission",
+    num: "Chapter 12", title: "Fission", short: "Fission",
     lead: "The heaviest nuclei have an exit lighter ones lack: instead of throwing out one particle, the whole nucleus tears in two. This is fission.",
     html: `
 <div class="step">

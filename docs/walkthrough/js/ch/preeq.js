@@ -20,7 +20,7 @@
   function resetChain(S) { chain = [{ kind: "n", y: 1, hole: false }]; S.n = 1; S.set("n", 1); S.bumps = 0; S.collideT = -10; }
 
   WT.chapter("preeq", {
-    num: "Chapter 7", title: "Collisions before calm", short: "Pre-equilibrium",
+    num: "Chapter 7", title: "Pre-equilibrium emission", short: "Pre-equilibrium",
     lead: "A neutron that enters a nucleus does not share its energy with everyone at once. For the first few collisions one particle holds most of it, and that particle can fly straight back out. This is pre-equilibrium: emission “before the energy evens out”.",
     html: `
 <div class="step">

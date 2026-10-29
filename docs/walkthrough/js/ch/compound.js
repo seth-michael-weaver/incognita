@@ -91,7 +91,7 @@
   const NBD = 10; let casc = { t0: 0, path: [] };
 
   WT.chapter("compound", {
-    num: "Chapter 8", title: "Sharing the energy", short: "Compound nucleus",
+    num: "Chapter 8", title: "The compound nucleus", short: "Compound nucleus",
     lead: "Once the first fast collisions are over, all the nucleons share the energy. This settled state is the compound nucleus. To predict what it does next, the engine needs to know how many ways it can hold its energy.",
     html: `
 <div class="step">

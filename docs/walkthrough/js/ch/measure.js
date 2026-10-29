@@ -45,7 +45,7 @@
   const tmc = { knobs: { psf: 1, ld: 0, omp: 0 }, show: { psf: 0, ld: 0, omp: 0 }, queue: 0, qT: 0, grow: [] };
 
   WT.chapter("measure", {
-    num: "Chapter 17", title: "What comes out", short: "Observables",
+    num: "Chapter 17", title: "Observables", short: "Observables",
     lead: "An experiment, a reactor or a star sees only a handful of numbers. This chapter shows how the engine turns what happens inside the nucleus into them.",
     html: `
 <div class="step">

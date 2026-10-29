@@ -76,7 +76,7 @@
   }
 
   WT.chapter("decay", {
-    num: "Chapter 9", title: "Choosing an exit", short: "Decay",
+    num: "Chapter 9", title: "Compound-nucleus decay", short: "Decay",
     lead: "The compound nucleus must shed its energy by emitting a particle or a photon. This chapter draws each way out as a door. The engine's job is to say what share of the flux (the stream of reactions arriving here) leaves through each door.",
     html: `
 <div class="step">

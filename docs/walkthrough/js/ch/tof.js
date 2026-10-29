@@ -85,7 +85,7 @@
   const fmtUs = (t) => (t >= 1000 ? `${(t / 1000).toFixed(2)} ms` : `${t.toFixed(0)} µs`);
 
   WT.chapter("tof", {
-    num: "Chapter 16", title: "Catching a resonance", short: "Measuring peaks",
+    num: "Chapter 16", title: "Time-of-flight measurements", short: "Measuring peaks",
     html: `
 <div class="step">
   <p>A neutron's flight time tells its energy. A short pulse of neutrons with all sorts of energies leaves the source and races down an empty tube to the detector; the fast ones arrive first. The tube's length <i>L</i> is known, so each arrival time <i>t</i> gives the neutron's speed, and the speed gives its energy:</p>

@@ -25,7 +25,7 @@
   function batch(S, n) { for (let i = 0; i < n; i++) fission(S, false); }
 
   WT.chapter("fisout", {
-    num: "Chapter 13", title: "What fission throws out", short: "Fission neutrons",
+    num: "Chapter 13", title: "Fission neutrons", short: "Fission neutrons",
     html: `
 <div class="step">
   <p>Each fission frees two or three neutrons: 2.4 on average. At the top, one fission at a time: the uranium nucleus tears into two fragments and the blue balls fly off. These are the <b>prompt</b> neutrons, out in far less than a millionth of a second.</p>
