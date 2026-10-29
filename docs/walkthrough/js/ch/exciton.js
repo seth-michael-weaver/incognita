@@ -74,7 +74,7 @@
   <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ is the density of single-particle levels near the Fermi energy. <i>A<sub>p,h</sub></i> is the <b>Pauli</b> correction: two particles cannot share a level, so the lowest configurations cost energy and the density near the threshold drops. The curves are named by their counts: 3p2h means 3 particles and 2 holes. The sketch shows one configuration at a time with the chosen <i>p</i>, drawn at random: each hole is one nucleon missing from below the Fermi level.</p>
 </div>
 <div class="step">
-  <h3>Going deeper or getting out</h3>
+  <h3>Transition and emission rates</h3>
   <p>From each stage two things can happen. A collision creates another pair, at the rate λ<sup>+</sup>, which by Fermi's golden rule is the squared matrix element times the density of states it can reach. Or a particle leaves, at the rate <i>W</i>, given by detailed balance from the inverse cross section and the ratio of state densities with and without the escaping particle.</p>
   <div class="formula">λ<sup>+</sup>(n) = (2π/ħ) M² ω<sub>acc</sub> ,  W(p,h,ε) = (2s+1)/(π²ħ³) με σ<sub>inv</sub>(ε) ω(p−1,h,U) / ω(p,h,E)</div>
   <div class="ctl"><label for="ex-e">Neutron energy (MeV)</label><input id="ex-e" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
@@ -89,14 +89,14 @@
   <p>The whole chain is over in a few 10⁻²² s. The share that escapes on the way is the pre-equilibrium emission; the rest, after at most six particles in the engine, as in TALYS, is handed to the compound nucleus. Time integration gives each stage a strength τ(<i>n</i>)·<i>P</i>(<i>n</i>), and that product is what the engine computes.</p>
 </div>
 <div class="step">
-  <h3>Where the hard tail comes from</h3>
+  <h3>The high-energy tail</h3>
   <p>The emission spectrum is the sum over stages of population times lifetime times emission rate, then the evaporation of what is left. Stage <i>n</i> = 3 alone, two particles and a hole, reaches the highest outgoing energies: its spectrum falls only linearly toward the end point. Each later stage is softer.</p>
   <div class="formula">dσ/dε = σ<sub>CN</sub> Σ<sub>n</sub> P(n) τ(n) W(n,ε) + evaporation</div>
   <div class="ctl"><label for="ex-e3">Neutron energy (MeV)</label><input id="ex-e3" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
   <p>Raise the energy and the spectrum hardens: the pre-equilibrium tail stretches to the end point while the evaporation hump stays at 1 to 2 MeV. Above about 10 MeV the measured high-energy neutrons can only be reproduced with this tail.</p>
 </div>
 <div class="step">
-  <h3>How large a share</h3>
+  <h3>The pre-equilibrium fraction</h3>
   <p>The share of the emission that is pre-equilibrium grows with incident energy, from a few per cent near 5 MeV to about 40 per cent at 40 MeV here. It depends on one adjustable constant, the overall size of the matrix element: a weaker interaction means slower equilibration and more early emission.</p>
   <div class="ctl"><label for="ex-c">Matrix-element constant C₁</label><input id="ex-c" type="range" data-bind="c1" min="0.3" max="3" step="0.05" value="1"><output data-show="c1" data-fmt="2"></output></div>
   <p>The dashed curve is C₁ = 1, the engine's default; the solid one follows the slider. Halving C₁ raises the share by a factor of 1.5 to 1.9, not 2: the escape probability of each stage is W/(λ<sup>+</sup> + W), not W/λ<sup>+</sup>, and fewer nuclei survive to the later stages.</p>

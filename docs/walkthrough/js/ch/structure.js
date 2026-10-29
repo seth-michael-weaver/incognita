@@ -75,7 +75,7 @@
   <p>Drag to add or remove neutrons; each choice is a different <b>isotope</b>. The bars show the <b>binding energy</b> per nucleon in MeV (million electron-volts): the energy needed to pull the nucleus apart. It peaks near the stable isotopes.</p>
 </div>
 <div class="step">
-  <h3>The cost of pulling one out</h3>
+  <h3>Separation energies</h3>
   <p>The energy to pull one particle out is its <b>separation energy</b>: <i>S<sub>n</sub></i> for a neutron, <i>S<sub>p</sub></i> for a proton, <i>S<sub>α</sub></i> for an <b>alpha particle</b> (two protons and two neutrons bound together). The picture shows the nucleus as a well, energy going up; each pull lifts the top particle out past the dashed "free" line, and the meter records the cost.</p>
   <div class="btns"><button class="btn ghost" data-act="pn">Pull a neutron</button><button class="btn ghost" data-act="pp">Pull a proton</button><button class="btn ghost" data-act="pa">Pull an alpha</button></div>
   <p>The engine gets each one as the difference of two nuclear masses: measured where possible, from a mass model where not.</p>
@@ -83,14 +83,14 @@
   <p>Drag the neutron count and pull a neutron again: <i>S<sub>n</sub></i> zigzags, because nucleons pair up and an even count holds the last one tighter. A reaction can throw out a particle only if it brings enough energy to pay this cost. These costs are the <b>thresholds</b> of the whole calculation.</p>
 </div>
 <div class="step">
-  <h3>Energy levels, and dropping down</h3>
+  <h3>Excited states and gamma decay</h3>
   <p>A nucleus can hold only certain exact amounts of extra energy: the lines, here for iron-56, with the <b>ground state</b> at the bottom. Each level has a <b>spin</b> <i>J</i> (angular momentum) and a <b>parity</b>, + or − (whether its wave looks the same in a mirror); 2<sup>+</sup> means spin 2, parity +.</p>
   <p>The orange ball is a nucleus on a high level. It falls one level at a time, each hop throwing off a <em class="g">photon</em> (a gamma ray) that carries the energy difference. The paths' width and percentage are the measured odds of each hop, the <b>branching ratios</b>.</p>
   <div class="btns"><button class="btn" data-act="drop">Excite the nucleus</button></div>
   <p>Press it a few times: the same level reaches the ground state by different routes. The engine keeps about thirty measured levels per nucleus, with their odds; higher up it treats the crowded levels as a smooth <b>continuum</b>. Above the dashed line, <i>S<sub>n</sub></i>, the nucleus can emit a neutron.</p>
 </div>
 <div class="step">
-  <h3>A level with no easy way down</h3>
+  <h3>Isomers: long-lived excited states</h3>
   <p>A level whose only way down needs a big spin change, Δ<i>J</i>, decays very slowly. On the right, 64 nuclei sit on such a level; each waits a random time, then drops and a <em class="g">photon</em> pops out. Half have dropped after one <b>half-life</b>.</p>
   <div class="ctl"><label for="st-dj">Spin change ΔJ</label><input id="st-dj" type="range" data-bind="dJ" min="1" max="5" step="1" value="2" data-instant><output data-show="dJ" data-fmt="0"></output></div>
   <div class="ctl"><label for="st-eg">Photon energy (MeV)</label><input id="st-eg" type="range" data-bind="Eg" min="0.05" max="1.5" step="0.05" value="0.3"><output data-show="Eg" data-fmt="2"></output></div>
@@ -98,7 +98,7 @@
   <p>Raise Δ<i>J</i> and the popping slows: each extra unit of spin makes the wait a hundred thousand times longer or more, and lower photon energy lengthens it too (shown on a log scale). A level that lives longer than about a second is an <b>isomer</b>, and the engine treats it as an end point, like the ground state.</p>
 </div>
 <div class="step">
-  <h3>Round, or not</h3>
+  <h3>Nuclear deformation</h3>
   <p>Many nuclei are not round. <i>β₂</i> ("beta-two") measures the stretch: 0 is a sphere, positive is stretched like an American football, negative is squashed into a disc. The ladder on the right shows the levels each kind makes.</p>
   <p>A stretched nucleus can rotate, giving levels 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> with gaps growing like <i>J</i>(<i>J</i>+1): a <b>rotor</b>. A round one can ripple; each unit of ripple, a <b>phonon</b>, adds the same energy, so its levels are evenly spaced: a <b>vibrator</b>.</p>
   <div class="ctl"><label for="st-beta">Deformation β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
@@ -106,7 +106,7 @@
   <p>Drag <i>β₂</i> and press the buttons: a bigger stretch pulls the rotor's levels closer. A vibrator is round on average, so the slider rests while it ripples; and a sphere cannot rotate in this sense (turning it changes nothing), so near <i>β₂</i> = 0 the rotor band disappears. The engine stores deformations per nucleus and a tag: spherical, vibrator or rotor. Chapter 6 shows how a passing neutron uses them.</p>
 </div>
 <div class="step">
-  <h3>Fingerprints just above the threshold</h3>
+  <h3>Resonance parameters above the neutron threshold</h3>
   <p>A slow neutron joining the target lands just above <i>S<sub>n</sub></i>, in the small box on the left. The right panel magnifies that box thousands of times, neutron energy running left to right.</p>
   <div class="ctl"><label for="st-fe">Beam energy</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">Pause the sweep</button></div>

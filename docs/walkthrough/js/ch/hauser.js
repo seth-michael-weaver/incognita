@@ -170,7 +170,7 @@
   <p>The two agree closely for elastic and inelastic; for capture in the keV range HRTW removes up to 10 per cent more. Between 0.85 and 2 MeV capture even gains: there the total width is dominated by a few fluctuating neutron widths, and the average of 1/Γ exceeds 1/⟨Γ⟩. Both recipes are fits to the exact random-matrix (GOE) result, which TALYS also offers as a triple integral. INCOGNITA ports all three (<code>widthmode</code> 1, 2, 3); Moldauer is the default, applied for incident neutrons up to the target's neutron separation energy.</p>
 </div>
 <div class="step">
-  <h3>Between 3 and 2</h3>
+  <h3>Limits of the elastic enhancement</h3>
   <p>How big can the elastic boost get? Between two and three times, depending on whether the resonances stand apart or overlap.</p>
   <p>The limits explain the size of the effect. Take <i>N</i> equal channels and no capture, and vary their total ΣT, which is 2π times the ratio of the average total width to the level spacing, Γ/<i>D</i>. With isolated resonances (ΣT ≪ 1) and many channels, each width follows Porter–Thomas with one degree of freedom and the elastic enhancement is ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3. When resonances overlap strongly (ΣT ≫ 2π) the cross section fluctuates like a random wave (Ericson fluctuations) and the enhancement falls to 2.</p>
   <div class="ctl"><label for="hf-n">Open channels N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>

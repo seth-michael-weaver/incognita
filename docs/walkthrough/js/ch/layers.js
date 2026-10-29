@@ -83,7 +83,7 @@
   <p>Drag it and count the measurements inside. Too narrow, and the band claims a precision it does not have; too wide, and it says nothing. The engine's own band is not adopted yet: it is on target with all reactions pooled, but not yet in every reaction family. TERRA carries its own bands, and they are part of its comparisons above.</p>
 </div>
 <div class="step">
-  <h3>Where it stands</h3>
+  <h3>Current status</h3>
   <p>A layer is adopted only after it has been tested against measurements, and it stays off when it does not help. Today the engine is in use and TERRA is a candidate; the measured-structure layer and the engine's uncertainty band are still being tested.</p>
   <p><a href="scoreboard.html" data-keep-lang>See the full scoreboard →</a> Every comparison we do not win, each rival, and how to read it.</p>
   <div class="aside">${ASOF ? `Scores as of ${ASOF}, from` : "Scores from"} the project's research ledger. The curves in the picture are illustrative.</div>

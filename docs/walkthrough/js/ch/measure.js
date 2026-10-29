@@ -54,38 +54,38 @@
   <p>Lower the energy and the discs swell: a slow neutron is a wide wave and reacts from farther away. At high energy the disc shrinks toward the nucleus itself.</p>
 </div>
 <div class="step">
-  <h3>New exits open with energy</h3>
+  <h3>Excitation functions</h3>
   <p>Each door is one exit, or <b>channel</b>: the neutron bounces out (elastic), leaves the target excited (n′), knocks out more neutrons (2n, 3n), is captured with only photons leaving (γ), or a proton or α particle leaves instead. A padlocked door has a <b>threshold</b>: the reaction costs more energy than the neutron brings.</p>
   <div class="ctl"><label for="mea-e2">Neutron energy (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
   <p>Drag the energy past a threshold and that door flashes open; the buckets fill to each channel's share, and every new door takes share from the others. The thresholds come from the masses of the nuclei; the shares from the competition of Chapter 9.</p>
 </div>
 <div class="step">
-  <h3>What a detector sees</h3>
+  <h3>Emission spectra</h3>
   <p>The two piles are the neutrons that reach the forward and backward halves of a detector ring, sorted by energy. The beam is pulsed, so each neutron's flight time gives its energy: fast ones arrive first.</p>
   <div class="ctl"><label for="mea-ein">Incident energy (MeV)</label><input id="mea-ein" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="30"><output data-show="Ein" data-fmt="0"></output></div>
   <p>Both piles have a hump of slow, <b>evaporated</b> neutrons: they boil off the compound nucleus once the energy is shared, in every direction alike. Only the forward pile has a long fast tail: <b>pre-equilibrium</b> neutrons, which leave from the first collisions still moving roughly with the beam. Raise the incident energy and the tail grows.</p>
 </div>
 <div class="step">
-  <h3>Which way they go</h3>
+  <h3>Angular distributions</h3>
   <p>The petal shows how many neutrons leave in each direction; the beam comes from the left. Evaporated neutrons have forgotten the beam and leave every way alike; fast pre-equilibrium ones lean forward. Kalbach's rule sets how far, with one slope <i>a</i> that grows with the outgoing energy. The engine can write these angular distributions out too, as an optional output.</p>
   <div class="ctl"><label for="mea-eo">Outgoing energy (MeV)</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>Lower the outgoing energy and the petal rounds out: slow neutrons are mostly evaporated.</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
 </div>
 <div class="step">
-  <h3>In a star</h3>
+  <h3>Maxwellian-averaged cross sections</h3>
   <p>The pile below collects the energies of neutrons captured in a star's hot gas. Their speeds follow a Maxwell distribution set by the temperature <i>kT</i> (30 keV is about 350 million degrees); longer trails mean faster neutrons, and each pass by a nucleus may end in a capture flash.</p>
   <div class="ctl"><label for="mea-kt">Temperature kT (keV)</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Slow neutrons are easy to catch but pass by rarely, and fast ones are few, so most captures come from a window a few <i>kT</i> wide. The rate over the whole gas is the <b>Maxwellian-averaged cross section</b> (MACS), in millibarns (mb). Heat the gas and the window slides to higher energy, where the target is smaller. The MACS is folded from the engine's capture curve.</p>
 </div>
 <div class="step">
-  <h3>The target is hot too</h3>
+  <h3>Thermally excited targets</h3>
   <p>The balls show what share of target nuclei sit on each of its lowest levels at this temperature. In a star some targets are already excited, and each excited level is a different entrance to the same compound nucleus. A level with spin <i>J</i> holds more because it has 2<i>J</i>+1 orientations.</p>
   <div class="ctl"><label for="mea-kt2">Temperature kT (keV)</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Raise the temperature and watch nuclei move up. A stellar rate runs capture from each populated level and adds the results with these shares; the weights sum to the partition function <i>G</i>, and the ratio to the ground-state rate is the <b>stellar enhancement factor</b>. The engine can do this as an option, off by default; normally every target starts in its ground state.</p>
 </div>
 <div class="step">
-  <h3>How sure is any of this?</h3>
+  <h3>Uncertainties and covariances</h3>
   <p>Each faint disc is one run of the engine with its inputs nudged at random: the depth of the optical well, the level density and the photon strength, each known only to within some percent. The spread of many runs is an honest uncertainty: <b>Total Monte Carlo</b>.</p>
   <div class="btns"><button class="btn" data-act="tmc1">Run a variant</button><button class="btn ghost" data-act="tmc">Run 10</button><button class="btn ghost" data-act="clear">Clear</button></div>
   <p>A crisp rim means the inputs pin the answer; a fuzzy rim means they do not, and that is where new measurements would help most.</p>

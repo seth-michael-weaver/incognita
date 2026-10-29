@@ -100,19 +100,19 @@
   <p>Press the button to send the neutron in from another side. The glow always ends the same: the nucleus has <b>forgotten how it was formed</b>. This is Bohr's compound nucleus. From here on only three facts matter: its energy, its spin (how much it rotates) and its parity (a + or − label for its mirror symmetry).</p>
 </div>
 <div class="step">
-  <h3>From separate levels to a continuum</h3>
+  <h3>From discrete levels to the continuum</h3>
   <p>The ladder on the left holds the states of the nucleus, energy rising upward; the window on the right magnifies a 1-MeV slice around the orange ball. Near the bottom the rungs are far apart, and each one has been measured. Higher up, the ways to share the energy among 56 nucleons multiply until the rungs blur into a solid band, the continuum.</p>
   <div class="ctl"><label for="cn-e">Excitation energy</label><input id="cn-e" type="range" data-bind="E" min="0" max="20" step="0.1" value="6.5"><output data-show="E" data-fmt="1"></output></div>
   <p>Drag the excitation energy (the energy held above the lowest state, in MeV) and watch the window. The <b>level density</b> ρ, states per MeV, grows roughly as e<sup>2√(aE)</sup>, where <i>a</i> sets each nucleus's pace: a few per MeV at 3 MeV, hundreds near 8 MeV (where a neutron could escape), millions by 20 MeV. Up there the engine works with ρ itself.</p>
 </div>
 <div class="step">
-  <h3>Three pieces, joined at one energy</h3>
+  <h3>The composite level density</h3>
   <p>The terrain's height is the level density on a log scale, with energy to the right. Bottom left stand the counted levels. The straight plank is the <b>constant-temperature</b> law: ρ multiplies by e (about 2.7) every <i>T</i> MeV, where <i>T</i> is the nuclear temperature. The hillside is the <b>Fermi gas</b>, which treats the nucleons as independent particles. Except for the heaviest targets, where it reads tabulated densities, the engine uses this pair by default.</p>
   <div class="ctl"><label for="cn-ex">Matching energy</label><input id="cn-ex" type="range" data-bind="Ex" min="4.5" max="12" step="0.05" value="6"><output data-show="Ex" data-fmt="1"></output></div>
   <p>Drag the matching energy: the joint slides along the hill, and the plank pivots to meet it with the same height and slope. The two stacks below compare the levels the plank predicts with those actually counted. Only one joint makes them equal; there the plank turns green. That is the energy the engine picks.</p>
 </div>
 <div class="step">
-  <h3>Shells that melt</h3>
+  <h3>Shell effects and their damping</h3>
   <p>Single-nucleon levels, two nucleons each, for two nuclei. Left, a closed shell: everything below a big gap is full, so any move pays for the whole gap. Right, a mid-shell nucleus with a half-full top level, so cheap moves exist at once. Each counter shows how many arrangements hold the given heat.</p>
   <div class="ctl"><label for="cn-u">Heat (excitation)</label><input id="cn-u" type="range" data-bind="U" min="0" max="40" step="0.5" value="3"><output data-show="U" data-fmt="1"></output></div>
   <p>Drag the heat up and watch nucleons hop. At low heat the closed shell is starved of arrangements; with enough heat the gap stops mattering and both counts grow alike. The engine sums this up in one number per nucleus, the <b>level-density parameter</b> <i>a</i>: the bigger <i>a</i>, the faster the count of arrangements grows with heat. The needles show it for each nucleus: they start apart and, over about 10 MeV, both settle on the same smooth value (written <i>ã</i>, "a-tilde"), the one a nucleus with no shell gaps would have.</p>
@@ -120,14 +120,14 @@
   <div class="aside">The formula: <i>a</i>(<i>U</i>) = <i>ã</i> · [1 + δW · (1 − e<sup>−γ<i>U</i></sup>) / <i>U</i>], with <i>U</i> the heat and γ (gamma, about 0.1 per MeV here, less in heavier nuclei) how quickly the shell effect fades.</div>
 </div>
 <div class="step">
-  <h3>Sorted by spin and parity</h3>
+  <h3>Spin and parity distributions</h3>
   <p>The states at one energy fall into drawers by spin <i>J</i>, the nucleus's angular momentum: solid tokens for + parity, hollow for −. The middle drawers fill most, following (2<i>J</i>+1) e<sup>−(J+½)²/2σ²</sup>, where the spin cutoff σ sets the spread. The two parities come out about equal.</p>
   <div class="ctl"><label for="cn-u2">Excitation</label><input id="cn-u2" type="range" data-bind="U2" min="1" max="30" step="0.5" value="8"><output data-show="U2" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="deform">Deform the nucleus</button></div>
   <p>Drag the excitation up: σ grows, since a hotter nucleus can carry more spin. Then press Deform. A football-shaped nucleus can also rotate as a whole, so every drawer gains states (the blue tokens): the <b>collective enhancement</b>. By default the engine adds it only for targets heavier than about 215 nucleons.</p>
 </div>
 <div class="step">
-  <h3>Chopped into bins</h3>
+  <h3>Energy bins in the continuum</h3>
   <p>Above the last counted level the engine cuts the continuum into slices of equal energy width, called bins. In each bin the dots collapse into one block of ρ·ΔE states (ΔE is the bin width), sorted by spin and parity as above.</p>
   <div class="ctl"><label for="cn-emax">Top of the ladder</label><input id="cn-emax" type="range" data-bind="Emax" min="8" max="30" step="0.5" value="14"><output data-show="Emax" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="rebin">Sort again</button></div>

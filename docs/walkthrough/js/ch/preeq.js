@@ -28,19 +28,19 @@
   <p>The incoming neutron hovers above, holding all the energy: its own plus several MeV (million electron-volts) released by its capture.</p>
 </div>
 <div class="step">
-  <h3>Lifting pairs</h3>
+  <h3>Particle–hole excitations</h3>
   <p>The fast neutron bumps into a nucleon in the sea and hands it some of its energy. That nucleon jumps up to an empty rung, and the spot it left is now empty: a <b>hole</b> (the open ring). So every bump makes a <b>pair</b>: one more lifted nucleon and one hole. Physicists count the lifted nucleons and the holes together and call them <b>excitons</b>: after the first bump there are 3 (2 lifted, 1 hole).</p>
   <div class="btns"><button class="btn" data-act="collide">Collide</button><button class="btn ghost" data-act="reset">Start again</button></div>
   <p>Press Collide and watch one bump: the dive, the jump, the hole. Do it a few times. The one that gets hit may be a proton or a neutron. With every bump the energy is shared by more nucleons, so each lifted one sits lower, and the fast one gets less likely to escape.</p>
 </div>
 <div class="step">
-  <h3>The fork at every stage</h3>
+  <h3>Emission versus further collisions</h3>
   <p>At each stage the top neutron either escapes (arrow up, only if it is above the free line) or collides again (arrow down); thickness shows the odds. How fast it escapes is read off the reverse event: a nucleus that easily swallows a neutron of some energy also easily lets one of that energy go. Chapter 5 already worked out how easily it swallows (this two-way rule is called <b>detailed balance</b>). How fast it collides is how hard two nucleons hit each other, times how many new ways there are to share the energy after the hit.</p>
   <div class="ctl"><label for="pe-n">Stage (excitons n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Drag the stage up. Early on one particle holds most of the energy, so what escapes is fast. Later the energy is spread thin, and little gets out.</p>
 </div>
 <div class="step">
-  <h3>Where the fast tail comes from</h3>
+  <h3>The pre-equilibrium spectrum</h3>
   <p>The pile on the right is the <b>spectrum</b>: how many neutrons come out at each energy, slow on the left, fast on the right. Each reaction runs the chain until the top neutron escapes, and its colour says when: <em style="font-style:normal;color:var(--warm);font-weight:600">deep orange</em> at stage 3, paler later, <em class="n">blue</em> if it came out only after the nucleus calmed down (Chapter 8).</p>
   <div class="btns"><button class="btn" data-act="run">Run 300 reactions</button></div>
   <p>Stage 3 builds a broad, low dome that stretches almost to the maximum energy, the only stage that reaches that far. Later stages pile up lower. The blue hump is <b>evaporation</b>: once everyone shares the energy, only slow neutrons trickle out, like steam from a hot liquid.</p>
@@ -48,20 +48,20 @@
   <p>Drag the incoming neutron's energy: a new batch runs and the dome stretches further. Evaporation alone never makes fast neutrons.</p>
 </div>
 <div class="step">
-  <h3>Counting arrangements</h3>
+  <h3>Particle–hole state densities</h3>
   <p>The counter ticks through every way to put particles on empty rungs and holes in filled rungs so that their energies add up to the energy to share (rungs here are 1 MeV apart). Nucleons are fermions: no two share a rung, so a particle must land on an empty rung and a hole opens only where a nucleon was. This is <b>Pauli blocking</b>.</p>
   <div class="ctl"><label for="pe-u">Energy to share (MeV)</label><input id="pe-u" type="range" data-bind="U" min="2" max="16" step="1" value="8" data-instant><output data-show="U" data-fmt="0"></output></div>
   <div class="btns"><button class="btn" data-act="addpair">Add a pair</button><button class="btn ghost" data-act="droppair">Remove a pair</button></div>
   <p>Add a pair and the count jumps; raise the energy and it climbs roughly like <i>E</i><sup>n−1</sup>. This count, the <b>particle–hole state density</b>, sets the collision rate: more arrangements, more places a collision can lead. The engine counts on the real ladder, with rungs a fraction of an MeV apart, and adds one limit you see at high energy: a hole cannot sit below the bottom of the well.</p>
 </div>
 <div class="step">
-  <h3>Clusters leave too</h3>
+  <h3>Cluster emission</h3>
   <p>Small clusters can also leave early. In a <b>pickup</b>, a proton on its way out grabs a neutron at the surface and leaves with it as a <em class="n">deuteron</em>; grabbing two gives a triton or helium-3. In a <b>knockout</b>, the incoming neutron hits an <em class="a">alpha particle</em> (two protons and two neutrons) already formed near the surface and knocks it out. The engine uses Kalbach's formulas for both.</p>
   <div class="btns"><button class="btn ghost" data-act="pickup">Pick up a neutron → d</button><button class="btn ghost" data-act="knock">Knock out an α</button></div>
   <p>Press a button to watch one. Both give deuterons and alphas fast tails of their own, starting just above the energy it costs to pull each one out.</p>
 </div>
 <div class="step">
-  <h3>A second fast one</h3>
+  <h3>Multiple pre-equilibrium emission</h3>
   <p>At high energy the first bump can hand the hit nucleon a lot of energy too. When the fast neutron leaves, that second nucleon may still have more than the 8 MeV it needs to get out (the free line), and then it flies out as well: two fast particles from one reaction. The picture replays one reaction at a time and says what happens at each moment; the number next to each ball is its energy.</p>
   <div class="ctl"><label for="pe-e2">Neutron energy</label><input id="pe-e2" type="range" data-bind="E" min="5" max="80" step="0.5" value="40"><output data-show="E" data-fmt="1"></output></div>
   <p>Drag the energy. Below about 20 MeV the second nucleon rarely clears the line; above, more and more reactions shed two fast particles. This is <b>multiple pre-equilibrium</b>, which the engine includes from 20 MeV up. Whatever has not left becomes the compound nucleus of the next chapter. Below a few MeV (the target's highest discrete level in use) the engine skips the chain entirely.</p>

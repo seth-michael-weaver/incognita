@@ -48,18 +48,18 @@
     num: "Chapter 20", title: "Keeping it critical", short: "Criticality",
     html: `
 <div class="step">
-  <h3>Generation by generation</h3>
+  <h3>The multiplication factor</h3>
   <p>Each fission frees a few neutrons; some cause the next fissions, the rest are lost. The <b>multiplication factor</b> <i>k</i> is how many new fissions one fission leads to: each generation multiplies the neutrons by <i>k</i>. Above 1 the chain grows, below 1 it dies away.</p>
   <div class="ctl"><label for="cri-k">Multiplication k</label><input id="cri-k" type="range" data-bind="k" data-instant min="0.95" max="1.05" step="0.05" value="1.05"><output data-show="k" data-fmt="2"></output></div>
 </div>
 <div class="step">
-  <h3>The late few</h3>
+  <h3>Delayed neutrons</h3>
   <p>A small share of the neutrons (0.65 %) arrive seconds late, from fission fragments that decay first. Those late ones set the pace, so growth slows from a blink to minutes. The plot runs at ×10 speed.</p>
   <div class="ctl"><label for="cri-k2">Multiplication k</label><input id="cri-k2" type="range" data-bind="kd" data-instant min="0.998" max="1.002" step="0.0005" value="1.001"><output data-show="kd" data-fmt="4"></output></div>
   <div class="btns"><button class="btn ghost" data-act="delayed" aria-pressed="true">Delayed neutrons</button></div>
 </div>
 <div class="step">
-  <h3>Finding k = 1</h3>
+  <h3>Criticality</h3>
   <p>A critical experiment: move the control rods until the power stays flat. At that setting <i>k</i> is exactly 1, and that rod position is the measurement. Find it: the readout shows <i>k</i> to five decimals.</p>
   <div class="ctl"><label for="cri-rod">Control rods in (%)</label><input id="cri-rod" type="range" data-bind="ins" data-instant min="35" max="75" step="1" value="45"><output data-show="ins" data-fmt="0"></output></div>
 </div>`,

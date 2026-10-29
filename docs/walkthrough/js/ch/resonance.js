@@ -132,19 +132,19 @@
   <p>The neutron hops along in energy; where it lands it may be captured, in a flash of photons. On a peak the cross section is thousands of barns and capture is almost certain; between peaks it is a few barns. Drag the energy to park it on a peak, then between two.</p>
 </div>
 <div class="step">
-  <h3>Peaks keep their distance</h3>
+  <h3>Level repulsion</h3>
   <p>The middle row shows how real levels sit: two levels with the same spin and parity repel, so near-coincidences are rare. <b>Random-matrix theory</b> describes this pattern. Truly random positions (top row) clump and leave gaps.</p>
   <div class="btns"><button class="btn" data-act="again">Draw again</button></div>
   <p>Draw again for a new sample. ⟨r̃⟩ compares each spacing with the next: about 0.39 for random, 0.53 for repelling levels; the code uses the repelling pattern. Mixing two sequences, say two spins (bottom row), partly hides the repulsion.</p>
 </div>
 <div class="step">
-  <h3>Heights scatter wildly</h3>
+  <h3>Porter–Thomas width fluctuations</h3>
   <p>Now each peak's height is its <b>neutron width</b> Γ<sub>n</sub> on a linear scale: how strongly the level couples to a neutron. The yellow cap is its γ width Γ<sub>γ</sub>, how fast it emits photons; it sums hundreds of photon paths, so it is nearly the same for every level.</p>
   <div class="btns"><button class="btn" data-act="roll">Roll a width</button><button class="btn ghost" data-act="equal">Equal widths</button><button class="btn ghost" data-act="pt">Porter–Thomas</button></div>
   <p>A level has only one way to break up into neutron plus target, so its width behaves like the square of one bell-curve number. Roll one: the ball lands at <i>x</i>, <i>x</i>² becomes the next peak's height, and a dot drops into the pile. The pile crowds near zero with a long tail, the <b>Porter–Thomas</b> law: most levels are weak, a few enormous. Equal widths shows a row of average peaks instead.</p>
 </div>
 <div class="step">
-  <h3>A ladder from four numbers</h3>
+  <h3>Statistical resonance ladders</h3>
   <p>The peaks now come from four averages you can set. For an unmeasured nucleus only these averages can be predicted: the mean spacing <i>D</i><sub>0</sub>; the <b>strength functions</b> <i>S</i><sub>0</sub> and <i>S</i><sub>1</sub>, the average neutron width per unit spacing for s-wave (head-on) and p-wave (off-centre) neutrons; and the average γ width. From these the code builds a <b>ladder</b>: one random set of levels with those averages. Three have sliders here; <i>S</i><sub>1</sub> stays fixed (its value is written under the peaks).</p>
   <div class="ctl"><label for="res-d0">Spacing D₀ (eV)</label><input id="res-d0" type="range" data-bind="D0" min="3" max="60" step="0.5" value="20"><output data-show="D0" data-fmt="1"></output></div>
   <div class="ctl"><label for="res-s0">Strength S₀ (×10⁻⁴)</label><input id="res-s0" type="range" data-bind="S0" min="0.2" max="3" step="0.05" value="1"><output data-show="S0" data-fmt="2"></output></div>
@@ -152,13 +152,13 @@
   <p>Drag <i>D</i><sub>0</sub> and the peaks spread out or crowd together. Solid peaks are s-wave levels (positive parity), outlined peaks p-wave (negative parity). Neutron widths grow as √<i>E</i> for s-waves and as <i>E</i><sup>3/2</sup> for p-waves, so the outlined peaks start short and grow toward the right.</p>
 </div>
 <div class="step">
-  <h3>Down at thermal</h3>
+  <h3>The thermal region</h3>
   <p>The same peaks on a logarithmic energy scale, down to thousandths of an eV. Reactor neutrons slow down by bouncing off light nuclei, losing about the same fraction of their energy each time, so every hop here is the same length. Some are caught by the peaks on the way.</p>
   <div class="btns"><button class="btn" data-act="slow">Slow down 10 neutrons</button></div>
   <p>Those that get through settle at room temperature, 0.025 eV, the <b>thermal</b> energy, far below the first peak. There the cross section, the disc's area, is the sum of the resonances' tails, including bound levels just below zero; the tails grow as 1/<i>v</i> (<i>v</i> the neutron's speed), so the ground rises to the left. The catch on the way down is measured by the <b>resonance integral</b>: the cross section above 0.5 eV, each energy weighted by 1/<i>E</i>.</p>
 </div>
 <div class="step">
-  <h3>Only the statistics are predictable</h3>
+  <h3>What the statistics can predict</h3>
   <p>Each row is one ladder drawn from the same four numbers, with a disc whose area is its thermal capture cross section. The bracket reaches to the peak that sets that value, usually the nearest; its distance changes from ladder to ladder, and the disc swings by a factor of ten or more.</p>
   <div class="btns"><button class="btn" data-act="draw1">Draw a ladder</button><button class="btn ghost" data-act="more">Draw 20</button></div>
   <p>Each value drops into the pile on the right. For an unmeasured nucleus the answer is a spread of values, not one number, and no better model can narrow it. The resonance integral, a sum over many peaks, spreads less. Where levels are more than about 10 keV apart, as in light nuclei, none is near thermal: capture there is direct, and the code refuses to answer.</p>

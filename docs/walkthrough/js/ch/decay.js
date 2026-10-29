@@ -85,32 +85,32 @@
   <p>The <b>transmission coefficient</b> <i>T</i> is the chance that a particle reaching the edge gets through; for particles it comes from the optical model of Chapter 5, run backwards. The <b>level density</b> ρ, written beside each door, counts the states the leftover nucleus can end up in. Sharing by <i>T</i> times ρ is the <b>Hauser–Feshbach</b> rule. At 10 MeV the neutron door takes nearly everything.</p>
 </div>
 <div class="step">
-  <h3>Why most particles come out slow</h3>
+  <h3>Evaporation spectra</h3>
   <p>The neutron door, split by outgoing energy ε (slow left, fast right). Each door's gap <i>T</i>(ε) widens for faster neutrons. Under it is the crowd of states the leftover nucleus can be in: a slow neutron leaves most of the energy behind, where states are plentiful, so the crowds shrink to the right.</p>
   <div class="ctl"><label for="dc-sp">Energy to spare</label><input id="dc-sp" type="range" data-bind="spare" min="1" max="12" step="0.5" value="5"><output data-show="spare" data-fmt="1"></output></div>
   <p>Door × crowd makes the pile a hump, the <b>evaporation spectrum</b>, like steam leaving a hot liquid. Drag the energy to spare (in MeV, million electron-volts): the pile restarts, and its peak stays near 1 MeV, set by the nuclear temperature. Extra energy mostly makes the leftover nucleus hotter.</p>
 </div>
 <div class="step">
-  <h3>Charged particles must climb</h3>
+  <h3>The Coulomb barrier in emission</h3>
   <p>A proton's energy at each distance r from the centre: a well inside, and outside a hill from the electric (Coulomb) repulsion, falling off as 1/r. Below the hilltop the proton, rattling in the well, can only <b>tunnel</b> through the shaded stretch, a quantum effect that succeeds once in many knocks on the wall. The odds are worked out as in Chapter 4: the wider and higher the stretch, the more zeros in "1 knock in 10<sup>N</sup>".</p>
   <div class="ctl"><label for="dc-ce">Particle energy</label><input id="dc-ce" type="range" data-bind="eps" min="0.5" max="12" step="0.1" value="3"><output data-show="eps" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="toggleAlpha">Switch proton / alpha</button></div>
   <p>Drag the energy down and watch the tunnel widen; then switch to the alpha, whose two charges face a hill about twice as high. That is why uncharged neutrons usually win once they can leave, and why proton and alpha exits matter mostly for light nuclei and high energies.</p>
 </div>
 <div class="step">
-  <h3>Doors open one by one</h3>
+  <h3>Channel thresholds</h3>
   <p>Each particle door opens only above its <b>separation energy</b>, the cost of pulling that particle out: here 8 MeV for a neutron, 9 for a proton, 7 for an alpha. Below the neutron's 8 MeV, nearly every decay gives off light.</p>
   <div class="ctl"><label for="dc-e">Excitation energy</label><input id="dc-e" type="range" data-bind="E" min="5" max="24" step="0.1" value="7"><output data-show="E" data-fmt="1"></output></div>
   <p>Drag the excitation energy past 8 MeV. Within about 1 MeV the neutron door swings wide and the photon share drops a hundredfold. The alpha door is unlocked first, at 7 MeV, yet barely opens: its Coulomb hill (Chapter 4) keeps it nearly shut until well above. The proton door unlocks at 9 MeV and also stays narrow, held back by its own hill.</p>
 </div>
 <div class="step">
-  <h3>Spin and parity must balance</h3>
+  <h3>Angular-momentum and parity conservation</h3>
   <p>The compound nucleus (top) has spin <i>J</i>; the leftover nucleus's states sit below in drawers by spin <i>J</i>′. The neutron carries off the difference in spin and parity: leaving with orbital angular momentum <i>l</i>, it changes the spin by up to <i>l</i> + ½ and flips the parity when <i>l</i> is odd. Larger <i>l</i> means a narrower door; each drawer's door is the smallest <i>l</i> that reaches it. Solid landings keep parity; hollow ones flip it.</p>
   <div class="ctl"><label for="dc-j">Compound spin J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
   <p>Drag <i>J</i> up. The open doors slide toward high-spin drawers, which hold few states, while the full drawers sit behind shut doors. A high-spin compound nucleus is slow to emit particles, which gives photons, and isomers (long-lived states, Chapter 10), their chance.</p>
 </div>
 <div class="step">
-  <h3>The way you came in</h3>
+  <h3>Elastic enhancement</h3>
   <p>At low energy the compound nucleus is a set of sharp <b>resonances</b>, energies where the neutron is easily absorbed; eight are drawn, one per row. Each has random door widths: the entrance (the neutron channel) on the left, width <i>x</i>, and the other doors, mostly photons here, on the right, widths <i>y</i>.</p>
   <div class="btns"><button class="btn" data-act="fire">Fire 40 neutrons</button><button class="btn ghost" data-act="reroll">New resonances</button></div>
   <p>Press Fire and follow the neutrons. A neutron gets into a row in proportion to that row's entrance width <i>x</i>. Once inside, it picks a way out in proportion to the widths: back through the entrance with chance <i>x</i> / (<i>x</i> + Σ<i>y</i>), otherwise through one of the other doors. The trays count where they went.</p>
@@ -120,7 +120,7 @@
   <p>Add doors. With many exits their total width stops fluctuating, so the correction matters most where few doors are open. The engine applies it, with Moldauer's formula, for incident neutrons up to the target's neutron separation energy, and leaves it out above.</p>
 </div>
 <div class="step">
-  <h3>What is left to share</h3>
+  <h3>Flux after direct reactions</h3>
   <p>The doors of this chapter only share out the neutrons that actually stayed. Chapters 6 and 7 already took their cut: some neutrons make one glancing hit and fly off (direct), some knock about once or twice and shoot out fast (pre-equilibrium). Only the rest stay inside and heat the nucleus. The counters on the right tally each fate; the ones that stay never leave the nucleus, they are only counted.</p>
   <div class="ctl"><label for="dc-einc">Neutron energy</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Only those that stay enter the door competition. Drag the neutron energy: at a few MeV nearly all stay; by 30 MeV about half have left before reaching equilibrium.</p>

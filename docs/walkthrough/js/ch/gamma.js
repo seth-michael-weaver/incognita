@@ -122,31 +122,31 @@
   <p>The pile peaks a few MeV below the start: most photons carry 2 to 4 MeV. Move the start energy and the peak follows.</p>
 </div>
 <div class="step">
-  <h3>The whole nucleus rings</h3>
+  <h3>The giant dipole resonance</h3>
   <p>The big peak on the right is the <b>giant dipole resonance</b>: all the protons (hatched) sloshing back and forth against all the neutrons (filled). Its frequency sets the photon energy the nucleus absorbs and emits most readily. The curve is the photon strength <i>f</i>, on a log scale (each step up is ten times more).</p>
   <div class="ctl"><label for="gm-a">Mass number A</label><input id="gm-a" type="range" data-bind="A" min="40" max="240" step="1" value="112"><output data-show="A" data-fmt="0"></output></div>
   <p>Drag the mass number A (protons plus neutrons): heavy nuclei slosh more slowly, ringing near 12 to 14 MeV; light ones near 20. A decaying nucleus emits photons of only a few MeV, so what matters most is the shaded low-energy tail.</p>
 </div>
 <div class="step">
-  <h3>Scissors and the upbend</h3>
+  <h3>Low-energy magnetic strength</h3>
   <p>A deformed nucleus also radiates magnetically: its protons (hatched) and neutrons (filled), two footballs, rock against each other like scissor blades. This <b>scissors mode</b> sits near 3 MeV. <b>Spin-flip</b>, near 8 MeV, is single nucleons flipping their spin (the small arrows), in any shape.</p>
   <div class="ctl"><label for="gm-b">Deformation β₂</label><input id="gm-b" type="range" data-bind="beta" min="0" max="0.35" step="0.01" value="0.25"><output data-show="beta" data-fmt="2"></output></div>
   <p>Drag the deformation β₂ (0 is a sphere). The more stretched, the more scissors photons fly; a sphere has none. At the lowest energies the strength rises again: the <b>upbend</b>, a trickle of soft photons, which the engine weakens as the nucleus deforms. An optional switch, off by default, uses stronger scissors systematics that match Oslo measurements (four to five times stronger in uranium).</p>
 </div>
 <div class="step">
-  <h3>Down the ladder</h3>
+  <h3>Gamma cascades</h3>
   <p>A cascade is photons emitted one after another, from the bins at the top (states too dense to list, Chapter 8) down to the named levels, stretched so they can be read (solid rung parity +, hollow −). There the engine stops estimating and follows the tabulated <b>branching ratios</b>: each level's measured odds of decaying to each lower one.</p>
   <div class="btns"><button class="btn" data-act="drop">Drop a cascade</button></div>
   <p>Press the button a few times: the upper part changes every time; the ending follows one of a few measured paths.</p>
 </div>
 <div class="step">
-  <h3>Shelves that hold</h3>
+  <h3>Isomer production</h3>
   <p>The 11/2− level at 0.40 MeV is an <b>isomer</b>: its spin is so far from the levels below that a photon can hardly connect them, so it lives seconds to years, and whatever lands there stays. The engine treats any level living longer than one second as an end point. Each ball is one cascade, ending in the isomer's pile or the ground state's.</p>
   <div class="ctl"><label for="gm-j">Entrance spin</label><input id="gm-j" type="range" data-bind="J0" min="0" max="8" step="1" value="2" data-instant><output id="gm-jout">5/2</output></div>
   <p>Drag the entrance spin, where the cascades start, and the piles restart. The share that ends on the isomer, the <b>isomer ratio</b>, depends on it: a high-spin start feeds the high-spin isomer; a low-spin start slides past it to the ground state.</p>
 </div>
 <div class="step">
-  <h3>Capture</h3>
+  <h3>Radiative capture</h3>
   <p>A nucleus that has just absorbed a slow neutron has two exit doors (Chapter 9): photons (top) and the neutron going back out (right). Each door's gap is its <b>width</b>, in eV: how fast the nucleus decays through it. The photon width hardly changes; the neutron width grows with the neutron's speed.</p>
   <div class="ctl"><label for="gm-e">Neutron energy</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1.0 keV</output></div>
   <p>Drag the neutron energy, from 10 eV to 2 MeV. <b>Capture</b>, (n,γ), means the neutron stays and a photon leaves: it wins most of the time at 10 eV and becomes a small share above a few keV. The photon width at threshold is measured for hundreds of nuclei, a check on the photon strength. By default the engine uses its own; an optional switch scales each measured nucleus's photon strength until the two agree.</p>

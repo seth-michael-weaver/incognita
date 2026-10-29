@@ -36,17 +36,17 @@
     num: "Chapter 19", title: "Hotter means less reactive", short: "Doppler",
     html: `
 <div class="step">
-  <h3>Hot fuel jiggles</h3>
+  <h3>Thermal motion of the target</h3>
   <p>Hotter fuel: its atoms jiggle faster. Each uranium atom is no longer sitting still when a neutron arrives.</p>
   <div class="ctl"><label for="dop-t1">Fuel temperature (K)</label><input id="dop-t1" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="600"><output data-show="T" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <h3>The peak spreads out</h3>
+  <h3>Doppler broadening</h3>
   <p>The curve is the chance that uranium-238 catches a neutron, plotted against the neutron's energy. Its height is a target area in <b>barns</b> (one barn is 10<sup>−24</sup> cm², roughly the size a nucleus shows a neutron). Because the atoms move, some meet the neutron head-on and some run away from it, so the narrow peak gets smeared: lower and wider. Its area stays the same.</p>
   <div class="ctl"><label for="dop-t2">Fuel temperature (K)</label><input id="dop-t2" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="1200"><output data-show="T" data-fmt="0"></output></div>
 </div>
 <div class="step">
-  <h3>Wider wings catch more</h3>
+  <h3>Resonance self-shielding</h3>
   <p>A fuel pellet is thick. The shaded band is the share of neutrons it stops at each energy. The peak's centre already stops everything, hot or cold, so a lower peak loses nothing there; the wider wings catch more. More neutrons are lost to capture instead of causing fission, so <i>k</i> drops by itself. (<i>k</i> is how many new fissions each fission leads to; Chapter 20 explains it.)</p>
   <div class="ctl"><label for="dop-t3">Fuel temperature (K)</label><input id="dop-t3" type="range" data-bind="T" data-instant min="300" max="1500" step="10" value="900"><output data-show="T" data-fmt="0"></output></div>
 </div>`,

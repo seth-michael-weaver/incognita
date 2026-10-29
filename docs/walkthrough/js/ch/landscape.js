@@ -24,23 +24,23 @@
     lead: "Every nucleus anyone has ever made, on one map: 3,338 of them so far, and only 252 last forever.",
     html: `
 <div class="step">
-  <h3>Every nucleus ever made</h3>
+  <h3>The chart of nuclides</h3>
   <p>Each little square is one nucleus that has actually been seen in an experiment: neutrons count across, protons count up. Pale squares have been seen, but their mass has not been weighed yet, only estimated. The <b>dark</b> squares are the 252 that never decay. The others fall apart, orange ones in a blink, blue ones only after years. The <em style="font-style:normal;color:var(--proton);font-weight:600">red</em> row is the element you pick with the slider: all its known isotopes.</p>
   <div class="ctl"><label for="ls-z">Look at element (protons Z)</label><input id="ls-z" type="range" data-bind="zSel" data-instant min="1" max="110" step="1" value="26"><output data-show="zSel" data-fmt="0"></output></div>
   <p class="ctl-result" id="ls-z-out" aria-live="polite"></p>
 </div>
 <div class="step">
-  <h3>Binding: the ridge</h3>
+  <h3>Binding energy across the chart</h3>
   <p>Now each square is coloured by its <b>binding energy per nucleon</b>, how tightly each neutron or proton is held (Chapter 3). The stable nuclei sit along a ridge of strong binding; step away from it, with too many neutrons or too many protons, and the binding drops. The strongest of all is nickel-62. The thin lines mark the <b>magic numbers</b> (8, 20, 28, 50, 82, 126), where nuclei are extra tightly bound.</p>
 </div>
 <div class="step">
-  <h3>Rolling down to stability</h3>
+  <h3>Beta decay toward stability</h3>
   <p>Nuclei with the same total number of nucleons (the same <b>mass number</b> A) lie on a diagonal line across the map, shown in <em style="font-style:normal;color:var(--proton);font-weight:600">red</em>. Start with too many neutrons, as the fragments of a split uranium nucleus do. In <b>beta decay</b> a neutron turns into a proton, so the nucleus steps one place along its line toward the more tightly bound middle, again and again, until it reaches the ridge and stops. The small graph shows the same chain as a valley the nucleus rolls down. Try A = 137: the chain passes caesium-137, the long-lived product of reactor accidents.</p>
   <div class="ctl"><label for="ls-a">Mass number A</label><input id="ls-a" type="range" data-bind="aSel" data-instant min="8" max="250" step="1" value="137"><output data-show="aSel" data-fmt="0"></output></div>
   <p class="ctl-result" id="ls-a-out" aria-live="polite"></p>
 </div>
 <div class="step">
-  <h3>What INCOGNITA ships</h3>
+  <h3>INCOGNITA coverage</h3>
   <p>The same map, coloured by what our library holds for each nucleus. <em style="font-style:normal;color:var(--fission);font-weight:600">Green</em>: evaluated from its measured resonances. The rest have a model file built by the engine alone: <b>dark</b> for stable or long-lived (tier A), <em style="font-style:normal;color:var(--accent);font-weight:600">blue</em> for more than a day (tier B), <em style="font-style:normal;color:var(--warm);font-weight:600">orange</em> for shorter-lived (tier C). Grey ones are not in the library (mostly the lightest nuclei, and a few the engine cannot run).</p>
 </div>`,
     setup(S) { S.set("mode", "chart"); S.set("zSel", 26); S.set("aSel", 137); S.rollT = 0; },

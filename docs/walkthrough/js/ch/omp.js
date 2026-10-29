@@ -34,24 +34,24 @@
   <p>Drag the energy and watch the wavelength at the bottom, in femtometres (fm, 10⁻¹⁵ m). Slow neutrons have long waves: below about 9 MeV one wavelength is wider than this whole nucleus.</p>
 </div>
 <div class="step">
-  <h3>The real part pulls</h3>
+  <h3>The real potential: refraction</h3>
   <p>The <b>optical potential</b> is the averaged force of the whole nucleus on the neutron. Its <em>real part</em> is a well about 50 MeV deep: the neutron speeds up inside, so the crests crowd together. The engine gives it a Woods–Saxon shape, flat and deep in the middle, fading smoothly to zero at the surface.</p>
 </div>
 <div class="step">
-  <h3>The imaginary part absorbs</h3>
+  <h3>The imaginary potential: absorption</h3>
   <p>The shadow behind the nucleus is the neutrons lost to reactions. The <em>imaginary part</em> of the potential models them: it shrinks the wave instead of bending it, mostly near the surface (the coloured ring).</p>
   <div class="ctl"><label for="omp-w">Absorption W (MeV)</label><input id="omp-w" type="range" data-bind="W" min="0" max="14" step="0.5" value="7"><output data-show="W" data-fmt="1"></output></div>
   <p>Drag <i>W</i> to 0 and the shadow fills in: no absorption, no reactions. Hence the name optical model: the nucleus is a cloudy glass ball that partly bends and partly absorbs.</p>
 </div>
 <div class="step">
-  <h3>Aim matters</h3>
+  <h3>Partial waves and impact parameter</h3>
   <p>Seen head-on, the target splits into rings, one per <b>partial wave</b> <i>l</i> = 0, 1, 2, … A neutron passing at distance <i>b</i> from the centre carries <b>angular momentum</b> <i>l</i> ≈ <i>k b</i>, where <i>k</i> grows with energy. The darker a ring, the larger its <b>transmission coefficient</b> <i>T<sub>l</sub></i>: the chance that a neutron in that ring is absorbed.</p>
   <div class="ctl"><label for="omp-e3">Neutron energy (MeV)</label><input id="omp-e3" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Fire 200 neutrons</button></div>
   <p>Orange flashes are absorbed neutrons; the bars count each ring's absorbed share against the model's <i>T<sub>l</sub></i> (the tick). Inner rings absorb nearly everything, outer rings let neutrons pass. At low energy the rings are huge and only <i>l</i> = 0 matters.</p>
 </div>
 <div class="step">
-  <h3>Swinging past the nucleus</h3>
+  <h3>The centrifugal barrier</h3>
   <p>A neutron with a lot of angular momentum passes too far out to touch the nucleus: that is the <b>centrifugal barrier</b>. Seen from above, every neutron here belongs to one partial wave <i>l</i>, so it passes at the same <b>swing distance</b> <i>b</i> ≈ (<i>l</i>+½)/<i>k</i> (the dashed circle).</p>
   <p>But each neutron is a wave, fuzzy over about one reduced wavelength λ̄ (the glow). Even when its path misses, the fuzzy edge can brush the surface and get in: <b>tunnelling</b>.</p>
   <div class="ctl"><label for="omp-l">Partial wave l</label><input id="omp-l" type="range" data-bind="L" min="0" max="8" step="1" value="3" data-instant><output data-show="L" data-fmt="0"></output></div>
@@ -60,7 +60,7 @@
   <div class="formula">T<sub>lj</sub> = 1 − |S<sub>lj</sub>|²</div>
 </div>
 <div class="step">
-  <h3>Adding up the target</h3>
+  <h3>The reaction cross section</h3>
   <p>The disc on the right is how big the nucleus looks to the neutron: the <b>reaction cross section</b>, in barns (10⁻²⁴ cm²). Each ring adds its area times <i>T<sub>l</sub></i> to it. The dashed circle is the geometric size.</p>
   <div class="ctl"><label for="omp-e4">Neutron energy (MeV)</label><input id="omp-e4" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="sum">Add up again</button></div>

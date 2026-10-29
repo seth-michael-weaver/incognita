@@ -108,7 +108,7 @@
   <p>Emitted neutrons are usually slow, so most drops are short. Blue dots sit above the dashed neutron threshold: they can afford a second neutron, the (n,2n) reaction. Below about 11 MeV none get there.</p>
 </div>
 <div class="step">
-  <h3>A walk across the chart</h3>
+  <h3>Sequential emission across the chart</h3>
   <p>The streams are reactions walking across a corner of the <b>chart of nuclides</b>, nuclei mapped by neutron number N (across) and proton number Z (up). Each starts in the outlined compound square; each square is named for the reaction that ends there.</p>
   <p>A <em class="n">neutron</em> out moves one square left, a <em class="p">proton</em> one down, an <em class="a">alpha particle</em> (two protons, two neutrons) two diagonally. Stream width is how much takes that step; shade and percentage are where reactions end.</p>
   <div class="ctl"><label for="cs-e4">Neutron energy</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
@@ -116,7 +116,7 @@
   <p>Drag the energy: at a few MeV almost everything stops on the target square; higher up the streams reach further. Each step costs 7 to 11 MeV of separation energy, so even at 30 MeV the walk is three or four steps at most.</p>
 </div>
 <div class="step">
-  <h3>Top down, bin by bin</h3>
+  <h3>Population bookkeeping</h3>
   <p>The engine empties each nucleus from the top down, one energy slice, or <b>bin</b>, at a time. Right: the residual from the first emission; left: its daughter, one neutron fewer. Orange balls are reactions waiting in each bin. Bins are 1 MeV here; the engine uses about 40 per nucleus, sized to the energy available.</p>
   <p>As the marker sweeps a bin, each ball takes an exit by the competition of Chapter 9: a photon (<em class="g">γ</em>) drops it to a lower bin, a <em class="n">neutron</em> moves it into the daughter, a proton or alpha takes it off the picture. Below every threshold, photons carry the rest to the ground state (grey). Then the daughter is swept.</p>
   <div class="ctl"><label for="cs-e3">Neutron energy</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
@@ -124,13 +124,13 @@
   <p>Photons only fall, and each nucleus is finished before its daughters, so nothing lands on a bin already emptied.</p>
 </div>
 <div class="step">
-  <h3>Naming the history</h3>
+  <h3>Exclusive reaction channels</h3>
   <p>One reaction plays at a time: the marker hops across the chart and each particle emitted falls into the tray. Each channel plays at an energy where it really happens (top of the picture): (n,3n) at 25 MeV, since three neutrons cost more than 20 MeV here; capture, (n,γ), at 1 MeV. The full tray names the <b>exclusive channel</b>, such as (n,2n); photons do not count. The engine gives each channel its own cross section (its likelihood, as an effective target area).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Next channel</button></div>
   <p>Step through them. (n,np) plays twice, neutron first and proton first: same square, same tray, one channel. Then a ghost deuteron (a bound proton and neutron) reaches that square in one hop: its tray reads d, a different channel, (n,d).</p>
 </div>
 <div class="step">
-  <h3>Where everything ends</h3>
+  <h3>Residual production</h3>
   <p>Each square now holds shelves: ink for the <b>ground state</b>, green (on two squares) for an <b>isomer</b>, an excited state long-lived enough to count as a separate product. Pile height is the <b>residual production</b>: how much of each nucleus the reactions made.</p>
   <div class="ctl"><label for="cs-e2">Neutron energy</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Fire 200 reactions</button></div>
