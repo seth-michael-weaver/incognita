@@ -9,14 +9,14 @@ WT.L.ch.exciton = {
   <div class="formula">ω(p,h,E) = g<sup>n</sup> (E − A<sub>p,h</sub>)<sup>n−1</sup> / (p! h! (n−1)!) ,  A<sub>p,h</sub> = max(p,h)²/g − (p² + h² + p + h)/4g</div>
   <div class="ctl"><label for="ex-n">Teilchen p (Löcher p − 1)</label><input id="ex-n" type="range" data-bind="pp" min="2" max="6" step="1" value="3" data-instant><output data-show="pp" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="pauli" aria-pressed="true">Pauli-Korrektur</button></div>
-  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ ist die Dichte der Einteilchenniveaus nahe der Fermi-Energie. <i>A<sub>p,h</sub></i> ist die <b>Pauli-Korrektur</b>: Zwei Teilchen können nicht dasselbe Niveau besetzen, also kosten die tiefsten Konfigurationen Energie, und die Dichte nahe der Schwelle sinkt. Die Skizze zeigt jeweils eine zufällig gezogene Konfiguration mit dem gewählten <i>p</i>.</p>
+  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ ist die Dichte der Einteilchenniveaus nahe der Fermi-Energie. <i>A<sub>p,h</sub></i> ist die <b>Pauli-Korrektur</b>: Zwei Teilchen können nicht dasselbe Niveau besetzen, also kosten die tiefsten Konfigurationen Energie, und die Dichte nahe der Schwelle sinkt. Die Kurven sind nach ihren Anzahlen benannt: 3p2h bedeutet 3 Teilchen und 2 Löcher. Die Skizze zeigt jeweils eine zufällig gezogene Konfiguration mit dem gewählten <i>p</i>: Jedes Loch ist ein Nukleon, das unterhalb der Fermi-Kante fehlt.</p>
 </div>
 <div class="step">
-  <h3>Tiefer hinein oder hinaus</h3>
+  <h3>Übergangs- und Emissionsraten</h3>
   <p>Von jeder Stufe aus kann zweierlei geschehen. Ein Stoß erzeugt ein weiteres Paar, mit der Rate λ<sup>+</sup>, nach Fermis goldener Regel das Quadrat des Matrixelements mal der Dichte der erreichbaren Zustände. Oder ein Teilchen verlässt den Kern, mit der Rate <i>W</i>, die aus dem detaillierten Gleichgewicht folgt: aus dem inversen Wirkungsquerschnitt und dem Verhältnis der Zustandsdichten mit und ohne das entweichende Teilchen.</p>
   <div class="formula">λ<sup>+</sup>(n) = (2π/ħ) M² ω<sub>acc</sub> ,  W(p,h,ε) = (2s+1)/(π²ħ³) με σ<sub>inv</sub>(ε) ω(p−1,h,U) / ω(p,h,E)</div>
   <div class="ctl"><label for="ex-e">Neutronenenergie (MeV)</label><input id="ex-e" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
-  <p>Die Balken sind die beiden Raten auf jeder Stufe, auf logarithmischer Skala: λ<sup>+</sup> von der Größenordnung 10²² s⁻¹, <i>W</i> auf der ersten Stufe etwa ein Zehntel davon und mit jeder Stufe kleiner, denn jedes neue Paar verringert die Energie, die das führende Teilchen tragen kann. Die Engine nimmt M² in der Form von Koning und Duijvestijn, die mit der Energie pro Exziton abfällt:</p>
+  <p>Jede Stufe ist mit ihren Anzahlen benannt (2p1h: 2 Teilchen, 1 Loch). Die Balken sind die beiden Raten auf jeder Stufe, auf logarithmischer Skala: λ<sup>+</sup> von der Größenordnung 10²² s⁻¹, <i>W</i> auf der ersten Stufe etwa ein Zehntel davon und mit jeder Stufe kleiner, denn jedes neue Paar verringert die Energie, die das führende Teilchen tragen kann. Die Engine nimmt M² in der Form von Koning und Duijvestijn, die mit der Energie pro Exziton abfällt:</p>
   <div class="formula">M² = (C₁ A<sub>p</sub> / A³) · [7.48 + 4.62×10⁵ / (E/(n A<sub>p</sub>) + 10.7)³]  MeV²</div>
 </div>
 <div class="step">
@@ -27,14 +27,14 @@ WT.L.ch.exciton = {
   <p>Nach wenigen 10⁻²² s ist die ganze Kette durchlaufen. Der Anteil, der unterwegs entweicht, ist die Präequilibrium-Emission; der Rest wird, in der Engine wie in TALYS nach höchstens sechs Teilchen, an den Compoundkern übergeben. Die Integration über die Zeit gibt jeder Stufe eine Stärke τ(<i>n</i>)·<i>P</i>(<i>n</i>), und genau dieses Produkt berechnet die Engine.</p>
 </div>
 <div class="step">
-  <h3>Woher der harte Ausläufer kommt</h3>
+  <h3>Der hochenergetische Ausläufer</h3>
   <p>Das Emissionsspektrum ist die Summe über die Stufen aus Besetzung mal Lebensdauer mal Emissionsrate, dazu die Verdampfung dessen, was übrig bleibt. Die Stufe <i>n</i> = 3 allein, zwei Teilchen und ein Loch, erreicht die höchsten Austrittsenergien: Ihr Spektrum fällt zum Endpunkt hin nur linear ab. Jede spätere Stufe ist weicher.</p>
   <div class="formula">dσ/dε = σ<sub>CN</sub> Σ<sub>n</sub> P(n) τ(n) W(n,ε) + Verdampfung</div>
   <div class="ctl"><label for="ex-e3">Neutronenenergie (MeV)</label><input id="ex-e3" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
   <p>Erhöhe die Energie, und das Spektrum wird härter: Der Präequilibrium-Ausläufer reicht bis zum Endpunkt, während der Verdampfungsbuckel bei 1 bis 2 MeV bleibt. Oberhalb von etwa 10 MeV lassen sich die gemessenen hochenergetischen Neutronen nur mit diesem Ausläufer reproduzieren.</p>
 </div>
 <div class="step">
-  <h3>Wie groß der Anteil ist</h3>
+  <h3>Der Präequilibrium-Anteil</h3>
   <p>Der Präequilibrium-Anteil an der Emission wächst mit der Einschussenergie, hier von einigen Prozent nahe 5 MeV auf etwa 40 Prozent bei 40 MeV. Er hängt von einer einzigen anpassbaren Konstante ab, der Gesamtgröße des Matrixelements: Eine schwächere Wechselwirkung bedeutet langsamere Äquilibrierung und mehr frühe Emission.</p>
   <div class="ctl"><label for="ex-c">Matrixelement-Konstante C₁</label><input id="ex-c" type="range" data-bind="c1" min="0.3" max="3" step="0.05" value="1"><output data-show="c1" data-fmt="2"></output></div>
   <p>Die gestrichelte Kurve ist C₁ = 1, der Standardwert der Engine; die durchgezogene folgt dem Regler. Halbiert man C₁, steigt der Anteil um einen Faktor 1,5 bis 1,9, nicht 2: Die Entkommwahrscheinlichkeit jeder Stufe ist W/(λ<sup>+</sup> + W), nicht W/λ<sup>+</sup>, und weniger Kerne erreichen die späteren Stufen.</p>
@@ -89,3 +89,4 @@ Object.assign(WT.L.glossary, {
     chapter: "exciton",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="pauli" */

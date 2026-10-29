@@ -56,7 +56,7 @@
   <p>Arrástrala y cuenta las mediciones que quedan dentro. Demasiado estrecha, y la banda promete una precisión que no tiene; demasiado ancha, y no dice nada. La banda del propio motor aún no está adoptada: acierta cuando se juntan todas las reacciones, pero todavía no en cada familia de reacciones. TERRA lleva sus propias bandas, y forman parte de sus comparaciones de arriba.</p>
 </div>
 <div class="step">
-  <h3>Dónde estamos</h3>
+  <h3>Estado actual</h3>
   <p>Una capa solo se adopta después de probarla frente a las mediciones, y se queda apagada si no ayuda. Hoy el motor está en uso y TERRA es candidata; la capa de estructura medida y la banda de incertidumbre del motor siguen en pruebas.</p>
   <p><a href="scoreboard.html" data-keep-lang>Ver el marcador completo →</a> Todas las comparaciones que no ganamos, cada rival y cómo leerlo.</p>
   <div class="aside">${ASOF ? `Resultados a ${ASOF}, del` : "Resultados del"} registro de investigación del proyecto. Las curvas del dibujo son ilustrativas.</div>
@@ -80,3 +80,4 @@ Object.assign(WT.es.labels, {
   "no measurements to check the band against": "no hay mediciones con las que comprobar la banda",
 });
 Object.assign(WT.es.ui, { nav_board: "Marcador" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

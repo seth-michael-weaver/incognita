@@ -1,6 +1,6 @@
 /* German (Deutsch): measure (Kapitel 17, Observablen) */
 WT.L.ch.measure = {
-  num: "Kapitel 17", title: "Was herauskommt", short: "Observablen",
+  num: "Kapitel 17", title: "Observablen", short: "Observablen",
   lead: "Ein Experiment, ein Reaktor oder ein Stern sieht nur eine Handvoll Zahlen. Dieses Kapitel zeigt, wie die Engine das, was im Kern geschieht, in diese Zahlen übersetzt.",
   html: `
 <div class="step">
@@ -9,38 +9,38 @@ WT.L.ch.measure = {
   <p>Senke die Energie, und die Scheiben schwellen an: Ein langsames Neutron ist eine breite Welle und reagiert aus größerer Entfernung. Bei hoher Energie schrumpft die Scheibe auf den Kern selbst zu.</p>
 </div>
 <div class="step">
-  <h3>Mit der Energie öffnen sich neue Ausgänge</h3>
+  <h3>Anregungsfunktionen</h3>
   <p>Jede Tür ist ein Ausgang, ein <b>Kanal</b>: Das Neutron prallt ab (elastisch), lässt das Target angeregt zurück (n′), schlägt weitere Neutronen heraus (2n, 3n), wird eingefangen, wobei nur Photonen hinausgehen (γ), oder stattdessen geht ein Proton oder ein α-Teilchen. Eine Tür mit Vorhängeschloss hat eine <b>Schwelle</b>: Die Reaktion kostet mehr Energie, als das Neutron mitbringt.</p>
   <div class="ctl"><label for="mea-e2">Neutronenenergie (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
   <p>Zieh die Energie über eine Schwelle, und diese Tür springt auf; die Eimer füllen sich bis zum Anteil jedes Kanals, und jede neue Tür nimmt den anderen Anteile ab. Die Schwellen ergeben sich aus den Massen der Kerne; die Anteile aus dem Wettbewerb aus Kapitel 9.</p>
 </div>
 <div class="step">
-  <h3>Was ein Detektor sieht</h3>
+  <h3>Emissionsspektren</h3>
   <p>Die beiden Stapel sind die Neutronen, die die vordere und die hintere Hälfte eines Detektorrings erreichen, sortiert nach Energie. Der Strahl ist gepulst, also gibt die Flugzeit jedes Neutrons seine Energie an: Schnelle kommen zuerst an.</p>
   <div class="ctl"><label for="mea-ein">Einfallsenergie (MeV)</label><input id="mea-ein" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="30"><output data-show="Ein" data-fmt="0"></output></div>
   <p>Beide Stapel haben einen Buckel aus langsamen, <b>verdampften</b> Neutronen: Sie verdampfen aus dem Compoundkern, sobald die Energie verteilt ist, in alle Richtungen gleich. Nur der vordere Stapel hat einen langen schnellen Ausläufer: Neutronen aus dem <b>Präequilibrium</b>, die bei den ersten Stößen hinausgehen und sich noch ungefähr mit dem Strahl bewegen. Erhöhe die Einfallsenergie, und der Ausläufer wächst.</p>
 </div>
 <div class="step">
-  <h3>In welche Richtung sie fliegen</h3>
+  <h3>Winkelverteilungen</h3>
   <p>Das Blütenblatt zeigt, wie viele Neutronen in jede Richtung hinausgehen; der Strahl kommt von links. Verdampfte Neutronen haben den Strahl vergessen und gehen in alle Richtungen gleich; schnelle aus dem Präequilibrium neigen sich nach vorn. Die Regel von Kalbach legt fest, wie stark, mit einer einzigen Steigung <i>a</i>, die mit der Austrittsenergie wächst. Die Engine kann diese Winkelverteilungen als optionale Ausgabe ebenfalls herausschreiben.</p>
   <div class="ctl"><label for="mea-eo">Austrittsenergie (MeV)</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>Senke die Austrittsenergie, und das Blütenblatt wird runder: Langsame Neutronen sind überwiegend verdampft.</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
 </div>
 <div class="step">
-  <h3>In einem Stern</h3>
+  <h3>Maxwell-gemittelte Wirkungsquerschnitte</h3>
   <p>Der Stapel unten sammelt die Energien von Neutronen, die im heißen Gas eines Sterns eingefangen werden. Ihre Geschwindigkeiten folgen einer Maxwell-Verteilung, die durch die Temperatur <i>kT</i> bestimmt ist (30 keV sind etwa 350 Millionen Grad); längere Spuren bedeuten schnellere Neutronen, und jeder Vorbeiflug an einem Kern kann mit einem Einfangblitz enden.</p>
   <div class="ctl"><label for="mea-kt">Temperatur kT (keV)</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Langsame Neutronen sind leicht zu fangen, kommen aber selten vorbei, und schnelle gibt es wenige, also stammen die meisten Einfänge aus einem Fenster von einigen <i>kT</i> Breite. Die Rate über das ganze Gas ist der <b>Maxwell-gemittelte Wirkungsquerschnitt</b> (MACS), in Millibarn (mb). Heiz das Gas auf, und das Fenster rutscht zu höherer Energie, wo das Ziel kleiner ist. Der MACS wird aus der Einfangkurve der Engine gefaltet.</p>
 </div>
 <div class="step">
-  <h3>Auch das Target ist heiß</h3>
+  <h3>Thermisch angeregte Targets</h3>
   <p>Die Kugeln zeigen, welcher Anteil der Targetkerne bei dieser Temperatur auf jedem seiner tiefsten Niveaus sitzt. In einem Stern sind manche Targets bereits angeregt, und jedes angeregte Niveau ist ein anderer Eingang zum selben Compoundkern. Ein Niveau mit Spin <i>J</i> nimmt mehr auf, weil es 2<i>J</i>+1 Orientierungen hat.</p>
   <div class="ctl"><label for="mea-kt2">Temperatur kT (keV)</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Erhöhe die Temperatur und sieh zu, wie Kerne nach oben wandern. Eine stellare Rate berechnet den Einfang aus jedem besetzten Niveau und addiert die Ergebnisse mit diesen Anteilen; die Gewichte summieren sich zur Zustandssumme <i>G</i>, und das Verhältnis zur Rate aus dem Grundzustand ist der <b>stellare Verstärkungsfaktor</b>. Die Engine kann das als Option, standardmäßig aus; normalerweise startet jedes Target im Grundzustand.</p>
 </div>
 <div class="step">
-  <h3>Wie sicher ist das alles?</h3>
+  <h3>Unsicherheiten und Kovarianzen</h3>
   <p>Jede blasse Scheibe ist ein Lauf der Engine mit zufällig verschobenen Eingaben: die Tiefe des optischen Topfs, die Niveaudichte und die Photonenstärke, jede nur auf einige Prozent genau bekannt. Die Streuung vieler Läufe ist eine ehrliche Unsicherheit: <b>Total Monte Carlo</b>.</p>
   <div class="btns"><button class="btn" data-act="tmc1">Eine Variante rechnen</button><button class="btn ghost" data-act="tmc">10 rechnen</button><button class="btn ghost" data-act="clear">Leeren</button></div>
   <p>Ein scharfer Rand bedeutet, dass die Eingaben die Antwort festlegen; ein verschwommener Rand bedeutet, dass sie es nicht tun, und genau dort würden neue Messungen am meisten helfen.</p>

@@ -20,6 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Fluctuations des largeurs</h3>
+  <p>La formule simple sous-estime légèrement la diffusion élastique, et la correction y ramène un peu de flux depuis les autres sorties. Voici pourquoi.</p>
   <p>Avec <i>W<sub>ab</sub></i> = 1, la formule multiplie des moyennes. Or les résonances qui se cachent derrière ces moyennes ont des largeurs dispersées (Porter–Thomas, chapitre 15) et, pour la diffusion élastique, la largeur qui laisse entrer le neutron est celle-là même qui le laisse sortir : les deux sont corrélées. Pour l'élastique, la moyenne des produits dépasse alors le produit des moyennes, et les autres sorties perdent ce que l'élastique gagne.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Sans correction</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Énergie du neutron (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -35,10 +36,11 @@ WT.L.ch.hauser = {
   <p>Les deux concordent étroitement pour l'élastique et l'inélastique ; pour la capture dans le domaine du keV, HRTW retire jusqu'à 10 % de plus. Entre 0,85 et 2 MeV, la capture gagne même : la largeur totale y est dominée par quelques largeurs neutroniques qui fluctuent, et la moyenne de 1/Γ dépasse 1/⟨Γ⟩. Les deux recettes sont des ajustements sur le résultat exact des matrices aléatoires (GOE), que TALYS propose aussi sous la forme d'une intégrale triple. INCOGNITA porte les trois (<code>widthmode</code> 1, 2, 3) ; Moldauer est la valeur par défaut, appliquée aux neutrons incidents jusqu'à l'énergie de séparation du neutron de la cible.</p>
 </div>
 <div class="step">
-  <h3>Entre 3 et 2</h3>
+  <h3>Limites de l'amplification élastique</h3>
+  <p>Jusqu'où l'amplification élastique peut-elle aller ? Entre deux et trois fois, selon que les résonances sont séparées ou se recouvrent.</p>
   <p>Les limites expliquent l'ampleur de l'effet. Prenons <i>N</i> voies égales sans capture, et faisons varier leur somme ΣT, qui vaut 2π fois le rapport de la largeur totale moyenne à l'espacement des niveaux, Γ/<i>D</i>. Pour des résonances isolées (ΣT ≪ 1) et de nombreuses voies, chaque largeur suit une loi de Porter–Thomas à un degré de liberté, et l'amplification élastique vaut ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3. Quand les résonances se recouvrent fortement (ΣT ≫ 2π), la section efficace fluctue comme une onde aléatoire (fluctuations d'Ericson) et l'amplification tombe à 2.</p>
   <div class="ctl"><label for="hf-n">Voies ouvertes N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>Pour <i>N</i> voies isolées, la valeur exacte est 3<i>N</i>/(<i>N</i>+2) (le losange) : avec deux voies seulement, l'amplification ne peut dépasser 1,5, car la largeur totale fluctue alors autant que la largeur élastique. La recette de Moldauer reproduit cette limite ; HRTW reste en deçà quand de nombreuses voies faibles sont ouvertes. L'encart dessine des résonances ayant la largeur qui correspond au point mobile. Dans la formule de Moldauer, la limite à grand nombre de voies est 1 + 2/ν : ν → 1 pour des résonances isolées, ν → 1,78 quand elles se recouvrent (soit 2,12, la petite erreur de l'ajustement en recouvrement complet).</p>
+  <p>Pour <i>N</i> voies isolées, la valeur exacte est 3<i>N</i>/(<i>N</i>+2) (le losange) : avec deux voies seulement, l'amplification ne peut dépasser 1,5, car la largeur totale fluctue alors autant que la largeur élastique. La recette de Moldauer reproduit cette limite ; HRTW reste en deçà quand de nombreuses voies faibles sont ouvertes. L'encart dessine des résonances ayant la largeur qui correspond au point mobile. Dans la formule de Moldauer, la limite à grand nombre de voies est 1 + 2/ν : ν → 1 pour des résonances isolées et ν → 1,78 quand elles se recouvrent. Cela donne 2,12 en recouvrement complet au lieu de 2 : une petite erreur de l'ajustement.</p>
   <div class="aside">Dans le code : <code>compound/prepare.py</code> (les voies de sortie et leurs transmissions pour chaque <i>J</i><sup>π</sup>), <code>compound/target.py</code> (les sommes de Hauser–Feshbach), <code>compound/wfc.py</code> (Moldauer, HRTW et GOE, portés depuis TALYS). L'image évalue les mêmes formules avec des ingrédients indicatifs : des transmissions de sphère dure pour une cible semblable au fer, sept niveaux, un continuum à température constante et une seule voie de capture regroupée.</div>
 </div>`,
 };
@@ -101,3 +103,4 @@ Object.assign(WT.L.glossary, {
     chapter: "hauser",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-show="jbShow" data-act="w0" data-act="w1" */

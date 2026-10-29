@@ -5,7 +5,7 @@ WT.L.ch.densities = {
   html: `
 <div class="step">
   <h3>壳效应逐渐衰减的费米气体</h3>
-  <p>引擎默认的能级密度 ldmodel 1 是 <b>Gilbert–Cameron</b> 复合公式：高能处为费米气体，低能处为恒温公式。费米气体只需要一个数，即能级密度参数 <i>a</i>，而在低能时这个数会感受到壳层。<b>Ignatyuk</b> 的形式让壳修正 δW 在低激发时充分起作用，并以阻尼速率 γ 逐渐消失，使原子核足够热时 <i>a</i>(<i>U</i>) 趋于平滑值 <i>ã</i>。</p>
+  <p>引擎默认的能级密度是 <b>Gilbert–Cameron</b> 复合公式：高能处为费米气体，低能处为恒温公式。费米气体只需要一个数，即能级密度参数 <i>a</i>，而在低能时这个数会感受到壳层。<b>Ignatyuk</b> 的形式让壳修正 δW 在低激发时充分起作用，并以阻尼速率 γ 逐渐消失，使原子核足够热时 <i>a</i>(<i>U</i>) 趋于平滑值 <i>ã</i>。</p>
   <div class="formula">a(U) = ã [1 + δW (1 − e<sup>−γU</sup>) / U] ,  ã = αA + βA<sup>2/3</sup> ,  γ = γ₁ / A<sup>1/3</sup></div>
   <div class="ctl"><label for="ld-dw">壳修正 δW (MeV)</label><input id="ld-dw" type="range" data-bind="dW" min="-6" max="4" step="0.1" value="1"><output data-show="dW" data-fmt="1"></output></div>
   <div class="formula">ρ<sub>F</sub>(E) = exp(2√(aU)) / (12√2 σ a<sup>1/4</sup> U<sup>5/4</sup>) ,  U = E − Δ ,  σ² = 0.01389 A<sup>5/3</sup> √(aU) / ã</div>
@@ -27,9 +27,10 @@ WT.L.ch.densities = {
 </div>
 <div class="step">
   <h3>没有接点的时候</h3>
-  <p>对双闭壳原子核，低能处的费米气体被压低得如此厉害，以至于它的温度处处都很低，<i>F</i> 从不改变符号：不存在匹配能。这时 TALYS 取经验温度 <i>T</i> = −0.25 + 10.2/√(<i>A</i>(1 + γδW))，并寻找费米气体具有该温度的能量。在双闭壳附近，费米气体只有在远高于任何合理接点的地方才达到这个温度，或者根本达不到，所以接点也退回到系统学，<i>E<sub>x</sub></i> = 2.33 + 253/<i>A</i> + Δ，并确定 <i>E</i>₀ 使数值连续。</p>
+  <p>有时两条曲线无法平滑地接起来。在质子和中子壳层都闭合的原子核里，例如铅-208，费米气体被压得很低，以至于没有任何切线与计数的能级相交：不存在匹配能。这时程序退而采用温度和接点的经验规则。两段仍然相接，但有一个折点：数值一致，斜率不一致。</p>
   <div class="btns"><button class="btn ghost" data-act="tang" aria-pressed="false">在后备能量处取切线</button></div>
-  <p>数值是连续的，但经验 <i>T</i> 并不是该能量处的费米气体温度，所以斜率发生跳变。在默认输入下，这种情况出现在 ²⁰⁵,²⁰⁶Tl、²⁰⁶⁻²⁰⁹Pb 和 ²¹⁰Bi，斜率跳变为 34% 到 62%；在那里改用费米气体的 <i>T</i>（TALYS 在输入中给定 <i>E<sub>x</sub></i> 时本来就这样做），就恢复了切线，并使铅区的俘获改变多达 20% 到 30%。INCOGNITA 在这里重现 TALYS 的做法；这一改动已报告给 TALYS 开发者。图中是一个类铅原子核的示意，其 <i>ã</i> 提高了 30%，使它的费米气体直到约 24 MeV（超出搜索范围）都低于经验温度；其斜率跳变 62%。</p>
+  <p>按下按钮，改看平滑的切线。在默认输入下，铅附近的七个原子核会出现折点，去掉它会使它们的中子俘获改变多达 20% 到 30%。INCOGNITA 在这里重现 TALYS 的做法；这一改动已报告给 TALYS 开发者。</p>
+  <div class="aside">细节：对双闭壳原子核，低能处的费米气体处处都很冷，<i>F</i> 从不改变符号。这时 TALYS 取经验温度 <i>T</i> = −0.25 + 10.2/√(<i>A</i>(1 + γδW))，并寻找费米气体具有该温度的能量。在双闭壳附近，它只有在远高于任何合理接点的地方才达到这个温度，或者根本达不到，所以接点也退回到系统学，<i>E<sub>x</sub></i> = 2.33 + 253/<i>A</i> + Δ，并确定 <i>E</i>₀ 使数值连续。经验 <i>T</i> 并不是该能量处的费米气体温度，所以斜率发生跳变：在默认输入下，对 ²⁰⁵,²⁰⁶Tl、²⁰⁶⁻²⁰⁹Pb 和 ²¹⁰Bi，跳变为 34% 到 62%。在那里改用费米气体的 <i>T</i>（TALYS 在输入中给定 <i>E<sub>x</sub></i> 时本来就这样做），就恢复了切线。图中是一个类铅原子核的示意，其 <i>ã</i> 提高了 30%，使它的费米气体直到约 24 MeV（超出搜索范围）都低于经验温度；其斜率跳变 62%。</div>
 </div>
 <div class="step">
   <h3>用间距 D₀ 检验</h3>
@@ -95,3 +96,4 @@ Object.assign(WT.L.glossary, {
     chapter: "densities",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="tang" */

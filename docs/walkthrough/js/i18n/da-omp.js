@@ -1,6 +1,6 @@
 /* Danish: omp (Kapitel 5, den optiske model) */
 WT.L.ch.omp = {
-  num: "Kapitel 5", title: "En tåget krystalkugle", short: "Optisk model",
+  num: "Kapitel 5", title: "Den optiske model", short: "Optisk model",
   lead: "Før alt andet stiller motoren et enklere spørgsmål: hvordan ser kernen ud for en indkommende neutron?",
   html: `
 <div class="step">
@@ -9,33 +9,33 @@ WT.L.ch.omp = {
   <p>Træk i energien og se bølgelængden nederst, i femtometer (fm, 10⁻¹⁵ m). Langsomme neutroner har lange bølger: under ca. 9 MeV er én bølgelængde bredere end hele denne kerne.</p>
 </div>
 <div class="step">
-  <h3>Realdelen trækker</h3>
+  <h3>Realdelen af potentialet: brydning</h3>
   <p>Det <b>optiske potential</b> er den gennemsnitlige kraft fra hele kernen på neutronen. Dets <em>realdel</em> er en brønd, ca. 50 MeV dyb: neutronen bliver hurtigere indeni, så bølgetoppene presses sammen. Motoren giver den en Woods–Saxon-form, flad og dyb i midten og jævnt aftagende til nul ved overfladen.</p>
 </div>
 <div class="step">
-  <h3>Imaginærdelen absorberer</h3>
+  <h3>Imaginærdelen af potentialet: absorption</h3>
   <p>Skyggen bag kernen er de neutroner, der går tabt til reaktioner. Potentialets <em>imaginærdel</em> beskriver dem: den formindsker bølgen i stedet for at afbøje den, mest nær overfladen (den farvede ring).</p>
   <div class="ctl"><label for="omp-w">Absorption W (MeV)</label><input id="omp-w" type="range" data-bind="W" min="0" max="14" step="0.5" value="7"><output data-show="W" data-fmt="1"></output></div>
   <p>Træk <i>W</i> ned til 0, og skyggen fyldes ud: ingen absorption, ingen reaktioner. Deraf navnet optisk model: kernen er en tåget glaskugle, der dels afbøjer, dels absorberer.</p>
 </div>
 <div class="step">
-  <h3>Sigtet betyder noget</h3>
+  <h3>Partialbølger og stødparameter</h3>
   <p>Set forfra deler målet sig i ringe, én for hver <b>partialbølge</b> <i>l</i> = 0, 1, 2, … En neutron, der passerer i afstanden <i>b</i> fra centrum, har <b>impulsmoment</b> <i>l</i> ≈ <i>k b</i>, hvor <i>k</i> vokser med energien. Jo mørkere en ring er, desto større er dens <b>transmissionskoefficient</b> <i>T<sub>l</sub></i>: sandsynligheden for, at en neutron i den ring bliver absorberet.</p>
   <div class="ctl"><label for="omp-e3">Neutronenergi (MeV)</label><input id="omp-e3" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Affyr 200 neutroner</button></div>
   <p>Orange glimt er absorberede neutroner; søjlerne tæller hver rings absorberede andel op mod modellens <i>T<sub>l</sub></i> (stregen). De inderste ringe absorberer næsten alt, de yderste lader neutronerne passere. Ved lav energi er ringene enorme, og kun <i>l</i> = 0 betyder noget.</p>
 </div>
 <div class="step">
-  <h3>Forbi kernen i en bue</h3>
+  <h3>Centrifugalbarrieren</h3>
   <p>En neutron med stort impulsmoment passerer for langt ude til at røre kernen: det er <b>centrifugalbarrieren</b>. Set ovenfra hører hver neutron her til én partialbølge <i>l</i>, så den passerer i samme <b>passageafstand</b> <i>b</i> ≈ (<i>l</i>+½)/<i>k</i> (den stiplede cirkel).</p>
   <p>Men hver neutron er en bølge, udtværet over ca. én reduceret bølgelængde λ̄ (skæret). Selv når banen går udenom, kan den udtværede kant strejfe overfladen og komme ind: <b>tunnelering</b>.</p>
   <div class="ctl"><label for="omp-l">Partialbølge l</label><input id="omp-l" type="range" data-bind="L" min="0" max="8" step="1" value="3" data-instant><output data-show="L" data-fmt="0"></output></div>
   <div class="ctl"><label for="omp-e2">Energi (MeV)</label><input id="omp-e2" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
-  <p>Hæv <i>l</i>, og banen flytter udad: færre kommer ind. Hæv energien, og samme <i>l</i> passerer tættere på, med mindre udtværing. Motoren finder hvert <i>T<sub>l</sub></i> eksakt ved at løse Schrödingerligningen gennem hele potentialet; <i>S</i> måler, hvor meget af bølgen der kommer ud igen.</p>
+  <p>Hæv <i>l</i>, og banen flytter sig udad: færre kommer ind. Hæv energien, og det samme <i>l</i> passerer tættere på, med mindre sløring. Motoren finder hvert <i>T<sub>l</sub></i> præcist ved at løse Schrödingerligningen (kvantemekanikkens bølgeligning) gennem hele potentialet. Den sender en bølge ind og måler, hvor meget af den der kommer ud igen uabsorberet: den returnerende bølge kaldes <i>S</i>, og dens kvadrat, |<i>S</i>|², er den andel, der vender tilbage. Det, der ikke kommer tilbage, blev optaget af kernen, og den manglende andel er <i>T<sub>l</sub></i>.</p>
   <div class="formula">T<sub>lj</sub> = 1 − |S<sub>lj</sub>|²</div>
 </div>
 <div class="step">
-  <h3>Målet lægges sammen</h3>
+  <h3>Reaktionstværsnittet</h3>
   <p>Skiven til højre er, hvor stor kernen ser ud for neutronen: <b>reaktionstværsnittet</b>, i barn (10⁻²⁴ cm²). Hver ring bidrager med sit areal gange <i>T<sub>l</sub></i>. Den stiplede cirkel er den geometriske størrelse.</p>
   <div class="ctl"><label for="omp-e4">Neutronenergi (MeV)</label><input id="omp-e4" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="sum">Læg sammen igen</button></div>

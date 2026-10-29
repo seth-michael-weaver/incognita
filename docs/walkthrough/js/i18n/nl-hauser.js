@@ -20,6 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Breedtefluctuaties</h3>
+  <p>De gewone formule onderschat de elastische verstrooiing een weinig, en de correctie brengt een beetje flux vanuit de andere uitgangen terug. Dit is waarom.</p>
   <p>Met <i>W<sub>ab</sub></i> = 1 vermenigvuldigt de formule gemiddelden. De resonanties achter die gemiddelden hebben breedten die spreiden (Porter–Thomas, hoofdstuk 15), en bij elastische verstrooiing is de breedte die het neutron binnenlaat dezelfde breedte die het weer naar buiten laat, dus de twee zijn gecorreleerd. Voor elastisch is het gemiddelde van de producten dan groter dan het product van de gemiddelden, en de andere uitgangen verliezen wat elastisch wint.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Zonder correctie</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Neutronenergie (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -35,10 +36,11 @@ WT.L.ch.hauser = {
   <p>Voor elastisch en inelastisch komen de twee goed overeen; voor vangst in het keV-gebied haalt HRTW er tot 10 procent meer af. Tussen 0,85 en 2 MeV wint vangst zelfs: daar wordt de totale breedte gedomineerd door een paar fluctuerende neutronbreedten, en het gemiddelde van 1/Γ is groter dan 1/⟨Γ⟩. Beide recepten zijn fits aan het exacte resultaat van de theorie van stochastische matrices (GOE), dat TALYS ook als drievoudige integraal aanbiedt. INCOGNITA port alle drie (<code>widthmode</code> 1, 2, 3); Moldauer is de standaard, toegepast voor invallende neutronen tot aan de neutronseparatie-energie van de trefkern.</p>
 </div>
 <div class="step">
-  <h3>Tussen 3 en 2</h3>
+  <h3>Grenzen van de elastische versterking</h3>
+  <p>Hoe groot kan de elastische opstoot worden? Tussen twee en drie keer, afhankelijk van of de resonanties apart staan of overlappen.</p>
   <p>De limieten verklaren de grootte van het effect. Neem <i>N</i> gelijke kanalen zonder vangst en varieer hun som ΣT, die 2π maal de verhouding van de gemiddelde totale breedte tot de niveauafstand is, Γ/<i>D</i>. Bij geïsoleerde resonanties (ΣT ≪ 1) en veel kanalen volgt elke breedte Porter–Thomas met één vrijheidsgraad en is de elastische versterking ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3. Wanneer resonanties sterk overlappen (ΣT ≫ 2π), fluctueert de werkzame doorsnede als een willekeurige golf (Ericson-fluctuaties) en zakt de versterking naar 2.</p>
   <div class="ctl"><label for="hf-n">Open kanalen N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>Voor geïsoleerde resonanties met <i>N</i> kanalen is de exacte waarde 3<i>N</i>/(<i>N</i>+2) (de ruit): met maar twee kanalen kan de versterking niet boven 1,5 uitkomen, omdat de totale breedte dan even sterk fluctueert als de elastische. Het recept van Moldauer reproduceert deze limiet; HRTW blijft eronder wanneer veel zwakke kanalen open zijn. Het inzetje tekent resonanties met de breedte die bij het bewegende punt hoort. In de formule van Moldauer is de limiet voor veel kanalen 1 + 2/ν: ν → 1 voor geïsoleerde resonanties, ν → 1,78 wanneer ze overlappen (2,12, de kleine fout van de fit bij volledige overlap).</p>
+  <p>Voor geïsoleerde resonanties met <i>N</i> kanalen is de exacte waarde 3<i>N</i>/(<i>N</i>+2) (de ruit): met maar twee kanalen kan de versterking niet boven 1,5 uitkomen, omdat de totale breedte dan even sterk fluctueert als de elastische. Het recept van Moldauer reproduceert deze limiet; HRTW blijft eronder wanneer veel zwakke kanalen open zijn. Het inzetje tekent resonanties met de breedte die bij het bewegende punt hoort. In de formule van Moldauer is de limiet voor veel kanalen 1 + 2/ν: ν → 1 voor geïsoleerde resonanties en ν → 1,78 wanneer ze overlappen. Dat geeft 2,12 bij volledige overlap in plaats van 2: een kleine fout van de fit.</p>
   <div class="aside">In de code: <code>compound/prepare.py</code> (uitgangskanalen en hun transmissies per <i>J</i><sup>π</sup>), <code>compound/target.py</code> (de sommen van Hauser–Feshbach), <code>compound/wfc.py</code> (Moldauer, HRTW en GOE, geport uit TALYS). De afbeelding rekent dezelfde formules uit met illustratieve ingrediënten: transmissies van een harde bol voor een ijzerachtige trefkern, zeven niveaus, een continuüm met constante temperatuur en één samengenomen vangstkanaal.</div>
 </div>`,
 };
@@ -109,3 +111,4 @@ Object.assign(WT.L.glossary, {
     chapter: "hauser",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="w0" data-act="w1" data-show="jbShow" */

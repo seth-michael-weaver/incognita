@@ -20,6 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>宽度涨落</h3>
+  <p>朴素公式会略微低估弹性散射，修正则把一小部分通量从其他出口移回弹性道。原因如下。</p>
   <p>当 <i>W<sub>ab</sub></i> = 1 时，公式乘的是平均值。平均值背后的共振，其宽度是涨落的（Porter–Thomas，第 15 章）；而对弹性散射，让中子进来的宽度正是让它出去的宽度，所以二者是关联的。于是对弹性道，乘积的平均大于平均的乘积，弹性道多得的部分由其他出口让出。</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">不加修正</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">中子能量 (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -35,10 +36,11 @@ WT.L.ch.hauser = {
   <p>对弹性和非弹性，两者符合得很好；对 keV 能区的俘获，HRTW 多减去最多 10%。在 0.85 到 2 MeV 之间，俘获甚至会增加：那里的总宽度由少数几个涨落的中子宽度主导，而 1/Γ 的平均大于 1/⟨Γ⟩。两种方案都是对精确随机矩阵（GOE）结果的拟合，TALYS 也以三重积分的形式提供这一精确结果。INCOGNITA 移植了全部三种（<code>widthmode</code> 1、2、3）；默认采用 Moldauer，用于能量不超过靶核中子分离能的入射中子。</p>
 </div>
 <div class="step">
-  <h3>介于 3 与 2 之间</h3>
+  <h3>弹性增强的极限</h3>
+  <p>弹性增强最大能有多大？介于 2 倍到 3 倍之间，取决于共振是彼此分开还是相互重叠。</p>
   <p>两个极限说明了这一效应的大小。取 <i>N</i> 个相同的道，不考虑俘获，改变它们的总和 ΣT，它等于 2π 乘以平均总宽度与能级间距之比 Γ/<i>D</i>。对孤立共振（ΣT ≪ 1）且道数很多时，每个宽度服从一个自由度的 Porter–Thomas 分布，弹性增强为 ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3。当共振强烈重叠（ΣT ≫ 2π）时，截面像随机波一样涨落（Ericson 涨落），增强降到 2。</p>
   <div class="ctl"><label for="hf-n">开放道数 N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>对 <i>N</i> 个孤立的道，精确值为 3<i>N</i>/(<i>N</i>+2)（菱形）：只有两个道时，增强不能超过 1.5，因为这时总宽度的涨落与弹性宽度一样大。Moldauer 的方案重现了这一极限；当开放的弱道很多时，HRTW 达不到它。插图按移动点对应的宽度画出共振。在 Moldauer 公式中，多道极限为 1 + 2/ν：孤立共振时 ν → 1，共振重叠时 ν → 1.78（得到 2.12，这是该拟合在完全重叠时的小误差）。</p>
+  <p>对 <i>N</i> 个孤立的道，精确值为 3<i>N</i>/(<i>N</i>+2)（菱形）：只有两个道时，增强不能超过 1.5，因为这时总宽度的涨落与弹性宽度一样大。Moldauer 的方案重现了这一极限；当开放的弱道很多时，HRTW 达不到它。插图按移动点对应的宽度画出共振。在 Moldauer 公式中，多道极限为 1 + 2/ν：孤立共振时 ν → 1，共振重叠时 ν → 1.78。这在完全重叠时给出 2.12 而不是 2：是该拟合的一个小误差。</p>
   <div class="aside">代码位置：<code>compound/prepare.py</code>（每个 <i>J</i><sup>π</sup> 的出射道及其穿透系数），<code>compound/target.py</code>（Hauser–Feshbach 求和），<code>compound/wfc.py</code>（Moldauer、HRTW 和 GOE，移植自 TALYS）。图中用示意性的输入计算同样的公式：类铁靶核的硬球穿透系数、七个能级、一个恒温连续区，以及一个合并的俘获道。</div>
 </div>`,
 };
@@ -108,3 +110,4 @@ Object.assign(WT.L.glossary, {
     chapter: "hauser",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="w0" data-act="w1" data-show="jbShow" */

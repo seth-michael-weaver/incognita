@@ -1,6 +1,6 @@
 /* Japanese: measure (第17章、観測量) */
 WT.L.ch.measure = {
-  num: "第17章", title: "出てくるもの", short: "観測量",
+  num: "第17章", title: "観測量", short: "観測量",
   lead: "実験も原子炉も恒星も、目にするのはほんの一握りの数値だけです。この章では、エンジンが原子核の内部で起きることをどのようにそれらの数値に変えるかを示します。",
   html: `
 <div class="step">
@@ -9,38 +9,38 @@ WT.L.ch.measure = {
   <p>エネルギーを下げると円盤が膨らみます。遅い中性子は幅の広い波なので、より遠くから反応するのです。高エネルギーでは、円盤は原子核そのものの大きさへと縮んでいきます。</p>
 </div>
 <div class="step">
-  <h3>エネルギーとともに新しい出口が開く</h3>
+  <h3>励起関数</h3>
   <p>各扉が1つの出口、すなわち<b>チャネル</b>です。中性子が跳ね返って出ていく（弾性）、標的を励起状態に残して出ていく（n′）、さらに中性子を叩き出す（2n、3n）、捕獲されて光子だけが出ていく（γ）、あるいは代わりに陽子やα粒子が出ていく、のいずれかです。南京錠のかかった扉には<b>しきい値</b>があり、反応に必要なエネルギーが中性子の持ち込む分を上回っています。</p>
   <div class="ctl"><label for="mea-e2">中性子エネルギー（MeV）</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
   <p>エネルギーをしきい値より上に動かすと、その扉がぱっと開きます。バケツは各チャネルの割合まで満たされ、新しい扉はそれぞれ他の扉から割合を奪います。しきい値は原子核の質量から、割合は第9章の競争から決まります。</p>
 </div>
 <div class="step">
-  <h3>検出器に見えるもの</h3>
+  <h3>放出スペクトル</h3>
   <p>2つの山は、リング状の検出器の前方半分と後方半分に届いた中性子を、エネルギーごとに分けたものです。ビームはパルス状なので、各中性子の飛行時間からエネルギーがわかります。速いものが先に届きます。</p>
   <div class="ctl"><label for="mea-ein">入射エネルギー（MeV）</label><input id="mea-ein" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="30"><output data-show="Ein" data-fmt="0"></output></div>
   <p>どちらの山にも、遅い<b>蒸発</b>中性子のこぶがあります。エネルギーが分け合われた後に複合核から沸き出すもので、どの方向にも同じように出ていきます。長く速い裾があるのは前方の山だけです。これが<b>前平衡</b>中性子で、最初の衝突から出ていくため、まだおおむねビームの向きに動いています。入射エネルギーを上げると、裾が伸びます。</p>
 </div>
 <div class="step">
-  <h3>どちらへ向かうか</h3>
+  <h3>角度分布</h3>
   <p>花びらは、各方向にどれだけの中性子が出ていくかを示します。ビームは左から来ます。蒸発した中性子はビームのことを忘れていて、どの方向にも同じように出ていきます。速い前平衡の中性子は前方に傾きます。どれだけ傾くかはカルバッハの規則が決め、出ていくエネルギーとともに大きくなる1つの傾き<i>a</i>で表されます。エンジンはこれらの角度分布も任意の出力として書き出せます。</p>
   <div class="ctl"><label for="mea-eo">放出エネルギー（MeV）</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>放出エネルギーを下げると花びらは丸くなります。遅い中性子はほとんどが蒸発によるものだからです。</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
 </div>
 <div class="step">
-  <h3>恒星の中で</h3>
+  <h3>マクスウェル平均断面積</h3>
   <p>下の山は、恒星の熱いガスの中で捕獲された中性子のエネルギーを集めたものです。中性子の速さは温度<i>kT</i>で決まるマクスウェル分布に従います（30 keVは約3億5000万度）。軌跡が長いほど速い中性子で、原子核のそばを通るたびに捕獲の閃光で終わることがあります。</p>
   <div class="ctl"><label for="mea-kt">温度 kT（keV）</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>遅い中性子は捕まりやすいもののめったに通りかからず、速い中性子は数が少ないので、捕獲の大部分は幅が<i>kT</i>の数倍の窓から来ます。ガス全体での率が<b>マクスウェル平均断面積</b>（MACS）で、単位はミリバーン（mb）です。ガスを熱すると窓は高いエネルギー側へ移り、そこでは標的は小さくなります。MACSはエンジンの捕獲曲線を畳み込んで求めます。</p>
 </div>
 <div class="step">
-  <h3>標的も熱い</h3>
+  <h3>熱的に励起された標的</h3>
   <p>玉は、この温度で標的原子核のうちどれだけの割合が最も低いいくつかの準位にいるかを示しています。恒星の中では一部の標的がすでに励起されていて、各励起準位は同じ複合核への別の入口になります。スピン<i>J</i>の準位は2<i>J</i>+1通りの向きをもつので、より多くを収容します。</p>
   <div class="ctl"><label for="mea-kt2">温度 kT（keV）</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>温度を上げて、原子核が上へ移っていくのを見てみましょう。恒星内での率は、占有された各準位からの捕獲を計算し、その結果をこれらの割合で足し合わせます。重みの和が分配関数<i>G</i>で、基底状態からの率との比が<b>恒星内増大因子</b>です。エンジンは任意機能としてこれを計算できますが、既定ではオフで、通常はすべての標的が基底状態から出発します。</p>
 </div>
 <div class="step">
-  <h3>どれほど確かなのか</h3>
+  <h3>不確かさと共分散</h3>
   <p>淡い円盤の1つ1つは、入力をランダムに少しずらしてエンジンを1回実行した結果です。光学ポテンシャルの井戸の深さ、準位密度、光子強度関数は、どれも数パーセントの精度でしかわかっていません。多数の実行のばらつきが、正直な不確かさになります。これが<b>トータル・モンテカルロ</b>です。</p>
   <div class="btns"><button class="btn" data-act="tmc1">変種を1回実行</button><button class="btn ghost" data-act="tmc">10回実行</button><button class="btn ghost" data-act="clear">消去</button></div>
   <p>縁がくっきりしていれば入力が答えを決めており、ぼやけていればそうではありません。新しい測定が最も役立つのはそこです。</p>
@@ -85,6 +85,9 @@ Object.assign(WT.L.labels, {
   "each capture drops here, by the neutron's energy: the window that counts": "各捕獲が中性子エネルギーごとにここへ：効いてくる窓",
   "MACS ≈ {#} mb at kT = {#} keV · captures watched: {#}": "MACS ≈ {#} mb（kT = {#} keV）· 観測した捕獲：{#}",
   // hot target
+  "{#}⁺  ground": "{#}⁺  基底",
+  "target levels (energy stretched at the bottom)": "標的の準位（下側のエネルギーを引き伸ばしてある）",
+  "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "標的の準位と、各準位にいる原子核の割合（下側のエネルギー目盛を引き伸ばしてある）",
   "{#}⁺  ground state": "{#}⁺  基底状態", "{#}⁺  {#} keV": "{#}⁺  {#} keV",
   "target levels, with the share of nuclei sitting on each": "標的の準位と、各準位にいる原子核の割合",
   "{#} % start from the ground state · partition function G ≈ {#}": "{#}%が基底状態から出発 · 分配関数 G ≈ {#}",

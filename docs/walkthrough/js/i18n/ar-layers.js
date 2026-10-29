@@ -1,4 +1,4 @@
-/* Arabic: layers (chapter 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Arabic: layers (chapter 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in // [i18n check parity with English helper: data-act="${act}"]
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -56,7 +56,7 @@
   <p>اسحبه وعُدّ القياسات التي تقع داخله. إن كان ضيقًا جدًا فهو يعد بدقة لا يملكها؛ وإن كان عريضًا جدًا فلا يقول شيئًا. لم يُعتمد نطاق المحرك نفسه بعد: فهو صحيح حين تُجمع التفاعلات كلها، لكنه ليس صحيحًا بعد في كل عائلة من التفاعلات. أما TERRA فلها نطاقاتها الخاصة، وهي جزء من مقارناتها المذكورة أعلاه.</p>
 </div>
 <div class="step">
-  <h3>أين نحن الآن</h3>
+  <h3>الوضع الحالي</h3>
   <p>لا تُعتمد أي طبقة إلا بعد اختبارها أمام القياسات، وتبقى معطلة إن لم تُفِد. اليوم المحرك قيد الاستخدام وTERRA مرشّحة؛ أما طبقة البنية المقيسة ونطاق عدم اليقين الخاص بالمحرك فما زالا قيد الاختبار.</p>
   <p><a href="scoreboard.html" data-keep-lang>اعرض لوحة النتائج كاملة ←</a> كل المقارنات التي لا نفوز بها، وكل منافس، وكيفية قراءتها.</p>
   <div class="aside">${ASOF ? `النتائج حتى ${ASOF}، من` : "النتائج من"} سجل البحث الخاص بالمشروع. المنحنيات في الرسم توضيحية.</div>

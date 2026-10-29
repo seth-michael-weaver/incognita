@@ -1,6 +1,6 @@
 /* Danish: cascade (chapter 8) */
 WT.L.ch.cascade = {
-  num: "Kapitel 11", title: "Ned ad kortet", short: "Kaskade",
+  num: "Kapitel 11", title: "Emissionskaskaden", short: "Kaskade",
   lead: "Én emission er sjældent enden: den kerne, der bliver tilbage, er ofte varm nok til at udsende igen.",
   html: `
 <div class="step">
@@ -10,15 +10,15 @@ WT.L.ch.cascade = {
   <p>Udsendte neutroner er som regel langsomme, så de fleste fald er korte. Blå prikker ligger over den stiplede neutrontærskel: de har råd til en neutron mere, (n,2n)-reaktionen. Under omkring 11 MeV kommer ingen derop.</p>
 </div>
 <div class="step">
-  <h3>En vandring hen over kortet</h3>
+  <h3>Sekventiel emission hen over kortet</h3>
   <p>Strømmene er reaktioner, der vandrer hen over et hjørne af <b>nuklidkortet</b>, kerner afbildet efter neutrontal N (vandret) og protontal Z (lodret). Hver starter i det omkransede compoundfelt; hvert felt er opkaldt efter den reaktion, der ender dér.</p>
   <p>En <em class="n">neutron</em> ud flytter ét felt til venstre, en <em class="p">proton</em> ét ned, en <em class="a">alfapartikel</em> (to protoner, to neutroner) to diagonalt. Strømmens bredde er, hvor meget der tager det skridt; farvetone og procent viser, hvor reaktionerne ender.</p>
   <div class="ctl"><label for="cs-e4">Neutronenergi</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Affyr 200 reaktioner</button></div>
-  <p>Hvert skridt koster 7 til 11 MeV i separationsenergi, så selv ved 30 MeV er vandringen højst tre eller fire skridt.</p>
+  <p>Træk i energien: ved et par MeV standser næsten alt på målfeltet; højere oppe når strømmene længere. Hvert skridt koster 7 til 11 MeV i separationsenergi, så selv ved 30 MeV er vandringen højst tre eller fire skridt.</p>
 </div>
 <div class="step">
-  <h3>Oppefra og ned, interval for interval</h3>
+  <h3>Regnskab over bestanden</h3>
   <p>Motoren tømmer hver kerne oppefra og ned, én energiskive, eller ét <b>interval</b>, ad gangen. Til højre: restkernen fra den første emission; til venstre: dens datterkerne, med én neutron mindre. Orange kugler er reaktioner, der venter i hvert interval. Intervallerne er 1 MeV her; motoren bruger omkring 40 pr. kerne, afpasset efter den tilgængelige energi.</p>
   <p>Når markøren fejer hen over et interval, tager hver kugle en udgang efter konkurrencen fra kapitel 9: en foton (<em class="g">γ</em>) sænker den til et lavere interval, en <em class="n">neutron</em> flytter den over i datterkernen, en proton eller alfapartikel fjerner den fra billedet. Under alle tærskler fører fotoner resten ned til grundtilstanden (grå). Derefter fejes datterkernen.</p>
   <div class="ctl"><label for="cs-e3">Neutronenergi</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
@@ -26,13 +26,13 @@ WT.L.ch.cascade = {
   <p>Fotoner falder kun nedad, og hver kerne er færdig før sine datterkerner, så intet lander i et interval, der allerede er tømt.</p>
 </div>
 <div class="step">
-  <h3>Historien får et navn</h3>
-  <p>Én reaktion afspilles ad gangen: markøren hopper hen over kortet, og hver udsendt partikel falder ned i bakken. Den fulde bakke navngiver den <b>eksklusive kanal</b>, fx (n,2n); fotoner tæller ikke. Motoren giver hver kanal sit eget tværsnit (dens sandsynlighed, udtrykt som et effektivt målareal).</p>
+  <h3>Eksklusive reaktionskanaler</h3>
+  <p>Én reaktion afspilles ad gangen: markøren hopper hen over kortet, og hver udsendt partikel falder ned i bakken. Hver kanal afspilles ved en energi, hvor den rent faktisk sker (øverst i billedet): (n,3n) ved 25 MeV, da tre neutroner her koster mere end 20 MeV; indfangning, (n,γ), ved 1 MeV. Den fyldte bakke navngiver den <b>eksklusive kanal</b>, fx (n,2n); fotoner tæller ikke med. Motoren giver hver kanal sit eget tværsnit (dens sandsynlighed, som et effektivt målareal).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Næste kanal</button></div>
   <p>Gå dem igennem. (n,np) afspilles to gange, med neutronen først og med protonen først: samme felt, samme bakke, én kanal. Derefter når en spøgelsesdeuteron (en bundet proton og neutron) samme felt i ét hop: dens bakke viser d, en anden kanal, (n,d).</p>
 </div>
 <div class="step">
-  <h3>Hvor alt ender</h3>
+  <h3>Produktion af restkerner</h3>
   <p>Hvert felt har nu hylder: blæk for <b>grundtilstanden</b>, grøn (på to felter) for en <b>isomer</b>, en exciteret tilstand, der lever længe nok til at tælle som et separat produkt. Bunkens højde er <b>restkerneproduktionen</b>: hvor meget af hver kerne reaktionerne har lavet.</p>
   <div class="ctl"><label for="cs-e2">Neutronenergi</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Affyr 200 reaktioner</button></div>

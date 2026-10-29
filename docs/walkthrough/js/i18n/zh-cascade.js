@@ -1,6 +1,6 @@
 /* Simplified Chinese (简体中文): cascade (chapter 8) */
 WT.L.ch.cascade = {
-  num: "第 11 章", title: "沿核素图而下", short: "级联",
+  num: "第 11 章", title: "发射级联", short: "级联",
   lead: "一次发射很少就是终点：留下的原子核往往仍然足够热，可以再次发射。",
   html: `
 <div class="step">
@@ -10,15 +10,15 @@ WT.L.ch.cascade = {
   <p>发射出的中子通常很慢，所以大多数落差都很短。蓝点位于虚线所示的中子阈能之上：它们还能再发射第二个中子，即 (n,2n) 反应。低于约 11 MeV 时，没有一个能到达那里。</p>
 </div>
 <div class="step">
-  <h3>在核素图上漫步</h3>
+  <h3>沿核素图的顺序发射</h3>
   <p>这些流线是反应在<b>核素图</b>一角上的行走路线。核素图按中子数 N（横向）和质子数 Z（纵向）排列原子核。每条路线都从加框的复合核方格出发；每个方格以终止于此的反应命名。</p>
   <p>发射一个<em class="n">中子</em>向左移一格，一个<em class="p">质子</em>向下移一格，一个<em class="a">α粒子</em>（两个质子、两个中子）沿对角线移两格。流线的宽度表示走这一步的份额；色调和百分比表示反应在哪里终止。</p>
   <div class="ctl"><label for="cs-e4">中子能量</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">发射 200 次反应</button></div>
-  <p>每一步都要付出 7 到 11 MeV 的分离能，所以即使在 30 MeV，这段路最多也只有三四步。</p>
+  <p>拖动能量：在几 MeV 时，几乎一切都停在靶方格上；能量更高时，流线会走得更远。每一步都要付出 7 到 11 MeV 的分离能，所以即使在 30 MeV，这段路最多也只有三四步。</p>
 </div>
 <div class="step">
-  <h3>自上而下，逐个区间</h3>
+  <h3>布居记账</h3>
   <p>程序从上到下清空每个原子核，每次处理一个能量切片，即一个<b>能量区间</b>。右边是第一次发射后的剩余核；左边是它的子核，少一个中子。橙色小球是在各区间中等待的反应。这里每个区间宽 1 MeV；程序每个原子核大约用 40 个区间，大小按可用能量确定。</p>
   <p>标记扫过一个区间时，每个小球按第 9 章的竞争选择一个出口：一个光子（<em class="g">γ</em>）使它落到更低的区间，一个<em class="n">中子</em>把它移入子核，一个质子或 α 粒子则把它带出画面。低于所有阈能时，光子把剩下的部分带到基态（灰色）。随后再扫子核。</p>
   <div class="ctl"><label for="cs-e3">中子能量</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
@@ -26,13 +26,13 @@ WT.L.ch.cascade = {
   <p>光子只会向下落，而且每个原子核都在它的子核之前处理完，所以不会有东西落入已经清空的区间。</p>
 </div>
 <div class="step">
-  <h3>为每段历程命名</h3>
-  <p>每次演示一个反应：标记在核素图上跳动，每个发射出的粒子落入托盘。装满的托盘给出<b>排他反应道</b>的名称，例如 (n,2n)；光子不计入。程序为每个反应道给出各自的截面（即它发生的可能性，表示为等效的靶面积）。</p>
+  <h3>排他反应道</h3>
+  <p>每次演示一个反应：标记在核素图上跳动，每个发射出的粒子落入托盘。每个反应道都在它真正发生的能量下演示（图的顶部）：(n,3n) 在 25 MeV，因为这里三个中子要花超过 20 MeV；俘获 (n,γ) 在 1 MeV。装满的托盘给出<b>排他反应道</b>的名称，例如 (n,2n)；光子不计入。程序为每个反应道给出各自的截面（即它发生的可能性，表示为等效的靶面积）。</p>
   <div class="btns"><button class="btn ghost" data-act="next">下一个反应道</button></div>
   <p>逐个浏览。(n,np) 演示两次，一次先发中子，一次先发质子：同一个方格，同一个托盘，同一个反应道。接着，一个虚影氘核（一个质子和一个中子的束缚态）一步跳到同一方格：它的托盘写着 d，这是另一个反应道 (n,d)。</p>
 </div>
 <div class="step">
-  <h3>一切终结之处</h3>
+  <h3>剩余核产生</h3>
   <p>现在每个方格里都有几层架子：墨色代表<b>基态</b>，绿色（在两个方格中）代表<b>同质异能态</b>，即寿命足够长、可以算作独立产物的激发态。堆的高度就是<b>剩余核产生</b>：反应生成了多少各种原子核。</p>
   <div class="ctl"><label for="cs-e2">中子能量</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">发射 200 次反应</button></div>

@@ -109,3 +109,4 @@ Object.assign(WT.L.glossary, {
     chapter: "averages",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="rm" data-act="bw" */

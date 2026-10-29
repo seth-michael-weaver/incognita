@@ -8,7 +8,7 @@ WT.L.ch.strength = {
   <p><b>光子强度函数</b> <i>f<sub>XL</sub></i>(<i>E</i><sub>γ</sub>) 是 <i>XL</i> 型光子的平均约化概率：电偶极 E1、磁偶极 M1，依此类推。对 E1，它由 18 MeV 附近的巨偶极共振主导，但 <i>S<sub>n</sub></i> 处的衰变用的是 1 到 7 MeV 的光子，远在其尾部，而尾部的形状正是全部问题所在。</p>
   <div class="formula">f<sub>E1</sub> = K σ₀Γ₀ · E<sub>γ</sub> Γ(E<sub>γ</sub>,T) / [(E<sub>γ</sub>² − E₀²)² + E<sub>γ</sub>² Γ(E<sub>γ</sub>,T)²] / (1 − e<sup>−E<sub>γ</sub>/T</sup>) ,  Γ(E<sub>γ</sub>,T) = (Γ₀/E₀)(E<sub>γ</sub> + 4π²T²/E₀)</div>
   <div class="ctl"><label for="ps-t">末态温度 T (MeV)</label><input id="ps-t" type="range" data-bind="T" min="0" max="1.5" step="0.01" value="0.7"><output data-show="T" data-fmt="2"></output></div>
-  <p>虚线是标准洛伦兹型（SLO），即拟合光吸收数据得到的形状。由于宽度恒定，它在衰变窗口内把强度高估 2 到 5 倍，这是球形核上早已知道的失败。实线是简化修正洛伦兹型（<b>SMLO</b>）：它的宽度随光子能量和末态温度增大，这降低了窗口内的尾部，但在光子能量为零处留下有限的强度，正如衰变数据所要求的。把 <i>T</i> 拖到 0，这个低能下限就消失了。</p>
+  <p>虚线是标准洛伦兹型（SLO），即拟合光吸收数据得到的形状。由于宽度恒定，它在衰变窗口内把强度高估 2 到 5 倍，这是球形核上早已知道的失败。实线是简化修正洛伦兹型（<b>SMLO</b>）：它的宽度随光子能量和末态温度增大，这降低了窗口内的尾部，但在光子能量为零处留下有限的强度，正如衰变数据所要求的。放大框显示了 2 MeV 以下的这个下限：把 <i>T</i> 拖到 0，它就消失了。</p>
 </div>
 <div class="step">
   <h3>M1：自旋翻转、剪刀模式、低能上翘</h3>
@@ -29,7 +29,7 @@ WT.L.ch.strength = {
   <p>对 s 波共振（自旋为 0 的靶核上 <i>J</i><sup>π</sup> = ½⁺）经 E1 或 M1 可达的所有末态求和，就得到它们的平均总光子宽度。它已由共振形状对几百个原子核测出，是检验 <i>S<sub>n</sub></i> 处强度的主要手段。</p>
   <div class="formula">⟨Γ<sub>γ</sub>⟩ = D₀/2π · Σ<sub>XL</sub> Σ<sub>J′π′</sub> ∫₀^{S<sub>n</sub>} T<sub>XL</sub>(E<sub>γ</sub>) ρ(S<sub>n</sub> − E<sub>γ</sub>, J′, π′) dE<sub>γ</sub></div>
   <div class="ctl"><label for="ps-s">强度的缩放因子</label><input id="ps-s" type="range" data-bind="scale" min="0.3" max="8" step="0.01" value="1"><output data-show="scale" data-fmt="2"></output></div>
-  <p>曲线逐个光子地显示宽度来自哪里：主要是 3 到 7 MeV，且主要是 E1，M1 约贡献 15%。在这里，用解析形式和示意性的能级密度代替引擎的表格，得到的宽度只有实测值 0.92 eV 的约六分之一：宽度对 <i>S<sub>n</sub></i> 以下的能级密度和强度的尾部就是这么敏感。引擎所遵循的 TALYS 默认设置对这个原子核给出约 1.3 eV。滑块施加的就是评价工作会拟合的那个整体因子。当 Γ<sub>γ</sub> ≪ Γ<sub>n</sub> 时，keV 能区的俘获几乎正比于 ⟨Γ<sub>γ</sub>⟩，所以这里的一个因子就是 (n,γ) 中的一个因子。TALYS 可以把强度重新标定到实测 ⟨Γ<sub>γ</sub>⟩（<code>gnorm</code>）；在 INCOGNITA 中，这种对级联中每个原子核都施加的重新标定是一个可选开关，默认关闭。</p>
+  <p>曲线逐个光子地显示宽度来自哪里：主要是 3 到 7 MeV，且主要是 E1，M1 约贡献 15%。在这里，用解析形式和示意性的能级密度代替引擎的表格，得到的宽度只有实测值 0.92 eV 的约六分之一：宽度对 <i>S<sub>n</sub></i> 以下的能级密度和强度的尾部就是这么敏感。引擎所遵循的 TALYS 默认设置对这个原子核给出约 1.3 eV。滑块施加的就是评价工作会拟合的那个整体因子：大约 ×6 就把它带进实测范围。当 Γ<sub>γ</sub> ≪ Γ<sub>n</sub> 时，keV 能区的俘获几乎正比于 ⟨Γ<sub>γ</sub>⟩，所以这里的一个因子就是 (n,γ) 中的一个因子。TALYS 可以把强度重新标定到实测 ⟨Γ<sub>γ</sub>⟩（<code>gnorm</code>）；在 INCOGNITA 中，这种对级联中每个原子核都施加的重新标定是一个可选开关，默认关闭。</p>
 </div>
 <div class="step">
   <h3>级联</h3>
@@ -85,3 +85,4 @@ Object.assign(WT.L.glossary, {
     chapter: "strength",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="up" data-act="up2" */

@@ -1,6 +1,6 @@
 /* German (Deutsch): resonance (Kapitel 15, Resonanzen) */
 WT.L.ch.resonance = {
-  num: "Kapitel 15", title: "Scharfe Peaks", short: "Resonanzen",
+  num: "Kapitel 15", title: "Resonanzen", short: "Resonanzen",
   lead: "Bei genügend niedriger Energie sieht ein Neutron keinen glatten, gemittelten Kern mehr. Es sieht die einzelnen Energieniveaus des Compoundkerns, eines nach dem anderen.",
   html: `
 <div class="step">
@@ -9,33 +9,33 @@ WT.L.ch.resonance = {
   <p>Das Neutron hüpft in der Energie voran; wo es landet, kann es eingefangen werden, in einem Blitz aus Photonen. Auf einem Peak beträgt der Wirkungsquerschnitt Tausende Barn, und der Einfang ist fast sicher; zwischen den Peaks sind es einige Barn. Stell die Energie auf einen Peak und dann zwischen zwei.</p>
 </div>
 <div class="step">
-  <h3>Peaks halten Abstand</h3>
+  <h3>Niveauabstoßung</h3>
   <p>Die mittlere Reihe zeigt, wie echte Niveaus liegen: Zwei Niveaus mit gleichem Spin und gleicher Parität stoßen sich ab, also sind Beinahe-Zusammenfälle selten. Die <b>Theorie der Zufallsmatrizen</b> beschreibt dieses Muster. Wirklich zufällige Positionen (obere Reihe) klumpen und lassen Lücken.</p>
   <div class="btns"><button class="btn" data-act="again">Neu ziehen</button></div>
   <p>Zieh neu für eine neue Stichprobe. ⟨r̃⟩ vergleicht jeden Abstand mit dem nächsten: etwa 0,39 für zufällige, 0,53 für sich abstoßende Niveaus; der Code verwendet das abstoßende Muster. Mischt man zwei Folgen, etwa zwei Spins (untere Reihe), verdeckt das die Abstoßung teilweise.</p>
 </div>
 <div class="step">
-  <h3>Höhen streuen wild</h3>
+  <h3>Porter–Thomas-Breitenfluktuationen</h3>
   <p>Jetzt ist die Höhe jedes Peaks seine <b>Neutronenbreite</b> Γ<sub>n</sub>, auf linearer Skala: wie stark das Niveau an ein Neutron koppelt. Die gelbe Kappe ist seine γ-Breite Γ<sub>γ</sub>, wie schnell es Photonen aussendet; sie summiert Hunderte von Photonenwegen und ist daher für jedes Niveau fast gleich.</p>
   <div class="btns"><button class="btn" data-act="roll">Breite würfeln</button><button class="btn ghost" data-act="equal">Gleiche Breiten</button><button class="btn ghost" data-act="pt">Porter–Thomas</button></div>
   <p>Ein Niveau hat nur eine Möglichkeit, in Neutron plus Target zu zerfallen, also verhält sich seine Breite wie das Quadrat einer einzigen normalverteilten Zahl. Würfle eine: Die Kugel landet bei <i>x</i>, <i>x</i>² wird zur Höhe des nächsten Peaks, und ein Punkt fällt in den Stapel. Der Stapel drängt sich nahe null mit einem langen Ausläufer, das <b>Porter–Thomas</b>-Gesetz: Die meisten Niveaus sind schwach, einige wenige riesig. Gleiche Breiten zeigt stattdessen eine Reihe durchschnittlicher Peaks.</p>
 </div>
 <div class="step">
-  <h3>Eine Leiter aus vier Zahlen</h3>
-  <p>Die Peaks entstehen jetzt aus vier Mittelwerten, die du einstellen kannst. Für einen nicht gemessenen Kern lassen sich nur diese Mittelwerte vorhersagen: der mittlere Abstand <i>D</i><sub>0</sub>; die <b>Stärkefunktionen</b> <i>S</i><sub>0</sub> und <i>S</i><sub>1</sub>, die mittlere Neutronenbreite pro Abstandseinheit für s-Wellen-Neutronen (zentral) und p-Wellen-Neutronen (außermittig); und die mittlere γ-Breite. Daraus baut der Code eine <b>Leiter</b>: einen zufälligen Satz von Niveaus mit diesen Mittelwerten.</p>
+  <h3>Statistische Resonanzleitern</h3>
+  <p>Die Peaks entstehen jetzt aus vier Mittelwerten, die du einstellen kannst. Für einen nicht gemessenen Kern lassen sich nur diese Mittelwerte vorhersagen: der mittlere Abstand <i>D</i><sub>0</sub>; die <b>Stärkefunktionen</b> <i>S</i><sub>0</sub> und <i>S</i><sub>1</sub>, die mittlere Neutronenbreite pro Abstandseinheit für s-Wellen-Neutronen (zentral) und p-Wellen-Neutronen (außermittig); und die mittlere γ-Breite. Daraus baut der Code eine <b>Leiter</b>: einen zufälligen Satz von Niveaus mit diesen Mittelwerten. Drei haben hier Regler; <i>S</i><sub>1</sub> bleibt fest (sein Wert steht unter den Peaks).</p>
   <div class="ctl"><label for="res-d0">Abstand D₀ (eV)</label><input id="res-d0" type="range" data-bind="D0" min="3" max="60" step="0.5" value="20"><output data-show="D0" data-fmt="1"></output></div>
   <div class="ctl"><label for="res-s0">Stärke S₀ (×10⁻⁴)</label><input id="res-s0" type="range" data-bind="S0" min="0.2" max="3" step="0.05" value="1"><output data-show="S0" data-fmt="2"></output></div>
   <div class="ctl"><label for="res-gg">γ-Breite ⟨Γγ⟩ (meV)</label><input id="res-gg" type="range" data-bind="Gg" min="10" max="80" step="1" value="23"><output data-show="Gg" data-fmt="0"></output></div>
   <p>Zieh an <i>D</i><sub>0</sub>, und die Peaks rücken auseinander oder drängen sich zusammen. Volle Peaks sind s-Wellen-Niveaus (positive Parität), umrandete Peaks p-Wellen-Niveaus (negative Parität). Neutronenbreiten wachsen wie √<i>E</i> für s-Wellen und wie <i>E</i><sup>3/2</sup> für p-Wellen, also beginnen die umrandeten Peaks klein und wachsen nach rechts.</p>
 </div>
 <div class="step">
-  <h3>Hinunter bis thermisch</h3>
+  <h3>Der thermische Bereich</h3>
   <p>Dieselben Peaks auf logarithmischer Energieskala, bis hinunter zu Tausendsteln eines eV. Reaktorneutronen werden langsamer, indem sie an leichten Kernen abprallen und dabei jedes Mal etwa denselben Bruchteil ihrer Energie verlieren, also ist hier jeder Sprung gleich lang. Manche werden unterwegs von den Peaks eingefangen.</p>
   <div class="btns"><button class="btn" data-act="slow">10 Neutronen abbremsen</button></div>
   <p>Die durchkommen, kommen bei Raumtemperatur zur Ruhe, 0,025 eV, der <b>thermischen</b> Energie, weit unterhalb des ersten Peaks. Dort ist der Wirkungsquerschnitt, die Fläche der Scheibe, die Summe der Ausläufer der Resonanzen, einschließlich gebundener Niveaus knapp unter null; die Ausläufer wachsen wie 1/<i>v</i> (<i>v</i> die Geschwindigkeit des Neutrons), also steigt der Untergrund nach links an. Der Fang auf dem Weg nach unten wird durch das <b>Resonanzintegral</b> gemessen: den Wirkungsquerschnitt oberhalb von 0,5 eV, jede Energie mit 1/<i>E</i> gewichtet.</p>
 </div>
 <div class="step">
-  <h3>Vorhersagbar ist nur die Statistik</h3>
+  <h3>Was die Statistik vorhersagen kann</h3>
   <p>Jede Reihe ist eine Leiter, gezogen aus denselben vier Zahlen, mit einer Scheibe, deren Fläche ihr thermischer Einfangquerschnitt ist. Die Klammer reicht bis zu dem Peak, der diesen Wert bestimmt, meist dem nächstgelegenen; sein Abstand ändert sich von Leiter zu Leiter, und die Scheibe schwankt um einen Faktor zehn oder mehr.</p>
   <div class="btns"><button class="btn" data-act="draw1">Eine Leiter ziehen</button><button class="btn ghost" data-act="more">20 ziehen</button></div>
   <p>Jeder Wert fällt in den Stapel rechts. Für einen nicht gemessenen Kern ist die Antwort eine Streuung von Werten, nicht eine Zahl, und kein besseres Modell kann sie verengen. Das Resonanzintegral, eine Summe über viele Peaks, streut weniger. Wo die Niveaus mehr als etwa 10 keV auseinanderliegen, wie bei leichten Kernen, liegt keines nahe thermisch: Der Einfang ist dort direkt, und der Code verweigert die Antwort.</p>

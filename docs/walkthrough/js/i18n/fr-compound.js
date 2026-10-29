@@ -1,6 +1,6 @@
 /* French: compound (Chapitre 8) */
 WT.L.ch.compound = {
-  num: "Chapitre 8", title: "Partager l'énergie", short: "Noyau composé",
+  num: "Chapitre 8", title: "Le noyau composé", short: "Noyau composé",
   lead: "Une fois les premières collisions rapides terminées, tous les nucléons partagent l'énergie. Cet état apaisé est le noyau composé. Pour prédire ce qu'il fera ensuite, le moteur doit savoir de combien de façons il peut stocker son énergie.",
   html: `
 <div class="step">
@@ -9,33 +9,34 @@ WT.L.ch.compound = {
   <p>Appuyez sur le bouton pour envoyer le neutron d'un autre côté. La lueur finit toujours de la même façon : le noyau a <b>oublié comment il s'est formé</b>. C'est le noyau composé de Bohr. À partir de là, seules trois données comptent : son énergie, son spin (à quel point il tourne) et sa parité (une étiquette + ou − pour sa symétrie miroir).</p>
 </div>
 <div class="step">
-  <h3>Des niveaux séparés à un continuum</h3>
+  <h3>Des niveaux discrets au continuum</h3>
   <p>L'échelle de gauche contient les états du noyau, l'énergie croissant vers le haut ; la fenêtre de droite agrandit une tranche de 1 MeV autour de la boule orange. Près du bas, les barreaux sont très espacés, et chacun a été mesuré. Plus haut, les façons de répartir l'énergie entre 56 nucléons se multiplient jusqu'à ce que les barreaux se fondent en une bande continue : le continuum.</p>
   <div class="ctl"><label for="cn-e">Énergie d'excitation</label><input id="cn-e" type="range" data-bind="E" min="0" max="20" step="0.1" value="6.5"><output data-show="E" data-fmt="1"></output></div>
   <p>Faites varier l'énergie d'excitation (l'énergie stockée au-dessus de l'état le plus bas, en MeV) et regardez la fenêtre. La <b>densité de niveaux</b> ρ, en états par MeV, croît à peu près comme e<sup>2√(aE)</sup>, où <i>a</i> fixe le rythme propre à chaque noyau : quelques-uns par MeV à 3 MeV, des centaines vers 8 MeV (où un neutron pourrait s'échapper), des millions à 20 MeV. Là-haut, le moteur travaille directement avec ρ.</p>
 </div>
 <div class="step">
-  <h3>Trois morceaux, raccordés à une énergie</h3>
+  <h3>La densité de niveaux composite</h3>
   <p>La hauteur du relief est la densité de niveaux en échelle logarithmique, l'énergie croissant vers la droite. En bas à gauche se trouvent les niveaux comptés. La planche droite est la loi à <b>température constante</b> : ρ est multipliée par e (environ 2,7) tous les <i>T</i> MeV, où <i>T</i> est la température nucléaire. Le versant est le <b>gaz de Fermi</b>, qui traite les nucléons comme des particules indépendantes. Sauf pour les cibles les plus lourdes, pour lesquelles il lit des densités tabulées, le moteur utilise ce couple par défaut.</p>
   <div class="ctl"><label for="cn-ex">Énergie de raccordement</label><input id="cn-ex" type="range" data-bind="Ex" min="4.5" max="12" step="0.05" value="6"><output data-show="Ex" data-fmt="1"></output></div>
   <p>Faites varier l'énergie de raccordement : le point de jonction glisse le long du versant, et la planche pivote pour le rejoindre avec la même hauteur et la même pente. Les deux piles du dessous comparent les niveaux prédits par la planche à ceux réellement comptés. Un seul point de jonction les rend égaux ; la planche devient alors verte. C'est l'énergie que choisit le moteur.</p>
 </div>
 <div class="step">
-  <h3>Des couches qui fondent</h3>
+  <h3>Effets de couches et leur amortissement</h3>
   <p>Niveaux individuels de nucléons, deux nucléons chacun, pour deux noyaux. À gauche, une couche fermée : tout ce qui est sous un grand écart est plein, donc tout déplacement coûte l'écart entier. À droite, un noyau de milieu de couche avec un niveau supérieur à moitié plein, donc des déplacements bon marché existent tout de suite. Chaque compteur indique combien de configurations peuvent contenir la chaleur donnée.</p>
   <div class="ctl"><label for="cn-u">Chaleur (excitation)</label><input id="cn-u" type="range" data-bind="U" min="0" max="40" step="0.5" value="3"><output data-show="U" data-fmt="1"></output></div>
-  <p>Augmentez la chaleur et regardez les nucléons sauter. À faible chaleur, la couche fermée manque de configurations ; avec assez de chaleur, l'écart ne compte plus et les deux comptes croissent de la même façon. Le <b>paramètre de densité de niveaux</b> <i>a</i> traduit cela : les aiguilles partent séparées et convergent vers la valeur lissée <i>ã</i> sur environ 10 MeV. Le moteur atténue la correction de couches δW à un rythme γ :</p>
-  <div class="formula">a(U) = ã · [1 + δW · (1 − e<sup>−γU</sup>) / U]</div>
+  <p>Augmentez la chaleur et regardez les nucléons sauter. À faible chaleur, la couche fermée manque de configurations ; avec assez de chaleur, l'écart ne compte plus et les deux comptes croissent de la même façon. Le moteur résume cela en un seul nombre par noyau, le <b>paramètre de densité de niveaux</b> <i>a</i> : plus <i>a</i> est grand, plus vite le nombre de configurations croît avec la chaleur. Les aiguilles le montrent pour chaque noyau : elles partent séparées et, sur environ 10 MeV, se posent toutes deux sur la même valeur lissée (notée <i>ã</i>, « a tilde »), celle qu'aurait un noyau sans écarts de couches.</p>
+  <p>Le moteur part donc, pour chaque noyau, de son effet de couches, l'énergie supplémentaire que valent ses écarts (notée δW), et le laisse s'estomper à mesure que la chaleur augmente.</p>
+  <div class="aside">La formule : <i>a</i>(<i>U</i>) = <i>ã</i> · [1 + δW · (1 − e<sup>−γ<i>U</i></sup>) / <i>U</i>], où <i>U</i> est la chaleur et γ (gamma, environ 0,1 par MeV ici, moins dans les noyaux plus lourds) la vitesse à laquelle l'effet de couches s'estompe.</div>
 </div>
 <div class="step">
-  <h3>Triés par spin et parité</h3>
+  <h3>Distributions de spin et de parité</h3>
   <p>Les états à une énergie donnée se rangent dans des tiroirs selon leur spin <i>J</i>, le moment angulaire du noyau : jetons pleins pour la parité +, creux pour la parité −. Les tiroirs du milieu se remplissent le plus, selon (2<i>J</i>+1) e<sup>−(J+½)²/2σ²</sup>, où le paramètre de coupure en spin σ fixe l'étalement. Les deux parités sont à peu près à égalité.</p>
   <div class="ctl"><label for="cn-u2">Excitation</label><input id="cn-u2" type="range" data-bind="U2" min="1" max="30" step="0.5" value="8"><output data-show="U2" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="deform">Déformer le noyau</button></div>
   <p>Augmentez l'excitation : σ grandit, car un noyau plus chaud peut porter plus de spin. Appuyez ensuite sur Déformer. Un noyau en forme de ballon de rugby peut aussi tourner d'un bloc, donc chaque tiroir gagne des états (les jetons bleus) : c'est l'<b>amplification collective</b>. Par défaut, le moteur ne l'ajoute que pour les cibles de plus d'environ 215 nucléons.</p>
 </div>
 <div class="step">
-  <h3>Découpé en intervalles</h3>
+  <h3>Intervalles d'énergie dans le continuum</h3>
   <p>Au-dessus du dernier niveau compté, le moteur découpe le continuum en tranches de même largeur en énergie, appelées intervalles (bins). Dans chaque intervalle, les points se regroupent en un bloc de ρ·ΔE états (ΔE est la largeur de l'intervalle), triés par spin et parité comme ci-dessus.</p>
   <div class="ctl"><label for="cn-emax">Haut de l'échelle</label><input id="cn-emax" type="range" data-bind="Emax" min="8" max="30" step="0.5" value="14"><output data-show="Emax" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="rebin">Trier à nouveau</button></div>

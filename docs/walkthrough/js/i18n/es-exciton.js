@@ -9,14 +9,14 @@ WT.L.ch.exciton = {
   <div class="formula">ω(p,h,E) = g<sup>n</sup> (E − A<sub>p,h</sub>)<sup>n−1</sup> / (p! h! (n−1)!) ,  A<sub>p,h</sub> = max(p,h)²/g − (p² + h² + p + h)/4g</div>
   <div class="ctl"><label for="ex-n">Partículas p (huecos p − 1)</label><input id="ex-n" type="range" data-bind="pp" min="2" max="6" step="1" value="3" data-instant><output data-show="pp" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="pauli" aria-pressed="true">Corrección de Pauli</button></div>
-  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ es la densidad de niveles de una partícula cerca de la energía de Fermi. <i>A<sub>p,h</sub></i> es la corrección de <b>Pauli</b>: dos partículas no pueden compartir un nivel, así que las configuraciones más bajas cuestan energía y la densidad cerca del umbral cae. El esquema muestra una configuración cada vez con la <i>p</i> elegida, sorteada al azar.</p>
+  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ es la densidad de niveles de una partícula cerca de la energía de Fermi. <i>A<sub>p,h</sub></i> es la corrección de <b>Pauli</b>: dos partículas no pueden compartir un nivel, así que las configuraciones más bajas cuestan energía y la densidad cerca del umbral cae. Las curvas se nombran por sus cuentas: 3p2h significa 3 partículas y 2 huecos. El esquema muestra una configuración cada vez con la <i>p</i> elegida, sorteada al azar: cada hueco es un nucleón que falta por debajo del nivel de Fermi.</p>
 </div>
 <div class="step">
-  <h3>Ir más hondo o salir</h3>
+  <h3>Tasas de transición y de emisión</h3>
   <p>Desde cada etapa pueden pasar dos cosas. Una colisión crea otro par, con la tasa λ<sup>+</sup>, que por la regla de oro de Fermi es el elemento de matriz al cuadrado por la densidad de estados que puede alcanzar. O una partícula sale, con la tasa <i>W</i>, que da el balance detallado a partir de la sección eficaz inversa y del cociente de densidades de estados con y sin la partícula que escapa.</p>
   <div class="formula">λ<sup>+</sup>(n) = (2π/ħ) M² ω<sub>acc</sub> ,  W(p,h,ε) = (2s+1)/(π²ħ³) με σ<sub>inv</sub>(ε) ω(p−1,h,U) / ω(p,h,E)</div>
   <div class="ctl"><label for="ex-e">Energía del neutrón (MeV)</label><input id="ex-e" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
-  <p>Las barras son las dos tasas en cada etapa, en escala logarítmica: λ<sup>+</sup> del orden de 10²² s⁻¹, <i>W</i> alrededor de una décima parte en la primera etapa y menor en cada etapa siguiente, porque cada par nuevo reduce la energía que puede llevarse la partícula más energética. El motor toma M² de la forma de Koning–Duijvestijn, que disminuye con la energía por excitón:</p>
+  <p>Cada etapa se rotula con sus cuentas (2p1h: 2 partículas, 1 hueco). Las barras son las dos tasas en cada etapa, en escala logarítmica: λ<sup>+</sup> del orden de 10²² s⁻¹, <i>W</i> alrededor de una décima parte en la primera etapa y menor en cada etapa siguiente, porque cada par nuevo reduce la energía que puede llevarse la partícula más energética. El motor toma M² de la forma de Koning–Duijvestijn, que disminuye con la energía por excitón:</p>
   <div class="formula">M² = (C₁ A<sub>p</sub> / A³) · [7.48 + 4.62×10⁵ / (E/(n A<sub>p</sub>) + 10.7)³]  MeV²</div>
 </div>
 <div class="step">
@@ -27,14 +27,14 @@ WT.L.ch.exciton = {
   <p>Toda la cadena termina en unos pocos 10⁻²² s. La parte que escapa por el camino es la emisión de preequilibrio; el resto, tras un máximo de seis partículas en el motor, como en TALYS, pasa al núcleo compuesto. La integración en el tiempo da a cada etapa un peso τ(<i>n</i>)·<i>P</i>(<i>n</i>), y ese producto es lo que calcula el motor.</p>
 </div>
 <div class="step">
-  <h3>De dónde sale la cola dura</h3>
+  <h3>La cola de alta energía</h3>
   <p>El espectro de emisión es la suma sobre etapas de la población por la vida media por la tasa de emisión, más la evaporación de lo que queda. La etapa <i>n</i> = 3 por sí sola, dos partículas y un hueco, llega a las energías de salida más altas: su espectro solo cae linealmente hacia el punto final. Cada etapa posterior es más blanda.</p>
   <div class="formula">dσ/dε = σ<sub>CN</sub> Σ<sub>n</sub> P(n) τ(n) W(n,ε) + evaporación</div>
   <div class="ctl"><label for="ex-e3">Energía del neutrón (MeV)</label><input id="ex-e3" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
   <p>Sube la energía y el espectro se endurece: la cola de preequilibrio se estira hasta el punto final mientras la joroba de evaporación se queda en 1 a 2 MeV. Por encima de unos 10 MeV, los neutrones de alta energía medidos solo se reproducen con esta cola.</p>
 </div>
 <div class="step">
-  <h3>Qué fracción</h3>
+  <h3>La fracción de preequilibrio</h3>
   <p>La fracción de la emisión que es de preequilibrio crece con la energía incidente, desde un pequeño tanto por ciento cerca de 5 MeV hasta cerca del 40 % a 40 MeV aquí. Depende de una sola constante ajustable, el tamaño global del elemento de matriz: una interacción más débil supone un equilibrado más lento y más emisión temprana.</p>
   <div class="ctl"><label for="ex-c">Constante del elemento de matriz C₁</label><input id="ex-c" type="range" data-bind="c1" min="0.3" max="3" step="0.05" value="1"><output data-show="c1" data-fmt="2"></output></div>
   <p>La curva discontinua es C₁ = 1, el valor por defecto del motor; la continua sigue al control. Reducir C₁ a la mitad multiplica la fracción por 1,5 a 1,9, no por 2: la probabilidad de escape de cada etapa es W/(λ<sup>+</sup> + W), no W/λ<sup>+</sup>, y menos núcleos sobreviven hasta las etapas posteriores.</p>
@@ -90,3 +90,4 @@ Object.assign(WT.L.glossary, {
     chapter: "exciton",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="pauli" */

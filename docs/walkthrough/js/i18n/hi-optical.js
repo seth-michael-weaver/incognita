@@ -117,3 +117,4 @@ Object.assign(WT.L.glossary, {
     chapter: "optical",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

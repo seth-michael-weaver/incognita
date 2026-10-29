@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "Capítulo 17", title: "O que sai", short: "Observáveis",
+  num: "Capítulo 17", title: "Observáveis", short: "Observáveis",
   lead: "Uma experiência, um reator ou uma estrela só veem um punhado de números. Este capítulo mostra como o motor transforma o que acontece dentro do núcleo nesses números.",
   html: `
 <div class="step">
@@ -9,38 +9,38 @@ WT.L.ch.measure = {
   <p>Baixa a energia e os discos incham: um neutrão lento é uma onda larga e reage a partir de mais longe. A alta energia o disco encolhe até ao próprio núcleo.</p>
 </div>
 <div class="step">
-  <h3>Com a energia abrem-se novas saídas</h3>
+  <h3>Funções de excitação</h3>
   <p>Cada porta é uma saída, ou <b>canal</b>: o neutrão ressalta para fora (elástico), deixa o alvo excitado (n′), arranca mais neutrões (2n, 3n), é capturado e só saem fotões (γ), ou sai em vez disso um protão ou uma partícula α. Uma porta com cadeado tem um <b>limiar</b>: a reação custa mais energia do que a que o neutrão traz.</p>
   <div class="ctl"><label for="mea-e2">Energia do neutrão (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
   <p>Arrasta a energia para lá de um limiar e essa porta abre-se com um clarão; os baldes enchem-se conforme a fração de cada canal, e cada porta nova tira parte às outras. Os limiares vêm das massas dos núcleos; as frações, da competição do capítulo 9.</p>
 </div>
 <div class="step">
-  <h3>O que um detetor vê</h3>
+  <h3>Espectros de emissão</h3>
   <p>Os dois montes são os neutrões que chegam à metade dianteira e à metade traseira de um anel de detetores, ordenados por energia. O feixe é pulsado, por isso o tempo de voo de cada neutrão dá a sua energia: os rápidos chegam primeiro.</p>
   <div class="ctl"><label for="mea-ein">Energia incidente (MeV)</label><input id="mea-ein" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="30"><output data-show="Ein" data-fmt="0"></output></div>
   <p>Os dois montes têm uma bossa de neutrões lentos, <b>evaporados</b>: libertam-se do núcleo composto depois de a energia estar repartida, igualmente em todas as direções. Só o monte dianteiro tem uma longa cauda rápida: neutrões de <b>pré-equilíbrio</b>, que saem das primeiras colisões ainda a mover-se mais ou menos com o feixe. Sobe a energia incidente e a cauda cresce.</p>
 </div>
 <div class="step">
-  <h3>Para onde vão</h3>
+  <h3>Distribuições angulares</h3>
   <p>A pétala mostra quantos neutrões saem em cada direção; o feixe chega da esquerda. Os evaporados esqueceram o feixe e saem igualmente em todas as direções; os rápidos de pré-equilíbrio inclinam-se para a frente. A regra de Kalbach fixa quanto, com um único declive <i>a</i> que cresce com a energia de saída. O motor também pode escrever estas distribuições angulares, como saída opcional.</p>
   <div class="ctl"><label for="mea-eo">Energia de saída (MeV)</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>Baixa a energia de saída e a pétala arredonda-se: os neutrões lentos são sobretudo evaporados.</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
 </div>
 <div class="step">
-  <h3>Numa estrela</h3>
+  <h3>Secções eficazes médias de Maxwell</h3>
   <p>O monte de baixo recolhe as energias dos neutrões capturados no gás quente de uma estrela. As suas velocidades seguem uma distribuição de Maxwell fixada pela temperatura <i>kT</i> (30 keV são cerca de 350 milhões de graus); os rastos mais longos são neutrões mais rápidos, e cada passagem junto a um núcleo pode acabar num clarão de captura.</p>
   <div class="ctl"><label for="mea-kt">Temperatura kT (keV)</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Os neutrões lentos são capturados com facilidade mas passam raramente, e os rápidos são poucos, por isso a maioria das capturas vem de uma janela com alguns <i>kT</i> de largura. A taxa sobre todo o gás é a <b>secção eficaz de média maxwelliana</b> (MACS), em milibarns (mb). Aquece o gás e a janela desloca-se para energias mais altas, onde o alvo é mais pequeno. A MACS obtém-se integrando a curva de captura do motor.</p>
 </div>
 <div class="step">
-  <h3>O alvo também está quente</h3>
+  <h3>Alvos excitados termicamente</h3>
   <p>As bolas mostram que fração dos núcleos do alvo está em cada um dos seus níveis mais baixos a esta temperatura. Numa estrela alguns alvos já estão excitados, e cada nível excitado é uma entrada diferente para o mesmo núcleo composto. Um nível com spin <i>J</i> acolhe mais porque tem 2<i>J</i>+1 orientações.</p>
   <div class="ctl"><label for="mea-kt2">Temperatura kT (keV)</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Sobe a temperatura e vê os núcleos a subir. Uma taxa estelar calcula a captura a partir de cada nível povoado e soma os resultados com estas frações; os pesos somam a função de partição <i>G</i>, e a razão face à taxa a partir do estado fundamental é o <b>fator de reforço estelar</b>. O motor pode fazê-lo como opção, desligada por defeito; normalmente cada alvo parte do seu estado fundamental.</p>
 </div>
 <div class="step">
-  <h3>Que grau de certeza tem tudo isto?</h3>
+  <h3>Incertezas e covariâncias</h3>
   <p>Cada disco ténue é uma execução do motor com os seus dados de entrada alterados ao acaso: a profundidade do poço ótico, a densidade de níveis e a intensidade fotónica, cada uma conhecida só com uma margem de alguns por cento. A dispersão de muitas execuções é uma incerteza honesta: <b>Monte Carlo total</b>.</p>
   <div class="btns"><button class="btn" data-act="tmc1">Executar uma variante</button><button class="btn ghost" data-act="tmc">Executar 10</button><button class="btn ghost" data-act="clear">Limpar</button></div>
   <p>Um contorno nítido significa que os dados de entrada fixam a resposta; um contorno difuso, que não, e é aí que novas medições ajudariam mais.</p>

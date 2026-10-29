@@ -1,6 +1,6 @@
 /* Italian: direct (Capitolo 6, reazioni dirette) */
 WT.L.ch.direct = {
-  num: "Capitolo 6", title: "Un colpo di striscio", short: "Reazioni dirette",
+  num: "Capitolo 6", title: "Reazioni dirette", short: "Reazioni dirette",
   lead: "Non ogni neutrone che raggiunge il nucleo viene inghiottito. Alcuni ne sfiorano la superficie, gli danno una spinta e proseguono il volo.",
   html: `
 <div class="step">
@@ -9,40 +9,40 @@ WT.L.ch.direct = {
   <p>Trascina <i>b</i>. Sotto circa 0,8 il neutrone viene inghiottito. Vicino a 1 sfiora il nucleo e lo lascia nel suo primo livello eccitato, 2⁺. Sopra circa 1,2 lo manca e viene solo deviato: <b>diffusione elastica</b>, con il nucleo invariato.</p>
 </div>
 <div class="step">
-  <h3>Mettere in rotazione un nucleo allungato</h3>
+  <h3>Eccitazione rotazionale dei nuclei deformati</h3>
   <p>Una spinta mette in rotazione un nucleo allungato (capitolo 1) e lo fa salire lungo la scala della sua <b>banda rotazionale</b>: 0⁺, 2⁺, 4⁺, 6⁺, 8⁺. Il neutrone può spingere il nucleo verso l'alto e il nucleo può restituire la spinta, quindi nessun livello si può calcolare da solo. Il motore li risolve tutti insieme: <b>canali accoppiati</b>, dove ogni canale è un esito, qui un livello della banda.</p>
   <div class="btns"><button class="btn" data-act="kick">Spingilo su di un livello</button><button class="btn ghost" data-act="rpause">Pausa / riprendi</button></div>
   <div class="ctl"><label for="di-beta">Deformazione β₂</label><input id="di-beta" type="range" data-bind="beta2" min="0.05" max="0.4" step="0.01" value="0.25"><output data-show="beta2" data-fmt="2"></output></div>
-  <p>Gli archi mostrano quali livelli sono collegati: <i>λ</i> = 2, l'allungamento complessivo, collega i vicini; <i>λ</i> = 4, un rigonfiamento più fine, ne salta due. Trascina <i>β₂</i>: un nucleo più allungato collega i suoi livelli più fortemente, e gli archi si ispessiscono. Poiché la banda viene risolta insieme all'onda entrante, i coefficienti di trasmissione escludono già ciò che essa si prende.</p>
+  <p>Gli archi mostrano quali livelli sono collegati: <i>λ</i> = 2, l'allungamento complessivo, collega i vicini; <i>λ</i> = 4, un rigonfiamento più fine, ne salta due. Trascina <i>β₂</i>: un nucleo più allungato collega i suoi livelli più fortemente, e gli archi si ispessiscono. Poiché la banda viene calcolata insieme al neutrone entrante, il motore sa esattamente quanti neutroni essa prende, e passa solo il resto alle vie più lente dei capitoli successivi.</p>
 </div>
 <div class="step">
-  <h3>Increspature su una sfera</h3>
+  <h3>Vibrazioni di superficie</h3>
   <p>Un nucleo rotondo può incresparsi, e l'energia di increspatura arriva in pacchetti uguali chiamati <b>fononi</b>. Un fonone dell'increspatura pallone–disco (<i>λ</i> = 2) dà il livello 2⁺; due ne danno tre, 0⁺, 2⁺ e 4⁺, al doppio dell'energia. Per raggiungerli servono due spinte di fila. Il motore risolve questi livelli insieme allo stato fondamentale.</p>
   <div class="ctl"><label for="di-lam">Forma dell'increspatura λ</label><input id="di-lam" type="range" data-bind="lam" min="2" max="3" step="1" value="2" data-instant><output data-show="lam" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="ph1">Un fonone</button><button class="btn ghost" data-act="ph2">Due fononi</button></div>
   <p>Imposta <i>λ</i> = 3 per un'increspatura a forma di pera, il cui primo livello è 3⁻. Premi i pulsanti per aggiungere uno o due fononi.</p>
 </div>
 <div class="step">
-  <h3>Una spinta, una volta</h3>
+  <h3>Reazioni dirette a passo singolo</h3>
   <p>Per la maggior parte dei livelli il collegamento è debole e basta una spinta: la <b>DWBA</b> (approssimazione di Born a onde distorte). L'onda entrante del capitolo 5 spinge il nucleo una volta, sul bordo, dove il potenziale scende da profondo a zero; il bordo si illumina dove lo colpiscono le creste. L'onda circolare che si allarga sono i neutroni che hanno lasciato il nucleo eccitato.</p>
   <div class="ctl"><label for="di-bd">Deformazione del livello β</label><input id="di-bd" type="range" data-bind="bd" min="0.02" max="0.4" step="0.01" value="0.2"><output data-show="bd" data-fmt="2"></output></div>
   <p>Trascina <i>β</i>: il bordo oscilla di più e i cerchi si illuminano, come <i>β</i>²: doppia deformazione, quattro volte tanti. Il motore prende il <i>β</i> di ogni livello da valori misurati, o da sistematiche dove non se ne conosce nessuno. Come si distribuiscono in angolo i neutroni diffusi è un'uscita aggiuntiva opzionale.</p>
 </div>
 <div class="step">
-  <h3>Si muove l'intero nucleo</h3>
+  <h3>Risonanze giganti</h3>
   <p>Tutti i nucleoni possono muoversi insieme: respirare, schiacciarsi e allungarsi, oppure oscillare verso una forma a pera. Sono le <b>risonanze giganti</b>. In questo nucleo di massa media si trovano tra circa 7 e 25 MeV, ciascuna larga diversi MeV, troppo ampia per contare come un solo livello; le gobbe segnano l'<b>energia di eccitazione</b> di ciascuna.</p>
   <p>Il motore fissa l'intensità totale di ciascuna con una <b>regola di somma</b>, un limite dato dalla fisica di base a quanto fortemente un nucleo può rispondere, e la distribuisce come una gobba sopra l'ultimo livello noto. Queste gobbe, più le spinte verso livelli alti, formano il <b>continuo collettivo</b>.</p>
   <div class="btns"><button class="btn ghost" data-act="mono">Respiro</button><button class="btn ghost" data-act="quad">Schiacciamento</button><button class="btn ghost" data-act="oct">Pera</button></div>
   <p>La più nota, i protoni che oscillano contro i neutroni (la risonanza gigante di dipolo), soprattutto assorbe ed emette luce, quindi appartiene al capitolo 10.</p>
 </div>
 <div class="step">
-  <h3>Dritto in un'orbita</h3>
+  <h3>Cattura diretta</h3>
   <p>Un neutrone libero può cadere direttamente in un'<b>orbita</b> vuota della buca (un'energia permessa per un neutrone all'interno) ed emettere l'energia in eccesso come un <em class="g">fotone</em>. Il nucleo non si riscalda mai. Questa è la <b>cattura diretta</b>. Il motore può calcolarla con la stessa buca del capitolo 5: l'onda libera fuori, l'orbita legata dentro, il fotone che le collega. È opzionale e disattivata per impostazione predefinita.</p>
   <div class="btns"><button class="btn" data-act="drop">Fai cadere un neutrone</button></div>
   <p>La cattura diretta conta soprattutto dove la via abituale, spartire l'energia del neutrone, è debole: nuclei leggeri e nuclei lontani dalla stabilità, con pochi livelli molto distanziati.</p>
 </div>
 <div class="step">
-  <h3>Il diretto prende per primo la sua parte</h3>
+  <h3>Flusso diretto contro composto</h3>
   <p>Il motore ripartisce in ordine la sezione d'urto di reazione del capitolo 5: prima le reazioni dirette, poi le collisioni rapide, e solo ciò che resta forma un nucleo composto. Nell'immagine ogni neutrone va incontro a uno di tre destini: <b>diretto</b> (sfiora e prosegue), rapido (fa uscire un nucleone prima che l'energia si distribuisca: <b>pre-equilibrio</b>, capitolo 7) o inghiottito (un <b>nucleo composto</b>, capitolo 8). I mucchi li contano.</p>
   <div class="ctl"><label for="di-e">Energia del neutrone (MeV)</label><input id="di-e" type="range" data-bind="E" min="1" max="60" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <p>Trascina l'energia e guarda i mucchi riempirsi di nuovo. A pochi MeV quasi ogni neutrone viene inghiottito. A decine di MeV, reazioni dirette e collisioni rapide insieme ne prendono una grossa parte.</p>

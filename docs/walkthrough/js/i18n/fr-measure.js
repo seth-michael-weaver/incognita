@@ -1,6 +1,6 @@
 /* French: measure (chapter 11) */
 WT.L.ch.measure = {
-  num: "Chapitre 17", title: "Ce qui en ressort", short: "Observables",
+  num: "Chapitre 17", title: "Observables", short: "Observables",
   lead: "Une expérience, un réacteur ou une étoile ne voient qu'une poignée de nombres. Ce chapitre montre comment le moteur transforme ce qui se passe dans le noyau en ces nombres.",
   html: `
 <div class="step">
@@ -9,38 +9,38 @@ WT.L.ch.measure = {
   <p>Baissez l'énergie et les disques gonflent : un neutron lent est une onde étendue et réagit de plus loin. À haute énergie, le disque se réduit jusqu'au noyau lui-même.</p>
 </div>
 <div class="step">
-  <h3>De nouvelles sorties s'ouvrent avec l'énergie</h3>
+  <h3>Fonctions d'excitation</h3>
   <p>Chaque porte est une sortie, ou <b>voie</b> : le neutron rebondit (élastique), laisse la cible excitée (n′), arrache d'autres neutrons (2n, 3n), est capturé et seuls des photons sortent (γ), ou bien c'est un proton ou une particule α qui sort. Une porte cadenassée a un <b>seuil</b> : la réaction coûte plus d'énergie que le neutron n'en apporte.</p>
   <div class="ctl"><label for="mea-e2">Énergie du neutron (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
   <p>Faites glisser l'énergie au-delà d'un seuil et cette porte s'ouvre dans un éclair ; les seaux se remplissent selon la part de chaque voie, et chaque nouvelle porte prend une part aux autres. Les seuils viennent des masses des noyaux ; les parts, de la compétition du chapitre 9.</p>
 </div>
 <div class="step">
-  <h3>Ce que voit un détecteur</h3>
+  <h3>Spectres d'émission</h3>
   <p>Les deux piles sont les neutrons qui atteignent la moitié avant et la moitié arrière d'un anneau de détecteurs, triés par énergie. Le faisceau est pulsé : le temps de vol de chaque neutron donne donc son énergie, les rapides arrivant en premier.</p>
   <div class="ctl"><label for="mea-ein">Énergie incidente (MeV)</label><input id="mea-ein" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="30"><output data-show="Ein" data-fmt="0"></output></div>
   <p>Les deux piles ont une bosse de neutrons lents, <b>évaporés</b> : ils s'échappent du noyau composé une fois l'énergie partagée, de la même façon dans toutes les directions. Seule la pile avant a une longue queue rapide : des neutrons de <b>prééquilibre</b>, qui partent dès les premières collisions en se déplaçant encore à peu près dans le sens du faisceau. Augmentez l'énergie incidente et la queue grandit.</p>
 </div>
 <div class="step">
-  <h3>Dans quelle direction ils partent</h3>
+  <h3>Distributions angulaires</h3>
   <p>Le pétale montre combien de neutrons partent dans chaque direction ; le faisceau arrive de la gauche. Les neutrons évaporés ont oublié le faisceau et partent de la même façon dans toutes les directions ; les rapides du prééquilibre penchent vers l'avant. La règle de Kalbach fixe dans quelle mesure, avec une seule pente <i>a</i> qui croît avec l'énergie de sortie. Le moteur peut aussi écrire ces distributions angulaires, en sortie facultative.</p>
   <div class="ctl"><label for="mea-eo">Énergie de sortie (MeV)</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>Baissez l'énergie de sortie et le pétale s'arrondit : les neutrons lents sont surtout des neutrons évaporés.</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
 </div>
 <div class="step">
-  <h3>Dans une étoile</h3>
+  <h3>Sections efficaces moyennées sur une maxwellienne</h3>
   <p>La pile du bas recueille les énergies des neutrons capturés dans le gaz chaud d'une étoile. Leurs vitesses suivent une distribution de Maxwell fixée par la température <i>kT</i> (30 keV correspondent à environ 350 millions de degrés) ; les traînées plus longues sont des neutrons plus rapides, et chaque passage près d'un noyau peut finir par un éclair de capture.</p>
   <div class="ctl"><label for="mea-kt">Température kT (keV)</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Les neutrons lents sont faciles à capturer mais passent rarement, et les rapides sont peu nombreux : la plupart des captures proviennent d'une fenêtre large de quelques <i>kT</i>. Le taux sur l'ensemble du gaz est la <b>section efficace moyennée sur une maxwellienne</b> (MACS), en millibarns (mb). Chauffez le gaz et la fenêtre glisse vers les hautes énergies, où la cible est plus petite. La MACS est obtenue en intégrant la courbe de capture du moteur.</p>
 </div>
 <div class="step">
-  <h3>La cible est chaude, elle aussi</h3>
+  <h3>Cibles thermiquement excitées</h3>
   <p>Les billes montrent quelle fraction des noyaux cibles se trouve sur chacun de leurs niveaux les plus bas à cette température. Dans une étoile, certaines cibles sont déjà excitées, et chaque niveau excité est une entrée différente vers le même noyau composé. Un niveau de spin <i>J</i> en accueille davantage, car il possède 2<i>J</i>+1 orientations.</p>
   <div class="ctl"><label for="mea-kt2">Température kT (keV)</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Augmentez la température et regardez les noyaux monter. Un taux stellaire calcule la capture depuis chaque niveau peuplé et additionne les résultats avec ces parts ; la somme des poids est la fonction de partition <i>G</i>, et le rapport au taux depuis l'état fondamental est le <b>facteur d'amplification stellaire</b>. Le moteur peut le faire en option, désactivée par défaut ; normalement, chaque cible part de son état fondamental.</p>
 </div>
 <div class="step">
-  <h3>Quel degré de certitude ?</h3>
+  <h3>Incertitudes et covariances</h3>
   <p>Chaque disque pâle est un calcul du moteur avec ses données d'entrée perturbées au hasard : la profondeur du puits optique, la densité de niveaux et la fonction de force gamma, chacune connue seulement à quelques pour cent près. La dispersion de nombreux calculs est une incertitude honnête : le <b>Total Monte Carlo</b>.</p>
   <div class="btns"><button class="btn" data-act="tmc1">Lancer une variante</button><button class="btn ghost" data-act="tmc">En lancer 10</button><button class="btn ghost" data-act="clear">Effacer</button></div>
   <p>Un bord net signifie que les données d'entrée fixent la réponse ; un bord flou, qu'elles ne la fixent pas, et c'est là que de nouvelles mesures aideraient le plus.</p>

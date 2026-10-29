@@ -9,7 +9,7 @@ WT.L.ch.structure = {
   <p>Arrasta para acrescentar ou retirar neutrões; cada escolha é um <b>isótopo</b> diferente. As barras mostram a <b>energia de ligação</b> por nucleão em MeV (milhões de eletrão-volts): a energia necessária para desfazer o núcleo. É máxima perto dos isótopos estáveis.</p>
 </div>
 <div class="step">
-  <h3>Quanto custa tirar um</h3>
+  <h3>Energias de separação</h3>
   <p>A energia para tirar uma partícula é a sua <b>energia de separação</b>: <i>S<sub>n</sub></i> para um neutrão, <i>S<sub>p</sub></i> para um protão, <i>S<sub>α</sub></i> para uma <b>partícula alfa</b> (dois protões e dois neutrões ligados entre si). A imagem mostra o núcleo como um poço, com a energia a crescer para cima; cada extração leva a partícula do topo para lá da linha tracejada «livre», e o medidor regista o custo.</p>
   <div class="btns"><button class="btn ghost" data-act="pn">Tirar um neutrão</button><button class="btn ghost" data-act="pp">Tirar um protão</button><button class="btn ghost" data-act="pa">Tirar uma alfa</button></div>
   <p>O motor obtém cada uma como a diferença entre duas massas nucleares: medidas onde é possível, de um modelo de massas onde não é.</p>
@@ -17,14 +17,14 @@ WT.L.ch.structure = {
   <p>Arrasta o número de neutrões e volta a tirar um neutrão: <i>S<sub>n</sub></i> sobe e desce em ziguezague, porque os nucleões formam pares e, com um número par, o último fica mais ligado. Uma reação só pode expulsar uma partícula se trouxer energia suficiente para pagar esse custo. Estes custos são os <b>limiares</b> de todo o cálculo.</p>
 </div>
 <div class="step">
-  <h3>Níveis de energia, e a descida</h3>
+  <h3>Estados excitados e decaimento gama</h3>
   <p>Um núcleo só pode guardar certas quantidades exatas de energia extra: as linhas, aqui para o ferro-56, com o <b>estado fundamental</b> em baixo. Cada nível tem um <b>spin</b> <i>J</i> (momento angular) e uma <b>paridade</b>, + ou − (se a sua onda fica igual vista num espelho); 2<sup>+</sup> significa spin 2, paridade +.</p>
   <p>A bola laranja é um núcleo num nível alto. Desce nível a nível, e cada salto emite um <em class="g">fotão</em> (um raio gama) que leva a diferença de energia. A espessura e a percentagem dos caminhos são as probabilidades medidas de cada salto, as <b>razões de ramificação</b>.</p>
   <div class="btns"><button class="btn" data-act="drop">Excitar o núcleo</button></div>
   <p>Carrega várias vezes: o mesmo nível chega ao estado fundamental por caminhos diferentes. O motor guarda cerca de trinta níveis medidos por núcleo, com as suas probabilidades; mais acima, trata os níveis apinhados como um <b>contínuo</b> suave. Acima da linha tracejada, <i>S<sub>n</sub></i>, o núcleo pode emitir um neutrão.</p>
 </div>
 <div class="step">
-  <h3>Um nível sem saída fácil</h3>
+  <h3>Isómeros: estados excitados de longa vida</h3>
   <p>Um nível cuja única saída exige uma grande mudança de spin, Δ<i>J</i>, decai muito devagar. À direita, 64 núcleos estão num nível assim; cada um espera um tempo aleatório, depois desce e sai um <em class="g">fotão</em>. Passada uma <b>semivida</b>, metade já desceu.</p>
   <div class="ctl"><label for="st-dj">Mudança de spin ΔJ</label><input id="st-dj" type="range" data-bind="dJ" min="1" max="5" step="1" value="2" data-instant><output data-show="dJ" data-fmt="0"></output></div>
   <div class="ctl"><label for="st-eg">Energia do fotão (MeV)</label><input id="st-eg" type="range" data-bind="Eg" min="0.05" max="1.5" step="0.05" value="0.3"><output data-show="Eg" data-fmt="2"></output></div>
@@ -32,15 +32,15 @@ WT.L.ch.structure = {
   <p>Aumenta Δ<i>J</i> e os fotões saem mais devagar: cada unidade extra de spin torna a espera cem mil vezes mais longa ou mais, e uma energia de fotão menor também a alonga (em escala logarítmica). Um nível que vive mais de cerca de um segundo é um <b>isómero</b>, e o motor trata-o como um ponto final, tal como o estado fundamental.</p>
 </div>
 <div class="step">
-  <h3>Redondo, ou não</h3>
+  <h3>Deformação nuclear</h3>
   <p>Muitos núcleos não são redondos. <i>β₂</i> («beta dois») mede o alongamento: 0 é uma esfera, positivo é esticado como uma bola de râguebi, negativo é achatado como um disco. A escada à direita mostra os níveis que cada tipo produz.</p>
   <p>Um núcleo esticado pode rodar, e dá os níveis 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> com espaçamentos que crescem como <i>J</i>(<i>J</i>+1): um <b>rotor</b>. Um redondo pode ondular; cada unidade de ondulação, um <b>fonão</b>, acrescenta a mesma energia, por isso os seus níveis são igualmente espaçados: um <b>vibrador</b>.</p>
   <div class="ctl"><label for="st-beta">Deformação β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Parado</button><button class="btn ghost" data-act="vib">A vibrar</button><button class="btn ghost" data-act="rot">A rodar</button></div>
-  <p>Arrasta <i>β₂</i> e carrega nos botões: um alongamento maior aproxima os níveis do rotor. O motor guarda deformações por núcleo e uma etiqueta: esférico, vibrador ou rotor. O capítulo 6 mostra como um neutrão que passa as usa.</p>
+  <p>Arrasta <i>β₂</i> e carrega nos botões: um alongamento maior aproxima os níveis do rotor. Um vibrador é redondo em média, por isso o cursor fica quieto enquanto ele ondula; e uma esfera não pode rodar neste sentido (rodá-la não muda nada), pelo que perto de <i>β₂</i> = 0 a banda do rotor desaparece. O motor guarda deformações por núcleo e uma etiqueta: esférico, vibrador ou rotor. O capítulo 6 mostra como um neutrão que passa as usa.</p>
 </div>
 <div class="step">
-  <h3>Impressões digitais logo acima do limiar</h3>
+  <h3>Parâmetros de ressonância acima do limiar neutrónico</h3>
   <p>Um neutrão lento que se junta ao alvo fica logo acima de <i>S<sub>n</sub></i>, na caixinha à esquerda. O painel da direita amplia essa caixa milhares de vezes, com a energia do neutrão da esquerda para a direita.</p>
   <div class="ctl"><label for="st-fe">Energia do feixe</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">Pausar o varrimento</button></div>

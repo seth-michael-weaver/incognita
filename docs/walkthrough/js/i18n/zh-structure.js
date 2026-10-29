@@ -9,7 +9,7 @@ WT.L.ch.structure = {
   <p>拖动滑块增减中子；每一种选择都是一种不同的<b>同位素</b>。柱条显示以 MeV（百万电子伏特）为单位的每核子<b>结合能</b>：即把原子核拆散所需的能量。它在稳定同位素附近达到峰值。</p>
 </div>
 <div class="step">
-  <h3>取出一个粒子的代价</h3>
+  <h3>分离能</h3>
   <p>取出一个粒子所需的能量是它的<b>分离能</b>：中子为 <i>S<sub>n</sub></i>，质子为 <i>S<sub>p</sub></i>，<b>α粒子</b>（两个质子和两个中子结合在一起）为 <i>S<sub>α</sub></i>。图中把原子核画成一个势阱，能量向上增加；每次拉动都把最上面的粒子拉出，越过虚线“自由”线，仪表记录所付出的代价。</p>
   <div class="btns"><button class="btn ghost" data-act="pn">拉出一个中子</button><button class="btn ghost" data-act="pp">拉出一个质子</button><button class="btn ghost" data-act="pa">拉出一个 α</button></div>
   <p>程序用两个原子核质量之差求得每个分离能：能用实测值时用实测值，否则用质量模型。</p>
@@ -17,14 +17,14 @@ WT.L.ch.structure = {
   <p>拖动中子数，再拉出一个中子：<i>S<sub>n</sub></i> 呈锯齿状变化，因为核子会配对，偶数个时最后一个被束缚得更紧。只有带来足够能量支付这一代价，反应才能放出一个粒子。这些代价就是整个计算的<b>阈能</b>。</p>
 </div>
 <div class="step">
-  <h3>能级，以及向下跃迁</h3>
+  <h3>激发态与 γ 衰变</h3>
   <p>原子核只能容纳某些确定数值的额外能量：图中的横线（这里是铁-56），最底部是<b>基态</b>。每个能级有一个<b>自旋</b> <i>J</i>（角动量）和一个<b>宇称</b>，+ 或 −（它的波在镜中是否看起来一样）；2<sup>+</sup> 表示自旋 2、宇称 +。</p>
   <p>橙色小球是处于高能级的原子核。它一次下降一个能级，每一跳放出一个带走能量差的<em class="g">光子</em>（γ射线）。路径的宽度和百分比是每一跳的实测概率，即<b>分支比</b>。</p>
   <div class="btns"><button class="btn" data-act="drop">激发原子核</button></div>
   <p>多按几次：同一个能级会经由不同路径到达基态。程序为每个原子核保留约三十个实测能级及其分支比；更高处则把密集的能级当作平滑的<b>连续区</b>处理。在虚线 <i>S<sub>n</sub></i> 之上，原子核可以发射中子。</p>
 </div>
 <div class="step">
-  <h3>难以退激的能级</h3>
+  <h3>同质异能态：长寿命的激发态</h3>
   <p>如果一个能级唯一的退激途径需要很大的自旋变化 Δ<i>J</i>，它衰变得就非常慢。右边有 64 个原子核处在这样的能级上；每个都等待一段随机的时间，然后跃迁下来，放出一个<em class="g">光子</em>。经过一个<b>半衰期</b>后，一半已经跃迁。</p>
   <div class="ctl"><label for="st-dj">自旋变化 ΔJ</label><input id="st-dj" type="range" data-bind="dJ" min="1" max="5" step="1" value="2" data-instant><output data-show="dJ" data-fmt="0"></output></div>
   <div class="ctl"><label for="st-eg">光子能量 (MeV)</label><input id="st-eg" type="range" data-bind="Eg" min="0.05" max="1.5" step="0.05" value="0.3"><output data-show="Eg" data-fmt="2"></output></div>
@@ -32,15 +32,15 @@ WT.L.ch.structure = {
   <p>增大 Δ<i>J</i>，放出光子的速度就变慢：自旋每多一个单位，等待时间就延长十万倍甚至更多；光子能量越低，等待也越长（以对数坐标显示）。寿命超过约一秒的能级称为<b>同质异能态</b>，程序把它当作终点，与基态同等对待。</p>
 </div>
 <div class="step">
-  <h3>圆的，还是不圆</h3>
+  <h3>原子核的形变</h3>
   <p>许多原子核并不是圆的。<i>β₂</i>（读作“贝塔二”）衡量拉伸程度：0 是球形，正值像橄榄球那样被拉长，负值被压扁成圆盘。右边的梯子显示每种形状产生的能级。</p>
   <p>拉长的原子核可以转动，产生 0<sup>+</sup>、2<sup>+</sup>、4<sup>+</sup>、6<sup>+</sup> 能级，间距按 <i>J</i>(<i>J</i>+1) 增大：这是<b>转动核</b>。球形原子核可以振动；每一份振动能量即一个<b>声子</b>，增加相同的能量，所以能级等间距排列：这是<b>振动核</b>。</p>
   <div class="ctl"><label for="st-beta">形变 β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">静止</button><button class="btn ghost" data-act="vib">振动</button><button class="btn ghost" data-act="rot">转动</button></div>
-  <p>拖动 <i>β₂</i> 并按按钮：拉伸越大，转动核的能级越靠拢。程序为每个原子核存储形变值和一个标签：球形、振动核或转动核。第 6 章展示了经过的中子如何利用它们。</p>
+  <p>拖动 <i>β₂</i> 并按按钮：拉伸越大，转动核的能级越靠拢。振动核平均而言是圆的，所以它起伏时滑块保持不动；而球在这个意义上不能转动（转动它没有任何变化），所以在 <i>β₂</i> = 0 附近，转动带消失。程序为每个原子核存储形变值和一个标签：球形、振动核或转动核。第 6 章展示了经过的中子如何利用它们。</p>
 </div>
 <div class="step">
-  <h3>阈能之上的指纹</h3>
+  <h3>中子阈以上的共振参数</h3>
   <p>加入靶核的慢中子落在略高于 <i>S<sub>n</sub></i> 的地方，即左边的小方框里。右边的面板把这个方框放大了数千倍，中子能量从左到右增加。</p>
   <div class="ctl"><label for="st-fe">束流能量</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">暂停扫描</button></div>

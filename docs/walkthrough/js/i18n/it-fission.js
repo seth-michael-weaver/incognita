@@ -1,6 +1,6 @@
 /* Italian: fission (Capitolo 12, fissione) */
 WT.L.ch.fission = {
-  num: "Capitolo 12", title: "Spezzarsi in due", short: "Fissione",
+  num: "Capitolo 12", title: "Fissione", short: "Fissione",
   lead: "I nuclei più pesanti hanno un'uscita che a quelli leggeri manca: invece di espellere una particella, l'intero nucleo si strappa in due. Questa è la fissione.",
   html: `
 <div class="step">
@@ -9,36 +9,36 @@ WT.L.ch.fission = {
   <p>Trascina per allungarla e guarda il punto sulla piccola curva di energia qui sotto. Allungarla aggiunge superficie, il che costa energia, ma distribuisce la carica, il che libera energia. Oltre la cima della curva vince la carica: si forma un collo e le due metà volano via con circa 200 MeV.</p>
 </div>
 <div class="step">
-  <h3>Il paesaggio delle forme</h3>
+  <h3>La superficie di energia potenziale</h3>
   <p>La curva è l'energia per ogni forma, da rotonda (a sinistra) a spezzata (a destra). Una goccia liquida liscia dà una sola collina, ma i nucleoni riempiono i livelli di energia a gruppi, chiamati <b>shell</b>, e negli elementi più pesanti questo scava una buca nella collina: una <b>barriera a doppia gobba</b>, dove il nucleo può indugiare in una forma allungata.</p>
   <p>Il motore non dà per scontata questa curva: la legge punto per punto da un calcolo microscopico dell'energia a ogni deformazione (grado di allungamento).</p>
 </div>
 <div class="step">
-  <h3>Attraversare la collina per effetto tunnel</h3>
+  <h3>Penetrazione della barriera</h3>
   <p>La palla è il nucleo eccitato nella prima valle, all'energia di eccitazione della linea tratteggiata arancione, sotto la cima di 6 MeV. Secondo la fisica classica non può mai passare; la meccanica quantistica le permette di attraversare per <b>effetto tunnel</b> la parte più scura e proibita, con una probabilità <i>T</i> che cala esponenzialmente man mano che quella parte si ispessisce.</p>
   <div class="ctl"><label for="fis-e">Energia di eccitazione</label><input id="fis-e" type="range" data-bind="E" min="3" max="8" step="0.05" value="5"><output data-show="E" data-fmt="2"></output></div>
   <p>Aumenta l'energia e guarda <i>T</i> crescere mentre la parte proibita si assottiglia. La scorciatoia dei libri di testo (Hill–Wheeler) tratta la cima come una parabola (blu tratteggiata). Il motore segue la forma reale, più larga in basso, quindi molto sotto la cima la sua probabilità è minore. <i>K</i> misura quanta collina c'è di mezzo.</p>
   <div class="formula">T = 1 / (1 + e<sup>2K</sup>),  K = ∫ √(2μ(V−E)) dβ / ħ</div>
 </div>
 <div class="step">
-  <h3>Cancelli sulla cima</h3>
+  <h3>Stati di transizione</h3>
   <p>Le porte sulla cima sono gli <b>stati di transizione</b>, gli stati quantistici del nucleo allungato sopra la barriera. Ciascuno ha uno spin e una parità (0⁺, 2⁻, …) e fa da cancello; il suo varco illuminato mostra quanto è aperto. Un nucleo passa solo attraverso i cancelli con il suo stesso spin e la sua stessa parità, e ciascuno si apre gradualmente man mano che l'energia ne supera l'altezza.</p>
   <div class="ctl"><label for="fis-e2">Energia di eccitazione</label><input id="fis-e2" type="range" data-bind="E" min="3" max="8" step="0.05" value="5"><output data-show="E" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="jpAll">Qualsiasi spin</button><button class="btn ghost" data-act="jp0">Composto 0⁺</button><button class="btn ghost" data-act="jp1">Composto 1⁻</button></div>
   <p>Scegli uno spin e una parità: contano solo i cancelli corrispondenti, e l'apertura totale cala. Più in alto i cancelli si affollano in un <b>continuo</b>, e il motore li conta in base alla loro densità, come fa con i livelli ordinari.</p>
 </div>
 <div class="step">
-  <h3>Due colline in serie</h3>
+  <h3>Barriere a doppia gobba</h3>
   <p>Ora entrambe le colline, ciascuna con un cancello (il cerchio; la parte piena indica quanto è aperto). I nuclei arrivano da sinistra; quelli che superano la prima collina restano intrappolati nella buca, rimbalzando fra i cancelli finché escono da una parte o dall'altra. Le probabilità si combinano come resistenze in serie, quindi a decidere è soprattutto la collina più difficile.</p>
   <div class="ctl"><label for="fis-b">Altezza della collina esterna</label><input id="fis-b" type="range" data-bind="Bb" min="3.5" max="7.5" step="0.05" value="5.6"><output data-show="Bb" data-fmt="2"></output></div>
   <div class="formula">1/T = 1/T<sub>A</sub> + 1/T<sub>B</sub></div>
   <p>Alza la collina esterna e guarda il flusso verso la fissione strozzarsi, per quanto aperto sia il cancello interno.</p>
 </div>
 <div class="step">
-  <h3>Più di una possibilità</h3>
+  <h3>Fissione a più possibilità</h3>
   <p>L'uranio-238 assorbe il neutrone e diventa uranio-239 con eccitazione <i>E</i>* (linea tratteggiata). Se non si spezza, può invece emettere un neutrone; la linea scende, e l'uranio-238 che resta, ancora caldo, tenta la propria barriera: fissione di <b>seconda possibilità</b>, (n,n′f). I mucchi raccolgono come è finito ogni nucleo.</p>
   <div class="ctl"><label for="fis-en">Energia del neutrone</label><input id="fis-en" type="range" data-bind="En" min="0" max="25" step="0.1" value="7"><output data-show="En" data-fmt="1"></output></div>
-  <p>Aumenta l'energia e i tentativi successivi cominciano a riuscire; una terza possibilità si apre vicino a 12 MeV. Ogni nuova possibilità appare come un gradino nella <b>sezione d'urto di fissione</b> misurata, quanto è probabile che il nucleo si spezzi. Il motore calcola quanto spesso si spezza, non in quali frammenti.</p>
+  <p>Aumenta l'energia e i tentativi successivi cominciano a riuscire; una terza possibilità si apre vicino a 12 MeV. Ogni nuova possibilità appare come un gradino nella <b>sezione d'urto di fissione</b> misurata, quanto è probabile che il nucleo si spezzi: il piccolo grafico in alto a destra disegna quei gradini, con la tua energia segnata. Il motore calcola quanto spesso si spezza, non in quali frammenti.</p>
   <div class="aside">Nel codice: <code>fission/wkb.py</code> (il cammino dell'energia di deformazione e gli integrali WKB), <code>fission/barriers.py</code> (Hill–Wheeler, stati di transizione, la densità dei livelli sulla barriera), <code>fission/transmission.py</code> (gobbe in serie, T<sub>fis</sub> per spin e parità), <code>fission/chain.py</code> (barriere per ogni nucleo della cascata).</div>
 </div>`,
 };

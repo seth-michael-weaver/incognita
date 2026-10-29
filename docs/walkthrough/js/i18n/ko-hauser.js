@@ -20,6 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>폭 요동</h3>
+  <p>단순한 공식은 탄성 산란을 약간 과소평가하며, 보정은 다른 출구에서 약간의 선속을 탄성 쪽으로 되돌려 보냅니다. 그 이유는 다음과 같습니다.</p>
   <p><i>W<sub>ab</sub></i> = 1이면 이 공식은 평균끼리 곱합니다. 평균 뒤에 있는 공명들의 폭은 제각각 흩어져 있고(포터–토머스, 15장), 탄성 산란에서는 중성자를 들여보내는 폭과 내보내는 폭이 같은 폭이므로 둘은 상관되어 있습니다. 그래서 탄성에서는 곱의 평균이 평균의 곱보다 커지고, 탄성이 얻는 만큼 다른 출구가 잃습니다.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">보정 없음</button><button class="btn ghost" data-act="w1" aria-pressed="true">몰다우어</button></div>
   <div class="ctl"><label for="hf-e3">중성자 에너지 (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -35,10 +36,11 @@ WT.L.ch.hauser = {
   <p>탄성과 비탄성에서는 둘이 잘 일치합니다. keV 영역의 포획에서는 HRTW가 최대 10퍼센트를 더 깎습니다. 0.85–2 MeV 사이에서는 포획이 오히려 늘어납니다. 그곳에서는 전체 폭을 요동하는 몇 개의 중성자 폭이 좌우하므로 1/Γ의 평균이 1/⟨Γ⟩보다 커지기 때문입니다. 두 처방 모두 정확한 무작위 행렬(GOE) 결과에 맞춘 근사식이며, TALYS는 이 정확한 결과도 3중 적분으로 제공합니다. INCOGNITA는 셋을 모두 이식했습니다(<code>widthmode</code> 1, 2, 3). 기본값은 몰다우어이며, 입사 중성자 에너지가 표적의 중성자 분리 에너지 이하일 때 적용됩니다.</p>
 </div>
 <div class="step">
-  <h3>3과 2 사이</h3>
+  <h3>탄성 증강의 한계</h3>
+  <p>탄성 증강은 얼마나 커질 수 있을까요? 공명이 떨어져 있는지 겹치는지에 따라 2배에서 3배 사이입니다.</p>
   <p>극한을 보면 효과의 크기를 이해할 수 있습니다. 포획 없이 똑같은 채널 <i>N</i>개를 두고, 그 합 ΣT를 바꿔 봅니다. ΣT는 평균 전체 폭과 준위 간격의 비 Γ/<i>D</i>의 2π배입니다. 공명이 고립되어 있고(ΣT ≪ 1) 채널이 많으면 각 폭은 자유도 1의 포터–토머스 분포를 따르고, 탄성 증강은 ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3입니다. 공명이 크게 겹치면(ΣT ≫ 2π) 단면적은 무작위 파동처럼 요동하고(에릭슨 요동), 증강은 2로 떨어집니다.</p>
   <div class="ctl"><label for="hf-n">열린 채널 N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>고립된 채널 <i>N</i>개에 대한 정확한 값은 3<i>N</i>/(<i>N</i>+2)(마름모)입니다. 채널이 두 개뿐이면 전체 폭도 탄성 폭만큼 요동하므로 증강은 1.5를 넘을 수 없습니다. 몰다우어의 처방은 이 극한을 재현하지만, HRTW는 약한 채널이 많이 열려 있을 때 이에 못 미칩니다. 삽입 그림은 움직이는 점에 해당하는 폭으로 공명을 그립니다. 몰다우어의 공식에서 채널이 많을 때의 극한은 1 + 2/ν이고, 고립된 공명에서는 ν → 1, 겹칠 때는 ν → 1.78입니다(2.12는 완전히 겹칠 때 근사식이 내는 작은 오차입니다).</p>
+  <p>고립된 채널 <i>N</i>개에 대한 정확한 값은 3<i>N</i>/(<i>N</i>+2)(마름모)입니다. 채널이 두 개뿐이면 전체 폭도 탄성 폭만큼 요동하므로 증강은 1.5를 넘을 수 없습니다. 몰다우어의 처방은 이 극한을 재현하지만, HRTW는 약한 채널이 많이 열려 있을 때 이에 못 미칩니다. 삽입 그림은 움직이는 점에 해당하는 폭으로 공명을 그립니다. 몰다우어의 공식에서 채널이 많을 때의 극한은 1 + 2/ν이고, 고립된 공명에서는 ν → 1, 겹칠 때는 ν → 1.78입니다. 그러면 완전히 겹칠 때 2가 아니라 2.12가 나오는데, 이는 근사식의 작은 오차입니다.</p>
   <div class="aside">코드에서: <code>compound/prepare.py</code>(<i>J</i><sup>π</sup>별 출구 채널과 그 투과 계수), <code>compound/target.py</code>(하우저–페시바흐 합), <code>compound/wfc.py</code>(TALYS에서 이식한 몰다우어, HRTW, GOE). 그림은 같은 공식을 예시용 재료로 계산합니다. 철과 비슷한 표적에 대한 강체구 투과 계수, 준위 일곱 개, 일정 온도 연속 영역, 하나로 묶은 포획 채널입니다.</div>
 </div>`,
 };
@@ -107,3 +109,4 @@ Object.assign(WT.L.glossary, {
     chapter: "hauser",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="w0" data-act="w1" data-show="jbShow" */

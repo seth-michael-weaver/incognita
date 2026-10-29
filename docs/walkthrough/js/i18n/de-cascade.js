@@ -1,6 +1,6 @@
 /* German (Deutsch): cascade (Kapitel 11, über die Nuklidkarte hinab) */
 WT.L.ch.cascade = {
-  num: "Kapitel 11", title: "Über die Karte hinab", short: "Kaskade",
+  num: "Kapitel 11", title: "Die Emissionskaskade", short: "Kaskade",
   lead: "Eine Emission ist selten das Ende: Der zurückbleibende Kern ist oft heiß genug, um erneut zu emittieren.",
   html: `
 <div class="step">
@@ -10,15 +10,15 @@ WT.L.ch.cascade = {
   <p>Emittierte Neutronen sind meist langsam, also sind die meisten Fälle kurz. Blaue Punkte liegen über der gestrichelten Neutronenschwelle: Sie können sich ein zweites Neutron leisten, die (n,2n)-Reaktion. Unterhalb von etwa 11 MeV kommt keiner dorthin.</p>
 </div>
 <div class="step">
-  <h3>Ein Weg über die Karte</h3>
+  <h3>Sequentielle Emission über die Karte</h3>
   <p>Die Ströme sind Reaktionen, die über eine Ecke der <b>Nuklidkarte</b> wandern, auf der die Kerne nach Neutronenzahl N (waagrecht) und Protonenzahl Z (senkrecht) angeordnet sind. Jede beginnt im umrandeten Compound-Feld; jedes Feld ist nach der Reaktion benannt, die dort endet.</p>
   <p>Ein ausgesandtes <em class="n">Neutron</em> bewegt sich ein Feld nach links, ein <em class="p">Proton</em> eines nach unten, ein <em class="a">Alphateilchen</em> (zwei Protonen, zwei Neutronen) zwei diagonal. Die Stromstärke zeigt, wie viel diesen Schritt nimmt; Tönung und Prozentwert zeigen, wo Reaktionen enden.</p>
   <div class="ctl"><label for="cs-e4">Neutronenenergie</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">200 Reaktionen abfeuern</button></div>
-  <p>Jeder Schritt kostet 7 bis 11 MeV Separationsenergie, also umfasst der Weg selbst bei 30 MeV höchstens drei oder vier Schritte.</p>
+  <p>Zieh an der Energie: Bei wenigen MeV bleibt fast alles auf dem Targetfeld stehen; weiter oben reichen die Ströme weiter. Jeder Schritt kostet 7 bis 11 MeV Separationsenergie, also umfasst der Weg selbst bei 30 MeV höchstens drei oder vier Schritte.</p>
 </div>
 <div class="step">
-  <h3>Von oben nach unten, Intervall für Intervall</h3>
+  <h3>Bilanzierung der Besetzung</h3>
   <p>Die Engine leert jeden Kern von oben nach unten, eine Energiescheibe, ein <b>Intervall</b>, nach der anderen. Rechts: der Restkern der ersten Emission; links: sein Tochterkern, mit einem Neutron weniger. Orange Kugeln sind Reaktionen, die in jedem Intervall warten. Die Intervalle sind hier 1 MeV breit; die Engine verwendet etwa 40 pro Kern, bemessen nach der verfügbaren Energie.</p>
   <p>Während die Markierung ein Intervall überstreicht, nimmt jede Kugel einen Ausgang nach dem Wettbewerb aus Kapitel 9: Ein Photon (<em class="g">γ</em>) lässt sie in ein tieferes Intervall fallen, ein <em class="n">Neutron</em> bringt sie in den Tochterkern, ein Proton oder Alpha nimmt sie aus dem Bild. Unterhalb aller Schwellen tragen Photonen den Rest in den Grundzustand (grau). Dann wird der Tochterkern abgearbeitet.</p>
   <div class="ctl"><label for="cs-e3">Neutronenenergie</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
@@ -26,13 +26,13 @@ WT.L.ch.cascade = {
   <p>Photonen fallen nur nach unten, und jeder Kern ist fertig, bevor seine Töchter drankommen, also landet nichts in einem bereits geleerten Intervall.</p>
 </div>
 <div class="step">
-  <h3>Die Geschichte benennen</h3>
-  <p>Es läuft jeweils eine Reaktion ab: Die Markierung springt über die Karte, und jedes ausgesandte Teilchen fällt in die Ablage. Die volle Ablage benennt den <b>exklusiven Kanal</b>, etwa (n,2n); Photonen zählen nicht. Die Engine gibt jedem Kanal seinen eigenen Wirkungsquerschnitt (seine Wahrscheinlichkeit, ausgedrückt als effektive Zielfläche).</p>
+  <h3>Exklusive Reaktionskanäle</h3>
+  <p>Es läuft jeweils eine Reaktion ab: Die Markierung springt über die Karte, und jedes ausgesandte Teilchen fällt in die Ablage. Jeder Kanal läuft bei einer Energie ab, bei der er wirklich stattfindet (oben im Bild): (n,3n) bei 25 MeV, da drei Neutronen hier mehr als 20 MeV kosten; Einfang, (n,γ), bei 1 MeV. Die volle Ablage benennt den <b>exklusiven Kanal</b>, etwa (n,2n); Photonen zählen nicht. Die Engine gibt jedem Kanal seinen eigenen Wirkungsquerschnitt (seine Wahrscheinlichkeit, ausgedrückt als effektive Zielfläche).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Nächster Kanal</button></div>
   <p>Geh sie durch. (n,np) läuft zweimal ab, einmal das Neutron zuerst, einmal das Proton zuerst: dasselbe Feld, dieselbe Ablage, ein Kanal. Dann erreicht ein geisterhaftes Deuteron (ein gebundenes Proton und Neutron) dieses Feld mit einem Sprung: Seine Ablage zeigt d, ein anderer Kanal, (n,d).</p>
 </div>
 <div class="step">
-  <h3>Wo alles endet</h3>
+  <h3>Restkernproduktion</h3>
   <p>Jedes Feld enthält jetzt Regale: dunkel für den <b>Grundzustand</b>, grün (auf zwei Feldern) für ein <b>Isomer</b>, einen angeregten Zustand, der langlebig genug ist, um als eigenes Produkt zu zählen. Die Stapelhöhe ist die <b>Restkernproduktion</b>: wie viel von jedem Kern die Reaktionen erzeugt haben.</p>
   <div class="ctl"><label for="cs-e2">Neutronenenergie</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">200 Reaktionen abfeuern</button></div>

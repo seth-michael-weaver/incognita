@@ -56,7 +56,7 @@
   <p>Trascinala e conta le misure che restano dentro. Troppo stretta, e la banda dichiara una precisione che non ha; troppo larga, e non dice nulla. La banda propria del motore non è ancora adottata: è centrata quando si mettono insieme tutte le reazioni, ma non ancora in ogni famiglia di reazioni. TERRA porta le sue bande, che fanno parte dei suoi confronti qui sopra.</p>
 </div>
 <div class="step">
-  <h3>A che punto siamo</h3>
+  <h3>Stato attuale</h3>
   <p>Uno strato viene adottato solo dopo essere stato provato contro le misure, e resta disattivato se non aiuta. Oggi il motore è in uso e TERRA è un candidato; lo strato della struttura misurata e la banda di incertezza del motore sono ancora in prova.</p>
   <p><a href="scoreboard.html" data-keep-lang>Vedi la classifica completa →</a> Ogni confronto che non vinciamo, ogni rivale, e come leggerla.</p>
   <div class="aside">${ASOF ? `Punteggi al ${ASOF}, dal` : "Punteggi dal"} registro di ricerca del progetto. Le curve dell'immagine sono illustrative.</div>
@@ -80,3 +80,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "nessuna misura con cui verificare la banda",
 });
 Object.assign(WT.L.ui, { nav_board: "Classifica" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

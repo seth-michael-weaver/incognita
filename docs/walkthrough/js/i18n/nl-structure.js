@@ -9,7 +9,7 @@ WT.L.ch.structure = {
   <p>Sleep om neutronen toe te voegen of weg te halen; elke keuze is een ander <b>isotoop</b>. De staafjes tonen de <b>bindingsenergie</b> per nucleon in MeV (miljoen elektronvolt): de energie die nodig is om de kern uit elkaar te trekken. Die is het grootst rond de stabiele isotopen.</p>
 </div>
 <div class="step">
-  <h3>Wat het kost om er één uit te halen</h3>
+  <h3>Separatie-energieën</h3>
   <p>De energie om één deeltje eruit te halen is zijn <b>separatie-energie</b>: <i>S<sub>n</sub></i> voor een neutron, <i>S<sub>p</sub></i> voor een proton, <i>S<sub>α</sub></i> voor een <b>alfadeeltje</b> (twee protonen en twee neutronen die aan elkaar gebonden zijn). De afbeelding toont de kern als een put, met de energie naar boven; elke keer dat je trekt, wordt het bovenste deeltje voorbij de gestippelde lijn ‘vrij’ getild, en de meter houdt de kosten bij.</p>
   <div class="btns"><button class="btn ghost" data-act="pn">Haal een neutron eruit</button><button class="btn ghost" data-act="pp">Haal een proton eruit</button><button class="btn ghost" data-act="pa">Haal een alfa eruit</button></div>
   <p>De motor berekent elk ervan als het verschil tussen twee kernmassa's: gemeten waar dat kan, uit een massamodel waar dat niet kan.</p>
@@ -17,14 +17,14 @@ WT.L.ch.structure = {
   <p>Sleep het aantal neutronen en haal opnieuw een neutron eruit: <i>S<sub>n</sub></i> zigzagt, omdat nucleonen paren vormen en bij een even aantal het laatste steviger vastzit. Een reactie kan een deeltje alleen uitstoten als ze genoeg energie meebrengt om deze prijs te betalen. Deze kosten zijn de <b>drempels</b> van de hele berekening.</p>
 </div>
 <div class="step">
-  <h3>Energieniveaus, en naar beneden vallen</h3>
+  <h3>Aangeslagen toestanden en gammaverval</h3>
   <p>Een kern kan alleen bepaalde exacte hoeveelheden extra energie bevatten: de lijnen, hier voor ijzer-56, met de <b>grondtoestand</b> onderaan. Elk niveau heeft een <b>spin</b> <i>J</i> (impulsmoment) en een <b>pariteit</b>, + of − (of zijn golf er in een spiegel hetzelfde uitziet); 2<sup>+</sup> betekent spin 2, pariteit +.</p>
   <p>Het oranje bolletje is een kern op een hoog niveau. Hij valt niveau voor niveau omlaag, en bij elke sprong komt er een <em class="g">foton</em> (een gammastraal) vrij dat het energieverschil meeneemt. De dikte en het percentage van de paden zijn de gemeten kansen op elke sprong, de <b>vertakkingsverhoudingen</b>.</p>
   <div class="btns"><button class="btn" data-act="drop">Breng de kern in aangeslagen toestand</button></div>
   <p>Druk er een paar keer op: hetzelfde niveau bereikt de grondtoestand langs verschillende routes. De motor houdt per kern zo'n dertig gemeten niveaus bij, met hun kansen; hoger op behandelt hij de opeengepakte niveaus als een glad <b>continuüm</b>. Boven de gestippelde lijn, <i>S<sub>n</sub></i>, kan de kern een neutron uitzenden.</p>
 </div>
 <div class="step">
-  <h3>Een niveau zonder makkelijke weg naar beneden</h3>
+  <h3>Isomeren: langlevende aangeslagen toestanden</h3>
   <p>Een niveau waarvan de enige weg omlaag een grote spinverandering Δ<i>J</i> vraagt, vervalt heel langzaam. Rechts zitten 64 kernen op zo'n niveau; elke kern wacht een willekeurige tijd, valt dan omlaag en er springt een <em class="g">foton</em> uit. Na één <b>halveringstijd</b> is de helft gevallen.</p>
   <div class="ctl"><label for="st-dj">Spinverandering ΔJ</label><input id="st-dj" type="range" data-bind="dJ" min="1" max="5" step="1" value="2" data-instant><output data-show="dJ" data-fmt="0"></output></div>
   <div class="ctl"><label for="st-eg">Fotonenergie (MeV)</label><input id="st-eg" type="range" data-bind="Eg" min="0.05" max="1.5" step="0.05" value="0.3"><output data-show="Eg" data-fmt="2"></output></div>
@@ -32,15 +32,15 @@ WT.L.ch.structure = {
   <p>Verhoog Δ<i>J</i> en het uitspringen gaat trager: elke extra eenheid spin maakt het wachten honderdduizend keer langer of meer, en een lagere fotonenergie verlengt het ook (op een logaritmische schaal getoond). Een niveau dat langer leeft dan ongeveer een seconde is een <b>isomeer</b>, en de motor behandelt het als een eindpunt, net als de grondtoestand.</p>
 </div>
 <div class="step">
-  <h3>Rond, of niet</h3>
+  <h3>Kernvervorming</h3>
   <p>Veel kernen zijn niet rond. <i>β₂</i> (‘bèta-twee’) meet de uitrekking: 0 is een bol, positief is uitgerekt als een rugbybal, negatief is platgedrukt tot een schijf. De ladder rechts toont de niveaus die elke soort oplevert.</p>
   <p>Een uitgerekte kern kan roteren en geeft dan niveaus 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> met afstanden die groeien als <i>J</i>(<i>J</i>+1): een <b>rotor</b>. Een ronde kern kan rimpelen; elke eenheid rimpeling, een <b>fonon</b>, voegt dezelfde energie toe, dus zijn niveaus liggen op gelijke afstanden: een <b>vibrator</b>.</p>
   <div class="ctl"><label for="st-beta">Vervorming β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Stil</button><button class="btn ghost" data-act="vib">Trillend</button><button class="btn ghost" data-act="rot">Roterend</button></div>
-  <p>Sleep <i>β₂</i> en druk op de knoppen: een grotere uitrekking trekt de niveaus van de rotor dichter naar elkaar. De motor slaat per kern vervormingen op en een label: sferisch, vibrator of rotor. Hoofdstuk 6 laat zien hoe een passerend neutron die gebruikt.</p>
+  <p>Sleep <i>β₂</i> en druk op de knoppen: een grotere uitrekking trekt de niveaus van de rotor dichter naar elkaar. Een vibrator is gemiddeld rond, dus het schuifje rust terwijl hij rimpelt; en een bol kan in deze zin niet roteren (draaien verandert niets), dus bij <i>β₂</i> = 0 verdwijnt de rotorband. De motor slaat per kern vervormingen op en een label: sferisch, vibrator of rotor. Hoofdstuk 6 laat zien hoe een passerend neutron die gebruikt.</p>
 </div>
 <div class="step">
-  <h3>Vingerafdrukken net boven de drempel</h3>
+  <h3>Resonantieparameters boven de neutronendrempel</h3>
   <p>Een langzaam neutron dat zich bij de trefkern voegt, komt net boven <i>S<sub>n</sub></i> terecht, in het kleine kader links. Het rechterpaneel vergroot dat kader duizenden keren, met de neutronenergie van links naar rechts.</p>
   <div class="ctl"><label for="st-fe">Bundelenergie</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">Doorloop pauzeren</button></div>

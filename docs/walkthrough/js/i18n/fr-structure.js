@@ -9,7 +9,7 @@ WT.L.ch.structure = {
   <p>Faites glisser pour ajouter ou retirer des neutrons ; chaque choix est un <b>isotope</b> différent. Les barres montrent l'<b>énergie de liaison</b> par nucléon en MeV (millions d'électronvolts) : l'énergie nécessaire pour démonter le noyau. Elle est maximale près des isotopes stables.</p>
 </div>
 <div class="step">
-  <h3>Le prix d'une particule arrachée</h3>
+  <h3>Énergies de séparation</h3>
   <p>L'énergie qu'il faut pour arracher une particule est son <b>énergie de séparation</b> : <i>S<sub>n</sub></i> pour un neutron, <i>S<sub>p</sub></i> pour un proton, <i>S<sub>α</sub></i> pour une <b>particule alpha</b> (deux protons et deux neutrons liés ensemble). L'image représente le noyau comme un puits, l'énergie croissant vers le haut ; chaque extraction fait passer la particule du sommet au-delà de la ligne pointillée « libre », et le compteur enregistre le coût.</p>
   <div class="btns"><button class="btn ghost" data-act="pn">Arracher un neutron</button><button class="btn ghost" data-act="pp">Arracher un proton</button><button class="btn ghost" data-act="pa">Arracher une alpha</button></div>
   <p>Le moteur obtient chacune comme la différence entre deux masses nucléaires : mesurées quand c'est possible, tirées d'un modèle de masses sinon.</p>
@@ -17,14 +17,14 @@ WT.L.ch.structure = {
   <p>Changez le nombre de neutrons et arrachez de nouveau un neutron : <i>S<sub>n</sub></i> monte et descend en zigzag, car les nucléons s'apparient et, avec un nombre pair, le dernier est plus fortement lié. Une réaction ne peut éjecter une particule que si elle apporte assez d'énergie pour payer ce coût. Ces coûts sont les <b>seuils</b> de tout le calcul.</p>
 </div>
 <div class="step">
-  <h3>Niveaux d'énergie, et la descente</h3>
+  <h3>États excités et désexcitation gamma</h3>
   <p>Un noyau ne peut stocker que certaines quantités exactes d'énergie supplémentaire : les traits, ici pour le fer-56, avec l'<b>état fondamental</b> en bas. Chaque niveau a un <b>spin</b> <i>J</i> (moment angulaire) et une <b>parité</b>, + ou − (selon que son onde reste identique dans un miroir) ; 2<sup>+</sup> signifie spin 2, parité +.</p>
   <p>La boule orange est un noyau sur un niveau élevé. Il descend niveau par niveau, et chaque saut émet un <em class="g">photon</em> (un rayon gamma) qui emporte la différence d'énergie. L'épaisseur et le pourcentage des chemins donnent les probabilités mesurées de chaque saut, les <b>rapports d'embranchement</b>.</p>
   <div class="btns"><button class="btn" data-act="drop">Exciter le noyau</button></div>
   <p>Appuyez plusieurs fois : le même niveau rejoint l'état fondamental par des chemins différents. Le moteur garde une trentaine de niveaux mesurés par noyau, avec leurs probabilités ; plus haut, il traite les niveaux serrés comme un <b>continuum</b> lisse. Au-dessus de la ligne pointillée, <i>S<sub>n</sub></i>, le noyau peut émettre un neutron.</p>
 </div>
 <div class="step">
-  <h3>Un niveau sans issue facile</h3>
+  <h3>Isomères : états excités de longue durée de vie</h3>
   <p>Un niveau dont la seule issue exige un grand changement de spin, Δ<i>J</i>, se désexcite très lentement. À droite, 64 noyaux sont sur un tel niveau ; chacun attend un temps aléatoire, puis descend et un <em class="g">photon</em> s'échappe. Au bout d'une <b>demi-vie</b>, la moitié est descendue.</p>
   <div class="ctl"><label for="st-dj">Changement de spin ΔJ</label><input id="st-dj" type="range" data-bind="dJ" min="1" max="5" step="1" value="2" data-instant><output data-show="dJ" data-fmt="0"></output></div>
   <div class="ctl"><label for="st-eg">Énergie du photon (MeV)</label><input id="st-eg" type="range" data-bind="Eg" min="0.05" max="1.5" step="0.05" value="0.3"><output data-show="Eg" data-fmt="2"></output></div>
@@ -32,15 +32,15 @@ WT.L.ch.structure = {
   <p>Augmentez Δ<i>J</i> et les photons sortent plus lentement : chaque unité de spin supplémentaire rend l'attente cent mille fois plus longue, voire davantage, et une énergie de photon plus faible l'allonge aussi (échelle logarithmique). Un niveau qui vit plus d'une seconde environ est un <b>isomère</b>, et le moteur le traite comme un point d'arrivée, au même titre que l'état fondamental.</p>
 </div>
 <div class="step">
-  <h3>Rond, ou pas</h3>
+  <h3>Déformation nucléaire</h3>
   <p>Beaucoup de noyaux ne sont pas ronds. <i>β₂</i> (« bêta deux ») mesure l'étirement : 0 est une sphère, une valeur positive un noyau étiré comme un ballon de rugby, une valeur négative un noyau aplati en disque. L'échelle de droite montre les niveaux que produit chaque forme.</p>
   <p>Un noyau étiré peut tourner, ce qui donne les niveaux 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> avec des écarts qui croissent comme <i>J</i>(<i>J</i>+1) : un <b>rotor</b>. Un noyau rond peut onduler ; chaque quantum d'ondulation, un <b>phonon</b>, ajoute la même énergie, donc ses niveaux sont régulièrement espacés : un <b>vibrateur</b>.</p>
   <div class="ctl"><label for="st-beta">Déformation β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Immobile</button><button class="btn ghost" data-act="vib">En vibration</button><button class="btn ghost" data-act="rot">En rotation</button></div>
-  <p>Faites varier <i>β₂</i> et appuyez sur les boutons : un étirement plus grand resserre les niveaux du rotor. Le moteur stocke les déformations de chaque noyau et une étiquette : sphérique, vibrateur ou rotor. Le chapitre 6 montre comment un neutron qui passe s'en sert.</p>
+  <p>Faites varier <i>β₂</i> et appuyez sur les boutons : un étirement plus grand resserre les niveaux du rotor. Un vibrateur est rond en moyenne : le curseur reste donc au repos pendant qu'il ondule ; et une sphère ne peut pas tourner en ce sens (la faire tourner ne change rien), si bien que près de <i>β₂</i> = 0 la bande du rotor disparaît. Le moteur stocke les déformations de chaque noyau et une étiquette : sphérique, vibrateur ou rotor. Le chapitre 6 montre comment un neutron qui passe s'en sert.</p>
 </div>
 <div class="step">
-  <h3>Des empreintes juste au-dessus du seuil</h3>
+  <h3>Paramètres de résonance au-dessus du seuil neutronique</h3>
   <p>Un neutron lent qui rejoint la cible arrive juste au-dessus de <i>S<sub>n</sub></i>, dans la petite boîte de gauche. Le panneau de droite agrandit cette boîte des milliers de fois, l'énergie du neutron croissant de gauche à droite.</p>
   <div class="ctl"><label for="st-fe">Énergie du faisceau</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">Mettre le balayage en pause</button></div>

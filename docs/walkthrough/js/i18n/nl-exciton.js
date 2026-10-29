@@ -9,14 +9,14 @@ WT.L.ch.exciton = {
   <div class="formula">ω(p,h,E) = g<sup>n</sup> (E − A<sub>p,h</sub>)<sup>n−1</sup> / (p! h! (n−1)!) ,  A<sub>p,h</sub> = max(p,h)²/g − (p² + h² + p + h)/4g</div>
   <div class="ctl"><label for="ex-n">Deeltjes p (gaten p − 1)</label><input id="ex-n" type="range" data-bind="pp" min="2" max="6" step="1" value="3" data-instant><output data-show="pp" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="pauli" aria-pressed="true">Pauli-correctie</button></div>
-  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ is de dichtheid van eendeeltjesniveaus bij de fermi-energie. <i>A<sub>p,h</sub></i> is de correctie voor <b>Pauli</b>: twee deeltjes kunnen geen niveau delen, dus de laagste configuraties kosten energie en de dichtheid bij de drempel daalt. De schets toont telkens één configuratie met de gekozen <i>p</i>, willekeurig getrokken.</p>
+  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ is de dichtheid van eendeeltjesniveaus bij de fermi-energie. <i>A<sub>p,h</sub></i> is de correctie voor <b>Pauli</b>: twee deeltjes kunnen geen niveau delen, dus de laagste configuraties kosten energie en de dichtheid bij de drempel daalt. De krommen zijn genoemd naar hun aantallen: 3p2h betekent 3 deeltjes en 2 gaten. De schets toont telkens één configuratie met de gekozen <i>p</i>, willekeurig getrokken: elk gat is een nucleon dat onder het fermi-niveau ontbreekt.</p>
 </div>
 <div class="step">
-  <h3>Dieper gaan of eruit</h3>
+  <h3>Overgangs- en emissiesnelheden</h3>
   <p>Vanuit elk stadium kunnen twee dingen gebeuren. Een botsing maakt een nieuw paar, met de snelheid λ<sup>+</sup>, die volgens de gulden regel van Fermi het kwadraat van het matrixelement is maal de dichtheid van de toestanden die de botsing kan bereiken. Of een deeltje vertrekt, met de snelheid <i>W</i>, die via gedetailleerd evenwicht volgt uit de inverse werkzame doorsnede en de verhouding van de toestandsdichtheden met en zonder het ontsnappende deeltje.</p>
   <div class="formula">λ<sup>+</sup>(n) = (2π/ħ) M² ω<sub>acc</sub> ,  W(p,h,ε) = (2s+1)/(π²ħ³) με σ<sub>inv</sub>(ε) ω(p−1,h,U) / ω(p,h,E)</div>
   <div class="ctl"><label for="ex-e">Neutronenergie (MeV)</label><input id="ex-e" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
-  <p>De balken zijn de twee snelheden in elk stadium, op een logaritmische schaal: λ<sup>+</sup> van de orde 10²² s⁻¹, <i>W</i> in het eerste stadium ongeveer een tiende daarvan en dalend met elk stadium, omdat elk nieuw paar de energie verdunt die het voorste deeltje kan meenemen. De motor neemt M² uit de vorm van Koning–Duijvestijn, die daalt met de energie per exciton:</p>
+  <p>Elk stadium is gelabeld met zijn aantallen (2p1h: 2 deeltjes, 1 gat). De balken zijn de twee snelheden in elk stadium, op een logaritmische schaal: λ<sup>+</sup> van de orde 10²² s⁻¹, <i>W</i> in het eerste stadium ongeveer een tiende daarvan en dalend met elk stadium, omdat elk nieuw paar de energie verdunt die het voorste deeltje kan meenemen. De motor neemt M² uit de vorm van Koning–Duijvestijn, die daalt met de energie per exciton:</p>
   <div class="formula">M² = (C₁ A<sub>p</sub> / A³) · [7.48 + 4.62×10⁵ / (E/(n A<sub>p</sub>) + 10.7)³]  MeV²</div>
 </div>
 <div class="step">
@@ -27,14 +27,14 @@ WT.L.ch.exciton = {
   <p>De hele keten is in een paar keer 10⁻²² s voorbij. Het deel dat onderweg ontsnapt, is de pre-evenwichtsemissie; de rest wordt, na hoogstens zes deeltjes in de motor, net als in TALYS, aan de compoundkern overgedragen. Integratie over de tijd geeft elk stadium een sterkte τ(<i>n</i>)·<i>P</i>(<i>n</i>), en dat product is wat de motor berekent.</p>
 </div>
 <div class="step">
-  <h3>Waar de harde staart vandaan komt</h3>
+  <h3>De hoogenergetische staart</h3>
   <p>Het emissiespectrum is de som over de stadia van populatie maal levensduur maal emissiesnelheid, plus daarna de verdamping van wat overblijft. Alleen stadium <i>n</i> = 3, twee deeltjes en een gat, bereikt de hoogste uitgaande energieën: zijn spectrum daalt naar het eindpunt toe slechts lineair. Elk later stadium is zachter.</p>
   <div class="formula">dσ/dε = σ<sub>CN</sub> Σ<sub>n</sub> P(n) τ(n) W(n,ε) + verdamping</div>
   <div class="ctl"><label for="ex-e3">Neutronenergie (MeV)</label><input id="ex-e3" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
   <p>Verhoog de energie en het spectrum wordt harder: de pre-evenwichtsstaart rekt uit tot het eindpunt, terwijl de verdampingsbult op 1 à 2 MeV blijft. Boven ongeveer 10 MeV zijn de gemeten hoogenergetische neutronen alleen met deze staart te reproduceren.</p>
 </div>
 <div class="step">
-  <h3>Hoe groot een deel</h3>
+  <h3>De pre-evenwichtsfractie</h3>
   <p>Het deel van de emissie dat pre-evenwicht is, groeit met de inval-energie, hier van een paar procent bij 5 MeV tot ongeveer 40 procent bij 40 MeV. Het hangt af van één instelbare constante, de totale grootte van het matrixelement: een zwakkere wisselwerking betekent een tragere evenwichtsinstelling en meer vroege emissie.</p>
   <div class="ctl"><label for="ex-c">Constante van het matrixelement C₁</label><input id="ex-c" type="range" data-bind="c1" min="0.3" max="3" step="0.05" value="1"><output data-show="c1" data-fmt="2"></output></div>
   <p>De gestippelde curve is C₁ = 1, de standaard van de motor; de doorgetrokken curve volgt de schuif. Halveren van C₁ verhoogt het deel met een factor 1,5 tot 1,9, niet 2: de ontsnappingskans van elk stadium is W/(λ<sup>+</sup> + W), niet W/λ<sup>+</sup>, en minder kernen overleven tot de latere stadia.</p>
@@ -89,3 +89,4 @@ Object.assign(WT.L.glossary, {
     chapter: "exciton",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="pauli" */

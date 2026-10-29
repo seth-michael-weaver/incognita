@@ -5,7 +5,7 @@ WT.L.ch.densities = {
   html: `
 <div class="step">
   <h3>Fermigassen med dæmpede skaleffekter</h3>
-  <p>Motorens standardniveautæthed, ldmodel 1, er den sammensatte model af <b>Gilbert–Cameron</b>: en Fermigas ved høj energi og konstant temperatur nedenunder. Fermigassen behøver ét tal, niveautæthedsparameteren <i>a</i>, og ved lav energi mærker det tal skallerne. <b>Ignatyuks</b> form lader skalkorrektionen δW virke fuldt ved lav excitation og aftage med en dæmpningsrate γ, så <i>a</i>(<i>U</i>) går mod den glatte værdi <i>ã</i>, når kernen er varm.</p>
+  <p>Motorens standardniveautæthed er den sammensatte <b>Gilbert–Cameron</b>: en Fermigas ved høj energi, en konstant temperatur nedenunder. Fermigassen skal bruge ét tal, niveautæthedsparameteren <i>a</i>, og ved lav energi mærker det tal skallerne. <b>Ignatyuks</b> form lader skalkorrektionen δW virke fuldt ved lav excitation og forsvinde med en dæmpningsrate γ, så <i>a</i>(<i>U</i>) går mod det glatte <i>ã</i>, når kernen er varm.</p>
   <div class="formula">a(U) = ã [1 + δW (1 − e<sup>−γU</sup>) / U] ,  ã = αA + βA<sup>2/3</sup> ,  γ = γ₁ / A<sup>1/3</sup></div>
   <div class="ctl"><label for="ld-dw">Skalkorrektion δW (MeV)</label><input id="ld-dw" type="range" data-bind="dW" min="-6" max="4" step="0.1" value="1"><output data-show="dW" data-fmt="1"></output></div>
   <div class="formula">ρ<sub>F</sub>(E) = exp(2√(aU)) / (12√2 σ a<sup>1/4</sup> U<sup>5/4</sup>) ,  U = E − Δ ,  σ² = 0.01389 A<sup>5/3</sup> √(aU) / ã</div>
@@ -27,9 +27,10 @@ WT.L.ch.densities = {
 </div>
 <div class="step">
   <h3>Når der ingen samling er</h3>
-  <p>For en dobbelt lukket skal er Fermigassen ved lav energi så undertrykt, at dens temperatur forbliver lav overalt, og <i>F</i> skifter aldrig fortegn: der findes ingen tilpasningsenergi. TALYS tager så den empiriske temperatur <i>T</i> = −0,25 + 10,2/√(<i>A</i>(1 + γδW)) og leder efter den energi, hvor Fermigassen har den temperatur. Nær en dobbelt lukket skal når Fermigassen først den temperatur langt over enhver fornuftig samling, eller aldrig, så samlingen falder også tilbage på systematik, <i>E<sub>x</sub></i> = 2,33 + 253/<i>A</i> + Δ, og <i>E</i>₀ fastlægges, så værdien er kontinuert.</p>
+  <p>Nogle gange kan de to kurver ikke samles glat. I en kerne med lukkede skaller for både protoner og neutroner, som bly-208, holdes Fermigassen så langt nede, at ingen tangent rammer de talte niveauer: der er ingen tilpasningsenergi. Koden falder så tilbage på tommelfingerregler for temperaturen og for samlingspunktet. De to stykker mødes stadig, men med et knæk: værdierne stemmer, hældningerne gør ikke.</p>
   <div class="btns"><button class="btn ghost" data-act="tang" aria-pressed="false">Tangent ved reserveenergien</button></div>
-  <p>Værdien er kontinuert, men det empiriske <i>T</i> er ikke Fermigassens temperatur ved den energi, så hældningen springer. Med standardinputtet sker det for ²⁰⁵,²⁰⁶Tl, ²⁰⁶⁻²⁰⁹Pb og ²¹⁰Bi, med hældningsspring på 34 til 62 %; tages <i>T</i> fra Fermigassen dér, som TALYS allerede gør, når <i>E<sub>x</sub></i> er givet i inputtet, genoprettes tangenten, og indfangning i blyområdet flytter sig med op til 20 til 30 %. INCOGNITA gengiver TALYS her; ændringen er rapporteret til TALYS-udviklerne. Billedet er en blylignende illustration med <i>ã</i> hævet med 30 %, så dens Fermigas holder sig under den empiriske temperatur op til omkring 24 MeV, ud over søgningen; dens hældning springer med 62 %.</p>
+  <p>Tryk på knappen for at se den glatte tangent i stedet. Med standardinput optræder knækket for syv kerner omkring bly, og fjernes det, flytter det deres neutronindfangning med op til 20 til 30 %. INCOGNITA gengiver TALYS her; ændringen er blevet meldt til TALYS' udviklere.</p>
+  <div class="aside">Detaljerne: for en dobbelt lukket skal forbliver lavenergi-Fermigassen kold overalt, og <i>F</i> skifter aldrig fortegn. TALYS tager så den empiriske temperatur <i>T</i> = −0,25 + 10,2/√(<i>A</i>(1 + γδW)) og leder efter den energi, hvor Fermigassen har den temperatur. Nær en dobbelt lukket skal når den den først langt over ethvert fornuftigt samlingspunkt, eller aldrig, så samlingspunktet falder også tilbage på systematik, <i>E<sub>x</sub></i> = 2,33 + 253/<i>A</i> + Δ, og <i>E</i>₀ fastsættes, så værdien er kontinuert. Den empiriske <i>T</i> er ikke Fermigassens temperatur ved den energi, så hældningen springer: med standardinput for ²⁰⁵,²⁰⁶Tl, ²⁰⁶⁻²⁰⁹Pb og ²¹⁰Bi med 34 til 62 %. Hvis <i>T</i> tages fra Fermigassen dér, som TALYS allerede gør, når <i>E<sub>x</sub></i> er givet i inputtet, genoprettes tangenten. Billedet er en blyagtig illustration med <i>ã</i> hævet med 30 %, så dens Fermigas holder sig under den empiriske temperatur til omkring 24 MeV, hinsides søgningen; dens hældning springer med 62 %.</div>
 </div>
 <div class="step">
   <h3>Afstanden D₀ som kontrol</h3>
@@ -95,3 +96,4 @@ Object.assign(WT.L.glossary, {
     chapter: "densities",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="tang" */

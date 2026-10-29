@@ -9,7 +9,7 @@ WT.L.ch.structure = {
   <p>Trascina per aggiungere o togliere neutroni; ogni scelta è un <b>isotopo</b> diverso. Le barre mostrano l'<b>energia di legame</b> per nucleone in MeV (milioni di elettronvolt): l'energia necessaria per smontare il nucleo. È massima vicino agli isotopi stabili.</p>
 </div>
 <div class="step">
-  <h3>Quanto costa estrarne uno</h3>
+  <h3>Energie di separazione</h3>
   <p>L'energia per estrarre una particella è la sua <b>energia di separazione</b>: <i>S<sub>n</sub></i> per un neutrone, <i>S<sub>p</sub></i> per un protone, <i>S<sub>α</sub></i> per una <b>particella alfa</b> (due protoni e due neutroni legati insieme). L'immagine mostra il nucleo come una buca, con l'energia verso l'alto; ogni estrazione porta la particella più in alto oltre la linea tratteggiata «libera», e il misuratore registra il costo.</p>
   <div class="btns"><button class="btn ghost" data-act="pn">Estrai un neutrone</button><button class="btn ghost" data-act="pp">Estrai un protone</button><button class="btn ghost" data-act="pa">Estrai un'alfa</button></div>
   <p>Il motore ricava ciascuna come differenza tra due masse nucleari: misurate dove possibile, da un modello di masse dove no.</p>
@@ -17,14 +17,14 @@ WT.L.ch.structure = {
   <p>Trascina il numero di neutroni ed estrai di nuovo un neutrone: <i>S<sub>n</sub></i> va a zigzag, perché i nucleoni si accoppiano e con un numero pari l'ultimo è legato più forte. Una reazione può espellere una particella solo se porta abbastanza energia da pagarne il costo. Questi costi sono le <b>soglie</b> di tutto il calcolo.</p>
 </div>
 <div class="step">
-  <h3>Livelli di energia, e la discesa</h3>
+  <h3>Stati eccitati e decadimento gamma</h3>
   <p>Un nucleo può contenere solo certe quantità esatte di energia in più: le linee, qui per il ferro-56, con lo <b>stato fondamentale</b> in basso. Ogni livello ha uno <b>spin</b> <i>J</i> (momento angolare) e una <b>parità</b>, + o − (se la sua onda appare uguale in uno specchio); 2<sup>+</sup> significa spin 2, parità +.</p>
   <p>La palla arancione è un nucleo su un livello alto. Scende un livello alla volta, e ogni salto emette un <em class="g">fotone</em> (un raggio gamma) che porta via la differenza di energia. Lo spessore e la percentuale dei percorsi sono le probabilità misurate di ogni salto, i <b>rapporti di diramazione</b>.</p>
   <div class="btns"><button class="btn" data-act="drop">Eccita il nucleo</button></div>
   <p>Premilo qualche volta: lo stesso livello raggiunge lo stato fondamentale per strade diverse. Il motore conserva una trentina di livelli misurati per nucleo, con le loro probabilità; più in alto tratta i livelli affollati come un <b>continuo</b> uniforme. Sopra la linea tratteggiata, <i>S<sub>n</sub></i>, il nucleo può emettere un neutrone.</p>
 </div>
 <div class="step">
-  <h3>Un livello senza una via facile verso il basso</h3>
+  <h3>Isomeri: stati eccitati di lunga vita</h3>
   <p>Un livello la cui unica via di discesa richiede un grande cambiamento di spin, Δ<i>J</i>, decade molto lentamente. A destra, 64 nuclei stanno su un livello così; ognuno aspetta un tempo casuale, poi scende e salta fuori un <em class="g">fotone</em>. Dopo un <b>tempo di dimezzamento</b> ne è sceso la metà.</p>
   <div class="ctl"><label for="st-dj">Cambiamento di spin ΔJ</label><input id="st-dj" type="range" data-bind="dJ" min="1" max="5" step="1" value="2" data-instant><output data-show="dJ" data-fmt="0"></output></div>
   <div class="ctl"><label for="st-eg">Energia del fotone (MeV)</label><input id="st-eg" type="range" data-bind="Eg" min="0.05" max="1.5" step="0.05" value="0.3"><output data-show="Eg" data-fmt="2"></output></div>
@@ -32,15 +32,15 @@ WT.L.ch.structure = {
   <p>Aumenta Δ<i>J</i> e i fotoni escono più piano: ogni unità di spin in più rende l'attesa centomila volte più lunga o anche di più, e un'energia del fotone più bassa la allunga ancora (in scala logaritmica). Un livello che vive più di circa un secondo è un <b>isomero</b>, e il motore lo tratta come un punto d'arrivo, come lo stato fondamentale.</p>
 </div>
 <div class="step">
-  <h3>Rotondo, oppure no</h3>
+  <h3>Deformazione nucleare</h3>
   <p>Molti nuclei non sono rotondi. <i>β₂</i> («beta due») misura l'allungamento: 0 è una sfera, positivo è allungato come un pallone da football americano, negativo è schiacciato come un disco. La scala a destra mostra i livelli che produce ciascun tipo.</p>
   <p>Un nucleo allungato può ruotare, e dà livelli 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> con distanze che crescono come <i>J</i>(<i>J</i>+1): un <b>rotore</b>. Uno rotondo può incresparsi; ogni unità di increspatura, un <b>fonone</b>, aggiunge la stessa energia, quindi i suoi livelli sono equidistanti: un <b>vibratore</b>.</p>
   <div class="ctl"><label for="st-beta">Deformazione β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">Fermo</button><button class="btn ghost" data-act="vib">Vibrante</button><button class="btn ghost" data-act="rot">Rotante</button></div>
-  <p>Trascina <i>β₂</i> e premi i pulsanti: un allungamento maggiore avvicina i livelli del rotore. Il motore conserva le deformazioni nucleo per nucleo e un'etichetta: sferico, vibratore o rotore. Il capitolo 6 mostra come le usa un neutrone di passaggio.</p>
+  <p>Trascina <i>β₂</i> e premi i pulsanti: un allungamento maggiore avvicina i livelli del rotore. Un vibratore è rotondo in media, quindi il cursore resta fermo mentre esso ondeggia; e una sfera non può ruotare in questo senso (girarla non cambia nulla), quindi vicino a <i>β₂</i> = 0 la banda del rotore scompare. Il motore conserva le deformazioni nucleo per nucleo e un'etichetta: sferico, vibratore o rotore. Il capitolo 6 mostra come le usa un neutrone di passaggio.</p>
 </div>
 <div class="step">
-  <h3>Impronte appena sopra la soglia</h3>
+  <h3>Parametri di risonanza sopra la soglia neutronica</h3>
   <p>Un neutrone lento che si unisce al bersaglio arriva appena sopra <i>S<sub>n</sub></i>, nel riquadro piccolo a sinistra. Il pannello a destra ingrandisce quel riquadro migliaia di volte, con l'energia del neutrone da sinistra a destra.</p>
   <div class="ctl"><label for="st-fe">Energia del fascio</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">Metti in pausa la scansione</button></div>

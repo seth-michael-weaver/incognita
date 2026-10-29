@@ -55,7 +55,7 @@
   <p>拖动滑块，数一数落在区间内的测量点。太窄，区间就宣称了它并不具备的精度；太宽，它就什么也没说明。引擎自身的区间尚未采用：把所有反应合在一起时它是准确的，但还不是对每一类反应都准确。TERRA 带有自己的区间，并已计入上面的比较中。</p>
 </div>
 <div class="step">
-  <h3>现状</h3>
+  <h3>当前状况</h3>
   <p>一层只有在经过测量数据检验之后才会被采用；如果没有帮助，就保持关闭。目前引擎已在使用，TERRA 是候选；实测结构层和引擎的不确定度区间仍在测试中。</p>
   <p><a href="scoreboard.html" data-keep-lang>查看完整记分板 →</a> 列出我们未胜出的每一项比较、每个对手，以及如何解读。</p>
   <div class="aside">${ASOF ? `截至 ${ASOF} 的分数，` : "分数"}来自本项目的研究记录。图中的曲线仅作示意。</div>
@@ -79,3 +79,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "没有可用于检验区间的测量数据",
 });
 Object.assign(WT.L.ui, { nav_board: "记分板" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

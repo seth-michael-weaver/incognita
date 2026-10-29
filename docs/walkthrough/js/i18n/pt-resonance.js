@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): resonance (chapter 10) */
 WT.L.ch.resonance = {
-  num: "Capítulo 15", title: "Picos agudos", short: "Ressonâncias",
+  num: "Capítulo 15", title: "Ressonâncias", short: "Ressonâncias",
   lead: "A uma energia suficientemente baixa, um neutrão já não vê um núcleo liso e médio. Vê os níveis de energia individuais do núcleo composto, um a um.",
   html: `
 <div class="step">
@@ -9,33 +9,33 @@ WT.L.ch.resonance = {
   <p>O neutrão avança aos saltos em energia; onde aterra pode ser capturado, com um clarão de fotões. Sobre um pico a secção eficaz é de milhares de barns e a captura é quase certa; entre picos é de poucos barns. Arrasta a energia para o pousar num pico e depois entre dois.</p>
 </div>
 <div class="step">
-  <h3>Os picos mantêm as distâncias</h3>
+  <h3>Repulsão de níveis</h3>
   <p>A fila do meio mostra como se dispõem os níveis reais: dois níveis com o mesmo spin e a mesma paridade repelem-se, por isso as quase coincidências são raras. A <b>teoria de matrizes aleatórias</b> descreve este padrão. Posições verdadeiramente aleatórias (fila de cima) agrupam-se e deixam lacunas.</p>
   <div class="btns"><button class="btn" data-act="again">Sortear de novo</button></div>
   <p>Sorteia de novo para obter outra amostra. ⟨r̃⟩ compara cada espaçamento com o seguinte: cerca de 0,39 para posições aleatórias, 0,53 para níveis que se repelem; o código usa o padrão com repulsão. Misturar duas sequências, por exemplo dois spins (fila de baixo), esconde em parte a repulsão.</p>
 </div>
 <div class="step">
-  <h3>As alturas dispersam-se imenso</h3>
+  <h3>Flutuações de largura de Porter–Thomas</h3>
   <p>Agora a altura de cada pico é a sua <b>largura neutrónica</b> Γ<sub>n</sub> em escala linear: a força com que o nível se acopla a um neutrão. A tampa amarela é a sua largura γ Γ<sub>γ</sub>, a rapidez com que emite fotões; soma centenas de caminhos de fotões, por isso é quase igual para todos os níveis.</p>
   <div class="btns"><button class="btn" data-act="roll">Sortear uma largura</button><button class="btn ghost" data-act="equal">Larguras iguais</button><button class="btn ghost" data-act="pt">Porter–Thomas</button></div>
   <p>Um nível só tem uma maneira de se partir em neutrão mais alvo, por isso a sua largura comporta-se como o quadrado de um único número de distribuição normal. Sorteia um: a bola cai em <i>x</i>, <i>x</i>² passa a ser a altura do pico seguinte, e um ponto cai no monte. O monte acumula-se perto de zero com uma cauda longa, a lei de <b>Porter–Thomas</b>: a maioria dos níveis é fraca, alguns são enormes. Larguras iguais mostra, em vez disso, uma fila de picos médios.</p>
 </div>
 <div class="step">
-  <h3>Uma escada a partir de quatro números</h3>
-  <p>Os picos saem agora de quatro médias que podes ajustar. Para um núcleo não medido só se podem prever estas médias: o espaçamento médio <i>D</i><sub>0</sub>; as <b>funções de intensidade</b> <i>S</i><sub>0</sub> e <i>S</i><sub>1</sub>, a largura neutrónica média por unidade de espaçamento para neutrões de onda s (de frente) e de onda p (descentrados); e a largura γ média. Com elas o código constrói uma <b>escada</b>: um conjunto aleatório de níveis com essas médias.</p>
+  <h3>Escadas estatísticas de ressonâncias</h3>
+  <p>Os picos saem agora de quatro médias que podes ajustar. Para um núcleo não medido só se podem prever estas médias: o espaçamento médio <i>D</i><sub>0</sub>; as <b>funções de intensidade</b> <i>S</i><sub>0</sub> e <i>S</i><sub>1</sub>, a largura neutrónica média por unidade de espaçamento para neutrões de onda s (de frente) e de onda p (descentrados); e a largura γ média. Com elas o código constrói uma <b>escada</b>: um conjunto aleatório de níveis com essas médias. Três têm cursores aqui; <i>S</i><sub>1</sub> fica fixo (o seu valor está escrito por baixo dos picos).</p>
   <div class="ctl"><label for="res-d0">Espaçamento D₀ (eV)</label><input id="res-d0" type="range" data-bind="D0" min="3" max="60" step="0.5" value="20"><output data-show="D0" data-fmt="1"></output></div>
   <div class="ctl"><label for="res-s0">Intensidade S₀ (×10⁻⁴)</label><input id="res-s0" type="range" data-bind="S0" min="0.2" max="3" step="0.05" value="1"><output data-show="S0" data-fmt="2"></output></div>
   <div class="ctl"><label for="res-gg">Largura γ ⟨Γγ⟩ (meV)</label><input id="res-gg" type="range" data-bind="Gg" min="10" max="80" step="1" value="23"><output data-show="Gg" data-fmt="0"></output></div>
   <p>Arrasta <i>D</i><sub>0</sub> e os picos afastam-se ou apinham-se. Os picos cheios são níveis de onda s (paridade positiva); os contornados, de onda p (paridade negativa). As larguras neutrónicas crescem como √<i>E</i> para as ondas s e como <i>E</i><sup>3/2</sup> para as ondas p, por isso os picos contornados começam baixos e crescem para a direita.</p>
 </div>
 <div class="step">
-  <h3>Lá em baixo, na zona térmica</h3>
+  <h3>A região térmica</h3>
   <p>Os mesmos picos numa escala de energia logarítmica, até milésimas de eV. Os neutrões de um reator abrandam ao ressaltar em núcleos leves, perdendo mais ou menos a mesma fração da sua energia de cada vez, por isso aqui todos os saltos têm o mesmo comprimento. Alguns ficam presos nos picos pelo caminho.</p>
   <div class="btns"><button class="btn" data-act="slow">Abrandar 10 neutrões</button></div>
   <p>Os que passam assentam à temperatura ambiente, 0,025 eV, a energia <b>térmica</b>, muito abaixo do primeiro pico. Aí a secção eficaz, a área do disco, é a soma das caudas das ressonâncias, incluindo níveis ligados logo abaixo de zero; as caudas crescem como 1/<i>v</i> (<i>v</i>, a velocidade do neutrão), por isso o fundo sobe para a esquerda. O que fica preso durante a descida mede-se com o <b>integral de ressonância</b>: a secção eficaz acima de 0,5 eV, com cada energia ponderada por 1/<i>E</i>.</p>
 </div>
 <div class="step">
-  <h3>Só a estatística é previsível</h3>
+  <h3>O que a estatística consegue prever</h3>
   <p>Cada fila é uma escada tirada dos mesmos quatro números, com um disco cuja área é a sua secção eficaz de captura térmica. O parêntese chega até ao pico que fixa esse valor, normalmente o mais próximo; a sua distância muda de escada para escada, e o disco varia por um fator de dez ou mais.</p>
   <div class="btns"><button class="btn" data-act="draw1">Sortear uma escada</button><button class="btn ghost" data-act="more">Sortear 20</button></div>
   <p>Cada valor cai no monte da direita. Para um núcleo não medido a resposta é uma dispersão de valores, não um único número, e nenhum modelo melhor a pode estreitar. O integral de ressonância, uma soma sobre muitos picos, dispersa-se menos. Onde os níveis estão afastados mais de cerca de 10 keV, como nos núcleos leves, nenhum fica perto da zona térmica: aí a captura é direta, e o código recusa-se a responder.</p>

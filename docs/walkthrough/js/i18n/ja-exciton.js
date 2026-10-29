@@ -9,14 +9,14 @@ WT.L.ch.exciton = {
   <div class="formula">ω(p,h,E) = g<sup>n</sup> (E − A<sub>p,h</sub>)<sup>n−1</sup> / (p! h! (n−1)!) ,  A<sub>p,h</sub> = max(p,h)²/g − (p² + h² + p + h)/4g</div>
   <div class="ctl"><label for="ex-n">粒子 p（空孔 p − 1）</label><input id="ex-n" type="range" data-bind="pp" min="2" max="6" step="1" value="3" data-instant><output data-show="pp" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="pauli" aria-pressed="true">パウリ補正</button></div>
-  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹は、フェルミエネルギー付近の1粒子準位の密度です。<i>A<sub>p,h</sub></i>は<b>パウリ</b>補正です。2つの粒子は同じ準位を共有できないので、最も低い配置にはエネルギーが必要になり、しきい値付近の密度が下がります。スケッチは、選んだ<i>p</i>の配置を1つずつ、ランダムに描いています。</p>
+  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹は、フェルミエネルギー付近の1粒子準位の密度です。<i>A<sub>p,h</sub></i>は<b>パウリ</b>補正です。2つの粒子は同じ準位を共有できないので、最も低い配置にはエネルギーが必要になり、しきい値付近の密度が下がります。曲線は粒子と空孔の数で名づけています。3p2hは粒子3個、空孔2個の意味です。スケッチは、選んだ<i>p</i>の配置を1つずつ、ランダムに描いています。空孔とは、フェルミ準位より下から核子が1個欠けた状態です。</p>
 </div>
 <div class="step">
-  <h3>奥へ進むか、外へ出るか</h3>
+  <h3>遷移速度と放出速度</h3>
   <p>各段階からは、2つのことが起こりえます。1つは衝突が新たな対をつくることで、その速度λ<sup>+</sup>はフェルミの黄金律により、行列要素の2乗と到達できる状態の密度の積です。もう1つは粒子が出ていくことで、その速度<i>W</i>は詳細つり合いにより、逆過程の断面積と、出ていく粒子がある場合とない場合の状態密度の比から与えられます。</p>
   <div class="formula">λ<sup>+</sup>(n) = (2π/ħ) M² ω<sub>acc</sub> ,  W(p,h,ε) = (2s+1)/(π²ħ³) με σ<sub>inv</sub>(ε) ω(p−1,h,U) / ω(p,h,E)</div>
   <div class="ctl"><label for="ex-e">中性子エネルギー（MeV）</label><input id="ex-e" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
-  <p>棒は各段階での2つの速度で、対数目盛です。λ<sup>+</sup>は10²² s⁻¹の桁で、<i>W</i>は最初の段階でその約10分の1、段階ごとに減っていきます。新しい対ができるたびに、先頭の粒子が運べるエネルギーが薄まるからです。エンジンはM²をKoning–Duijvestijnの形からとり、これはエキシトンあたりのエネルギーとともに減少します。</p>
+  <p>各段階は粒子と空孔の数で表します（2p1hは粒子2個、空孔1個）。棒は各段階での2つの速度で、対数目盛です。λ<sup>+</sup>は10²² s⁻¹の桁で、<i>W</i>は最初の段階でその約10分の1、段階ごとに減っていきます。新しい対ができるたびに、先頭の粒子が運べるエネルギーが薄まるからです。エンジンはM²をKoning–Duijvestijnの形からとり、これはエキシトンあたりのエネルギーとともに減少します。</p>
   <div class="formula">M² = (C₁ A<sub>p</sub> / A³) · [7.48 + 4.62×10⁵ / (E/(n A<sub>p</sub>) + 10.7)³]  MeV²</div>
 </div>
 <div class="step">
@@ -27,14 +27,14 @@ WT.L.ch.exciton = {
   <p>連鎖全体は数×10⁻²² sで終わります。途中で逃げ出す割合が前平衡放出で、残りは、エンジンではTALYSと同じく最大6個の粒子を経たのち、複合核に引き渡されます。時間積分によって各段階に強さτ(<i>n</i>)·<i>P</i>(<i>n</i>)が与えられ、エンジンが計算するのはこの積です。</p>
 </div>
 <div class="step">
-  <h3>硬い裾はどこから来るか</h3>
+  <h3>高エネルギーの裾</h3>
   <p>放出スペクトルは、集団×寿命×放出速度を段階について足し合わせ、残った分の蒸発を加えたものです。2つの粒子と1つの空孔からなる段階<i>n</i> = 3だけが最も高い出射エネルギーまで届き、そのスペクトルは端点に向かって直線的にしか減りません。後の段階ほど柔らかくなります。</p>
   <div class="formula">dσ/dε = σ<sub>CN</sub> Σ<sub>n</sub> P(n) τ(n) W(n,ε) + 蒸発</div>
   <div class="ctl"><label for="ex-e3">中性子エネルギー（MeV）</label><input id="ex-e3" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
   <p>エネルギーを上げると、スペクトルは硬くなります。前平衡の裾は端点まで伸び、蒸発のこぶは1〜2 MeVにとどまります。約10 MeVより上では、測定された高エネルギー中性子はこの裾がなければ再現できません。</p>
 </div>
 <div class="step">
-  <h3>割合はどれくらいか</h3>
+  <h3>前平衡の割合</h3>
   <p>放出のうち前平衡の割合は入射エネルギーとともに増え、ここでは5 MeV付近の数パーセントから、40 MeVでの約40パーセントまでになります。それは調整可能な定数1つ、すなわち行列要素の全体の大きさに依存します。相互作用が弱いほど平衡化は遅く、早い段階の放出が増えます。</p>
   <div class="ctl"><label for="ex-c">行列要素の定数 C₁</label><input id="ex-c" type="range" data-bind="c1" min="0.3" max="3" step="0.05" value="1"><output data-show="c1" data-fmt="2"></output></div>
   <p>破線はエンジンの既定であるC₁ = 1で、実線はスライダーに従います。C₁を半分にすると、割合は2倍ではなく1.5〜1.9倍になります。各段階の脱出確率はW/λ<sup>+</sup>ではなくW/(λ<sup>+</sup> + W)であり、後の段階まで生き残る原子核も減るからです。</p>
@@ -63,6 +63,7 @@ Object.assign(WT.L.labels, {
   "E = {#} + Sₙ = {#} MeV · τ(n={#}) = {#} × {#}⁻²² s": "E = {#} + Sₙ = {#} MeV · τ(n={#}) = {#} × {#}⁻²² s",
   // scene 3: master equation
   "compound": "複合核",
+  "(of {#} % in the end)": "（最終的には{#} %）",
   "emitted before equilibrium: {#} % (of {#} % in the end)": "平衡前に放出：{#} %（最終的には{#} %）",
   "t = {#} × {#}⁻²² s": "t = {#} × {#}⁻²² s",
   // scene 4: spectrum
@@ -79,6 +80,7 @@ Object.assign(WT.L.labels, {
   // scene 6: second escape
   "{#} MeV: multiple pre-equilibrium on": "{#} MeV：多重前平衡放出オン",
   "chance of a second fast emission (toy estimate)": "2度目の速い放出の確率（簡易な見積もり）",
+  "(2 particles, 1 hole)": "（粒子2個、空孔1個）", "(1 particle, 1 hole)": "（粒子1個、空孔1個）",
   "residual: {#}p{#}h": "残留核：{#}p{#}h",
 });
 Object.assign(WT.L.glossary, {
@@ -89,3 +91,4 @@ Object.assign(WT.L.glossary, {
     chapter: "exciton",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="pauli" */

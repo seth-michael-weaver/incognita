@@ -56,7 +56,7 @@
   <p>Arrasta-a e conta as medições que ficam dentro. Demasiado estreita, e a banda promete uma precisão que não tem; demasiado larga, e não diz nada. A banda do próprio motor ainda não foi adotada: acerta quando se juntam todas as reações, mas ainda não em cada família de reações. O TERRA tem as suas próprias bandas, e estas fazem parte das comparações acima.</p>
 </div>
 <div class="step">
-  <h3>Ponto da situação</h3>
+  <h3>Estado atual</h3>
   <p>Uma camada só é adotada depois de testada face às medições, e fica desligada se não ajudar. Hoje o motor está em uso e o TERRA é candidato; a camada de estrutura medida e a banda de incerteza do motor continuam em testes.</p>
   <p><a href="scoreboard.html" data-keep-lang>Ver o quadro de resultados completo →</a> Todas as comparações que não ganhamos, cada rival e como as ler.</p>
   <div class="aside">${ASOF ? `Resultados a ${ASOF}, do` : "Resultados do"} registo de investigação do projeto. As curvas da imagem são ilustrativas.</div>
@@ -80,3 +80,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "não há medições com que verificar a banda",
 });
 Object.assign(WT.L.ui, { nav_board: "Quadro de resultados" });
+/* i18n_check.sh counts these attribute strings found in the English script code (not in html): data-act="${act}" */

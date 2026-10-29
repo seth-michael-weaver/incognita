@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): compound (chapter 5) */
 WT.L.ch.compound = {
-  num: "Capítulo 8", title: "Partilhar a energia", short: "Núcleo composto",
+  num: "Capítulo 8", title: "O núcleo composto", short: "Núcleo composto",
   lead: "Quando terminam as primeiras colisões rápidas, todos os nucleões partilham a energia. Este estado assente é o núcleo composto. Para prever o que fará a seguir, o motor precisa de saber de quantas maneiras pode guardar a sua energia.",
   html: `
 <div class="step">
@@ -9,33 +9,34 @@ WT.L.ch.compound = {
   <p>Carrega no botão para lançar o neutrão de outro lado. O brilho acaba sempre da mesma maneira: o núcleo <b>esqueceu como se formou</b>. É o núcleo composto de Bohr. A partir daqui só contam três dados: a sua energia, o seu spin (quanto roda) e a sua paridade (uma etiqueta + ou − para a sua simetria de espelho).</p>
 </div>
 <div class="step">
-  <h3>De níveis separados a um contínuo</h3>
+  <h3>De níveis discretos ao contínuo</h3>
   <p>A escada da esquerda contém os estados do núcleo, com a energia para cima; a janela da direita amplia uma faixa de 1 MeV à volta da bola laranja. Perto do fundo os degraus estão muito afastados, e cada um foi medido. Mais acima, as maneiras de repartir a energia entre 56 nucleões multiplicam-se até os degraus se fundirem numa banda contínua, o contínuo.</p>
   <div class="ctl"><label for="cn-e">Energia de excitação</label><input id="cn-e" type="range" data-bind="E" min="0" max="20" step="0.1" value="6.5"><output data-show="E" data-fmt="1"></output></div>
   <p>Arrasta a energia de excitação (a energia guardada acima do estado mais baixo, em MeV) e observa a janela. A <b>densidade de níveis</b> ρ, estados por MeV, cresce aproximadamente como e<sup>2√(aE)</sup>, onde <i>a</i> marca o ritmo de cada núcleo: alguns por MeV a 3 MeV, centenas perto de 8 MeV (onde um neutrão poderia escapar), milhões perto de 20 MeV. Lá em cima o motor trabalha com a própria ρ.</p>
 </div>
 <div class="step">
-  <h3>Três peças unidas numa energia</h3>
+  <h3>A densidade de níveis composta</h3>
   <p>A altura do terreno é a densidade de níveis em escala logarítmica, com a energia para a direita. Em baixo à esquerda estão os níveis contados. A prancha reta é a lei de <b>temperatura constante</b>: ρ multiplica-se por e (cerca de 2,7) a cada <i>T</i> MeV, onde <i>T</i> é a temperatura nuclear. A encosta é o <b>gás de Fermi</b>, que trata os nucleões como partículas independentes. Exceto para os alvos mais pesados, para os quais lê densidades tabeladas, o motor usa este par por defeito.</p>
   <div class="ctl"><label for="cn-ex">Energia de junção</label><input id="cn-ex" type="range" data-bind="Ex" min="4.5" max="12" step="0.05" value="6"><output data-show="Ex" data-fmt="1"></output></div>
   <p>Arrasta a energia de junção: a união desliza pela colina e a prancha roda para a encontrar com a mesma altura e o mesmo declive. As duas pilhas em baixo comparam os níveis que a prancha prevê com os realmente contados. Só uma união os iguala; aí a prancha fica verde. É essa a energia que o motor escolhe.</p>
 </div>
 <div class="step">
-  <h3>Camadas que se fundem</h3>
+  <h3>Efeitos de camada e o seu amortecimento</h3>
   <p>Níveis de um só nucleão, dois nucleões por nível, para dois núcleos. À esquerda, uma camada fechada: tudo o que está abaixo de um grande hiato está cheio, por isso qualquer movimento paga o hiato inteiro. À direita, um núcleo de meio de camada com o nível superior meio cheio, por isso há movimentos baratos desde o início. Cada contador mostra quantas configurações admitem esse calor.</p>
   <div class="ctl"><label for="cn-u">Calor (excitação)</label><input id="cn-u" type="range" data-bind="U" min="0" max="40" step="0.5" value="3"><output data-show="U" data-fmt="1"></output></div>
-  <p>Sobe o calor e vê como os nucleões saltam. Com pouco calor, faltam configurações à camada fechada; com calor suficiente o hiato deixa de importar e ambas as contagens crescem da mesma maneira. O <b>parâmetro de densidade de níveis</b> <i>a</i> traduz isto: os ponteiros começam afastados e convergem para o valor suave <i>ã</i> ao longo de cerca de 10 MeV. O motor esbate a correção de camadas δW a um ritmo γ:</p>
-  <div class="formula">a(U) = ã · [1 + δW · (1 − e<sup>−γU</sup>) / U]</div>
+  <p>Sobe o calor e vê como os nucleões saltam. Com pouco calor, faltam configurações à camada fechada; com calor suficiente o hiato deixa de importar e ambas as contagens crescem da mesma maneira. O motor resume isto num só número por núcleo, o <b>parâmetro de densidade de níveis</b> <i>a</i>: quanto maior o <i>a</i>, mais depressa cresce com o calor o número de configurações. Os ponteiros mostram-no para cada núcleo: começam afastados e, ao longo de cerca de 10 MeV, ambos assentam no mesmo valor suave (escrito <i>ã</i>, “a-til”), o que teria um núcleo sem hiatos de camada.</p>
+  <p>Assim, o motor começa cada núcleo com o seu efeito de camada, a energia extra que os seus hiatos valem (escrita δW), e deixa esse efeito esbater-se à medida que o calor sobe.</p>
+  <div class="aside">A fórmula: <i>a</i>(<i>U</i>) = <i>ã</i> · [1 + δW · (1 − e<sup>−γ<i>U</i></sup>) / <i>U</i>], com <i>U</i> o calor e γ (gama, cerca de 0,1 por MeV aqui, menos nos núcleos mais pesados) a rapidez com que o efeito de camada se esbate.</div>
 </div>
 <div class="step">
-  <h3>Ordenados por spin e paridade</h3>
+  <h3>Distribuições de spin e paridade</h3>
   <p>Os estados de uma energia caem em gavetas segundo o spin <i>J</i>, o momento angular do núcleo: fichas cheias para paridade +, ocas para −. As gavetas do meio são as que mais se enchem, seguindo (2<i>J</i>+1) e<sup>−(J+½)²/2σ²</sup>, onde o corte de spin σ fixa a largura. As duas paridades saem mais ou menos iguais.</p>
   <div class="ctl"><label for="cn-u2">Excitação</label><input id="cn-u2" type="range" data-bind="U2" min="1" max="30" step="0.5" value="8"><output data-show="U2" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="deform">Deformar o núcleo</button></div>
   <p>Sobe a excitação: σ cresce, porque um núcleo mais quente pode ter mais spin. Depois carrega em Deformar. Um núcleo com forma de bola de râguebi também pode rodar como um todo, por isso cada gaveta ganha estados (as fichas azuis): é o <b>reforço coletivo</b>. Por defeito, o motor só o acrescenta para alvos com mais de cerca de 215 nucleões.</p>
 </div>
 <div class="step">
-  <h3>Cortado em intervalos</h3>
+  <h3>Intervalos de energia no contínuo</h3>
   <p>Acima do último nível contado, o motor corta o contínuo em faixas de igual largura em energia, chamadas intervalos (bins). Em cada intervalo os pontos juntam-se num bloco de ρ·ΔE estados (ΔE é a largura do intervalo), repartido por spin e paridade como acima.</p>
   <div class="ctl"><label for="cn-emax">Topo da escada</label><input id="cn-emax" type="range" data-bind="Emax" min="8" max="30" step="0.5" value="14"><output data-show="Emax" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="rebin">Reordenar</button></div>

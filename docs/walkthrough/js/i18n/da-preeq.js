@@ -1,6 +1,6 @@
 /* Danish: preeq (Kapitel 7, præligevægt) */
 WT.L.ch.preeq = {
-  num: "Kapitel 7", title: "Kollisioner før roen", short: "Præligevægt",
+  num: "Kapitel 7", title: "Præligevægtsemission", short: "Præligevægt",
   lead: "En neutron, der trænger ind i en kerne, deler ikke sin energi med alle på én gang. I de første par kollisioner har én partikel det meste af den, og den partikel kan flyve lige ud igen. Det er præligevægt: emission “før energien udjævnes”.",
   html: `
 <div class="step">
@@ -8,41 +8,41 @@ WT.L.ch.preeq = {
   <p>Den indkommende neutron svæver ovenover med al energien: sin egen plus flere MeV (millioner elektronvolt), der frigøres ved indfangningen.</p>
 </div>
 <div class="step">
-  <h3>Par løftes op</h3>
-  <p>Hver kollision løfter en nukleon op på et tomt trin og efterlader et <b>hul</b> (en åben ring). Partikler over overfladen og huller under den kaldes begge <b>excitoner</b>. Den første kollision giver 2 partikler og 1 hul (n = 3); hver senere tilføjer endnu et par.</p>
+  <h3>Partikel-hul-excitationer</h3>
+  <p>Den hurtige neutron støder ind i en nukleon i havet og giver den noget af sin energi. Nukleonen springer op på et tomt trin, og det sted, den forlod, er nu tomt: et <b>hul</b> (den åbne ring). Så hvert stød skaber et <b>par</b>: endnu en løftet nukleon og ét hul. Fysikere tæller de løftede nukleoner og hullerne sammen og kalder dem <b>excitoner</b>: efter det første stød er der 3 (2 løftede, 1 hul).</p>
   <div class="btns"><button class="btn" data-act="collide">Kollidér</button><button class="btn ghost" data-act="reset">Start forfra</button></div>
-  <p>Tryk på Kollidér et par gange. Den løftede nukleon kan være en proton eller en neutron, og motoren tæller hver slags. Med hvert par deles energien på flere, så den øverste partikel ligger lavere.</p>
+  <p>Tryk på Kollidér og følg ét stød: dykket, springet, hullet. Gør det et par gange. Den, der bliver ramt, kan være en proton eller en neutron. Med hvert stød deles energien mellem flere nukleoner, så hver løftet nukleon sidder lavere, og den hurtige har mindre chance for at slippe ud.</p>
 </div>
 <div class="step">
-  <h3>Forgreningen ved hvert trin</h3>
-  <p>På hvert trin undslipper den øverste neutron enten (pil op, kun hvis den er over fri-linjen) eller kolliderer igen (pil ned); tykkelsen viser oddsene. Undslipningsraten følger af <b>detaljeret balance</b>: af sandsynligheden for den omvendte proces, at samme partikel absorberes, som kapitel 5 beregner. Kollisionsraten er styrken af én nukleon–nukleon-kollision gange antallet af nye konfigurationer, den kan nå.</p>
+  <h3>Emission eller flere kollisioner</h3>
+  <p>På hvert trin slipper den øverste neutron enten ud (pil op, kun hvis den er over den frie linje) eller kolliderer igen (pil ned); tykkelsen viser sandsynlighederne. Hvor hurtigt den slipper ud, kan aflæses af den omvendte proces: en kerne, der let sluger en neutron med en vis energi, slipper også let en neutron med den energi fra sig. Kapitel 5 har allerede regnet ud, hvor let den sluger (denne tovejsregel kaldes <b>detaljeret balance</b>). Hvor hurtigt den kolliderer, afhænger af, hvor hårdt to nukleoner støder sammen, gange hvor mange nye måder energien kan deles på efter stødet.</p>
   <div class="ctl"><label for="pe-n">Trin (excitoner n)</label><input id="pe-n" type="range" data-bind="n" min="3" max="11" step="2" value="3" data-instant><output data-show="n" data-fmt="0"></output></div>
   <p>Træk trinnet op. Tidligt har én partikel det meste af energien, så det, der slipper ud, er hurtigt. Senere er energien spredt tyndt, og lidt kommer ud.</p>
 </div>
 <div class="step">
-  <h3>Hvor den hurtige hale kommer fra</h3>
+  <h3>Præligevægtsspektret</h3>
   <p>Bunken til højre er <b>spektret</b>: hvor mange neutroner der kommer ud ved hver energi, langsomme til venstre, hurtige til højre. Hver reaktion kører kæden, indtil den øverste neutron undslipper, og dens farve fortæller hvornår: <em style="font-style:normal;color:var(--warm);font-weight:600">dyb orange</em> på trin 3, blegere senere, <em class="n">blå</em>, hvis den først kom ud, efter at kernen var faldet til ro (kapitel 8).</p>
   <div class="btns"><button class="btn" data-act="run">Kør 300 reaktioner</button></div>
-  <p>Trin 3 bygger en bred, næsten flad hylde, der når den maksimale energi. Senere trin hober sig op lavere. Den blå pukkel er <b>fordampning</b>: når alle deler energien, siver kun langsomme neutroner ud, som damp fra en varm væske.</p>
+  <p>Trin 3 bygger en bred, lav kuppel, der strækker sig næsten til den maksimale energi, det eneste trin der når så langt. Senere trin hober sig op lavere. Den blå pukkel er <b>fordampning</b>: når alle deler energien, siver kun langsomme neutroner ud, som damp fra en varm væske.</p>
   <div class="ctl"><label for="pe-e">Neutronenergi</label><input id="pe-e" type="range" data-bind="E" min="5" max="60" step="0.5" value="20"><output data-show="E" data-fmt="1"></output></div>
-  <p>Træk i den indkommende neutrons energi: et nyt hold kører, og hylden strækker sig længere. Fordampning alene giver aldrig hurtige neutroner.</p>
+  <p>Træk i den indkommende neutrons energi: en ny omgang kører, og kuplen strækker sig længere. Fordampning alene giver aldrig hurtige neutroner.</p>
 </div>
 <div class="step">
-  <h3>Konfigurationer tælles</h3>
+  <h3>Partikel-hul-tilstandstætheder</h3>
   <p>Tælleren gennemgår alle måder at placere partikler på tomme trin og huller i fyldte trin, så deres energier summer til den energi, der skal deles (trinene ligger her 1 MeV fra hinanden). Nukleoner er fermioner: to kan ikke dele et trin, så en partikel må lande på et tomt trin, og et hul opstår kun, hvor der var en nukleon. Det er <b>Pauli-blokering</b>.</p>
   <div class="ctl"><label for="pe-u">Energi at dele (MeV)</label><input id="pe-u" type="range" data-bind="U" min="2" max="16" step="1" value="8" data-instant><output data-show="U" data-fmt="0"></output></div>
   <div class="btns"><button class="btn" data-act="addpair">Tilføj et par</button><button class="btn ghost" data-act="droppair">Fjern et par</button></div>
   <p>Tilføj et par, og tallet springer op; hæv energien, og det stiger omtrent som <i>E</i><sup>n−1</sup>. Dette tal, <b>partikel-hul-tilstandstætheden</b>, bestemmer kollisionsraten: flere konfigurationer, flere steder en kollision kan føre hen. Motoren tæller på den virkelige stige, med trin en brøkdel af en MeV fra hinanden, og tilføjer én grænse, du ser ved høj energi: et hul kan ikke ligge under brøndens bund.</p>
 </div>
 <div class="step">
-  <h3>Klynger forlader også kernen</h3>
+  <h3>Klyngeemission</h3>
   <p>Små klynger kan også forlade kernen tidligt. Ved <b>pickup</b> griber en proton på vej ud en neutron ved overfladen og forlader kernen sammen med den som en <em class="n">deuteron</em>; griber den to, bliver det en triton eller helium-3. Ved <b>knockout</b> rammer den indkommende neutron en <em class="a">alfapartikel</em> (to protoner og to neutroner), der allerede er dannet nær overfladen, og slår den ud. Motoren bruger Kalbachs formler til begge.</p>
   <div class="btns"><button class="btn ghost" data-act="pickup">Grib en neutron → d</button><button class="btn ghost" data-act="knock">Slå en α ud</button></div>
   <p>Tryk på en knap for at se en af dem. Begge giver deuteroner og alfapartikler deres egne hurtige haler, der begynder lige over den energi, det koster at trække hver af dem ud.</p>
 </div>
 <div class="step">
-  <h3>En hurtig nummer to</h3>
-  <p>Ved høj energi kan en anden løftet nukleon stadig ligge over fri-linjen, når den første neutron forlader kernen, og også undslippe, som en hurtig neutron eller proton. Brøndene genafspiller én reaktion ad gangen, med energiskalaen trykket sammen.</p>
+  <h3>Multipel præligevægtsemission</h3>
+  <p>Ved høj energi kan det første stød også give den ramte nukleon meget energi. Når den hurtige neutron forlader kernen, kan den anden nukleon stadig have mere end de 8 MeV, den skal bruge for at slippe ud (den frie linje), og så flyver også den ud: to hurtige partikler fra én reaktion. Billedet afspiller én reaktion ad gangen og siger, hvad der sker på hvert tidspunkt; tallet ved siden af hver kugle er dens energi.</p>
   <div class="ctl"><label for="pe-e2">Neutronenergi</label><input id="pe-e2" type="range" data-bind="E" min="5" max="80" step="0.5" value="40"><output data-show="E" data-fmt="1"></output></div>
   <p>Træk i energien. Under ca. 20 MeV kommer den anden nukleon sjældent over linjen; derover afgiver flere og flere reaktioner to hurtige partikler. Det er <b>multipel præligevægt</b>, som motoren medtager fra 20 MeV og op. Det, der ikke er sluppet ud, bliver til næste kapitels compoundkerne. Under nogle få MeV (målkernens højeste diskrete niveau i brug) springer motoren helt kæden over.</p>
   <div class="aside">I koden: <code>preeq/exciton.py</code> (excitonkæde med to komponenter, kollisions- og undslipningsrater), <code>density/particle_hole.py</code> (partikel-hul-tilstandstætheder med Pauli- og endelig-brønd-korrektioner), <code>preeq/complex.py</code> (Kalbachs pickup, stripping og α-knockout), <code>preeq/multi.py</code> (multipel præligevægt), <code>compound/normalization.py</code> (overdragelse til compoundkernen).</div>

@@ -20,6 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Breitenfluktuationen</h3>
+  <p>Die einfache Formel unterschätzt die elastische Streuung leicht, und die Korrektur schiebt etwas Fluss aus den anderen Ausgängen dorthin zurück. Hier ist der Grund.</p>
   <p>Mit <i>W<sub>ab</sub></i> = 1 multipliziert die Formel Mittelwerte. Die Resonanzen hinter den Mittelwerten haben streuende Breiten (Porter–Thomas, Kapitel 15), und bei elastischer Streuung ist die Breite, die das Neutron hereinlässt, dieselbe, die es wieder hinauslässt; beide sind also korreliert. Für den elastischen Kanal übersteigt dann der Mittelwert der Produkte das Produkt der Mittelwerte, und die übrigen Ausgänge verlieren, was der elastische gewinnt.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Ohne Korrektur</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Neutronenenergie (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -35,10 +36,11 @@ WT.L.ch.hauser = {
   <p>Für elastische und inelastische Streuung stimmen beide eng überein; beim Einfang im keV-Bereich zieht HRTW bis zu 10 Prozent mehr ab. Zwischen 0,85 und 2 MeV gewinnt der Einfang sogar: Dort wird die Gesamtbreite von wenigen fluktuierenden Neutronenbreiten bestimmt, und der Mittelwert von 1/Γ übersteigt 1/⟨Γ⟩. Beide Rezepte sind Anpassungen an das exakte Ergebnis der Zufallsmatrizen (GOE), das TALYS auch als Dreifachintegral anbietet. INCOGNITA portiert alle drei (<code>widthmode</code> 1, 2, 3); Standard ist Moldauer, angewandt für einlaufende Neutronen bis zur Neutronenseparationsenergie des Targets.</p>
 </div>
 <div class="step">
-  <h3>Zwischen 3 und 2</h3>
+  <h3>Grenzen der elastischen Überhöhung</h3>
+  <p>Wie groß kann der elastische Schub werden? Zwischen dem Zwei- und Dreifachen, je nachdem, ob die Resonanzen getrennt stehen oder überlappen.</p>
   <p>Die Grenzfälle erklären die Größe des Effekts. Nimm <i>N</i> gleiche Kanäle ohne Einfang und variiere ihre Summe ΣT, das 2π-Fache des Verhältnisses von mittlerer Gesamtbreite zu Niveauabstand, Γ/<i>D</i>. Bei isolierten Resonanzen (ΣT ≪ 1) und vielen Kanälen folgt jede Breite Porter–Thomas mit einem Freiheitsgrad, und die elastische Überhöhung beträgt ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3. Überlappen die Resonanzen stark (ΣT ≫ 2π), fluktuiert der Wirkungsquerschnitt wie eine Zufallswelle (Ericson-Fluktuationen), und die Überhöhung fällt auf 2.</p>
   <div class="ctl"><label for="hf-n">Offene Kanäle N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>Für <i>N</i> isolierte Kanäle ist der exakte Wert 3<i>N</i>/(<i>N</i>+2) (die Raute): Bei nur zwei Kanälen kann die Überhöhung 1,5 nicht übersteigen, weil die Gesamtbreite dann ebenso stark fluktuiert wie die elastische. Moldauers Rezept gibt diesen Grenzwert wieder; HRTW bleibt darunter, wenn viele schwache Kanäle offen sind. Der Einschub zeichnet Resonanzen mit der Breite, die zum wandernden Punkt gehört. In Moldauers Formel ist der Grenzwert für viele Kanäle 1 + 2/ν: ν → 1 für isolierte Resonanzen, ν → 1,78 bei Überlapp (2,12, der kleine Fehler der Anpassung bei vollem Überlapp).</p>
+  <p>Für <i>N</i> isolierte Kanäle ist der exakte Wert 3<i>N</i>/(<i>N</i>+2) (die Raute): Bei nur zwei Kanälen kann die Überhöhung 1,5 nicht übersteigen, weil die Gesamtbreite dann ebenso stark fluktuiert wie die elastische. Moldauers Rezept gibt diesen Grenzwert wieder; HRTW bleibt darunter, wenn viele schwache Kanäle offen sind. Der Einschub zeichnet Resonanzen mit der Breite, die zum wandernden Punkt gehört. In Moldauers Formel ist der Grenzwert für viele Kanäle 1 + 2/ν: ν → 1 für isolierte Resonanzen und ν → 1,78 bei Überlapp. Das ergibt bei vollem Überlapp 2,12 statt 2: ein kleiner Fehler der Anpassung.</p>
   <div class="aside">Im Code: <code>compound/prepare.py</code> (Ausgangskanäle und ihre Transmissionen pro <i>J</i><sup>π</sup>), <code>compound/target.py</code> (die Hauser–Feshbach-Summen), <code>compound/wfc.py</code> (Moldauer, HRTW und GOE, aus TALYS portiert). Das Bild wertet dieselben Formeln mit illustrativen Zutaten aus: Transmissionen einer harten Kugel für ein eisenähnliches Target, sieben Niveaus, ein Kontinuum konstanter Temperatur und ein zusammengefasster Einfangkanal.</div>
 </div>`,
 };
@@ -107,3 +109,4 @@ Object.assign(WT.L.glossary, {
     chapter: "hauser",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-show="jbShow" data-act="w0" data-act="w1" */

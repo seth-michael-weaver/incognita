@@ -56,7 +56,7 @@
   <p>Træk i det, og tæl målingerne inden for båndet. For smalt, og båndet påstår en præcision, det ikke har; for bredt, og det siger ingenting. Motorens eget bånd er ikke taget i brug endnu: det rammer målet, når alle reaktioner lægges sammen, men endnu ikke i hver reaktionsfamilie. TERRA har sine egne bånd, og de indgår i sammenligningerne ovenfor.</p>
 </div>
 <div class="step">
-  <h3>Hvor det står</h3>
+  <h3>Aktuel status</h3>
   <p>Et lag tages kun i brug, efter at det er testet over for målinger, og det forbliver slået fra, når det ikke hjælper. I dag er motoren i brug, og TERRA er kandidat; laget med målt struktur og motorens usikkerhedsbånd testes stadig.</p>
   <p><a href="scoreboard.html" data-keep-lang>Se hele resultattavlen →</a> Hver sammenligning, vi ikke vinder, hver konkurrent, og hvordan du læser det.</p>
   <div class="aside">${ASOF ? `Resultater pr. ${ASOF}, fra` : "Resultater fra"} projektets forskningslog. Kurverne på billedet er illustrative.</div>
@@ -80,3 +80,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "ingen målinger at tjekke båndet op imod",
 });
 Object.assign(WT.L.ui, { nav_board: "Resultattavle" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

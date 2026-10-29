@@ -1,6 +1,6 @@
 /* Dutch (Nederlands): measure (Hoofdstuk 17, wat eruit komt) */
 WT.L.ch.measure = {
-  num: "Hoofdstuk 17", title: "Wat eruit komt", short: "Observabelen",
+  num: "Hoofdstuk 17", title: "Observabelen", short: "Observabelen",
   lead: "Een experiment, een reactor of een ster ziet maar een handvol getallen. Dit hoofdstuk laat zien hoe de motor wat er in de kern gebeurt in die getallen omzet.",
   html: `
 <div class="step">
@@ -9,38 +9,38 @@ WT.L.ch.measure = {
   <p>Verlaag de energie en de schijven zwellen op: een langzaam neutron is een brede golf en reageert van verder weg. Bij hoge energie krimpt de schijf naar de kern zelf.</p>
 </div>
 <div class="step">
-  <h3>Met de energie gaan nieuwe uitgangen open</h3>
+  <h3>Excitatiefuncties</h3>
   <p>Elke deur is één uitgang, of <b>kanaal</b>: het neutron kaatst eruit (elastisch), laat de trefkern aangeslagen achter (n′), stoot meer neutronen uit (2n, 3n), wordt ingevangen terwijl alleen fotonen vertrekken (γ), of er vertrekt in plaats daarvan een proton of α-deeltje. Een deur met een hangslot heeft een <b>drempel</b>: de reactie kost meer energie dan het neutron meebrengt.</p>
   <div class="ctl"><label for="mea-e2">Neutronenergie (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
   <p>Sleep de energie voorbij een drempel en die deur flitst open; de emmers vullen zich tot het aandeel van elk kanaal, en elke nieuwe deur neemt aandeel af van de andere. De drempels komen uit de massa's van de kernen; de aandelen uit de competitie van hoofdstuk 9.</p>
 </div>
 <div class="step">
-  <h3>Wat een detector ziet</h3>
+  <h3>Emissiespectra</h3>
   <p>De twee stapels zijn de neutronen die de voorste en achterste helft van een detectorring bereiken, gesorteerd op energie. De bundel is gepulst, dus de vliegtijd van elk neutron geeft zijn energie: snelle komen het eerst aan.</p>
   <div class="ctl"><label for="mea-ein">Invallende energie (MeV)</label><input id="mea-ein" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="30"><output data-show="Ein" data-fmt="0"></output></div>
   <p>Beide stapels hebben een bult van langzame, <b>verdampte</b> neutronen: die koken van de compoundkern af zodra de energie verdeeld is, in alle richtingen gelijk. Alleen de voorste stapel heeft een lange snelle staart: neutronen uit het <b>pre-evenwicht</b>, die al bij de eerste botsingen vertrekken en nog ruwweg met de bundel mee bewegen. Verhoog de invallende energie en de staart groeit.</p>
 </div>
 <div class="step">
-  <h3>Welke kant ze op gaan</h3>
+  <h3>Hoekverdelingen</h3>
   <p>Het bloemblad toont hoeveel neutronen in elke richting vertrekken; de bundel komt van links. Verdampte neutronen zijn de bundel vergeten en vertrekken alle kanten even veel op; snelle neutronen uit het pre-evenwicht hellen naar voren. De regel van Kalbach bepaalt hoe ver, met één helling <i>a</i> die groeit met de uitgaande energie. De motor kan deze hoekverdelingen ook wegschrijven, als optionele uitvoer.</p>
   <div class="ctl"><label for="mea-eo">Uitgaande energie (MeV)</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>Verlaag de uitgaande energie en het bloemblad wordt ronder: langzame neutronen zijn vooral verdampt.</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
 </div>
 <div class="step">
-  <h3>In een ster</h3>
+  <h3>Maxwell-gemiddelde werkzame doorsneden</h3>
   <p>De stapel eronder verzamelt de energieën van neutronen die in het hete gas van een ster worden ingevangen. Hun snelheden volgen een maxwellverdeling die door de temperatuur <i>kT</i> wordt bepaald (30 keV is ongeveer 350 miljoen graden); langere sporen betekenen snellere neutronen, en elke passage langs een kern kan eindigen in een vangstflits.</p>
   <div class="ctl"><label for="mea-kt">Temperatuur kT (keV)</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Langzame neutronen zijn makkelijk te vangen maar komen zelden langs, en snelle zijn er weinig, dus de meeste vangsten komen uit een venster van een paar <i>kT</i> breed. De snelheid over het hele gas is de <b>maxwelliaans gemiddelde werkzame doorsnede</b> (MACS), in millibarn (mb). Verhit het gas en het venster schuift naar hogere energie, waar het doel kleiner is. De MACS wordt berekend uit de vangstcurve van de motor.</p>
 </div>
 <div class="step">
-  <h3>Ook de trefkern is heet</h3>
+  <h3>Thermisch aangeslagen targets</h3>
   <p>De bolletjes tonen welk deel van de trefkernen bij deze temperatuur op elk van hun laagste niveaus zit. In een ster zijn sommige trefkernen al aangeslagen, en elk aangeslagen niveau is een andere ingang naar dezelfde compoundkern. Een niveau met spin <i>J</i> bevat er meer omdat het 2<i>J</i>+1 oriëntaties heeft.</p>
   <div class="ctl"><label for="mea-kt2">Temperatuur kT (keV)</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Verhoog de temperatuur en kijk hoe kernen omhoog schuiven. Een stellaire snelheid berekent de vangst vanuit elk bezet niveau en telt de resultaten met deze aandelen op; de gewichten tellen op tot de partitiefunctie <i>G</i>, en de verhouding tot de snelheid vanuit de grondtoestand is de <b>stellaire versterkingsfactor</b>. De motor kan dit als optie doen, standaard uit; normaal begint elke trefkern in zijn grondtoestand.</p>
 </div>
 <div class="step">
-  <h3>Hoe zeker is dit allemaal?</h3>
+  <h3>Onzekerheden en covarianties</h3>
   <p>Elke vage schijf is één run van de motor waarin de invoer willekeurig is bijgesteld: de diepte van de optische put, de niveaudichtheid en de fotonsterkte, die elk maar tot op een paar procent bekend zijn. De spreiding van veel runs is een eerlijke onzekerheid: <b>Total Monte Carlo</b>.</p>
   <div class="btns"><button class="btn" data-act="tmc1">Draai een variant</button><button class="btn ghost" data-act="tmc">Draai er 10</button><button class="btn ghost" data-act="clear">Wissen</button></div>
   <p>Een scherpe rand betekent dat de invoer het antwoord vastlegt; een vage rand betekent dat dat niet zo is, en daar zouden nieuwe metingen het meest helpen.</p>

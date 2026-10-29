@@ -1,6 +1,6 @@
 /* Simplified Chinese: compound (chapter 5) */
 WT.L.ch.compound = {
-  num: "第 8 章", title: "能量的共享", short: "复合核",
+  num: "第 8 章", title: "复合核", short: "复合核",
   lead: "最初的快速碰撞结束后，所有核子共同分享能量。这种安定下来的状态就是复合核。要预言它接下来会做什么，引擎需要知道它有多少种方式来容纳自己的能量。",
   html: `
 <div class="step">
@@ -15,27 +15,28 @@ WT.L.ch.compound = {
   <p>拖动激发能（高于最低状态所储存的能量，单位 MeV），观察窗口。<b>能级密度</b> ρ，即每 MeV 的状态数，大致按 e<sup>2√(aE)</sup> 增长，其中 <i>a</i> 决定每个原子核的增长速度：3 MeV 处每 MeV 只有几个，8 MeV 附近（中子可以逃逸的地方）有数百个，到 20 MeV 则有数百万个。在那么高的地方，引擎直接使用 ρ 本身。</p>
 </div>
 <div class="step">
-  <h3>三段，在一个能量处拼接</h3>
+  <h3>组合能级密度</h3>
   <p>地形的高度是对数坐标下的能级密度，能量向右增加。左下方是计数得到的能级。笔直的木板是<b>恒温公式</b>：每增加 <i>T</i> MeV，ρ 就乘以 e（约 2.7），其中 <i>T</i> 是核温度。山坡是<b>费米气体</b>，它把核子当作独立粒子处理。除了最重的靶核会读取列表给出的能级密度外，引擎默认使用这一对模型。</p>
   <div class="ctl"><label for="cn-ex">匹配能</label><input id="cn-ex" type="range" data-bind="Ex" min="4.5" max="12" step="0.05" value="6"><output data-show="Ex" data-fmt="1"></output></div>
   <p>拖动匹配能：接点沿山坡滑动，木板随之转动，以相同的高度和斜率与之相接。下方的两摞比较木板预言的能级数与实际计数的能级数。只有一个接点能使两者相等；此时木板变成绿色。这就是引擎选定的能量。</p>
 </div>
 <div class="step">
-  <h3>逐渐消融的壳层</h3>
+  <h3>壳效应及其衰减</h3>
   <p>两个原子核的单核子能级，每个能级容纳两个核子。左边是闭合壳层：一个大能隙以下全部填满，所以任何跃迁都要付出整个能隙的代价。右边是壳层中部的原子核，最上面的能级只填了一半，所以一开始就有代价很低的跃迁。每个计数器显示能容纳给定热量的排布方式有多少。</p>
   <div class="ctl"><label for="cn-u">热量（激发）</label><input id="cn-u" type="range" data-bind="U" min="0" max="40" step="0.5" value="3"><output data-show="U" data-fmt="1"></output></div>
-  <p>把热量调高，看核子如何跃迁。热量较低时，闭合壳层的排布方式严重不足；热量足够时，能隙不再重要，两边的计数以相同方式增长。<b>能级密度参数</b> <i>a</i> 反映了这一点：两根指针起初分开，在大约 10 MeV 的范围内收敛到平滑值 <i>ã</i>。引擎以速率 γ 让壳修正 δW 逐渐消失：</p>
-  <div class="formula">a(U) = ã · [1 + δW · (1 − e<sup>−γU</sup>) / U]</div>
+  <p>把热量调高，看核子如何跃迁。热量较低时，闭合壳层的排布方式严重不足；热量足够时，能隙不再重要，两边的计数以相同方式增长。引擎把这一点概括为每个原子核的一个数，即<b>能级密度参数</b> <i>a</i>：<i>a</i> 越大，排布方式的数目随热量增长得越快。指针显示了每个原子核的 <i>a</i>：它们起初分开，在大约 10 MeV 的范围内都落到同一个平滑值（记作 <i>ã</i>，读作“a 波浪”），也就是没有壳层能隙的原子核会有的值。</p>
+  <p>因此，引擎为每个原子核从它的壳效应出发（能隙值得的额外能量，记作 δW），并让这一效应随热量升高而逐渐消失。</p>
+  <div class="aside">公式：<i>a</i>(<i>U</i>) = <i>ã</i> · [1 + δW · (1 − e<sup>−γ<i>U</i></sup>) / <i>U</i>]，其中 <i>U</i> 是热量，γ（伽马，这里约为每 MeV 0.1，较重的原子核更小）表示壳效应消失的快慢。</div>
 </div>
 <div class="step">
-  <h3>按自旋和宇称分类</h3>
+  <h3>自旋与宇称分布</h3>
   <p>同一能量的状态按自旋 <i>J</i>（原子核的角动量）放入不同的抽屉：实心标记表示 + 宇称，空心表示 −。中间的抽屉装得最多，遵循 (2<i>J</i>+1) e<sup>−(J+½)²/2σ²</sup>，其中自旋截断参数 σ 决定分布的宽度。两种宇称的数目大致相等。</p>
   <div class="ctl"><label for="cn-u2">激发</label><input id="cn-u2" type="range" data-bind="U2" min="1" max="30" step="0.5" value="8"><output data-show="U2" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="deform">使原子核形变</button></div>
   <p>把激发调高：σ 增大，因为更热的原子核能够携带更大的自旋。然后按“形变”。橄榄球形状的原子核还能整体转动，所以每个抽屉都会增加状态（蓝色标记）：这就是<b>集体增强</b>。默认情况下，引擎只对核子数超过约 215 的靶核加入这一效应。</p>
 </div>
 <div class="step">
-  <h3>切分成能量区间</h3>
+  <h3>连续区中的能量区间</h3>
   <p>在最后一个计数能级以上，引擎把连续区切成能量宽度相等的片段，称为能量区间（bin）。在每个能量区间中，点聚合成一个包含 ρ·ΔE 个状态的方块（ΔE 是区间宽度），并像上面一样按自旋和宇称分类。</p>
   <div class="ctl"><label for="cn-emax">梯子顶端</label><input id="cn-emax" type="range" data-bind="Emax" min="8" max="30" step="0.5" value="14"><output data-show="Emax" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="rebin">重新分类</button></div>

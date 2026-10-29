@@ -56,7 +56,7 @@
   <p>Zieh daran und zähl die Messungen innerhalb. Zu schmal, und das Band behauptet eine Genauigkeit, die es nicht hat; zu breit, und es sagt nichts aus. Das eigene Band der Engine ist noch nicht übernommen: Es trifft das Ziel, wenn alle Reaktionen zusammengefasst werden, aber noch nicht in jeder Reaktionsfamilie. TERRA bringt eigene Bänder mit, und sie sind Teil seiner Vergleiche oben.</p>
 </div>
 <div class="step">
-  <h3>Wo es steht</h3>
+  <h3>Aktueller Stand</h3>
   <p>Eine Schicht wird erst übernommen, nachdem sie an Messungen getestet wurde, und sie bleibt aus, wenn sie nicht hilft. Heute ist die Engine in Gebrauch und TERRA ein Kandidat; die Schicht mit gemessener Struktur und das Unsicherheitsband der Engine werden noch getestet.</p>
   <p><a href="scoreboard.html" data-keep-lang>Zur vollständigen Rangliste →</a> Jeder Vergleich, den wir nicht gewinnen, jeder Konkurrent und wie man das liest.</p>
   <div class="aside">${ASOF ? `Ergebnisse mit Stand ${ASOF}, aus` : "Ergebnisse aus"} dem Forschungsprotokoll des Projekts. Die Kurven im Bild dienen der Veranschaulichung.</div>
@@ -80,3 +80,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "keine Messungen, an denen sich das Band prüfen lässt",
 });
 Object.assign(WT.L.ui, { nav_board: "Rangliste" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

@@ -1,6 +1,6 @@
 /* French: cascade (chapter 8) */
 WT.L.ch.cascade = {
-  num: "Chapitre 11", title: "En descendant la carte", short: "Cascade",
+  num: "Chapitre 11", title: "La cascade d'émission", short: "Cascade",
   lead: "Une émission est rarement la fin : le noyau laissé derrière est souvent assez chaud pour émettre à nouveau.",
   html: `
 <div class="step">
@@ -10,15 +10,15 @@ WT.L.ch.cascade = {
   <p>Les neutrons émis sont en général lents, donc la plupart des chutes sont courtes. Les points bleus sont au-dessus du seuil neutron en tirets : ils peuvent s'offrir un second neutron, la réaction (n,2n). Sous environ 11 MeV, aucun n'y parvient.</p>
 </div>
 <div class="step">
-  <h3>Une promenade sur la carte</h3>
+  <h3>Émission séquentielle sur la carte</h3>
   <p>Les flux sont des réactions qui parcourent un coin de la <b>carte des nucléides</b>, les noyaux rangés par nombre de neutrons N (horizontalement) et nombre de protons Z (verticalement). Chacune part de la case encadrée du noyau composé ; chaque case porte le nom de la réaction qui s'y termine.</p>
   <p>Un <em class="n">neutron</em> émis déplace d'une case vers la gauche, un <em class="p">proton</em> d'une case vers le bas, une <em class="a">particule alpha</em> (deux protons, deux neutrons) de deux cases en diagonale. La largeur du flux indique combien de réactions font ce pas ; la teinte et le pourcentage, où elles se terminent.</p>
   <div class="ctl"><label for="cs-e4">Énergie du neutron</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lancer 200 réactions</button></div>
-  <p>Chaque pas coûte de 7 à 11 MeV d'énergie de séparation : même à 30 MeV, la promenade compte au plus trois ou quatre pas.</p>
+  <p>Faites varier l'énergie : à quelques MeV, presque tout s'arrête sur la case de la cible ; plus haut, les flux vont plus loin. Chaque pas coûte de 7 à 11 MeV d'énergie de séparation : même à 30 MeV, la promenade compte au plus trois ou quatre pas.</p>
 </div>
 <div class="step">
-  <h3>De haut en bas, intervalle par intervalle</h3>
+  <h3>Bilan des populations</h3>
   <p>Le moteur vide chaque noyau de haut en bas, une tranche d'énergie, ou <b>intervalle</b>, à la fois. À droite, le résiduel de la première émission ; à gauche, son noyau fils, avec un neutron de moins. Les billes orange sont des réactions en attente dans chaque intervalle. Ici, les intervalles font 1 MeV ; le moteur en utilise environ 40 par noyau, dimensionnés selon l'énergie disponible.</p>
   <p>Quand le marqueur balaie un intervalle, chaque bille prend une sortie selon la compétition du chapitre 9 : un photon (<em class="g">γ</em>) la fait descendre dans un intervalle inférieur, un <em class="n">neutron</em> la fait passer dans le noyau fils, un proton ou une alpha la fait sortir de l'image. Sous tous les seuils, les photons conduisent le reste à l'état fondamental (gris). Puis le noyau fils est balayé à son tour.</p>
   <div class="ctl"><label for="cs-e3">Énergie du neutron</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
@@ -26,13 +26,13 @@ WT.L.ch.cascade = {
   <p>Les photons ne font que descendre, et chaque noyau est traité avant ses fils : rien n'arrive donc dans un intervalle déjà vidé.</p>
 </div>
 <div class="step">
-  <h3>Nommer l'histoire</h3>
-  <p>Une seule réaction se déroule à la fois : le marqueur saute sur la carte et chaque particule émise tombe dans le plateau. Le plateau rempli nomme la <b>voie exclusive</b>, par exemple (n,2n) ; les photons ne comptent pas. Le moteur donne à chaque voie sa propre section efficace (sa probabilité, exprimée comme une surface effective de la cible).</p>
+  <h3>Voies de réaction exclusives</h3>
+  <p>Une seule réaction se déroule à la fois : le marqueur saute sur la carte et chaque particule émise tombe dans le plateau. Chaque voie est jouée à une énergie où elle a réellement lieu (en haut de l'image) : (n,3n) à 25 MeV, puisque trois neutrons coûtent ici plus de 20 MeV ; la capture, (n,γ), à 1 MeV. Le plateau rempli nomme la <b>voie exclusive</b>, par exemple (n,2n) ; les photons ne comptent pas. Le moteur donne à chaque voie sa propre section efficace (sa probabilité, exprimée comme une surface effective de la cible).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Voie suivante</button></div>
   <p>Parcourez-les. (n,np) se déroule deux fois, d'abord neutron puis proton, ensuite l'inverse : même case, même plateau, une seule voie. Puis un deutéron fantôme (un proton et un neutron liés) atteint cette case en un seul saut : son plateau indique d, une autre voie, (n,d).</p>
 </div>
 <div class="step">
-  <h3>Où tout se termine</h3>
+  <h3>Production des noyaux résiduels</h3>
   <p>Chaque case porte maintenant des étagères : encre pour l'<b>état fondamental</b>, vert (sur deux cases) pour un <b>isomère</b>, un état excité qui vit assez longtemps pour compter comme un produit distinct. La hauteur de la pile est la <b>production de résidus</b> : la quantité de chaque noyau fabriquée par les réactions.</p>
   <div class="ctl"><label for="cs-e2">Énergie du neutron</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lancer 200 réactions</button></div>

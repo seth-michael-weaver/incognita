@@ -56,7 +56,7 @@
   <p>Sleep eraan en tel de metingen erbinnen. Te smal, en de band belooft een precisie die hij niet heeft; te breed, en hij zegt niets. De eigen band van de motor is nog niet aangenomen: die zit op het doel als alle reacties samen worden genomen, maar nog niet in elke reactiefamilie. TERRA heeft zijn eigen banden, en die maken deel uit van zijn vergelijkingen hierboven.</p>
 </div>
 <div class="step">
-  <h3>Waar het nu staat</h3>
+  <h3>Huidige stand van zaken</h3>
   <p>Een laag wordt pas aangenomen nadat ze tegenover metingen is getest, en ze blijft uit als ze niet helpt. Vandaag is de motor in gebruik en is TERRA kandidaat; de laag met gemeten structuur en de onzekerheidsband van de motor worden nog getest.</p>
   <p><a href="scoreboard.html" data-keep-lang>Bekijk het volledige scorebord →</a> Elke vergelijking die we niet winnen, elke concurrent, en hoe je het leest.</p>
   <div class="aside">${ASOF ? `Scores per ${ASOF}, uit` : "Scores uit"} het onderzoekslogboek van het project. De curven in de afbeelding zijn ter illustratie.</div>
@@ -80,3 +80,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "geen metingen om de band aan te toetsen",
 });
 Object.assign(WT.L.ui, { nav_board: "Scorebord" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

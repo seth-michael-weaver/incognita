@@ -1,6 +1,6 @@
 /* Dutch (Nederlands): cascade (Hoofdstuk 11, de kaart af) */
 WT.L.ch.cascade = {
-  num: "Hoofdstuk 11", title: "De kaart af", short: "Cascade",
+  num: "Hoofdstuk 11", title: "De emissiecascade", short: "Cascade",
   lead: "Eén emissie is zelden het einde: de kern die achterblijft, is vaak heet genoeg om opnieuw iets uit te zenden.",
   html: `
 <div class="step">
@@ -10,15 +10,15 @@ WT.L.ch.cascade = {
   <p>Uitgezonden neutronen zijn meestal langzaam, dus de meeste vallen zijn kort. Blauwe stippen liggen boven de gestippelde neutrondrempel: die kunnen zich een tweede neutron veroorloven, de reactie (n,2n). Onder ongeveer 11 MeV komt er geen enkele zover.</p>
 </div>
 <div class="step">
-  <h3>Een tocht over de kaart</h3>
+  <h3>Opeenvolgende emissie over de kaart</h3>
   <p>De stromen zijn reacties die over een hoek van de <b>nuclidenkaart</b> lopen, waarop kernen staan uitgezet naar neutronengetal N (horizontaal) en protonengetal Z (verticaal). Elke stroom begint in het omlijnde compoundvakje; elk vakje is genoemd naar de reactie die daar eindigt.</p>
   <p>Een <em class="n">neutron</em> eruit schuift één vakje naar links, een <em class="p">proton</em> één naar beneden, een <em class="a">alfadeeltje</em> (twee protonen, twee neutronen) twee schuin. De breedte van een stroom is hoeveel die stap zet; tint en percentage geven aan waar reacties eindigen.</p>
   <div class="ctl"><label for="cs-e4">Neutronenergie</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Schiet 200 reacties af</button></div>
-  <p>Elke stap kost 7 tot 11 MeV aan separatie-energie, dus zelfs bij 30 MeV is de tocht hooguit drie of vier stappen lang.</p>
+  <p>Sleep de energie: bij een paar MeV stopt bijna alles op het doelvakje; hoger bereiken de stromen verder. Elke stap kost 7 tot 11 MeV aan separatie-energie, dus zelfs bij 30 MeV is de tocht hooguit drie of vier stappen lang.</p>
 </div>
 <div class="step">
-  <h3>Van boven naar beneden, bin voor bin</h3>
+  <h3>Boekhouding van de bezetting</h3>
   <p>De motor leegt elke kern van boven naar beneden, één energieplak, of <b>bin</b>, tegelijk. Rechts: de restkern van de eerste emissie; links: haar dochter, met één neutron minder. Oranje bolletjes zijn reacties die in elke bin wachten. De bins zijn hier 1 MeV; de motor gebruikt er ongeveer 40 per kern, afgestemd op de beschikbare energie.</p>
   <p>Terwijl de markering een bin doorloopt, neemt elk bolletje een uitgang volgens de competitie van hoofdstuk 9: een foton (<em class="g">γ</em>) laat het naar een lagere bin zakken, een <em class="n">neutron</em> verplaatst het naar de dochter, een proton of alfa haalt het uit beeld. Onder elke drempel brengen fotonen de rest naar de grondtoestand (grijs). Dan wordt de dochter doorlopen.</p>
   <div class="ctl"><label for="cs-e3">Neutronenergie</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
@@ -26,13 +26,13 @@ WT.L.ch.cascade = {
   <p>Fotonen vallen alleen omlaag, en elke kern is klaar voordat haar dochters aan de beurt zijn, dus niets landt op een bin die al geleegd is.</p>
 </div>
 <div class="step">
-  <h3>De geschiedenis een naam geven</h3>
-  <p>Er speelt telkens één reactie af: de markering springt over de kaart en elk uitgezonden deeltje valt in het bakje. Het volle bakje geeft de naam van het <b>exclusieve kanaal</b>, zoals (n,2n); fotonen tellen niet mee. De motor geeft elk kanaal zijn eigen werkzame doorsnede (zijn waarschijnlijkheid, uitgedrukt als effectief trefoppervlak).</p>
+  <h3>Exclusieve reactiekanalen</h3>
+  <p>Er speelt telkens één reactie af: de markering springt over de kaart en elk uitgezonden deeltje valt in het bakje. Elk kanaal speelt af bij een energie waarbij het echt gebeurt (bovenaan de afbeelding): (n,3n) bij 25 MeV, omdat drie neutronen hier meer dan 20 MeV kosten; vangst, (n,γ), bij 1 MeV. Het volle bakje geeft de naam van het <b>exclusieve kanaal</b>, zoals (n,2n); fotonen tellen niet mee. De motor geeft elk kanaal zijn eigen werkzame doorsnede (zijn waarschijnlijkheid, uitgedrukt als effectief trefoppervlak).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Volgend kanaal</button></div>
   <p>Loop ze door. (n,np) speelt twee keer af, eerst het neutron en eerst het proton: hetzelfde vakje, hetzelfde bakje, één kanaal. Dan bereikt een spookdeuteron (een gebonden proton en neutron) dat vakje in één sprong: zijn bakje zegt d, een ander kanaal, (n,d).</p>
 </div>
 <div class="step">
-  <h3>Waar alles eindigt</h3>
+  <h3>Residuproductie</h3>
   <p>Elk vakje heeft nu planken: inkt voor de <b>grondtoestand</b>, groen (op twee vakjes) voor een <b>isomeer</b>, een aangeslagen toestand die lang genoeg leeft om als apart product te tellen. De hoogte van de stapel is de <b>productie van restkernen</b>: hoeveel van elke kern de reacties hebben gemaakt.</p>
   <div class="ctl"><label for="cs-e2">Neutronenergie</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Schiet 200 reacties af</button></div>

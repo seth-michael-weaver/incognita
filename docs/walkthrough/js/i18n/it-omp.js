@@ -1,6 +1,6 @@
 /* Italian: omp (Capitolo 5, il modello ottico) */
 WT.L.ch.omp = {
-  num: "Capitolo 5", title: "Una sfera di cristallo offuscata", short: "Modello ottico",
+  num: "Capitolo 5", title: "Il modello ottico", short: "Modello ottico",
   lead: "Prima di tutto, il motore si pone una domanda più semplice: come appare il nucleo a un neutrone in arrivo?",
   html: `
 <div class="step">
@@ -9,33 +9,33 @@ WT.L.ch.omp = {
   <p>Trascina l'energia e guarda in basso la lunghezza d'onda, in femtometri (fm, 10⁻¹⁵ m). I neutroni lenti hanno onde lunghe: sotto circa 9 MeV una lunghezza d'onda è più larga di tutto questo nucleo.</p>
 </div>
 <div class="step">
-  <h3>La parte reale attrae</h3>
+  <h3>Il potenziale reale: rifrazione</h3>
   <p>Il <b>potenziale ottico</b> è la forza media che tutto il nucleo esercita sul neutrone. La sua <em>parte reale</em> è una buca profonda circa 50 MeV: dentro, il neutrone accelera, quindi le creste si addensano. Il motore le dà una forma di Woods–Saxon, piatta e profonda al centro, che svanisce dolcemente a zero sulla superficie.</p>
 </div>
 <div class="step">
-  <h3>La parte immaginaria assorbe</h3>
+  <h3>Il potenziale immaginario: assorbimento</h3>
   <p>L'ombra dietro il nucleo sono i neutroni persi nelle reazioni. La <em>parte immaginaria</em> del potenziale li rappresenta: riduce l'onda invece di deviarla, soprattutto vicino alla superficie (l'anello colorato).</p>
   <div class="ctl"><label for="omp-w">Assorbimento W (MeV)</label><input id="omp-w" type="range" data-bind="W" min="0" max="14" step="0.5" value="7"><output data-show="W" data-fmt="1"></output></div>
   <p>Porta <i>W</i> a 0 e l'ombra si riempie: niente assorbimento, niente reazioni. Da qui il nome di modello ottico: il nucleo è una sfera di vetro offuscata che in parte devia e in parte assorbe.</p>
 </div>
 <div class="step">
-  <h3>La mira conta</h3>
+  <h3>Onde parziali e parametro d'impatto</h3>
   <p>Visto di fronte, il bersaglio si divide in anelli, uno per ogni <b>onda parziale</b> <i>l</i> = 0, 1, 2, … Un neutrone che passa a distanza <i>b</i> dal centro porta un <b>momento angolare</b> <i>l</i> ≈ <i>k b</i>, dove <i>k</i> cresce con l'energia. Più un anello è scuro, più è grande il suo <b>coefficiente di trasmissione</b> <i>T<sub>l</sub></i>: la probabilità che un neutrone di quell'anello venga assorbito.</p>
   <div class="ctl"><label for="omp-e3">Energia del neutrone (MeV)</label><input id="omp-e3" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lancia 200 neutroni</button></div>
   <p>I lampi arancioni sono neutroni assorbiti; le barre confrontano la frazione assorbita in ogni anello con il <i>T<sub>l</sub></i> del modello (il segno). Gli anelli interni assorbono quasi tutto, quelli esterni lasciano passare i neutroni. A bassa energia gli anelli sono enormi e conta solo <i>l</i> = 0.</p>
 </div>
 <div class="step">
-  <h3>Passare accanto al nucleo</h3>
+  <h3>La barriera centrifuga</h3>
   <p>Un neutrone con molto momento angolare passa troppo lontano per toccare il nucleo: è la <b>barriera centrifuga</b>. Visto dall'alto, ogni neutrone qui appartiene a una stessa onda parziale <i>l</i>, quindi passa alla stessa <b>distanza di passaggio</b> <i>b</i> ≈ (<i>l</i>+½)/<i>k</i> (il cerchio tratteggiato).</p>
   <p>Ma ogni neutrone è un'onda, sfumata su circa una lunghezza d'onda ridotta λ̄ (l'alone). Anche quando la sua traiettoria manca il bersaglio, il bordo sfumato può sfiorare la superficie ed entrare: l'<b>effetto tunnel</b>.</p>
   <div class="ctl"><label for="omp-l">Onda parziale l</label><input id="omp-l" type="range" data-bind="L" min="0" max="8" step="1" value="3" data-instant><output data-show="L" data-fmt="0"></output></div>
   <div class="ctl"><label for="omp-e2">Energia (MeV)</label><input id="omp-e2" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
-  <p>Aumenta <i>l</i> e la traiettoria si allontana: ne entrano meno. Aumenta l'energia e la stessa <i>l</i> passa più vicino, con meno sfumatura. Il motore calcola ogni <i>T<sub>l</sub></i> in modo esatto risolvendo l'equazione di Schrödinger attraverso il potenziale completo; <i>S</i> misura quanta onda torna fuori.</p>
+  <p>Aumenta <i>l</i> e la traiettoria si allontana: ne entrano meno. Aumenta l'energia e la stessa <i>l</i> passa più vicino, con meno sfumatura. Il motore calcola ogni <i>T<sub>l</sub></i> in modo esatto risolvendo l'equazione di Schrödinger (l'equazione d'onda della meccanica quantistica) attraverso il potenziale completo. Invia un'onda e misura quanta ne torna fuori, non assorbita: l'onda di ritorno si chiama <i>S</i>, e il suo quadrato, |<i>S</i>|², è la frazione che ritorna. Ciò che non torna è stato preso dal nucleo, e quella frazione mancante è <i>T<sub>l</sub></i>.</p>
   <div class="formula">T<sub>lj</sub> = 1 − |S<sub>lj</sub>|²</div>
 </div>
 <div class="step">
-  <h3>Sommare il bersaglio</h3>
+  <h3>La sezione d'urto di reazione</h3>
   <p>Il disco a destra è quanto grande appare il nucleo al neutrone: la <b>sezione d'urto di reazione</b>, in barn (10⁻²⁴ cm²). Ogni anello vi aggiunge la sua area per <i>T<sub>l</sub></i>. Il cerchio tratteggiato è la dimensione geometrica.</p>
   <div class="ctl"><label for="omp-e4">Energia del neutrone (MeV)</label><input id="omp-e4" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="sum">Somma di nuovo</button></div>

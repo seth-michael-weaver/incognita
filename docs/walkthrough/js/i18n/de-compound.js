@@ -1,6 +1,6 @@
 /* German (Deutsch): compound (Kapitel 8, der Compoundkern) */
 WT.L.ch.compound = {
-  num: "Kapitel 8", title: "Die Energie teilen", short: "Compoundkern",
+  num: "Kapitel 8", title: "Der Compoundkern", short: "Compoundkern",
   lead: "Sobald die ersten schnellen Stöße vorbei sind, teilen sich alle Nukleonen die Energie. Dieser beruhigte Zustand ist der Compoundkern. Um vorherzusagen, was er als Nächstes tut, muss die Engine wissen, auf wie viele Arten er seine Energie halten kann.",
   html: `
 <div class="step">
@@ -9,33 +9,34 @@ WT.L.ch.compound = {
   <p>Drück den Knopf, um das Neutron von einer anderen Seite hineinzuschicken. Das Leuchten endet immer gleich: Der Kern hat <b>vergessen, wie er entstanden ist</b>. Das ist Bohrs Compoundkern. Von hier an zählen nur noch drei Dinge: seine Energie, sein Spin (wie stark er rotiert) und seine Parität (ein Etikett + oder − für seine Spiegelsymmetrie).</p>
 </div>
 <div class="step">
-  <h3>Von einzelnen Niveaus zum Kontinuum</h3>
+  <h3>Von diskreten Niveaus zum Kontinuum</h3>
   <p>Die Leiter links enthält die Zustände des Kerns, die Energie steigt nach oben; das Fenster rechts vergrößert einen 1 MeV breiten Ausschnitt um die orange Kugel. Ganz unten liegen die Sprossen weit auseinander, und jede wurde gemessen. Weiter oben vervielfachen sich die Möglichkeiten, die Energie auf 56 Nukleonen zu verteilen, bis die Sprossen zu einem durchgehenden Band verschwimmen, dem Kontinuum.</p>
   <div class="ctl"><label for="cn-e">Anregungsenergie</label><input id="cn-e" type="range" data-bind="E" min="0" max="20" step="0.1" value="6.5"><output data-show="E" data-fmt="1"></output></div>
   <p>Ändere die Anregungsenergie (die Energie oberhalb des tiefsten Zustands, in MeV) und beobachte das Fenster. Die <b>Niveaudichte</b> ρ, Zustände pro MeV, wächst ungefähr wie e<sup>2√(aE)</sup>, wobei <i>a</i> das Tempo jedes Kerns bestimmt: einige pro MeV bei 3 MeV, Hunderte nahe 8 MeV (wo ein Neutron entkommen könnte), Millionen bei 20 MeV. Dort oben arbeitet die Engine mit ρ selbst.</p>
 </div>
 <div class="step">
-  <h3>Drei Stücke, bei einer Energie verbunden</h3>
+  <h3>Die zusammengesetzte Niveaudichte</h3>
   <p>Die Höhe des Geländes ist die Niveaudichte auf logarithmischer Skala, die Energie nach rechts. Unten links stehen die gezählten Niveaus. Die gerade Planke ist das Gesetz der <b>konstanten Temperatur</b>: ρ vervielfacht sich alle <i>T</i> MeV um e (etwa 2,7), wobei <i>T</i> die Kerntemperatur ist. Der Hang ist das <b>Fermi-Gas</b>, das die Nukleonen als unabhängige Teilchen behandelt. Außer bei den schwersten Targets, für die sie tabellierte Dichten liest, verwendet die Engine standardmäßig dieses Paar.</p>
   <div class="ctl"><label for="cn-ex">Anschlussenergie</label><input id="cn-ex" type="range" data-bind="Ex" min="4.5" max="12" step="0.05" value="6"><output data-show="Ex" data-fmt="1"></output></div>
   <p>Ändere die Anschlussenergie: Die Verbindungsstelle gleitet den Hang entlang, und die Planke dreht sich, um sie mit derselben Höhe und Steigung zu treffen. Die zwei Stapel darunter vergleichen die Niveaus, die die Planke vorhersagt, mit den tatsächlich gezählten. Nur eine Verbindungsstelle macht sie gleich; dort wird die Planke grün. Das ist die Energie, die die Engine wählt.</p>
 </div>
 <div class="step">
-  <h3>Schalen, die schmelzen</h3>
+  <h3>Schaleneffekte und ihre Dämpfung</h3>
   <p>Einteilchenniveaus, je zwei Nukleonen, für zwei Kerne. Links eine abgeschlossene Schale: Alles unterhalb einer großen Lücke ist voll, also bezahlt jede Bewegung die ganze Lücke. Rechts ein Kern in der Schalenmitte mit halb vollem obersten Niveau, sodass es sofort billige Bewegungen gibt. Jeder Zähler zeigt, wie viele Anordnungen die gegebene Wärme aufnehmen.</p>
   <div class="ctl"><label for="cn-u">Wärme (Anregung)</label><input id="cn-u" type="range" data-bind="U" min="0" max="40" step="0.5" value="3"><output data-show="U" data-fmt="1"></output></div>
-  <p>Erhöhe die Wärme und sieh den Nukleonen beim Springen zu. Bei wenig Wärme fehlen der abgeschlossenen Schale die Anordnungen; mit genug Wärme spielt die Lücke keine Rolle mehr, und beide Zahlen wachsen gleich. Der <b>Niveaudichteparameter</b> <i>a</i> erfasst das: Die Nadeln starten auseinander und laufen über etwa 10 MeV auf den glatten Wert <i>ã</i> zu. Die Engine lässt die Schalenkorrektur δW mit einer Rate γ abklingen:</p>
-  <div class="formula">a(U) = ã · [1 + δW · (1 − e<sup>−γU</sup>) / U]</div>
+  <p>Erhöhe die Wärme und sieh den Nukleonen beim Springen zu. Bei wenig Wärme fehlen der abgeschlossenen Schale die Anordnungen; mit genug Wärme spielt die Lücke keine Rolle mehr, und beide Zahlen wachsen gleich. Die Engine fasst das in einer Zahl pro Kern zusammen, dem <b>Niveaudichteparameter</b> <i>a</i>: Je größer <i>a</i>, desto schneller wächst die Zahl der Anordnungen mit der Wärme. Die Nadeln zeigen ihn für jeden Kern: Sie starten auseinander und laufen über etwa 10 MeV beide auf denselben glatten Wert zu (geschrieben <i>ã</i>, „a-Tilde“), den ein Kern ohne Schalenlücken hätte.</p>
+  <p>Die Engine beginnt daher bei jedem Kern mit seinem Schaleneffekt, der zusätzlichen Energie, die seine Lücken wert sind (geschrieben δW), und lässt diesen Effekt mit steigender Wärme abklingen.</p>
+  <div class="aside">Die Formel: <i>a</i>(<i>U</i>) = <i>ã</i> · [1 + δW · (1 − e<sup>−γ<i>U</i></sup>) / <i>U</i>], mit <i>U</i> der Wärme und γ (Gamma, hier etwa 0,1 pro MeV, in schwereren Kernen weniger), wie schnell der Schaleneffekt abklingt.</div>
 </div>
 <div class="step">
-  <h3>Nach Spin und Parität sortiert</h3>
+  <h3>Spin- und Paritätsverteilungen</h3>
   <p>Die Zustände bei einer Energie fallen nach dem Spin <i>J</i>, dem Drehimpuls des Kerns, in Schubladen: volle Marken für Parität +, hohle für −. Die mittleren Schubladen füllen sich am meisten, gemäß (2<i>J</i>+1) e<sup>−(J+½)²/2σ²</sup>, wobei der Spin-Cutoff σ die Breite festlegt. Die beiden Paritäten kommen etwa gleich oft vor.</p>
   <div class="ctl"><label for="cn-u2">Anregung</label><input id="cn-u2" type="range" data-bind="U2" min="1" max="30" step="0.5" value="8"><output data-show="U2" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="deform">Kern deformieren</button></div>
   <p>Erhöhe die Anregung: σ wächst, weil ein heißerer Kern mehr Spin tragen kann. Drück dann auf Deformieren. Ein footballförmiger Kern kann außerdem als Ganzes rotieren, also gewinnt jede Schublade Zustände hinzu (die blauen Marken): die <b>kollektive Verstärkung</b>. Standardmäßig fügt die Engine sie nur für Targets mit mehr als etwa 215 Nukleonen hinzu.</p>
 </div>
 <div class="step">
-  <h3>In Intervalle zerlegt</h3>
+  <h3>Energieintervalle im Kontinuum</h3>
   <p>Oberhalb des letzten gezählten Niveaus zerlegt die Engine das Kontinuum in Scheiben gleicher Energiebreite, die Intervalle (Bins). In jedem Intervall fallen die Punkte zu einem Block aus ρ·ΔE Zuständen zusammen (ΔE ist die Intervallbreite), sortiert nach Spin und Parität wie oben.</p>
   <div class="ctl"><label for="cn-emax">Oberes Ende der Leiter</label><input id="cn-emax" type="range" data-bind="Emax" min="8" max="30" step="0.5" value="14"><output data-show="Emax" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="rebin">Neu sortieren</button></div>

@@ -20,6 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Fluttuazioni delle larghezze</h3>
+  <p>La formula semplice sottostima leggermente la diffusione elastica, e la correzione riporta un po' di flusso verso di essa dalle altre uscite. Ecco perché.</p>
   <p>Con <i>W<sub>ab</sub></i> = 1 la formula moltiplica delle medie. Ma le risonanze dietro quelle medie hanno larghezze che si disperdono (Porter–Thomas, capitolo 15), e nella diffusione elastica la larghezza che fa entrare il neutrone è la stessa che lo fa uscire: le due sono correlate. Per l'elastico la media dei prodotti supera allora il prodotto delle medie, e le altre uscite perdono ciò che l'elastico guadagna.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Senza correzione</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Energia del neutrone (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -35,10 +36,11 @@ WT.L.ch.hauser = {
   <p>Le due concordano molto bene per l'elastico e l'anelastico; per la cattura nella regione dei keV HRTW toglie fino al 10 per cento in più. Fra 0,85 e 2 MeV la cattura addirittura guadagna: lì la larghezza totale è dominata da poche larghezze neutroniche fluttuanti, e la media di 1/Γ supera 1/⟨Γ⟩. Entrambe le ricette sono adattamenti al risultato esatto delle matrici aleatorie (GOE), che TALYS offre anche come integrale triplo. INCOGNITA le porta tutte e tre (<code>widthmode</code> 1, 2, 3); quella predefinita è Moldauer, applicata ai neutroni incidenti fino all'energia di separazione del neutrone del bersaglio.</p>
 </div>
 <div class="step">
-  <h3>Fra 3 e 2</h3>
+  <h3>Limiti dell'aumento elastico</h3>
+  <p>Quanto può diventare grande l'aumento elastico? Fra due e tre volte, a seconda che le risonanze siano separate o sovrapposte.</p>
   <p>I casi limite spiegano l'entità dell'effetto. Prendi <i>N</i> canali uguali e niente cattura, e fai variare la loro somma ΣT, che vale 2π volte il rapporto fra la larghezza totale media e la spaziatura dei livelli, Γ/<i>D</i>. Con risonanze isolate (ΣT ≪ 1) e molti canali, ogni larghezza segue Porter–Thomas con un grado di libertà e l'aumento elastico è ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3. Quando le risonanze si sovrappongono fortemente (ΣT ≫ 2π) la sezione d'urto fluttua come un'onda casuale (fluttuazioni di Ericson) e l'aumento scende a 2.</p>
   <div class="ctl"><label for="hf-n">Canali aperti N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>Per <i>N</i> canali isolati il valore esatto è 3<i>N</i>/(<i>N</i>+2) (il rombo): con due soli canali l'aumento non può superare 1,5, perché allora la larghezza totale fluttua quanto quella elastica. La ricetta di Moldauer riproduce questo limite; HRTW resta al di sotto quando sono aperti molti canali deboli. Il riquadro disegna risonanze con la larghezza che corrisponde al punto in movimento. Nella formula di Moldauer il limite a molti canali è 1 + 2/ν: ν → 1 per risonanze isolate, ν → 1,78 quando si sovrappongono (2,12, il piccolo errore dell'adattamento a sovrapposizione completa).</p>
+  <p>Per <i>N</i> canali isolati il valore esatto è 3<i>N</i>/(<i>N</i>+2) (il rombo): con due soli canali l'aumento non può superare 1,5, perché allora la larghezza totale fluttua quanto quella elastica. La ricetta di Moldauer riproduce questo limite; HRTW resta al di sotto quando sono aperti molti canali deboli. Il riquadro disegna risonanze con la larghezza che corrisponde al punto in movimento. Nella formula di Moldauer il limite a molti canali è 1 + 2/ν: ν → 1 per risonanze isolate e ν → 1,78 quando si sovrappongono. Ciò dà 2,12 a sovrapposizione completa invece di 2: un piccolo errore dell'adattamento.</p>
   <div class="aside">Nel codice: <code>compound/prepare.py</code> (i canali d'uscita e le loro trasmissioni per ogni <i>J</i><sup>π</sup>), <code>compound/target.py</code> (le somme di Hauser–Feshbach), <code>compound/wfc.py</code> (Moldauer, HRTW e GOE, portati da TALYS). Il disegno valuta le stesse formule con ingredienti illustrativi: trasmissioni di sfera dura per un bersaglio simile al ferro, sette livelli, un continuo a temperatura costante e un unico canale di cattura riassuntivo.</div>
 </div>`,
 };
@@ -108,3 +110,4 @@ Object.assign(WT.L.glossary, {
     chapter: "hauser",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-show="jbShow" data-act="w0" data-act="w1" */

@@ -1,6 +1,6 @@
 /* Spanish: measure (chapter 11) */
 WT.es.ch.measure = {
-  num: "Capítulo 17", title: "Lo que sale", short: "Observables",
+  num: "Capítulo 17", title: "Observables", short: "Observables",
   lead: "Un experimento, un reactor o una estrella solo ven un puñado de números. Este capítulo muestra cómo el motor convierte lo que pasa dentro del núcleo en esos números.",
   html: `
 <div class="step">
@@ -9,38 +9,38 @@ WT.es.ch.measure = {
   <p>Baja la energía y los discos se hinchan: un neutrón lento es una onda ancha y reacciona desde más lejos. A alta energía el disco se encoge hacia el propio núcleo.</p>
 </div>
 <div class="step">
-  <h3>Con la energía se abren nuevas salidas</h3>
+  <h3>Funciones de excitación</h3>
   <p>Cada puerta es una salida, o <b>canal</b>: el neutrón rebota hacia fuera (elástico), deja el blanco excitado (n′), arranca más neutrones (2n, 3n), es capturado y solo salen fotones (γ), o en su lugar sale un protón o una partícula α. Una puerta con candado tiene un <b>umbral</b>: la reacción cuesta más energía de la que trae el neutrón.</p>
   <div class="ctl"><label for="mea-e2">Energía del neutrón (MeV)</label><input id="mea-e2" type="range" data-bind="E" min="0.1" max="20" step="0.1" value="2"><output data-show="E" data-fmt="1"></output></div>
   <p>Arrastra la energía más allá de un umbral y esa puerta se abre con un destello; los cubos se llenan según la fracción de cada canal, y cada puerta nueva les quita parte a las demás. Los umbrales salen de las masas de los núcleos; las fracciones, de la competencia del capítulo 9.</p>
 </div>
 <div class="step">
-  <h3>Lo que ve un detector</h3>
+  <h3>Espectros de emisión</h3>
   <p>Los dos montones son los neutrones que llegan a la mitad delantera y a la trasera de un anillo de detectores, ordenados por energía. El haz va en pulsos, así que el tiempo de vuelo de cada neutrón da su energía: los rápidos llegan primero.</p>
   <div class="ctl"><label for="mea-ein">Energía incidente (MeV)</label><input id="mea-ein" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="30"><output data-show="Ein" data-fmt="0"></output></div>
   <p>Los dos montones tienen una joroba de neutrones lentos, <b>evaporados</b>: se desprenden del núcleo compuesto una vez repartida la energía, igual en todas las direcciones. Solo el montón delantero tiene una larga cola rápida: neutrones de <b>preequilibrio</b>, que salen de las primeras colisiones moviéndose todavía más o menos con el haz. Sube la energía incidente y la cola crece.</p>
 </div>
 <div class="step">
-  <h3>Hacia dónde van</h3>
+  <h3>Distribuciones angulares</h3>
   <p>El pétalo muestra cuántos neutrones salen en cada dirección; el haz llega desde la izquierda. Los evaporados han olvidado el haz y salen igual en todas direcciones; los rápidos de preequilibrio se inclinan hacia delante. La regla de Kalbach fija cuánto, con una sola pendiente <i>a</i> que crece con la energía de salida. El motor también puede escribir estas distribuciones angulares, como salida opcional.</p>
   <div class="ctl"><label for="mea-eo">Energía de salida (MeV)</label><input id="mea-eo" type="range" data-bind="Eout" min="1" max="45" step="0.5" value="25"><output data-show="Eout" data-fmt="1"></output></div>
   <p>Baja la energía de salida y el pétalo se redondea: los neutrones lentos son sobre todo evaporados.</p>
   <div class="formula">dσ/dΩ ∝ e<sup>a cos θ</sup></div>
 </div>
 <div class="step">
-  <h3>En una estrella</h3>
+  <h3>Secciones eficaces promediadas de Maxwell</h3>
   <p>El montón de abajo recoge las energías de los neutrones capturados en el gas caliente de una estrella. Sus velocidades siguen una distribución de Maxwell fijada por la temperatura <i>kT</i> (30 keV son unos 350 millones de grados); las estelas más largas son neutrones más rápidos, y cada paso junto a un núcleo puede acabar en un destello de captura.</p>
   <div class="ctl"><label for="mea-kt">Temperatura kT (keV)</label><input id="mea-kt" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Los neutrones lentos se capturan con facilidad pero pasan rara vez, y los rápidos son pocos, así que la mayoría de las capturas vienen de una ventana de unos pocos <i>kT</i>. La tasa sobre todo el gas es la <b>sección eficaz promediada sobre Maxwell</b> (MACS), en milibarns (mb). Calienta el gas y la ventana se desplaza a energías más altas, donde el blanco es más pequeño. La MACS se obtiene integrando la curva de captura del motor.</p>
 </div>
 <div class="step">
-  <h3>El blanco también está caliente</h3>
+  <h3>Blancos excitados térmicamente</h3>
   <p>Las bolas muestran qué fracción de los núcleos del blanco está en cada uno de sus niveles más bajos a esta temperatura. En una estrella algunos blancos ya están excitados, y cada nivel excitado es una entrada distinta al mismo núcleo compuesto. Un nivel con espín <i>J</i> aloja más porque tiene 2<i>J</i>+1 orientaciones.</p>
   <div class="ctl"><label for="mea-kt2">Temperatura kT (keV)</label><input id="mea-kt2" type="range" data-bind="kT" min="5" max="100" step="1" value="30"><output data-show="kT" data-fmt="0"></output></div>
   <p>Sube la temperatura y mira cómo los núcleos suben. Una tasa estelar calcula la captura desde cada nivel poblado y suma los resultados con estas fracciones; los pesos suman la función de partición <i>G</i>, y el cociente respecto a la tasa desde el estado fundamental es el <b>factor de realce estelar</b>. El motor puede hacerlo como opción, apagada por defecto; normalmente cada blanco parte de su estado fundamental.</p>
 </div>
 <div class="step">
-  <h3>¿Qué grado de certeza tiene todo esto?</h3>
+  <h3>Incertidumbres y covarianzas</h3>
   <p>Cada disco tenue es una ejecución del motor con sus datos de entrada movidos al azar: la profundidad del pozo óptico, la densidad de niveles y la intensidad fotónica, cada una conocida solo con un margen de algunos por ciento. La dispersión de muchas ejecuciones es una incertidumbre honesta: <b>Monte Carlo total</b>.</p>
   <div class="btns"><button class="btn" data-act="tmc1">Ejecutar una variante</button><button class="btn ghost" data-act="tmc">Ejecutar 10</button><button class="btn ghost" data-act="clear">Borrar</button></div>
   <p>Un borde nítido significa que los datos de entrada fijan la respuesta; un borde difuso, que no, y ahí es donde nuevas medidas ayudarían más.</p>

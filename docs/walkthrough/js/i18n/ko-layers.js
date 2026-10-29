@@ -56,7 +56,7 @@
   <p>띠를 조절하며 안에 든 측정값을 세어 보세요. 너무 좁으면 띠는 갖지 못한 정밀도를 주장하고, 너무 넓으면 아무것도 말해 주지 않습니다. 엔진 자체의 띠는 아직 채택되지 않았습니다. 모든 반응을 한데 모으면 목표에 맞지만, 아직 모든 반응 계열에서 맞지는 않습니다. TERRA는 자체 띠를 가지고 있으며, 그 띠는 위의 비교에 포함되어 있습니다.</p>
 </div>
 <div class="step">
-  <h3>현재 상황</h3>
+  <h3>현재 상태</h3>
   <p>어떤 층이든 측정값으로 시험한 뒤에야 채택되며, 도움이 되지 않으면 꺼진 채로 남습니다. 현재 엔진은 사용 중이고 TERRA는 후보입니다. 측정 구조 층과 엔진의 불확도 띠는 아직 시험 중입니다.</p>
   <p><a href="scoreboard.html" data-keep-lang>전체 점수판 보기 →</a> 우리가 이기지 못한 모든 비교, 각 경쟁 상대, 그리고 읽는 방법이 있습니다.</p>
   <div class="aside">${ASOF ? `${ASOF} 기준 점수, 출처:` : "점수 출처:"} 프로젝트의 연구 기록부. 그림의 곡선은 예시입니다.</div>
@@ -80,3 +80,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "띠를 확인할 측정값 없음",
 });
 Object.assign(WT.L.ui, { nav_board: "점수판" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

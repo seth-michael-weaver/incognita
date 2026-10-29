@@ -1,6 +1,6 @@
 /* Spanish: fission (chapter 9) */
 WT.es.ch.fission = {
-  num: "Capítulo 12", title: "Partirse en dos", short: "Fisión",
+  num: "Capítulo 12", title: "Fisión", short: "Fisión",
   lead: "Los núcleos más pesados tienen una salida que a los ligeros les falta: en lugar de lanzar una partícula, el núcleo entero se rompe en dos. Esto es la fisión.",
   html: `
 <div class="step">
@@ -9,36 +9,36 @@ WT.es.ch.fission = {
   <p>Arrastra para estirarla y observa el punto en la pequeña curva de energía de abajo. Estirarla añade superficie, lo que cuesta energía, pero reparte la carga, lo que libera energía. Pasada la cima de la curva gana la carga: se forma un cuello y las mitades salen despedidas con unos 200 MeV.</p>
 </div>
 <div class="step">
-  <h3>El paisaje de las formas</h3>
+  <h3>La superficie de energía potencial</h3>
   <p>La curva es la energía para cada forma, desde redonda (izquierda) hasta partida (derecha). Una gota líquida lisa da una sola colina, pero los nucleones llenan los niveles de energía por grupos, llamados <b>capas</b>, y en los elementos más pesados esto excava un pozo en ella: una <b>barrera de doble joroba</b>, donde el núcleo puede quedarse un tiempo con forma estirada.</p>
   <p>El motor no da esta curva por supuesta: la lee punto a punto de un cálculo microscópico de la energía en cada deformación (grado de estiramiento).</p>
 </div>
 <div class="step">
-  <h3>Atravesar la colina por efecto túnel</h3>
+  <h3>Penetración de la barrera</h3>
   <p>La bola es el núcleo excitado en el primer valle, a la energía de excitación de la línea discontinua naranja, por debajo de la cima de 6 MeV. Según la física clásica nunca puede cruzar; la mecánica cuántica le permite atravesar por <b>efecto túnel</b> la parte más oscura y prohibida, con una probabilidad <i>T</i> que cae exponencialmente a medida que esa parte engorda.</p>
   <div class="ctl"><label for="fis-e">Energía de excitación</label><input id="fis-e" type="range" data-bind="E" min="3" max="8" step="0.05" value="5"><output data-show="E" data-fmt="2"></output></div>
   <p>Sube la energía y mira cómo <i>T</i> crece al adelgazarse la parte prohibida. El atajo de los libros de texto (Hill–Wheeler) trata la cima como una parábola (azul discontinua). El motor sigue la forma real, más ancha más abajo, así que muy por debajo de la cima su probabilidad es menor. <i>K</i> mide cuánta colina hay en medio.</p>
   <div class="formula">T = 1 / (1 + e<sup>2K</sup>),  K = ∫ √(2μ(V−E)) dβ / ħ</div>
 </div>
 <div class="step">
-  <h3>Puertas en la cima</h3>
+  <h3>Estados de transición</h3>
   <p>Las puertas de la cima son los <b>estados de transición</b>, los estados cuánticos del núcleo estirado sobre la barrera. Cada uno tiene un espín y una paridad (0⁺, 2⁻, …) y actúa como una puerta; su rendija iluminada indica cuánto está abierta. Un núcleo solo pasa por puertas con su mismo espín y paridad, y cada una se abre poco a poco a medida que la energía supera su altura.</p>
   <div class="ctl"><label for="fis-e2">Energía de excitación</label><input id="fis-e2" type="range" data-bind="E" min="3" max="8" step="0.05" value="5"><output data-show="E" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="jpAll">Cualquier espín</button><button class="btn ghost" data-act="jp0">Compuesto 0⁺</button><button class="btn ghost" data-act="jp1">Compuesto 1⁻</button></div>
   <p>Elige un espín y una paridad: solo cuentan las puertas que coinciden, y la apertura total baja. Más arriba, las puertas se apiñan en un <b>continuo</b>, y el motor las cuenta por su densidad, como hace con los niveles ordinarios.</p>
 </div>
 <div class="step">
-  <h3>Dos colinas en serie</h3>
+  <h3>Barreras de doble joroba</h3>
   <p>Ahora las dos colinas, cada una con su puerta (el círculo; su parte rellena indica cuánto está abierta). Los núcleos llegan desde la izquierda; los que cruzan la primera colina quedan atrapados en el pozo, rebotando entre las puertas hasta salir por un lado u otro. Las probabilidades se combinan como resistencias en serie, así que la colina más difícil es la que más decide.</p>
   <div class="ctl"><label for="fis-b">Altura de la colina exterior</label><input id="fis-b" type="range" data-bind="Bb" min="3.5" max="7.5" step="0.05" value="5.6"><output data-show="Bb" data-fmt="2"></output></div>
   <div class="formula">1/T = 1/T<sub>A</sub> + 1/T<sub>B</sub></div>
   <p>Sube la colina exterior y mira cómo se estrangula el flujo hacia la fisión, por muy abierta que esté la puerta interior.</p>
 </div>
 <div class="step">
-  <h3>Más de una oportunidad</h3>
+  <h3>Fisión de múltiples oportunidades</h3>
   <p>El uranio-238 absorbe el neutrón y se convierte en uranio-239 con excitación <i>E</i>* (línea discontinua). Si no se parte, puede emitir un neutrón; la línea baja, y el uranio-238 que queda, aún caliente, intenta su propia barrera: fisión de <b>segunda oportunidad</b>, (n,n′f). Los montones recogen cómo terminó cada núcleo.</p>
   <div class="ctl"><label for="fis-en">Energía del neutrón</label><input id="fis-en" type="range" data-bind="En" min="0" max="25" step="0.1" value="7"><output data-show="En" data-fmt="1"></output></div>
-  <p>Sube la energía y los intentos posteriores empiezan a tener éxito; una tercera oportunidad se abre cerca de 12 MeV. Cada nueva oportunidad aparece como un escalón en la <b>sección eficaz de fisión</b> medida, la probabilidad de que el núcleo se parta. El motor calcula con qué frecuencia se parte, no en qué fragmentos.</p>
+  <p>Sube la energía y los intentos posteriores empiezan a tener éxito; una tercera oportunidad se abre cerca de 12 MeV. Cada nueva oportunidad aparece como un escalón en la <b>sección eficaz de fisión</b> medida, la probabilidad de que el núcleo se parta: el pequeño gráfico de arriba a la derecha dibuja esos escalones, con tu energía marcada. El motor calcula con qué frecuencia se parte, no en qué fragmentos.</p>
   <div class="aside">En el código: <code>fission/wkb.py</code> (el camino de energía de deformación y las integrales WKB), <code>fission/barriers.py</code> (Hill–Wheeler, estados de transición, la densidad de niveles en la barrera), <code>fission/transmission.py</code> (jorobas en serie, T<sub>fis</sub> por espín y paridad), <code>fission/chain.py</code> (barreras para cada núcleo de la cascada).</div>
 </div>`,
 };

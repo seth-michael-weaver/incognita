@@ -1,0 +1,17 @@
+/* Portuguese (pt-PT): neutrons (Capítulo 4, porque é que os reatores funcionam com neutrões) */
+WT.L.ch.neutrons = {
+  num: "Capítulo 4", title: "Porque é que os reatores funcionam com neutrões", short: "Porquê neutrões",
+  html: `
+<div class="step">
+  <p>Um protão é positivo, tal como os 82 protões do núcleo. Cargas iguais repelem-se, pelo que o protão é empurrado para longe, e o empurrão cresce depressa à medida que se aproxima (a seta). Um protão lento pára antes e volta para trás sem tocar. Só acima de cerca de 13 MeV consegue vencer o empurrão; logo abaixo, por vezes passa na mesma (<b>efeito de túnel</b>). O pequeno gráfico mostra o mesmo empurrão como uma colina de energia.</p>
+  <div class="ctl"><label for="wn-e1">Energia do protão (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
+</div>
+<div class="step">
+  <p>Um neutrão não tem carga: entra a qualquer velocidade. Nada o empurra para longe, por isso não há colina para subir; só precisa de chegar ao núcleo, e então a força forte puxa-o para dentro.</p>
+  <div class="ctl"><label for="wn-e2">Energia do neutrão (lento → rápido)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"><output id="wn-en-out"></output></div>
+  <p>O cursor vai de 0,025 eV, a velocidade de um neutrão à temperatura ambiente, até 20 MeV, quase mil milhões de vezes mais. Em todo o percurso, o neutrão continua a entrar.</p>
+</div>
+<div class="step">
+  <p>Por isso, mesmo neutrões lentos conseguem dividir urânio num reator. Um núcleo de urânio-235 que engole um deles torna-se urânio-236 com um pouco de energia a mais, o suficiente para oscilar, esticar-se num pescoço e partir-se em dois. Os dois pedaços afastam-se com cerca de 200 MeV, e os dois ou três neutrões novos que lançam podem dividir os núcleos seguintes: uma reação em cadeia.</p>
+</div>`,
+};

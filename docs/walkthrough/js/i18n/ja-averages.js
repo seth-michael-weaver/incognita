@@ -68,6 +68,11 @@ WT.L.ch.averages = {
     "{#} levels around {#} eV: {#} b · HF {#} b without, {#} b with the correction": "準位{#}個（{#} eV付近）：{#} b · HF 補正なし {#} b、補正あり {#} b",
     // scene 5: regions
     "resolved": "分離", "unresolved": "非分離", "averaged": "平均化",
+    "Γ = {#} meV · Δ = {#} meV": "Γ = {#} meV · Δ = {#} meV",
+    "{#} levels around {#} eV: {#} b": "準位{#}個（{#} eV付近）：{#} b",
+    "HF {#} b without, {#} b with the correction": "HF 補正なし {#} b、補正あり {#} b",
+    "capture as measured, finite resolution": "有限の分解能で測定した捕獲",
+    "dashed: Hauser–Feshbach with fluctuations": "破線：幅ゆらぎを含むハウザー・フェッシュバッハ",
     "capture as measured with finite resolution · dashed: Hauser–Feshbach with fluctuations": "有限の分解能で測定した捕獲 · 破線：幅ゆらぎを含むハウザー・フェッシュバッハ",
     "resolution reaches D₀/{#} at {#} eV": "分解能が D₀/{#} に達する：{#} eV",
     "resolution reaches D₀/{#} at {#} keV": "分解能が D₀/{#} に達する：{#} keV",
@@ -79,6 +84,7 @@ WT.L.ch.averages = {
   const B = ["{#} b", "{#}k b"];
   for (const a of B) for (const b of B) {
     L[`{#} eV · total ${a} · capture ${b}`] = `{#} eV · 全断面積 ${a} · 捕獲 ${b}`;
+    L[`peak ${a} ({#} K: ${b})`] = `ピーク ${a}（{#} K：${b}）`;
     L[`Γ = {#} meV · Δ = {#} meV · peak ${a} ({#} K: ${b})`] = `Γ = {#} meV · Δ = {#} meV · ピーク ${a}（{#} K：${b}）`;
   }
   Object.assign(WT.L.labels, L);
@@ -108,3 +114,4 @@ Object.assign(WT.L.glossary, {
     chapter: "averages",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="bw" data-act="rm" */

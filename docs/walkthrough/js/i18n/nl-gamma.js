@@ -1,42 +1,42 @@
 /* Dutch (Nederlands): gamma (Hoofdstuk 10, fotonemissie) */
 WT.L.ch.gamma = {
-  num: "Hoofdstuk 10", title: "Licht afgeven", short: "Fotonen",
+  num: "Hoofdstuk 10", title: "Gammastraling", short: "Fotonen",
   lead: "Als er geen deeltje vertrekt, koelt de kern af door fotonen uit te zenden: gammastralen, deeltjes van hoogenergetisch licht. Deze uitgang staat bij elke energie open.",
   html: `
 <div class="step">
   <p>Een hete toestand bij 8 MeV (miljoen elektronvolt) zendt fotonen (γ) uit; de stapel naast de ladder verzamelt waar ze landen. Onder 2 MeV zijn de toestanden een paar benoemde sporten; daarboven een menigte die met de energie steil dichter wordt (grijze stippen). Elk foton neemt de energie van zijn val mee, <i>E<sub>γ</sub></i>, en wordt helderder getekend naar verhouding van <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> is de transmissiecoëfficiënt van het foton (de deur uit hoofdstuk 9), <i>l</i> = 1 voor dipoolfotonen, en <i>f</i> is de <b>fotonsterkte</b>: hoe makkelijk de kern bij die energie straalt. De kans op een val is <i>T<sub>γ</sub></i> maal de menigte toestanden waar hij landt: kleine vallen vinden veel toestanden maar zijn zwak; grote vallen zijn helder maar vinden er weinig.</p>
+  <p>In woorden: hoe makkelijk een foton met energie <i>E<sub>γ</sub></i> naar buiten komt (<i>T<sub>γ</sub></i>, de fotondeur uit hoofdstuk 9) groeit als <i>E<sub>γ</sub></i>³ voor de gewone soort foton (dipool, <i>l</i> = 1), maal de <b>fotonsterkte</b> <i>f</i>: hoe makkelijk deze kern bij die energie straalt. Daarna moet het een toestand vinden om op te landen. Kleine vallen hebben een menigte toestanden die wacht, maar komen nauwelijks naar buiten; grote vallen komen makkelijk naar buiten maar vinden weinig toestanden. De winnaars zitten ertussenin.</p>
   <div class="ctl"><label for="gm-e0">Beginenergie</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Zend er 100 uit</button></div>
   <p>De stapel piekt een paar MeV onder het begin: de meeste fotonen dragen 2 tot 4 MeV. Verschuif de beginenergie en de piek volgt.</p>
 </div>
 <div class="step">
-  <h3>De hele kern trilt</h3>
-  <p>De grote piek rechts is de <b>gigantische dipoolresonantie</b>: alle protonen (gearceerd, links) die tegen alle neutronen (gevuld) in heen en weer klotsen. Haar frequentie bepaalt bij welke fotonenergie de kern het makkelijkst absorbeert en uitzendt. De curve is de fotonsterkte <i>f</i>, op een logaritmische schaal (elke stap omhoog is tien keer meer).</p>
+  <h3>De gigantische dipoolresonantie</h3>
+  <p>De grote piek rechts is de <b>gigantische dipoolresonantie</b>: alle protonen (gearceerd) die heen en weer klotsen tegen alle neutronen (gevuld). Haar frequentie bepaalt bij welke fotonenergie de kern het makkelijkst absorbeert en uitzendt. De curve is de fotonsterkte <i>f</i>, op een logaritmische schaal (elke stap omhoog is tien keer meer).</p>
   <div class="ctl"><label for="gm-a">Massagetal A</label><input id="gm-a" type="range" data-bind="A" min="40" max="240" step="1" value="112"><output data-show="A" data-fmt="0"></output></div>
   <p>Sleep het massagetal A (protonen plus neutronen): zware kernen klotsen langzamer en trillen rond 12 tot 14 MeV; lichte rond 20. Een vervallende kern zendt fotonen van maar een paar MeV uit, dus wat het meest telt is de gearceerde staart bij lage energie.</p>
 </div>
 <div class="step">
-  <h3>Schaar en upbend</h3>
+  <h3>Magnetische sterkte bij lage energie</h3>
   <p>Een vervormde kern straalt ook magnetisch: zijn protonen (gearceerd) en neutronen (gevuld), twee rugbyballen, schommelen tegen elkaar in als schaarbladen. Deze <b>schaarmodus</b> ligt rond 3 MeV. <b>Spin-flip</b>, rond 8 MeV, is het omklappen van de spin van afzonderlijke nucleonen (de pijltjes), bij elke vorm.</p>
   <div class="ctl"><label for="gm-b">Vervorming β₂</label><input id="gm-b" type="range" data-bind="beta" min="0" max="0.35" step="0.01" value="0.25"><output data-show="beta" data-fmt="2"></output></div>
   <p>Sleep de vervorming β₂ (0 is een bol). Hoe sterker uitgerekt, hoe meer schaarfotonen er vliegen; een bol heeft er geen. Bij de laagste energieën stijgt de sterkte weer: de <b>upbend</b>, een straaltje zachte fotonen, die de motor afzwakt naarmate de kern vervormt. Een optionele schakelaar, standaard uit, gebruikt een sterkere schaarsystematiek die overeenkomt met Oslo-metingen (vier tot vijf keer sterker in uranium).</p>
 </div>
 <div class="step">
-  <h3>De ladder af</h3>
+  <h3>Gammacascades</h3>
   <p>Een cascade is een reeks fotonen die na elkaar worden uitgezonden, van de bins bovenaan (toestanden te dicht om op te sommen, hoofdstuk 8) tot de benoemde niveaus, uitgerekt zodat je ze kunt lezen (dichte sport pariteit +, holle −). Daar stopt de motor met schatten en volgt hij de getabelleerde <b>vertakkingsverhoudingen</b>: de gemeten kansen dat elk niveau naar elk lager niveau vervalt.</p>
   <div class="btns"><button class="btn" data-act="drop">Laat een cascade vallen</button></div>
   <p>Druk een paar keer op de knop: het bovenste deel verandert elke keer; het einde volgt een van een paar gemeten paden.</p>
 </div>
 <div class="step">
-  <h3>Planken die vasthouden</h3>
+  <h3>Productie van isomeren</h3>
   <p>Het 11/2−-niveau bij 0,40 MeV is een <b>isomeer</b>: zijn spin ligt zo ver van de niveaus eronder dat een foton ze nauwelijks kan verbinden, dus het leeft seconden tot jaren, en wat daar landt, blijft. De motor behandelt elk niveau dat langer dan een seconde leeft als een eindpunt. Elk bolletje is één cascade, die eindigt op de stapel van de isomeer of op die van de grondtoestand.</p>
   <div class="ctl"><label for="gm-j">Beginspin</label><input id="gm-j" type="range" data-bind="J0" min="0" max="8" step="1" value="2" data-instant><output id="gm-jout">5/2</output></div>
   <p>Sleep de beginspin, waar de cascades starten, en de stapels beginnen opnieuw. Het deel dat op de isomeer eindigt, de <b>isomeerverhouding</b>, hangt ervan af: een begin met hoge spin voedt de isomeer met hoge spin; een begin met lage spin glijdt erlangs naar de grondtoestand.</p>
 </div>
 <div class="step">
-  <h3>Vangst</h3>
+  <h3>Stralingsvangst</h3>
   <p>Een kern die net een langzaam neutron heeft geabsorbeerd, heeft twee uitgangsdeuren (hoofdstuk 9): fotonen (boven) en het neutron dat weer naar buiten gaat (rechts). De opening van elke deur is haar <b>breedte</b>, in eV: hoe snel de kern erdoor vervalt. De fotonbreedte verandert nauwelijks; de neutronbreedte groeit met de snelheid van het neutron.</p>
   <div class="ctl"><label for="gm-e">Neutronenergie</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1,0 keV</output></div>
   <p>Sleep de neutronenergie, van 10 eV tot 2 MeV. <b>Vangst</b>, (n,γ), betekent dat het neutron blijft en er een foton vertrekt: bij 10 eV wint ze meestal, boven een paar keV wordt ze een klein aandeel. De fotonbreedte bij de drempel is voor honderden kernen gemeten, een controle op de fotonsterkte. Standaard gebruikt de motor zijn eigen; een optionele schakelaar schaalt de fotonsterkte van elke gemeten kern tot de twee overeenkomen.</p>

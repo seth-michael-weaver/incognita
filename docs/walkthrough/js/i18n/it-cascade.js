@@ -1,6 +1,6 @@
 /* Italian: cascade (Capitolo 11, la cascata) */
 WT.L.ch.cascade = {
-  num: "Capitolo 11", title: "Giù per la carta", short: "Cascata",
+  num: "Capitolo 11", title: "La cascata di emissione", short: "Cascata",
   lead: "Un'emissione raramente è la fine: il nucleo che resta è spesso ancora abbastanza caldo da emettere di nuovo.",
   html: `
 <div class="step">
@@ -10,15 +10,15 @@ WT.L.ch.cascade = {
   <p>I neutroni emessi sono di solito lenti, quindi la maggior parte delle discese è breve. I punti blu stanno sopra la soglia neutronica tratteggiata: possono permettersi un secondo neutrone, la reazione (n,2n). Sotto circa 11 MeV nessuno ci arriva.</p>
 </div>
 <div class="step">
-  <h3>Una passeggiata sulla carta</h3>
+  <h3>Emissione sequenziale sulla carta</h3>
   <p>Le correnti sono reazioni che attraversano un angolo della <b>carta dei nuclidi</b>, i nuclei disposti secondo il numero di neutroni N (in orizzontale) e il numero di protoni Z (in verticale). Ciascuna parte dalla casella evidenziata del nucleo composto; ogni casella porta il nome della reazione che finisce lì.</p>
   <p>Un <em class="n">neutrone</em> emesso sposta di una casella a sinistra, un <em class="p">protone</em> di una in basso, una <em class="a">particella alfa</em> (due protoni, due neutroni) di due in diagonale. La larghezza della corrente è quanto compie quel passo; la tonalità e la percentuale indicano dove finiscono le reazioni.</p>
   <div class="ctl"><label for="cs-e4">Energia del neutrone</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lancia 200 reazioni</button></div>
-  <p>Ogni passo costa da 7 a 11 MeV di energia di separazione, quindi anche a 30 MeV il percorso conta al massimo tre o quattro passi.</p>
+  <p>Trascina l'energia: a pochi MeV quasi tutto si ferma sulla casella del bersaglio; più in alto le correnti arrivano più lontano. Ogni passo costa da 7 a 11 MeV di energia di separazione, quindi anche a 30 MeV il percorso conta al massimo tre o quattro passi.</p>
 </div>
 <div class="step">
-  <h3>Dall'alto in basso, intervallo per intervallo</h3>
+  <h3>Contabilità delle popolazioni</h3>
   <p>Il motore svuota ogni nucleo dall'alto in basso, una fetta di energia, o <b>intervallo</b>, alla volta. A destra, il residuo della prima emissione; a sinistra, suo figlio, con un neutrone in meno. Le palle arancioni sono reazioni in attesa in ogni intervallo. Qui gli intervalli sono di 1 MeV; il motore ne usa circa 40 per nucleo, dimensionati sull'energia disponibile.</p>
   <p>Quando l'indicatore passa su un intervallo, ogni palla prende un'uscita secondo la competizione del capitolo 9: un fotone (<em class="g">γ</em>) la fa scendere a un intervallo più basso, un <em class="n">neutrone</em> la porta nel figlio, un protone o un'alfa la portano fuori dall'immagine. Sotto tutte le soglie, i fotoni portano il resto allo stato fondamentale (grigio). Poi tocca al figlio.</p>
   <div class="ctl"><label for="cs-e3">Energia del neutrone</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
@@ -26,13 +26,13 @@ WT.L.ch.cascade = {
   <p>I fotoni scendono soltanto, e ogni nucleo viene completato prima dei suoi figli, quindi niente arriva su un intervallo già svuotato.</p>
 </div>
 <div class="step">
-  <h3>Dare un nome alla storia</h3>
-  <p>Si riproduce una reazione alla volta: l'indicatore salta sulla carta e ogni particella emessa cade nel vassoio. Il vassoio pieno dà il nome al <b>canale esclusivo</b>, come (n,2n); i fotoni non contano. Il motore assegna a ogni canale la sua sezione d'urto (la sua probabilità, espressa come un'area efficace del bersaglio).</p>
+  <h3>Canali di reazione esclusivi</h3>
+  <p>Si riproduce una reazione alla volta: l'indicatore salta sulla carta e ogni particella emessa cade nel vassoio. Ogni canale viene riprodotto a un'energia alla quale avviene davvero (in alto nell'immagine): (n,3n) a 25 MeV, perché qui tre neutroni costano più di 20 MeV; la cattura, (n,γ), a 1 MeV. Il vassoio pieno dà il nome al <b>canale esclusivo</b>, come (n,2n); i fotoni non contano. Il motore assegna a ogni canale la sua sezione d'urto (la sua probabilità, espressa come un'area efficace del bersaglio).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Canale successivo</button></div>
   <p>Scorrili. (n,np) viene riprodotto due volte, prima con il neutrone e poi con il protone: stessa casella, stesso vassoio, un solo canale. Poi un deutone fantasma (un protone e un neutrone legati) raggiunge quella casella con un solo salto: il suo vassoio dice d, un canale diverso, (n,d).</p>
 </div>
 <div class="step">
-  <h3>Dove finisce tutto</h3>
+  <h3>Produzione di residui</h3>
   <p>Ogni casella ora ha dei ripiani: color inchiostro per lo <b>stato fondamentale</b>, verde (in due caselle) per un <b>isomero</b>, uno stato eccitato che vive abbastanza da contare come un prodotto a sé. L'altezza del mucchio è la <b>produzione di residui</b>: quanto di ogni nucleo hanno prodotto le reazioni.</p>
   <div class="ctl"><label for="cs-e2">Energia del neutrone</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lancia 200 reazioni</button></div>

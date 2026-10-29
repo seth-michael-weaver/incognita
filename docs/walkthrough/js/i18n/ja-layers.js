@@ -55,7 +55,7 @@
   <p>動かして、帯の内側にある測定値を数えてみましょう。狭すぎれば帯は持っていない精度を主張することになり、広すぎれば何も語りません。エンジン自身の帯はまだ採用されていません。すべての反応をまとめれば狙いどおりですが、反応の系統ごとにはまだ達成できていないからです。TERRAは独自の帯をもっており、それは上の比較に含まれています。</p>
 </div>
 <div class="step">
-  <h3>現状</h3>
+  <h3>現在の状況</h3>
   <p>層が採用されるのは測定値と照らし合わせて検証された後だけで、役に立たなければオフのままです。現在、エンジンは使用中で、TERRAは候補です。測定された構造の層とエンジンの不確かさの帯は、まだ検証中です。</p>
   <p><a href="scoreboard.html" data-keep-lang>スコアボード全体を見る →</a> 勝てなかった比較のすべて、各対抗相手、そしてその読み方。</p>
   <div class="aside">${ASOF ? `${ASOF}時点のスコア。出典は` : "スコアの出典は"}プロジェクトの研究台帳です。図の曲線は説明用です。</div>
@@ -79,3 +79,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "帯を確かめる測定値なし",
 });
 Object.assign(WT.L.ui, { nav_board: "スコアボード" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

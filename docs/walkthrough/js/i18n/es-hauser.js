@@ -20,6 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Fluctuaciones de anchura</h3>
+  <p>La fórmula simple subestima un poco la dispersión elástica, y la corrección devuelve un poco de flujo hacia ella desde las otras salidas. He aquí por qué.</p>
   <p>Con <i>W<sub>ab</sub></i> = 1 la fórmula multiplica promedios. Las resonancias que hay detrás de esos promedios tienen anchuras que fluctúan (Porter–Thomas, capítulo 15), y en la dispersión elástica la anchura que deja entrar al neutrón es la misma que lo deja salir, así que ambas están correlacionadas. Para el elástico, el promedio de los productos supera entonces al producto de los promedios, y las demás salidas pierden lo que gana el elástico.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Sin corrección</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Energía del neutrón (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -35,10 +36,11 @@ WT.L.ch.hauser = {
   <p>Ambas coinciden de cerca para el elástico y el inelástico; para la captura en la región de keV, HRTW quita hasta un 10 % más. Entre 0,85 y 2 MeV la captura incluso gana: ahí la anchura total está dominada por unas pocas anchuras neutrónicas que fluctúan, y el promedio de 1/Γ supera a 1/⟨Γ⟩. Las dos recetas son ajustes al resultado exacto de matrices aleatorias (GOE), que TALYS ofrece también como integral triple. INCOGNITA porta las tres (<code>widthmode</code> 1, 2, 3); Moldauer es la opción por defecto, aplicada a neutrones incidentes hasta la energía de separación del neutrón del blanco.</p>
 </div>
 <div class="step">
-  <h3>Entre 3 y 2</h3>
+  <h3>Límites del realce elástico</h3>
+  <p>¿Cuánto puede crecer el realce elástico? Entre dos y tres veces, según las resonancias estén separadas o se solapen.</p>
   <p>Los límites explican el tamaño del efecto. Toma <i>N</i> canales iguales, sin captura, y varía su suma ΣT, que es 2π veces el cociente entre la anchura total media y el espaciado de niveles, Γ/<i>D</i>. Con resonancias aisladas (ΣT ≪ 1) y muchos canales, cada anchura sigue Porter–Thomas con un grado de libertad y el realce elástico es ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3. Cuando las resonancias se solapan mucho (ΣT ≫ 2π), la sección eficaz fluctúa como una onda aleatoria (fluctuaciones de Ericson) y el realce baja a 2.</p>
   <div class="ctl"><label for="hf-n">Canales abiertos N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>Para <i>N</i> canales aislados el valor exacto es 3<i>N</i>/(<i>N</i>+2) (el rombo): con solo dos canales el realce no puede pasar de 1,5, porque entonces la anchura total fluctúa tanto como la elástica. La receta de Moldauer reproduce este límite; HRTW se queda por debajo cuando hay muchos canales débiles abiertos. El recuadro dibuja resonancias con la anchura que corresponde al punto móvil. En la fórmula de Moldauer el límite de muchos canales es 1 + 2/ν: ν → 1 para resonancias aisladas, ν → 1,78 cuando se solapan (2,12, el pequeño error del ajuste en solapamiento total).</p>
+  <p>Para <i>N</i> canales aislados el valor exacto es 3<i>N</i>/(<i>N</i>+2) (el rombo): con solo dos canales el realce no puede pasar de 1,5, porque entonces la anchura total fluctúa tanto como la elástica. La receta de Moldauer reproduce este límite; HRTW se queda por debajo cuando hay muchos canales débiles abiertos. El recuadro dibuja resonancias con la anchura que corresponde al punto móvil. En la fórmula de Moldauer el límite de muchos canales es 1 + 2/ν: ν → 1 para resonancias aisladas y ν → 1,78 cuando se solapan. Eso da 2,12 en solapamiento total en lugar de 2: un pequeño error del ajuste.</p>
   <div class="aside">En el código: <code>compound/prepare.py</code> (canales de salida y sus transmisiones por <i>J</i><sup>π</sup>), <code>compound/target.py</code> (las sumas de Hauser–Feshbach), <code>compound/wfc.py</code> (Moldauer, HRTW y GOE, portados de TALYS). La imagen evalúa las mismas fórmulas con ingredientes ilustrativos: transmisiones de esfera dura para un blanco parecido al hierro, siete niveles, un continuo de temperatura constante y un único canal de captura agrupado.</div>
 </div>`,
 };
@@ -113,3 +115,4 @@ Object.assign(WT.L.glossary, {
     chapter: "hauser",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-show="jbShow" data-act="w0" data-act="w1" */

@@ -1,6 +1,6 @@
 /* Spanish: omp (Capítulo 5, el modelo óptico) */
 WT.es.ch.omp = {
-  num: "Capítulo 5", title: "Una bola de cristal nublada", short: "Modelo óptico",
+  num: "Capítulo 5", title: "El modelo óptico", short: "Modelo óptico",
   lead: "Antes que nada, el motor se hace una pregunta más sencilla: ¿cómo ve el núcleo un neutrón que llega?",
   html: `
 <div class="step">
@@ -9,33 +9,33 @@ WT.es.ch.omp = {
   <p>Arrastra la energía y mira abajo la longitud de onda, en femtómetros (fm, 10⁻¹⁵ m). Los neutrones lentos tienen ondas largas: por debajo de unos 9 MeV, una longitud de onda es más ancha que todo este núcleo.</p>
 </div>
 <div class="step">
-  <h3>La parte real atrae</h3>
+  <h3>El potencial real: refracción</h3>
   <p>El <b>potencial óptico</b> es la fuerza promedio de todo el núcleo sobre el neutrón. Su <em>parte real</em> es un pozo de unos 50 MeV de profundidad: dentro, el neutrón se acelera, así que las crestas se apiñan. El motor le da una forma de Woods–Saxon, plana y profunda en el centro, que se desvanece suavemente hasta cero en la superficie.</p>
 </div>
 <div class="step">
-  <h3>La parte imaginaria absorbe</h3>
+  <h3>El potencial imaginario: absorción</h3>
   <p>La sombra detrás del núcleo son los neutrones perdidos en reacciones. La <em>parte imaginaria</em> del potencial los representa: encoge la onda en lugar de desviarla, sobre todo cerca de la superficie (el anillo de color).</p>
   <div class="ctl"><label for="omp-w">Absorción W (MeV)</label><input id="omp-w" type="range" data-bind="W" min="0" max="14" step="0.5" value="7"><output data-show="W" data-fmt="1"></output></div>
   <p>Lleva <i>W</i> a 0 y la sombra se rellena: sin absorción no hay reacciones. De ahí el nombre de modelo óptico: el núcleo es una bola de cristal nublada que en parte desvía y en parte absorbe.</p>
 </div>
 <div class="step">
-  <h3>La puntería importa</h3>
+  <h3>Ondas parciales y parámetro de impacto</h3>
   <p>Visto de frente, el blanco se divide en anillos, uno por cada <b>onda parcial</b> <i>l</i> = 0, 1, 2, … Un neutrón que pasa a una distancia <i>b</i> del centro lleva un <b>momento angular</b> <i>l</i> ≈ <i>k b</i>, donde <i>k</i> crece con la energía. Cuanto más oscuro es un anillo, mayor es su <b>coeficiente de transmisión</b> <i>T<sub>l</sub></i>: la probabilidad de que un neutrón de ese anillo sea absorbido.</p>
   <div class="ctl"><label for="omp-e3">Energía del neutrón (MeV)</label><input id="omp-e3" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Disparar 200 neutrones</button></div>
   <p>Los destellos naranjas son neutrones absorbidos; las barras comparan la fracción absorbida en cada anillo con el <i>T<sub>l</sub></i> del modelo (la marca). Los anillos interiores lo absorben casi todo; los exteriores dejan pasar los neutrones. A baja energía los anillos son enormes y solo importa <i>l</i> = 0.</p>
 </div>
 <div class="step">
-  <h3>Pasar de largo junto al núcleo</h3>
+  <h3>La barrera centrífuga</h3>
   <p>Un neutrón con mucho momento angular pasa demasiado lejos para tocar el núcleo: esa es la <b>barrera centrífuga</b>. Visto desde arriba, cada neutrón de aquí pertenece a una misma onda parcial <i>l</i>, así que pasa a la misma <b>distancia de paso</b> <i>b</i> ≈ (<i>l</i>+½)/<i>k</i> (el círculo discontinuo).</p>
   <p>Pero cada neutrón es una onda, difuminada sobre aproximadamente una longitud de onda reducida λ̄ (el halo). Aunque su trayectoria no acierte, el borde difuso puede rozar la superficie y entrar: el <b>efecto túnel</b>.</p>
   <div class="ctl"><label for="omp-l">Onda parcial l</label><input id="omp-l" type="range" data-bind="L" min="0" max="8" step="1" value="3" data-instant><output data-show="L" data-fmt="0"></output></div>
   <div class="ctl"><label for="omp-e2">Energía (MeV)</label><input id="omp-e2" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
-  <p>Sube <i>l</i> y la trayectoria se aleja: entran menos. Sube la energía y la misma <i>l</i> pasa más cerca, con menos difuminado. El motor calcula cada <i>T<sub>l</sub></i> de forma exacta resolviendo la ecuación de Schrödinger a través del potencial completo; <i>S</i> mide cuánta onda vuelve a salir.</p>
+  <p>Sube <i>l</i> y la trayectoria se aleja: entran menos. Sube la energía y la misma <i>l</i> pasa más cerca, con menos difuminado. El motor calcula cada <i>T<sub>l</sub></i> de forma exacta resolviendo la ecuación de Schrödinger (la ecuación de onda de la mecánica cuántica) a través del potencial completo. Envía una onda hacia dentro y mide cuánta vuelve a salir sin ser absorbida: la onda que vuelve se llama <i>S</i>, y su cuadrado, |<i>S</i>|², es la fracción que regresa. Lo que no vuelve fue tomado por el núcleo, y esa fracción que falta es <i>T<sub>l</sub></i>.</p>
   <div class="formula">T<sub>lj</sub> = 1 − |S<sub>lj</sub>|²</div>
 </div>
 <div class="step">
-  <h3>Sumar el blanco</h3>
+  <h3>La sección eficaz de reacción</h3>
   <p>El disco de la derecha es lo grande que el núcleo le parece al neutrón: la <b>sección eficaz de reacción</b>, en barns (10⁻²⁴ cm²). Cada anillo le añade su área por <i>T<sub>l</sub></i>. El círculo discontinuo es el tamaño geométrico.</p>
   <div class="ctl"><label for="omp-e4">Energía del neutrón (MeV)</label><input id="omp-e4" type="range" data-bind="E" min="0.2" max="40" step="0.1" value="8"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="sum">Volver a sumar</button></div>

@@ -1,6 +1,6 @@
 /* French: decay (Chapitre 9) */
 WT.L.ch.decay = {
-  num: "Chapitre 9", title: "Choisir une sortie", short: "Désexcitation",
+  num: "Chapitre 9", title: "Désexcitation du noyau composé", short: "Désexcitation",
   lead: "Le noyau composé doit se débarrasser de son énergie en émettant une particule ou un photon. Ce chapitre représente chaque issue par une porte. Le rôle du moteur est de dire quelle part du flux (le courant de réactions qui arrivent ici) sort par chaque porte.",
   html: `
 <div class="step">
@@ -9,41 +9,43 @@ WT.L.ch.decay = {
   <p>Le <b>coefficient de transmission</b> <i>T</i> est la probabilité qu'une particule arrivée au bord passe ; pour les particules, il provient du modèle optique du chapitre 5, utilisé à l'envers. La <b>densité de niveaux</b> ρ, écrite à côté de chaque porte, compte les états dans lesquels le noyau restant peut se retrouver. Répartir selon <i>T</i> fois ρ, c'est la règle de <b>Hauser–Feshbach</b>. À 10 MeV, la porte du neutron prend presque tout.</p>
 </div>
 <div class="step">
-  <h3>Pourquoi la plupart des particules sortent lentes</h3>
+  <h3>Spectres d'évaporation</h3>
   <p>La porte du neutron, découpée selon l'énergie de sortie ε (lents à gauche, rapides à droite). L'ouverture <i>T</i>(ε) de chaque porte s'élargit pour les neutrons plus rapides. En dessous se trouve la foule d'états où le noyau restant peut se trouver : un neutron lent laisse derrière lui l'essentiel de l'énergie, là où les états abondent, donc les foules diminuent vers la droite.</p>
   <div class="ctl"><label for="dc-sp">Énergie disponible</label><input id="dc-sp" type="range" data-bind="spare" min="1" max="12" step="0.5" value="5"><output data-show="spare" data-fmt="1"></output></div>
   <p>Porte × foule donne à la pile la forme d'une bosse, le <b>spectre d'évaporation</b>, comme la vapeur qui s'échappe d'un liquide chaud. Faites varier l'énergie disponible (en MeV, millions d'électronvolts) : la pile recommence, et son maximum reste vers 1 MeV, fixé par la température nucléaire. L'énergie en plus sert surtout à chauffer davantage le noyau restant.</p>
 </div>
 <div class="step">
-  <h3>Les particules chargées doivent grimper</h3>
-  <p>L'énergie d'un proton à chaque distance r du centre : un puits à l'intérieur et, à l'extérieur, une colline due à la répulsion électrique (coulombienne), qui décroît comme 1/r. Sous le sommet de la colline, le proton, qui s'agite dans le puits, ne peut que traverser par <b>effet tunnel</b> la zone ombrée, un effet quantique qui réussit une fois sur de nombreux chocs contre la paroi.</p>
+  <h3>La barrière coulombienne à l'émission</h3>
+  <p>L'énergie d'un proton à chaque distance r du centre : un puits à l'intérieur et, à l'extérieur, une colline due à la répulsion électrique (coulombienne), qui décroît comme 1/r. Sous le sommet de la colline, le proton, qui s'agite dans le puits, ne peut que traverser par <b>effet tunnel</b> la zone ombrée, un effet quantique qui réussit une fois sur de nombreux chocs contre la paroi. Les chances se calculent comme au chapitre 4 : plus la zone est large et haute, plus il y a de zéros dans « 1 choc sur 10<sup>N</sup> ».</p>
   <div class="ctl"><label for="dc-ce">Énergie de la particule</label><input id="dc-ce" type="range" data-bind="eps" min="0.5" max="12" step="0.1" value="3"><output data-show="eps" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="toggleAlpha">Basculer proton / alpha</button></div>
   <p>Diminuez l'énergie et regardez le tunnel s'élargir ; passez ensuite à l'alpha, dont les deux charges font face à une colline environ deux fois plus haute. C'est pourquoi les neutrons, sans charge, l'emportent en général dès qu'ils peuvent sortir, et pourquoi les sorties proton et alpha comptent surtout pour les noyaux légers et à haute énergie.</p>
 </div>
 <div class="step">
-  <h3>Les portes s'ouvrent une à une</h3>
+  <h3>Seuils des voies</h3>
   <p>Chaque porte de particule ne s'ouvre qu'au-dessus de son <b>énergie de séparation</b>, le coût d'extraction de cette particule : ici 8 MeV pour un neutron, 9 pour un proton, 7 pour une alpha. En dessous des 8 MeV du neutron, presque toutes les désexcitations émettent de la lumière.</p>
   <div class="ctl"><label for="dc-e">Énergie d'excitation</label><input id="dc-e" type="range" data-bind="E" min="5" max="24" step="0.1" value="7"><output data-show="E" data-fmt="1"></output></div>
-  <p>Faites passer l'énergie d'excitation au-delà de 8 MeV. En environ 1 MeV, la porte du neutron s'ouvre en grand et la part des photons chute d'un facteur cent. Les portes du proton et de l'alpha s'allument plus tard et restent étroites, freinées par leurs collines coulombiennes.</p>
+  <p>Faites passer l'énergie d'excitation au-delà de 8 MeV. En environ 1 MeV, la porte du neutron s'ouvre en grand et la part des photons chute d'un facteur cent. La porte de l'alpha se déverrouille la première, à 7 MeV, mais s'entrouvre à peine : sa colline coulombienne (chapitre 4) la garde presque fermée jusqu'à bien plus haut. La porte du proton se déverrouille à 9 MeV et reste elle aussi étroite, freinée par sa propre colline.</p>
 </div>
 <div class="step">
-  <h3>Spin et parité doivent s'équilibrer</h3>
+  <h3>Conservation du moment cinétique et de la parité</h3>
   <p>Le noyau composé (en haut) a un spin <i>J</i> ; les états du noyau restant sont rangés en dessous dans des tiroirs selon leur spin <i>J</i>′. Le neutron emporte la différence de spin et de parité : en partant avec un moment angulaire orbital <i>l</i>, il change le spin d'au plus <i>l</i> + ½ et inverse la parité quand <i>l</i> est impair. Un <i>l</i> plus grand signifie une porte plus étroite ; la porte de chaque tiroir correspond au plus petit <i>l</i> qui l'atteint. Les arrivées pleines conservent la parité ; les creuses l'inversent.</p>
   <div class="ctl"><label for="dc-j">Spin du noyau composé J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
   <p>Augmentez <i>J</i>. Les portes ouvertes glissent vers les tiroirs de haut spin, qui contiennent peu d'états, tandis que les tiroirs pleins sont derrière des portes fermées. Un noyau composé de haut spin émet lentement des particules, ce qui laisse leur chance aux photons et aux isomères (états de longue durée de vie, chapitre 10).</p>
 </div>
 <div class="step">
-  <h3>Par où vous êtes entré</h3>
+  <h3>Amplification élastique</h3>
   <p>À basse énergie, le noyau composé est un ensemble de <b>résonances</b> étroites, des énergies où le neutron est facilement absorbé ; huit sont dessinées, une par ligne. Chacune a des largeurs de porte aléatoires : l'entrée (la voie neutron) à gauche, de largeur <i>x</i>, et les autres portes, surtout des photons ici, à droite, de largeurs <i>y</i>.</p>
   <div class="btns"><button class="btn" data-act="fire">Tirer 40 neutrons</button><button class="btn ghost" data-act="reroll">Nouvelles résonances</button></div>
-  <p>Un neutron entre dans la résonance <i>i</i> avec une probabilité proportionnelle à <i>x<sub>i</sub></i> et ressort par l'entrée avec une probabilité <i>x<sub>i</sub></i> / (<i>x<sub>i</sub></i> + Σ<i>y</i>). Les lignes à large entrée font entrer plus de neutrons et en renvoient davantage, donc la vraie part qui ressort (une <b>moyenne de produits</b>) dépasse l'estimation tirée des largeurs moyennes (un <b>produit de moyennes</b>). Le rapport est l'<b>amplification élastique</b>, et la <b>correction de fluctuation des largeurs</b> transfère ce flux des autres portes vers l'entrée.</p>
+  <p>Appuyez sur Tirer et suivez les neutrons. Un neutron entre dans une ligne proportionnellement à la largeur d'entrée <i>x</i> de cette ligne. Une fois dedans, il choisit une sortie proportionnellement aux largeurs : retour par l'entrée avec la probabilité <i>x</i> / (<i>x</i> + Σ<i>y</i>), sinon par l'une des autres portes. Les plateaux comptent où ils sont passés.</p>
+  <p>Le piège : une ligne à large entrée fait entrer plus de neutrons et en renvoie aussi davantage. Il en revient donc plus que ce que laissent deviner les seules largeurs moyennes. La vraie part qui ressort (une <b>moyenne de produits</b>) dépasse l'estimation simple (un <b>produit de moyennes</b>) ; les deux sont écrites en haut.</p>
+  <p>Leur rapport est l'<b>amplification élastique</b>. La <b>correction de fluctuation des largeurs</b> du moteur l'applique : elle transfère ce flux supplémentaire des autres portes vers l'entrée.</p>
   <div class="ctl"><label for="dc-n">Autres portes</label><input id="dc-n" type="range" data-bind="Nch" min="1" max="12" step="1" value="2" data-instant><output data-show="Nch" data-fmt="0"></output></div>
   <p>Ajoutez des portes. Avec de nombreuses sorties, leur largeur totale cesse de fluctuer, donc la correction compte surtout quand peu de portes sont ouvertes. Le moteur l'applique, avec la formule de Moldauer, pour des neutrons incidents jusqu'à l'énergie de séparation neutronique de la cible, et l'omet au-delà.</p>
 </div>
 <div class="step">
-  <h3>Ce qui reste à partager</h3>
-  <p>Tous les neutrons absorbés ne forment pas un noyau composé. Certains font un seul coup rasant et repartent (réactions directes, chapitre 6) ; d'autres s'entrechoquent une ou deux fois et ressortent vite (prééquilibre, chapitre 7). Seul le reste demeure et chauffe le noyau. Les compteurs totalisent chaque sort.</p>
+  <h3>Flux après les réactions directes</h3>
+  <p>Les portes de ce chapitre ne partagent que les neutrons qui sont réellement restés. Les chapitres 6 et 7 ont déjà prélevé leur part : certains neutrons font un seul coup rasant et repartent (direct), d'autres s'entrechoquent une ou deux fois et ressortent vite (prééquilibre). Seul le reste demeure à l'intérieur et chauffe le noyau. Les compteurs de droite totalisent chaque sort ; ceux qui restent ne quittent jamais le noyau, ils sont seulement comptés.</p>
   <div class="ctl"><label for="dc-einc">Énergie du neutron</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Seuls ceux qui restent entrent dans la compétition des portes. Faites varier l'énergie du neutron : à quelques MeV, presque tous restent ; à 30 MeV, environ la moitié est partie avant d'atteindre l'équilibre.</p>
   <div class="aside">Dans le code : <code>compound/prepare.py</code> (poids de sortie T·ρ par spin et parité, règles de sélection), <code>compound/target.py</code> (première désexcitation avec fluctuations des largeurs), <code>compound/continuum.py</code> (désexcitation de chaque intervalle suivant), <code>compound/wfc.py</code> (corrections Moldauer, HRTW, GOE), <code>compound/normalization.py</code> (flux restant pour le noyau composé), <code>omp/inverse.py</code> (les portes utilisées à l'envers).</div>

@@ -9,14 +9,14 @@ WT.L.ch.exciton = {
   <div class="formula">ω(p,h,E) = g<sup>n</sup> (E − A<sub>p,h</sub>)<sup>n−1</sup> / (p! h! (n−1)!) ,  A<sub>p,h</sub> = max(p,h)²/g − (p² + h² + p + h)/4g</div>
   <div class="ctl"><label for="ex-n">粒子数 p（空穴数 p − 1）</label><input id="ex-n" type="range" data-bind="pp" min="2" max="6" step="1" value="3" data-instant><output data-show="pp" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="pauli" aria-pressed="true">泡利修正</button></div>
-  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ 是费米能附近的单粒子能级密度。<i>A<sub>p,h</sub></i> 是<b>泡利</b>修正：两个粒子不能占据同一能级，所以最低的组态要付出能量，阈值附近的密度随之下降。示意图每次显示一个随机抽取的、粒子数为所选 <i>p</i> 的组态。</p>
+  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ 是费米能附近的单粒子能级密度。<i>A<sub>p,h</sub></i> 是<b>泡利</b>修正：两个粒子不能占据同一能级，所以最低的组态要付出能量，阈值附近的密度随之下降。曲线以其计数命名：3p2h 表示 3 个粒子、2 个空穴。示意图每次显示一个随机抽取的、粒子数为所选 <i>p</i> 的组态：每个空穴就是费米面以下缺少的一个核子。</p>
 </div>
 <div class="step">
-  <h3>深入下去，还是逃出去</h3>
+  <h3>跃迁率与发射率</h3>
   <p>从每个阶段出发，可能发生两件事。一次碰撞产生另一对，速率为 λ<sup>+</sup>，按费米黄金规则，它等于矩阵元的平方乘以可到达的态密度。或者一个粒子离开，速率为 <i>W</i>，由细致平衡从逆截面以及有、无逃逸粒子时的态密度之比给出。</p>
   <div class="formula">λ<sup>+</sup>(n) = (2π/ħ) M² ω<sub>acc</sub> ,  W(p,h,ε) = (2s+1)/(π²ħ³) με σ<sub>inv</sub>(ε) ω(p−1,h,U) / ω(p,h,E)</div>
   <div class="ctl"><label for="ex-e">中子能量 (MeV)</label><input id="ex-e" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
-  <p>柱条是每个阶段的两个速率，采用对数坐标：λ<sup>+</sup> 的量级为 10²² s⁻¹，<i>W</i> 在第一阶段约为它的十分之一，并且每过一个阶段都在下降，因为每多一对，领头粒子能携带的能量就更少。引擎采用 Koning–Duijvestijn 形式的 M²，它随每个激子的能量增大而减小：</p>
+  <p>每个阶段以其计数标记（2p1h：2 个粒子、1 个空穴）。柱条是每个阶段的两个速率，采用对数坐标：λ<sup>+</sup> 的量级为 10²² s⁻¹，<i>W</i> 在第一阶段约为它的十分之一，并且每过一个阶段都在下降，因为每多一对，领头粒子能携带的能量就更少。引擎采用 Koning–Duijvestijn 形式的 M²，它随每个激子的能量增大而减小：</p>
   <div class="formula">M² = (C₁ A<sub>p</sub> / A³) · [7.48 + 4.62×10⁵ / (E/(n A<sub>p</sub>) + 10.7)³]  MeV²</div>
 </div>
 <div class="step">
@@ -27,14 +27,14 @@ WT.L.ch.exciton = {
   <p>整条链在几个 10⁻²² s 内就结束了。途中逃逸的份额就是预平衡发射；其余部分在引擎中（与 TALYS 一样）最多到六个粒子之后，交给复合核。对时间积分给每个阶段一个强度 τ(<i>n</i>)·<i>P</i>(<i>n</i>)，引擎计算的正是这个乘积。</p>
 </div>
 <div class="step">
-  <h3>硬尾从哪里来</h3>
+  <h3>高能尾部</h3>
   <p>发射谱是各阶段的布居乘寿命乘发射率之和，再加上剩余部分的蒸发。单单 <i>n</i> = 3 这一阶段，即两个粒子加一个空穴，就能达到最高的出射能量：它的谱朝端点只是线性下降。之后的每个阶段都更软。</p>
   <div class="formula">dσ/dε = σ<sub>CN</sub> Σ<sub>n</sub> P(n) τ(n) W(n,ε) + 蒸发</div>
   <div class="ctl"><label for="ex-e3">中子能量 (MeV)</label><input id="ex-e3" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
   <p>提高能量，谱就变硬：预平衡尾部一直延伸到端点，而蒸发峰停留在 1 到 2 MeV。在约 10 MeV 以上，实测的高能中子只有靠这条尾部才能重现。</p>
 </div>
 <div class="step">
-  <h3>份额有多大</h3>
+  <h3>预平衡份额</h3>
   <p>发射中属于预平衡的份额随入射能量增长，这里从 5 MeV 附近的百分之几增长到 40 MeV 时的约 40%。它取决于一个可调常数，即矩阵元的整体大小：相互作用越弱，平衡越慢，早期发射越多。</p>
   <div class="ctl"><label for="ex-c">矩阵元常数 C₁</label><input id="ex-c" type="range" data-bind="c1" min="0.3" max="3" step="0.05" value="1"><output data-show="c1" data-fmt="2"></output></div>
   <p>虚线是 C₁ = 1，即引擎的默认值；实线随滑块变化。C₁ 减半，份额增加 1.5 到 1.9 倍，而不是 2 倍：每个阶段的逃逸概率是 W/(λ<sup>+</sup> + W)，而不是 W/λ<sup>+</sup>，而且能存活到后续阶段的原子核更少。</p>
@@ -90,3 +90,4 @@ Object.assign(WT.L.glossary, {
     chapter: "exciton",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="pauli" */

@@ -1,6 +1,6 @@
 /* Dutch (Nederlands): resonance (Hoofdstuk 15, scherpe pieken) */
 WT.L.ch.resonance = {
-  num: "Hoofdstuk 15", title: "Scherpe pieken", short: "Resonanties",
+  num: "Hoofdstuk 15", title: "Resonanties", short: "Resonanties",
   lead: "Bij een laag genoeg energie ziet een neutron geen gladde, uitgemiddelde kern meer. Het ziet de afzonderlijke energieniveaus van de compoundkern, één voor één.",
   html: `
 <div class="step">
@@ -9,33 +9,33 @@ WT.L.ch.resonance = {
   <p>Het neutron hupt verder in energie; waar het landt, kan het worden ingevangen, in een flits van fotonen. Op een piek is de werkzame doorsnede duizenden barn en is vangst bijna zeker; tussen de pieken is ze een paar barn. Sleep de energie om het op een piek te parkeren, en daarna tussen twee pieken.</p>
 </div>
 <div class="step">
-  <h3>Pieken houden afstand</h3>
+  <h3>Niveauafstoting</h3>
   <p>De middelste rij toont hoe echte niveaus liggen: twee niveaus met dezelfde spin en pariteit stoten elkaar af, dus bijna-samenvallen is zeldzaam. De <b>theorie van stochastische matrices</b> beschrijft dit patroon. Echt willekeurige posities (bovenste rij) klonteren en laten gaten.</p>
   <div class="btns"><button class="btn" data-act="again">Opnieuw trekken</button></div>
   <p>Trek opnieuw voor een nieuwe steekproef. ⟨r̃⟩ vergelijkt elke afstand met de volgende: ongeveer 0,39 bij willekeurig, 0,53 bij elkaar afstotende niveaus; de code gebruikt het afstotende patroon. Het mengen van twee reeksen, bijvoorbeeld twee spins (onderste rij), verbergt de afstoting gedeeltelijk.</p>
 </div>
 <div class="step">
-  <h3>Hoogten lopen wild uiteen</h3>
+  <h3>Porter–Thomas-breedtefluctuaties</h3>
   <p>Nu is de hoogte van elke piek haar <b>neutronbreedte</b> Γ<sub>n</sub> op een lineaire schaal: hoe sterk het niveau aan een neutron koppelt. Het gele kapje is haar γ-breedte Γ<sub>γ</sub>, hoe snel ze fotonen uitzendt; die telt honderden fotonpaden bij elkaar op, dus ze is voor elk niveau bijna gelijk.</p>
   <div class="btns"><button class="btn" data-act="roll">Gooi een breedte</button><button class="btn ghost" data-act="equal">Gelijke breedten</button><button class="btn ghost" data-act="pt">Porter–Thomas</button></div>
   <p>Een niveau heeft maar één manier om uiteen te vallen in neutron plus trefkern, dus zijn breedte gedraagt zich als het kwadraat van één getal uit een klokkromme. Gooi er een: het balletje landt op <i>x</i>, <i>x</i>² wordt de hoogte van de volgende piek, en er valt een stip in de stapel. De stapel hoopt zich op bij nul met een lange staart, de wet van <b>Porter–Thomas</b>: de meeste niveaus zijn zwak, een paar enorm. Gelijke breedten toont in plaats daarvan een rij gemiddelde pieken.</p>
 </div>
 <div class="step">
-  <h3>Een ladder uit vier getallen</h3>
-  <p>De pieken komen nu uit vier gemiddelden die je kunt instellen. Voor een niet-gemeten kern kunnen alleen deze gemiddelden worden voorspeld: de gemiddelde afstand <i>D</i><sub>0</sub>; de <b>sterktefuncties</b> <i>S</i><sub>0</sub> en <i>S</i><sub>1</sub>, de gemiddelde neutronbreedte per eenheid afstand voor s-golf- (frontale) en p-golfneutronen (buiten het midden); en de gemiddelde γ-breedte. Hieruit bouwt de code een <b>resonantieladder</b>: één willekeurige verzameling niveaus met die gemiddelden.</p>
+  <h3>Statistische resonantieladders</h3>
+  <p>De pieken komen nu uit vier gemiddelden die je kunt instellen. Voor een niet-gemeten kern kunnen alleen deze gemiddelden worden voorspeld: de gemiddelde afstand <i>D</i><sub>0</sub>; de <b>sterktefuncties</b> <i>S</i><sub>0</sub> en <i>S</i><sub>1</sub>, de gemiddelde neutronbreedte per eenheid afstand voor s-golf- (frontale) en p-golfneutronen (buiten het midden); en de gemiddelde γ-breedte. Hieruit bouwt de code een <b>resonantieladder</b>: één willekeurige verzameling niveaus met die gemiddelden. Drie ervan hebben hier een schuifje; <i>S</i><sub>1</sub> blijft vast (zijn waarde staat onder de pieken).</p>
   <div class="ctl"><label for="res-d0">Afstand D₀ (eV)</label><input id="res-d0" type="range" data-bind="D0" min="3" max="60" step="0.5" value="20"><output data-show="D0" data-fmt="1"></output></div>
   <div class="ctl"><label for="res-s0">Sterkte S₀ (×10⁻⁴)</label><input id="res-s0" type="range" data-bind="S0" min="0.2" max="3" step="0.05" value="1"><output data-show="S0" data-fmt="2"></output></div>
   <div class="ctl"><label for="res-gg">γ-breedte ⟨Γγ⟩ (meV)</label><input id="res-gg" type="range" data-bind="Gg" min="10" max="80" step="1" value="23"><output data-show="Gg" data-fmt="0"></output></div>
   <p>Sleep <i>D</i><sub>0</sub> en de pieken spreiden zich uit of dringen samen. Dichte pieken zijn s-golfniveaus (positieve pariteit), omlijnde pieken p-golfniveaus (negatieve pariteit). Neutronbreedten groeien als √<i>E</i> voor s-golven en als <i>E</i><sup>3/2</sup> voor p-golven, dus de omlijnde pieken beginnen laag en groeien naar rechts.</p>
 </div>
 <div class="step">
-  <h3>Omlaag tot thermisch</h3>
+  <h3>Het thermische gebied</h3>
   <p>Dezelfde pieken op een logaritmische energieschaal, tot duizendsten van een eV. Reactorneutronen worden afgeremd door tegen lichte kernen te botsen, waarbij ze elke keer ongeveer dezelfde fractie van hun energie verliezen, dus elke sprong is hier even lang. Sommige worden onderweg door de pieken gevangen.</p>
   <div class="btns"><button class="btn" data-act="slow">Rem 10 neutronen af</button></div>
   <p>Wie erdoor komt, komt tot rust bij kamertemperatuur, 0,025 eV, de <b>thermische</b> energie, ver onder de eerste piek. Daar is de werkzame doorsnede, het oppervlak van de schijf, de som van de staarten van de resonanties, inclusief gebonden niveaus net onder nul; de staarten groeien als 1/<i>v</i> (<i>v</i> de snelheid van het neutron), dus de bodem stijgt naar links. De vangst onderweg omlaag wordt gemeten met de <b>resonantie-integraal</b>: de werkzame doorsnede boven 0,5 eV, waarbij elke energie met 1/<i>E</i> wordt gewogen.</p>
 </div>
 <div class="step">
-  <h3>Alleen de statistiek is voorspelbaar</h3>
+  <h3>Wat de statistiek kan voorspellen</h3>
   <p>Elke rij is één ladder getrokken uit dezelfde vier getallen, met een schijf waarvan het oppervlak de werkzame doorsnede voor thermische vangst is. De haak reikt tot de piek die die waarde bepaalt, meestal de dichtstbijzijnde; de afstand ervan verschilt van ladder tot ladder, en de schijf schommelt met een factor tien of meer.</p>
   <div class="btns"><button class="btn" data-act="draw1">Trek een ladder</button><button class="btn ghost" data-act="more">Trek er 20</button></div>
   <p>Elke waarde valt in de stapel rechts. Voor een niet-gemeten kern is het antwoord een spreiding van waarden, geen enkel getal, en geen beter model kan die verkleinen. De resonantie-integraal, een som over veel pieken, spreidt minder. Waar niveaus meer dan ongeveer 10 keV uit elkaar liggen, zoals bij lichte kernen, ligt er geen dicht bij thermisch: vangst is daar direct, en de code weigert te antwoorden.</p>

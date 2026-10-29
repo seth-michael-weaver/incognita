@@ -1,6 +1,6 @@
 /* Portuguese (pt-PT): cascade (chapter 8) */
 WT.L.ch.cascade = {
-  num: "Capítulo 11", title: "Descendo pela carta", short: "Cascata",
+  num: "Capítulo 11", title: "A cascata de emissão", short: "Cascata",
   lead: "Uma emissão raramente é o fim: o núcleo que fica está muitas vezes quente o suficiente para voltar a emitir.",
   html: `
 <div class="step">
@@ -10,15 +10,15 @@ WT.L.ch.cascade = {
   <p>Os neutrões emitidos costumam ser lentos, por isso a maioria das descidas é curta. Os pontos azuis ficam acima do limiar de neutrões (linha tracejada): podem dar-se ao luxo de um segundo neutrão, a reação (n,2n). Abaixo de cerca de 11 MeV nenhum lá chega.</p>
 </div>
 <div class="step">
-  <h3>Um passeio pela carta</h3>
+  <h3>Emissão sequencial ao longo da carta</h3>
   <p>As correntes são reações que percorrem um canto da <b>carta de nuclídeos</b>, os núcleos dispostos por número de neutrões N (na horizontal) e número de protões Z (na vertical). Todas começam na casa contornada do núcleo composto; cada casa tem o nome da reação que aí termina.</p>
   <p>Um <em class="n">neutrão</em> emitido move uma casa para a esquerda, um <em class="p">protão</em> uma para baixo, uma <em class="a">partícula alfa</em> (dois protões, dois neutrões) duas na diagonal. A largura da corrente é quanto dá esse passo; o tom e a percentagem, onde terminam as reações.</p>
   <div class="ctl"><label for="cs-e4">Energia do neutrão</label><input id="cs-e4" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lançar 200 reações</button></div>
-  <p>Cada passo custa de 7 a 11 MeV de energia de separação, por isso mesmo a 30 MeV o percurso tem no máximo três ou quatro passos.</p>
+  <p>Arraste a energia: a poucos MeV quase tudo pára na casa do alvo; mais acima as correntes chegam mais longe. Cada passo custa de 7 a 11 MeV de energia de separação, por isso mesmo a 30 MeV o percurso tem no máximo três ou quatro passos.</p>
 </div>
 <div class="step">
-  <h3>De cima para baixo, intervalo a intervalo</h3>
+  <h3>Contabilidade das populações</h3>
   <p>O motor esvazia cada núcleo de cima para baixo, uma fatia de energia, ou <b>intervalo</b>, de cada vez. À direita, o residual da primeira emissão; à esquerda, o seu filho, com um neutrão a menos. As bolas laranja são reações à espera em cada intervalo. Aqui os intervalos medem 1 MeV; o motor usa cerca de 40 por núcleo, ajustados à energia disponível.</p>
   <p>Quando o marcador varre um intervalo, cada bola toma uma saída segundo a competição do capítulo 9: um fotão (<em class="g">γ</em>) desce-a para um intervalo inferior, um <em class="n">neutrão</em> leva-a para o filho, um protão ou uma alfa tiram-na da figura. Abaixo de todos os limiares, os fotões levam o resto para o estado fundamental (cinzento). Depois varre-se o filho.</p>
   <div class="ctl"><label for="cs-e3">Energia do neutrão</label><input id="cs-e3" type="range" data-bind="E" min="8" max="30" step="0.5" value="18"><output data-show="E" data-fmt="1"></output></div>
@@ -26,13 +26,13 @@ WT.L.ch.cascade = {
   <p>Os fotões só descem, e cada núcleo fica terminado antes dos seus filhos, por isso nada cai num intervalo já esvaziado.</p>
 </div>
 <div class="step">
-  <h3>Dar nome à história</h3>
-  <p>Reproduz-se uma reação de cada vez: o marcador salta pela carta e cada partícula emitida cai no tabuleiro. O tabuleiro cheio dá nome ao <b>canal exclusivo</b>, como (n,2n); os fotões não contam. O motor dá a cada canal a sua própria secção eficaz (a sua probabilidade, como uma área efetiva do alvo).</p>
+  <h3>Canais de reação exclusivos</h3>
+  <p>Reproduz-se uma reação de cada vez: o marcador salta pela carta e cada partícula emitida cai no tabuleiro. Cada canal é reproduzido a uma energia a que realmente ocorre (no topo da imagem): (n,3n) a 25 MeV, já que três neutrões custam aqui mais de 20 MeV; a captura, (n,γ), a 1 MeV. O tabuleiro cheio dá nome ao <b>canal exclusivo</b>, como (n,2n); os fotões não contam. O motor dá a cada canal a sua própria secção eficaz (a sua probabilidade, como uma área efetiva do alvo).</p>
   <div class="btns"><button class="btn ghost" data-act="next">Canal seguinte</button></div>
   <p>Percorre-os. (n,np) reproduz-se duas vezes, primeiro com o neutrão e depois com o protão: a mesma casa, o mesmo tabuleiro, um só canal. Depois, um deuterão fantasma (um protão e um neutrão ligados) chega a essa casa num só salto: o seu tabuleiro diz d, outro canal, (n,d).</p>
 </div>
 <div class="step">
-  <h3>Onde tudo acaba</h3>
+  <h3>Produção residual</h3>
   <p>Cada casa tem agora prateleiras: de tinta para o <b>estado fundamental</b>, verde (em duas casas) para um <b>isómero</b>, um estado excitado que vive o suficiente para contar como produto à parte. A altura do monte é a <b>produção residual</b>: quanto de cada núcleo as reações fabricaram.</p>
   <div class="ctl"><label for="cs-e2">Energia do neutrão</label><input id="cs-e2" type="range" data-bind="E" min="1" max="30" step="0.5" value="14"><output data-show="E" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="fire">Lançar 200 reações</button></div>

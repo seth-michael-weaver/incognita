@@ -1,6 +1,6 @@
 /* Dutch (Nederlands): decay (Hoofdstuk 9, een uitgang kiezen) */
 WT.L.ch.decay = {
-  num: "Hoofdstuk 9", title: "Een uitgang kiezen", short: "Verval",
+  num: "Hoofdstuk 9", title: "Verval van de compoundkern", short: "Verval",
   lead: "De compoundkern moet haar energie kwijt door een deeltje of een foton uit te zenden. Dit hoofdstuk tekent elke uitweg als een deur. De taak van de motor is te zeggen welk deel van de flux (de stroom reacties die hier aankomt) door elke deur vertrekt.",
   html: `
 <div class="step">
@@ -9,41 +9,43 @@ WT.L.ch.decay = {
   <p>De <b>transmissiecoëfficiënt</b> <i>T</i> is de kans dat een deeltje dat de rand bereikt erdoor komt; voor deeltjes komt hij uit het optisch model van hoofdstuk 5, achterstevoren gedraaid. De <b>niveaudichtheid</b> ρ, naast elke deur geschreven, telt de toestanden waarin de overgebleven kern terecht kan komen. Verdelen volgens <i>T</i> maal ρ is de regel van <b>Hauser–Feshbach</b>. Bij 10 MeV neemt de neutrondeur bijna alles.</p>
 </div>
 <div class="step">
-  <h3>Waarom de meeste deeltjes langzaam naar buiten komen</h3>
+  <h3>Verdampingsspectra</h3>
   <p>De neutrondeur, opgesplitst naar uitgaande energie ε (langzaam links, snel rechts). De opening <i>T</i>(ε) van elke deur wordt breder voor snellere neutronen. Eronder staat de menigte toestanden waarin de overgebleven kern kan zijn: een langzaam neutron laat het meeste van de energie achter, waar toestanden volop zijn, dus de menigten krimpen naar rechts.</p>
   <div class="ctl"><label for="dc-sp">Beschikbare energie</label><input id="dc-sp" type="range" data-bind="spare" min="1" max="12" step="0.5" value="5"><output data-show="spare" data-fmt="1"></output></div>
   <p>Deur × menigte maakt van de stapel een bult, het <b>verdampingsspectrum</b>, zoals stoom die uit een hete vloeistof ontsnapt. Sleep de beschikbare energie (in MeV, miljoen elektronvolt): de stapel begint opnieuw, en zijn piek blijft rond 1 MeV, bepaald door de kerntemperatuur. Extra energie maakt vooral de overgebleven kern heter.</p>
 </div>
 <div class="step">
-  <h3>Geladen deeltjes moeten klimmen</h3>
-  <p>De energie van een proton op elke afstand r van het middelpunt: binnen een put, en buiten een heuvel door de elektrische (coulomb)afstoting, die afneemt als 1/r. Onder de top van de heuvel kan het proton, dat in de put heen en weer rammelt, alleen door het gearceerde stuk <b>tunnelen</b>, een quantumeffect dat eens in de vele botsingen tegen de wand lukt.</p>
+  <h3>De coulombbarrière bij emissie</h3>
+  <p>De energie van een proton op elke afstand r van het middelpunt: binnen een put, en buiten een heuvel door de elektrische (coulomb)afstoting, die afneemt als 1/r. Onder de top van de heuvel kan het proton, dat in de put heen en weer rammelt, alleen door het gearceerde stuk <b>tunnelen</b>, een quantumeffect dat eens in de vele botsingen tegen de wand lukt. De kans wordt berekend zoals in hoofdstuk 4: hoe breder en hoger het stuk, hoe meer nullen in “1 botsing op 10<sup>N</sup>”.</p>
   <div class="ctl"><label for="dc-ce">Deeltjesenergie</label><input id="dc-ce" type="range" data-bind="eps" min="0.5" max="12" step="0.1" value="3"><output data-show="eps" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="toggleAlpha">Wissel proton / alfa</button></div>
   <p>Sleep de energie omlaag en kijk hoe de tunnel breder wordt; wissel dan naar de alfa, wiens twee ladingen tegenover een ongeveer twee keer zo hoge heuvel staan. Daarom winnen ongeladen neutronen meestal zodra ze weg kunnen, en daarom tellen proton- en alfa-uitgangen vooral voor lichte kernen en hoge energieën.</p>
 </div>
 <div class="step">
-  <h3>Deuren gaan één voor één open</h3>
+  <h3>Drempels van de kanalen</h3>
   <p>Elke deeltjesdeur gaat pas open boven haar <b>separatie-energie</b>, de kosten om dat deeltje eruit te halen: hier 8 MeV voor een neutron, 9 voor een proton, 7 voor een alfa. Onder de 8 MeV van het neutron geeft bijna elk verval licht af.</p>
   <div class="ctl"><label for="dc-e">Excitatie-energie</label><input id="dc-e" type="range" data-bind="E" min="5" max="24" step="0.1" value="7"><output data-show="E" data-fmt="1"></output></div>
-  <p>Sleep de excitatie-energie voorbij 8 MeV. Binnen ongeveer 1 MeV zwaait de neutrondeur wijd open en zakt het fotonaandeel met een factor honderd. De proton- en alfadeuren lichten later op en blijven smal, tegengehouden door hun coulombheuvels.</p>
+  <p>Sleep de excitatie-energie voorbij 8 MeV. Binnen ongeveer 1 MeV zwaait de neutrondeur wijd open en zakt het fotonaandeel met een factor honderd. De alfadeur wordt als eerste ontgrendeld, bij 7 MeV, maar gaat nauwelijks open: haar coulombheuvel (hoofdstuk 4) houdt haar bijna dicht tot ver daarboven. De protondeur wordt ontgrendeld bij 9 MeV en blijft eveneens smal, tegengehouden door haar eigen heuvel.</p>
 </div>
 <div class="step">
-  <h3>Spin en pariteit moeten kloppen</h3>
+  <h3>Behoud van impulsmoment en pariteit</h3>
   <p>De compoundkern (boven) heeft spin <i>J</i>; de toestanden van de overgebleven kern zitten eronder in laden naar spin <i>J</i>′. Het neutron neemt het verschil in spin en pariteit mee: als het vertrekt met baanimpulsmoment <i>l</i>, verandert het de spin met hoogstens <i>l</i> + ½ en keert het de pariteit om als <i>l</i> oneven is. Een grotere <i>l</i> betekent een smallere deur; de deur van elke la is de kleinste <i>l</i> die haar bereikt. Dichte landingen behouden de pariteit; holle keren haar om.</p>
   <div class="ctl"><label for="dc-j">Compoundspin J</label><input id="dc-j" type="range" data-bind="J" min="0" max="10" step="1" value="2" data-instant><output id="dc-jout">5/2</output></div>
   <p>Sleep <i>J</i> omhoog. De open deuren schuiven naar laden met hoge spin, die weinig toestanden bevatten, terwijl de volle laden achter dichte deuren zitten. Een compoundkern met hoge spin zendt traag deeltjes uit, en dat geeft fotonen, en isomeren (langlevende toestanden, hoofdstuk 10), hun kans.</p>
 </div>
 <div class="step">
-  <h3>De weg waarlangs je binnenkwam</h3>
+  <h3>Elastische versterking</h3>
   <p>Bij lage energie is de compoundkern een verzameling scherpe <b>resonanties</b>, energieën waarbij het neutron makkelijk wordt geabsorbeerd; er zijn er acht getekend, één per rij. Elk heeft willekeurige deurbreedten: de ingang (het neutronkanaal) links, breedte <i>x</i>, en de andere deuren, hier vooral fotonen, rechts, breedten <i>y</i>.</p>
   <div class="btns"><button class="btn" data-act="fire">Schiet 40 neutronen af</button><button class="btn ghost" data-act="reroll">Nieuwe resonanties</button></div>
-  <p>Een neutron gaat resonantie <i>i</i> binnen met een kans evenredig met <i>x<sub>i</sub></i> en vertrekt via de ingang met kans <i>x<sub>i</sub></i> / (<i>x<sub>i</sub></i> + Σ<i>y</i>). Rijen met een brede ingang krijgen meer neutronen binnen en sturen er meer terug naar buiten, dus het echte aandeel dat terugkeert (een <b>gemiddelde van producten</b>) is groter dan de schatting uit gemiddelde breedten (een <b>product van gemiddelden</b>). De verhouding is de <b>elastische versterking</b>, en de <b>breedtefluctuatiecorrectie</b> verschuift die flux van de andere deuren naar de ingang.</p>
+  <p>Druk op Schiet af en volg de neutronen. Een neutron komt in een rij terecht in verhouding tot de ingangsbreedte <i>x</i> van die rij. Eenmaal binnen kiest het een uitweg in verhouding tot de breedtes: terug door de ingang met kans <i>x</i> / (<i>x</i> + Σ<i>y</i>), anders door een van de andere deuren. De bakjes tellen waar ze heen gingen.</p>
+  <p>De adder: een rij met een brede ingang krijgt meer neutronen binnen en stuurt er ook meer van terug naar buiten. Er komen dus meer terug dan je uit de gemiddelde breedten alleen zou verwachten. Het echte aandeel dat terugkeert (een <b>gemiddelde van producten</b>) is groter dan de eenvoudige schatting (een <b>product van gemiddelden</b>); beide staan bovenaan.</p>
+  <p>Hun verhouding is de <b>elastische versterking</b>. De <b>breedtefluctuatiecorrectie</b> van de motor past haar toe: ze verschuift die extra flux van de andere deuren terug naar de ingang.</p>
   <div class="ctl"><label for="dc-n">Andere deuren</label><input id="dc-n" type="range" data-bind="Nch" min="1" max="12" step="1" value="2" data-instant><output data-show="Nch" data-fmt="0"></output></div>
   <p>Voeg deuren toe. Met veel uitgangen fluctueert hun totale breedte niet meer, dus de correctie telt het zwaarst waar weinig deuren open zijn. De motor past haar toe, met de formule van Moldauer, voor invallende neutronen tot aan de neutronseparatie-energie van de trefkern, en laat haar daarboven weg.</p>
 </div>
 <div class="step">
-  <h3>Wat er overblijft om te verdelen</h3>
-  <p>Niet elk geabsorbeerd neutron vormt een compoundkern. Sommige maken één schampende treffer en vliegen weg (directe reacties, hoofdstuk 6); sommige botsen een of twee keer rond en schieten er snel uit (pre-evenwicht, hoofdstuk 7). Alleen de rest blijft en verhit de kern. De tellers houden elk lot bij.</p>
+  <h3>Flux na directe reacties</h3>
+  <p>De deuren van dit hoofdstuk verdelen alleen de neutronen die echt zijn gebleven. De hoofdstukken 6 en 7 hebben hun deel al genomen: sommige neutronen maken één schampende treffer en vliegen weg (direct), sommige botsen een of twee keer rond en schieten er snel uit (pre-evenwicht). Alleen de rest blijft binnen en verhit de kern. De tellers rechts houden elk lot bij; wie blijft, verlaat de kern nooit, hij wordt alleen geteld.</p>
   <div class="ctl"><label for="dc-einc">Neutronenergie</label><input id="dc-einc" type="range" data-bind="Einc" min="1" max="30" step="0.5" value="8"><output data-show="Einc" data-fmt="1"></output></div>
   <p>Alleen de neutronen die blijven, doen mee aan de deurencompetitie. Sleep de neutronenergie: bij een paar MeV blijven ze bijna allemaal; bij 30 MeV is ongeveer de helft vertrokken voordat het evenwicht bereikt is.</p>
   <div class="aside">In de code: <code>compound/prepare.py</code> (uitganggewichten T·ρ per spin en pariteit, selectieregels), <code>compound/target.py</code> (eerste verval met breedtefluctuaties), <code>compound/continuum.py</code> (verval van elke latere bin), <code>compound/wfc.py</code> (correcties van Moldauer, HRTW, GOE), <code>compound/normalization.py</code> (flux die overblijft voor de compoundkern), <code>omp/inverse.py</code> (deuren achterstevoren gedraaid).</div>

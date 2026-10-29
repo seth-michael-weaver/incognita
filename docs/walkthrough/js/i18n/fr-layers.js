@@ -56,7 +56,7 @@
   <p>Faites-la glisser et comptez les mesures à l'intérieur. Trop étroite, la bande promet une précision qu'elle n'a pas ; trop large, elle ne dit rien. La bande propre au moteur n'est pas encore adoptée : elle vise juste quand toutes les réactions sont regroupées, mais pas encore dans chaque famille de réactions. TERRA porte ses propres bandes, qui font partie de ses comparaisons ci-dessus.</p>
 </div>
 <div class="step">
-  <h3>Où nous en sommes</h3>
+  <h3>État actuel</h3>
   <p>Une couche n'est adoptée qu'après avoir été testée face aux mesures, et elle reste désactivée si elle n'aide pas. Aujourd'hui, le moteur est en service et TERRA est candidate ; la couche de structure mesurée et la bande d'incertitude du moteur sont encore en test.</p>
   <p><a href="scoreboard.html" data-keep-lang>Voir le tableau des scores complet →</a> Toutes les comparaisons que nous ne gagnons pas, chaque rival, et comment le lire.</p>
   <div class="aside">${ASOF ? `Scores au ${ASOF}, tirés du` : "Scores tirés du"} registre de recherche du projet. Les courbes de l'image sont indicatives.</div>
@@ -80,3 +80,4 @@ Object.assign(WT.L.labels, {
   "no measurements to check the band against": "aucune mesure pour vérifier la bande",
 });
 Object.assign(WT.L.ui, { nav_board: "Tableau des scores" });
+/* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

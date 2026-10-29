@@ -1,42 +1,42 @@
 /* Danish: gamma (chapter 7) */
 WT.L.ch.gamma = {
-  num: "Kapitel 10", title: "Kernen lyser", short: "Fotoner",
+  num: "Kapitel 10", title: "Gammaemission", short: "Fotoner",
   lead: "Når ingen partikel slipper ud, køler kernen af ved at udsende fotoner: gammastråler, partikler af højenergetisk lys. Denne udgang er åben ved alle energier.",
   html: `
 <div class="step">
   <p>En varm tilstand ved 8 MeV (millioner elektronvolt) udsender fotoner (γ); bunken ved siden af stigen samler, hvor de lander. Under 2 MeV er tilstandene nogle få navngivne trin; derover en mængde, der bliver stejlt tættere med energien (grå prikker). Hver foton tager energien fra sit fald, <i>E<sub>γ</sub></i>, med sig og tegnes lysere i forhold til <i>E<sub>γ</sub></i>³.</p>
   <div class="formula">T<sub>γ</sub>(E<sub>γ</sub>) = 2π · E<sub>γ</sub><sup>2l+1</sup> · f(E<sub>γ</sub>)</div>
-  <p><i>T<sub>γ</sub></i> er fotonens transmissionskoefficient (døren fra kapitel 9), <i>l</i> = 1 for dipolfotoner, og <i>f</i> er <b>fotonstyrken</b>: hvor villigt kernen stråler ved den energi. Et falds chance er <i>T<sub>γ</sub></i> gange mængden af tilstande, hvor det lander: små fald finder mange tilstande, men er svage; store fald er lysstærke, men finder få.</p>
+  <p>Med ord: hvor let en foton med energien <i>E<sub>γ</sub></i> slipper ud (<i>T<sub>γ</sub></i>, fotonens dør fra kapitel 9) vokser som <i>E<sub>γ</sub></i>³ for den almindelige type foton (dipol, <i>l</i> = 1), gange <b>fotonstyrken</b> <i>f</i>: hvor villigt denne kerne udstråler ved den energi. Derefter skal den finde en tilstand at lande på. Små dråber har en skare af tilstande, der venter, men slipper næsten ikke ud; store dråber slipper let ud, men finder få tilstande. Vinderne sidder midt imellem.</p>
   <div class="ctl"><label for="gm-e0">Startenergi</label><input id="gm-e0" type="range" data-bind="E0" min="3" max="9" step="0.5" value="8"><output data-show="E0" data-fmt="1"></output></div>
   <div class="btns"><button class="btn" data-act="emit">Udsend 100</button></div>
   <p>Bunken topper nogle få MeV under starten: de fleste fotoner bærer 2 til 4 MeV. Flyt startenergien, og toppen følger med.</p>
 </div>
 <div class="step">
-  <h3>Hele kernen svinger</h3>
-  <p>Den store top til højre er <b>kæmpedipolresonansen</b>: alle protonerne (skraveret, til venstre) svinger mod alle neutronerne (fyldt). Dens frekvens bestemmer den fotonenergi, kernen lettest absorberer og udsender. Kurven er fotonstyrken <i>f</i> på en logaritmisk skala (hvert trin op er ti gange mere).</p>
+  <h3>Kæmpedipolresonansen</h3>
+  <p>Den store top til højre er <b>kæmpedipolresonansen</b>: alle protonerne (skraverede) svingende frem og tilbage mod alle neutronerne (fyldte). Dens frekvens afgør, hvilken fotonenergi kernen lettest absorberer og udsender. Kurven er fotonstyrken <i>f</i> på logaritmisk skala (hvert trin op er ti gange mere).</p>
   <div class="ctl"><label for="gm-a">Massetal A</label><input id="gm-a" type="range" data-bind="A" min="40" max="240" step="1" value="112"><output data-show="A" data-fmt="0"></output></div>
   <p>Træk i massetallet A (protoner plus neutroner): tunge kerner svinger langsommere, nær 12 til 14 MeV; lette nær 20. En henfaldende kerne udsender kun fotoner på nogle få MeV, så det, der betyder mest, er den skraverede lavenergihale.</p>
 </div>
 <div class="step">
-  <h3>Saksen og upbend</h3>
+  <h3>Magnetisk styrke ved lav energi</h3>
   <p>En deformeret kerne stråler også magnetisk: dens protoner (skraveret) og neutroner (fyldt), to amerikanske fodbolde, vipper mod hinanden som saksens blade. Denne <b>saksetilstand</b> ligger nær 3 MeV. <b>Spin-flip</b>, nær 8 MeV, er enkelte nukleoner, der vender deres spin (de små pile), uanset form.</p>
   <div class="ctl"><label for="gm-b">Deformation β₂</label><input id="gm-b" type="range" data-bind="beta" min="0" max="0.35" step="0.01" value="0.25"><output data-show="beta" data-fmt="2"></output></div>
   <p>Træk i deformationen β₂ (0 er en kugle). Jo mere strakt, jo flere saksefotoner flyver; en kugle har ingen. Ved de laveste energier stiger styrken igen: <b>upbend</b>, en sivende strøm af bløde fotoner, som motoren svækker, når kernen deformeres. En valgfri indstilling, slået fra som standard, bruger en stærkere saksesystematik, der passer med målinger fra Oslo (fire til fem gange stærkere i uran).</p>
 </div>
 <div class="step">
-  <h3>Ned ad stigen</h3>
+  <h3>Gammakaskader</h3>
   <p>En kaskade er fotoner udsendt én efter én, fra intervallerne øverst (tilstande for tætte til at liste, kapitel 8) ned til de navngivne niveauer, strakt ud så de kan læses (fyldt trin paritet +, hult −). Dér holder motoren op med at estimere og følger de tabellerede <b>forgreningsforhold</b>: hvert niveaus målte sandsynlighed for at henfalde til hvert lavere niveau.</p>
   <div class="btns"><button class="btn" data-act="drop">Slip en kaskade</button></div>
   <p>Tryk på knappen et par gange: den øverste del ændrer sig hver gang; slutningen følger en af nogle få målte veje.</p>
 </div>
 <div class="step">
-  <h3>Hylder, der holder</h3>
+  <h3>Produktion af isomerer</h3>
   <p>Niveauet 11/2− ved 0,40 MeV er en <b>isomer</b>: dets spin ligger så langt fra niveauerne nedenunder, at en foton næppe kan forbinde dem, så det lever fra sekunder til år, og hvad der lander dér, bliver der. Motoren behandler ethvert niveau, der lever længere end ét sekund, som et endepunkt. Hver kugle er én kaskade, der ender i isomerens bunke eller grundtilstandens.</p>
   <div class="ctl"><label for="gm-j">Indgangsspin</label><input id="gm-j" type="range" data-bind="J0" min="0" max="8" step="1" value="2" data-instant><output id="gm-jout">5/2</output></div>
   <p>Træk i indgangsspinnet, hvor kaskaderne starter, og bunkerne starter forfra. Den andel, der ender på isomeren, <b>isomerforholdet</b>, afhænger af det: en start med højt spin fodrer isomeren med højt spin; en start med lavt spin glider forbi den til grundtilstanden.</p>
 </div>
 <div class="step">
-  <h3>Indfangning</h3>
+  <h3>Strålingsindfangning</h3>
   <p>En kerne, der lige har absorberet en langsom neutron, har to udgangsdøre (kapitel 9): fotoner (øverst) og neutronen, der går ud igen (til højre). Hver dørs åbning er dens <b>bredde</b>, i eV: hvor hurtigt kernen henfalder gennem den. Fotonbredden ændrer sig næsten ikke; neutronbredden vokser med neutronens fart.</p>
   <div class="ctl"><label for="gm-e">Neutronenergi</label><input id="gm-e" type="range" data-bind="lgE" min="-2" max="3.3" step="0.02" value="0"><output id="gm-eout">1,0 keV</output></div>
   <p>Træk i neutronenergien, fra 10 eV til 2 MeV. <b>Indfangning</b>, (n,γ), betyder, at neutronen bliver, og en foton forlader kernen: den vinder for det meste ved 10 eV og bliver en lille andel over nogle få keV. Fotonbredden ved tærsklen er målt for hundredvis af kerner, et tjek af fotonstyrken. Som standard bruger motoren sin egen; en valgfri indstilling skalerer hver målt kernes fotonstyrke, til de to stemmer overens.</p>

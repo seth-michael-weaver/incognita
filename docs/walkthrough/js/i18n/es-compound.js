@@ -1,6 +1,6 @@
 /* Spanish: compound (chapter 5) */
 WT.es.ch.compound = {
-  num: "Capítulo 8", title: "Repartir la energía", short: "Núcleo compuesto",
+  num: "Capítulo 8", title: "El núcleo compuesto", short: "Núcleo compuesto",
   lead: "Cuando terminan los primeros choques rápidos, todos los nucleones comparten la energía. Este estado asentado es el núcleo compuesto. Para predecir qué hará después, el motor necesita saber de cuántas formas puede guardar su energía.",
   html: `
 <div class="step">
@@ -9,33 +9,34 @@ WT.es.ch.compound = {
   <p>Pulsa el botón para lanzar el neutrón desde otro lado. El resplandor siempre termina igual: el núcleo ha <b>olvidado cómo se formó</b>. Es el núcleo compuesto de Bohr. A partir de aquí solo importan tres datos: su energía, su espín (cuánto gira) y su paridad (una etiqueta + o − para su simetría especular).</p>
 </div>
 <div class="step">
-  <h3>De niveles separados a un continuo</h3>
+  <h3>De los niveles discretos al continuo</h3>
   <p>La escalera de la izquierda contiene los estados del núcleo, con la energía hacia arriba; la ventana de la derecha amplía una franja de 1 MeV alrededor de la bola naranja. Cerca del fondo los peldaños están muy separados, y cada uno se ha medido. Más arriba, las formas de repartir la energía entre 56 nucleones se multiplican hasta que los peldaños se funden en una banda continua, el continuo.</p>
   <div class="ctl"><label for="cn-e">Energía de excitación</label><input id="cn-e" type="range" data-bind="E" min="0" max="20" step="0.1" value="6.5"><output data-show="E" data-fmt="1"></output></div>
   <p>Arrastra la energía de excitación (la energía guardada por encima del estado más bajo, en MeV) y observa la ventana. La <b>densidad de niveles</b> ρ, estados por MeV, crece aproximadamente como e<sup>2√(aE)</sup>, donde <i>a</i> marca el ritmo de cada núcleo: unos pocos por MeV a 3 MeV, cientos cerca de 8 MeV (donde un neutrón podría escapar), millones hacia 20 MeV. Ahí arriba el motor trabaja con la propia ρ.</p>
 </div>
 <div class="step">
-  <h3>Tres piezas unidas en una energía</h3>
+  <h3>La densidad de niveles compuesta</h3>
   <p>La altura del terreno es la densidad de niveles en escala logarítmica, con la energía hacia la derecha. Abajo a la izquierda están los niveles contados. El tablón recto es la ley de <b>temperatura constante</b>: ρ se multiplica por e (unos 2,7) cada <i>T</i> MeV, donde <i>T</i> es la temperatura nuclear. La ladera es el <b>gas de Fermi</b>, que trata los nucleones como partículas independientes. Salvo para los blancos más pesados, donde lee densidades tabuladas, el motor usa esta pareja por defecto.</p>
   <div class="ctl"><label for="cn-ex">Energía de empalme</label><input id="cn-ex" type="range" data-bind="Ex" min="4.5" max="12" step="0.05" value="6"><output data-show="Ex" data-fmt="1"></output></div>
   <p>Arrastra la energía de empalme: la unión se desliza por la colina y el tablón gira para encontrarla con la misma altura y pendiente. Las dos pilas de abajo comparan los niveles que predice el tablón con los realmente contados. Solo una unión los iguala; ahí el tablón se pone verde. Esa es la energía que elige el motor.</p>
 </div>
 <div class="step">
-  <h3>Capas que se funden</h3>
+  <h3>Efectos de capas y su amortiguamiento</h3>
   <p>Niveles de un solo nucleón, dos nucleones por nivel, para dos núcleos. A la izquierda, una capa cerrada: todo lo que hay bajo un gran hueco está lleno, así que cualquier movimiento paga el hueco entero. A la derecha, un núcleo de mitad de capa con el nivel superior medio lleno, así que hay movimientos baratos desde el principio. Cada contador muestra cuántas configuraciones admiten ese calor.</p>
   <div class="ctl"><label for="cn-u">Calor (excitación)</label><input id="cn-u" type="range" data-bind="U" min="0" max="40" step="0.5" value="3"><output data-show="U" data-fmt="1"></output></div>
-  <p>Sube el calor y mira cómo saltan los nucleones. Con poco calor, a la capa cerrada le faltan configuraciones; con calor suficiente el hueco deja de importar y ambas cuentas crecen igual. El <b>parámetro de densidad de niveles</b> <i>a</i> recoge esto: las agujas empiezan separadas y convergen en el valor suave <i>ã</i> a lo largo de unos 10 MeV. El motor desvanece la corrección de capas δW a un ritmo γ:</p>
-  <div class="formula">a(U) = ã · [1 + δW · (1 − e<sup>−γU</sup>) / U]</div>
+  <p>Sube el calor y mira cómo saltan los nucleones. Con poco calor, a la capa cerrada le faltan configuraciones; con calor suficiente el hueco deja de importar y ambas cuentas crecen igual. El motor lo resume en un número por núcleo, el <b>parámetro de densidad de niveles</b> <i>a</i>: cuanto mayor es <i>a</i>, más rápido crece con el calor el número de configuraciones. Las agujas lo muestran para cada núcleo: empiezan separadas y, a lo largo de unos 10 MeV, ambas se asientan en el mismo valor suave (escrito <i>ã</i>, «a tilde»), el que tendría un núcleo sin huecos de capa.</p>
+  <p>Así, el motor parte de cada núcleo con su efecto de capas, la energía extra que valen sus huecos (escrita δW), y deja que ese efecto se desvanezca al subir el calor.</p>
+  <div class="aside">La fórmula: <i>a</i>(<i>U</i>) = <i>ã</i> · [1 + δW · (1 − e<sup>−γ<i>U</i></sup>) / <i>U</i>], con <i>U</i> el calor y γ (gamma, unos 0,1 por MeV aquí, menos en núcleos más pesados) la rapidez con que se desvanece el efecto de capas.</div>
 </div>
 <div class="step">
-  <h3>Ordenados por espín y paridad</h3>
+  <h3>Distribuciones de espín y paridad</h3>
   <p>Los estados de una energía caen en cajones según el espín <i>J</i>, el momento angular del núcleo: fichas rellenas para paridad +, huecas para −. Los cajones del medio son los que más se llenan, siguiendo (2<i>J</i>+1) e<sup>−(J+½)²/2σ²</sup>, donde el corte de espín σ fija la anchura. Las dos paridades salen más o menos iguales.</p>
   <div class="ctl"><label for="cn-u2">Excitación</label><input id="cn-u2" type="range" data-bind="U2" min="1" max="30" step="0.5" value="8"><output data-show="U2" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="deform">Deformar el núcleo</button></div>
   <p>Sube la excitación: σ crece, porque un núcleo más caliente puede llevar más espín. Luego pulsa Deformar. Un núcleo con forma de balón de rugby también puede girar como un todo, así que cada cajón gana estados (las fichas azules): es el <b>realce colectivo</b>. Por defecto, el motor solo lo añade para blancos de más de unos 215 nucleones.</p>
 </div>
 <div class="step">
-  <h3>Troceado en intervalos</h3>
+  <h3>Intervalos de energía en el continuo</h3>
   <p>Por encima del último nivel contado, el motor corta el continuo en franjas de igual anchura en energía, llamadas intervalos (bins). En cada intervalo los puntos se agrupan en un bloque de ρ·ΔE estados (ΔE es la anchura del intervalo), repartido por espín y paridad como arriba.</p>
   <div class="ctl"><label for="cn-emax">Tope de la escalera</label><input id="cn-emax" type="range" data-bind="Emax" min="8" max="30" step="0.5" value="14"><output data-show="Emax" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="rebin">Volver a ordenar</button></div>

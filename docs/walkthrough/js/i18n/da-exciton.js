@@ -9,14 +9,14 @@ WT.L.ch.exciton = {
   <div class="formula">ω(p,h,E) = g<sup>n</sup> (E − A<sub>p,h</sub>)<sup>n−1</sup> / (p! h! (n−1)!) ,  A<sub>p,h</sub> = max(p,h)²/g − (p² + h² + p + h)/4g</div>
   <div class="ctl"><label for="ex-n">Partikler p (huller p − 1)</label><input id="ex-n" type="range" data-bind="pp" min="2" max="6" step="1" value="3" data-instant><output data-show="pp" data-fmt="0"></output></div>
   <div class="btns"><button class="btn ghost" data-act="pauli" aria-pressed="true">Pauli-korrektion</button></div>
-  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ er tætheden af enkeltpartikelniveauer nær Fermienergien. <i>A<sub>p,h</sub></i> er <b>Pauli</b>-korrektionen: to partikler kan ikke dele et niveau, så de laveste konfigurationer koster energi, og tætheden nær tærsklen falder. Skitsen viser én konfiguration ad gangen med det valgte <i>p</i>, trukket tilfældigt.</p>
+  <p><i>g</i> ≈ <i>A</i>/15 MeV⁻¹ er tætheden af enkeltpartikelniveauer nær Fermienergien. <i>A<sub>p,h</sub></i> er <b>Pauli</b>-korrektionen: to partikler kan ikke dele et niveau, så de laveste konfigurationer koster energi, og tætheden nær tærsklen falder. Kurverne er navngivet efter deres antal: 3p2h betyder 3 partikler og 2 huller. Skitsen viser én konfiguration ad gangen med det valgte <i>p</i>, trukket tilfældigt: hvert hul er én nukleon, der mangler under Ferminiveauet.</p>
 </div>
 <div class="step">
-  <h3>Dybere ind eller ud</h3>
+  <h3>Overgangs- og emissionsrater</h3>
   <p>Fra hvert trin kan der ske to ting. En kollision skaber endnu et par med raten λ<sup>+</sup>, som efter Fermis gyldne regel er det kvadrerede matrixelement gange tætheden af de tilstande, den kan nå. Eller en partikel forlader kernen med raten <i>W</i>, givet ved detaljeret balance ud fra det inverse tværsnit og forholdet mellem tilstandstæthederne med og uden den udsendte partikel.</p>
   <div class="formula">λ<sup>+</sup>(n) = (2π/ħ) M² ω<sub>acc</sub> ,  W(p,h,ε) = (2s+1)/(π²ħ³) με σ<sub>inv</sub>(ε) ω(p−1,h,U) / ω(p,h,E)</div>
   <div class="ctl"><label for="ex-e">Neutronenergi (MeV)</label><input id="ex-e" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
-  <p>Søjlerne er de to rater på hvert trin, på en logaritmisk skala: λ<sup>+</sup> af størrelsesordenen 10²² s⁻¹, <i>W</i> omkring en tiendedel af den på første trin og faldende for hvert trin, da hvert nyt par udtynder den energi, den førende partikel kan bære. Motoren tager M² fra Koning–Duijvestijn-formen, der falder med energien pr. exciton:</p>
+  <p>Hvert trin er mærket med sine antal (2p1h: 2 partikler, 1 hul). Søjlerne er de to rater på hvert trin, på logaritmisk skala: λ<sup>+</sup> af størrelsesordenen 10²² s⁻¹, <i>W</i> omkring en tiendedel af den på det første trin og faldende med hvert trin, da hvert nyt par tynder den energi ud, som den førende partikel kan bære. Motoren tager M² fra Koning–Duijvestijn-formen, som falder med energien pr. exciton:</p>
   <div class="formula">M² = (C₁ A<sub>p</sub> / A³) · [7.48 + 4.62×10⁵ / (E/(n A<sub>p</sub>) + 10.7)³]  MeV²</div>
 </div>
 <div class="step">
@@ -27,14 +27,14 @@ WT.L.ch.exciton = {
   <p>Hele kæden er overstået på nogle få 10⁻²² s. Den andel, der slipper ud undervejs, er præligevægtsemissionen; resten overdrages, efter højst seks partikler i motoren ligesom i TALYS, til compoundkernen. Tidsintegrationen giver hvert trin en styrke τ(<i>n</i>)·<i>P</i>(<i>n</i>), og det er dette produkt, motoren beregner.</p>
 </div>
 <div class="step">
-  <h3>Hvor den hårde hale kommer fra</h3>
+  <h3>Højenergihalen</h3>
   <p>Emissionsspektret er summen over trinene af population gange levetid gange emissionsrate plus fordampningen af det, der er tilbage. Trinnet <i>n</i> = 3 alene, to partikler og ét hul, når de højeste udgående energier: dets spektrum falder kun lineært mod endepunktet. Hvert senere trin er blødere.</p>
   <div class="formula">dσ/dε = σ<sub>CN</sub> Σ<sub>n</sub> P(n) τ(n) W(n,ε) + fordampning</div>
   <div class="ctl"><label for="ex-e3">Neutronenergi (MeV)</label><input id="ex-e3" type="range" data-bind="Ein" min="5" max="60" step="0.5" value="20"><output data-show="Ein" data-fmt="1"></output></div>
   <p>Hæv energien, og spektret bliver hårdere: præligevægtshalen strækker sig ud til endepunktet, mens fordampningspuklen bliver ved 1 til 2 MeV. Over omkring 10 MeV kan de målte højenergetiske neutroner kun gengives med denne hale.</p>
 </div>
 <div class="step">
-  <h3>Hvor stor en andel</h3>
+  <h3>Præligevægtsandelen</h3>
   <p>Den andel af emissionen, der er præligevægt, vokser med den indkommende energi, fra nogle få procent nær 5 MeV til omkring 40 procent ved 40 MeV her. Den afhænger af én justerbar konstant, matrixelementets samlede størrelse: en svagere vekselvirkning betyder langsommere ligevægtsindstilling og mere tidlig emission.</p>
   <div class="ctl"><label for="ex-c">Matrixelementkonstant C₁</label><input id="ex-c" type="range" data-bind="c1" min="0.3" max="3" step="0.05" value="1"><output data-show="c1" data-fmt="2"></output></div>
   <p>Den stiplede kurve er C₁ = 1, motorens standard; den fuldt optrukne følger skyderen. En halvering af C₁ hæver andelen med en faktor 1,5 til 1,9, ikke 2: hvert trins udslipssandsynlighed er W/(λ<sup>+</sup> + W), ikke W/λ<sup>+</sup>, og færre kerner overlever til de senere trin.</p>
@@ -90,3 +90,4 @@ Object.assign(WT.L.glossary, {
     chapter: "exciton",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="pauli" */

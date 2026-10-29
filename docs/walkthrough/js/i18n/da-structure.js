@@ -9,7 +9,7 @@ WT.L.ch.structure = {
   <p>Træk for at tilføje eller fjerne neutroner; hvert valg er en anden <b>isotop</b>. Søjlerne viser <b>bindingsenergien</b> per nukleon i MeV (millioner elektronvolt): den energi, der skal til for at trække kernen fra hinanden. Den topper nær de stabile isotoper.</p>
 </div>
 <div class="step">
-  <h3>Prisen for at trække én ud</h3>
+  <h3>Separationsenergier</h3>
   <p>Energien til at trække én partikel ud er dens <b>separationsenergi</b>: <i>S<sub>n</sub></i> for en neutron, <i>S<sub>p</sub></i> for en proton, <i>S<sub>α</sub></i> for en <b>alfapartikel</b> (to protoner og to neutroner bundet sammen). Billedet viser kernen som en brønd med energien opad; hvert træk løfter den øverste partikel ud forbi den stiplede "fri"-linje, og måleren registrerer prisen.</p>
   <div class="btns"><button class="btn ghost" data-act="pn">Træk en neutron ud</button><button class="btn ghost" data-act="pp">Træk en proton ud</button><button class="btn ghost" data-act="pa">Træk en alfa ud</button></div>
   <p>Motoren får hver af dem som forskellen mellem to kernemasser: målte, hvor det er muligt, ellers fra en massemodel.</p>
@@ -17,14 +17,14 @@ WT.L.ch.structure = {
   <p>Træk i antallet af neutroner og træk en neutron ud igen: <i>S<sub>n</sub></i> går i zigzag, fordi nukleoner danner par, og et lige antal holder fastere på den sidste. En reaktion kan kun kaste en partikel ud, hvis den bringer energi nok til at betale denne pris. Disse priser er hele beregningens <b>tærskler</b>.</p>
 </div>
 <div class="step">
-  <h3>Energiniveauer, og faldet nedad</h3>
+  <h3>Exciterede tilstande og gammahenfald</h3>
   <p>En kerne kan kun rumme bestemte, præcise mængder ekstra energi: linjerne, her for jern-56, med <b>grundtilstanden</b> nederst. Hvert niveau har et <b>spin</b> <i>J</i> (impulsmoment) og en <b>paritet</b>, + eller − (om dets bølge ser ens ud i et spejl); 2<sup>+</sup> betyder spin 2, paritet +.</p>
   <p>Den orange kugle er en kerne på et højt niveau. Den falder ét niveau ad gangen, og hvert hop kaster en <em class="g">foton</em> (en gammastråle) af sig, som bærer energiforskellen. Banernes bredde og procent er de målte odds for hvert hop, <b>forgreningsforholdene</b>.</p>
   <div class="btns"><button class="btn" data-act="drop">Excitér kernen</button></div>
   <p>Tryk et par gange: samme niveau når grundtilstanden ad forskellige veje. Motoren gemmer omkring tredive målte niveauer per kerne med deres odds; højere oppe behandler den de tætpakkede niveauer som et jævnt <b>kontinuum</b>. Over den stiplede linje, <i>S<sub>n</sub></i>, kan kernen udsende en neutron.</p>
 </div>
 <div class="step">
-  <h3>Et niveau uden nem vej ned</h3>
+  <h3>Isomerer: langlivede exciterede tilstande</h3>
   <p>Et niveau, hvis eneste vej ned kræver en stor spinændring, Δ<i>J</i>, henfalder meget langsomt. Til højre sidder 64 kerner på sådan et niveau; hver venter en tilfældig tid, falder så ned, og en <em class="g">foton</em> springer ud. Halvdelen er faldet efter én <b>halveringstid</b>.</p>
   <div class="ctl"><label for="st-dj">Spinændring ΔJ</label><input id="st-dj" type="range" data-bind="dJ" min="1" max="5" step="1" value="2" data-instant><output data-show="dJ" data-fmt="0"></output></div>
   <div class="ctl"><label for="st-eg">Fotonenergi (MeV)</label><input id="st-eg" type="range" data-bind="Eg" min="0.05" max="1.5" step="0.05" value="0.3"><output data-show="Eg" data-fmt="2"></output></div>
@@ -32,15 +32,15 @@ WT.L.ch.structure = {
   <p>Hæv Δ<i>J</i>, og glimtene bliver sjældnere: hver ekstra enhed spin gør ventetiden hundrede tusind gange længere eller mere, og lavere fotonenergi forlænger den også (vist på logaritmisk skala). Et niveau, der lever længere end ca. et sekund, er en <b>isomer</b>, og motoren behandler det som et endepunkt, ligesom grundtilstanden.</p>
 </div>
 <div class="step">
-  <h3>Rund, eller ej</h3>
+  <h3>Kernedeformation</h3>
   <p>Mange kerner er ikke runde. <i>β₂</i> ("beta-to") måler strækningen: 0 er en kugle, positiv er strakt som en amerikansk fodbold, negativ er trykket flad til en skive. Stigen til højre viser de niveauer, hver slags giver.</p>
   <p>En aflang kerne kan rotere og giver niveauerne 0<sup>+</sup>, 2<sup>+</sup>, 4<sup>+</sup>, 6<sup>+</sup> med afstande, der vokser som <i>J</i>(<i>J</i>+1): en <b>rotor</b>. En rund kerne kan kruse; hver enhed krusning, en <b>fonon</b>, tilføjer samme energi, så dens niveauer ligger med lige store afstande: en <b>vibrator</b>.</p>
   <div class="ctl"><label for="st-beta">Deformation β₂</label><input id="st-beta" type="range" data-bind="beta" min="-0.3" max="0.45" step="0.01" value="0.28"><output data-show="beta" data-fmt="2"></output></div>
   <div class="btns"><button class="btn ghost" data-act="still">I ro</button><button class="btn ghost" data-act="vib">Vibrerende</button><button class="btn ghost" data-act="rot">Roterende</button></div>
-  <p>Træk i <i>β₂</i> og tryk på knapperne: en større strækning trækker rotorens niveauer tættere sammen. Motoren gemmer deformationer per kerne og en mærkat: sfærisk, vibrator eller rotor. Kapitel 6 viser, hvordan en forbipasserende neutron bruger dem.</p>
+  <p>Træk i <i>β₂</i> og tryk på knapperne: en større strækning trækker rotorens niveauer tættere sammen. En vibrator er rund i gennemsnit, så skyderen hviler, mens den bølger; og en kugle kan ikke rotere i denne forstand (at dreje den ændrer intet), så nær <i>β₂</i> = 0 forsvinder rotorbåndet. Motoren gemmer deformationer pr. kerne og en etiket: sfærisk, vibrator eller rotor. Kapitel 6 viser, hvordan en forbipasserende neutron bruger dem.</p>
 </div>
 <div class="step">
-  <h3>Fingeraftryk lige over tærsklen</h3>
+  <h3>Resonansparametre over neutrontærsklen</h3>
   <p>En langsom neutron, der forener sig med målkernen, lander lige over <i>S<sub>n</sub></i>, i den lille boks til venstre. Panelet til højre forstørrer den boks tusindvis af gange, med neutronenergien fra venstre mod højre.</p>
   <div class="ctl"><label for="st-fe">Stråleenergi</label><input id="st-fe" type="range" data-bind="fe" min="0" max="1" step="0.001" value="0.3" data-instant><output id="st-fe-out"></output></div>
   <div class="btns"><button class="btn ghost" data-act="fplay" id="st-fplay">Sæt gennemløbet på pause</button></div>

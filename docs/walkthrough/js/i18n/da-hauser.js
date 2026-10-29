@@ -20,6 +20,7 @@ WT.L.ch.hauser = {
 </div>
 <div class="step">
   <h3>Breddefluktuationer</h3>
+  <p>Den simple formel undervurderer elastisk spredning en smule, og korrektionen flytter lidt flux tilbage til den fra de andre udgange. Her er hvorfor.</p>
   <p>Med <i>W<sub>ab</sub></i> = 1 ganger formlen gennemsnit. Resonanserne bag gennemsnittene har bredder, der spreder sig (Porter–Thomas, kapitel 15), og ved elastisk spredning er den bredde, der lukker neutronen ind, den samme, som lukker den ud, så de to er korrelerede. Gennemsnittet af produkterne overstiger da produktet af gennemsnittene for den elastiske kanal, og de andre udgange mister, hvad den elastiske vinder.</p>
   <div class="btns"><button class="btn ghost" data-act="w0" aria-pressed="false">Uden korrektion</button><button class="btn ghost" data-act="w1" aria-pressed="true">Moldauer</button></div>
   <div class="ctl"><label for="hf-e3">Neutronenergi (MeV)</label><input id="hf-e3" type="range" data-bind="lgE" min="-3" max="0.7" step="0.01" value="-0.3"><output data-show="Eshow" data-fmt="3"></output></div>
@@ -35,10 +36,11 @@ WT.L.ch.hauser = {
   <p>De to stemmer nøje overens for elastisk og uelastisk spredning; for indfangning i keV-området fjerner HRTW op til 10 procent mere. Mellem 0,85 og 2 MeV vinder indfangning endda: dér domineres den totale bredde af nogle få fluktuerende neutronbredder, og gennemsnittet af 1/Γ overstiger 1/⟨Γ⟩. Begge opskrifter er tilpasninger til det eksakte resultat fra teorien for tilfældige matricer (GOE), som TALYS også tilbyder som et tredobbelt integral. INCOGNITA porterer alle tre (<code>widthmode</code> 1, 2, 3); Moldauer er standard og anvendes for indkommende neutroner op til targetkernens neutronseparationsenergi.</p>
 </div>
 <div class="step">
-  <h3>Mellem 3 og 2</h3>
+  <h3>Grænser for den elastiske forstærkning</h3>
+  <p>Hvor stor kan den elastiske forstærkning blive? Mellem to og tre gange, afhængigt af om resonanserne ligger adskilt eller overlapper.</p>
   <p>Grænsetilfældene forklarer effektens størrelse. Tag <i>N</i> ens kanaler uden indfangning, og varier deres sum ΣT, som er 2π gange forholdet mellem den gennemsnitlige totale bredde og niveauafstanden, Γ/<i>D</i>. Med isolerede resonanser (ΣT ≪ 1) og mange kanaler følger hver bredde Porter–Thomas med én frihedsgrad, og den elastiske forstærkning er ⟨Γ<sub>a</sub>²⟩/⟨Γ<sub>a</sub>⟩² = 3. Når resonanserne overlapper kraftigt (ΣT ≫ 2π), fluktuerer tværsnittet som en tilfældig bølge (Ericson-fluktuationer), og forstærkningen falder til 2.</p>
   <div class="ctl"><label for="hf-n">Åbne kanaler N</label><input id="hf-n" type="range" data-bind="nch" min="2" max="60" step="1" value="30" data-instant><output data-show="nch" data-fmt="0"></output></div>
-  <p>For <i>N</i> isolerede kanaler er den eksakte værdi 3<i>N</i>/(<i>N</i>+2) (ruden): med kun to kanaler kan forstærkningen ikke overstige 1,5, fordi den totale bredde så fluktuerer lige så meget som den elastiske. Moldauers opskrift gengiver denne grænse; HRTW når den ikke, når mange svage kanaler er åbne. Indsatsen tegner resonanser med den bredde, der hører til det bevægelige punkt. I Moldauers formel er grænsen for mange kanaler 1 + 2/ν: ν → 1 for isolerede resonanser, ν → 1,78, når de overlapper (2,12, tilpasningens lille fejl ved fuldt overlap).</p>
+  <p>For <i>N</i> isolerede kanaler er den eksakte værdi 3<i>N</i>/(<i>N</i>+2) (diamanten): med kun to kanaler kan forstærkningen ikke overstige 1,5, fordi den totale bredde da fluktuerer lige så meget som den elastiske. Moldauers opskrift gengiver denne grænse; HRTW når ikke op på den, når mange svage kanaler er åbne. Indsatsen tegner resonanser med den bredde, der hører til det bevægelige punkt. I Moldauers formel er mangekanalgrænsen 1 + 2/ν: ν → 1 for isolerede resonanser og ν → 1,78, når de overlapper. Det giver 2,12 ved fuldt overlap i stedet for 2: en lille fejl i tilpasningen.</p>
   <div class="aside">I koden: <code>compound/prepare.py</code> (udgangskanaler og deres transmissioner pr. <i>J</i><sup>π</sup>), <code>compound/target.py</code> (Hauser–Feshbach-summerne), <code>compound/wfc.py</code> (Moldauer, HRTW og GOE, porteret fra TALYS). Billedet evaluerer de samme formler med illustrative ingredienser: hårdkugletransmissioner for en jernlignende targetkerne, syv niveauer, et konstanttemperatur-kontinuum og én samlet indfangningskanal.</div>
 </div>`,
 };
@@ -109,3 +111,4 @@ Object.assign(WT.L.glossary, {
     chapter: "hauser",
   },
 });
+/* attributes referenced in the English chapter script (for the structure check): data-act="w0" data-act="w1" data-show="jbShow" */

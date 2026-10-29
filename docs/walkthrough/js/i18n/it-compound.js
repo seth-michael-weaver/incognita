@@ -1,6 +1,6 @@
 /* Italian: compound (Capitolo 8, nucleo composto) */
 WT.L.ch.compound = {
-  num: "Capitolo 8", title: "Spartire l'energia", short: "Nucleo composto",
+  num: "Capitolo 8", title: "Il nucleo composto", short: "Nucleo composto",
   lead: "Finiti i primi urti rapidi, tutti i nucleoni condividono l'energia. Questo stato assestato è il nucleo composto. Per prevedere che cosa farà dopo, il motore deve sapere in quanti modi può contenere la sua energia.",
   html: `
 <div class="step">
@@ -9,33 +9,34 @@ WT.L.ch.compound = {
   <p>Premi il pulsante per mandare il neutrone da un altro lato. Il bagliore finisce sempre allo stesso modo: il nucleo ha <b>dimenticato come si è formato</b>. È il nucleo composto di Bohr. Da qui in poi contano solo tre cose: la sua energia, il suo spin (quanto ruota) e la sua parità (un'etichetta + o − per la sua simmetria speculare).</p>
 </div>
 <div class="step">
-  <h3>Dai livelli separati a un continuo</h3>
+  <h3>Dai livelli discreti al continuo</h3>
   <p>La scala a sinistra contiene gli stati del nucleo, con l'energia che sale verso l'alto; la finestra a destra ingrandisce una fetta di 1 MeV attorno alla palla arancione. Vicino al fondo i pioli sono molto distanziati, e ognuno è stato misurato. Più in alto, i modi di spartire l'energia fra 56 nucleoni si moltiplicano finché i pioli si fondono in una banda compatta, il continuo.</p>
   <div class="ctl"><label for="cn-e">Energia di eccitazione</label><input id="cn-e" type="range" data-bind="E" min="0" max="20" step="0.1" value="6.5"><output data-show="E" data-fmt="1"></output></div>
   <p>Trascina l'energia di eccitazione (l'energia contenuta sopra lo stato più basso, in MeV) e osserva la finestra. La <b>densità dei livelli</b> ρ, stati per MeV, cresce più o meno come e<sup>2√(aE)</sup>, dove <i>a</i> fissa il ritmo di ogni nucleo: pochi per MeV a 3 MeV, centinaia vicino a 8 MeV (dove un neutrone potrebbe uscire), milioni verso 20 MeV. Lassù il motore lavora direttamente con ρ.</p>
 </div>
 <div class="step">
-  <h3>Tre pezzi, uniti a una certa energia</h3>
+  <h3>La densità di livelli composita</h3>
   <p>L'altezza del terreno è la densità dei livelli in scala logaritmica, con l'energia verso destra. In basso a sinistra stanno i livelli contati. L'asse dritta è la legge a <b>temperatura costante</b>: ρ si moltiplica per e (circa 2,7) ogni <i>T</i> MeV, dove <i>T</i> è la temperatura nucleare. Il pendio è il <b>gas di Fermi</b>, che tratta i nucleoni come particelle indipendenti. Tranne che per i bersagli più pesanti, per cui legge densità tabulate, il motore usa questa coppia per impostazione predefinita.</p>
   <div class="ctl"><label for="cn-ex">Energia di raccordo</label><input id="cn-ex" type="range" data-bind="Ex" min="4.5" max="12" step="0.05" value="6"><output data-show="Ex" data-fmt="1"></output></div>
   <p>Trascina l'energia di raccordo: il giunto scivola lungo la collina e l'asse ruota per incontrarlo con la stessa altezza e la stessa pendenza. Le due pile in basso confrontano i livelli previsti dall'asse con quelli effettivamente contati. Solo un giunto li rende uguali; lì l'asse diventa verde. Quella è l'energia che sceglie il motore.</p>
 </div>
 <div class="step">
-  <h3>Shell che si sciolgono</h3>
+  <h3>Effetti di shell e loro smorzamento</h3>
   <p>Livelli di singolo nucleone, due nucleoni ciascuno, per due nuclei. A sinistra, una shell chiusa: tutto ciò che sta sotto un grande gap è pieno, quindi ogni spostamento paga l'intero gap. A destra, un nucleo a metà shell con il livello più alto pieno a metà, quindi esistono subito spostamenti economici. Ogni contatore mostra quante configurazioni possono contenere quel calore.</p>
   <div class="ctl"><label for="cn-u">Calore (eccitazione)</label><input id="cn-u" type="range" data-bind="U" min="0" max="40" step="0.5" value="3"><output data-show="U" data-fmt="1"></output></div>
-  <p>Aumenta il calore e guarda i nucleoni saltare. Con poco calore la shell chiusa è a corto di configurazioni; con abbastanza calore il gap smette di contare ed entrambi i conteggi crescono allo stesso modo. Il <b>parametro di densità dei livelli</b> <i>a</i> porta con sé questo effetto: gli aghi partono distanti e convergono sul valore liscio <i>ã</i> nell'arco di circa 10 MeV. Il motore attenua la correzione di shell δW con un ritmo γ:</p>
-  <div class="formula">a(U) = ã · [1 + δW · (1 − e<sup>−γU</sup>) / U]</div>
+  <p>Aumenta il calore e guarda i nucleoni saltare. Con poco calore la shell chiusa è a corto di configurazioni; con abbastanza calore il gap smette di contare ed entrambi i conteggi crescono allo stesso modo. Il motore riassume tutto questo in un numero per nucleo, il <b>parametro di densità dei livelli</b> <i>a</i>: più <i>a</i> è grande, più in fretta cresce con il calore il numero di configurazioni. Gli aghi lo mostrano per ciascun nucleo: partono distanti e, nell'arco di circa 10 MeV, si assestano entrambi sullo stesso valore liscio (scritto <i>ã</i>, «a tilde»), quello che avrebbe un nucleo senza gap di shell.</p>
+  <p>Così il motore parte per ogni nucleo dal suo effetto di shell, l'energia in più che valgono i suoi gap (scritta δW), e lo lascia svanire al crescere del calore.</p>
+  <div class="aside">La formula: <i>a</i>(<i>U</i>) = <i>ã</i> · [1 + δW · (1 − e<sup>−γ<i>U</i></sup>) / <i>U</i>], con <i>U</i> il calore e γ (gamma, circa 0,1 per MeV qui, meno nei nuclei più pesanti) la rapidità con cui l'effetto di shell svanisce.</div>
 </div>
 <div class="step">
-  <h3>Ordinati per spin e parità</h3>
+  <h3>Distribuzioni di spin e parità</h3>
   <p>Gli stati a una data energia cadono in cassetti secondo lo spin <i>J</i>, il momento angolare del nucleo: gettoni pieni per la parità +, vuoti per −. I cassetti centrali sono i più pieni, secondo (2<i>J</i>+1) e<sup>−(J+½)²/2σ²</sup>, dove il cutoff di spin σ fissa la larghezza. Le due parità risultano più o meno uguali.</p>
   <div class="ctl"><label for="cn-u2">Eccitazione</label><input id="cn-u2" type="range" data-bind="U2" min="1" max="30" step="0.5" value="8"><output data-show="U2" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="deform">Deforma il nucleo</button></div>
   <p>Fai salire l'eccitazione: σ cresce, perché un nucleo più caldo può portare più spin. Poi premi Deforma. Un nucleo a forma di pallone da rugby può anche ruotare nel suo insieme, quindi ogni cassetto guadagna stati (i gettoni blu): è l'<b>incremento collettivo</b>. Per impostazione predefinita il motore lo aggiunge solo per bersagli con più di circa 215 nucleoni.</p>
 </div>
 <div class="step">
-  <h3>Tagliato in intervalli</h3>
+  <h3>Intervalli di energia nel continuo</h3>
   <p>Sopra l'ultimo livello contato il motore taglia il continuo in fette di uguale larghezza in energia, chiamate intervalli (bin). In ogni intervallo i punti si raccolgono in un blocco di ρ·ΔE stati (ΔE è la larghezza dell'intervallo), ordinati per spin e parità come sopra.</p>
   <div class="ctl"><label for="cn-emax">Cima della scala</label><input id="cn-emax" type="range" data-bind="Emax" min="8" max="30" step="0.5" value="14"><output data-show="Emax" data-fmt="1"></output></div>
   <div class="btns"><button class="btn ghost" data-act="rebin">Riordina</button></div>

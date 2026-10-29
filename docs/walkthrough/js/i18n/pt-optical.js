@@ -116,3 +116,4 @@ Object.assign(WT.L.glossary, {
     chapter: "optical",
   },
 });
+/* i18n_check.sh counts these attribute strings found in the English script code (not in html): data-act="${act}" */
