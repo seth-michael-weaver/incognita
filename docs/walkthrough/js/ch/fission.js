@@ -149,9 +149,10 @@
     for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + 0.3, ex = Math.cos(a) * (sx + sep + 36), ey = Math.sin(a) * (sy + 36); g.arrow(cx + ex, cy + ey, cx + Math.cos(a) * (sx + sep + 14), cy + Math.sin(a) * (sy + 14), c.soft, 1.4, 0.5, 6); }
     const cl = 24 + 28 * d; g.arrow(cx + sx + sep + 6, cy, cx + sx + sep + 6 + cl, cy, c.proton, 2.2, 0.9); g.arrow(cx - sx - sep - 6, cy, cx - sx - sep - 6 - cl, cy, c.proton, 2.2, 0.9);
     g.label("surface tension pulls it round", cx, cy - sy - 60, { color: c.soft, size: fs, bg: true });
-    g.label("the protons push it apart", cx, cy + sy + 58, { color: c.proton, size: fs, bg: true });
+    const pY = cy + sy + (W < 600 ? 30 : 58);            // phones: keep the two labels under the drop from overlapping
+    g.label("the protons push it apart", cx, pY, { color: c.proton, size: fs, bg: true });
     const cap = d < 0.3 ? "a charged drop, nearly round" : d < 0.6 ? "stretched: more surface, charge further apart" : d < 0.88 ? "a neck forms" : "two fragments, carrying about 200 MeV";
-    g.label(cap, cx, H * 0.78, { color: c.ink, size: fs + 3, weight: 600, serif: true });
+    g.label(cap, cx, Math.max(H * 0.78, pY + fs + 14), { color: c.ink, size: fs + 3, weight: 600, serif: true });
     // the drop's energy along the way, a small hill below
     const F = frameOf(g, { x0: 0.25, x1: 0.75, yTop: 0.85, yBot: 0.97, vMin: -7, vMax: 8 });
     const pts = []; for (let i = 0; i <= 100; i++) pts.push([F.X(i / 100), F.Y(herm(CP_LD, i / 100))]);

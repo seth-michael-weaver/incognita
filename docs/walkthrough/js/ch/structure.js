@@ -168,7 +168,7 @@
       const x = lerp(x0, x1, (n - n0) / (n1 - n0)), p = bind(Z0, n) / (Z0 + n), h = hmax * clamp((p - pmin) / (pmax - pmin), 0.05, 1);
       const on = n === N;
       g.ctx.save(); g.ctx.globalAlpha = on ? 0.9 : 0.35; g.ctx.fillStyle = on ? c.warm : c.faint; g.ctx.fillRect(x - 5, yb - h, 10, h); g.ctx.restore();
-      if (on) g.label(`${Z0 + n}`, x, yb - h - 10, { color: c.warm, size: 11 });
+      if (on) { const capY = cy + R + 34, ly = yb - h - 10; if (ly > capY + 14) g.label(`${Z0 + n}`, x, ly, { color: c.warm, size: 11 }); else g.label(`${Z0 + n}`, x + 9, yb - h / 2, { color: c.warm, size: 11, align: "left" }); }   // beside the bar when the caption is close
     }
     g.label("binding per nucleon, one bar per isotope →", x1, yb + 14, { color: c.faint, size: 11, align: "right" });
   }

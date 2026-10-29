@@ -784,3 +784,5 @@ body.shot .part-head { display: none; }
 
 
 @media (prefers-reduced-motion: reduce) { .ch-rail .rail-more { transition: none; } }
+/* phones (Seth 2026-10-28): no chapter-dot menu and no floating chapter chip (it sat over the text); the chapter headings say where you are */
+@media (max-width: 900px) { .ch-rail { display: none !important; } }
