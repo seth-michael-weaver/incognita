@@ -789,3 +789,52 @@ body.shot .part-head { display: none; }
 /* hero text higher (Seth 2026-10-28): centred on wide screens; on phones raised, leaving the band above it for the nucleus */
 .hero-copy { justify-content: center; bottom: max(72px, 11vh); }
 @media (max-width: 720px) { .hero .hero-copy { justify-content: flex-end; bottom: calc(19vh + 64px); } }
+
+/* ---------- immersive hero (2026-10-29): no text-left / picture-right split. The nucleus is centred and large, the title runs
+   edge to edge across it as solid type, the rest is a quiet caption row along the bottom. Phones keep their stacked layout. */
+@media (min-width: 721px) {
+  .hero { --hero-gold: #f4e2a8; }
+  .hero .hero-copy { left: 0; right: 0; top: 0; bottom: 0; max-width: none; padding: 0 max(24px, 5vw) max(150px, 20vh); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; pointer-events: none; }
+  .hero h1 { position: absolute; left: 0; right: 0; top: 43%; transform-origin: var(--ho, 50% 50%); opacity: 0; transform: translate(var(--hx, 0px), calc(-50% + var(--hy, 0px))) scale(.03); will-change: transform, opacity; margin: 0; padding-inline: 4vw; text-align: center; font-size: clamp(52px, min(8vw, 14vh), 144px); line-height: .9; letter-spacing: -0.035em; color: var(--hero-gold); text-wrap: balance; pointer-events: none; text-shadow: 0 2px 6px rgba(2,3,8,.55), 0 6px 40px rgba(2,3,8,.6); } /* solid: nothing shows through; the dark halo keeps it readable over the white-hot nucleus */
+  .hero .hero-tag { font-size: clamp(22px, 2.1vw, 32px); line-height: 1.3; margin: 0 0 14px; color: #fff; }
+  .hero .hero-credit { max-width: 30rem; }
+  .hero .hero-hint { position: absolute; left: max(24px, 5vw); bottom: max(28px, 5vh); display: flex; align-items: center; gap: 12px; margin: 0; text-align: left; } /* bottom-left corner, level with the scroll cue */
+  [dir="rtl"] .hero .hero-hint { left: auto; right: max(24px, 5vw); }
+  [dir="rtl"] .hero .hero-copy { align-items: center; }
+}
+/* the title flies out of the centre of the nucleus toward the reader when the first neutron hits (js/ch/intro.js adds .hero-live) */
+@media (min-width: 721px) {
+  .hero.hero-live h1 { animation: hero-zoom 2.6s cubic-bezier(.16, 1, .3, 1) both; }
+  /* the bottom text (tagline, fire button, credit, scroll cue) waits until the title has landed */
+  .hero .hero-tag, .hero .hero-hint, .hero .hero-credit, .hero .scrollcue { opacity: 0; visibility: hidden; }
+  .hero.hero-live .hero-tag, .hero.hero-live .hero-hint, .hero.hero-live .hero-credit { animation: hero-after .7s ease-out 2.4s both; }
+  .hero .scrollcue { transition: opacity .7s ease-out 2.4s, visibility 0s 2.4s; } /* a transition, so its own colour pulse (cueflash) keeps running */
+  .hero.hero-live .scrollcue { opacity: 1; visibility: visible; }
+}
+@keyframes hero-after { from { opacity: 0; visibility: visible; } to { opacity: 1; visibility: visible; } }
+@keyframes hero-zoom { from { transform: translate(var(--hx, 0px), calc(-50% + var(--hy, 0px))) scale(.03); opacity: 0; } 35% { opacity: 1; } to { transform: translate(var(--hx, 0px), calc(-50% + var(--hy, 0px))) scale(var(--hk, 1)); opacity: 1; } } /* transform + opacity only: no filter, so it stays on the compositor */
+@media (prefers-reduced-motion: reduce) { .hero h1 { animation: none !important; opacity: 1 !important; transform: translate(var(--hx, 0px), calc(-50% + var(--hy, 0px))) scale(var(--hk, 1)) !important; } .hero .hero-tag, .hero .hero-hint, .hero .hero-credit, .hero .scrollcue { animation: none !important; opacity: 1 !important; visibility: visible !important; } }
+
+
+/* ---------- hero reactions (js/ch/intro.js heroReact): the title and tagline answer what the nucleus does ---------- */
+@media (min-width: 721px) and (prefers-reduced-motion: no-preference) {
+  .hero h1 .hw { display: inline-block; }
+  .hero.rx-impact h1 .hw { animation: rx-jolt .45s ease-out; }
+  .hero.rx-impact h1 { --rx: rgba(255,176,103,.85); }
+  .hero.rx-gamma { --rx: rgba(255,209,102,.95); }
+  .hero.rx-proton { --rx: rgba(255,106,92,.9); }
+  .hero.rx-alpha { --rx: rgba(180,140,255,.9); }
+  .hero.rx-neutron, .hero.rx-two { --rx: rgba(111,140,255,.9); }
+  .hero.rx-impact h1, .hero.rx-gamma h1, .hero.rx-proton h1, .hero.rx-alpha h1, .hero.rx-neutron h1 { animation: hero-zoom 2.6s cubic-bezier(.16, 1, .3, 1) both, rx-glow 1.6s ease-out; }
+  .hero.rx-two h1 { animation: hero-zoom 2.6s cubic-bezier(.16, 1, .3, 1) both, rx-glow .8s ease-out 2; }
+  .hero.rx-gamma .hero-tag, .hero.rx-proton .hero-tag, .hero.rx-alpha .hero-tag, .hero.rx-neutron .hero-tag, .hero.rx-two .hero-tag { animation: hero-after .7s ease-out 2.4s both, rx-tag 1.6s ease-out; }
+}
+@keyframes rx-glow { 0% { text-shadow: 0 2px 6px rgba(2,3,8,.55), 0 0 0 transparent; } 18% { text-shadow: 0 2px 6px rgba(2,3,8,.55), 0 0 42px var(--rx, transparent); } 100% { text-shadow: 0 2px 6px rgba(2,3,8,.55), 0 6px 40px rgba(2,3,8,.6); } }
+@keyframes rx-tag { 0% { color: #fff; } 20% { color: var(--rx, #fff); } 100% { color: #fff; } }
+@keyframes rx-jolt { 0% { transform: translate(0, 0); } 20% { transform: translate(-6px, 3px); } 45% { transform: translate(5px, -2px); } 70% { transform: translate(-2px, 1px); } 100% { transform: translate(0, 0); } }
+
+/* the chapter-dot menu waits for the title to land, then fades in with the rest of the hero text (intro.js adds body.hero-done) */
+@media (min-width: 721px) and (prefers-reduced-motion: no-preference) {
+  body:has(.hero):not(.hero-done) .ch-rail { opacity: 0 !important; pointer-events: none !important; }
+  body:has(.hero) .ch-rail { transition-duration: .7s; }
+}

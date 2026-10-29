@@ -17,6 +17,7 @@
     try { if (heroWorker(hero, cv)) return; } catch (e) { console.error("hero worker", e); }
   }
   const ctx = cv.getContext("2d"), copy = hero.querySelector(".hero-copy");
+  if (!self.__heroWorker) setTimeout(() => heroLive(hero), 7000); // fallback only: the first strike comes at T_IMP = 1.9 s
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const TAU = Math.PI * 2, clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, s) => a + (b - a) * s;
   const smooth = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
@@ -81,13 +82,15 @@
   let tiltX = 0, tiltY = 0, tgtX = 0, tgtY = 0, scrollP = 0, shake = 0, flash = 0, flashCol = C.white, impacted = false, emitted = false;
   let spin = 1, fis = { e: 0, sep: 0, done: false, rot: 0, alpha: 1, away: 0 }, reform = 1, kick = 0;
   const parts = [], rings = [], shots = [];
-  let imp = { x: 0, y: 0, t: -99 };
+  let imp = { x: 0, y: 0, t: -99 }, titled = false;
+  // the title and tagline react to what the nucleus does (impact, each emission): see heroReact below
+  const signal = (e, k) => { if (self.__heroWorker) self.postMessage({ t: "rx", e, k }); else heroReact(hero, e, k); };
   const geo = () => {
     const phone = W < 720;
     // the nucleus stays put while the page scrolls (no zoom or drift): the hero is what visitors see on arrival
     // phones: the nucleus fills the band above the text, never behind the title
     const room = phone ? Math.max(120, copy.offsetTop + (copy.firstElementChild ? copy.firstElementChild.offsetTop : 0)) : 0; // the copy box is bottom-aligned: its first line is where the text starts
-    const R = phone ? Math.min(W * 0.13, room * 0.3) : Math.min(W, H) * 0.24, cx = W * (phone ? 0.5 : 0.64), cy = phone ? room * 0.56 : H * 0.47;
+    const R = phone ? Math.min(W * 0.13, room * 0.3) : Math.min(W, H) * 0.27, cx = W * 0.5, cy = phone ? room * 0.56 : H * 0.43; // wide screens: centred and large, the title runs across it (immersive hero, 2026-10-29)
     return { R, cx, cy, phone };
   };
 
@@ -116,11 +119,14 @@
   }
 
   function impact(x, y, strength) {
+    if (!titled) { titled = true; if (self.__heroWorker) self.postMessage({ t: "impact" }); else heroLive(hero); } // the title flies out of the first hit
+    else signal("impact");
     imp = { x, y, t: time, s: strength }; flash = Math.max(flash, 0.55 * strength); flashCol = C.white; shake = Math.max(shake, 10 * strength);
     rings.push({ x, y, t: time, s: strength, col: C.white }, { x, y, t: time + 0.08, s: strength * 0.7, col: C.hot });
   }
 
   function emit(k, cx, cy, R) {
+    signal("emit", k);
     const a = ang, sp = Math.max(W, H) * 0.55, out = (dir, extra) => ({ x: cx + Math.cos(dir) * R * 1.02, y: cy + Math.sin(dir) * R * 1.02, vx: Math.cos(dir) * sp, vy: Math.sin(dir) * sp, t0: time, trail: [], ...extra });
     if (k === "gamma") { parts.push(out(a, { k: "gam" }), out(a + 2.5, { k: "gam" })); flash = 0.7; flashCol = C.gam; }
     else if (k === "proton") parts.push(out(a, { k: "p" }));
@@ -324,12 +330,12 @@
       while (ctx.measureText(tr(cap)).width > W - 28 && fs > 10) { fs -= 0.5; ctx.font = `italic 500 ${fs}px "Source Serif 4", Georgia, serif`; } // fit narrow screens
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillStyle = "rgba(230,236,250,0.92)"; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 12;
-      ctx.fillText(tr(cap), cx, phone ? Math.max(18, cy - R * 1.5) : Math.min(H - 30, cy + R * 1.5)); // phones: above the nucleus, clear of the title
+      ctx.fillText(tr(cap), cx, phone ? Math.max(18, cy - R * 1.5) : Math.max(24, cy - R * 1.32)); // phones: above the nucleus, clear of the title
       ctx.shadowBlur = 0; ctx.shadowColor = "transparent"; // was inside the comment above: the caption's shadow stayed on for every later sprite (seconds per frame without a GPU canvas)
     }
     // left-side shade so the title stays readable over the picture
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1;
-    if (!phone) { const g = ctx.createLinearGradient(0, 0, W * 0.55, 0); g.addColorStop(0, "rgba(2,3,8,0.72)"); g.addColorStop(1, "rgba(2,3,8,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W * 0.55, H); }
+    if (!phone) { const g = ctx.createLinearGradient(0, H * 0.62, 0, H); g.addColorStop(0, "rgba(2,3,8,0)"); g.addColorStop(1, "rgba(2,3,8,0.78)"); ctx.fillStyle = g; ctx.fillRect(0, H * 0.62, W, H * 0.38); } // bottom shade for the caption row
     else { const g = ctx.createLinearGradient(0, H * 0.45, 0, H); g.addColorStop(0, "rgba(2,3,8,0)"); g.addColorStop(1, "rgba(2,3,8,0.85)"); ctx.fillStyle = g; ctx.fillRect(0, H * 0.45, W, H * 0.55); }
   }
 
@@ -342,7 +348,7 @@
     const r = hero.getBoundingClientRect(); scrollP = clamp(-r.top / Math.max(1, r.height), 0, 1);
     if (copy) { copy.style.opacity = String(clamp(1 - scrollP * 2.2, 0, 1)); copy.style.transform = `translateY(${-scrollP * 60}px)`; }
   }
-  let visible = true, last = 0; let maxDpr = 2, slowAcc = 0, slowN = 0;
+  let visible = true, last = 0; let maxDpr = 2, slowAcc = 0, slowN = 0; const boot = performance.now(); // page-load jank in the first seconds is not a slow device: do not drop resolution for it
   new IntersectionObserver((ents) => ents.forEach((en) => (visible = en.isIntersecting))).observe(hero);
   window.addEventListener("resize", () => { resize(); if (reduce) frame(0); });
   window.addEventListener("scroll", onScroll, { passive: true });
@@ -357,7 +363,7 @@
   }
   function loop(now) {
     const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
-    if (visible && dt > 0) { slowAcc += dt; slowN++; if (slowN >= 90) { if (slowAcc / slowN > 0.019 && maxDpr > 1) { maxDpr = Math.max(1, dpr - 0.5); resize(); } slowAcc = 0; slowN = 0; } } // slow device: step the resolution down
+    if (visible && dt > 0 && now - boot > 4000) { slowAcc += dt; slowN++; if (slowN >= 90) { if (slowAcc / slowN > 0.019 && maxDpr > 1) { maxDpr = Math.max(1, dpr - 0.5); resize(); } slowAcc = 0; slowN = 0; } } // slow device: step the resolution down
     if (visible && !document.hidden) frame(ff ? 0 : dt); // a fast-forwarded screenshot holds still
     requestAnimationFrame(loop);
   }
@@ -379,7 +385,9 @@
     const scroll = () => { const r = hero.getBoundingClientRect(), p = Math.max(0, Math.min(1, -r.top / Math.max(1, r.height)));
       if (copy) { copy.style.opacity = String(Math.max(0, Math.min(1, 1 - p * 2.2))); copy.style.transform = `translateY(${-p * 60}px)`; }
       return { heroTop: r.top, heroH: r.height }; };
-    w.onerror = (e) => { console.error("hero worker", e.message || e); cv.style.visibility = "hidden"; }; // the dark hero background stays
+    w.onmessage = (e) => { const d = e.data || {}; if (d.t === "impact") heroLive(hero); else if (d.t === "rx") heroReact(hero, d.e, d.k); };
+    setTimeout(() => heroLive(hero), 7000); // fallback only: the first strike comes at T_IMP = 1.9 s
+    w.onerror = (e) => { console.error("hero worker", e.message || e); cv.style.visibility = "hidden"; heroLive(hero); }; // the dark hero background stays
     w.postMessage({ t: "init", canvas: off, size: size(), scroll: scroll(), tr, fonts, og: document.body.classList.contains("og") }, [off]);
     const rel = (e) => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height }; };
     const nudge = () => { if (cue) cue.classList.add("hot"); };
@@ -393,5 +401,37 @@
     new IntersectionObserver((ents) => ents.forEach((en) => w.postMessage({ t: "vis", v: en.isIntersecting }))).observe(hero);
     document.addEventListener("visibilitychange", () => w.postMessage({ t: "hidden", v: document.hidden }));
     return true;
+  }
+  // ---------- page side: the title and tagline answer the reaction (classes styled in style.css "hero reactions") ----------
+  // the title becomes live at the first strike: words go into spans BEFORE the zoom starts (no re-layout once it has landed)
+  function heroLive(hero) {
+    if (self.__heroWorker || !hero.classList || hero.classList.contains("hero-live")) return;
+    const h1 = hero.querySelector("h1");
+    if (h1 && !h1.querySelector(".hw")) {
+      const words = h1.textContent.trim().split(/\s+/);
+      h1.innerHTML = words.map((w) => `<span class="hw">${w.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c])}</span>`).join(" ");
+    }
+    heroAim(hero); window.addEventListener("resize", () => heroAim(hero));
+    hero.classList.add("hero-live");
+    setTimeout(() => document.body.classList.add("hero-done"), 2400); // the chapter-dot menu fades in with the bottom text (style.css)
+  }
+  // centre the word "Nuclear" (any word starting "nucl", else the middle word) on the nucleus, which sits at the hero's centre line;
+  // the zoom grows out of that word, and the title shrinks (--hk) if the shift would push it off the screen. Layout offsets ignore transforms.
+  function heroAim(hero) {
+    const h1 = hero.querySelector("h1"), ws = h1 ? [...h1.querySelectorAll(".hw")] : [];
+    if (!ws.length || window.innerWidth < 721) return;
+    const w = ws.find((x) => /^nucl/i.test(x.textContent)) || ws[Math.floor(ws.length / 2)];
+    const bw = h1.offsetWidth, bh = h1.offsetHeight, wx = w.offsetLeft + w.offsetWidth / 2, wy = w.offsetTop + w.offsetHeight / 2;
+    let l = Infinity, r = -Infinity; for (const x of ws) { l = Math.min(l, x.offsetLeft); r = Math.max(r, x.offsetLeft + x.offsetWidth); }
+    const half = Math.max(wx - l, r - wx), room = bw / 2 - 24, k = Math.min(1, room / half);
+    h1.style.setProperty("--hx", `${(bw / 2 - wx).toFixed(1)}px`); h1.style.setProperty("--hy", `${(bh / 2 - wy).toFixed(1)}px`);
+    h1.style.setProperty("--ho", `${wx.toFixed(1)}px ${wy.toFixed(1)}px`); h1.style.setProperty("--hk", k.toFixed(3));
+  }
+  function heroReact(hero, e, k) {
+    if (self.__heroWorker || !hero.classList || !hero.classList.contains("hero-live")) return;
+    const cls = e === "impact" ? "rx-impact" : "rx-" + k;
+    hero.classList.remove("rx-impact", "rx-gamma", "rx-proton", "rx-alpha", "rx-neutron", "rx-two");
+    void hero.offsetWidth; // restart the CSS animation
+    hero.classList.add(cls);
   }
 })();
