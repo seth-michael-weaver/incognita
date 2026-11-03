@@ -1025,5 +1025,86 @@
       short: "Scored on the same measurements the method was fitted to, which flatters it.",
       more: "The fair test is out of sample: refit without the data being judged, then compare. TERRA's comparisons do this for part of the board, leaving one data series out at a time.",
     },
+    /* ---------- part three: fusion ---------- */
+    fusion: {
+      term: "Fusion", aliases: ["fusion"], scope: "chapter",
+      short: "Two light nuclei joining into a heavier one; the product weighs less than the parts, and the difference comes out as energy.",
+      more: "Deuterium and tritium make helium-4 and a 14.1 MeV neutron, releasing 17.6 MeV. Their electric repulsion means they must collide fast, which is why fusion needs a gas at around 100 million kelvin.",
+      chapter: "fusion",
+    },
+    plasma: {
+      term: "Plasma", aliases: ["plasma"], scope: "chapter",
+      short: "A gas so hot that the electrons are stripped from the nuclei, so it is made of charged particles.",
+      more: "Because every particle is charged, a magnetic field can steer it. Fusion plasmas run at 10 to 20 keV, over 100 million kelvin.",
+      chapter: "tokamak",
+    },
+    gamowPeak: {
+      term: "Gamow peak", aliases: ["Gamow peak", "Gamow window"],
+      short: "The narrow band of collision energies where almost all fusion in a hot gas happens.",
+      more: "Fast collisions are rare (the Maxwell tail falls as e^(−E/kT)) but tunnel more easily (e^(−√(E_G/E)) rises); their product peaks at E₀, several times kT.",
+      formula: "E_0 = (E_G (kT)^2 / 4)^(1/3)",
+      chapter: "gamow",
+    },
+    reactivity: {
+      term: "Reactivity", aliases: ["reactivity", "⟨σv⟩"],
+      short: "The fusion cross section times the relative speed, averaged over a hot gas: it sets how fast fusions happen.",
+      more: "The rate per volume is n₁ n₂ ⟨σv⟩. For D–T it peaks near 65 keV at about 8.7 × 10⁻²² m³/s (the fits used here are Bosch and Hale, 1992).",
+      chapter: "gamow",
+    },
+    ignition: {
+      term: "Ignition", aliases: ["ignition", "triple product", "Lawson criterion"],
+      short: "The point where the fusion alpha particles heat the plasma as fast as it loses heat, so it stays hot by itself.",
+      more: "For D–T it needs density × energy confinement time × temperature of about 3 × 10²¹ keV s m⁻³, at its easiest near 14 keV. Q is fusion power divided by the heating put in; ignition is Q → ∞.",
+      formula: "n τ_E ≥ 3T / (⟨σv⟩ E_α / 4 − C_B √T)",
+      chapter: "gamow",
+    },
+    gyroRadius: {
+      term: "Gyro-radius", aliases: ["gyro-radius", "Larmor radius"],
+      short: "The radius of the circle a charged particle makes around a magnetic field line.",
+      more: "It grows with the particle's momentum and shrinks with the field: a 10 keV deuteron in 5 tesla circles in about 4 mm, a 3.5 MeV alpha in about 5 cm.",
+      formula: "ρ = √(2mE) / (|q| B)",
+      chapter: "tokamak",
+    },
+    tokamak: {
+      term: "Tokamak", aliases: ["tokamak"],
+      short: "A doughnut-shaped magnetic bottle: a strong field around the ring plus a weaker one around the tube, so the lines twist.",
+      more: "The twist matters: a field that only went round the ring would let particles drift out. ITER and JET are tokamaks; stellarators get the twist from shaped coils instead.",
+      chapter: "tokamak",
+    },
+    safetyFactor: {
+      term: "Safety factor", aliases: ["safety factor"],
+      short: "q: how many times a field line goes round the ring for each time it goes round the tube.",
+      more: "Where q is a simple fraction (2, 3/2, 3), field lines close on themselves, and small ripples in the field can grow into magnetic islands.",
+      chapter: "tokamak",
+    },
+    island: {
+      term: "Magnetic island", aliases: ["islands", "magnetic island", "magnetic islands"], scope: "chapter",
+      short: "A chain of closed loops in the field lines, torn open where the twist q is a simple fraction.",
+      more: "Inside an island the field lines short-circuit across the nested surfaces, so heat leaks faster. Where islands of neighbouring fractions overlap, the field lines wander: chaos.",
+      chapter: "tokamak",
+    },
+    blanket: {
+      term: "Breeding blanket", aliases: ["blanket", "breeding blanket", "breeder"], scope: "chapter",
+      short: "The layer around a fusion plasma that catches its neutrons, turns their energy into heat and breeds tritium from lithium.",
+      more: "Lithium-6 makes tritium with slow neutrons; lithium-7 does it with fast ones; lead or beryllium add neutrons through (n,2n).",
+      chapter: "blanket",
+    },
+    tbr: {
+      term: "Tritium breeding ratio", aliases: ["TBR", "tritium breeding ratio"],
+      short: "Tritium nuclei made in the blanket per tritium nucleus burned in the plasma; it must exceed 1.",
+      more: "Each D–T fusion burns one triton and makes one neutron, so each neutron must make more than one triton on average, to cover ports, losses and decay.",
+      chapter: "blanket",
+    },
+    firstWall: {
+      term: "First wall", aliases: ["first wall"],
+      short: "The surface facing the plasma, hit by the full flux of 14.1 MeV neutrons.",
+      more: "Reactions such as (n,α) and (n,p) leave helium and hydrogen inside the metal; helium gathers into bubbles that make steel brittle.",
+      chapter: "blanket",
+    },
+    appm: {
+      term: "appm", aliases: ["appm"],
+      short: "Atomic parts per million: how many atoms of a gas, such as helium, per million atoms of the metal.",
+      chapter: "blanket",
+    },
   };
 })();

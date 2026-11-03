@@ -14,9 +14,11 @@ import sys
 from pathlib import Path
 
 D = Path(__file__).resolve().parent
-ORDER = ["intro", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "layers", "hauser", "optical", "densities", "strength", "exciton", "averages"]
+ORDER = ["intro", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "layers", "hauser", "optical", "densities", "strength", "exciton", "averages", "fusion", "gamow", "tokamak", "blanket"]
 
 IGNORE = {
+    # part three (fusion): element names and picture words
+    "Lithium", "million-degree", "Tungsten Vanadium Copper SiC",
     # single-letter variables and symbols the text defines on the spot
     *"a b k l r x y i n p d E J T W S K A N Z R U".split(), "J′", "xi", "Tb", "Tc", "ρb", "ρc", "Σc", "TA", "TB", "Tfis", "ΔJ", "ΔE",
     "σ", "γ", "α", "ε", "θ", "μ", "ħ", "δ", "e", "n′", "2n", "3n", "En−1", "Eγ2l+1", "E3/2", "2J+1", "(2J+1)", "x²", "β²", "Sp",

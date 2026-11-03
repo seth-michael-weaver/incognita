@@ -4,7 +4,7 @@ Live at <https://www.incognitanuclear.org/>. Three pages, in English and Spanish
 
 | Page | What it is |
 |---|---|
-| `index.html` | **The physics**: an explorable explanation of what the engine computes, in the order it computes it. A live, full-screen hero (a neutron hitting a nucleus), then eighteen chapters (twelve, then six Expert chapters in part two): a pinned drawing beside the text that changes as you read, with controls in the text that drag the physics. |
+| `index.html` | **The physics**: an explorable explanation of what the engine computes, in the order it computes it. A live, full-screen hero (a neutron hitting a nucleus), then thirty-two chapters (twenty-two; six Expert chapters in part two; four fusion chapters in part three, one per level): a pinned drawing beside the text that changes as you read, with controls in the text that drag the physics. |
 | `data.html` | **Every nuclide**: a chart of nuclides; for any nuclide, the v0.2 library's predicted curves (68 / 95 % bands) beside every curated EXFOR measurement, with dataset links, a table view and the command that reproduces the numbers. |
 | `scoreboard.html` | **Scoreboard**: how the engine and the data product compare with other codes and libraries, losses first. |
 | `pipeline.html` | **Pipeline**: how measurements become a reactor library (measurements, R-matrix fit, ENDF-6 file, NJOY, OpenMC library, benchmarks, judges), as a lit diagram with one live drawing per stage and the current status, losses first. Code in `js/pipeline.js`, styles in `pipeline.css`. |
@@ -25,9 +25,10 @@ cd docs/walkthrough && python3 serve.py 8765    # then open http://localhost:876
 |---|---|
 | `index.html`, `style.css` | Page shell, typography and layout for all pages (light and dark tokens on `:root`) |
 | `js/nav.js` | Site header on every page: links, EN \| ES switch, phone menu |
-| `js/kit.js` | Chapter runtime: scroll-driven steps, inline controls (`data-bind`, `data-show`, `data-act`), eased state, drawing helpers (`g.label` shrinks labels to fit), glossary cards |
+| `js/kit.js` | Chapter runtime: scroll-driven steps, inline controls (`data-bind`, `data-show`, `data-act`), eased state, drawing helpers (`g.label` shrinks labels to fit), glossary cards, `WT.shader` (WebGL fragment shaders drawn into a chapter canvas; null without WebGL, so keep a CPU fallback), `WT.grab` (drags and taps on the drawing) |
 | `js/ch/intro.js` | The hero animation (standalone canvas loop, not a chapter) |
 | `js/ch/<id>.js` | One chapter each: its text (`html`) and its drawing (`frame`) |
+| `js/ch/fusion.js`, `gamow.js`, `tokamak.js`, `blanket.js` | Part three, fusion. Physics explanation, except the last step of the blanket chapter, which reads INCOGNITA's (n,α), (n,p), (n,2n) at 14.1 MeV from `data/n/`. `WT.fus` (Bosch–Hale reactivities) lives in fusion.js. Plan: `FUSION_PLAN.md` |
 | `js/glossary.js` | One entry per technical term; the first use per chapter is marked and explained in a card |
 | `js/i18n.js`, `js/i18n/es-*.js` | Language layer and Spanish text; the Spanish files load only for Spanish readers |
 | `js/data.js`, `data/` | The data explorer and its data: `data/index.json` (one row per nuclide) and `data/n/<Z>/<A>.json` (one nuclide, fetched only when it is opened) |
@@ -65,6 +66,7 @@ cd docs/walkthrough && python3 serve.py 8765    # then open http://localhost:876
 | `?og=1` | Render the hero alone at 1200 × 630, as used for `og.png` (the share image) |
 | `?theme=dark` / `?theme=light` | Force a colour theme |
 | `?i18ndump=1` | List canvas labels that have no Spanish translation |
+| `?nogl=1` | Turn WebGL off, to check the CPU fallback of shader drawings |
 
 ## Deploy
 

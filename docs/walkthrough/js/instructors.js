@@ -41,6 +41,10 @@
     ["strength", 26, 3, 18, 5, "Photon strength, in detail", "Photon strength", "E1 (SLO and SMLO) and M1 (spin-flip, scissors, upbend), the Brink–Axel hypothesis, the average radiative width ⟨Γγ⟩ and the γ cascade."],
     ["exciton", 27, 3, 20, 6, "The exciton model, in numbers", "Exciton model", "Particle–hole state densities, transition and emission rates, the exciton chain in time, the hard tail of spectra, the pre-equilibrium share and the two-component model."],
     ["averages", 28, 3, 18, 5, "From resonances to averages", "Resonances to averages", "The R-matrix formula, the statistics of resonance parameters, Doppler broadening, the energy average that becomes Hauser–Feshbach, and resolved, unresolved and smooth ranges."],
+    ["fusion", 29, 0, 10, 3, "Fusion and the Coulomb barrier", "Fusion", "Two light nuclei over the Coulomb hill: tunnelling, the energy released as missing mass, fuels compared, and why the gas must be hot."],
+    ["gamow", 30, 1, 12, 3, "The Gamow peak and ignition", "Gamow peak", "The Gamow peak from the Maxwell tail and tunnelling, reactivities of D–T, D–D and D–³He, and the Lawson plane with a 0-D power balance to ignition."],
+    ["tokamak", 31, 2, 12, 3, "Magnetic confinement", "Confinement", "Gyration in a magnetic field, the twisted field of a tokamak and its safety factor, Poincaré sections, magnetic islands and chaos (the tokamap)."],
+    ["blanket", 32, 3, 15, 3, "Breeding blanket and first wall", "Blanket", "Monte Carlo neutron transport in a breeding blanket: tritium breeding ratio, ⁶Li enrichment, (n,2n) multiplication; helium and hydrogen in the first wall from INCOGNITA's 14.1 MeV cross sections."],
   ].map(([id, n, lv, min, steps, title, topic, what], i) => ({ id, n: i + 1, lv, min, steps, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
   const byId = Object.fromEntries(CH.map((c) => [c.id, c]));
   const lang = WT.langQ();

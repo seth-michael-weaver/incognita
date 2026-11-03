@@ -179,6 +179,67 @@
     return g;
   }
 
+  // ---------- WebGL fragment shaders, drawn into a chapter's 2D canvas ----------
+  // WT.shader(fragBody) compiles a full-screen fragment shader on one shared off-screen WebGL canvas and returns
+  // { draw(g, uniforms, res) }, or null when WebGL is unavailable (the chapter then draws its CPU fallback).
+  // The body defines `vec4 shade(vec2 p)` with p in CSS pixels of the stage (origin top left); uniforms are numbers or
+  // arrays of 2-4 numbers (float / vec2..vec4); u_size (stage size) is set automatically. res = pixel density (default 1).
+  let GL = null, GLC = null, GLfail = false;
+  function glInit() {
+    if (GL || GLfail) return GL;
+    try {
+      GLC = document.createElement("canvas");
+      GL = GLC.getContext("webgl", { premultipliedAlpha: false, preserveDrawingBuffer: true, antialias: false, alpha: true });
+    } catch (e) { GL = null; }
+    if (!GL) { GLfail = true; return null; }
+    const b = GL.createBuffer(); GL.bindBuffer(GL.ARRAY_BUFFER, b); GL.bufferData(GL.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), GL.STATIC_DRAW);
+    return GL;
+  }
+  WT.shader = function (body) {
+    if (/[?&]nogl=1/.test(location.search)) return null;   // dev aid: force the CPU fallback
+    const gl = glInit(); if (!gl) return null;
+    const vs = "attribute vec2 a;varying vec2 v;void main(){v=a*0.5+0.5;gl_Position=vec4(a,0.,1.);}";
+    const fs = "precision highp float;varying vec2 v;uniform vec2 u_size;\n" + body + "\nvoid main(){gl_FragColor=shade(vec2(v.x,1.-v.y)*u_size);}";
+    const mk = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; } return s; };
+    const v = mk(gl.VERTEX_SHADER, vs), f = mk(gl.FRAGMENT_SHADER, fs); if (!v || !f) return null;
+    const p = gl.createProgram(); gl.attachShader(p, v); gl.attachShader(p, f); gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(p)); return null; }
+    const loc = {}, aLoc = gl.getAttribLocation(p, "a");
+    return {
+      draw(g, U, res = 1) {
+        const w = Math.max(2, Math.round(g.W * res)), h = Math.max(2, Math.round(g.H * res));
+        if (GLC.width !== w || GLC.height !== h) { GLC.width = w; GLC.height = h; }
+        gl.viewport(0, 0, w, h); gl.useProgram(p);
+        gl.enableVertexAttribArray(aLoc); gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+        const set = (k, val) => { if (!(k in loc)) loc[k] = gl.getUniformLocation(p, k); const l = loc[k]; if (!l) return;
+          if (typeof val === "number") gl.uniform1f(l, val); else [, , gl.uniform2fv, gl.uniform3fv, gl.uniform4fv][val.length].call(gl, l, val); };
+        set("u_size", [g.W, g.H]); for (const k in U) set(k, U[k]);
+        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3);
+        g.ctx.drawImage(GLC, 0, 0, g.W, g.H);
+      },
+    };
+  };
+  /** A theme colour as [r, g, b] in 0..1 (for shader uniforms). */
+  WT.rgb01 = (hex) => { const h = (hex || "#888888").replace("#", ""); const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
+
+  // ---------- direct manipulation on a chapter's drawing ----------
+  // WT.grab(canvas, { down(x, y, e) -> true to start a drag, move(x, y, e), up(x, y, e) }), coordinates in CSS pixels of
+  // the stage. Attached once per canvas. Wide screens take any drag; on phones (narrow) the picture must still scroll, so
+  // touch keeps vertical panning and a tap still lands (down + up).
+  WT.grab = function (cv, h) {
+    if (cv._grab) { cv._grab = h; return; } cv._grab = h;
+    const narrow = () => cv.clientWidth < 600;
+    const set = () => { cv.style.touchAction = narrow() ? "pan-y" : "none"; };
+    set(); window.addEventListener("resize", set);
+    const xy = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    let on = false;
+    cv.addEventListener("pointerdown", (e) => { const H = cv._grab; if (!H || !H.down) return; const [x, y] = xy(e); if (H.down(x, y, e) === true) { on = true; try { cv.setPointerCapture(e.pointerId); } catch (er) {} e.preventDefault(); } });
+    cv.addEventListener("pointermove", (e) => { const H = cv._grab; if (!H) return; const [x, y] = xy(e); if (on) { H.move && H.move(x, y, e); } else if (H.hover) H.hover(x, y, e); });
+    const end = (e) => { if (!on) return; on = false; const H = cv._grab; const [x, y] = xy(e); H && H.up && H.up(x, y, e); };
+    cv.addEventListener("pointerup", end);
+    cv.addEventListener("pointercancel", () => { if (!on) return; on = false; const H = cv._grab; H && H.cancel && H.cancel(); }); // the page scrolled instead
+  };
+
   // ---------- chapter runtime ----------
   function makeState(id) {
     const S = { id, target: {}, speed: 6, time: 0, step: -1, handlers: {} };
@@ -438,7 +499,8 @@
     const chapters = [];
     const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
     const LEVEL = { structure: 0, xsec: 0, binding: 0, landscape: 0, neutrons: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, fisout: 1, products: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, doppler: 1, critical: 1, layers: 2,
-      hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3 }; // the Expert part (chapters 23-28)
+      hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3, // the Expert part (chapters 23-28)
+      fusion: 0, gamow: 1, tokamak: 2, blanket: 3 }; // part three, fusion (chapters 29-32): one chapter per level
     // chapter numbers follow page order (1..N), in the reader's language: "Chapter 1" (or its translation) with the number replaced
     const order = [...document.querySelectorAll("[data-ch]")].map((el) => el.dataset.ch).filter((id) => WT.mods[id] && WT.mods[id].title);
     const numTpl = (order.length && ((WT.tl && WT.L.ch[order[0]] && WT.L.ch[order[0]].num) || WT.mods[order[0]].num)) || "Chapter 1";
