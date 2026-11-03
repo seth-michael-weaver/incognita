@@ -42,7 +42,8 @@
     return Math.exp(-(2 / Math.PI) * Math.sqrt(EGDT / E) * (Math.acos(Math.sqrt(x)) - Math.sqrt(x * (1 - x))));
   }
   const pFuse = (E, b) => pTun(E) * Math.exp(-((b / lamBar(E)) ** 2));
-  const oneIn = (p) => (p > 0.5 ? (100 * p).toFixed(0) + " %" : p > 1e-9 ? "1 in " + (1 / p < 1e4 ? Math.round(1 / p).toLocaleString("en-US") : (1 / p).toExponential(0).replace("e+", "·10^")) : "almost never");
+  const bigN = (v) => (v < 1e4 ? String(Math.round(v)) : (v / 10 ** Math.floor(Math.log10(v))).toFixed(0) + "·10" + String(Math.floor(Math.log10(v))).replace(/\d/g, (d) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]));
+  const oneIn = (p) => (p > 0.5 ? WT.trf("{a} %", (100 * p).toFixed(0)) : p > 1e-9 ? WT.trf("1 in {a}", bigN(1 / p)) : WT.trf("almost never"));
   const HILL_GLSL = `
 uniform vec2 u_c; uniform float u_rp, u_rc, u_t;
 uniform vec3 u_paper, u_warm, u_hot, u_deep, u_ring;
@@ -149,9 +150,15 @@ vec4 shade(vec2 p) {
   }
 
   WT.chapter("fusion", {
-    num: "Chapter 29", title: "Fusion and the Coulomb barrier", short: "Fusion",
+    num: "Chapter 29", title: "Fusion energy and the Coulomb barrier", short: "Fusion",
     lead: "Fusion runs the other way from fission: two light nuclei join, and the pair weighs less than its parts.",
     html: `
+<div class="step">
+  <h3>Fusion energy from the binding curve</h3>
+  <p>Join two light nuclei: if the new one sits higher on the binding curve, energy is released. Past the iron peak, joining costs energy.</p>
+  <div class="ctl"><label for="fu-a">Each light nucleus A</label><input id="fu-a" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
+  <p class="ctl-result" id="fu-fuse-out" aria-live="polite"></p>
+</div>
 <div class="step">
   <h3>Coulomb barrier and tunnelling</h3>
   <p>Pull the deuteron back and let go. Both nuclei are charged, so most shots bounce off the hill; a few tunnel through.</p>
@@ -169,7 +176,7 @@ vec4 shade(vec2 p) {
   <div class="ctl"><label for="fu-t">Temperature (keV)</label><input id="fu-t" type="range" data-bind="lT" min="0" max="2" step="0.01" value="1"><output data-show="T" data-fmt="1"></output></div>
 </div>`,
     setup(S) {
-      S.set("mode", "hill"); S.set("lE", 1.7); S.set("lT", 1); S.set("fuel", "DT"); S.speed = 8;
+      S.set("mode", "curve"); S.set("fuse", 2); S.set("lE", 1.7); S.set("lT", 1); S.set("fuel", "DT"); S.speed = 8;
       S.E = Math.pow(10, 1.7); S.T = 10;
       S.sling = { pull: null, shot: null, tries: 0, fused: 0, last: -10, products: [], auto: 0, touched: false };
       S.on("fire", () => fire(S, S.E, (Math.random() - 0.5) * 0.06));
@@ -177,17 +184,33 @@ vec4 shade(vec2 p) {
       ["DT", "DD", "DHe", "pB"].forEach((k) => S.on(k, pick(k)));
     },
     steps: [
+      (S) => { S.set("mode", "curve"); },
       (S) => { S.set("mode", "hill"); },
       (S) => { S.set("mode", "out"); S.outT0 = S.time; },
       (S) => { S.set("mode", "gas"); },
     ],
     frame(g, S, dt) {
       S.E = Math.pow(10, S.lE); S.T = Math.pow(10, S.lT);
-      if (S.mode === "hill") drawHill(g, S, dt);
+      if (S.mode === "curve") drawCurve(g, S);
+      else if (S.mode === "hill") drawHill(g, S, dt);
       else if (S.mode === "out") drawOut(g, S);
       else drawGas(g, S, dt);
     },
   });
+
+  // the binding-energy curve of the Binding chapter (its frame, mode 2), and the energy of A + A -> 2A under the slider
+  const BS = { mode: 2, pick: 56, frag: 95, splitShown: 95, fuseShown: 0, fuse: 2 };
+  function drawCurve(g, S) {
+    const Bm = WT.mods.binding, Bf = WT.binding; if (!Bm || !Bf) return;
+    BS.fuse = S.fuse; BS.time = S.time; Bm.frame(g, BS);
+    const fa = Math.round(S.fuse);
+    if (fa !== S.fuseShown) {
+      S.fuseShown = fa; const o = document.getElementById("fu-fuse-out");
+      if (o) { const fq = 2 * fa * (Bf.bOf(2 * fa) - Bf.bOf(fa)), n1 = Bf.nameOf(fa), n2 = Bf.nameOf(2 * fa);
+        o.textContent = fq >= 0 ? WT.trf("{a} + {a} → {b}: about {c} MeV released", n1, n2, fq.toFixed(1)) : WT.trf("{a} + {a} → {b}: costs {c} MeV", n1, n2, (-fq).toFixed(1));
+        o.classList.toggle("cost", fq < 0); }
+    }
+  }
 
   function fire(S, E, psi) {
     const sl = S.sling; sl.shot = newShot(E, psi); sl.tries++; sl.last = S.time;
@@ -232,7 +255,7 @@ vec4 shade(vec2 p) {
       g.line(P0[0] - 4, P0[1] - post, dpos[0], dpos[1], c.soft, 1.6, 0.8); g.line(P0[0] - 4, P0[1] + post, dpos[0], dpos[1], c.soft, 1.6, 0.8);
       const pts = preview(ps.E, ps.psi).map((p) => toS(p[0], p[1])); g.poly(pts, c.warm, 1.6, 0.7, [3, 5]);
       const p = pFuse(ps.E, RS * Math.sin(ps.psi));
-      g.label(`${ps.E.toFixed(0)} keV · chance ${oneIn(p)}`, dpos[0], dpos[1] - 22, { color: c.ink, size: 13, weight: 600, bg: true });
+      g.label(WT.trf("{a} keV · chance {b}", ps.E.toFixed(0), oneIn(p)), dpos[0], dpos[1] - 22, { color: c.ink, size: 13, weight: 600, bg: true, raw: true });
     }
     // the shot in flight
     const sh = sl.shot;
@@ -262,15 +285,15 @@ vec4 shade(vec2 p) {
       const xa = pr.x - Math.cos(pr.a) * sp * 0.25 * age, ya = pr.y - Math.sin(pr.a) * sp * 0.25 * age, fade = 1 - smooth(1.8, 2.6, age);
       if (age < 0.5) g.glow(pr.x, pr.y, 30 + 160 * age, c.photon, 0.9 * (1 - age / 0.5));
       g.line(xn - Math.cos(pr.a) * 30, yn - Math.sin(pr.a) * 30, xn, yn, c.neutron, 2.5, 0.6 * fade);
-      g.ball(xn, yn, 5, c.neutron, fade); g.label("n 14.1 MeV", xn, yn - 14, { color: c.neutron, size: 12, weight: 600, alpha: fade, bg: true });
+      g.ball(xn, yn, 5, c.neutron, fade); g.label("n " + WT.dec("14.1") + " MeV", xn, yn - 14, { color: c.neutron, size: 12, weight: 600, alpha: fade, bg: true, raw: true });
       g.glow(xa, ya, 14, c.alpha, 0.3 * fade); g.nucleus(xa, ya, 7, { N: 4, Z: 2, seed: 2, t: S.time, alpha: fade });
-      g.label("α 3.5 MeV", xa, ya + 16, { color: c.alpha, size: 12, weight: 600, alpha: fade, bg: true });
+      g.label("α " + WT.dec("3.5") + " MeV", xa, ya + 16, { color: c.alpha, size: 12, weight: 600, alpha: fade, bg: true, raw: true });
     }
     // auto-fire while nobody plays (so the picture is never still)
     if (!sl.touched && !sl.shot && !ps && S.time - sl.last > 2.2) fire(S, Math.pow(10, 1.6 + 0.6 * Math.random()), (Math.random() - 0.5) * 0.05);
     // readouts
     const E = ps ? ps.E : S.E;
-    g.label(`push ${E.toFixed(0)} keV · chance to tunnel head-on ${oneIn(pTun(E))}`, W / 2, phone ? 16 : 26, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true });
+    g.label(WT.trf("push {a} keV · chance to tunnel head-on {b}", E.toFixed(0), oneIn(pTun(E))), W / 2, phone ? 16 : 26, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true, raw: true });
     g.label(`tries ${sl.tries} · fused ${sl.fused}`, W / 2, H - (phone ? 14 : 24), { color: c.soft, size: phone ? 12 : 13, bg: true });
     if (!phone) g.label("screen radius is logarithmic: 4 fm to 400 fm", W / 2, H - 46, { color: c.faint, size: 11 });
   }
@@ -319,7 +342,7 @@ vec4 shade(vec2 p) {
           const lf = 1 - smooth(1.6, 2.4, age);
           if (lf > 0) {
             if (A === 1) g.ball(last[0], last[1], 5, col, lf); else { g.glow(last[0], last[1], 14, col, 0.3 * lf); g.nucleus(last[0], last[1], 6.5 * Math.cbrt(A) * 0.8, { N: A, Z, seed: 2 + i, t: S.time, alpha: lf }); }
-            g.label(`${lab} ${E.toFixed(E < 10 ? 2 : 1)} MeV`, last[0], last[1] - 15, { color: col, size: phone ? 12 : 13, weight: 600, alpha: lf, bg: true });
+            g.label(lab + " " + WT.dec(E.toFixed(E < 10 ? 2 : 1)) + " MeV", last[0], last[1] - 15, { color: col, size: phone ? 12 : 13, weight: 600, alpha: lf, bg: true, raw: true });
           }
         }
       });
@@ -332,10 +355,10 @@ vec4 shade(vec2 p) {
     const br = newest ? newest.br : 0, prods = f[2][br];
     const mIn = f[1].reduce((s, r) => s + MASS[r[2]], 0), mOut = prods.reduce((s, r) => s + MASS[r[3]], 0), dm = mIn - mOut;
     const by = H * (phone ? 0.8 : 0.82), lab = (s, x, y, o) => g.label(s, x, y, Object.assign({ size: phone ? 11 : 13 }, o));
-    lab(`${f[1].map((r) => r[2]).join(" + ")}  ${mIn.toFixed(4)} u   →   ${prods.map((r) => r[3]).join(" + ")}  ${mOut.toFixed(4)} u`, W / 2, by, { color: c.ink, weight: 600, bg: true });
+    lab(`${f[1].map((r) => r[2]).join(" + ")}  ${WT.dec(mIn.toFixed(4))} u   →   ${prods.map((r) => r[3]).join(" + ")}  ${WT.dec(mOut.toFixed(4))} u`, W / 2, by, { color: c.ink, weight: 600, bg: true, raw: true });
     lab(`missing ${dm.toFixed(4)} u  =  ${(dm * 931.494).toFixed(2)} MeV out`, W / 2, by + (phone ? 20 : 24), { color: c.photon, weight: 600, bg: true });
     lab(`hill to climb: charge product Z₁Z₂ = ${f[3]}`, W / 2, by + (phone ? 40 : 48), { color: c.warm, size: phone ? 11 : 12 });
-    g.label(f[0] + (f[2].length > 1 ? " · two branches, equally likely" : ""), W / 2, phone ? 16 : 30, { color: c.ink, size: phone ? 14 : 18, weight: 600, serif: true });
+    g.label(f[2].length > 1 ? WT.trf("{a} · two branches, equally likely", f[0]) : f[0], W / 2, phone ? 16 : 30, { color: c.ink, size: phone ? 14 : 18, weight: 600, serif: true, raw: true });
     if (!phone) g.label("bubble-chamber view, magnetic field into the page: charged products curl, the neutron leaves no track", W / 2, phone ? 34 : 54, { color: c.faint, size: 12 });
   }
 
@@ -383,7 +406,7 @@ vec4 shade(vec2 p) {
     g.line(X(1.3), ty - 10, X(1.3), ty + 3, c.photon, 2); g.label("Sun's core", X(1.3) + 4, ty - 16, { color: c.soft, size: 11, align: "left" });
     g.dot(X(T), ty, 7, c.ink); g.ring(X(T), ty, 11, c.ink, 1.5, 0.5);
     g.label(`${T.toFixed(T < 10 ? 1 : 0)} keV = ${(T * 11.6).toFixed(0)} million K`, W / 2, phone ? 14 : by - 22, { color: c.ink, size: phone ? 13 : 15, weight: 600, bg: true });
-    const relS = rel >= 1 ? `×${rel < 10 ? rel.toFixed(1) : rel.toFixed(0)}` : `1/${(1 / rel) < 1e4 ? Math.round(1 / rel).toLocaleString("en-US") : (1 / rel).toExponential(0).replace("e+", "·10^")}`;
-    g.label(`fusion rate: ${relS} the rate at 10 keV`, W / 2, ty + (phone ? 34 : 42), { color: c.photon, size: phone ? 12 : 14, weight: 600, bg: true });
+    const relS = rel >= 1 ? `×${rel < 10 ? rel.toFixed(1) : rel.toFixed(0)}` : `1/${bigN(1 / rel)}`;
+    g.label(WT.trf("fusion rate: {a} the rate at {b} keV", relS, 10), W / 2, ty + (phone ? 34 : 42), { color: c.photon, size: phone ? 12 : 14, weight: 600, bg: true, raw: true });
   }
 })();

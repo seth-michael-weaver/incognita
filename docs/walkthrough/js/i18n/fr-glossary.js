@@ -1021,5 +1021,87 @@
       short: "Noté sur les mêmes mesures que celles sur lesquelles la méthode a été ajustée, ce qui la flatte.",
       more: "Le test équitable se fait hors échantillon : réajuster sans les données jugées, puis comparer. Les comparaisons de TERRA le font pour une partie du tableau, en laissant de côté une série de données à la fois.",
     },
+
+    /* ---------- troisième partie : la fusion ---------- */
+    fusion: {
+      term: "Fusion", aliases: ["fusion", "fusions"], scope: "chapter",
+      short: "L'union de deux noyaux légers en un noyau plus lourd ; le produit pèse moins que ses parties, et la différence sort sous forme d'énergie.",
+      more: "Le deutérium et le tritium donnent de l'hélium 4 et un neutron de 14,1 MeV, en libérant 17,6 MeV. Leur répulsion électrique les oblige à se heurter vite : c'est pourquoi la fusion exige un gaz à environ 100 millions de kelvins.",
+      chapter: "fusion",
+    },
+    plasma: {
+      term: "Plasma", aliases: ["plasma", "plasmas"], scope: "chapter",
+      short: "Un gaz si chaud que les électrons sont arrachés aux noyaux : il est donc fait de particules chargées.",
+      more: "Comme chaque particule est chargée, un champ magnétique peut la guider. Les plasmas de fusion fonctionnent entre 10 et 20 keV, plus de 100 millions de kelvins.",
+      chapter: "tokamak",
+    },
+    gamowPeak: {
+      term: "Pic de Gamow", aliases: ["pic de Gamow", "fenêtre de Gamow"],
+      short: "L'étroite bande d'énergies de collision où se produit presque toute la fusion dans un gaz chaud.",
+      more: "Les collisions rapides sont rares (la queue de Maxwell chute comme e^(−E/kT)) mais passent plus facilement par effet tunnel (e^(−√(E_G/E)) croît) ; leur produit culmine à E₀, plusieurs fois kT.",
+      formula: "E_0 = (E_G (kT)^2 / 4)^(1/3)",
+      chapter: "gamow",
+    },
+    reactivity: {
+      term: "Réactivité", aliases: ["réactivité", "réactivités", "⟨σv⟩"],
+      short: "La section efficace de fusion multipliée par la vitesse relative, moyennée sur un gaz chaud : elle fixe la cadence des fusions.",
+      more: "Le taux par volume vaut n₁ n₂ ⟨σv⟩. Pour D–T, il culmine vers 65 keV à environ 8,7 × 10⁻²² m³/s (les ajustements utilisés ici sont ceux de Bosch et Hale, 1992).",
+      chapter: "gamow",
+    },
+    ignition: {
+      term: "Ignition", aliases: ["ignition", "produit triple", "critère de Lawson"],
+      short: "Le point où les particules alpha de fusion chauffent le plasma aussi vite qu'il perd sa chaleur, si bien qu'il reste chaud tout seul.",
+      more: "Pour D–T, il faut densité × temps de confinement de l'énergie × température d'environ 3 × 10²¹ keV s m⁻³, le plus facilement vers 14 keV. Q est la puissance de fusion divisée par le chauffage apporté ; l'ignition correspond à Q → ∞.",
+      formula: "n τ_E ≥ 3T / (⟨σv⟩ E_α / 4 − C_B √T)",
+      chapter: "gamow",
+    },
+    gyroRadius: {
+      term: "Rayon de giration", aliases: ["rayon de giration", "rayons de giration", "rayon de Larmor"],
+      short: "Le rayon du cercle que décrit une particule chargée autour d'une ligne de champ magnétique.",
+      more: "Il croît avec la quantité de mouvement de la particule et diminue avec le champ : dans 5 teslas, un deutéron de 10 keV tourne sur environ 4 mm, une alpha de 3,5 MeV sur environ 5 cm.",
+      formula: "ρ = √(2mE) / (|q| B)",
+      chapter: "tokamak",
+    },
+    tokamak: {
+      term: "Tokamak", aliases: ["tokamak", "tokamaks"],
+      short: "Une bouteille magnétique en forme d'anneau : un champ fort le long de l'anneau plus un champ plus faible autour du tube, si bien que les lignes se tordent.",
+      more: "La torsion compte : un champ qui ne ferait que suivre l'anneau laisserait les particules dériver vers l'extérieur. ITER et JET sont des tokamaks ; les stellarators obtiennent la torsion par des bobines profilées.",
+      chapter: "tokamak",
+    },
+    safetyFactor: {
+      term: "Facteur de sécurité", aliases: ["facteur de sécurité"],
+      short: "q : combien de fois une ligne de champ fait le tour de l'anneau pour chaque tour qu'elle fait autour du tube.",
+      more: "Là où q est une fraction simple (2, 3/2, 3), les lignes de champ se referment sur elles-mêmes, et de petites ondulations du champ peuvent croître en îlots magnétiques.",
+      chapter: "tokamak",
+    },
+    island: {
+      term: "Îlot magnétique", aliases: ["îlots", "îlot magnétique", "îlots magnétiques"], scope: "chapter",
+      short: "Une chaîne de boucles fermées dans les lignes de champ, ouverte là où la torsion q est une fraction simple.",
+      more: "Dans un îlot, les lignes de champ court-circuitent les surfaces emboîtées, et la chaleur fuit plus vite. Là où les îlots de fractions voisines se chevauchent, les lignes de champ errent : c'est le chaos.",
+      chapter: "tokamak",
+    },
+    blanket: {
+      term: "Couverture tritigène", aliases: ["couverture", "couvertures", "couverture tritigène", "couvertures tritigènes"], scope: "chapter",
+      short: "La couche qui entoure un plasma de fusion, capture ses neutrons, convertit leur énergie en chaleur et produit du tritium à partir du lithium.",
+      more: "Le lithium 6 produit du tritium avec des neutrons lents, le lithium 7 avec des neutrons rapides ; le plomb ou le béryllium ajoutent des neutrons par (n,2n).",
+      chapter: "blanket",
+    },
+    tbr: {
+      term: "Taux de régénération du tritium", aliases: ["TBR", "taux de régénération du tritium"],
+      short: "Le nombre de noyaux de tritium produits dans la couverture par noyau de tritium brûlé dans le plasma ; il doit dépasser 1.",
+      more: "Chaque fusion D–T brûle un triton et produit un neutron : chaque neutron doit donc produire en moyenne plus d'un triton, pour couvrir les ouvertures, les pertes et la décroissance.",
+      chapter: "blanket",
+    },
+    firstWall: {
+      term: "Première paroi", aliases: ["première paroi"],
+      short: "La surface face au plasma, frappée par tout le flux de neutrons de 14,1 MeV.",
+      more: "Des réactions comme (n,α) et (n,p) laissent de l'hélium et de l'hydrogène dans le métal ; l'hélium se rassemble en bulles qui rendent l'acier fragile.",
+      chapter: "blanket",
+    },
+    appm: {
+      term: "appm", aliases: ["appm"],
+      short: "Parties par million en atomes : combien d'atomes d'un gaz, comme l'hélium, par million d'atomes du métal.",
+      chapter: "blanket",
+    },
   };
 })();

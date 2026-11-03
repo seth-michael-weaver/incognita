@@ -5,6 +5,7 @@ WT.es.ch.neutrons = {
 <div class="step">
   <p>Un protón es positivo, y también lo son los 82 protones del núcleo. Las cargas iguales se repelen, así que el protón es empujado hacia fuera, y el empuje crece rápido cuanto más se acerca (la flecha). Un protón lento se detiene antes y da la vuelta sin llegar a tocar. Solo por encima de unos 13 MeV supera el empuje; justo por debajo, a veces se cuela igualmente (<b>efecto túnel</b>). El pequeño gráfico muestra el mismo empuje como una colina de energía.</p>
   <div class="ctl"><label for="wn-e1">Energía del protón (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
+  <p>Dos núcleos ligeros se enfrentan a la misma colina cuando se fusionan: <a href="#fusion-2">→ Fusión</a>.</p>
 </div>
 <div class="step">
   <p>Un neutrón no tiene carga: entra a cualquier velocidad. Nada lo empuja hacia fuera, así que no hay colina que subir; solo tiene que llegar al núcleo, y entonces la fuerza fuerte lo atrae hacia dentro.</p>

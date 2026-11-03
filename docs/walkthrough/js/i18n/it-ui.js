@@ -86,5 +86,8 @@ Object.assign(WT.L.ui, {
   xp_kicker: "Parte seconda · Esperto",
   xp_h: "Nel dettaglio",
   xp_p: "Finora i capitoli hanno raccontato ogni passo con un'immagine. I sei che seguono aprono gli stessi passi: le formule che il motore calcola, le approssimazioni che contengono e i punti in cui vanno in difficoltà. Sono scritti per valutatori di dati nucleari, sviluppatori di modelli e studenti di dottorato. I disegni calcolano le formule in tempo reale, con dati d'ingresso illustrativi.",
+  fu_kicker: "Parte terza · Fusione",
+  fu_h: "Unire nuclei leggeri",
+  fu_p: "Quattro capitoli, uno per livello: la barriera, il plasma, il magnete, il mantello.",
   step_link: "Copia un link a questo passo", link_copied: "Link copiato",
 });

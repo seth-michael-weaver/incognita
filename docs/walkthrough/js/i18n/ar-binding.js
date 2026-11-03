@@ -11,11 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">الشظية الأخف A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>مهما كان الانشطار، فهو نحو 200 MeV: أكبر بعشرات الملايين من المرات من الإلكترون فولتات القليلة التي يعطيها احتراق جزيء واحد من الوقود.</p>
-</div>
-<div class="step">
-  <p>ادمج نواتين خفيفتين في نواة واحدة. إن كانت النواة الجديدة أعلى على المنحنى تحررت طاقة. وبعد القمة يكلّف الدمج طاقة بدلًا من ذلك.</p>
-  <div class="ctl"><label for="bi-u">كل نواة خفيفة A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>أما الأنوية الخفيفة فتحرر الطاقة بالطريق المعاكس، بالاتحاد: <a href="#fusion">→ الاندماج</a>.</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {

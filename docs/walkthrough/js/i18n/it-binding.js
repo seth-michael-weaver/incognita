@@ -11,11 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">Frammento più leggero A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Qualunque sia la divisione, sono circa 200 MeV: decine di milioni di volte i pochi elettronvolt che dà la combustione di una molecola di combustibile.</p>
-</div>
-<div class="step">
-  <p>Unisci due nuclei leggeri in uno. Se il nuovo nucleo sta più in alto sulla curva, viene liberata energia. Oltre il picco, invece, l'unione costa energia.</p>
-  <div class="ctl"><label for="bi-u">Ogni nucleo leggero A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>I nuclei leggeri liberano energia nel verso opposto, unendosi: <a href="#fusion">→ Fusione</a>.</p>
 </div>`,
 };
 

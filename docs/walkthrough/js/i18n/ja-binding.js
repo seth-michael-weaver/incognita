@@ -11,11 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">軽いほうの破片の A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>どう分裂しても約200 MeVになります。燃料分子1個を燃やして得られる数電子ボルトの、数千万倍です。</p>
-</div>
-<div class="step">
-  <p>2つの軽い原子核を1つに結合させます。できた原子核が曲線の高い位置にあれば、エネルギーが放出されます。頂上を越えると、結合させるにはかえってエネルギーが必要になります。</p>
-  <div class="ctl"><label for="bi-u">それぞれの軽い原子核の A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>軽い原子核は逆に、結合することでエネルギーを放出します：<a href="#fusion">→ 核融合</a>。</p>
 </div>`,
 };
 

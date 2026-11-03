@@ -45,7 +45,7 @@
     g.save = () => ctx.save(); g.restore = () => ctx.restore();
     /** Text label. o: color size weight serif italic align base alpha, bg (true = paper backing so it never collides). */
     g.label = (s, x, y, o = {}) => {
-      if (WT.tr) s = WT.tr(s);
+      if (WT.tr && !o.raw) s = WT.tr(s); // raw: already translated (WT.trf)
       ctx.save(); ctx.globalAlpha = o.alpha ?? 1;
       let size = Math.max(o.size || 14, W < 600 ? 10 : 12); // legible minimum; phones keep their tighter sizes so labels fit
       const font = () => `${o.italic ? "italic " : ""}${o.weight || 500} ${size}px ${o.serif ? SERIF : SANS}`;
@@ -219,6 +219,10 @@
       },
     };
   };
+  /** Translate a label with named slots: WT.trf("push {a} keV · chance {b}", 50, "1 in 14"). The key (no digits in it) is
+   *  looked up once in WT.L.labels; the values are filled in afterwards (decimal comma where the language uses one). Draw
+   *  the result with g.label(..., { raw: true }). */
+  WT.trf = (k, ...v) => { let s = WT.tr ? WT.tr(k) : k; v.forEach((x, i) => { s = s.split("{" + "abcdefgh"[i] + "}").join(WT.dec ? WT.dec(String(x)) : String(x)); }); return s; };
   /** A theme colour as [r, g, b] in 0..1 (for shader uniforms). */
   WT.rgb01 = (hex) => { const h = (hex || "#888888").replace("#", ""); const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
 

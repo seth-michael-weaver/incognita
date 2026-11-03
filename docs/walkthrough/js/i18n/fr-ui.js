@@ -87,4 +87,7 @@ Object.assign(WT.L.ui, {
   xp_kicker: "Deuxième partie · Expert",
   xp_h: "Dans le détail",
   xp_p: "Jusqu'ici, chaque étape a été racontée par une image. Les six chapitres qui suivent ouvrent ces mêmes étapes : les formules que le moteur évalue, les approximations qu'elles contiennent et les endroits où elles atteignent leurs limites. Ils s'adressent aux évaluateurs, aux développeurs de modèles et aux doctorants. Les schémas évaluent les formules en direct, avec des entrées indicatives.",
+  fu_kicker: "Troisième partie · Fusion",
+  fu_h: "Unir des noyaux légers",
+  fu_p: "Quatre chapitres, un par niveau : la barrière, le plasma, l'aimant, la couverture.",
 });

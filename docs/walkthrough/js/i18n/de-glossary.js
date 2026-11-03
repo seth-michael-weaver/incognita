@@ -1021,5 +1021,86 @@
       short: "Bewertet an denselben Messungen, an die die Methode angepasst wurde, was sie besser aussehen lässt.",
       more: "Der faire Test ist Out-of-Sample: ohne die zu beurteilenden Daten neu anpassen, dann vergleichen. Die Vergleiche von TERRA tun das für einen Teil der Tafel, wobei jeweils eine Messreihe ausgelassen wird.",
     },
+    /* ---------- Teil drei: Fusion ---------- */
+    fusion: {
+      term: "Fusion", aliases: ["Fusion", "Fusionen", "Kernfusion"], scope: "chapter",
+      short: "Zwei leichte Kerne verbinden sich zu einem schwereren; das Produkt wiegt weniger als die Teile, und der Unterschied wird als Energie frei.",
+      more: "Deuterium und Tritium ergeben Helium-4 und ein 14,1-MeV-Neutron und setzen dabei 17,6 MeV frei. Weil sie sich elektrisch abstoßen, müssen sie schnell zusammenstoßen; deshalb braucht Fusion ein Gas von etwa 100 Millionen Kelvin.",
+      chapter: "fusion",
+    },
+    plasma: {
+      term: "Plasma", aliases: ["Plasma", "Plasmas", "Plasmen"], scope: "chapter",
+      short: "Ein Gas, so heiß, dass die Elektronen von den Kernen abgestreift sind; es besteht also aus geladenen Teilchen.",
+      more: "Weil jedes Teilchen geladen ist, kann ein Magnetfeld es lenken. Fusionsplasmen laufen bei 10 bis 20 keV, über 100 Millionen Kelvin.",
+      chapter: "tokamak",
+    },
+    gamowPeak: {
+      term: "Gamow-Peak", aliases: ["Gamow-Peak", "Gamow-Peaks", "Gamow-Fenster"],
+      short: "Das schmale Band von Stoßenergien, in dem fast die gesamte Fusion in einem heißen Gas stattfindet.",
+      more: "Schnelle Stöße sind selten (der Maxwell-Ausläufer fällt wie e^(−E/kT)), tunneln aber leichter (e^(−√(E_G/E)) steigt); ihr Produkt hat sein Maximum bei E₀, einem Mehrfachen von kT.",
+      formula: "E_0 = (E_G (kT)^2 / 4)^(1/3)",
+      chapter: "gamow",
+    },
+    reactivity: {
+      term: "Reaktivität", aliases: ["Reaktivität", "Reaktivitäten", "⟨σv⟩"],
+      short: "Der Fusionswirkungsquerschnitt mal die Relativgeschwindigkeit, gemittelt über ein heißes Gas: Sie bestimmt, wie schnell Fusionen ablaufen.",
+      more: "Die Rate pro Volumen ist n₁ n₂ ⟨σv⟩. Für D–T hat sie ihr Maximum bei etwa 65 keV mit rund 8,7 × 10⁻²² m³/s (die hier verwendeten Fits stammen von Bosch und Hale, 1992).",
+      chapter: "gamow",
+    },
+    ignition: {
+      term: "Zündung", aliases: ["Zündung", "Tripelprodukt", "Lawson-Kriterium"],
+      short: "Der Punkt, an dem die Alphateilchen aus der Fusion das Plasma so schnell heizen, wie es Wärme verliert, sodass es von selbst heiß bleibt.",
+      more: "Für D–T braucht sie Dichte × Energieeinschlusszeit × Temperatur von etwa 3 × 10²¹ keV s m⁻³, am leichtesten bei etwa 14 keV. Q ist die Fusionsleistung geteilt durch die zugeführte Heizleistung; Zündung bedeutet Q → ∞.",
+      formula: "n τ_E ≥ 3T / (⟨σv⟩ E_α / 4 − C_B √T)",
+      chapter: "gamow",
+    },
+    gyroRadius: {
+      term: "Gyrationsradius", aliases: ["Gyrationsradius", "Larmor-Radius"],
+      short: "Der Radius des Kreises, den ein geladenes Teilchen um eine magnetische Feldlinie beschreibt.",
+      more: "Er wächst mit dem Impuls des Teilchens und schrumpft mit dem Feld: Ein 10-keV-Deuteron kreist in 5 Tesla auf etwa 4 mm, ein 3,5-MeV-Alphateilchen auf etwa 5 cm.",
+      formula: "ρ = √(2mE) / (|q| B)",
+      chapter: "tokamak",
+    },
+    tokamak: {
+      term: "Tokamak", aliases: ["Tokamak", "Tokamaks"],
+      short: "Eine ringförmige magnetische Flasche: ein starkes Feld entlang des Rings plus ein schwächeres um die Röhre, sodass sich die Linien verdrillen.",
+      more: "Die Verdrillung ist entscheidend: Ein Feld, das nur um den Ring liefe, ließe die Teilchen hinausdriften. ITER und JET sind Tokamaks; Stellaratoren erhalten die Verdrillung stattdessen aus geformten Spulen.",
+      chapter: "tokamak",
+    },
+    safetyFactor: {
+      term: "Sicherheitsfaktor", aliases: ["Sicherheitsfaktor", "Sicherheitsfaktors"],
+      short: "q: wie oft eine Feldlinie den Ring umläuft, während sie einmal die Röhre umläuft.",
+      more: "Wo q ein einfacher Bruch ist (2, 3/2, 3), schließen sich die Feldlinien, und kleine Wellen im Feld können zu magnetischen Inseln anwachsen.",
+      chapter: "tokamak",
+    },
+    island: {
+      term: "Magnetische Insel", aliases: ["Inseln", "magnetische Insel", "magnetische Inseln", "magnetischen Inseln", "Magnetische Inseln"], scope: "chapter",
+      short: "Eine Kette geschlossener Schleifen in den Feldlinien, aufgerissen dort, wo die Verdrillung q ein einfacher Bruch ist.",
+      more: "In einer Insel schließen die Feldlinien die ineinanderliegenden Flächen kurz, sodass Wärme schneller entweicht. Wo Inseln benachbarter Brüche überlappen, irren die Feldlinien umher: Chaos.",
+      chapter: "tokamak",
+    },
+    blanket: {
+      term: "Brutblanket", aliases: ["Blanket", "Brutblanket", "Brutmaterial", "Brutmaterials"], scope: "chapter",
+      short: "Die Schicht um ein Fusionsplasma, die seine Neutronen auffängt, ihre Energie in Wärme umwandelt und aus Lithium Tritium erbrütet.",
+      more: "Lithium-6 erzeugt Tritium mit langsamen Neutronen, Lithium-7 mit schnellen; Blei oder Beryllium liefern über (n,2n) zusätzliche Neutronen.",
+      chapter: "blanket",
+    },
+    tbr: {
+      term: "Tritiumbrutrate", aliases: ["TBR", "Tritiumbrutrate"],
+      short: "Im Blanket erzeugte Tritiumkerne pro im Plasma verbranntem Tritiumkern; sie muss über 1 liegen.",
+      more: "Jede D–T-Fusion verbrennt ein Triton und erzeugt ein Neutron, also muss jedes Neutron im Mittel mehr als ein Triton erzeugen, um Öffnungen, Verluste und Zerfall auszugleichen.",
+      chapter: "blanket",
+    },
+    firstWall: {
+      term: "Erste Wand", aliases: ["erste Wand", "ersten Wand", "Erste Wand"],
+      short: "Die dem Plasma zugewandte Oberfläche, getroffen vom vollen Fluss der 14,1-MeV-Neutronen.",
+      more: "Reaktionen wie (n,α) und (n,p) hinterlassen Helium und Wasserstoff im Metall; Helium sammelt sich in Blasen, die Stahl spröde machen.",
+      chapter: "blanket",
+    },
+    appm: {
+      term: "appm", aliases: ["appm"],
+      short: "Atomare Anteile pro Million: wie viele Atome eines Gases, etwa Helium, auf eine Million Atome des Metalls kommen.",
+      chapter: "blanket",
+    },
   };
 })();

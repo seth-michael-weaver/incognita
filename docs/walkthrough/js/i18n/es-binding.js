@@ -11,11 +11,7 @@ WT.es.ch.binding = {
   <div class="ctl"><label for="bi-f">A del fragmento más ligero</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Sea cual sea la división, son unos 200 MeV: decenas de millones de veces los pocos electronvoltios que da quemar una molécula de combustible.</p>
-</div>
-<div class="step">
-  <p>Une dos núcleos ligeros en uno. Si el núcleo nuevo queda más arriba en la curva, se libera energía. Pasado el máximo, unir cuesta energía en lugar de liberarla.</p>
-  <div class="ctl"><label for="bi-u">A de cada núcleo ligero</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>Los núcleos ligeros liberan energía por el camino contrario, uniéndose: <a href="#fusion">→ Fusión</a>.</p>
 </div>`,
 };
 

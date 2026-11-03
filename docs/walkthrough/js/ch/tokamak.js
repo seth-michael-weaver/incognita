@@ -142,10 +142,10 @@
     // scale bar: 1 display unit = rho at 5 T
     const rho5 = rhoOf(sp, 5), rho = rhoOf(sp, S.B), bx = phone ? 16 : 30, by = H - (phone ? 18 : 30);
     g.line(bx, by, bx + scale, by, c.ink, 2); g.line(bx, by - 4, bx, by + 4, c.ink, 1.5); g.line(bx + scale, by - 4, bx + scale, by + 4, c.ink, 1.5);
-    g.label(fmtLen(rho5), bx + scale + 8, by, { color: c.ink, size: 12, align: "left" });
+    g.label(WT.dec(fmtLen(rho5)), bx + scale + 8, by, { color: c.ink, size: 12, align: "left", raw: true });
     const f = (Math.abs(sp.q) * QE * S.B) / (TAU * sp.m);
-    g.label(`${sp.lab} · ρ up to ${fmtLen(rho)} · ${sci(f)} turns a second`, W / 2, phone ? 14 : 24, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true });
-    g.label(sp.q < 0 ? "negative: turns the other way" : `time slowed ${sci(f / (0.35 * S.B / 5))}×`, W / 2, phone ? 32 : 46, { color: c.faint, size: 11 });
+    g.label(WT.trf("{a} · ρ up to {b} · {c} turns a second", WT.trf(sp.lab), fmtLen(rho), sci(f)), W / 2, phone ? 14 : 24, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true, raw: true });
+    g.label(sp.q < 0 ? WT.trf("negative: turns the other way") : WT.trf("time slowed {a}×", sci(f / (0.35 * S.B / 5))), W / 2, phone ? 32 : 46, { color: c.faint, size: 11, raw: true });
   }
 
   function drawTorus(g, S, dt) {

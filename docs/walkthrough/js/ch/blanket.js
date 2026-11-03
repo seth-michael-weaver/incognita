@@ -195,7 +195,7 @@
     g.label(`TBR ${tbr.toFixed(2)}`, phone ? W / 2 : W * 0.3, phone ? 16 : 30, { color: ok ? c.fission : c.proton, size: phone ? 18 : 24, weight: 700, serif: true });
     const line = `⁶Li ${(T.t6 / N).toFixed(2)} · ⁷Li ${(T.t7 / N).toFixed(2)} · (n,2n) ${(T.n2n / N).toFixed(2)} · captured ${((T.capFe + T.capPb) / N).toFixed(2)} · leaked ${(T.leak / N).toFixed(2)}`;
     g.label(phone ? `⁶Li ${(T.t6 / N).toFixed(2)} · ⁷Li ${(T.t7 / N).toFixed(2)} · (n,2n) ${(T.n2n / N).toFixed(2)}` : line, phone ? W / 2 : W * 0.66, phone ? 40 : 30, { color: c.soft, size: phone ? 11 : 12 });
-    g.label(`per fusion neutron · ${T.N.toLocaleString("en-US")} neutrons · cross sections are simple fits`, W / 2, H - (phone ? 8 : 14), { color: c.faint, size: 11 });
+    g.label(`per fusion neutron · ${T.N} neutrons · cross sections are simple fits`, W / 2, H - (phone ? 8 : 14), { color: c.faint, size: 11 });
   }
 
   // ---------- the first wall ----------
@@ -236,8 +236,10 @@
       g.label(`σ at 14.1 MeV:  (n,α) ${L.na.toFixed(1)} mb · (n,p) ${L.np.toFixed(1)} mb · (n,2n) ${L.n2n.toFixed(0)} mb`, W / 2, phone ? 36 : 52, { color: c.soft, size: phone ? 11 : 12 });
       g.ball(W * 0.22, ly, 5, c.alpha); g.label(`helium ${appm(L.na).toFixed(0)} appm`, W * 0.22 + 10, ly, { color: c.alpha, size: fs, weight: 700, align: "left" });
       g.ball(W * 0.6, ly, 4, c.proton); g.label(`hydrogen ${appm(L.np).toFixed(0)} appm`, W * 0.6 + 10, ly, { color: c.proton, size: fs, weight: 700, align: "left" });
-      g.label(`after ${S.yrs.toFixed(1)} years at ${S.load.toFixed(1)} MW/m² · 14.1 MeV neutrons only · σ from INCOGNITA library v0.2`, W / 2, ly + (phone ? 22 : 28), { color: c.faint, size: 11 });
-      g.label("helium stays and gathers into bubbles; hydrogen mostly diffuses out", W / 2, ly + (phone ? 40 : 48), { color: c.soft, size: 11 });
+      { const t = WT.tr(`after ${S.yrs.toFixed(1)} years at ${S.load.toFixed(1)} MW/m² · 14.1 MeV neutrons only · σ from INCOGNITA library v0.2`), k = t.lastIndexOf(" · ");
+        if (phone && k > 0) { g.label(t.slice(0, k), W / 2, ly + 20, { color: c.faint, size: 11, raw: true }); g.label(t.slice(k + 3), W / 2, ly + 34, { color: c.faint, size: 11, raw: true }); }
+        else g.label(t, W / 2, ly + (phone ? 22 : 28), { color: c.faint, size: 11, raw: true }); }
+      g.label("helium stays and gathers into bubbles; hydrogen mostly diffuses out", W / 2, ly + (phone ? 52 : 48), { color: c.soft, size: 11 });
     } else g.label(L.state === "fail" ? "could not load the library file" : "loading INCOGNITA's cross sections…", W / 2, ly, { color: c.soft, size: 12 });
   }
 })();

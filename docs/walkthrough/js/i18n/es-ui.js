@@ -85,5 +85,7 @@ Object.assign(WT.es.ui, {
   lvl0: "Introducción", lvl1: "Intermedio", lvl2: "Avanzado", lvl3: "Experto", lvl_title: "Nivel",
   xp_kicker: "Segunda parte · Experto", xp_h: "A fondo",
   xp_p: "Hasta aquí, cada capítulo contaba un paso como una imagen. Los seis que siguen abren esos mismos pasos: las fórmulas que evalúa el motor, las aproximaciones que contienen y dónde flaquean. Están escritos para evaluadores, desarrolladores de modelos y estudiantes de posgrado. Los dibujos evalúan las fórmulas en directo, con entradas ilustrativas.",
+  fu_kicker: "Tercera parte · Fusión", fu_h: "Unir núcleos ligeros",
+  fu_p: "Cuatro capítulos, uno por nivel: la barrera, el plasma, el imán, el manto.",
   step_link: "Copiar un enlace a este paso", link_copied: "Enlace copiado",
 });

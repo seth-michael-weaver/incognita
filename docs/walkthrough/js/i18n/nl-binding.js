@@ -11,11 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">Lichter brokstuk A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Hoe het ook splijt, het is ongeveer 200 MeV: tientallen miljoenen keren de paar elektronvolt die het verbranden van één molecuul brandstof oplevert.</p>
-</div>
-<div class="step">
-  <p>Voeg twee lichte kernen samen tot één. Als de nieuwe kern hoger op de curve zit, komt er energie vrij. Voorbij de top kost samenvoegen juist energie.</p>
-  <div class="ctl"><label for="bi-u">Elke lichte kern A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>Lichte kernen geven op de omgekeerde manier energie vrij, door samen te smelten: <a href="#fusion">→ Fusie</a>.</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {

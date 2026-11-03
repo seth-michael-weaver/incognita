@@ -1020,5 +1020,86 @@
       short: "Gescoord op dezelfde metingen waaraan de methode is gefit, wat haar flatteert.",
       more: "De eerlijke toets is buiten de steekproef: opnieuw fitten zonder de data die beoordeeld worden, en dan vergelijken. De vergelijkingen van TERRA doen dit voor een deel van het bord, telkens met weglating van één datareeks.",
     },
+    /* ---------- deel drie: fusie ---------- */
+    fusion: {
+      term: "Fusie", aliases: ["fusie", "fusies", "kernfusie"], scope: "chapter",
+      short: "Twee lichte kernen die samensmelten tot een zwaardere; het product weegt minder dan de delen, en het verschil komt vrij als energie.",
+      more: "Deuterium en tritium maken helium-4 en een neutron van 14,1 MeV, waarbij 17,6 MeV vrijkomt. Door hun elektrische afstoting moeten ze snel botsen; daarom heeft fusie een gas van ongeveer 100 miljoen kelvin nodig.",
+      chapter: "fusion",
+    },
+    plasma: {
+      term: "Plasma", aliases: ["plasma", "plasma's"], scope: "chapter",
+      short: "Een gas zo heet dat de elektronen van de kernen zijn losgerukt, zodat het uit geladen deeltjes bestaat.",
+      more: "Omdat elk deeltje geladen is, kan een magneetveld het sturen. Fusieplasma's werken bij 10 tot 20 keV, meer dan 100 miljoen kelvin.",
+      chapter: "tokamak",
+    },
+    gamowPeak: {
+      term: "Gamowpiek", aliases: ["gamowpiek", "gamowvenster"],
+      short: "De smalle band van botsingsenergieën waarin bijna alle fusie in een heet gas plaatsvindt.",
+      more: "Snelle botsingen zijn zeldzaam (de maxwellstaart valt als e^(−E/kT)) maar tunnelen makkelijker (e^(−√(E_G/E)) stijgt); hun product piekt bij E₀, een paar keer kT.",
+      formula: "E_0 = (E_G (kT)^2 / 4)^(1/3)",
+      chapter: "gamow",
+    },
+    reactivity: {
+      term: "Reactiviteit", aliases: ["reactiviteit", "⟨σv⟩"],
+      short: "De fusiedoorsnede maal de relatieve snelheid, gemiddeld over een heet gas: die bepaalt hoe snel fusies gebeuren.",
+      more: "Het aantal per volume is n₁ n₂ ⟨σv⟩. Voor D–T piekt ze rond 65 keV bij ongeveer 8,7 × 10⁻²² m³/s (de fits hier zijn van Bosch en Hale, 1992).",
+      chapter: "gamow",
+    },
+    ignition: {
+      term: "Ontsteking", aliases: ["ontsteking", "tripelproduct", "lawsoncriterium"],
+      short: "Het punt waarop de alfadeeltjes uit fusie het plasma even snel verwarmen als het warmte verliest, zodat het vanzelf heet blijft.",
+      more: "Voor D–T is dichtheid × energieopsluitingstijd × temperatuur van ongeveer 3 × 10²¹ keV s m⁻³ nodig, het makkelijkst rond 14 keV. Q is het fusievermogen gedeeld door het toegevoerde verwarmingsvermogen; ontsteking is Q → ∞.",
+      formula: "n τ_E ≥ 3T / (⟨σv⟩ E_α / 4 − C_B √T)",
+      chapter: "gamow",
+    },
+    gyroRadius: {
+      term: "Gyrostraal", aliases: ["gyrostraal", "larmorstraal"],
+      short: "De straal van de cirkel die een geladen deeltje rond een magnetische veldlijn beschrijft.",
+      more: "Ze groeit met de impuls van het deeltje en krimpt met het veld: een deuteron van 10 keV draait in 5 tesla rond op ongeveer 4 mm, een alfa van 3,5 MeV op ongeveer 5 cm.",
+      formula: "ρ = √(2mE) / (|q| B)",
+      chapter: "tokamak",
+    },
+    tokamak: {
+      term: "Tokamak", aliases: ["tokamak", "tokamaks"],
+      short: "Een donutvormige magnetische fles: een sterk veld rond de ring plus een zwakker veld rond de buis, zodat de lijnen in elkaar draaien.",
+      more: "De draaiing is essentieel: een veld dat alleen rond de ring liep, zou deeltjes naar buiten laten driften. ITER en JET zijn tokamaks; stellarators halen de draaiing in plaats daarvan uit gevormde spoelen.",
+      chapter: "tokamak",
+    },
+    safetyFactor: {
+      term: "Veiligheidsfactor", aliases: ["veiligheidsfactor"],
+      short: "q: hoe vaak een veldlijn rond de ring gaat voor elke keer dat ze rond de buis gaat.",
+      more: "Waar q een eenvoudige breuk is (2, 3/2, 3), sluiten veldlijnen zich, en kleine rimpelingen in het veld kunnen uitgroeien tot magnetische eilanden.",
+      chapter: "tokamak",
+    },
+    island: {
+      term: "Magnetisch eiland", aliases: ["eilanden", "magnetisch eiland", "magnetische eilanden"], scope: "chapter",
+      short: "Een keten van gesloten lussen in de veldlijnen, opengescheurd waar de draaiing q een eenvoudige breuk is.",
+      more: "Binnen een eiland sluiten de veldlijnen de geneste oppervlakken kort, zodat warmte sneller weglekt. Waar eilanden van naburige breuken overlappen, dwalen de veldlijnen rond: chaos.",
+      chapter: "tokamak",
+    },
+    blanket: {
+      term: "Kweekmantel", aliases: ["kweekmantel", "kweeklaag", "blanket"], scope: "chapter",
+      short: "De laag rond een fusieplasma die de neutronen opvangt, hun energie omzet in warmte en uit lithium tritium kweekt.",
+      more: "Lithium-6 maakt tritium met langzame neutronen, lithium-7 met snelle; lood of beryllium voegen neutronen toe via (n,2n).",
+      chapter: "blanket",
+    },
+    tbr: {
+      term: "Tritiumkweekverhouding", aliases: ["TBR", "tritiumkweekverhouding"],
+      short: "Tritiumkernen gemaakt in de kweekmantel per tritiumkern verbrand in het plasma; ze moet boven 1 liggen.",
+      more: "Elke D–T-fusie verbrandt één triton en maakt één neutron, dus elk neutron moet gemiddeld meer dan één triton maken, om poorten, verliezen en verval te dekken.",
+      chapter: "blanket",
+    },
+    firstWall: {
+      term: "Eerste wand", aliases: ["eerste wand"],
+      short: "Het oppervlak dat naar het plasma gekeerd is, getroffen door de volle flux van neutronen van 14,1 MeV.",
+      more: "Reacties als (n,α) en (n,p) laten helium en waterstof achter in het metaal; helium klontert samen tot bellen die staal bros maken.",
+      chapter: "blanket",
+    },
+    appm: {
+      term: "appm", aliases: ["appm"],
+      short: "Atomaire delen per miljoen: hoeveel atomen van een gas, zoals helium, per miljoen atomen van het metaal.",
+      chapter: "blanket",
+    },
   };
 })();

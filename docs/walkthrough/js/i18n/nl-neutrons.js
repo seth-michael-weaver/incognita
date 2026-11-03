@@ -5,6 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>Een proton is positief, en de 82 protonen van de kern ook. Gelijke ladingen stoten elkaar af, dus het proton wordt weggeduwd, en de duw groeit snel naarmate het dichterbij komt (de pijl). Een langzaam proton stopt vóór de kern en keert om zonder hem te raken. Pas boven ongeveer 13 MeV komt het over de duw heen; net daaronder glipt het soms toch door (<b>tunnelen</b>). De kleine grafiek toont dezelfde duw als een energieheuvel.</p>
   <div class="ctl"><label for="wn-e1">Protonenergie (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
+  <p>Twee lichte kernen staan voor dezelfde heuvel als ze fuseren: <a href="#fusion-2">→ Fusie</a>.</p>
 </div>
 <div class="step">
   <p>Een neutron heeft geen lading: het komt bij elke snelheid binnen. Niets duwt het weg, dus er is geen heuvel te beklimmen; het hoeft alleen de kern te bereiken, en dan trekt de sterke kernkracht het naar binnen.</p>

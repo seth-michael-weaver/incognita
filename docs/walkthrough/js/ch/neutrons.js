@@ -30,6 +30,7 @@
 <div class="step">
   <p>A proton is positive, and so are the nucleus's 82 protons. Like charges repel, so the proton is pushed away, and the push grows fast as it gets closer (the arrow). A slow proton stops short and turns back without touching. Only above about 13 MeV does it get over the push; just below, it sometimes slips through anyway (<b>tunnelling</b>). The small graph shows the same push as an energy hill.</p>
   <div class="ctl"><label for="wn-e1">Proton energy (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
+  <p>Two light nuclei face the same hill when they fuse: <a href="#fusion-2">→ Fusion</a>.</p>
 </div>
 <div class="step">
   <p>A neutron has no charge: it gets in at any speed. Nothing pushes it away, so there is no hill to climb; it only has to reach the nucleus, and then the strong force pulls it in.</p>

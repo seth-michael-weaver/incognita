@@ -1021,5 +1021,87 @@
       short: "Bedømt på de samme målinger, som metoden blev tilpasset, hvilket stiller den for gunstigt.",
       more: "Den fair test er out-of-sample: tilpas igen uden de data, der bedømmes, og sammenlign så. TERRAs sammenligninger gør dette for en del af tavlen, ved at udelade én dataserie ad gangen.",
     },
+
+    /* ---------- del tre: fusion ---------- */
+    fusion: {
+      term: "Fusion", aliases: ["fusion", "fusionen", "fusioner"], scope: "chapter",
+      short: "To lette kerner, der smelter sammen til en tungere; produktet vejer mindre end delene, og forskellen kommer ud som energi.",
+      more: "Deuterium og tritium giver helium-4 og en neutron på 14,1 MeV og frigiver 17,6 MeV. Deres elektriske frastødning betyder, at de skal støde hurtigt sammen, og derfor kræver fusion en gas på omkring 100 millioner kelvin.",
+      chapter: "fusion",
+    },
+    plasma: {
+      term: "Plasma", aliases: ["plasma", "plasmaet", "plasmaer"], scope: "chapter",
+      short: "En gas så varm, at elektronerne er revet af kernerne, så den består af ladede partikler.",
+      more: "Fordi hver partikel er ladet, kan et magnetfelt styre den. Fusionsplasmaer kører ved 10 til 20 keV, over 100 millioner kelvin.",
+      chapter: "tokamak",
+    },
+    gamowPeak: {
+      term: "Gamow-top", aliases: ["Gamow-top", "Gamow-toppen", "Gamow-vindue", "Gamow-vinduet"],
+      short: "Det smalle bånd af kollisionsenergier, hvor næsten al fusion i en varm gas foregår.",
+      more: "Hurtige kollisioner er sjældne (Maxwell-halen falder som e^(−E/kT)), men tunnelerer lettere (e^(−√(E_G/E)) stiger); produktet topper ved E₀, flere gange kT.",
+      formula: "E_0 = (E_G (kT)^2 / 4)^(1/3)",
+      chapter: "gamow",
+    },
+    reactivity: {
+      term: "Reaktivitet", aliases: ["reaktivitet", "reaktiviteten", "reaktiviteter", "⟨σv⟩"],
+      short: "Fusionstværsnittet gange den relative hastighed, midlet over en varm gas: det bestemmer, hvor hurtigt fusioner sker.",
+      more: "Raten pr. volumen er n₁ n₂ ⟨σv⟩. For D–T topper den nær 65 keV ved omkring 8,7 × 10⁻²² m³/s (tilpasningerne, der bruges her, er Bosch og Hale, 1992).",
+      chapter: "gamow",
+    },
+    ignition: {
+      term: "Antændelse", aliases: ["antændelse", "antændelsen", "tripelprodukt", "tripelproduktet", "Lawson-kriteriet", "Lawson-kriterium"],
+      short: "Punktet, hvor fusionens alfapartikler opvarmer plasmaet lige så hurtigt, som det taber varme, så det holder sig varmt af sig selv.",
+      more: "For D–T kræver det tæthed × energiindeslutningstid × temperatur på omkring 3 × 10²¹ keV s m⁻³, lettest nær 14 keV. Q er fusionseffekten divideret med den tilførte opvarmning; antændelse er Q → ∞.",
+      formula: "n τ_E ≥ 3T / (⟨σv⟩ E_α / 4 − C_B √T)",
+      chapter: "gamow",
+    },
+    gyroRadius: {
+      term: "Gyroradius", aliases: ["gyroradius", "gyroradiussen", "Larmor-radius", "Larmor-radiussen"],
+      short: "Radius af den cirkel, en ladet partikel beskriver omkring en magnetisk feltlinje.",
+      more: "Den vokser med partiklens impuls og skrumper med feltet: en deuteron på 10 keV i 5 tesla kredser med omkring 4 mm, en alfapartikel på 3,5 MeV med omkring 5 cm.",
+      formula: "ρ = √(2mE) / (|q| B)",
+      chapter: "tokamak",
+    },
+    tokamak: {
+      term: "Tokamak", aliases: ["tokamak", "tokamakken", "tokamaks", "tokamakker"],
+      short: "En donutformet magnetisk flaske: et stærkt felt rundt om ringen plus et svagere rundt om røret, så linjerne snoer sig.",
+      more: "Snoningen er afgørende: et felt, der kun gik rundt om ringen, ville lade partiklerne drive ud. ITER og JET er tokamakker; stellaratorer får i stedet snoningen fra formede spoler.",
+      chapter: "tokamak",
+    },
+    safetyFactor: {
+      term: "Sikkerhedsfaktor", aliases: ["sikkerhedsfaktor", "sikkerhedsfaktoren"],
+      short: "q: hvor mange gange en feltlinje går rundt om ringen for hver gang, den går rundt om røret.",
+      more: "Hvor q er en simpel brøk (2, 3/2, 3), lukker feltlinjerne sig om sig selv, og små krusninger i feltet kan vokse til magnetiske øer.",
+      chapter: "tokamak",
+    },
+    island: {
+      term: "Magnetisk ø", aliases: ["øer", "øerne", "magnetisk ø", "magnetiske øer", "magnetiske øerne"], scope: "chapter",
+      short: "En kæde af lukkede sløjfer i feltlinjerne, revet op, hvor snoningen q er en simpel brøk.",
+      more: "Inde i en ø kortslutter feltlinjerne de indlejrede flader, så varmen siver hurtigere ud. Hvor øer fra nabobrøker overlapper, vandrer feltlinjerne: kaos.",
+      chapter: "tokamak",
+    },
+    blanket: {
+      term: "Avlskappe", aliases: ["avlskappe", "avlskappen", "avlskapper", "avlslag", "avlslaget", "avlslagets"], scope: "chapter",
+      short: "Laget omkring et fusionsplasma, der fanger dets neutroner, omdanner deres energi til varme og avler tritium af lithium.",
+      more: "Lithium-6 laver tritium med langsomme neutroner, lithium-7 med hurtige; bly eller beryllium tilføjer neutroner gennem (n,2n).",
+      chapter: "blanket",
+    },
+    tbr: {
+      term: "Tritiumavlsforhold", aliases: ["TBR", "tritiumavlsforhold", "tritiumavlsforholdet"],
+      short: "Antal tritiumkerner dannet i avlskappen pr. tritiumkerne brændt i plasmaet; det skal være over 1.",
+      more: "Hver D–T-fusion brænder én triton og laver én neutron, så hver neutron skal i gennemsnit lave mere end én triton for at dække porte, tab og henfald.",
+      chapter: "blanket",
+    },
+    firstWall: {
+      term: "Første væg", aliases: ["første væg"],
+      short: "Overfladen ud mod plasmaet, som rammes af hele fluxen af 14,1 MeV-neutroner.",
+      more: "Reaktioner som (n,α) og (n,p) efterlader helium og brint inde i metallet; helium samles i bobler, der gør stål sprødt.",
+      chapter: "blanket",
+    },
+    appm: {
+      term: "appm", aliases: ["appm"],
+      short: "Atomare milliontedele: hvor mange atomer af en gas, fx helium, pr. million atomer af metallet.",
+      chapter: "blanket",
+    },
   };
 })();

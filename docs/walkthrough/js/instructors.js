@@ -15,7 +15,7 @@
   const CH = [
     ["structure", 1, 0, 12, 6, "What a nucleus is made of", "Structure", "Masses and separation energies, discrete levels and their γ branchings, isomers, nuclear shapes, and the resonance averages D₀, S₀, ⟨Γγ⟩."],
     ["xsec", 2, 0, 6, 3, "What is a cross section?", "Cross section", "The cross section as a target area in barns: a beam on a slab of nuclei, transmission, 1/v at low energy and a resonance."],
-    ["binding", 3, 0, 8, 3, "Why nuclei hold together", "Binding", "Binding energy per nucleon from measured masses (AME2020): the iron peak, energy from splitting uranium and from fusing light nuclei."],
+    ["binding", 3, 0, 7, 2, "Why nuclei hold together", "Binding", "Binding energy per nucleon from measured masses (AME2020): the iron peak and the energy from splitting uranium."],
     ["landscape", 4, 0, 6, 4, "The landscape of nuclei", "Landscape", "The chart of nuclides from measured masses and half-lives (AME2020, NUBASE2020): the 252 stable nuclei, the ridge of binding energy per nucleon with the magic numbers, beta decay down a mass chain to stability, and what INCOGNITA holds for each nucleus."],
     ["neutrons", 5, 0, 6, 3, "Why reactors run on neutrons", "Why neutrons", "The Coulomb barrier: a proton turned back or tunnelling; a neutron entering at any energy, down to thermal; so slow neutrons can start fission."],
     ["omp", 6, 0, 12, 6, "The optical model", "Optical model", "The optical model: a complex potential that bends and absorbs; aim and partial waves; transmission coefficients and the total cross section."],
@@ -41,7 +41,7 @@
     ["strength", 26, 3, 18, 5, "Photon strength, in detail", "Photon strength", "E1 (SLO and SMLO) and M1 (spin-flip, scissors, upbend), the Brink–Axel hypothesis, the average radiative width ⟨Γγ⟩ and the γ cascade."],
     ["exciton", 27, 3, 20, 6, "The exciton model, in numbers", "Exciton model", "Particle–hole state densities, transition and emission rates, the exciton chain in time, the hard tail of spectra, the pre-equilibrium share and the two-component model."],
     ["averages", 28, 3, 18, 5, "From resonances to averages", "Resonances to averages", "The R-matrix formula, the statistics of resonance parameters, Doppler broadening, the energy average that becomes Hauser–Feshbach, and resolved, unresolved and smooth ranges."],
-    ["fusion", 29, 0, 10, 3, "Fusion and the Coulomb barrier", "Fusion", "Two light nuclei over the Coulomb hill: tunnelling, the energy released as missing mass, fuels compared, and why the gas must be hot."],
+    ["fusion", 29, 0, 12, 4, "Fusion energy and the Coulomb barrier", "Fusion", "Fusion energy from the binding curve; two light nuclei over the Coulomb hill: tunnelling, the energy released as missing mass, fuels compared, and why the gas must be hot."],
     ["gamow", 30, 1, 12, 3, "The Gamow peak and ignition", "Gamow peak", "The Gamow peak from the Maxwell tail and tunnelling, reactivities of D–T, D–D and D–³He, and the Lawson plane with a 0-D power balance to ignition."],
     ["tokamak", 31, 2, 12, 3, "Magnetic confinement", "Confinement", "Gyration in a magnetic field, the twisted field of a tokamak and its safety factor, Poincaré sections, magnetic islands and chaos (the tokamap)."],
     ["blanket", 32, 3, 15, 3, "Breeding blanket and first wall", "Blanket", "Monte Carlo neutron transport in a breeding blanket: tritium breeding ratio, ⁶Li enrichment, (n,2n) multiplication; helium and hydrogen in the first wall from INCOGNITA's 14.1 MeV cross sections."],

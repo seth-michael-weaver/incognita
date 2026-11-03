@@ -85,5 +85,7 @@ Object.assign(WT.L.ui, {
   lvl0: "Introdutório", lvl1: "Intermédio", lvl2: "Avançado", lvl3: "Especialista", lvl_title: "Nível",
   xp_kicker: "Segunda parte · Especialista", xp_h: "A fundo",
   xp_p: "Até aqui, os capítulos contaram cada etapa como uma imagem. Os seis que se seguem abrem essas mesmas etapas: as fórmulas que o motor avalia, as aproximações que contêm e os pontos onde cedem. Foram escritos para avaliadores, autores de modelos e estudantes de pós-graduação. Os desenhos avaliam as fórmulas em tempo real, com dados de entrada ilustrativos.",
+  fu_kicker: "Terceira parte · Fusão", fu_h: "Juntar núcleos leves",
+  fu_p: "Quatro capítulos, um por nível: a barreira, o plasma, o íman, o manto.",
   step_link: "Copiar uma ligação para este passo", link_copied: "Ligação copiada",
 });

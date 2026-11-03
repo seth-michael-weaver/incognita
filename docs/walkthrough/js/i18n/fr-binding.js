@@ -11,11 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">A du fragment léger</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Quelle que soit la cassure, cela fait environ 200 MeV : des dizaines de millions de fois les quelques électronvolts que donne la combustion d'une molécule de combustible.</p>
-</div>
-<div class="step">
-  <p>Réunissez deux noyaux légers en un seul. Si le nouveau noyau se trouve plus haut sur la courbe, de l'énergie est libérée. Au-delà du sommet, la réunion coûte de l'énergie au contraire.</p>
-  <div class="ctl"><label for="bi-u">A de chaque noyau léger</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>Les noyaux légers libèrent de l'énergie dans l'autre sens, en s'unissant : <a href="#fusion">→ Fusion</a>.</p>
 </div>`,
 };
 

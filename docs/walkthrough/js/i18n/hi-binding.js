@@ -11,11 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">हल्का टुकड़ा A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>विखंडन चाहे जैसा हो, यह लगभग 200 MeV है: ईंधन के एक अणु को जलाने पर मिलने वाले कुछ इलेक्ट्रॉन-वोल्ट से करोड़ों गुना अधिक।</p>
-</div>
-<div class="step">
-  <p>दो हल्के नाभिकों को जोड़कर एक कीजिए। यदि नया नाभिक वक्र पर ऊपर बैठता है, तो ऊर्जा निकलती है। शिखर के पार जाने पर जोड़ने में उल्टे ऊर्जा लगती है।</p>
-  <div class="ctl"><label for="bi-u">प्रत्येक हल्का नाभिक A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>हल्के नाभिक उलटे रास्ते से, जुड़कर, ऊर्जा छोड़ते हैं: <a href="#fusion">→ संलयन</a>।</p>
 </div>`,
 };
 

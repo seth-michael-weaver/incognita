@@ -91,4 +91,7 @@ Object.assign(WT.L.ui, {
   xp_kicker: "Teil zwei · Experte",
   xp_h: "Ins Detail",
   xp_p: "Bisher wurde jeder Schritt als Bild erzählt. Die sechs folgenden Kapitel öffnen dieselben Schritte: die Formeln, die die Engine auswertet, die Näherungen darin und die Stellen, an denen sie an ihre Grenzen stoßen. Sie richten sich an Evaluatoren, Modellentwickler und Doktoranden. Die Zeichnungen werten die Formeln live aus, mit illustrativen Eingabewerten.",
+  fu_kicker: "Teil drei · Fusion",
+  fu_h: "Leichte Kerne verschmelzen",
+  fu_p: "Vier Kapitel, eins pro Ebene: die Barriere, das Plasma, der Magnet, das Blanket.",
 });

@@ -64,7 +64,11 @@ sections, or transport with branching histories in a layered geometry.
 The text stays minimal: a step heading, one short line, the controls, and for 30–32 a formula line. Labels on the
 drawings do the rest.
 
-### 29 · Fusion and the Coulomb barrier (Intro)
+### 29 · Fusion energy and the Coulomb barrier (Intro)
+0. **Fusion energy from the binding curve** — moved here from the Binding chapter (Seth, 2026-11-03: keep the fusion
+   material together). It draws the Binding chapter's curve (its frame, mode 2) with A + A → 2A. Binding keeps the curve
+   and fission, plus a one-line pointer "→ Fusion"; the Neutrons chapter keeps its general proton barrier with a pointer
+   to this chapter's barrier step (#fusion-2).
 1. **Over the hill** — a WebGL relief of the d–t potential seen from above: a Coulomb hill that rises toward the triton
    and a nuclear crater at the top. Pull the deuteron back and let go: the pull sets its energy (1–400 keV), the aim
    sets its impact parameter. It follows the Coulomb (Rutherford) orbit, turns at r = 1.44 MeV·fm / E and sometimes

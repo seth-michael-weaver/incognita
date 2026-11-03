@@ -147,7 +147,7 @@ vec4 shade(vec2 p) {
     g.line(X(E0 - wid / 2), sy1 + 6, X(E0 + wid / 2), sy1 + 6, c.ink, 2); g.line(X(E0), sy1 + 2, X(E0), sy0 + sh * 0.05, c.ink, 1, 0.5, [3, 3]);
     g.label("few are this fast", X(Math.min(240, T * 2.2)) + 4, sy1 - sh * Math.exp(-Math.min(240, T * 2.2) / T) - 10, { color: c.cool, size: 11, align: "left", bg: true });
     g.label("tunnels more easily", X(235), sy0 + 2, { color: c.warm, size: 11, align: "right", bg: true });
-    g.label(`product ×${sci(1 / pmax, 0)}`, X(E0) + 8, sy1 - sh * 0.92 - 4, { color: c.photon, size: 12, weight: 600, align: "left", bg: true });
+    g.label(WT.trf("product ×{a}", sci(1 / pmax, 0)), X(E0) + 8, sy1 - sh * 0.92 - 4, { color: c.photon, size: 12, weight: 600, align: "left", bg: true, raw: true });
     g.label(`kT ${T.toFixed(T < 10 ? 1 : 0)} keV · E₀ ${E0.toFixed(0)} keV · width ${wid.toFixed(0)} keV`, W / 2, H - (phone ? 10 : 16), { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true });
   }
 
@@ -181,7 +181,7 @@ vec4 shade(vec2 p) {
     g.line(xT, y0, xT, y1, c.ink, 1.6, 0.7);
     FU.forEach(([k, , col]) => { const v = F().sv(k, T); if (lg(v) > YMIN) { g.dot(xT, Y(v), 6, col); g.ring(xT, Y(v), 10, col, 1.5, 0.6); } });
     const r = F().sv("DT", T) / F().sv("DD", T);
-    g.label(`kT ${T.toFixed(T < 10 ? 1 : 0)} keV · D–T ${sci(F().sv("DT", T))} m³/s · ${r.toFixed(0)}× D–D`, W / 2, phone ? 14 : 24, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true });
+    g.label(WT.trf("kT {a} keV · D–T {b} m³/s · {c}× D–D", T.toFixed(T < 10 ? 1 : 0), sci(F().sv("DT", T)), r.toFixed(0)), W / 2, phone ? 14 : 24, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true, raw: true });
   }
 
   function launch(S, T, nt) { const L = S.law; L.T = T; L.nt = nt; L.held = false; release(S); }
@@ -217,7 +217,7 @@ vec4 shade(vec2 p) {
     if (ign.length > 2) g.label("keeps itself hot", X(30), Y(10 ** 22), { color: c.ink, size: phone ? 12 : 14, weight: 600, serif: true });
     // triple-product minimum
     let best = [1e99, 0]; for (let i = 0; i <= 200; i++) { const T = 10 ** (0.5 + i / 200), v = ntCurve(T, Infinity) * T; if (v < best[0]) best = [v, T]; }
-    g.dot(X(best[1]), Y(best[0] / best[1]), 4, c.ink); g.label(`easiest: ${best[1].toFixed(0)} keV, nτT ${sci(best[0] * 1, 0)}`, X(best[1]) + 8, Y(best[0] / best[1]) + 16, { color: c.soft, size: 11, align: "left", bg: true });
+    g.dot(X(best[1]), Y(best[0] / best[1]), 4, c.ink); g.label(WT.trf("easiest: {a} keV, nτT {b}", best[1].toFixed(0), sci(best[0] * 1, 0)), X(best[1]) + 8, Y(best[0] / best[1]) + 16, { color: c.soft, size: 11, align: "left", bg: true, raw: true });
     // dynamics: heating off, tau_E degrading with power
     if (L.run && dt > 0) {
       const warp = 0.9 * L.tauRef, n = 40, h = (dt * warp) / n;
@@ -241,8 +241,8 @@ vec4 shade(vec2 p) {
     g.ball(px, py, 8, burning ? c.warm : c.cool); g.ring(px, py, 13, c.ink, 1.2, L.held ? 0.9 : 0.4);
     // readout: Q while held (heating needed), state when released
     const pa = pAlpha(L.T), need = (3 * NDEN * L.T * F().KEV) / (L.nt / NDEN) + pBrem(L.T) - pa;
-    const Qs = need <= 0 ? "Q = ∞: no heating needed" : `Q = ${((5 * pa) / need).toFixed((5 * pa) / need < 10 ? 2 : 0)}`;
-    g.label(L.held ? `${L.T.toFixed(1)} keV · nτ ${sci(L.nt)} · ${Qs}` : `${L.T.toFixed(1)} keV · nτ ${sci(L.nt)} · ${L.msg || ""}`, W / 2, phone ? 14 : 24, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true });
+    const Qs = need <= 0 ? WT.trf("Q = ∞: no heating needed") : "Q = " + WT.dec(((5 * pa) / need).toFixed((5 * pa) / need < 10 ? 2 : 0));
+    g.label(WT.trf("{a} keV · nτ {b} · {c}", L.T.toFixed(1), sci(L.nt), L.held ? Qs : L.msg ? WT.trf(L.msg) : ""), W / 2, phone ? 14 : 24, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true, raw: true });
     g.label(phone ? "drag or tap a point; it runs on its own" : "hold: heaters on (Q = fusion power / heating) · let go: heaters off, the plasma is on its own", W / 2, H - (phone ? 14 : 22), { color: c.faint, size: 11 });
   }
 })();

@@ -11,11 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">가벼운 조각 A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>어떻게 쪼개든 약 200 MeV입니다. 연료 분자 하나를 태워 얻는 몇 전자볼트의 수천만 배입니다.</p>
-</div>
-<div class="step">
-  <p>가벼운 원자핵 둘을 하나로 합쳐 보세요. 새 원자핵이 곡선에서 더 높은 곳에 있으면 에너지가 나옵니다. 꼭대기를 지나면 합치는 데 오히려 에너지가 듭니다.</p>
-  <div class="ctl"><label for="bi-u">가벼운 원자핵 하나의 A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>가벼운 원자핵은 반대 방향, 곧 합쳐지면서 에너지를 내놓습니다: <a href="#fusion">→ 핵융합</a>.</p>
 </div>`,
 };
 

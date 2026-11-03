@@ -1019,5 +1019,86 @@
       short: "Valutato con le stesse misure a cui il metodo è stato adattato, il che lo favorisce.",
       more: "La prova onesta è fuori dal campione: riadattare senza i dati giudicati e poi confrontare. I confronti di TERRA lo fanno in parte della tabella, lasciando fuori una serie di dati alla volta.",
     },
+    /* ---------- parte terza: fusione ---------- */
+    fusion: {
+      term: "Fusione", aliases: ["fusione", "fusioni", "fusione nucleare"], scope: "chapter",
+      short: "L'unione di due nuclei leggeri in uno più pesante; il prodotto pesa meno delle parti e la differenza esce come energia.",
+      more: "Deuterio e trizio producono elio-4 e un neutrone da 14,1 MeV, liberando 17,6 MeV. La loro repulsione elettrica impone che si scontrino ad alta velocità: per questo la fusione richiede un gas a circa 100 milioni di kelvin.",
+      chapter: "fusion",
+    },
+    plasma: {
+      term: "Plasma", aliases: ["plasma", "plasmi"], scope: "chapter",
+      short: "Un gas così caldo che gli elettroni sono strappati via dai nuclei, quindi è fatto di particelle cariche.",
+      more: "Poiché ogni particella è carica, un campo magnetico può guidarla. I plasmi da fusione lavorano a 10–20 keV, oltre 100 milioni di kelvin.",
+      chapter: "tokamak",
+    },
+    gamowPeak: {
+      term: "Picco di Gamow", aliases: ["picco di Gamow", "finestra di Gamow"],
+      short: "La stretta banda di energie di collisione in cui avviene quasi tutta la fusione in un gas caldo.",
+      more: "Gli urti veloci sono rari (la coda di Maxwell cala come e^(−E/kT)) ma passano più facilmente per effetto tunnel (e^(−√(E_G/E)) cresce); il loro prodotto ha il massimo in E₀, alcune volte kT.",
+      formula: "E_0 = (E_G (kT)^2 / 4)^(1/3)",
+      chapter: "gamow",
+    },
+    reactivity: {
+      term: "Reattività", aliases: ["reattività", "⟨σv⟩"],
+      short: "La sezione d'urto di fusione per la velocità relativa, mediata su un gas caldo: stabilisce quanto rapidamente avvengono le fusioni.",
+      more: "Il tasso per unità di volume è n₁ n₂ ⟨σv⟩. Per il D–T ha il massimo vicino a 65 keV, a circa 8,7 × 10⁻²² m³/s (i fit usati qui sono quelli di Bosch e Hale, 1992).",
+      chapter: "gamow",
+    },
+    ignition: {
+      term: "Ignizione", aliases: ["ignizione", "prodotto triplo", "criterio di Lawson"],
+      short: "Il punto in cui le particelle alfa della fusione scaldano il plasma con la stessa rapidità con cui perde calore, così resta caldo da solo.",
+      more: "Per il D–T serve densità × tempo di confinamento dell'energia × temperatura di circa 3 × 10²¹ keV s m⁻³, più facile vicino a 14 keV. Q è la potenza di fusione divisa per il riscaldamento immesso; l'ignizione è Q → ∞.",
+      formula: "n τ_E ≥ 3T / (⟨σv⟩ E_α / 4 − C_B √T)",
+      chapter: "gamow",
+    },
+    gyroRadius: {
+      term: "Raggio di Larmor", aliases: ["raggio di Larmor", "raggi di Larmor", "raggio di girazione", "girazione"],
+      short: "Il raggio del cerchio che una particella carica descrive attorno a una linea di campo magnetico.",
+      more: "Cresce con la quantità di moto della particella e cala con il campo: un deutone da 10 keV in 5 tesla gira su circa 4 mm, una particella alfa da 3,5 MeV su circa 5 cm.",
+      formula: "ρ = √(2mE) / (|q| B)",
+      chapter: "tokamak",
+    },
+    tokamak: {
+      term: "Tokamak", aliases: ["tokamak"],
+      short: "Una bottiglia magnetica a forma di ciambella: un campo forte lungo l'anello più uno più debole attorno al tubo, così le linee si torcono.",
+      more: "La torsione conta: un campo che girasse solo lungo l'anello lascerebbe derivare fuori le particelle. ITER e JET sono tokamak; gli stellarator ottengono la torsione da bobine sagomate.",
+      chapter: "tokamak",
+    },
+    safetyFactor: {
+      term: "Fattore di sicurezza", aliases: ["fattore di sicurezza"],
+      short: "q: quante volte una linea di campo fa il giro dell'anello per ogni giro attorno al tubo.",
+      more: "Dove q è una frazione semplice (2, 3/2, 3), le linee di campo si richiudono su sé stesse, e piccole increspature del campo possono crescere fino a formare isole magnetiche.",
+      chapter: "tokamak",
+    },
+    island: {
+      term: "Isola magnetica", aliases: ["isole", "isola magnetica", "isole magnetiche"], scope: "chapter",
+      short: "Una catena di anelli chiusi nelle linee di campo, aperta dove la torsione q è una frazione semplice.",
+      more: "Dentro un'isola le linee di campo mettono in cortocircuito le superfici annidate, quindi il calore sfugge più in fretta. Dove le isole di frazioni vicine si sovrappongono, le linee di campo vagano: è il caos.",
+      chapter: "tokamak",
+    },
+    blanket: {
+      term: "Mantello triziogeno", aliases: ["mantello", "mantello triziogeno", "fertilizzante", "blanket"], scope: "chapter",
+      short: "Lo strato attorno a un plasma da fusione che cattura i suoi neutroni, ne trasforma l'energia in calore e produce trizio dal litio.",
+      more: "Il litio-6 produce trizio con i neutroni lenti, il litio-7 con quelli veloci; piombo o berillio aggiungono neutroni tramite (n,2n).",
+      chapter: "blanket",
+    },
+    tbr: {
+      term: "Rapporto di triziogenesi", aliases: ["TBR", "rapporto di triziogenesi"],
+      short: "I nuclei di trizio prodotti nel mantello per ogni nucleo di trizio bruciato nel plasma; deve superare 1.",
+      more: "Ogni fusione D–T brucia un tritone e produce un neutrone, quindi ogni neutrone deve produrre in media più di un tritone, per coprire aperture, perdite e decadimento.",
+      chapter: "blanket",
+    },
+    firstWall: {
+      term: "Prima parete", aliases: ["prima parete"],
+      short: "La superficie rivolta verso il plasma, colpita dal flusso completo di neutroni da 14,1 MeV.",
+      more: "Reazioni come (n,α) e (n,p) lasciano elio e idrogeno dentro il metallo; l'elio si raccoglie in bolle che rendono fragile l'acciaio.",
+      chapter: "blanket",
+    },
+    appm: {
+      term: "appm", aliases: ["appm"],
+      short: "Parti atomiche per milione: quanti atomi di un gas, come l'elio, per milione di atomi del metallo.",
+      chapter: "blanket",
+    },
   };
 })();

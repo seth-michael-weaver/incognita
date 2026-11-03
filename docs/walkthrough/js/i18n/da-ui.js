@@ -87,4 +87,7 @@ Object.assign(WT.L.ui, {
   xp_kicker: "Del to · Ekspert",
   xp_h: "Ned i detaljerne",
   xp_p: "Indtil nu er hvert trin blevet fortalt som et billede. De seks følgende kapitler åbner de samme trin: formlerne, som motoren evaluerer, approksimationerne i dem, og hvor de kommer under pres. De er skrevet til evaluatorer, modeludviklere og ph.d.-studerende. Tegningerne evaluerer formlerne live, med illustrative inputværdier.",
+  fu_kicker: "Del tre · Fusion",
+  fu_h: "Lette kerner smelter sammen",
+  fu_p: "Fire kapitler, ét pr. niveau: barrieren, plasmaet, magneten, avlskappen.",
 });

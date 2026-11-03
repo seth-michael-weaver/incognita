@@ -11,11 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">较轻碎片的 A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>无论怎样分裂，大约都是 200 MeV：是燃烧一个燃料分子所得几电子伏特的数千万倍。</p>
-</div>
-<div class="step">
-  <p>把两个轻核聚合成一个。如果新的原子核在曲线上更高，就会放出能量。越过峰值之后，聚合反而要消耗能量。</p>
-  <div class="ctl"><label for="bi-u">每个轻核的 A</label><input id="bi-u" type="range" data-bind="fuse" data-instant min="2" max="60" step="1" value="2"><output data-show="fuse" data-fmt="0"></output></div>
-  <p class="ctl-result" id="bi-fuse-out" aria-live="polite"></p>
+  <p>轻核则以相反的方式放出能量，即结合：<a href="#fusion">→ 聚变</a>。</p>
 </div>`,
 };
 

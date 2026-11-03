@@ -86,5 +86,8 @@ Object.assign(WT.L.ui, {
   xp_kicker: "Deel twee · Expert",
   xp_h: "De diepte in",
   xp_p: "De hoofdstukken tot nu toe vertelden elke stap als een plaatje. De zes die volgen, openen dezelfde stappen: de formules die de motor uitrekent, de benaderingen die erin zitten en waar die knellen. Ze zijn geschreven voor evaluatoren, modelontwikkelaars, masterstudenten en promovendi. De tekeningen rekenen de formules live uit, met illustratieve invoer.",
+  fu_kicker: "Deel drie · Fusie",
+  fu_h: "Lichte kernen samenvoegen",
+  fu_p: "Vier hoofdstukken, één per niveau: de barrière, het plasma, de magneet, de mantel.",
   step_link: "Kopieer een link naar deze stap", link_copied: "Link gekopieerd",
 });

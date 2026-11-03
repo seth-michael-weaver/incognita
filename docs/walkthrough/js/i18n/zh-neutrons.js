@@ -5,6 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>质子带正电，原子核里的 82 个质子也带正电。同号电荷相斥，所以质子被推开，而且越靠近，推力增长得越快（箭头）。慢速质子会在半路停下并折返，根本碰不到原子核。只有能量超过约 13 MeV，它才能越过这股推力；略低于这个值时，它有时仍然能溜进去（<b>隧穿</b>）。小图把同样的推力画成一座能量山丘。</p>
   <div class="ctl"><label for="wn-e1">质子能量 (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
+  <p>两个轻核聚变时也要面对同一座山丘：<a href="#fusion-2">→ 聚变</a>。</p>
 </div>
 <div class="step">
   <p>中子不带电：无论多快多慢都能进入。没有任何东西把它推开，所以没有山丘要爬；它只需要到达原子核，然后强力就会把它拉进去。</p>

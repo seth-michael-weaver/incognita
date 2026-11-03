@@ -5,6 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>Un proton est positif, tout comme les 82 protons du noyau. Les charges de même signe se repoussent : le proton est donc repoussé, et la poussée croît vite à mesure qu'il se rapproche (la flèche). Un proton lent s'arrête avant et fait demi-tour sans toucher le noyau. Ce n'est qu'au-dessus d'environ 13 MeV qu'il surmonte la poussée ; juste en dessous, il lui arrive de passer quand même (<b>effet tunnel</b>). Le petit graphique montre la même poussée comme une colline d'énergie.</p>
   <div class="ctl"><label for="wn-e1">Énergie du proton (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
+  <p>Deux noyaux légers affrontent la même colline lorsqu'ils fusionnent : <a href="#fusion-2">→ Fusion</a>.</p>
 </div>
 <div class="step">
   <p>Un neutron n'a pas de charge : il entre à n'importe quelle vitesse. Rien ne le repousse, il n'y a donc pas de colline à gravir ; il lui suffit d'atteindre le noyau, et l'interaction forte l'attire alors à l'intérieur.</p>

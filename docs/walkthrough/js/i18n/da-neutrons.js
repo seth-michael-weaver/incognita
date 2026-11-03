@@ -5,6 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>En proton er positiv, og det er kernens 82 protoner også. Ens ladninger frastøder hinanden, så protonen bliver skubbet væk, og skubbet vokser hurtigt, når den kommer tættere på (pilen). En langsom proton standser i god afstand og vender om uden at røre kernen. Først over omkring 13 MeV kommer den over skubbet; lige under slipper den nogle gange alligevel igennem (<b>tunnelering</b>). Den lille graf viser det samme skub som en energibakke.</p>
   <div class="ctl"><label for="wn-e1">Protonenergi (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
+  <p>To lette kerner møder den samme bakke, når de fusionerer: <a href="#fusion-2">→ Fusion</a>.</p>
 </div>
 <div class="step">
   <p>En neutron har ingen ladning: den kommer ind ved enhver hastighed. Intet skubber den væk, så der er ingen bakke at komme over; den skal bare nå frem til kernen, og så trækker den stærke kraft den ind.</p>

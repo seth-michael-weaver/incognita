@@ -1020,5 +1020,87 @@
       short: "Avaliado com as mesmas medições a que o método foi ajustado, o que o favorece.",
       more: "O teste justo é fora da amostra: reajustar sem os dados que estão a ser julgados e só então comparar. As comparações da TERRA fazem isso em parte do quadro de resultados, deixando de fora uma série de dados de cada vez.",
     },
+
+    /* ---------- terceira parte: fusão ---------- */
+    fusion: {
+      term: "Fusão", aliases: ["fusão", "fusões"], scope: "chapter",
+      short: "Dois núcleos leves que se juntam num mais pesado; o produto pesa menos do que as partes, e a diferença sai como energia.",
+      more: "O deutério e o trítio formam hélio-4 e um neutrão de 14,1 MeV, libertando 17,6 MeV. A repulsão elétrica entre eles obriga-os a colidir depressa, e é por isso que a fusão precisa de um gás a cerca de 100 milhões de kelvin.",
+      chapter: "fusion",
+    },
+    plasma: {
+      term: "Plasma", aliases: ["plasma", "plasmas"], scope: "chapter",
+      short: "Um gás tão quente que os eletrões foram arrancados aos núcleos, pelo que é feito de partículas carregadas.",
+      more: "Como todas as partículas têm carga, um campo magnético consegue guiá-lo. Os plasmas de fusão funcionam entre 10 e 20 keV, mais de 100 milhões de kelvin.",
+      chapter: "tokamak",
+    },
+    gamowPeak: {
+      term: "Pico de Gamow", aliases: ["pico de Gamow", "janela de Gamow"],
+      short: "A banda estreita de energias de colisão onde acontece quase toda a fusão num gás quente.",
+      more: "As colisões rápidas são raras (a cauda de Maxwell cai como e^(−E/kT)) mas atravessam a barreira por efeito túnel mais facilmente (e^(−√(E_G/E)) sobe); o produto tem um máximo em E₀, várias vezes kT.",
+      formula: "E_0 = (E_G (kT)^2 / 4)^(1/3)",
+      chapter: "gamow",
+    },
+    reactivity: {
+      term: "Reatividade", aliases: ["reatividade", "reatividades", "⟨σv⟩"],
+      short: "A secção eficaz de fusão vezes a velocidade relativa, em média sobre um gás quente: define a rapidez com que as fusões acontecem.",
+      more: "A taxa por unidade de volume é n₁ n₂ ⟨σv⟩. Para D–T atinge o máximo perto de 65 keV, com cerca de 8,7 × 10⁻²² m³/s (os ajustes aqui usados são os de Bosch e Hale, 1992).",
+      chapter: "gamow",
+    },
+    ignition: {
+      term: "Ignição", aliases: ["ignição", "produto triplo", "critério de Lawson"],
+      short: "O ponto em que as partículas alfa da fusão aquecem o plasma tão depressa quanto ele perde calor, de modo que se mantém quente sozinho.",
+      more: "Para D–T exige densidade × tempo de confinamento da energia × temperatura de cerca de 3 × 10²¹ keV s m⁻³, no ponto mais fácil perto de 14 keV. Q é a potência de fusão a dividir pelo aquecimento fornecido; a ignição é Q → ∞.",
+      formula: "n τ_E ≥ 3T / (⟨σv⟩ E_α / 4 − C_B √T)",
+      chapter: "gamow",
+    },
+    gyroRadius: {
+      term: "Raio de giração", aliases: ["raio de giração", "raios de giração", "raio de Larmor", "giração"],
+      short: "O raio do círculo que uma partícula carregada descreve em torno de uma linha de campo magnético.",
+      more: "Cresce com o momento da partícula e diminui com o campo: um deuterão de 10 keV em 5 tesla descreve um círculo de cerca de 4 mm, uma partícula alfa de 3,5 MeV um de cerca de 5 cm.",
+      formula: "ρ = √(2mE) / (|q| B)",
+      chapter: "tokamak",
+    },
+    tokamak: {
+      term: "Tokamak", aliases: ["tokamak", "tokamaks"],
+      short: "Uma garrafa magnética em forma de rosca: um campo forte ao longo do anel e outro mais fraco em torno do tubo, de modo que as linhas se torcem.",
+      more: "A torção é importante: um campo que só desse a volta ao anel deixaria as partículas derivar para fora. O ITER e o JET são tokamaks; os stellarators obtêm a torção de bobinas com formas especiais.",
+      chapter: "tokamak",
+    },
+    safetyFactor: {
+      term: "Fator de segurança", aliases: ["fator de segurança"],
+      short: "q: quantas vezes uma linha de campo dá a volta ao anel por cada volta em torno do tubo.",
+      more: "Onde q é uma fração simples (2, 3/2, 3), as linhas de campo fecham-se sobre si mesmas, e pequenas ondulações do campo podem crescer até formarem ilhas magnéticas.",
+      chapter: "tokamak",
+    },
+    island: {
+      term: "Ilha magnética", aliases: ["ilhas", "ilha magnética", "ilhas magnéticas"], scope: "chapter",
+      short: "Uma cadeia de laços fechados nas linhas de campo, rasgada onde a torção q é uma fração simples.",
+      more: "Dentro de uma ilha as linhas de campo fazem curto-circuito entre as superfícies encaixadas, por isso o calor escapa mais depressa. Onde as ilhas de frações vizinhas se sobrepõem, as linhas de campo vagueiam: caos.",
+      chapter: "tokamak",
+    },
+    blanket: {
+      term: "Manto regenerador", aliases: ["manto", "mantos", "manto regenerador", "mantos regeneradores", "regenerador"], scope: "chapter",
+      short: "A camada à volta de um plasma de fusão que apanha os seus neutrões, transforma a energia deles em calor e regenera trítio a partir do lítio.",
+      more: "O lítio-6 produz trítio com neutrões lentos; o lítio-7 fá-lo com neutrões rápidos; o chumbo ou o berílio acrescentam neutrões através de (n,2n).",
+      chapter: "blanket",
+    },
+    tbr: {
+      term: "Razão de regeneração de trítio", aliases: ["TBR", "razão de regeneração de trítio"],
+      short: "Núcleos de trítio produzidos no manto por cada núcleo de trítio queimado no plasma; tem de ser superior a 1.",
+      more: "Cada fusão D–T queima um tritão e produz um neutrão, por isso cada neutrão tem de produzir, em média, mais de um tritão, para cobrir portas de acesso, perdas e decaimento.",
+      chapter: "blanket",
+    },
+    firstWall: {
+      term: "Primeira parede", aliases: ["primeira parede"],
+      short: "A superfície virada para o plasma, atingida pelo fluxo completo de neutrões de 14,1 MeV.",
+      more: "Reações como (n,α) e (n,p) deixam hélio e hidrogénio dentro do metal; o hélio junta-se em bolhas que tornam o aço frágil.",
+      chapter: "blanket",
+    },
+    appm: {
+      term: "appm", aliases: ["appm"],
+      short: "Partes atómicas por milhão: quantos átomos de um gás, como o hélio, há por cada milhão de átomos do metal.",
+      chapter: "blanket",
+    },
   };
 })();
