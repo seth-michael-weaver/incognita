@@ -1,19 +1,10 @@
-/* Hero of topics.html: a word cloud of hopeful things nuclear science does, each word with its own small picture
- * (Seth 2026-11-06: "a word-cloud with pictures on topics of optimistic things for nuclear").
- * The words float around the title without covering it (and away from the caption row), drift gently and follow the
- * pointer a little. Hover (or tap, on phones) shows one short, sourced fact; where a lesson on this page covers the topic,
- * a click scrolls to it. "Start a chain" sends a ripple through the cloud.
- * Facts (rounded, sourced):
- *   ~9 % of world electricity from nuclear in 2023 (IEA, World Energy Outlook 2024; IAEA PRIS); no CO2 from the plant itself.
- *   Voyager 1 and 2 (launched 1977) run on plutonium-238 radioisotope generators (NASA JPL).
- *   Curiosity (2012) and Perseverance (2021) Mars rovers: MMRTG plutonium-238 power (NASA).
- *   Tc-99m: about 40 million procedures a year (OECD-NEA 2019, "The Supply of Medical Radioisotopes").
- *   Sterile insect technique: radiation-sterilised screwworm flies eradicated the pest from the USA, Mexico and Central America
- *   (IAEA/FAO Joint Division; USDA).
- *   BN-350 (Aktau, Kazakhstan) desalinated Caspian water 1973-1999 (IAEA TECDOC-1235; WNA).
- *   Food irradiation kills bacteria and insects without making food radioactive (WHO, FAO/IAEA).
- *   Russian nuclear icebreakers keep the Northern Sea Route open (Rosatomflot; WNA "Nuclear-powered ships").
- * Dev aid: ?herot=<seconds> runs to that moment and freezes (for screenshots); ?herohover=<i> shows item i's fact. */
+/* Hero of topics.html: a cousin of the main page's hero (js/ch/intro.js), same look: a uranium-235 nucleus of 235 shaded
+ * nucleons over a star field. On arrival a neutron streaks in, the impact flashes, the title flies out of it (same CSS as
+ * the main hero: .hero-live), and the nucleus bursts: its nucleons fly out in groups that gather into small spinning
+ * nuclei around the title, one for each part of this page, labelled with the part's own heading (read from the page,
+ * so already translated). Hover a fragment to light it; click to go to that part. A click on empty space fires a neutron
+ * at the nearest fragment. The nucleus tilts toward the pointer, as on the main page. Illustrative, not a fission model.
+ * Dev aid: ?herot=<seconds> runs to that moment and freezes (for screenshots). */
 (function () {
   "use strict";
   const hero = document.querySelector(".tp-hero"), cv = hero && hero.querySelector(".hero-cv");
@@ -21,228 +12,172 @@
   const ctx = cv.getContext("2d"), copy = hero.querySelector(".hero-copy");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const qT = /[?&]herot=([\d.]+)/.exec(location.search), freezeAt = qT ? +qT[1] : null;
-  const qH = /[?&]herohover=(\d+)/.exec(location.search);
   const TAU = Math.PI * 2, clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, s) => a + (b - a) * s;
-  const ease = (u) => 1 - Math.pow(1 - clamp(u, 0, 1), 3);
-  const T = (k, en) => (window.WT && WT.ui ? WT.ui(k, en) : en);
+  const smooth = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
+  const easeOut = (t) => 1 - Math.pow(1 - clamp(t, 0, 1), 3);
+  function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 16807) % 2147483647) / 2147483647); }
+  const C = { n: "#6f8cff", p: "#ff6a5c", hot: "#ffb067", white: "#fff6ea", gam: "#ffd166" };
   const SERIF = getComputedStyle(document.documentElement).getPropertyValue("--display").trim() || "Georgia, serif";
-  const SANS = getComputedStyle(document.documentElement).getPropertyValue("--sans").trim() || "system-ui, sans-serif";
 
-  // ---------- the topics: [key, words, tier (0 big .. 2 small), colour, picture, link (#id or null), fact] ----------
-  const C = { gold: "#f5c04d", blue: "#5fb0ff", green: "#3fd3a8", red: "#ff7e72", violet: "#b392ff", orange: "#ff9b55", cyan: "#62e0f0" };
-  const ITEMS = [
-    ["power", "Clean electricity", 0, C.gold, "bolt", "reactor", "About 9 % of the world's electricity, with no CO₂ from the plant"],
-    ["cancer", "Cancer treatment", 0, C.red, "beams", "everyday-2", "Beams from many sides meet on the tumour"],
-    ["fusion", "Fusion energy", 0, C.orange, "sun", "fusion", "Joining light nuclei, the way the Sun shines"],
-    ["space", "Voyager's power", 1, C.violet, "probe", null, "Plutonium-238 has powered Voyager 1 and 2 since 1977"],
-    ["pet", "PET scans", 1, C.cyan, "ring", "everyday-1", "Two gamma rays, back to back, show where the tracer went"],
-    ["stars", "Stardust", 1, C.gold, "star", "stars", "Most heavy elements were built in stars by neutron capture"],
-    ["water", "Clean water", 1, C.blue, "drop", null, "Kazakhstan's BN-350 reactor desalinated sea water for 26 years"],
-    ["crops", "Saving crops", 1, C.green, "fly", null, "Sterilised flies wiped out the screwworm pest across North America"],
-    ["mars", "Mars rovers", 1, C.red, "rover", null, "Curiosity and Perseverance run on plutonium-238 heat"],
-    ["isotopes", "Medical isotopes", 2, C.cyan, "vial", "everyday-3", "Technetium-99m: about 40 million scans a year"],
-    ["dating", "Carbon dating", 2, C.green, "leaf", "everyday-4", "Carbon-14 tells the age of anything that once lived"],
-    ["smr", "Small modular reactors", 2, C.blue, "module", "rwater-5", "Factory-built reactors, small enough to ship"],
-    ["recycle", "Recycling fuel", 2, C.green, "cycle", "fuelcycle-5", "Used fuel still holds uranium and plutonium to burn again"],
-    ["food", "Safer food", 2, C.orange, "apple", null, "Irradiation kills bacteria without making food radioactive"],
-    ["ice", "Arctic icebreakers", 2, C.cyan, "ship", null, "Nuclear icebreakers keep the Northern Sea Route open"],
-    ["build", "Build a reactor", 2, C.violet, "atom", "sandbox", "Pick fuel, moderator and size: will it run?"],
-    ["breed", "Breeding fuel", 2, C.orange, "spark", "breeding", "Turning uranium-238 into new fuel"],
-    ["smoke", "Smoke alarms", 2, C.red, "alarm", "everyday-5", "A speck of americium guards millions of homes"],
-  ].map(([key, words, tier, col, pic, link, fact]) => ({ key, words: T("tp_w_" + key, words), tier, col, pic, link, fact: T("tp_f_" + key, fact) }));
+  // ---------- sprites (as in intro.js) ----------
+  function hex(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  const rgba = (h, a) => { const [r, g, b] = hex(h); return `rgba(${r},${g},${b},${a})`; };
+  const shade = (h, f) => { const [r, g, b] = hex(h), c = (v) => Math.min(255, (v * f) | 0).toString(16).padStart(2, "0"); return "#" + c(r) + c(g) + c(b); };
+  function ballSprite(col, S = 96) { const c = document.createElement("canvas"); c.width = c.height = S; const g = c.getContext("2d"), r = S / 2;
+    const gr = g.createRadialGradient(r * 0.62, r * 0.55, r * 0.04, r, r, r); gr.addColorStop(0, "#ffffff"); gr.addColorStop(0.22, col); gr.addColorStop(0.75, shade(col, 0.55)); gr.addColorStop(1, shade(col, 0.22));
+    g.fillStyle = gr; g.beginPath(); g.arc(r, r, r - 1, 0, TAU); g.fill(); return c; }
+  function glowSprite(col, S = 128) { const c = document.createElement("canvas"); c.width = c.height = S; const g = c.getContext("2d"), r = S / 2;
+    const gr = g.createRadialGradient(r, r, 0, r, r, r); gr.addColorStop(0, rgba(col, 1)); gr.addColorStop(0.25, rgba(col, 0.45)); gr.addColorStop(1, rgba(col, 0)); g.fillStyle = gr; g.fillRect(0, 0, S, S); return c; }
+  const DEPTH = [0.5, 0.72, 0.9, 1.08];
+  const SPD = { n: DEPTH.map((f) => ballSprite(shade(C.n, f))), p: DEPTH.map((f) => ballSprite(shade(C.p, f))) };
+  const GL = { n: glowSprite(C.n), hot: glowSprite(C.hot), white: glowSprite(C.white), gam: glowSprite(C.gam) };
+  const stamp = (img, x, y, r, a = 1) => { if (a <= 0.003 || r <= 0.2) return; ctx.globalAlpha = Math.min(1, a); ctx.drawImage(img, x - r, y - r, 2 * r, 2 * r); };
 
-  // ---------- pictures: drawn in a unit circle (radius 1), white strokes on a coloured disc ----------
-  function picture(x, kind) {
-    x.lineCap = "round"; x.lineJoin = "round"; x.strokeStyle = "#fff"; x.fillStyle = "#fff"; x.lineWidth = 0.11;
-    const P = (pts, close, fill) => { x.beginPath(); pts.forEach(([a, b], i) => (i ? x.lineTo(a, b) : x.moveTo(a, b))); if (close) x.closePath(); fill ? x.fill() : x.stroke(); };
-    const O = (cx, cy, r, fill) => { x.beginPath(); x.arc(cx, cy, r, 0, TAU); fill ? x.fill() : x.stroke(); };
-    switch (kind) {
-      case "bolt": P([[0.12, -0.62], [-0.3, 0.08], [0.02, 0.08], [-0.12, 0.62], [0.32, -0.12], [0, -0.12]], true, true); break;
-      case "beams": for (let k = 0; k < 5; k++) { const a = k * TAU / 5 - Math.PI / 2; x.globalAlpha = 0.75; P([[Math.cos(a) * 0.62, Math.sin(a) * 0.62], [Math.cos(a) * 0.18, Math.sin(a) * 0.18]]); } x.globalAlpha = 1; O(0, 0, 0.16, true); break;
-      case "sun": O(0, 0, 0.26, true); for (let k = 0; k < 8; k++) { const a = k * TAU / 8; P([[Math.cos(a) * 0.38, Math.sin(a) * 0.38], [Math.cos(a) * 0.58, Math.sin(a) * 0.58]]); } break;
-      case "probe": O(-0.12, 0.08, 0.28); P([[-0.3, -0.14], [0.06, 0.3]]); P([[0.12, -0.08], [0.6, -0.5]]); P([[0.2, -0.02], [0.46, 0.24]]); O(0.6, -0.5, 0.07, true); break;
-      case "ring": for (let k = 0; k < 12; k++) { const a = k * TAU / 12; x.fillRect(Math.cos(a) * 0.52 - 0.06, Math.sin(a) * 0.52 - 0.06, 0.12, 0.12); } P([[-0.42, 0.24], [0.42, -0.24]]); O(0.08, -0.05, 0.08, true); break;
-      case "star": { const pts = []; for (let k = 0; k < 10; k++) { const a = k * TAU / 10 - Math.PI / 2, r = k % 2 ? 0.25 : 0.6; pts.push([Math.cos(a) * r, Math.sin(a) * r]); } P(pts, true, true); break; }
-      case "drop": x.beginPath(); x.moveTo(0, -0.6); x.bezierCurveTo(0.12, -0.3, 0.42, -0.02, 0.42, 0.18); x.arc(0, 0.18, 0.42, 0, Math.PI); x.bezierCurveTo(-0.42, -0.02, -0.12, -0.3, 0, -0.6); x.fill(); break;
-      case "fly": x.save(); x.scale(1, 0.75); O(0, 0.1, 0.18, true); x.restore(); x.globalAlpha = 0.8; x.beginPath(); x.ellipse(-0.24, -0.16, 0.26, 0.13, -0.5, 0, TAU); x.fill(); x.beginPath(); x.ellipse(0.24, -0.16, 0.26, 0.13, 0.5, 0, TAU); x.fill(); x.globalAlpha = 1; P([[-0.08, -0.06], [-0.2, -0.46]]); P([[0.08, -0.06], [0.2, -0.46]]); break;
-      case "rover": x.fillRect(-0.44, -0.1, 0.88, 0.24); O(-0.32, 0.32, 0.13, true); O(0, 0.32, 0.13, true); O(0.32, 0.32, 0.13, true); P([[0.24, -0.1], [0.24, -0.44], [0.42, -0.44]]); break;
-      case "vial": P([[-0.16, -0.56], [-0.16, 0.4], [0, 0.56], [0.16, 0.4], [0.16, -0.56]]); x.fillRect(-0.24, -0.62, 0.48, 0.1); x.globalAlpha = 0.85; x.fillRect(-0.12, 0.02, 0.24, 0.38); x.globalAlpha = 1; break;
-      case "leaf": x.beginPath(); x.moveTo(-0.5, 0.5); x.quadraticCurveTo(-0.5, -0.5, 0.5, -0.5); x.quadraticCurveTo(0.5, 0.5, -0.5, 0.5); x.fill(); x.strokeStyle = "rgba(0,0,0,.35)"; P([[-0.42, 0.42], [0.3, -0.3]]); break;
-      case "module": x.strokeRect(-0.4, -0.5, 0.8, 1.0); x.strokeRect(-0.22, -0.3, 0.44, 0.44); P([[-0.4, 0.3], [0.4, 0.3]]); break;
-      case "cycle": for (let k = 0; k < 3; k++) { const a0 = k * TAU / 3 - 0.2; x.beginPath(); x.arc(0, 0, 0.46, a0, a0 + 1.6); x.stroke(); const a1 = a0 + 1.6, hx = Math.cos(a1) * 0.46, hy = Math.sin(a1) * 0.46, tx = -Math.sin(a1), ty = Math.cos(a1);
-          P([[hx + tx * 0.16 - Math.cos(a1) * 0.12, hy + ty * 0.16 - Math.sin(a1) * 0.12], [hx + tx * 0.02, hy + ty * 0.02], [hx + tx * 0.16 + Math.cos(a1) * 0.12, hy + ty * 0.16 + Math.sin(a1) * 0.12]]); } break;
-      case "apple": O(-0.14, 0.12, 0.34, true); O(0.14, 0.12, 0.34, true); P([[0, -0.2], [0.06, -0.5]]); x.beginPath(); x.ellipse(0.2, -0.46, 0.16, 0.08, -0.4, 0, TAU); x.fill(); break;
-      case "ship": P([[-0.58, 0.06], [0.58, 0.06], [0.36, 0.4], [-0.44, 0.4]], true, true); x.fillRect(-0.24, -0.24, 0.42, 0.28); x.fillRect(0.0, -0.46, 0.1, 0.24); P([[-0.66, 0.54], [0.66, 0.54]]); break;
-      case "atom": for (let k = 0; k < 3; k++) { x.save(); x.rotate(k * Math.PI / 3); x.beginPath(); x.ellipse(0, 0, 0.6, 0.22, 0, 0, TAU); x.stroke(); x.restore(); } O(0, 0, 0.12, true); break;
-      case "spark": O(-0.2, 0.08, 0.2, true); O(0.28, -0.22, 0.12, true); P([[-0.02, -0.02], [0.18, -0.14]]); for (let k = 0; k < 6; k++) { const a = k * TAU / 6; P([[0.28 + Math.cos(a) * 0.2, -0.22 + Math.sin(a) * 0.2], [0.28 + Math.cos(a) * 0.32, -0.22 + Math.sin(a) * 0.32]]); } break;
-      case "alarm": O(0, 0.08, 0.44); O(0, 0.08, 0.16, true); P([[-0.56, -0.5], [-0.36, -0.36]]); P([[0.56, -0.5], [0.36, -0.36]]); P([[0, -0.6], [0, -0.44]]); break;
-    }
-  }
-  function shade(hex, f) { const n = parseInt(hex.slice(1), 16); return `rgb(${Math.round(((n >> 16) & 255) * f)},${Math.round(((n >> 8) & 255) * f)},${Math.round((n & 255) * f)})`; }
-  function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; }
-  // each item's badge is drawn once into its own small canvas (crisp at the device pixel ratio)
-  function badge(it, R) {
-    const s = Math.ceil(R * 2.6 * dpr), c = document.createElement("canvas"); c.width = c.height = s; const x = c.getContext("2d");
-    x.translate(s / 2, s / 2); x.scale(s / 2.6, s / 2.6);
-    const g = x.createRadialGradient(-0.35, -0.4, 0.1, 0, 0, 1); g.addColorStop(0, "#ffffff"); g.addColorStop(0.18, it.col); g.addColorStop(1, shade(it.col, 0.42));
-    x.fillStyle = g; x.beginPath(); x.arc(0, 0, 1, 0, TAU); x.fill();
-    x.strokeStyle = "rgba(255,255,255,.35)"; x.lineWidth = 0.05; x.stroke();
-    x.save(); x.scale(0.78, 0.78); picture(x, it.pic); x.restore();
-    return c;
-  }
+  // ---------- the nucleus: U-235 packed in a unit sphere (relaxed once, as on the main page) ----------
+  const N = 235, Z = 92, rb = Math.cbrt(0.62 / N), nuc = [];
+  (function pack() { const r = rng(11);
+    for (let i = 0; i < N; i++) { let x, y, z; do { x = r() * 2 - 1; y = r() * 2 - 1; z = r() * 2 - 1; } while (x * x + y * y + z * z > 1); nuc.push({ x, y, z, p: false, ph: r() * 100 }); }
+    const d0 = 2 * rb * 0.97, lim = 1 - rb;
+    for (let it = 0; it < 60; it++) { for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) { const a = nuc[i], b = nuc[j], dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z, d = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1e-6;
+        if (d < d0) { const k = (d0 - d) / d * 0.5; a.x -= dx * k; a.y -= dy * k; a.z -= dz * k; b.x += dx * k; b.y += dy * k; b.z += dz * k; } }
+      for (const a of nuc) { const d = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z); if (d > lim) { a.x *= lim / d; a.y *= lim / d; a.z *= lim / d; } } }
+    const idx = nuc.map((_, i) => i); for (let i = N - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    for (let k = 0; k < Z; k++) nuc[idx[k]].p = true;
+  })();
 
-  // the hub: a nucleus (protons red, neutrons blue), drawn once
-  function nucleusSprite(size) {
-    const c = document.createElement("canvas"); c.width = c.height = size; const x = c.getContext("2d"), R = size * 0.36, r = R * 0.24, pts = [];
-    let q = 7; const rn = () => ((q = (q * 16807) % 2147483647) / 2147483647);
-    for (let i = 0; i < 60; i++) { const u = rn(), v = rn(), w = rn(), rr = R * Math.cbrt(u) * 0.86, th = TAU * v, ph = Math.acos(2 * w - 1); pts.push({ x: rr * Math.sin(ph) * Math.cos(th), y: rr * Math.sin(ph) * Math.sin(th), z: rr * Math.cos(ph), p: rn() < 0.42 }); }
-    pts.sort((a, b) => a.z - b.z);
-    for (const p of pts) { const cx = size / 2 + p.x, cy = size / 2 + p.y, lit = 0.55 + 0.45 * (p.z / R + 1) / 2, base = p.p ? [236, 92, 78] : [86, 120, 230];
-      const g = x.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.08, cx, cy, r);
-      g.addColorStop(0, `rgba(255,255,255,${(0.95 * lit).toFixed(2)})`); g.addColorStop(0.25, `rgb(${base.map((v) => Math.round(v * (0.75 + 0.35 * lit))).join(",")})`); g.addColorStop(1, `rgb(${base.map((v) => Math.round(v * 0.28)).join(",")})`);
-      x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, TAU); x.fill(); }
-    return c;
-  }
-  const NUC = nucleusSprite(256);
-  let hubX = 0, hubY = 0, hubR = 60;
+  // ---------- the parts of the page (headings read from the page) ----------
+  const PARTS = [...document.querySelectorAll("main > .part-head")].map((el) => ({ id: el.id, name: (el.querySelector("h2") || el).textContent.trim() }));
+  const NP = Math.max(1, PARTS.length);
 
-  // ---------- layout: a spiral packing around the title, avoiding the text ----------
-  let W = 0, H = 0, dpr = 1, phone = false, placed = [], blocks = [], mx = 0.5, my = 0.5, pmx = 0.5, pmy = 0.5, hover = -1, t = 0, ripple = -9, motes = [];
-  const SIZES = [[34, 34], [25, 26], [19, 20]]; // [font px, badge radius] by tier
-  const hit = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
-  function rectOf(el, pad) { if (!el) return null; const b = hero.getBoundingClientRect(), r = el.getBoundingClientRect(); if (!r.width || !r.height) return null;
-    return { x0: r.left - b.left - pad, y0: r.top - b.top - pad, x1: r.right - b.left + pad, y1: r.bottom - b.top + pad }; }
-  // the title's final box: its text width at full size (the fly-in transform scales it, so measure layout boxes, not the rendered rect)
-  function titleRect(h1, pad) {
-    const b = hero.getBoundingClientRect(), left = h1.offsetLeft, top = h1.offsetTop, w = h1.offsetWidth, h = h1.offsetHeight;
-    const rg = document.createRange(); rg.selectNodeContents(h1); const rs = [...rg.getClientRects()], sc = scaleOf(h1);
-    const tw = rs.length ? Math.max(...rs.map((q) => q.width)) / sc : w; void b;
-    const cx = left + w / 2, cyTop = top; // the CSS centres it vertically with translate(-50%)
-    return { x0: cx - tw / 2 - pad, x1: cx + tw / 2 + pad, y0: cyTop - h / 2 - pad, y1: cyTop + h / 2 + pad };
-  }
-  function scaleOf(el) { const m = getComputedStyle(el).transform; if (!m || m === "none") return 1; const v = m.match(/matrix\(([^,]+),([^,]+)/); return v ? Math.hypot(+v[1], +v[2]) || 1 : 1; }
+  // ---------- background (as in intro.js) ----------
+  const R0 = rng(5), stars = [], flux = [];
+  for (let i = 0; i < 260; i++) stars.push({ x: R0(), y: R0(), d: 0.2 + R0() * 0.8, s: 0.4 + R0() * 1.3, tw: R0() * TAU });
+  for (let i = 0; i < 70; i++) flux.push({ x: R0(), y: R0(), v: 0.04 + R0() * 0.12, l: 10 + R0() * 40, a: 0.08 + R0() * 0.22 });
+  const STREAK = (() => { const c = document.createElement("canvas"); c.width = 64; c.height = 2; const g = c.getContext("2d"), gr = g.createLinearGradient(0, 0, 64, 0); gr.addColorStop(0, rgba(C.n, 0)); gr.addColorStop(1, rgba(C.n, 1)); g.fillStyle = gr; g.fillRect(0, 0, 64, 2); return c; })();
+
+  // ---------- timeline ----------
+  const T_IMP = 1.6, T_BURST = 2.5, T_LAND = 4.6, FS = 0.62; // FS: a fragment's drawing scale against the parent nucleus   // neutron arrives, nucleus heats and bulges, fragments fly and settle
+  let W = 0, H = 0, dpr = 1, phone = false, time = 0, tiltX = 0, tiltY = 0, tgtX = 0, tgtY = 0, flash = 0, shake = 0, live = false, hover = -1;
+  const rings = [], shots = [];
+  let frags = [], cx0 = 0, cy0 = 0, R = 100, inTrail = [];
+
   function layout() {
     const b = hero.getBoundingClientRect(); W = Math.max(320, b.width); H = Math.max(400, b.height); phone = W < 720;
     dpr = Math.min(window.devicePixelRatio || 1, 2); cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    blocks = [];
-    const h1 = hero.querySelector("h1");
-    if (h1) blocks.push(phone ? rectOf(h1, 10) : titleRect(h1, 26));
-    [".kicker", ".hero-tag", ".hero-hint", ".scrollcue"].forEach((s) => { const r = rectOf(hero.querySelector(s), phone ? 8 : 14); if (r) blocks.push(r); });
-    blocks = blocks.filter(Boolean);
-    if (phone) { const top = Math.min(...blocks.map((r) => r.y0).concat([H * 0.62])); blocks.push({ x0: -9, x1: W + 9, y0: top - 6, y1: H + 9 }); }
-    const sc = phone ? 0.7 : clamp(Math.min(W / 1500, H / 760), 0.72, 1.35);
-    placed = [];
-    const cx = W / 2, cy = phone ? H * 0.3 : H * 0.45, list = phone ? ITEMS.slice(0, 13) : ITEMS;
-    hubX = cx; hubY = phone ? cy : (blocks[0] ? (blocks[0].y0 + blocks[0].y1) / 2 : cy); hubR = Math.min(W, H) * (phone ? 0.13 : 0.15);
-    if (phone) { hubR = Math.min(W, H) * 0.11; blocks.push({ x0: hubX - hubR * 1.15, x1: hubX + hubR * 1.15, y0: hubY - hubR * 1.15, y1: hubY + hubR * 1.15 }); } // phones: the topics go around the nucleus
-    list.forEach((it, i) => {
-      const [fs0, R0] = SIZES[it.tier], fs = Math.round(fs0 * sc), R = R0 * sc;
-      ctx.font = `600 ${fs}px ${it.tier === 0 ? SERIF : SANS}`; const tw = ctx.measureText(it.words).width;
-      const w = R * 2 + 10 + tw, h = Math.max(R * 2, fs * 1.2), pad = phone ? 6 : 14;
-      let found = null; // spiral outward from the centre (stretched to the screen's shape); the first free spot wins
-      for (let s = 0; s < 2200 && !found; s++) {
-        const a = s * 0.37 + i * 1.7, rr = 6 + s * (phone ? 0.9 : 1.4), x = cx + Math.cos(a) * rr * (W / H) * 0.62 - w / 2, y = cy + Math.sin(a) * rr * 0.62 - h / 2;
-        const box = { x0: x - pad, y0: y - pad, x1: x + w + pad, y1: y + h + pad };
-        if (box.x0 < (phone ? 8 : 60) || box.x1 > W - 8 || box.y0 < 10 || box.y1 > H - 8) continue; // desktop: clear of the lesson dots on the left
-        if (blocks.some((r) => hit(box, r)) || placed.some((p) => hit(box, p.box))) continue;
-        found = { x, y, box };
-      }
-      if (!found) return;
-      placed.push(Object.assign({}, it, { x: found.x, y: found.y, w, h, fs, R, tw, box: found.box, img: badge(it, R), ph: (i * 2.399) % TAU, order: placed.length, z: 0.6 + 0.4 * ((i * 0.618) % 1) }));
+    const h1 = hero.querySelector("h1"), top = phone && h1 ? Math.max(160, copy.offsetTop + h1.offsetTop - 20) : H;
+    cx0 = W / 2; cy0 = phone ? top * 0.5 : H * 0.43; R = phone ? Math.min(W * 0.2, top * 0.24) : Math.min(W, H) * 0.24;
+    // where the fragments settle: an ellipse around the title (desktop) or a grid above it (phones)
+    frags = PARTS.map((p, i) => {
+      let x, y;
+      if (phone) { const col = i % 2, row = Math.floor(i / 2), rows = Math.ceil(NP / 2); x = W * (col ? 0.72 : 0.28); y = lerp(top * 0.14, top * 0.86, rows > 1 ? row / (rows - 1) : 0.5); }
+      else { const nTop = Math.ceil(NP / 2), top1 = i < nTop, k = top1 ? i : i - nTop, n = top1 ? nTop : NP - nTop; // a row above the title and a row below it
+        x = W * lerp(0.2, 0.8, n > 1 ? k / (n - 1) : 0.5); y = H * (top1 ? 0.17 : 0.64); }
+      return Object.assign({}, p, { x, y, dir: Math.atan2(y - cy0, x - cx0), members: [], r: 0, flash: 0, ph: i * 1.7 });
     });
-    motes = []; for (let i = 0; i < (phone ? 40 : 90); i++) motes.push({ x: Math.random() * W, y: Math.random() * H, r: 0.6 + Math.random() * 1.6, v: 4 + Math.random() * 10, ph: Math.random() * TAU });
+    // each nucleon joins the fragment whose direction is closest to its own side of the nucleus
+    nuc.forEach((a) => { const da = Math.atan2(a.y, a.x); let best = 0, bd = 9; frags.forEach((f, i) => { const d = Math.abs(Math.atan2(Math.sin(da - f.dir), Math.cos(da - f.dir))); if (d < bd) { bd = d; best = i; } }); a.f = null; frags[best] && frags[best].members.push(a); });
+    // balance: move nucleons from the biggest groups to the smallest so every fragment looks alike
+    const angTo = (a, t) => Math.abs(Math.atan2(Math.sin(Math.atan2(a.y, a.x) - t), Math.cos(Math.atan2(a.y, a.x) - t)));
+    for (let k = 0; k < 400 && frags.length; k++) { let mx = 0, mn = 0; frags.forEach((f, i) => { if (f.members.length > frags[mx].members.length) mx = i; if (f.members.length < frags[mn].members.length) mn = i; });
+      if (frags[mx].members.length - frags[mn].members.length <= 1) break; const fm = frags[mx].members, tgt = frags[mn].dir; let bi = 0, bd = 9;
+      fm.forEach((a, i) => { const d = angTo(a, tgt); if (d < bd) { bd = d; bi = i; } }); frags[mn].members.push(fm.splice(bi, 1)[0]); }
+    // each fragment's own compact shape: its nucleons' offsets from their centre, squeezed into a small ball
+    frags.forEach((f, fi) => { const n = f.members.length || 1, want = Math.cbrt(n / N), r2 = rng(97 + fi), d0 = 2 * rb * 0.97, lim = want - rb;
+      f.members.forEach((a) => { let x, y, z; do { x = r2() * 2 - 1; y = r2() * 2 - 1; z = r2() * 2 - 1; } while (x * x + y * y + z * z > 1); a.ox = x * lim; a.oy = y * lim; a.oz = z * lim; a.f = f; });
+      const m = f.members; for (let it = 0; it < 40; it++) { for (let i = 0; i < m.length; i++) for (let j = i + 1; j < m.length; j++) { const A = m[i], B = m[j], dx = B.ox - A.ox, dy = B.oy - A.oy, dz = B.oz - A.oz, d = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1e-6;
+          if (d < d0) { const k = (d0 - d) / d * 0.5; A.ox -= dx * k; A.oy -= dy * k; A.oz -= dz * k; B.ox += dx * k; B.oy += dy * k; B.oz += dz * k; } }
+        for (const A of m) { const d = Math.hypot(A.ox, A.oy, A.oz); if (d > lim) { A.ox *= lim / d; A.oy *= lim / d; A.oz *= lim / d; } } }
+      f.r = R * FS * want; });
   }
+
+  // ---------- pointer ----------
+  const labelSize = () => (phone ? 15 : clamp(Math.min(W / 60, H / 30), 17, 26));
+  const labelY = (f) => f.y + f.r * (phone ? 1.3 : 1) + labelSize() * 1.1;
+  function fragAt(x, y) { for (let i = 0; i < frags.length; i++) { const f = frags[i]; if (Math.hypot(x - f.x, y - f.y) < f.r * 1.4 + 10) return i;
+      ctx.font = `600 ${labelSize()}px ${SERIF}`; const w = ctx.measureText(f.name).width, ly = labelY(f); if (x > f.x - w / 2 - 8 && x < f.x + w / 2 + 8 && y > ly - 16 && y < ly + 16) return i; } return -1; }
+  hero.addEventListener("pointermove", (e) => { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; tgtX = (x / r.width - 0.5) * 2; tgtY = (y / r.height - 0.5) * 2;
+    if (e.pointerType !== "touch") { hover = time > T_LAND - 0.3 ? fragAt(x, y) : -1; cv.style.cursor = hover >= 0 ? "pointer" : "crosshair"; } });
+  hero.addEventListener("pointerleave", () => { tgtX = 0; tgtY = 0; hover = -1; });
+  cv.addEventListener("click", (e) => { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, i = fragAt(x, y);
+    if (i >= 0 && time > T_LAND - 0.3) { const el = document.getElementById(frags[i].id); frags[i].flash = 1; if (el) el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); return; }
+    let best = 0, bd = 1e9; frags.forEach((f, k) => { const d = Math.hypot(f.x - x, f.y - y); if (d < bd) { bd = d; best = k; } }); // empty space: a neutron flies to the nearest fragment
+    if (frags[best]) shots.push({ sx: x, sy: y, t0: time, to: best, trail: [] }); if (reduce) draw(0); });
 
   // ---------- drawing ----------
-  function itemPos(p) {
-    const appear = ease((t - 0.35 - p.order * 0.07) / 0.9), bob = reduce ? 0 : Math.sin(t * 0.8 + p.ph) * 4 * p.z;
-    const rp = t - ripple, d = Math.hypot(p.x + p.w / 2 - W / 2, p.y + p.h / 2 - H / 2), rip = rp > 0 && rp < 2.5 ? Math.max(0, Math.sin(clamp(rp * 4 - d / 200, 0, Math.PI))) * 12 : 0;
-    const px = (pmx - 0.5) * 26 * p.z, py = (pmy - 0.5) * 16 * p.z, cx = W / 2, cy = H * 0.45, ox = p.x + p.w / 2, oy = p.y + p.h / 2;
-    return { x: lerp(cx, ox, appear) - p.w / 2 + px, y: lerp(cy, oy, appear) - p.h / 2 + py + bob - rip, a: appear, s: lerp(0.4, 1, appear) * (1 + 0.08 * rip / 12), rip };
-  }
-  function draw() {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
-    const bg = ctx.createRadialGradient(W * 0.5, H * 0.42, 0, W * 0.5, H * 0.5, Math.hypot(W, H) * 0.65);
-    bg.addColorStop(0, "#0b1d3d"); bg.addColorStop(0.5, "#050d22"); bg.addColorStop(1, "#01040b"); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-    ctx.globalCompositeOperation = "lighter"; // slow drifting motes
-    for (const m of motes) { const y = (((m.y - t * m.v) % H) + H) % H; ctx.globalAlpha = 0.22 + 0.18 * Math.sin(t + m.ph); ctx.fillStyle = "#9fc4ff"; ctx.beginPath(); ctx.arc(m.x + Math.sin(t * 0.3 + m.ph) * 6, y, m.r, 0, TAU); ctx.fill(); }
-    ctx.globalAlpha = 1;
-    // the hub: one nucleus behind the title, glowing and slowly turning; everything below grows out of it
-    const pulse = 1 + 0.04 * Math.sin(t * 1.6), rp0 = t - ripple, kick = rp0 > 0 && rp0 < 1.2 ? (1 - rp0 / 1.2) : 0;
+  let bgC = null, bgKey = "";
+  function background() {
+    const key = W + "x" + H + "@" + dpr;
+    if (key !== bgKey) { bgKey = key; bgC = bgC || document.createElement("canvas"); bgC.width = Math.round(W * dpr); bgC.height = Math.round(H * dpr);
+      const b = bgC.getContext("2d"); b.setTransform(dpr, 0, 0, dpr, 0, 0); const g = b.createRadialGradient(cx0, cy0, R * 0.2, cx0, cy0, Math.max(W, H) * 0.95);
+      g.addColorStop(0, "#101a33"); g.addColorStop(0.45, "#070b17"); g.addColorStop(1, "#020308"); b.fillStyle = g; b.fillRect(0, 0, W, H); }
+    ctx.globalAlpha = 1; ctx.drawImage(bgC, 0, 0, W, H);
     ctx.globalCompositeOperation = "lighter";
-    const hg = ctx.createRadialGradient(hubX, hubY, 0, hubX, hubY, hubR * 3.2 * pulse); hg.addColorStop(0, `rgba(150,200,255,${0.32 + 0.4 * kick})`); hg.addColorStop(0.35, "rgba(70,130,255,0.13)"); hg.addColorStop(1, "rgba(40,80,220,0)");
-    ctx.fillStyle = hg; ctx.fillRect(hubX - hubR * 3.4, hubY - hubR * 3.4, hubR * 6.8, hubR * 6.8);
+    for (const s of stars) { const x = ((s.x * W - tiltX * 18 * s.d) % W + W) % W, y = ((s.y * H - tiltY * 12 * s.d) % H + H) % H; ctx.globalAlpha = (0.25 + 0.35 * Math.sin(time * 1.3 + s.tw) ** 2) * s.d; ctx.fillStyle = "#cfd8ff"; ctx.fillRect(x, y, s.s, s.s); }
+    for (const f of flux) { const x = ((f.x + f.v * time) % 1.2 - 0.1) * W, y = f.y * H - tiltY * 8; ctx.globalAlpha = f.a; ctx.drawImage(STREAK, x - f.l, y - 0.6, f.l, 1.2); }
     ctx.globalCompositeOperation = "source-over";
-    ctx.save(); ctx.translate(hubX, hubY); ctx.rotate(t * 0.08); ctx.globalAlpha = phone ? 0.95 : 0.55; const ns = hubR * 2.2 * pulse; ctx.drawImage(NUC, -ns / 2, -ns / 2, ns, ns); ctx.restore();
-    // rays from the nucleus to each topic, with sparks running outward
-    ctx.globalCompositeOperation = "lighter";
-    placed.forEach((p, i) => {
-      const q = itemPos(p); if (q.a <= 0.01) return; const on = i === hover, bx = q.x + p.R, by = q.y + p.h / 2, dx = bx - hubX, dy = by - hubY, L = Math.hypot(dx, dy) || 1;
-      const sx = hubX + dx / L * hubR * 0.7, sy = hubY + dy / L * hubR * 0.7, bend = (i % 2 ? 1 : -1) * 0.12 * L, cxp = (sx + bx) / 2 - dy / L * bend, cyp = (sy + by) / 2 + dx / L * bend;
-      const lg = ctx.createLinearGradient(sx, sy, bx, by); lg.addColorStop(0, hexA(p.col, 0)); lg.addColorStop(1, hexA(p.col, (on ? 0.75 : 0.26) * q.a));
-      ctx.globalAlpha = 1; ctx.strokeStyle = lg; ctx.lineWidth = on ? 2.4 : 1.3; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(cxp, cyp, bx, by); ctx.stroke();
-      for (let k = 0; k < (on ? 4 : 2); k++) { const u = (t * 0.22 + p.ph / TAU + k / (on ? 4 : 2)) % 1, a2 = (1 - u) * (1 - u), ax = a2 * sx + 2 * (1 - u) * u * cxp + u * u * bx, ay = a2 * sy + 2 * (1 - u) * u * cyp + u * u * by;
-        const sg = ctx.createRadialGradient(ax, ay, 0, ax, ay, 7); sg.addColorStop(0, hexA(p.col, 0.9 * Math.sin(Math.PI * u) * q.a)); sg.addColorStop(1, hexA(p.col, 0)); ctx.fillStyle = sg; ctx.fillRect(ax - 7, ay - 7, 14, 14); }
-    });
-    ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
-    placed.forEach((p, i) => {
-      const q = itemPos(p); if (q.a <= 0.01) return; const on = i === hover, k = q.s * (on ? 1.08 : 1);
-      ctx.save(); ctx.translate(q.x + p.w / 2, q.y + p.h / 2); ctx.scale(k, k); ctx.translate(-p.w / 2, -p.h / 2); ctx.globalAlpha = q.a;
-      ctx.globalCompositeOperation = "lighter"; // soft coloured glow behind the picture
-      const gr = ctx.createRadialGradient(p.R, p.h / 2, 0, p.R, p.h / 2, p.R * (on ? 3.4 : 2.4) + q.rip);
-      gr.addColorStop(0, hexA(p.col, on ? 0.5 : 0.24 * p.z + q.rip / 40)); gr.addColorStop(1, hexA(p.col, 0)); ctx.fillStyle = gr; ctx.fillRect(-p.R * 2.5, p.h / 2 - p.R * 3.5, p.R * 7, p.R * 7);
-      ctx.globalCompositeOperation = "source-over";
-      { const bp = 1 + 0.035 * Math.sin(t * 2 + p.ph), bs = p.R * 2.6 * bp; ctx.drawImage(p.img, p.R - bs / 2, p.h / 2 - bs / 2, bs, bs);
-        const oa = t * (0.9 + 0.3 * p.z) + p.ph, ox = p.R + Math.cos(oa) * p.R * 1.32, oy = p.h / 2 + Math.sin(oa) * p.R * 1.32 * 0.55;
-        ctx.globalCompositeOperation = "lighter"; const og = ctx.createRadialGradient(ox, oy, 0, ox, oy, 6); og.addColorStop(0, "rgba(255,255,255,.95)"); og.addColorStop(0.4, hexA(p.col, 0.8)); og.addColorStop(1, hexA(p.col, 0));
-        ctx.fillStyle = og; ctx.fillRect(ox - 6, oy - 6, 12, 12); ctx.globalCompositeOperation = "source-over"; }
-      ctx.font = `600 ${p.fs}px ${p.tier === 0 ? SERIF : SANS}`; ctx.textBaseline = "middle"; ctx.textAlign = "left";
-      ctx.fillStyle = on ? "#ffffff" : `rgba(232,240,255,${(0.66 + 0.34 * p.z).toFixed(2)})`; ctx.shadowColor = "rgba(1,4,12,.9)"; ctx.shadowBlur = 8;
-      ctx.fillText(p.words, p.R * 2 + 10, p.h / 2 + 1); ctx.shadowBlur = 0;
-      if (on && p.link) { ctx.strokeStyle = hexA(p.col, 0.9); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(p.R * 2 + 10, p.h / 2 + p.fs * 0.62); ctx.lineTo(p.R * 2 + 10 + p.tw, p.h / 2 + p.fs * 0.62); ctx.stroke(); }
-      ctx.restore();
-    });
-    if (hover >= 0 && placed[hover]) { // the fact, in a small dark card next to the item (kept on screen and off the text)
-      const p = placed[hover], q = itemPos(p), fs = phone ? 13 : 14;
-      ctx.font = `500 ${fs}px ${SANS}`; const txt = p.fact + (p.link ? "  →" : ""), w = Math.min(ctx.measureText(txt).width + 26, W - 16), h = fs * 2.2;
-      let x = clamp(q.x + p.w / 2 - w / 2, 8, W - 8 - w), y = q.y + p.h + 10;
-      if (blocks.some((r) => hit({ x0: x, y0: y, x1: x + w, y1: y + h }, r)) || y + h > H - 6) y = q.y - h - 10;
-      ctx.globalAlpha = 0.95; ctx.fillStyle = "rgba(6,14,32,.94)"; ctx.strokeStyle = hexA(p.col, 0.75); ctx.lineWidth = 1.2; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, 10); else ctx.rect(x, y, w, h); ctx.fill(); ctx.stroke();
-      ctx.globalAlpha = 1; ctx.fillStyle = "#eef3ff"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(txt, x + w / 2, y + h / 2, w - 16);
-    }
-    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.4, W / 2, H / 2, Math.hypot(W, H) * 0.62); vg.addColorStop(0, "rgba(1,3,9,0)"); vg.addColorStop(1, "rgba(1,3,9,0.55)");
-    ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
   }
+  function trail(pts, col, w) { if (pts.length < 2) return; ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+    for (let i = 1; i < pts.length; i++) { const f = i / pts.length; ctx.globalAlpha = f * f * 0.9; ctx.strokeStyle = col; ctx.lineWidth = w * (0.3 + 0.7 * f); ctx.beginPath(); ctx.moveTo(pts[i - 1][0], pts[i - 1][1]); ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke(); }
+    ctx.globalCompositeOperation = "source-over"; }
 
-  // ---------- interaction ----------
-  function pick(x, y) { for (let i = placed.length - 1; i >= 0; i--) { const p = placed[i], q = itemPos(p); if (x >= q.x - 6 && x <= q.x + p.w + 6 && y >= q.y - 6 && y <= q.y + p.h + 6) return i; } return -1; }
-  hero.addEventListener("pointermove", (e) => { if (e.pointerType === "touch") return; const b = cv.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top;
-    mx = x / b.width; my = y / b.height; hover = pick(x, y); cv.style.cursor = hover >= 0 && placed[hover].link ? "pointer" : "default"; if (reduce) draw(); });
-  hero.addEventListener("pointerleave", () => { hover = -1; if (reduce) draw(); });
-  let lastType = "mouse"; cv.addEventListener("pointerdown", (e) => (lastType = e.pointerType));
-  cv.addEventListener("click", (e) => { const b = cv.getBoundingClientRect(), i = pick(e.clientX - b.left, e.clientY - b.top);
-    if (i < 0) { hover = -1; if (reduce) draw(); return; }
-    if (lastType === "touch" && hover !== i) { hover = i; if (reduce) draw(); return; } // phones: the first tap shows the fact
-    const p = placed[i]; hover = i; if (!p.link) { if (reduce) draw(); return; }
-    const el = document.getElementById(p.link) || document.getElementById(p.link.replace(/-\d+$/, ""));
-    if (el) { history.replaceState(null, "", location.pathname + location.search + "#" + p.link); el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" }); } });
-  const btn = hero.querySelector(".fire-btn");
-  if (btn) btn.addEventListener("click", (e) => { e.stopPropagation(); ripple = t; if (reduce) draw(); });
+  function draw(dt) {
+    tiltX += (tgtX - tiltX) * Math.min(1, dt * 3); tiltY += (tgtY - tiltY) * Math.min(1, dt * 3);
+    flash *= Math.exp(-dt * 3.5); shake *= Math.exp(-dt * 6);
+    const sx = (Math.random() - 0.5) * shake, sy = (Math.random() - 0.5) * shake;
+    ctx.setTransform(dpr, 0, 0, dpr, dpr * sx, dpr * sy); ctx.globalCompositeOperation = "source-over";
+    background();
+    // the incoming neutron
+    if (time < T_IMP) { const u = easeOut(time / T_IMP), x = lerp(-W * 0.1, cx0 - R * 0.9, u), y = lerp(cy0 - H * 0.16, cy0 + R * 0.08, u); inTrail.push([x, y]); if (inTrail.length > 22) inTrail.shift();
+      trail(inTrail, C.n, 4); ctx.globalCompositeOperation = "lighter"; stamp(GL.n, x, y, 26, 0.9); ctx.globalCompositeOperation = "source-over"; stamp(SPD.n[3], x, y, rb * R * 1.1); }
+    else if (!live) { flash = 1; shake = 12; rings.push({ x: cx0 - R * 0.9, y: cy0 + R * 0.08, t: time, col: C.white }, { x: cx0, y: cy0, t: time + 0.25, col: C.hot }); goLive(); }
+    // the nucleus heats and bulges, then bursts; each nucleon flies to its fragment along a gentle arc
+    const heat = smooth(T_IMP, T_BURST, time), go = easeOut((time - T_BURST) / (T_LAND - T_BURST)), ya = 0.4 + time * 0.25 + tiltX * 0.55, pa = 0.28 + tiltY * 0.35;
+    const cyw = Math.cos(ya), syw = Math.sin(ya), cp = Math.cos(pa), spt = Math.sin(pa), D = 5, list = [], fsc = R * FS * (phone ? 1.3 : 1);
+    for (const a of nuc) {
+      const f = a.f; if (!f) continue;
+      let x = a.x * cyw + a.z * syw, z = -a.x * syw + a.z * cyw, y = a.y * cp - z * spt; z = a.y * spt + z * cp;
+      const j = rb * (0.06 + 0.5 * heat * (1 - go)), bulge = 1 + 0.12 * heat * (1 - go);
+      x = (x + Math.sin(time * 9.1 + a.ph) * j) * bulge; y = (y + Math.cos(time * 8.3 + a.ph * 1.7) * j) * bulge;
+      const k0 = D / (D - z), X0 = cx0 + x * k0 * R, Y0 = cy0 + y * k0 * R;
+      const fy = 0.6 * time + f.ph + tiltX * 0.4, c2 = Math.cos(fy), s2 = Math.sin(fy); // each fragment spins on its own
+      let ux = a.ox * c2 + a.oz * s2, uz = -a.ox * s2 + a.oz * c2; const uy = a.oy * cp - uz * spt; uz = a.oy * spt + uz * cp;
+      const bob = Math.sin(time * 0.9 + f.ph) * 5, k1 = D / (D - uz), X1 = f.x + ux * k1 * fsc + tiltX * 10, Y1 = f.y + uy * k1 * fsc + bob + tiltY * 7;
+      const mid = Math.sin(Math.PI * go) * R * 0.15, nx = -Math.sin(f.dir), ny = Math.cos(f.dir);
+      list.push({ X: lerp(X0, X1, go) + nx * mid, Y: lerp(Y0, Y1, go) + ny * mid, z: lerp(z, uz, go), a, k: lerp(k0, k1, go), sc: lerp(R, fsc, go) });
+    }
+    list.sort((p, q) => p.z - q.z);
+    ctx.globalCompositeOperation = "lighter"; // halos: the whole nucleus before the burst, each fragment after
+    if (go < 1) stamp(GL.hot, cx0, cy0, R * (2.2 + heat), (0.06 + heat * 0.5) * (1 - go));
+    if (go < 0.3) stamp(GL.n, cx0, cy0, R * 2.6, 0.14 * (1 - go / 0.3));
+    frags.forEach((f, i) => { const on = i === hover, fx = f.x + tiltX * 10, fy = f.y + tiltY * 7; stamp(GL.n, fx, fy, f.r * (on ? 4 : 3), go * (on ? 0.6 : 0.22) + f.flash * 0.6); stamp(GL.hot, fx, fy, f.r * 2.4, f.flash * 0.7 + (1 - go) * go * 0.8); f.flash *= Math.exp(-dt * 2.5); });
+    ctx.globalCompositeOperation = "source-over";
+    for (const q of list) { const d = clamp(Math.floor((q.z + 1) * 0.5 * DEPTH.length), 0, DEPTH.length - 1); stamp((q.a.p ? SPD.p : SPD.n)[d], q.X, q.Y, rb * q.sc * 1.08 * q.k); }
+    ctx.globalCompositeOperation = "lighter"; // flash and rings
+    if (flash > 0.01) stamp(GL.white, cx0, cy0, Math.max(W, H) * 0.7, flash * 0.5);
+    for (let i = rings.length - 1; i >= 0; i--) { const g = rings[i], u = (time - g.t) / 1.2; if (u > 1) { rings.splice(i, 1); continue; } if (u < 0) continue;
+      ctx.globalAlpha = (1 - u) * 0.7; ctx.strokeStyle = g.col; ctx.lineWidth = 3 * (1 - u) + 0.5; ctx.beginPath(); ctx.arc(g.x, g.y, 10 + u * R * 2.4, 0, TAU); ctx.stroke(); }
+    for (let i = shots.length - 1; i >= 0; i--) { const s = shots[i], f = frags[s.to], u = (time - s.t0) / 0.7; // neutrons fired by clicks
+      if (!f || u > 1) { if (f) { f.flash = 1; rings.push({ x: f.x, y: f.y, t: time, col: C.hot }); } shots.splice(i, 1); continue; }
+      const x = lerp(s.sx, f.x, easeOut(u)), y = lerp(s.sy, f.y, easeOut(u)); s.trail.push([x, y]); if (s.trail.length > 16) s.trail.shift(); trail(s.trail, C.n, 3); ctx.globalCompositeOperation = "lighter"; stamp(GL.n, x, y, 18, 0.9); }
+    ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
+    if (go > 0.6) { const fs = labelSize(); ctx.font = `600 ${fs}px ${SERIF}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; // the part names under the fragments
+      frags.forEach((f, i) => { const on = i === hover, a = smooth(0.6, 1, go), lx = f.x + tiltX * 10, ly = labelY(f) + tiltY * 7;
+        ctx.globalAlpha = a * (on ? 1 : 0.88); ctx.shadowColor = "rgba(2,3,8,.9)"; ctx.shadowBlur = 10; ctx.fillStyle = on ? "#ffffff" : "#e8ecff"; ctx.fillText(f.name, lx, ly); ctx.shadowBlur = 0;
+        if (on) { const w = ctx.measureText(f.name).width; ctx.strokeStyle = "rgba(180,200,255,.85)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(lx - w / 2, ly + fs * 0.62); ctx.lineTo(lx + w / 2, ly + fs * 0.62); ctx.stroke(); } });
+      ctx.globalAlpha = 1; }
+  }
 
   // ---------- loop ----------
+  function goLive() { if (live) return; live = true; hero.classList.add("hero-live"); setTimeout(() => document.body.classList.add("hero-done"), 2600); }
   let last = 0, vis = true;
   new IntersectionObserver((es) => es.forEach((en) => (vis = en.isIntersecting))).observe(hero);
-  function frame(now) {
-    const dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016); last = now;
-    if (vis && !document.hidden) { t += dt; pmx += (mx - pmx) * Math.min(1, dt * 3); pmy += (my - pmy) * Math.min(1, dt * 3); draw();
-      const sc = clamp(window.scrollY / (H * 0.8), 0, 1); if (copy) copy.style.opacity = String(clamp(1 - sc * 1.6, 0, 1)); }
-    requestAnimationFrame(frame);
-  }
-  let relayT = 0; window.addEventListener("resize", () => { clearTimeout(relayT); relayT = setTimeout(() => { layout(); draw(); }, 120); });
-  hero.classList.add("hero-live"); setTimeout(() => document.body.classList.add("hero-done"), 2600);
-  // lay out once fonts are in (the title's size depends on them)
+  function loop(now) { const dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016); last = now;
+    if (vis && !document.hidden) { time += dt; draw(dt); const sc = clamp(window.scrollY / (H * 0.8), 0, 1); if (copy) copy.style.opacity = String(clamp(1 - sc * 1.6, 0, 1)); }
+    requestAnimationFrame(loop); }
+  let relayT = 0; window.addEventListener("resize", () => { clearTimeout(relayT); relayT = setTimeout(() => { layout(); bgKey = ""; if (reduce || freezeAt != null) draw(0); }, 120); });
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => {
-    layout(); if (qH) hover = Math.min(+qH[1], placed.length - 1);
-    if (freezeAt != null || reduce) { t = freezeAt != null ? freezeAt : 5; draw(); } else requestAnimationFrame(frame);
+    layout();
+    if (freezeAt != null || reduce) { const end = freezeAt != null ? freezeAt : T_LAND + 1; for (time = 0; time < end; time += 1 / 30) draw(1 / 30); goLive(); }
+    else requestAnimationFrame(loop);
   });
 })();
