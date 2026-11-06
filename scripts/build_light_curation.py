@@ -17,9 +17,11 @@ Steps (all inside the research checkout given by --main, default ~/nucleus; noth
      the build stops if it does not.
   2. Curate. quality_model runs ONCE on Z 1-92 together (light + the Z 26-92 staging), so the metadata prior and the
      global scatter model are learned from the whole chart, as for Z 26-92, and the IAEA-standards and 238U spot-list
-     gates can run (a light-only run has no capture standard). Only the Z 1-25 rows are kept. The human review
-     decisions in data/curate/review_decisions.jsonl are applied as usual; none of them names a light dataset, so
-     every light decision is the automatic layer (reviewer "auto:quality_model_v0.2").
+     gates can run (a light-only run has no capture standard). Only the Z 1-25 rows are kept. The review decisions
+     are the research repository's data/curate/review_decisions.jsonl (none of its lines names a light dataset) followed
+     by this repository's data/curation/inputs/review_decisions_Z1-25.jsonl (same format; light datasets checked against
+     their EXFOR entries), passed to the quality model as its human-decision file. Every other light decision is the
+     automatic layer (reviewer "auto:quality_model_v0.2").
   3. Cells. As validation/cache.py cache_exfor_cells: discrepancy.cells_from_parquet on the staged light data, joined to
      the trust table (trust, inflation, year, decision, usable). Capture has no value floor.
 
@@ -38,6 +40,7 @@ ALL = "exfor_all_2026-10-14_x4fix1.parquet"
 HEAVY = "exfor_capture_Z26-92_2026-10-14_x4fix1.parquet"
 EMAX = 20e6
 TAG = "exfor_capture_Z1-92"
+LIGHT_REVIEW = OUT / "review_decisions_Z1-25.jsonl"
 
 
 def sha(p):
@@ -107,11 +110,17 @@ def main():
     import polars as pl
     from data.curate import quality_model as qm
     from data.curate.discrepancy import cells_from_parquet, split_group_key
+    from data.curate import review_log as rl
     qdir = a.work / "q92"
-    res = qm.run(a.work / "exfor_capture_Z1-92.parquet", qdir, tag=TAG, verbose=False)
+    hd = a.work / "review_decisions_Z1-92.jsonl"  # research file, then the light lines (a later line overrides)
+    hd.write_text(qm.HUMAN_DECISIONS.read_text(encoding="utf-8").rstrip("\n") + "\n" + LIGHT_REVIEW.read_text(encoding="utf-8"),
+                  encoding="utf-8")
+    mine = set(rl.parse_decisions_jsonl(LIGHT_REVIEW))
+    res = qm.run(a.work / "exfor_capture_Z1-92.parquet", qdir, tag=TAG, verbose=False, human_decisions=hd)
     q = pl.read_parquet(qdir / f"{TAG}_trust.parquet")
     light = q.filter(pl.col("target_z") <= 25)
-    assert light.filter(pl.col("reviewer") != "auto:quality_model_v0.2").height == 0, "a human decision names a light dataset"
+    rev = set(light.filter(pl.col("reviewer") != "auto:quality_model_v0.2")["dataset_key"].to_list())
+    assert rev == mine, f"reviewed light datasets {sorted(rev)} != the lines of {LIGHT_REVIEW.name} {sorted(mine)}"
     ship = pl.read_parquet(OUT / "exfor_capture_Z26-92_trust.parquet")
     assert light.columns == ship.columns, "trust schema differs from the shipped Z 26-92 table"
     light.write_parquet(OUT / "exfor_capture_Z1-25_trust.parquet")
@@ -140,7 +149,10 @@ def main():
         "staging": {"source": f"staging/{ALL}", "entry_zip": "2026-10-14", "sha256": sha(a.main / "staging" / ALL),
                     "check": f"same predicate + clip on Z 26-92 reproduces staging/{HEAVY} exactly"},
         "light_datasets": light.height, "light_cells": cells.height,
-        "decisions": dict(dec), "human_decisions_on_light": 0,
+        "decisions": dict(dec),
+        "review_lines_on_light": {k: light.filter(pl.col("dataset_key") == k)["decision"].item() for k in sorted(mine)},
+        "review_file": {"path": "data/curation/inputs/review_decisions_Z1-25.jsonl", "sha256": sha(LIGHT_REVIEW),
+                        "research_file_sha256": sha(qm.HUMAN_DECISIONS)},
         "gates_joint_run": {k: v.get("pass") for k, v in res.gates.items()},
         "z26_92_joint_vs_shipped_decision_agreement": round(float(agree), 4),
         "note": "resampling_stability also fails for a Z 26-92-only run with the same staging and review file, so it is not caused by the light data",

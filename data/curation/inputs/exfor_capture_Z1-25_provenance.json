@@ -2,7 +2,7 @@
  "built": "2026-11-06",
  "script": "scripts/build_light_curation.py",
  "curation": "WP-12 quality_model (research repository data/curate/quality_model.py), unchanged, run on Z 1-92 jointly; Z 1-25 rows kept",
- "research_commit": "a3597cde9",
+ "research_commit": "66f4b2468",
  "staging": {
   "source": "staging/exfor_all_2026-10-14_x4fix1.parquet",
   "entry_zip": "2026-10-14",
@@ -13,11 +13,20 @@
  "light_cells": 4040,
  "decisions": {
   "keep": 1148,
-  "exclude": 385,
-  "downweight": 161,
+  "exclude": 388,
+  "downweight": 158,
   "fix-unit": 1
  },
- "human_decisions_on_light": 0,
+ "review_lines_on_light": {
+  "13139/13139008/": "exclude",
+  "21808/21808011/": "exclude",
+  "21808/21808013/": "exclude"
+ },
+ "review_file": {
+  "path": "data/curation/inputs/review_decisions_Z1-25.jsonl",
+  "sha256": "33def54877ca917587dd7240dfa6228b0f7186e2fa7396945efe339db8c215da",
+  "research_file_sha256": "87b34551c08b655cabcfc1bfad36de6287897822f1eb1ebbafb7f4f3055a9235"
+ },
  "gates_joint_run": {
   "standards": true,
   "spot_list": true,
