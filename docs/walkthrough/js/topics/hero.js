@@ -46,7 +46,9 @@
   })();
 
   // ---------- the parts of the page (headings read from the page) ----------
-  const PARTS = [...document.querySelectorAll("main > .part-head")].map((el) => ({ id: el.id, name: (el.querySelector("h2") || el).textContent.trim() }));
+  // the hero runs before the page applies its translations, so each heading's text is looked up by its i18n key
+  const PARTS = [...document.querySelectorAll("main > .part-head")].map((el) => { const h = el.querySelector("h2") || el, en = h.textContent.trim(), k = h.dataset && h.dataset.i18n;
+    return { id: el.id, name: k && window.WT && WT.ui ? WT.ui(k, en) : en }; });
   const NP = Math.max(1, PARTS.length);
 
   // ---------- background (as in intro.js) ----------
