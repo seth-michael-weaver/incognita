@@ -72,7 +72,7 @@
 
   // ---------- chapter list with a level filter ----------
   const list = $("#in-list"), chips = $("#in-filter");
-  const tpHead = `<li class="in-part"><h3>${T("way4_t", "The Playground")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, stability and control, fusion.")}</p></li>`;
+  const tpHead = `<li class="in-part"><h3>${T("way4_t", "More Nuclear Topics")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, stability and control, fusion.")}</p></li>`;
   list.innerHTML = CH.map((c, i) => (c.tp && !(CH[i - 1] || {}).tp ? tpHead : "") + `<li class="in-ch" data-lv="${c.lv}" data-min="${c.min}"><a class="in-ch-a" href="${href(c.id)}"><span class="in-n">${c.n}</span><span class="in-body"><span class="in-top"><b>${c.title}</b><span class="in-topic">${c.topic}</span></span><span class="in-what">${c.what}</span><span class="in-meta">${pill(c.lv)}<span>${mins(c.min)}</span><span>${c.steps} ${T("in_steps", "steps")}</span><code>#${c.id}</code></span></span></a></li>`).join("");
   const opts = [["all", T("in_all", "All")], ["0", LV[0]], ["1", LV[1]], ["2", LV[2]], ["3", LV[3]]];
   chips.innerHTML = opts.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${v === "all"}">${t}</button>`).join("");
@@ -109,7 +109,7 @@
   const selC = $("#in-b-ch"), selS = $("#in-b-step"), selL = $("#in-b-lang"), out = $("#in-b-url"), open = $("#in-b-open"), copy = $("#in-b-copy");
   const base = location.origin + location.pathname.replace(/instructors(\.html)?$/, "");
   const opt = (c) => `<option value="${c.id}">${c.n} · ${c.title}</option>`;
-  selC.innerHTML = CH.filter((c) => !c.tp).map(opt).join("") + `<optgroup label="${T("way4_t", "The Playground")}">` + CH.filter((c) => c.tp).map(opt).join("") + "</optgroup>";
+  selC.innerHTML = CH.filter((c) => !c.tp).map(opt).join("") + `<optgroup label="${T("way4_t", "More Nuclear Topics")}">` + CH.filter((c) => c.tp).map(opt).join("") + "</optgroup>";
   const fillSteps = () => { const c = byId[selC.value], v = selS.value; selS.innerHTML = `<option value="">${T("in_b_whole", "whole chapter")}</option>` + Array.from({ length: c.steps }, (_, i) => `<option value="${i + 1}">${T("in_b_step", "step")} ${i + 1}</option>`).join(""); if (v && +v <= c.steps) selS.value = v; };
   const build = () => { const url = base + (byId[selC.value].tp ? "topics.html" : "") + (selL.value !== "en" ? "?lang=" + selL.value : "") + "#" + selC.value + (selS.value ? "-" + selS.value : ""); out.textContent = url; open.href = url; };
   selL.innerHTML = Object.entries(WT.LANGS).map(([l, [, name]]) => `<option value="${l}" lang="${l}">${name}</option>`).join(""); selL.value = WT.lang; fillSteps(); build();

@@ -884,14 +884,20 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 .in-part p { margin: 0; }
 /* header menus fit their entries (Seth 2026-11-06: "the menu doesn't have to be that wide") */
 .site .chap ol { width: max-content; min-width: 13rem; max-width: min(22rem, 92vw); }
-/* cross-page menus inside the header links: a button on wide screens, the plain link on phones */
-.site .chap-x > a { display: none; }
+/* cross-page menus (Seth 2026-11-06): the label is a link styled as a button; its chapter list opens on hover or keyboard
+   focus (an invisible bridge keeps it open while the pointer crosses the gap). Phones: the plain link in the ☰ menu. */
+.site .chap-x > .toc-menu { background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.site .chap-x > .toc-menu:hover, .site .chap-x:focus-within > .toc-menu { color: var(--ink); }
+.site .chap-x .caret { font-size: inherit; }
 .site .chap-x ol { inset-inline-end: auto; inset-inline-start: 0; }
+.site .chap-x::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 10px; }
+@media (min-width: 861px) { .site .chap-x:hover > ol, .site .chap-x:focus-within > ol { display: flex; } }
 @media (max-width: 860px) {
   .site .chap ol { width: auto; max-width: none; }
-  .site .chap-x > a { display: inline-flex; }
-  .site .chap-x > .toc-menu, .site .chap-x > ol, .site .chap-x.open > ol { display: none; }
+  .site .chap-x > .toc-menu { background: none; box-shadow: none; }
+  .site .chap-x .caret, .site .chap-x > ol, .site .chap-x::after { display: none; }
 }
-/* the cross-page menu buttons look like buttons too (Seth 2026-11-06), matching the current page's menu; text stays softer */
-.site .chap-x > .toc-menu { background: var(--card); box-shadow: 0 0 0 1px var(--line); }
-.site .chap-x > .toc-menu:hover, .site .chap-x.open > .toc-menu { color: var(--ink); }
+/* the label span inside a cross-page link is ordinary text, not a chapter number (.toc a span sets mono 11px) */
+.site .chap-x > a.toc-menu span { font: inherit; margin: 0; opacity: 1; }
+.site .chap-x > a.toc-menu .caret { font-size: inherit; opacity: 1; }
+@media (max-width: 860px) { .site .chap-x { margin: 0; display: flex; flex-direction: column; } .site .chap-x > a.toc-menu { display: flex; } }

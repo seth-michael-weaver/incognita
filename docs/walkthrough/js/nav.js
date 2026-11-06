@@ -14,7 +14,7 @@
   // }
   // "More topics" link (every page): lessons beside the engine story (reactors, radiation, fusion), placed after Scoreboard
   if (sl && !head.querySelector('[data-i18n="nav_topics"]')) { // topics.html has it as its chapter menu instead
-    const a = document.createElement("a"); a.href = "topics.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_topics"; a.textContent = WT.ui("nav_topics", "The Playground");
+    const a = document.createElement("a"); a.href = "topics.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_topics"; a.textContent = WT.ui("nav_topics", "More Nuclear Topics");
     const b = sl.querySelector('a[href^="scoreboard.html"]');
     sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
   }
@@ -38,9 +38,9 @@
     }).join("");
     const w = document.createElement("div"); w.className = "chap chap-x";
     a.replaceWith(w); w.appendChild(a);
-    w.insertAdjacentHTML("beforeend", `<button type="button" class="toc-menu" aria-expanded="false"><span data-i18n="${a.dataset.i18n}">${a.innerHTML}</span> ▾</button><ol>${lis}</ol>`);
-    const b = w.querySelector("button");
-    b.addEventListener("click", (e) => { e.stopPropagation(); head.classList.remove("menu-open"); const o = w.classList.toggle("open"); b.setAttribute("aria-expanded", String(o)); });
+    // the label is the link itself (Seth: "you can't click More topics"); the list opens on hover or focus (CSS)
+    a.classList.add("toc-menu"); a.innerHTML = `<span data-i18n="${a.dataset.i18n}">${a.innerHTML}</span><span class="caret" aria-hidden="true">▾</span>`; delete a.dataset.i18n;
+    w.insertAdjacentHTML("beforeend", `<ol>${lis}</ol>`);
   });
   // opening one menu closes the others (capture phase, before each button's own handler)
   head.addEventListener("click", (e) => { const b = e.target.closest(".toc-menu"); if (b) head.querySelectorAll(".chap.open").forEach((c) => { if (!c.contains(b)) { c.classList.remove("open"); const m = c.querySelector(".toc-menu"); m && m.setAttribute("aria-expanded", "false"); } }); }, true);
@@ -49,6 +49,13 @@
     document.querySelectorAll("[data-i18n-aria]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
     WT.keepLang();
   }
+  // topics.html: its own menu sits where "More Nuclear Topics" sits on every other page (after Scoreboard), so the
+  // button doesn't jump when you arrive (Seth 2026-11-06). Phones keep it beside the ☰ button.
+  { const own = head.querySelector(".chap:not(.chap-x)"), wide = window.matchMedia("(min-width: 861px)");
+    if (own && sl && own.querySelector('[data-i18n="nav_topics"]')) {
+      const place = () => { if (wide.matches) { const b = sl.querySelector('a[href^="scoreboard.html"]'); sl.insertBefore(own, b ? b.nextSibling : sl.querySelector(".gh")); } else if (own.parentElement !== head) head.insertBefore(own, sl); };
+      place(); wide.addEventListener("change", place);
+    } }
   // language picker
   const links = head.querySelector(".site-links");
   links.appendChild(WT.langSwitch());

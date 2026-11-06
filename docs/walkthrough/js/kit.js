@@ -561,7 +561,7 @@
       chapters.push(ch);
     });
     // contents bar
-    const toc = document.querySelector(".toc ol");
+    const toc = document.querySelector(".toc .chap:not(.chap-x) > ol") || document.querySelector(".toc ol"); // the page's own menu, not a cross-page one
     if (toc) {
       // each entry: a dot coloured by level, the number, the title, the level tag; a part heading wherever the page starts a part
       chapters.filter((c) => c.mod.title).forEach((c) => {
