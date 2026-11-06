@@ -477,12 +477,16 @@
         ROWS.forEach(([name, ...cells], i) => {
           const y = y0 + rh * (i + 0.5); g.line(W * 0.02, y0 + rh * i, x1, y0 + rh * i, c.soft, 1, 0.2);
           g.label(phone ? ROWS_PH[i] : name, W * 0.02, y, { color: c.ink, size: fs - 1, weight: 600, align: "left" });
+          // chips sized to their (translated) text, two per row, centred in the cell and kept inside the drawing
+          const fsz = phone ? 9 : fs - 1; ctx.save(); ctx.font = `600 ${fsz}px ${getComputedStyle(document.documentElement).getPropertyValue("--sans") || "sans-serif"}`;
+          const cw2 = cells.map((list) => list.map((k) => Math.max(cw * (phone ? 0.4 : 0.36), ctx.measureText(WT.tr ? WT.tr(TY[k].ab) : TY[k].ab).width + (phone ? 10 : 16)))); ctx.restore();
           cells.forEach((list, j) => list.forEach((k, m) => {
-            const per = phone ? 2 : 2, col2 = m % per, row2 = Math.floor(m / per), nrow = Math.ceil(list.length / per), nc = Math.min(per, list.length);
-            const x = x0 + cw * (j + 0.5) + (col2 - (nc - 1) / 2) * cw * 0.46, yy = y + (row2 - (nrow - 1) / 2) * rh * 0.42, t = TY[k], hov = S.hot === k;
-            const fast = t.spec === "fast", w = cw * (phone ? 0.47 : 0.42), h = Math.min(rh * 0.36, 30);
+            const per = 2, col2 = m % per, row2 = Math.floor(m / per), nrow = Math.ceil(list.length / per), r0 = row2 * per, rowK = list.slice(r0, r0 + per), ws = cw2[j].slice(r0, r0 + per);
+            const tot = ws.reduce((a2, b2) => a2 + b2, 0) + 4 * (ws.length - 1); let left = x0 + cw * (j + 0.5) - tot / 2; left = Math.min(left, W - 4 - tot);
+            const w = ws[col2], x = left + ws.slice(0, col2).reduce((a2, b2) => a2 + b2 + 4, 0) + w / 2, yy = y + (row2 - (nrow - 1) / 2) * rh * 0.42, t = TY[k], hov = S.hot === k;
+            const fast = t.spec === "fast", h = Math.min(rh * 0.36, 30);
             ctx.save(); rr(ctx, x - w / 2, yy - h / 2, w, h, 8); ctx.fillStyle = g.rgba(fast ? c.warm : c.cool, hov ? 0.4 : 0.18); ctx.fill(); ctx.strokeStyle = g.rgba(fast ? c.warm : c.cool, 0.8); ctx.lineWidth = hov ? 2.2 : 1.2; ctx.stroke(); ctx.restore();
-            g.label(t.ab, x, yy, { color: c.ink, size: phone ? 9 : fs - 1, weight: 600 });
+            g.label(t.ab, x, yy, { color: c.ink, size: fsz, weight: 600 });
             hits.push([x - w / 2, yy - h / 2, w, h, k]);
           }));
         });
