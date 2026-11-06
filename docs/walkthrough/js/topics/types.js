@@ -447,7 +447,7 @@
   const COLS = ["light water", "heavy water", "graphite", "none (fast)"];
   const ROWS_PH = ["water", "boiling", "supercrit.", "gas", "liquid metal", "salt"];
   // label offsets in the temperature chart, where the water reactors crowd together
-  const LOFF = { bwr: [-9, -10, "right"], pwr: [9, -10, "left"], smr: [9, 11, "left"], phwr: [0, 17, "center"], rbmk: [-9, 11, "right"], lfr: [9, 10, "left"] };
+  const LOFF = { bwr: [-9, -10, "right"], pwr: [9, -10, "left"], smr: [9, 11, "left"], phwr: [0, 17, "center"], rbmk: [-9, 11, "right"], lfr: [-9, 11, "right"], sfr: [9, 11, "left"] };
   const FLEET = [["PWR", 0.7, "pwr"], ["BWR", 0.15, "bwr"], ["PHWR", 0.1, "phwr"], ["others", 0.05, null]];
   WT.chapter("rcompare", {
     level: 1, num: "Lesson 1", title: "Reactor types compared", short: "Compared", lead: "Every reactor is a choice of moderator and coolant.",
@@ -503,7 +503,7 @@
         g.label(phone ? "↑ electricity" : "↑ share of heat turned into electricity", x0 + 4, y0 - 8, { color: c.soft, size: fs - 1, align: "left" });
         // Carnot limit with 30 C cooling water: 1 - Tc/Th
         const pts = []; for (let T = T0; T <= T1; T += 10) { const e = 100 * (1 - 303 / (T + 273)); if (e <= E1) pts.push([X(T), Y(e)]); }
-        g.poly(pts, c.accent, 2, 0.6, [6, 5]); if (pts.length) g.label(phone ? "ideal limit" : "ideal (Carnot) limit", pts[pts.length - 1][0] - 4, pts[pts.length - 1][1] + 14, { color: c.accent, size: fs - 1, align: "right" });
+        g.poly(pts, c.accent, 2, 0.6, [6, 5]); if (pts.length) g.label(phone ? "ideal limit" : "ideal (Carnot) limit", pts[pts.length - 1][0] - 8, pts[pts.length - 1][1] - 14, { color: c.accent, size: fs - 1, align: "right" });
         Object.keys(TY).forEach((k) => { const t = TY[k]; if (!t.eff) return; const x = X(t.tout), y = Y(t.eff), hov = S.hot === k, fast = t.spec === "fast";
           g.glow(x, y, hov ? 26 : 16, fast ? c.warm : c.cool, 0.4); g.dot(x, y, hov ? 7 : 5, fast ? c.warm : c.cool, 0.95);
           const [dx, dy, al] = LOFF[k] || [9, -9, "left"];
