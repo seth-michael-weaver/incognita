@@ -81,7 +81,7 @@
       g.glow(fl.x, fl.y, (fl.big ? 30 : 10) + (fl.big ? 90 : 30) * a, g.c.fission, 0.75 * (1 - a)); if (fl.big) g.ring(fl.x, fl.y, 10 + 80 * a, g.c.fission, 2.5 * (1 - a), 0.8 * (1 - a)); }
     while (flashes.length > 80) flashes.shift(); }
   const DT = 8, NB = 32; const dif = { pa: -1, tally: { v: new Float64Array(NB), _ratio: 1 }, n: 0, show: [] };
-  function difReset(pa) { dif.pa = pa; dif.tally.v.fill(0); dif.n = 0; dif.show.length = 0; }
+  function difReset(pa) { dif.pa = pa; dif.tally.v.fill(0); dif.n = 0; dif.show.length = 0; for (let i = 0; i < 40000; i++) historyT(r() * DT, DT, pa, dif.tally, NB); dif.n = 40000; } // pre-converged: no early noise
   const pw = { N: 400, gen: 0, src: [], k: [], Hs: [], hist: new Float64Array(40), show: [], u: 0, inact: 20 };
   function pwReset(N) { pw.N = N; pw.gen = 0; pw.src = []; for (let i = 0; i < N; i++) pw.src.push(r()); pw.k = []; pw.Hs = [entropy(pw.src)]; pw.show = []; binSrc(); }
   function entropy(src) { const nb = 20, h = new Array(nb).fill(0); src.forEach((x) => h[clamp(Math.floor(x / SL0 * nb), 0, nb - 1)]++); let H = 0; h.forEach((v) => { if (v) { const p = v / src.length; H -= p * log2(p); } }); return H; }
@@ -96,12 +96,12 @@
   const stats = () => { const a = pw.k.slice(pw.inact); if (a.length < 2) return null; const m = a.reduce((s, v) => s + v, 0) / a.length, sd = Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (a.length - 1)); return { m, se: sd / Math.sqrt(a.length), n: a.length }; };
 
   // ---------- drawing ----------
-  function slab(g, box, T, S) {
+  function slab(g, box, T, S, bare) {
     const { c, ctx } = g; ctx.save(); const gr = ctx.createLinearGradient(box.x, 0, box.x + box.w, 0); gr.addColorStop(0, g.rgba(c.cool, 0.08)); gr.addColorStop(0.5, g.rgba(c.cool, 0.18)); gr.addColorStop(1, g.rgba(c.cool, 0.08)); ctx.fillStyle = gr;
     ctx.fillRect(box.x, box.y, box.w, box.h); ctx.restore();
     // fuel pins in water, as a backdrop (the physics uses the homogenised mixture)
     const pitch = Math.max(14, box.w / (T * 1.25)), nx = Math.floor(box.w / pitch), ny = Math.max(2, Math.floor(box.h / pitch)), pr = pitch * 0.26, br = S ? 0.06 * Math.sin(S.time * 1.7) : 0;
-    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const x = box.x + (i + 0.5) * box.w / nx, y = box.y + (j + 0.5) * box.h / ny; g.glow(x, y, pr * 2.4, c.warm, 0.1 + br * 0.5); g.ball(x, y, pr, c.warm, 0.55); }
+    if (!bare) for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const x = box.x + (i + 0.5) * box.w / nx, y = box.y + (j + 0.5) * box.h / ny; g.glow(x, y, pr * 2.4, c.warm, 0.1 + br * 0.5); g.ball(x, y, pr, c.warm, 0.55); }
     g.line(box.x, box.y, box.x, box.y + box.h, c.warm, 1.6, 0.8); g.line(box.x + box.w, box.y, box.x + box.w, box.y + box.h, c.warm, 1.6, 0.8);
     if (g.W >= 600) g.label("vacuum", box.x - 6, box.y + box.h / 2, { color: c.faint, size: 11, align: "right" });
   }
@@ -194,27 +194,33 @@
         g.label(`ξ = ${xi.toFixed(2)}  →  s = −ln ξ / Σₜ = ${s.toFixed(2)} free paths`, W / 2, yRd, rd);
       } else if (mode === "diff") {
         const T = DT, pa = S.pa; if (Math.abs(pa - dif.pa) > 1e-6) difReset(pa);
-        const sx = box.w / T, yH = box.h / sx; slab(g, box, T, S);
+        const sx = box.w / T, yH = box.h / sx; slab(g, box, T, S, true);
         // run histories: tally all, keep a few tracks to show
         const nRun = snap ? (dif.n < 60000 ? 60000 : 0) : 1500; for (let i = 0; i < nRun; i++) historyT(r() * T, T, pa, dif.tally, NB); dif.n += nRun;
-        if (!snap) S.u += dt; if (dif.show.length < 14 || S.u > 0.25) { S.u = 0; dif.show.push({ h: history(r() * T, T, pa, 0, true, null, 0), u: 0 }); while (dif.show.length > 14) dif.show.shift(); }
-        { const mx = Math.max(...dif.tally.v, 1e-9), band = new Float32Array(NB * 2); for (let i = 0; i < NB; i++) band[i] = band[NB + i] = dif.tally.v[i]; drawGrid(g, box, c.accent, band, NB, 2, mx, 0.55); }
-        dif.show.forEach((L, i) => { L.u = snap ? L.h.pts.length : Math.min(L.h.pts.length - 1, L.u + dt * 10); drawTrack(g, box, T, L.h, L.u, i === dif.show.length - 1 ? 1 : 0.45, yH); });
+        // the slab is symmetric, so the two halves of the tally are averaged (halves the noise, changes nothing else)
+        const V = new Float64Array(NB); for (let i = 0; i < NB; i++) V[i] = (dif.tally.v[i] + dif.tally.v[NB - 1 - i]) / 2;
+        if (!snap) S.u += dt; if (dif.show.length < 24 || S.u > 0.045) { S.u = 0; dif.show.push({ h: history(r() * T, T, pa, 0, true, null, 0), u: 0, age: 0 }); while (dif.show.length > 40) dif.show.shift(); }
+        { const mx = Math.max(...V, 1e-9), band = new Float32Array(NB * 2); for (let i = 0; i < NB; i++) band[i] = band[NB + i] = V[i]; drawGrid(g, box, c.accent, band, NB, 2, mx, 0.45, 1); }
+        // neutrons born everywhere, random-walking until absorbed (grey dot) or escaping through a surface (red dot); each fades after it ends
+        dif.show.forEach((L) => { const n = L.h.pts.length - 1; L.u = snap ? n : Math.min(n, L.u + dt * 6); if (L.u >= n) L.age += dt; const a = snap ? 0.7 : clamp(1 - L.age / 1.6, 0, 1); if (a <= 0) return;
+          drawTrack(g, box, T, L.h, L.u, a, yH);
+          if (L.u < n) { const i = Math.floor(L.u), f = L.u - i, A = L.h.pts[i], B = L.h.pts[i + 1], x = lerp(A[0], B[0], f), y = lerp(A[1], B[1], f), px = box.x + x * sx, py = box.y + (((y % yH) + yH) % yH) * sx; g.glow(px, py, 9, c.neutron, 0.5); g.ball(px, py, 3.2, c.neutron, 1); }
+          else if (L.h.end === "leak" && L.age < 0.6) { const P = L.h.pts[n], px = box.x + P[0] * sx, py = box.y + (((P[1] % yH) + yH) % yH) * sx; g.glow(px, py, 16, c.proton, 0.6 * (1 - L.age / 0.6)); } });
         g.label(`${T} free paths`, box.x + box.w / 2, box.y + box.h + 12, { color: c.warm, size: fs - 1 });
         // flux landscape: MC vs diffusion
         const py0 = H * (phone ? 0.42 : 0.44), py1 = H * 0.84, bw = T / NB, S0 = 1 / T, Dd = 1 / 3, L = Math.sqrt(Dd / pa), ah = T / 2, ae = ah + 0.7104;
         const phiD = (x) => S0 / pa * (1 - Math.cosh((x - ah) / L) / Math.cosh(ae / L)), top = S0 / pa;
         const X = (x) => box.x + x * sx, Y = (v) => lerp(py1, py0, v / (top * 1.08));
-        const mc = [], df = []; for (let i = 0; i < NB; i++) { const v = dif.tally.v[i] / (dif.n * bw); mc.push([X((i + 0.5) * bw), Y(v)]); }
+        const mc = [], df = []; for (let i = 0; i < NB; i++) { const v = V[i] / (dif.n * bw); mc.push([X((i + 0.5) * bw), Y(v)]); }
         for (let i = 0; i <= 120; i++) { const x = T * i / 120; df.push([X(x), Y(phiD(x))]); }
         g.line(box.x, py1, box.x + box.w, py1, c.line, 1); g.line(box.x, Y(top), box.x + box.w, Y(top), c.soft, 1, 0.4, [2, 4]);
         g.label("infinite medium S/Σₐ", box.x + box.w, Y(top) - 10, { color: c.soft, size: fs - 2, align: "right" });
         const mcS = [[X(0), mc[0][1]], ...mc, [X(T), mc[NB - 1][1]]];
-        g.clip(0, py0 - 4, W, py1 - py0 + 4); g.ground(mcS, c.accent, py1 - Y(top), 0.3); g.ctx.restore(); g.poly(mcS, c.accent, 2.6); g.poly(df, c.warm, 2, 0.95, [6, 4]);
-        g.label("Monte Carlo", X(T * 0.5), Y(dif.tally.v[NB / 2] / (dif.n * bw)) + 16, { color: c.accent, size: fs - 1, weight: 600, bg: true });
+        g.clip(0, py0 - 4, W, py1 - py0 + 4); g.ground(mcS, c.accent, py1 - Y(top), 0.3); g.ctx.restore(); g.area([...df, ...mcS.slice().reverse()], c.warm, 0.28); g.poly(mcS, c.accent, 2.6); g.poly(df, c.warm, 2, 0.95, [6, 4]); // the gap: where diffusion is wrong
+        g.label("Monte Carlo", X(T * 0.5), Y(V[NB / 2] / (dif.n * bw)) + 16, { color: c.accent, size: fs - 1, weight: 600, bg: true });
         g.label("diffusion", X(T * 0.13), Y(phiD(T * 0.13)) - 14, { color: c.warm, size: fs - 1, weight: 600, bg: true });
         g.label("flux", box.x, py0 - 12, { color: c.soft, size: fs - 1, align: "left" });
-        const edge = (dif.tally.v[0] + dif.tally.v[NB - 1]) / 2 / (dif.n * bw), mid = (dif.tally.v[NB / 2 - 1] + dif.tally.v[NB / 2]) / 2 / (dif.n * bw);
+        const edge = V[0] / (dif.n * bw), mid = (V[NB / 2 - 1] + V[NB / 2]) / 2 / (dif.n * bw);
         const eE = phiD(bw / 2) / edge - 1, eM = phiD(ah) / mid - 1, p = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(100 * v).toFixed(0)} %`;
         g.label(`diffusion vs Monte Carlo: ${p(eE)} at the surface, ${p(eM)} in the middle`, W / 2, yRd, rd);
       } else {
