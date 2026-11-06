@@ -80,6 +80,7 @@ import time
 import zipfile
 from collections import Counter
 from collections.abc import Iterable, Iterator
+import dataclasses
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
@@ -97,7 +98,37 @@ REPO = Path(__file__).resolve().parents[2]
 _MAIN = Path(os.environ.get("INCOGNITA_MAIN", REPO)).expanduser()   # one data directory for every tool (default: the repository root)
 RAW_ENTRY_ZIP = _MAIN / "raw" / "exfor" / "entry.zip"
 STAGING = _MAIN / "staging"
-EXFOR_VERSION = "2026-08-27"  # entry.zip snapshot date (raw/MANIFEST.json)
+EXFOR_VERSION = "2026-08-27"  # entry.zip snapshot date (raw/MANIFEST.json); CAPSET-v2 runs use exfor_version_of(zip)
+
+# CAPSET-v2 (2026-11-06, data/curation/capture_v2/README.md): ingestion fixes, OPT-IN. With V2_FIXES empty (the default)
+# every staged row is unchanged, so the shipped tables stay reproducible. scripts/build_capture_v2.py sets V2_FIXES; the
+# environment variable INCOGNITA_X4_V2 ("1" = all, or a comma list) does the same for `python -m data.ingest.exfor`.
+#   numfix    Fortran numbers with a blank-separated exponent after a bare point, "5.     -07" (was NaN)
+#   ratio     the data heading RATIO (and RATIO-ERR) is a data column like DATA
+#   enminapx  EN-MIN-APX / EN-MAX-APX are energy bounds like EN-MIN / EN-MAX
+#   ktdegc    KT-K (and KT-K-ERR) given in DEG-C: kT = k_B (T + 273.15) (an error column: k_B dT)
+#   eqroute   "(X(N,ABS),,SIG)=(X(N,G)...,,SIG)": an equivalence whose capture leaf is routed to the (N,G) leaf
+#   unc       uncertainty split: stat = ERR-S; sys = ERR-SYS, else sqrt(ERR-T^2 - ERR-S^2) when both are given;
+#             an unsplit total (ERR-T / DATA-ERR alone) goes to sys_sigma (correlated: not reduced by sqrt(n) in a
+#             cell mean); with ERR-T and ERR-SYS but no ERR-S, stat = sqrt(ERR-T^2 - ERR-SYS^2)
+V2_ALL = frozenset({"numfix", "ratio", "enminapx", "ktdegc", "eqroute", "unc"})
+_v2env = os.environ.get("INCOGNITA_X4_V2", "").strip()
+V2_FIXES: frozenset[str] = V2_ALL if _v2env == "1" else frozenset(x for x in _v2env.split(",") if x in V2_ALL)
+V2_LOG: dict[str, set[str]] = {}  # fix -> {"subentry/pointer"} touched by it (filled only when V2_FIXES is not empty)
+K_B_EV = 8.617333262e-5
+
+
+def _v2log(fix: str, sub: str, ptr: str | None) -> None:
+    V2_LOG.setdefault(fix, set()).add(f"{sub}/{ptr or ''}")
+
+
+def exfor_version_of(zip_path: Path) -> str:
+    """Snapshot date of an entry zip: the date in its file name (entry_YYYY-MM-DD.zip), else the name it links to."""
+    for p in (Path(zip_path), Path(zip_path).resolve()):
+        m = re.search(r"(\d{4}-\d{2}-\d{2})", p.name)
+        if m:
+            return m[1]
+    return EXFOR_VERSION
 
 RSS_LIMIT_MB = 2500
 WORKER_RSS_LIMIT_MB = 900
@@ -212,6 +243,7 @@ class Entry:
 
 
 _NUM_FIX = re.compile(r"^([+-]?\d*\.?\d+)([+-]\d+)$")
+_NUM_FIX_V2 = re.compile(r"^([+-]?(?:\d+\.?\d*|\.\d+))([+-]\d+)$")  # also "5.-07" (CAPSET-v2 numfix)
 
 
 def _num(s: str) -> float:
@@ -226,7 +258,7 @@ def _num(s: str) -> float:
         try:
             return float(s)
         except ValueError:
-            m = _NUM_FIX.match(s)
+            m = (_NUM_FIX_V2 if "numfix" in V2_FIXES else _NUM_FIX).match(s)
             if m:
                 return float(f"{m[1]}e{m[2]}")
             return math.nan
@@ -601,6 +633,10 @@ def _projectile_a(rx: ParsedReaction) -> int | None:
 
 def _col_to_ev(c: Column, rx: ParsedReaction) -> np.ndarray | None:
     """Energy column → eV; handles MeV/nucleon by multiplying with the projectile A."""
+    if "ktdegc" in V2_FIXES and c.name.startswith("KT") and c.unit.strip().upper() == "DEG-C":
+        if c.name.endswith("ERR"):  # a temperature difference
+            return c.values * K_B_EV
+        return (c.values + 273.15) * K_B_EV
     info = parse_unit(c.unit)
     if info.canonical == "eV":
         return c.values * info.factor
@@ -612,7 +648,13 @@ def _col_to_ev(c: Column, rx: ParsedReaction) -> np.ndarray | None:
 
 
 _ENERGY_SIGMA = ("EN-ERR", "EN-RSL", "EN-RSL-HW", "EN-RES-ERR", "EN-ERR-DIG", "KT-ERR")
+_ENERGY_SIGMA_V2 = _ENERGY_SIGMA + ("KT-K-ERR",)
 _DATA_NAMES = ("DATA", "DATA-CM", "DATA-APRX")
+_DATA_NAMES_V2 = _DATA_NAMES + ("RATIO",)
+
+
+def _dn() -> tuple[str, ...]:
+    return _DATA_NAMES_V2 if "ratio" in V2_FIXES else _DATA_NAMES
 _ANGLE = ("ANG", "ANG-CM", "ANG-MEAN")
 _COS = ("COS", "COS-CM")
 _SECONDARY = ("E", "E-CM", "E-LVL", "E-EXC", "E-MEAN")
@@ -630,8 +672,9 @@ def _energy(
         if resonance_energy is not None:
             # sibling pointer carries the resonance energy: (N,0),,EN in DATA 1
             return resonance_energy, None, "DATA(EN pointer)"
-        lo = _pick(cols, ("EN-MIN", "EN-RES-MIN", "EN-CM-MIN", "EN-MIN-NM"), ptr)
-        hi = _pick(cols, ("EN-MAX", "EN-RES-MAX", "EN-CM-MAX", "EN-MAX-NM"), ptr)
+        apx = "enminapx" in V2_FIXES
+        lo = _pick(cols, ("EN-MIN", "EN-RES-MIN", "EN-CM-MIN", "EN-MIN-NM") + (("EN-MIN-APX",) if apx else ()), ptr)
+        hi = _pick(cols, ("EN-MAX", "EN-RES-MAX", "EN-CM-MAX", "EN-MAX-NM") + (("EN-MAX-APX",) if apx else ()), ptr)
         lo_ev = _col_to_ev(lo, rx) if lo is not None else None
         hi_ev = _col_to_ev(hi, rx) if hi is not None else None
         if lo_ev is not None and hi_ev is not None:
@@ -639,7 +682,7 @@ def _energy(
         if hi_ev is not None:
             return hi_ev, None, "EN-MAX"
         if (rx.sf.sf6 or "").upper() == "EN":  # resonance energies: DATA is the energy
-            d = _pick(cols, _DATA_NAMES, ptr)
+            d = _pick(cols, _dn(), ptr)
             if d is not None and parse_unit(d.unit).canonical == "eV":
                 return d.values * parse_unit(d.unit).factor, None, "DATA"
         if lo_ev is not None and (rx.sf.sf6 or "").upper() in ("RI", "SIG"):
@@ -669,7 +712,7 @@ def _energy(
     e = _col_to_ev(c, rx)
     if e is None:
         return None
-    s = _pick(cols, _ENERGY_SIGMA, ptr)
+    s = _pick(cols, _ENERGY_SIGMA_V2 if "ktdegc" in V2_FIXES else _ENERGY_SIGMA, ptr)
     if s is None:
         fw = _pick(cols, ("EN-RSL-FW",), ptr)
         if fw is not None:
@@ -1043,6 +1086,40 @@ def build_measurements(
     return out
 
 
+def _route_equivalence(rx: ParsedReaction, sub: str, ptr: str) -> ParsedReaction:
+    """CAPSET-v2 eqroute: in "(A)=(B)" the compilers state that A and B are the same number. When A is not a capture
+    reaction and a simple leaf B is (N,G) SIG/RI (e.g. "(71-LU-175(N,ABS),,SIG)=(71-LU-175(N,G)71-LU-176,,SIG)"),
+    the measurement is filed under B. The REACTION string is kept verbatim."""
+    if "eqroute" not in V2_FIXES or rx.operator != "=" or rx.is_ratio or len(rx.components) < 2:
+        return rx
+    if (rx.sf.sf2 or "").upper() == "N" and (rx.sf.sf3 or "").upper() == "G":
+        return rx
+    for c in rx.components[1:]:
+        if (not c.components and (c.sf.sf2 or "").upper() == "N" and (c.sf.sf3 or "").upper() == "G"
+                and (c.sf.sf6 or "").upper() in ("SIG", "RI")):
+            _v2log("eqroute", sub, ptr)
+            return dataclasses.replace(c, raw=rx.raw, operator="=", components=rx.components)
+    return rx
+
+
+def _split_uncertainty(
+    s: np.ndarray | None, t: np.ndarray | None, y: np.ndarray | None
+) -> tuple[np.ndarray | None, np.ndarray | None, str]:
+    """CAPSET-v2 unc: (stat, sys, mode) from absolute ERR-S, total (ERR-T / DATA-ERR) and ERR-SYS columns."""
+    def diff(a, b):
+        with np.errstate(invalid="ignore"):
+            return np.sqrt(np.maximum(a * a - b * b, 0.0))
+    if s is not None:
+        if y is None and t is not None:
+            return s, diff(t, s), "split_sys_derived"   # sys = sqrt(T^2 - S^2)
+        return s, y, "split" if y is not None else "stat_only"
+    if t is not None:
+        if y is not None:
+            return diff(t, y), y, "total_minus_sys"     # stat = sqrt(T^2 - SYS^2)
+        return None, t, "total_correlated"              # unsplit total: correlated, no sqrt(n) reduction
+    return None, y, "sys_only" if y is not None else "none"
+
+
 def _build_sub(
     entry: Entry,
     sub: Subentry,
@@ -1076,11 +1153,11 @@ def _build_sub(
     monitors = bib.get("MONITOR") or ebib.get("MONITOR")
     monit_refs = bib.get("MONIT-REF") or ebib.get("MONIT-REF") or []
 
-    data_ptrs = {c.pointer for c in cols if c.name in _DATA_NAMES}
+    data_ptrs = {c.pointer for c in cols if c.name in _dn()}
     parsed: list[tuple[BibItem, ParsedReaction | None, str]] = []
     for it in rx_items:
         try:
-            parsed.append((it, parse_reaction(it.code), ""))
+            parsed.append((it, _route_equivalence(parse_reaction(it.code), sub.accession, it.pointer), ""))
         except ReactionParseError as e:
             parsed.append((it, None, str(e)))
     # resonance tables: pointer whose reaction is ",,EN" holds the energy for its siblings
@@ -1091,7 +1168,7 @@ def _build_sub(
             and (rx.sf.sf6 or "").upper() == "EN"
             and _pick(cols, _ENERGY_PRIMARY, it.pointer) is None
         ):
-            d = _pick(cols, _DATA_NAMES, it.pointer)
+            d = _pick(cols, _dn(), it.pointer)
             if d is not None and parse_unit(d.unit).canonical == "eV":
                 res_energy = d.values * parse_unit(d.unit).factor
                 break
@@ -1103,7 +1180,7 @@ def _build_sub(
             reasons.append(f"reaction_parse:{perr}")
             stats["pointer:reaction_parse"] += 1
             continue
-        dcol = _pick(cols, _DATA_NAMES, ptr)
+        dcol = _pick(cols, _dn(), ptr)
         if dcol is None or (ptr and dcol.pointer != ptr and len(rx_items) > 1 and data_ptrs - {""}):
             if _pick(cols, ("DATA-MAX", "DATA-MIN"), ptr) is not None:
                 reasons.append(f"limit_only:{ptr or '-'}")  # upper/lower limits only
@@ -1118,6 +1195,15 @@ def _build_sub(
             stats["pointer:no_energy_column"] += 1
             continue
         energy_ev, energy_sig, _src = en
+        if V2_FIXES:
+            if dcol.name == "RATIO":
+                _v2log("ratio", sub.accession, ptr)
+            if _src in ("EN-MIN/EN-MAX", "EN-MIN", "EN-MAX") and not (
+                    {c.name for c in cols} & {"EN-MIN", "EN-MAX", "EN-RES-MIN", "EN-RES-MAX", "EN-CM-MIN", "EN-CM-MAX",
+                                              "EN-MIN-NM", "EN-MAX-NM"}):
+                _v2log("enminapx", sub.accession, ptr)
+            if _src.startswith("KT") and any(c.name == _src and c.unit.strip().upper() == "DEG-C" for c in cols):
+                _v2log("ktdegc", sub.accession, ptr)
         values = dcol.values
         keep = np.isfinite(values) & np.isfinite(energy_ev)
         if not keep.any():
@@ -1126,7 +1212,7 @@ def _build_sub(
             continue
 
         err_s = _pick(cols, ("ERR-S",), ptr)
-        err_t = _pick(cols, ("ERR-T", "DATA-ERR"), ptr)
+        err_t = _pick(cols, ("ERR-T", "DATA-ERR") + (("RATIO-ERR",) if "ratio" in V2_FIXES else ()), ptr)
         if err_t is None:
             plus = _pick(cols, ("+DATA-ERR", "+ERR-T"), ptr)
             minus = _pick(cols, ("-DATA-ERR", "-ERR-T"), ptr)
@@ -1139,6 +1225,13 @@ def _build_sub(
         if stat is None:
             stat = _to_abs_sigma(err_t, values, dcol.unit)
         sysg = _to_abs_sigma(err_sys, values, dcol.unit)
+        if "unc" in V2_FIXES:
+            stat, sysg, mode = _split_uncertainty(
+                _to_abs_sigma(err_s, values, dcol.unit), _to_abs_sigma(err_t, values, dcol.unit), sysg)
+            _v2log("unc:" + mode, sub.accession, ptr)
+            used = [c for c in (err_s, err_t, err_sys) if c is not None]
+            if used and any(parse_unit(c.unit).canonical != "%" for c in used):
+                _v2log("unc_abs_units", sub.accession, ptr)  # absolute units: sigma/value depends on the observed value
 
         angle = _angle(cols, ptr)
         secondary = _secondary(cols, ptr)
@@ -1382,6 +1475,9 @@ def run(
     errors_path: Path | None = None,
     renorm_band: tuple[float, float] = RENORM_BAND,
 ) -> dict[str, Any]:
+    global EXFOR_VERSION
+    if V2_FIXES:  # CAPSET-v2: the version is the snapshot actually read, not the hard-coded constant
+        EXFOR_VERSION = exfor_version_of(zip_path)
     t0 = time.time()
     with zipfile.ZipFile(zip_path) as z:
         names = [n for n in z.namelist() if n.endswith(".txt")]

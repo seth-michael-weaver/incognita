@@ -1,0 +1,139 @@
+# Curated EXFOR capture set v2 (CAPSET-v2), Z 1-92
+
+EXFOR-derived (IAEA Nuclear Data Section and the NRDC network), CC BY 4.0. `SHA256SUMS` checks every data file.
+Built 2026-11-06 by `scripts/build_capture_v2.py` from the 2026-10-14 EXFOR snapshot (`entry_2026-10-14.zip`).
+
+This is a NEW version of the curated capture tables in `../inputs/` (Z 26-92 run 2026-09-12, Z 1-25 run 2026-11-06).
+Those files are not changed. Nothing sealed or frozen reads this directory; `ADOPTION.md` says what would change
+if a future card or rescore adopts it. ("v2" here is the capture set's version. The curation REGISTER v2,
+`../curation_register_v2.*`, is a different product built from the v1 cells; see ADOPTION.md.)
+
+| file | what |
+|---|---|
+| `exfor_capture_Z26-92_trust_v2.parquet` | one row per dataset, Z 26-92, the schema of `../inputs/exfor_capture_Z26-92_trust.parquet` |
+| `exfor_cells_Z26-92_v2.parquet` | one row per dataset and 0.1-dex bin, the schema of `../inputs/exfor_cells.parquet` |
+| `exfor_capture_Z1-25_trust_v2.parquet`, `exfor_cells_Z1-25_v2.parquet` | the same for Z 1-25 |
+| `review_decisions_capture_v2.jsonl` | every decision this version adds (390 lines), review-decision format, each with rule code, reason and EXFOR id |
+| `ladder_v2.csv` | the decision of every dataset after each fix step S0-S8 (below), and the CAPSET-v2 rule that decided it |
+| `counts_v2.json` | all counts quoted here, per defect and per step |
+| `provenance.json` | inputs and their SHA256 (entry zip, staging, the three human-decision files), code, gates |
+
+## How it was made
+
+1. **Staging.** Every entry of the zip that holds `(N,G)` is parsed by this repository's `data/ingest/exfor.py` with the
+   six CAPSET-v2 parser fixes switched on (`V2_FIXES`; they are opt-in, so the default ingest is byte-identical to before).
+   Capture predicate and clip of `python -m data.ingest.exfor --subset capture` (SF2 N, SF3 G, SF6 SIG/RI, points
+   <= 20 MeV), Z 1-92 together: 12 432 measurements. Check: the same code with only the number fix reproduces the
+   research staging `exfor_capture_Z26-92_2026-10-14_x4fix1` (the 2026-10-22 X4NUMFIX output) exactly, 10 706 of
+   10 706 rows.
+2. **Curation.** The research WP-12 quality model (`data/curate/quality_model.py`, `review_log.py`, unchanged) runs once
+   on Z 1-92, as for the light run. Human-decision file = research `review_decisions.jsonl` (sha in provenance) +
+   `../inputs/review_decisions_Z1-25.jsonl` + `review_decisions_capture_v2.jsonl` (later lines override). The consensus
+   fit leaves out the 300 datasets that a CAPSET-v2 line excludes (as it already leaves out compilations), and re-bases
+   absolute-unit uncertainties (fix D4).
+3. **Cells.** `discrepancy.cells_from_parquet` on the v2 staging, joined to the trust table; split at Z 25/26.
+
+## The fixes, with counts before and after
+
+"v1" = the shipped tables in `../inputs/`. Dataset counts exclude the 12 STD2017 anchor rows.
+
+**D1. Fortran numbers with a blank exponent** (`"5.     -07"`, `"7.     -03"` read as NaN; `_NUM_FIX` at
+exfor.py:214, the X4NUMFIX of 2026-10-22 corrected staged files but neither code base). Fixed regex
+`^([+-]?(?:\d+\.?\d*|\.\d+))([+-]\d+)$`.
+Z 26-92: 87 datasets recovered (e.g. 11407012 Zr-96, 11658002/005 resonance integrals), 148 more datasets gain points
+or uncertainties, 142 points and 241 uncertainty values recovered. Z 1-25: 15 datasets, 50, 70 points, 101 values.
+(The hunt's 87 / 55 points / ~99 uncertainties counted used Z 26-92 data only.)
+
+**D2. Parser gaps.**
+- Data heading `RATIO` (and `RATIO-ERR`): 4 datasets now staged (20942004, 21181002 ptr 1, 21181004, 21216002); 2 are
+  excluded automatically (ratio to a non-standard, not convertible to barns), 2 kept.
+- `EN-MIN-APX` / `EN-MAX-APX`: 15 resonance-integral datasets of entry 10637 now staged (9 in Z 26-92); 13 keep, 2 downweight.
+- `KT-K` in `DEG-C`: kT = k_B (T + 273.15); 3 datasets (10013010, 31756002, 31756003), all keep.
+- `(X(N,ABS),,SIG)=(X(N,G)...)` equivalences filed under the (N,G) leaf (the REACTION string is kept): 7 datasets,
+  160 points (21178003, 21278005/008/011/013, 21322007/008), all keep.
+
+**D3. Sums kept as single-isotope capture.** `score_channels_fixed.reaction_flags` (the REACTION-code rule of the
+benchmark fix) is applied to every capture dataset; COMBO_SUM / COMBO_DIFF / COMBO_PROD -> exclude (rule
+`D3_SUM_REACTION`). 12 datasets: 22580006 (Pd-106 + Pd-108), 40336092 (Te-128 + Te-130), 40385003 (U-235 (n,g) +
+(n,f)), 30567005 ptr 2 (Pd-109 G + 1.006 x M, FCT, was keyed state G), 30268015 and 30400038/045/046/048/050/051/052
+(fission-spectrum sums). v1 used all 12 (11 keep, 1 downweight). Ratios and `=` equivalences are not excluded. The benchmark threshold rows
+(n,2n)/(n,p)/(n,alpha) are not in this product; branch `benchfix` handles them (it has no commits beyond main
+as of this build, so nothing here duplicates or conflicts with it).
+
+**D4. Uncertainties.** New split (exfor.py `_split_uncertainty`): stat = ERR-S; sys = ERR-SYS, else
+sqrt(ERR-T^2 - ERR-S^2) when both are given (568 datasets, `split_sys_derived`; v1 dropped ERR-T there); an unsplit
+total (ERR-T / DATA-ERR alone) goes to sys_sigma, so a cell mean does not divide it by sqrt(n) (9 503 datasets,
+`total_correlated`; v1 treated it as purely statistical); ERR-T with ERR-SYS but no ERR-S: stat = sqrt(T^2 - SYS^2)
+(62). Others: split 348, stat only 330, sys only 27, none 1 594. Effect on the cells' relative uncertainty (37 699 cells
+in both versions, 27 285 with an uncertainty in both): median ratio v2/v1 1.00 (single-point cells do not change),
+32 % of cells larger by > 5 %, median x2.23 for cells of >= 4 points.
+Peelle (PREAMBLE gate-calibration rule 8: no data uncertainty proportional to the observed value): the cells' relative
+uncertainties are already relative to the cell mean, not to each point; inside the consensus fit the 16 915 cells of
+the 9 257 datasets whose uncertainty columns are in absolute units are re-based on the expected value of a first fit,
+sigma / exp(mu + bias), instead of sigma / observed mean (factor clipped to [1/3, 3]; median |ln factor| 0.003).
+Uncertainties given in per cent are already independent of the observed value. The shipped cells carry the reported
+uncertainties; the re-basing is inside the fit only.
+
+**D5. Duplicates and preliminary data.** A dataset whose EXFOR STATUS (subentry or SUBENT 001) says `(SPSDD,X)` or
+`(DEP,X)` is excluded when X is in the set, is a measurement (not a V-entry compilation, not SF9 CALC/EVAL) and has the
+same comparable quantity (group key: nuclide, MT, branch, kind, state); it is also left out of the consensus fit. Within
+and across entries alike (v1 only shared weight within an entry). A dataset an earlier human line already decides keeps
+that line (339, all of them excludes). In a mutual reference one member is kept (11).
+- SPSDD: 96 excluded, DEP: 189 excluded (42 of the 285 cross-entry). Rule codes `D5_SPSDD`, `D5_DEP`, field `superseded_by`.
+- Two excluded datasets point to an original that is itself superseded (C-14: 22254002 and 22895003 -> 22995002 ->
+  22995004 ptr 2); the chain ends at a kept dataset.
+- PRELM (STATUS PRELM): down-weighted (trust x0.25, the review `downweight`) wherever the automatic layer kept or
+  down-weighted the dataset and no earlier human line decides it: 90 datasets (`D5_PRELM`). The hunt counted 115 used
+  PRELM datasets (79 at full keep); the rest are excluded by D5/D3 or by earlier lines.
+
+**D6. x1000-type slips** (hand lines, reviewer `agent:claude-opus-5.5`, checked against the EXFOR record):
+- 14657002 Y-89(n,g)Y-90m thermal MXW, Krane 2020: 1.02 B vs 1 mb in 11870002, 23488032, 23266090/91 -> `fix-unit` 0.001.
+- 13947004 Ni-60 partial gamma lines (PAR), Raman 2004: sum 3 693 B vs 2 744 MB for the same quantity in 30150003 ->
+  `fix-unit` 0.001.
+- 41639002 Sb-124 SPA, Murin 1957: 2000 B, DATA-APRX, no uncertainty, energy supposed by the compiler -> `exclude`
+  on the record. It is NOT shown to be a unit slip: Elgart 1971 (10728004, MXW) gives 2990 B, Courtemanche 1966
+  (11990002, SPA) 6.5 B. Sb-124 is left open for a person (10728004 and 11990002 keep their automatic decisions).
+
+**D7. EXFOR version.** `exfor_version` of every staged row is the snapshot read, 2026-10-14 (`exfor_version_of(zip)`),
+not the hard-coded 2026-08-27. The default ingest keeps the constant (reproducibility of v1); CAPSET-v2 runs and
+`INCOGNITA_X4_V2` runs use the zip's date.
+
+## Before / after
+
+| | Z 26-92 v1 | Z 26-92 v2 | Z 1-25 v1 | Z 1-25 v2 |
+|---|---|---|---|---|
+| datasets | 10 619 | 10 728 | 1 695 | 1 704 |
+| points | 688 818 | 689 138 | 266 299 | 266 308 |
+| cells | 33 659 | 33 830 | 4 040 | 4 049 |
+| keep / downweight / exclude / fix-unit (datasets) | 6 829 / 1 327 / 2 458 / 5 | 6 707 / 912 / 3 104 / 5 | 1 148 / 158 / 388 / 1 | 1 148 / 107 / 448 / 1 |
+| cells keep / downweight / exclude / fix-unit | 23 878 / 8 344 / 1 424 / 13 | 23 700 / 6 478 / 3 647 / 5 | 3 115 / 675 / 249 / 1 | 3 161 / 456 / 431 / 1 |
+
+No v1 dataset is missing from v2. The ladder (`ladder_v2.csv`, `counts_v2.json` "ladder") attributes every change:
+
+| step (Z 26-92) | keep | downweight | exclude | fix-unit | changed vs previous step |
+|---|---|---|---|---|---|
+| S0 shipped v1 (2026-09-12) | 6 829 | 1 327 | 2 458 | 5 | |
+| S1 same parser, 2026-10-14 snapshot, current review files | 6 743 | 1 011 | 2 861 | 4 | 715 |
+| S2 + D1 number fix | 6 702 | 1 135 | 2 865 | 4 | 397 |
+| S3 + D2 parser gaps | 6 817 | 1 040 | 2 867 | 4 | 290 |
+| S4 + D4 uncertainty split | 6 913 | 945 | 2 866 | 4 | 262 |
+| S5 + D4 Peelle re-basing | 6 942 | 916 | 2 866 | 4 | 195 |
+| S6 + D3 sums, D6 slips | 6 851 | 992 | 2 879 | 6 | 182 |
+| S7 + D5 SPSDD / DEP | 6 786 | 833 | 3 104 | 5 | 434 |
+| S8 + D5 PRELM = v2 | 6 707 | 912 | 3 104 | 5 | 79 |
+
+Read this honestly: S1 alone (no fix, only the newer snapshot and review files) changes 715 decisions, and S2-S5 each
+move a few hundred datasets across the keep / downweight boundary (trust 0.5) because the metadata prior and the
+posterior trust are re-learned on every run. The resampling-stability gate fails in every run since the 2026-10-14
+snapshot (it failed for the light run too); the standards and spot-list gates pass. The fit stops at its 300-iteration
+cap as every WP-12 run has (converged = false, rms step 9e-5). Decision changes that come from a rule are the S6-S8
+steps (rule lines); the rest is the automatic layer's sensitivity, which v2 does not claim to fix.
+
+## Not done / open
+
+- The research checkout (`~/nucleus`) parser is not patched: its card code is frozen by sha. The fixes live here,
+  opt-in, and the research staging can be rebuilt with them by the same script.
+- Sb-124 (above); the fix-unit factors are logged, not applied (as in v1).
+- The curation register v2 and its decisions were not re-run on these cells (it is pre-registered on the v1 cells;
+  re-running it would be a new register version with its own pre-registration).
+- No person has reviewed the 390 new lines; 387 are rule lines from the EXFOR record, 3 are agent-checked.
