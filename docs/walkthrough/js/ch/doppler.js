@@ -56,7 +56,7 @@
       const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13, T = S.T, st = Math.max(0, S.step);
       const R = sigT(T), R0 = sigT(300), hot = (T - 300) / 1200;
       // ---------- the pellet ----------
-      const py = H * 0.2, pr = Math.min(W * (phone ? 0.16 : 0.15), H * 0.15), px = W * (phone ? 0.2 : 0.17);
+      const pr = Math.min(W * (phone ? 0.16 : 0.15), H * 0.15), py = Math.max(H * 0.2, pr + 34), px = W * (phone ? 0.2 : 0.17); // room above for the thermometer's reading
       g.glow(px, py, pr * 1.6, c.warm, 0.12 + 0.35 * hot);
       ctx.save(); const pg = ctx.createRadialGradient(px - pr * 0.3, py - pr * 0.3, pr * 0.1, px, py, pr); pg.addColorStop(0, g.rgba(c.warm, 0.18 + 0.2 * hot)); pg.addColorStop(1, g.rgba(c.soft, 0.12)); ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(px, py, pr, 0, TAU); ctx.fill(); ctx.restore();
       g.ring(px, py, pr, c.soft, 1.2, 0.5);

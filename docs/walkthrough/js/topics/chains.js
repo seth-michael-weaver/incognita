@@ -271,11 +271,12 @@
       // axes and legend
       const yAx = PY(z0 + 0.35);
       g.label("neutrons →", PX(n1 - 1), yAx, { color: c.soft, size: fs - 1, align: "right" });
-      g.label("grey: stable", PX(124) - rn, yAx, { color: c.soft, size: fs - 1, align: "left" });
       g.label("protons ↑", ox - 4, PY(z1 - 0.4), { color: c.soft, size: fs - 1, align: "left" });
       const LGY = yAx + (phone ? 22 : 30);
       g.dot(W * 0.1, LGY, 5, c.alpha); g.label(phone ? "alpha: −2 p, −2 n" : "alpha: loses 2 protons and 2 neutrons", W * 0.1 + 10, LGY, { color: c.alpha, size: fs - 1, weight: 600, align: "left" });
       g.dot(W * 0.58, LGY, 5, c.accent); g.label(phone ? "beta: n → p" : "beta: a neutron becomes a proton", W * 0.58 + 10, LGY, { color: c.accent, size: fs - 1, weight: 600, align: "left" });
+      // stable ends: a legend line of its own (beside the Pb row it sat on lead-206's mass number)
+      g.dot(W * 0.1, LGY + (phone ? 18 : 22), 5, c.faint); g.label("grey: stable", W * 0.1 + 10, LGY + (phone ? 18 : 22), { color: c.soft, size: fs - 1, weight: 600, align: "left" });
       // the current member, written large below
       const name = `${cu[2]}-${cu[3]}${cu[2] === "Pa" ? "m" : ""}`;
       g.label(fin ? `${name}: stable, the chain ends` : cu[5] === "a" ? `${name} · half-life ${cu[4]} · alpha next` : `${name} · half-life ${cu[4]} · beta next`, W * 0.5, H * (phone ? 0.87 : 0.86), { color: fin ? c.fission : c.ink, size: fs + 3, weight: 700, serif: true });

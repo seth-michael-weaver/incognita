@@ -180,7 +180,7 @@
     g.label("the cut, flat", sx, sy - sr - 14, { color: c.soft, size: 11 });
     const rat = ratOf(q), laps = tor.cuts.length;
     g.label(rat ? `q = ${rat[0]}/${rat[1]}: closes after ${rat[1]} lap${rat[1] > 1 ? "s" : ""}` : `q = ${q.toFixed(2)}: no simple fraction, the dots fill the circle`, W / 2, phone ? 14 : 24, { color: c.ink, size: phone ? 12 : 14, weight: 600, bg: true });
-    g.label(`laps ${laps}`, sx, sy + sr + 16, { color: c.soft, size: 11 });
+    g.label(`laps ${laps}`, phone ? sx - sr - 10 : sx, phone ? sy + sr * 0.75 : sy + sr + 16, { color: c.soft, size: 11, align: phone ? "right" : "center" }); // phones: beside the circle (below it ran off the stage)
   }
 
   function drawMap(g, S, dt) {
