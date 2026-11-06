@@ -72,3 +72,21 @@ Object.assign(WT.L.labels, {
   "↑ electricity": "↑ الكهرباء",
   "↑ share of heat turned into electricity": "↑ نسبة الحرارة المحوَّلة إلى كهرباء",
 });
+// hover line in the temperature chart
+Object.assign(WT.L.labels, {
+  "Pressurized water reactor: {#} °C, {#} %": "مفاعل الماء المضغوط: {#} °C، {#} %",
+  "Boiling water reactor: {#} °C, {#} %": "مفاعل الماء المغلي: {#} °C، {#} %",
+  "Pressurized heavy water reactor: {#} °C, {#} %": "مفاعل الماء الثقيل المضغوط: {#} °C، {#} %",
+  "Graphite-moderated boiling water reactor: {#} °C, {#} %": "مفاعل الماء المغلي المهدَّأ بالغرافيت: {#} °C، {#} %",
+  "Supercritical water reactor: {#} °C, {#} %": "مفاعل الماء فوق الحرج: {#} °C، {#} %",
+  "Magnox: {#} °C, {#} %": "ماغنوكس: {#} °C، {#} %",
+  "Advanced gas-cooled reactor: {#} °C, {#} %": "المفاعل المتقدم المبرَّد بالغاز: {#} °C، {#} %",
+  "High-temperature gas reactor: {#} °C, {#} %": "مفاعل الغاز عالي الحرارة: {#} °C، {#} %",
+  "Very-high-temperature reactor: {#} °C, {#} %": "مفاعل الحرارة فائقة الارتفاع: {#} °C، {#} %",
+  "Sodium-cooled fast reactor: {#} °C, {#} %": "المفاعل السريع المبرَّد بالصوديوم: {#} °C، {#} %",
+  "Lead-cooled fast reactor: {#} °C, {#} %": "المفاعل السريع المبرَّد بالرصاص: {#} °C، {#} %",
+  "Gas-cooled fast reactor: {#} °C, {#} %": "المفاعل السريع المبرَّد بالغاز: {#} °C، {#} %",
+  "Molten salt reactor: {#} °C, {#} %": "مفاعل الملح المنصهر: {#} °C، {#} %",
+  "Small modular reactor: {#} °C, {#} %": "المفاعل المعياري الصغير: {#} °C، {#} %",
+  "Heat-pipe microreactor: {#} °C, {#} %": "المفاعل الميكروي بالأنابيب الحرارية: {#} °C، {#} %",
+});

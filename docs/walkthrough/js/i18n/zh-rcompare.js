@@ -72,3 +72,21 @@ Object.assign(WT.L.labels, {
   "↑ electricity": "↑ 发电效率",
   "↑ share of heat turned into electricity": "↑ 热量转化为电的比例",
 });
+// hover line in the temperature chart
+Object.assign(WT.L.labels, {
+  "Pressurized water reactor: {#} °C, {#} %": "压水堆：{#} °C，{#} %",
+  "Boiling water reactor: {#} °C, {#} %": "沸水堆：{#} °C，{#} %",
+  "Pressurized heavy water reactor: {#} °C, {#} %": "加压重水堆：{#} °C，{#} %",
+  "Graphite-moderated boiling water reactor: {#} °C, {#} %": "石墨慢化沸水堆：{#} °C，{#} %",
+  "Supercritical water reactor: {#} °C, {#} %": "超临界水堆：{#} °C，{#} %",
+  "Magnox: {#} °C, {#} %": "镁诺克斯堆：{#} °C，{#} %",
+  "Advanced gas-cooled reactor: {#} °C, {#} %": "先进气冷堆：{#} °C，{#} %",
+  "High-temperature gas reactor: {#} °C, {#} %": "高温气冷堆：{#} °C，{#} %",
+  "Very-high-temperature reactor: {#} °C, {#} %": "超高温气冷堆：{#} °C，{#} %",
+  "Sodium-cooled fast reactor: {#} °C, {#} %": "钠冷快堆：{#} °C，{#} %",
+  "Lead-cooled fast reactor: {#} °C, {#} %": "铅冷快堆：{#} °C，{#} %",
+  "Gas-cooled fast reactor: {#} °C, {#} %": "气冷快堆：{#} °C，{#} %",
+  "Molten salt reactor: {#} °C, {#} %": "熔盐堆：{#} °C，{#} %",
+  "Small modular reactor: {#} °C, {#} %": "小型模块化反应堆：{#} °C，{#} %",
+  "Heat-pipe microreactor: {#} °C, {#} %": "热管微堆：{#} °C，{#} %",
+});

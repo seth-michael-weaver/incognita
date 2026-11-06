@@ -72,3 +72,21 @@ Object.assign(WT.L.labels, {
   "↑ electricity": "↑ 전기",
   "↑ share of heat turned into electricity": "↑ 전기로 바뀌는 열의 비율",
 });
+// hover line in the temperature chart
+Object.assign(WT.L.labels, {
+  "Pressurized water reactor: {#} °C, {#} %": "가압경수로: {#} °C, {#} %",
+  "Boiling water reactor: {#} °C, {#} %": "비등경수로: {#} °C, {#} %",
+  "Pressurized heavy water reactor: {#} °C, {#} %": "가압중수로: {#} °C, {#} %",
+  "Graphite-moderated boiling water reactor: {#} °C, {#} %": "흑연감속 비등경수로: {#} °C, {#} %",
+  "Supercritical water reactor: {#} °C, {#} %": "초임계수로: {#} °C, {#} %",
+  "Magnox: {#} °C, {#} %": "마그녹스: {#} °C, {#} %",
+  "Advanced gas-cooled reactor: {#} °C, {#} %": "개량형 가스냉각로: {#} °C, {#} %",
+  "High-temperature gas reactor: {#} °C, {#} %": "고온가스로: {#} °C, {#} %",
+  "Very-high-temperature reactor: {#} °C, {#} %": "초고온가스로: {#} °C, {#} %",
+  "Sodium-cooled fast reactor: {#} °C, {#} %": "소듐냉각 고속로: {#} °C, {#} %",
+  "Lead-cooled fast reactor: {#} °C, {#} %": "납냉각 고속로: {#} °C, {#} %",
+  "Gas-cooled fast reactor: {#} °C, {#} %": "가스냉각 고속로: {#} °C, {#} %",
+  "Molten salt reactor: {#} °C, {#} %": "용융염 원자로: {#} °C, {#} %",
+  "Small modular reactor: {#} °C, {#} %": "소형 모듈 원자로: {#} °C, {#} %",
+  "Heat-pipe microreactor: {#} °C, {#} %": "히트파이프 초소형 원자로: {#} °C, {#} %",
+});

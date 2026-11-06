@@ -72,3 +72,21 @@ Object.assign(WT.L.labels, {
   "↑ electricity": "↑ बिजली",
   "↑ share of heat turned into electricity": "↑ ऊष्मा का बिजली में बदला हिस्सा",
 });
+// hover line in the temperature chart
+Object.assign(WT.L.labels, {
+  "Pressurized water reactor: {#} °C, {#} %": "दाबित जल रिएक्टर: {#} °C, {#} %",
+  "Boiling water reactor: {#} °C, {#} %": "क्वथन जल रिएक्टर: {#} °C, {#} %",
+  "Pressurized heavy water reactor: {#} °C, {#} %": "दाबित भारी जल रिएक्टर: {#} °C, {#} %",
+  "Graphite-moderated boiling water reactor: {#} °C, {#} %": "ग्रेफाइट-मंदित क्वथन जल रिएक्टर: {#} °C, {#} %",
+  "Supercritical water reactor: {#} °C, {#} %": "अतिक्रांतिक जल रिएक्टर: {#} °C, {#} %",
+  "Magnox: {#} °C, {#} %": "मैग्नॉक्स: {#} °C, {#} %",
+  "Advanced gas-cooled reactor: {#} °C, {#} %": "उन्नत गैस-शीतित रिएक्टर: {#} °C, {#} %",
+  "High-temperature gas reactor: {#} °C, {#} %": "उच्च-तापमान गैस रिएक्टर: {#} °C, {#} %",
+  "Very-high-temperature reactor: {#} °C, {#} %": "अति-उच्च-तापमान रिएक्टर: {#} °C, {#} %",
+  "Sodium-cooled fast reactor: {#} °C, {#} %": "सोडियम-शीतित फास्ट रिएक्टर: {#} °C, {#} %",
+  "Lead-cooled fast reactor: {#} °C, {#} %": "सीसा-शीतित फास्ट रिएक्टर: {#} °C, {#} %",
+  "Gas-cooled fast reactor: {#} °C, {#} %": "गैस-शीतित फास्ट रिएक्टर: {#} °C, {#} %",
+  "Molten salt reactor: {#} °C, {#} %": "पिघला लवण रिएक्टर: {#} °C, {#} %",
+  "Small modular reactor: {#} °C, {#} %": "लघु मॉड्यूलर रिएक्टर: {#} °C, {#} %",
+  "Heat-pipe microreactor: {#} °C, {#} %": "हीट-पाइप माइक्रोरिएक्टर: {#} °C, {#} %",
+});
