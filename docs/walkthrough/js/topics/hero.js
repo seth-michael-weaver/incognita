@@ -91,6 +91,21 @@
     return c;
   }
 
+  // the hub: a nucleus (protons red, neutrons blue), drawn once
+  function nucleusSprite(size) {
+    const c = document.createElement("canvas"); c.width = c.height = size; const x = c.getContext("2d"), R = size * 0.36, r = R * 0.24, pts = [];
+    let q = 7; const rn = () => ((q = (q * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 60; i++) { const u = rn(), v = rn(), w = rn(), rr = R * Math.cbrt(u) * 0.86, th = TAU * v, ph = Math.acos(2 * w - 1); pts.push({ x: rr * Math.sin(ph) * Math.cos(th), y: rr * Math.sin(ph) * Math.sin(th), z: rr * Math.cos(ph), p: rn() < 0.42 }); }
+    pts.sort((a, b) => a.z - b.z);
+    for (const p of pts) { const cx = size / 2 + p.x, cy = size / 2 + p.y, lit = 0.55 + 0.45 * (p.z / R + 1) / 2, base = p.p ? [236, 92, 78] : [86, 120, 230];
+      const g = x.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.08, cx, cy, r);
+      g.addColorStop(0, `rgba(255,255,255,${(0.95 * lit).toFixed(2)})`); g.addColorStop(0.25, `rgb(${base.map((v) => Math.round(v * (0.75 + 0.35 * lit))).join(",")})`); g.addColorStop(1, `rgb(${base.map((v) => Math.round(v * 0.28)).join(",")})`);
+      x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, TAU); x.fill(); }
+    return c;
+  }
+  const NUC = nucleusSprite(256);
+  let hubX = 0, hubY = 0, hubR = 60;
+
   // ---------- layout: a spiral packing around the title, avoiding the text ----------
   let W = 0, H = 0, dpr = 1, phone = false, placed = [], blocks = [], mx = 0.5, my = 0.5, pmx = 0.5, pmy = 0.5, hover = -1, t = 0, ripple = -9, motes = [];
   const SIZES = [[34, 34], [25, 26], [19, 20]]; // [font px, badge radius] by tier
@@ -118,6 +133,8 @@
     const sc = phone ? 0.7 : clamp(Math.min(W / 1500, H / 760), 0.72, 1.35);
     placed = [];
     const cx = W / 2, cy = phone ? H * 0.3 : H * 0.45, list = phone ? ITEMS.slice(0, 13) : ITEMS;
+    hubX = cx; hubY = phone ? cy : (blocks[0] ? (blocks[0].y0 + blocks[0].y1) / 2 : cy); hubR = Math.min(W, H) * (phone ? 0.13 : 0.15);
+    if (phone) { hubR = Math.min(W, H) * 0.11; blocks.push({ x0: hubX - hubR * 1.15, x1: hubX + hubR * 1.15, y0: hubY - hubR * 1.15, y1: hubY + hubR * 1.15 }); } // phones: the topics go around the nucleus
     list.forEach((it, i) => {
       const [fs0, R0] = SIZES[it.tier], fs = Math.round(fs0 * sc), R = R0 * sc;
       ctx.font = `600 ${fs}px ${it.tier === 0 ? SERIF : SANS}`; const tw = ctx.measureText(it.words).width;
@@ -150,6 +167,24 @@
     ctx.globalCompositeOperation = "lighter"; // slow drifting motes
     for (const m of motes) { const y = (((m.y - t * m.v) % H) + H) % H; ctx.globalAlpha = 0.22 + 0.18 * Math.sin(t + m.ph); ctx.fillStyle = "#9fc4ff"; ctx.beginPath(); ctx.arc(m.x + Math.sin(t * 0.3 + m.ph) * 6, y, m.r, 0, TAU); ctx.fill(); }
     ctx.globalAlpha = 1;
+    // the hub: one nucleus behind the title, glowing and slowly turning; everything below grows out of it
+    const pulse = 1 + 0.04 * Math.sin(t * 1.6), rp0 = t - ripple, kick = rp0 > 0 && rp0 < 1.2 ? (1 - rp0 / 1.2) : 0;
+    ctx.globalCompositeOperation = "lighter";
+    const hg = ctx.createRadialGradient(hubX, hubY, 0, hubX, hubY, hubR * 3.2 * pulse); hg.addColorStop(0, `rgba(150,200,255,${0.32 + 0.4 * kick})`); hg.addColorStop(0.35, "rgba(70,130,255,0.13)"); hg.addColorStop(1, "rgba(40,80,220,0)");
+    ctx.fillStyle = hg; ctx.fillRect(hubX - hubR * 3.4, hubY - hubR * 3.4, hubR * 6.8, hubR * 6.8);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.save(); ctx.translate(hubX, hubY); ctx.rotate(t * 0.08); ctx.globalAlpha = phone ? 0.95 : 0.55; const ns = hubR * 2.2 * pulse; ctx.drawImage(NUC, -ns / 2, -ns / 2, ns, ns); ctx.restore();
+    // rays from the nucleus to each topic, with sparks running outward
+    ctx.globalCompositeOperation = "lighter";
+    placed.forEach((p, i) => {
+      const q = itemPos(p); if (q.a <= 0.01) return; const on = i === hover, bx = q.x + p.R, by = q.y + p.h / 2, dx = bx - hubX, dy = by - hubY, L = Math.hypot(dx, dy) || 1;
+      const sx = hubX + dx / L * hubR * 0.7, sy = hubY + dy / L * hubR * 0.7, bend = (i % 2 ? 1 : -1) * 0.12 * L, cxp = (sx + bx) / 2 - dy / L * bend, cyp = (sy + by) / 2 + dx / L * bend;
+      const lg = ctx.createLinearGradient(sx, sy, bx, by); lg.addColorStop(0, hexA(p.col, 0)); lg.addColorStop(1, hexA(p.col, (on ? 0.75 : 0.26) * q.a));
+      ctx.globalAlpha = 1; ctx.strokeStyle = lg; ctx.lineWidth = on ? 2.4 : 1.3; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(cxp, cyp, bx, by); ctx.stroke();
+      for (let k = 0; k < (on ? 4 : 2); k++) { const u = (t * 0.22 + p.ph / TAU + k / (on ? 4 : 2)) % 1, a2 = (1 - u) * (1 - u), ax = a2 * sx + 2 * (1 - u) * u * cxp + u * u * bx, ay = a2 * sy + 2 * (1 - u) * u * cyp + u * u * by;
+        const sg = ctx.createRadialGradient(ax, ay, 0, ax, ay, 7); sg.addColorStop(0, hexA(p.col, 0.9 * Math.sin(Math.PI * u) * q.a)); sg.addColorStop(1, hexA(p.col, 0)); ctx.fillStyle = sg; ctx.fillRect(ax - 7, ay - 7, 14, 14); }
+    });
+    ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
     placed.forEach((p, i) => {
       const q = itemPos(p); if (q.a <= 0.01) return; const on = i === hover, k = q.s * (on ? 1.08 : 1);
       ctx.save(); ctx.translate(q.x + p.w / 2, q.y + p.h / 2); ctx.scale(k, k); ctx.translate(-p.w / 2, -p.h / 2); ctx.globalAlpha = q.a;
@@ -157,7 +192,10 @@
       const gr = ctx.createRadialGradient(p.R, p.h / 2, 0, p.R, p.h / 2, p.R * (on ? 3.4 : 2.4) + q.rip);
       gr.addColorStop(0, hexA(p.col, on ? 0.5 : 0.24 * p.z + q.rip / 40)); gr.addColorStop(1, hexA(p.col, 0)); ctx.fillStyle = gr; ctx.fillRect(-p.R * 2.5, p.h / 2 - p.R * 3.5, p.R * 7, p.R * 7);
       ctx.globalCompositeOperation = "source-over";
-      ctx.drawImage(p.img, p.R - p.R * 1.3, p.h / 2 - p.R * 1.3, p.R * 2.6, p.R * 2.6);
+      { const bp = 1 + 0.035 * Math.sin(t * 2 + p.ph), bs = p.R * 2.6 * bp; ctx.drawImage(p.img, p.R - bs / 2, p.h / 2 - bs / 2, bs, bs);
+        const oa = t * (0.9 + 0.3 * p.z) + p.ph, ox = p.R + Math.cos(oa) * p.R * 1.32, oy = p.h / 2 + Math.sin(oa) * p.R * 1.32 * 0.55;
+        ctx.globalCompositeOperation = "lighter"; const og = ctx.createRadialGradient(ox, oy, 0, ox, oy, 6); og.addColorStop(0, "rgba(255,255,255,.95)"); og.addColorStop(0.4, hexA(p.col, 0.8)); og.addColorStop(1, hexA(p.col, 0));
+        ctx.fillStyle = og; ctx.fillRect(ox - 6, oy - 6, 12, 12); ctx.globalCompositeOperation = "source-over"; }
       ctx.font = `600 ${p.fs}px ${p.tier === 0 ? SERIF : SANS}`; ctx.textBaseline = "middle"; ctx.textAlign = "left";
       ctx.fillStyle = on ? "#ffffff" : `rgba(232,240,255,${(0.66 + 0.34 * p.z).toFixed(2)})`; ctx.shadowColor = "rgba(1,4,12,.9)"; ctx.shadowBlur = 8;
       ctx.fillText(p.words, p.R * 2 + 10, p.h / 2 + 1); ctx.shadowBlur = 0;
