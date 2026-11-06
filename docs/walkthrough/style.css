@@ -866,6 +866,10 @@ body.shot .part-head, body.shot .tp-index { display: none; }
   .tp-hero.hero-live .kicker { animation: hero-after .7s ease-out 2.4s both; }
 }
 @media (prefers-reduced-motion: reduce) { .tp-hero .kicker { animation: none !important; opacity: 1 !important; visibility: visible !important; } }
+/* the kicker sits over the glowing core: a dark halo keeps it readable; on phones the caption sits lower, leaving the top half to the core */
+.tp-hero .kicker { color: rgba(226,238,255,.86); text-shadow: 0 1px 3px rgba(1,4,10,.95), 0 0 14px rgba(1,4,10,.85); }
+.tp-hero .hero-tag { text-shadow: 0 1px 3px rgba(1,4,10,.8), 0 0 18px rgba(1,4,10,.7); }
+@media (max-width: 720px) { .tp-hero .hero-copy { bottom: calc(5vh + 64px); } }
 /* header chapter menus (The physics, More topics): level dot, number, title, level tag; part headings */
 .site .chap ol a { display: flex; align-items: center; gap: 9px; }
 .site .chap ol a i { flex: none; width: 9px; height: 9px; border-radius: 50%; --c: var(--accent); background: color-mix(in srgb, var(--c) 30%, transparent); box-shadow: 0 0 0 1.5px var(--c); }
