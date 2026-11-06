@@ -25,12 +25,15 @@
   const SUP = { "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
   const pow10 = (k) => "10" + String(k).split("").map((c) => SUP[c]).join("");
   const decE = (k) => (k >= -2 ? fmtE(10 ** k) : pow10(k) + " eV"), decY = (k, u) => (k >= -2 && k <= 4 ? num(10 ** k) : pow10(k)) + " " + u;
-  const TIERS = [T("dx_t0", "Measured"), T("dx_t1", "Anchored to a measured MACS"), T("dx_t2", "Interpolated (near measured nuclides)"), T("dx_t3", "Extrapolated"), T("dx_t4", "Not assessed (below Z 26)"), T("dx_t5", "Measured (library tier not updated)")];
-  const TIER_SHORT = [T("dx_ts0", "measured"), T("dx_ts1", "anchored"), T("dx_ts2", "interpolated"), T("dx_ts3", "extrapolated"), T("dx_ts4", "not assessed"), T("dx_ts5", "measured")];
-  // shown tier: the library v0.2 tier, except where it would mislead. Below Z 26 the library assigns no real tier (all
-  // EXTRAPOLATED, its curated capture set starts at Z 26), so it says nothing about measurement: 4. A nucleus the library
-  // calls EXTRAPOLATED but with curated capture data (tier kept from v0.1): 5.
-  const shownTier = (Z, t, nm) => (t == null || t < 0 ? t : Z < 26 ? 4 : t === 3 && nm > 0 ? 5 : t);
+  const TIERS = [T("dx_t0", "Measured"), T("dx_t1", "Anchored to a measured MACS"), T("dx_t2", "Interpolated (near measured nuclides)"), T("dx_t3", "Extrapolated"), T("dx_t4", "Not measured (Z < 26)"), T("dx_t5", "Measured (library tier not updated)"), T("dx_t6", "Measured (Z < 26)")];
+  const TIER_SHORT = [T("dx_ts0", "measured"), T("dx_ts1", "anchored"), T("dx_ts2", "interpolated"), T("dx_ts3", "extrapolated"), T("dx_ts4", "not measured"), T("dx_ts5", "measured"), T("dx_ts6", "measured")];
+  // shown tier: the library v0.2 tier, except where it would mislead. A nucleus the library calls EXTRAPOLATED but with
+  // curated capture data (tier kept from v0.1): 5. Below Z 26 the library assigns no real tier (all EXTRAPOLATED, its
+  // curated capture set started at Z 26), so the page uses the light-nucleus curation (data/curation/inputs/*Z1-25*, same
+  // WP-12 curation as Z 26-92): 6 if the nucleus has a curated capture cell that the curation did not exclude (index
+  // column n_use), else 4 (not measured); also for H..N (Z 1-7), which have measurements but no library v0.2 curve (index
+  // tier -1). The library's own tier field is not changed. See scripts/build_site_data.py.
+  const shownTier = (Z, t, nm, nu) => (t == null ? t : Z < 26 ? (nu > 0 ? 6 : 4) : t < 0 ? t : t === 3 && nm > 0 ? 5 : t);
   const DEC = { k: T("dx_keep", "kept"), d: T("dx_down", "down-weighted"), x: T("dx_excl", "excluded"), f: T("dx_fix", "unit fixed") };
   const CH = { cap: T("dx_cap", "Capture (n,γ)"), n2n: "(n,2n)", np: "(n,p)", na: "(n,α)", macs: T("dx_macs", "Stellar average (MACS)") };
 
@@ -39,6 +42,7 @@
   function readColors() {
     const cs = getComputedStyle($(".dx"));
     ["surface", "ink", "soft", "faint", "line", "grid", "curve", "meas", "alt", "none", "t0", "t1", "t2", "t3", "t4", "t5", "sel", "l1", "l2", "l3"].forEach((k) => (C[k] = cs.getPropertyValue("--dx-" + k).trim()));
+    C.t6 = C.t0; // measured below Z 26: drawn like measured
     C.ramp = [1, 2, 3, 4, 5, 6, 7].map((i) => cs.getPropertyValue("--dx-r" + i).trim());
   }
   const rgba = (hex, a) => { const n = parseInt(hex.replace("#", ""), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
@@ -129,7 +133,7 @@
     }
     // glow on the nuclides that stand out in this view (measured, or with measured data), so the valley of stability shines
     if (glow) {
-      const lit = rows.filter((r) => { if (!r.A || !(mode === "tier" ? r.st === 0 || r.st === 1 || r.st === 5 : mode === "meas" ? r.ncap + r.nmxw > 0 : r.macs > 300)) return false;
+      const lit = rows.filter((r) => { if (!r.A || !(mode === "tier" ? r.st === 0 || r.st === 1 || r.st === 5 || r.st === 6 : mode === "meas" ? r.ncap + r.nmxw > 0 : r.macs > 300)) return false;
         const x = toX(r.A - r.Z), y = toY(r.Z); return !(x < -s || x > W || y < -s || y > H); });
       const blur = Math.max(6, s * 1.4);
       if (typeof ctx.filter === "string") { // one blur of all lit squares at once: the same picture as a shadow per square, far cheaper
@@ -153,7 +157,7 @@
     if (s >= 26) {
       ctx.textAlign = "center";
       for (const r of rows) { if (!r.A) continue; const x = toX(r.A - r.Z), y = toY(r.Z); if (x < -s || x > W || y < -s || y > H) continue;
-        const dark = mode === "tier" ? r.st <= 1 || r.st === 5 : mode === "macs" ? r.macs > 30 : false;
+        const dark = mode === "tier" ? r.st <= 1 || r.st >= 5 : mode === "macs" ? r.macs > 30 : false;
         ctx.fillStyle = dark ? "#ffffff" : C.ink; ctx.font = `600 ${Math.min(13, s * 0.3)}px ${SANS}`; ctx.fillText(IDX.sym[r.Z], x + (s - gap) / 2, y + s * 0.38);
         ctx.font = `500 ${Math.min(11, s * 0.24)}px ${SANS}`; ctx.fillText(String(r.A), x + (s - gap) / 2, y + s * 0.68); }
     }
@@ -329,8 +333,8 @@
     atomSoon(r.Z, r.A);
     $("#dx-tile").innerHTML = `<span>${IDX.sym[r.Z]}</span>`; $("#dx-tile").title = "Z = " + r.Z;
     const d = cur.d, f = [];
-    const shown = shownTier(r.Z, d.tier, r.ncap + r.nmxw);
-    if (d.tier != null) f.push(`<span class="dx-chip t${shown}">${TIERS[shown]}</span>`);
+    const shown = d.tier != null ? shownTier(r.Z, d.tier, r.ncap + r.nmxw, r.nuse) : r.A && r.Z < 26 ? r.st : null; // light nuclei without a curve still get their measured / not measured tier
+    if (shown != null) f.push(`<span class="dx-chip t${shown}">${TIERS[shown]}</span>`);
     f.push(`<span>Z ${r.Z} · N ${r.A ? r.A - r.Z : "–"}</span>`);
     if (d.macs30) f.push(`<span>MACS 30 keV ≈ <b>${num(d.macs30)} mb</b>${d.macsU ? ` (×/÷ ${num(d.macsU[6], 2)}, 68 %)` : ""}</span>`);
     if (d.meas) f.push(`<span>${d.meas.ds.length} ${T("dx_capsets", "capture datasets")}</span>`);
@@ -347,7 +351,7 @@
     $("#dx-stats").innerHTML = st.map(([v, l]) => `<div class="dx-stat"><b>${v}</b><span>${l}</span></div>`).join("");
     const nm = r.A ? `${IDX.sym[r.Z]}-${r.A}` : "";
     $("#dx-cmd").textContent = nm && d.cap ? `uv run python -m incognita.library show ${nm} --version v0.2\n\n# or from Python\nfrom incognita.library import capture_curve\ndf = capture_curve("${nm}", version="v0.2")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier`
-      : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/inputs/exfor_cells.parquet`;
+      : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/inputs/${r.Z < 26 ? "exfor_cells_Z1-25.parquet" : "exfor_cells.parquet"}`;
     sweep();
     if ((center || scroll) && !stay) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -466,11 +470,12 @@
       T("dx_tr_t1", "Anchored. No measured cross sections, but a measured stellar average at 30 keV: the engine’s curve is scaled by one factor to match it, so its shape is still the model’s."),
       T("dx_tr_t2", "Interpolated. Not measured, but within two neutrons or protons of measured nuclei; the curve is the model’s prediction."),
       T("dx_tr_t3", "Extrapolated. Not measured and not close to measured nuclei (or without structure data): the curve is the model alone, with no measurement to check it."),
-      T("dx_tr_t4", "Not assessed. The library’s tiers, its curated measurements and its validation start at Z 26, so this label says nothing about whether the nucleus has been measured (many light nuclei, such as O-16, Na-23 and Al-27, are measured very precisely). Below about Z 20, neutron capture goes through individual resonances that a statistical engine like this one does not describe: read this curve as a rough estimate, not an evaluation. INCOGNITA’s own light-nucleus evaluations are in preparation and not shown here yet."),
-      T("dx_tr_t5", "Measured nucleus. The library still lists it as extrapolated (the tier was kept from v0.1), but curated capture measurements of it exist and are shown below. The curve is the engine’s own prediction, not fitted to them, so comparing the two is a check of the model.")];
-    const st = shownTier(r.Z, d.tier, r.ncap + r.nmxw);
+      T("dx_tr_t4", "Not measured. No curated capture measurement of this nucleus: none in EXFOR, or the curation excluded all of them. The curve is the model alone. Below about Z 20, capture goes through individual resonances that this statistical engine does not describe: read the curve as a rough estimate."),
+      T("dx_tr_t5", "Measured nucleus. The library still lists it as extrapolated (the tier was kept from v0.1), but curated capture measurements of it exist and are shown below. The curve is the engine’s own prediction, not fitted to them, so comparing the two is a check of the model."),
+      T("dx_tr_t6", "Measured nucleus. Curated EXFOR capture measurements are shown below (the same automatic curation as for Z 26 and up; no person has reviewed its decisions for these light nuclei). The curve is the engine’s prediction, not fitted to them. Below about Z 20, capture goes through individual resonances that this statistical engine does not describe: read the curve as a rough estimate.")];
+    const st = shownTier(r.Z, d.tier, r.ncap + r.nmxw, r.nuse);
     const h = [`<h3>${T("dx_tr_h", "How far to trust this")}</h3>`, `<p><span class="dx-chip t${st}">${TIER_SHORT[st]}</span> ${TT[st]}</p>`];
-    if (!d.valid && st !== 4) h.push(`<p>${T("dx_tr_out", "Outside Z 26–83, the range the library’s validation covers.")}</p>`);
+    if (!d.valid) h.push(`<p>${T("dx_tr_out", "Outside Z 26–83, the range the library’s validation covers.")}</p>`);
     const mk = d.mform && d.mform.kind;
     if (mk === "pe_kev" || mk === "fists2") h.push(`<p>${T("dx_tr_mf", "Model-form flag: one engine setting changes capture here by more than a factor of 2 (see the note above). No measurement can decide between the two choices; the bands below 1 MeV are widened to contain both.")}</p>`);
     else if (mk === "gg_deadend") h.push(`<p>${T("dx_tr_mf_gg", "Model-form flag: the value relies on the engine’s fix of a missing gamma-decay width (see the note above); the band is not widened for it.")}</p>`);
@@ -855,6 +860,9 @@
       units: "energy in eV (Maxwellian rows: kT in eV); capture cross sections in barns (b); (n,2n), (n,p), (n,alpha) and MACS in millibarns (mb)",
     };
     const J = { ...meta };
+    // below Z 26 the page's label comes from the Z 1-25 curation, not from the library (see shownTier)
+    const lr = Z < 26 && A ? byKey.get(Z + "-" + A) : null;
+    if (lr) J.page_label_below_z26 = `${lr.st === 6 ? "measured" : "not measured"}: library v0.2 assigns tiers only from Z 26; this label is from the curated EXFOR capture cells of Z 1-25 (data/curation/inputs, README.md there)`;
     if (d.tier != null) Object.assign(J, { tier: IDX.tiers[d.tier], in_validated_range: !!d.valid, value_source: d.src || null, uncertainty_kind: d.unc || null, resolved_resonances_up_to_ev: d.res ?? null, macs30_mb: d.macs30 ?? null, macs30_flag: d.flag || null });
     if (d.cap) J.capture = { unit: "b", energy_ev: grid, sigma_b: d.cap, unc68_log10: d.u68 || null, unc95_log10: d.u95 || null, note: "68 % and 95 % bands: sigma divided and multiplied by 10^unc" };
     if (d.mform) J.model_form = { flag: d.mform.kind, alt_value_30keV_b: d.mform.alt30 ?? null, alt_over_value_30keV: d.mform.ratio ?? null,
@@ -887,6 +895,7 @@
     const head = [`INCOGNITA · ${id} (Z=${Z}${A ? `, A=${A}` : ""})`, `Source: ${meta.source}`, `Page: ${page} (generated ${meta.generated})`, `Engine: ${meta.engine}`, `License: ${meta.license}`,
       `Measurements: ${meta.measurements}`, `Units: ${meta.units}. Bands: lo/hi columns are the 68 % and 95 % intervals where the library gives them.`]
       .concat(d.tier != null ? [`Tier: ${IDX.tiers[d.tier]}${d.valid ? "" : " (outside the validated range Z 26-83)"}${d.res ? `; resolved resonances up to ${d.res} eV (the curve is an average there)` : ""}`] : [])
+      .concat(J.page_label_below_z26 ? [`Page label: ${J.page_label_below_z26}`] : [])
       .concat(J.model_form ? [`Model-form flag: ${J.model_form.flag}: ${J.model_form.note}. Other choice at 30 keV: ${J.model_form.alt_value_30keV_b ?? "n/a"} b.`] : []);
     const csv = head.map((l) => "# " + l).join("\n") + "\n" + rows.map((r) => r.map(q).join(",")).join("\n") + "\n";
     return { name: `incognita_${id}_v0.2`, csv, json: JSON.stringify(J, null, 1) + "\n" };
@@ -906,8 +915,8 @@
   fetch("data/index.json").then((r) => r.json()).then((idx) => {
     IDX = idx; readColors();
     const k = Object.fromEntries(idx.cols.map((c, i) => [c, i]));
-    rows = idx.rows.map((a) => ({ Z: a[k.Z], A: a[k.A], tier: a[k.tier], macs: a[k.macs30_mb], u30: a[k.unc68_30], ncap: a[k.n_cap], nmxw: a[k.n_mxw], nds: a[k.n_ds], nn2n: a[k.n_n2n], nnp: a[k.n_np], nna: a[k.n_na] }));
-    rows.forEach((r) => (r.st = shownTier(r.Z, r.tier, r.ncap + r.nmxw)));
+    rows = idx.rows.map((a) => ({ Z: a[k.Z], A: a[k.A], tier: a[k.tier], macs: a[k.macs30_mb], u30: a[k.unc68_30], ncap: a[k.n_cap], nmxw: a[k.n_mxw], nds: a[k.n_ds], nn2n: a[k.n_n2n], nnp: a[k.n_np], nna: a[k.n_na], nuse: a[k.n_use] }));
+    rows.forEach((r) => (r.st = shownTier(r.Z, r.tier, r.ncap + r.nmxw, r.nuse)));
     for (const Z of idx.natural) rows.push({ Z, A: 0, tier: -1, ncap: 1, nmxw: 0, nds: 0, nn2n: 0, nnp: 0, nna: 0 });
     rows.forEach((r) => byKey.set(r.Z + "-" + r.A, r));
     const real = rows.filter((r) => r.A); bounds = { n0: 0, n1: Math.max(...real.map((r) => r.A - r.Z)), z0: 0, z1: Math.max(...real.map((r) => r.Z)) };

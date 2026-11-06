@@ -1,10 +1,17 @@
 """Build the data files of the website's Data explorer (docs/walkthrough/data/).
 
-Reads the v0.2 library (production-engine curves for every nuclide) and the curated EXFOR capture cells, plus the benchmark
-rows for (n,2n), (n,p) and (n,alpha), and writes:
+Reads the v0.2 library (production-engine curves for every nuclide) and the curated EXFOR capture cells (Z 26-92:
+exfor_capture_Z26-92_trust + exfor_cells; Z 1-25: exfor_capture_Z1-25_trust + exfor_cells_Z1-25, the same WP-12 curation
+run by scripts/build_light_curation.py), plus the benchmark rows for (n,2n), (n,p) and (n,alpha), and writes:
   data/index.json      one row per nuclide (chart of nuclides: tier, MACS at 30 keV, counts of measured data)
   data/n/<Z>/<A>.json  everything about one nuclide (<A> is "nat" for a natural element), fetched only when that
                        nuclide is opened; the chart itself needs only the index
+
+Index column n_use: curated capture cells (cross sections and Maxwellian averages) of the nuclide that the curation did
+NOT exclude. The page uses it for the tier it shows below Z 26. Library v0.2 defines its tiers only from Z 26 up (every
+Z < 26 row is EXTRAPOLATED there, because the library's curated capture set started at Z 26); the page does not change
+the library's tier (field "tier" stays the library's), it shows "measured (Z < 26)" when n_use > 0 and "not measured
+(Z < 26)" otherwise. Measured means: at least one curated EXFOR capture cell that the curation kept or down-weighted.
 
 usage:  uv run --no-project --with pyarrow python scripts/build_site_data.py
 """
@@ -102,12 +109,16 @@ def main():
             n["macsU"] = [fl(r[f"unc68_factor_{t}keV"]) for t in KT]
 
     # ---- measured capture (curated EXFOR cells) ----
+    # Z 26-92 and Z 1-25 are two runs of the same curation; a dataset key never appears in both (asserted)
+    INP = os.path.join(ROOT, "data", "curation", "inputs")
     meta = {}
-    for r in pq.read_table(os.path.join(ROOT, "data", "curation", "inputs", "exfor_capture_Z26-92_trust.parquet"),
-                           columns=["dataset_key", "first_author", "year", "facility"]).to_pylist():
-        meta[r["dataset_key"]] = (r["first_author"] or "", r["year"], r["facility"] or "")
+    for fn in ("exfor_capture_Z26-92_trust.parquet", "exfor_capture_Z1-25_trust.parquet"):
+        for r in pq.read_table(os.path.join(INP, fn), columns=["dataset_key", "first_author", "year", "facility"]).to_pylist():
+            assert r["dataset_key"] not in meta, r["dataset_key"]
+            meta[r["dataset_key"]] = (r["first_author"] or "", r["year"], r["facility"] or "")
     meas = defaultdict(lambda: {"ds": [], "dsi": {}, "cap": [], "mxw": [], "other": defaultdict(int)})
-    for r in pq.read_table(os.path.join(ROOT, "data", "curation", "inputs", "exfor_cells.parquet")).to_pylist():
+    cells = [r for fn in ("exfor_cells.parquet", "exfor_cells_Z1-25.parquet") for r in pq.read_table(os.path.join(INP, fn)).to_pylist()]
+    for r in cells:
         Z, A = za(r["nuclide"])
         if Z is None:
             continue
@@ -148,7 +159,8 @@ def main():
         byz[Z][str(A)] = rec
         index.append([Z, A, n.get("tier", -1), n.get("macs30"), (n.get("macs") and n.get("macsU") and n["macsU"][KT.index(30)]),
                       len(m["cap"]) if m else 0, len(m["mxw"]) if m else 0, len(m["ds"]) if m else 0,
-                      len(t.get("n2n", [])), len(t.get("np", [])), len(t.get("na", [])), 1 if n.get("valid") else 0])
+                      len(t.get("n2n", [])), len(t.get("np", [])), len(t.get("na", [])), 1 if n.get("valid") else 0,
+                      sum(1 for p in (m["cap"] + m["mxw"] if m else []) if p[5] != "x")])
     for (Z, A), m in meas.items():
         if A == 0:  # natural element
             byz[Z]["nat"] = {"meas": {"ds": m["ds"], "cap": m["cap"], "mxw": m["mxw"], "other": dict(m["other"])}}
@@ -161,13 +173,16 @@ def main():
                 json.dump(rec, f, separators=(",", ":"))
             nfiles += 1
     with open(os.path.join(OUT, "index.json"), "w") as f:
-        json.dump({"cols": ["Z", "A", "tier", "macs30_mb", "unc68_30", "n_cap", "n_mxw", "n_ds", "n_n2n", "n_np", "n_na", "valid"],
+        json.dump({"cols": ["Z", "A", "tier", "macs30_mb", "unc68_30", "n_cap", "n_mxw", "n_ds", "n_n2n", "n_np", "n_na", "valid", "n_use"],
                    "tiers": TIERS, "sym": SYM, "grid_ev": grid, "kT_keV": KT, "natural": nat, "rows": index},
                   f, separators=(",", ":"))
     tot = sum(os.path.getsize(os.path.join(dp, x)) for dp, _, fs in os.walk(os.path.join(OUT, "n")) for x in fs)
     print(f"{len(index)} nuclides, {nfiles} nuclide files ({tot / 1e6:.1f} MB), "
           f"index {os.path.getsize(os.path.join(OUT, 'index.json')) / 1e3:.0f} kB, "
           f"measured capture on {sum(1 for k in meas if k[1] > 0)} nuclides + {len(nat)} natural elements")
+    light = [r for r in index if r[0] < 26]
+    print(f"Z 1-25: {len(light)} nuclides, {sum(1 for r in light if r[-1] > 0)} measured (n_use > 0), "
+          f"{sum(1 for r in light if r[5] + r[6] > 0 and r[-1] == 0)} with only excluded cells")
 
 
 if __name__ == "__main__":
