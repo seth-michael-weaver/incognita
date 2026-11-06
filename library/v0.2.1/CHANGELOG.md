@@ -64,3 +64,8 @@ v0.1 stays unchanged in `library/v0.1`.
 ## v0.1 (2026-09)
 
 First release. See `library/v0.1/README.md`.
+
+## Checksum note (2026-11-06)
+
+- `library/v0.2/SHA256SUMS` listed a stale hash for `README.md` since v0.2 was published (2026-10-29): the README was edited after the sums were made. Only that line was wrong; every v0.2 data file verifies. The line is corrected in v0.2/SHA256SUMS; no v0.2 file changed.
+- `.gitattributes` now exempts `library/**` and `data/curation/**` from line-ending conversion, so `sha256sum -c` passes on Windows checkouts too.

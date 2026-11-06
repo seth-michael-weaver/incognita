@@ -1,0 +1,3 @@
+# Released data: checksummed byte-for-byte (SHA256SUMS), so never convert line endings on checkout
+library/** -text
+data/curation/** -text

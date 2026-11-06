@@ -72,6 +72,8 @@
     const [t0, c0] = RAMP[i], [t1, c1] = RAMP[i + 1], q = (t - t0) / (t1 - t0); return `rgba(${c0.map((v, j) => Math.round(lerp(v, c1[j], q))).join(",")},${a})`; };
   const fmt = (x) => x >= 1e5 ? x.toExponential(1).replace("e+", " × 10^") : x >= 100 ? Math.round(x).toLocaleString("en-US") : x >= 10 ? x.toFixed(1) : x >= 1 ? x.toFixed(2) : x >= 0.01 ? x.toFixed(3) : x.toPrecision(2);
   const sup = (s) => s.replace(/\^(-?\d+)/, (m, d) => d.split("").map((c) => (c === "-" ? "⁻" : "⁰¹²³⁴⁵⁶⁷⁸⁹"[c])).join(""));
+  // the comparison figures come from the scoreboard (its own MACS calculation), not from the σ shown: say so
+  const boardTxt = (e) => ratioTxt(e) + " (" + (WT.ui ? WT.ui("nav_board", "Scoreboard") : "Scoreboard") + ")";
   const ratioTxt = (e) => { const r = Math.pow(10, e); return r >= 1 ? WT.trf("{a} % above measured", Math.round((r - 1) * 100)) : WT.trf("{a} % below measured", Math.round((1 - r) * 100)); };
 
   const geo = {}, R = rng(7);
@@ -286,7 +288,7 @@
     g.ring(h.x, h.y, h.cell * 1.1, c.ink, 1.5);
     let t = s.m != null ? WT.trf("{a}: INCOGNITA σ = {b} mb", nm(s.Z, s.A), fmt(s.m)) : nm(s.Z, s.A);
     if (s.tier === "A") t += WT.tr(" (scaled to a measured value)");
-    else if (s.err != null && !phone) t += " · " + ratioTxt(s.err);
+    else if (s.err != null && !phone) t += " · " + boardTxt(s.err);
     g.label(t, g.W / 2, y, { color: c.ink, size: fs, weight: 600, bg: true, raw: true });
   }
   function spath(g, S, phone, fs, X, Y, cell, rmode) {
@@ -389,7 +391,7 @@
       if (Math.abs(s.err) > L) g.label(s.err > 0 ? "▲" : "▼", x, y + (s.err > 0 ? -10 : 10), { color: c.soft, size: 9 });
       if (S.hx != null) { const d = Math.hypot(S.hx - x, S.hy - y); if (d < hd) { hd = d; hov = s; } } });
     const ty = H - (phone ? 14 : 22);
-    if (hov) { g.ring(X(hov.A), Y(hov.err), 10, c.ink, 1.5); g.label(hov.tier === "A" ? WT.trf("{a}: INCOGNITA's engine {b} (the library then scales to it)", nm(hov.Z, hov.A), ratioTxt(hov.err)) : WT.trf("{a}: INCOGNITA σ = {b} mb, {c}", nm(hov.Z, hov.A), fmt(hov.m), ratioTxt(hov.err)), W / 2, ty, { color: c.ink, size: fs, weight: 600, serif: true, raw: true }); }
+    if (hov) { g.ring(X(hov.A), Y(hov.err), 10, c.ink, 1.5); g.label(hov.tier === "A" ? WT.trf("{a}: INCOGNITA's engine {b} (the library then scales to it)", nm(hov.Z, hov.A), ratioTxt(hov.err)) : WT.trf("{a}: INCOGNITA σ = {b} mb, {c}", nm(hov.Z, hov.A), fmt(hov.m), boardTxt(hov.err)), W / 2, ty, { color: c.ink, size: fs, weight: 600, serif: true, raw: true }); }
     else g.label(WT.trf(phone ? "{a} nuclides · typical difference {b} %" : "{a} stable nuclides · typical difference {b} % (median), rms {c} %", CHK.length, Math.round((Math.pow(10, MED) - 1) * 100), Math.round((Math.pow(10, RMS) - 1) * 100)), W / 2, ty, { color: c.ink, size: fs, weight: 600, serif: true, raw: true });
     g.label(phone ? "ringed: s-only · measured: KADoNiS" : "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test", W / 2, ty - (phone ? 18 : 22), { color: c.soft, size: fs - 2 });
   }
