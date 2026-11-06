@@ -5,7 +5,7 @@
  * Like the English file, bare everyday words are avoided ("nivel", "energía", "onda" are never aliased alone; "hueco" is
  * skipped because the prose uses it for gaps; "intervalo" alone means an energy bin in this text, chapter-scoped). */
 (function () {
-  WT.es.glossary = {
+  WT.L.glossary = {
     /* ---------- piezas básicas ---------- */
     nucleus: {
       term: "Núcleo", aliases: ["núcleo", "núcleos", "núcleo atómico", "núcleos atómicos"], scope: "page",
@@ -1101,6 +1101,224 @@
       term: "appm", aliases: ["appm"],
       short: "Partes atómicas por millón: cuántos átomos de un gas, como el helio, hay por cada millón de átomos del metal.",
       chapter: "blanket",
+    },
+    /* ---------- lecciones de topics.html ---------- */
+    activity: {
+      term: "Actividad", aliases: ["actividad", "actividades", "becquerel", "becquerels", "becquerelios", "Bq"],
+      short: "Cuántos núcleos de una muestra se desintegran cada segundo, en becquerelios (1 Bq = una desintegración por segundo).",
+      more: "La actividad es el número de núcleos multiplicado por la constante de desintegración ln 2 / T½: una semivida corta da una actividad intensa pero breve; una larga, débil pero duradera.",
+      formula: "A = λN = (ln 2 / T½) N",
+      chapter: "halflife",
+    },
+    sievert: {
+      term: "Sievert", aliases: ["sievert", "sieverts", "Sv", "mSv", "µSv"],
+      short: "La unidad de dosis que mide el daño: energía absorbida por kilogramo, ponderada según el tipo de radiación y los órganos alcanzados.",
+      more: "Un milisievert (mSv) es una milésima. El fondo natural medio en el mundo es de unos 2,4 mSv al año.",
+      chapter: "dose",
+    },
+    gray: {
+      term: "Gray", aliases: ["gray", "grays", "Gy", "mGy"],
+      short: "Dosis absorbida: un julio de energía de radiación depositado por kilogramo de materia.",
+      more: "El sievert es el gray ponderado según el daño: los rayos gamma y las partículas beta cuentan una vez; las partículas alfa, unas 20 veces.",
+      chapter: "dose",
+    },
+    halfValue: {
+      term: "Capa hemirreductora", aliases: ["capa hemirreductora", "capas hemirreductoras", "espesor de semirreducción", "espesores de semirreducción"],
+      short: "El espesor de blindaje que deja pasar la mitad de un haz gamma.",
+      more: "Para los gammas del cesio-137 (662 keV) son unos 5,4 mm de plomo. Cada capa adicional vuelve a reducir el haz a la mitad, así que nunca llega exactamente a cero.",
+      chapter: "rays",
+    },
+    decayChain: {
+      term: "Cadena de desintegración", aliases: ["cadena de desintegración", "cadenas de desintegración", "serie radiactiva", "series radiactivas", "familia radiactiva", "familias radiactivas"],
+      short: "Una sucesión de desintegraciones, cada núcleo hijo inestable a su vez, hasta llegar a un núcleo estable.",
+      more: "El uranio-238 necesita 14 pasos (8 alfa, 6 beta) para llegar al plomo-206.",
+      chapter: "chains",
+    },
+    secularEq: {
+      term: "Equilibrio secular", aliases: ["equilibrio secular"],
+      short: "Cuando un padre de vida larga alimenta a un hijo de vida corta, la actividad del hijo crece hasta igualar la del padre.",
+      formula: "A_d = A_p (1 − e^(−λ_d t))",
+      chapter: "chains",
+    },
+    transientEq: {
+      term: "Equilibrio transitorio", aliases: ["equilibrio transitorio"],
+      short: "Un padre solo algo más longevo que su hijo: la actividad del hijo se estabiliza un poco por encima de la del padre y decae con ella.",
+      more: "El molibdeno-99 (66 h) y el tecnecio-99m (6 h) de los generadores hospitalarios se comportan así.",
+      chapter: "chains",
+    },
+    radon: {
+      term: "Radón", aliases: ["radón", "radón-222", "Rn-222"], scope: "chapter",
+      short: "Un gas noble radiactivo de la cadena del uranio; se filtra desde las rocas y el suelo.",
+      more: "El radón-222 (semivida de 3,8 días) es la mayor parte de la dosis natural de la mayoría de las personas.",
+      chapter: "chains",
+    },
+    spentFuel: {
+      term: "Combustible gastado", aliases: ["combustible gastado", "combustibles gastados", "combustible irradiado", "combustible usado"],
+      short: "Combustible retirado de un reactor tras su uso: todavía un 95 % de uranio, más productos de fisión, plutonio y actínidos minoritarios.",
+      chapter: "waste",
+    },
+    fissionProducts: {
+      term: "Productos de fisión", aliases: ["productos de fisión", "producto de fisión"],
+      short: "Los núcleos de masa intermedia que quedan cuando se parten los núcleos pesados; la mayoría son radiactivos.",
+      more: "El cesio-137 y el estroncio-90 (unos 30 años) dominan el peligro del combustible gastado durante sus primeros siglos.",
+      chapter: "waste",
+    },
+    minorActinides: {
+      term: "Actínidos minoritarios", aliases: ["actínidos minoritarios", "actínido minoritario"],
+      short: "Elementos pesados distintos del uranio y el plutonio que se forman en un reactor: neptunio, americio, curio.",
+      more: "Poca masa pero vida larga; los neutrones rápidos los fisionan, y por eso los reactores rápidos pueden quemarlos.",
+      chapter: "waste",
+    },
+    radiotoxicity: {
+      term: "Radiotoxicidad", aliases: ["radiotoxicidad"],
+      short: "Lo dañino que sería un material si se ingiriera, sumado sobre todo su contenido radiactivo; sirve para comparar los residuos con el mineral de uranio natural.",
+      chapter: "waste",
+    },
+    moderator: {
+      term: "Moderador", aliases: ["moderador", "moderadores"],
+      short: "Material que frena los neutrones mediante colisiones, normalmente agua, agua pesada o grafito.",
+      more: "Los neutrones lentos (térmicos) tienen cientos de veces más probabilidad de fisionar el uranio-235 que los rápidos.",
+      chapter: "reactor",
+    },
+    coolant: {
+      term: "Refrigerante", aliases: ["refrigerante", "refrigerantes"],
+      short: "El fluido que extrae el calor del núcleo: agua, agua pesada, sodio, helio o sal fundida.",
+      chapter: "reactor",
+    },
+    controlRod: {
+      term: "Barra de control", aliases: ["barra de control", "barras de control"],
+      short: "Una barra de material absorbente de neutrones (boro, cadmio, hafnio) que se introduce o se retira del núcleo para fijar la potencia.",
+      chapter: "reactor",
+    },
+    pwr: {
+      term: "Reactor de agua a presión", aliases: ["reactor de agua a presión", "reactores de agua a presión", "PWR"],
+      short: "El reactor de potencia más común: el agua, a unos 155 bar, sigue líquida a 325 °C y lleva el calor a un generador de vapor.",
+      chapter: "reactor",
+    },
+    sixFactor: {
+      term: "Fórmula de los seis factores", aliases: ["fórmula de los seis factores", "seis factores"],
+      short: "El balance neutrónico de un reactor térmico escrito como producto de seis probabilidades y rendimientos.",
+      more: "ε fisión rápida, P_FNL y P_TNL no fuga, p escape a las resonancias, f utilización térmica, η neutrones por absorción en el combustible.",
+      formula: "k = η f p ε P_FNL P_TNL",
+      chapter: "economy",
+    },
+    resonanceEscape: {
+      term: "Probabilidad de escape a las resonancias", aliases: ["escape a las resonancias", "probabilidad de escape a las resonancias", "escape a la resonancia", "probabilidad de escape a la resonancia"],
+      short: "p: la probabilidad de que un neutrón que se frena atraviese las resonancias de captura del uranio-238 sin ser capturado.",
+      chapter: "economy",
+    },
+    thermalUtil: {
+      term: "Utilización térmica", aliases: ["utilización térmica", "factor de utilización térmica"],
+      short: "f: la fracción de neutrones térmicos absorbidos en el combustible y no en el agua, el acero o los venenos.",
+      chapter: "economy",
+    },
+    enrichment: {
+      term: "Enriquecimiento", aliases: ["enriquecimiento", "enriquecido", "enriquecida", "enriquecidos", "enriquecidas"],
+      short: "La fracción de uranio-235 en el uranio: 0,72 % en la naturaleza, en torno al 3–5 % en el combustible de los reactores de potencia.",
+      chapter: "economy",
+    },
+    eta: {
+      term: "η (eta)", aliases: ["η", "factor de reproducción"],
+      short: "Neutrones liberados por cada neutrón absorbido en el combustible; para regenerar hace falta η mayor que 2.",
+      formula: "η = ν σ_f / σ_a",
+      chapter: "spectrum",
+    },
+    fastReactor: {
+      term: "Reactor rápido", aliases: ["reactor rápido", "reactores rápidos"],
+      short: "Un reactor sin moderador, en el que los neutrones siguen siendo rápidos (unos 0,1–1 MeV); suele refrigerarse con sodio, plomo o gas.",
+      chapter: "spectrum",
+    },
+    fissile: {
+      term: "Fisible", aliases: ["fisible", "fisibles", "físil", "físiles"],
+      short: "Un núcleo que los neutrones lentos pueden fisionar: uranio-235, plutonio-239, uranio-233.",
+      chapter: "breeding",
+    },
+    fertile: {
+      term: "Fértil", aliases: ["fértil", "fértiles"],
+      short: "Un núcleo que se vuelve fisible al capturar un neutrón: el uranio-238 (que da plutonio-239) y el torio-232 (que da uranio-233).",
+      chapter: "breeding",
+    },
+    conversionRatio: {
+      term: "Razón de conversión", aliases: ["razón de conversión", "razón de regeneración", "factor de conversión", "factor de regeneración"],
+      short: "Núcleos fisibles producidos por cada núcleo fisible consumido; por encima de 1 el reactor regenera más combustible del que quema.",
+      chapter: "breeding",
+    },
+    burnup: {
+      term: "Grado de quemado", aliases: ["grado de quemado", "quemado del combustible", "GWd/tU"],
+      short: "Energía extraída del combustible por tonelada de uranio, en gigavatios-día por tonelada (GWd/tU).",
+      more: "El combustible de los reactores de agua sale con unos 45–55 GWd/tU, con aproximadamente un 5 % de sus átomos pesados fisionados.",
+      chapter: "burnup",
+    },
+    decayHeat: {
+      term: "Calor residual", aliases: ["calor residual", "calor de desintegración"],
+      short: "Calor procedente de la desintegración de los productos de fisión, que continúa después de detenerse la reacción en cadena.",
+      more: "Alrededor del 6–7 % de la potencia nominal justo tras la parada, un 1 % al cabo de una hora y menos del 0,5 % al cabo de un día.",
+      chapter: "afterheat",
+    },
+    reactorReactivity: {
+      term: "Reactividad", aliases: ["reactividad", "reactividades"],
+      short: "ρ = (k − 1)/k: cuánto se aleja un reactor de la criticidad. Si es positiva, la potencia crece; si es negativa, se extingue.",
+      more: "Suele expresarse en dólares: 1 $ es la fracción de neutrones retardados β, el umbral de la criticidad instantánea.",
+      chapter: "critical",
+    },
+    feedbackCoef: {
+      term: "Coeficiente de temperatura", aliases: ["coeficiente de temperatura", "coeficientes de temperatura", "coeficiente de huecos", "coeficientes de huecos", "coeficiente de vacío", "coeficiente de potencia", "coeficiente de realimentación", "coeficientes de realimentación"],
+      short: "Cuánto cambia la reactividad cuando el combustible o el refrigerante se calientan (o hierven); si es negativo, el reactor se calma solo.",
+      chapter: "feedback",
+    },
+    poison: {
+      term: "Veneno neutrónico", aliases: ["veneno neutrónico", "venenos neutrónicos", "veneno", "venenos"], scope: "chapter",
+      short: "Un núcleo que absorbe muchos neutrones, como el xenón-135, el samario-149 o el boro-10.",
+      chapter: "xenon",
+    },
+    xenonPit: {
+      term: "Pozo de xenón", aliases: ["pozo de xenón", "pozo de yodo"],
+      short: "Las horas tras una parada en que el xenón-135, que sigue formándose a partir del yodo, envenena tanto el núcleo que no se puede volver a arrancar.",
+      chapter: "xenon",
+    },
+    buckling: {
+      term: "Laplaciano (buckling)", aliases: ["buckling", "laplaciano geométrico", "laplaciano material", "B²"],
+      short: "Una medida de cuánto se curva el flujo de neutrones dentro de un núcleo; los núcleos pequeños se curvan más y tienen más fugas.",
+      formula: "B² = (π/a)² para una placa desnuda de espesor a",
+      chapter: "diffusion",
+    },
+    migrationArea: {
+      term: "Área de migración", aliases: ["área de migración", "M²"],
+      short: "Un sexto de la distancia cuadrática media que recorre un neutrón desde que nace hasta que se absorbe; determina cuánto se fuga de un núcleo.",
+      formula: "k_eff = k∞ / (1 + M²B²)",
+      chapter: "diffusion",
+    },
+    reflector: {
+      term: "Reflector", aliases: ["reflector", "reflectores", "ahorro de reflector"],
+      short: "Una capa alrededor del núcleo (agua, grafito, berilio) que devuelve hacia dentro los neutrones que se escapan, de modo que un núcleo más pequeño alcanza la criticidad.",
+      chapter: "diffusion",
+    },
+    inhour: {
+      term: "Ecuación inhour", aliases: ["ecuación inhour", "ecuación de inhour", "inhour"],
+      short: "La relación entre un escalón de reactividad y el periodo estable de la potencia que le sigue, con todos los grupos retardados.",
+      formula: "ρ = ωΛ + Σ β_i ω / (ω + λ_i)",
+      chapter: "kinetics",
+    },
+    promptJump: {
+      term: "Salto instantáneo", aliases: ["salto instantáneo", "saltos instantáneos", "caída instantánea"],
+      short: "El escalón rápido de potencia, en milisegundos, tras un cambio de reactividad, antes de que los neutrones retardados se pongan al día.",
+      formula: "P₁/P₀ ≈ β / (β − ρ)",
+      chapter: "kinetics",
+    },
+    promptCritical: {
+      term: "Crítico instantáneo", aliases: ["crítico instantáneo", "crítica instantánea", "criticidad instantánea"],
+      short: "Reactividad de un dólar (ρ = β): la cadena crece solo con neutrones instantáneos, en milisegundos, y los retardados ya no marcan el ritmo.",
+      chapter: "kinetics",
+    },
+    powerIteration: {
+      term: "Iteración de potencia", aliases: ["iteración de potencia", "iteración de fuente", "iteración de la fuente"],
+      short: "Calcular k y la fuente de fisión simulando una generación tras otra, cada una a partir de los puntos de fisión de la anterior.",
+      chapter: "transport",
+    },
+    shannon: {
+      term: "Entropía de Shannon", aliases: ["entropía de Shannon"],
+      short: "Un único número que mide lo dispersa que está la fuente de fisión; cuando deja de derivar, la fuente ha convergido.",
+      chapter: "transport",
     },
   };
 })();

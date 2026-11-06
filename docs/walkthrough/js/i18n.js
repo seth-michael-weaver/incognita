@@ -58,7 +58,8 @@
     cache.set(s, out); return out;
   };
   // decimal comma where the language uses one (3.6 → 3,6); leaves English untouched
-  WT.dec = (v) => (LANGS[WT.lang][3] ? String(v).replace(/(\d)\.(\d)/g, "$1,$2") : String(v));
+  // and an English thousands comma becomes a narrow space there (150,000 → 150 000), so it is not read as a decimal
+  WT.dec = (v) => (LANGS[WT.lang][3] ? String(v).replace(/(\d),(?=\d{3}(?!\d))/g, "$1\u202F").replace(/(\d)\.(\d)/g, "$1,$2") : String(v));
   WT.loc = () => LANGS[WT.lang][2];
   WT.ui = (key, en) => (WT.tl && WT.L.ui[key] != null ? WT.L.ui[key] : en);
   // the ?lang= suffix that keeps the current language on a link ("" in English)

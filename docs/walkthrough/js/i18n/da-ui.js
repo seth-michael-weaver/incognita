@@ -1,7 +1,11 @@
 /* Danish: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "Sprog", nav_teach: "Undervisere",
-  nav_topics: "Flere emner", way4_k: "Lær", way4_t: "Flere emner", way4_p: "Lektioner ved siden af hovedhistorien: stråling og dosis, hvordan en reaktor virker, stabilitet og styring, fusion. Fra intro til ekspert.", way4_go: "Vælg en lektion →", tp_lessons: "Lektioner", tp_h1: "Flere nukleare emner",
+  nav_topics: "Flere nukleare emner", way4_k: "Lær", way4_t: "Flere nukleare emner", way4_p: "Lektioner ved siden af hovedhistorien: stråling og dosis, hvordan en reaktor virker, stabilitet og styring, fusion. Fra intro til ekspert.", way4_go: "Vælg en lektion →", tp_lessons: "Lektioner", tp_h1: "Flere nukleare emner",
+  tp_kicker: "Reaktorer · stråling · fusion", tp_tag: "Interaktive lektioner fra de første idéer til forskningsniveau", tp_fire: "Start en kæde", tp_hint: "eller klik på en brændselsstav", tp_cue: "Vælg en lektion ↓",
+  tp_p1_k: "Del et", tp_p1_h: "Stråling", tp_p2_k: "Del to", tp_p2_h: "Inde i en reaktor", tp_p3_k: "Del tre", tp_p3_h: "Stabilitet og styring", tp_p4_k: "Del fire",
+  tp_coda: "Disse lektioner står ved siden af hovedhistorien, <a href=\"./\" data-keep-lang>Inde i en kernereaktion</a>, som følger én neutron ind i én kerne. Billederne er illustrative, medmindre andet er angivet.",
+  tp_title: "Flere nukleare emner · Inde i en kernereaktion",
   brand: "Inde i en kernereaktion", nav_physics: "Fysikken", nav_data: "Alle nuklider", nav_board: "Resultattavle", menu: "Menu", site_nav: "Websted",
   ways_h: "Flere veje ind", ways_more: "Eller bliv ved med at scrolle: fysikken begynder her ↓",
   way1_k: "Udforsk", way1_t: "Alle nuklider", way1_p: "Forudsagte tværsnit for 6168 nuklider ved siden af hver kurateret måling. Søg efter en hvilken som helst isotop, og se alle datasæt.", way1_go: "Åbn dataene →",

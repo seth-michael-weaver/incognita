@@ -1,7 +1,13 @@
 /* French: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "Langue", nav_teach: "Enseignants",
-  nav_topics: "Autres sujets", way4_k: "Apprendre", way4_t: "Autres sujets", way4_p: "Des leçons à côté du récit principal : rayonnement et dose, fonctionnement d'un réacteur, stabilité et pilotage, fusion. De l'initiation à l'expert.", way4_go: "Choisir une leçon →", tp_lessons: "Leçons", tp_h1: "Autres sujets nucléaires",
+  nav_topics: "Autres sujets nucléaires", way4_k: "Apprendre", way4_t: "Autres sujets nucléaires", way4_p: "Des leçons à côté du récit principal : rayonnement et dose, fonctionnement d'un réacteur, stabilité et pilotage, fusion. De l'initiation à l'expert.", way4_go: "Choisir une leçon →", tp_lessons: "Leçons", tp_h1: "Autres sujets nucléaires",
+  tp_kicker: "Réacteurs · rayonnements · fusion", tp_tag: "Des leçons interactives, des premières idées au niveau de la recherche",
+  tp_fire: "Lancer une réaction en chaîne", tp_hint: "ou cliquez sur un crayon combustible", tp_cue: "Choisissez une leçon ↓",
+  tp_p1_k: "Première partie", tp_p1_h: "Les rayonnements", tp_p2_k: "Deuxième partie", tp_p2_h: "Au cœur d'un réacteur",
+  tp_p3_k: "Troisième partie", tp_p3_h: "Stabilité et pilotage", tp_p4_k: "Quatrième partie",
+  tp_coda: "Ces leçons accompagnent le récit principal, <a href=\"./\" data-keep-lang>Au cœur d'une réaction nucléaire</a>, qui suit un neutron jusque dans un noyau. Les images sont indicatives, sauf mention contraire.",
+  tp_title: "Autres sujets nucléaires · Au cœur d'une réaction nucléaire",
   brand: "Au cœur d'une réaction nucléaire", nav_physics: "La physique", nav_data: "Tous les nucléides", nav_board: "Tableau des scores", menu: "Menu", site_nav: "Site",
   ways_h: "D'autres portes d'entrée", ways_more: "Ou continuez à défiler : la physique commence ici ↓",
   way1_k: "Explorer", way1_t: "Tous les nucléides", way1_p: "Sections efficaces prédites pour 6168 nucléides, à côté de chaque mesure sélectionnée. Cherchez n'importe quel isotope et voyez tous ses jeux de données.", way1_go: "Ouvrir les données →",

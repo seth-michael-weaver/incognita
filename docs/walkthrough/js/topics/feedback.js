@@ -163,8 +163,8 @@
       const pc = S.aD * 600 + (S.mode === "dop" ? 0 : S.aM * 15);
       const rd = { color: c.ink, size: fs + 1, weight: 600, serif: true, raw: true };
       const vy = H * (phone ? 0.88 : 0.93);
-      if (sim.halt) { g.label(phone ? "power ran away · protection would shut it down" : "power ran away · in a real plant the protection system would shut it down", W * 0.5, vy, Object.assign({}, rd, { color: c.proton })); g.glow(W * 0.5, vy, 90, c.proton, 0.15); }
-      else if (sim.ins < 0) g.label(phone ? "steady at 60 % · press Insert" : "steady at 60 % power · press Insert to add reactivity", W * 0.5, vy, rd);
+      if (sim.halt) { g.label(WT.tr(phone ? "power ran away · protection would shut it down" : "power ran away · in a real plant the protection system would shut it down"), W * 0.5, vy, Object.assign({}, rd, { color: c.proton })); g.glow(W * 0.5, vy, 90, c.proton, 0.15); }
+      else if (sim.ins < 0) g.label(WT.tr(phone ? "steady at 60 % · press Insert" : "steady at 60 % power · press Insert to add reactivity"), W * 0.5, vy, rd);
       else {
         const s = pc < 0 ? WT.trf(phone ? "power coefficient {a} pcm per 100 %: settles" : "power coefficient {a} pcm per 100 % power: self-stabilising", Math.round(pc)) : WT.trf(phone ? "power coefficient +{a} pcm per 100 %: runs away" : "power coefficient +{a} pcm per 100 % power: runs away", Math.round(pc));
         g.label(s, W * 0.5, vy, Object.assign({}, rd, { color: pc < 0 ? c.fission : c.proton }));

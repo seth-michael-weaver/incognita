@@ -1,7 +1,13 @@
 /* Spanish: static page text (index.html data-i18n keys) and kit UI strings */
-Object.assign(WT.es.ui, {
+Object.assign(WT.L.ui, {
   lang_label: "Idioma", nav_teach: "Docentes",
-  nav_topics: "Más temas", way4_k: "Aprende", way4_t: "Más temas", way4_p: "Lecciones junto a la historia principal: radiación y dosis, cómo funciona un reactor, estabilidad y control, fusión. De introducción a experto.", way4_go: "Elige una lección →", tp_lessons: "Lecciones", tp_h1: "Más temas nucleares",
+  nav_topics: "Más temas nucleares", way4_k: "Aprende", way4_t: "Más temas nucleares", way4_p: "Lecciones junto a la historia principal: radiación y dosis, cómo funciona un reactor, estabilidad y control, fusión. Desde lo más básico hasta nivel experto.", way4_go: "Elige una lección →", tp_lessons: "Lecciones", tp_h1: "Más temas nucleares",
+  tp_kicker: "Reactores · radiación · fusión", tp_tag: "Lecciones interactivas, desde las primeras ideas hasta el nivel de investigación",
+  tp_fire: "Inicia una cadena", tp_hint: "o haz clic en una barra de combustible", tp_cue: "Elige una lección ↓",
+  tp_p1_k: "Primera parte", tp_p1_h: "Radiación", tp_p2_k: "Segunda parte", tp_p2_h: "Dentro de un reactor",
+  tp_p3_k: "Tercera parte", tp_p3_h: "Estabilidad y control", tp_p4_k: "Cuarta parte",
+  tp_coda: "Estas lecciones acompañan a la historia principal, <a href=\"./\" data-keep-lang>Dentro de una reacción nuclear</a>, que sigue a un neutrón hasta el interior de un núcleo. Las imágenes son ilustrativas salvo que se indique lo contrario.",
+  tp_title: "Más temas nucleares · Dentro de una reacción nuclear",
   brand: "Dentro de una reacción nuclear", nav_physics: "La física", nav_data: "Todos los núclidos", nav_board: "Marcador", menu: "Menú", site_nav: "Sitio",
   ways_h: "Más formas de entrar", ways_more: "O sigue bajando: la física empieza aquí ↓",
   way1_k: "Explora", way1_t: "Todos los núclidos", way1_p: "Secciones eficaces predichas para 6168 núclidos junto a cada medida depurada. Busca cualquier isótopo y mira cada conjunto de datos.", way1_go: "Abrir los datos →",
@@ -78,10 +84,10 @@ Object.assign(WT.es.ui, {
   diagram: "Diagrama",
 });
 
-Object.assign(WT.es.ui, { pause_sweep: "Pausar el barrido", play_sweep: "Reanudar el barrido" });
+Object.assign(WT.L.ui, { pause_sweep: "Pausar el barrido", play_sweep: "Reanudar el barrido" });
 
 /* course mode: audience note, chapter level tags, per-step links */
-Object.assign(WT.es.ui, {
+Object.assign(WT.L.ui, {
   audience: '<b>Para quién es:</b> para cualquier persona con curiosidad. Los primeros capítulos no exigen saber física; los últimos llegan al nivel de investigación. Cada capítulo lleva una etiqueta: <span class="lvl l0">Introducción</span>, <span class="lvl l1">Intermedio</span>, <span class="lvl l2">Avanzado</span> o <span class="lvl l3">Experto</span>. ¿Quieres usarlo en clase? Consulta la <a href="instructors.html" data-keep-lang>guía para docentes</a>.',
   lvl0: "Introducción", lvl1: "Intermedio", lvl2: "Avanzado", lvl3: "Experto", lvl_title: "Nivel",
   xp_kicker: "Segunda parte · Experto", xp_h: "A fondo",

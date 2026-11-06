@@ -1,7 +1,11 @@
 /* Simplified Chinese (简体中文): static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "语言", nav_teach: "教师指南",
-  nav_topics: "更多主题", way4_k: "学习", way4_t: "更多主题", way4_p: "主线之外的课程：辐射与剂量、反应堆如何工作、稳定性与控制、聚变。从入门到专家。", way4_go: "选择一课 →", tp_lessons: "课程", tp_h1: "更多核科学主题",
+  nav_topics: "更多核科学主题", way4_k: "学习", way4_t: "更多核科学主题", way4_p: "主线之外的课程：辐射与剂量、反应堆如何工作、稳定性与控制、聚变。从入门到专家。", way4_go: "选择一课 →", tp_lessons: "课程", tp_h1: "更多核科学主题",
+  tp_kicker: "反应堆 · 辐射 · 聚变", tp_tag: "从基本概念到研究前沿的互动课程", tp_fire: "启动链式反应", tp_hint: "或点击一根燃料棒",
+  tp_cue: "选择一课 ↓", tp_p1_k: "第一部分", tp_p1_h: "辐射", tp_p2_k: "第二部分", tp_p2_h: "走进反应堆", tp_p3_k: "第三部分", tp_p3_h: "稳定性与控制", tp_p4_k: "第四部分",
+  tp_coda: "这些课程与主线<a href=\"./\" data-keep-lang>走进核反应</a>并列；主线跟随一个中子进入一个原子核。除非另有说明，图示均为示意。",
+  tp_title: "更多核科学主题 · 走进核反应",
   brand: "走进核反应", nav_physics: "物理原理", nav_data: "全部核素", nav_board: "记分板", menu: "菜单", site_nav: "网站",
   ways_h: "更多入口", ways_more: "或者继续向下滚动：物理部分从这里开始 ↓",
   way1_k: "探索", way1_t: "全部核素", way1_p: "6168 个核素的预测截面，与每一组经过整理的测量数据并列。可以搜索任意同位素，查看每个数据集。", way1_go: "打开数据 →",

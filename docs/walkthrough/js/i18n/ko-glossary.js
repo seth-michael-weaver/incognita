@@ -1103,5 +1103,215 @@
       short: "원자 백만분율: 금속 원자 백만 개당 헬륨 같은 기체 원자가 몇 개인지를 나타냅니다.",
       chapter: "blanket",
     },
+    /* ---------- topics.html lessons ---------- */
+    activity: {
+      term: "방사능", aliases: ["방사능", "베크렐", "Bq"],
+      short: "시료 속 원자핵이 1초에 몇 개 붕괴하는지를 베크렐로 나타낸 것입니다(1 Bq = 초당 붕괴 1번).",
+      more: "방사능은 원자핵 수에 붕괴 상수 ln 2 / T½를 곱한 것입니다. 그래서 반감기가 짧으면 강하지만 짧게, 길면 약하지만 오래갑니다.",
+      formula: "A = λN = (ln 2 / T½) N", chapter: "halflife",
+    },
+    sievert: {
+      term: "시버트", aliases: ["시버트", "밀리시버트", "Sv", "mSv", "µSv"],
+      short: "피해를 따지는 방사선 선량의 단위입니다. 1킬로그램당 흡수된 에너지에 방사선의 종류와 맞은 장기에 따른 가중치를 줍니다.",
+      more: "밀리시버트(mSv)는 1000분의 1입니다. 세계 평균 자연 배경 방사선은 1년에 약 2.4 mSv입니다.",
+      chapter: "dose",
+    },
+    gray: {
+      term: "그레이", aliases: ["그레이", "Gy", "mGy"],
+      short: "흡수 선량: 물질 1킬로그램에 방사선 에너지 1줄이 쌓인 것입니다.",
+      more: "시버트는 그레이에 피해의 가중치를 준 것입니다. 감마선과 베타 입자는 1배, 알파 입자는 약 20배로 셉니다.",
+      chapter: "dose",
+    },
+    halfValue: {
+      term: "반가층", aliases: ["반가층", "반가 두께"],
+      short: "감마선 빔의 절반을 통과시키는 차폐체의 두께입니다.",
+      more: "세슘-137의 감마선(662 keV)에 대해서는 납 약 5.4 mm입니다. 한 층을 더할 때마다 빔이 다시 절반이 되므로 정확히 0에 이르지는 않습니다.",
+      chapter: "rays",
+    },
+    decayChain: {
+      term: "붕괴 사슬", aliases: ["붕괴 사슬", "붕괴 계열"],
+      short: "딸핵이 차례로 다시 불안정하여 안정한 원자핵에 이를 때까지 이어지는 붕괴의 연속입니다.",
+      more: "우라늄-238은 14단계(알파 8번, 베타 6번)를 거쳐 납-206이 됩니다.",
+      chapter: "chains",
+    },
+    secularEq: {
+      term: "영년 평형", aliases: ["영년 평형"],
+      short: "수명이 긴 어미핵이 수명이 짧은 딸핵을 공급하면, 딸핵의 방사능은 어미핵의 방사능과 같아질 때까지 커집니다.",
+      formula: "A_d = A_p (1 − e^(−λ_d t))", chapter: "chains",
+    },
+    transientEq: {
+      term: "과도 평형", aliases: ["과도 평형"],
+      short: "어미핵의 수명이 딸핵보다 조금만 길 때: 딸핵의 방사능은 어미핵보다 약간 높은 곳에 자리 잡고 어미핵과 함께 줄어듭니다.",
+      more: "병원의 발생기 속 몰리브데넘-99(66시간)와 테크네튬-99m(6시간)이 이렇게 움직입니다.",
+      chapter: "chains",
+    },
+    radon: {
+      term: "라돈", aliases: ["라돈", "라돈-222", "Rn-222"], scope: "chapter",
+      short: "우라늄 사슬에서 생기는 방사성 비활성 기체로, 암석과 토양에서 스며 나옵니다.",
+      more: "라돈-222(반감기 3.8일)는 대부분의 사람이 받는 자연 선량에서 가장 큰 몫을 차지합니다.",
+      chapter: "chains",
+    },
+    spentFuel: {
+      term: "사용후핵연료", aliases: ["사용후핵연료", "사용 후 핵연료", "사용한 연료"],
+      short: "사용한 뒤 원자로에서 꺼낸 연료로, 여전히 약 95 %가 우라늄이고 핵분열 생성물, 플루토늄, 부악티늄족이 더해져 있습니다.",
+      chapter: "waste",
+    },
+    fissionProducts: {
+      term: "핵분열 생성물", aliases: ["핵분열 생성물", "핵분열생성물"],
+      short: "무거운 원자핵이 쪼개질 때 남는 중간 무게의 원자핵으로, 대부분 방사성입니다.",
+      more: "세슘-137과 스트론튬-90(약 30년)이 처음 몇백 년 동안 사용후핵연료의 위해도를 지배합니다.",
+      chapter: "waste",
+    },
+    minorActinides: {
+      term: "부악티늄족", aliases: ["부악티늄족", "부악티나이드", "마이너 악티나이드"],
+      short: "원자로에서 생기는 우라늄과 플루토늄 이외의 무거운 원소: 넵투늄, 아메리슘, 퀴륨.",
+      more: "질량은 작지만 수명이 깁니다. 빠른 중성자가 이들을 쪼개므로 고속로에서 태울 수 있습니다.",
+      chapter: "waste",
+    },
+    radiotoxicity: {
+      term: "방사독성", aliases: ["방사독성"],
+      short: "물질을 삼켰을 때 그 속의 방사성 물질 전체가 얼마나 해로운지를 나타낸 값으로, 폐기물을 천연 우라늄 광석과 비교할 때 씁니다.",
+      chapter: "waste",
+    },
+    moderator: {
+      term: "감속재", aliases: ["감속재"],
+      short: "충돌로 중성자를 느리게 하는 물질로, 보통 물, 중수, 흑연입니다.",
+      more: "느린(열)중성자는 빠른 중성자보다 우라늄-235를 쪼갤 확률이 수백 배 큽니다.",
+      chapter: "reactor",
+    },
+    coolant: {
+      term: "냉각재", aliases: ["냉각재", "냉각수"],
+      short: "노심에서 열을 실어 나르는 유체: 물, 중수, 나트륨, 헬륨, 용융염.",
+      chapter: "reactor",
+    },
+    controlRod: {
+      term: "제어봉", aliases: ["제어봉"],
+      short: "중성자를 흡수하는 물질(붕소, 카드뮴, 하프늄)로 만든 봉으로, 노심에 넣고 빼서 출력을 조절합니다.",
+      chapter: "reactor",
+    },
+    pwr: {
+      term: "가압경수로", aliases: ["가압경수로", "가압 경수로", "PWR"],
+      short: "가장 흔한 발전용 원자로입니다. 약 155 bar의 물은 325 °C에서도 액체로 남아 열을 증기 발생기로 나릅니다.",
+      chapter: "reactor",
+    },
+    sixFactor: {
+      term: "6인자 공식", aliases: ["6인자 공식", "여섯 인자"],
+      short: "열중성자로의 중성자 수지를 여섯 가지 확률과 수율의 곱으로 쓴 것입니다.",
+      more: "ε 고속 핵분열, P_FNL과 P_TNL 비누설 확률, p 공명 이탈 확률, f 열중성자 이용률, η 연료 흡수당 중성자 수.",
+      formula: "k = η f p ε P_FNL P_TNL", chapter: "economy",
+    },
+    resonanceEscape: {
+      term: "공명 이탈 확률", aliases: ["공명 이탈 확률", "공명 이탈"],
+      short: "p: 감속 중인 중성자가 우라늄-238의 포획 공명에 잡히지 않고 지나갈 확률입니다.",
+      chapter: "economy",
+    },
+    thermalUtil: {
+      term: "열중성자 이용률", aliases: ["열중성자 이용률", "열 이용률"],
+      short: "f: 열중성자 가운데 물, 강철, 독물질이 아니라 연료에 흡수되는 몫입니다.",
+      chapter: "economy",
+    },
+    enrichment: {
+      term: "농축도", aliases: ["농축도", "농축", "농축된", "농축 우라늄"],
+      short: "우라늄 속 우라늄-235의 몫: 자연에서는 0.72 %, 발전로 연료에서는 약 3–5 %입니다.",
+      chapter: "economy",
+    },
+    eta: {
+      term: "η (에타)", aliases: ["η", "재생 인자"],
+      short: "연료에 흡수된 중성자 하나당 나오는 중성자 수로, 증식하려면 η가 2보다 커야 합니다.",
+      formula: "η = ν σ_f / σ_a", chapter: "spectrum",
+    },
+    fastReactor: {
+      term: "고속로", aliases: ["고속로", "고속 원자로", "고속 중성자로"],
+      short: "감속재가 없어 중성자가 빠른 채로(약 0.1–1 MeV) 남는 원자로로, 보통 나트륨, 납, 기체로 냉각합니다.",
+      chapter: "spectrum",
+    },
+    fissile: {
+      term: "핵분열성", aliases: ["핵분열성", "핵분열성 물질", "핵분열성 원자핵"],
+      short: "느린 중성자로 쪼갤 수 있는 원자핵: 우라늄-235, 플루토늄-239, 우라늄-233.",
+      chapter: "breeding",
+    },
+    fertile: {
+      term: "친원료", aliases: ["친원료", "친원료 물질", "핵원료 물질"],
+      short: "중성자를 포획한 뒤 핵분열성이 되는 원자핵: 우라늄-238(플루토늄-239로)과 토륨-232(우라늄-233으로).",
+      chapter: "breeding",
+    },
+    conversionRatio: {
+      term: "전환비", aliases: ["전환비", "증식비"],
+      short: "핵분열성 원자핵 하나를 소비할 때 새로 만들어지는 핵분열성 원자핵의 수입니다. 1을 넘으면 원자로는 태우는 것보다 많은 연료를 증식합니다.",
+      chapter: "breeding",
+    },
+    burnup: {
+      term: "연소도", aliases: ["연소도", "GWd/tU"],
+      short: "우라늄 1톤당 연료에서 꺼낸 에너지로, 톤당 기가와트일(GWd/tU)로 나타냅니다.",
+      more: "경수로 연료는 약 45–55 GWd/tU에서 방출되며, 그때 무거운 원자의 약 5 %가 쪼개져 있습니다.",
+      chapter: "burnup",
+    },
+    decayHeat: {
+      term: "붕괴열", aliases: ["붕괴열", "잔열"],
+      short: "핵분열 생성물의 붕괴에서 나오는 열로, 연쇄 반응이 멈춘 뒤에도 계속됩니다.",
+      more: "정지 직후 전출력의 약 6–7 %, 1시간 뒤 1 %, 하루 뒤 0.5 % 미만입니다.",
+      chapter: "afterheat",
+    },
+    reactorReactivity: {
+      term: "반응도", aliases: ["반응도"],
+      short: "ρ = (k − 1)/k: 원자로가 임계에서 얼마나 떨어져 있는지를 나타냅니다. 양이면 커지고, 음이면 잦아듭니다.",
+      more: "흔히 달러로 나타냅니다. 1 $는 지연 중성자 분율 β로, 즉발 임계가 되는 점입니다.",
+      chapter: "critical",
+    },
+    feedbackCoef: {
+      term: "온도 계수", aliases: ["온도 계수", "기포 계수", "출력 계수", "되먹임 계수", "반응도 계수"],
+      short: "연료나 냉각재가 데워지거나 끓을 때 반응도가 얼마나 변하는지를 나타냅니다. 음이면 원자로가 스스로 진정됩니다.",
+      chapter: "feedback",
+    },
+    poison: {
+      term: "중성자 독물질", aliases: ["중성자 독물질", "중성자 독", "독물질"], scope: "chapter",
+      short: "제논-135, 사마륨-149, 붕소-10처럼 중성자를 빨아들이는 원자핵입니다.",
+      chapter: "xenon",
+    },
+    xenonPit: {
+      term: "제논 구덩이", aliases: ["제논 구덩이", "아이오딘 구덩이", "요오드 구덩이"],
+      short: "정지 후 몇 시간 동안, 아이오딘에서 계속 만들어지는 제논-135가 노심을 너무 많이 중독시켜 재가동할 수 없는 시기입니다.",
+      chapter: "xenon",
+    },
+    buckling: {
+      term: "버클링", aliases: ["버클링", "B²"],
+      short: "노심 속 중성자 선속이 얼마나 급하게 휘는지를 나타내는 양입니다. 작은 노심일수록 더 휘고 더 많이 샙니다.",
+      formula: "폭 a인 맨 평판에서 B² = (π/a)²", chapter: "diffusion",
+    },
+    migrationArea: {
+      term: "이동 면적", aliases: ["이동 면적", "M²"],
+      short: "중성자가 태어나서 흡수될 때까지 이동한 거리의 제곱 평균의 6분의 1로, 노심이 얼마나 새는지를 정합니다.",
+      formula: "k_eff = k∞ / (1 + M²B²)", chapter: "diffusion",
+    },
+    reflector: {
+      term: "반사체", aliases: ["반사체", "반사체 절약"],
+      short: "노심을 둘러싸고 새어 나가는 중성자를 산란시켜 되돌려 보내는 층(물, 흑연, 베릴륨)으로, 더 작은 노심으로도 임계가 되게 합니다.",
+      chapter: "diffusion",
+    },
+    inhour: {
+      term: "인아워 방정식", aliases: ["인아워 방정식", "인아워"],
+      short: "모든 지연 중성자 군을 넣어, 반응도 계단과 그 뒤 출력의 안정 주기 사이의 관계를 나타낸 식입니다.",
+      formula: "ρ = ωΛ + Σ β_i ω / (ω + λ_i)", chapter: "kinetics",
+    },
+    promptJump: {
+      term: "즉발 도약", aliases: ["즉발 도약", "즉발 강하"],
+      short: "반응도가 바뀐 뒤 지연 중성자가 따라오기 전에 몇 밀리초 안에 일어나는 출력의 빠른 계단 변화입니다.",
+      formula: "P₁/P₀ ≈ β / (β − ρ)", chapter: "kinetics",
+    },
+    promptCritical: {
+      term: "즉발 임계", aliases: ["즉발 임계"],
+      short: "반응도 1달러(ρ = β): 연쇄가 즉발 중성자만으로 몇 밀리초 단위로 커지며, 지연 중성자는 더 이상 속도를 정하지 못합니다.",
+      chapter: "kinetics",
+    },
+    powerIteration: {
+      term: "거듭제곱 반복", aliases: ["거듭제곱 반복", "선원 반복", "멱반복"],
+      short: "세대를 거듭 돌려 k와 핵분열 선원을 구하는 방법으로, 각 세대는 앞 세대의 핵분열 위치에서 출발합니다.",
+      chapter: "transport",
+    },
+    shannon: {
+      term: "섀넌 엔트로피", aliases: ["섀넌 엔트로피"],
+      short: "핵분열 선원이 얼마나 퍼져 있는지를 재는 하나의 수로, 이 값의 표류가 멈추면 선원이 수렴한 것입니다.",
+      chapter: "transport",
+    },
   };
 })();
