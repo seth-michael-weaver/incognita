@@ -128,3 +128,6 @@ Object.assign(WT.L.ui, {
   dx_tr_e_none: "ingen test med tilbageholdte data for dette område",
   dx_tr_src: "Niveau og flag: README for library/v0.2. Bånd: et forhåndsregistreret dækningstjek mod målinger (5 testkerner, oktober 2026), hvor båndene for indfangning, fission og elastisk spredning dækkede som angivet, og tærskelkanalerne og det totale tværsnit dækkede for lidt. Fejl: <a href=\"scoreboard.html\" data-keep-lang>Resultattavlen</a>, kvadratisk gennemsnit af log10(motor / målt); den er ikke en blindtest, fordi motorens regler blev valgt med blik på den.",
 });
+// less text (2026-11-06)
+Object.assign(WT.L.ui, { dx_hint2: "Træk for at flytte · rul for at zoome · klik på et felt", dx_more_nuc: "Detaljer: hvor meget man kan stole på det, kilder, kode", dx_about: "Om dataene, downloads og kode" });
+Object.assign(WT.L.ui, { dx_cmp: "til sammenligning" });

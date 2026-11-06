@@ -128,3 +128,6 @@ Object.assign(WT.L.ui, {
   dx_tr_e_none: "该区域没有留出数据的检验",
   dx_tr_src: "类别与标记：library/v0.2 的 README。误差带：一次针对测量的预注册覆盖率检验（5 个测试核，2026 年 10 月），其中俘获、裂变和弹性散射的误差带覆盖与标称一致，阈反应道和总截面覆盖不足。误差：<a href=\"scoreboard.html\" data-keep-lang>记分板</a>，log10(引擎 / 测量) 的均方根；它不是盲测，因为引擎的规则是看着它选定的。",
 });
+// less text (2026-11-06)
+Object.assign(WT.L.ui, { dx_hint2: "拖动平移 · 滚动缩放 · 点击方格", dx_more_nuc: "详情:可信度、来源、代码", dx_about: "关于数据、下载与代码" });
+Object.assign(WT.L.ui, { dx_cmp: "对比" });

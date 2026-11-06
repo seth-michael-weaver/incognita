@@ -128,3 +128,6 @@ Object.assign(WT.L.ui, {
   dx_tr_e_none: "geen test met achtergehouden data voor dit gebied",
   dx_tr_src: "Niveau en vlaggen: README van library/v0.2. Banden: een vooraf geregistreerde dekkingscontrole tegen metingen (5 testkernen, oktober 2026), waarin de banden voor vangst, splijting en elastische verstrooiing dekten zoals opgegeven en die van de drempelkanalen en de totale te weinig. Fouten: het <a href=\"scoreboard.html\" data-keep-lang>Scorebord</a>, kwadratisch gemiddelde van log10(engine / gemeten); het is geen blinde test, want de regels van de engine zijn gekozen terwijl ernaar werd gekeken.",
 });
+// less text (2026-11-06)
+Object.assign(WT.L.ui, { dx_hint2: "Sleep om te verschuiven · scroll om te zoomen · klik op een vakje", dx_more_nuc: "Details: hoe betrouwbaar, bronnen, code", dx_about: "Over de gegevens, downloads en code" });
+Object.assign(WT.L.ui, { dx_cmp: "ter vergelijking" });

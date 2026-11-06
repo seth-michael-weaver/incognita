@@ -128,3 +128,6 @@ Object.assign(WT.L.ui, {
   dx_tr_e_none: "aucun test sur données réservées pour cette région",
   dx_tr_src: "Catégorie et marques : README de library/v0.2. Bandes : une vérification de couverture préenregistrée face aux mesures (5 noyaux test, octobre 2026), où les bandes de capture, de fission et de diffusion élastique ont couvert comme annoncé, et celles des voies à seuil et de la section totale ont sous-couvert. Erreurs : le <a href=\"scoreboard.html\" data-keep-lang>Tableau des scores</a>, moyenne quadratique de log10(moteur / mesure) ; ce n’est pas un test en aveugle, car les règles du moteur ont été choisies en le regardant.",
 });
+// less text (2026-11-06)
+Object.assign(WT.L.ui, { dx_hint2: "Glissez pour déplacer · molette pour zoomer · cliquez sur une case", dx_more_nuc: "Détails : quelle confiance, sources, code", dx_about: "À propos des données, téléchargements et code" });
+Object.assign(WT.L.ui, { dx_cmp: "comparaison" });

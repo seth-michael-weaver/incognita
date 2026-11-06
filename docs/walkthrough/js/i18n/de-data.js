@@ -128,3 +128,6 @@ Object.assign(WT.L.ui, {
   dx_tr_e_none: "kein Test mit zurückgehaltenen Daten für diesen Bereich",
   dx_tr_src: "Stufe und Markierungen: README von library/v0.2. Bänder: eine vorab registrierte Prüfung der Abdeckung an Messungen (5 Testkerne, Oktober 2026), in der die Bänder für Einfang, Spaltung und elastische Streuung wie angegeben abdeckten und die Schwellenkanäle und der totale Querschnitt zu wenig. Fehler: die <a href=\"scoreboard.html\" data-keep-lang>Rangliste</a>, quadratisches Mittel von log10(Engine / gemessen); sie ist kein Blindtest, weil die Regeln der Engine mit Blick auf sie gewählt wurden.",
 });
+// less text (2026-11-06)
+Object.assign(WT.L.ui, { dx_hint2: "Ziehen zum Verschieben · Scrollen zum Zoomen · Feld anklicken", dx_more_nuc: "Details: wie verlässlich, Quellen, Code", dx_about: "Über die Daten, Downloads und Code" });
+Object.assign(WT.L.ui, { dx_cmp: "zum Vergleich" });

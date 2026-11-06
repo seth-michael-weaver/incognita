@@ -128,3 +128,6 @@ Object.assign(WT.L.ui, {
   dx_tr_e_none: "nessun test su dati tenuti da parte per questa regione",
   dx_tr_src: "Categoria e segnali: README di library/v0.2. Bande: una verifica di copertura preregistrata sulle misure (5 nuclei di prova, ottobre 2026), in cui le bande di cattura, fissione e diffusione elastica hanno coperto come dichiarato e quelle dei canali a soglia e della totale hanno coperto poco. Errori: la <a href=\"scoreboard.html\" data-keep-lang>Classifica</a>, media quadratica di log10(motore / misurato); non è un test alla cieca, perché le regole del motore sono state scelte guardandola.",
 });
+// less text (2026-11-06)
+Object.assign(WT.L.ui, { dx_hint2: "Trascina per spostare · scorri per lo zoom · clicca un quadrato", dx_more_nuc: "Dettagli: quanto fidarsi, fonti, codice", dx_about: "Sui dati, download e codice" });
+Object.assign(WT.L.ui, { dx_cmp: "confronto" });

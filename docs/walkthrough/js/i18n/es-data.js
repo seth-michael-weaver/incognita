@@ -128,3 +128,6 @@ Object.assign(WT.L.ui, {
   dx_tr_e_none: "no hay prueba con datos reservados para esta región",
   dx_tr_src: "Nivel y marcas: README de library/v0.2. Bandas: una comprobación de cobertura prerregistrada frente a medidas (5 núcleos de prueba, octubre de 2026), en la que las bandas de captura, fisión y dispersión elástica cubrieron lo indicado y las de los canales con umbral y la total cubrieron de menos. Errores: el <a href=\"scoreboard.html\" data-keep-lang>Marcador</a>, media cuadrática de log10(motor / medido); no es una prueba ciega, porque las reglas del motor se eligieron mirándolo.",
 });
+// less text (2026-11-06)
+Object.assign(WT.L.ui, { dx_hint2: "Arrastra para mover · desplaza para ampliar · haz clic en un cuadro", dx_more_nuc: "Detalles: cuánto fiarse, fuentes, código", dx_about: "Sobre los datos, descargas y código" });
+Object.assign(WT.L.ui, { dx_cmp: "comparación" });

@@ -128,3 +128,6 @@ Object.assign(WT.L.ui, {
   dx_tr_e_none: "이 영역에는 보류 데이터로 한 검증이 없음",
   dx_tr_src: "등급과 표시: library/v0.2 README. 띠: 측정값에 대한 사전 등록 포함률 점검(시험 핵 5개, 2026년 10월)에서 포획·핵분열·탄성 산란의 띠는 명시된 대로 포함했고, 문턱 채널과 전체 단면적의 띠는 부족했습니다. 오차: <a href=\"scoreboard.html\" data-keep-lang>점수판</a>, log10(엔진 / 측정값)의 제곱평균제곱근. 엔진 규칙을 이것을 보면서 정했으므로 블라인드 검증이 아닙니다.",
 });
+// less text (2026-11-06)
+Object.assign(WT.L.ui, { dx_hint2: "드래그로 이동 · 스크롤로 확대 · 칸을 클릭", dx_more_nuc: "자세히: 신뢰도, 출처, 코드", dx_about: "데이터, 다운로드, 코드에 대하여" });
+Object.assign(WT.L.ui, { dx_cmp: "비교용" });

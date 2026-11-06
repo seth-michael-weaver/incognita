@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=156">
+<link rel="stylesheet" href="style.css?v=157">
 <link rel="preload" href="data/index.json" as="fetch" crossorigin>
 <link rel="preload" href="data/n/92/238.json" as="fetch" crossorigin>
 <link rel="preload" href="data/lib/92.json" as="fetch" crossorigin>
@@ -64,9 +64,7 @@
       <div class="dx-tip" id="dx-tip" hidden></div>
     </div>
     <div class="dx-legend" id="dx-legend"></div>
-    <p class="dx-hint" data-i18n="dx_hint">Drag to pan, scroll or pinch to zoom. Click a square to open it: the nuclide's details appear below the chart. Protons up, neutrons across.</p>
-    <p class="dx-lede" data-i18n="dx_lede">The engine's predicted neutron cross sections for every nuclide in the library, beside the curated measurements of each nuclide. Pick a nuclide on the chart, or search for one.</p>
-    <p class="dx-lede" data-i18n="dx_lede_ver">The curves are library v0.2 (October 2026), made with the same engine version that is scored on the Scoreboard (the engine of 22 October 2026). They are not TERRA, the Scoreboard's data product that is fitted to measurements. Every curve is the engine's own prediction: none was fitted to the measurements shown beside it, except that a nuclide marked anchored has its curve scaled by a single factor so that its stellar average at 30 keV equals the measured value. The engine's general settings were chosen once, for all nuclides, using many measurements (these among them), so a match on a measured nuclide is a fair check of the model, though not a fully independent one. Most nuclides have never been measured (extrapolated), and their bands are wide.</p>
+    <p class="dx-hint" data-i18n="dx_hint2">Drag to pan · scroll to zoom · click a square</p>
   </section>
 </div>
 
@@ -87,29 +85,35 @@
       <canvas id="dx-plot" role="img"></canvas>
       <div class="dx-tip" id="dx-ptip" hidden></div>
     </div>
-    <p class="dx-below" id="dx-below" hidden></p>
     <div class="dx-plotbar">
       <div class="dx-plegend" id="dx-plegend"></div>
       <label class="dx-check" hidden><input type="checkbox" id="dx-full"> <span data-i18n="dx_full">Show the full energy range</span></label>
       <label class="dx-check"><input type="checkbox" id="dx-excl"> <span data-i18n="dx_show_excl">Show points the curation excluded</span></label>
       <button type="button" class="dx-link" id="dx-tbtn" aria-expanded="false" data-i18n="dx_table">Show as a table</button>
     </div>
-    <div class="dx-trust" id="dx-trust" hidden></div>
-    <div class="dx-libbar">
+    <div class="dx-table" id="dx-table" hidden></div>
+    <div class="dx-run dx-run-min"><div class="dx-dl"><span data-i18n="dx_dl">Download this nuclide:</span> <button type="button" class="btn" id="dx-dl-csv">⤓ CSV</button> <button type="button" class="btn ghost" id="dx-dl-json">⤓ JSON</button></div></div>
+    <details class="dx-more">
+      <summary data-i18n="dx_more_nuc">Details: how far to trust it, sources, code</summary>
+      <p class="dx-below" id="dx-below" hidden></p>
+      <div class="dx-trust" id="dx-trust" hidden></div>
+      <div class="dx-libbar">
       <label class="dx-check"><input type="checkbox" id="dx-lib" aria-describedby="dx-libnote" checked> <span data-i18n="dx_lib">Overlay evaluated libraries (comparison only — not used by INCOGNITA)</span></label>
       <div class="dx-libnote" id="dx-libnote" hidden></div>
     </div>
-    <div class="dx-table" id="dx-table" hidden></div>
-    <div class="dx-ds" id="dx-ds"></div>
-    <div class="dx-run">
-      <h3 data-i18n="dx_run_h">Get these numbers yourself</h3>
-      <div class="dx-dl"><span data-i18n="dx_dl">Download this nuclide:</span> <button type="button" class="btn" id="dx-dl-csv">⤓ CSV</button> <button type="button" class="btn ghost" id="dx-dl-json">⤓ JSON</button>
-        <p class="dx-dl-note" data-i18n="dx_dl_note">Every curve and measured point for this nuclide, all reactions, with units, sources and EXFOR ids written into the file.</p></div>
+      <div class="dx-ds" id="dx-ds"></div>
+      <p class="dx-dl-note" data-i18n="dx_dl_note">Every curve and measured point for this nuclide, all reactions, with units, sources and EXFOR ids written into the file.</p>
       <pre><code id="dx-cmd"></code></pre>
       <button type="button" class="dx-link" id="dx-copy" data-i18n="dx_copy">Copy</button>
-    </div>
+    </details>
   </section>
 
+  <details class="dx-more dx-about">
+    <summary data-i18n="dx_about">About the data, downloads and code</summary>
+    <section class="dx-repo">
+    <p class="dx-lede" data-i18n="dx_lede">The engine's predicted neutron cross sections for every nuclide in the library, beside the curated measurements of each nuclide. Pick a nuclide on the chart, or search for one.</p>
+    <p class="dx-lede" data-i18n="dx_lede_ver">The curves are library v0.2 (October 2026), made with the same engine version that is scored on the Scoreboard (the engine of 22 October 2026). They are not TERRA, the Scoreboard's data product that is fitted to measurements. Every curve is the engine's own prediction: none was fitted to the measurements shown beside it, except that a nuclide marked anchored has its curve scaled by a single factor so that its stellar average at 30 keV equals the measured value. The engine's general settings were chosen once, for all nuclides, using many measurements (these among them), so a match on a measured nuclide is a fair check of the model, though not a fully independent one. Most nuclides have never been measured (extrapolated), and their bands are wide.</p>
+    </section>
   <section class="dx-repo dx-tsl" aria-labelledby="dx-tsl-h">
     <h2 id="dx-tsl-h">Moderators: thermal scattering</h2>
     <p>Slow neutrons scatter off whole molecules and crystal lattices, not free atoms. INCOGNITA's own scattering laws, S(α,β), are built from our own physics: molecular dynamics for water, DFT phonons for beryllium. No evaluated library goes in. Both <b>tie</b> ENDF/B-VIII.1 on criticality benchmarks; neither is shown to be better.</p>
@@ -135,11 +139,12 @@ uv run python -m incognita.library show Au-197 --version v0.2    # one capture c
     <p><a class="dx-gh" href="https://github.com/seth-michael-weaver/incognita" data-i18n="dx_repo_link">seth-michael-weaver/incognita on GitHub →</a></p>
     <p class="dx-src" data-i18n="dx_src">Sources: predictions from library v0.2 (<code>library/v0.2</code>); capture measurements from EXFOR as curated in <code>data/curation</code>; (n,2n), (n,p) and (n,α) measurements from the benchmark rows in <code>incognita/bench</code>. Measurements the curation excluded are hidden unless you ask for them. The optional dashed overlay of evaluated libraries (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) is built by <code>scripts/build_site_overlay.py</code> for display only; INCOGNITA never reads it.</p>
   </section>
+  </details>
 </main>
 
 <script src="js/i18n.js?v=154"></script>
-<script>WT.load(["instructors", "data"], 138);</script>
+<script>WT.load(["instructors", "data"], 139);</script>
 <script src="js/nav.js?v=150"></script>
-<script src="js/data.js?v=91"></script>
+<script src="js/data.js?v=93"></script>
 </body>
 </html>

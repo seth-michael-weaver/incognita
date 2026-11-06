@@ -965,3 +965,15 @@ body.sb-lit::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 5
 .sb-cin { font-size: 12px; margin-top: 4px; color: var(--soft); white-space: nowrap; }
 .sb-cin span { color: var(--faint); }
 .sb-vd { white-space: nowrap; }
+
+/* Every nuclide, less text (2026-11-06): long notes sit behind closed Details toggles */
+.dx-more { margin: 18px 0 8px; }
+.dx-more > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 600 14px var(--sans); color: var(--soft); padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; list-style: none; }
+.dx-more > summary::-webkit-details-marker { display: none; }
+.dx-more > summary::after { content: "▾"; font-size: 12px; transition: transform .2s; }
+.dx-more[open] > summary::after { transform: rotate(180deg); }
+.dx-more > summary:hover { color: var(--ink); }
+.dx-more[open] > summary { margin-bottom: 12px; }
+.dx-about { margin: 40px 0; }
+.dx-run-min { margin-top: 10px; }
+.dx-run-min .dx-dl { margin: 0; }
