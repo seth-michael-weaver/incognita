@@ -28,12 +28,12 @@
   const TIERS = [T("dx_t0", "Measured"), T("dx_t1", "Anchored to a measured MACS"), T("dx_t2", "Interpolated (near measured nuclides)"), T("dx_t3", "Extrapolated"), T("dx_t4", "Not measured (Z < 26)"), T("dx_t5", "Measured (library tier not updated)"), T("dx_t6", "Measured (Z < 26)")];
   const TIER_SHORT = [T("dx_ts0", "measured"), T("dx_ts1", "anchored"), T("dx_ts2", "interpolated"), T("dx_ts3", "extrapolated"), T("dx_ts4", "not measured"), T("dx_ts5", "measured"), T("dx_ts6", "measured")];
   // shown tier: the library v0.2 tier, except where it would mislead. A nucleus the library calls EXTRAPOLATED but with
-  // curated capture data (tier kept from v0.1): 5. Below Z 26 the library assigns no real tier (all EXTRAPOLATED, its
+  // curated capture data that the curation did not exclude (tier kept from v0.1): 5; excluded-only data does not count. Below Z 26 the library assigns no real tier (all EXTRAPOLATED, its
   // curated capture set started at Z 26), so the page uses the light-nucleus curation (data/curation/inputs/*Z1-25*, same
   // WP-12 curation as Z 26-92): 6 if the nucleus has a curated capture cell that the curation did not exclude (index
   // column n_use), else 4 (not measured); also for H..N (Z 1-7), which have measurements but no library v0.2 curve (index
   // tier -1). The library's own tier field is not changed. See scripts/build_site_data.py.
-  const shownTier = (Z, t, nm, nu) => (t == null ? t : Z < 26 ? (nu > 0 ? 6 : 4) : t < 0 ? t : t === 3 && nm > 0 ? 5 : t);
+  const shownTier = (Z, t, nm, nu) => (t == null ? t : Z < 26 ? (nu > 0 ? 6 : 4) : t < 0 ? t : t === 3 && nu > 0 ? 5 : t);
   const DEC = { k: T("dx_keep", "kept"), d: T("dx_down", "down-weighted"), x: T("dx_excl", "excluded"), f: T("dx_fix", "unit fixed") };
   const CH = { cap: T("dx_cap", "Capture (n,γ)"), n2n: "(n,2n)", np: "(n,p)", na: "(n,α)", macs: T("dx_macs", "Stellar average (MACS)") };
 
