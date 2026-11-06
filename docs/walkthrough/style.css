@@ -916,3 +916,48 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 .tp-d { font: 400 14.5px/1.45 var(--sans); color: var(--soft); }
 .tp-list .lvl { justify-self: end; }
 @media (max-width: 600px) { .tp-list a { grid-template-columns: 1.6em minmax(0, 1fr); gap: 10px; } .tp-list .lvl { grid-column: 2; justify-self: start; } .tp-t b { font-size: 17px; } }
+
+/* ---------- scoreboard, calmer (Seth 2026-11-06: "much more palatable"): no glow, one type scale, theme-aware ---------- */
+body.sb-lit { background: var(--paper); }
+body.sb-lit::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 520px; pointer-events: none; z-index: -1; background: radial-gradient(900px 420px at 25% -20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%); }
+.sb-lit .sb-head h1 { font-size: clamp(40px, 6vw, 68px); color: var(--ink); text-shadow: none; letter-spacing: -0.01em; }
+.sb-lit .sb-head p { color: var(--soft); }
+.sb-head p.sb-sum { font: 400 17px/1.7 var(--sans); color: var(--soft); max-width: 42rem; margin: 14px 0 0; }
+.sb-head p.sb-scope { font-size: 14px; color: var(--faint); }
+.sb-lit .sb-sec h2 { color: var(--ink); }
+.sb-sec > p, .sb-list li { font-size: 16.5px; line-height: 1.65; }
+.sb-sec h2 { margin-top: 0; }
+/* summary rows */
+.sb-hero { margin: 28px 0 26px; padding: 6px 0; background: none; box-shadow: none; border-radius: 0; display: grid; gap: 4px; }
+.sb-sumrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "lab nums" "bar bar"; gap: 8px 18px; align-items: baseline; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); text-decoration: none; transition: border-color .15s ease; }
+.sb-sumrow:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.sb-sumlab { grid-area: lab; font: 600 15px/1.35 var(--sans); }
+.sb-sumnums { grid-area: nums; display: flex; gap: 16px; font: 500 12px var(--sans); color: var(--faint); letter-spacing: .04em; white-space: nowrap; }
+.sb-sumnums b { font: 600 22px var(--sans); letter-spacing: 0; margin-right: 3px; color: var(--ink); }
+.sb-sumnums .sb-win b { color: var(--win-ink); } .sb-sumnums .sb-loss b { color: var(--loss-ink); }
+.sb-sumbar { grid-area: bar; display: flex; gap: 2px; height: 8px; border-radius: 99px; overflow: hidden; }
+.sb-sumbar i { display: block; min-width: 4px; }
+.sb-sumbar .sb-win { background: var(--win-ink); } .sb-sumbar .sb-tie { background: color-mix(in srgb, var(--soft) 45%, transparent); } .sb-sumbar .sb-loss { background: var(--loss-ink); }
+@media (max-width: 600px) { .sb-sumrow { grid-template-columns: minmax(0, 1fr); grid-template-areas: "lab" "nums" "bar"; } }
+/* section tiles and strips: quieter */
+.sb-lit .sb-tile { background: var(--card); border-color: var(--line); box-shadow: none; }
+.sb-tile .sb-n { font-size: 30px; }
+/* tables: compact, the interval drawn as a bar around zero */
+.sb-lit .sb-table { background: none; }
+.sb-table { font-size: 14px; }
+.sb-table td, .sb-table th { padding: 10px 10px; vertical-align: middle; }
+.sb-table thead th { font-size: 11px; letter-spacing: .06em; color: var(--faint); border-bottom: 1px solid var(--line); }
+.sb-table tbody tr { border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
+.sb-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.sb-cell { font-weight: 500; color: var(--ink); }
+.sb-table .sb-gl { font-size: 12px; color: var(--faint); margin-top: 2px; white-space: nowrap; }
+.sb-citd { min-width: 170px; }
+.sb-ci { position: relative; display: block; height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--line) 45%, transparent); }
+.sb-ci i { position: absolute; display: block; }
+.sb-ci .z { left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--soft); opacity: .6; }
+.sb-ci .bar { top: 4px; height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--soft) 55%, transparent); }
+.sb-ci .bar.win { background: var(--win-ink); } .sb-ci .bar.loss { background: var(--loss-ink); }
+.sb-ci .pt { top: 2px; width: 3px; height: 10px; margin-left: -1.5px; border-radius: 2px; background: var(--ink); }
+.sb-cin { font-size: 12px; margin-top: 4px; color: var(--soft); white-space: nowrap; }
+.sb-cin span { color: var(--faint); }
+.sb-vd { white-space: nowrap; }

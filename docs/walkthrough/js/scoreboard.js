@@ -83,9 +83,13 @@
   const rname = (r) => T("sb_r_" + rk(r), RN[r] || r);
   const CLS = { trail: T("cls_trail", "engine behind"), parity: T("cls_parity", "about level"), underpowered: T("cls_under", "engine ahead, not resolved") };
   const open = I.open.slice().sort((a, b) => ((b.verdict === "LOSS") - (a.verdict === "LOSS")) || (b.hi - a.hi));   // losses, then closest to a loss
+  // the interval as a small bar around zero (Seth 2026-11-06: "much more palatable"); numbers stay in text beside it
+  const span = Math.max(...open.map((c) => Math.max(Math.abs(c.lo), Math.abs(c.hi)))) * 1.08 || 1;
+  const X = (v) => (50 + 50 * v / span).toFixed(2);
+  const ci = (c) => `<span class="sb-ci" aria-hidden="true"><i class="z"></i><i class="bar ${c.verdict.toLowerCase()}" style="left:${X(c.lo)}%;width:${(X(c.hi) - X(c.lo)).toFixed(2)}%"></i><i class="pt" style="left:${X(c.gap)}%"></i></span>`;
   $("#sb-open").insertAdjacentHTML("beforeend",
-    `<thead><tr><th scope="col">${T("th_cell", "Comparison")}</th><th scope="col">${T("th_rival", "Rival")}</th><th scope="col" class="r">${T("th_n", "Nuclei")}</th><th scope="col" class="r">${T("th_ours", "Engine error")}</th><th scope="col" class="r">${T("th_theirs", "Rival error")}</th><th scope="col" class="r">${T("th_gap", "Gap")}</th><th scope="col">${T("th_ci", "95 % interval")}</th><th scope="col">${T("th_verdict", "Verdict")}</th></tr></thead><tbody>`
-    + open.map((c) => `<tr><td>${esc(gloss(c.cell))}</td><td><span class="sb-rn">${esc(rname(c.rival))}</span></td><td class="r">${c.n}</td><td class="r num">${dex(c.ours)}</td><td class="r num">${dex(c.theirs)}</td><td class="r num">${num(c.gap)}</td><td class="num">[${num(c.lo)}, ${num(c.hi)}]</td><td>${badge(c.verdict)} <span class="sb-cls">${CLS[c.cls] || c.cls}</span></td></tr>`).join("")
+    `<thead><tr><th scope="col">${T("th_cell", "Comparison")}</th><th scope="col" class="r">${T("th_n", "Nuclei")}</th><th scope="col" class="r">${T("th_ours", "Engine error")}</th><th scope="col" class="r">${T("th_theirs", "Rival error")}</th><th scope="col">${T("th_ci", "95 % interval")}</th><th scope="col">${T("th_verdict", "Verdict")}</th></tr></thead><tbody>`
+    + open.map((c) => `<tr><td><div class="sb-cell">${esc(gloss(c.cell))}</div><div class="sb-gl">${T("vs", "vs")} ${esc(rname(c.rival))}</div></td><td class="r">${c.n}</td><td class="r num">${dex(c.ours)}</td><td class="r num">${dex(c.theirs)}</td><td class="sb-citd">${ci(c)}<div class="sb-cin num">${num(c.gap)} <span>[${num(c.lo)}, ${num(c.hi)}]</span></div></td><td class="sb-vd">${badge(c.verdict)}<div class="sb-gl">${CLS[c.cls] || ""}</div></td></tr>`).join("")
     + "</tbody>");
 
   const rivals = ["TALYS-2.24", "R_T", "CoH3", "YAHFC"].filter((r) => I.by_rival[r]);
@@ -121,39 +125,14 @@
   $("#sb-terra-note").innerHTML = fill(T("sb_n_terra", "{n} comparisons are scored leave-one-series-out: TERRA is refitted without the measurement series being judged, while the libraries, which cannot be refitted, stay in-sample. {ncov} of them score uncertainty coverage and {nacc} score capture resonance integrals ({win} {W}, {tie} {T}, {loss} {L}). {same} of the coverage ones equal their in-sample versions, because TERRA does not fit (n,2n) or fission. All other comparisons, thermal cross sections included, are in-sample. A rebuild on the current engine is in progress."),
     { n: O.WIN + O.TIE + O.LOSS, ncov: O.cov, nacc: O.acc, same: O.same, win: O.WIN, tie: O.TIE, loss: O.LOSS, W: V.WIN, T: V.TIE, L: V.LOSS });
 
-  // ---------- hero: one glowing dot per comparison, engine above, TERRA below; final counts from the start, dots fade in ----------
-  (function hero() {
-    const cv = $("#sb-hero-cv"); if (!cv) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const css = getComputedStyle(document.documentElement), col = { WIN: css.getPropertyValue("--win-ink").trim() || "#3fd3a8", TIE: "#9aa6bf", LOSS: css.getPropertyValue("--loss-ink").trim() || "#ff8b80", NA: "#3a4560" };
-    const rows = [[I, T("sb_h_eng", "The engine against other codes")], [B.terra, T("sb_h_terra", "The data product (an in-sample fit) against evaluated libraries")]].filter((r) => r[0]);
-    const lists = rows.map(([b]) => [].concat(...ORDER.map((v) => Array(b[v] || 0).fill(v))));
-    let t0 = 0, W = 0, H = 0, dpr = 1;
-    function size() { dpr = Math.min(2, window.devicePixelRatio || 1); const ps = getComputedStyle(cv.parentElement); W = Math.floor(cv.parentElement.clientWidth - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight)); H = W < 640 ? 2 * 250 : Math.round(Math.min(420, Math.max(300, W * 0.36))); cv.style.width = W + "px"; cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr; }
-    function frame(now) {
-      if (!t0) t0 = now; const fade = reduce ? 1 : Math.min(1, (now - t0) / 700);
-      const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-      const bandH = H / rows.length;
-      rows.forEach(([b, label], ri) => {
-        const Ls = lists[ri], y0 = ri * bandH, n = Ls.length, narrow = W < 640, labW = narrow ? 0 : Math.min(330, W * 0.36), top = narrow ? 104 : 22, area = W - labW - 10;
-        const cols = Math.max(1, Math.ceil(Math.sqrt(n * area / (bandH - top - 12)))), cell = Math.min(22, area / cols, (bandH - top - 12) / Math.ceil(n / cols)), r = cell * 0.36;
-        // label and the final counts
-        g.globalAlpha = 1; g.fillStyle = "rgba(220,228,248,.75)"; g.font = "600 13px 'IBM Plex Sans', sans-serif"; g.textBaseline = "top"; g.fillText(label, 0, y0 + 8);
-        let x = 0; g.textBaseline = "alphabetic";
-        for (const k of ORDER) { g.font = "600 34px 'IBM Plex Sans', sans-serif"; g.fillStyle = col[k]; const s = String(b[k] || 0); g.fillText(s, x, y0 + 68); const w = g.measureText(s).width; g.font = "600 12px 'IBM Plex Sans', sans-serif"; g.fillStyle = "rgba(220,228,248,.7)"; g.fillText(V[k], x, y0 + 86); x += Math.max(w, g.measureText(V[k]).width) + 22; }
-        // the dots
-        for (let i = 0; i < n; i++) {
-          const k = Ls[i], cx = labW + 10 + (i % cols + 0.5) * cell, cy = y0 + top + (Math.floor(i / cols) + 0.5) * cell;
-          const pulse = k === "LOSS" ? 1 + 0.35 * Math.sin(now / 260) : 1;
-          g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.35 * fade; g.fillStyle = col[k]; g.beginPath(); g.arc(cx, cy, r * 2.1 * pulse, 0, Math.PI * 2); g.fill();
-          g.globalCompositeOperation = "source-over"; g.globalAlpha = fade; g.beginPath(); g.arc(cx, cy, r * (k === "LOSS" ? pulse : 1), 0, Math.PI * 2); g.fill();
-        }
-        g.globalAlpha = 1;
-      });
-      if (!reduce) requestAnimationFrame(frame);
-    }
-    size(); window.addEventListener("resize", () => { size(); if (reduce) requestAnimationFrame(frame); }); requestAnimationFrame(frame); if (reduce) window.addEventListener("load", () => requestAnimationFrame(frame));
-    cv.setAttribute("role", "img");
-    cv.setAttribute("aria-label", rows.map(([b, l]) => `${l}: ` + ORDER.map((v) => `${b[v] || 0} ${V[v]}`).join(", ")).join(". "));
+  // ---------- summary at the top: one calm row per board (label, counts, a thin proportional bar) ----------
+  (function summary() {
+    const box = document.querySelector(".sb-hero"); if (!box) return;
+    const rows = [[I, T("sb_h_eng", "The engine against other codes"), "#sb-inc-h"], [B.terra, T("sb_h_terra", "The data product (an in-sample fit) against evaluated libraries"), "#sb-terra-h"]].filter((r) => r[0]);
+    box.innerHTML = rows.map(([b, label, href]) => {
+      const tot = ORDER.reduce((n, v) => n + (b[v] || 0), 0) || 1;
+      return `<a class="sb-sumrow" href="${href}"><div class="sb-sumlab">${esc(label)}</div><div class="sb-sumnums">${ORDER.map((v) => `<span class="sb-${v.toLowerCase()}"><b>${b[v] || 0}</b> ${V[v]}</span>`).join("")}</div>`
+        + `<div class="sb-sumbar" role="img" aria-label="${ORDER.map((v) => `${b[v] || 0} ${V[v]}`).join(", ")}">${ORDER.filter((v) => b[v]).map((v) => `<i class="sb-${v.toLowerCase()}" style="flex-grow:${b[v]}"></i>`).join("")}</div></a>`;
+    }).join("");
   })();
 })();
