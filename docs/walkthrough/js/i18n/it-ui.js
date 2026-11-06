@@ -5,7 +5,7 @@ Object.assign(WT.L.ui, {
   tp_kicker: "Reattori · radiazioni · fusione", tp_tag: "Lezioni interattive, dalle prime idee al livello della ricerca",
   tp_fire: "Avvia una reazione a catena", tp_hint: "oppure fai clic su una barretta di combustibile", tp_cue: "Scegli una lezione ↓", tp_cue2: "Scorri per iniziare ↓",
   tp_p1_k: "Parte prima", tp_p1_h: "Le radiazioni", tp_p2_k: "Parte seconda", tp_p2_h: "Dentro un reattore",
-  tp_p3_k: "Parte terza", tp_p3_h: "Stabilità e controllo", tp_p4_k: "Parte quarta", tp_p5_k: "Parte quinta", tp_p5_h: "Tipi di reattore",
+  tp_p3_k: "Parte terza", tp_p3_h: "Stabilità e controllo", tp_p4_k: "Parte quarta", tp_p5_k: "Parte quinta", tp_p5_h: "Tipi di reattore", tp_hint3: "o fai clic ovunque",
   tp_coda: "Queste lezioni affiancano la storia principale, <a href=\"./\" data-keep-lang>Dentro una reazione nucleare</a>, che segue un neutrone dentro un nucleo. Le immagini sono illustrative, salvo dove indicato.",
   tp_title: "Altri argomenti nucleari · Dentro una reazione nucleare",
   brand: "Dentro una reazione nucleare", nav_physics: "La fisica", nav_data: "Tutti i nuclidi", nav_board: "Classifica", menu: "Menu", site_nav: "Sito",

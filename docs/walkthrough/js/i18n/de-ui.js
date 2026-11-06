@@ -3,7 +3,7 @@ Object.assign(WT.L.ui, {
   lang_label: "Sprache", nav_teach: "Lehrende",
   nav_topics: "Weitere Kernphysik-Themen", way4_k: "Lernen", way4_t: "Weitere Kernphysik-Themen", way4_p: "Lektionen neben der Hauptgeschichte: Strahlung und Dosis, wie ein Reaktor arbeitet, Stabilität und Regelung, Fusion. Von Einstieg bis Experte.", way4_go: "Lektion wählen →", tp_lessons: "Lektionen", tp_h1: "Weitere Kernphysik-Themen",
   tp_kicker: "Reaktoren · Strahlung · Fusion", tp_tag: "Interaktive Lektionen von den ersten Ideen bis zur Forschung", tp_fire: "Kette starten", tp_hint: "oder klicke auf einen Brennstab", tp_cue: "Lektion wählen ↓", tp_cue2: "Scrollen zum Starten ↓",
-  tp_p1_k: "Teil eins", tp_p1_h: "Strahlung", tp_p2_k: "Teil zwei", tp_p2_h: "Im Inneren eines Reaktors", tp_p3_k: "Teil drei", tp_p3_h: "Stabilität und Regelung", tp_p4_k: "Teil vier", tp_p5_k: "Teil fünf", tp_p5_h: "Reaktortypen",
+  tp_p1_k: "Teil eins", tp_p1_h: "Strahlung", tp_p2_k: "Teil zwei", tp_p2_h: "Im Inneren eines Reaktors", tp_p3_k: "Teil drei", tp_p3_h: "Stabilität und Regelung", tp_p4_k: "Teil vier", tp_p5_k: "Teil fünf", tp_p5_h: "Reaktortypen", tp_hint3: "oder irgendwo klicken",
   tp_coda: "Diese Lektionen stehen neben der Hauptgeschichte, <a href=\"./\" data-keep-lang>Im Inneren einer Kernreaktion</a>, die einem Neutron in einen Kern folgt. Die Bilder dienen der Veranschaulichung, sofern nicht anders angegeben.",
   tp_title: "Weitere Kernphysik-Themen · Im Inneren einer Kernreaktion",
   brand: "Im Inneren einer Kernreaktion", nav_physics: "Die Physik", nav_data: "Alle Nuklide", nav_board: "Rangliste", menu: "Menü", site_nav: "Website",
