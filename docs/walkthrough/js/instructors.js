@@ -42,6 +42,7 @@
     ["halflife", 0, 0, 10, 5, "Radioactivity and half-life", "Half-life", "Random decay of single nuclei, the half-life as a statistical law, exponential decay curves and activity.", 1],
     ["rays", 0, 0, 10, 5, "Alpha, beta, gamma and neutrons", "Radiation", "The four kinds of radiation, what stops each (paper, aluminium, lead, water), and shielding by thickness.", 1],
     ["dose", 0, 0, 8, 4, "Radiation dose", "Dose", "Gray and sievert, everyday doses from a banana to a CT scan, and the doses at which tissue damage begins.", 1],
+    ["everyday", 0, 0, 10, 5, "Nuclear in everyday life", "Everyday", "PET scans (fluorine-18, back-to-back 511 keV photons), radiotherapy beams crossing on a tumour, technetium-99m, carbon dating and smoke detectors.", 1],
     ["chains", 0, 1, 8, 4, "Decay chains and equilibrium", "Decay chains", "The uranium series to lead, secular equilibrium, and a medical isotope generator milked for its daughter.", 1],
     ["waste", 0, 1, 8, 4, "Spent fuel over time", "Spent fuel", "What is in used fuel, how its radioactivity falls over centuries, and when it drops to the level of uranium ore.", 1],
     ["reactor", 0, 0, 8, 4, "How a reactor makes electricity", "Reactor", "Core, control rods, coolant, steam and turbine: how fission heat becomes electricity in a water-cooled reactor.", 1],
