@@ -5,7 +5,7 @@ Object.assign(WT.L.ui, {
   tp_kicker: "Réacteurs · rayonnements · fusion", tp_tag: "Des leçons interactives, des premières idées au niveau de la recherche",
   tp_fire: "Lancer une réaction en chaîne", tp_hint: "ou cliquez sur un crayon combustible", tp_cue: "Choisissez une leçon ↓", tp_cue2: "Faites défiler pour commencer ↓",
   tp_p1_k: "Première partie", tp_p1_h: "Les rayonnements", tp_p2_k: "Deuxième partie", tp_p2_h: "Au cœur d'un réacteur",
-  tp_p3_k: "Troisième partie", tp_p3_h: "Stabilité et pilotage", tp_p4_k: "Quatrième partie", tp_p5_k: "Cinquième partie", tp_p5_h: "Types de réacteurs", tp_hint3: "ou cliquez n’importe où",
+  tp_p3_k: "Troisième partie", tp_p3_h: "Stabilité et pilotage", tp_p4_k: "Quatrième partie", tp_p5_k: "Cinquième partie", tp_p5_h: "Types de réacteurs", tp_hint3: "ou cliquez sur un sujet",
   tp_coda: "Ces leçons accompagnent le récit principal, <a href=\"./\" data-keep-lang>Au cœur d'une réaction nucléaire</a>, qui suit un neutron jusque dans un noyau. Les images sont indicatives, sauf mention contraire.",
   tp_title: "Autres sujets nucléaires · Au cœur d'une réaction nucléaire",
   brand: "Au cœur d'une réaction nucléaire", nav_physics: "La physique", nav_data: "Tous les nucléides", nav_board: "Tableau des scores", menu: "Menu", site_nav: "Site",
