@@ -32,8 +32,6 @@
     ["tof", 17, 1, 10, 5, "Time-of-flight measurements", "Measuring peaks", "Time of flight: a pulsed source, a flight path and a sample; transmission dips, self-shielding in thick samples, and resolution broadening."],
     ["measure", 18, 1, 15, 7, "Observables", "Observables", "From the nucleus to measured numbers: excitation functions, spectra, angular distributions, stellar capture (MACS), Total Monte Carlo uncertainty."],
     ["slowing", 19, 1, 10, 3, "Neutron moderation", "Slowing down", "Moderation: energy lost per collision with hydrogen and oxygen, thermal neutrons, chemical binding and the scattering law S(α,β)."],
-    ["doppler", 20, 1, 8, 3, "Doppler broadening", "Doppler", "Doppler broadening of a resonance with fuel temperature, self-shielding in thick fuel, and the negative fuel-temperature feedback on k."],
-    ["critical", 21, 1, 10, 3, "Criticality and reactor control", "Criticality", "The chain reaction: the multiplication factor k, delayed neutrons and why a reactor can be controlled, critical experiments."],
     ["layers", 22, 2, 12, 5, "How the model is layered", "Layers", "How the data product is built on the engine: one global rule, each nucleus's own data, anchoring to good data (TERRA), calibrated error bars."],
     ["hauser", 23, 3, 18, 5, "Hauser–Feshbach, channel by channel", "Hauser–Feshbach", "The Hauser–Feshbach formula one spin and parity at a time, transmission per channel, width fluctuations (Moldauer, HRTW) and their effect when few channels are open."],
     ["optical", 24, 3, 20, 6, "The optical model, solved", "Optical model, solved", "The Koning–Delaroche potential, Numerov integration of the radial equation, matching to S and T, spin–orbit splitting, cross sections and the s-wave strength function."],
@@ -41,26 +39,47 @@
     ["strength", 26, 3, 18, 5, "Photon strength, in detail", "Photon strength", "E1 (SLO and SMLO) and M1 (spin-flip, scissors, upbend), the Brink–Axel hypothesis, the average radiative width ⟨Γγ⟩ and the γ cascade."],
     ["exciton", 27, 3, 20, 6, "The exciton model, in numbers", "Exciton model", "Particle–hole state densities, transition and emission rates, the exciton chain in time, the hard tail of spectra, the pre-equilibrium share and the two-component model."],
     ["averages", 28, 3, 18, 5, "From resonances to averages", "Resonances to averages", "The R-matrix formula, the statistics of resonance parameters, Doppler broadening, the energy average that becomes Hauser–Feshbach, and resolved, unresolved and smooth ranges."],
-    ["fusion", 29, 0, 12, 4, "Fusion energy and the Coulomb barrier", "Fusion", "Fusion energy from the binding curve; two light nuclei over the Coulomb hill: tunnelling, the energy released as missing mass, fuels compared, and why the gas must be hot."],
-    ["gamow", 30, 1, 12, 3, "The Gamow peak and ignition", "Gamow peak", "The Gamow peak from the Maxwell tail and tunnelling, reactivities of D–T, D–D and D–³He, and the Lawson plane with a 0-D power balance to ignition."],
-    ["tokamak", 31, 2, 12, 3, "Magnetic confinement", "Confinement", "Gyration in a magnetic field, the twisted field of a tokamak and its safety factor, Poincaré sections, magnetic islands and chaos (the tokamap)."],
-    ["blanket", 32, 3, 15, 3, "Breeding blanket and first wall", "Blanket", "Monte Carlo neutron transport in a breeding blanket: tritium breeding ratio, ⁶Li enrichment, (n,2n) multiplication; helium and hydrogen in the first wall from INCOGNITA's 14.1 MeV cross sections."],
-  ].map(([id, n, lv, min, steps, title, topic, what], i) => ({ id, n: i + 1, lv, min, steps, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
+    ["halflife", 0, 0, 10, 5, "Radioactivity and half-life", "Half-life", "Random decay of single nuclei, the half-life as a statistical law, exponential decay curves and activity.", 1],
+    ["rays", 0, 0, 10, 5, "Alpha, beta, gamma and neutrons", "Radiation", "The four kinds of radiation, what stops each (paper, aluminium, lead, water), and shielding by thickness.", 1],
+    ["dose", 0, 0, 8, 4, "Radiation dose", "Dose", "Gray and sievert, everyday doses from a banana to a CT scan, and the doses at which tissue damage begins.", 1],
+    ["chains", 0, 1, 8, 4, "Decay chains and equilibrium", "Decay chains", "The uranium series to lead, secular equilibrium, and a medical isotope generator milked for its daughter.", 1],
+    ["waste", 0, 1, 8, 4, "Spent fuel over time", "Spent fuel", "What is in used fuel, how its radioactivity falls over centuries, and when it drops to the level of uranium ore.", 1],
+    ["reactor", 0, 0, 8, 4, "How a reactor makes electricity", "Reactor", "Core, control rods, coolant, steam and turbine: how fission heat becomes electricity in a water-cooled reactor.", 1],
+    ["economy", 0, 1, 8, 4, "The neutron economy", "Neutron economy", "Where each generation of neutrons goes: fission, capture in uranium-238 and water, leakage, and the four-factor formula.", 1],
+    ["spectrum", 0, 1, 8, 4, "Fast and thermal reactors", "Fast vs thermal", "Slowing neutrons down with a moderator, why thermal reactors need less enrichment, and what fast reactors gain.", 1],
+    ["breeding", 0, 1, 10, 5, "Breeding new fuel", "Breeding", "Turning uranium-238 and thorium-232 into fissile fuel, neutrons per absorption (η), and the conversion and breeding ratio.", 1],
+    ["burnup", 0, 1, 8, 4, "Fuel burnup", "Burnup", "How fuel changes in the core: uranium-235 burns, plutonium builds up, fission products absorb, and burnup in MWd/kg.", 1],
+    ["afterheat", 0, 0, 8, 4, "Heat after shutdown", "Afterheat", "Decay heat after a reactor stops, how quickly it falls, and why cooling must continue after shutdown.", 1],
+    ["critical", 21, 1, 10, 3, "Criticality and reactor control", "Criticality", "The chain reaction: the multiplication factor k, delayed neutrons and why a reactor can be controlled, critical experiments.", 1],
+    ["doppler", 20, 1, 8, 3, "Doppler broadening", "Doppler", "Doppler broadening of a resonance with fuel temperature, self-shielding in thick fuel, and the negative fuel-temperature feedback on k.", 1],
+    ["feedback", 0, 2, 8, 4, "Reactor stability and feedback", "Feedback", "Fuel- and moderator-temperature feedback, void coefficients, and why negative feedback makes a reactor stable.", 1],
+    ["xenon", 0, 2, 8, 4, "Xenon poisoning", "Xenon", "Xenon-135 build-up and burn-out, the iodine pit after shutdown, and xenon oscillations in large cores.", 1],
+    ["diffusion", 0, 2, 8, 4, "Critical size and leakage", "Critical size", "Neutron diffusion, leakage through the surface, buckling, and the critical size of a bare core.", 1],
+    ["kinetics", 0, 3, 10, 4, "Reactor kinetics: six groups and the inhour equation", "Kinetics", "Point kinetics with six delayed-neutron groups, the inhour equation, the reactor period and the prompt jump.", 1],
+    ["transport", 0, 3, 10, 4, "Neutron transport and Monte Carlo", "Monte Carlo", "Following neutrons one at a time through a slab: collisions, the random walk, and how Monte Carlo transport estimates k and flux.", 1],
+    ["fusion", 29, 0, 12, 4, "Fusion energy and the Coulomb barrier", "Fusion", "Fusion energy from the binding curve; two light nuclei over the Coulomb hill: tunnelling, the energy released as missing mass, fuels compared, and why the gas must be hot.", 1],
+    ["gamow", 30, 1, 12, 3, "The Gamow peak and ignition", "Gamow peak", "The Gamow peak from the Maxwell tail and tunnelling, reactivities of D–T, D–D and D–³He, and the Lawson plane with a 0-D power balance to ignition.", 1],
+    ["tokamak", 31, 2, 12, 3, "Magnetic confinement", "Confinement", "Gyration in a magnetic field, the twisted field of a tokamak and its safety factor, Poincaré sections, magnetic islands and chaos (the tokamap).", 1],
+    ["blanket", 32, 3, 15, 3, "Breeding blanket and first wall", "Blanket", "Monte Carlo neutron transport in a breeding blanket: tritium breeding ratio, ⁶Li enrichment, (n,2n) multiplication; helium and hydrogen in the first wall from INCOGNITA's 14.1 MeV cross sections.", 1],
+  ].map(([id, n, lv, min, steps, title, topic, what, tp], i) => ({ id, lv, min, steps, tp: !!tp, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
+  // numbers per page: main story 1..26, then the More topics lessons 1..22 (topics.html)
+  { let a = 0, b = 0; CH.forEach((c) => (c.n = c.tp ? ++b : ++a)); }
   const byId = Object.fromEntries(CH.map((c) => [c.id, c]));
   const lang = WT.langQ();
-  const href = (id) => "./" + lang + "#" + id;
+  const href = (id) => (byId[id] && byId[id].tp ? "./topics.html" : "./") + lang + "#" + id;
   const pill = (lv) => `<span class="lvl l${lv}">${LV[lv]}</span>`;
   const mins = (m) => `${m} ${T("in_min", "min")}`;
 
   // ---------- chapter list with a level filter ----------
   const list = $("#in-list"), chips = $("#in-filter");
-  list.innerHTML = CH.map((c) => `<li class="in-ch" data-lv="${c.lv}"><a class="in-ch-a" href="${href(c.id)}"><span class="in-n">${c.n}</span><span class="in-body"><span class="in-top"><b>${c.title}</b><span class="in-topic">${c.topic}</span></span><span class="in-what">${c.what}</span><span class="in-meta">${pill(c.lv)}<span>${mins(c.min)}</span><span>${c.steps} ${T("in_steps", "steps")}</span><code>#${c.id}</code></span></span></a></li>`).join("");
+  const tpHead = `<li class="in-part"><h3>${T("way4_t", "More topics")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, stability and control, fusion.")}</p></li>`;
+  list.innerHTML = CH.map((c, i) => (c.tp && !(CH[i - 1] || {}).tp ? tpHead : "") + `<li class="in-ch" data-lv="${c.lv}" data-min="${c.min}"><a class="in-ch-a" href="${href(c.id)}"><span class="in-n">${c.n}</span><span class="in-body"><span class="in-top"><b>${c.title}</b><span class="in-topic">${c.topic}</span></span><span class="in-what">${c.what}</span><span class="in-meta">${pill(c.lv)}<span>${mins(c.min)}</span><span>${c.steps} ${T("in_steps", "steps")}</span><code>#${c.id}</code></span></span></a></li>`).join("");
   const opts = [["all", T("in_all", "All")], ["0", LV[0]], ["1", LV[1]], ["2", LV[2]], ["3", LV[3]]];
   chips.innerHTML = opts.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${v === "all"}">${t}</button>`).join("");
   const total = $("#in-total");
   const filt = (v) => {
     chips.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
-    let n = 0, m = 0; list.querySelectorAll(".in-ch").forEach((li, i) => { const on = v === "all" || li.dataset.lv === v; li.hidden = !on; if (on) { n++; m += CH[i].min; } });
+    let n = 0, m = 0; list.querySelectorAll(".in-ch").forEach((li) => { const on = v === "all" || li.dataset.lv === v; li.hidden = !on; if (on) { n++; m += +li.dataset.min; } });
     total.textContent = `${n} ${T("in_chapters", "chapters")} · ≈ ${mins(m)}`;
   };
   chips.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) filt(b.dataset.v); });
@@ -89,9 +108,10 @@
   // ---------- link builder ----------
   const selC = $("#in-b-ch"), selS = $("#in-b-step"), selL = $("#in-b-lang"), out = $("#in-b-url"), open = $("#in-b-open"), copy = $("#in-b-copy");
   const base = location.origin + location.pathname.replace(/instructors(\.html)?$/, "");
-  selC.innerHTML = CH.map((c) => `<option value="${c.id}">${c.n} · ${c.title}</option>`).join("");
+  const opt = (c) => `<option value="${c.id}">${c.n} · ${c.title}</option>`;
+  selC.innerHTML = CH.filter((c) => !c.tp).map(opt).join("") + `<optgroup label="${T("way4_t", "More topics")}">` + CH.filter((c) => c.tp).map(opt).join("") + "</optgroup>";
   const fillSteps = () => { const c = byId[selC.value], v = selS.value; selS.innerHTML = `<option value="">${T("in_b_whole", "whole chapter")}</option>` + Array.from({ length: c.steps }, (_, i) => `<option value="${i + 1}">${T("in_b_step", "step")} ${i + 1}</option>`).join(""); if (v && +v <= c.steps) selS.value = v; };
-  const build = () => { const url = base + (selL.value !== "en" ? "?lang=" + selL.value : "") + "#" + selC.value + (selS.value ? "-" + selS.value : ""); out.textContent = url; open.href = url; };
+  const build = () => { const url = base + (byId[selC.value].tp ? "topics.html" : "") + (selL.value !== "en" ? "?lang=" + selL.value : "") + "#" + selC.value + (selS.value ? "-" + selS.value : ""); out.textContent = url; open.href = url; };
   selL.innerHTML = Object.entries(WT.LANGS).map(([l, [, name]]) => `<option value="${l}" lang="${l}">${name}</option>`).join(""); selL.value = WT.lang; fillSteps(); build();
   selC.addEventListener("change", () => { fillSteps(); build(); }); selS.addEventListener("change", build); selL.addEventListener("change", build);
   copy.addEventListener("click", () => { const done = () => { copy.textContent = T("link_copied", "Link copied"); setTimeout(() => (copy.textContent = T("in_b_copy", "Copy")), 1600); };

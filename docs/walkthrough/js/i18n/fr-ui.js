@@ -1,6 +1,7 @@
 /* French: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "Langue", nav_teach: "Enseignants",
+  nav_topics: "Autres sujets", way4_k: "Apprendre", way4_t: "Autres sujets", way4_p: "Des leçons à côté du récit principal : rayonnement et dose, fonctionnement d'un réacteur, stabilité et pilotage, fusion. De l'initiation à l'expert.", way4_go: "Choisir une leçon →", tp_lessons: "Leçons", tp_h1: "Autres sujets nucléaires",
   brand: "Au cœur d'une réaction nucléaire", nav_physics: "La physique", nav_data: "Tous les nucléides", nav_board: "Tableau des scores", menu: "Menu", site_nav: "Site",
   ways_h: "D'autres portes d'entrée", ways_more: "Ou continuez à défiler : la physique commence ici ↓",
   way1_k: "Explorer", way1_t: "Tous les nucléides", way1_p: "Sections efficaces prédites pour 6168 nucléides, à côté de chaque mesure sélectionnée. Cherchez n'importe quel isotope et voyez tous ses jeux de données.", way1_go: "Ouvrir les données →",

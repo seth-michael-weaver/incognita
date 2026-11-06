@@ -11,7 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">Lettere fragment A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Uanset opdelingen er det omkring 200 MeV: snesevis af millioner gange de få elektronvolt, som afbrænding af ét brændstofmolekyle giver.</p>
-  <p>Lette kerner frigiver energi den anden vej, ved at smelte sammen: <a href="#fusion">→ Fusion</a>.</p>
+  <p>Lette kerner frigiver energi den anden vej, ved at smelte sammen: <a href="topics.html#fusion" data-keep-lang>→ Fusion</a>.</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {

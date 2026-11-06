@@ -41,6 +41,7 @@
   WT.rtl = lang === "ar";
   document.documentElement.dir = WT.rtl ? "rtl" : "ltr";
   WT.missing = new Set();
+  WT.seen = /[?&]labeldump=1/.test(location.search) ? new Set() : null; // dev aid: every canvas label key drawn (numbers as {#}), for translators
   const NUM = /[−-]?\d+(?:[.,]\d+)?/g;
   const cache = new Map();
   // translate one canvas label; untranslated strings fall back to English (and are recorded in WT.missing)

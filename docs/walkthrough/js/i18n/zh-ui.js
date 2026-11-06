@@ -1,6 +1,7 @@
 /* Simplified Chinese (简体中文): static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "语言", nav_teach: "教师指南",
+  nav_topics: "更多主题", way4_k: "学习", way4_t: "更多主题", way4_p: "主线之外的课程：辐射与剂量、反应堆如何工作、稳定性与控制、聚变。从入门到专家。", way4_go: "选择一课 →", tp_lessons: "课程", tp_h1: "更多核科学主题",
   brand: "走进核反应", nav_physics: "物理原理", nav_data: "全部核素", nav_board: "记分板", menu: "菜单", site_nav: "网站",
   ways_h: "更多入口", ways_more: "或者继续向下滚动：物理部分从这里开始 ↓",
   way1_k: "探索", way1_t: "全部核素", way1_p: "6168 个核素的预测截面，与每一组经过整理的测量数据并列。可以搜索任意同位素，查看每个数据集。", way1_go: "打开数据 →",

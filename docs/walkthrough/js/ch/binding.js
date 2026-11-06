@@ -22,7 +22,7 @@
   <div class="ctl"><label for="bi-f">Lighter fragment A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Whatever the split, it is about 200 MeV: tens of millions of times the few electron-volts that burning one molecule of fuel gives.</p>
-  <p>Light nuclei release energy the other way, by joining: <a href="#fusion">→ Fusion</a>.</p>
+  <p>Light nuclei release energy the other way, by joining: <a href="topics.html#fusion" data-keep-lang>→ Fusion</a>.</p>
 </div>`,
     setup(S) { S.set("mode", 0); S.set("pick", 56); S.set("frag", 95); S.set("fuse", 2); },
     steps: [(S) => S.set("mode", 0), (S) => S.set("mode", 1)],

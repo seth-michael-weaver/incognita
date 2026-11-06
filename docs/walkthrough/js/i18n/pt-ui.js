@@ -1,6 +1,7 @@
 /* Portuguese (pt-PT): static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "Língua", nav_teach: "Docentes",
+  nav_topics: "Mais temas", way4_k: "Aprende", way4_t: "Mais temas", way4_p: "Lições ao lado da história principal: radiação e dose, como funciona um reator, estabilidade e controlo, fusão. Da introdução ao nível de especialista.", way4_go: "Escolhe uma lição →", tp_lessons: "Lições", tp_h1: "Mais temas nucleares",
   brand: "Dentro de uma reação nuclear", nav_physics: "A física", nav_data: "Todos os nuclídeos", nav_board: "Quadro de resultados", menu: "Menu", site_nav: "Sítio",
   ways_h: "Mais formas de entrar", ways_more: "Ou continua a descer: a física começa aqui ↓",
   way1_k: "Explora", way1_t: "Todos os nuclídeos", way1_p: "Secções eficazes previstas para 6168 nuclídeos ao lado de cada medição curada. Procura qualquer isótopo e vê todos os conjuntos de dados.", way1_go: "Abrir os dados →",

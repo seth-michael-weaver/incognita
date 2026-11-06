@@ -5,7 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>陽子は正の電荷をもち、原子核の82個の陽子も同じです。同じ符号の電荷は反発するので、陽子は押し返され、近づくほどその力は急に強まります（矢印）。遅い陽子は手前で止まり、触れることなく引き返します。約13 MeVを超えて初めてこの反発を乗り越えられ、それより少し低いときでも、ときどきすり抜けることがあります（<b>トンネル効果</b>）。小さなグラフは、同じ反発をエネルギーの丘として描いたものです。</p>
   <div class="ctl"><label for="wn-e1">陽子のエネルギー（MeV）</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
-  <p>2つの軽い原子核が融合するときも、同じ丘に向き合います：<a href="#fusion-2">→ 核融合</a>。</p>
+  <p>2つの軽い原子核が融合するときも、同じ丘に向き合います：<a href="topics.html#fusion-2" data-keep-lang>→ 核融合</a>。</p>
 </div>
 <div class="step">
   <p>中性子は電荷をもたないので、どんな速さでも入り込めます。押し返すものがないので登るべき丘はなく、原子核に届きさえすれば、あとは強い力が引き込みます。</p>

@@ -11,7 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">Более лёгкий осколок A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>При любом способе деления выходит около 200 MeV: в десятки миллионов раз больше нескольких электронвольт, которые даёт сгорание одной молекулы топлива.</p>
-  <p>Лёгкие ядра выделяют энергию наоборот — соединяясь: <a href="#fusion">→ Синтез</a>.</p>
+  <p>Лёгкие ядра выделяют энергию наоборот — соединяясь: <a href="topics.html#fusion" data-keep-lang>→ Синтез</a>.</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {

@@ -5,7 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>양성자는 양전하이고, 원자핵의 양성자 82개도 그렇습니다. 같은 전하끼리는 밀어내므로 양성자는 밀려나고, 가까워질수록 그 밀침은 빠르게 커집니다(화살표). 느린 양성자는 닿기 전에 멈추어 되돌아갑니다. 약 13 MeV를 넘어야 그 밀침을 넘어서고, 그 바로 아래에서는 가끔 그래도 빠져들어 갑니다(<b>터널링</b>). 작은 그래프는 같은 밀침을 에너지 언덕으로 보여 줍니다.</p>
   <div class="ctl"><label for="wn-e1">양성자 에너지 (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
-  <p>가벼운 원자핵 둘이 융합할 때도 같은 언덕을 마주합니다: <a href="#fusion-2">→ 핵융합</a>.</p>
+  <p>가벼운 원자핵 둘이 융합할 때도 같은 언덕을 마주합니다: <a href="topics.html#fusion-2" data-keep-lang>→ 핵융합</a>.</p>
 </div>
 <div class="step">
   <p>중성자는 전하가 없어서 어떤 속도로도 들어갑니다. 밀어내는 것이 없으니 오를 언덕이 없습니다. 원자핵에 닿기만 하면 강한 핵력이 끌어당겨 줍니다.</p>

@@ -11,7 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">हल्का टुकड़ा A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>विखंडन चाहे जैसा हो, यह लगभग 200 MeV है: ईंधन के एक अणु को जलाने पर मिलने वाले कुछ इलेक्ट्रॉन-वोल्ट से करोड़ों गुना अधिक।</p>
-  <p>हल्के नाभिक उलटे रास्ते से, जुड़कर, ऊर्जा छोड़ते हैं: <a href="#fusion">→ संलयन</a>।</p>
+  <p>हल्के नाभिक उलटे रास्ते से, जुड़कर, ऊर्जा छोड़ते हैं: <a href="topics.html#fusion" data-keep-lang>→ संलयन</a>।</p>
 </div>`,
 };
 

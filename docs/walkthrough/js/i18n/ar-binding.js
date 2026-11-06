@@ -11,7 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">الشظية الأخف A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>مهما كان الانشطار، فهو نحو 200 MeV: أكبر بعشرات الملايين من المرات من الإلكترون فولتات القليلة التي يعطيها احتراق جزيء واحد من الوقود.</p>
-  <p>أما الأنوية الخفيفة فتحرر الطاقة بالطريق المعاكس، بالاتحاد: <a href="#fusion">→ الاندماج</a>.</p>
+  <p>أما الأنوية الخفيفة فتحرر الطاقة بالطريق المعاكس، بالاتحاد: <a href="topics.html#fusion" data-keep-lang>→ الاندماج</a>.</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {

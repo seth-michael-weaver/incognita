@@ -12,6 +12,12 @@
   //   const b = sl.querySelector('a[href^="scoreboard.html"]');
   //   sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
   // }
+  // "More topics" link (every page): lessons beside the engine story (reactors, radiation, fusion), placed after Scoreboard
+  if (sl && !head.querySelector('[data-i18n="nav_topics"]')) { // topics.html has it as its chapter menu instead
+    const a = document.createElement("a"); a.href = "topics.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_topics"; a.textContent = WT.ui("nav_topics", "More topics");
+    const b = sl.querySelector('a[href^="scoreboard.html"]');
+    sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
+  }
   if (sl && !sl.querySelector('a[href^="instructors.html"]')) {
     const a = document.createElement("a"); a.href = "instructors.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_teach"; a.textContent = WT.ui("nav_teach", "Instructors");
     if (/\/instructors(\.html)?$/.test(location.pathname)) { a.className = "here"; a.setAttribute("aria-current", "page"); }

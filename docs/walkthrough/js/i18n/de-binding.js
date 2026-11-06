@@ -11,7 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">Leichteres Bruchstück A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Wie auch immer die Teilung ausfällt, es sind etwa 200 MeV: zig Millionen Mal die wenigen Elektronenvolt, die das Verbrennen eines Brennstoffmoleküls liefert.</p>
-  <p>Leichte Kerne setzen auf dem umgekehrten Weg Energie frei, durch Verschmelzen: <a href="#fusion">→ Fusion</a>.</p>
+  <p>Leichte Kerne setzen auf dem umgekehrten Weg Energie frei, durch Verschmelzen: <a href="topics.html#fusion" data-keep-lang>→ Fusion</a>.</p>
 </div>`,
 };
 

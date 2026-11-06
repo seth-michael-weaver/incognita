@@ -1,6 +1,7 @@
 /* Japanese: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "言語", nav_teach: "教員向け",
+  nav_topics: "その他のトピック", way4_k: "学ぶ", way4_t: "その他のトピック", way4_p: "本編と並ぶレッスン：放射線と線量、原子炉のしくみ、安定性と制御、核融合。入門から上級まで。", way4_go: "レッスンを選ぶ →", tp_lessons: "レッスン", tp_h1: "その他の原子力トピック",
   brand: "原子核反応の内側", nav_physics: "物理", nav_data: "全核種", nav_board: "スコアボード", menu: "メニュー", site_nav: "サイト",
   ways_h: "ほかの入り口", ways_more: "またはこのままスクロール：物理はここから始まります ↓",
   way1_k: "探索", way1_t: "全核種", way1_p: "6168核種の断面積予測を、精査済みの測定値とともに表示します。どの同位体でも検索でき、すべてのデータセットを見られます。", way1_go: "データを開く →",

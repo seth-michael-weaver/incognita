@@ -11,7 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">Frammento più leggero A</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Qualunque sia la divisione, sono circa 200 MeV: decine di milioni di volte i pochi elettronvolt che dà la combustione di una molecola di combustibile.</p>
-  <p>I nuclei leggeri liberano energia nel verso opposto, unendosi: <a href="#fusion">→ Fusione</a>.</p>
+  <p>I nuclei leggeri liberano energia nel verso opposto, unendosi: <a href="topics.html#fusion" data-keep-lang>→ Fusione</a>.</p>
 </div>`,
 };
 

@@ -11,7 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">A du fragment léger</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Quelle que soit la cassure, cela fait environ 200 MeV : des dizaines de millions de fois les quelques électronvolts que donne la combustion d'une molécule de combustible.</p>
-  <p>Les noyaux légers libèrent de l'énergie dans l'autre sens, en s'unissant : <a href="#fusion">→ Fusion</a>.</p>
+  <p>Les noyaux légers libèrent de l'énergie dans l'autre sens, en s'unissant : <a href="topics.html#fusion" data-keep-lang>→ Fusion</a>.</p>
 </div>`,
 };
 

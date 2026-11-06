@@ -1,6 +1,7 @@
 /* Dutch (Nederlands): static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "Taal", nav_teach: "Docenten",
+  nav_topics: "Meer onderwerpen", way4_k: "Leren", way4_t: "Meer onderwerpen", way4_p: "Lessen naast het hoofdverhaal: straling en dosis, hoe een reactor werkt, stabiliteit en regeling, fusie. Van intro tot expert.", way4_go: "Kies een les →", tp_lessons: "Lessen", tp_h1: "Meer nucleaire onderwerpen",
   brand: "Binnen in een kernreactie", nav_physics: "De natuurkunde", nav_data: "Alle nucliden", nav_board: "Scorebord", menu: "Menu", site_nav: "Site",
   ways_h: "Meer manieren om te beginnen", ways_more: "Of scrol gewoon verder: de natuurkunde begint hier ↓",
   way1_k: "Verken", way1_t: "Alle nucliden", way1_p: "Voorspelde werkzame doorsneden voor 6168 nucliden naast elke gecureerde meting. Zoek elk isotoop op en bekijk elke dataset.", way1_go: "Open de data →",

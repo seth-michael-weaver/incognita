@@ -1,6 +1,7 @@
 /* Italian: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "Lingua", nav_teach: "Docenti",
+  nav_topics: "Altri argomenti", way4_k: "Impara", way4_t: "Altri argomenti", way4_p: "Lezioni accanto alla storia principale: radiazioni e dose, come funziona un reattore, stabilità e controllo, fusione. Dall'introduzione al livello esperto.", way4_go: "Scegli una lezione →", tp_lessons: "Lezioni", tp_h1: "Altri argomenti nucleari",
   brand: "Dentro una reazione nucleare", nav_physics: "La fisica", nav_data: "Tutti i nuclidi", nav_board: "Classifica", menu: "Menu", site_nav: "Sito",
   ways_h: "Altre porte d'ingresso", ways_more: "Oppure continua a scorrere: la fisica comincia qui ↓",
   way1_k: "Esplora", way1_t: "Tutti i nuclidi", way1_p: "Sezioni d'urto previste per 6168 nuclidi accanto a ogni misura revisionata. Cerca qualsiasi isotopo e guarda ogni insieme di dati.", way1_go: "Apri i dati →",

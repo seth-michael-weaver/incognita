@@ -5,7 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>Un protone è positivo, e lo sono anche gli 82 protoni del nucleo. Le cariche uguali si respingono, quindi il protone viene spinto via, e la spinta cresce rapidamente man mano che si avvicina (la freccia). Un protone lento si ferma prima e torna indietro senza toccare. Solo sopra circa 13 MeV supera la spinta; appena sotto, a volte passa comunque (<b>effetto tunnel</b>). Il piccolo grafico mostra la stessa spinta come una collina di energia.</p>
   <div class="ctl"><label for="wn-e1">Energia del protone (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
-  <p>Due nuclei leggeri affrontano la stessa collina quando si fondono: <a href="#fusion-2">→ Fusione</a>.</p>
+  <p>Due nuclei leggeri affrontano la stessa collina quando si fondono: <a href="topics.html#fusion-2" data-keep-lang>→ Fusione</a>.</p>
 </div>
 <div class="step">
   <p>Un neutrone non ha carica: entra a qualsiasi velocità. Niente lo respinge, quindi non c'è nessuna collina da scalare; deve solo raggiungere il nucleo, e poi la forza forte lo attira dentro.</p>

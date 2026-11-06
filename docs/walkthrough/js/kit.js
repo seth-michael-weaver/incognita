@@ -45,6 +45,7 @@
     g.save = () => ctx.save(); g.restore = () => ctx.restore();
     /** Text label. o: color size weight serif italic align base alpha, bg (true = paper backing so it never collides). */
     g.label = (s, x, y, o = {}) => {
+      if (WT.seen && !o.raw && /[A-Za-z]/.test(s)) WT.seen.add(String(s).replace(/[−-]?\d+(?:[.,]\d+)?/g, "{#}"));
       if (WT.tr && !o.raw) s = WT.tr(s); // raw: already translated (WT.trf)
       ctx.save(); ctx.globalAlpha = o.alpha ?? 1;
       let size = Math.max(o.size || 14, W < 600 ? 10 : 12); // legible minimum; phones keep their tighter sizes so labels fit
@@ -274,13 +275,14 @@
     return a + "s";
   }
   function glMatchers() {
-    const ci = new Map(), cs = new Map(); // alias -> key
+    const ci = new Map(), cs = new Map(); // alias -> [keys] (several entries may share a word; only / not pick one per chapter)
+    const add = (m, a, key) => { const l = m.get(a); if (!l) m.set(a, [key]); else if (!l.includes(key)) l.push(key); };
     const G = WT.gl() || {};
     for (const key in G) for (const a of G[key].aliases || []) {
       // plain words (an optional capital first letter, then lower case) match case-insensitively, with plurals;
       // a single letter is a symbol and keeps its case (the width Γ must not mark every γ)
-      if (/^\p{L}[\p{Ll}' \-–]+$/u.test(a)) { const l = a.toLowerCase(); if (!ci.has(l)) ci.set(l, key); const pl = plural(l); if (!ci.has(pl)) ci.set(pl, key); }
-      else if (!cs.has(a)) cs.set(a, key);
+      if (/^\p{L}[\p{Ll}' \-–]+$/u.test(a)) { const l = a.toLowerCase(); add(ci, l, key); add(ci, plural(l), key); }
+      else add(cs, a, key);
     }
     const mk = (m, fl) => { if (!m.size) return null; const alts = [...m.keys()].sort((x, y) => y.length - x.length).map(escRe).join("|"); return new RegExp(`(?<!${BOUND_BEFORE})(?:${alts})(?!${BOUND_AFTER})`, "gu" + fl); };
     return { ci, cs, rci: mk(ci, "i"), rcs: mk(cs, "") };
@@ -303,7 +305,11 @@
       const found = [];
       [[M.rci, M.ci, true], [M.rcs, M.cs, false]].forEach(([re, map, low]) => {
         if (!re) return; re.lastIndex = 0;
-        for (let m; (m = re.exec(text)); ) { const k = map.get(low ? m[0].toLowerCase().replace(/\s+/g, " ") : m[0].replace(/\s+/g, " ")); if (k) found.push({ s: m.index, e: m.index + m[0].length, k }); }
+        for (let m; (m = re.exec(text)); ) {
+          const ks = map.get(low ? m[0].toLowerCase().replace(/\s+/g, " ") : m[0].replace(/\s+/g, " ")) || [], here = chEl && chEl.dataset.ch;
+          // only / not: [chapter ids] where an entry does / does not apply (fusion "reactivity" ⟨σv⟩ vs a reactor's reactivity ρ)
+          const k = ks.find((key) => { const E = (WT.glossary && WT.glossary[key]) || G[key] || {}; return !(E.only && !E.only.includes(here)) && !(E.not && E.not.includes(here)); });
+          if (k) found.push({ s: m.index, e: m.index + m[0].length, k }); }
       });
       found.sort((a, b) => a.s - b.s || b.e - a.e);
       const picks = []; let end = -1;
@@ -504,7 +510,8 @@
     const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
     const LEVEL = { structure: 0, xsec: 0, binding: 0, landscape: 0, neutrons: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, fisout: 1, products: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, doppler: 1, critical: 1, layers: 2,
       hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3, // the Expert part (chapters 23-28)
-      fusion: 0, gamow: 1, tokamak: 2, blanket: 3 }; // part three, fusion (chapters 29-32): one chapter per level
+      fusion: 0, gamow: 1, tokamak: 2, blanket: 3 }; // fusion (on topics.html): one chapter per level
+    Object.keys(WT.mods).forEach((id) => { if (WT.mods[id].level != null) LEVEL[id] = WT.mods[id].level; }); // a chapter may carry its own level (topics.html)
     // chapter numbers follow page order (1..N), in the reader's language: "Chapter 1" (or its translation) with the number replaced
     const order = [...document.querySelectorAll("[data-ch]")].map((el) => el.dataset.ch).filter((id) => WT.mods[id] && WT.mods[id].title);
     const numTpl = (order.length && ((WT.tl && WT.L.ch[order[0]] && WT.L.ch[order[0]].num) || WT.mods[order[0]].num)) || "Chapter 1";
@@ -556,7 +563,11 @@
     // contents bar
     const toc = document.querySelector(".toc ol");
     if (toc) {
-      chapters.filter((c) => c.mod.title).forEach((c) => { const li = document.createElement("li"); li.innerHTML = `<a href="#${c.id}"><span>${(c.mod.num || "").replace(/[^0-9]/g, "")}</span>${c.mod.short || c.mod.title}</a>`; toc.appendChild(li); });
+      // each entry: a dot coloured by level, the number, the title, the level tag; a part heading wherever the page starts a part
+      chapters.filter((c) => c.mod.title).forEach((c) => {
+        const ph = c.el.previousElementSibling; if (ph && ph.classList.contains("part-head")) { const k = ph.querySelector(".part-kicker"), h = ph.querySelector("h2"), p = document.createElement("li"); p.className = "toc-part"; p.innerHTML = `<span>${k ? k.textContent : ""}</span>${h ? h.textContent : ""}`; toc.appendChild(p); }
+        const lv = LEVEL[c.id], li = document.createElement("li"), lvt = lv == null ? "" : `<span class="lvl l${lv}">${WT.ui ? WT.ui("lvl" + lv, LEVELS[lv]) : LEVELS[lv]}</span>`;
+        li.innerHTML = `<a href="#${c.id}"><i class="l${lv}"></i><span class="n">${(c.mod.num || "").replace(/[^0-9]/g, "")}</span><span class="t">${c.mod.short || c.mod.title}</span>${lvt}</a>`; toc.appendChild(li); });
       const links = [...toc.querySelectorAll("a")];
       const nav = toc.parentElement, made = !nav.querySelector(".toc-menu"), menu = nav.querySelector(".toc-menu") || document.createElement("button"); // the chapter list opens from a button
       if (made) { menu.type = "button"; menu.className = "toc-menu"; menu.setAttribute("aria-expanded", "false"); menu.textContent = (WT.ui ? WT.ui("chapters", "Chapters") : "Chapters") + " ▾"; }

@@ -1,6 +1,7 @@
 /* Korean: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "언어", nav_teach: "교수자용",
+  nav_topics: "더 많은 주제", way4_k: "배우기", way4_t: "더 많은 주제", way4_p: "본편 옆의 강의: 방사선과 선량, 원자로의 작동 원리, 안정성과 제어, 핵융합. 입문부터 전문가까지.", way4_go: "강의 고르기 →", tp_lessons: "강의", tp_h1: "더 많은 원자력 주제",
   brand: "핵반응의 내부", nav_physics: "물리", nav_data: "모든 핵종", nav_board: "점수판", menu: "메뉴", site_nav: "사이트",
   ways_h: "더 많은 입구", ways_more: "아니면 계속 내려가세요. 물리는 여기서 시작합니다 ↓",
   way1_k: "탐색", way1_t: "모든 핵종", way1_p: "6,168개 핵종에 대한 예측 단면적을 정리된 모든 측정값과 나란히 보여 줍니다. 어떤 동위원소든 검색하고 모든 데이터 세트를 살펴보세요.", way1_go: "데이터 열기 →",

@@ -5,7 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>Um protão é positivo, tal como os 82 protões do núcleo. Cargas iguais repelem-se, pelo que o protão é empurrado para longe, e o empurrão cresce depressa à medida que se aproxima (a seta). Um protão lento para antes e volta para trás sem tocar. Só acima de cerca de 13 MeV consegue vencer o empurrão; logo abaixo, por vezes passa na mesma (<b>efeito de túnel</b>). O pequeno gráfico mostra o mesmo empurrão como uma colina de energia.</p>
   <div class="ctl"><label for="wn-e1">Energia do protão (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
-  <p>Dois núcleos leves enfrentam a mesma colina quando se fundem: <a href="#fusion-2">→ Fusão</a>.</p>
+  <p>Dois núcleos leves enfrentam a mesma colina quando se fundem: <a href="topics.html#fusion-2" data-keep-lang>→ Fusão</a>.</p>
 </div>
 <div class="step">
   <p>Um neutrão não tem carga: entra a qualquer velocidade. Nada o empurra para longe, por isso não há colina para subir; só precisa de chegar ao núcleo, e então a força forte puxa-o para dentro.</p>

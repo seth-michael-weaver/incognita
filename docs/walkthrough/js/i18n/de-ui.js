@@ -1,6 +1,7 @@
 /* German (Deutsch): static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "Sprache", nav_teach: "Lehrende",
+  nav_topics: "Weitere Themen", way4_k: "Lernen", way4_t: "Weitere Themen", way4_p: "Lektionen neben der Hauptgeschichte: Strahlung und Dosis, wie ein Reaktor arbeitet, Stabilität und Regelung, Fusion. Von Einstieg bis Experte.", way4_go: "Lektion wählen →", tp_lessons: "Lektionen", tp_h1: "Weitere Kernphysik-Themen",
   brand: "Im Inneren einer Kernreaktion", nav_physics: "Die Physik", nav_data: "Alle Nuklide", nav_board: "Rangliste", menu: "Menü", site_nav: "Website",
   ways_h: "Weitere Einstiege", ways_more: "Oder scroll einfach weiter: Hier beginnt die Physik ↓",
   way1_k: "Erkunden", way1_t: "Alle Nuklide", way1_p: "Vorhergesagte Wirkungsquerschnitte für 6168 Nuklide neben jeder kuratierten Messung. Such dir ein beliebiges Isotop und sieh dir jeden Datensatz an.", way1_go: "Zu den Daten →",

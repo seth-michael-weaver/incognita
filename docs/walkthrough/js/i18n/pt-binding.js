@@ -11,7 +11,7 @@ WT.L.ch.binding = {
   <div class="ctl"><label for="bi-f">A do fragmento mais leve</label><input id="bi-f" type="range" data-bind="frag" data-instant min="70" max="118" step="1" value="95"><output data-show="frag" data-fmt="0"></output></div>
   <p class="ctl-result" id="bi-split-out" aria-live="polite"></p>
   <p>Seja qual for a divisão, são cerca de 200 MeV: dezenas de milhões de vezes os poucos eletrão-volts que a queima de uma molécula de combustível dá.</p>
-  <p>Os núcleos leves libertam energia pelo caminho inverso, juntando-se: <a href="#fusion">→ Fusão</a>.</p>
+  <p>Os núcleos leves libertam energia pelo caminho inverso, juntando-se: <a href="topics.html#fusion" data-keep-lang>→ Fusão</a>.</p>
 </div>`,
 };
 

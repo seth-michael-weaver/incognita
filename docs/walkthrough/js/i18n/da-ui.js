@@ -1,6 +1,7 @@
 /* Danish: static page text (index.html data-i18n keys) and kit UI strings */
 Object.assign(WT.L.ui, {
   lang_label: "Sprog", nav_teach: "Undervisere",
+  nav_topics: "Flere emner", way4_k: "Lær", way4_t: "Flere emner", way4_p: "Lektioner ved siden af hovedhistorien: stråling og dosis, hvordan en reaktor virker, stabilitet og styring, fusion. Fra intro til ekspert.", way4_go: "Vælg en lektion →", tp_lessons: "Lektioner", tp_h1: "Flere nukleare emner",
   brand: "Inde i en kernereaktion", nav_physics: "Fysikken", nav_data: "Alle nuklider", nav_board: "Resultattavle", menu: "Menu", site_nav: "Websted",
   ways_h: "Flere veje ind", ways_more: "Eller bliv ved med at scrolle: fysikken begynder her ↓",
   way1_k: "Udforsk", way1_t: "Alle nuklider", way1_p: "Forudsagte tværsnit for 6168 nuklider ved siden af hver kurateret måling. Søg efter en hvilken som helst isotop, og se alle datasæt.", way1_go: "Åbn dataene →",

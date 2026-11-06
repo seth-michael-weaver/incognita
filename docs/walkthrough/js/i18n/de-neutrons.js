@@ -5,7 +5,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>Ein Proton ist positiv, und die 82 Protonen des Kerns sind es auch. Gleiche Ladungen stoßen sich ab, das Proton wird also weggedrückt, und die Abstoßung wächst schnell, je näher es kommt (der Pfeil). Ein langsames Proton bleibt davor stehen und kehrt um, ohne den Kern zu berühren. Erst über etwa 13 MeV überwindet es die Abstoßung; knapp darunter schlüpft es manchmal trotzdem hindurch (<b>Tunneln</b>). Das kleine Diagramm zeigt dieselbe Abstoßung als Energieberg.</p>
   <div class="ctl"><label for="wn-e1">Protonenenergie (MeV)</label><input id="wn-e1" type="range" data-bind="Ep" data-instant min="0.5" max="20" step="0.1" value="6"><output data-show="Ep" data-fmt="1"></output></div>
-  <p>Zwei leichte Kerne stehen vor demselben Hügel, wenn sie verschmelzen: <a href="#fusion-2">→ Fusion</a>.</p>
+  <p>Zwei leichte Kerne stehen vor demselben Hügel, wenn sie verschmelzen: <a href="topics.html#fusion-2" data-keep-lang>→ Fusion</a>.</p>
 </div>
 <div class="step">
   <p>Ein Neutron hat keine Ladung: Es dringt bei jeder Geschwindigkeit ein. Nichts stößt es ab, es gibt also keinen Berg zu erklimmen; es muss nur den Kern erreichen, dann zieht die starke Kraft es hinein.</p>
