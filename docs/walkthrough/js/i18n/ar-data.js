@@ -21,7 +21,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "محرك INCOGNITA نقلٌ برمجي لـ <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning، S. Hilaire، S. Goriely) ويستخدم قاعدة بيانات البنية النووية الخاصة بـ TALYS. ما يضيفه INCOGNITA <a href=\"./?lang=ar#code\">مُدرَج، مفتاحًا مفتاحًا، في آخر الصفحة التعليمية</a>.",
   dx_repo_p2: "لتشغيل المحرك نفسه تحتاج أيضًا إلى قاعدة بيانات البنية الخاصة بـ TALYS؛ ويشرح ملف README كيفية تنزيلها.",
   dx_repo_link: "seth-michael-weaver/incognita على GitHub ←",
-  dx_src: "المصادر: تنبؤات المكتبة v0.2 (<code>library/v0.2</code>)؛ قياسات الأسر من EXFOR منقّحة في <code>data/curation</code>؛ قياسات (n,2n) و(n,p) و(n,α) من صفوف المرجع في <code>incognita/bench</code>. القياسات التي استبعدها التنقيح مخفية ما لم تطلبها. التراكب الاختياري (خطوط متقطعة) للمكتبات المقيَّمة (ENDF/B-VIII.1، JEFF-4.0، TENDL-2025) يولّده <code>scripts/build_site_overlay.py</code> للعرض فقط؛ ولا يقرؤه INCOGNITA أبدًا.",
+  dx_src: "المصادر: تنبؤات المكتبة v0.2 (<code>library/v0.2</code>)؛ قياسات الأسر من EXFOR منقّحة في <code>data/curation</code>؛ قياسات (n,2n) و(n,p) و(n,α) من صفوف المرجع في <code>incognita/bench</code> (دون Z 26: صفوف EXFOR مختارة بالقواعد نفسها، <code>data/curation/inputs</code>). القياسات التي استبعدها التنقيح مخفية ما لم تطلبها. التراكب الاختياري (خطوط متقطعة) للمكتبات المقيَّمة (ENDF/B-VIII.1، JEFF-4.0، TENDL-2025) يولّده <code>scripts/build_site_overlay.py</code> للعرض فقط؛ ولا يقرؤه INCOGNITA أبدًا.",
   dx_t0: "مقيس", dx_t1: "مثبّت على MACS مقيسة", dx_t2: "مستكمَل (قرب نويدات مقيسة)", dx_t3: "مستقرأ",
   dx_ts0: "مقيس", dx_ts1: "مثبّت", dx_ts2: "مستكمَل", dx_ts3: "مستقرأ",
   dx_keep: "مُبقى", dx_down: "بوزن أقل", dx_excl: "مستبعد", dx_fix: "وحدة مصحّحة",

@@ -2,7 +2,9 @@
 
 Reads the v0.2 library (production-engine curves for every nuclide) and the curated EXFOR capture cells (Z 26-92:
 exfor_capture_Z26-92_trust + exfor_cells; Z 1-25: exfor_capture_Z1-25_trust + exfor_cells_Z1-25, the same WP-12 curation
-run by scripts/build_light_curation.py), plus the benchmark rows for (n,2n), (n,p) and (n,alpha), and writes:
+run by scripts/build_light_curation.py), plus measured (n,2n), (n,p) and (n,alpha) points: the benchmark rows (Z 24-92,
+incognita/bench/data/exam_rows) and, for Z 1-25, EXFOR rows cut with the same rules by scripts/build_light_channels.py
+(data/curation/inputs/exfor_threshold_Z1-25_rows.parquet), and writes:
   data/index.json      one row per nuclide (chart of nuclides: tier, MACS at 30 keV, counts of measured data)
   data/n/<Z>/<A>.json  everything about one nuclide (<A> is "nat" for a natural element), fetched only when that
                        nuclide is opened; the chart itself needs only the index
@@ -137,12 +139,23 @@ def main():
         else:
             m["other"][kind] += 1
 
-    # ---- measured threshold channels (benchmark rows) ----
+    # ---- measured threshold channels ----
+    # Z >= 26: the benchmark rows. Their (n,alpha) file also holds He-4 production rows (kind "nxa", (n,x)He-4, the
+    # benchmark's separate he_prod quantity): a different reaction, so they are not shown as (n,alpha).
+    # Z 1-25: the same rules on the 2026-10-14 EXFOR snapshot (scripts/build_light_channels.py); for Z 24-25 the benchmark
+    # has only He-production rows, so the two sources never meet on one nuclide (asserted).
     thr = defaultdict(lambda: defaultdict(list))
     for ch_, fn in (("n2n", "n2n_rows"), ("np", "np_rows"), ("na", "na_rows")):
         for r in pq.read_table(os.path.join(ROOT, "incognita", "bench", "data", "exam_rows", fn + ".parquet")).to_pylist():
+            if r.get("kind") == "nxa":
+                continue
             series = str(r.get("series") or "").replace(".nan", "")
             thr[(r["Z"], r["A"])][ch_].append([sig(r["e_ev"], 5), sig(r["data_mb"]), series, r.get("year")])
+    assert all(Z >= 26 for Z, _ in thr), "benchmark (n,2n)/(n,p)/(n,alpha) rows below Z 26"
+    for r in pq.read_table(os.path.join(INP, "exfor_threshold_Z1-25_rows.parquet")).to_pylist():
+        assert r["Z"] <= 25
+        series = str(r["series"]).replace(".nan", "")
+        thr[(r["Z"], r["A"])][r["channel"]].append([sig(r["e_ev"], 5), sig(r["data_mb"]), series, r["year"]])
 
     # ---- write ----
     keys = set(nucs) | {k for k in meas if k[1] > 0} | set(thr)
@@ -182,7 +195,9 @@ def main():
           f"measured capture on {sum(1 for k in meas if k[1] > 0)} nuclides + {len(nat)} natural elements")
     light = [r for r in index if r[0] < 26]
     print(f"Z 1-25: {len(light)} nuclides, {sum(1 for r in light if r[-1] > 0)} measured (n_use > 0), "
-          f"{sum(1 for r in light if r[5] + r[6] > 0 and r[-1] == 0)} with only excluded cells")
+          f"{sum(1 for r in light if r[5] + r[6] > 0 and r[-1] == 0)} with only excluded cells; "
+          f"(n,2n) / (n,p) / (n,alpha) measured on {sum(1 for r in light if r[8])} / {sum(1 for r in light if r[9])} / "
+          f"{sum(1 for r in light if r[10])} nuclides ({sum(r[8] for r in light)} / {sum(r[9] for r in light)} / {sum(r[10] for r in light)} points)")
 
 
 if __name__ == "__main__":

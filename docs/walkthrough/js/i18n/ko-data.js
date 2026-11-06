@@ -21,7 +21,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITA 엔진은 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>(A. J. Koning, S. Hilaire, S. Goriely)를 이식한 것으로, TALYS 핵구조 데이터베이스를 사용합니다. INCOGNITA가 더한 것은 <a href=\"./?lang=ko#code\">해설 페이지 끝에 스위치별로 정리되어 있습니다</a>.",
   dx_repo_p2: "엔진 자체를 실행하려면 TALYS 구조 데이터베이스도 필요합니다. 받는 방법은 README에 있습니다.",
   dx_repo_link: "GitHub의 seth-michael-weaver/incognita →",
-  dx_src: "출처: v0.2 라이브러리의 예측(<code>library/v0.2</code>), <code>data/curation</code>에서 정리한 EXFOR의 포획 측정값, <code>incognita/bench</code>의 벤치마크 행에서 가져온 (n,2n), (n,p), (n,α) 측정값. 정리 과정에서 제외된 측정값은 요청하지 않으면 숨겨집니다. 평가 라이브러리(ENDF/B-VIII.1, JEFF-4.0, TENDL-2025)의 선택적 점선 겹쳐 보기는 표시용으로만 <code>scripts/build_site_overlay.py</code>가 만들며, INCOGNITA는 이를 결코 읽지 않습니다.",
+  dx_src: "출처: v0.2 라이브러리의 예측(<code>library/v0.2</code>), <code>data/curation</code>에서 정리한 EXFOR의 포획 측정값, <code>incognita/bench</code>의 벤치마크 행에서 가져온 (n,2n), (n,p), (n,α) 측정값(Z 26 미만은 같은 규칙으로 고른 EXFOR 행, <code>data/curation/inputs</code>). 정리 과정에서 제외된 측정값은 요청하지 않으면 숨겨집니다. 평가 라이브러리(ENDF/B-VIII.1, JEFF-4.0, TENDL-2025)의 선택적 점선 겹쳐 보기는 표시용으로만 <code>scripts/build_site_overlay.py</code>가 만들며, INCOGNITA는 이를 결코 읽지 않습니다.",
   dx_t0: "측정됨", dx_t1: "측정된 MACS에 고정", dx_t2: "보간 (측정된 핵종 근처)", dx_t3: "외삽",
   dx_ts0: "측정", dx_ts1: "고정", dx_ts2: "보간", dx_ts3: "외삽",
   dx_keep: "유지", dx_down: "가중치 낮춤", dx_excl: "제외", dx_fix: "단위 수정",

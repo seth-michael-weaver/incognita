@@ -21,7 +21,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITAエンジンは<a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely）を移植したもので、TALYSの原子核構造データベースを使っています。INCOGNITAが追加したものは、<a href=\"./#code\" data-keep-lang>解説ページの最後にスイッチごとに一覧</a>しています。",
   dx_repo_p2: "エンジン自体を実行するには、TALYSの構造データベースも必要です。入手方法はREADMEに書かれています。",
   dx_repo_link: "GitHub上のseth-michael-weaver/incognita →",
-  dx_src: "出典：予測はv0.2ライブラリ（<code>library/v0.2</code>）、捕獲の測定値は<code>data/curation</code>で精査したEXFOR、(n,2n)、(n,p)、(n,α)の測定値は<code>incognita/bench</code>のベンチマーク行から。精査で除外された測定値は、要求しないかぎり表示されません。評価済みライブラリ（ENDF/B-VIII.1、JEFF-4.0、TENDL-2025）の任意の点線オーバーレイは、表示専用に<code>scripts/build_site_overlay.py</code>で作成しており、INCOGNITAがそれを読むことはありません。",
+  dx_src: "出典：予測はv0.2ライブラリ（<code>library/v0.2</code>）、捕獲の測定値は<code>data/curation</code>で精査したEXFOR、(n,2n)、(n,p)、(n,α)の測定値は<code>incognita/bench</code>のベンチマーク行から（Z 26 未満は同じ規則で選んだ EXFOR の行、<code>data/curation/inputs</code>）。精査で除外された測定値は、要求しないかぎり表示されません。評価済みライブラリ（ENDF/B-VIII.1、JEFF-4.0、TENDL-2025）の任意の点線オーバーレイは、表示専用に<code>scripts/build_site_overlay.py</code>で作成しており、INCOGNITAがそれを読むことはありません。",
   dx_t0: "測定済み", dx_t1: "測定MACSに固定", dx_t2: "内挿（測定済み核種の近く）", dx_t3: "外挿",
   dx_ts0: "測定", dx_ts1: "固定", dx_ts2: "内挿", dx_ts3: "外挿",
   dx_keep: "採用", dx_down: "重み低減", dx_excl: "除外", dx_fix: "単位修正",

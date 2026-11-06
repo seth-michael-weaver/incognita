@@ -856,7 +856,7 @@
       page, generated: new Date().toISOString().slice(0, 10),
       engine: "The INCOGNITA engine is a port of TALYS-2 (A. J. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131) and uses the TALYS nuclear-structure database.",
       license: "Predictions and data: CC-BY-4.0. Cite the project (CITATION.cff in the repository), TALYS (Eur. Phys. J. A 59 (2023) 131) and EXFOR (N. Otuka et al., Nucl. Data Sheets 120 (2014) 272).",
-      measurements: "Measured points are from EXFOR (IAEA Nuclear Data Section) as curated in data/curation; each row carries its EXFOR dataset id (entry/subentry/pointer). (n,2n), (n,p) and (n,alpha) points are the benchmark rows in incognita/bench, with their EXFOR subentry.",
+      measurements: "Measured points are from EXFOR (IAEA Nuclear Data Section) as curated in data/curation; each row carries its EXFOR dataset id (entry/subentry/pointer). (n,2n), (n,p) and (n,alpha) points are the benchmark rows in incognita/bench (Z >= 26) or, below Z 26, EXFOR rows cut with the same rules (data/curation/inputs/exfor_threshold_Z1-25_rows.parquet, scripts/build_light_channels.py), with their EXFOR subentry.",
       units: "energy in eV (Maxwellian rows: kT in eV); capture cross sections in barns (b); (n,2n), (n,p), (n,alpha) and MACS in millibarns (mb)",
     };
     const J = { ...meta };
@@ -874,11 +874,12 @@
     if (d.macs) J.macs = { unit: "mb", kT_keV: kT, macs_mb: d.macs, unc68_factor: d.macsU || null, note: "68 % band: MACS divided and multiplied by the factor" };
     const ds = d.meas ? d.meas.ds.map((x, i) => { const ex = exforOf(x[0]); return { index: i, exfor_id: x[0], exfor_subentry: ex ? ex.id : null, url: ex ? ex.url : null, author: x[1] || null, year: x[2] ?? null, facility: x[3] || null }; }) : [];
     const mrow = (p) => [p[0], p[1], p[2], p[3], p[4], DECW[p[5]] || p[5], p[6] || ""];
+    const thrSrc = Z < 26 ? "data/curation/inputs/exfor_threshold_Z1-25_rows.parquet: EXFOR 2026-10-14, cut with the benchmark rows' rules (scripts/build_light_channels.py)" : "incognita/bench/data/exam_rows (benchmark rows)";
     if (d.meas || d.thr) J.measured = {
       datasets: ds,
       capture: d.meas ? { unit: "b", columns: ["e_lo_ev", "e_hi_ev", "sigma_b", "rel_unc", "dataset", "curation", "state"], rows: d.meas.cap.map(mrow) } : null,
       maxwellian: d.meas ? { unit: "b", columns: ["kT_lo_ev", "kT_hi_ev", "value_b", "rel_unc", "dataset", "curation", "state"], rows: d.meas.mxw.map(mrow) } : null,
-      threshold: d.thr ? Object.fromEntries(Object.entries(d.thr).map(([k, v]) => [k === "na" ? "n_alpha" : k, { unit: "mb", columns: ["energy_ev", "sigma_mb", "exfor_subentry", "year"], rows: v }])) : null,
+      threshold: d.thr ? Object.fromEntries(Object.entries(d.thr).map(([k, v]) => [k === "na" ? "n_alpha" : k, { unit: "mb", columns: ["energy_ev", "sigma_mb", "exfor_subentry", "year"], rows: v, source: thrSrc }])) : null,
     };
     // CSV: one long table, '#' header lines first
     const q = (v) => { if (v == null) return ""; const s = String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
@@ -891,7 +892,7 @@
     if (d.macs) kT.forEach((k, i) => { const f = d.macsU && d.macsU[i]; rows.push(["prediction", "MACS (kT)", k * 1e3, "", d.macs[i], "mb", f ? r4(d.macs[i] / f) : "", f ? r4(d.macs[i] * f) : ""]); });
     const mline = (kind, reac, p) => { const s = ds[p[4]] || {}; rows.push([kind, reac, p[0], p[1], p[2], "b", "", "", "", "", p[3] ?? "", s.exfor_id || "", s.author || "", s.year ?? "", DECW[p[5]] || p[5], p[6] || ""]); };
     if (d.meas) { d.meas.cap.forEach((p) => mline("measured (EXFOR)", "capture (n,g)", p)); d.meas.mxw.forEach((p) => mline("measured (EXFOR)", "Maxwellian average (kT)", p)); }
-    if (d.thr) for (const [k, v] of Object.entries(d.thr)) v.forEach((p) => rows.push(["measured (EXFOR, benchmark)", k === "na" ? "(n,alpha)" : `(${k[0]},${k.slice(1)})`, p[0], "", p[1], "mb", "", "", "", "", "", p[2] || "", "", p[3] ?? "", "", ""]));
+    if (d.thr) for (const [k, v] of Object.entries(d.thr)) v.forEach((p) => rows.push([Z < 26 ? "measured (EXFOR, benchmark rules)" : "measured (EXFOR, benchmark)", k === "na" ? "(n,alpha)" : `(${k[0]},${k.slice(1)})`, p[0], "", p[1], "mb", "", "", "", "", "", p[2] || "", "", p[3] ?? "", "", ""]));
     const head = [`INCOGNITA · ${id} (Z=${Z}${A ? `, A=${A}` : ""})`, `Source: ${meta.source}`, `Page: ${page} (generated ${meta.generated})`, `Engine: ${meta.engine}`, `License: ${meta.license}`,
       `Measurements: ${meta.measurements}`, `Units: ${meta.units}. Bands: lo/hi columns are the 68 % and 95 % intervals where the library gives them.`]
       .concat(d.tier != null ? [`Tier: ${IDX.tiers[d.tier]}${d.valid ? "" : " (outside the validated range Z 26-83)"}${d.res ? `; resolved resonances up to ${d.res} eV (the curve is an average there)` : ""}`] : [])

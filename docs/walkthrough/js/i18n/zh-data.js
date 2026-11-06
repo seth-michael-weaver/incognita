@@ -21,7 +21,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITA 引擎移植自 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely），并使用 TALYS 的核结构数据库。INCOGNITA 新增的内容<a href=\"./?lang=zh#code\" data-keep-lang>在教学页面末尾逐个开关地列出</a>。",
   dx_repo_p2: "运行引擎本身还需要 TALYS 结构数据库；README 中说明了如何获取。",
   dx_repo_link: "GitHub 上的 seth-michael-weaver/incognita →",
-  dx_src: "来源：预测值来自 v0.2 数据库（<code>library/v0.2</code>）；俘获测量数据来自 EXFOR，经 <code>data/curation</code> 整理；(n,2n)、(n,p) 和 (n,α) 测量数据来自 <code>incognita/bench</code> 中的基准条目。整理时排除的测量数据默认隐藏，除非你选择显示。可选的评价数据库叠加曲线（虚线，ENDF/B-VIII.1、JEFF-4.0、TENDL-2025）由 <code>scripts/build_site_overlay.py</code> 生成，仅供显示；INCOGNITA 从不读取它们。",
+  dx_src: "来源：预测值来自 v0.2 数据库（<code>library/v0.2</code>）；俘获测量数据来自 EXFOR，经 <code>data/curation</code> 整理；(n,2n)、(n,p) 和 (n,α) 测量数据来自 <code>incognita/bench</code> 中的基准条目（Z 26 以下：按相同规则选取的 EXFOR 条目，<code>data/curation/inputs</code>）。整理时排除的测量数据默认隐藏，除非你选择显示。可选的评价数据库叠加曲线（虚线，ENDF/B-VIII.1、JEFF-4.0、TENDL-2025）由 <code>scripts/build_site_overlay.py</code> 生成，仅供显示；INCOGNITA 从不读取它们。",
   dx_t0: "已测量", dx_t1: "锚定到实测 MACS", dx_t2: "插值（靠近已测量核素）", dx_t3: "外推",
   dx_ts0: "已测量", dx_ts1: "已锚定", dx_ts2: "插值", dx_ts3: "外推",
   dx_keep: "保留", dx_down: "降低权重", dx_excl: "排除", dx_fix: "单位已修正",
