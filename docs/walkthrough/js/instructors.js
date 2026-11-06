@@ -69,6 +69,7 @@
     ["gamow", 30, 1, 12, 3, "The Gamow peak and ignition", "Gamow peak", "The Gamow peak from the Maxwell tail and tunnelling, reactivities of D–T, D–D and D–³He, and the Lawson plane with a 0-D power balance to ignition.", 1],
     ["tokamak", 31, 2, 12, 3, "Magnetic confinement", "Confinement", "Gyration in a magnetic field, the twisted field of a tokamak and its safety factor, Poincaré sections, magnetic islands and chaos (the tokamap).", 1],
     ["blanket", 32, 3, 15, 3, "Breeding blanket and first wall", "Blanket", "Monte Carlo neutron transport in a breeding blanket: tritium breeding ratio, ⁶Li enrichment, (n,2n) multiplication; helium and hydrogen in the first wall from INCOGNITA's 14.1 MeV cross sections.", 1],
+    ["stars", 0, 1, 10, 6, "Where the elements come from", "Elements from stars", "Fusion up to iron, then neutron capture: the s-process path along the valley of stability, the r-process in neutron-star mergers, abundance peaks at the magic numbers, and σN ≈ constant with INCOGNITA's computed 30 keV capture rates.", 1],
   ].map(([id, n, lv, min, steps, title, topic, what, tp], i) => ({ id, lv, min, steps, tp: !!tp, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
   // numbers per page: main story 1..26, then the More topics lessons 1..28 (topics.html)
   { let a = 0, b = 0; CH.forEach((c) => (c.n = c.tp ? ++b : ++a)); }
