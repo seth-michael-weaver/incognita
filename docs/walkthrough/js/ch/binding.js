@@ -43,7 +43,11 @@
       // the most tightly bound measured nucleus (Ni-62), labelled above the curve so the slider's label below never covers it
       const top = BA.reduce((m, d) => (d[1] > m[1] ? d : m)), peak = Y(top[1]);
       g.glow(X(top[0]), peak, 30, c.fission, 0.3); g.dot(X(top[0]), peak, 3.5, c.fission, 1);
-      g.label(`${top[3]}-${top[0]}: most tightly bound`, X(top[0]) + 12, peak - (phone ? 20 : 18), { color: c.fission, size: fs - 1, weight: 600, bg: true, align: "left" });
+      // while splitting, the fragment tags (A 70-118) sit just right of the peak: put this tag left of it when it fits there, else above them
+      const tTxt = `${top[3]}-${top[0]}: most tightly bound`; let tx = X(top[0]) + 12, ty = peak - (phone ? 20 : 18), tal = "left";
+      if (S.mode === 1) { ctx.save(); ctx.font = `600 ${fs - 1}px sans-serif`; const tw = ctx.measureText(WT.tr ? WT.tr(tTxt) : tTxt).width + 16; ctx.restore();
+        if (X(top[0]) - 12 - tw > 4) { tx = X(top[0]) - 12; tal = "right"; } else ty = Math.max(y0 + 4, peak - 40); }
+      g.label(tTxt, tx, ty, { color: c.fission, size: fs - 1, weight: 600, bg: true, align: tal });
       g.label("measured masses (AME2020)", x1, Y(1.2), { color: c.faint, size: fs - 2, align: "right" });
       const marker = (a, col, lab, up) => { const b = bOf(a); g.glow(X(a), Y(b), 18, col, 0.4); g.ball(X(a), Y(b), 6, col); if (lab) g.label(lab, X(a), Y(b) + (up ? -18 : 18), { color: col, size: fs - 1, weight: 600, bg: true, raw: true }); return b; }; // nuclide names need no translation
       const ry = H * 0.92;
