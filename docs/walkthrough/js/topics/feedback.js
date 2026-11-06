@@ -100,9 +100,12 @@
       if (!snap && sim.t > 2.5 && sim.ins < 0 && S.step === 0 && !S.fired) { S.fired = true; sim.rx += S.rs * 1e-5; sim.ins = sim.t; }
       const rho = rhoOf(S), fD = S.aD * 1e-5 * sim.dTf, fM = S.aM * 1e-5 * sim.dTm;
       // ---------- the loop diagram ----------
-      const cx = phone ? W * 0.5 : W * 0.25, cy = phone ? H * 0.33 : H * 0.34, rx = phone ? W * 0.33 : W * 0.17, ry = phone ? H * 0.13 : H * 0.2;
+      // the core box is sized by the stage height too, so on wide, short screens it stays below the header (its "P" tag above it)
+      const coreW = phone ? W * 0.26 : Math.min(W * 0.3, H * 0.32), coreH = coreW * 0.62, rP = coreH * 0.62;
+      const cx = phone ? W * 0.5 : W * 0.25, cy = phone ? H * 0.33 : H * 0.36, rx = phone ? W * 0.33 : W * 0.17;
+      const ry = phone ? H * 0.13 : Math.min(H * 0.2, cy - coreH / 2 - 34);
       const NP = [cx, cy - ry], NF = [cx + rx, cy], NM = [cx, cy + ry], NR = [cx - rx, cy];
-      const nr = phone ? 17 : 22, coreW = phone ? W * 0.26 : W * 0.3, coreH = coreW * 0.62, rP = coreH * 0.62;
+      const nr = phone ? 17 : 22;
       geo.core = { x: NP[0] - coreW / 2, y: NP[1] - coreH / 2, w: coreW, h: coreH };
       const pcm = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v * 1e5).toFixed(0)} pcm`;
       const arrows = [
@@ -138,7 +141,7 @@
       g.label(`P ${(100 * sim.n).toFixed(0)} %`, NP[0], NP[1] - coreH / 2 - 12, Object.assign({ color: c.warm }, lb));
       g.label(phone ? `fuel ${sim.dTf >= 0 ? "+" : "−"}${Math.abs(sim.dTf).toFixed(0)} K` : `fuel ΔT ${sim.dTf >= 0 ? "+" : "−"}${Math.abs(sim.dTf).toFixed(0)} K`, NF[0] + (phone ? 0 : nr + 8), NF[1] + (phone ? nr + 14 : 0), Object.assign({ color: c.proton, align: phone ? "center" : "left" }, lb));
       g.label(phone ? `water ${sim.dTm >= 0 ? "+" : "−"}${Math.abs(sim.dTm).toFixed(1)} K` : `water ΔT ${sim.dTm >= 0 ? "+" : "−"}${Math.abs(sim.dTm).toFixed(1)} K`, NM[0], NM[1] + nr + 13, Object.assign({ color: c.cool, alpha: S.mode === "dop" ? 0.5 : 1 }, lb));
-      g.label(`ρ ${pcm(rho)}`, NR[0] - (phone ? 0 : nr + 8), NR[1] + (phone ? nr + 14 : 0), Object.assign({ color: rho >= 0 ? c.photon : c.neutron, align: phone ? "center" : "right" }, lb));
+      g.label(`ρ ${pcm(rho)}`, NR[0] - (phone ? 0 : nr + 16), NR[1] + (phone ? nr + 14 : 0), Object.assign({ color: rho >= 0 ? c.photon : c.neutron, align: phone ? "center" : "right" }, lb));
       // formulas (desktop beside the loop, phone one line)
       if (!phone) {
         const fx = W * 0.56, fy = H * 0.12, fsty = { color: c.ink, size: fs + 1, serif: true, italic: true, align: "left" };
