@@ -3,7 +3,7 @@ Object.assign(WT.L.ui, {
   lang_label: "Lingua", nav_teach: "Docenti",
   nav_topics: "Altri argomenti nucleari", way4_k: "Impara", way4_t: "Altri argomenti nucleari", way4_p: "Lezioni accanto alla storia principale: radiazioni e dose, come funziona un reattore, stabilità e controllo, fusione. Dall'introduzione al livello esperto.", way4_go: "Scegli una lezione →", tp_lessons: "Lezioni", tp_h1: "Altri argomenti nucleari",
   tp_kicker: "Reattori · radiazioni · fusione", tp_tag: "Lezioni interattive, dalle prime idee al livello della ricerca",
-  tp_fire: "Avvia una reazione a catena", tp_hint: "oppure fai clic su una barretta di combustibile", tp_cue: "Scegli una lezione ↓",
+  tp_fire: "Avvia una reazione a catena", tp_hint: "oppure fai clic su una barretta di combustibile", tp_cue: "Scegli una lezione ↓", tp_cue2: "Scorri per iniziare ↓",
   tp_p1_k: "Parte prima", tp_p1_h: "Le radiazioni", tp_p2_k: "Parte seconda", tp_p2_h: "Dentro un reattore",
   tp_p3_k: "Parte terza", tp_p3_h: "Stabilità e controllo", tp_p4_k: "Parte quarta",
   tp_coda: "Queste lezioni affiancano la storia principale, <a href=\"./\" data-keep-lang>Dentro una reazione nucleare</a>, che segue un neutrone dentro un nucleo. Le immagini sono illustrative, salvo dove indicato.",

@@ -2,7 +2,7 @@
 Object.assign(WT.L.ui, {
   lang_label: "Taal", nav_teach: "Docenten",
   nav_topics: "Meer nucleaire onderwerpen", way4_k: "Leren", way4_t: "Meer nucleaire onderwerpen", way4_p: "Lessen naast het hoofdverhaal: straling en dosis, hoe een reactor werkt, stabiliteit en regeling, fusie. Van intro tot expert.", way4_go: "Kies een les →", tp_lessons: "Lessen", tp_h1: "Meer nucleaire onderwerpen",
-  tp_kicker: "Reactoren · straling · fusie", tp_tag: "Interactieve lessen van de eerste ideeën tot onderzoeksniveau", tp_fire: "Start een keten", tp_hint: "of klik op een splijtstofstaaf", tp_cue: "Kies een les ↓",
+  tp_kicker: "Reactoren · straling · fusie", tp_tag: "Interactieve lessen van de eerste ideeën tot onderzoeksniveau", tp_fire: "Start een keten", tp_hint: "of klik op een splijtstofstaaf", tp_cue: "Kies een les ↓", tp_cue2: "Scroll om te beginnen ↓",
   tp_p1_k: "Deel een", tp_p1_h: "Straling", tp_p2_k: "Deel twee", tp_p2_h: "Binnen in een reactor", tp_p3_k: "Deel drie", tp_p3_h: "Stabiliteit en regeling", tp_p4_k: "Deel vier",
   tp_coda: "Deze lessen staan naast het hoofdverhaal, <a href=\"./\" data-keep-lang>Binnen in een kernreactie</a>, dat één neutron volgt tot in één kern. De afbeeldingen zijn illustratief, tenzij anders vermeld.",
   tp_title: "Meer nucleaire onderwerpen · Binnen in een kernreactie",

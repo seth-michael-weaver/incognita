@@ -901,3 +901,18 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 .site .chap-x > a.toc-menu span { font: inherit; margin: 0; opacity: 1; }
 .site .chap-x > a.toc-menu .caret { font-size: inherit; opacity: 1; }
 @media (max-width: 860px) { .site .chap-x { margin: 0; display: flex; flex-direction: column; } .site .chap-x > a.toc-menu { display: flex; } }
+/* topics.html lesson index as a plain list, like a glossary (Seth 2026-11-06: no boxes) */
+.tp-index { max-width: 54rem; }
+.tp-part { margin: 0 0 40px; }
+.tp-part-h { display: flex; align-items: baseline; gap: 14px; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 1px solid var(--line); font: inherit; }
+.tp-list { list-style: none; margin: 0; padding: 0; }
+.tp-list li[hidden] { display: none; }
+.tp-list a { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto; align-items: baseline; gap: 14px; padding: 13px 8px; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); color: var(--ink); text-decoration: none; border-radius: 6px; transition: background .15s ease; }
+.tp-list a:hover, .tp-list a:focus-visible { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.tp-list a:hover b { color: var(--accent); }
+.tp-n { font: 500 13px var(--mono); color: var(--faint); text-align: right; }
+.tp-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tp-t b { font: 600 18px/1.3 var(--display); }
+.tp-d { font: 400 14.5px/1.45 var(--sans); color: var(--soft); }
+.tp-list .lvl { justify-self: end; }
+@media (max-width: 600px) { .tp-list a { grid-template-columns: 1.6em minmax(0, 1fr); gap: 10px; } .tp-list .lvl { grid-column: 2; justify-self: start; } .tp-t b { font-size: 17px; } }
