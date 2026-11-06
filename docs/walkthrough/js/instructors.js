@@ -45,6 +45,7 @@
     ["everyday", 0, 0, 10, 5, "Nuclear in everyday life", "Everyday", "PET scans (fluorine-18, back-to-back 511 keV photons), radiotherapy beams crossing on a tumour, technetium-99m, carbon dating and smoke detectors.", 1],
     ["chains", 0, 1, 8, 4, "Decay chains and equilibrium", "Decay chains", "The uranium series to lead, secular equilibrium, and a medical isotope generator milked for its daughter.", 1],
     ["waste", 0, 1, 8, 4, "Spent fuel over time", "Spent fuel", "What is in used fuel, how its radioactivity falls over centuries, and when it drops to the level of uranium ore.", 1],
+    ["fuelcycle", 0, 0, 10, 5, "The fuel cycle", "Fuel cycle", "From ore to waste for one tonne of fuel: ore grades, the enrichment mass balance (feed, product, tails, SWU), pellets to assemblies, burnup, pool and cask storage, and once-through or reprocessing to MOX.", 1],
     ["reactor", 0, 0, 8, 4, "How a reactor makes electricity", "Reactor", "Core, control rods, coolant, steam and turbine: how fission heat becomes electricity in a water-cooled reactor.", 1],
     ["economy", 0, 1, 8, 4, "The neutron economy", "Neutron economy", "Where each generation of neutrons goes: fission, capture in uranium-238 and water, leakage, and the six-factor formula.", 1],
     ["spectrum", 0, 1, 8, 4, "Fast and thermal reactors", "Fast vs thermal", "Slowing neutrons down with a moderator, why thermal reactors need less enrichment, and what fast reactors gain.", 1],
