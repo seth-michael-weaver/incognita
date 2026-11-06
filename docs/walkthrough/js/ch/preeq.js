@@ -215,7 +215,7 @@
       }
     });
     if (anim && holeXY && a > 0.45 && a < 0.9) g.label("bump!", holeXY[0], holeXY[1] - 40, { color: c.warm, size: phone ? 13 : 15, weight: 700, bg: true });
-    if ((S.bumps || 0) > 0) g.label(`bump ${S.bumps}: a ${S.bumpKind === "p" ? "proton" : "neutron"} in the sea was hit, jumped up, and left a hole`, W / 2, H * 0.97 - (phone ? 34 : 26), { color: c.soft, size: phone ? 11 : 13, serif: true });
+    if ((S.bumps || 0) > 0) g.label(`bump ${S.bumps}: a ${S.bumpKind === "p" ? "proton" : "neutron"} in the sea was hit, jumped up, and left a hole`, W / 2, yTop - (phone ? 6 : 14), { color: c.soft, size: phone ? 11 : 13, serif: true, bg: true }); // above the wells (below, it ran into the well names)
     const n = chain.length;
     const P = counts.p[0] + counts.n[0], Hh = counts.p[1] + counts.n[1];
     g.label(`${P} particle${P > 1 ? "s" : ""}, ${Hh} hole${Hh !== 1 ? "s" : ""}: n = ${n}`, W / 2, H * 0.97, { color: c.ink, size: phone ? 13 : 16, weight: 600, serif: true });
