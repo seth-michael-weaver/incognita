@@ -50,6 +50,11 @@
     ["breeding", 0, 1, 10, 5, "Breeding new fuel", "Breeding", "Turning uranium-238 and thorium-232 into fissile fuel, neutrons per absorption (η), and the conversion and breeding ratio.", 1],
     ["burnup", 0, 1, 8, 4, "Fuel burnup", "Burnup", "How fuel changes in the core: uranium-235 burns, plutonium builds up, fission products absorb, and burnup in MWd/kg.", 1],
     ["afterheat", 0, 0, 8, 4, "Heat after shutdown", "Afterheat", "Decay heat after a reactor stops, how quickly it falls, and why cooling must continue after shutdown.", 1],
+    ["rwater", 0, 0, 8, 6, "Water-cooled reactors", "Water reactors", "PWR, BWR, CANDU heavy water, RBMK, small modular and supercritical water reactors: one plant drawing each, with loops, pressures and temperatures.", 1],
+    ["rgas", 0, 1, 6, 4, "Gas-cooled reactors", "Gas reactors", "Magnox, AGR, pebble-bed HTGR and VHTR: graphite moderation, CO₂ and helium coolant, high outlet temperatures.", 1],
+    ["rfast", 0, 2, 6, 3, "Fast reactors", "Fast reactors", "Sodium, lead and gas-cooled fast reactors: pool designs, intermediate loops, no moderator.", 1],
+    ["rother", 0, 2, 8, 5, "Molten salt and other reactors", "Salt and others", "Molten salt reactors, heat-pipe microreactors, TRIGA pool research reactors, accelerator-driven systems and the Oklo natural reactor.", 1],
+    ["rcompare", 0, 1, 6, 3, "Reactor types compared", "Compared", "The moderator × coolant grid of every type, outlet temperature against efficiency with the Carnot limit, and the world fleet by type.", 1],
     ["critical", 21, 1, 10, 3, "Criticality and reactor control", "Criticality", "The chain reaction: the multiplication factor k, delayed neutrons and why a reactor can be controlled, critical experiments.", 1],
     ["doppler", 20, 1, 8, 3, "Doppler broadening", "Doppler", "Doppler broadening of a resonance with fuel temperature, self-shielding in thick fuel, and the negative fuel-temperature feedback on k.", 1],
     ["feedback", 0, 2, 8, 4, "Reactor stability and feedback", "Feedback", "Fuel- and moderator-temperature feedback, void coefficients, and why negative feedback makes a reactor stable.", 1],
@@ -62,7 +67,7 @@
     ["tokamak", 31, 2, 12, 3, "Magnetic confinement", "Confinement", "Gyration in a magnetic field, the twisted field of a tokamak and its safety factor, Poincaré sections, magnetic islands and chaos (the tokamap).", 1],
     ["blanket", 32, 3, 15, 3, "Breeding blanket and first wall", "Blanket", "Monte Carlo neutron transport in a breeding blanket: tritium breeding ratio, ⁶Li enrichment, (n,2n) multiplication; helium and hydrogen in the first wall from INCOGNITA's 14.1 MeV cross sections.", 1],
   ].map(([id, n, lv, min, steps, title, topic, what, tp], i) => ({ id, lv, min, steps, tp: !!tp, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
-  // numbers per page: main story 1..26, then the More topics lessons 1..22 (topics.html)
+  // numbers per page: main story 1..26, then the More topics lessons 1..27 (topics.html)
   { let a = 0, b = 0; CH.forEach((c) => (c.n = c.tp ? ++b : ++a)); }
   const byId = Object.fromEntries(CH.map((c) => [c.id, c]));
   const lang = WT.langQ();
@@ -72,7 +77,7 @@
 
   // ---------- chapter list with a level filter ----------
   const list = $("#in-list"), chips = $("#in-filter");
-  const tpHead = `<li class="in-part"><h3>${T("way4_t", "More Nuclear Topics")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, stability and control, fusion.")}</p></li>`;
+  const tpHead = `<li class="in-part"><h3>${T("way4_t", "More Nuclear Topics")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, every kind of reactor, stability and control, fusion.")}</p></li>`;
   list.innerHTML = CH.map((c, i) => (c.tp && !(CH[i - 1] || {}).tp ? tpHead : "") + `<li class="in-ch" data-lv="${c.lv}" data-min="${c.min}"><a class="in-ch-a" href="${href(c.id)}"><span class="in-n">${c.n}</span><span class="in-body"><span class="in-top"><b>${c.title}</b><span class="in-topic">${c.topic}</span></span><span class="in-what">${c.what}</span><span class="in-meta">${pill(c.lv)}<span>${mins(c.min)}</span><span>${c.steps} ${T("in_steps", "steps")}</span><code>#${c.id}</code></span></span></a></li>`).join("");
   const opts = [["all", T("in_all", "All")], ["0", LV[0]], ["1", LV[1]], ["2", LV[2]], ["3", LV[3]]];
   chips.innerHTML = opts.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${v === "all"}">${t}</button>`).join("");
