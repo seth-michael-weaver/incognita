@@ -56,6 +56,7 @@
     ["rfast", 0, 2, 6, 3, "Fast reactors", "Fast reactors", "Sodium, lead and gas-cooled fast reactors: pool designs, intermediate loops, no moderator.", 1],
     ["rother", 0, 2, 8, 5, "Molten salt and other reactors", "Salt and others", "Molten salt reactors, heat-pipe microreactors, TRIGA pool research reactors, accelerator-driven systems and the Oklo natural reactor.", 1],
     ["rcompare", 0, 1, 6, 3, "Reactor types compared", "Compared", "The moderator × coolant grid of every type, outlet temperature against efficiency with the Carnot limit, and the world fleet by type.", 1],
+    ["sandbox", 0, 2, 10, 6, "Build a reactor", "Build a reactor", "A sandbox: pick fuel, enrichment, moderator, coolant, lattice and size; the four-factor formula, one-group leakage and the critical size, the neutron budget, and the sign of the void and Doppler feedback.", 1],
     ["critical", 21, 1, 10, 3, "Criticality and reactor control", "Criticality", "The chain reaction: the multiplication factor k, delayed neutrons and why a reactor can be controlled, critical experiments.", 1],
     ["doppler", 20, 1, 8, 3, "Doppler broadening", "Doppler", "Doppler broadening of a resonance with fuel temperature, self-shielding in thick fuel, and the negative fuel-temperature feedback on k.", 1],
     ["feedback", 0, 2, 8, 4, "Reactor stability and feedback", "Feedback", "Fuel- and moderator-temperature feedback, void coefficients, and why negative feedback makes a reactor stable.", 1],
@@ -68,7 +69,7 @@
     ["tokamak", 31, 2, 12, 3, "Magnetic confinement", "Confinement", "Gyration in a magnetic field, the twisted field of a tokamak and its safety factor, Poincaré sections, magnetic islands and chaos (the tokamap).", 1],
     ["blanket", 32, 3, 15, 3, "Breeding blanket and first wall", "Blanket", "Monte Carlo neutron transport in a breeding blanket: tritium breeding ratio, ⁶Li enrichment, (n,2n) multiplication; helium and hydrogen in the first wall from INCOGNITA's 14.1 MeV cross sections.", 1],
   ].map(([id, n, lv, min, steps, title, topic, what, tp], i) => ({ id, lv, min, steps, tp: !!tp, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
-  // numbers per page: main story 1..26, then the More topics lessons 1..27 (topics.html)
+  // numbers per page: main story 1..26, then the More topics lessons 1..28 (topics.html)
   { let a = 0, b = 0; CH.forEach((c) => (c.n = c.tp ? ++b : ++a)); }
   const byId = Object.fromEntries(CH.map((c) => [c.id, c]));
   const lang = WT.langQ();
