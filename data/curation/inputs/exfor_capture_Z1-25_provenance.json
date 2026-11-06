@@ -1,0 +1,28 @@
+{
+ "built": "2026-11-06",
+ "script": "scripts/build_light_curation.py",
+ "curation": "WP-12 quality_model (research repository data/curate/quality_model.py), unchanged, run on Z 1-92 jointly; Z 1-25 rows kept",
+ "research_commit": "a3597cde9",
+ "staging": {
+  "source": "staging/exfor_all_2026-10-14_x4fix1.parquet",
+  "entry_zip": "2026-10-14",
+  "sha256": "26a881ccb046779f09fe664c8dbe7a43c2a5b6945b44b46fbcf0ea0f32daebe0",
+  "check": "same predicate + clip on Z 26-92 reproduces staging/exfor_capture_Z26-92_2026-10-14_x4fix1.parquet exactly"
+ },
+ "light_datasets": 1695,
+ "light_cells": 4040,
+ "decisions": {
+  "keep": 1148,
+  "exclude": 385,
+  "downweight": 161,
+  "fix-unit": 1
+ },
+ "human_decisions_on_light": 0,
+ "gates_joint_run": {
+  "standards": true,
+  "spot_list": true,
+  "resampling_stability": false
+ },
+ "z26_92_joint_vs_shipped_decision_agreement": 0.9406,
+ "note": "resampling_stability also fails for a Z 26-92-only run with the same staging and review file, so it is not caused by the light data"
+}
