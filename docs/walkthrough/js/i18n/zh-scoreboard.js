@@ -97,4 +97,12 @@ Object.assign(WT.L.ui, {
   cls_trail: "引擎落后", cls_parity: "大致持平", cls_under: "引擎领先，未分胜负",
   th_cell: "比较项", th_rival: "对手", th_n: "原子核数", th_gap: "差距", th_ours: "引擎误差", th_theirs: "对手误差", th_ci: "95 % 区间", th_verdict: "判定",
   total: "全部", vs: "对",
+  // family-wise correction and the wins to read with care (js/scoreboard.js)
+  sb_fw_head: "按 {m} 类测量校正后 {W} {k} 项",
+  sb_keep_fw: "若对 {m} 类测量做 Bonferroni 校正，{w} 项胜中仍有 {k} 项保持。",
+  sb_how_fw_t: "多重比较校正",
+  sb_how_fw_d: "Bonferroni 校正，m = {m} 类测量（或全部 {n} 项比较）：若同样 2,000 次重抽样的第 0.05/2m 到第 1 − 0.05/2m 百分位区间位于零以下，则该胜项保持。2,000 次重抽样下这些百分位比较粗糙，因此同时使用正态近似；两种方法保留 {w} 项胜中的 {k} 项（按全部 {n} 项比较为 {kc} 项）。本页的判定未做校正。",
+  sb_care_h: "需谨慎看待的胜项",
+  sb_care_cap: "依据 {sn} 个或更少原子核的胜项（标 †），或区间上端在零以下不足 {nz} dex 的胜项。最后一列为按 {m} 类测量校正后的结果：自助抽样百分位 / 正态近似。",
+  th_fw: "校正后",
 });

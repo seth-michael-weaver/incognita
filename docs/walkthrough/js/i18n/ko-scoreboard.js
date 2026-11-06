@@ -97,4 +97,12 @@ Object.assign(WT.L.ui, {
   cls_trail: "엔진이 뒤처짐", cls_parity: "거의 대등", cls_under: "엔진이 앞서지만 미결",
   th_cell: "비교", th_rival: "경쟁 상대", th_n: "원자핵 수", th_gap: "차이", th_ours: "엔진 오차", th_theirs: "경쟁 상대 오차", th_ci: "95% 구간", th_verdict: "판정",
   total: "전체", vs: "대",
+  // family-wise correction and the wins to read with care (js/scoreboard.js)
+  sb_fw_head: "측정 {m}종류에 대해 보정하면 {W} {k}",
+  sb_keep_fw: "측정 {m}종류에 대해 본페로니 보정을 하면 승 {w}개 가운데 {k}개가 남습니다.",
+  sb_how_fw_t: "다중 비교 보정",
+  sb_how_fw_d: "본페로니 방법, m = 측정 {m}종류(또는 비교 {n}개 전체): 같은 재표집 2,000번에서 0.05/2m 백분위수부터 1 − 0.05/2m 백분위수까지의 구간이 0보다 아래에 있으면 승이 남습니다. 재표집 2,000번으로는 이 백분위수가 거칠어서 정규 근사도 함께 씁니다. 두 방법으로 승 {w}개 가운데 {k}개가 남습니다(비교 {n}개 전체로는 {kc}개). 이 페이지의 판정은 보정하지 않았습니다.",
+  sb_care_h: "주의해서 읽어야 할 승",
+  sb_care_cap: "원자핵 {sn}개 이하에 기댄 승(† 표시), 또는 구간의 위쪽 끝이 0 아래 {nz} dex 안쪽에서 끝나는 승. 마지막 열은 측정 {m}종류에 대한 보정을 적용한 결과입니다(부트스트랩 백분위수 / 정규 근사).",
+  th_fw: "보정 후",
 });

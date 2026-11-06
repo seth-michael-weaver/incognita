@@ -96,4 +96,12 @@ Object.assign(WT.L.ui, {
   cls_trail: "motor bagud", cls_parity: "omtrent lige", cls_under: "motor foran, ikke afgjort",
   th_cell: "Sammenligning", th_rival: "Rival", th_n: "Kerner", th_gap: "Forskel", th_ours: "Motorens fejl", th_theirs: "Rivalens fejl", th_ci: "95 %-interval", th_verdict: "Afgørelse",
   total: "Alle", vs: "mod",
+  // family-wise correction and the wins to read with care (js/scoreboard.js)
+  sb_fw_head: "{k} {W} efter korrektion for {m} slags målinger",
+  sb_keep_fw: "Med en Bonferroni-korrektion for de {m} slags målinger ville {k} af de {w} sejre stå tilbage.",
+  sb_how_fw_t: "Korrektion for multiple sammenligninger",
+  sb_how_fw_d: "Bonferroni, med m = {m} slags målinger (eller alle {n} sammenligninger): en sejr består, når intervallet fra 0,05/2m- til (1 − 0,05/2m)-percentilen af de samme 2.000 gentrækninger ligger under nul. Med 2.000 gentrækninger er disse percentiler grove, så der bruges også en normalapproksimation; de to metoder beholder {k} af de {w} sejre ({kc} over alle {n} sammenligninger). Afgørelserne på denne side er ikke korrigerede.",
+  sb_care_h: "Sejre, der skal læses med forsigtighed",
+  sb_care_cap: "Sejre, der hviler på {sn} eller færre kerner (markeret med †), eller hvis interval ender mindre end {nz} dex under nul. Sidste kolonne anvender korrektionen for {m} slags målinger: bootstrap-percentiler / normalapproksimation.",
+  th_fw: "Korrigeret",
 });

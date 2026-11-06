@@ -96,4 +96,12 @@ Object.assign(WT.L.ui, {
   cls_trail: "motor achter", cls_parity: "ongeveer gelijk", cls_under: "motor voor, onbeslist",
   th_cell: "Vergelijking", th_rival: "Concurrent", th_n: "Kernen", th_gap: "Verschil", th_ours: "Fout motor", th_theirs: "Fout concurrent", th_ci: "95 %-interval", th_verdict: "Oordeel",
   total: "Alle", vs: "tegen",
+  // family-wise correction and the wins to read with care (js/scoreboard.js)
+  sb_fw_head: "{k} {W} na correctie voor {m} soorten metingen",
+  sb_keep_fw: "Met een Bonferroni-correctie voor de {m} soorten metingen zouden {k} van de {w} winsten overblijven.",
+  sb_how_fw_t: "Correctie voor meervoudige vergelijkingen",
+  sb_how_fw_d: "Bonferroni, met m = {m} soorten metingen (of alle {n} vergelijkingen): een winst blijft staan als het interval van het 0,05/2m- tot het (1 − 0,05/2m)-percentiel van dezelfde 2.000 herbemonsteringen onder nul ligt. Bij 2.000 herbemonsteringen zijn die percentielen grof, dus wordt ook een normale benadering gebruikt; de twee methoden houden {k} van de {w} winsten over ({kc} over alle {n} vergelijkingen). De oordelen op deze pagina zijn niet gecorrigeerd.",
+  sb_care_h: "Winsten die je voorzichtig moet lezen",
+  sb_care_cap: "Winsten die op {sn} of minder kernen berusten (gemarkeerd met †), of waarvan het interval minder dan {nz} dex onder nul eindigt. De laatste kolom past de correctie voor {m} soorten metingen toe: bootstrap-percentielen / normale benadering.",
+  th_fw: "Gecorrigeerd",
 });

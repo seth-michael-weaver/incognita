@@ -27,7 +27,8 @@ down-weighted, 221 excluded; see `measurements.csv.gz`).
 | `d_rows.csv.gz` | 447 kB | Data views: every measurement row (6,425), with our residual, each rival's residual, the weight, and whether the row is scored. `d_pernuc.csv` is built from these. |
 | `k_pernuc.csv` | 22 kB | MACS bands: for each of 185 nuclides, our error and each rival's (dex), its Z band, and whether it is scored. |
 | `measurements.csv.gz` | 119 kB | The EXFOR measurements each scored row rests on, by EXFOR entry and subentry, with energy, value, uncertainty and the curation decision. |
-| `recompute.py` | 12 kB | Recomputes every engine cell from these files and checks the result against `cells.csv`. |
+| `recompute.py` | 18 kB | Recomputes every engine cell from these files and checks the result against `cells.csv`; also counts the WINs that survive a correction for multiple comparisons. |
+| `familywise.csv` | 12 kB | Written by `python3 recompute.py --familywise`: for each of the 66 counted, scored engine cells, its interval after a Bonferroni correction over 19 views and over 66 cells (bootstrap percentiles and a normal approximation), and whether a WIN rests on 10 or fewer nuclei (`small_n`) or has an interval ending within 0.005 dex of zero (`near_zero`). |
 
 The `.gz` files are gzip-compressed CSV; Python, R and spreadsheet tools read them directly, or run `gunzip`.
 
@@ -37,6 +38,7 @@ The `.gz` files are gzip-compressed CSV; Python, R and spreadsheet tools read th
 python3 recompute.py              # gaps and 95 % intervals from d_pernuc.csv and k_pernuc.csv
 python3 recompute.py --rows       # first rebuild d_pernuc.csv from the per-row residuals in d_rows.csv.gz
 python3 recompute.py --table      # print every engine cell
+python3 recompute.py --familywise # also write familywise.csv and list the flagged WINs
 ```
 
 It needs Python 3 and nothing else; with numpy installed the intervals come out the same as the board's. Our run
@@ -46,6 +48,9 @@ It needs Python 3 and nothing else; with numpy installed the intervals come out 
 --rows: d_pernuc.csv rebuilt from d_rows.csv.gz: 1808 nucleus entries, same nuclei and order, max relative difference 8.7e-12
 engine cells recomputed: 140 (20 of them empty MACS bands, not counted); counted on the board: WIN 47, TIE 19, LOSS 0, N/A 14
 max |difference| vs cells.csv over gap, scores, CI ends: 4.6e-10 dex (tolerance 1e-08)
+WIN after family-wise correction (Bonferroni over 19 views): 31 of 47  (bootstrap percentiles 0.1316-99.8684; normal approximation: 24 of 47)
+WIN after family-wise correction (Bonferroni over 66 counted cells): 27 of 47  (bootstrap percentiles 0.0379-99.9621; normal approximation: 21 of 47)
+WINs resting on 10 or fewer nuclei: 5; WINs whose 95 % interval ends within 0.005 dex of zero: 9
 REPRODUCED
 ```
 
@@ -103,7 +108,25 @@ numpy's `default_rng`, with nuclei in the order they appear in `d_pernuc.csv` (`
 The TERRA board keeps the rule it was scored with: N/A with 3 or fewer nuclei for the plain accuracy cells, fewer
 than 5 for the series-aware and uncertainty-coverage cells (`na_reason` = `too few nuclei`).
 
-A tie is not a win. Some comparisons reuse the same measurements (for example `n2n_step1` is a second scoring of the `thrA1_n2n` rows), so the 66 counted comparisons are not independent; no correction for multiple comparisons is applied.
+A tie is not a win. Some comparisons reuse the same measurements (for example `n2n_step1` is a second scoring of the `thrA1_n2n` rows), so the 66 counted comparisons are not independent. The verdicts above, and the board's 47 WIN, are not corrected for multiple comparisons.
+
+**Family-wise count.** `recompute.py` also reports how many WINs survive a Bonferroni correction at a 5 % family-wise
+error rate. For m comparisons the interval runs from the 0.05/2m to the 1 − 0.05/2m percentile of the same 2,000
+bootstrap gaps (same seeds); a WIN survives when that upper end is below 0. Two choices of m: the 19 distinct views
+among the 66 counted cells (a view is one kind of measurement, scored against up to four rivals; 18 of them hold a
+WIN, `np_FRESH_curated` only ties), and the 66 cells themselves. With 2,000 draws these tail percentiles rest on the
+2nd to 4th most extreme draw, so they are coarse; a normal approximation, `z = −gap / ((ci_hi − ci_lo) / 3.92)`
+against the Bonferroni critical value, is reported beside them. Result: over 19 views, 31 of the 47 WINs survive by
+the bootstrap percentiles and 24 by the normal approximation (23 by both); over 66 cells, 27 and 21 (20 by both). The
+board shows the range, 24–31. Percentile intervals from few nuclei tend to be too narrow (three of the WINs only the
+bootstrap keeps rest on 8–10 nuclei), so the lower figure is the safer one. Per cell, see `familywise.csv`.
+
+**WINs to read with care.** Nine WINs have an interval whose upper end is within 0.005 dex of zero: `capture_all` and
+`macs_Zge20` against TALYS-2.24; `n2n_SELECT` and `n2n_SELECT_RL3` against the TENDL-style recipe (`R_T`);
+`n2n_SELECT_RL3`, `n2n_step1` and `thrA1_n2n` against YAHFC; `n2n_step1` against `R_T`; and `SURR fission_SELECT`
+against TALYS-2.24. Five WINs rest on 10 or fewer nuclei (the board marks them): `SURR fission_SELECT` against
+TALYS-2.24 (6 nuclei); `na_SELECT` against CoH3 (8), TALYS-2.24 (10) and `R_T` (10); `capture_FAR` against CoH3 (9).
+Under the normal approximation none of these thirteen cells survives either correction.
 
 ## The rivals (engine board)
 

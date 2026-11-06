@@ -96,4 +96,12 @@ Object.assign(WT.L.ui, {
   cls_trail: "Engine hinten", cls_parity: "etwa gleichauf", cls_under: "Engine vorn, nicht entschieden",
   th_cell: "Vergleich", th_rival: "Konkurrent", th_n: "Kerne", th_gap: "Abstand", th_ours: "Fehler der Engine", th_theirs: "Fehler des Konkurrenten",th_ci: "95-%-Intervall", th_verdict: "Urteil",
   total: "Alle", vs: "gegen",
+  // family-wise correction and the wins to read with care (js/scoreboard.js)
+  sb_fw_head: "{k} {W} nach Korrektur für {m} Arten von Messungen",
+  sb_keep_fw: "Mit einer Bonferroni-Korrektur für die {m} Arten von Messungen blieben {k} der {w} Siege bestehen.",
+  sb_how_fw_t: "Korrektur für Mehrfachvergleiche",
+  sb_how_fw_d: "Bonferroni, mit m = {m} Arten von Messungen (oder allen {n} Vergleichen): Ein Sieg bleibt bestehen, wenn das Intervall vom 0,05/2m- bis zum (1 − 0,05/2m)-Perzentil derselben 2000 Neuziehungen unter null liegt. Bei 2000 Neuziehungen sind diese Perzentile grob, daher wird zusätzlich eine Normalnäherung verwendet; die beiden Methoden behalten {k} der {w} Siege ({kc} über alle {n} Vergleiche). Die Urteile auf dieser Seite sind nicht korrigiert.",
+  sb_care_h: "Siege, die man mit Vorsicht lesen sollte",
+  sb_care_cap: "Siege, die auf {sn} oder weniger Kernen beruhen (mit † markiert), oder deren Intervall höchstens {nz} dex unter null endet. Die letzte Spalte wendet die Korrektur für {m} Arten von Messungen an: Bootstrap-Perzentile / Normalnäherung.",
+  th_fw: "Korrigiert",
 });

@@ -70,6 +70,11 @@
     <h3 id="sb-loss-h"></h3>
     <p id="sb-loss-p"></p>
 
+    <h3 data-i18n="sb_care_h">Wins to read with care</h3>
+    <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-care-cap">
+      <table class="sb-table" id="sb-care"><caption id="sb-care-cap"></caption></table>
+    </div>
+
     <h3 data-i18n="sb_open_h">Every comparison that is not a win</h3>
     <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-open-cap">
       <table class="sb-table" id="sb-open"><caption id="sb-open-cap" data-i18n="sb_open_cap">Closest to a loss first (highest upper end of the interval). In dex; a negative gap means the engine is closer to the data.</caption></table>
@@ -87,6 +92,8 @@
         <dd data-i18n="sb_how_err_d">The root-mean-square of log10(code / measured), in dex. In most comparisons every measured point counts, with weight 1 / (0.1² + u²) for a point of uncertainty u (dex), so nuclei with many points weigh more; in fission and stellar capture each nucleus counts equally. Both codes are scored on the same points. The 0.1 dex in the weight is a floor: no point counts as more precise than about 26 %, so a few very precise points cannot dominate.</dd>
         <dt data-i18n="sb_how_ci_t">Interval</dt>
         <dd data-i18n="sb_how_ci_d">A paired bootstrap over nuclei: 2,000 resamples, with both codes scored on each; the interval runs from the 2.5th to the 97.5th percentile of the gap.</dd>
+        <dt data-i18n="sb_how_fw_t">Correction for multiple comparisons</dt>
+        <dd id="sb-how-fw"></dd>
         <dt data-i18n="sb_how_na_t">Not scored (N/A)</dt>
         <dd data-i18n="sb_how_na_d">A comparison is N/A when the rival gives no value, when 5 or fewer nuclei can be scored, or when the rival's error exceeds 1 dex (a factor of 10: its run failed). The rule is the same whatever the verdict would have been; the data package still lists these gaps. The TERRA board keeps its own rule: N/A with 3 or fewer nuclei for plain accuracy, fewer than 5 otherwise.</dd>
         <dt data-i18n="sb_how_cls_t">Kinds of tie</dt>
@@ -144,9 +151,29 @@
 </main>
 
 <script src="js/i18n.js?v=154"></script>
-<script>WT.load(["instructors", "scoreboard"], 138);</script>
+<script>WT.load(["instructors", "scoreboard"], 144);</script>
 <script src="js/nav.js?v=150"></script>
 <script src="js/scoreboard-data.js?v=91"></script>
-<script src="js/scoreboard.js?v=92"></script>
+<script>
+/* Family-wise (Bonferroni) count and the WINs to read with care: from data/board/familywise.csv, written by
+   python3 recompute.py --familywise. views/cells: WINs surviving over m_views views / m_cells cells, [normal approximation,
+   bootstrap percentiles]. care: WINs on <= small_n nuclei or with an interval ending within near_zero dex of zero;
+   boot/normal: their verdict after the correction over m_views views. */
+WT.boardFW = {"m_views":19,"m_cells":66,"wins":47,"small_n":10,"near_zero":0.005,"views":[24,31],"cells":[21,27],"care":[
+ {"cell":"capture_all","rival":"TALYS-2.24","n":41,"ours":0.1299,"theirs":0.1548,"gap":-0.0249,"lo":-0.045,"hi":-0.0043,"small":false,"boot":"TIE","normal":"TIE"},
+ {"cell":"SURR fission_SELECT","rival":"TALYS-2.24","n":6,"ours":0.2369,"theirs":0.2654,"gap":-0.0286,"lo":-0.0442,"hi":-0.0031,"small":true,"boot":"TIE","normal":"TIE"},
+ {"cell":"macs_Zge20","rival":"TALYS-2.24","n":68,"ours":0.1377,"theirs":0.1605,"gap":-0.0228,"lo":-0.0428,"hi":-0.0012,"small":false,"boot":"TIE","normal":"TIE"},
+ {"cell":"na_SELECT","rival":"TALYS-2.24","n":10,"ours":0.2071,"theirs":0.4037,"gap":-0.1967,"lo":-0.4033,"hi":-0.0636,"small":true,"boot":"WIN","normal":"TIE"},
+ {"cell":"capture_FAR","rival":"CoH3","n":9,"ours":0.1483,"theirs":0.2422,"gap":-0.0939,"lo":-0.1717,"hi":-0.0339,"small":true,"boot":"TIE","normal":"TIE"},
+ {"cell":"n2n_SELECT","rival":"R_T","n":15,"ours":0.0632,"theirs":0.0682,"gap":-0.005,"lo":-0.0123,"hi":-0.0002,"small":false,"boot":"TIE","normal":"TIE"},
+ {"cell":"n2n_SELECT_RL3","rival":"R_T","n":15,"ours":0.0642,"theirs":0.0673,"gap":-0.0031,"lo":-0.0059,"hi":-0.0013,"small":false,"boot":"TIE","normal":"TIE"},
+ {"cell":"n2n_SELECT_RL3","rival":"YAHFC","n":15,"ours":0.0642,"theirs":0.0758,"gap":-0.0116,"lo":-0.0211,"hi":-0.0031,"small":false,"boot":"WIN","normal":"TIE"},
+ {"cell":"n2n_step1","rival":"R_T","n":35,"ours":0.0872,"theirs":0.1107,"gap":-0.0236,"lo":-0.0479,"hi":-0.003,"small":false,"boot":"TIE","normal":"TIE"},
+ {"cell":"n2n_step1","rival":"YAHFC","n":34,"ours":0.0851,"theirs":0.1241,"gap":-0.0391,"lo":-0.0693,"hi":-0.0033,"small":false,"boot":"TIE","normal":"TIE"},
+ {"cell":"na_SELECT","rival":"R_T","n":10,"ours":0.2071,"theirs":0.4272,"gap":-0.2202,"lo":-0.4375,"hi":-0.0814,"small":true,"boot":"WIN","normal":"TIE"},
+ {"cell":"na_SELECT","rival":"CoH3","n":8,"ours":0.2105,"theirs":0.299,"gap":-0.0885,"lo":-0.1934,"hi":-0.0489,"small":true,"boot":"WIN","normal":"TIE"},
+ {"cell":"thrA1_n2n","rival":"YAHFC","n":34,"ours":0.0848,"theirs":0.1243,"gap":-0.0395,"lo":-0.0699,"hi":-0.0035,"small":false,"boot":"TIE","normal":"TIE"}]};
+</script>
+<script src="js/scoreboard.js?v=93"></script>
 </body>
 </html>

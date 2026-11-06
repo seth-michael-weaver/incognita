@@ -96,4 +96,12 @@ Object.assign(WT.L.ui, {
   cls_trail: "motor atrás", cls_parity: "mais ou menos a par", cls_under: "motor à frente, por decidir",
   th_cell: "Comparação", th_rival: "Rival", th_n: "Núcleos", th_gap: "Diferença", th_ours: "Erro do motor", th_theirs: "Erro do rival", th_ci: "Intervalo 95 %", th_verdict: "Veredicto",
   total: "Todos", vs: "face a",
+  // family-wise correction and the wins to read with care (js/scoreboard.js)
+  sb_fw_head: "{k} {W} após corrigir para {m} tipos de medição",
+  sb_keep_fw: "Com uma correção de Bonferroni para os {m} tipos de medição, manter-se-iam {k} das {w} vitórias.",
+  sb_how_fw_t: "Correção para comparações múltiplas",
+  sb_how_fw_d: "Bonferroni, com m = {m} tipos de medição (ou todas as {n} comparações): uma vitória mantém-se quando o intervalo entre os percentis 0,05/2m e 1 − 0,05/2m das mesmas 2000 reamostragens fica abaixo de zero. Com 2000 reamostragens esses percentis são grosseiros, por isso usa-se também uma aproximação normal; os dois métodos mantêm {k} das {w} vitórias ({kc} sobre todas as {n} comparações). Os veredictos desta página não estão corrigidos.",
+  sb_care_h: "Vitórias a ler com cautela",
+  sb_care_cap: "Vitórias que assentam em {sn} núcleos ou menos (marcadas com †) ou cujo intervalo termina a menos de {nz} dex abaixo de zero. A última coluna aplica a correção para {m} tipos de medição: percentis bootstrap / aproximação normal.",
+  th_fw: "Corrigido",
 });

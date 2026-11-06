@@ -96,4 +96,12 @@ Object.assign(WT.L.ui, {
   cls_trail: "motore indietro", cls_parity: "più o meno alla pari", cls_under: "motore avanti, non risolto",
   th_cell: "Confronto", th_rival: "Rivale", th_n: "Nuclei", th_gap: "Scarto", th_ours: "Errore del motore", th_theirs: "Errore del rivale", th_ci: "Intervallo 95 %", th_verdict: "Verdetto",
   total: "Tutti", vs: "contro",
+  // family-wise correction and the wins to read with care (js/scoreboard.js)
+  sb_fw_head: "{k} {W} dopo la correzione per {m} tipi di misura",
+  sb_keep_fw: "Con una correzione di Bonferroni per i {m} tipi di misura, resterebbero {k} delle {w} vittorie.",
+  sb_how_fw_t: "Correzione per confronti multipli",
+  sb_how_fw_d: "Bonferroni, con m = {m} tipi di misura (o tutti i {n} confronti): una vittoria resta tale se l'intervallo tra il percentile 0,05/2m e il percentile 1 − 0,05/2m degli stessi 2000 ricampionamenti sta sotto zero. Con 2000 ricampionamenti questi percentili sono grossolani, quindi si usa anche un'approssimazione normale; i due metodi conservano {k} delle {w} vittorie ({kc} su tutti i {n} confronti). I verdetti di questa pagina non sono corretti.",
+  sb_care_h: "Vittorie da leggere con cautela",
+  sb_care_cap: "Vittorie che poggiano su {sn} nuclei o meno (segnate con †) o il cui intervallo finisce a meno di {nz} dex sotto lo zero. L'ultima colonna applica la correzione per {m} tipi di misura: percentili bootstrap / approssimazione normale.",
+  th_fw: "Corretto",
 });
