@@ -9,9 +9,25 @@ EXFOR-derived (IAEA Nuclear Data Section and the NRDC network), CC BY 4.0. `SHA2
 | `exfor_capture_Z1-25_trust.parquet` | Z 1-25 (H..Mn): same schema, same curation (added 2026-11-06) |
 | `exfor_cells_Z1-25.parquet` | Z 1-25: same schema as `exfor_cells.parquet` |
 | `exfor_capture_Z1-25_provenance.json` | inputs (SHA256), gates and decision counts of the Z 1-25 run |
+| `review_decisions_Z26-92.jsonl` | review lines for Z 26-92 capture datasets (same format, plus a `rekey` form), applied on top of the 2026-09-12 run by `scripts/apply_review_Z26-92.py` (added 2026-11-06; see below) |
 | `review_decisions_Z1-25.jsonl` | review lines for light capture datasets (format of the research repository's `data/curate/review_decisions.jsonl`), applied by the Z 1-25 run |
 | `exfor_threshold_Z1-25_rows.parquet` | Z 1-25 measured (n,2n), (n,p), (n,α): one row per EXFOR series and engine energy bin, columns of the benchmark `n2n_rows` / `np_rows` plus `reaction` and `first_author` (added 2026-11-06) |
 | `exfor_threshold_Z1-25_provenance.json` | inputs (SHA256), rule counts and checks of that file |
+
+## Z 26-92 review lines (2026-11-06)
+
+A check of every REACTION code in the Z 26-92 set found 12 datasets whose code is a sum (`+`) of two reactions. Eleven
+are not a single-isotope capture cross section and were still kept (one was already down-weighted to trust 1e-6): Pd-106
++ Pd-108 capture compiled as Pd-106 (22580006), Te-128 + Te-130 compiled as Te-128 (40336092), U-235 capture + fission
+compiled as capture (40385003), and eight spectrum-averaged activation sums of a capture and an (n,2n) or (n,n') term
+leading to the same product (30268015, 30400038, 30400045-052). They are excluded by `review_decisions_Z26-92.jsonl`
+(reason with the EXFOR REACTION code on each line); in no case is the partner term negligible, so none was converted.
+The twelfth, Pd-108 30567005 pointer 2, is ground state + isomer of one target, i.e. the total capture; the ingest read
+only its first SF block and keyed it as the ground state `G`. It is re-keyed to the total (state `''`, group
+`Z046N062M0|102||sig|`), decision and values unchanged. `scripts/apply_review_Z26-92.py` applies the lines (the data stay
+in the tables; 12 datasets and 19 cells change). The 2026-09-12 consensus columns are not recomputed. Since these
+tables were built, the capture exam files in `docs/release/exam` were frozen from them; none of the 12 datasets'
+nuclide-bins changed a frozen exam label here (the exam files are not modified).
 
 ## The Z 1-25 extension (2026-11-06)
 
@@ -30,7 +46,7 @@ outdated flag and low posterior trust down-weight. Differences from the Z 26-92 
   (31830002, EXFOR gives 9.7 B for the thermal spectrum average, a x1000 slip against the about 8 mb thermal capture of Be-9; decision
   `fix-unit`, trust 0) is a spectrum-averaged (SPA) value that the website does not plot; Ne-22 Almeida 1983 pointwise
   (21808010) keeps its automatic decision although its 2008 unit correction (MB -> MICRO-B) contradicts the MACS
-  derived from it, because which unit is right cannot be decided from the entry. (The Z 26-92 file has one reviewed line.)
+  derived from it, because which unit is right cannot be decided from the entry. (The Z 26-92 file had one reviewed line in the 2026-09-12 run; 12 more are applied on top, see above.)
 - The curation v2 register (`../curation_register_v2.*`, `docs/release/CURATION_RULE_v2.md`) covers Z 26-92 only.
 - Z 26-92 stays the 2026-09-12 run. Run again today with the newer snapshot and review file, it would agree on 94 % of
   the Z 26-92 datasets' decisions; the resampling-stability gate fails in that newer run with or without the light data.
