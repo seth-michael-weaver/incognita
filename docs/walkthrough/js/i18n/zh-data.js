@@ -7,7 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · 数据浏览器",
   dx_h1: "全部核素",
   dx_lede: "引擎为数据库中每个核素预测的中子截面，与每个核素经过整理的测量数据并列展示。可以在核素图上选取一个核素，也可以直接搜索。",
-  dx_lede_ver: "这些曲线是 v0.2 数据库（2026 年 10 月），由记分板计分的同一引擎版本（2026 年 10 月 22 日的引擎）生成。它们不是 TERRA——记分板上那个针对测量数据拟合的数据产品。每条曲线都是引擎自己的预测，没有一条针对旁边所示的测量数据拟合；唯一的例外是标为已锚定的核素：其曲线乘以一个系数，使 30 keV 处的恒星平均值等于测量值。引擎的总体设置是针对所有核素一次性选定的，用到了许多测量数据（包括这些），因此在已测量核素上的吻合是对模型的公平检验，但并非完全独立。大多数核素从未被测量（外推），它们的区间很宽。",
+  dx_lede_ver: "这些曲线是 v0.2.1 数据库（2026 年 11 月），由记分板计分的同一引擎版本（2026 年 10 月 22 日的引擎）生成。它们不是 TERRA——记分板上那个针对测量数据拟合的数据产品。每条曲线都是引擎自己的预测，没有一条针对旁边所示的测量数据拟合；唯一的例外是标为已锚定的核素：其曲线乘以一个系数，使 30 keV 处的恒星平均值等于测量值。引擎的总体设置是针对所有核素一次性选定的，用到了许多测量数据（包括这些），因此在已测量核素上的吻合是对模型的公平检验，但并非完全独立。大多数核素从未被测量（外推），它们的区间很宽。",
   dx_controls: "核素图控件", dx_search_label: "查找核素", dx_search_ph: "搜索：U-235、Fe56、Au…",
   dx_colour: "核素图着色依据", dx_m_tier: "已知程度", dx_m_macs: "30 keV 俘获", dx_m_meas: "测量数据",
   dx_chart_h: "核素图",
@@ -21,7 +21,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "INCOGNITA 引擎移植自 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely），并使用 TALYS 的核结构数据库。INCOGNITA 新增的内容<a href=\"./?lang=zh#code\" data-keep-lang>在教学页面末尾逐个开关地列出</a>。",
   dx_repo_p2: "运行引擎本身还需要 TALYS 结构数据库；README 中说明了如何获取。",
   dx_repo_link: "GitHub 上的 seth-michael-weaver/incognita →",
-  dx_src: "来源：预测值来自 v0.2 数据库（<code>library/v0.2</code>）；俘获测量数据来自 EXFOR，经 <code>data/curation</code> 整理；(n,2n)、(n,p) 和 (n,α) 测量数据来自 <code>incognita/bench</code> 中的基准条目（Z 26 以下：按相同规则选取的 EXFOR 条目，<code>data/curation/inputs</code>）。整理时排除的测量数据默认隐藏，除非你选择显示。可选的评价数据库叠加曲线（虚线，ENDF/B-VIII.1、JEFF-4.0、TENDL-2025）由 <code>scripts/build_site_overlay.py</code> 生成，仅供显示；INCOGNITA 从不读取它们。",
+  dx_src: "来源：预测值来自 v0.2.1 数据库（<code>library/v0.2.1</code>）；俘获测量数据来自 EXFOR，经 <code>data/curation</code> 整理；(n,2n)、(n,p) 和 (n,α) 测量数据来自 <code>incognita/bench</code> 中的基准条目（Z 26 以下：按相同规则选取的 EXFOR 条目，<code>data/curation/inputs</code>）。整理时排除的测量数据默认隐藏，除非你选择显示。可选的评价数据库叠加曲线（虚线，ENDF/B-VIII.1、JEFF-4.0、TENDL-2025）由 <code>scripts/build_site_overlay.py</code> 生成，仅供显示；INCOGNITA 从不读取它们。",
   dx_t0: "已测量", dx_t1: "锚定到实测 MACS", dx_t2: "插值（靠近已测量核素）", dx_t3: "外推",
   dx_ts0: "已测量", dx_ts1: "已锚定", dx_ts2: "插值", dx_ts3: "外推",
   dx_keep: "保留", dx_down: "降低权重", dx_excl: "排除", dx_fix: "单位已修正",
@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   dx_capsets: "个俘获数据集", dx_measured: "已测量",
   dx_outside: "超出验证范围（Z 26–83）", dx_flag: "可分辨共振延伸到 MACS 窗口内：建议使用实测 MACS",
   dx_nocurve: "此条目没有数据库曲线；测量数据来自",
-  dx_xE: "中子能量", dx_pred: "预测（数据库 v0.2）",
+  dx_xE: "中子能量", dx_pred: "预测（数据库 v0.2.1）",
   dx_res: "可分辨共振区：此处曲线为平均值",
   dx_empty: "此反应没有可显示的内容。", dx_bands: "区间：68 % 和 95 %", dx_band68: "区间：68 %",
   dx_meas_pts: "测量点", dx_table_hint: "点击“以表格显示”查看数值。", dx_ds_h: "测量数据", dx_pts: "点",
@@ -45,7 +45,7 @@ Object.assign(WT.L.ui, {
 Object.assign(WT.L.ui, {
   dx_dl: "下载此核素：",
   dx_dl_note: "此核素的每条曲线和每个测量点，涵盖所有反应，文件中写明单位、来源和 EXFOR 编号。",
-  dx_access: "<b>数据获取。</b>这里显示的所有内容都在代码仓库的 <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2\"><code>library/v0.2</code></a> 下：带 68 / 95 % 区间的俘获曲线（<code>capture_v02.parquet</code>）、麦克斯韦平均（<code>macs30_v02.csv</code>、<code>macs_kt_v02.csv</code>）、恒星反应率（<code>rates_v02.csv</code>、<code>reaclib_v02.dat</code>）以及 (n,2n)、(n,p)、(n,α) 反应道（<code>channels_v02.parquet</code>、<code>grid_np_v02.parquet</code>），并由 <code>SHA256SUMS</code> 校验。如果只需要一个核素，上面的 CSV 和 JSON 下载就足够了。经过整理的测量数据位于 <code>data/curation</code>；它们来自 EXFOR（国际原子能机构核数据科），并保留其 EXFOR 编号。数据库数据采用 CC-BY-4.0 许可。较早的 v0.1 保留在 <code>library/v0.1</code>；改动见 <code>library/v0.2</code> 中的 <code>CHANGELOG.md</code>。",
+  dx_access: "<b>数据获取。</b>这里显示的所有内容都在代码仓库的 <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2.1\"><code>library/v0.2.1</code></a> 下：带 68 / 95 % 区间的俘获曲线（<code>capture_v021.parquet</code>）、麦克斯韦平均（<code>macs30_v021.csv</code>、<code>macs_kt_v021.csv</code>）、恒星反应率（<code>rates_v021.csv</code>、<code>reaclib_v021.dat</code>）以及 (n,2n)、(n,p)、(n,α) 反应道（<code>channels_v021.parquet</code>、<code>grid_np_v021.parquet</code>），并由 <code>SHA256SUMS</code> 校验。如果只需要一个核素，上面的 CSV 和 JSON 下载就足够了。经过整理的测量数据位于 <code>data/curation</code>；它们来自 EXFOR（国际原子能机构核数据科），并保留其 EXFOR 编号。数据库数据采用 CC-BY-4.0 许可。较早的 v0.1 保留在 <code>library/v0.1</code>；改动见 <code>library/v0.2.1</code> 中的 <code>CHANGELOG.md</code>。",
 });
 Object.assign(WT.L.ui, {
   dx_lib: "叠加评价数据库（仅供比较——INCOGNITA 不使用）",
@@ -56,7 +56,7 @@ Object.assign(WT.L.ui, {
   dx_lib_held: "JENDL-5 将在其再分发衍生表格的条款确认后加入。",
 });
 
-/* library v0.2: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
+/* library v0.2.1: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
 Object.assign(WT.L.ui, {
   dx_mf_pe_lo: "模型选择不确定：本引擎在所有能量下都允许粒子在原子核达到平衡之前逸出（预平衡发射），而 TALYS 只在约 1 MeV 以上才这样做；按 TALYS 的选择，30 keV 处的俘获约为现值的 1/{n}，1 MeV 以下的 95 % 区间涵盖两者。",
   dx_mf_pe_hi: "模型选择不确定：本引擎在所有能量下都允许粒子在原子核达到平衡之前逸出（预平衡发射），而 TALYS 只在约 1 MeV 以上才这样做；按 TALYS 的选择，30 keV 处的俘获约为现值的 {n} 倍，1 MeV 以下的 95 % 区间涵盖两者。",
@@ -127,7 +127,7 @@ Object.assign(WT.L.ui, {
   dx_tr_b_macs: "误差带未单独检验",
   dx_tr_e: "记分板上的误差通常为 ×{f}（{n} 个已测量的核，Z {z}；非盲测）",
   dx_tr_e_none: "该区域没有留出数据的检验",
-  dx_tr_src: "类别与标记：library/v0.2 的 README。误差带：一次针对测量的预注册覆盖率检验（5 个测试核，2026 年 10 月），其中俘获、裂变和弹性散射的误差带覆盖与标称一致，阈反应道和总截面覆盖不足。误差：<a href=\"scoreboard.html\" data-keep-lang>记分板</a>，log10(引擎 / 测量) 的均方根；它不是盲测，因为引擎的规则是看着它选定的。",
+  dx_tr_src: "类别与标记：library/v0.2.1 的 README。误差带：一次针对测量的预注册覆盖率检验（5 个测试核，2026 年 10 月），其中俘获、裂变和弹性散射的误差带覆盖与标称一致，阈反应道和总截面覆盖不足。误差：<a href=\"scoreboard.html\" data-keep-lang>记分板</a>，log10(引擎 / 测量) 的均方根；它不是盲测，因为引擎的规则是看着它选定的。",
 });
 // less text (2026-11-06)
 Object.assign(WT.L.ui, { dx_hint2: "拖动平移 · 滚动缩放 · 点击方格", dx_more_nuc: "详情:可信度、来源、代码", dx_about: "关于数据、下载与代码" });

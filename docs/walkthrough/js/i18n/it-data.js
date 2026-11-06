@@ -7,7 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · esploratore di dati",
   dx_h1: "Tutti i nuclidi",
   dx_lede: "Le sezioni d'urto neutroniche previste dal motore per ogni nuclide della libreria, accanto alle misure revisionate di ciascun nuclide. Scegli un nuclide sulla carta, oppure cercalo.",
-  dx_lede_ver: "Le curve sono la libreria v0.2 (ottobre 2026), prodotta con la stessa versione del motore valutata nella Classifica (il motore del 22 ottobre 2026). Non sono TERRA, il prodotto di dati della Classifica adattato alle misure. Ogni curva è la previsione del motore stesso: nessuna è stata adattata alle misure mostrate accanto, tranne che per un nuclide segnato come ancorato, la cui curva è moltiplicata per un solo fattore perché la sua media stellare a 30 keV sia uguale al valore misurato. Le impostazioni generali del motore sono state scelte una volta sola, per tutti i nuclidi, usando molte misure (tra cui queste), quindi l'accordo su un nuclide misurato è una verifica onesta del modello, anche se non del tutto indipendente. La maggior parte dei nuclidi non è mai stata misurata (estrapolati), e le loro bande sono larghe.",
+  dx_lede_ver: "Le curve sono la libreria v0.2.1 (novembre 2026), prodotta con la stessa versione del motore valutata nella Classifica (il motore del 22 ottobre 2026). Non sono TERRA, il prodotto di dati della Classifica adattato alle misure. Ogni curva è la previsione del motore stesso: nessuna è stata adattata alle misure mostrate accanto, tranne che per un nuclide segnato come ancorato, la cui curva è moltiplicata per un solo fattore perché la sua media stellare a 30 keV sia uguale al valore misurato. Le impostazioni generali del motore sono state scelte una volta sola, per tutti i nuclidi, usando molte misure (tra cui queste), quindi l'accordo su un nuclide misurato è una verifica onesta del modello, anche se non del tutto indipendente. La maggior parte dei nuclidi non è mai stata misurata (estrapolati), e le loro bande sono larghe.",
   dx_controls: "Comandi della carta", dx_search_label: "Trova un nuclide", dx_search_ph: "Cerca: U-235, Fe56, Au…",
   dx_colour: "Colora la carta per", dx_m_tier: "Come è noto", dx_m_macs: "Cattura a 30 keV", dx_m_meas: "Dati misurati",
   dx_chart_h: "Carta dei nuclidi",
@@ -21,7 +21,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "Il motore INCOGNITA è un port di <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) e usa la banca dati di struttura nucleare di TALYS. Ciò che INCOGNITA aggiunge è <a href=\"./?lang=it#code\" data-keep-lang>elencato, opzione per opzione, alla fine della pagina didattica</a>.",
   dx_repo_p2: "Per eseguire il motore stesso serve anche la banca dati di struttura di TALYS; il README spiega come scaricarla.",
   dx_repo_link: "seth-michael-weaver/incognita su GitHub →",
-  dx_src: "Fonti: previsioni della libreria v0.2 (<code>library/v0.2</code>); misure di cattura da EXFOR revisionate in <code>data/curation</code>; misure di (n,2n), (n,p) e (n,α) dalle righe di riferimento in <code>incognita/bench</code> (sotto Z 26: righe EXFOR scelte con le stesse regole, <code>data/curation/inputs</code>). Le misure escluse dalla revisione restano nascoste se non le chiedi. La sovrapposizione opzionale (linee tratteggiate) di librerie valutate (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) è generata da <code>scripts/build_site_overlay.py</code> solo per la visualizzazione; INCOGNITA non la legge mai.",
+  dx_src: "Fonti: previsioni della libreria v0.2.1 (<code>library/v0.2.1</code>); misure di cattura da EXFOR revisionate in <code>data/curation</code>; misure di (n,2n), (n,p) e (n,α) dalle righe di riferimento in <code>incognita/bench</code> (sotto Z 26: righe EXFOR scelte con le stesse regole, <code>data/curation/inputs</code>). Le misure escluse dalla revisione restano nascoste se non le chiedi. La sovrapposizione opzionale (linee tratteggiate) di librerie valutate (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) è generata da <code>scripts/build_site_overlay.py</code> solo per la visualizzazione; INCOGNITA non la legge mai.",
   dx_t0: "Misurato", dx_t1: "Ancorato a una MACS misurata", dx_t2: "Interpolato (vicino a nuclidi misurati)", dx_t3: "Estrapolato",
   dx_ts0: "misurato", dx_ts1: "ancorato", dx_ts2: "interpolato", dx_ts3: "estrapolato",
   dx_keep: "conservato", dx_down: "con peso ridotto", dx_excl: "escluso", dx_fix: "unità corretta",
@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   dx_capsets: "insiemi di dati di cattura", dx_measured: "Misurato",
   dx_outside: "fuori dall'intervallo validato (Z 26–83)", dx_flag: "le risonanze risolte raggiungono la finestra della MACS: meglio una MACS misurata",
   dx_nocurve: "nessuna curva di libreria per questa voce; le misure vengono da",
-  dx_xE: "energia del neutrone", dx_pred: "previsione (libreria v0.2)",
+  dx_xE: "energia del neutrone", dx_pred: "previsione (libreria v0.2.1)",
   dx_res: "risonanze risolte: qui la curva è una media",
   dx_empty: "Niente da mostrare per questa reazione.", dx_bands: "bande: 68 % e 95 %", dx_band68: "banda: 68 %",
   dx_meas_pts: "misurati", dx_table_hint: "Usa «Mostra come tabella» per i valori.", dx_ds_h: "Misure", dx_pts: "punti",
@@ -45,7 +45,7 @@ Object.assign(WT.L.ui, {
 Object.assign(WT.L.ui, {
   dx_dl: "Scarica questo nuclide:",
   dx_dl_note: "Ogni curva e ogni punto misurato di questo nuclide, tutte le reazioni, con unità, fonti e identificativi EXFOR scritti nel file.",
-  dx_access: "<b>Accesso ai dati.</b> Tutto ciò che è mostrato qui si trova nel repository, in <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2\"><code>library/v0.2</code></a>: curve di cattura con bande al 68 / 95 % (<code>capture_v02.parquet</code>), medie maxwelliane (<code>macs30_v02.csv</code>, <code>macs_kt_v02.csv</code>), tassi stellari (<code>rates_v02.csv</code>, <code>reaclib_v02.dat</code>) e i canali (n,2n), (n,p), (n,α) (<code>channels_v02.parquet</code>, <code>grid_np_v02.parquet</code>), verificati con <code>SHA256SUMS</code>. Per un solo nuclide bastano i download CSV e JSON qui sopra. Le misure revisionate sono in <code>data/curation</code>; provengono da EXFOR (Sezione Dati Nucleari della IAEA) e conservano i loro identificativi EXFOR. I dati della libreria sono CC-BY-4.0. La versione precedente, v0.1, resta in <code>library/v0.1</code>; il file <code>CHANGELOG.md</code> in <code>library/v0.2</code> spiega cosa è cambiato.",
+  dx_access: "<b>Accesso ai dati.</b> Tutto ciò che è mostrato qui si trova nel repository, in <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2.1\"><code>library/v0.2.1</code></a>: curve di cattura con bande al 68 / 95 % (<code>capture_v021.parquet</code>), medie maxwelliane (<code>macs30_v021.csv</code>, <code>macs_kt_v021.csv</code>), tassi stellari (<code>rates_v021.csv</code>, <code>reaclib_v021.dat</code>) e i canali (n,2n), (n,p), (n,α) (<code>channels_v021.parquet</code>, <code>grid_np_v021.parquet</code>), verificati con <code>SHA256SUMS</code>. Per un solo nuclide bastano i download CSV e JSON qui sopra. Le misure revisionate sono in <code>data/curation</code>; provengono da EXFOR (Sezione Dati Nucleari della IAEA) e conservano i loro identificativi EXFOR. I dati della libreria sono CC-BY-4.0. La versione precedente, v0.1, resta in <code>library/v0.1</code>; il file <code>CHANGELOG.md</code> in <code>library/v0.2.1</code> spiega cosa è cambiato.",
 });
 Object.assign(WT.L.ui, {
   dx_lib: "Sovrapponi librerie valutate (solo per confronto — INCOGNITA non le usa)",
@@ -56,7 +56,7 @@ Object.assign(WT.L.ui, {
   dx_lib_held: "JENDL-5 sarà aggiunta quando saranno confermate le sue condizioni per ridistribuire tabelle derivate.",
 });
 
-/* library v0.2: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
+/* library v0.2.1: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
 Object.assign(WT.L.ui, {
   dx_mf_pe_lo: "Scelta di modello incerta: questo motore lascia sfuggire una particella prima che il nucleo si assesti (emissione di pre-equilibrio) a tutte le energie, mentre TALYS lo fa solo sopra circa 1 MeV; la scelta di TALYS dà circa {n} volte meno cattura a 30 keV, e la banda al 95 % sotto 1 MeV copre entrambe.",
   dx_mf_pe_hi: "Scelta di modello incerta: questo motore lascia sfuggire una particella prima che il nucleo si assesti (emissione di pre-equilibrio) a tutte le energie, mentre TALYS lo fa solo sopra circa 1 MeV; la scelta di TALYS dà circa {n} volte più cattura a 30 keV, e la banda al 95 % sotto 1 MeV copre entrambe.",

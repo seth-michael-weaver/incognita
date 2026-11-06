@@ -1,6 +1,6 @@
 """Build the data files of the website's Data explorer (docs/walkthrough/data/).
 
-Reads the v0.2 library (production-engine curves for every nuclide) and the curated EXFOR capture cells (Z 26-92:
+Reads library v0.2.1 (production-engine curves for every nuclide; v0.2 with centre-of-mass Maxwellian averages) and the curated EXFOR capture cells (Z 26-92:
 exfor_capture_Z26-92_trust + exfor_cells; Z 1-25: exfor_capture_Z1-25_trust + exfor_cells_Z1-25, the same WP-12 curation
 run by scripts/build_light_curation.py), plus measured (n,2n), (n,p) and (n,alpha) points: the benchmark rows (Z 24-92,
 incognita/bench/data/exam_rows) and, for Z 1-25, EXFOR rows cut with the same rules by scripts/build_light_channels.py
@@ -10,7 +10,7 @@ incognita/bench/data/exam_rows) and, for Z 1-25, EXFOR rows cut with the same ru
                        nuclide is opened; the chart itself needs only the index
 
 Index column n_use: curated capture cells (cross sections and Maxwellian averages) of the nuclide that the curation did
-NOT exclude. The page uses it for the tier it shows below Z 26. Library v0.2 defines its tiers only from Z 26 up (every
+NOT exclude. The page uses it for the tier it shows below Z 26. Library v0.2 (and v0.2.1) defines its tiers only from Z 26 up (every
 Z < 26 row is EXTRAPOLATED there, because the library's curated capture set started at Z 26); the page does not change
 the library's tier (field "tier" stays the library's), it shows "measured (Z < 26)" when n_use > 0 and "not measured
 (Z < 26)" otherwise. Measured means: at least one curated EXFOR capture cell that the curation kept or down-weighted.
@@ -23,7 +23,7 @@ from collections import defaultdict
 import pyarrow.parquet as pq
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LIB = os.path.join(ROOT, "library", "v0.2")
+LIB = os.path.join(ROOT, "library", "v0.2.1")
 OUT = os.path.join(ROOT, "docs", "walkthrough", "data")
 
 SYM = ("n H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr "
@@ -71,7 +71,7 @@ def main():
     nucs = {}  # (Z, A) -> dict
 
     # ---- library curves ----
-    cap = pq.read_table(os.path.join(LIB, "capture_v02.parquet")).to_pylist()
+    cap = pq.read_table(os.path.join(LIB, "capture_v021.parquet")).to_pylist()
     grid = [sig(e, 5) for e in cap[0]["energy_ev"]]
     for r in cap:
         assert [sig(e, 5) for e in r["energy_ev"]] == grid, "capture grids differ"
@@ -87,21 +87,21 @@ def main():
             a30 = r.get("alt_value_30keV_b")
             ok = a30 is not None and not (isinstance(a30, float) and math.isnan(a30)) and v30 > 0
             nucs[(r["Z"], r["A"])]["mform"] = {"kind": mf, "alt30": sig(a30) if ok else None, "ratio": sig(a30 / v30, 3) if ok else None}
-    ch = pq.read_table(os.path.join(LIB, "channels_v02.parquet")).to_pylist()
+    ch = pq.read_table(os.path.join(LIB, "channels_v021.parquet")).to_pylist()
     for r in ch:
         n = nucs.get((r["Z"], r["A"]))
         if n is None:
             continue
         n["ch"] = {k: sigl(r[f"sigma_{k}_mb"]) for k in ("np", "n2n", "na") if r[f"sigma_{k}_mb"] is not None}
     npl = defaultdict(list)
-    for r in pq.read_table(os.path.join(LIB, "grid_np_v02.parquet")).to_pylist():
+    for r in pq.read_table(os.path.join(LIB, "grid_np_v021.parquet")).to_pylist():
         if r["pred_mb"] is not None:
             npl[(r["Z"], r["A"])].append((r["E_MeV"] * 1e6, r["pred_mb"], r["lo68_mb"], r["hi68_mb"]))
     for k, rows in npl.items():
         if k in nucs:
             rows.sort()
             nucs[k]["npL"] = [[sig(a, 5), sig(b), sig(c), sig(d)] for a, b, c, d in rows]
-    with open(os.path.join(LIB, "macs_kt_v02.csv"), newline="") as f:
+    with open(os.path.join(LIB, "macs_kt_v021.csv"), newline="") as f:
         for r in csv.DictReader(f):
             n = nucs.get((int(r["Z"]), int(r["A"])))
             if n is None:
