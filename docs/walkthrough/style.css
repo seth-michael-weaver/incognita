@@ -882,3 +882,13 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 .in-part { list-style: none; margin: 18px 0 2px; }
 .in-part h3 { margin: 0 0 4px; }
 .in-part p { margin: 0; }
+/* header menus fit their entries (Seth 2026-11-06: "the menu doesn't have to be that wide") */
+.site .chap ol { width: max-content; min-width: 13rem; max-width: min(22rem, 92vw); }
+/* cross-page menus inside the header links: a button on wide screens, the plain link on phones */
+.site .chap-x > a { display: none; }
+.site .chap-x ol { inset-inline-end: auto; inset-inline-start: 0; }
+@media (max-width: 860px) {
+  .site .chap ol { width: auto; max-width: none; }
+  .site .chap-x > a { display: inline-flex; }
+  .site .chap-x > .toc-menu, .site .chap-x > ol, .site .chap-x.open > ol { display: none; }
+}
