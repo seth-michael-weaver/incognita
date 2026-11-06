@@ -1,8 +1,9 @@
-"""Read the shipped libraries (library/v0.1/, library/v0.2/) without any other tooling.
+"""Read the shipped libraries (library/v0.1/, library/v0.2/, library/v0.2.1/) without any other tooling.
 
     uv run python -m incognita.library summary            # nuclei per regime tier, energy grid
     uv run python -m incognita.library show Fe-56          # capture curve with 68 / 95 % intervals, MACS at 30 keV
     uv run python -m incognita.library show Fe-56 --version v0.2   # the same from library v0.2
+    uv run python -m incognita.library show Fe-56 --version v0.2.1 # v0.2 with centre-of-mass MACS (library/v0.2.1/CHANGELOG.md)
     uv run python -m incognita.library show Z026N030M0 --every 4
 
 `--version` (or `version=` in Python) picks the library; the default stays v0.1.
@@ -22,7 +23,7 @@ import pandas as pd
 
 LIBRARY = Path(__file__).resolve().parents[1] / "library" / "v0.1"
 CAPTURE = "capture_v01_indep.parquet"
-VERSIONS = {"v0.1": CAPTURE, "v0.2": "capture_v02.parquet"}  # library/<version>/<capture file>
+VERSIONS = {"v0.1": CAPTURE, "v0.2": "capture_v02.parquet", "v0.2.1": "capture_v021.parquet"}  # library/<version>/<capture file>
 TIERS = ("MEASURED", "ANCHORED", "INTERPOLATED", "EXTRAPOLATED")
 
 _SYMBOLS = (
@@ -54,7 +55,7 @@ def nuclide_id(name: str) -> str:
 
 
 def load_capture(root: Path | str = LIBRARY, version: str | None = None) -> pd.DataFrame:
-    """The capture table of library `version` ("v0.1" or "v0.2"); without a version, CAPTURE under `root`."""
+    """The capture table of library `version` ("v0.1", "v0.2" or "v0.2.1"); without a version, CAPTURE under `root`."""
     if version is None:
         return pd.read_parquet(Path(root) / CAPTURE)
     if version not in VERSIONS:

@@ -48,3 +48,19 @@ def test_v02_reads_and_bands_are_ordered():
     assert (c.sigma_b <= c.hi68_b).all() and (c.hi68_b <= c.hi95_b).all()
     with pytest.raises(ValueError):
         L.load_capture(version="v9")
+
+
+def test_v021_cm_macs_and_unchanged_curves():
+    """v0.2.1: MACS in the centre-of-mass frame; only the 21 ANCHORED curves differ from v0.2."""
+    t1, t2 = L.load_capture(version="v0.2.1"), L.load_capture(version="v0.2")
+    assert list(t1.nuclide_id) == list(t2.nuclide_id) and (t1.tier.values == t2.tier.values).all()
+    diff = [n for n, a, b in zip(t1.nuclide_id, t1.sigma_b, t2.sigma_b) if not np.array_equal(np.asarray(a), np.asarray(b))]
+    assert set(diff) == set(t1.nuclide_id[t1.tier == "ANCHORED"])
+    # macs30_mb is the centre-of-mass Maxwellian average of the shipped curve (1/v below the 1 keV grid start)
+    for nid in ("Z008N008M0", "Z079N118M0"):
+        r = t1[t1.nuclide_id == nid].iloc[0]
+        e, sb, A, kt = np.asarray(r.energy_ev, float), np.asarray(r.sigma_b, float), int(r.A), 3e4
+        g = np.exp(np.linspace(np.log(1e-6), np.log(e[-1] * A / (A + 1)), 400_001)); el = g * (A + 1) / A
+        ls = np.where(el < e[0], np.log(sb[0]) + 0.5 * np.log(e[0] / el), np.interp(np.log(el), np.log(e), np.log(sb)))
+        m = 2 / np.sqrt(np.pi) * np.trapezoid(np.exp(ls) * g * g * np.exp(-g / kt), np.log(g)) / kt ** 2 * 1e3
+        assert r.macs30_mb == pytest.approx(m, rel=1e-6)
