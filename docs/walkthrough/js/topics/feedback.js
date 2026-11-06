@@ -102,7 +102,8 @@
       // ---------- the loop diagram ----------
       // the core box is sized by the stage height too, so on wide, short screens it stays below the header (its "P" tag above it)
       const coreW = phone ? W * 0.26 : Math.min(W * 0.3, H * 0.32), coreH = coreW * 0.62, rP = coreH * 0.62;
-      const cx = phone ? W * 0.5 : W * 0.25, cy = phone ? H * 0.33 : H * 0.36, rx = phone ? W * 0.33 : W * 0.17;
+      const rx = phone ? W * 0.33 : W * 0.17, cy = phone ? H * 0.33 : H * 0.36;
+      const cx = phone ? W * 0.5 : Math.max(W * 0.25, rx + 22 + 16 + 100); // room left of the rho node for its label (else it slides onto the node)
       const ry = phone ? H * 0.13 : Math.min(H * 0.2, cy - coreH / 2 - 34);
       const NP = [cx, cy - ry], NF = [cx + rx, cy], NM = [cx, cy + ry], NR = [cx - rx, cy];
       const nr = phone ? 17 : 22;

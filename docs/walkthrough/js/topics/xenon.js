@@ -208,7 +208,7 @@
         land(g, all, c.alpha, pb); g.poly(all, c.alpha, 2.4); yTicks(g, P, pb, ym > 9 ? [0, 4, 8] : [0, 2, 4, 6], fs);
         g.line(P.X(0), pb.y + 18, P.X(0), pb.y + pb.h, c.soft, 1, 0.5, [2, 4]); g.label("shutdown", P.X(0), pb.y + pb.h + 26, { color: c.soft, size: fs - 2 });
         g.line(P.X(th), pb.y, P.X(th), pb.y + pb.h, c.ink, 1, 0.3); g.ring(P.X(th), P.Y(xv), 10 + 2 * Math.sin(S.time * 3), c.alpha, 1.5, LAY.drag ? 0.9 : 0.55); g.dot(P.X(th), P.Y(xv), 5.5, c.alpha); g.glow(P.X(th), P.Y(xv), 22, c.alpha, 0.5); void P2;
-        if (!LAY.used) g.label("drag", P.X(th), P.Y(xv) - 24, { color: c.alpha, size: fs - 2, weight: 600, bg: true });
+        if (!LAY.used) { const up = P.Y(xv) - 24 > pb.y - 4; g.label("drag", P.X(th) + (up ? 0 : 18), up ? P.Y(xv) - 24 : P.Y(xv), { color: c.alpha, size: fs - 2, weight: 600, bg: true, align: up ? "center" : "left" }); } // near the top, beside the point (above it ran into the axis title)
         if (Math.abs(th - C.tp) > 4) g.label(`peak −${C.pk.toFixed(1)} % at ${C.tp.toFixed(0)} h`, P.X(C.tp) + 8, P.Y(C.pk) - 12, { color: c.alpha, size: fs - 1, align: "left", bg: true });
         yLab("xenon worth (% of k)"); ticks(g, P, pb, [0, 24, 48, 72], fs, "h");
         const can = xv <= MARGIN;

@@ -324,7 +324,9 @@ vec4 shade(vec2 p) {
         const p = Math.sqrt(2 * A * E), sLen = vk * Math.min(age * Math.sqrt(E / A) * 0.6, 3.2);   // path length so far (speed ~ sqrt(E/A))
         let x = cx, y = cy, last = [cx, cy];
         if (!Z) {   // neutron: straight, dashed, no bubbles
-          const L = Math.min(sLen, Math.hypot(W, H)); x = cx + Math.cos(a) * L; y = cy + Math.sin(a) * L;
+          // stops where it leaves the picture (with room for its label), so the ball and its label never sit off the edge or on the text
+          const ca = Math.cos(a), sa = Math.sin(a), m = 24, edge = Math.min(ca > 1e-6 ? (W - m - cx) / ca : ca < -1e-6 ? (m - cx) / ca : 1e9, sa > 1e-6 ? (H * (phone ? 0.8 : 0.82) - 24 - cy) / sa : sa < -1e-6 ? ((phone ? 46 : 90) - cy) / sa : 1e9); // above the mass balance, below the title
+          const L = Math.max(0, Math.min(sLen, edge)); x = cx + ca * L; y = cy + sa * L;
           g.line(cx, cy, x, y, col, 1.6, 0.55 * fade, [5, 6]); last = [x, y];
         } else {
           const R = (k * p) / (Z * 2.8);    // radius of curvature, px
