@@ -143,4 +143,17 @@ Object.assign(WT.L.ui, {
   in_w_kinetics: "La cinétique ponctuelle à six groupes de neutrons retardés, l'équation inhour, la période du réacteur et le saut prompt.",
   in_t_transport: "Transport des neutrons et Monte Carlo", in_s_transport: "Monte Carlo",
   in_w_transport: "Suivre les neutrons un par un à travers une plaque : collisions, marche aléatoire, et comment le transport Monte Carlo estime k et le flux.",
+  // new lessons (kinds of reactor II)
+  in_t_everyday: "Le nucléaire au quotidien", in_s_everyday: "Quotidien",
+  in_w_everyday: "La TEP (fluor 18, photons de 511 keV émis dos à dos), des faisceaux de radiothérapie qui se croisent sur une tumeur, le technétium 99m, la datation au carbone 14 et les détecteurs de fumée.",
+  in_t_sandbox: "Construire un réacteur", in_s_sandbox: "Construire un réacteur",
+  in_w_sandbox: "Un bac à sable : choisir combustible, enrichissement, modérateur, caloporteur, réseau et taille ; la formule des quatre facteurs, les fuites à un groupe et la taille critique, le bilan neutronique et le signe des contre-réactions de vide et Doppler.",
+  in_t_fuelcycle: "Le cycle du combustible", in_s_fuelcycle: "Cycle du combustible",
+  in_w_fuelcycle: "Du minerai aux déchets pour une tonne de combustible : teneurs du minerai, bilan matière de l'enrichissement (alimentation, produit, rejets, UTS), des pastilles aux assemblages, taux de combustion, entreposage en piscine et en château, et cycle ouvert ou retraitement en MOX.",
+  in_t_stars: "D'où viennent les éléments", in_s_stars: "Éléments des étoiles",
+  in_w_stars: "La fusion jusqu'au fer, puis la capture de neutrons : le chemin du processus s le long de la vallée de stabilité, le processus r dans les fusions d'étoiles à neutrons, les pics d'abondance aux nombres magiques, et σN ≈ constante avec les taux de capture à 30 keV calculés par INCOGNITA.",
+  in_t_accidents: "Trois accidents expliqués", in_s_accidents: "Accidents",
+  in_w_accidents: "La physique de Three Mile Island (soupape de décharge bloquée, niveau mal interprété, chaleur résiduelle), de Tchernobyl (contre-réaction de vide positive, effet positif de l'arrêt d'urgence) et de Fukushima Daiichi (perte totale des alimentations électriques, évaporation de l'eau, hydrogène issu du zirconium et de la vapeur), et ce qui a changé après chacun.",
+  in_t_spentfuel: "Le combustible usé, nucléide par nucléide", in_s_spentfuel: "Nucléide par nucléide",
+  in_w_spentfuel: "Une tonne de combustible usé de REP, décroissance nucléide par nucléide (chaînes de Bateman, coefficients d'ingestion de la CIPR 72) : activité contre radiotoxicité, quel nucléide domine à quel moment, et comment retirer le plutonium et les actinides mineurs à 99 % ou 99,9 % raccourcit le temps nécessaire pour passer sous le minerai d'uranium.",
 });

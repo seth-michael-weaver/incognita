@@ -143,4 +143,17 @@ Object.assign(WT.es.ui, {
   in_w_kinetics: "La cinética puntual con seis grupos de neutrones retardados, la ecuación inhour, el periodo del reactor y el salto instantáneo.",
   in_t_transport: "Transporte de neutrones y Monte Carlo", in_s_transport: "Monte Carlo",
   in_w_transport: "Seguir los neutrones uno a uno a través de una placa: colisiones, el camino aleatorio y cómo el transporte Monte Carlo estima k y el flujo.",
+  // new lessons (kinds of reactor II)
+  in_t_everyday: "Lo nuclear en la vida cotidiana", in_s_everyday: "Vida cotidiana",
+  in_w_everyday: "Tomografía PET (flúor-18, fotones de 511 keV emitidos en sentidos opuestos), haces de radioterapia que se cruzan en un tumor, tecnecio-99m, datación por carbono-14 y detectores de humo.",
+  in_t_sandbox: "Construye un reactor", in_s_sandbox: "Construye un reactor",
+  in_w_sandbox: "Un banco de pruebas: elige combustible, enriquecimiento, moderador, refrigerante, red y tamaño; la fórmula de los cuatro factores, las fugas a un grupo y el tamaño crítico, el balance neutrónico y el signo de las realimentaciones por vacío y Doppler.",
+  in_t_fuelcycle: "El ciclo del combustible", in_s_fuelcycle: "Ciclo del combustible",
+  in_w_fuelcycle: "Del mineral a los residuos para una tonelada de combustible: leyes del mineral, el balance de masas del enriquecimiento (alimentación, producto, colas, UTS), de pastillas a elementos, quemado, almacenamiento en piscina y en contenedor, y ciclo abierto o reprocesado a MOX.",
+  in_t_stars: "De dónde vienen los elementos", in_s_stars: "Elementos de las estrellas",
+  in_w_stars: "Fusión hasta el hierro y luego captura de neutrones: el camino del proceso s a lo largo del valle de estabilidad, el proceso r en las fusiones de estrellas de neutrones, los picos de abundancia en los números mágicos y σN ≈ constante con las tasas de captura a 30 keV calculadas por INCOGNITA.",
+  in_t_accidents: "Tres accidentes, explicados", in_s_accidents: "Accidentes",
+  in_w_accidents: "La física de Three Mile Island (válvula de alivio atascada, nivel mal interpretado, calor residual), Chernóbil (realimentación por vacío positiva, el efecto positivo del scram) y Fukushima Daiichi (pérdida total de energía eléctrica, evaporación del agua, hidrógeno del circonio y el vapor), y lo que cambió tras cada uno.",
+  in_t_spentfuel: "El combustible gastado, nucleido a nucleido", in_s_spentfuel: "Nucleido a nucleido",
+  in_w_spentfuel: "Una tonelada de combustible gastado de PWR que decae nucleido a nucleido (cadenas de Bateman, coeficientes de ingestión de ICRP-72): actividad frente a radiotoxicidad, qué nucleido domina en cada momento y cómo retirar el plutonio y los actínidos minoritarios al 99 % o al 99,9 % acorta el tiempo hasta quedar por debajo del mineral de uranio.",
 });

@@ -142,4 +142,17 @@ Object.assign(WT.L.ui, {
   in_w_kinetics: "Punktkinetik mit sechs Gruppen verzögerter Neutronen, die Inhour-Gleichung, die Reaktorperiode und der prompte Sprung.",
   in_t_transport: "Neutronentransport und Monte Carlo", in_s_transport: "Monte Carlo",
   in_w_transport: "Neutronen einzeln durch eine Platte verfolgen: Stöße, die Zufallsbewegung und wie Monte-Carlo-Transport k und Fluss schätzt.",
+  // new lessons (kinds of reactor II)
+  in_t_everyday: "Kernphysik im Alltag", in_s_everyday: "Alltag",
+  in_w_everyday: "PET-Scans (Fluor-18, gegenläufige 511-keV-Photonen), Bestrahlungsfelder, die sich im Tumor kreuzen, Technetium-99m, Radiokarbondatierung und Rauchmelder.",
+  in_t_sandbox: "Baue einen Reaktor", in_s_sandbox: "Reaktor bauen",
+  in_w_sandbox: "Ein Baukasten: Brennstoff, Anreicherung, Moderator, Kühlmittel, Gitter und Größe wählen; die Vier-Faktoren-Formel, Eingruppen-Leckage und kritische Größe, die Neutronenbilanz und das Vorzeichen der Dampfblasen- und Doppler-Rückkopplung.",
+  in_t_fuelcycle: "Der Brennstoffkreislauf", in_s_fuelcycle: "Brennstoffkreislauf",
+  in_w_fuelcycle: "Vom Erz zum Abfall für eine Tonne Brennstoff: Erzgehalte, die Massenbilanz der Anreicherung (Feed, Produkt, Tails, UTA), von Tabletten zu Brennelementen, Abbrand, Nass- und Trockenlagerung, und direkte Endlagerung oder Wiederaufarbeitung zu MOX.",
+  in_t_stars: "Woher die Elemente kommen", in_s_stars: "Elemente aus Sternen",
+  in_w_stars: "Fusion bis zum Eisen, dann Neutroneneinfang: der s-Prozess-Pfad entlang des Stabilitätstals, der r-Prozess in Neutronensternverschmelzungen, Häufigkeitsmaxima bei den magischen Zahlen und σN ≈ konstant mit den von INCOGNITA berechneten Einfangraten bei 30 keV.",
+  in_t_accidents: "Drei Unfälle, erklärt", in_s_accidents: "Unfälle",
+  in_w_accidents: "Die Physik von Three Mile Island (klemmendes Abblaseventil, falsch gedeuteter Füllstand, Nachzerfallswärme), Tschernobyl (positive Dampfblasen-Rückkopplung, der positive Scram-Effekt) und Fukushima Daiichi (Totalausfall der Stromversorgung, Ausdampfen, Wasserstoff aus Zirkonium und Dampf), und was sich nach jedem änderte.",
+  in_t_spentfuel: "Abgebrannter Brennstoff, Nuklid für Nuklid", in_s_spentfuel: "Nuklid für Nuklid",
+  in_w_spentfuel: "Eine Tonne abgebrannter DWR-Brennstoff, Nuklid für Nuklid zerfallen (Bateman-Ketten, Ingestionskoeffizienten nach ICRP-72): Aktivität gegenüber Radiotoxizität, welches Nuklid wann dominiert, und wie das Abtrennen von Plutonium und den minoren Actinoiden zu 99 % oder 99,9 % die Zeit verkürzt, bis der Wert unter den des Uranerzes fällt.",
 });

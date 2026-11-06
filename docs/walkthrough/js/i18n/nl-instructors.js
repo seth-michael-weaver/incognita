@@ -142,4 +142,17 @@ Object.assign(WT.L.ui, {
   in_w_kinetics: "Puntkinetiek met zes groepen vertraagde neutronen, de inhour-vergelijking, de reactorperiode en de promptsprong.",
   in_t_transport: "Neutronentransport en Monte Carlo", in_s_transport: "Monte Carlo",
   in_w_transport: "Neutronen één voor één door een plaat volgen: botsingen, de willekeurige wandeling, en hoe Monte Carlo-transport k en flux schat.",
+  // new lessons (kinds of reactor II)
+  in_t_everyday: "Kernfysica in het dagelijks leven", in_s_everyday: "Dagelijks leven",
+  in_w_everyday: "PET-scans (fluor-18, tegengesteld uitgezonden fotonen van 511 keV), bestralingsbundels die elkaar in een tumor kruisen, technetium-99m, koolstofdatering en rookmelders.",
+  in_t_sandbox: "Bouw een reactor", in_s_sandbox: "Bouw een reactor",
+  in_w_sandbox: "Een zandbak: kies brandstof, verrijking, moderator, koelmiddel, rooster en grootte; de vierfactorformule, één-groepslekkage en de kritische grootte, de neutronenbalans en het teken van de dampbellen- en dopplerterugkoppeling.",
+  in_t_fuelcycle: "De splijtstofcyclus", in_s_fuelcycle: "Splijtstofcyclus",
+  in_w_fuelcycle: "Van erts tot afval voor één ton brandstof: ertsgehaltes, de massabalans van verrijking (voeding, product, tails, SWU), van tabletten tot elementen, opbrand, opslag in bassin en container, en directe berging of opwerking tot MOX.",
+  in_t_stars: "Waar de elementen vandaan komen", in_s_stars: "Elementen uit sterren",
+  in_w_stars: "Fusie tot ijzer, dan neutronenvangst: het s-procespad langs de stabiliteitsvallei, het r-proces bij samensmeltende neutronensterren, abundantiepieken bij de magische getallen, en σN ≈ constant met de door INCOGNITA berekende vangstsnelheden bij 30 keV.",
+  in_t_accidents: "Drie ongevallen, uitgelegd", in_s_accidents: "Ongevallen",
+  in_w_accidents: "De natuurkunde van Three Mile Island (vastzittende ontlastklep, verkeerd gelezen niveau, vervalwarmte), Tsjernobyl (positieve dampbellenterugkoppeling, het positieve scram-effect) en Fukushima Daiichi (volledige stroomuitval, wegkoken, waterstof uit zirkonium en stoom), en wat er na elk veranderde.",
+  in_t_spentfuel: "Gebruikte brandstof, nuclide voor nuclide", in_s_spentfuel: "Nuclide voor nuclide",
+  in_w_spentfuel: "Eén ton gebruikte PWR-brandstof, nuclide voor nuclide vervallen (Bateman-ketens, ingestiecoëfficiënten volgens ICRP-72): activiteit tegenover radiotoxiciteit, welk nuclide wanneer domineert, en hoe het verwijderen van plutonium en de minor actiniden voor 99 % of 99,9 % de tijd verkort tot het onder het uraniumerts zakt.",
 });

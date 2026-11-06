@@ -142,4 +142,17 @@ Object.assign(WT.L.ui, {
   in_w_kinetics: "Punktkinetik med seks grupper af forsinkede neutroner, inhour-ligningen, reaktorperioden og promptspringet.",
   in_t_transport: "Neutrontransport og Monte Carlo", in_s_transport: "Monte Carlo",
   in_w_transport: "At følge neutroner én ad gangen gennem en plade: stød, den tilfældige vandring, og hvordan Monte Carlo-transport estimerer k og flux.",
+  // new lessons (kinds of reactor II)
+  in_t_everyday: "Kernefysik i hverdagen", in_s_everyday: "Hverdagen",
+  in_w_everyday: "PET-skanninger (fluor-18, modsatrettede 511 keV-fotoner), strålebundter der krydser hinanden i en tumor, technetium-99m, kulstof-14-datering og røgalarmer.",
+  in_t_sandbox: "Byg en reaktor", in_s_sandbox: "Byg en reaktor",
+  in_w_sandbox: "En sandkasse: vælg brændsel, berigning, moderator, kølemiddel, gitter og størrelse; firefaktorformlen, én-gruppe-lækage og den kritiske størrelse, neutronbudgettet og fortegnet for dampblære- og dopplertilbagekoblingen.",
+  in_t_fuelcycle: "Brændselskredsløbet", in_s_fuelcycle: "Brændselskredsløb",
+  in_w_fuelcycle: "Fra malm til affald for ét ton brændsel: malmindhold, berigningens massebalance (fødning, produkt, tails, SWU), fra piller til elementer, udbrænding, opbevaring i bassin og beholder, og direkte deponering eller oparbejdning til MOX.",
+  in_t_stars: "Hvor grundstofferne kommer fra", in_s_stars: "Grundstoffer fra stjerner",
+  in_w_stars: "Fusion op til jern, derefter neutronindfangning: s-processens vej langs stabilitetsdalen, r-processen i neutronstjernesammensmeltninger, hyppighedstoppe ved de magiske tal, og σN ≈ konstant med INCOGNITAs beregnede indfangningsrater ved 30 keV.",
+  in_t_accidents: "Tre ulykker, forklaret", in_s_accidents: "Ulykker",
+  in_w_accidents: "Fysikken bag Three Mile Island (fastsiddende aflastningsventil, fejltolket niveau, henfaldsvarme), Tjernobyl (positiv dampblæretilbagekobling, den positive scram-effekt) og Fukushima Daiichi (totalt strømsvigt, bortkogning, brint fra zirkonium og damp), og hvad der ændrede sig efter hver.",
+  in_t_spentfuel: "Brugt brændsel, nuklid for nuklid", in_s_spentfuel: "Nuklid for nuklid",
+  in_w_spentfuel: "Ét ton brugt PWR-brændsel henfaldet nuklid for nuklid (Bateman-kæder, ingestionskoefficienter fra ICRP-72): aktivitet over for radiotoksicitet, hvilket nuklid der dominerer hvornår, og hvordan fjernelse af plutonium og de mindre actinider med 99 % eller 99,9 % forkorter tiden, til det falder under uranmalmen.",
 });

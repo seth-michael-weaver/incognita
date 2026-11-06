@@ -462,7 +462,7 @@
       // seawall
       const wx = dx + dw * 0.95; box(g, wx - 5, sea - bh * 0.55, 10, bh * 0.55, 2, g.rgba(c.soft, 0.6)); ctx.save(); ctx.fillStyle = g.rgba(c.cool, 0.35); ctx.fillRect(wx + 5, sea - bh * 0.3 + 3 * Math.sin(S.time * 1.5), W - wx, bh * 0.3); ctx.restore();
       g.line(dx, sea, wx, sea, c.soft, 1.5, 0.6);
-      if (!phone) { g.label("FLEX pump", tx - 4, ty + 26, { color: c.photon, size: fs - 2, weight: 600 }); g.label("recombiners", bx + bw / 2, by - 10, { color: c.fission, size: fs - 2, weight: 600, bg: true }); g.label("vent", sx + 18, by - dh * 0.15 - 12, { color: c.soft, size: fs - 2 }); g.label("wall", wx, sea - bh * 0.55 - 12, { color: c.soft, size: fs - 2 }); }
+      if (!phone) { g.label("FLEX pump", tx - 4, ty + 26, { color: c.photon, size: fs - 2, weight: 600 }); g.label("recombiners", bx + bw / 2, by - 10, { color: c.fission, size: fs - 2, weight: 600, bg: true }); g.label("vent", sx + 18, by - dh * 0.15 - 12, { color: c.soft, size: fs - 2 }); g.label("sea wall", wx, sea - bh * 0.55 - 12, { color: c.soft, size: fs - 2 }); }
     }
     // the list
     const lx = phone ? W * 0.58 : W * 0.6, ly0 = phone ? 44 : H * 0.2, lgap = phone ? Math.min(30, (H * 0.62 - 44) / items.length) : Math.min(54, H * 0.6 / items.length);

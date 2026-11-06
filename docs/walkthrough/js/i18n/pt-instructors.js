@@ -142,4 +142,17 @@ Object.assign(WT.L.ui, {
   in_w_kinetics: "Cinética pontual com seis grupos de neutrões retardados, a equação inhour, o período do reator e o salto pronto.",
   in_t_transport: "Transporte de neutrões e Monte Carlo", in_s_transport: "Monte Carlo",
   in_w_transport: "Seguir os neutrões um a um através de uma placa: colisões, o passeio aleatório e como o transporte por Monte Carlo estima k e o fluxo.",
+  // new lessons (kinds of reactor II)
+  in_t_everyday: "O nuclear no dia a dia", in_s_everyday: "Dia a dia",
+  in_w_everyday: "Exames PET (flúor-18, fotões de 511 keV emitidos em sentidos opostos), feixes de radioterapia que se cruzam num tumor, tecnécio-99m, datação por carbono-14 e detetores de fumo.",
+  in_t_sandbox: "Construa um reator", in_s_sandbox: "Construa um reator",
+  in_w_sandbox: "Uma caixa de areia: escolha combustível, enriquecimento, moderador, refrigerante, rede e tamanho; a fórmula dos quatro fatores, as fugas a um grupo e o tamanho crítico, o balanço de neutrões e o sinal das realimentações de vazio e Doppler.",
+  in_t_fuelcycle: "O ciclo do combustível", in_s_fuelcycle: "Ciclo do combustível",
+  in_w_fuelcycle: "Do minério aos resíduos para uma tonelada de combustível: teores do minério, o balanço de massa do enriquecimento (alimentação, produto, rejeitados, UTS), de pastilhas a elementos, taxa de queima, armazenamento em piscina e em contentor, e ciclo aberto ou reprocessamento em MOX.",
+  in_t_stars: "De onde vêm os elementos", in_s_stars: "Elementos das estrelas",
+  in_w_stars: "Fusão até ao ferro, depois captura de neutrões: o caminho do processo s ao longo do vale de estabilidade, o processo r nas fusões de estrelas de neutrões, os picos de abundância nos números mágicos, e σN ≈ constante com as taxas de captura a 30 keV calculadas pelo INCOGNITA.",
+  in_t_accidents: "Três acidentes, explicados", in_s_accidents: "Acidentes",
+  in_w_accidents: "A física de Three Mile Island (válvula de alívio presa, nível mal interpretado, calor residual), Chernobyl (realimentação de vazio positiva, o efeito positivo do scram) e Fukushima Daiichi (perda total de energia elétrica, evaporação da água, hidrogénio do zircónio e do vapor), e o que mudou depois de cada um.",
+  in_t_spentfuel: "O combustível irradiado, nuclídeo a nuclídeo", in_s_spentfuel: "Nuclídeo a nuclídeo",
+  in_w_spentfuel: "Uma tonelada de combustível irradiado de PWR a decair nuclídeo a nuclídeo (cadeias de Bateman, coeficientes de ingestão da ICRP-72): atividade versus radiotoxicidade, que nuclídeo domina em cada momento, e como remover o plutónio e os actinídeos menores a 99 % ou 99,9 % encurta o tempo até ficar abaixo do minério de urânio.",
 });
