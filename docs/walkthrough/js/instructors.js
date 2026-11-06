@@ -45,7 +45,7 @@
     ["chains", 0, 1, 8, 4, "Decay chains and equilibrium", "Decay chains", "The uranium series to lead, secular equilibrium, and a medical isotope generator milked for its daughter.", 1],
     ["waste", 0, 1, 8, 4, "Spent fuel over time", "Spent fuel", "What is in used fuel, how its radioactivity falls over centuries, and when it drops to the level of uranium ore.", 1],
     ["reactor", 0, 0, 8, 4, "How a reactor makes electricity", "Reactor", "Core, control rods, coolant, steam and turbine: how fission heat becomes electricity in a water-cooled reactor.", 1],
-    ["economy", 0, 1, 8, 4, "The neutron economy", "Neutron economy", "Where each generation of neutrons goes: fission, capture in uranium-238 and water, leakage, and the four-factor formula.", 1],
+    ["economy", 0, 1, 8, 4, "The neutron economy", "Neutron economy", "Where each generation of neutrons goes: fission, capture in uranium-238 and water, leakage, and the six-factor formula.", 1],
     ["spectrum", 0, 1, 8, 4, "Fast and thermal reactors", "Fast vs thermal", "Slowing neutrons down with a moderator, why thermal reactors need less enrichment, and what fast reactors gain.", 1],
     ["breeding", 0, 1, 10, 5, "Breeding new fuel", "Breeding", "Turning uranium-238 and thorium-232 into fissile fuel, neutrons per absorption (η), and the conversion and breeding ratio.", 1],
     ["burnup", 0, 1, 8, 4, "Fuel burnup", "Burnup", "How fuel changes in the core: uranium-235 burns, plutonium builds up, fission products absorb, and burnup in MWd/kg.", 1],
@@ -72,7 +72,7 @@
 
   // ---------- chapter list with a level filter ----------
   const list = $("#in-list"), chips = $("#in-filter");
-  const tpHead = `<li class="in-part"><h3>${T("way4_t", "More topics")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, stability and control, fusion.")}</p></li>`;
+  const tpHead = `<li class="in-part"><h3>${T("way4_t", "The Playground")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, stability and control, fusion.")}</p></li>`;
   list.innerHTML = CH.map((c, i) => (c.tp && !(CH[i - 1] || {}).tp ? tpHead : "") + `<li class="in-ch" data-lv="${c.lv}" data-min="${c.min}"><a class="in-ch-a" href="${href(c.id)}"><span class="in-n">${c.n}</span><span class="in-body"><span class="in-top"><b>${c.title}</b><span class="in-topic">${c.topic}</span></span><span class="in-what">${c.what}</span><span class="in-meta">${pill(c.lv)}<span>${mins(c.min)}</span><span>${c.steps} ${T("in_steps", "steps")}</span><code>#${c.id}</code></span></span></a></li>`).join("");
   const opts = [["all", T("in_all", "All")], ["0", LV[0]], ["1", LV[1]], ["2", LV[2]], ["3", LV[3]]];
   chips.innerHTML = opts.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${v === "all"}">${t}</button>`).join("");
@@ -109,7 +109,7 @@
   const selC = $("#in-b-ch"), selS = $("#in-b-step"), selL = $("#in-b-lang"), out = $("#in-b-url"), open = $("#in-b-open"), copy = $("#in-b-copy");
   const base = location.origin + location.pathname.replace(/instructors(\.html)?$/, "");
   const opt = (c) => `<option value="${c.id}">${c.n} · ${c.title}</option>`;
-  selC.innerHTML = CH.filter((c) => !c.tp).map(opt).join("") + `<optgroup label="${T("way4_t", "More topics")}">` + CH.filter((c) => c.tp).map(opt).join("") + "</optgroup>";
+  selC.innerHTML = CH.filter((c) => !c.tp).map(opt).join("") + `<optgroup label="${T("way4_t", "The Playground")}">` + CH.filter((c) => c.tp).map(opt).join("") + "</optgroup>";
   const fillSteps = () => { const c = byId[selC.value], v = selS.value; selS.innerHTML = `<option value="">${T("in_b_whole", "whole chapter")}</option>` + Array.from({ length: c.steps }, (_, i) => `<option value="${i + 1}">${T("in_b_step", "step")} ${i + 1}</option>`).join(""); if (v && +v <= c.steps) selS.value = v; };
   const build = () => { const url = base + (byId[selC.value].tp ? "topics.html" : "") + (selL.value !== "en" ? "?lang=" + selL.value : "") + "#" + selC.value + (selS.value ? "-" + selS.value : ""); out.textContent = url; open.href = url; };
   selL.innerHTML = Object.entries(WT.LANGS).map(([l, [, name]]) => `<option value="${l}" lang="${l}">${name}</option>`).join(""); selL.value = WT.lang; fillSteps(); build();

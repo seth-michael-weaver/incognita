@@ -892,3 +892,6 @@ body.shot .part-head, body.shot .tp-index { display: none; }
   .site .chap-x > a { display: inline-flex; }
   .site .chap-x > .toc-menu, .site .chap-x > ol, .site .chap-x.open > ol { display: none; }
 }
+/* the cross-page menu buttons look like buttons too (Seth 2026-11-06), matching the current page's menu; text stays softer */
+.site .chap-x > .toc-menu { background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.site .chap-x > .toc-menu:hover, .site .chap-x.open > .toc-menu { color: var(--ink); }

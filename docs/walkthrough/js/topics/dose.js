@@ -49,6 +49,7 @@
     ctx.restore();
   }
   const BUB = []; { const q = rng(23); for (let i = 0; i < 40; i++) BUB.push([q(), q(), 0.5 + q()]); }
+  const trd = (s) => { const t = WT.tr(s); return t === s ? WT.dec(s) : t; }; // readouts: translated if the key exists, else decimal comma only
   function fmtD(sv) {
     if (sv < 1e-3) { const u = sv * 1e6; return `${u < 1 ? u.toFixed(1) : u < 10 ? u.toFixed(1).replace(/\.0$/, "") : Math.round(u)} µSv`; }
     if (sv < 1) { const m = sv * 1e3; return `${m < 10 ? m.toFixed(1).replace(/\.0$/, "") : Math.round(m)} mSv`; }
@@ -98,7 +99,7 @@
     ],
     frame(g, S, dt) {
       const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13, snap = document.body.classList.contains("shot"), mode = S.mode;
-      { const a = fmtD(10 ** S.ld), b = fmtD(10 ** S.la); if (a !== S._o1) { S._o1 = a; document.querySelectorAll("#dose .ds-out").forEach((o) => (o.textContent = a)); } if (b !== S._o2) { S._o2 = b; document.querySelectorAll("#dose .ds-out2").forEach((o) => (o.textContent = b)); } }
+      { const a = fmtD(10 ** S.ld), b = fmtD(10 ** S.la); if (a !== S._o1) { S._o1 = a; document.querySelectorAll("#dose .ds-out").forEach((o) => (o.textContent = trd(a))); } if (b !== S._o2) { S._o2 = b; document.querySelectorAll("#dose .ds-out2").forEach((o) => (o.textContent = trd(b))); } }
       if (!S._cv && g.ctx.canvas) { S._cv = g.ctx.canvas; WT.grab(S._cv, {
         down: (x, y) => { if (S.mode !== "ladder" || !S._lad) return false; const L = S._lad; if (Math.abs(x - L.x) > 50) return false; S.set("ld", clamp(L.inv(y), -7, 1)); return true; },
         move: (x, y) => { if (S.mode === "ladder" && S._lad) S.set("ld", clamp(S._lad.inv(y), -7, 1)); },

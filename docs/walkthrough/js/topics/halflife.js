@@ -31,7 +31,7 @@
     if (s < 2 * DAY) return `${Math.round(s / 3600)} hours`;
     if (s < 60 * DAY) return `${Math.round(s / DAY)} days`;
     if (y < 2) return `${Math.round(s / (30.44 * DAY))} months`;
-    if (y < 1e4) return `${y < 100 ? Math.round(y) : Math.round(y / 10) * 10} years`.replace(/(\d)(\d{3}) /, "$1,$2 ");
+    if (y < 1e4) return `${y < 100 ? Math.round(y) : Math.round(y / 10) * 10} years`.replace(/(\d)(\d{3}) /, WT.tl ? "$1$2 " : "$1,$2 "); // no English thousands comma in other languages (5,700 reads as 5.7)
     if (y < 1e6) return `${Math.round(y / 1000)} thousand years`;
     if (y < 1e9) return `${(y / 1e6).toFixed(y < 1e7 ? 1 : 0)} million years`;
     return `${(y / 1e9).toFixed(1)} billion years`;
@@ -106,7 +106,7 @@
     frame(g, S, dt) {
       const { W, H, c, ctx } = g, phone = W < 600, fs = phone ? 11 : 13, snap = document.body.classList.contains("shot"), mode = S.mode;
       const tl = 10 ** S.lt;
-      { const s = fmtT(tl); if (s !== S._tout) { S._tout = s; document.querySelectorAll("#halflife .hl-tout").forEach((o) => (o.textContent = s)); } }
+      { const s = fmtT(tl); if (s !== S._tout) { S._tout = s; document.querySelectorAll("#halflife .hl-tout").forEach((o) => (o.textContent = WT.tr(s))); } }
       // ---------- geometry ----------
       const big = mode === "live" ? 1 - S.curveV : 0, sr = Math.min(W * (phone ? 0.3 : 0.27), H * 0.21) * (1 + 0.45 * big), sx = W * 0.5, sy = lerp(H * 0.07 + sr, H * 0.45, big), sq = 0.92;
       const geo = { x: sx, y: sy, r: sr, sq }, br = Math.max(2.4, sr / Math.sqrt(N0) * 0.86);

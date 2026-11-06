@@ -158,7 +158,7 @@
         ctx.save(); ctx.fillStyle = g.rgba(c.soft, 0.1); ctx.fillRect(gx, y - 6, gw, 12); ctx.fillStyle = col; ctx.fillRect(gx, y - 6, Math.max(1.5, gw * f), 12); ctx.restore(); g.glow(gx + gw * f, y, 16, col, 0.5);
         g.label(`${pct(v)} %`, gx + gw, y - 14, { color: col, size: fs + 1, weight: 700, align: "right" });
       });
-      const msg = t < 0 ? (phone ? "full power" : "running at full power") : WT.trf(phone ? "{a} after the rods dropped" : "{a} after the rods dropped", fmtT(t));
+      const msg = t < 0 ? WT.tr(phone ? "full power" : "running at full power") : WT.trf(phone ? "{a} after the rods dropped" : "{a} after the rods dropped", fmtT(t));
       g.label(msg, W * 0.5, gy + (phone ? 100 : 130), { color: c.ink, size: fs + 2, weight: 600, serif: true, align: "center", raw: true });
       g.label(WT.trf("total heat: {a} % of full power", pct(P)), W * 0.5, gy + (phone ? 122 : 156), { color: c.soft, size: fs, align: "center", raw: true });
       if (t > 0 && t < 70) g.label(phone ? "the splitting dies away in about a minute" : "the splitting dies away within about a minute", W * 0.5, gy + (phone ? 144 : 182), { color: c.fission, size: fs - 1, align: "center" });

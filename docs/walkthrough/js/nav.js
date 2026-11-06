@@ -14,7 +14,7 @@
   // }
   // "More topics" link (every page): lessons beside the engine story (reactors, radiation, fusion), placed after Scoreboard
   if (sl && !head.querySelector('[data-i18n="nav_topics"]')) { // topics.html has it as its chapter menu instead
-    const a = document.createElement("a"); a.href = "topics.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_topics"; a.textContent = WT.ui("nav_topics", "More topics");
+    const a = document.createElement("a"); a.href = "topics.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_topics"; a.textContent = WT.ui("nav_topics", "The Playground");
     const b = sl.querySelector('a[href^="scoreboard.html"]');
     sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
   }
