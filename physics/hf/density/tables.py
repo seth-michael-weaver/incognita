@@ -252,6 +252,17 @@ def _table_blocks(path: str, A: int, nendens: int, nparity: int) -> tuple:
     """
     import numpy as np
 
+    from physics.hf.structure import bincache
+
+    args = (int(A), int(nendens), int(nparity))
+    hit = bincache.load("ldtable", path, args)  # PERFSTART: the parsed records from disk
+    if hit is not None and len(hit) == int(hit["n"]):
+        out = []
+        for k in range(len(hit) - 1):
+            block = np.ascontiguousarray(hit[f"b{k}"], dtype=np.float64)
+            block.setflags(write=False)
+            out.append(block)
+        return tuple(out)
     lines = _file_lines(path)
     nl = len(lines)
     read = fortran_reader(_DATA_FMT)
@@ -274,6 +285,7 @@ def _table_blocks(path: str, A: int, nendens: int, nparity: int) -> tuple:
             break
         if not found:
             break
+    bincache.store("ldtable", path, args, {"n": np.array(len(out) + 1), **{f"b{k}": b for k, b in enumerate(out)}})
     return tuple(out)
 
 

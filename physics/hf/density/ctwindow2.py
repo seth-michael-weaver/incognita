@@ -233,7 +233,115 @@ def used_density(ld, E) -> np.ndarray:
     return densitytot(ld, x, 0).double().numpy().reshape(np.shape(E))
 
 
+#: PERFCASC: anchor results of this process, keyed by the complete input (`_memo_key`); a hit rebuilds the same record
+_MEMO: dict = {}
+_MEMO_MAX = 256
+#: environment switches the anchor cannot read (photon-strength / isospin options the h-rule toggles between its runs,
+#: the pre-equilibrium window and few-resonance switches the run adds after it)
+_ENV_IGNORED = frozenset({"INCOGNITA_ISOE2", "INCOGNITA_ISOHOLD", "INCOGNITA_ISOE2_K", "INCOGNITA_M1SHARE",
+                          "INCOGNITA_PEWINDOW", "INCOGNITA_FEWRES"})
+
+
+def _fp(h, v) -> bool:
+    """Feed a canonical byte form of `v` to hash `h`; False when `v` holds something without one (no memo then)."""
+    import dataclasses
+
+    if v is None or isinstance(v, (bool, int, float, str)):
+        h.update(repr((type(v).__name__, v)).encode())
+        return True
+    if isinstance(v, torch.Tensor):
+        if v.requires_grad:
+            return False
+        a = v.detach().cpu().contiguous()
+        h.update(repr(("T", str(a.dtype), tuple(a.shape))).encode())
+        h.update(a.numpy().tobytes())
+        return True
+    if isinstance(v, np.ndarray):
+        if v.dtype == object:
+            return False
+        h.update(repr(("A", str(v.dtype), v.shape)).encode())
+        h.update(np.ascontiguousarray(v).tobytes())
+        return True
+    if isinstance(v, (tuple, list)):
+        h.update(repr((type(v).__name__, len(v))).encode())
+        return all(_fp(h, x) for x in v)
+    if isinstance(v, dict):
+        h.update(repr(("D", len(v))).encode())
+        for k in sorted(v, key=repr):
+            h.update(repr(k).encode())
+            if not _fp(h, v[k]):
+                return False
+        return True
+    if dataclasses.is_dataclass(v) and not isinstance(v, type):
+        h.update(repr(("DC", type(v).__qualname__)).encode())
+        return all(_fp(h, getattr(v, f.name)) for f in dataclasses.fields(v))
+    return False
+
+
+def _memo_key(ld, cont):
+    """Everything `anchor` reads: the record (every field), `cont`, the engine's environment switches and the active
+    deck's energy-adjustment bumps (`eadj.token`, NPWINDOW included); None when some field has no canonical form or
+    carries a gradient (then no memo). The module's helpers enter by identity (a monkeypatched helper misses)."""
+    import hashlib
+
+    from physics.hf import eadj
+
+    h = hashlib.blake2b(digest_size=20)
+    if not _fp(h, ld):
+        return None
+    env = tuple(sorted((k, v) for k, v in os.environ.items()
+                       if k.startswith(("INCOGNITA_", "HF_")) and k not in _ENV_IGNORED))
+    try:
+        tok = eadj.token()
+        hash(tok)
+    except Exception:  # noqa: BLE001  (an unhashable token: no memo)
+        return None
+    # the module's own helpers by identity: a replaced helper (a test's monkeypatch) is a different anchor
+    fns = tuple(id(globals().get(n)) for n in ("_window", "ripl_umax", "_pure", "fg_log", "_fg_point", "_count",
+                                                "_g_batch", "_bisect", "_least", "_simpson", "_ctf"))
+    from physics.hf.density import matching as _Ma, models as _Mo, parameters as _Pa
+
+    fns += (id(_Mo.fermi), id(_Pa.colenhance), id(_Pa.ignatyuk), id(_Ma.ignatyuk), id(_Mo.densitytot))
+    return (h.hexdigest(), bool(cont), env, tok, fns)
+
+
 def anchor(ld, cont: bool = False):
+    """`_anchor` (below) with a per-process memo (PERFCASC): the h-rule and the run rebuild the same nucleus's matched
+    record up to four times per arm; a repeat of the same input returns the same record (T, E0, Exmatch of barrier 0
+    set from the stored floats, as `_anchor` sets them) and replays the LAST/WHY diagnostics. Bit-identical."""
+    key = _memo_key(ld, cont)
+    if key is None:
+        return _anchor(ld, cont)
+    zk = (int(ld.Z), int(ld.A))
+    got = _MEMO.get(key)
+    if got is None:
+        out = _anchor(ld, cont)
+        if out is ld:
+            got = ("same", WHY.get(zk))
+        else:
+            got = ("set", float(out.T_mev[0]), float(out.E0_mev[0]), float(out.Exmatch_mev[0]), LAST.get(zk))
+        while len(_MEMO) >= _MEMO_MAX:
+            _MEMO.pop(next(iter(_MEMO)))
+        _MEMO[key] = got
+        return out
+    if got[0] == "same":
+        if got[1] is None:
+            WHY.pop(zk, None)
+        else:
+            WHY[zk] = got[1]
+        return ld
+    _, T, E0, Ex, last = got
+    if last is not None:
+        LAST[zk] = dict(last)
+    WHY.pop(zk, None)
+    Tm, Em, Xm = ld.T_mev.clone(), ld.E0_mev.clone(), ld.Exmatch_mev.clone()
+    Tm[0] = torch.as_tensor(T, dtype=Tm.dtype)
+    Em[0] = torch.as_tensor(E0, dtype=Em.dtype)
+    Xm[0] = torch.as_tensor(Ex, dtype=Xm.dtype)
+    return replace(ld, T_mev=Tm, E0_mev=Em, Exmatch_mev=Xm)
+
+
+def _anchor(ld, cont: bool = False):
     """`ld` (already matched by densitymatch) with T, E0, Exmatch of barrier 0 solved jointly on the complete level window
     (value + slope continuity at Ex, window count), or `ld` unchanged where the rule does not apply.
     `cont` (ARTFIX, `ctwcont y`): without a root, or when the root fails TALYS's guards, anchor at the least

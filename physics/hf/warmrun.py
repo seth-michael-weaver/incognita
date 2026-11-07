@@ -126,6 +126,21 @@ def run_on(Z: int, A: int, declared_energies: tuple[float, ...], cas):
                                                 cascade=cas))
 
 
+def freeze_startup() -> None:
+    """PERFSTART: move every object alive now (the imported engine, torch, numpy) into the
+    collector's permanent generation (`gc.freeze`), so the full collections a run makes
+    (`chartrun.drop_target_caches`) no longer walk ~10^6 import-time objects (~45 ms each).
+    Call it once, right after the imports and before any target is built; garbage made later is
+    collected as before. Memory management only: no number changes.
+
+    TALYS: none (worker hygiene)
+    Test: scripts/perfstart/gate.py
+    """
+    import gc
+
+    gc.freeze()
+
+
 @stagetime.timed("setup.cascade")
 def new_cascade(Z: int, A: int, declared_energies: tuple[float, ...]):
     """The `Cascade` `ChainedFull.cases` would build for this run (float32 grid, as TALYS)."""
