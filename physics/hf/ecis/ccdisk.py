@@ -35,9 +35,9 @@ kernel is resolved here exactly as `omp_nx2._kernel` resolves it and only that l
 are hashed: a PSF edit no longer throws the whole cache away, while a build without `libsetup`
 (where `libnx2` really does serve the kernels) still keys on `libnx2`.
 
-The version is computed once per process (the switches are read at the first solve, as a
-worker sets its environment before it imports anything); the cache DIRECTORY is read per call,
-so a test can turn the cache on and off in one process.
+The source / library part of the version is computed once per process; the switches part
+(`env_token`: every HF_* / INCOGNITA_* variable but stagedisk's deny-list) is read per call
+(ENGFIX4), and so is the cache DIRECTORY, so a test can turn the cache on and off in one process.
 
 **Storage.**  One file per key, `<dir>/<version>/<ab>/<digest>.npz`, float64 raw through
 `numpy.savez` (no text, exact round-trip), written to a temporary file in the same directory and
@@ -199,8 +199,52 @@ def _omp_providers() -> list[tuple[str, str, str | None]]:
     return out
 
 
-@lru_cache(maxsize=1)
+_ENV_TOKENS: dict = {}
+
+
+def env_token() -> str:
+    """ENGFIX4: the switches part of every CC cache key, read on every call -- the row cache
+    (`_version`), `incident._SOLVED` and PERFCC2's batch carry (memory and disk). It is the stage
+    disk cache's environment digest (`stagedisk._env_part`): every `HF_*` and `INCOGNITA_*` variable
+    except `stagedisk.ENV_EXCLUDE` (cache locations, diagnostics, derived `*_EFF`, LD / PSF /
+    cascade levers) plus the evaluated ENGPHYS switches. So INCOGNITA_ECMSTABLE, INCOGNITA_CCSOCB,
+    the OMP region / deformed switches, HF_INC_REFINE and any switch added later are in the key
+    without being listed here."""
+    from physics.hf import stagedisk
+
+    raw = stagedisk._env_part()
+    tok = _ENV_TOKENS.get(raw)
+    if tok is None:
+        if len(_ENV_TOKENS) > 64:
+            _ENV_TOKENS.clear()
+        tok = _ENV_TOKENS[raw] = hashlib.sha256(raw).hexdigest()[:24]
+    return tok
+
+
+_VERSIONS: dict = {}
+
+
 def _version() -> str:
+    """The cache's version directory: `_static_version` (source, libraries, torch) with the
+    switches (`env_token`), read per call (ENGFIX4: the switches used to be read once per process,
+    and only `_NUMERICS_ENV`)."""
+    tok = env_token()
+    v = _VERSIONS.get(tok)
+    if v is None:
+        v = _VERSIONS[tok] = hashlib.sha256((_static_version() + ":" + tok).encode()).hexdigest()[:24]
+    return v
+
+
+def _version_cache_clear() -> None:
+    _static_version.cache_clear()
+    _VERSIONS.clear()
+
+
+_version.cache_clear = _version_cache_clear  # the former lru_cache's interface
+
+
+@lru_cache(maxsize=1)
+def _static_version() -> str:
     """sha256 over the CC source, the native libraries the solve runs, whether they are loaded,
     and the numerics switches -- the fingerprint of "what this process would compute"."""
     h = hashlib.sha256()

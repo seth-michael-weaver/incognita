@@ -258,3 +258,29 @@ def test_ewfc_memo_never_serves_another_options_object(monkeypatch):
     else:  # the memo holds the old object, so its address cannot be reused
         assert any(v[0] is not None and id(v[0]) == old for v in ewfc._MEMO.values())
     ewfc._MEMO.clear()
+
+
+# ---------------------------------------------------------------------------------------- CC cache keys
+
+
+@pytest.mark.parametrize("var,val", [("INCOGNITA_ECMSTABLE", "0"), ("INCOGNITA_CCSOCB", "1"),
+                                     ("INCOGNITA_OMP_REGION", "1"), ("INCOGNITA_OMP_DEFORMED", "1"),
+                                     ("HF_INC_REFINE", "2"), ("HF_INC_REFINE_EMAX", "1.0"),
+                                     ("INCOGNITA_NUMEN", "300"), ("HF_CC_MODNUM", "0")])
+def test_cc_cache_keys_follow_every_switch_per_call(monkeypatch, tmp_path, var, val):
+    """The CC row cache's version and the row / batch-carry keys (`ccdisk.env_token`, which every
+    `incident._SOLVED` key ends in) follow the switches without a cache reset."""
+    from physics.hf.ecis import ccdisk
+
+    monkeypatch.setenv(ccdisk.ENV_VAR, str(tmp_path))
+    monkeypatch.delenv(var, raising=False)
+    v0, t0 = ccdisk._version(), ccdisk.env_token()
+    monkeypatch.setenv(var, val)
+    assert ccdisk._version() != v0 and ccdisk.env_token() != t0
+    monkeypatch.setenv("INCOGNITA_STAGE_CACHE", str(tmp_path))  # a cache location: not a key
+    assert ccdisk.env_token() == ccdisk.env_token()
+    t1 = ccdisk.env_token()
+    monkeypatch.delenv("INCOGNITA_STAGE_CACHE")
+    assert ccdisk.env_token() == t1
+    monkeypatch.delenv(var)
+    assert ccdisk._version() == v0 and ccdisk.env_token() == t0

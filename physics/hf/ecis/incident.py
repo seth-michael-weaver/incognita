@@ -233,9 +233,10 @@ _SOLVED_MAX = 4096
 # (tests/hf/test_ccfast.py, batched LAPACK and vectorised tails), so a per-row carry would hand a
 # later caller a row from a different batch than the one it would have solved and move its result
 # by ~1e-15. A batch hit is the very computation the caller would repeat, on the same inputs, so
-# it is bit for bit what solving gives. The key also holds the values of every environment switch
-# that can move a solver number (`ccdisk._NUMERICS_ENV` and the two INCOGNITA_ switches the solve
-# reads); the source and the libraries cannot change inside a process. `HF_CC_CARRY=0` turns it
+# it is bit for bit what solving gives. The key also holds every environment switch that can move a
+# solver number, through the row keys' `ccdisk.env_token()` (ENGFIX4; it was `ccdisk._NUMERICS_ENV`
+# and the two INCOGNITA_ switches the solve reads); the source and the libraries cannot change
+# inside a process. `HF_CC_CARRY=0` turns it
 # off. With `INCOGNITA_CC_BATCHCACHE=<dir>` the same batches are also kept on disk (`ccdisk`, under
 # the cache's version directory), which carries them across processes: a warm-pool job, a rerun,
 # the next calculator request for the same nuclide. Least recently used batches go first.
@@ -247,9 +248,8 @@ def _carry_key(keys: list[tuple], miss: Tensor) -> tuple | None:
     """The carry key of solving the energies `miss` of `keys`, or None when carrying is off."""
     if os.environ.get("HF_CC_CARRY", "1") == "0":
         return None
-    env = tuple(os.environ.get(k) for k in ccdisk._NUMERICS_ENV) + (
-        os.environ.get("INCOGNITA_ECMSTABLE"), os.environ.get("INCOGNITA_CCSOCB"))
-    return ("perfcc2-batch", env, tuple(keys[i] for i in torch.nonzero(miss).reshape(-1).tolist()))
+    # ENGFIX4: the row keys already end in `ccdisk.env_token()` (every switch, read per call)
+    return ("perfcc2-batch", tuple(keys[i] for i in torch.nonzero(miss).reshape(-1).tolist()))
 
 
 def _carry_get(ck: tuple) -> CoupledResult | None:
@@ -454,7 +454,10 @@ def incident_coupled(
     keys = _energy_keys(omp, e, (Z, A, particle, _band_key(band), nj,
                                  bool(allow_undeformed_spin_orbit), soswitch))
     if keys is not None:  # FISSC2: the refinement is per energy, so the key must be too
-        keys = [k + (int(ref_ax[i]),) for i, k in enumerate(keys)]
+        # ENGFIX4: and every switch (`ccdisk.env_token`, read now), so `_SOLVED`, the row cache
+        # and the batch carry never serve a row solved under other switches
+        tok = ccdisk.env_token()
+        keys = [k + (int(ref_ax[i]), tok) for i, k in enumerate(keys)]
     from physics.hf.ecis import solver as _solver
 
     if keys is None:
