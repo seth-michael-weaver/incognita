@@ -25,6 +25,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from incognita.bench import alpha as AL
+
 BIN = 0.1
 EMIN, EMAX = 1e3, 2e7
 THRESHOLD_Q = ('inelastic', 'n2n', 'np', 'na')
@@ -49,16 +51,27 @@ def channel_curves(pendf_mf3: dict, original_mts, mt5_na=None) -> dict:
     ('incomplete', x5, y5) when sigma_5 > 0 but the file's MT 5 products were not read (the (n,a) curve is then NaN
     wherever sigma_5 > 0, so a row there is not covered), or None (no MT 5).
     -> {quantity: (x, y, source)} with source 'MT<n>' or 'sum MT<a>-<b> (k sections)' (+ ' + MT5 part')."""
+    # BUGSCORE2 amendments B and C: the same rules as the point scorer (score.py / alpha.py), so a library row is covered
+    # or not by the same criterion on every track.  B: incomplete only where the unread part (bounded by sigma_5) may exceed
+    # alpha.TOL (1 %) of the value, not wherever sigma_5 > 0.  C: a file with no MT 107 / 800-849 whose (n,a) is made only
+    # inside MT 5 has that (n,a) curve when it reaches alpha.NA_MIN_MT5_ONLY_B somewhere (alpha.na_total), instead of none.
     out = _channel_curves(pendf_mf3, original_mts)
+    incomplete = mt5_na is not None and isinstance(mt5_na[0], str) and mt5_na[0] == 'incomplete'
     if mt5_na is not None and 'na' in out:
         x, y, s = out['na']
-        if isinstance(mt5_na[0], str) and mt5_na[0] == 'incomplete':
+        if incomplete:
             xx, yy = _sum_on_union([(x, y)])
             s5 = np.interp(xx, mt5_na[1], mt5_na[2], left=0.0, right=0.0)
-            out['na'] = (xx, np.where(s5 > 0, np.nan, yy), s + ' (MT 5 products not read: incomplete where sigma_5 > 0)')
+            bad = (s5 > 0) & ~((yy > 0) & (s5 <= AL.TOL * yy))
+            out['na'] = (xx, np.where(bad, np.nan, yy),
+                         s + f' (MT 5 products not read: incomplete where sigma_5 > {AL.TOL:g} x the value)')
         else:
             xx, yy = _sum_on_union([(x, y), tuple(map(np.asarray, mt5_na))])
             out['na'] = (xx, yy, s + ' + MT5 part')
+    elif mt5_na is not None and not incomplete:
+        x5, y5 = map(np.asarray, mt5_na)
+        if len(y5) and np.max(y5) >= AL.NA_MIN_MT5_ONLY_B:
+            out['na'] = (np.asarray(x5, float), np.asarray(y5, float), 'MT5 part only (no MT 107 / 800-849)')
     return out
 
 

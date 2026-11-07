@@ -919,6 +919,12 @@ def load_exfor_points(
         & pl.col("mt").is_in(mts)
     )
     curated = quantity.filter(pl.col("usable") & (pl.col("decision") != "exclude"))
+    # BUGSCORE2: a fix-unit cell keeps its value AS COMPILED (the curation logs the factor, e.g. x1000 for a mb/b slip,
+    # and sets trust 0). Trust 0 only silences it in trust-weighted sums; the unweighted metrics and the readers that
+    # ignore the weight (models/macs_constraint.py) took the wrong-unit value at face value. It is not a measurement of
+    # this quantity until the factor is applied, so it is removed here and counted.
+    n_fix_unit = int((curated["decision"] == "fix-unit").sum())
+    curated = curated.filter(pl.col("decision") != "fix-unit")
     cells = curated.filter(pl.col("trust") >= min_trust)
     drops: dict[str, int | float | str] = {
         "channel": channel,
@@ -928,6 +934,7 @@ def load_exfor_points(
         "cells_after_trust": cells.height,
         "dropped_quantity": all_cells.height - quantity.height,
         "dropped_curation": quantity.height - curated.height,
+        "dropped_fix_unit": n_fix_unit,
         "dropped_trust": curated.height - cells.height,
         "min_trust": float(min_trust),
     }
@@ -944,6 +951,14 @@ def load_exfor_points(
         drops["consensus_total"] = all_cons.height
         drops["consensus_after_quantity"] = cons.height
         drops["dropped_consensus_quantity"] = all_cons.height - cons.height
+        # BUGSCORE2: the cell cache marks cells below CHANNEL_FLOOR_B excluded (validation/cache.py), but the consensus
+        # table is fitted upstream and still holds those bins ((n,a) down to 3.8e-12 b): the floor has to be applied to
+        # the consensus value too, or consensus mode scores exactly the bins the floor was introduced to remove.
+        floor = C.CHANNEL_FLOOR_B.get(channel)
+        if floor is not None:
+            n0 = cons.height
+            cons = cons.filter(pl.col("consensus_b") >= floor)
+            drops["dropped_consensus_floor"] = n0 - cons.height
         wt = cells.group_by("group_key", "bin").agg(
             weight=pl.col("trust").sum(),
             year_max=pl.col("year").max(),
@@ -955,22 +970,16 @@ def load_exfor_points(
         # with 1.0 makes the *least* trustworthy bins heavier than the median real weight
         # (0.88 on the capture set) -- failure-mode §2, a sentinel that reads as a value, and
         # §4 with the sign flipped: raising ``min_trust`` would then promote exactly the bins
-        # it was asked to demote. There are none at min_trust = 0 (verified on capture and
-        # n2n), so the published numbers do not move; above 0 the bin is dropped, because its
-        # consensus value is made of the datasets that were just excluded.
+        # it was asked to demote. Such a bin is dropped at every min_trust, because its
+        # consensus value is made of datasets the curation excluded. (An earlier comment said
+        # there were none at min_trust = 0; BUGSCORE2 found 1 capture, 7 (n,p) and 24 (n,a)
+        # sig/av bins, the (n,a)/(n,p) ones almost all below CHANNEL_FLOOR_B.)
         n_orphan = int(joined["weight"].is_null().sum())
         drops["consensus_bins_without_cells"] = n_orphan
-        if n_orphan and min_trust > 0:
-            joined = joined.filter(pl.col("weight").is_not_null())
-            drops["dropped_consensus_no_surviving_dataset"] = n_orphan
-        elif n_orphan:
-            _tally(
-                f"[exfor] WARNING {n_orphan} consensus bins have no usable cell behind them; "
-                "their trust weight falls back to 1.0 (above the median real weight)"
-            )
+        joined = joined.filter(pl.col("weight").is_not_null())
+        drops["dropped_consensus_no_surviving_dataset"] = n_orphan
         df = (
             joined.with_columns(
-                weight=pl.col("weight").fill_null(1.0),
                 meas_b=pl.col("consensus_b"),
                 sigma_log10=pl.col("sigma_log") * LOG10E,
                 dataset_key=pl.lit(None, dtype=pl.Utf8),
@@ -1049,8 +1058,15 @@ def load_exfor_points(
         f"[exfor] {channel} {mode}: {all_cells.height} cells -> {quantity.height} "
         f"(kinds {','.join(kinds)} / state {state!r} / branch {branch!r} / "
         f"MT {','.join(map(str, mts))}; -{drops['dropped_quantity']}) -> {curated.height} "
-        f"(usable & not excluded; -{drops['dropped_curation']}) -> "
+        f"(usable & not excluded & not fix-unit; -{drops['dropped_curation']}, "
+        f"{n_fix_unit} fix-unit) -> "
         f"{drops['cells_after_trust']} (trust >= {min_trust}; -{drops['dropped_trust']})"
+        + (
+            f"; consensus bins -{drops.get('dropped_consensus_floor', 0)} below the channel floor, "
+            f"-{drops.get('dropped_consensus_no_surviving_dataset', 0)} with no usable dataset"
+            if mode == "consensus"
+            else ""
+        )
         + (
             f" -> year > {year_cutoff} (-{drops.get('dropped_year_cutoff', 0)})"
             if year_cutoff is not None
