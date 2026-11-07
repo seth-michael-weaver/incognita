@@ -18,6 +18,13 @@ The measurements were curated by this project: of the 6,425 measurement rows in 
 each capture row is a trust-weighted consensus of the EXFOR datasets in its energy bin (502 dataset entries
 down-weighted, 221 excluded; see `measurements.csv.gz`).
 
+**Check of 2026-11-06.** The REACTION-code check applied that day to the open benchmark's rows
+(`incognita/bench/reaction_check.py`: no partial-state products, no sums with another target or process, no SF9 DERIV)
+also flags 29 of the 5,332 scored rows here (Br-81, Au-197, Pt-192, Pb-208 (n,2n); Ba-138, Fe-58, Ni-58 (n,α); As-75,
+Ni-58, Ni-61, Ba-138 (n,p); all at 13-15 MeV). Excluding them moves no verdict and no count (still 47 WIN / 19 TIE /
+0 LOSS / 14 N/A); the largest change of a gap is 0.0009 dex. The files here are left as scored; none of the capture
+datasets excluded by the curation review of the same day is used by the board.
+
 ## Files
 
 | File | Size | What it is |
