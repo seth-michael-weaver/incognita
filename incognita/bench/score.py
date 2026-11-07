@@ -490,10 +490,28 @@ def reconr(path: Path, njoy: str, workdir: Path | None = None) -> Path:
     return d / 'tape21'
 
 
+def endf_liso(path: Path) -> int:
+    """LISO (target isomer state) from the second MF1/MT451 record of an ENDF-6 (NFOR = 6) material or its PENDF; 0 if absent."""
+    with open(path, errors='replace') as fh:
+        mt451 = []
+        for L in fh:
+            if len(L) >= 75 and L[70:75] == ' 1451':
+                mt451.append(L)
+                if len(mt451) == 2:
+                    break
+    if len(mt451) < 2 or int(_f(mt451[1][55:66])) != 6:
+        return 0
+    return int(_f(mt451[1][33:44]))
+
+
 def endf_library(paths, njoy: str | None = None, workdir: Path | None = None) -> Curves:
-    tab, warned = {}, []
+    """Ground-state targets only (LISO = 0), as the staged grids (iso == 0): a metastable target file (e.g. Am-242m1) carries
+    the same ZA and would otherwise overwrite the ground state's curves."""
+    tab, warned, iso = {}, [], []
     for p in paths:
         try:
+            if endf_liso(p) != 0:
+                iso.append(p.name); continue
             z, a, lrp, t = read_endf(p)
         except Exception as ex:                    # noqa: BLE001 - one bad file must not stop the library
             print(f'  skip {p.name}: {ex}', file=sys.stderr); continue
@@ -508,6 +526,8 @@ def endf_library(paths, njoy: str | None = None, workdir: Path | None = None) ->
                 warned.append(p.name)
         for mt, y in t.items():
             tab[(z, a, mt)] = y
+    if iso:
+        print(f'  {len(iso)} metastable-target files (LISO > 0) not scored: {", ".join(iso[:10])}', file=sys.stderr)
     if warned:
         print(f'  WARNING: {len(warned)} files carry resonance parameters (LRP=1) and were read without reconstruction; '
               'values inside the resolved/unresolved range are the MF3 background only. Pass --njoy or PENDF files.',

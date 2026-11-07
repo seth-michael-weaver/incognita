@@ -216,16 +216,20 @@ def na_total(curves: dict):
 
 
 def he_total(curves: dict):
-    """He-4 production on the grid: sum of multiplicity x sigma_MT over HE_MULT + MT5_HE. Same `missing` rule."""
+    """He-4 production on the grid: sum of multiplicity x sigma_MT over HE_MULT (MT 107, else its levels MT 800-849)
+    + MT5_HE. Same `missing` rule."""
     have = [m for m in HE_MULT if m in curves]
+    lv = [m for m in NA_LEVELS if m in curves] if 107 not in curves else []   # (n,a) given only as its levels (as na_total)
     s5 = curves.get(5)
     part = curves.get(MT5_HE)
-    if not have and part is None:
+    if not have and not lv and part is None:
         return None, None
     n = len(next(iter(curves.values())))
     v = np.zeros(n)
     for m in have:
         v = v + HE_MULT[m] * np.asarray(curves[m], float)
+    for m in lv:
+        v = v + np.asarray(curves[m], float)
     if part is not None:
         return v + part, None
     if s5 is not None and np.any(np.asarray(s5) > 0):
