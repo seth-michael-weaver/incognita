@@ -132,3 +132,5 @@ Object.assign(WT.L.ui, {
 // less text (2026-11-06)
 Object.assign(WT.L.ui, { dx_hint2: "ドラッグで移動・スクロールでズーム・マスをクリック", dx_more_nuc: "詳細:信頼度、出典、コード", dx_about: "データ・ダウンロード・コードについて" });
 Object.assign(WT.L.ui, { dx_cmp: "比較用" });
+// C12RM9 R-matrix evaluation (light nuclei, 2026-11-07)
+Object.assign(WT.L.ui, {"dx_el": "弾性散乱 (n,n)", "dx_rm_name": "INCOGNITA R行列評価 (C12RM9)", "dx_rm_h": "この核種に対する私たちのモデル", "dx_rm_what": "炭素12による中性子の弾性散乱。EXFORの全断面積と弾性散乱断面積の測定値に対するINCOGNITA独自の多準位R行列フィットによるものです。公開前に、事前登録したチェックに合格しました：IAEAの炭素標準、取り置いた全断面積の測定値、NJOYによる処理の往復検証、黒鉛を含む臨界ベンチマーク（PCI-001）。", "dx_rm_range": "エネルギー範囲：{lo}～{hi}。それより上にINCOGNITAの曲線はありません。", "dx_rm_caveat": "注意：学習データでのχ²/自由度 {c}。傾きのある2つのデータセットに印を付けています。判定は較正済みですが検出力は低めです。", "dx_rm_nocap": "捕獲はモデル化していません。捕獲タブには測定値だけを示します。", "dx_rm_report": "報告書を読む"});

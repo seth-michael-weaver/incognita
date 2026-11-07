@@ -132,3 +132,5 @@ Object.assign(WT.L.ui, {
 // less text (2026-11-06)
 Object.assign(WT.L.ui, { dx_hint2: "드래그로 이동 · 스크롤로 확대 · 칸을 클릭", dx_more_nuc: "자세히: 신뢰도, 출처, 코드", dx_about: "데이터, 다운로드, 코드에 대하여" });
 Object.assign(WT.L.ui, { dx_cmp: "비교용" });
+// C12RM9 R-matrix evaluation (light nuclei, 2026-11-07)
+Object.assign(WT.L.ui, {"dx_el": "탄성 산란 (n,n)", "dx_rm_name": "INCOGNITA R-행렬 평가 (C12RM9)", "dx_rm_h": "이 핵종에 대한 우리 모델", "dx_rm_what": "탄소-12에서의 중성자 탄성 산란으로, EXFOR의 전체 단면적과 탄성 단면적 측정값에 INCOGNITA가 직접 맞춘 다준위 R-행렬 피팅에서 나온 것입니다. 공개 전에 미리 등록한 검사를 통과했습니다: IAEA 탄소 표준, 따로 남겨 둔 전체 단면적 측정값, NJOY 처리 왕복 검사, 흑연 임계 벤치마크(PCI-001).", "dx_rm_range": "에너지 범위: {lo}부터 {hi}까지이며, 그 위에는 INCOGNITA 곡선이 없습니다.", "dx_rm_caveat": "주의: 학습 표본의 χ²/자유도 {c}; 기울어진 데이터 세트 두 개를 표시했습니다; 판정 기준은 보정되었지만 검정력이 낮습니다.", "dx_rm_nocap": "포획은 모델링하지 않습니다. 포획 탭에는 측정값만 표시됩니다.", "dx_rm_report": "보고서 읽기"});
