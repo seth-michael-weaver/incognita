@@ -1206,5 +1206,12 @@ def omp_table(
         if not (part == want and zbeg <= Z <= zend and abeg <= A <= aend):
             raise ValueError(f"RIPL OMP {iref} for {A} Z={Z} out of range (flagriplrisk stops)")
     _raw, e_full, vals_full, ef = _full_table(Z, A, iref, sdir)
-    n = len(ripl_energies(enincmax_mev)[1])
+    n = _n_energies(float(enincmax_mev))
     return e_full[:n].copy(), vals_full[:n].copy(), ef
+
+
+@cache
+def _n_energies(enincmax_mev: float) -> int:
+    """PERFOMP: `len(ripl_energies(enincmax_mev)[1])`, which `omp_table` rebuilt (a float32 loop
+    and 260 f7.3 prints) at every incident energy of a run for the same `enincmax`."""
+    return len(ripl_energies(enincmax_mev)[1])

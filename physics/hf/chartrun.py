@@ -68,6 +68,7 @@ KEEP: frozenset[str] = frozenset({
     # SPEED50C: a RIPL potential's full table on (Z, A): files only (omp_table hands out copies).
     # With CCGPU the plan pass builds it and the target's run needed it again after the drop
     "physics.hf.omp.ripl._full_table",
+    "physics.hf.omp.ripl._n_energies",  # PERFOMP: a function of enincmax only
     "physics.hf.core.constants._talys_constants_memo",  # SETB: constants.f90's values
     "physics.hf.native.nativex.lib",  # NATIVEX: the loaded kernels
     "physics.hf.engine_c.lib",  # CENGWIRE: the loaded cascade engine, with its kernel pointers
