@@ -44,3 +44,7 @@ differently: 118 more measured datasets (114 of them not excluded), the keep / d
 wider error bars on multi-point cells whose uncertainty is an unsplit total (it is no longer divided by sqrt(n)), and,
 below Z 26 only, the page's own "measured / not measured (Z < 26)" label where a nucleus gains or loses its last
 non-excluded cell (the label is computed by the page from the curation, not taken from the library).
+
+Result of the regeneration in this branch: 359 of the 6 244 nuclide files and `index.json` change (measured points,
+their marks and error bars, the measured-cell counts); the index columns tier, MACS 30 keV and its uncertainty are
+identical for all 6 183 nuclides, and no Z < 26 nucleus changes its measured / not measured label.
