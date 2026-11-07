@@ -18,7 +18,8 @@ the library's tier (field "tier" stays the library's), it shows "measured (Z < 2
 
 Only the capture cross section of the ground-state (or natural) target is drawn and counted: cells on an isomeric target
 (Ta-180m, Hf-178m2, Ho-166m, ...) are not put on the ground state's file, and partial branches (EXFOR SF5 PAR, CN, DI,
-M-, INC: gamma-line, level or component cross sections) are listed with the datasets but only counted under "other". A
+M-, INC: gamma-line, level or component cross sections) and capture into one product state (-G, -M, -M1, -L ...) are
+listed with the datasets but only counted under "other". A
 fix-unit cell is drawn with its logged unit factor applied (the curation tables keep the value as compiled).
 Checked by tests/data/test_data_consistency.py.
 
@@ -45,6 +46,19 @@ DEC = {"keep": "k", "downweight": "d", "exclude": "x", "fix-unit": "f"}
 # "metastable excluded"), not the capture cross section: listed with the nuclide's datasets, counted under "other", not
 # drawn as capture and not counted as a capture measurement (n_use)
 PARTIAL = {"PAR", "CN", "DI", "M-", "INC"}
+# Capture into ONE product state (EXFOR SF4 -G, -M, -M1, -M2, -L ...; the cell's "state") is a partial cross section of
+# the same class (Seth, 2026-11-07): listed with the datasets, counted under "other" as "<state>:<kind>", not drawn as
+# total capture and not in n_use. Sums over states (M1+M2, G+M1, G+M2) are not single states and are left as they were.
+ONE_STATE = re.compile(r"^[GML]\d*$")
+
+
+def partial_kind(branch, state):
+    """The "other" label of a partial cell (lower-case SF5 branch or single product state), or None for total capture."""
+    if (branch or "") in PARTIAL:
+        return branch.lower()
+    if ONE_STATE.match(state or ""):
+        return state.lower()
+    return None
 
 
 def sig(v, n=4):
@@ -174,8 +188,9 @@ def main():
             assert f is not None and f > 0 and not math.isnan(f), key
             y *= f
         pt = [sig(r["e_lo_ev"], 5), sig(r["e_hi_ev"], 5), sig(y), relerr(r), i, DEC.get(r["decision"], "k"), r["state"] or ""]
-        if (r["branch"] or "") in PARTIAL:
-            m["other"][f"{r['branch'].lower()}:{kind}"] += 1
+        pk = partial_kind(r["branch"], r["state"])
+        if pk:
+            m["other"][f"{pk}:{kind}"] += 1
         elif kind in ("sig", "av"):
             m["cap"].append(pt)
         elif kind == "mxw":

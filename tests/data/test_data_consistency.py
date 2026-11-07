@@ -38,6 +38,11 @@ NA = 6.02214076e23
 U_KEV = 931494.10242  # keV per u
 C_CMS = 2.99792458e10
 PARTIAL = {"PAR", "CN", "DI", "M-", "INC"}  # SF5 branches that are a part of capture, not the capture cross section
+ONE_STATE = re.compile(r"^[GML]\d*$")       # capture into one product state (-G, -M, -M1, -L ...): partial too
+
+
+def _partial(c):
+    return c["branch"] in PARTIAL or bool(ONE_STATE.match(c["state"] or ""))
 
 
 # ---------------------------------------------------------------- loaders
@@ -368,7 +373,7 @@ def test_site_light_labels():
     for c in cells():
         Z, A, M = parse_nuc(c["nuclide"])
         if Z < 26 and A and M == 0 and c["kind"] in ("sig", "av", "mxw") and c["decision"] != "exclude" \
-                and c["branch"] not in PARTIAL:
+                and not _partial(c):
             use[(Z, A)] += 1
     for row in idx["rows"]:
         x = dict(zip(cols, row))
@@ -392,6 +397,7 @@ def test_site_isomer_targets_not_merged_into_ground_state():
 
 def test_site_partial_branches_not_drawn_as_capture():
     part = {c["dataset_key"] for c in cells() if c["branch"] in PARTIAL}
+    part |= {c["dataset_key"] for c in cells() if ONE_STATE.match(c["state"] or "")}
     for p in SITE.glob("n/*/*.json"):
         d = json.loads(p.read_text())
         m = d.get("meas")
@@ -406,7 +412,7 @@ def test_site_fix_unit_points_are_fixed():
     tr = trust()
     want = {}
     for c in cells():
-        if c["decision"] == "fix-unit" and c["kind"] in ("sig", "av", "mxw") and c["branch"] not in PARTIAL:
+        if c["decision"] == "fix-unit" and c["kind"] in ("sig", "av", "mxw") and not _partial(c):
             Z, A, M = parse_nuc(c["nuclide"])
             want[(Z, A or "nat", c["dataset_key"], _sig(c["e_lo_ev"], 5))] = _sig(c["mean_b"] * tr[c["dataset_key"]]["unit_fix_factor"])
     assert want
