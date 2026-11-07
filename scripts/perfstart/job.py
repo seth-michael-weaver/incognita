@@ -31,7 +31,7 @@ DECK = ("preequilibrium y;multipreeq y;knockfix2 y;leeshell nm;ctwindow2 y;peuni
 
 def set_env(z, a, lines):
     for k in [k for k in os.environ if k.startswith(("INCOGNITA_", "NUCLIDO_"))]:
-        if k not in ("INCOGNITA_CC_CACHE", "INCOGNITA_STAGE_CACHE"): del os.environ[k]
+        if k not in ("INCOGNITA_CC_CACHE", "INCOGNITA_STAGE_CACHE", "INCOGNITA_STRUCT_CACHE"): del os.environ[k]
     os.environ.update(ENV)
     os.environ.setdefault("INCOGNITA_CC_CACHE", f"{H}/.cache/perfstart-cc")
     if os.path.isdir(f"{H}/relb61_strip/structure"): os.environ.setdefault("TALYS_DIR", f"{H}/relb61_strip")
@@ -102,7 +102,9 @@ def main():
         np.savez(a.out, e_mev=np.asarray(e_mev), **ex)
     sd = sys.modules.get("physics.hf.stagedisk")
     stc = sd.stats() if sd is not None and sd.enabled() else None
-    print(json.dumps(dict(stagecache=stc, z=a.z, a=a.a, n_e=len(e_mev), import_s=round(t_imp, 4), reps=reps,
+    bc = sys.modules.get("physics.hf.structure.bincache")
+    sbc = bc.stats() if bc is not None and bc.directory() is not None else None
+    print(json.dumps(dict(stagecache=stc, structcache=sbc, z=a.z, a=a.a, n_e=len(e_mev), import_s=round(t_imp, 4), reps=reps,
                           wall_s=round(time.time() - T_START, 4), first_job_s=round(t_imp + reps[0]["cascade_s"] + reps[0]["run_s"], 4))))
     sys.stdout.flush(); sys.stderr.flush()
     if os.environ.get("PS_FASTEXIT", "1") != "0":
