@@ -1,5 +1,5 @@
 {
- "version": "1.1",
+ "version": "1.2",
  "built": "2026-11-07",
  "script": "scripts/build_light_channels.py",
  "rules": "research scripts/channels/score_channels.py exfor_rows() + amendment A1 (the rules of the benchmark rows incognita/bench/data/exam_rows, ch-n2n / ch-np / ch-na), applied to Z 1-25, plus the v5b REACTION-code check (score_channels_fixed.reaction_flags); Li-6 SF3=A would be dropped as (n,t) (rule li6_nt)",
@@ -12,9 +12,9 @@
  "engine_grid": "64 points 1000-20000000 eV (chart_s9_npz e_ev)",
  "filter_counts": {
   "n2n": {
-   "subentries": 551,
-   "kept": 253,
-   "pts": 816,
+   "subentries": 547,
+   "kept": 249,
+   "pts": 812,
    "rule_filter": 274,
    "reaction_code": 16,
    "reaction_code:SF9": 7,
@@ -25,9 +25,9 @@
    "v_entry": 6
   },
   "np": {
-   "subentries": 1481,
-   "kept": 697,
-   "pts": 5662,
+   "subentries": 1475,
+   "kept": 691,
+   "pts": 5655,
    "rule_filter": 682,
    "reaction_code": 52,
    "reaction_code:STATE": 2,
@@ -38,9 +38,9 @@
    "v_entry": 21
   },
   "na": {
-   "subentries": 995,
-   "kept": 428,
-   "pts": 7652,
+   "subentries": 994,
+   "kept": 427,
+   "pts": 7651,
    "rule_filter": 504,
    "reaction_code": 24,
    "reaction_code:STATE": 6,
@@ -66,21 +66,21 @@
   },
   "review_file": {
    "path": "data/curation/inputs/review_decisions_threshold_Z1-25.jsonl",
-   "sha256": "bf972d291c455ac779038d38de25508d2faafc328dc8be7ac68ff6eef81a55f5",
-   "lines": 6
+   "sha256": "a6c13893792c463d856294939a012f5bbfcb6ae2d3afe0b8c867afd43d8710a5",
+   "lines": 18
   },
   "counts": {
+   "review_excluded_series": 14,
    "review_fix_unit_series": 2,
    "encm_series": 6,
    "encm_points": 86,
-   "review_excluded_points": 3,
-   "review_excluded_series": 3
+   "review_excluded_points": 4
   }
  },
  "per_channel": {
   "n2n": {
-   "rows": 405,
-   "series": 253,
+   "rows": 401,
+   "series": 249,
    "nuclides": [
     "1-2",
     "1-3",
@@ -104,7 +104,6 @@
     "3-7",
     "4-9",
     "5-11",
-    "6-12",
     "6-13",
     "7-14",
     "8-16",
@@ -112,8 +111,8 @@
    ]
   },
   "np": {
-   "rows": 1374,
-   "series": 697,
+   "rows": 1367,
+   "series": 691,
    "nuclides": [
     "11-23",
     "12-24",
@@ -163,8 +162,8 @@
    ]
   },
   "na": {
-   "rows": 1086,
-   "series": 428,
+   "rows": 1085,
+   "series": 427,
    "nuclides": [
     "10-20",
     "11-23",

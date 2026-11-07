@@ -40,6 +40,12 @@ Version 1.1 (2026-11-07), two corrections applied after the staging check and be
     optional "points" list of the EXFOR points a line applies to): exclude drops the series (or its listed points),
     fix-unit multiplies its values by "factor". Rows of a fix-unit series carry review = "fix-unit xFACTOR".
 
+Version 1.2 (2026-11-07, BUGLIGHT5): no code change, 12 more review lines (same file): two (n,2n) series measured below
+the reaction's kinematic threshold (C-12 at 14.1 MeV, Ca-40 at 14.69 MeV), four copies of a measurement compiled twice
+(Si-28(n,p) Klochkova, Ti-46(n,p) Lu Hanlin at 8.5 MeV, Ti-46 / Cr-50(n,2n) Pansare 1993 pointer 1) and six averages
+shown next to the runs they average (EXFOR STATUS DEP: Schantl 1970 O-16, F-19, K-41, Ca-40 (n,p); Al-27 (n,p) 40676,
+(n,alpha) 41051), each with its EXFOR evidence in the reason.
+
 Reaction identities stay exact: SF3 = A is (n,alpha) with the residual the target + n - alpha; Li-6(n,t)He-4 is SF3 = T
 and is not taken (ENDF puts Li-6 + n -> alpha + t in MT 105, (n,t)). A Li-6 SF3 = A series (residual H-3) would be the
 same final state as (n,t) and is dropped and counted (rule LI6_NT).
@@ -61,7 +67,7 @@ SF3 = {"n2n": "2N", "np": "P", "na": "A"}
 EMAX = 20e6
 ISOMER = re.compile(r"-(M\d?|G)$")  # score_channels.py ISOMER (product state suffix)
 ENGINE = "~/nuc-local/capture/chart_s9_npz"
-VERSION = "1.1"
+VERSION = "1.2"
 REVIEW = OUT / "review_decisions_threshold_Z1-25.jsonl"
 
 
