@@ -1,5 +1,6 @@
 /* Japanese: instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
+  nav_calc: "計算機",
   in_title: "教員向け · 原子核反応の内側",
   credit_sub: "INCOGNITAエンジンは<a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely）を移植したもので、TALYSの原子核構造データベースを使っています。INCOGNITAが追加したものは、<a href=\"./#code\" data-keep-lang>解説ページの最後にスイッチごとに一覧</a>しています。",
   in_kicker: "INCOGNITA · 教員向けガイド",

@@ -1,5 +1,6 @@
 /* French: instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
+  nav_calc: "Calculateur",
   in_title: "Pour les enseignants · Au cœur d'une réaction nucléaire",
   credit_sub: "Le moteur INCOGNITA est un portage de <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) et utilise la base de données de structure nucléaire de TALYS. Ce qu'INCOGNITA ajoute est <a href=\"./?lang=fr#code\">détaillé, option par option, à la fin de la page pédagogique</a>.",
   in_kicker: "INCOGNITA · guide pédagogique",

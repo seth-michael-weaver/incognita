@@ -1,5 +1,6 @@
 /* Danish: instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
+  nav_calc: "Beregner",
   in_title: "For undervisere · Inde i en kernereaktion",
   credit_sub: "INCOGNITA-motoren er en portering af <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) og bruger TALYS' database over kernestruktur. Det, INCOGNITA tilføjer, er <a href=\"./?lang=da#code\" data-keep-lang>listet, kontakt for kontakt, nederst på undervisningssiden</a>.",
   in_kicker: "INCOGNITA · undervisningsvejledning",

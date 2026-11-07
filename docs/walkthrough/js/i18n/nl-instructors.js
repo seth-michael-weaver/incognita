@@ -1,5 +1,6 @@
 /* Dutch (Nederlands): instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
+  nav_calc: "Rekenmachine",
   in_title: "Voor docenten · Binnen in een kernreactie",
   credit_sub: "De INCOGNITA-motor is een port van <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) en gebruikt de kernstructuurdatabase van TALYS. Wat INCOGNITA toevoegt, staat <a href=\"./?lang=nl#code\">schakelaar voor schakelaar onderaan de uitlegpagina</a>.",
   in_kicker: "INCOGNITA · handleiding voor docenten",

@@ -1,5 +1,6 @@
 /* German (Deutsch): instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
+  nav_calc: "Rechner",
   in_title: "Für Lehrende · Im Inneren einer Kernreaktion",
   credit_sub: "Die Engine INCOGNITA ist eine Portierung von <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) und nutzt die Kernstrukturdatenbank von TALYS. Was INCOGNITA hinzufügt, ist <a href=\"./?lang=de#code\" data-keep-lang>am Ende der Lehrseite Schalter für Schalter aufgelistet</a>.",
   in_kicker: "INCOGNITA · Leitfaden für die Lehre",
