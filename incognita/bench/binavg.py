@@ -52,7 +52,7 @@ def channel_curves(pendf_mf3: dict, original_mts, mt5_na=None) -> dict:
     out = _channel_curves(pendf_mf3, original_mts)
     if mt5_na is not None and 'na' in out:
         x, y, s = out['na']
-        if mt5_na[0] == 'incomplete':
+        if isinstance(mt5_na[0], str) and mt5_na[0] == 'incomplete':
             xx, yy = _sum_on_union([(x, y)])
             s5 = np.interp(xx, mt5_na[1], mt5_na[2], left=0.0, right=0.0)
             out['na'] = (xx, np.where(s5 > 0, np.nan, yy), s + ' (MT 5 products not read: incomplete where sigma_5 > 0)')

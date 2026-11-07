@@ -109,3 +109,14 @@ def test_ingest_stages_mt5_alpha_parts(tmp_path):
     g = np.array([5e6, 1e7, 1.5e7, 2e7])
     p = AL.mt5_alpha_parts('\n'.join(lines), 26, 56, np.array([0.0, 0.01, 0.1, 0.4]), g)
     assert np.allclose(p[AL.MT5_NA], [0, 0, 0.025, 0.2])
+
+
+def test_binavg_na_channel_adds_mt5_part():
+    from incognita.bench import binavg as BA
+    x = np.array([1e6, 1e7, 2e7]); y107 = np.array([0.0, 0.004, 0.004]); x5 = np.array([1e7, 2e7]); p5 = np.array([0.0, 0.1])
+    c = BA.channel_curves({107: (x, y107)}, [107], (x5, p5))
+    v, _ = BA.lethargy_average(c['na'][0], c['na'][1], 1.9e7, 2e7)
+    assert c['na'][2].endswith('+ MT5 part') and 0.09 < v < 0.11
+    c = BA.channel_curves({107: (x, y107)}, [107], ('incomplete', x5, np.array([0.0, 0.5])))
+    assert np.isnan(BA.lethargy_average(c['na'][0], c['na'][1], 1.9e7, 2e7)[0])
+    assert np.isfinite(BA.lethargy_average(c['na'][0], c['na'][1], 1.5e6, 2e6)[0])
