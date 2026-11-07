@@ -29,7 +29,7 @@
   const TIER_SHORT = [T("dx_ts0", "measured"), T("dx_ts1", "anchored"), T("dx_ts2", "interpolated"), T("dx_ts3", "extrapolated"), T("dx_ts4", "not measured"), T("dx_ts5", "measured"), T("dx_ts6", "measured")];
   // shown tier: the library v0.2.1 tier, except where it would mislead. A nucleus the library calls EXTRAPOLATED but with
   // curated capture data that the curation did not exclude (tier kept from v0.1): 5; excluded-only data does not count. Below Z 26 the library assigns no real tier (all EXTRAPOLATED, its
-  // curated capture set started at Z 26), so the page uses the light-nucleus curation (data/curation/inputs/*Z1-25*, same
+  // curated capture set started at Z 26), so the page uses the light-nucleus curation (data/curation/capture_v2/*Z1-25*, same
   // WP-12 curation as Z 26-92): 6 if the nucleus has a curated capture cell that the curation did not exclude (index
   // column n_use), else 4 (not measured); also for H..N (Z 1-7), which have measurements but no library v0.2.1 curve (index
   // tier -1). The library's own tier field is not changed. See scripts/build_site_data.py.
@@ -351,7 +351,7 @@
     $("#dx-stats").innerHTML = st.map(([v, l]) => `<div class="dx-stat"><b>${v}</b><span>${l}</span></div>`).join("");
     const nm = r.A ? `${IDX.sym[r.Z]}-${r.A}` : "";
     $("#dx-cmd").textContent = nm && d.cap ? `uv run python -m incognita.library show ${nm} --version v0.2.1\n\n# or from Python\nfrom incognita.library import capture_curve\ndf = capture_curve("${nm}", version="v0.2.1")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier`
-      : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/inputs/${r.Z < 26 ? "exfor_cells_Z1-25.parquet" : "exfor_cells.parquet"}`;
+      : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/capture_v2/${r.Z < 26 ? "exfor_cells_Z1-25_v2.parquet" : "exfor_cells_Z26-92_v2.parquet"}`;
     sweep();
     if ((center || scroll) && !stay) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -856,13 +856,13 @@
       page, generated: new Date().toISOString().slice(0, 10),
       engine: "The INCOGNITA engine is a port of TALYS-2 (A. J. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131) and uses the TALYS nuclear-structure database.",
       license: "Predictions and data: CC-BY-4.0. Cite the project (CITATION.cff in the repository), TALYS (Eur. Phys. J. A 59 (2023) 131) and EXFOR (N. Otuka et al., Nucl. Data Sheets 120 (2014) 272).",
-      measurements: "Measured points are from EXFOR (IAEA Nuclear Data Section) as curated in data/curation; each row carries its EXFOR dataset id (entry/subentry/pointer). (n,2n), (n,p) and (n,alpha) points are the benchmark rows in incognita/bench (Z >= 26) or, below Z 26, EXFOR rows cut with the same rules (data/curation/inputs/exfor_threshold_Z1-25_rows.parquet, scripts/build_light_channels.py), with their EXFOR subentry.",
+      measurements: "Measured points are from EXFOR (IAEA Nuclear Data Section) as curated in data/curation (capture set v2, data/curation/capture_v2); each row carries its EXFOR dataset id (entry/subentry/pointer). (n,2n), (n,p) and (n,alpha) points are the benchmark rows in incognita/bench (Z >= 26) or, below Z 26, EXFOR rows cut with the same rules (data/curation/inputs/exfor_threshold_Z1-25_rows.parquet, scripts/build_light_channels.py), with their EXFOR subentry.",
       units: "energy in eV (Maxwellian rows: kT in eV); capture cross sections in barns (b); (n,2n), (n,p), (n,alpha) and MACS in millibarns (mb)",
     };
     const J = { ...meta };
     // below Z 26 the page's label comes from the Z 1-25 curation, not from the library (see shownTier)
     const lr = Z < 26 && A ? byKey.get(Z + "-" + A) : null;
-    if (lr) J.page_label_below_z26 = `${lr.st === 6 ? "measured" : "not measured"}: library v0.2.1 assigns tiers only from Z 26; this label is from the curated EXFOR capture cells of Z 1-25 (data/curation/inputs, README.md there)`;
+    if (lr) J.page_label_below_z26 = `${lr.st === 6 ? "measured" : "not measured"}: library v0.2.1 assigns tiers only from Z 26; this label is from the curated EXFOR capture cells of Z 1-25 (capture set v2, data/curation/capture_v2, README.md there)`;
     if (d.tier != null) Object.assign(J, { tier: IDX.tiers[d.tier], in_validated_range: !!d.valid, value_source: d.src || null, uncertainty_kind: d.unc || null, resolved_resonances_up_to_ev: d.res ?? null, macs30_mb: d.macs30 ?? null, macs30_flag: d.flag || null });
     if (d.cap) J.capture = { unit: "b", energy_ev: grid, sigma_b: d.cap, unc68_log10: d.u68 || null, unc95_log10: d.u95 || null, note: "68 % and 95 % bands: sigma divided and multiplied by 10^unc" };
     if (d.mform) J.model_form = { flag: d.mform.kind, alt_value_30keV_b: d.mform.alt30 ?? null, alt_over_value_30keV: d.mform.ratio ?? null,

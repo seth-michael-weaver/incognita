@@ -1,8 +1,9 @@
 """Build the data files of the website's Data explorer (docs/walkthrough/data/).
 
-Reads library v0.2.1 (production-engine curves for every nuclide; v0.2 with centre-of-mass Maxwellian averages) and the curated EXFOR capture cells (Z 26-92:
-exfor_capture_Z26-92_trust + exfor_cells; Z 1-25: exfor_capture_Z1-25_trust + exfor_cells_Z1-25, the same WP-12 curation
-run by scripts/build_light_curation.py), plus measured (n,2n), (n,p) and (n,alpha) points: the benchmark rows (Z 24-92,
+Reads library v0.2.1 (production-engine curves for every nuclide; v0.2 with centre-of-mass Maxwellian averages) and the curated EXFOR capture cells of
+capture set v2 (data/curation/capture_v2: exfor_capture_Z26-92_trust_v2 + exfor_cells_Z26-92_v2 and the Z 1-25 pair, the WP-12
+curation re-run on the corrected 2026-10-14 staging by scripts/build_capture_v2.py; display only: the library, its tiers
+and every score stay as they are; --curation v1 reads the earlier data/curation/inputs tables), plus measured (n,2n), (n,p) and (n,alpha) points: the benchmark rows (Z 24-92,
 incognita/bench/data/exam_rows) and, for Z 1-25, EXFOR rows cut with the same rules by scripts/build_light_channels.py
 (data/curation/inputs/exfor_threshold_Z1-25_rows.parquet), and writes:
   data/index.json      one row per nuclide (chart of nuclides: tier, MACS at 30 keV, counts of measured data)
@@ -15,12 +16,13 @@ Z < 26 row is EXTRAPOLATED there, because the library's curated capture set star
 the library's tier (field "tier" stays the library's), it shows "measured (Z < 26)" when n_use > 0 and "not measured
 (Z < 26)" otherwise. Measured means: at least one curated EXFOR capture cell that the curation kept or down-weighted.
 
-usage:  uv run --no-project --with pyarrow python scripts/build_site_data.py
+usage:  uv run --no-project --with pyarrow python scripts/build_site_data.py [--curation v1]
 """
 import csv, json, math, os, re, shutil
 from collections import defaultdict
 
 import pyarrow.parquet as pq
+import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LIB = os.path.join(ROOT, "library", "v0.2.1")
@@ -111,15 +113,21 @@ def main():
             n["macsU"] = [fl(r[f"unc68_factor_{t}keV"]) for t in KT]
 
     # ---- measured capture (curated EXFOR cells) ----
-    # Z 26-92 and Z 1-25 are two runs of the same curation; a dataset key never appears in both (asserted)
+    # capture set v2 (default) or v1 (--curation v1); Z 26-92 and Z 1-25 files never share a dataset key (asserted)
     INP = os.path.join(ROOT, "data", "curation", "inputs")
+    v1 = "--curation" in sys.argv and sys.argv[sys.argv.index("--curation") + 1] == "v1"
+    CAP = INP if v1 else os.path.join(ROOT, "data", "curation", "capture_v2")
+    TRUST = (("exfor_capture_Z26-92_trust.parquet", "exfor_capture_Z1-25_trust.parquet") if v1
+             else ("exfor_capture_Z26-92_trust_v2.parquet", "exfor_capture_Z1-25_trust_v2.parquet"))
+    CELLS = (("exfor_cells.parquet", "exfor_cells_Z1-25.parquet") if v1
+             else ("exfor_cells_Z26-92_v2.parquet", "exfor_cells_Z1-25_v2.parquet"))
     meta = {}
-    for fn in ("exfor_capture_Z26-92_trust.parquet", "exfor_capture_Z1-25_trust.parquet"):
-        for r in pq.read_table(os.path.join(INP, fn), columns=["dataset_key", "first_author", "year", "facility"]).to_pylist():
+    for fn in TRUST:
+        for r in pq.read_table(os.path.join(CAP, fn), columns=["dataset_key", "first_author", "year", "facility"]).to_pylist():
             assert r["dataset_key"] not in meta, r["dataset_key"]
             meta[r["dataset_key"]] = (r["first_author"] or "", r["year"], r["facility"] or "")
     meas = defaultdict(lambda: {"ds": [], "dsi": {}, "cap": [], "mxw": [], "other": defaultdict(int)})
-    cells = [r for fn in ("exfor_cells.parquet", "exfor_cells_Z1-25.parquet") for r in pq.read_table(os.path.join(INP, fn)).to_pylist()]
+    cells = [r for fn in CELLS for r in pq.read_table(os.path.join(CAP, fn)).to_pylist()]
     for r in cells:
         Z, A = za(r["nuclide"])
         if Z is None:
