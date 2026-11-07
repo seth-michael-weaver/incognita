@@ -62,7 +62,11 @@ NUMEN_DEFAULT = 260  # A0_talys_mod.f90:59
 def numen(default: int = NUMEN_DEFAULT) -> int:
     """`numen`, the outgoing-grid dimension: INCOGNITA_NUMEN (PECOLLAPSE: larger only for refined-segment
     reference runs), else `default`. ENGFIX4: read on every call (it was read once at import, so a
-    long-lived worker kept its parent's value)."""
+    long-lived worker kept its parent's value).
+
+    TALYS: (none -- the dimension numen of A0_talys_mod is a compile-time constant there)
+    Test: tests/hf/test_engfix4.py
+    """
     return int(os.environ.get("INCOGNITA_NUMEN", str(default)))
 
 

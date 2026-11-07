@@ -62,6 +62,11 @@ CDTYPE = torch.complex128
 # ENGFIX4: read on every call (it used to be read once at import, so a long-lived worker kept its
 # parent's value).
 def ecmstable() -> bool:
+    """CCNANTHERM's switch, INCOGNITA_ECMSTABLE (default ON; "0" = ECIS's expression everywhere).
+
+    TALYS: (none -- Incognita switch)
+    Test: tests/hf/test_engfix4.py
+    """
     return os.environ.get("INCOGNITA_ECMSTABLE", "") != "0"
 
 

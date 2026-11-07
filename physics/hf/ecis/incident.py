@@ -94,12 +94,20 @@ SOSWITCH_DEFAULT_MEV = 10.0  # input_directpar.f90:64
 # ENGFIX4: both are read from the environment on every call (they used to be read once at import, so
 # a long-lived worker kept its parent's values).
 def incident_refine() -> int:
-    """`HF_INC_REFINE` (default 1 = off)."""
+    """`HF_INC_REFINE` (default 1 = off).
+
+    TALYS: (none -- port switch)
+    Test: tests/hf/test_fissc2.py
+    """
     return int(os.environ.get("HF_INC_REFINE", "1"))
 
 
 def incident_refine_emax_mev() -> float:
-    """`HF_INC_REFINE_EMAX` (default 0.05 MeV)."""
+    """`HF_INC_REFINE_EMAX` (default 0.05 MeV).
+
+    TALYS: (none -- port switch)
+    Test: tests/hf/test_fissc2.py
+    """
     return float(os.environ.get("HF_INC_REFINE_EMAX", "0.05"))
 
 

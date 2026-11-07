@@ -163,7 +163,11 @@ def _parinclude(options) -> list[bool]:
 
 
 def parinclude_of(options) -> tuple[bool, ...]:
-    """`parinclude(0:6)`: the ejectile types 0..6 the run emits (`_parinclude` without fission)."""
+    """`parinclude(0:6)`: the ejectile types 0..6 the run emits (`_parinclude` without fission).
+
+    TALYS: input_basicreac.f90:1 (input_basicreac)
+    Test: tests/hf/test_engfix4.py
+    """
     return tuple(_parinclude(options)[1:])
 
 
