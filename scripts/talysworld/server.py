@@ -18,11 +18,16 @@ The public site's calculator page (www.incognitanuclear.org/calculator.html) fin
 and offers live runs; CORS allows only the site's own origins and localhost, and the service listens on 127.0.0.1 only.
 Never expose it publicly (no tunnels, no port forwarding).
 Engine job: scripts/talysworld/engine_job.py (production engine engine-20261022-3, library v0.2 run environment).
+Warm pool (default; --no-warm for the old fresh process per job): jobs go to warmpool.py, one preloaded daemon per service
+port (socket ~/talysworld_data/warm-PORT.sock) that forks a child per job, at most --workers engine processes at once; a
+one-energy point then costs ~1-3 s instead of ~11-15 s, with the same numbers (scripts/talysworld/check_warm.py).
 """
 import argparse, hashlib, json, math, os, queue, re, subprocess, threading, time, uuid
 from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
+
+import warmpool as WP  # scripts/talysworld/warmpool.py (its client side imports no engine)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -143,14 +148,16 @@ def run_point(z, a, comp, kws, key, e):
         if os.path.exists(cf): return dict(json.load(open(cf)), cached=True)
     try:
         work = os.path.join(DATA, "jobs", uuid.uuid4().hex[:12])
-        cmd = ["nice", "-n", str(NICE), PY, os.path.join(HERE, "engine_job.py"), "--z", str(z), "--a", str(a), "--e", repr(float(e)),
-               "--comp", comp, "--kw", kws, "--work", work]
-        try:
-            p = subprocess.run(cmd, capture_output=True, text=True, timeout=3600, cwd=DATA)
-            line = [ln for ln in p.stdout.splitlines() if ln.startswith("{")]
-            res = json.loads(line[-1]) if line else dict(z=z, a=a, e_ev=e, err=f"engine job exit {p.returncode}: {p.stderr.strip()[-300:]}")
-        except subprocess.TimeoutExpired:
-            res = dict(z=z, a=a, e_ev=e, err="engine job timed out (1 h)")
+        res = warm_point(z, a, comp, kws, e, work)
+        if res is None:   # no warm pool: one fresh engine process (the old way)
+            cmd = ["nice", "-n", str(NICE), PY, os.path.join(HERE, "engine_job.py"), "--z", str(z), "--a", str(a), "--e", repr(float(e)),
+                   "--comp", comp, "--kw", kws, "--work", work, "--cold"]
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=3600, cwd=DATA)
+                line = [ln for ln in p.stdout.splitlines() if ln.startswith("{")]
+                res = json.loads(line[-1]) if line else dict(z=z, a=a, e_ev=e, err=f"engine job exit {p.returncode}: {p.stderr.strip()[-300:]}")
+            except subprocess.TimeoutExpired:
+                res = dict(z=z, a=a, e_ev=e, err="engine job timed out (1 h)")
         res["e_ev"] = float(e); res.pop("log_tail", None)
         if not res.get("err"):
             os.makedirs(cdir, exist_ok=True); json.dump(res, open(cf, "w"))
@@ -172,6 +179,12 @@ POINTS = [16, 32, 64, 134]
 BINS = [20, 40, 60, 100]   # the engine's continuum excitation bins (TALYS keyword bins; 40 = the TALYS default, not in the deck)
 SMIN = {}                  # (z, a) -> min separation energy of the compound nucleus (MeV), for the GRIDTOP pad
 WARM = dict(p=None, lock=threading.Lock())
+WARM_SOCK = None           # set in main(): one pool socket per service port
+# Curves with TW_CHUNK_MIN energies or more are split over the workers (energy subsets of one declared grid; equal to the
+# one-run curve, check_warm.py). Default 0 = off: measured 2026-11-07, every slice repeats the run's set-up and walks all
+# lower energies (sfactor), so 2-3 slices gave 0.6x-1.4x on the 64-point curve; a two-arm curve already runs its arms
+# side by side.
+CHUNK_MIN = int(os.environ.get("TW_CHUNK_MIN", "0"))
 
 
 def grid_for(points, low):
@@ -183,45 +196,68 @@ def grid_for(points, low):
     return (LOW15 + g) if low else g
 
 
-def warm_proc():
-    """The warm engine worker (engine_warm.py): imports the engine once and forks one child per job."""
+def warm_pool():
+    """The warm engine pool (warmpool.py: one preloaded daemon, a forked child per job, at most `--workers` at once),
+    started on first use; None if it cannot be started (callers then run a fresh process per job, as before)."""
     with WARM["lock"]:
-        p = WARM["p"]
-        if p is None or p.poll() is not None:
-            if WARM.get("fails", 0) >= 3: raise RuntimeError("warm worker disabled after 3 failures")
-            if p is not None: WARM["fails"] = WARM.get("fails", 0) + 1
-            log = open(os.path.join(DATA, "engine_warm.log"), "a")
-            p = WARM["p"] = subprocess.Popen(["nice", "-n", str(NICE), PY, os.path.join(HERE, "engine_warm.py")], stdin=subprocess.PIPE,
-                                             stdout=subprocess.DEVNULL, stderr=log, text=True, cwd=DATA)
-        return p
+        if WARM["p"] is not None and WARM["p"].alive(): return WARM["p"]
+        if WARM.get("fails", 0) >= 3: return None
+        try:
+            P, proc = WP.ensure(WARM_SOCK, workers=pool._max_workers, nice=NICE, data=DATA, python=PY)
+            WARM["p"], WARM["proc"] = P, proc; return P
+        except (OSError, RuntimeError) as ex:
+            WARM["fails"] = WARM.get("fails", 0) + 1
+            print(f"talysworld: warm pool unavailable ({ex}); fresh processes", flush=True); return None
+
+
+def smin_of(P, z, a):
+    if (z, a) not in SMIN: SMIN[(z, a)] = min(P.smin(z, a))
+    return SMIN[(z, a)]
+
+
+def warm_point(z, a, comp, kws, e, work):
+    """One energy through the warm pool, in engine_job.py's result format; None if the pool is unavailable."""
+    P = warm_pool()
+    if P is None: return None
+    try:
+        sm = smin_of(P, z, a) if GRIDTOP else None
+        r = P.run(dict(z=z, a=a, grid=[float(e)], comp=comp, kw=kws, work=work, smin=sm, gridtop=GRIDTOP, skip_pad=True))
+    except (OSError, RuntimeError, ValueError) as ex:
+        return dict(z=z, a=a, e_ev=e, err=f"warm pool: {type(ex).__name__}: {ex}"[:300])
+    out = {k: v for k, v in r.items() if k not in ("channels", "e_ev", "n_grid", "computed")}
+    if r.get("channels"): out["channels"] = {c: v[0] for c, v in r["channels"].items()}
+    if GRIDTOP and sm is not None: out["s_min_mev"] = round(sm, 4)
+    if GRIDTOP and sm is not None and sm < 0: out["grid_ev"] = [float(e), float(e) + (-sm + 1.0) * 1e6]
+    out["warm"] = True
+    return out
 
 
 def engine_call(args):
-    """One engine job: through the warm worker (no start-up cost), or as a fresh process if the worker is unavailable."""
-    out = os.path.join(DATA, "jobs", uuid.uuid4().hex[:12] + ".result.json")
-    try:
-        p = warm_proc()
-        with WARM["lock"]:
-            p.stdin.write(json.dumps(dict(args=args, out=out)) + "\n"); p.stdin.flush()
-        t0 = time.time()
-        while not os.path.exists(out):
-            if time.time() - t0 > 7200: return dict(err="engine job timed out (2 h)")
-            if p.poll() is not None and not os.path.exists(out): raise RuntimeError("warm worker exited")
-            time.sleep(0.2)
-        res = json.load(open(out)); os.remove(out); res["warm"] = True; return res
-    except (OSError, RuntimeError, ValueError):
-        gf = args["work"] + ".grid.json"; json.dump(args["grid"], open(gf, "w"))
-        cmd = ["nice", "-n", str(NICE), PY, os.path.join(HERE, "engine_grid.py"), "--z", str(args["z"]), "--a", str(args["a"]), "--grid", gf,
-               "--comp", args["comp"], "--kw", args["kw"], "--work", args["work"]] + (["--smin", repr(args["smin"])] if args.get("smin") is not None else [])
+    """One curve: through the warm pool, its energies split over the pool's workers when the grid is wide (CHUNK_MIN
+    points or more); or one fresh engine_grid.py process if the pool is unavailable."""
+    P = warm_pool()
+    if P is not None:
         try:
-            p = subprocess.run(cmd, capture_output=True, text=True, timeout=7200, cwd=DATA)
-            line = [ln for ln in p.stdout.splitlines() if ln.startswith("{")]
-            return json.loads(line[-1]) if line else dict(err=f"engine job exit {p.returncode}: {p.stderr.strip()[-300:]}")
-        except subprocess.TimeoutExpired:
-            return dict(err="engine job timed out (2 h)")
-        finally:
-            try: os.remove(gf)
-            except OSError: pass
+            sm = args.get("smin")
+            if sm is None and GRIDTOP: sm = smin_of(P, args["z"], args["a"])
+            n = len(args["grid"]); chunks = pool._max_workers if CHUNK_MIN and n >= CHUNK_MIN else 1
+            res = P.run_grid(args["z"], args["a"], args["grid"], args["comp"], args["kw"], smin=sm, chunks=chunks, gridtop=GRIDTOP)
+            res["warm"] = True; return res
+        except (OSError, RuntimeError, ValueError) as ex:
+            print(f"talysworld: warm pool call failed ({ex}); fresh process", flush=True)
+    os.makedirs(os.path.dirname(args["work"]), exist_ok=True)
+    gf = args["work"] + ".grid.json"; json.dump(args["grid"], open(gf, "w"))
+    cmd = ["nice", "-n", str(NICE), PY, os.path.join(HERE, "engine_grid.py"), "--z", str(args["z"]), "--a", str(args["a"]), "--grid", gf,
+           "--comp", args["comp"], "--kw", args["kw"], "--work", args["work"]] + (["--smin", repr(args["smin"])] if args.get("smin") is not None else [])
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=7200, cwd=DATA)
+        line = [ln for ln in p.stdout.splitlines() if ln.startswith("{")]
+        return json.loads(line[-1]) if line else dict(err=f"engine job exit {p.returncode}: {p.stderr.strip()[-300:]}")
+    except subprocess.TimeoutExpired:
+        return dict(err="engine job timed out (2 h)")
+    finally:
+        try: os.remove(gf)
+        except OSError: pass
 
 
 def run_grid(z, a, comp, kws, points=64, low=False):
@@ -387,10 +423,13 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    global pool, NICE
+    global pool, NICE, WARM_SOCK
     ap = argparse.ArgumentParser(); ap.add_argument("--port", type=int, default=8765); ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--workers", type=int, default=3); ap.add_argument("--nice", type=int, default=10)
+    ap.add_argument("--no-warm", action="store_true", help="a fresh engine process per job (no warm pool)")
     a = ap.parse_args(); NICE = max(10, a.nice)
+    WARM_SOCK = os.path.join(DATA, f"warm-{a.port}.sock")
+    if a.no_warm: WARM["fails"] = 99
     if a.host not in ("127.0.0.1", "localhost", "::1"): raise SystemExit("talysworld listens on this machine only (127.0.0.1); never expose it")
     pool = ThreadPoolExecutor(max_workers=max(1, min(MAX_WORKERS, a.workers)))
     os.makedirs(os.path.join(DATA, "cache"), exist_ok=True)

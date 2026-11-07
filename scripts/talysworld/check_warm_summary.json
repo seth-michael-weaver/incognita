@@ -1,0 +1,243 @@
+{
+ "targets": [
+  "26-56 JS(P,A)",
+  "40-90 JS(P,A)",
+  "79-197 JS(P,A)",
+  "92-238 ACTJS A(rotor)"
+ ],
+ "rtol": 1e-12,
+ "workers": 2,
+ "e1_ev": 1000000.0,
+ "rows": [
+  {
+   "check": "smin pool == fresh",
+   "target": "26-56",
+   "ok": true,
+   "where": "0.0 vs 0.0"
+  },
+  {
+   "check": "smin pool == fresh",
+   "target": "40-90",
+   "ok": true,
+   "where": "0.0 vs 0.0"
+  },
+  {
+   "check": "smin pool == fresh",
+   "target": "79-197",
+   "ok": true,
+   "where": "-0.5263641756976867 vs -0.5264"
+  },
+  {
+   "check": "smin pool == fresh",
+   "target": "92-238",
+   "ok": true,
+   "where": "-4.13029517569769 vs -4.1303"
+  },
+  {
+   "check": "one energy: warm == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: warm == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: chunked x2 == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy: warm == fresh",
+   "target": "40-90",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: warm == fresh",
+   "target": "40-90",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: chunked x2 == fresh",
+   "target": "40-90",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy: warm == fresh",
+   "target": "79-197",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: warm == fresh",
+   "target": "79-197",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: chunked x2 == fresh",
+   "target": "79-197",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy: warm == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: warm == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: chunked x2 == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: reverse order == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy: reverse order == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: reverse order == fresh",
+   "target": "79-197",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy: reverse order == fresh",
+   "target": "79-197",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: reverse order == fresh",
+   "target": "40-90",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy: reverse order == fresh",
+   "target": "40-90",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "64 points: reverse order == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy: reverse order == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "engine_job.py via pool == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "engine_job.py via pool == fresh",
+   "target": "40-90",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "engine_job.py via pool == fresh",
+   "target": "79-197",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "engine_job.py via pool == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  }
+ ],
+ "timing": {
+  "26-56 one energy, fresh engine_job.py (incl. S process)": 8.13,
+  "26-56 64 points, fresh engine_grid.py": 9.97,
+  "40-90 one energy, fresh engine_job.py (incl. S process)": 6.4,
+  "40-90 64 points, fresh engine_grid.py": 9.91,
+  "79-197 one energy, fresh engine_job.py (incl. S process)": 5.95,
+  "79-197 64 points, fresh engine_grid.py": 11.31,
+  "92-238 one energy, fresh engine_job.py (incl. S process)": 6.3,
+  "92-238 64 points, fresh engine_grid.py": 11.07,
+  "pool start-up (once)": 3.89,
+  "26-56 separation energies, pool": 0.05,
+  "40-90 separation energies, pool": 0.04,
+  "79-197 separation energies, pool": 0.05,
+  "92-238 separation energies, pool": 0.05,
+  "26-56 one energy, warm pool (run 1)": 1.76,
+  "26-56 one energy, warm pool (run 2)": 1.81,
+  "26-56 64 points, warm pool, 1 worker": 3.81,
+  "26-56 64 points, warm pool, 2 workers (chunked)": 4.62,
+  "40-90 one energy, warm pool (run 1)": 1.99,
+  "40-90 one energy, warm pool (run 2)": 1.9,
+  "40-90 64 points, warm pool, 1 worker": 5.88,
+  "40-90 64 points, warm pool, 2 workers (chunked)": 5.16,
+  "79-197 one energy, warm pool (run 1)": 1.48,
+  "79-197 one energy, warm pool (run 2)": 1.41,
+  "79-197 64 points, warm pool, 1 worker": 6.72,
+  "79-197 64 points, warm pool, 2 workers (chunked)": 7.31,
+  "92-238 one energy, warm pool (run 1)": 1.35,
+  "92-238 one energy, warm pool (run 2)": 1.24,
+  "92-238 64 points, warm pool, 1 worker": 6.33,
+  "92-238 64 points, warm pool, 2 workers (chunked)": 5.3,
+  "all 8 jobs at once, reverse order": 15.38,
+  "26-56 one energy, engine_job.py via pool (incl. its own python start)": 2.23,
+  "40-90 one energy, engine_job.py via pool (incl. its own python start)": 2.18,
+  "79-197 one energy, engine_job.py via pool (incl. its own python start)": 2.04,
+  "92-238 one energy, engine_job.py via pool (incl. its own python start)": 2.1
+ },
+ "n_checks": 28,
+ "n_failed": 0
+}
