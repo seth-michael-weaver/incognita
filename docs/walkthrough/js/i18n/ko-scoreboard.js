@@ -106,3 +106,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "원자핵 {sn}개 이하에 기댄 승(† 표시), 또는 구간의 위쪽 끝이 0 아래 {nz} dex 안쪽에서 끝나는 승. 마지막 열은 측정 {m}종류에 대한 보정을 적용한 결과입니다(부트스트랩 백분위수 / 정규 근사).",
   th_fw: "보정 후",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "더 많은 원자력 주제" });

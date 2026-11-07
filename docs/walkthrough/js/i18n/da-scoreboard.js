@@ -105,3 +105,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "Sejre, der hviler på {sn} eller færre kerner (markeret med †), eller hvis interval ender mindre end {nz} dex under nul. Sidste kolonne anvender korrektionen for {m} slags målinger: bootstrap-percentiler / normalapproksimation.",
   th_fw: "Korrigeret",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "Flere nukleare emner" });

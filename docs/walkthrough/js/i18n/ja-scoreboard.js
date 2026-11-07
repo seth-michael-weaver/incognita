@@ -106,3 +106,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "{sn}個以下の原子核にもとづく勝ち（†印）と、区間の上端が0の下{nz} dex以内で終わる勝ち。最後の列は{m}種類の測定についての補正を適用した結果です（ブートストラップのパーセンタイル / 正規近似）。",
   th_fw: "補正後",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "その他の原子力トピック" });

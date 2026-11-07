@@ -105,3 +105,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "انتصارات تستند إلى {sn} أنوية أو أقل (مُعلَّمة بـ †)، أو تنتهي فترتها تحت الصفر بأقل من {nz} dex. يطبّق العمود الأخير التصحيح لـ{m} نوعًا من القياسات: مئينات bootstrap / التقريب الطبيعي.",
   th_fw: "بعد التصحيح",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "موضوعات نووية أخرى" });

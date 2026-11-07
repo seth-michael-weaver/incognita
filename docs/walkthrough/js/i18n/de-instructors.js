@@ -156,3 +156,5 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "Abgebrannter Brennstoff, Nuklid für Nuklid", in_s_spentfuel: "Nuklid für Nuklid",
   in_w_spentfuel: "Eine Tonne abgebrannter DWR-Brennstoff, Nuklid für Nuklid zerfallen (Bateman-Ketten, Ingestionskoeffizienten nach ICRP-72): Aktivität gegenüber Radiotoxizität, welches Nuklid wann dominiert, und wie das Abtrennen von Plutonium und den minoren Actinoiden zu 99 % oder 99,9 % die Zeit verkürzt, bis der Wert unter den des Uranerzes fällt.",
 });
+/* minutes, after a lesson length (instructors.js) */
+Object.assign(WT.L.ui, { in_min: "Min." });

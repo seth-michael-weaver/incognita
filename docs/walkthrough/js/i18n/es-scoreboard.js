@@ -105,3 +105,5 @@ Object.assign(WT.es.ui, {
   sb_care_cap: "Victorias que se basan en {sn} núcleos o menos (marcadas con †) o cuyo intervalo termina a menos de {nz} dex por debajo de cero. La última columna aplica la corrección por {m} tipos de medición: percentiles bootstrap / aproximación normal.",
   th_fw: "Corregido",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.es.ui, { nav_topics: "Más temas nucleares" });

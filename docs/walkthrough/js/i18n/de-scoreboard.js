@@ -105,3 +105,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "Siege, die auf {sn} oder weniger Kernen beruhen (mit † markiert), oder deren Intervall höchstens {nz} dex unter null endet. Die letzte Spalte wendet die Korrektur für {m} Arten von Messungen an: Bootstrap-Perzentile / Normalnäherung.",
   th_fw: "Korrigiert",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "Weitere Kernphysik-Themen" });

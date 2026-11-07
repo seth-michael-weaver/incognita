@@ -106,3 +106,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "依据 {sn} 个或更少原子核的胜项（标 †），或区间上端在零以下不足 {nz} dex 的胜项。最后一列为按 {m} 类测量校正后的结果：自助抽样百分位 / 正态近似。",
   th_fw: "校正后",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "更多核科学主题" });
