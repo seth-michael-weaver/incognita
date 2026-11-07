@@ -1196,11 +1196,12 @@ def binary_lean(inp, state):
     from types import SimpleNamespace
 
     from physics.hf.emission import emit_nx2 as E
-    from physics.hf.emission.binary import PARDIS, _pi
+    from physics.hf.emission.binary import PARDIS, _pi, sfaclocal_on
 
     kern = E._kernel()
     if kern is None or not E.enabled() or torch.is_grad_enabled():
         raise _Unsupported("binary kernel")
+    sfl = sfaclocal_on()
     tn = torch.from_numpy
     nj = inp.numj
     k0, lt = inp.k0, inp.ltarget
@@ -1214,6 +1215,8 @@ def binary_lean(inp, state):
         dd = inp.xsdirdisc_mb[t].numpy()
         sfglobal = state.get(g.zix, g.nix, nj).numpy()
         sfac = sfglobal[: nmax + 1].copy()
+        if sfl:  # TSPORT-SFACLOCAL, as binary.binary and emit_nx2.binary do; this path used to ignore the switch
+            sfac[:] = 0.0
         ppx = inp.preeqpopex_mb[t].numpy().copy()
         do_pe = inp.flagpreeq and nmax - nl > 0 and inp.pespinmodel <= 2
         if not E._binary_type_c(kern, pop, pex, dd, g, ppx, sfglobal, sfac, nl, nmax,
