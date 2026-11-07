@@ -67,6 +67,19 @@ def relerr(r):
     return sig(m, 3) if m is not None and not math.isnan(m) else None
 
 
+def shown_value(mean_b, decision, factor):
+    """The value the page shows for a cell. A fix-unit dataset (a compiled unit slip, e.g. B for mb) is labelled
+    "unit fixed" on the page, so it is shown with the curation's factor applied (the cell keeps the compiled value)."""
+    if decision == "fix-unit" and factor is not None and not math.isnan(factor) and mean_b is not None:
+        return mean_b * factor
+    return mean_b
+
+
+def n_use(points):
+    """Measured points the curation kept or down-weighted (index column n_use)."""
+    return sum(1 for p in points if p[5] in ("k", "d"))
+
+
 def main():
     for old in ("z", "n"):  # data/z/<Z>.json was the per-element layout before per-nuclide files
         shutil.rmtree(os.path.join(OUT, old), ignore_errors=True)
@@ -121,11 +134,15 @@ def main():
              else ("exfor_capture_Z26-92_trust_v2.parquet", "exfor_capture_Z1-25_trust_v2.parquet"))
     CELLS = (("exfor_cells.parquet", "exfor_cells_Z1-25.parquet") if v1
              else ("exfor_cells_Z26-92_v2.parquet", "exfor_cells_Z1-25_v2.parquet"))
-    meta = {}
+    meta, ufix = {}, {}
     for fn in TRUST:
-        for r in pq.read_table(os.path.join(CAP, fn), columns=["dataset_key", "first_author", "year", "facility"]).to_pylist():
+        tp = os.path.join(CAP, fn)
+        cols = ["dataset_key", "first_author", "year", "facility"]
+        cols += ["unit_fix_factor"] if "unit_fix_factor" in pq.read_schema(tp).names else []
+        for r in pq.read_table(tp, columns=cols).to_pylist():
             assert r["dataset_key"] not in meta, r["dataset_key"]
             meta[r["dataset_key"]] = (r["first_author"] or "", r["year"], r["facility"] or "")
+            ufix[r["dataset_key"]] = r.get("unit_fix_factor")
     meas = defaultdict(lambda: {"ds": [], "dsi": {}, "cap": [], "mxw": [], "other": defaultdict(int)})
     cells = [r for fn in CELLS for r in pq.read_table(os.path.join(CAP, fn)).to_pylist()]
     for r in cells:
@@ -139,7 +156,7 @@ def main():
             m["dsi"][key] = len(m["ds"])
             m["ds"].append([key, au, yr if yr is not None else r["year"], fac])
         i, kind = m["dsi"][key], r["kind"]
-        pt = [sig(r["e_lo_ev"], 5), sig(r["e_hi_ev"], 5), sig(r["mean_b"]), relerr(r), i, DEC.get(r["decision"], "k"), r["state"] or ""]
+        pt = [sig(r["e_lo_ev"], 5), sig(r["e_hi_ev"], 5), sig(shown_value(r["mean_b"], r["decision"], ufix.get(key))), relerr(r), i, DEC.get(r["decision"], "k"), r["state"] or ""]
         if kind in ("sig", "av"):
             m["cap"].append(pt)
         elif kind == "mxw":
@@ -181,7 +198,7 @@ def main():
         index.append([Z, A, n.get("tier", -1), n.get("macs30"), (n.get("macs") and n.get("macsU") and n["macsU"][KT.index(30)]),
                       len(m["cap"]) if m else 0, len(m["mxw"]) if m else 0, len(m["ds"]) if m else 0,
                       len(t.get("n2n", [])), len(t.get("np", [])), len(t.get("na", [])), 1 if n.get("valid") else 0,
-                      sum(1 for p in (m["cap"] + m["mxw"] if m else []) if p[5] != "x")])
+                      n_use(m["cap"] + m["mxw"]) if m else 0])
     for (Z, A), m in meas.items():
         if A == 0:  # natural element
             byz[Z]["nat"] = {"meas": {"ds": m["ds"], "cap": m["cap"], "mxw": m["mxw"], "other": dict(m["other"])}}
