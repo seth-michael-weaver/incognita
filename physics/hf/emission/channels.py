@@ -36,7 +36,6 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 
 import numpy as np
-from scipy.linalg import solve_triangular
 
 from physics.hf.emission.dumps import ChannelInputs
 from physics.hf.emission.feed_table import dense_feed
@@ -353,6 +352,9 @@ def exclusive_channels(inp: ChannelInputs, state: ExclusiveState | None = None) 
                         xe += xsexcl[idorg][1 : ratio.shape[0] + 1] @ ratio
                         ge += gamexcl[idorg][1 : ratio.shape[0] + 1] @ ratio
                     if ug is not None:
+                        # PERFSTART: scipy (~0.1 s of import) only for the photon-cascade solve
+                        from scipy.linalg import solve_triangular
+
                         A, U = tables.gamma_system(zix, nix, ug, nr)
                         xe = solve_triangular(A, xe, lower=False, unit_diagonal=True,
                                               check_finite=False)

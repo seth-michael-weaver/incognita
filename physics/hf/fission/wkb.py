@@ -121,6 +121,20 @@ def _parsed_blocks(path: str, fismodel: int) -> tuple:
     got = _PARSED.get((path, fismodel))
     if got is not None:
         return got
+    from physics.hf.structure import bincache
+
+    hit = bincache.load("hfbpath", path, (int(fismodel),))  # PERFSTART: the parsed rows from disk
+    if hit is not None:
+        out = []
+        for k, (ia, nbeta) in enumerate(hit["head"].tolist()):
+            r = hit[f"r{k}"]
+            if fismodel == 5:
+                parsed = tuple((float(a), float(b)) for a, b in r.tolist())
+            else:
+                parsed = tuple((float(a), float(b), float(c), int(d)) for a, b, c, d in r.tolist())
+            out.append((int(ia), int(nbeta), parsed))
+        got = _PARSED[(path, fismodel)] = tuple(out)
+        return got
     f32 = np.float32
     out = []
     for ia, nbeta, rows in _blocks(Path(path), fismodel):
@@ -135,6 +149,11 @@ def _parsed_blocks(path: str, fismodel: int) -> tuple:
             parsed = tuple(parsed)
         out.append((ia, nbeta, parsed))
     got = _PARSED[(path, fismodel)] = tuple(out)
+    ncol = 2 if fismodel == 5 else 4
+    arrays = {"head": np.array([(ia, nb) for ia, nb, _ in out], dtype=np.int64).reshape(-1, 2)}
+    for k, (_ia, _nb, parsed) in enumerate(out):
+        arrays[f"r{k}"] = np.array(parsed, dtype=np.float64).reshape(-1, ncol)
+    bincache.store("hfbpath", path, (int(fismodel),), arrays)
     return got
 
 
