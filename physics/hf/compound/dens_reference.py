@@ -62,7 +62,7 @@ from physics.hf.structure.masses import masses
 from physics.hf import stagetime
 from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
-NUMEN = int(__import__("os").environ.get("INCOGNITA_NUMEN", "250"))  # INCOGNITA_NUMEN (PECOLLAPSE): reference runs only
+NUMEN_DEFAULT = 250  # the reference runs' numen; INCOGNITA_NUMEN (PECOLLAPSE) overrides it, read per call (ENGFIX4)
 NUML = 60  # A0_talys_mod.f90 numl
 TRANSEPS = 1.0e-8  # input_numerics.f90:80
 
@@ -296,6 +296,7 @@ class _RunGrid:
     options: object
     params: object
     m: object
+    target_e: float = 0.0  # ENGFIX4: targetE = edis(parZ(k0), parN(k0), Ltarget), nuclides.f90:234
 
 
 @lru_cache(maxsize=32)
@@ -305,14 +306,21 @@ def run_grid(Zt: int, At: int, enincmax_mev: float) -> _RunGrid:
     TALYS: grid.f90:1 (grid)
     Test: A-grid
     """
+    from physics.hf.core.grids import gridtop_exits, numen
+    from physics.hf.structure.scalars import parinclude_of, target_energy_mev
+
     o, p, m = _structure_of(Zt, At)
     s0 = [float(m.s_mev[0, 0, t]) for t in range(7)]
+    te = target_energy_mev(Zt, At, o, m, p)  # ENGFIX4: 0 for a ground-state target
     eg, maxen = egrid_values(
-        emission_limit(enincmax_mev, s0[o.k0], 0.0, s_exits_mev=s0), o.segment, NUMEN, o.flagequispec, None)
+        emission_limit(enincmax_mev, s0[o.k0], te,
+                       s_exits_mev=gridtop_exits(s0, m.mass_amu, parinclude_of(o))),
+        o.segment, numen(NUMEN_DEFAULT), o.flagequispec,
+        float(enincmax_mev) if o.flagequispec else None)  # ENGFIX4: equispec needs enincmax
     cb = coulomb_barriers(o)
     ebegin, _ = charged_particle_begin(
         eg, maxen, At, {t: cb[t] for t in range(7)}, {t: False for t in range(7)})
-    return _RunGrid(eg, maxen, ebegin, s0, o, p, m)
+    return _RunGrid(eg, maxen, ebegin, s0, o, p, m, te)
 
 
 @lru_cache(maxsize=32)
@@ -549,7 +557,7 @@ def _eendmax(Zt: int, At: int, enincmax_mev: float) -> dict:
         float(rg.m.redumass_amu[c["parZ"][rg.options.k0], c["parN"][rg.options.k0],
                                 rg.options.k0]),
         rg.options.flagrel)
-    ecomp = total_energy(eninccm, rg.s0[rg.options.k0], 0.0)
+    ecomp = total_energy(eninccm, rg.s0[rg.options.k0], rg.target_e)
     eend, _ = emission_end(rg.egrid, rg.maxen, ecomp, {t: rg.s0[t] for t in range(7)},
                            rg.ebegin, {t: False for t in range(7)})
     return eend
@@ -804,7 +812,7 @@ def dens_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float) -> D
         float(rg.m.specmass[c["parZ"][inp.k0], c["parN"][inp.k0], inp.k0]),
         float(rg.m.redumass_amu[c["parZ"][inp.k0], c["parN"][inp.k0], inp.k0]),
         rg.options.flagrel)
-    ecomp = total_energy(eninccm, rg.s0[inp.k0], 0.0)
+    ecomp = total_energy(eninccm, rg.s0[inp.k0], rg.target_e)
     eend, _ = emission_end(rg.egrid, rg.maxen, ecomp, {t: rg.s0[t] for t in range(7)},
                            rg.ebegin, {t: False for t in range(7)})
     residuals, trans = {}, {}

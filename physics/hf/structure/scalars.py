@@ -162,6 +162,28 @@ def _parinclude(options) -> list[bool]:
     return [bool(options.flagfission), *[bool(x) for x in inc]]
 
 
+def parinclude_of(options) -> tuple[bool, ...]:
+    """`parinclude(0:6)`: the ejectile types 0..6 the run emits (`_parinclude` without fission)."""
+    return tuple(_parinclude(options)[1:])
+
+
+def target_energy_mev(Z: int, A: int, options, m, params) -> float:
+    """`targetE = edis(parZ(k0), parN(k0), Ltarget)`, the excitation energy of the target state
+    (nuclides.f90:234): 0 for a ground-state target (no level is read), else the energy of level
+    `Ltarget` of the target's discrete levels, as `structure_scalars.targete_mev`. TALYS adds it to
+    the grid top `Elimit` (grid.f90:123) and to `Etotal` (energies.f90:131).
+
+    TALYS: nuclides.f90:1 (nuclides)
+    Test: tests/hf/test_engfix4.py
+    """
+    lt = int(getattr(options, "Ltarget", 0))
+    if lt == 0:
+        return 0.0
+    from physics.hf.structure.levels import discrete_levels
+
+    return float(discrete_levels(Z, A, options, m, params).all_e_mev[lt])
+
+
 def _parskip(options) -> list[bool]:
     """`parskip(0:6)` = not `parinclude(type)`."""
     return [not x for x in _parinclude(options)[1:]]
