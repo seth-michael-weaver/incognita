@@ -29,6 +29,10 @@ CAPSET-v2.1 (2026-11-07, step S9 on top of the v2 result S8; S1-S8 are unchanged
   D10 slips    unit and energy slips found by the 2026-11-07 data hunt (hand lines, HAND21): fix-unit, exclude, or an
                energy-unit correction applied at staging (ENERGY_FIX; a line with "energy_fix" and no decision).
 
+CAPSET-v2.2 (2026-11-07, step S10 on top of the v2.1 result S9; S1-S9 are unchanged and reproduce v2.1):
+  D11 totals   thermal values compiled as (N,G) SIG that are the TOTAL cross section (capture + scattering) of the sample
+               (hand lines, HAND22, exclude; checked against the EXFOR record). Staging is the v2.1 staging.
+
 Steps (inside the research checkout --main, default ~/nucleus; nothing there is written):
   1. Stage three times from raw/exfor/entry_2026-10-14.zip with this repository's data/ingest/exfor.py: v1 behaviour
      (no fix), numfix only, all fixes. Capture predicate and 20 MeV clip of `python -m data.ingest.exfor --subset
@@ -59,7 +63,8 @@ EMAX = 20e6
 TAG = "exfor_capture_Z1-92_v2"
 DATE = "2026-11-06"
 DATE21 = "2026-11-07"
-VERSION = "2.1"
+VERSION = "2.2"
+DATE22 = "2026-11-07"
 REVIEWER_RULE = "rule:capset-v2"
 REVIEWER_HAND = "agent:claude-opus-5.5"
 COMBO_EXCLUDE = ("COMBO_SUM", "COMBO_DIFF", "COMBO_PROD")
@@ -138,6 +143,33 @@ HAND21 = [
                "entry 14248: KT-NRM 25 KEV; 204 +- 10 mb at kT = 30 is the W-186 30 keV MACS). The stored temperature is "
                "x1000 too small. Corrected at staging: kT x 1000 (EV -> KEV); values unchanged, decision left to the "
                "automatic layer."},
+]
+# CAPSET-v2.2 hand lines (2026-11-07 bug hunt round 6). D11: total cross sections compiled as capture.
+_CEL = ("Celenk, Demirel, Ozmen 1991 (J. Radioanal. Nucl. Chem. 148, 393, Table 5), EXFOR entry 22234: TITLE 'Measurement of "
+        "macroscopic and microscopic thermal neutron cross sections of V, Co, In, Dy and Au using neutron self absorption "
+        "properties'; ANALYSIS (subentry 001, common to every subentry): 'The gamma-photopeak areas as a function of foil "
+        "thickness were model fitted to yield the total thermal neutron macroscopic cross section, from which the microscopic "
+        "cross-section was calculated dividing the macroscopic cross section by the number of nuclei per cm3'. The six "
+        "values (002-007) are therefore total (removal) cross sections of the natural-element foils, compiled as (N,G) SIG "
+        "at EN-DUMMY 0.0253 eV with no uncertainty (ERR-ANALYS: 'No uncertainties on data are given'). ")
+HAND22 = [
+    {"entry": "22234", "subentry": f"22234{s}", "pointer": "", "decision": "exclude", "rule": "D11_TOTAL_XS",
+     "reason": _CEL + "Total cross section, not capture: " + why}
+    for s, why in (
+        ("002", "V-51 10.13 B = the V total at 2200 m/s (EXFOR (N,TOT) thermal median 10.5 b: capture about 5 b + "
+                "scattering about 5 b), twice the V-51 capture consensus of the set (5.1 b)."),
+        ("003", "Co-59 -> Co-60m 46.94 B exceeds the TOTAL Co-59 capture (about 37 b; set consensus 37.8 b), which a "
+                "partial cross section to the isomer cannot; it equals the Co total (capture + about 6 b scattering; "
+                "EXFOR (N,TOT) thermal median 46.0 b)."),
+        ("004", "Cu-63 11.24 B (natural Cu foils, 99.9999 %) is about the natural-Cu total (absorption 3.8 b + scattering "
+                "about 8 b), 2.6 x the Cu-63 capture consensus of the set (4.4 b)."),
+        ("005", "In-115 -> In-116m1+m2 191.78 B is about the natural-In total (absorption about 194 b + scattering about "
+                "2.6 b); the partial cross section to In-116m1+m2 is about 160-170 b."),
+        ("006", "Dy-164 -> Dy-165 (g, M+) 1056 B is the natural-Dy total (absorption about 994 b + scattering about 90 b), "
+                "not Dy-164 capture (about 2.7 kb; set consensus 2720 b)."),
+        ("007", "Au-197 107.55 B = the Au total at 2200 m/s (capture 98.7 b + scattering about 7.9 b), 9 % above the "
+                "capture standard."),
+    )
 ]
 ENERGY_FIX = {f"{h['entry']}/{h['subentry']}/{h['pointer']}": h["energy_fix"]["factor"] for h in HAND21 if "energy_fix" in h}
 
@@ -505,12 +537,11 @@ def main():
             l["decision"] = h["decision"]
         l.update({x: h[x] for x in ("factor", "superseded_by", "energy_fix") if x in h})
         l.update({"rule": h["rule"], "reason": f"CAPSET-v2.1 {h['rule'].split('_')[0]}: " + h["reason"],
-                  "reviewer": REVIEWER_HAND, "date": DATE21, "version": VERSION})
+                  "reviewer": REVIEWER_HAND, "date": DATE21, "version": "2.1"})
         lines21.append(l)
     hdr21 = hdr + ("# CAPSET-v2.1 (2026-11-07): the lines with \"version\": \"2.1\" (rules D9_DUPLICATE, D10_UNIT_SLIP,\n"
                    "# D10_ENERGY_UNIT) are applied after the v2 lines. A line with \"energy_fix\" and no decision is an energy-unit\n"
                    "# correction applied at staging (energy x factor); it is not passed to the decision reader.\n")
-    write_jsonl(OUT / "review_decisions_capture_v2.jsonl", lines + lines21, hdr21)
     hd21 = a.work / "final_human_v21.jsonl"
     write_jsonl(a.work / "v21_lines.jsonl", [l for l in lines21 if "decision" in l], "")
     hd21.write_text(hd.read_text(encoding="utf-8") + (a.work / "v21_lines.jsonl").read_text(encoding="utf-8"), encoding="utf-8")
@@ -523,11 +554,34 @@ def main():
     got = set(q.filter(pl.col("dataset_key").is_in(sorted(mine | mine21)))["dataset_key"].to_list())
     assert got == mine | mine21, f"CAPSET-v2.1 lines without a dataset: {sorted((mine | mine21) - got)[:10]}"
 
+    # S10: CAPSET-v2.2 = v2.1 + the D11 hand lines (same staging)
+    lines22 = []
+    for h in HAND22:
+        k = f"{h['entry']}/{h['subentry']}/{h['pointer']}"
+        assert k in keys21, f"CAPSET-v2.2 line without a dataset: {k}"
+        lines22.append({"entry": h["entry"], "subentry": h["subentry"], "pointer": h["pointer"], "decision": h["decision"],
+                        "rule": h["rule"], "reason": f"CAPSET-v2.2 {h['rule'].split('_')[0]}: " + h["reason"],
+                        "reviewer": REVIEWER_HAND, "date": DATE22, "version": VERSION})
+    hdr22 = hdr21 + ("# CAPSET-v2.2 (2026-11-07): the lines with \"version\": \"2.2\" (rule D11_TOTAL_XS: a total cross section\n"
+                     "# compiled as capture) are applied after the v2.1 lines.\n")
+    write_jsonl(OUT / "review_decisions_capture_v2.jsonl", lines + lines21 + lines22, hdr22)
+    write_jsonl(a.work / "v22_lines.jsonl", lines22, "")
+    hd22 = a.work / "final_human_v22.jsonl"
+    hd22.write_text(hd21.read_text(encoding="utf-8") + (a.work / "v22_lines.jsonl").read_text(encoding="utf-8"), encoding="utf-8")
+    r21 = r3
+    r3, p3 = run_qm(stg21, a.work, hd22, kk(lines + lines21 + lines22), peelle21, "q_v22")
+    q = r3.quality
+    lad["S10_v22"] = q.select("dataset_key", "target_z", "decision", "trust")
+    mine22 = {f"{l['entry']}/{l['subentry']}/{l['pointer']}" for l in lines22}
+    got = set(q.filter(pl.col("dataset_key").is_in(sorted(mine | mine21 | mine22)))["dataset_key"].to_list())
+    assert got == mine | mine21 | mine22, f"CAPSET-v2.2 lines without a dataset: {sorted((mine | mine21 | mine22) - got)[:10]}"
+
     # 3. tables with the shipped schemas
     from data.curate.discrepancy import cells_from_parquet, split_group_key
     ship_t = pl.read_parquet(INP / "exfor_capture_Z26-92_trust.parquet")
     ship_c = pl.read_parquet(INP / "exfor_cells.parquet")
     q = q.select(ship_t.columns).cast(ship_t.schema)
+    q21 = r21.quality.select(ship_t.columns).cast(ship_t.schema)
     cells = cells_from_parquet(stg21, verbose=False)
     parts = [split_group_key(k) for k in cells["group_key"].to_list()]
     cells = cells.with_columns(
@@ -545,11 +599,12 @@ def main():
     q8 = r2.quality.select(ship_t.columns).cast(ship_t.schema)
     cells8 = cells_from_parquet(stg, verbose=False).select("dataset_key").join(q8.select("dataset_key", "decision"),
                                                                                 on="dataset_key", how="left")
+    cells21 = cells.select("dataset_key").join(q21.select("dataset_key", "decision"), on="dataset_key", how="left")
     counts = report(a, i_v1, i_nf, i_v2, chk, lines, audit, q, cells.drop("target_z"), lad, pstats, p3, r3, i_v21, lines21,
-                    q8, cells8)
+                    q8, cells8, lines22, q21, cells21)
     (OUT / "counts_v2.json").write_text(json.dumps(counts, indent=1, default=str) + "\n")
     prov = {
-        "product": "CAPSET-v2.1 curated EXFOR capture set, Z 1-92 (data/curation/capture_v2)",
+        "product": "CAPSET-v2.2 curated EXFOR capture set, Z 1-92 (data/curation/capture_v2)",
         "version": VERSION,
         "built": time.strftime("%Y-%m-%d %H:%M"),
         "script": "scripts/build_capture_v2.py",
@@ -558,7 +613,8 @@ def main():
         "research_commit": subprocess.run(["git", "-C", str(a.main), "log", "-1", "--format=%H"], capture_output=True, text=True).stdout.strip(),
         "curation_code": "research data/curate/quality_model.py + review_log.py (unchanged) with this repository's "
                          "data/curate/discrepancy.py (unchanged) and data/ingest/exfor.py (V2_FIXES = all six for S1-S8; "
-                         "V21_ALL = the six + encm, and the ENERGY_FIX of the D10 lines, for the v2.1 tables)",
+                         "V21_ALL = the six + encm, and the ENERGY_FIX of the D10 lines, for the v2.1 and v2.2 tables; v2.2 = v2.1 + "
+                         "the D11 lines on the same staging)",
         "entry_zip": {"path": f"raw/exfor/{ZIPNAME}", "sha256": sha(a.main / "raw" / "exfor" / ZIPNAME), "exfor_version": i_v2["exfor_version"]},
         "staging_v2": {"sha256": sha(stg), "rows": counts["staging"]["v2"], "where": "work directory, not shipped (rebuilt by this script)"},
         "staging_v21": {"sha256": sha(stg21), "rows": counts["staging"]["v21"], "fixes": sorted(X.V21_ALL),
@@ -566,7 +622,7 @@ def main():
         "human_decision_files": {"research data/curate/review_decisions.jsonl": sha(qm.HUMAN_DECISIONS),
                                  "data/curation/inputs/review_decisions_Z1-25.jsonl": sha(light_review),
                                  "data/curation/capture_v2/review_decisions_capture_v2.jsonl": sha(OUT / "review_decisions_capture_v2.jsonl")},
-        "fit": {"left_out_of_consensus_fit": len(kk(lines + lines21)), "peelle_rebased_datasets": len(peelle21),
+        "fit": {"left_out_of_consensus_fit": len(kk(lines + lines21 + lines22)), "peelle_rebased_datasets": len(peelle21),
                 "peelle_final": p3, "peelle_clip": PEELLE_CLIP, "summary": {k: r3.summary.get(k) for k in ("fit", "n_cells", "n_datasets")}},
         "gates": {k: v.get("pass") for k, v in r3.gates.items()},
         "research_staging_check": {k: v for k, v in chk.items() if not isinstance(v, list)},
@@ -579,13 +635,18 @@ def main():
     print(json.dumps({k: counts[k] for k in ("summary", "ladder")}, indent=1, default=str))
 
 
-def changed_count(cur, prev) -> int:
+def changed_mask(cur, prev):
     """Datasets whose decision differs between two ladder steps: a different decision, or present in one step only.
     Absent in both (null == null) is not a change (polars' null != null is null, and null | False stays null)."""
-    return int(((cur != prev).fill_null(False) | (cur.is_null() != prev.is_null())).sum())
+    return (cur != prev).fill_null(False) | (cur.is_null() != prev.is_null())
 
 
-def report(a, i_v1, i_nf, i_v2, chk, lines, audit, q, cells, lad, pstats, p2, r2, i_v21, lines21, q8, cells8) -> dict:
+def changed_count(cur, prev) -> int:
+    return int(changed_mask(cur, prev).sum())
+
+
+def report(a, i_v1, i_nf, i_v2, chk, lines, audit, q, cells, lad, pstats, p2, r2, i_v21, lines21, q8, cells8,
+           lines22, q21, cells21) -> dict:
     """Before/after counts per defect, the decision ladder (ladder_v2.csv) and the change table (changes_v1_v2.csv)."""
     import polars as pl
     w = a.work
@@ -626,16 +687,20 @@ def report(a, i_v1, i_nf, i_v2, chk, lines, audit, q, cells, lad, pstats, p2, r2
           for l in lines if l["rule"] == "D6_HAND_SLIP"}
     # CAPSET-v2.1
     s8 = dict(zip(lad["S8_prelm_final"]["dataset_key"].to_list(), lad["S8_prelm_final"]["decision"].to_list()))
+    s9 = dict(zip(lad["S9_v21"]["dataset_key"].to_list(), lad["S9_v21"]["decision"].to_list()))
     cm = {k for k in s21 if k.split("/", 1)[1] in set(i_v21["v2_log"].get("encm", []))}
     D8 = {"datasets": len(cm), "points": pts(s21, cm), "by_Z": zsplit(cm, s21),
           "points_by_Z": {"Z26-92": pts(s21, {k for k in cm if s21[k][0] >= 26}), "Z1-25": pts(s21, {k for k in cm if s21[k][0] <= 25})},
-          "decisions_v21": dict(collections.Counter(final.get(k) for k in cm)),
-          "decision_changed_v2_to_v21": sorted(k for k in cm if s8.get(k) != final.get(k)),
+          "decisions_v21": dict(collections.Counter(s9.get(k) for k in cm)),
+          "decision_changed_v2_to_v21": sorted(k for k in cm if s8.get(k) != s9.get(k)),
           "keys": sorted(cm)}
     D9_10 = {f"{l['entry']}/{l['subentry']}/{l['pointer']}": {"rule": l["rule"], "line": l.get("decision") or "energy_fix",
                                                                "v2": s8.get(f"{l['entry']}/{l['subentry']}/{l['pointer']}"),
-                                                               "v21": final.get(f"{l['entry']}/{l['subentry']}/{l['pointer']}")}
+                                                               "v21": s9.get(f"{l['entry']}/{l['subentry']}/{l['pointer']}"),
+                                                               "v22": final.get(f"{l['entry']}/{l['subentry']}/{l['pointer']}")}
              for l in lines21}
+    k22 = {f"{l['entry']}/{l['subentry']}/{l['pointer']}" for l in lines22}
+    D11 = {"lines": {k: {"rule": "D11_TOTAL_XS", "line": "exclude", "v21": s9.get(k), "v22": final.get(k)} for k in sorted(k22)}}
     # v1 shipped vs v2
     real = lambda t: t.filter(~pl.col("dataset_key").str.starts_with("STD2017"))
     v1t = pl.concat([pl.read_parquet(INP / "exfor_capture_Z26-92_trust.parquet"), pl.read_parquet(INP / "exfor_capture_Z1-25_trust.parquet")])
@@ -664,11 +729,21 @@ def report(a, i_v1, i_nf, i_v2, chk, lines, audit, q, cells, lad, pstats, p2, r2
     trans = {}
     for lab, lo, hi in (("Z26-92", 26, 200), ("Z1-25", 1, 25)):
         x = lt.filter(pl.col("target_z").is_between(lo, hi))
-        trans[lab] = {f"{r['S0_shipped_v1']}->{r['S9_v21']}": r["len"]
-                      for r in x.group_by("S0_shipped_v1", "S9_v21").len().sort("len", descending=True).iter_rows(named=True)}
+        trans[lab] = {f"{r['S0_shipped_v1']}->{r['S10_v22']}": r["len"]
+                      for r in x.group_by("S0_shipped_v1", "S10_v22").len().sort("len", descending=True).iter_rows(named=True)}
         trans[lab + "_v2_to_v21"] = {f"{r['S8_prelm_final']}->{r['S9_v21']}": r["len"]
                                      for r in x.filter(pl.col("S8_prelm_final") != pl.col("S9_v21"))
                                      .group_by("S8_prelm_final", "S9_v21").len().sort("len", descending=True).iter_rows(named=True)}
+        ch = x.filter(changed_mask(x["S10_v22"], x["S9_v21"]))
+        trans[lab + "_v21_to_v22"] = {f"{r['S9_v21']}->{r['S10_v22']}": r["len"]
+                                      for r in ch.group_by("S9_v21", "S10_v22").len().sort("len", descending=True).iter_rows(named=True)}
+        auto = ch.filter(~pl.col("dataset_key").is_in(sorted(k22)))
+        D11[lab] = {"changed_v21_to_v22": ch.height,
+                    "by_review_lines": ch.height - auto.height,
+                    "by_automatic_relearning": auto.height,
+                    "relearning_transitions": {f"{r['S9_v21']}->{r['S10_v22']}": r["len"] for r in
+                                               auto.group_by("S9_v21", "S10_v22").len().sort("len", descending=True)
+                                               .iter_rows(named=True)}}
 
     def side(t, c, lo, hi):
         t = real(t).filter(pl.col("target_z").is_between(lo, hi))
@@ -676,11 +751,12 @@ def report(a, i_v1, i_nf, i_v2, chk, lines, audit, q, cells, lad, pstats, p2, r2
         return {"datasets": t.height, "points": int(t["n_points"].sum()), "cells": c.height,
                 "decisions": dict(sorted(collections.Counter(t["decision"].to_list()).items())),
                 "cells_by_decision": dict(sorted(collections.Counter(c["decision"].to_list()).items()))}
-    summ = {lab: {"v1": side(v1t, v1c, lo, hi), "v2": side(q8, cells8, lo, hi), "v2.1": side(q, cells, lo, hi)}
+    summ = {lab: {"v1": side(v1t, v1c, lo, hi), "v2": side(q8, cells8, lo, hi), "v2.1": side(q21, cells21, lo, hi),
+                  "v2.2": side(q, cells, lo, hi)}
             for lab, lo, hi in (("Z26-92", 26, 200), ("Z1-25", 1, 25))}
     return {"version": VERSION, "summary": summ, "ladder": ladder, "transitions_v1_to_v2": trans, "D1_numfix": D1,
             "D2_parser": D2, "D3_sums": D3, "D4_uncertainty": D4, "D5_duplicates": D5, "D6_slips": D6,
-            "D8_centre_of_mass_energy": D8, "D9_D10_v21_lines": D9_10,
+            "D8_centre_of_mass_energy": D8, "D9_D10_v21_lines": D9_10, "D11_v22_lines": D11,
             "D7_version": {"v1_parser_staged": i_v1["exfor_version"], "v2_staged": i_v2["exfor_version"]},
             "staging": {"v1_mode": len(s1), "numfix_only": len(sn), "v2": len(s2), "v21": len(s21)}, "research_staging_check": chk,
             "gates_final": {k: v.get("pass") for k, v in r2.gates.items()}, "peelle_by_step": pstats,

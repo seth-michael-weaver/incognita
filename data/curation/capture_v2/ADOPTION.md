@@ -1,5 +1,17 @@
 # Adopting capture set v2
 
+**v2.2 (2026-11-07).** The files here are now v2.2 (README section "v2.2"): v2.1 plus 6 agent-checked lines (rule
+D11_TOTAL_XS) excluding the Celenk 1991 thermal values (EXFOR 22234002-007: V-51, Co-59, Cu-63, In-115, Dy-164,
+Au-197), which are total cross sections of the foils, not capture. 116 decisions move from v2.1: 6 by the lines and 110
+keep <-> downweight by the automatic layer's re-learning (none to or from exclude). v2.1 is rebuilt by the same script
+(ladder step S9). A card that pinned v2 or v2.1 by its `SHA256SUMS` lines keeps what it pinned; the v2.1 tables are in
+git history (commit 3fe96822).
+Website (`scripts/build_site_data.py`, regenerated on v2.2): 59 of the 6 244 nuclide files and `index.json` change
+(marks keep <-> downweight of the re-learned datasets, the six Celenk points now drawn as excluded where the page shows
+them; the Co-59 -> Co-60m partial is not drawn). Index: only `n_use` changes, for 4 nuclides (V-51 112 -> 111, Cu-63
+145 -> 144, In-115 143 -> 142, Au-197 934 -> 933); tier, MACS 30 keV and its uncertainty are identical for all 6 183
+nuclides, and no nucleus changes its measured / not measured label.
+
 **v2.1 (2026-11-07).** The files here are now v2.1 (README section "v2.1"): 15 agent-checked lines (12 duplicate
 excludes, Mo-95 fix-unit, Te-120 exclude, W-186 kT EV -> KEV) and centre-of-mass energies converted to lab (11 datasets).
 A card adopting the capture set names v2 or v2.1 by the `SHA256SUMS` lines it pins; v2 is rebuilt by the same script

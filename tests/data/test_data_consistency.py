@@ -1,7 +1,7 @@
 """Consistency checks over every nuclide of INCOGNITA's data products.
 
 Covers: library/v0.2.3 (curves, MACS, rates, below-1-keV joins, grid-dependent list, checksums), the curated capture
-set v2.1 (data/curation/capture_v2: keys, units, energies, duplicates, v2.1 review lines), the light
+set v2.2 (data/curation/capture_v2: keys, units, energies, duplicates, v2.1 and v2.2 review lines), the light
 threshold rows (review lines), the site data (docs/walkthrough/data: index.json
 against the per-nuclide files and the library) and the C-12 R-matrix evaluation (data/light_evals/C12RM9.json).
 
@@ -293,6 +293,21 @@ def test_curation_v21_lines_applied():
                 assert tr[k]["unit_fix_factor"] == l["factor"], k
         if l.get("superseded_by"):
             assert tr[l["superseded_by"]]["decision"] != "exclude", l["superseded_by"]
+
+
+def test_curation_v22_total_cross_sections_excluded():
+    """CAPSET-v2.2 D11: Celenk 1991 (EXFOR 22234002-007) are total thermal cross sections of the foils compiled as
+    (N,G); every subentry has an exclude line and is excluded in the v2.2 tables, and no cell of them is used."""
+    lines = [l for l in _review_lines(CAP / "review_decisions_capture_v2.jsonl") if l.get("version") == "2.2"]
+    keys = {f"{l['entry']}/{l['subentry']}/{l['pointer']}" for l in lines}
+    assert keys == {f"22234/22234{i:03d}/" for i in range(2, 8)}, sorted(keys)
+    tr = trust()
+    for l in lines:
+        k = f"{l['entry']}/{l['subentry']}/{l['pointer']}"
+        assert l["decision"] == "exclude" and l["rule"] == "D11_TOTAL_XS" and "total" in l["reason"], k
+        assert tr[k]["decision"] == "exclude", (k, tr[k]["decision"])
+    assert not [c for c in cells() if c["dataset_key"] in keys and c["decision"] != "exclude"]
+    assert json.loads((CAP / "provenance.json").read_text())["version"] == "2.2"
 
 
 def _identical_used_pairs(min_cells=2):
