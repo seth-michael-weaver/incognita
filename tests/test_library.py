@@ -1,6 +1,7 @@
 import hashlib
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from incognita import library as L
@@ -64,3 +65,18 @@ def test_v021_cm_macs_and_unchanged_curves():
         ls = np.where(el < e[0], np.log(sb[0]) + 0.5 * np.log(e[0] / el), np.interp(np.log(el), np.log(e), np.log(sb)))
         m = 2 / np.sqrt(np.pi) * np.trapezoid(np.exp(ls) * g * g * np.exp(-g / kt), np.log(g)) / kt ** 2 * 1e3
         assert r.macs30_mb == pytest.approx(m, rel=1e-6)
+
+
+def test_v022_engine_below_1kev_and_reduced_mass():
+    """v0.2.2: the engine's own capture below 1 keV joins the v0.2 curve; rates use mu = m_n M / (m_n + M)."""
+    t3, t2 = L.load_capture(version="v0.2.2"), L.load_capture(version="v0.2")
+    assert list(t3.nuclide_id) == list(t2.nuclide_id) and (t3.tier.values == t2.tier.values).all()
+    diff = [n for n, a, b in zip(t3.nuclide_id, t3.sigma_b, t2.sigma_b) if not np.array_equal(np.asarray(a), np.asarray(b))]
+    assert set(diff) == set(t3.nuclide_id[t3.tier == "ANCHORED"])
+    r = t3[t3.nuclide_id == "Z079N118M0"].iloc[0]
+    assert r.below1keV_source.startswith("engine") and len(r.sigma_below1keV_b) == 15
+    el, sl = np.asarray(r.energy_below1keV_ev, float), np.asarray(r.sigma_below1keV_b, float)
+    assert el[0] == pytest.approx(2.0) and (np.diff(sl) < 0).all() and sl[-1] > np.asarray(r.sigma_b)[0]
+    rt = pd.read_csv(L.LIBRARY.parent / "v0.2.2" / "rates_v022.csv").set_index("nuclide_id")
+    m = rt.loc["Z079N118M0"]
+    assert m.reduced_mass_u == pytest.approx(1.00866491590 * m.target_mass_u / (1.00866491590 + m.target_mass_u), rel=1e-12)

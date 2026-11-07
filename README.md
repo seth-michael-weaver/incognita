@@ -27,9 +27,10 @@ benchmark and a registry of predictions made before the data.**
   2026-10-23 for measurements not yet published, with a fixed scoring rule; 16 of the targets are blind and decide the
   headline verdict.
 - **Engine:** release tag [`engine-2026-10-22`](https://github.com/seth-michael-weaver/incognita/tree/engine-2026-10-22).
-- **Library:** [`library/v0.2.1/`](library/v0.2.1/) is the latest version: v0.2, built with the scored engine, with its
-  Maxwellian averages and rates corrected to the centre-of-mass definition (what changed:
-  [`CHANGELOG.md`](library/v0.2.1/CHANGELOG.md)); [`library/v0.2/`](library/v0.2/) and [`library/v0.1/`](library/v0.1/) stay available unchanged.
+- **Library:** [`library/v0.2.2/`](library/v0.2.2/) is the latest version: v0.2, built with the scored engine, with its
+  Maxwellian averages and rates in the centre-of-mass definition, the engine's own capture below 1 keV and the correct
+  reduced mass (what changed: [`CHANGELOG.md`](library/v0.2.2/CHANGELOG.md)); [`library/v0.2.1/`](library/v0.2.1/),
+  [`library/v0.2/`](library/v0.2/) and [`library/v0.1/`](library/v0.1/) stay available unchanged.
 - **Citing:** [`CITATION.cff`](CITATION.cff) (see [Citing](#citing)).
 
 ## What is this
@@ -68,7 +69,7 @@ Running the engine itself needs the TALYS structure database: see [Running the e
 
 | path | content |
 |---|---|
-| [`library/v0.2.1/`](library/v0.2.1/), [`library/v0.2/`](library/v0.2/), [`library/v0.1/`](library/v0.1/) | the predictions (CC-BY-4.0): v0.2.1 latest, v0.2 and v0.1 kept unchanged |
+| [`library/v0.2.2/`](library/v0.2.2/), [`library/v0.2.1/`](library/v0.2.1/), [`library/v0.2/`](library/v0.2/), [`library/v0.1/`](library/v0.1/) | the predictions (CC-BY-4.0): v0.2.2 latest, v0.2.1, v0.2 and v0.1 kept unchanged |
 | [`incognita/`](incognita/) | library reader, benchmark scorer and tracks, calibration and curation tools |
 | [`physics/`](physics/) | the Hauser–Feshbach engine |
 | [`scripts/`](scripts/) | `reproduce.sh`, scorers, engine driver, native-kernel builds |

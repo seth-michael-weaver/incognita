@@ -7,7 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · Daten-Explorer",
   dx_h1: "Alle Nuklide",
   dx_lede: "Die von der Engine vorhergesagten Neutronenwirkungsquerschnitte für jedes Nuklid der Bibliothek, neben den kuratierten Messungen jedes Nuklids. Wähl ein Nuklid auf der Karte oder such danach.",
-  dx_lede_ver: "Die Kurven sind die Bibliothek v0.2.1 (November 2026), erstellt mit derselben Engine-Version, die die Rangliste bewertet (der Engine vom 22. Oktober 2026). Sie sind nicht TERRA, das Datenprodukt der Rangliste, das an Messungen angepasst ist. Jede Kurve ist die eigene Vorhersage der Engine: Keine wurde an die daneben gezeigten Messungen angepasst; nur bei einem als verankert markierten Nuklid ist die Kurve mit einem einzigen Faktor skaliert, sodass ihr stellarer Mittelwert bei 30 keV dem gemessenen Wert entspricht. Die allgemeinen Einstellungen der Engine wurden einmal für alle Nuklide anhand vieler Messungen gewählt (auch dieser), daher ist eine Übereinstimmung bei einem gemessenen Nuklid eine faire Prüfung des Modells, wenn auch keine völlig unabhängige. Die meisten Nuklide wurden nie gemessen (extrapoliert), und ihre Bänder sind breit.",
+  dx_lede_ver: "Die Kurven sind die Bibliothek v0.2.2 (November 2026), erstellt mit derselben Engine-Version, die die Rangliste bewertet (der Engine vom 22. Oktober 2026). Sie sind nicht TERRA, das Datenprodukt der Rangliste, das an Messungen angepasst ist. Jede Kurve ist die eigene Vorhersage der Engine: Keine wurde an die daneben gezeigten Messungen angepasst; nur bei einem als verankert markierten Nuklid ist die Kurve mit einem einzigen Faktor skaliert, sodass ihr stellarer Mittelwert bei 30 keV dem gemessenen Wert entspricht. Die allgemeinen Einstellungen der Engine wurden einmal für alle Nuklide anhand vieler Messungen gewählt (auch dieser), daher ist eine Übereinstimmung bei einem gemessenen Nuklid eine faire Prüfung des Modells, wenn auch keine völlig unabhängige. Die meisten Nuklide wurden nie gemessen (extrapoliert), und ihre Bänder sind breit.",
   dx_controls: "Steuerung der Karte", dx_search_label: "Nuklid suchen", dx_search_ph: "Suche: U-235, Fe56, Au…",
   dx_colour: "Karte einfärben nach", dx_m_tier: "Wie es bekannt ist", dx_m_macs: "Einfang bei 30 keV", dx_m_meas: "Messdaten",
   dx_chart_h: "Nuklidkarte",
@@ -21,7 +21,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "Die Engine INCOGNITA ist eine Portierung von <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) und nutzt die Kernstrukturdatenbank von TALYS. Was INCOGNITA hinzufügt, ist <a href=\"./?lang=de#code\" data-keep-lang>am Ende der Lehrseite Schalter für Schalter aufgelistet</a>.",
   dx_repo_p2: "Um die Engine selbst laufen zu lassen, braucht man außerdem die Strukturdatenbank von TALYS; die README erklärt, wie man sie herunterlädt.",
   dx_repo_link: "seth-michael-weaver/incognita auf GitHub →",
-  dx_src: "Quellen: Vorhersagen aus der Bibliothek v0.2.1 (<code>library/v0.2.1</code>); Einfangmessungen aus EXFOR, kuratiert in <code>data/curation</code>; Messungen zu (n,2n), (n,p) und (n,α) aus den Benchmark-Zeilen in <code>incognita/bench</code> (unter Z 26: EXFOR-Zeilen nach denselben Regeln, <code>data/curation/inputs</code>). Von der Kuratierung ausgeschlossene Messungen sind verborgen, solange du sie nicht anforderst. Die optionale gestrichelte Überlagerung evaluierter Bibliotheken (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) erzeugt <code>scripts/build_site_overlay.py</code> nur zur Anzeige; INCOGNITA liest sie nie.",
+  dx_src: "Quellen: Vorhersagen aus der Bibliothek v0.2.2 (<code>library/v0.2.2</code>); Einfangmessungen aus EXFOR, kuratiert in <code>data/curation</code>; Messungen zu (n,2n), (n,p) und (n,α) aus den Benchmark-Zeilen in <code>incognita/bench</code> (unter Z 26: EXFOR-Zeilen nach denselben Regeln, <code>data/curation/inputs</code>). Von der Kuratierung ausgeschlossene Messungen sind verborgen, solange du sie nicht anforderst. Die optionale gestrichelte Überlagerung evaluierter Bibliotheken (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) erzeugt <code>scripts/build_site_overlay.py</code> nur zur Anzeige; INCOGNITA liest sie nie.",
   dx_t0: "Gemessen", dx_t1: "An einem gemessenen MACS verankert", dx_t2: "Interpoliert (nahe an gemessenen Nukliden)", dx_t3: "Extrapoliert",
   dx_ts0: "gemessen", dx_ts1: "verankert", dx_ts2: "interpoliert", dx_ts3: "extrapoliert",
   dx_keep: "behalten", dx_down: "heruntergewichtet", dx_excl: "ausgeschlossen", dx_fix: "Einheit korrigiert",
@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   dx_capsets: "Einfang-Datensätze", dx_measured: "Gemessen",
   dx_outside: "außerhalb des validierten Bereichs (Z 26–83)", dx_flag: "aufgelöste Resonanzen reichen ins MACS-Fenster: lieber einen gemessenen MACS verwenden",
   dx_nocurve: "keine Bibliothekskurve für diesen Eintrag; die Messungen stammen von",
-  dx_xE: "Neutronenenergie", dx_pred: "Vorhersage (Bibliothek v0.2.1)",
+  dx_xE: "Neutronenenergie", dx_pred: "Vorhersage (Bibliothek v0.2.2)",
   dx_res: "aufgelöste Resonanzen: die Kurve ist hier ein Mittelwert",
   dx_empty: "Für diese Reaktion gibt es nichts anzuzeigen.", dx_bands: "Bänder: 68 % und 95 %", dx_band68: "Band: 68 %",
   dx_meas_pts: "gemessen", dx_table_hint: "Nutze „Als Tabelle zeigen“ für die Werte.", dx_ds_h: "Messungen", dx_pts: "Pkt.",
@@ -45,7 +45,7 @@ Object.assign(WT.L.ui, {
 Object.assign(WT.L.ui, {
   dx_dl: "Dieses Nuklid herunterladen:",
   dx_dl_note: "Jede Kurve und jeder Messpunkt zu diesem Nuklid, alle Reaktionen, mit Einheiten, Quellen und EXFOR-Kennungen in der Datei.",
-  dx_access: "<b>Datenzugang.</b> Alles, was hier gezeigt wird, liegt im Repository unter <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2.1\"><code>library/v0.2.1</code></a>: Einfangkurven mit 68-/95-%-Bändern (<code>capture_v021.parquet</code>), Maxwell-Mittelwerte (<code>macs30_v021.csv</code>, <code>macs_kt_v021.csv</code>), stellare Raten (<code>rates_v021.csv</code>, <code>reaclib_v021.dat</code>) und die Kanäle (n,2n), (n,p), (n,α) (<code>channels_v021.parquet</code>, <code>grid_np_v021.parquet</code>), geprüft über <code>SHA256SUMS</code>. Für ein einzelnes Nuklid reichen die CSV- und JSON-Downloads oben. Die kuratierten Messungen liegen in <code>data/curation</code>; sie stammen aus EXFOR (Nuclear Data Section der IAEA) und behalten ihre EXFOR-Kennungen. Die Bibliotheksdaten stehen unter CC-BY-4.0. Die frühere Version v0.1 bleibt in <code>library/v0.1</code>; <code>CHANGELOG.md</code> in <code>library/v0.2.1</code> beschreibt, was sich geändert hat.",
+  dx_access: "<b>Datenzugang.</b> Alles, was hier gezeigt wird, liegt im Repository unter <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2.2\"><code>library/v0.2.2</code></a>: Einfangkurven mit 68-/95-%-Bändern (<code>capture_v022.parquet</code>), Maxwell-Mittelwerte (<code>macs30_v022.csv</code>, <code>macs_kt_v022.csv</code>), stellare Raten (<code>rates_v022.csv</code>, <code>reaclib_v022.dat</code>) und die Kanäle (n,2n), (n,p), (n,α) (<code>channels_v022.parquet</code>, <code>grid_np_v022.parquet</code>), geprüft über <code>SHA256SUMS</code>. Für ein einzelnes Nuklid reichen die CSV- und JSON-Downloads oben. Die kuratierten Messungen liegen in <code>data/curation</code>; sie stammen aus EXFOR (Nuclear Data Section der IAEA) und behalten ihre EXFOR-Kennungen. Die Bibliotheksdaten stehen unter CC-BY-4.0. Die frühere Version v0.1 bleibt in <code>library/v0.1</code>; <code>CHANGELOG.md</code> in <code>library/v0.2.2</code> beschreibt, was sich geändert hat.",
 });
 Object.assign(WT.L.ui, {
   dx_lib: "Evaluierte Bibliotheken überlagern (nur zum Vergleich — INCOGNITA nutzt sie nicht)",
@@ -56,7 +56,7 @@ Object.assign(WT.L.ui, {
   dx_lib_held: "JENDL-5 kommt hinzu, sobald seine Bedingungen für die Weitergabe abgeleiteter Tabellen bestätigt sind.",
 });
 
-/* library v0.2.1: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
+/* library v0.2.2: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
 Object.assign(WT.L.ui, {
   dx_mf_pe_lo: "Unsichere Modellwahl: Diese Engine lässt bei allen Energien ein Teilchen entweichen, bevor sich der Kern beruhigt hat (Präequilibrium-Emission), TALYS dagegen erst oberhalb von etwa 1 MeV; die TALYS-Wahl ergibt bei 30 keV etwa {n}-mal weniger Einfang, und das 95-%-Band unterhalb von 1 MeV deckt beide ab.",
   dx_mf_pe_hi: "Unsichere Modellwahl: Diese Engine lässt bei allen Energien ein Teilchen entweichen, bevor sich der Kern beruhigt hat (Präequilibrium-Emission), TALYS dagegen erst oberhalb von etwa 1 MeV; die TALYS-Wahl ergibt bei 30 keV etwa {n}-mal mehr Einfang, und das 95-%-Band unterhalb von 1 MeV deckt beide ab.",

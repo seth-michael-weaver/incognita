@@ -1,6 +1,6 @@
 /* Data explorer (data.html): a chart of nuclides coloured by how each is known, and for any nuclide the library's
  * predicted curves (with 68 / 95 % bands) beside every curated measurement. Data: data/index.json and data/n/<Z>/<A>.json,
- * built by scripts/build_site_data.py from library/v0.2.1, data/curation and incognita/bench. Plain script, no build. */
+ * built by scripts/build_site_data.py from library/v0.2.2, data/curation and incognita/bench. Plain script, no build. */
 (function () {
   "use strict";
   const es = WT.tl, T = (k, en) => WT.ui(k, en);
@@ -27,11 +27,11 @@
   const decE = (k) => (k >= -2 ? fmtE(10 ** k) : pow10(k) + " eV"), decY = (k, u) => (k >= -2 && k <= 4 ? num(10 ** k) : pow10(k)) + " " + u;
   const TIERS = [T("dx_t0", "Measured"), T("dx_t1", "Anchored to a measured MACS"), T("dx_t2", "Interpolated (near measured nuclides)"), T("dx_t3", "Extrapolated"), T("dx_t4", "Not measured (Z < 26)"), T("dx_t5", "Measured (library tier not updated)"), T("dx_t6", "Measured (Z < 26)")];
   const TIER_SHORT = [T("dx_ts0", "measured"), T("dx_ts1", "anchored"), T("dx_ts2", "interpolated"), T("dx_ts3", "extrapolated"), T("dx_ts4", "not measured"), T("dx_ts5", "measured"), T("dx_ts6", "measured")];
-  // shown tier: the library v0.2.1 tier, except where it would mislead. A nucleus the library calls EXTRAPOLATED but with
+  // shown tier: the library v0.2.2 tier, except where it would mislead. A nucleus the library calls EXTRAPOLATED but with
   // curated capture data that the curation did not exclude (tier kept from v0.1): 5; excluded-only data does not count. Below Z 26 the library assigns no real tier (all EXTRAPOLATED, its
   // curated capture set started at Z 26), so the page uses the light-nucleus curation (data/curation/capture_v2/*Z1-25*, same
   // WP-12 curation as Z 26-92): 6 if the nucleus has a curated capture cell that the curation did not exclude (index
-  // column n_use), else 4 (not measured); also for H..N (Z 1-7), which have measurements but no library v0.2.1 curve (index
+  // column n_use), else 4 (not measured); also for H..N (Z 1-7), which have measurements but no library v0.2.2 curve (index
   // tier -1). The library's own tier field is not changed. See scripts/build_site_data.py.
   const shownTier = (Z, t, nm, nu) => (t == null ? t : Z < 26 ? (nu > 0 ? 6 : 4) : t < 0 ? t : t === 3 && nu > 0 ? 5 : t);
   const DEC = { k: T("dx_keep", "kept"), d: T("dx_down", "down-weighted"), x: T("dx_excl", "excluded"), f: T("dx_fix", "unit fixed") };
@@ -352,13 +352,13 @@
     const nThr = d.thr ? Object.values(d.thr).reduce((s, v) => s + v.length, 0) : 0; if (nThr) st.push([nThr, T("dx_s_thr", "(n,2n), (n,p), (n,α) points")]);
     $("#dx-stats").innerHTML = st.map(([v, l]) => `<div class="dx-stat"><b>${v}</b><span>${l}</span></div>`).join("");
     const nm = r.A ? `${IDX.sym[r.Z]}-${r.A}` : "";
-    $("#dx-cmd").textContent = nm && d.cap ? `uv run python -m incognita.library show ${nm} --version v0.2.1\n\n# or from Python\nfrom incognita.library import capture_curve\ndf = capture_curve("${nm}", version="v0.2.1")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier`
+    $("#dx-cmd").textContent = nm && d.cap ? `uv run python -m incognita.library show ${nm} --version v0.2.2\n\n# or from Python\nfrom incognita.library import capture_curve\ndf = capture_curve("${nm}", version="v0.2.2")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier`
       : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/capture_v2/${r.Z < 26 ? "exfor_cells_Z1-25_v2.parquet" : "exfor_cells_Z26-92_v2.parquet"}`;
     sweep();
     if ((center || scroll) && !stay) $("#dx-nuc").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  /** One plain sentence for a nuclide whose capture below 1 MeV hinges on one engine setting (library v0.2.1 model_form_flag):
+  /** One plain sentence for a nuclide whose capture below 1 MeV hinges on one engine setting (library v0.2.2 model_form_flag):
    *  m = { kind: "pe_kev" | "fists2" | "gg_deadend", ratio: other choice / this curve, at 30 keV }. {n} is the factor. */
   function mformNote(m) {
     if (!m || !m.kind) return "";
@@ -453,10 +453,10 @@
   }
 
   /** "How far to trust this": only checked results, no new claims.
-   *  Tier meanings, the validated range (Z 26–83), model_form_flag: library/v0.2.1/README.md and CHANGELOG.md.
+   *  Tier meanings, the validated range (Z 26–83), model_form_flag: library/v0.2.2/README.md and CHANGELOG.md.
    *  Bands: the pre-registered coverage check of 2026-10-24 (research reports/COVAR.md, 5 test nuclides; caveat in
-   *  library/v0.2.1/README.md): capture, fission, elastic covered as stated; (n,p), (n,α), (n,2n) and total under-covered.
-   *  Capture "if anything, wide": library/v0.2.1/README.md ("the bands are on the wide side").
+   *  library/v0.2.2/README.md): capture, fission, elastic covered as stated; (n,p), (n,α), (n,2n) and total under-covered.
+   *  Capture "if anything, wide": library/v0.2.2/README.md ("the bands are on the wide side").
    *  Engine errors: data/board/cells.csv, engine section (scoring "in-sample (development)", not blind), score_ours of the
    *  row with the most nuclei: [view, nuclei, Z from, Z to (nuclei in d_pernuc.csv / band name), rms dex]. */
   const BOARD = {
@@ -508,7 +508,7 @@
     }
     if (d.cap && rr && rr.kind) { const ri = riText(rr); li.push(`<li><b>${T("dx_rr_b1k", "Below 1 keV")}</b> <span>${rrShort(rr)}${ri ? " · " + ri : ""}</span></li>`); }
     h.push(`<ul>${li.join("")}</ul>`);
-    h.push(`<p class="dx-tr-src">${T("dx_tr_src", "Tier and flags: library/v0.2.1 README. Bands: a pre-registered coverage check against measurements (5 test nuclides, October 2026), in which capture, fission and elastic bands covered as stated and the threshold channels and total under-covered. Errors: the <a href=\"scoreboard.html\" data-keep-lang>Scoreboard</a>, root-mean-square of log10(engine / measured); it is not a blind test, because the engine’s rules were chosen while watching it.")}</p>`);
+    h.push(`<p class="dx-tr-src">${T("dx_tr_src", "Tier and flags: library/v0.2.2 README. Bands: a pre-registered coverage check against measurements (5 test nuclides, October 2026), in which capture, fission and elastic bands covered as stated and the threshold channels and total under-covered. Errors: the <a href=\"scoreboard.html\" data-keep-lang>Scoreboard</a>, root-mean-square of log10(engine / measured); it is not a blind test, because the engine’s rules were chosen while watching it.")}</p>`);
     box.innerHTML = h.join(""); box.hidden = false; WT.keepLang();
   }
   const rrSwatch = (c) => { const s = rrSty(c.rr); return `<svg class="dx-rrsw" width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="21" y2="4" stroke="${c.col}" stroke-width="${s.w}" stroke-dasharray="${s.dash.join(" ")}" stroke-linecap="round"/></svg>`; };
@@ -518,7 +518,7 @@
     const d = cur.d, grid = IDX.grid_ev, out = { curves: [], points: [], ds: [], xlab: T("dx_xE", "neutron energy"), unit: "b", note: null };
     const band = (ys, us) => grid.map((x, i) => (ys[i] > 0 && us && us[i] != null ? [x, ys[i] / 10 ** us[i], ys[i] * 10 ** us[i]] : null)).filter(Boolean);
     if (tab === "cap") {
-      if (d.cap) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.1)"), col: C.curve, pts: grid.map((x, i) => [x, d.cap[i]]), b68: band(d.cap, d.u68), b95: band(d.cap, d.u95) });
+      if (d.cap) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.2)"), col: C.curve, pts: grid.map((x, i) => [x, d.cap[i]]), b68: band(d.cap, d.u68), b95: band(d.cap, d.u95) });
       // below 1 keV, INCOGNITA's own curve (RESFILL, 0 K), joined to the prediction's first point (1 keV, cap[0])
       const rr = cur.rr;
       if (d.cap && d.cap[0] > 0 && rr && rr.E && rr.cap && rr.E.length > 1) out.curves.push({ name: `${T("dx_rr_b1k", "Below 1 keV")}: ${rrLabel(rr)}`, short: rrShort(rr), col: C.curve, rr: rr.kind, rrd: rr,
@@ -535,16 +535,16 @@
       if (rm) out.curves.push({ name: T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"), col: C.curve, pts: rm.energy_ev.map((x, i) => [x, rm.sigma_b[i]]) });
     } else if (tab === "macs") {
       out.xlab = "kT"; out.unit = "mb";
-      if (d.macs) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.1)"), col: C.curve, pts: IDX.kT_keV.map((k, i) => [k * 1e3, d.macs[i]]), b68: IDX.kT_keV.map((k, i) => (d.macsU && d.macsU[i] ? [k * 1e3, d.macs[i] / d.macsU[i], d.macs[i] * d.macsU[i]] : null)).filter(Boolean) });
+      if (d.macs) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.2)"), col: C.curve, pts: IDX.kT_keV.map((k, i) => [k * 1e3, d.macs[i]]), b68: IDX.kT_keV.map((k, i) => (d.macsU && d.macsU[i] ? [k * 1e3, d.macs[i] / d.macsU[i], d.macs[i] * d.macsU[i]] : null)).filter(Boolean) });
       libCurves(out);
       if (d.meas) { out.ds = d.meas.ds; for (const p of d.meas.mxw) if (p[0] >= 1000) out.points.push({ x: p[0], xlo: p[0], xhi: p[1], y: p[2] * 1000, e: p[3], ds: p[4], dec: p[5], st: p[6], kind: "mxw" }); }
     } else {
       out.unit = "mb";
-      // v0.2.1: (n,2n), (n,p), (n,α) come from the same engine runs as capture; (n,p) also has a 68 % band (npL: the engine's
+      // v0.2.2: (n,2n), (n,p), (n,α) come from the same engine runs as capture; (n,p) also has a 68 % band (npL: the engine's
       // (n,p) at the benchmark energies, from the same runs), drawn around the one curve
       const npB = tab === "np" && d.npL ? d.npL.filter((p) => p[2] != null).map((p) => [p[0], p[2], p[3]]) : null;
-      if (d.ch && d.ch[tab]) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.1)"), col: C.curve, pts: grid.map((x, i) => [x, d.ch[tab][i]]), b68: npB && npB.length > 1 ? npB : undefined });
-      else if (npB) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.1)"), col: C.curve, pts: d.npL.map((p) => [p[0], p[1]]), b68: npB });
+      if (d.ch && d.ch[tab]) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.2)"), col: C.curve, pts: grid.map((x, i) => [x, d.ch[tab][i]]), b68: npB && npB.length > 1 ? npB : undefined });
+      else if (npB) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.2)"), col: C.curve, pts: d.npL.map((p) => [p[0], p[1]]), b68: npB });
       libCurves(out);
       const t = (d.thr && d.thr[tab]) || [], keys = [...new Set(t.map((p) => p[2]))];
       out.ds = keys.map((k) => [k, "", (t.find((p) => p[2] === k) || [])[3], ""]);
@@ -871,7 +871,7 @@
     const page = `${location.origin}${location.pathname.replace(/data(\.html)?$/, "")}data.html#${id}`;
     const meta = {
       nuclide: id, Z, A: A || null,
-      source: "INCOGNITA library v0.2.1 (November 2026): library/v0.2.1 in https://github.com/seth-michael-weaver/incognita, as shown on the Every nuclide page. Every curve is the prediction of the production engine scored on the Scoreboard (engine-20261022-3); none is fitted to this nuclide's measurements, except that an ANCHORED curve is scaled by one factor to a measured 30 keV MACS. The earlier v0.1 stays in library/v0.1.",
+      source: "INCOGNITA library v0.2.2 (November 2026): library/v0.2.2 in https://github.com/seth-michael-weaver/incognita, as shown on the Every nuclide page. Every curve is the prediction of the production engine scored on the Scoreboard (engine-20261022-3); none is fitted to this nuclide's measurements, except that an ANCHORED curve is scaled by one factor to a measured 30 keV MACS. The earlier v0.1 stays in library/v0.1.",
       page, generated: new Date().toISOString().slice(0, 10),
       engine: "The INCOGNITA engine is a port of TALYS-2 (A. J. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131) and uses the TALYS nuclear-structure database.",
       license: "Predictions and data: CC-BY-4.0. Cite the project (CITATION.cff in the repository), TALYS (Eur. Phys. J. A 59 (2023) 131) and EXFOR (N. Otuka et al., Nucl. Data Sheets 120 (2014) 272).",
@@ -881,7 +881,7 @@
     const J = { ...meta };
     // below Z 26 the page's label comes from the Z 1-25 curation, not from the library (see shownTier)
     const lr = Z < 26 && A ? byKey.get(Z + "-" + A) : null;
-    if (lr) J.page_label_below_z26 = `${lr.st === 6 ? "measured" : "not measured"}: library v0.2.1 assigns tiers only from Z 26; this label is from the curated EXFOR capture cells of Z 1-25 (capture set v2, data/curation/capture_v2, README.md there)`;
+    if (lr) J.page_label_below_z26 = `${lr.st === 6 ? "measured" : "not measured"}: library v0.2.2 assigns tiers only from Z 26; this label is from the curated EXFOR capture cells of Z 1-25 (capture set v2, data/curation/capture_v2, README.md there)`;
     if (d.tier != null) Object.assign(J, { tier: IDX.tiers[d.tier], in_validated_range: !!d.valid, value_source: d.src || null, uncertainty_kind: d.unc || null, resolved_resonances_up_to_ev: d.res ?? null, macs30_mb: d.macs30 ?? null, macs30_flag: d.flag || null });
     if (d.rm) J.rmatrix_evaluation = { id: d.rm.id, label: d.rm.label, reaction: d.rm.reaction, unit: "b", energy_ev: d.rm.energy_ev, sigma_b: d.rm.sigma_b,
       mubar_cm: d.rm.mubar_cm || null, range_ev: [d.rm.e_min_ev, d.rm.e_max_ev], chi2_dof_in_sample: d.rm.chi2_dof ?? null, caveat: d.rm.caveat || null, report: d.rm.report,
@@ -921,7 +921,7 @@
       .concat(J.page_label_below_z26 ? [`Page label: ${J.page_label_below_z26}`] : [])
       .concat(J.model_form ? [`Model-form flag: ${J.model_form.flag}: ${J.model_form.note}. Other choice at 30 keV: ${J.model_form.alt_value_30keV_b ?? "n/a"} b.`] : []);
     const csv = head.map((l) => "# " + l).join("\n") + "\n" + rows.map((r) => r.map(q).join(",")).join("\n") + "\n";
-    return { name: `incognita_${id}_v0.2.1`, csv, json: JSON.stringify(J, null, 1) + "\n" };
+    return { name: `incognita_${id}_v0.2.2`, csv, json: JSON.stringify(J, null, 1) + "\n" };
   }
   WT.dxExport = (Z, A) => loadNuc(Z, A).then((d) => exportNuc(Z, A, d));
   function save(text, name, type) {
