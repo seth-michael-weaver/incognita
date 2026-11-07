@@ -53,9 +53,20 @@ REPO = HERE.parent.parent
 EXAM = REPO / 'docs' / 'release' / 'exam'
 DATA = HERE / 'data'
 G = np.logspace(-5, np.log10(2e7), 3000)          # the staged library grid (eV), = incognita.eval.incognita_eval.G
-HEMT = (107, 22, 24, 45, 112, 117)                 # He-4 production = sum of alpha-emitting channels (hydrate.py)
-QMT = {'capture': (102,), 'na': (107,), 'he_prod': HEMT, 'n2n': (16,), 'np': (103,),
+# (n,a) and He-4 production are DERIVED the same way for every library (incognita/bench/alpha.py, 2026-11-06):
+#   (n,a)  = MT 107 (else sum of MT 800-849) + the (n,a) residual made inside MT 5 (MF6/MF9/MF10 yields, pseudo-MT 905)
+#   He-4   = sum of multiplicity x sigma over every alpha-emitting MT (alpha.HE_MULT) + alphas inside MT 5 (pseudo-MT 906)
+# Before that fix the scorer took MT 107 alone for (n,a) and MT 107+22+24+45+112+117 for He-4, which misses what an
+# evaluation lumps into MT 5 (ENDF/B-VIII.1 Fe-54: 4 mb in MT 107 at 14 MeV, the rest of ~100 mb inside MT 5).  Where
+# sigma_5 > 0 at a row and the file's MT 5 products were not read, the row is "comparator incomplete" for that library:
+# not covered (counted and reported), never silently scored on MT 107 alone (unless sigma_5 itself, an upper bound of the
+# unread part, is below 1 % of the derived value there).
+from incognita.bench import alpha as AL   # noqa: E402
+HEMT_OLD = (107, 22, 24, 45, 112, 117)             # the pre-2026-11-06 He-4 sum, kept for the old-comparator report only
+QMT = {'capture': (102,), 'na': (107,), 'he_prod': tuple(AL.HE_MULT), 'n2n': (16,), 'np': (103,),
        'total': (1,), 'elastic': (2,), 'inelastic': (4,)}   # MT 1/2/4: the dated tracks' total/elastic/inelastic rows
+ALPHA_Q = ('na', 'he_prod')
+LOAD_MTS = sorted({m for v in QMT.values() for m in v} | set(AL.WANT_MTS) | {AL.MT5_NA, AL.MT5_HE})
 
 # staged grids from the official distributions (docs/release/INPUTS.md section 2) with their release years
 LIBRARIES = [('ENDF/B-VIII.1', 'endfb81', 2024), ('JENDL-5', 'jendl5', 2021), ('TENDL-2025', 'tendl2025', 2025),
@@ -129,10 +140,19 @@ def t_capture_heldout():
         'entry:default TALYS = TENDL no-data recipe (our engine), measured D0': X.pred_recipe_d0assisted})
 
 
+# capture-nostructure labels (original, pre-audit targets) whose only dataset is a sum reaction excluded by the curation
+# review of 2026-11-06 (data/curation/inputs/review_decisions_Z26-92.jsonl): the label IS that sum, not the nucleus's capture
+CAPTURE_REVIEW_DROP = {('Z046N060M0', 43): 'EXFOR 22580006, Pd-106 + Pd-108 capture compiled as Pd-106',
+                       ('Z052N076M0', 50): 'EXFOR 40336092, Te-128 + Te-130 capture compiled as Te-128',
+                       ('Z052N076M0', 51): 'EXFOR 40336092, Te-128 + Te-130 capture compiled as Te-128',
+                       ('Z052N076M0', 53): 'EXFOR 40336092, Te-128 + Te-130 capture compiled as Te-128'}
+
+
 def t_capture_nostructure():
     X = src('capture_blind_cells')
+    drop = np.array([(n, b) in CAPTURE_REVIEW_DROP for n, b in zip(X.nuclide_id, X.bin)])
     X = X[(X.Z <= 82) & X.fold.isin(range(6)) & np.isfinite(X.pred_ours_strip - X.target_log10)
-          & np.isfinite(X.pred_recipe_strip)].reset_index(drop=True)
+          & np.isfinite(X.pred_recipe_strip) & ~drop].reset_index(drop=True)
     return pd.DataFrame({
         'Z': X.Z, 'A': X.A, 'energy_ev': X.energy_ev, 'quantity': 'capture', 'spectrum': '', 'label': X.target_log10,
         'entry:INCOGNITA capture, no structure data (STRIP)': X.pred_ours_strip,
@@ -261,6 +281,7 @@ def build(track: str) -> pd.DataFrame:
 
 
 DATED_LIBRARY_ENV = 'INCOGNITA_DATED_LIBRARY'
+TRACK_LIBRARY_ENV = 'INCOGNITA_TRACK_LIBRARY'      # capture tracks: bin-average table from place_tracks.py
 
 
 def dated_library_values(y: int, path=None) -> dict:
@@ -317,7 +338,42 @@ class Curves:
             return None
         return (self.grid, v) if self.grid is not None else v
 
+    def curves_on_grid(self, z, a):
+        """{mt: values on self.grid} of one nucleus (grid libraries only)."""
+        return {mt: v for (zz, aa, mt), v in self.tab.items() if zz == z and aa == a}
+
+    def alpha_value(self, z, a, q, e, spectrum='', old=False):
+        """(value, status) for q in ALPHA_Q with the derived-channel rule (alpha.py). status: 'ok', 'incomplete'
+        (sigma_5 > 0 here and the MT 5 products were not read: not covered), 'none' (no curve). old=True: the
+        pre-2026-11-06 comparator (MT 107 alone; He-4 = MT 107+22+24+45+112+117), for the comparison report."""
+        cur = self._cache.get((z, a)) if hasattr(self, '_cache') else None
+        if cur is None:
+            cur = self.curves_on_grid(z, a)
+            self._cache = getattr(self, '_cache', {}); self._cache[(z, a)] = cur
+        if old:
+            mts = (107,) if q == 'na' else HEMT_OLD
+            if mts[0] not in cur:
+                return np.nan, 'none'
+            y = np.sum([cur[m] for m in mts if m in cur], axis=0)
+            miss = None
+        else:
+            y, miss = (AL.na_total if q == 'na' else AL.he_total)(cur)
+            if y is None:
+                return np.nan, 'none'
+        x = np.asarray(self.grid)
+        if spectrum:
+            v = spectrum_fold(x, np.asarray(y) * 1e3, spectrum) / 1e3
+            m = spectrum_fold(x, miss * 1e3, spectrum) / 1e3 if miss is not None else 0.0
+        else:
+            v = interp_loglog(x, np.asarray(y, float), e)
+            m = float(np.interp(e, x, miss)) if miss is not None else 0.0
+        if AL.is_incomplete(v, m if np.isfinite(m) else 0.0):
+            return np.nan, 'incomplete'
+        return v, 'ok'
+
     def value(self, z, a, q, e, spectrum=''):
+        if q in ALPHA_Q and self.grid is not None:
+            return self.alpha_value(z, a, q, e, spectrum)[0]
         mts = QMT.get(q)
         if mts is None or self.xy(z, a, mts[0]) is None:
             return np.nan
@@ -336,10 +392,16 @@ class Curves:
 
 def staged_library(key: str, evaluated: Path | None = None) -> Curves:
     from incognita import config
-    p = (evaluated or config.evaluated_dir()) / f'{key}.parquet'
-    mts = sorted({m for v in QMT.values() for m in v})
-    x = pd.read_parquet(p, columns=['Z', 'N', 'iso', 'mt', 'values_b'], filters=[('iso', '==', 0), ('mt', 'in', mts)])
-    return Curves({(int(r.Z), int(r.Z + r.N), int(r.mt)): np.asarray(r.values_b, float) for r in x.itertuples()}, G)
+    ev = evaluated or config.evaluated_dir()
+    p = ev / f'{key}.parquet'
+    x = pd.read_parquet(p, columns=['Z', 'N', 'iso', 'mt', 'values_b'], filters=[('iso', '==', 0), ('mt', 'in', LOAD_MTS)])
+    tab = {(int(r.Z), int(r.Z + r.N), int(r.mt)): np.asarray(r.values_b, float) for r in x.itertuples()}
+    sup = ev / f'{key}_alpha.parquet'      # MT 5 alpha parts (pseudo-MTs 905/906) for grids staged before 2026-11-06
+    if sup.exists():
+        y = pd.read_parquet(sup, columns=['Z', 'N', 'iso', 'mt', 'values_b'], filters=[('iso', '==', 0)])
+        for r in y.itertuples():
+            tab.setdefault((int(r.Z), int(r.Z + r.N), int(r.mt)), np.asarray(r.values_b, float))
+    return Curves(tab, G)
 
 
 # --- ENDF-6 ---------------------------------------------------------------------------------------------------------
@@ -380,7 +442,7 @@ def read_endf(path: Path):
     lines = path.read_text(errors='replace').splitlines()
     za = lrp = None
     sec = {}
-    want = {m for v in QMT.values() for m in v}
+    want = set(LOAD_MTS)
     i = 0
     while i < len(lines):
         L = lines[i]
@@ -414,6 +476,8 @@ def read_endf(path: Path):
         # lin-lin for linearised sections, the section's own laws otherwise
         y = np.interp(G, x, y, left=0.0, right=0.0) if set(law) == {2} else _interp_law(x, y, nbt, law, G.copy())
         tab[mt] = np.clip(y, 0.0, None)
+    # MT 5 alpha parts from the file's own MF6 / MF9 / MF10 (alpha.py); MT 5 is above the resonance range, so MF3 is used
+    tab.update(AL.mt5_alpha_parts('\n'.join(lines), z, a, tab.get(5, np.zeros(len(G))), G))
     return z, a, lrp, tab
 
 
@@ -436,7 +500,9 @@ def endf_library(paths, njoy: str | None = None, workdir: Path | None = None) ->
         if lrp == 1:
             if njoy:
                 pendf = reconr(p, njoy, workdir)
+                parts = {m: t[m] for m in (AL.MT5_NA, AL.MT5_HE) if m in t}   # MF6 is not on the PENDF tape
                 z, a, _, t = read_endf(pendf)
+                t = {m: v for m, v in t.items() if m not in (AL.MT5_NA, AL.MT5_HE)} | parts
                 shutil.rmtree(pendf.parent, ignore_errors=True)
             else:
                 warned.append(p.name)
@@ -449,12 +515,62 @@ def endf_library(paths, njoy: str | None = None, workdir: Path | None = None) ->
     return Curves(tab, G)
 
 
+INCOMPLETE = np.inf     # predict(): a (n,a) / He-4 row that is comparator-incomplete for this library (alpha.py)
+
+
 def predict(T: pd.DataFrame, cur: Curves) -> np.ndarray:
+    """log10 barns per row; NaN = no value; +inf (INCOMPLETE) = comparator incomplete: excluded from this library's score
+    (never counted as a miss on tracks with miss_dex)."""
     out = np.full(len(T), np.nan)
     for i, r in enumerate(T[['Z', 'A', 'quantity', 'energy_ev', 'spectrum']].itertuples(index=False)):
-        v = cur.value(int(r.Z), int(r.A), r.quantity, r.energy_ev, r.spectrum)
+        if r.quantity in ALPHA_Q and cur.grid is not None:
+            v, st = cur.alpha_value(int(r.Z), int(r.A), r.quantity, r.energy_ev, r.spectrum)
+            if st == 'incomplete':
+                out[i] = INCOMPLETE; continue
+        else:
+            v = cur.value(int(r.Z), int(r.A), r.quantity, r.energy_ev, r.spectrum)
         out[i] = np.log10(v) if np.isfinite(v) and v > 0 else np.nan
     return out
+
+
+def predict_alpha_report(T: pd.DataFrame, cur: Curves):
+    """For the (n,a) / He-4 rows of a track: (status per row, log10 prediction with the pre-2026-11-06 comparator)."""
+    st = np.array([''] * len(T), dtype=object); old = np.full(len(T), np.nan)
+    if cur.grid is None:
+        return st, old
+    for i, r in enumerate(T[['Z', 'A', 'quantity', 'energy_ev', 'spectrum']].itertuples(index=False)):
+        if r.quantity in ALPHA_Q:
+            st[i] = cur.alpha_value(int(r.Z), int(r.A), r.quantity, r.energy_ev, r.spectrum)[1]
+            v = cur.alpha_value(int(r.Z), int(r.A), r.quantity, r.energy_ev, r.spectrum, old=True)[0]
+            old[i] = np.log10(v) if np.isfinite(v) and v > 0 else np.nan
+    return st, old
+
+
+def alpha_report_md(TT, LP, AR) -> list[str]:
+    """Markdown: per track with (n,a) / He-4 rows and per library, rows that are comparator-incomplete, and the rms
+    (a) corrected comparator, incomplete rows not covered (the leaderboard number), (b) the same rows plus the incomplete
+    ones scored on the old comparator, (c) the old comparator on every row (the pre-2026-11-06 leaderboard)."""
+    md = ['## (n,a) / He-4 comparator report (alpha.py, 2026-11-06)', '',
+          'rms of log10(prediction / measurement), point-weighted, on the (n,a) and He-4 rows of the track. corrected = the '
+          'leaderboard rule; incomplete = rows where the library has sigma_5 > 0 but its MT 5 products were not read (not '
+          'covered); "+ incomplete on old" = those rows added back with MT 107 alone; old = MT 107 alone (He-4: MT 107+22+24+'
+          '45+112+117) on every row, the comparator used before 2026-11-06.', '',
+          '| track | library | rows | covered (corrected) | incomplete | rms corrected | rms + incomplete on old | rms old | rows where the MT 5 part adds > 10 % |',
+          '|---|---|---|---|---|---|---|---|---|']
+    for k, per in AR.items():
+        T = TT[k]; lab = T.label.to_numpy(float); q = T.quantity.isin(ALPHA_Q).to_numpy()
+        for nm, (st, old) in per.items():
+            new = LP[k].get(nm)
+            if new is None:
+                continue
+            r = lambda e: f'{np.sqrt(np.nanmean(e ** 2)):.4f}' if np.isfinite(e).any() else '—'
+            en, eo = (new - lab)[q], (old - lab)[q]
+            inc = (st[q] == 'incomplete')
+            mix = np.where(inc, eo, en)
+            moved = np.isfinite(en) & np.isfinite(eo) & (np.abs(en - eo) > np.log10(1.1))
+            md.append(f'| {k} | {nm} | {int(q.sum())} | {int(np.isfinite(en).sum())} | {int(inc.sum())} | {r(en)} | {r(mix)} | '
+                      f'{r(eo)} | {int(moved.sum())} |')
+    return md + ['']
 
 
 def csv_entry(T: pd.DataFrame, track: str, path: Path):
@@ -485,15 +601,17 @@ def _boot_counts(n_nuc, seed, draws):
 def score_entry(T, track, pred, ref=None, h=None):
     _, _, weighting, miss, (seed, draws), _ = TRACKS[track]
     lab = T.label.to_numpy(float)
-    e = pred - lab
+    pred = np.asarray(pred, float)
+    inc = np.isposinf(pred)                      # comparator incomplete: out of this entry's score altogether
+    e = np.where(inc, np.nan, pred) - lab
     cov = np.isfinite(e)
     if miss is not None:
-        e = np.where(cov, e, miss); use = np.ones(len(e), bool)
+        e = np.where(cov, e, miss); use = ~inc
     else:
         use = cov
     nu = nid(T.Z, T.A)
     res = {'rows': int(use.sum()), 'rows_total': len(T), 'covered': int(cov.sum()),
-           'nuclei': int(len(np.unique(nu[use])))}
+           'nuclei': int(len(np.unique(nu[use]))), 'incomplete': int(inc.sum())}
     if not use.any():
         return res
 
@@ -517,9 +635,10 @@ def score_entry(T, track, pred, ref=None, h=None):
             res['median_h68'] = float(np.median(h[0][m]))
             res['interval_rows'] = int(m.sum())
     if ref is not None:
-        er = ref - lab
+        ref = np.asarray(ref, float)
+        er = np.where(np.isposinf(ref), np.nan, ref) - lab
         if miss is not None:
-            er = np.where(np.isfinite(er), er, miss); both = use.copy()
+            er = np.where(np.isfinite(er), er, miss); both = use & ~np.isposinf(ref)
         else:
             both = use & np.isfinite(er)
         if both.any():
@@ -646,15 +765,26 @@ def cmd_leaderboard(a):
     LP = {k: {} for k in tracks}                 # track -> library name -> log10 predictions
     dated = [k for k in tracks if k.startswith('dated-')]
     grid_tracks = [k for k in tracks if k not in dated]
+    AR = {k: {} for k in grid_tracks if TT[k].quantity.isin(ALPHA_Q).any()}   # (n,a) / He-4 comparator report
     for nm, key, yr in LIBRARIES:
         if grid_tracks and (ev / f'{key}.parquet').exists():
             print(f'loading {nm}', file=sys.stderr)
             cur = staged_library(key, ev)
             for k in grid_tracks:
                 LP[k][nm] = predict(TT[k], cur)
+                if k in AR:
+                    AR[k][nm] = predict_alpha_report(TT[k], cur)
             del cur
     for k in dated:     # DATEDEXAM2: libraries as bin averages on the rows' own bins (frozen table), not grid samples
         LP[k].update(dated_library_values(int(k[6:]), a.dated_library))
+    BAV = {k: set() for k in tracks}             # (track, library) placed as bin averages (place_tracks.py)
+    tl = getattr(a, 'track_library', None) or os.environ.get(TRACK_LIBRARY_ENV)
+    if tl:
+        from incognita.bench.place_tracks import CAPTURE_TRACKS, track_library_values
+        for k in tracks:
+            if k in CAPTURE_TRACKS:
+                for nm, v in track_library_values(k, tl).items():
+                    LP[k][nm] = v; BAV[k].add(nm)
     if 'capture-retro' in tracks and all((ev / f'{key}.parquet').exists() for _, key in TENDL_DATED):
         T = TT['capture-retro']; v = np.full(len(T), np.nan); cy = T.cutoff_year.to_numpy()
         for yr, key in TENDL_DATED:
@@ -673,6 +803,10 @@ def cmd_leaderboard(a):
             if k.startswith('dated-') and nm in DATED_Y:
                 P[nm] = (v, ('library, blind (released <= Y)' if DATED_Y[nm] <= int(k[6:]) else 'library, released after Y')
                          + ', bin average')
+            elif nm in BAV.get(k, ()):
+                P[nm] = (v, 'library, bin average')
+            elif k in ('capture-heldout', 'capture-nostructure', 'capture-retro', 'ch-capture') and tl:
+                P[nm] = (v, 'library, point sample (no bin average available)')
             else:
                 P[nm] = (v, 'library')
         refv = P[ref.split(':', 1)[1]][0] if ref.split(':', 1)[1] in P else None
@@ -692,9 +826,12 @@ def cmd_leaderboard(a):
             for i, r in enumerate(res, 1):
                 d = (f"{r['delta_vs_ref']:+.4f} [{r['delta_ci'][0]:+.4f}, {r['delta_ci'][1]:+.4f}] ({r['paired_rows']})"
                      if 'delta_vs_ref' in r else '—')
-                md.append(f"| {i} | {r['entry']} | {r['kind']} | {r['covered']}/{r['rows_total']} | {fmt_ci(r)} | "
+                inc = f" (+{r['incomplete']} incomplete)" if r.get('incomplete') else ''
+                md.append(f"| {i} | {r['entry']} | {r['kind']} | {r['covered']}/{r['rows_total']}{inc} | {fmt_ci(r)} | "
                           f"{r.get('bias', float('nan')):+.3f} | {d} |")
             md.append('')
+    if AR:
+        md += alpha_report_md(TT, LP, AR)
     pd.DataFrame(rows).to_csv(out / 'leaderboard.csv', index=False)
     (out / 'leaderboard.json').write_text(json.dumps(rows, indent=1) + '\n')
     (out / 'LEADERBOARD.md').write_text('\n'.join(md) + '\n')
@@ -720,6 +857,8 @@ def main(argv=None):
             p.add_argument('--njoy', default=os.environ.get('INCOGNITA_NJOY'), help='NJOY2016 executable for RECONR')
         else:
             p.add_argument('--out', default='docs/release/bench')
+            p.add_argument('--track-library', help='bin-average table for the capture tracks (uv run python -m '
+                                                   f'incognita.bench.place_tracks; default ${TRACK_LIBRARY_ENV})')
     a = ap.parse_args(argv)
     {'tracks': cmd_tracks, 'export': cmd_export, 'score': cmd_score, 'leaderboard': cmd_leaderboard}[a.cmd](a)
 

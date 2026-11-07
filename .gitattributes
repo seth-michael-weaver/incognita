@@ -1,3 +1,7 @@
 # Released data: checksummed byte-for-byte (SHA256SUMS), so never convert line endings on checkout
 library/** -text
 data/curation/** -text
+incognita/bench/tracks/** -text
+incognita/bench/data/** -text
+docs/registry/** -text
+docs/release/exam/** -text

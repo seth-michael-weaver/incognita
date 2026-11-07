@@ -70,10 +70,16 @@ NJOY_TIMEOUT_S = 1800
 # MTs (blueprint §2.2 Tier 3 / plan step 1). "capture" is priority (a) of WP-11.
 CAPTURE_MTS: tuple[int, ...] = (1, 2, 102, 4, 16, 103, 107, 18)
 ALL_MTS: tuple[int, ...] = (
-    1, 2, 3, 4, 5, 11, 16, 17, 18, 22, 24, 28, 32, 33, 37, 41, 42, 44, 45,
-    51, 52, 53, 54, 55, 91, 102, 103, 104, 105, 106, 107, 111, 112, 115, 116, 117,
+    1, 2, 3, 4, 5, 11, 16, 17, 18, 22, 23, 24, 25, 28, 29, 30, 32, 33, 35, 36, 37, 41, 42, 44, 45,
+    51, 52, 53, 54, 55, 91, 102, 103, 104, 105, 106, 107, 108, 109, 111, 112, 113, 114, 115, 116, 117,
+    155, 158, 159, 165, 166, 167, 168, 180, 181, 189, 193, 195, 196, 199,
     649, 699, 749, 799, 849,
 )  # fmt: skip
+# Every alpha-emitting MT is staged (2026-11-06) so He-4 production can be summed over all of them, and the alpha made
+# inside MT 5 ("anything else", products in MF6 / MF9 / MF10) is staged as two pseudo-MTs, 905 = sigma_5 x yield of the
+# (n,alpha) residual and 906 = sigma_5 x alpha yield (incognita/bench/alpha.py). Without them an evaluation that lumps
+# alpha emission into MT 5 (ENDF/B-VIII.1 Fe-54/56/57/58, ...) is scored on a partial (n,alpha) channel.
+MT5_ALPHA_MTS: tuple[int, ...] = (905, 906)
 # MTs whose MF33 self-covariance block is assembled and stored (capture first).
 COV_MTS: tuple[int, ...] = (102, 18, 1, 2, 16, 103, 107)
 CAPTURE_Z_RANGE: tuple[int, int] = (26, 92)
@@ -979,6 +985,16 @@ def stage_material(
     return tape20, tape_parse, present
 
 
+def _mt5_product_lines(tape: Path) -> list[str]:
+    """The MF6 / MF9 / MF10 lines of MT 5 of a tape (streamed: JENDL-5 actinide tapes are GB-sized)."""
+    out = []
+    with open(tape, "rb") as fh:
+        for line in fh:
+            if len(line) >= 75 and line[72:75] == b"  5" and line[70:72] in (b" 6", b" 9", b"10"):
+                out.append(line.decode(errors="replace").rstrip("\r\n"))
+    return out
+
+
 def process_material(task: MaterialTask) -> MaterialResult:
     """ENDF-6 material → reconstructed grid values, MF2 ladders, MF33 blocks."""
     from data.schema.keys import nuclide_id as make_nuclide_id
@@ -1056,6 +1072,7 @@ def process_material(task: MaterialTask) -> MaterialResult:
 
         # NJOY: RECONR (+ BROADR).
         tapes = run_njoy(tape20, hdr.mat, workdir, error=task.error, temperatures=task.temperatures)
+        mt5_lines = _mt5_product_lines(tape20) if 5 in task.mts else []
         for temp, pendf in tapes.items():
             sections = read_pendf_mf3(pendf, task.mts)
             if spec.mf3_original_only:
@@ -1068,6 +1085,13 @@ def process_material(task: MaterialTask) -> MaterialResult:
                     res.thresholds[mt] = threshold_from_pointwise(
                         sec.energy_ev, sec.xs_b, sec.qi, hdr.awr
                     )
+            if temp == 0.0 and 5 in task.mts:
+                from incognita.bench.alpha import mt5_alpha_parts
+                from physics.grid import ENERGY_GRID_EV
+
+                s5 = res.xs.get((5, 0.0), np.zeros_like(ENERGY_GRID_EV))
+                for mt, v in mt5_alpha_parts("\n".join(mt5_lines), hdr.Z, hdr.A, s5, ENERGY_GRID_EV).items():
+                    res.xs[(mt, 0.0)] = v      # kept even when all zero: "MT 5 products read, no alpha"
             del sections
         res.status = "ok"
     except subprocess.TimeoutExpired:

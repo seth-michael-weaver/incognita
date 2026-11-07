@@ -157,6 +157,22 @@ def mf3_mts(text: str) -> list[int]:
                    and L[72:75].strip().isdigit() and int(L[72:75]) > 0})
 
 
+def _mt5_na(mtext: str, z: int, a: int, mt5):
+    """The (n,a) residual inside MT 5 on the MT 5 PENDF grid (alpha.py), for binavg.channel_curves."""
+    from incognita.bench import alpha as AL
+    if mt5 is None:
+        return None
+    x5, y5 = map(np.asarray, mt5)
+    if not np.any(y5 > 0):
+        return None
+    res = 1000 * (z - 2) + (a - 3)
+    y = AL.mt5_yields(mtext, (res,), x5)
+    if y is not None:
+        return x5, y5 * y[res]
+    p = AL.mt5_production(mtext, (res,), x5)
+    return (x5, p[res]) if p is not None else ('incomplete', x5, y5)
+
+
 def place(key: str, src: Path, njoy: str) -> pd.DataFrame:
     name = SOURCES[key][0] if key in SOURCES else key
     R = S.src('dated_rows')[KEY].drop_duplicates().reset_index(drop=True)
@@ -179,7 +195,8 @@ def place(key: str, src: Path, njoy: str) -> pd.DataFrame:
                     r = subprocess.run([njoy], stdin=fin, cwd=w, capture_output=True, timeout=1800)
                 if r.returncode != 0 or not (w / 'tape21').exists():
                     print(f'  {name} {nm}: NJOY failed (rc {r.returncode})', file=sys.stderr); continue
-                cur = BA.channel_curves(read_mf3(w / 'tape21', BA.WANT_MTS), mf3_mts(mtext))
+                pend = read_mf3(w / 'tape21', sorted(set(BA.WANT_MTS) | {5}))
+                cur = BA.channel_curves(pend, mf3_mts(mtext), _mt5_na(mtext, z, a, pend.get(5)))
             m = ((R.Z == z) & (R.A == a)).to_numpy()
             vv, _, ff, ss = BA.place_rows(cur, R.quantity[m].to_numpy(), R.energy_ev[m].to_numpy(float), R.emin_ev[m].to_numpy(float),
                                           R.e_lo[m].to_numpy(float), R.e_hi[m].to_numpy(float))

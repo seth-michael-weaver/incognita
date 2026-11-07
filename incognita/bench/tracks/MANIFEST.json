@@ -25,9 +25,9 @@
  },
  "capture-nostructure": {
   "description": "capture sigma(E), held-out nuclei, DEV folds 0-5, model given no structure data",
-  "rows": 1966,
-  "nuclei": 126,
-  "rows_sha256": "f7deef9f3a2f458150a527bff1758912987a676e87b4166a346cffa3662399a9",
+  "rows": 1962,
+  "nuclei": 125,
+  "rows_sha256": "797a80e71aafffbd8d4aeb0a663a41c9605fafd98df707ec5b4d066e1ad9b027",
   "reference": "entry:default TALYS = TENDL no-data recipe (our engine), no structure data",
   "weighting": "point",
   "miss_dex": null,
@@ -448,9 +448,9 @@
  },
  "ch-na": {
   "description": "(n,a) and He production, EXFOR, all years (in-sample for every library)",
-  "rows": 1151,
-  "nuclei": 126,
-  "rows_sha256": "a3fa75c9918d1cb6ede897663c066229bb7d56bf5cc23d1b579f825c04c29566",
+  "rows": 1062,
+  "nuclei": 124,
+  "rows_sha256": "eaaf5af4446c544e8d99fdfb8209a03b4b135fec0b382208bf77a7acf3007ad2",
   "reference": "lib:TENDL-2025",
   "weighting": "point",
   "miss_dex": null,
@@ -464,9 +464,9 @@
  },
  "ch-n2n": {
   "description": "(n,2n), EXFOR binned, all years (in-sample)",
-  "rows": 2477,
-  "nuclei": 150,
-  "rows_sha256": "793d678b7bdfa716fca29b31061a70707a9c8919cadd3f74ea6c90566290b070",
+  "rows": 2334,
+  "nuclei": 148,
+  "rows_sha256": "342e24d7ec6745711b501b991b5f7b65b04b5b18ce578f8afc3b639bafb5156c",
   "reference": "lib:TENDL-2025",
   "weighting": "point",
   "miss_dex": null,
@@ -480,9 +480,9 @@
  },
  "ch-np": {
   "description": "(n,p), EXFOR binned, all years (in-sample)",
-  "rows": 1593,
+  "rows": 1525,
   "nuclei": 65,
-  "rows_sha256": "7dc47e081cf4bb7d885fc345983e812d790e392373135bf02f420d70bc06f74f",
+  "rows_sha256": "1fb32734f7a3b5204b836b3fcf355ae07ca31ea6567696ab9f149330ed33189c",
   "reference": "lib:TENDL-2025",
   "weighting": "point",
   "miss_dex": null,
@@ -496,9 +496,9 @@
  },
  "ch-capture": {
   "description": "capture above the resolved region, EXFOR, all years (in-sample)",
-  "rows": 7239,
-  "nuclei": 147,
-  "rows_sha256": "434bbd0953ea7e53976ab3138332941ae7019526f59ea23fae2c020e9c239a00",
+  "rows": 5872,
+  "nuclei": 124,
+  "rows_sha256": "dd1afeecf23b97e96aa9426c3f91d8f5ed43d2dd40c5fa83ed56bcebe5fd5e8f",
   "reference": "lib:TENDL-2025",
   "weighting": "point",
   "miss_dex": null,
@@ -512,9 +512,9 @@
  },
  "ch-sacs": {
   "description": "spectrum-averaged (U-235 / Cf-252) capture, (n,a), (n,2n), (n,p), non-suspect",
-  "rows": 400,
-  "nuclei": 87,
-  "rows_sha256": "86b6fbfd14e7d4412a9c56dbc9ef08a51908b23b53a71767879c9165e818879a",
+  "rows": 395,
+  "nuclei": 86,
+  "rows_sha256": "b1534f48a4160f8259f7a8755289beb0f72ce5d44de2e0aee830cfbd36d3c6d6",
   "reference": "lib:TENDL-2025",
   "weighting": "point",
   "miss_dex": null,
@@ -558,23 +558,23 @@
   },
   "na_rows": {
    "path": "incognita/bench/data/exam_rows/na_rows.parquet",
-   "sha256": "8ca93570a318d1f690f2b583cdbb7cdcb40a230e835867c309ad55a9b78588fd"
+   "sha256": "e63feec630a2fb8351fc296c575829926487b72585c5453ab204248ecf98e0d9"
   },
   "n2n_rows": {
    "path": "incognita/bench/data/exam_rows/n2n_rows.parquet",
-   "sha256": "a619d8836370f0f472d5a59158d8391928bf8a62d38cf62c6d54eea4b93fbe85"
+   "sha256": "bea957595185e1ff12602f351f22b393d94038fe631b509e8f4a5b012ef2ea6c"
   },
   "np_rows": {
    "path": "incognita/bench/data/exam_rows/np_rows.parquet",
-   "sha256": "f71f661ee428158d2b47fb7de6ae475bbe82aa8d087f3ab418fbab21ef310541"
+   "sha256": "da347307fad362259a1f77c4643002ff808249aa258f658c2ab5325fa88cce29"
   },
   "capture_rows": {
    "path": "incognita/bench/data/exam_rows/capture_rows.parquet",
-   "sha256": "5636685db41b6495a0a3f114c2f5e17b302b26daafc5dd020f0656c0d4eca7e5"
+   "sha256": "50377972cfad2f1b3a8e99cd7e7dd4f91486180660528162f1f6499d09118e6a"
   },
   "sacs_rows": {
    "path": "incognita/bench/data/exam_rows/sacs_rows.parquet",
-   "sha256": "fcb8a27f6dff9184e9ab25782fb8705ac8538227ed33fb702dd54c2c8d1f0f07"
+   "sha256": "974cfcc8d9c6b09298a2c2ab8ee533f6ecfa140e0205e2fc68d210420528f7e2"
   }
  }
 }

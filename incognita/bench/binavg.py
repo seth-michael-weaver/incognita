@@ -7,7 +7,7 @@ DATEDEXAM compared the two and every library lost 0.1-0.3 dex below 100 keV, inc
 Rule (docs/release/dated/PREREG2.md, fixed before any library value was compared with a label):
 - pointwise curve = NJOY2016 RECONR at 0 K, tolerance 0.1 % (the staging deck, `data.ingest.endf.njoy_deck`), lin-lin;
 - channel -> MT: capture 102, total 1, elastic 2, n2n 16; inelastic 4, else the sum of MT 51-91; (n,p) 103, else the sum of
-  MT 600-649; (n,a) 107, else the sum of MT 800-849. "present" means present in MF3 of the ORIGINAL evaluation (RECONR's
+  MT 600-649; (n,a) 107, else the sum of MT 800-849, plus (2026-11-06, alpha.py) the (n,a) residual made inside MT 5. "present" means present in MF3 of the ORIGINAL evaluation (RECONR's
   redundant sums are not trusted for libraries that carry only a few channels, e.g. IRDFF-II);
 - the row's bin is the data's: b = floor(ln(E_row) / 0.1), [e^{0.1 b}, e^{0.1 (b+1)}], clipped to [max(1 keV, emin_ev), 20 MeV]
   (emin_ev = the row's resonance cut, max(1 keV, 100 D0), below which the data points were dropped);
@@ -43,9 +43,26 @@ def _sum_on_union(curves):
     return x, y
 
 
-def channel_curves(pendf_mf3: dict, original_mts) -> dict:
+def channel_curves(pendf_mf3: dict, original_mts, mt5_na=None) -> dict:
     """pendf_mf3: {mt: (x, y)} from the RECONR tape; original_mts: MF3 MTs of the evaluation itself.
-    -> {quantity: (x, y, source)} with source 'MT<n>' or 'sum MT<a>-<b> (k sections)'."""
+    mt5_na: the (n,a) residual made inside MT 5 (alpha.py, 2026-11-06): (x, y) to add to the (n,a) curve, or
+    ('incomplete', x5, y5) when sigma_5 > 0 but the file's MT 5 products were not read (the (n,a) curve is then NaN
+    wherever sigma_5 > 0, so a row there is not covered), or None (no MT 5).
+    -> {quantity: (x, y, source)} with source 'MT<n>' or 'sum MT<a>-<b> (k sections)' (+ ' + MT5 part')."""
+    out = _channel_curves(pendf_mf3, original_mts)
+    if mt5_na is not None and 'na' in out:
+        x, y, s = out['na']
+        if mt5_na[0] == 'incomplete':
+            xx, yy = _sum_on_union([(x, y)])
+            s5 = np.interp(xx, mt5_na[1], mt5_na[2], left=0.0, right=0.0)
+            out['na'] = (xx, np.where(s5 > 0, np.nan, yy), s + ' (MT 5 products not read: incomplete where sigma_5 > 0)')
+        else:
+            xx, yy = _sum_on_union([(x, y), tuple(map(np.asarray, mt5_na))])
+            out['na'] = (xx, yy, s + ' + MT5 part')
+    return out
+
+
+def _channel_curves(pendf_mf3: dict, original_mts) -> dict:
     orig = set(int(m) for m in original_mts)
     out = {}
     for q, mt in MAIN_MT.items():
@@ -69,6 +86,9 @@ def lethargy_average(x, y, lo, hi, floor=None):
     i0, i1 = np.searchsorted(x, lo, 'right'), np.searchsorted(x, hi, 'left')
     xs = np.concatenate([[lo], x[i0:i1], [hi]])
     ys = np.interp(xs, x, y, left=0.0, right=0.0)
+    inner = y[max(i0 - 1, 0):min(i1 + 1, len(y))]
+    if np.isnan(ys).any() or np.isnan(inner).any():      # an undefined (comparator-incomplete) part of the curve
+        return np.nan, 0.0
     x1, x2, y1, y2 = xs[:-1], xs[1:], ys[:-1], ys[1:]
     ok = x2 > x1
     b = np.where(ok, (y2 - y1) / np.where(ok, x2 - x1, 1.0), 0.0)
