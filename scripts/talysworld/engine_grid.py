@@ -51,7 +51,10 @@ def run(z, a, grid, comp="P", kw="", work="", gridtop=None, smin=None, keep=Fals
     if gridtop:
         try:
             if smin is None: smin = min(EJ.cn_separation_mev(z, a))
-            out["s_min_mev"] = round(smin, 4)
+            # the service caches the returned (rounded) value and passes it back on later runs of this nucleus: pad with the
+            # rounded value every time, so the first run and the later ones get the same grid
+            smin = round(float(smin), 4)
+            out["s_min_mev"] = smin
             if smin < 0: g.append(max(es) + (-smin + 1.0) * 1e6)
         except Exception as ex:  # noqa: BLE001
             out["err"] = f"GRIDTOP pad: separation energies unavailable: {type(ex).__name__}: {ex}"[:400]
