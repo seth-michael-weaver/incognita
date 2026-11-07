@@ -15,7 +15,7 @@ def _node(code):
     node = shutil.which("node")
     if not node:
         pytest.skip("needs node")
-    return json.loads(subprocess.run([node, "-e", code], capture_output=True, text=True, check=True).stdout)
+    return json.loads(subprocess.run([node, "-e", code], capture_output=True, text=True, encoding="utf-8", check=True).stdout)
 
 
 def _defs():
@@ -60,3 +60,58 @@ def test_expert_menu_uses_chapter_short_names():
         label = re.search(rf'\["{k}",3,"([^"]*)"\]', nav).group(1)
         short = re.search(r'title: "[^"]*", short: "([^"]*)"', (JS / "ch" / f"{k}.js").read_text(encoding="utf-8")).group(1)
         assert label == short, k
+
+
+def _pipeline_fn(name):
+    src = (JS / "pipeline.js").read_text(encoding="utf-8")
+    body = src[src.index(f"  function {name}("):]
+    return body[:body.index("\n  }\n") + 4]
+
+
+def test_stage_subtitle_cut_gets_an_ellipsis():
+    # pipeline.js: a stage subtitle wrapped to more lines than the panel holds (German) was cut with no "…"
+    fn = _pipeline_fn("clampLines")
+    ctx = "const ctx = { measureText: (s) => ({ width: s.length * 10 }) };"   # 10 px per character
+    out = _node(ctx + "\n" + fn + "\nconsole.log(JSON.stringify(["
+                "clampLines(ctx, ['aaaa bbbb', 'cccc dddd', 'eeee'], 2, 90),"
+                "clampLines(ctx, ['aaaa', 'bbbb'], 2, 90),"
+                "clampLines(ctx, ['aaaa bbbb', 'cccc'], 1, 50)]));")
+    assert out[0][0] == "aaaa bbbb" and out[0][1].startswith("cccc d") and len(out[0]) == 2
+    assert all(len(l) * 10 <= 90 for l in out[0]) and out[0][-1].endswith("…")
+    assert out[1] == ["aaaa", "bbbb"]                       # fits: unchanged, no ellipsis
+    assert out[2][-1].endswith("…") and len(out[2]) == 1 and len(out[2][0]) * 10 <= 50
+
+
+def test_stage_subtitle_uses_clamp():
+    src = (JS / "pipeline.js").read_text(encoding="utf-8")
+    assert "clampLines(ctx, sl," in src
+
+
+def _live_job():
+    src = (Path(__file__).resolve().parents[1] / "scripts" / "talysworld" / "web" / "js" / "calc.js").read_text(encoding="utf-8")
+    body = src[src.index("  async function liveJob("):]
+    return body[:body.index("\n  }\n") + 4]
+
+
+def test_live_job_stops_when_the_service_restarts():
+    # calculator live mode: after a service restart, /api/run answers {"error": "no such run"} for ever; the poll used to
+    # loop for ever (spinner never cleared). Now: retry the job once, then fail with a message.
+    out = _node(_live_job() + """
+let sub = 0;
+const lost = () => liveJob(async () => ({ run: "r" + (++sub) }), async () => ({ error: "no such run" }), { every: 1 });
+const slow = () => { let t = 0; return liveJob(async () => ({ run: "x" }), async () => ({ done: false }), { every: 1, timeout: 50, now: () => (t += 20) }); };
+let n2 = 0;
+const second = () => liveJob(async () => ({ run: "y" + (++n2) }), async (run) => run === "y1" ? { error: "no such run" } : { done: true, points: [{ ok: 1 }] }, { every: 1 });
+const eng = () => { let k = 0; return liveJob(async () => { k++; return { run: "z" }; }, async () => ({ done: true, points: [{ err: "engine failed" }] }), { every: 1 }).catch((e) => [k, e.message]); };
+(async () => {
+  const a = await lost().then(() => "resolved", (e) => e.message);
+  const b = await slow().then(() => "resolved", (e) => e.message);
+  const c = await second();
+  const d = await eng();
+  console.log(JSON.stringify([a, sub, b, c, n2, d]));
+})();""")
+    a, sub, b, c, n2, d = out
+    assert "no such run" in a and sub == 2          # submitted twice (one retry), then a message
+    assert "no result after" in b
+    assert c == {"ok": 1} and n2 == 2               # the retry succeeds
+    assert d == [1, "engine failed"]                # the engine's own error is not retried

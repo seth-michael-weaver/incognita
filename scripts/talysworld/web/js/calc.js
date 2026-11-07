@@ -120,9 +120,39 @@
   }
 
   // ---------- live runs: one engine job per curve ----------
+  // fetch JSON with a per-request time limit (a service that accepts the connection but never answers would hang the poll)
+  async function getJSON(url, init = {}, ms = 20000) {
+    const ac = new AbortController(), t = setTimeout(() => ac.abort(), ms);
+    try { return await (await fetch(url, { ...init, signal: ac.signal })).json(); } finally { clearTimeout(t); }
+  }
+  // one live job: submit, then poll its run until done. Polling used to loop for ever when the local service restarted
+  // mid-run (the new process answers "no such run", without "done") and the spinner never cleared. Now a poll error, an
+  // unreachable service or no result within o.timeout ms ends the attempt, and the job is submitted again once; an engine
+  // error on the point (p.err) is the engine's answer and is not retried.
+  async function liveJob(submit, poll, o = {}) {
+    const timeout = o.timeout ?? 15 * 60 * 1000, every = o.every ?? 700, tries = o.tries ?? 2, now = o.now || Date.now;
+    let last = "";
+    for (let a = 0; a < tries; a++) {
+      let p;
+      try {
+        const r = await submit(); if (r.error) throw new Error(r.error);
+        const t0 = now();
+        for (;;) {
+          await new Promise((ok) => setTimeout(ok, every));
+          const s = await poll(r.run);
+          if (s.error) throw new Error(s.error);
+          if (s.done) { p = s.points[0]; break; }
+          if (now() - t0 > timeout) throw new Error(`no result after ${Math.round(timeout / 60000)} min`);
+        }
+      } catch (e) { last = String((e && e.message) || e); continue; }
+      if (p.err) throw new Error(p.err);
+      return p;
+    }
+    throw new Error(`local engine service, ${tries} tries: ${last.slice(0, 50)}. Is server.py running? Pick again to retry`);
+  }
   async function runLive() {
     if (!needLive() || !st.key) return;
-    const todo = jobs().filter((j) => !live.res.has(jobKey(j)));
+    const todo = jobs().filter((j) => { const r = live.res.get(jobKey(j)); return !r || r.err; });   // a failed job runs again on the next pick
     if (!todo.length) return;
     const [Z, A] = st.key.split("-").map(Number), pts = parseInt(st.pts, 10), low = st.pts.endsWith("L");
     todo.forEach((j) => live.res.set(jobKey(j), { pending: true }));
@@ -130,11 +160,9 @@
     await Promise.all(todo.map(async (j) => {
       const k = jobKey(j);
       try {
-        const r = await fetch(LIVE + "/api/gridrun", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ z: Z, a: A, comp: "library", kw: j.kw, points: pts, low, bins: +st.bins }) }).then((x) => x.json());
-        if (r.error) throw new Error(r.error);
-        let s; for (;;) { await new Promise((ok) => setTimeout(ok, 700)); s = await fetch(`${LIVE}/api/run?run=${r.run}`).then((x) => x.json()); if (s.done) break; }
-        const p = s.points[0]; if (p.err) throw new Error(p.err);
-        live.res.set(k, p);
+        const body = JSON.stringify({ z: Z, a: A, comp: "library", kw: j.kw, points: pts, low, bins: +st.bins });
+        live.res.set(k, await liveJob(() => getJSON(LIVE + "/api/gridrun", { method: "POST", headers: { "Content-Type": "application/json" }, body }),
+          (run) => getJSON(`${LIVE}/api/run?run=${run}`)));
       } catch (e) { live.res.set(k, { err: String(e.message || e).slice(0, 160) }); }
       live.busy--; spin(); render();
     }));
