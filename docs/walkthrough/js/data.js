@@ -21,7 +21,11 @@
 
   // ---------- formatting ----------
   const num = (v, p = 3) => (v == null || !isFinite(v) ? "–" : WT.dec(Math.abs(v) >= 1e5 || (Math.abs(v) < 1e-3 && v !== 0) ? v.toExponential(p - 1) : (+v.toPrecision(p)).toString()));
-  const fmtE = (ev) => (ev >= 1e6 ? num(ev / 1e6) + " MeV" : ev >= 1e3 ? num(ev / 1e3) + " keV" : num(ev) + " eV");
+  const fmtE = (ev) => { const r = isFinite(ev) ? +(+ev).toPrecision(3) : ev; return r >= 1e6 ? num(ev / 1e6) + " MeV" : r >= 1e3 ? num(ev / 1e3) + " keV" : num(ev) + " eV"; }; // unit from the ROUNDED value: 999.95 eV is 1 keV, not "1000 eV"
+  // a band value at x: the band's own point, else log-log between its neighbours (the (n,p) band sits at benchmark energies, not on the grid)
+  const bandAt = (b, x) => { if (!b || !b.length) return null; const q = b.find((r) => r[0] === x); if (q) return q; if (x < b[0][0] || x > b[b.length - 1][0]) return null;
+    const i = b.findIndex((r) => r[0] > x), a = b[i - 1], c = b[i]; if (!a || !c || !(a[1] > 0 && a[2] > 0 && c[1] > 0 && c[2] > 0)) return null; const t = Math.log(x / a[0]) / Math.log(c[0] / a[0]);
+    return [x, Math.exp(Math.log(a[1]) + t * Math.log(c[1] / a[1])), Math.exp(Math.log(a[2]) + t * Math.log(c[2] / a[2]))]; };
   const SUP = { "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
   const pow10 = (k) => "10" + String(k).split("").map((c) => SUP[c]).join("");
   const decE = (k) => (k >= -2 ? fmtE(10 ** k) : pow10(k) + " eV"), decY = (k, u) => (k >= -2 && k <= 4 ? num(10 ** k) : pow10(k)) + " " + u;
@@ -629,7 +633,9 @@
     if (!(x1 > 0)) { ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H); ctx.fillStyle = C.soft; ctx.font = `500 14px ${SANS}`; ctx.textAlign = "center"; ctx.fillText(T("dx_empty", "Nothing to show for this reaction."), W / 2, H / 2); finishNuc(S); return; }
     x0 = log10(x0); x1 = log10(x1); y0 = log10(y0); y1 = log10(y1);
     if (tab === "el" && y1 - y0 < 1) { y0 = Math.min(y0, Math.floor((y0 + y1) / 2)); y1 = Math.max(y1, Math.ceil((y0 + y1) / 2 + 1e-9)); } // a smooth elastic curve spans under a decade: keep at least one labelled decade line
-    if (x1 - x0 < 1 && !win) { x0 -= 0.5; x1 += 0.5; } // a threshold window keeps its edge: it may span under a decade if (y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; }
+    if (x1 - x0 < 1 && !win) { x0 -= 0.5; x1 += 0.5; } // a threshold window keeps its edge: it may span under a decade
+    if (!(x1 > x0)) { x0 -= 0.5; x1 += 0.5; } // a single energy (even inside a threshold window) still needs a width
+    if (y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; } // at least one decade: a flat or narrow range gets a labelled decade line and no 0/0
     if (!zw) { x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); } y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0);
     const X = (x) => m.l + (log10(x) - x0) / (x1 - x0) * (W - m.l - m.r), Y = (y) => H - m.b - (log10(y) - y0) / (y1 - y0) * (H - m.t - m.b);
     Object.assign(P, { X, Y, m, x0, x1, y0, y1, W, H });
@@ -796,7 +802,7 @@
     if (tableOpen) table(S);
   }
   function table(S) {
-    const rowsC = S.curves.flatMap((c) => c.pts.filter(([, y]) => y > 0).map(([x, y], i) => { const b = c.b68 && c.b68.find((q) => q[0] === x); return `<tr><td>${esc(c.name)}</td><td>${fmtE(x)}</td><td>${num(y)} ${S.unit}</td><td>${b ? `${num(b[1])}–${num(b[2])}` : ""}</td><td></td></tr>`; }));
+    const rowsC = S.curves.flatMap((c) => c.pts.filter(([, y]) => y > 0).map(([x, y], i) => { const b = bandAt(c.b68, x); return `<tr><td>${esc(c.name)}</td><td>${fmtE(x)}</td><td>${num(y)} ${S.unit}</td><td>${b ? `${num(b[1])}–${num(b[2])}` : ""}</td><td></td></tr>`; }));
     const rowsP = S.points.filter((p) => showExcl || p.dec !== "x").map((p) => { const d = S.ds[p.ds] || []; return `<tr><td>${esc(d[1] || d[0] || "")} ${d[2] || ""}</td><td>${p.xhi > p.xlo * 1.02 ? `${fmtE(p.xlo)}–${fmtE(p.xhi)}` : fmtE(p.x)}</td><td>${num(p.y)} ${S.unit}</td><td>${p.e ? "± " + num(p.e * 100, 2) + " %" : ""}</td><td>${DEC[p.dec] || ""}</td></tr>`; });
     if (S.th) rowsP.push(`<tr><td>${T("dx_th", "measured thermal value (EXFOR)")} · ${S.th.subs.map(esc).join(", ")}</td><td>${fmtE(S.th.x)}</td><td>${num(S.th.y, 4)} b</td><td>± ${num(S.th.u, 2)} b</td><td></td></tr>`);
     $("#dx-table").innerHTML = `<table><thead><tr><th>${T("dx_th_src", "Source")}</th><th>${S.xlab}</th><th>${T("dx_th_val", "Value")}</th><th>${T("dx_th_unc", "Range / uncertainty")}</th><th>${T("dx_th_cur", "Curation")}</th></tr></thead><tbody>${rowsC.join("")}${rowsP.join("")}</tbody></table>`;
@@ -807,7 +813,7 @@
     buildTabs(); renderNuc(); });
   $("#dx-excl").addEventListener("change", (e) => { showExcl = e.target.checked; renderNuc(); });
   $("#dx-full").addEventListener("change", (e) => { full = e.target.checked; renderNuc(); });
-  $("#dx-copy").addEventListener("click", (e) => { try { navigator.clipboard.writeText($("#dx-cmd").textContent); e.currentTarget.textContent = T("dx_copied", "Copied"); } catch (err) {} });
+  $("#dx-copy").addEventListener("click", (e) => { const btn = e.currentTarget; try { navigator.clipboard.writeText($("#dx-cmd").textContent).then(() => { btn.textContent = T("dx_copied", "Copied"); }, () => {}); } catch (err) {} });
   // hover (mouse) or tap (touch) shows the tooltip; clicking a measured point, or tapping it a second time, opens its EXFOR subentry
   let tipPin = null, lastPT = "mouse";
   function tipAt(x, y) {
@@ -838,7 +844,7 @@
     if (c && x > P.m.l && x < P.W - P.m.r) {
       const xv = 10 ** (P.x0 + (x - P.m.l) / (P.W - P.m.l - P.m.r) * (P.x1 - P.x0)); let j = -1, jd = Infinity; c.pts.forEach(([px], i) => { const dd = Math.abs(log10(px) - log10(xv)); if (dd < jd) { jd = dd; j = i; } });
       if (j >= 0 && jd < 0.2 && (!(pws.length || rrC) || xv >= PW_E * 0.98)) { const xe = c.pts[j][0], lines = [], anyLib = P.S.curves.some((cc) => cc.dash);
-        for (const cc of P.S.curves) { if (cc.pw || cc.rr) continue; const q =cc.pts.find((p) => p[0] === xe); if (!q || !(q[1] > 0)) continue; const b = cc.b68 && cc.b68.find((r) => r[0] === xe);
+        for (const cc of P.S.curves) { if (cc.pw || cc.rr) continue; const q =cc.pts.find((p) => p[0] === xe); if (!q || !(q[1] > 0)) continue; const b = bandAt(cc.b68, xe);
           lines.push(cc.dash ? `<span class="dx-faint">${esc(cc.short)}: ${num(q[1])} ${P.S.unit}</span>` : `<b>${num(q[1])} ${P.S.unit}</b>${b ? ` <span class="dx-faint">(68 %: ${num(b[1])}–${num(b[2])})</span>` : ""}${anyLib ? ` <span class="dx-faint">· ${esc(cc.name)}</span>` : ""}`); }
         if (lines.length) return { html: `${fmtE(xe)}${anyLib && tab !== "macs" ? ` <span class="dx-faint">· ${T("dx_lib_bin", "libraries: bin averages")}</span>` : ""}<br>${lines.join("<br>")}`, url: null, p: null }; } }
     return null;
