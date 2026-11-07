@@ -80,7 +80,7 @@ def test_shown_tier_marks_interpolated_nuclides_with_curated_data_as_measured():
 
 def test_interpolated_with_curated_data_exist_and_are_shown_as_measured():
     rows = [r for r in index_rows() if r["Z"] >= 26 and r["tier"] == 2 and r["n_use"] > 0]
-    assert len(rows) == 33  # the case above is real (capture set v2)
+    assert len(rows) == 29  # the case above is real (capture set v2.1; 33 before single-state capture became partial)
     assert any((r["Z"], r["A"]) == (27, 57) for r in rows)  # Co-57
 
 
@@ -111,14 +111,15 @@ def test_capture_band_claim_only_for_measured_tier():
 
 
 def test_anchored_text_does_not_deny_curated_measurements():
-    """14 of the 21 ANCHORED nuclides have kept curated capture cross-section cells (3 of them at keV energies: Zn-70,
-    Ge-76, Te-120). The panel said "No measured cross sections" above those points."""
+    """10 of the 21 ANCHORED nuclides have kept curated capture cross-section points on the site (14 before 2026-11-07
+    bugsite3, which stopped drawing capture into a single product state as total capture). The panel said
+    "No measured cross sections" above those points."""
     n = 0
     for r in cap().values():
         if r["tier"] == "ANCHORED":
             m = nfile(r["Z"], r["A"]).get("meas", {"cap": []})
             n += any(p[5] != "x" for p in m["cap"])
-    assert n == 14
+    assert n == 10
     assert not _en("dx_tr_t1").startswith("Anchored. No measured cross sections")
     for lang in LANGS:
         assert "v0.1" in _lang(lang, "dx_tr_t1"), lang
