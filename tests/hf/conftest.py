@@ -54,3 +54,13 @@ def _no_npwindow():
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_NPWINDOW", "0")
         yield
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _talys_grid_top():
+    """GRIDTOP (default ON; core/grids.emission_limit) raises the outgoing grid's top for compound nuclei with a negative
+    separation energy (alpha above A ~ 140); tests that compare with TALYS output or golden records made with TALYS's grid
+    (grid.f90:120) run with it off. tests/hf/test_gridtop.py removes it."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INCOGNITA_GRIDTOP", "0")
+        yield
