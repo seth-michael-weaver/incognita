@@ -108,12 +108,15 @@
     if (WT.tr) s = WT.tr(s);
     let size = o.size || 13; ctx.font = font(size, o.weight, o.mono);
     if (o.max) while (ctx.measureText(s).width > o.max && size > 9) { size -= 0.5; ctx.font = font(size, o.weight, o.mono); }
+    if (o.max && ctx.measureText(s).width > o.max) { while (s.length > 1 && ctx.measureText(s + "…").width > o.max) s = s.slice(0, -1); s = s.trimEnd() + "…"; } // still too wide at 9 px: cut, never spill out of the box
     ctx.textAlign = o.align || "left"; ctx.textBaseline = o.base || "middle"; ctx.fillStyle = o.color || C.ink; ctx.globalAlpha = o.alpha ?? 1;
     ctx.fillText(s, x, y); ctx.globalAlpha = 1; return ctx.measureText(s).width;
   }
+  // a word wider than maxW (German compounds: "ICSBEP-Kritikalitätsexperimente,") may also break after its hyphens
   function wrap(ctx, s, maxW, size, weight) {
-    ctx.font = font(size, weight); const words = String(s).split(" "), lines = []; let cur = "";
-    words.forEach((w) => { const t = cur ? cur + " " + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; });
+    ctx.font = font(size, weight); const lines = []; let cur = "";
+    const toks = []; String(s).split(" ").forEach((w) => (ctx.measureText(w).width > maxW ? w.split(/(?<=-)(?=.)/) : [w]).forEach((p, k) => toks.push([p, k > 0])));
+    toks.forEach(([w, glued]) => { const t = cur ? cur + (glued ? "" : " ") + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; });
     if (cur) lines.push(cur); return lines;
   }
   // keep at most n wrapped lines; when lines are dropped, the last kept one ends in "…" and still fits maxW (ctx.font set)

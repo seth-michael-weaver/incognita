@@ -82,6 +82,25 @@ def test_stage_subtitle_cut_gets_an_ellipsis():
     assert out[2][-1].endswith("…") and len(out[2]) == 1 and len(out[2][0]) * 10 <= 50
 
 
+def test_stage_subtitle_long_word_stays_in_its_box():
+    # pipeline.js (German, 1536 px): "ICSBEP-Kritikalitätsexperimente," is one word wider than the stage box; wrap() could not
+    # break it and text() stopped shrinking at 9 px, so it ran past the box border. Now wrap() breaks after hyphens and
+    # text() cuts with "…" when 9 px is still too wide.
+    pre = ("const WT = {}; const SANS = 's', MONO = 'm'; const C = { ink: '#fff' };"
+           "const ctx = { font: '13px', measureText(s) { return { width: s.length * parseFloat(this.font.split(' ')[1]) }; },"
+           " fillText(s) { this.drawn = s; } };")
+    out = _node(pre + "\n" + _pipeline_fn("font") + "\n" + _pipeline_fn("text") + "\n" + _pipeline_fn("wrap") +
+                "\nconst w = wrap(ctx, 'ICSBEP-Kritikalitaetsexperimente, k-eff', 200, 12, 500);"
+                "\nconst w2 = wrap(ctx, 'aa bb cc', 50, 10);"
+                "\ntext(ctx, 'Kritikalitaetsexperimentezzzzzzzzzz', 0, 0, { size: 12, max: 200 }); const cut = ctx.drawn, fitCut = ctx.measureText(cut).width;"
+                "\ntext(ctx, 'short', 0, 0, { size: 12, max: 200 });"
+                "\nconsole.log(JSON.stringify({ w, w2, cut, fitCut, short: ctx.drawn }));")
+    assert out["w"][0] == "ICSBEP-" and out["w"][1].startswith("Kritikalitaetsexperimente,")
+    assert out["w2"] == ["aa bb", "cc"]                     # ordinary words: unchanged behaviour
+    assert out["cut"].endswith("…") and out["fitCut"] <= 200
+    assert out["short"] == "short"
+
+
 def test_stage_subtitle_uses_clamp():
     src = (JS / "pipeline.js").read_text(encoding="utf-8")
     assert "clampLines(ctx, sl," in src
