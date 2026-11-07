@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engine calculator</title>
+<link rel="icon" href="/site/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --paper: #f5f6f8; --card: #ffffff; --ink: #1a2233; --soft: #4a5468; --faint: #8b93a5; --line: #dfe3ea; --accent: #2f5bd3;
+  --grid: #e6e9ef; --curve: #2a78d6; --meas: #eb6834; --eng: #1baf7a; --l1: #7d5bbf; --l2: #b0507e; --l3: #8c7a2e; --bad: #c8372d;
+  --display: "Newsreader", Georgia, serif; --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #11151d; --card: #181e29; --ink: #e8ecf3; --soft: #b3bccc; --faint: #7d879a; --line: #2a3242; --accent: #7c9cff;
+  --grid: #262d3a; --curve: #3987e5; --meas: #d95926; --eng: #2bc48b; --l1: #a68be0; --l2: #d784ab; --l3: #c7b065; --bad: #ff6b5e; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #11151d; --card: #181e29; --ink: #e8ecf3; --soft: #b3bccc; --faint: #7d879a; --line: #2a3242; --accent: #7c9cff;
+  --grid: #262d3a; --curve: #3987e5; --meas: #d95926; --eng: #2bc48b; --l1: #a68be0; --l2: #d784ab; --l3: #c7b065; --bad: #ff6b5e; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.45; }
+header { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding: 18px 24px 6px; }
+header h1 { font-family: var(--display); font-weight: 600; font-size: 30px; margin: 0; letter-spacing: -0.01em; }
+header .sub { color: var(--faint); font-size: 13.5px; }
+header .theme { margin-left: auto; }
+.wrap { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px; padding: 10px 24px 40px; align-items: start; }
+@media (max-width: 900px) { .wrap { grid-template-columns: 1fr; padding: 10px 16px 32px; } header { padding: 16px 16px 4px; } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+form.card { position: sticky; top: 12px; }
+@media (max-width: 900px) { form.card { position: static; } }
+fieldset { border: 0; margin: 0 0 12px; padding: 0; }
+legend, .lab { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); font-weight: 600; margin-bottom: 4px; padding: 0; }
+label.row { display: grid; grid-template-columns: 1fr; gap: 3px; margin: 0 0 9px; font-size: 13.5px; color: var(--soft); }
+input, select, textarea { font: 14px var(--sans); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; width: 100%; }
+textarea { font-family: var(--mono); font-size: 13px; resize: vertical; min-height: 54px; }
+.inline { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 6px; }
+.btn { font: 600 15px var(--sans); color: var(--card); background: var(--accent); border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.btn.ghost { color: var(--accent); background: transparent; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.hint { font-size: 12.5px; color: var(--faint); margin: 2px 0 0; }
+.err { color: var(--bad); font-size: 13px; min-height: 1em; margin: 6px 0 0; }
+.status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.bar { flex: 1 1 200px; height: 8px; background: var(--grid); border-radius: 99px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--eng); transition: width .25s; }
+.status .txt { font-family: var(--mono); font-size: 13px; color: var(--soft); font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--soft); margin: 0 0 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 0; border-top: 2.5px solid; display: inline-block; }
+.sw.dot { width: 8px; height: 8px; border: 0; border-radius: 50%; }
+.sw.dash { border-top-style: dashed; }
+.plots { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 14px; }
+@media (max-width: 500px) { .plots { grid-template-columns: 1fr; } }
+.plot { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 10px 4px; }
+.plot h3 { font: 600 14px var(--sans); margin: 0 4px 2px; display: flex; justify-content: space-between; gap: 8px; }
+.plot h3 small { font-weight: 400; color: var(--faint); font-size: 12px; }
+.plot canvas { width: 100%; height: 250px; display: block; cursor: crosshair; }
+.tip { position: absolute; pointer-events: none; background: var(--card); border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px;
+  font: 12.5px var(--mono); color: var(--ink); box-shadow: 0 4px 18px rgba(0,0,0,.18); white-space: nowrap; display: none; z-index: 3; }
+.meta { font-size: 13px; color: var(--soft); margin: 0 0 10px; }
+.meta b { color: var(--ink); font-weight: 600; }
+details { margin-top: 16px; }
+summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+table { border-collapse: collapse; font: 12.5px var(--mono); width: 100%; }
+th, td { text-align: right; padding: 3px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--faint); font-weight: 500; position: sticky; top: 0; background: var(--card); }
+.tblwrap { max-height: 360px; overflow: auto; margin-top: 8px; }
+.pins { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.pin { font-size: 12.5px; border: 1px solid var(--line); border-radius: 99px; padding: 2px 4px 2px 10px; display: inline-flex; gap: 6px; align-items: center; }
+.pin button { border: 0; background: transparent; color: var(--faint); cursor: pointer; font-size: 14px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Engine calculator</h1>
+  <span class="sub">TALYSWORLD-style: one engine job per incident energy · <span id="engine">INCOGNITA production engine</span></span>
+  <button class="btn ghost theme" id="theme" type="button" aria-label="Switch light or dark">◐</button>
+</header>
+<div class="wrap">
+  <form class="card" id="f" autocomplete="off">
+    <fieldset>
+      <legend>Reaction</legend>
+      <label class="row">Projectile
+        <select id="proj"><option value="n">neutron</option></select></label>
+      <label class="row">Target (e.g. Fe-56, Au197, 92-238)
+        <input id="tgt" value="Fe-56" required></label>
+    </fieldset>
+    <fieldset>
+      <legend>Incident energies</legend>
+      <label class="row">Energies
+        <select id="emode">
+          <option value="grid">library grid: 64 points, 1 keV - 20 MeV</option>
+          <option value="range">log-spaced range</option>
+          <option value="list">my list (MeV)</option>
+        </select></label>
+      <div id="erange" class="inline" hidden>
+        <label class="row">from MeV<input id="e0" value="0.001" inputmode="decimal"></label>
+        <label class="row">to MeV<input id="e1" value="20" inputmode="decimal"></label>
+        <label class="row">points<input id="en" value="20" inputmode="numeric"></label>
+      </div>
+      <label class="row" id="elist" hidden>MeV, separated by spaces, commas or lines
+        <textarea id="etext">0.001 0.01 0.03 0.1 1 5 14</textarea></label>
+      <p class="hint" id="ecount"></p>
+    </fieldset>
+    <fieldset id="kwset">
+      <legend>Keywords</legend>
+      <label class="row">Engine runs (composition)<select id="comp"></select></label>
+    </fieldset>
+    <label class="row">Extra deck keywords (TALYS spelling, ';' between)
+      <input id="extra" placeholder="e.g. rvadjust n 1.02"></label>
+    <div class="btns">
+      <button class="btn" id="go" type="submit">Run</button>
+      <button class="btn ghost" id="pin" type="button" disabled>Pin this run</button>
+      <button class="btn ghost" id="csv" type="button" disabled>CSV</button>
+    </div>
+    <p class="err" id="err" role="alert"></p>
+    <p class="hint" id="limits"></p>
+  </form>
+  <main>
+    <div class="status card" style="padding:10px 14px">
+      <div class="bar"><i id="bar"></i></div>
+      <span class="txt" id="stxt">ready</span>
+    </div>
+    <p class="meta" id="meta"></p>
+    <div class="pins" id="pins"></div>
+    <div class="legend" id="legend"></div>
+    <div class="plots" id="plots"></div>
+    <details class="card" style="margin-top:16px">
+      <summary>Finished points</summary>
+      <div class="tblwrap"><table id="tbl"></table></div>
+    </details>
+  </main>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const CH = [
+  { k: "total", t: "Total", lib: null }, { k: "elastic", t: "Elastic", lib: null },
+  { k: "capture", t: "Capture (n,γ)", lib: "capture_mb", ex: "cap" }, { k: "np", t: "(n,p)", lib: "np_mb", ex: "np" },
+  { k: "na", t: "(n,α)", lib: "na_mb", ex: "na" }, { k: "n2n", t: "(n,2n)", lib: "n2n_mb", ex: "n2n" },
+  { k: "fission", t: "Fission", lib: null, only: true },
+];
+const FLOOR = 1.0000001e-7;   // the engine's output floor (mb): drawn as zero
+let META = null, SYM = [], LIBD = null, EXF = null, RUN = null, PINS = [], ES = null, redrawQ = false;
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+// ---------- theme ----------
+try { const t = localStorage.getItem("tw-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+$("#theme").onclick = () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches, cur = document.documentElement.dataset.theme || (dark ? "dark" : "light");
+  const nx = cur === "dark" ? "light" : "dark"; document.documentElement.dataset.theme = nx;
+  try { localStorage.setItem("tw-theme", nx); } catch (e) {}
+  redraw();
+};
+
+// ---------- form ----------
+function parseTarget(s) {
+  s = s.trim(); let m = s.match(/^(\d+)\s*[-, ]\s*(\d+)$/); if (m) return { z: +m[1], a: +m[2] };
+  m = s.match(/^([A-Za-z]{1,2})\s*-?\s*(\d+)$/) || s.match(/^(\d+)\s*-?\s*([A-Za-z]{1,2})$/);
+  if (!m) return null;
+  let sym = isNaN(+m[1]) ? m[1] : m[2], a = isNaN(+m[1]) ? +m[2] : +m[1];
+  sym = sym[0].toUpperCase() + sym.slice(1).toLowerCase(); const z = SYM.indexOf(sym);
+  return z > 0 ? { z, a } : null;
+}
+function energies() {
+  const mode = $("#emode").value;
+  if (mode === "grid") return META.library_grid_ev.slice();
+  if (mode === "range") {
+    const a = +$("#e0").value * 1e6, b = +$("#e1").value * 1e6, n = Math.round(+$("#en").value);
+    if (!(a > 0 && b > a && n >= 1 && n <= 400)) return [];
+    if (n === 1) return [a];
+    return Array.from({ length: n }, (_, i) => a * (b / a) ** (i / (n - 1)));
+  }
+  return $("#etext").value.split(/[\s,;]+/).filter(Boolean).map((x) => +x * 1e6).filter((x) => x > 0);
+}
+function syncE() {
+  const m = $("#emode").value; $("#erange").hidden = m !== "range"; $("#elist").hidden = m !== "list";
+  const e = META ? energies() : []; $("#ecount").textContent = e.length ? `${e.length} engine job${e.length > 1 ? "s" : ""} (one per energy)` : "check the energies";
+}
+["emode", "e0", "e1", "en", "etext"].forEach((id) => $("#" + id).addEventListener("input", syncE));
+
+function kwBody() { const kw = {}; for (const k in META.keywords) kw[k] = $("#kw-" + k).value; return kw; }
+
+// ---------- formatting ----------
+const fmtE = (e) => e >= 1e6 ? +(e / 1e6).toPrecision(4) + " MeV" : e >= 1e3 ? +(e / 1e3).toPrecision(4) + " keV" : +e.toPrecision(4) + " eV";
+const fmtV = (v) => v == null || !isFinite(v) ? "—" : v === 0 ? "0" : Math.abs(v) >= 1e4 || Math.abs(v) < 1e-2 ? v.toExponential(3) : v.toPrecision(4);
+const yLab = (k) => k >= 3 ? (k - 3 <= 3 ? 10 ** (k - 3) : "1e" + (k - 3)) + " b" : (k >= 0 ? 10 ** k : "1e" + k) + " mb";
+const unitV = (mb) => mb == null ? "—" : mb >= 1000 ? fmtV(mb / 1000) + " b" : fmtV(mb) + " mb";
+
+// log-log interpolation in a curve [[x, y], ...] (y > 0)
+function interp(pts, x) {
+  if (!pts || pts.length < 2 || x < pts[0][0] * 0.9999 || x > pts[pts.length - 1][0] * 1.0001) return null;
+  for (let i = 1; i < pts.length; i++) if (x <= pts[i][0] * 1.0000001) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+    if (Math.abs(x / x1 - 1) < 1e-7) return y1; if (Math.abs(x / x0 - 1) < 1e-7) return y0;
+    if (!(y0 > 0 && y1 > 0)) return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+    return Math.exp(Math.log(y0) + (Math.log(y1) - Math.log(y0)) * Math.log(x / x0) / Math.log(x1 / x0));
+  }
+  return null;
+}
+
+// ---------- data for one channel ----------
+function libCurve(c) {
+  if (!LIBD || !c.lib || !LIBD[c.lib]) return null;
+  return LIBD.energy_ev.map((x, i) => [x, LIBD[c.lib][i]]);
+}
+function exfor(c) {
+  if (!EXF || !c.ex) return [];
+  if (c.ex === "cap") return ((EXF.meas && EXF.meas.cap) || []).map((p) => ({ x: Math.sqrt(p[0] * p[1]), y: p[2] * 1e3, e: p[3] }));
+  return ((EXF.thr && EXF.thr[c.ex]) || []).map((p) => ({ x: p[0], y: p[1], e: null }));
+}
+const engPts = (run, k) => run ? run.pts.filter((p) => p.channels && p.channels[k] != null).map((p) => [p.e_ev, p.channels[k] > FLOOR ? p.channels[k] : 0]) : [];
+function channelsShown() {
+  const fiss = (RUN && RUN.pts.some((p) => p.channels && p.channels.fission > FLOOR)) || (RUN && RUN.z >= 90);
+  return CH.filter((c) => !c.only || fiss);
+}
+
+// ---------- drawing ----------
+function setupPlots() {
+  const P = $("#plots"); P.innerHTML = "";
+  for (const c of channelsShown()) {
+    const d = document.createElement("div"); d.className = "plot"; d.dataset.k = c.k;
+    d.innerHTML = `<h3><span>${c.t}</span><small id="n-${c.k}"></small></h3><canvas aria-label="${c.t} cross section against incident energy"></canvas>`;
+    P.appendChild(d); const cv = d.querySelector("canvas");
+    cv.addEventListener("mousemove", (ev) => hover(ev, c, cv)); cv.addEventListener("mouseleave", () => ($("#tip").style.display = "none"));
+  }
+}
+function niceRange(vals) {
+  const v = vals.filter((x) => x > 0 && isFinite(x)); if (!v.length) return null;
+  let lo = Math.min(...v), hi = Math.max(...v); if (hi / lo < 10) { const m = Math.sqrt(hi * lo); lo = m / 4; hi = m * 4; }
+  return [Math.floor(Math.log10(lo) - 0.05), Math.ceil(Math.log10(hi) + 0.05)];
+}
+function frame(c) {
+  const lib = libCurve(c), eng = engPts(RUN, c.k), ex = exfor(c);
+  const xs = [...eng.map((p) => p[0]), ...(lib || []).map((p) => p[0])];
+  for (const pr of PINS) xs.push(...engPts(pr, c.k).map((p) => p[0]));
+  if (!xs.length && META) xs.push(...META.library_grid_ev);
+  const xr = niceRange(xs) || [3, 7.3];
+  const inX = (x) => x >= 10 ** xr[0] && x <= 10 ** xr[1];
+  const ys = [...eng.map((p) => p[1]), ...(lib || []).map((p) => p[1]), ...ex.filter((p) => inX(p.x)).map((p) => p.y)];
+  for (const pr of PINS) ys.push(...engPts(pr, c.k).map((p) => p[1]));
+  let yr = niceRange(ys) || [-1, 3]; if (yr[1] - yr[0] > 9) yr[0] = yr[1] - 9;   // at most 9 decades
+  return { lib, eng, ex, xr, yr };
+}
+function draw(c, cv) {
+  const dpr = devicePixelRatio || 1, W = cv.clientWidth, Hh = cv.clientHeight; cv.width = W * dpr; cv.height = Hh * dpr;
+  const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, Hh);
+  const F = frame(c), m = { l: 54, r: 10, t: 8, b: 30 };
+  const X = (x) => m.l + (Math.log10(x) - F.xr[0]) / (F.xr[1] - F.xr[0]) * (W - m.l - m.r);
+  const Y = (y) => Hh - m.b - (Math.log10(y) - F.yr[0]) / (F.yr[1] - F.yr[0]) * (Hh - m.t - m.b);
+  cv._X = X; cv._F = F; cv._m = m;
+  ctx.font = `500 11.5px ${css("--sans")}`; ctx.fillStyle = css("--faint"); ctx.strokeStyle = css("--grid"); ctx.lineWidth = 1;
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  const step = Math.max(1, Math.ceil((F.xr[1] - F.xr[0]) / 7));
+  for (let k = F.xr[0]; k <= F.xr[1]; k++) { const x = X(10 ** k); ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, Hh - m.b); ctx.stroke();
+    if ((k - F.xr[0]) % step === 0) ctx.fillText(fmtE(10 ** k).replace(/^1 /, "1 "), x, Hh - m.b + 6); }
+  ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  const ys = Math.max(1, Math.ceil((F.yr[1] - F.yr[0]) / 5));
+  for (let k = F.yr[0]; k <= F.yr[1]; k++) { const y = Y(10 ** k); ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke();
+    if ((k - F.yr[0]) % ys === 0) ctx.fillText(yLab(k), m.l - 6, y); }
+  ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, W - m.l - m.r, Hh - m.t - m.b); ctx.clip();
+  const okY = (y) => y > 0 && isFinite(y);
+  // EXFOR
+  ctx.fillStyle = css("--meas"); ctx.strokeStyle = css("--meas"); ctx.globalAlpha = 0.75;
+  for (const p of F.ex) { if (!okY(p.y)) continue; const x = X(p.x), y = Y(p.y);
+    if (p.e && p.e > 0) { ctx.beginPath(); ctx.moveTo(x, Y(p.y * (1 + p.e))); ctx.lineTo(x, Y(Math.max(p.y * (1 - p.e), p.y * 1e-3))); ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(x, y, 2.3, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  // library curve
+  const line = (pts, col, w, dash) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.setLineDash(dash || []); ctx.beginPath(); let on = false;
+    for (const [x, y] of pts) { if (!okY(y)) { on = false; continue; } on ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)); on = true; } ctx.stroke(); ctx.setLineDash([]); };
+  if (F.lib) line(F.lib, css("--curve"), 2, [6, 4]);
+  // pinned runs
+  PINS.forEach((pr, i) => { const pts = engPts(pr, c.k).sort((a, b) => a[0] - b[0]); line(pts, css(["--l1", "--l2", "--l3"][i % 3]), 1.5);
+    ctx.fillStyle = css(["--l1", "--l2", "--l3"][i % 3]); for (const [x, y] of pts) if (okY(y)) { ctx.beginPath(); ctx.arc(X(x), Y(y), 2, 0, 7); ctx.fill(); } });
+  // this run: points as they finish
+  const pts = F.eng.slice().sort((a, b) => a[0] - b[0]); line(pts, css("--eng"), 1.6);
+  ctx.fillStyle = css("--eng"); for (const [x, y] of pts) if (okY(y)) { ctx.beginPath(); ctx.arc(X(x), Y(y), 3.2, 0, 7); ctx.fill(); }
+  // pending energies: ticks on the axis
+  if (RUN && !RUN.done) { ctx.fillStyle = css("--faint"); const done = new Set(RUN.pts.map((p) => p.e_ev.toPrecision(7)));
+    for (const e of RUN.energies) if (!done.has(e.toPrecision(7))) ctx.fillRect(X(e) - 0.5, Hh - m.b - 5, 1, 5); }
+  ctx.restore();
+  const n = $("#n-" + c.k); if (n) { const z = pts.filter(([, y]) => !(y > 0)).length;
+    n.textContent = RUN ? `${pts.length} pts` + (z ? ` · ${z} zero` : "") + (F.lib ? "" : c.lib ? " · no library curve" : " · not in library") : ""; }
+}
+function redraw() {
+  if (redrawQ) return; redrawQ = true;
+  requestAnimationFrame(() => { redrawQ = false;
+    const want = channelsShown().map((c) => c.k).join(), have = [...document.querySelectorAll(".plot")].map((d) => d.dataset.k).join();
+    if (want !== have) setupPlots();
+    for (const d of document.querySelectorAll(".plot")) draw(CH.find((c) => c.k === d.dataset.k), d.querySelector("canvas"));
+    legend(); table(); });
+}
+addEventListener("resize", redraw);
+function legend() {
+  const L = [[`--eng`, "dot", `engine, one job per energy${RUN ? ` (${RUN.label})` : ""}`], ["--curve", "dash", "library v0.2.1 (same engine, production grid)"],
+    ["--meas", "dot", "EXFOR (site data)"]];
+  PINS.forEach((p, i) => L.push([["--l1", "--l2", "--l3"][i % 3], "", "pinned: " + p.label]));
+  $("#legend").innerHTML = L.map(([c, k, t]) => `<span><i class="sw ${k}" style="${k === "dot" ? "background" : "border-color"}:var(${c})"></i>${t}</span>`).join("");
+}
+function hover(ev, c, cv) {
+  const F = cv._F; if (!F || !RUN) return; const r = cv.getBoundingClientRect(), mx = ev.clientX - r.left;
+  let best = null, bd = 1e9; for (const p of F.eng) { const d = Math.abs(cv._X(p[0]) - mx); if (d < bd) { bd = d; best = p; } }
+  const tip = $("#tip"); if (!best || bd > 30) { tip.style.display = "none"; return; }
+  const lib = F.lib ? interp(F.lib, best[0]) : null;
+  const ratio = lib > 0 && best[1] > 0 ? ` (${best[1] / lib >= 1 ? "+" : ""}${((best[1] / lib - 1) * 100).toPrecision(3)} %)` : "";
+  const pt = RUN.pts.find((p) => p.e_ev === best[0]);
+  tip.innerHTML = `${c.t} at ${fmtE(best[0])}<br>engine ${unitV(best[1])}` + (F.lib ? `<br>library ${unitV(lib)}${ratio}` : "") +
+    (pt ? `<br><span style="color:var(--faint)">${pt.cached ? "cached" : pt.wall_s + " s"}</span>` : "");
+  tip.style.display = "block"; const w = tip.offsetWidth;
+  tip.style.left = Math.min(innerWidth - w - 8, ev.clientX + 14) + scrollX + "px"; tip.style.top = ev.clientY + 14 + scrollY + "px";
+}
+function table() {
+  if (!RUN) { $("#tbl").innerHTML = ""; return; }
+  const cs = channelsShown(); const pts = RUN.pts.slice().sort((a, b) => a.e_ev - b.e_ev);
+  let h = `<tr><th>E (eV)</th>${cs.map((c) => `<th>${c.t} (mb)</th>`).join("")}<th>lib. capture (mb)</th><th>job</th></tr>`;
+  const lc = libCurve(CH[2]);
+  for (const p of pts) h += `<tr><td>${p.e_ev.toPrecision(6)}</td>` + cs.map((c) => `<td>${p.channels ? fmtV(p.channels[c.k]) : "—"}</td>`).join("") +
+    `<td>${fmtV(lc ? interp(lc, p.e_ev) : null)}</td><td>${p.err ? `<span style="color:var(--bad)" title="${p.err.replace(/"/g, "'")}">error</span>` : p.cached ? "cached" : p.wall_s + " s"}</td></tr>`;
+  $("#tbl").innerHTML = h;
+}
+
+// ---------- run ----------
+async function loadTarget(z, a) {
+  const [l, e] = await Promise.all([fetch(`/api/library?z=${z}&a=${a}`).then((r) => r.json()).catch(() => ({})),
+    fetch(`/site/data/n/${z}/${a}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)]);
+  LIBD = l && l.energy_ev ? l : null; EXF = e;
+  const nm = `${SYM[z]}-${a}`;
+  $("#meta").innerHTML = LIBD ? `<b>${nm}</b> · library v0.2.1 tier <b>${LIBD.tier}</b> · composed <b>${LIBD.comp || "—"}</b>` +
+    (LIBD.anchored_factor ? ` · ANCHORED: library curve = engine × ${LIBD.anchored_factor} (one-energy jobs are the engine's own value)` : "") +
+    (LIBD.carried_v01 ? " · v0.1 value carried (no production engine run in the library)" : "") +
+    (LIBD.points_repaired ? ` · ${LIBD.points_repaired} library point(s) repaired from the engine floor` : "") +
+    (EXF ? "" : " · no EXFOR points in the site data") : `<b>${nm}</b> · not in library v0.2.1`;
+}
+$("#f").addEventListener("submit", async (ev) => {
+  ev.preventDefault(); $("#err").textContent = "";
+  const t = parseTarget($("#tgt").value); if (!t) { $("#err").textContent = "Target not recognised: use e.g. Fe-56 or 26-56."; return; }
+  const es = energies(); if (!es.length) { $("#err").textContent = "No valid energies."; return; }
+  $("#go").disabled = true;
+  try {
+    await loadTarget(t.z, t.a);
+    const body = { z: t.z, a: t.a, energies_ev: es, comp: $("#comp").value, kw: kwBody(), extra: $("#extra").value };
+    const r = await fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status);
+    if (ES) ES.close();
+    const label = `${SYM[t.z]}-${t.a}, ${j.comp}${j.kw ? "; " + j.kw : ""}`;
+    RUN = { id: j.run, z: t.z, a: t.a, label, comp: j.comp, kw: j.kw, energies: [...new Set(es)].sort((a, b) => a - b), pts: [], done: false, t0: performance.now(), cached: j.cached };
+    status(); redraw();
+    ES = new EventSource(`/api/stream?run=${j.run}`);
+    ES.addEventListener("point", (e) => { const p = JSON.parse(e.data); if (!RUN.pts.some((q) => q.e_ev === p.e_ev)) RUN.pts.push(p); status(); redraw(); });
+    ES.addEventListener("done", () => { RUN.done = true; ES.close(); status(); redraw(); });
+    ES.onerror = () => { if (!RUN.done) $("#err").textContent = "Lost the connection to the service; results so far are kept (rerun: cached points return at once)."; };
+  } catch (e) { $("#err").textContent = String(e.message || e); }
+  finally { $("#go").disabled = false; $("#pin").disabled = !RUN; $("#csv").disabled = !RUN; }
+});
+function status() {
+  if (!RUN) return; const n = RUN.pts.length, N = RUN.energies.length, bad = RUN.pts.filter((p) => p.err).length;
+  $("#bar").style.width = (100 * n / N) + "%";
+  const s = ((performance.now() - RUN.t0) / 1000).toFixed(0);
+  $("#stxt").textContent = `${n} / ${N} energies` + (RUN.cached ? ` (${RUN.cached} from cache)` : "") + (bad ? ` · ${bad} failed` : "") + ` · ${s} s` + (RUN.done ? " · done" : " · running");
+  if (bad) { const e = RUN.pts.find((p) => p.err); $("#err").textContent = `Engine error at ${fmtE(e.e_ev)}: ${e.err}`; }
+}
+setInterval(() => RUN && !RUN.done && status(), 1000);
+$("#pin").onclick = () => { if (!RUN) return; PINS.unshift({ ...RUN, pts: RUN.pts.slice() }); PINS = PINS.slice(0, 3); pins(); redraw(); };
+function pins() {
+  $("#pins").innerHTML = PINS.map((p, i) => `<span class="pin"><i class="sw" style="border-color:var(${["--l1", "--l2", "--l3"][i % 3]})"></i>${p.label}<button type="button" data-i="${i}" aria-label="Remove">×</button></span>`).join("");
+  for (const b of document.querySelectorAll(".pin button")) b.onclick = () => { PINS.splice(+b.dataset.i, 1); pins(); redraw(); };
+}
+$("#csv").onclick = () => {
+  if (!RUN) return; const cs = CH.map((c) => c.k), lc = libCurve(CH[2]);
+  const head = ["# INCOGNITA engine calculator: " + (META ? META.engine : ""), `# target ${RUN.label}; one engine job per energy; cross sections in mb`,
+    ["energy_ev", ...cs.map((k) => k + "_mb"), "library_v021_capture_mb", "cached", "error"].join(",")];
+  const rows = RUN.pts.slice().sort((a, b) => a.e_ev - b.e_ev).map((p) => [p.e_ev, ...cs.map((k) => (p.channels && p.channels[k] != null ? p.channels[k] : "")),
+    lc ? (interp(lc, p.e_ev) ?? "") : "", p.cached ? 1 : 0, (p.err || "").replace(/[,\n]/g, " ")].join(","));
+  const b = new Blob([[...head, ...rows].join("\n") + "\n"], { type: "text/csv" }), a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = `engine_${RUN.label.split(",")[0]}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+
+// ---------- start ----------
+(async () => {
+  const [m, idx] = await Promise.all([fetch("/api/meta").then((r) => r.json()), fetch("/site/data/index.json").then((r) => r.json()).catch(() => null)]);
+  META = m; SYM = idx ? idx.sym : []; $("#engine").textContent = m.engine;
+  $("#comp").innerHTML = m.comps.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+  const ks = $("#kwset");
+  for (const [k, d] of Object.entries(m.keywords)) {
+    const l = document.createElement("label"); l.className = "row"; l.title = d.help;
+    l.innerHTML = `${d.label} <code style="font:12px var(--mono);color:var(--faint)">${k}</code><select id="kw-${k}">${d.options.map(([v, t]) => `<option value="${v}">${t}</option>`).join("")}</select>`;
+    ks.appendChild(l);
+  }
+  $("#limits").textContent = `At most ${m.workers} engine processes at nice ${m.nice}; results are cached by inputs and energy. Neutron projectile only.`;
+  syncE(); setupPlots(); redraw();
+  const t = parseTarget($("#tgt").value); if (t) loadTarget(t.z, t.a).then(redraw);
+})();
+</script>
+</body>
+</html>
