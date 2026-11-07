@@ -1,4 +1,9 @@
-# Curated EXFOR capture set v2 (CAPSET-v2), Z 1-92
+# Curated EXFOR capture set v2.1 (CAPSET-v2.1), Z 1-92
+
+**Version 2.1 (2026-11-07).** The tables here are v2.1: v2 (below) plus the corrections of the 2026-11-07 data hunt,
+step S9 (section "v2.1" at the end). File names are unchanged (`*_v2.parquet`); `provenance.json` and `counts_v2.json`
+carry `"version": "2.1"`. The v2 result is still reproduced exactly by the same script (ladder step S8, 0 of 12 432
+decisions differ from the shipped v2) and is kept as the `S8_prelm_final` column of `ladder_v2.csv`.
 
 EXFOR-derived (IAEA Nuclear Data Section and the NRDC network), CC BY 4.0. `SHA256SUMS` checks every data file.
 Built 2026-11-06 by `scripts/build_capture_v2.py` from the 2026-10-14 EXFOR snapshot (`entry_2026-10-14.zip`).
@@ -13,7 +18,7 @@ if a future card or rescore adopts it. ("v2" here is the capture set's version. 
 | `exfor_capture_Z26-92_trust_v2.parquet` | one row per dataset, Z 26-92, the schema of `../inputs/exfor_capture_Z26-92_trust.parquet` |
 | `exfor_cells_Z26-92_v2.parquet` | one row per dataset and 0.1-dex bin, the schema of `../inputs/exfor_cells.parquet` |
 | `exfor_capture_Z1-25_trust_v2.parquet`, `exfor_cells_Z1-25_v2.parquet` | the same for Z 1-25 |
-| `review_decisions_capture_v2.jsonl` | every decision this version adds (390 lines), review-decision format, each with rule code, reason and EXFOR id |
+| `review_decisions_capture_v2.jsonl` | every decision this version adds (390 v2 lines + 15 v2.1 lines with `"version": "2.1"`), review-decision format, each with rule code, reason and EXFOR id |
 | `ladder_v2.csv` | the decision of every dataset after each fix step S0-S8 (below), and the CAPSET-v2 rule that decided it |
 | `counts_v2.json` | all counts quoted here, per defect and per step |
 | `provenance.json` | inputs and their SHA256 (entry zip, staging, the three human-decision files), code, gates |
@@ -109,15 +114,15 @@ not the hard-coded 2026-08-27. The default ingest keeps the constant (reproducib
 | datasets | 10 619 | 10 728 | 1 695 | 1 704 |
 | points | 688 818 | 689 138 | 266 299 | 266 308 |
 | cells | 33 659 | 33 830 | 4 040 | 4 049 |
-| keep / downweight / exclude / fix-unit (datasets) | 6 829 / 1 327 / 2 458 / 5 | 6 645 / 974 / 3 104 / 5 | 1 148 / 158 / 388 / 1 | 1 137 / 118 / 448 / 1 |
-| cells keep / downweight / exclude / fix-unit | 23 878 / 8 344 / 1 424 / 13 | 23 259 / 6 919 / 3 647 / 5 | 3 115 / 675 / 249 / 1 | 2 992 / 625 / 431 / 1 |
+| keep / downweight / exclude / fix-unit (datasets) | 6 819 / 1 326 / 2 469 / 5 | 6 645 / 974 / 3 104 / 5 | 1 148 / 158 / 388 / 1 | 1 137 / 118 / 448 / 1 |
+| cells keep / downweight / exclude / fix-unit | 23 866 / 8 341 / 1 439 / 13 | 23 259 / 6 919 / 3 647 / 5 | 3 115 / 675 / 249 / 1 | 2 992 / 625 / 431 / 1 |
 
 No v1 dataset is missing from v2. The ladder (`ladder_v2.csv`, `counts_v2.json` "ladder") attributes every change:
 
 | step (Z 26-92) | keep | downweight | exclude | fix-unit | changed vs previous step |
 |---|---|---|---|---|---|
-| S0 shipped v1 (2026-09-12) | 6 829 | 1 327 | 2 458 | 5 | |
-| S1 same parser, 2026-10-14 snapshot, current review files | 6 743 | 1 011 | 2 861 | 4 | 606 |
+| S0 shipped v1 (2026-09-12, with the 12 review lines of 2026-11-06) | 6 819 | 1 326 | 2 469 | 5 | |
+| S1 same parser, 2026-10-14 snapshot, current review files | 6 743 | 1 011 | 2 861 | 4 | 610 |
 | S2 + D1 number fix | 6 702 | 1 135 | 2 865 | 4 | 375 |
 | S3 + D2 parser gaps | 6 817 | 1 040 | 2 867 | 4 | 290 |
 | S4 + D4 uncertainty split | 6 847 | 1 011 | 2 866 | 4 | 200 |
@@ -126,14 +131,68 @@ No v1 dataset is missing from v2. The ladder (`ladder_v2.csv`, `counts_v2.json` 
 | S7 + D5 SPSDD / DEP | 6 724 | 895 | 3 104 | 5 | 423 |
 | S8 + D5 PRELM = v2 | 6 645 | 974 | 3 104 | 5 | 79 |
 
-Read this honestly: S1 alone (no fix, only the newer snapshot and review files) changes 606 decisions, and S2-S5 each
+Read this honestly: S1 alone (no fix, only the newer snapshot and review files) changes 610 decisions, and S2-S5 each
 move a few hundred datasets across the keep / downweight boundary (trust 0.5) because the metadata prior and the
 posterior trust are re-learned on every run. The resampling-stability gate fails in every run since the 2026-10-14
 snapshot (it failed for the light run too); the standards and spot-list gates pass. The fit stops at its 300-iteration
 cap as every WP-12 run has (converged = false, rms step 9e-5). Decision changes that come from a rule are the S6-S8
 steps (rule lines); the rest is the automatic layer's sensitivity, which v2 does not claim to fix. (Corrected 2026-11-07: the
 first build counted a dataset absent from both steps as changed, giving S1 715 and S2 397, Z 1-25 44 and 68; the
-decisions themselves and every other count are unchanged.)
+decisions themselves and every other count are unchanged. Regenerated 2026-11-07 with v2.1: S0 is read from the
+`../inputs/` tables as they ship, which since 2026-11-06 carry the 12 Z 26-92 review lines (11 more excludes), so the
+S0 row and the v1 column above moved by those 12 datasets and S1 by 4, 606 -> 610; S1-S8 are unchanged.)
+
+## v2.1 (2026-11-07)
+
+Step S9 of `scripts/build_capture_v2.py`: re-staged with `V21_ALL` (the six v2 fixes + `encm`) and the energy fixes of
+the D10 lines, the 15 v2.1 lines appended to the human-decision file, one more quality-model run. Lines: reviewer
+`agent:claude-opus-5.5`, each checked against its EXFOR record (the reasons quote it).
+
+**D8. Centre-of-mass energies** (`data/ingest/exfor.py` fix `encm`, opt-in and NOT in `V2_ALL`, so v2 stays
+reproducible). EN-CM, EN-RES-CM and EN-CM-MIN/-MAX were stored as `energy_ev`, which is the lab energy everywhere else.
+Now E_lab = E_cm (A + a) / A (mass numbers; for a neutron E_lab = E_cm (A+1)/A, +14 % for Li-7, +7 % for C-14, +1.6 %
+for Ni-63; a natural target uses its standard atomic weight). In the capture set: 11 datasets, 451 points (Z 1-25: 3
+datasets, 47 points: C-14 Nakamura 2009 14224002 and Jiang 2025 14859002, Li-7 Izsak 2013 14378002, all DERIV from
+Coulomb dissociation; Z 26-92: Ni-63 Weigand 2015 14446002, 207 points, and 7 V0012 evaluation datasets, excluded as
+compilations anyway). One decision changes with the energies: 14224002 C-14 keep -> downweight.
+In all of EXFOR 2026-10-14, 3 803 datasets take their incident energy from such a column; 437 (31 431 points) have a
+neutron projectile, 307 of them (7 818 points) on Z 1-25 targets, 288 of these on P-31 (the V0016 evaluation file, mostly
+DA/DE). Among the measured capture, (n,2n), (n,p), (n,alpha) products only the 11 datasets above and 6 light threshold
+series (He-3(n,p), Be-7(n,p)/(n,alpha), all removed by the threshold rules before the rows; see
+`../inputs/README.md`) are affected. Other staged products of the research checkout (elastic, inelastic, DE spectra)
+were not rebuilt.
+
+**D9. Duplicates** (the same measurement compiled twice; the later copy excluded, the original kept), 12 datasets:
+- Ba-132 MACS Dillmann 2010, 22939040 pointer 3 (JENDL-3.3 shape) = pointer 2 (JEFF) in all 11 values; pointer 3 excluded.
+- Cl-35 Pavetich 2019, entry 31796 (002, 003, 004) = entry 23468 (compiled first, author-approved); 31796 excluded.
+- P-31, I-127 (two), In-115 thermal activation Jozefowicz 1963, entry 31472 (002-005 pointer 2) = entry 31099; 31472 excluded.
+- Te-122 / Te-124 isomer cross sections and resonance integrals Alpatov, journal 1995 (41168002-005) = report 1990
+  (41039002-005), same samples and values; 41168 excluded.
+Checked and NOT duplicates (left as they are): F-19 Uberseder 2007 22968005 / 22968008 (two different samples, C-F2 no. 1
+and Na-F-1, whose 2007 values were both 3.46 mb, renormalised to 3.67 mb; their ratios to gold differ) and Pb-208 Ratzel
+2004 22883012 / 22883013 (samples Pb2 and Pb3, both 0.292 mb in 2004, different uncertainties). The test of identical
+datasets covers two or more equal cells; single-cell equalities (about 100 pairs, mostly thermal values equal to three
+digits) were not reviewed.
+
+**D10. Unit and energy slips**, 3 datasets:
+- Mo-95 MACS Koehler 2022 14797006: 1018 ... 346 B at kT 5-30 keV are mb -> `fix-unit` 0.001 (v2: downweight, trust 6e-5).
+- Te-120 Eastman 2008 14165012: a resonance integral (paper table 3, EN-MIN 0.5 eV) coded as a Maxwellian average at
+  kT = 0.5 eV -> `exclude`.
+- W-186 MACS Marganiec 2009 14248005: kT 5-100 compiled in EV, really keV -> energies x1000 at staging (line with
+  `energy_fix`, no decision); the decision stays automatic (keep).
+
+**Result.** Z 26-92: 10 728 datasets, 689 138 points, 33 823 cells (v2: 33 830; corrected energies fall into
+different 0.1-dex bins); keep / downweight / exclude / fix-unit 6 664 / 945 / 3 113 / 6 (v2: 6 645 / 974 / 3 104 / 5); cells
+23 527 / 6 625 / 3 657 / 14. Z 1-25: 1 704 datasets, 4 048 cells; 1 141 / 110 / 452 / 1 (v2: 1 137 / 118 / 448 / 1); cells
+3 073 / 539 / 435 / 1. 138 decisions change from v2 (`ladder_v2.csv` S8 -> S9): 14 by the lines (13 keep -> exclude, 1
+downweight -> fix-unit), 1 by the D8 energies (14224002), and 123 by the automatic layer re-learning its prior and trust
+(80 downweight -> keep, 43 keep -> downweight, none to or from exclude), the same sensitivity as steps S1-S5 above. Gates
+as v2: standards and spot list pass, resampling stability fails.
+
+| step | Z 26-92 keep / dw / excl / fix | changed | Z 1-25 keep / dw / excl / fix | changed |
+|---|---|---|---|---|
+| S8 = v2 | 6 645 / 974 / 3 104 / 5 | | 1 137 / 118 / 448 / 1 | |
+| S9 = v2.1 | 6 664 / 945 / 3 113 / 6 | 122 | 1 141 / 110 / 452 / 1 | 16 |
 
 ## Not done / open
 
@@ -142,4 +201,7 @@ decisions themselves and every other count are unchanged.)
 - Sb-124 (above); the fix-unit factors are logged, not applied (as in v1).
 - The curation register v2 and its decisions were not re-run on these cells (it is pre-registered on the v1 cells;
   re-running it would be a new register version with its own pre-registration).
-- No person has reviewed the 390 new lines; 387 are rule lines from the EXFOR record, 3 are agent-checked.
+- No person has reviewed the 390 new lines; 387 are rule lines from the EXFOR record, 3 are agent-checked. The 15
+  v2.1 lines are agent-checked, not reviewed by a person.
+- v2.1: the three pointers of each Dillmann DERIV MACS (22939, one SACS with three evaluated shapes) still count one
+  measurement two or three times where their values differ; the v1 tables in `../inputs/` do not get the v2.1 lines.

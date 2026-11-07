@@ -13,8 +13,9 @@ A corrected version of these capture tables, capture set v2 (2026-11-06: number 
 | `exfor_capture_Z1-25_provenance.json` | inputs (SHA256), gates and decision counts of the Z 1-25 run |
 | `review_decisions_Z26-92.jsonl` | review lines for Z 26-92 capture datasets (same format, plus a `rekey` form), applied on top of the 2026-09-12 run by `scripts/apply_review_Z26-92.py` (added 2026-11-06; see below) |
 | `review_decisions_Z1-25.jsonl` | review lines for light capture datasets (format of the research repository's `data/curate/review_decisions.jsonl`), applied by the Z 1-25 run |
-| `exfor_threshold_Z1-25_rows.parquet` | Z 1-25 measured (n,2n), (n,p), (n,α): one row per EXFOR series and engine energy bin, columns of the benchmark `n2n_rows` / `np_rows` plus `reaction` and `first_author` (added 2026-11-06) |
+| `exfor_threshold_Z1-25_rows.parquet` | Z 1-25 measured (n,2n), (n,p), (n,α): one row per EXFOR series and engine energy bin, columns of the benchmark `n2n_rows` / `np_rows` plus `reaction`, `first_author` and `review` (added 2026-11-06; version 1.1 of 2026-11-07, see below) |
 | `exfor_threshold_Z1-25_provenance.json` | inputs (SHA256), rule counts and checks of that file |
+| `review_decisions_threshold_Z1-25.jsonl` | review lines for those rows (6 lines, 2026-11-07), applied by `scripts/build_light_channels.py` |
 
 ## Z 26-92 review lines (2026-11-06)
 
@@ -71,3 +72,23 @@ target activation sums `(22-TI-46(N,P)21-SC-46)+(22-TI-47(N,X)21-SC-46)`). React
 SF3 = A only, so Li-6(n,t)He-4 is not in it; He-4 production (n,xα) is not (n,α) either, and the site no longer shows the
 benchmark's He-production rows as (n,α) points. These rows are not curated by the WP-12 model (neither are the benchmark
 rows). The site shows them next to the library v0.2 channel curves from Z 8; for Z 1-7 the measurements stand alone.
+
+### Version 1.1 of the light threshold rows (2026-11-07)
+
+`scripts/build_light_channels.py` (`--v1` rebuilds 1.0) now corrects the staged series before the rules:
+
+- **Review lines** (`review_decisions_threshold_Z1-25.jsonl`, reviewer `agent:claude-opus-5.5`, reasons quote the EXFOR
+  record). Cr-52 and Cr-53(n,p) at 14.8 MeV, Chittenden 1961 (11132004 / 11132005): compiled in B after the 2023 revision
+  "published numbers in mb adopted" (82.7 B, 37.3 B) -> `fix-unit` 0.001, now 82.7 and 37.3 mb (rows marked
+  `review = "fix-unit x0.001"`). Duplicates, original kept: Ti-47(n,p) Gonzalez 1962 compiled twice (31165002 = 30219002,
+  12 points) -> 31165002 excluded; Firkin 1983 (AERE-M-3350, entry 21941) repeats the Swinhoe+Uttley 1979 AERE points
+  (entry 20986) -> Ti-48(n,p) 21941005 and Al-27(n,α) 21941006 excluded (their 14.1 MeV Al-27 value is Swinhoe's 122 mb
+  monitor), and the three Ti-47(n,p) points of 21941002 at 5.47-9.8 MeV excluded (its 11.8 MeV point is kept).
+- **Centre-of-mass energies** (`data/ingest/exfor.py` fix `encm`, E_lab = E_cm (A+1)/A): 6 light series (86 points) give
+  their energy as EN-CM (He-3(n,p) Pizzone 2020; Be-7(n,p) / (n,α) Kawabata 2017, Hayakawa 2021, Lamia 2019). They are
+  converted, but none of them passes the rules (DERIV / SF5 / SF8), so no row changes.
+
+Rows: 2 881 -> 2 865 (16 rows of excluded series or points removed, 2 rows rescaled); (n,2n) 405, (n,p) 1 374, (n,α)
+1 086. The Z 26-92 check against the benchmark rows is unchanged (100 % reproduced). The v1 light capture tables
+(`exfor_capture_Z1-25_trust.parquet`, `exfor_cells_Z1-25.parquet`, `build_light_curation.py`) are not rebuilt: none of
+their inputs changed; the capture corrections of 2026-11-07 are in capture set v2.1 (`../capture_v2/`).
