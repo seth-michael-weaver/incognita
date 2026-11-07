@@ -113,8 +113,14 @@ EXFOR_VERSION = "2026-08-27"  # entry.zip snapshot date (raw/MANIFEST.json); CAP
 #             DATA-ERR alone) stays stat_sigma as in v1 (dense TOF scans: mostly counting statistics; the scatter
 #             model's per-dataset bias term carries the correlated normalisation)
 V2_ALL = frozenset({"numfix", "ratio", "enminapx", "ktdegc", "eqroute", "unc"})
+# CAPSET-v2.1 (2026-11-07): one more OPT-IN fix, NOT in V2_ALL, so a CAPSET-v2 run (V2_ALL) stays byte-identical:
+#   encm      incident energies compiled in the centre-of-mass frame (EN-CM, EN-RES-CM, EN-CM-MIN, EN-CM-MAX) were
+#             stored as if they were laboratory energies (energy_ev is the lab energy everywhere else). Converted with
+#             E_lab = E_cm (A + a) / A, a = projectile and A = target mass number (for a neutron: E_lab = E_cm (A+1)/A;
+#             a natural target uses its standard atomic weight); an absolute energy uncertainty is scaled alike.
+V21_ALL = V2_ALL | {"encm"}
 _v2env = os.environ.get("INCOGNITA_X4_V2", "").strip()
-V2_FIXES: frozenset[str] = V2_ALL if _v2env == "1" else frozenset(x for x in _v2env.split(",") if x in V2_ALL)
+V2_FIXES: frozenset[str] = V2_ALL if _v2env == "1" else frozenset(x for x in _v2env.split(",") if x in V21_ALL)
 V2_LOG: dict[str, set[str]] = {}  # fix -> {"subentry/pointer"} touched by it (filled only when V2_FIXES is not empty)
 K_B_EV = 8.617333262e-5
 
@@ -632,8 +638,39 @@ def _projectile_a(rx: ParsedReaction) -> int | None:
     return int(m[1]) if m and int(m[1]) > 0 else None
 
 
+_CM_ENERGY = frozenset({"EN-CM", "EN-RES-CM", "EN-CM-MIN", "EN-CM-MAX"})
+# standard atomic weights (IUPAC, rounded), Z = 1..94, for the centre-of-mass conversion of a natural target
+_STD_WEIGHT = (
+    1.008, 4.0026, 6.94, 9.0122, 10.81, 12.011, 14.007, 15.999, 18.998, 20.180, 22.990, 24.305, 26.982, 28.085, 30.974,
+    32.06, 35.45, 39.95, 39.098, 40.078, 44.956, 47.867, 50.942, 51.996, 54.938, 55.845, 58.933, 58.693, 63.546, 65.38,
+    69.723, 72.630, 74.922, 78.971, 79.904, 83.798, 85.468, 87.62, 88.906, 91.224, 92.906, 95.95, 98.0, 101.07, 102.91,
+    106.42, 107.87, 112.41, 114.82, 118.71, 121.76, 127.60, 126.90, 131.29, 132.91, 137.33, 138.91, 140.12, 140.91,
+    144.24, 145.0, 150.36, 151.96, 157.25, 158.93, 162.50, 164.93, 167.26, 168.93, 173.05, 174.97, 178.49, 180.95,
+    183.84, 186.21, 190.23, 192.22, 195.08, 196.97, 200.59, 204.38, 207.2, 208.98, 209.0, 210.0, 222.0, 223.0, 226.0,
+    227.0, 232.04, 231.04, 238.03, 237.0, 244.0,
+)
+ENCM_HIT: list[float] = []  # set by _col_to_ev when the encm fix converts a column (read and cleared by _build_sub)
+
+
+def cm_to_lab_factor(rx: ParsedReaction) -> float | None:
+    """E_lab / E_cm = (A + a) / A for the incident channel (mass numbers; standard atomic weight for a natural target)."""
+    a = _projectile_a(rx)
+    z, at = rx.target.z, rx.target.a
+    m_t = float(at) if at else (_STD_WEIGHT[z - 1] if 1 <= z <= len(_STD_WEIGHT) else None)
+    if not a or not m_t:
+        return None
+    return (m_t + a) / m_t
+
+
 def _col_to_ev(c: Column, rx: ParsedReaction) -> np.ndarray | None:
     """Energy column → eV; handles MeV/nucleon by multiplying with the projectile A."""
+    if "encm" in V2_FIXES and c.name in _CM_ENERGY:
+        f = cm_to_lab_factor(rx)
+        e = _col_to_ev(Column(c.name + "#LAB", c.pointer, c.unit, c.values), rx)
+        if f is None or e is None:
+            return e
+        ENCM_HIT.append(f)
+        return e * f
     if "ktdegc" in V2_FIXES and c.name.startswith("KT") and c.unit.strip().upper() == "DEG-C":
         if c.name.endswith("ERR"):  # a temperature difference
             return c.values * K_B_EV
@@ -725,6 +762,8 @@ def _energy(
         else:
             sev = _col_to_ev(s, rx)
             sig = np.abs(sev) if sev is not None else None
+            if sig is not None and "encm" in V2_FIXES and c.name in _CM_ENERGY and ENCM_HIT:
+                sig = sig * ENCM_HIT[-1]  # an absolute uncertainty of a centre-of-mass energy
     return e, sig, c.name
 
 
@@ -1190,7 +1229,10 @@ def _build_sub(
                 reasons.append(f"no_data_column:{ptr or '-'}")
                 stats["pointer:no_data_column"] += 1
             continue
+        ENCM_HIT.clear()
         en = _energy(cols, ptr, rx, res_energy)
+        if ENCM_HIT and en is not None and en[2] in ("EN-CM", "EN-RES-CM", "EN-MIN/EN-MAX", "EN-MIN", "EN-MAX"):
+            _v2log("encm", sub.accession, ptr)
         if en is None:
             reasons.append("no_energy_column")
             stats["pointer:no_energy_column"] += 1

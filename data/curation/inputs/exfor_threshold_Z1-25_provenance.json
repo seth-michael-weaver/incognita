@@ -1,5 +1,6 @@
 {
- "built": "2026-11-06",
+ "version": "1.1",
+ "built": "2026-11-07",
  "script": "scripts/build_light_channels.py",
  "rules": "research scripts/channels/score_channels.py exfor_rows() + amendment A1 (the rules of the benchmark rows incognita/bench/data/exam_rows, ch-n2n / ch-np / ch-na), applied to Z 1-25, plus the v5b REACTION-code check (score_channels_fixed.reaction_flags); Li-6 SF3=A would be dropped as (n,t) (rule li6_nt)",
  "staging": {
@@ -24,9 +25,9 @@
    "v_entry": 6
   },
   "np": {
-   "subentries": 1483,
-   "kept": 699,
-   "pts": 5682,
+   "subentries": 1481,
+   "kept": 697,
+   "pts": 5662,
    "rule_filter": 682,
    "reaction_code": 52,
    "reaction_code:STATE": 2,
@@ -37,9 +38,9 @@
    "v_entry": 21
   },
   "na": {
-   "subentries": 996,
-   "kept": 429,
-   "pts": 7657,
+   "subentries": 995,
+   "kept": 428,
+   "pts": 7652,
    "rule_filter": 504,
    "reaction_code": 24,
    "reaction_code:STATE": 6,
@@ -48,6 +49,32 @@
    "reaction_code:SF9": 12,
    "reaction_code:SF8": 1,
    "v_entry": 21
+  }
+ },
+ "v1_1_corrections": {
+  "centre_of_mass_energy": {
+   "rule": "E_lab = E_cm (A+1)/A (exfor.py fix encm), applied to the staged series",
+   "series": {
+    "14716002/": 1.333333,
+    "23366002/": 1.142857,
+    "23366003/": 1.142857,
+    "23652002/": 1.142857,
+    "23652003/": 1.142857,
+    "23726002/": 1.142857
+   },
+   "series_in_rows": []
+  },
+  "review_file": {
+   "path": "data/curation/inputs/review_decisions_threshold_Z1-25.jsonl",
+   "sha256": "bf972d291c455ac779038d38de25508d2faafc328dc8be7ac68ff6eef81a55f5",
+   "lines": 6
+  },
+  "counts": {
+   "review_fix_unit_series": 2,
+   "encm_series": 6,
+   "encm_points": 86,
+   "review_excluded_points": 3,
+   "review_excluded_series": 3
   }
  },
  "per_channel": {
@@ -85,8 +112,8 @@
    ]
   },
   "np": {
-   "rows": 1386,
-   "series": 699,
+   "rows": 1374,
+   "series": 697,
    "nuclides": [
     "11-23",
     "12-24",
@@ -136,8 +163,8 @@
    ]
   },
   "na": {
-   "rows": 1090,
-   "series": 429,
+   "rows": 1086,
+   "series": 428,
    "nuclides": [
     "10-20",
     "11-23",
@@ -189,25 +216,25 @@
  },
  "z26_92_check_vs_benchmark_rows": {
   "n2n": {
-   "benchmark_rows": 2477,
-   "reproduced_same_value": 2477,
+   "benchmark_rows": 2334,
+   "reproduced_same_value": 2334,
    "share": 1.0,
    "new_code_rows_z26_92": 2481,
-   "fixed_rule_would_drop": 143
+   "fixed_rule_would_drop": 0
   },
   "np": {
-   "benchmark_rows": 1593,
-   "reproduced_same_value": 1593,
+   "benchmark_rows": 1525,
+   "reproduced_same_value": 1525,
    "share": 1.0,
    "new_code_rows_z26_92": 2088,
-   "fixed_rule_would_drop": 68
+   "fixed_rule_would_drop": 0
   },
   "na": {
-   "benchmark_rows": 903,
-   "reproduced_same_value": 903,
+   "benchmark_rows": 868,
+   "reproduced_same_value": 868,
    "share": 1.0,
    "new_code_rows_z26_92": 906,
-   "fixed_rule_would_drop": 35
+   "fixed_rule_would_drop": 0
   }
  }
 }

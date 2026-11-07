@@ -31,6 +31,15 @@ Steps (inside the research checkout given by --main, default ~/nucleus; nothing 
   Check printed at the end: the same code on Z 26-92 of the same snapshot against the shipped benchmark rows (which were
   cut from the 2026-09 snapshot), as the share of benchmark rows reproduced with the same value.
 
+Version 1.1 (2026-11-07), two corrections applied after the staging check and before the rules (--v1 reproduces 1.0):
+  - Centre-of-mass energies. Series whose incident energy is compiled as EN-CM (EN-RES-CM, EN-CM-MIN/-MAX) were staged
+    with that number as the lab energy. They are found by parsing their entries with this repository's
+    data/ingest/exfor.py and its opt-in fix "encm"; their energies are converted, E_lab = E_cm (A+1)/A (A = target mass
+    number).
+  - Review lines, data/curation/inputs/review_decisions_threshold_Z1-25.jsonl (format of the capture review files plus an
+    optional "points" list of the EXFOR points a line applies to): exclude drops the series (or its listed points),
+    fix-unit multiplies its values by "factor". Rows of a fix-unit series carry review = "fix-unit xFACTOR".
+
 Reaction identities stay exact: SF3 = A is (n,alpha) with the residual the target + n - alpha; Li-6(n,t)He-4 is SF3 = T
 and is not taken (ENDF puts Li-6 + n -> alpha + t in MT 105, (n,t)). A Li-6 SF3 = A series (residual H-3) would be the
 same final state as (n,t) and is dropped and counted (rule LI6_NT).
@@ -52,6 +61,8 @@ SF3 = {"n2n": "2N", "np": "P", "na": "A"}
 EMAX = 20e6
 ISOMER = re.compile(r"-(M\d?|G)$")  # score_channels.py ISOMER (product state suffix)
 ENGINE = "~/nuc-local/capture/chart_s9_npz"
+VERSION = "1.1"
+REVIEW = OUT / "review_decisions_threshold_Z1-25.jsonl"
 
 
 def sha(p):
@@ -106,6 +117,94 @@ def stage(main: Path):
         res[ch] = (sub(1, 25), heavy)
         print(f"staged {ch}: {res[ch][0].num_rows} light measurements; Z 26-92 reproduces {heavy.num_rows} rows exactly", flush=True)
     return res
+
+
+def encm_series(light: dict, main: Path) -> dict:
+    """{"subentry/pointer": factor} of the light series whose incident energy is a centre-of-mass energy: their entries
+    are parsed with this repository's ingest and its opt-in fix "encm" (V2_LOG["encm"] lists what it converted)."""
+    import zipfile
+    sys.path.insert(0, str(REPO))
+    from data.ingest import exfor as X
+    assert Path(X.__file__).resolve().is_relative_to(REPO), X.__file__
+    rows = {}
+    for T in light.values():
+        for r in T.select(["entry", "subentry", "pointer", "target_a", "projectile"]).to_pylist():
+            rows[f"{r['subentry']}/{r['pointer'] or ''}"] = r
+    entries = sorted({r["entry"] for r in rows.values()})
+    X.V2_FIXES, out = frozenset({"encm"}), {}
+    try:
+        with zipfile.ZipFile(main / "raw" / "exfor" / "entry_2026-10-14.zip") as z:
+            names = {n.rsplit("/", 1)[-1][:-4]: n for n in z.namelist() if n.endswith(".txt")}
+            for e in entries:
+                if e not in names:
+                    continue
+                text = z.read(names[e]).decode("latin-1")
+                if "-CM" not in text:
+                    continue
+                X.V2_LOG.clear()
+                X.build_measurements(X.parse_entry(text), collections.Counter(), [])
+                for k in X.V2_LOG.get("encm", ()):
+                    if k in rows and (rows[k]["projectile"] or "").upper() == "N" and rows[k]["target_a"] > 0:
+                        A = rows[k]["target_a"]
+                        out[k] = (A + 1) / A
+    finally:
+        X.V2_FIXES = frozenset()
+    return out
+
+
+def read_review(path: Path) -> dict:
+    """series key "subentry/pointer" -> review line (later lines override)."""
+    out = {}
+    for ln in path.read_text(encoding="utf-8").splitlines():
+        if ln.strip() and not ln.lstrip().startswith("#"):
+            d = json.loads(ln)
+            assert d["decision"] in ("exclude", "fix-unit"), d
+            assert d["decision"] != "fix-unit" or d.get("factor"), d
+            out[f"{d['subentry']}/{d.get('pointer') or ''}"] = d
+    return out
+
+
+def correct(T, cm: dict, review: dict, cnt):
+    """Apply the centre-of-mass conversion and the review lines to a staged pyarrow table (returns a new table)."""
+    import pyarrow as pa
+    rows = []
+    for r in T.to_pylist():
+        k = f"{r['subentry']}/{r['pointer'] or ''}"
+        if k in cm:
+            f = cm[k]
+            r["energy_ev"] = [None if x is None else x * f for x in r["energy_ev"]]
+            if r["energy_sigma_ev"] is not None:
+                r["energy_sigma_ev"] = [None if x is None else x * f for x in r["energy_sigma_ev"]]
+            cnt["encm_series"] += 1
+            cnt["encm_points"] += len(r["energy_ev"])
+        d = review.get(k)
+        r["_review"] = ""
+        if d is not None and d["decision"] == "exclude" and not d.get("points"):
+            cnt["review_excluded_series"] += 1
+            continue
+        if d is not None and d["decision"] == "exclude":
+            drop = [i for i, e in enumerate(r["energy_ev"]) for p in d["points"]
+                    if e is not None and abs(e / p["e_ev"] - 1) < 1e-6]
+            keep = [i for i in range(len(r["energy_ev"])) if i not in drop]
+            assert len(drop) == len(d["points"]), (k, drop)
+            cnt["review_excluded_points"] += len(drop)
+            tk = lambda l: None if l is None else [l[i] for i in keep]
+            for c in ("energy_ev", "energy_sigma_ev", "angle_deg", "secondary_energy_ev"):
+                r[c] = tk(r[c])
+            for b in ("original", "renormalized"):
+                if r[b] is not None:
+                    r[b] = dict(r[b], values=tk(r[b]["values"]), stat_sigma=tk(r[b]["stat_sigma"]), sys_sigma=tk(r[b]["sys_sigma"]))
+        if d is not None and d["decision"] == "fix-unit":
+            f = float(d["factor"])
+            for b in ("original", "renormalized"):
+                if r[b] is not None:
+                    sc = lambda l: None if l is None else [None if x is None else x * f for x in l]
+                    r[b] = dict(r[b], values=sc(r[b]["values"]), stat_sigma=sc(r[b]["stat_sigma"]), sys_sigma=sc(r[b]["sys_sigma"]))
+            r["_review"] = f"fix-unit x{f:g}"
+            cnt["review_fix_unit_series"] += 1
+        rows.append(r)
+    sch = T.schema.append(pa.field("_review", pa.string()))
+    return pa.Table.from_pylist(rows, schema=sch)
 
 
 def lower_bounds(main: Path, zmin, zmax):
@@ -181,7 +280,7 @@ def rows_for(ch, T, lower, edges, cnt, flags=None):
             out.append(dict(channel=ch, Z=z, A=A, series=f"{r['subentry']}.{r['pointer']}".replace(".None", ".nan"), bin=int(bi),
                             e_ev=float(np.exp(np.log(e[m]).mean())), n_pts=int(m.sum()), data_mb=float(s[m].mean()),
                             year=int(r["year"]) if r["year"] is not None else -1,
-                            reaction=r["reaction"], first_author=r["first_author"] or ""))
+                            reaction=r["reaction"], first_author=r["first_author"] or "", review=r.get("_review") or ""))
     return out
 
 
@@ -189,8 +288,14 @@ def main():
     import pandas as pd
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--main", type=Path, default=Path("~/nucleus").expanduser())
+    ap.add_argument("--v1", action="store_true", help="version 1.0: no centre-of-mass conversion, no review lines")
     a = ap.parse_args()
     staged = stage(a.main)
+    review = {} if a.v1 else read_review(REVIEW)
+    cm = {} if a.v1 else encm_series({ch: L for ch, (L, _) in staged.items()}, a.main)
+    corr = collections.Counter()
+    staged = {ch: (correct(L, cm, review, corr), H) for ch, (L, H) in staged.items()}
+    print("v1.1 corrections:", dict(corr), "centre-of-mass series:", sorted(cm), flush=True)
     grid = np.asarray(np.load(sorted(glob.glob(os.path.expanduser(ENGINE + "/*.npz")))[0], allow_pickle=True)["e_ev"], float)
     for f in sorted(glob.glob(os.path.expanduser(ENGINE + "/*.npz")))[::500]:
         assert np.allclose(np.load(f, allow_pickle=True)["e_ev"], grid), f
@@ -223,11 +328,14 @@ def main():
 
     R = pd.DataFrame(rows).sort_values(["channel", "Z", "A", "series", "bin"]).reset_index(drop=True)
     R = R.astype({"Z": "int64", "A": "int64", "bin": "int64", "n_pts": "int64", "year": "int64"})
+    if a.v1:
+        R = R.drop(columns=["review"])
     out = OUT / "exfor_threshold_Z1-25_rows.parquet"
     R.to_parquet(out, index=False)
     per = {ch: {"rows": int((R.channel == ch).sum()), "series": int(R[R.channel == ch].series.nunique()),
                 "nuclides": sorted(f"{z}-{A}" for z, A in set(zip(R[R.channel == ch].Z, R[R.channel == ch].A)))} for ch in SF3}
     prov = {
+        "version": "1.0" if a.v1 else VERSION,
         "built": time.strftime("%Y-%m-%d"),
         "script": "scripts/build_light_channels.py",
         "rules": "research scripts/channels/score_channels.py exfor_rows() + amendment A1 (the rules of the benchmark rows "
@@ -237,6 +345,12 @@ def main():
                     "check": "same predicate + clip on Z 26-92 reproduces staging/" + HEAVY.format("<ch>") + " exactly"},
         "engine_grid": f"{len(grid)} points {grid[0]:.0f}-{grid[-1]:.0f} eV (chart_s9_npz e_ev)",
         "filter_counts": counts,
+        "v1_1_corrections": None if a.v1 else {
+            "centre_of_mass_energy": {"rule": "E_lab = E_cm (A+1)/A (exfor.py fix encm), applied to the staged series",
+                                      "series": {k: round(f, 6) for k, f in sorted(cm.items())},
+                                      "series_in_rows": sorted(set(R.series) & {(k[:-1] + ".nan") if k.endswith("/") else k.replace("/", ".") for k in cm})},
+            "review_file": {"path": "data/curation/inputs/" + REVIEW.name, "sha256": sha(REVIEW), "lines": len(review)},
+            "counts": dict(corr)},
         "per_channel": per,
         "z26_92_check_vs_benchmark_rows": check,
     }

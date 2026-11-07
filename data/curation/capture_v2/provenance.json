@@ -1,10 +1,11 @@
 {
- "product": "CAPSET-v2 curated EXFOR capture set, Z 1-92 (data/curation/capture_v2)",
- "built": "2026-11-06 19:22",
+ "product": "CAPSET-v2.1 curated EXFOR capture set, Z 1-92 (data/curation/capture_v2)",
+ "version": "2.1",
+ "built": "2026-11-07 13:19",
  "script": "scripts/build_capture_v2.py",
- "public_commit_base": "e5f258ddcbec9418b2d0fd6688fa3888982ec015",
- "research_commit": "94e68a486103b959152d770ecbf45fc5702adc6a",
- "curation_code": "research data/curate/quality_model.py + review_log.py (unchanged) with this repository's data/curate/discrepancy.py (unchanged) and data/ingest/exfor.py (V2_FIXES = all six)",
+ "public_commit_base": "e22decd6",
+ "research_commit": "5348fb93eabe2f595b580bbde4ecf6b1533d1758",
+ "curation_code": "research data/curate/quality_model.py + review_log.py (unchanged) with this repository's data/curate/discrepancy.py (unchanged) and data/ingest/exfor.py (V2_FIXES = all six for S1-S8; V21_ALL = the six + encm, and the ENERGY_FIX of the D10 lines, for the v2.1 tables)",
  "entry_zip": {
   "path": "raw/exfor/entry_2026-10-14.zip",
   "sha256": "1f54ffe07100e7e276179824475dfe91863238b2e37f9425a40c0012cf7f39a9",
@@ -15,31 +16,48 @@
   "rows": 12432,
   "where": "work directory, not shipped (rebuilt by this script)"
  },
+ "staging_v21": {
+  "sha256": "886709e486769b4dc72c688b06a2288bd520b71271010e563a14366b32ab3f48",
+  "rows": 12432,
+  "fixes": [
+   "encm",
+   "enminapx",
+   "eqroute",
+   "ktdegc",
+   "numfix",
+   "ratio",
+   "unc"
+  ],
+  "energy_fix": {
+   "14248/14248005/": 1000.0
+  },
+  "where": "work directory, not shipped (rebuilt by this script)"
+ },
  "human_decision_files": {
   "research data/curate/review_decisions.jsonl": "87b34551c08b655cabcfc1bfad36de6287897822f1eb1ebbafb7f4f3055a9235",
   "data/curation/inputs/review_decisions_Z1-25.jsonl": "33def54877ca917587dd7240dfa6228b0f7186e2fa7396945efe339db8c215da",
-  "data/curation/capture_v2/review_decisions_capture_v2.jsonl": "af421cd995a59ee22b209be20bfebcea5a6126932a985d53e8220a7744425bd8"
+  "data/curation/capture_v2/review_decisions_capture_v2.jsonl": "b0986d77285940b974b0dc70247e51f205928132672d46065a21050c2d8ceadf"
  },
  "fit": {
-  "left_out_of_consensus_fit": 300,
+  "left_out_of_consensus_fit": 314,
   "peelle_rebased_datasets": 9257,
   "peelle_final": {
-   "cells_rebased": 16915,
-   "cells_abs_units": 16915,
+   "cells_rebased": 17337,
+   "cells_abs_units": 17337,
    "median_abs_log_factor_x1000": 2
   },
   "peelle_clip": 3.0,
   "summary": {
    "fit": {
-    "n_cells": 35191,
-    "n_datasets": 9286,
-    "n_bins": 20113,
+    "n_cells": 35160,
+    "n_datasets": 9272,
+    "n_bins": 20107,
     "last_delta": 0.020125405417014797,
-    "rms_delta": 0.00017161299862279621,
+    "rms_delta": 0.00017167709084173202,
     "iterations": 300,
     "converged": false
    },
-   "n_cells": 37879,
+   "n_cells": 37871,
    "n_datasets": 12432
   }
  },
@@ -56,8 +74,8 @@
   "n_differ": 0
  },
  "shipped_v1": {
-  "exfor_capture_Z26-92_trust.parquet": "4447243851d52320cb0aedd825252103c5f66bc2f3134372409ff644240d1f90",
-  "exfor_cells.parquet": "1236f3372700d4ca5853f69ea35bfde581312ff3f85497e7b63b5ef769bf8faf",
+  "exfor_capture_Z26-92_trust.parquet": "35059e14cb9fe4a4ec960a5126422a8a788dbe75b2d2d8efbb6b3b62ada367d4",
+  "exfor_cells.parquet": "dbef678fae5c3ec25980f83d65ccd030bb174c4f3388a7cfb6aaff91c1c13dbb",
   "exfor_capture_Z1-25_trust.parquet": "838b52a5dfeacc5bef2c57fb7b8bf1e0e45c3a266ea2d5fbf2cf88f246aacd11",
   "exfor_cells_Z1-25.parquet": "5e08911216d1123bc1631a51bb55b07d534cd5bff5c800d65a697ad51b5a4d6d"
  }

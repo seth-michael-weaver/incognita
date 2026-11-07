@@ -1,7 +1,8 @@
 """Consistency checks over every nuclide of INCOGNITA's data products.
 
 Covers: library/v0.2.2 (curves, MACS, rates, below-1-keV joins, grid-dependent list, checksums), the curated capture
-set v2 (data/curation/capture_v2: keys, units, energies, duplicates), the site data (docs/walkthrough/data: index.json
+set v2.1 (data/curation/capture_v2: keys, units, energies, duplicates, v2.1 review lines), the light
+threshold rows (review lines), the site data (docs/walkthrough/data: index.json
 against the per-nuclide files and the library) and the C-12 R-matrix evaluation (data/light_evals/C12RM9.json).
 
 Known open defects that need a decision outside the site build (curation review lines or a library errata) are marked
@@ -262,14 +263,31 @@ def _mxw_odd():
                    and 0.1 < c["e_lo_ev"] < 1e3})
 
 
-@pytest.mark.xfail(strict=True, reason="14248005 W-186 Marganiec 2009: MACS at kT 5-100 keV stored at 5-100 eV (x1000 "
-                   "energy slip); 14165012 Te-120 Eastman 2008 MXW at 0.5 eV; both used. Needs review lines.")
 def test_curation_mxw_temperatures():
+    # fixed in capture set v2.1: 14248005 W-186 (kT EV -> KEV at staging), 14165012 Te-120 (a resonance integral, excluded)
     assert _mxw_odd() == []
+    w186 = sorted(c["e_lo_ev"] for c in cells() if c["dataset_key"] == "14248/14248005/")
+    assert w186 and 4e3 < w186[0] and w186[-1] <= 1.0001e5, w186
 
 
-def test_curation_mxw_odd_known():
-    assert _mxw_odd() == ["14165/14165012/", "14248/14248005/"]
+def _review_lines(path):
+    return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
+
+
+def test_curation_v21_lines_applied():
+    """Every CAPSET-v2.1 decision line is the dataset's decision in the v2.1 tables; fix-unit factors are logged."""
+    lines = [l for l in _review_lines(CAP / "review_decisions_capture_v2.jsonl") if l.get("version") == "2.1"]
+    assert lines
+    tr = trust()
+    for l in lines:
+        k = f"{l['entry']}/{l['subentry']}/{l['pointer']}"
+        assert k in tr, k
+        if "decision" in l:
+            assert tr[k]["decision"] == l["decision"], (k, tr[k]["decision"])
+            if l["decision"] == "fix-unit":
+                assert tr[k]["unit_fix_factor"] == l["factor"], k
+        if l.get("superseded_by"):
+            assert tr[l["superseded_by"]]["decision"] != "exclude", l["superseded_by"]
 
 
 def _identical_used_pairs(min_cells=2):
@@ -284,9 +302,9 @@ def _identical_used_pairs(min_cells=2):
     return sorted(tuple(sorted(v)) for v in sig.values() if len(v) > 1)
 
 
-@pytest.mark.xfail(strict=True, reason="duplicated datasets both used: Ba-132 Dillmann 2010 22939040 pointers 2 and 3 "
-                   "(9 identical MACS cells, kT 5-100 keV, both keep). Needs a review line.")
 def test_curation_no_duplicate_datasets_used():
+    # Ba-132 22939040 pointer 3 (= pointer 2) excluded in v2.1. Single-cell coincidences (one thermal value equal to
+    # another experiment's to the printed digits) are common and not tested here.
     assert _identical_used_pairs() == []
 
 
@@ -420,14 +438,28 @@ def _thr_outliers():
     return sorted(out)
 
 
-@pytest.mark.xfail(strict=True, reason="Cr-52/Cr-53(n,p) Chittenden 1961 (EXFOR 11132004/005) at 14.8 MeV: 82700 and "
-                   "37300 mb, x1000 slips (Cr-52(n,p) is ~90 mb there). Light rows (build_light_channels.py) need a fix.")
 def test_site_threshold_rows_units():
+    # Cr-52/Cr-53(n,p) Chittenden 1961 (11132004/005, x1000 slips) fixed by review lines in build_light_channels.py 1.1
     assert _thr_outliers() == []
 
 
-def test_site_threshold_rows_units_known():
-    assert _thr_outliers() == [(24, 52, "np", "11132004"), (24, 53, "np", "11132005")]
+def test_threshold_review_lines_applied():
+    """Light (n,2n)/(n,p)/(n,alpha) rows: excluded series (or points) are gone, fix-unit series are scaled and marked."""
+    rows = pq.read_table(INP / "exfor_threshold_Z1-25_rows.parquet").to_pylist()
+    by = defaultdict(list)
+    for r in rows:
+        by[r["series"].split(".")[0]].append(r)
+    for l in _review_lines(INP / "review_decisions_threshold_Z1-25.jsonl"):
+        got = by.get(l["subentry"], [])
+        if l["decision"] == "exclude" and not l.get("points"):
+            assert not got, l["subentry"]
+        elif l["decision"] == "exclude":
+            for p in l["points"]:
+                assert not any(abs(r["e_ev"] / p["e_ev"] - 1) < 1e-6 and r["n_pts"] == 1 for r in got), (l["subentry"], p)
+        else:
+            assert got and all(r["review"] == f"fix-unit x{l['factor']:g}" for r in got), l["subentry"]
+    cr52 = [r["data_mb"] for r in by["11132004"]]
+    assert cr52 == [pytest.approx(82.7)], cr52
 
 
 # ---------------------------------------------------------------- C-12 R-matrix evaluation
