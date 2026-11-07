@@ -159,7 +159,16 @@ def _evaluate(key: tuple[int, int], o) -> tuple[str, float]:
     out = ""
     with _stock():
         if _colltype(key[0], key[1], o) == "S" and not o.flagspher:
-            ratio = _direct_ratio(*key)
+            # PERFOMP: the trigger is a plain number compared with FRACTION; nothing differentiates
+            # through it. Evaluated with autograd off, its 64 DWBA solves take the compiled deck
+            # (ecis/dwba_nx2.py) instead of the torch path a worker's cascade build (autograd on)
+            # sent them down -- the same physics, held to closeness with the torch path, so the
+            # ratio moves in the last digits only and the decision (the only thing the run reads)
+            # is unchanged unless the ratio lies within ~1e-12 of FRACTION.
+            import torch
+
+            with torch.no_grad():
+                ratio = _direct_ratio(*key)
             if ratio > FRACTION:
                 out = "R" if _rotor_accepts(key[0], key[1], o) else "CAP"
         else:

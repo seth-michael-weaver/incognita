@@ -53,6 +53,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import stat
 import struct
 import tempfile
 from functools import lru_cache
@@ -262,9 +263,17 @@ def load(key: tuple):
         path, kb = _path(root, key)
     except TypeError:
         return None
-    if not path.is_file():
+    try:
+        sig = _sig(path)
+    except OSError:
+        sig = None
+    if sig is None:
         _stats["miss"] += 1
         return None
+    got = _MEMO.get(str(path))
+    if got is not None and got[0] == kb and got[2] == sig:  # PERFOMP: this very file, seen before
+        _stats["hit"] += 1
+        return _row_of(got[1])
     try:
         with np.load(path, allow_pickle=False) as z:
             if bytes(z["key"].tobytes()) != kb:
@@ -272,16 +281,48 @@ def load(key: tuple):
             # `np.array`, not `ascontiguousarray`: the four cross sections are 0-dim and
             # `ascontiguousarray` would promote them to shape (1,), which `_stack_rows` then
             # stacks into an (E, 1) column.
-            arrays = [torch.from_numpy(np.array(z[n], dtype=np.float64, copy=True)).to(DTYPE)
-                      for n in _ARRAYS]
-            n_j = int(z["n_j"])
-            frac = float(z["last_j_fraction"])
+            raw = ([np.array(z[n], dtype=np.float64, copy=True) for n in _ARRAYS],
+                   int(z["n_j"]), float(z["last_j_fraction"]))
     except Exception:
         _stats["bad"] += 1
         _stats["miss"] += 1
         return None
+    _remember(path, kb, raw, sig)
     _stats["hit"] += 1
-    return (*arrays, n_j, frac)
+    return _row_of(raw)
+
+
+# PERFOMP: the entries this process has read or written, so a key asked again (a worker's
+# collective-E2 hold rule builds the first energy's incident channel three times before the run
+# builds it once more; a warm worker meets the same keys target after target) is not unzipped
+# from disk again. Keyed by the file path, checked against the full key bytes like the file and
+# used only while the file on disk is the one remembered (size, mtime, inode: a file rewritten or
+# replaced by anyone is read again). Each hit hands out fresh tensors made exactly as a disk read
+# makes them, so it is the same bits as the read. Bounded; oldest entries go first.
+_MEMO: dict[str, tuple[bytes, tuple, tuple]] = {}
+_MEMO_MAX = 2048
+
+
+def _sig(path: Path) -> tuple:
+    st = os.stat(path)
+    if not stat.S_ISREG(st.st_mode):
+        raise OSError("not a file")
+    return (st.st_size, st.st_mtime_ns, st.st_ino)
+
+
+def _remember(path: Path, kb: bytes, raw: tuple, sig: tuple) -> None:
+    _MEMO.pop(str(path), None)
+    while len(_MEMO) >= _MEMO_MAX:
+        _MEMO.pop(next(iter(_MEMO)))
+    _MEMO[str(path)] = (kb, raw, sig)
+
+
+def _row_of(raw: tuple) -> tuple:
+    arrays, n_j, frac = raw
+    # `np.array`, not `ascontiguousarray` (see `load`); copied, so a caller writing into a
+    # returned tensor cannot reach the remembered entry
+    return (*[torch.from_numpy(np.array(a, dtype=np.float64, copy=True)).to(DTYPE) for a in arrays],
+            n_j, frac)
 
 
 def store(key: tuple, row) -> None:
@@ -305,8 +346,9 @@ def store(key: tuple, row) -> None:
         try:
             with os.fdopen(fd, "wb") as fh:
                 np.savez(fh, **payload)
-                fh.flush()
-                os.fsync(fh.fileno())
+            # PERFOMP: no fsync (it was ~10 ms of every miss). The rename is still atomic for
+            # every concurrent reader; after a power loss a file can come back empty or torn,
+            # which `load` rejects (np.load or the key check fails -> recompute), never misreads.
             os.replace(tmp, path)  # atomic: a concurrent reader sees the old file or the new one
             tmp = None
         finally:
@@ -314,6 +356,11 @@ def store(key: tuple, row) -> None:
                 os.unlink(tmp)
     except Exception:
         return
+    try:
+        _remember(path, kb, ([payload[n] for n in _ARRAYS], int(payload["n_j"]),
+                             float(payload["last_j_fraction"])), _sig(path))
+    except OSError:
+        pass
     _stats["write"] += 1
 
 
