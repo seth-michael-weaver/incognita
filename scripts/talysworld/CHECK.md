@@ -27,7 +27,7 @@ energy grid. Does it reproduce the published library v0.2.1 curves? Or does the 
     `physics.hf.jointcap.combine`. "[FEW->mean]" was treated as its base composition, as v0.2.2's collect step does.
   - (n,p), (n,2n) and (n,α) are taken from the P arm (the A arm for rotor compositions), as the v0.2 build does.
 - **Energies:** the library grid, 64 points from 1 keV to 20 MeV. Three of v0.2.2's points below 1 keV were added:
-  10.49, 126.0 and 660.8 eV. In total 20 × 67 = 1,340 jobs, about 40 min wall time, with 0 failed jobs.
+  10.49, 126.0 and 660.8 eV. In total 20 × 67 = 1,340 jobs, about 45 min wall time, with 0 failed jobs.
 - **Library:** `library/v0.2.1/capture_v021.parquet` and `channels_v021.parquet`.
   - For grid points from 1 keV up, v0.2.1 capture is v0.2's.
   - None of the 20 is ANCHORED, so no anchor factor was removed. None has floor-repaired points.
