@@ -3,6 +3,9 @@
 Copies the RESFILL site files (rr/<Z>/<A>.json, rr_index.json, README.md; schema in README.md) into
 docs/walkthrough/data/rr/ and checks every copied file against RESFILL's SHA256SUMS.txt
 (nucleus research rl/resfill/out/site/, commit df04a16d2). Exits non-zero on any missing file or mismatch.
+The published README.md has one line corrected after the copy (the file count: one per rr_index.json row, not per
+explorer row; tests/test_site_flags.py checks it), so a re-copy must re-apply that. Re-run scripts/build_site_data.py
+afterwards: its index.json column "rr" flags which rr files exist.
 
 usage (WSL): python3 scripts/build_site_rr.py [SRC_DIR] [SHA256SUMS]
   SRC_DIR    default ~/resfill_data/site (a copy of ~/nuc-local/rl/resfill/out/site)

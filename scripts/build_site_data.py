@@ -6,7 +6,8 @@ curation re-run on the corrected 2026-10-14 staging by scripts/build_capture_v2.
 and every score stay as they are; --curation v1 reads the earlier data/curation/inputs tables), plus measured (n,2n), (n,p) and (n,alpha) points: the benchmark rows (Z 24-92,
 incognita/bench/data/exam_rows) and, for Z 1-25, EXFOR rows cut with the same rules by scripts/build_light_channels.py
 (data/curation/inputs/exfor_threshold_Z1-25_rows.parquet), and writes:
-  data/index.json      one row per nuclide (chart of nuclides: tier, MACS at 30 keV, counts of measured data)
+  data/index.json      one row per nuclide (chart of nuclides: tier, MACS at 30 keV, counts of measured data), plus
+                       which comparison files exist (index list "lib", column "rr"; see below)
   data/n/<Z>/<A>.json  everything about one nuclide (<A> is "nat" for a natural element), fetched only when that
                        nuclide is opened; the chart itself needs only the index
 
@@ -21,6 +22,9 @@ Only the capture cross section of the ground-state (or natural) target is drawn 
 M-, INC: gamma-line, level or component cross sections) and capture into one product state (-G, -M, -M1, -L ...) are
 listed with the datasets but only counted under "other". A
 fix-unit cell is drawn with its logged unit factor applied (the curation tables keep the value as compiled).
+Index list "lib" (Z with a data/lib/<Z>.json) and column "rr" (1 when data/rr/<Z>/<A>.json exists) are read from the
+files already published there, so run scripts/build_site_overlay.py and scripts/build_site_rr.py first; the page fetches
+only the files they flag (tests/test_site_flags.py).
 Checked by tests/data/test_data_consistency.py.
 
 usage:  uv run --no-project --with pyarrow python scripts/build_site_data.py [--curation v1]
@@ -218,6 +222,11 @@ def main():
 
     # ---- write ----
     keys = set(nucs) | {k for k in meas if k[1] > 0} | set(thr)
+    # which comparison files exist, read from the published tree so the page never requests an absent one:
+    # data/lib/<Z>.json (scripts/build_site_overlay.py) -> index list "lib" of Z; data/rr/<Z>/<A>.json
+    # (scripts/build_site_rr.py) -> index column "rr" (1 = the file exists). Run those two first.
+    lib_z = sorted(int(f[:-5]) for f in os.listdir(os.path.join(OUT, "lib")) if re.fullmatch(r"\d+\.json", f))
+    has_rr = lambda Z, A: 1 if A > 0 and os.path.isfile(os.path.join(OUT, "rr", str(Z), f"{A}.json")) else 0
     index, byz = [], defaultdict(dict)
     for (Z, A) in sorted(keys):
         n = nucs.get((Z, A), {})
@@ -232,7 +241,7 @@ def main():
         index.append([Z, A, n.get("tier", -1), n.get("macs30"), (n.get("macs") and n.get("macsU") and n["macsU"][KT.index(30)]),
                       len(m["cap"]) if m else 0, len(m["mxw"]) if m else 0, len(m["ds"]) if m else 0,
                       len(t.get("n2n", [])), len(t.get("np", [])), len(t.get("na", [])), 1 if n.get("valid") else 0,
-                      n_use(m["cap"] + m["mxw"]) if m else 0])
+                      n_use(m["cap"] + m["mxw"]) if m else 0, has_rr(Z, A)])
     for (Z, A), m in meas.items():
         if A == 0:  # natural element
             byz[Z]["nat"] = {"meas": {"ds": m["ds"], "cap": m["cap"], "mxw": m["mxw"], "other": dict(m["other"])}}
@@ -245,17 +254,18 @@ def main():
                 json.dump(rec, f, separators=(",", ":"))
             nfiles += 1
     with open(os.path.join(OUT, "index.json"), "w") as f:
-        json.dump({"cols": ["Z", "A", "tier", "macs30_mb", "unc68_30", "n_cap", "n_mxw", "n_ds", "n_n2n", "n_np", "n_na", "valid", "n_use"],
-                   "tiers": TIERS, "sym": SYM, "grid_ev": grid, "kT_keV": KT, "natural": nat, "rows": index},
+        json.dump({"cols": ["Z", "A", "tier", "macs30_mb", "unc68_30", "n_cap", "n_mxw", "n_ds", "n_n2n", "n_np", "n_na", "valid", "n_use", "rr"],
+                   "tiers": TIERS, "sym": SYM, "grid_ev": grid, "kT_keV": KT, "natural": nat, "lib": lib_z, "rows": index},
                   f, separators=(",", ":"))
     tot = sum(os.path.getsize(os.path.join(dp, x)) for dp, _, fs in os.walk(os.path.join(OUT, "n")) for x in fs)
     print(f"{len(index)} nuclides, {nfiles} nuclide files ({tot / 1e6:.1f} MB), "
           f"index {os.path.getsize(os.path.join(OUT, 'index.json')) / 1e3:.0f} kB, "
           f"measured capture on {sum(1 for k in meas if k[1] > 0)} nuclides + {len(nat)} natural elements "
-          f"({n_iso} cells on isomeric targets not shown)")
+          f"({n_iso} cells on isomeric targets not shown); comparison files: lib for {len(lib_z)} elements, "
+          f"rr for {sum(r[13] for r in index)} nuclides")
     light = [r for r in index if r[0] < 26]
-    print(f"Z 1-25: {len(light)} nuclides, {sum(1 for r in light if r[-1] > 0)} measured (n_use > 0), "
-          f"{sum(1 for r in light if r[5] + r[6] > 0 and r[-1] == 0)} with only excluded cells; "
+    print(f"Z 1-25: {len(light)} nuclides, {sum(1 for r in light if r[12] > 0)} measured (n_use > 0), "
+          f"{sum(1 for r in light if r[5] + r[6] > 0 and r[12] == 0)} with only excluded cells; "
           f"(n,2n) / (n,p) / (n,alpha) measured on {sum(1 for r in light if r[8])} / {sum(1 for r in light if r[9])} / "
           f"{sum(1 for r in light if r[10])} nuclides ({sum(r[8] for r in light)} / {sum(r[9] for r in light)} / {sum(r[10] for r in light)} points)")
     # light-nuclide R-matrix evaluations that passed their gates (data/light_evals; scripts/add_light_evals.py)
