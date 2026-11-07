@@ -1,5 +1,6 @@
 /* Arabic: instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
+  nav_calc: "الحاسبة",
   in_title: "للمعلمين · داخل تفاعل نووي",
   credit_sub: "محرك INCOGNITA نقلٌ برمجي لـ <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning، S. Hilaire، S. Goriely) ويستخدم قاعدة بيانات البنية النووية الخاصة بـ TALYS. ما يضيفه INCOGNITA <a href=\"./?lang=ar#code\">مُدرَج، مفتاحًا مفتاحًا، في آخر الصفحة التعليمية</a>.",
   in_kicker: "INCOGNITA · دليل المعلمين",

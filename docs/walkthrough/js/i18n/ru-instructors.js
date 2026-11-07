@@ -1,5 +1,6 @@
 /* Russian: instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
+  nav_calc: "Калькулятор",
   in_title: "Преподавателям · Внутри ядерной реакции",
   credit_sub: "Программа INCOGNITA — это порт <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely), и она использует базу данных TALYS по структуре ядра. Всё, что добавляет INCOGNITA, <a href=\"./?lang=ru#code\">перечислено, переключатель за переключателем, в конце учебной страницы</a>.",
   in_kicker: "INCOGNITA · руководство для преподавателей",
