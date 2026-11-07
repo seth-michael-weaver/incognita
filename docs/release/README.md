@@ -13,6 +13,7 @@ Evaluation material for the v0.1 preview.
 | `CURATION_RULE_v2.md`, `CURATION_REGISTER.md` | the library-free EXFOR curation rules and the published register |
 | `MEASURE_NEXT.csv`, `MEASURE_NEXT.md` | unmeasured capture targets ranked by current uncertainty |
 | `uq/PREREG_FINAL674.md` | the pre-registration of the sealed coverage test |
+| `amendments/` | scoring-audit records: fixes applied with their before/after numbers, and amendment drafts not yet applied |
 
 These documents were written during development and keep its vocabulary: upper-case names (SHIPEXAMS, FINAL-674,
 INDEP_FIX, ...) are internal test and work-package names, "RC" is the release candidate that preceded the shipped

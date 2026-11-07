@@ -489,7 +489,10 @@ def test_consensus_min_trust_demotes_rather_than_promotes():
     median real weight -- so raising the cut promoted exactly the bins it was asked to drop.
     The default (0.0) must be untouched by the fix."""
     base = D.load_exfor_points(mts=(102,))
-    assert D.LAST_EXFOR_LOAD_DROPS["consensus_bins_without_cells"] == 0
+    # BUGSCORE2: orphan bins exist at min_trust = 0 too (1 on capture); they are dropped, never weighted 1.0
+    d = D.LAST_EXFOR_LOAD_DROPS
+    assert d["dropped_consensus_no_surviving_dataset"] == d["consensus_bins_without_cells"]
+    assert base.frame["weight"].is_not_null().all()
     strict = D.load_exfor_points(mts=(102,), min_trust=0.3)
     assert strict.frame.height < base.frame.height  # it must actually remove bins
     # and it must never invent a sentinel weight for a bin it just emptied
