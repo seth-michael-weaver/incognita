@@ -89,3 +89,62 @@ def test_corrupt_file_is_a_miss(cache):
     S._BYTES.clear()
     S.cached("t", (2,), compute)
     assert n[0] == 2 and S.stats()["t"]["bad"] == 1
+
+
+# ENGFIX4: the key covers every input that changes the stored transmissions -- the old allow-lists
+# missed tfold / alphatemp / alphatemp_dom / tlog* (options and environment) and INCOGNITA_GRIDTOP
+
+
+@pytest.mark.parametrize("field,value", [("tfold", False), ("alphatemp", 0.0), ("alphatemp_dom", "gd"),
+                                         ("tlog", "c"), ("tlogit", True), ("tlogref", True)])
+def test_key_follows_every_omp_option(cache, field, value):
+    import dataclasses
+
+    from physics.hf.input.defaults import default_options
+
+    o = default_options(26, 56)
+    assert getattr(o, field) != value
+    k0 = S.key("t", (1,), options=(o,))
+    assert S.key("t", (1,), options=(dataclasses.replace(o, **{field: value}),)) != k0
+
+
+@pytest.mark.parametrize("var,value", [("INCOGNITA_TFOLD", "0"), ("INCOGNITA_ALPHATEMP", "0"),
+                                       ("INCOGNITA_ALPHATEMP_DOM", "gd"), ("INCOGNITA_TLOG", "c"),
+                                       ("INCOGNITA_TLOGIT", "y"), ("INCOGNITA_TLOGREF", "y"),
+                                       ("INCOGNITA_GRIDTOP", "n"), ("INCOGNITA_CPINC", "p"),
+                                       ("INCOGNITA_SOMETHING_NEW", "1")])
+def test_key_follows_every_incognita_switch(cache, monkeypatch, var, value):
+    monkeypatch.delenv(var, raising=False)
+    k0 = S.key("t", (1,))
+    monkeypatch.setenv(var, value)
+    assert S.key("t", (1,)) != k0
+
+
+def test_key_ignores_ld_options_and_cache_locations(cache, monkeypatch):
+    import dataclasses
+
+    from physics.hf.input.defaults import default_options
+
+    o = default_options(26, 56)
+    k0 = S.key("t", (1,), options=(o,))
+    assert S.key("t", (1,), options=(dataclasses.replace(o, ldmodelall=2, strength=8),)) == k0
+    monkeypatch.setenv("INCOGNITA_CC_CACHE", "/elsewhere")
+    monkeypatch.setenv("INCOGNITA_STAGETIME", "1")
+    assert S.key("t", (1,), options=(o,)) == k0
+
+
+def test_excluded_inputs_not_read_by_stage_code():
+    """A lever on a deny-list (`ENV_LEVERS`, `OPTION_EXCLUDE`) must not be read by the modules the
+    cached stages execute (`ENV_NOT_INPUTS` -- cache locations, diagnostics, derived `*_EFF` -- may be)."""
+    import re
+    from pathlib import Path
+
+    root = Path(S.__file__).resolve().parents[2]
+    dirs = "\n".join(p.read_text(encoding="utf-8") for d in S._SOURCE_DIRS
+                     for p in (root / d).rglob("*.py") if "__pycache__" not in p.parts)
+    text = dirs + "\n".join((root / f).read_text(encoding="utf-8") for f in S._SOURCE_FILES
+                            if f != "physics/hf/stagedisk.py")
+    env_hits = sorted(v for v in S.ENV_LEVERS if re.search(rf"\b{v}\b", text))
+    opt_hits = sorted(f for f in S.OPTION_EXCLUDE
+                      if re.search(rf"(options|\bo|opts|opt)\.{f}\b|\"{f}\"", dirs))
+    assert (env_hits, opt_hits) == ([], [])

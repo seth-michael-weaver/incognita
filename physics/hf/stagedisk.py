@@ -13,20 +13,24 @@ SPEEDPROF2 measured them at 16-20 % of a warm product run.  This module is their
 **Key** (development notes, from a run-time trace of what the four stages read
 plus a static scan of every module they execute):  stage + its call arguments +
 
-* the values of the Options fields in `OPTION_FIELDS`, for every Options object the stage uses;
+* every field of every Options object the stage uses, except the level-density / photon-strength /
+  fission fields in `OPTION_EXCLUDE` (a new field is keyed unless it is added there);
 * the full bytes of the Params tensors in `PARAM_KEYS` (the optical-model `*adjust` family,
   `ompadjust*`, `ejoin`, `vinfadjust`, `beta2`, `elwidth`, `risomer`, the masses and the
   giant-resonance adjusts), for every Params object the stage uses;
 * the structure the stage consumes, BY VALUE: the `Masses`, `direct.prepare._base`'s collective
   structure (levels, spins, parities, deformations, coupled levels), the coupled band.  A level,
   deformation or mass change from any source changes the key, however it was produced;
-* every `HF_*` variable, the INCOGNITA_ switches in `ENV_KEYS`, the evaluated `engphys.on()` of the
-  switches the executed code asks for, TALYS_DIR and HOME;
+* every `HF_*` and `INCOGNITA_*` variable except `ENV_EXCLUDE` (cache locations, diagnostics,
+  derived `*_EFF` values, level-density / photon-strength / fission / cascade levers), the evaluated
+  `engphys.on()` of the switches the executed code asks for, TALYS_DIR and HOME;
 * the version: source bytes of the modules the stages execute (`_SOURCE_DIRS`, `_SOURCE_FILES`),
   bytes of the native libraries they can call (`_LIBS`), torch / numpy versions, `FORMAT`.
 
 What is deliberately NOT in it is what LD / PSF / cascade levers change: their parameters
-(`a`, `ctable`, `ptable`, `etable`, `ftable`, ...), their options and their INCOGNITA_ switches.  The
+(`a`, `ctable`, `ptable`, `etable`, `ftable`, ...), their options (`OPTION_EXCLUDE`) and their
+INCOGNITA_ switches (`ENV_EXCLUDE`).  Both exclusions are deny-lists, so an input nobody has
+classified is keyed; tests/hf/test_stagedisk.py checks no excluded name is read in `_SOURCE_DIRS`.  The
 key is hashed with sha256 over the typed exact encoding of `ecis.ccdisk` (float64 bytes, never
 `repr`).  Per-object digests are memoised on (object id, tensor ids, tensor `_version`) like
 `omp.omp_nx2._factors`; an inference tensor (no version counter) is re-hashed on every call.
@@ -56,22 +60,27 @@ from pathlib import Path
 import numpy as np
 import torch
 
-FORMAT = 2  # 2: trailing zeros of each array not stored
+FORMAT = 3  # 2: trailing zeros of each array not stored; 3: ENGFIX4 key (all options / env)
 ENV_VAR = "INCOGNITA_STAGE_CACHE"
 
-OPTION_FIELDS: tuple[str, ...] = (
-    "Atarget", "Ltarget", "Ztarget", "alphaomp", "altomp", "collrule", "disctable", "dwbaimag",
-    "emulpre_mev", "eninclow_mev", "epreeq_mev", "eurr_mev", "ewfc_mev", "flagautorot", "flagdisp",
-    "flagequispec", "flagexpmass", "flaggiant0", "flagglobalfermi", "flagjlm", "flaglocalomp",
-    "flagpseudores", "flagrel", "flagriplomp", "flagsoukho", "flagsoukhoinp", "flagspher", "flagurr",
-    "isomer_s", "k0", "massmodel", "maxN", "maxZ", "maxband", "maxrot", "nlevbin", "nlevmax",
-    "nlevmaxres", "pruitt", "pruittset", "riplomp", "segment", "soswitch_mev", "wddecay",
-    # static scan of the OMP / grid modules
-    "deuteronomp", "flagglobaldisp", "jlmmode", "flagequi", "nbins0",
-    "binconv", "binconvc", "binconvcn", "binconvg", "binconvk", "binconvr", "binconvt",
-    "binquad", "binquadc", "binquadg", "binquadk", "binquadm", "binquadp", "binquadq", "binquadr",
-    "binquads", "binquadw", "snbin", "snbincn", "snbinwmin",
-)  # fmt: skip
+# Options: EVERY field is keyed (`_option_items`) except these, which only the level-density,
+# photon-strength and fission models read -- none is read in `_SOURCE_DIRS`
+# (tests/hf/test_stagedisk.py::test_excluded_inputs_not_read_by_stage_code).  A field added to
+# Options later is keyed by default.  (ENGFIX4: the keyed subset used to be an allow-list from a
+# trace, `OPTION_FIELDS`, which missed `tfold`, `alphatemp`, `alphatemp_dom`, `tlog*` ...)
+OPTION_EXCLUDE: frozenset[str] = frozenset({
+    # level densities
+    "ldmodelall", "ldmodelCN", "shellmodel", "spincutmodel", "kvibmodel", "flagcolall",
+    "flagcolldamp", "flagldglobal", "flagasys", "flagctmglob", "flagctwindow", "flagctwindow2",
+    "flagctwcont", "nnleak", "flagparity", "flaggshell", "nlow_default", "ntop_default",
+    # photon strength
+    "strength", "strengthM1", "flagupbend", "flagpsfglobal", "flagglobalwtable", "m1share",
+    "leeshell", "flagstrengthjp", "flaggnorm", "ldmodelracap", "gammax",
+    # fission models (`flagfission` itself stays keyed)
+    "fismodel", "fismodelalt", "flaghbstate", "flagfists2", "flagexactfis", "flagclass2",
+    "flagfispartdamp", "flagsffactor", "flagffevap", "flagfisfeed", "flagffspin", "flagoutfy",
+    "fymodel", "ffmodel", "pfnsmodel", "gefran", "Rfiseps",
+})  # fmt: skip
 
 PARAM_KEYS: tuple[str, ...] = (
     "v1adjust", "v2adjust", "v3adjust", "v4adjust", "rvadjust", "avadjust", "w1adjust",
@@ -86,14 +95,30 @@ PARAM_KEYS: tuple[str, ...] = (
     "lv1adjust", "lvadjust", "lvsoadjust", "lw1adjust", "lwadjust", "lwsoadjust",
 )  # fmt: skip
 
-ENV_KEYS: tuple[str, ...] = (
-    "INCOGNITA_BANDCHECK", "INCOGNITA_BINCONV", "INCOGNITA_BINQUAD", "INCOGNITA_SNBIN", "INCOGNITA_COLLRULE",
-    "INCOGNITA_DWBAUNIT", "INCOGNITA_DWBAIMAG", "INCOGNITA_GGDEADEND", "INCOGNITA_LEVCOMPLETE",
-    "INCOGNITA_NUMEN", "INCOGNITA_OMP_DEFORMED", "INCOGNITA_OMP_REGION", "INCOGNITA_OMPROTOR",
-    "INCOGNITA_RIPL_LEVELS_PARAM", "INCOGNITA_WDDECAY", "INCOGNITA_HF_REFERENCE",
-    "INCOGNITA_HF_DIRECT_REFERENCE", "INCOGNITA_TALYS_FIT", "INCOGNITA_DIRCAP", "INCOGNITA_DEF_EVENEVEN",
-    "INCOGNITA_SOUKHO_EFCLAMP", "TALYS_DIR", "HOME",
-)  # fmt: skip
+# Environment: every `HF_*` and every `INCOGNITA_*` variable is keyed except `ENV_EXCLUDE`, plus
+# the named `ENV_KEYS` (ENGFIX4: the INCOGNITA_ part used to be an allow-list too, which missed
+# INCOGNITA_TFOLD, INCOGNITA_ALPHATEMP(_DOM), INCOGNITA_TLOG*, INCOGNITA_GRIDTOP, INCOGNITA_CPINC ...).
+ENV_KEYS: tuple[str, ...] = ("TALYS_DIR", "HOME")
+ENV_PREFIXES: tuple[bytes, ...] = (b"HF_", b"INCOGNITA_")
+# not inputs of the cached stages: where caches live, timing / diagnostics / recording, values a
+# run derives from keyed inputs (`*_EFF`) ...
+ENV_NOT_INPUTS: frozenset[str] = frozenset({
+    "INCOGNITA_STAGE_CACHE", "INCOGNITA_CC_CACHE", "INCOGNITA_STRUCT_CACHE", "INCOGNITA_STAGETIME",
+    "INCOGNITA_STAGEDISK", "INCOGNITA_HEAVYMEM", "INCOGNITA_CTW2_SERIAL",
+    "INCOGNITA_EWFC_DEBUG", "INCOGNITA_EWFC_DIAG", "INCOGNITA_PECOLLAPSE_DIAG", "INCOGNITA_PEREMOVE_DIAG",
+    "INCOGNITA_PEUNITS_DIAG", "INCOGNITA_ALPHATEMP_DOM_LOG", "INCOGNITA_TLOG_REC", "INCOGNITA_INGDUMP",
+    "INCOGNITA_SPECOUT", "INCOGNITA_SPECOUT_DA", "INCOGNITA_SPECOUT_F32", "INCOGNITA_STELLAR_CHECK",
+    "INCOGNITA_CHANCAP_EFF", "INCOGNITA_FLUXCLOSE_EFF", "INCOGNITA_NPWINDOW_EFF", "INCOGNITA_KEVLEAK2_EFF",
+})  # fmt: skip
+# level densities / photon strength / fission / cascade: none is read in the stage sources
+ENV_LEVERS: frozenset[str] = frozenset({
+    "INCOGNITA_CT_WINDOW2", "INCOGNITA_CTW2_CONT", "INCOGNITA_NNLEAK", "INCOGNITA_SPINQUENCH",
+    "INCOGNITA_RIGIDSPIN", "INCOGNITA_ACTPHYS", "INCOGNITA_M1_SCISSORS", "INCOGNITA_GGAMMA_NORM",
+    "INCOGNITA_E1", "INCOGNITA_E1_WTABLE", "INCOGNITA_M1SHARE", "INCOGNITA_LEESHELL",
+    "INCOGNITA_FTGLOBAL", "INCOGNITA_FISBAR_LD", "INCOGNITA_FIS_TS2", "INCOGNITA_EXACTFIS",
+    "INCOGNITA_TRAPFIX", "INCOGNITA_WFCNORM", "INCOGNITA_EWFC", "INCOGNITA_SPECCLOSE",
+})  # fmt: skip
+ENV_EXCLUDE: frozenset[str] = ENV_NOT_INPUTS | ENV_LEVERS
 
 ENGPHYS_KEYS: tuple[str, ...] = ("dircap", "oddodd", "efermi")
 
@@ -237,10 +262,32 @@ def _memo(obj, stamp, build) -> bytes:
     return d
 
 
+@lru_cache(maxsize=8)
+def _excluded_keywords(cls) -> frozenset[str]:
+    """The keywords (`Options.explicit` holds keywords, not field names) that set an excluded field."""
+    from physics.hf.input.defaults import _OPTION_KEYWORDS
+
+    return frozenset(k for k, (_stage, field, _kind) in _OPTION_KEYWORDS.items()
+                     if field in OPTION_EXCLUDE)
+
+
+def _option_items(o) -> tuple:
+    """(name, value) of every dataclass field of `o` but `OPTION_EXCLUDE`; `explicit` without the
+    keywords of excluded fields."""
+    out = []
+    for f in dataclasses.fields(o):
+        if f.name in OPTION_EXCLUDE:
+            continue
+        v = getattr(o, f.name)
+        if f.name == "explicit":
+            v = frozenset(v) - _excluded_keywords(type(o))
+        out.append((f.name, v))
+    return tuple(out)
+
+
 def _options_digest(o) -> bytes:
-    """The OPTION_FIELDS values of an Options object (frozen: memoised by identity)."""
-    return _memo(o, (), lambda: _key_bytes(tuple((f, getattr(o, f, "<absent>"))
-                                                 for f in OPTION_FIELDS)))
+    """Every keyed field of an Options object (`_option_items`; frozen: memoised by identity)."""
+    return _memo(o, (), lambda: _key_bytes(_option_items(o)))
 
 
 def _raw(h, name: str, t) -> None:
@@ -307,11 +354,16 @@ class Digest(bytes):
 _ENGPHYS_MEMO: dict = {}
 
 
+_ENV_EXCLUDE_B = frozenset(k.encode() for k in ENV_EXCLUDE)
+
+
 def _env_part() -> bytes:
-    """Every `HF_*` variable, the `ENV_KEYS` and the evaluated `engphys.on()` of `ENGPHYS_KEYS`,
-    read from the raw (bytes) environment on every call -- a worker or a test may change it."""
+    """Every `HF_*` and `INCOGNITA_*` variable but `ENV_EXCLUDE`, the `ENV_KEYS` and the evaluated
+    `engphys.on()` of `ENGPHYS_KEYS`, read from the raw (bytes) environment on every call -- a
+    worker or a test may change it."""
     raw = os.environ._data  # bytes -> bytes; iterating it skips decoding ~100 variables
-    hf = sorted(kv for kv in raw.items() if kv[0][:3] == b"HF_")
+    hf = sorted(kv for kv in raw.items()
+                if kv[0].startswith(ENV_PREFIXES) and kv[0] not in _ENV_EXCLUDE_B)
     named = [raw.get(k.encode()) for k in ENV_KEYS]
     # `engphys.on` reads INCOGNITA_ENGPHYS and one switch variable per name; evaluate it once per
     # distinct raw value of those variables
