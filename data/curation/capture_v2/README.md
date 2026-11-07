@@ -117,8 +117,8 @@ No v1 dataset is missing from v2. The ladder (`ladder_v2.csv`, `counts_v2.json` 
 | step (Z 26-92) | keep | downweight | exclude | fix-unit | changed vs previous step |
 |---|---|---|---|---|---|
 | S0 shipped v1 (2026-09-12) | 6 829 | 1 327 | 2 458 | 5 | |
-| S1 same parser, 2026-10-14 snapshot, current review files | 6 743 | 1 011 | 2 861 | 4 | 715 |
-| S2 + D1 number fix | 6 702 | 1 135 | 2 865 | 4 | 397 |
+| S1 same parser, 2026-10-14 snapshot, current review files | 6 743 | 1 011 | 2 861 | 4 | 606 |
+| S2 + D1 number fix | 6 702 | 1 135 | 2 865 | 4 | 375 |
 | S3 + D2 parser gaps | 6 817 | 1 040 | 2 867 | 4 | 290 |
 | S4 + D4 uncertainty split | 6 847 | 1 011 | 2 866 | 4 | 200 |
 | S5 + D4 Peelle re-basing | 6 898 | 960 | 2 866 | 4 | 277 |
@@ -126,12 +126,14 @@ No v1 dataset is missing from v2. The ladder (`ladder_v2.csv`, `counts_v2.json` 
 | S7 + D5 SPSDD / DEP | 6 724 | 895 | 3 104 | 5 | 423 |
 | S8 + D5 PRELM = v2 | 6 645 | 974 | 3 104 | 5 | 79 |
 
-Read this honestly: S1 alone (no fix, only the newer snapshot and review files) changes 715 decisions, and S2-S5 each
+Read this honestly: S1 alone (no fix, only the newer snapshot and review files) changes 606 decisions, and S2-S5 each
 move a few hundred datasets across the keep / downweight boundary (trust 0.5) because the metadata prior and the
 posterior trust are re-learned on every run. The resampling-stability gate fails in every run since the 2026-10-14
 snapshot (it failed for the light run too); the standards and spot-list gates pass. The fit stops at its 300-iteration
 cap as every WP-12 run has (converged = false, rms step 9e-5). Decision changes that come from a rule are the S6-S8
-steps (rule lines); the rest is the automatic layer's sensitivity, which v2 does not claim to fix.
+steps (rule lines); the rest is the automatic layer's sensitivity, which v2 does not claim to fix. (Corrected 2026-11-07: the
+first build counted a dataset absent from both steps as changed, giving S1 715 and S2 397, Z 1-25 44 and 68; the
+decisions themselves and every other count are unchanged.)
 
 ## Not done / open
 
