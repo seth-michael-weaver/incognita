@@ -1,0 +1,248 @@
+{
+ "energies_ev": [
+  1000.0,
+  4115.597137836078,
+  10569.507733924895,
+  19821.477802002966,
+  50904.706148241945,
+  95463.90696098917,
+  209503.26292609097,
+  459771.85068085446,
+  1009006.5029348617,
+  2214346.3577798195,
+  4152664.2755367034,
+  7787679.883380498,
+  10664702.036350533,
+  14604589.71443603,
+  20000000.000000004
+ ],
+ "nuclides": {
+  "I-109": {
+   "s_min_mev": -3.5808,
+   "e_cut_mev": 17.4192,
+   "capture_max_abs_below_cut": 0.014829102447638576,
+   "capture_max_abs_keV": 0.014829102447638576,
+   "capture_max_abs_above_cut": 9.881588347582237e-08,
+   "capture_onepoint_max_abs": 60.78839080883866,
+   "np_max_abs_below_cut": 0.00034045064453036566,
+   "np_onepoint_max_abs": 31.307650676362833,
+   "n_err": 0
+  },
+  "Pa-200": {
+   "s_min_mev": -9.7074,
+   "e_cut_mev": 11.2926,
+   "capture_max_abs_below_cut": 3.013800369267017e-07,
+   "capture_max_abs_keV": 1.4174705853520209e-10,
+   "capture_max_abs_above_cut": 0.010204063499894112,
+   "capture_onepoint_max_abs": 4.780439094562204,
+   "np_max_abs_below_cut": 4.527946268595429e-06,
+   "np_onepoint_max_abs": 5.96172658461127,
+   "n_err": 0
+  },
+  "Ra-215": {
+   "s_min_mev": -9.5261,
+   "e_cut_mev": 11.4739,
+   "capture_max_abs_below_cut": 5.585252993434153e-08,
+   "capture_max_abs_keV": 4.736551373341058e-09,
+   "capture_max_abs_above_cut": 4.343203712009469e-06,
+   "capture_onepoint_max_abs": 3.7207811019827446,
+   "np_max_abs_below_cut": 7.272167246163974e-08,
+   "np_onepoint_max_abs": 0.02964193817187577,
+   "n_err": 0
+  },
+  "Fr-190": {
+   "s_min_mev": -8.6904,
+   "e_cut_mev": 12.3096,
+   "capture_max_abs_below_cut": 3.500679746082369e-10,
+   "capture_max_abs_keV": 3.500679746082369e-10,
+   "capture_max_abs_above_cut": 0.0004664879365454677,
+   "capture_onepoint_max_abs": 3.5103610762644175,
+   "np_max_abs_below_cut": 5.836766625577638e-10,
+   "np_onepoint_max_abs": 5.7509682576375525,
+   "n_err": 0
+  },
+  "Bi-178": {
+   "s_min_mev": -8.9344,
+   "e_cut_mev": 12.0656,
+   "capture_max_abs_below_cut": 2.712747804167748e-10,
+   "capture_max_abs_keV": 9.405964895847774e-11,
+   "capture_max_abs_above_cut": 0.0009690428142186125,
+   "capture_onepoint_max_abs": 2.0251185147866466,
+   "np_max_abs_below_cut": 3.147511140610959e-10,
+   "np_onepoint_max_abs": 21.76742304286864,
+   "n_err": 0
+  },
+  "Tl-174": {
+   "s_min_mev": -7.6954,
+   "e_cut_mev": 13.3046,
+   "capture_max_abs_below_cut": 4.723352819979709e-10,
+   "capture_max_abs_keV": 4.723352819979709e-10,
+   "capture_max_abs_above_cut": 6.675005530265565e-05,
+   "capture_onepoint_max_abs": 1.9114629665772003,
+   "np_max_abs_below_cut": 5.502804878432244e-10,
+   "np_onepoint_max_abs": 2.233778825396958,
+   "n_err": 0
+  },
+  "Te-104": {
+   "s_min_mev": -5.0695,
+   "e_cut_mev": 15.9305,
+   "capture_max_abs_below_cut": 0.02489188334793413,
+   "capture_max_abs_keV": 0.0035712547606173706,
+   "capture_max_abs_above_cut": 0.011775781941317565,
+   "capture_onepoint_max_abs": 1.558729767333526,
+   "np_max_abs_below_cut": 0.0007395274187578238,
+   "np_onepoint_max_abs": 42.12426969025791,
+   "n_err": 0
+  }
+ },
+ "channels": {
+  "capture": {
+   "all": {
+    "n": 105,
+    "zero_vs_nonzero": 0,
+    "median_abs": 1.373383629044156e-10,
+    "max_abs": 0.02489188334793413,
+    "max_at": "Te-104 1.066e+07 eV"
+   },
+   "keV_below_100keV": {
+    "n": 42,
+    "zero_vs_nonzero": 0,
+    "median_abs": 1.020620254976734e-10,
+    "max_abs": 0.014829102447638576,
+    "max_at": "I-109 1.982e+04 eV"
+   },
+   "from_100keV_to_cut": {
+    "n": 51,
+    "zero_vs_nonzero": 0,
+    "median_abs": 5.922662360546838e-11,
+    "max_abs": 0.02489188334793413,
+    "max_at": "Te-104 1.066e+07 eV"
+   },
+   "above_cut": {
+    "n": 12,
+    "zero_vs_nonzero": 0,
+    "median_abs": 1.2902711433837588e-05,
+    "max_abs": 0.011775781941317565,
+    "max_at": "Te-104 2e+07 eV"
+   },
+   "onepoint_all": {
+    "n": 105,
+    "zero_vs_nonzero": 0,
+    "median_abs": 0.10952638832778971,
+    "max_abs": 60.78839080883866,
+    "max_at": "I-109 1.982e+04 eV"
+   }
+  },
+  "np": {
+   "all": {
+    "n": 105,
+    "zero_vs_nonzero": 0,
+    "median_abs": 9.583400739643366e-11,
+    "max_abs": 0.2873567582419212,
+    "max_at": "Bi-178 2e+07 eV"
+   },
+   "keV_below_100keV": {
+    "n": 42,
+    "zero_vs_nonzero": 0,
+    "median_abs": 6.047862211033816e-11,
+    "max_abs": 0.00034045064453036566,
+    "max_at": "I-109 1.982e+04 eV"
+   },
+   "from_100keV_to_cut": {
+    "n": 51,
+    "zero_vs_nonzero": 0,
+    "median_abs": 7.255751555135248e-11,
+    "max_abs": 0.0007395274187578238,
+    "max_at": "Te-104 1.066e+07 eV"
+   },
+   "above_cut": {
+    "n": 12,
+    "zero_vs_nonzero": 0,
+    "median_abs": 0.0001709981305270114,
+    "max_abs": 0.2873567582419212,
+    "max_at": "Bi-178 2e+07 eV"
+   },
+   "onepoint_all": {
+    "n": 105,
+    "zero_vs_nonzero": 0,
+    "median_abs": 0.09454563947036965,
+    "max_abs": 42.12426969025791,
+    "max_at": "Te-104 9.546e+04 eV"
+   }
+  },
+  "n2n": {
+   "all": {
+    "n": 105,
+    "zero_vs_nonzero": 0,
+    "median_abs": 0.0,
+    "max_abs": 0.000996361245177546,
+    "max_at": "Ra-215 1.46e+07 eV"
+   },
+   "keV_below_100keV": {
+    "n": 42,
+    "zero_vs_nonzero": 0,
+    "median_abs": 0.0,
+    "max_abs": 0.0,
+    "max_at": "I-109 1000 eV"
+   },
+   "from_100keV_to_cut": {
+    "n": 51,
+    "zero_vs_nonzero": 0,
+    "median_abs": 0.0,
+    "max_abs": 7.424835483993419e-06,
+    "max_at": "Pa-200 1.066e+07 eV"
+   },
+   "above_cut": {
+    "n": 12,
+    "zero_vs_nonzero": 0,
+    "median_abs": 8.804387443261952e-05,
+    "max_abs": 0.000996361245177546,
+    "max_at": "Ra-215 1.46e+07 eV"
+   },
+   "onepoint_all": {
+    "n": 105,
+    "zero_vs_nonzero": 0,
+    "median_abs": 0.0,
+    "max_abs": 0.057128431758970644,
+    "max_at": "Pa-200 1.066e+07 eV"
+   }
+  },
+  "na": {
+   "all": {
+    "n": 105,
+    "zero_vs_nonzero": 0,
+    "median_abs": 2.7001811897520156e-10,
+    "max_abs": 3.1231599446640734,
+    "max_at": "Pa-200 2e+07 eV"
+   },
+   "keV_below_100keV": {
+    "n": 42,
+    "zero_vs_nonzero": 0,
+    "median_abs": 1.808741489917054e-10,
+    "max_abs": 8.017392194581419e-08,
+    "max_at": "Te-104 9.546e+04 eV"
+   },
+   "from_100keV_to_cut": {
+    "n": 51,
+    "zero_vs_nonzero": 0,
+    "median_abs": 1.384117265246232e-10,
+    "max_abs": 0.0007014707699551925,
+    "max_at": "Ra-215 1.066e+07 eV"
+   },
+   "above_cut": {
+    "n": 12,
+    "zero_vs_nonzero": 0,
+    "median_abs": 0.19579601685607217,
+    "max_abs": 3.1231599446640734,
+    "max_at": "Pa-200 2e+07 eV"
+   },
+   "onepoint_all": {
+    "n": 105,
+    "zero_vs_nonzero": 8,
+    "median_abs": 0.9433305833226096,
+    "max_abs": 1.2848958805476052,
+    "max_at": "Te-104 1.46e+07 eV"
+   }
+  }
+ }
+}

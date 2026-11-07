@@ -4,8 +4,17 @@
 Runs on laptop WSL / Linux with the production engine engine-20261022-3 (nucleus 16606b356d6e), the same environment,
 runner (FASTGATE worker -> prodrun -> pprun, `fewres off`, `pewindow g`), deck and inputs as the library v0.2 runs
 (nucleus research/rl/libv02/code/run.sh + worker.py; the v0.2.2 copy is ~/libv022/code/worker.py on the mini). The only
-difference is the energy grid: a one-point grid [E]. Extra deck keywords (TALYS spelling, ';'-joined) are appended to
-the arm deck the way worker.py --repro does.
+difference is the energy grid: [E], padded by default with one dummy top energy (GRIDTOP pad, below). Extra deck
+keywords (TALYS spelling, ';'-joined) are appended to the arm deck the way worker.py --repro does.
+
+GRIDTOP pad (default on; TW_GRIDTOP=0 or --no-gridtop for the bare one-point grid [E]). This engine sets the outgoing grid
+top from the run's highest incident energy as TALYS does (grid.f90:120: enincmax + S_n(CN) + 1 MeV), i.e. 1 MeV above the
+photon exit only. When the compound nucleus is unbound to an ejectile (S < 0: alpha for nearly every CN above A ~ 140,
+proton on the proton-rich side) that exit's top energy E + S_n - S lies above the grid top and the transitions to the
+residual's lowest states are cut, so a one-energy job [E] is wrong for these nuclei (I-109 capture at 19.8 keV x62 too
+high). The fix of the later engines (NUCLIDO_GRIDTOP, default ON since engine-20261029-2; public INCOGNITA_GRIDTOP) is not
+in engine-20261022-3, so the job runs the grid [E, E + |min S| + 1 MeV] instead (S = the CN's separation energies,
+S(0,0,type) from the engine's own masses) and reports only E. Nothing changes when every S >= 0 (no pad is added).
 
 usage: engine_job.py --z Z --a A --e E_EV --comp COMP [--kw "ldmodel 2;strength 9"] --work DIR
 COMP: library composition label (P | A(rotor) | ACTJS A(rotor) | JS(P,A) | ACTJS JS(P,A)) or a single arm P | A | AJ.
@@ -40,15 +49,42 @@ def val(q, k):
     return float(np.asarray(q[k], float)[0]) if k in q else 0.0
 
 
+def cn_separation_mev(z, a):
+    """S(0,0,type), type 0..6, of the compound nucleus of n + (z, a), from the engine's own masses (default options), in a
+    separate process so nothing the engine caches at import leaks into the job."""
+    import subprocess
+    code = ("import json,sys; from physics.hf.compound.dens_reference import _structure_of as S; "
+            "o,p,m=S(int(sys.argv[1]),int(sys.argv[2])); print(json.dumps([float(m.s_mev[0,0,t]) for t in range(7)]))")
+    p = subprocess.run([sys.executable, "-c", code, str(z), str(a)], capture_output=True, text=True, cwd=ENG, timeout=600)
+    line = [ln for ln in p.stdout.splitlines() if ln.startswith("[")]
+    if not line: raise RuntimeError(p.stderr.strip()[-300:] or f"exit {p.returncode}")
+    return json.loads(line[-1])
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--z", type=int, required=True); ap.add_argument("--a", type=int, required=True)
     ap.add_argument("--e", type=float, required=True); ap.add_argument("--comp", default="P"); ap.add_argument("--kw", default="")
     ap.add_argument("--work", required=True); ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--no-gridtop", action="store_true", help="bare one-point grid [E] (TALYS grid top; wrong when some S < 0)")
     a = ap.parse_args(); t0 = time.process_time(); w0 = time.time()
     comp = a.comp.replace(" [FEW->mean]", "").strip()
-    os.makedirs(a.work, exist_ok=True); grid = os.path.join(a.work, "grid.json"); json.dump([a.e], open(grid, "w"))
+    os.makedirs(a.work, exist_ok=True); grid = os.path.join(a.work, "grid.json")
     out = dict(z=a.z, a=a.a, e_ev=a.e, comp=comp, kw=a.kw, arms=ARMS[comp], err="")
+    gridtop = not a.no_gridtop and os.environ.get("TW_GRIDTOP", "1").strip().lower() not in ("0", "n", "no", "off", "false")
+    g = [a.e]
+    if gridtop:
+        try:
+            smin = min(cn_separation_mev(a.z, a.a))
+        except Exception as ex:  # noqa: BLE001  (a job without S cannot be padded safely: report it)
+            out["err"] = f"GRIDTOP pad: separation energies unavailable: {type(ex).__name__}: {ex}"[:400]
+            out["cpu_s"] = round(time.process_time() - t0, 2); out["wall_s"] = round(time.time() - w0, 2)
+            if not a.keep: shutil.rmtree(a.work, ignore_errors=True)
+            sys.stdout.write(json.dumps(out) + "\n"); sys.stdout.flush(); return
+        out["s_min_mev"] = round(smin, 4)
+        if smin < 0: g = [a.e, a.e + (-smin + 1.0) * 1e6]
+    out["grid_ev"] = g; out["gridtop"] = gridtop
+    json.dump(g, open(grid, "w"))
     sys.path.insert(0, INP + "/code")
     import io, contextlib
     log = io.StringIO()

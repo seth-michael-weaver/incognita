@@ -2,7 +2,8 @@
 """TALYSWORLD-style calculator for INCOGNITA's production engine (local service + web page).
 
 Like IAEA TALYSWORLD: pick a target, incident energies and a few keywords; every incident energy runs as its own engine
-job (one-point energy grid), at most 3 at a time at nice 10, and each finished point is streamed to the page. Results are
+job (energy grid [E], padded with a dummy top energy when the compound nucleus is unbound to some ejectile: see
+engine_job.py, GRIDTOP pad; TW_GRIDTOP=0 turns the pad off), at most 3 at a time at nice 10, and each finished point is streamed to the page. Results are
 cached by (inputs, energy) under ~/talysworld_data/cache, so a repeated point costs nothing.
 
 Start (laptop WSL / Linux, system python3 with pandas + pyarrow for the library overlay):
@@ -27,15 +28,18 @@ ENG = os.environ.get("TW_ENG", f"{H}/fastgate_data/eng/16606b356d6e")
 PY = os.path.join(ENG, ".venv", "bin", "python")
 DATA = os.environ.get("TW_DATA", f"{H}/talysworld_data")
 ENGINE_LABEL = "INCOGNITA production engine engine-20261022-3 (nucleus 16606b356d6e)"
+GRIDTOP_NOTE = " + GRIDTOP pad (grid [E, E + |min S| + 1 MeV], only E reported)"
 MAX_WORKERS = 3
+GRIDTOP = os.environ.get("TW_GRIDTOP", "1").strip().lower() not in ("0", "n", "no", "off", "false")  # engine_job.py reads it too
 
 # Exposed keywords (TALYS spelling). "" = the library deck's own value (per-nucleus deck lines + production deck).
 KEYWORDS = {
     "localomp": dict(label="Optical model (neutron)", help="TALYS localomp: Koning-Delaroche local (y) or global (n) potential. "
                      "Checked 2026-11-07: 'n' gives the same numbers as the deck on Fe-56 and Pb-208 (no effect on this engine path)",
                      options=[["", "library deck (local KD03)"], ["y", "local Koning-Delaroche"], ["n", "global Koning-Delaroche (no effect seen)"]]),
-    "rvadjust": dict(label="OMP radius scale (neutron)", help="TALYS rvadjust n: real volume radius x factor. Checked: any OMP "
-                     "adjustment also moves the engine off its cached low-energy potential (Pb-208 1 MeV total 4.80 b -> 8.08 b at 1.05)",
+    "rvadjust": dict(label="OMP radius scale (neutron)", help="TALYS rvadjust n: real volume radius x factor. The response "
+                     "can be large (Pb-208 1 MeV total 4.80 b at 1 -> 8.08 b at 1.05); that is the optical model's own smooth response "
+                     "to the radius, not a stale cache",
                      options=[["", "library deck (1)"], ["n 0.97", "0.97"], ["n 0.99", "0.99"], ["n 1.01", "1.01"], ["n 1.03", "1.03"]]),
     "ldmodel": dict(label="Level density model", help="TALYS ldmodel (engine default 1; 5 above A = 215 for neutrons)",
                     options=[["", "library deck"], ["1", "1 constant temperature + Fermi gas"], ["2", "2 back-shifted Fermi gas"],
@@ -112,7 +116,9 @@ def ekey(e):
 
 
 def cache_key(z, a, comp, kws):
-    return hashlib.sha256(json.dumps(["16606b356d6e", "libv02-inputs", z, a, comp, kws]).encode()).hexdigest()[:16]
+    tag = ["16606b356d6e", "libv02-inputs", z, a, comp, kws]
+    if GRIDTOP: tag.append("gridtop-pad1")   # padded jobs differ from the old one-point jobs: separate cache
+    return hashlib.sha256(json.dumps(tag).encode()).hexdigest()[:16]
 
 
 def run_point(z, a, comp, kws, key, e):
@@ -142,7 +148,7 @@ def run_point(z, a, comp, kws, key, e):
         if not res.get("err"):
             os.makedirs(cdir, exist_ok=True); json.dump(res, open(cf, "w"))
             mf = os.path.join(cdir, "inputs.json")
-            if not os.path.exists(mf): json.dump(dict(z=z, a=a, comp=comp, kw=kws, engine=ENGINE_LABEL), open(mf, "w"))
+            if not os.path.exists(mf): json.dump(dict(z=z, a=a, comp=comp, kw=kws, engine=ENGINE_LABEL, gridtop=GRIDTOP), open(mf, "w"))
         return dict(res, cached=False)
     finally:
         if mine:
@@ -207,7 +213,7 @@ class Handler(BaseHTTPRequestHandler):
                 if not p.startswith(SITE): return self._send(403, {"error": "forbidden"})
                 return self._file(p)
             if u.path == "/api/meta":
-                return self._send(200, dict(engine=ENGINE_LABEL, keywords=KEYWORDS, comps=COMPS, library_grid_ev=LIB_GRID,
+                return self._send(200, dict(engine=ENGINE_LABEL + (GRIDTOP_NOTE if GRIDTOP else ""), keywords=KEYWORDS, comps=COMPS, library_grid_ev=LIB_GRID,
                                             library="v0.2.1", workers=pool._max_workers, nice=NICE, projectiles=["n"],
                                             nuclides=sorted([k[0], k[1]] for k in LIBRARY)))
             if u.path == "/api/library":

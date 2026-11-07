@@ -1,5 +1,57 @@
 # Check: one engine job per energy against library v0.2.1 (2026-11-07)
 
+## Correction (later on 2026-11-07): the library's wide grid is the closer one; the one-point jobs were wrong
+
+The first reading below had it backwards. The 7 "grid-dependent" nuclides are not a production-run oddity: a one-point
+grid `[E]` is too short for them. This engine sets the outgoing grid top as TALYS does (grid.f90:120: highest incident
+energy + S_n(CN) + 1 MeV), 1 MeV above the photon exit only. All 7 compound nuclei are unbound to an ejectile
+(min S = S_α from −3.58 MeV for I-110 to −9.71 MeV for Pa-201; also S_p < 0 for Pa-201, Fr-191, Bi-179, Tl-175). That
+exit's top energy E + S_n − S lies above a one-point grid's top, and the transitions to the residual's lowest states
+are cut. The library's 1 keV - 20 MeV run lifts the top by ~20 MeV, enough for every energy up to about 21 MeV + S_min.
+(Engine fix: GRIDTOP; NUCLIDO_GRIDTOP default on since engine-20261029-2, public `gridfix` branch INCOGNITA_GRIDTOP.)
+
+**Tool fix.** `engine_job.py` now pads each job by default: grid `[E, E + |min S| + 1 MeV]` when min S(CN) < 0 (S from
+the engine's own masses), and reports only E (TW_GRIDTOP=0 or `--no-gridtop` gives the old one-point grid). Nothing
+changes when every S ≥ 0. Padded jobs have their own cache key.
+
+**Re-check** (`check.py gridtop`): the 7 nuclides, 15 of the 64 library-grid energies (1 keV - 20 MeV), 105 jobs, 0
+failed, 2 workers at nice 10. Relative difference padded job / v0.2.1 − 1; "cut" = 21 MeV + S_min.
+
+| channel | median abs. | max, keV (< 100 keV) | max, 100 keV to cut | max, above cut | old one-point jobs, max |
+|---|---|---|---|---|---|
+| capture | 1.4e-10 | 1.5e-2 (I-109, 19.8 keV) | 2.5e-2 (Te-104, 10.7 MeV) | 1.2e-2 (Te-104, 20 MeV) | 60.8 (×61.8) |
+| (n,p) | 9.6e-11 | 3.4e-4 | 7.4e-4 | 0.29 (Bi-178, 20 MeV) | 42.1 (×43) |
+| (n,2n) | 0 | 0 | 7.4e-6 | 1.0e-3 | 0.057 |
+| (n,α) | 2.7e-10 | 8.0e-8 | 7.0e-4 | 3.1 (×4.1, Pa-200, 20 MeV) | 1.28 (+8 zero vs nonzero) |
+
+| nuclide | min S (MeV) | cut (MeV) | capture max, up to cut | capture max, above cut | capture, old one-point max |
+|---|---|---|---|---|---|
+| I-109 | −3.58 | 17.4 | 1.5e-2 (19.8 keV only; all other points ≤ 4e-9) | 1e-7 | 60.8 |
+| Pa-200 | −9.71 | 11.3 | 3e-7 | 1.0e-2 (20 MeV) | 4.78 |
+| Ra-215 | −9.53 | 11.5 | 6e-8 | 4e-6 | 3.72 |
+| Fr-190 | −8.69 | 12.3 | 4e-10 | 4.7e-4 | 3.51 |
+| Bi-178 | −8.93 | 12.1 | 3e-10 | 9.7e-4 | 2.03 |
+| Tl-174 | −7.70 | 13.3 | 5e-10 | 6.7e-5 | 1.91 |
+| Te-104 | −5.07 | 15.9 | 2.5e-2 (−0.35 % flat over 4-95 keV, −0.5 to −2.5 % at 0.2-10.7 MeV) | 1.2e-2 | 1.56 |
+
+Reading:
+- **Padded one-energy jobs reproduce the library for these 7 nuclides**, mostly to 1e-9, below the cut. The ×2-×62
+  differences are gone.
+- **Two residuals at keV/MeV:** I-109 at 19.8 keV (library 0.12201 vs 0.12020 mb, −1.5 %), and Te-104 (−0.35 % flat
+  from 4 keV, the same −0.35 % seen below 1 keV against v0.2.2, growing to −2.5 % at 10.7 MeV; 1 keV exact). Both
+  fit the run-scoped sfactor (spin shape carried over from the run's lower energies, which a single-energy job does
+  not have; cf. `gridfix` 22928b5c, I-109 0.12169 vs 0.12020 mb). Not checked further.
+- **Above the cut the library itself is short of grid** (its top is 20 MeV + S_n + 1), so it is the library value
+  that is cut there: (n,α) up to ×4 and (n,p) up to 29 % at 20 MeV. Capture moves by ≤ 1.2 %.
+- **Probably the same effect on the "reproduced" heavy nuclei.** Pb-209 (S_α = −2.25 MeV), and likely Th-233, U-239
+  and Au-198, are α-unbound too: the (n,α) near-threshold differences in reading 3 below are what the cut grid would
+  do. Not re-run.
+- Files: `check_gridtop_points.csv` (420 rows: per nuclide, channel and energy, library, padded and old one-point
+  values), `check_gridtop_summary.json`.
+
+The sections below are the original check, run with one-point jobs. Their numbers stand as measurements of the
+one-point grid; their reading of which side is wrong is superseded by this correction.
+
 **Question.** Run the production engine one incident energy per job, with library-default settings, on the library's own
 energy grid. Does it reproduce the published library v0.2.1 curves? Or does the grid dependence found on 11-06 show up?
 
@@ -13,7 +65,8 @@ energy grid. Does it reproduce the published library v0.2.1 curves? Or does the 
   goes to ≤ 2 % at 12-20 MeV.
 - **The one-energy value equals the short-grid (2 eV - 1 keV) run.** At 1 keV it is the same as v0.2.2's short-grid
   value to 1e-11, and below 1 keV too. So the 11-06 mismatch is reproduced exactly: one energy per job behaves like a
-  short grid, and the library's 134-point run is the odd one out for these nuclei.
+  short grid, and the library's 134-point run is the odd one out for these nuclei. *(Superseded: the short grids are
+  the wrong ones; see the correction at the top.)*
 
 ## Set-up
 
@@ -146,8 +199,9 @@ the engine below 1 keV, for that reason.
    approaches the production grid's top.
 
    The library curves of these nuclei (all EXTRAPOLATED, P composition, proton-rich or neutron-deficient) therefore
-   depend on the run's grid. They are not a property of the nucleus alone. The one-energy value is the grid-independent
-   reference; which value is "right" is an engine question.
+   depend on the run's grid. They are not a property of the nucleus alone. *(Superseded: the one-energy value is not a
+   grid-independent reference; its grid top is too low, and the library's wide grid is the closer one. See the
+   correction at the top.)*
 
    In this sample, (n,p) moves with capture (up to ×43). These nuclei have open proton channels at keV energies.
 3. **Small MeV-region differences on otherwise reproduced nuclei.** These are grid dependence on a smaller scale:
@@ -173,3 +227,5 @@ the engine below 1 keV, for that reason.
   1. Start the service: `wsl -e python3 scripts/talysworld/server.py`.
   2. In laptop WSL, run `python3 scripts/talysworld/check.py run`, then `python3 scripts/talysworld/check.py analyze`.
   3. Results are cached under `~/talysworld_data/cache`, so a rerun of the analysis is instant.
+  4. These original numbers were made with one-point jobs: start the service with `TW_GRIDTOP=0` to reproduce them.
+     The GRIDTOP re-check: service with the default pad, then `python3 scripts/talysworld/check.py gridtop`.

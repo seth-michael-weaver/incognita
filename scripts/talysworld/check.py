@@ -4,6 +4,8 @@
 usage (service running, laptop WSL python3 with pandas):
     python3 scripts/talysworld/check.py run       # submit the sample, wait (results land in the service cache)
     python3 scripts/talysworld/check.py analyze   # write check_points.csv + check_summary.json (+ tables for CHECK.md)
+    python3 scripts/talysworld/check.py gridtop   # the 7 grid-dependent nuclides again, GRIDTOP-padded jobs, 15 energies
+                                                  # (service started with the default TW_GRIDTOP=1) -> check_gridtop_*.{csv,json}
 
 Sample: 20 nuclides spread over Z and A, including the six named ones and six heavy/proton-rich nuclei from the v0.2.2
 short-grid mismatch list (library/v0.2.2/below1keV_engine_v022.parquet in the libv022 worktree: |junction_reldiff| > 0.5).
@@ -140,5 +142,64 @@ def analyze():
     print(json.dumps(S, indent=1, default=float)); print(Pn.to_string())
 
 
+# --- GRIDTOP re-check (2026-11-07): the 7 nuclides that were "grid-dependent" above, with the pad on (engine_job.py) ---
+GT_SAMPLE = [(53, 109), (91, 200), (88, 215), (87, 190), (83, 178), (81, 174), (52, 104)]
+GT_IDX = [0, 9, 15, 19, 25, 29, 34, 39, 44, 49, 53, 57, 59, 61, 63]   # 15 of the 64 library-grid points, 1 keV - 20 MeV
+
+
+def gridtop():
+    """Run (through the service, so cached points are reused) and compare with v0.2.1; the old unpadded one-point jobs are read
+    from the service cache under their old key for the 'before' column."""
+    import hashlib
+    C, X = lib(); G = [float(x) for x in C.energy_ev.iloc[0]]; E = [G[i] for i in GT_IDX]
+    data = os.environ.get("TW_DATA", os.path.expanduser("~/talysworld_data"))
+    rows = []
+    for z, a in GT_SAMPLE:
+        info, pts = client.run(z, a, E, quiet=True, poll=10)
+        assert any(p.get("gridtop") for p in pts), "service is not padding (start it with TW_GRIDTOP unset or 1)"
+        P = {round(p["e_ev"], 6): p for p in pts}
+        r = C[(C.Z == z) & (C.A == a)].iloc[0]; x = X.loc[r.nuclide_id]; nm = f"{SYM[z]}-{a}"
+        okey = hashlib.sha256(json.dumps(["16606b356d6e", "libv02-inputs", z, a, info["comp"], ""]).encode()).hexdigest()[:16]
+        libch = {"capture": np.asarray(r.sigma_b, float) * 1e3, "np": np.asarray(x.sigma_np_mb, float),
+                 "n2n": np.asarray(x.sigma_n2n_mb, float), "na": np.asarray(x.sigma_na_mb, float)}
+        smin = next((p["s_min_mev"] for p in pts if "s_min_mev" in p), np.nan)
+        for i in GT_IDX:
+            e = G[i]; p = P[round(e, 6)]; ch = p.get("channels") or {}
+            of = os.path.join(data, "cache", okey, f"{e:.6e}.json")
+            old = (json.load(open(of)).get("channels") or {}) if os.path.exists(of) else {}
+            for c, L in libch.items():
+                v = ch.get(c); lb = float(L[i]); o = old.get(c)
+                rows.append(dict(nuclide=nm, s_min_mev=smin, e_cut_mev=21.0 + smin, channel=c, e_ev=e, library_mb=lb, padded_mb=v,
+                                 rel=rel(v, lb) if v is not None else np.nan, onepoint_mb=o,
+                                 rel_onepoint=rel(o, lb) if o is not None else np.nan, err=p.get("err", "")))
+    D = pd.DataFrame(rows)
+    D.to_csv(os.path.join(OUT, "check_gridtop_points.csv"), index=False, float_format="%.6g")
+    S = {"energies_ev": E, "nuclides": {}, "channels": {}}
+
+    def st(g, col):
+        f = g[np.isfinite(g[col])]; ar = f[col].abs()
+        return dict(n=int(len(g)), zero_vs_nonzero=int((~np.isfinite(g[col]) & g[col].notna()).sum()),
+                    median_abs=float(ar.median()) if len(ar) else None, max_abs=float(ar.max()) if len(ar) else None,
+                    max_at=(f"{f.loc[ar.idxmax(), 'nuclide']} {f.loc[ar.idxmax(), 'e_ev']:.4g} eV" if len(ar) else ""))
+    for c, g in D.groupby("channel", sort=False):
+        lo = g[g.e_ev < 1e5]; mid = g[(g.e_ev >= 1e5) & (g.e_ev <= g.e_cut_mev * 1e6)]; hi = g[g.e_ev > g.e_cut_mev * 1e6]
+        S["channels"][c] = dict(all=st(g, "rel"), keV_below_100keV=st(lo, "rel"), from_100keV_to_cut=st(mid, "rel"),
+                                above_cut=st(hi, "rel"), onepoint_all=st(g, "rel_onepoint"))
+    for nm, g in D.groupby("nuclide", sort=False):
+        cap = g[g.channel == "capture"]; npc = g[g.channel == "np"]
+        S["nuclides"][nm] = dict(s_min_mev=float(g.s_min_mev.iloc[0]), e_cut_mev=float(g.e_cut_mev.iloc[0]),
+                                 capture_max_abs_below_cut=float(cap[cap.e_ev <= cap.e_cut_mev * 1e6].rel.abs().max()),
+                                 capture_max_abs_keV=float(cap[cap.e_ev < 1e5].rel.abs().max()),
+                                 capture_max_abs_above_cut=(float(cap[cap.e_ev > cap.e_cut_mev * 1e6].rel.abs().max())
+                                                            if (cap.e_ev > cap.e_cut_mev * 1e6).any() else None),
+                                 capture_onepoint_max_abs=float(cap.rel_onepoint.abs().max()),
+                                 np_max_abs_below_cut=float(npc[npc.e_ev <= npc.e_cut_mev * 1e6].rel.abs().max()),
+                                 np_onepoint_max_abs=float(npc.rel_onepoint.abs().max()),
+                                 n_err=int((g.err.fillna("") != "").sum()) // 4)
+    json.dump(S, open(os.path.join(OUT, "check_gridtop_summary.json"), "w"), indent=1, default=float)
+    print(json.dumps(S, indent=1, default=float))
+    print(D[D.channel == "capture"][["nuclide", "e_ev", "library_mb", "padded_mb", "rel", "rel_onepoint"]].to_string())
+
+
 if __name__ == "__main__":
-    {"run": run, "analyze": analyze}[sys.argv[1]]()
+    {"run": run, "analyze": analyze, "gridtop": gridtop}[sys.argv[1]]()
