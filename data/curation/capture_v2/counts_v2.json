@@ -23,16 +23,16 @@
     "points": 689138,
     "cells": 33830,
     "decisions": {
-     "downweight": 912,
+     "downweight": 974,
      "exclude": 3104,
      "fix-unit": 5,
-     "keep": 6707
+     "keep": 6645
     },
     "cells_by_decision": {
-     "downweight": 6478,
+     "downweight": 6919,
      "exclude": 3647,
      "fix-unit": 5,
-     "keep": 23700
+     "keep": 23259
     }
    }
   },
@@ -59,16 +59,16 @@
     "points": 266308,
     "cells": 4049,
     "decisions": {
-     "downweight": 107,
+     "downweight": 118,
      "exclude": 448,
      "fix-unit": 1,
-     "keep": 1148
+     "keep": 1137
     },
     "cells_by_decision": {
-     "downweight": 456,
+     "downweight": 625,
      "exclude": 431,
      "fix-unit": 1,
-     "keep": 3161
+     "keep": 2992
     }
    }
   }
@@ -112,44 +112,44 @@
    },
    {
     "step": "S4_uncertainty",
-    "keep": 6913,
-    "downweight": 945,
+    "keep": 6847,
+    "downweight": 1011,
     "exclude": 2866,
     "fix-unit": 4,
     "datasets": 10728,
-    "changed_vs_previous": 262
+    "changed_vs_previous": 200
    },
    {
     "step": "S5_peelle",
-    "keep": 6942,
-    "downweight": 916,
+    "keep": 6898,
+    "downweight": 960,
     "exclude": 2866,
     "fix-unit": 4,
     "datasets": 10728,
-    "changed_vs_previous": 195
+    "changed_vs_previous": 277
    },
    {
     "step": "S6_sums_slips",
-    "keep": 6851,
-    "downweight": 992,
+    "keep": 6912,
+    "downweight": 931,
     "exclude": 2879,
     "fix-unit": 6,
     "datasets": 10728,
-    "changed_vs_previous": 182
+    "changed_vs_previous": 136
    },
    {
     "step": "S7_spsdd_dep",
-    "keep": 6786,
-    "downweight": 833,
+    "keep": 6724,
+    "downweight": 895,
     "exclude": 3104,
     "fix-unit": 5,
     "datasets": 10728,
-    "changed_vs_previous": 434
+    "changed_vs_previous": 423
    },
    {
     "step": "S8_prelm_final",
-    "keep": 6707,
-    "downweight": 912,
+    "keep": 6645,
+    "downweight": 974,
     "exclude": 3104,
     "fix-unit": 5,
     "datasets": 10728,
@@ -194,44 +194,44 @@
    },
    {
     "step": "S4_uncertainty",
+    "keep": 1155,
+    "downweight": 160,
+    "exclude": 388,
+    "fix-unit": 1,
+    "datasets": 1704,
+    "changed_vs_previous": 25
+   },
+   {
+    "step": "S5_peelle",
+    "keep": 1164,
+    "downweight": 151,
+    "exclude": 388,
+    "fix-unit": 1,
+    "datasets": 1704,
+    "changed_vs_previous": 41
+   },
+   {
+    "step": "S6_sums_slips",
     "keep": 1172,
     "downweight": 143,
     "exclude": 388,
     "fix-unit": 1,
     "datasets": 1704,
-    "changed_vs_previous": 48
-   },
-   {
-    "step": "S5_peelle",
-    "keep": 1176,
-    "downweight": 139,
-    "exclude": 388,
-    "fix-unit": 1,
-    "datasets": 1704,
-    "changed_vs_previous": 30
-   },
-   {
-    "step": "S6_sums_slips",
-    "keep": 1150,
-    "downweight": 165,
-    "exclude": 388,
-    "fix-unit": 1,
-    "datasets": 1704,
-    "changed_vs_previous": 32
+    "changed_vs_previous": 16
    },
    {
     "step": "S7_spsdd_dep",
-    "keep": 1151,
-    "downweight": 104,
+    "keep": 1140,
+    "downweight": 115,
     "exclude": 448,
     "fix-unit": 1,
     "datasets": 1704,
-    "changed_vs_previous": 94
+    "changed_vs_previous": 77
    },
    {
     "step": "S8_prelm_final",
-    "keep": 1148,
-    "downweight": 107,
+    "keep": 1137,
+    "downweight": 118,
     "exclude": 448,
     "fix-unit": 1,
     "datasets": 1704,
@@ -241,15 +241,15 @@
  },
  "transitions_v1_to_v2": {
   "Z26-92": {
-   "keep->keep": 6400,
+   "keep->keep": 6375,
    "exclude->exclude": 2458,
-   "downweight->downweight": 698,
+   "downweight->downweight": 737,
    "downweight->exclude": 415,
+   "keep->downweight": 226,
    "keep->exclude": 226,
-   "downweight->keep": 214,
-   "keep->downweight": 201,
-   "None->keep": 93,
-   "None->downweight": 12,
+   "downweight->keep": 175,
+   "None->keep": 95,
+   "None->downweight": 10,
    "None->exclude": 4,
    "fix-unit->fix-unit": 3,
    "keep->fix-unit": 2,
@@ -257,13 +257,13 @@
    "fix-unit->downweight": 1
   },
   "Z1-25": {
-   "keep->keep": 1107,
+   "keep->keep": 1103,
    "exclude->exclude": 388,
-   "downweight->downweight": 91,
+   "downweight->downweight": 98,
    "downweight->exclude": 35,
-   "downweight->keep": 32,
    "keep->exclude": 25,
-   "keep->downweight": 16,
+   "downweight->keep": 25,
+   "keep->downweight": 20,
    "None->keep": 9,
    "fix-unit->fix-unit": 1
   }
@@ -399,14 +399,14 @@
    "split_sys_derived": 568,
    "stat_only": 330,
    "sys_only": 27,
-   "total_correlated": 9503,
-   "total_minus_sys": 62
+   "total_minus_sys": 62,
+   "total_unsplit": 9503
   },
   "abs_unit_datasets_peelle": 9257,
   "peelle_final": {
    "cells_rebased": 16915,
    "cells_abs_units": 16915,
-   "median_abs_log_factor_x1000": 3
+   "median_abs_log_factor_x1000": 2
   }
  },
  "D5_duplicates": {
@@ -467,7 +467,7 @@
   "S5_peelle": {
    "cells_rebased": 17963,
    "cells_abs_units": 17963,
-   "median_abs_log_factor_x1000": 3
+   "median_abs_log_factor_x1000": 2
   },
   "S6_sums_slips": {
    "cells_rebased": 17763,
@@ -477,7 +477,7 @@
   "S7_spsdd_dep": {
    "cells_rebased": 16915,
    "cells_abs_units": 16915,
-   "median_abs_log_factor_x1000": 3
+   "median_abs_log_factor_x1000": 2
   }
  },
  "d5_skips": {

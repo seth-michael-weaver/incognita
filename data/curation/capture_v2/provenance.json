@@ -1,9 +1,9 @@
 {
  "product": "CAPSET-v2 curated EXFOR capture set, Z 1-92 (data/curation/capture_v2)",
- "built": "2026-11-06 18:57",
+ "built": "2026-11-06 19:22",
  "script": "scripts/build_capture_v2.py",
  "public_commit_base": "e5f258ddcbec9418b2d0fd6688fa3888982ec015",
- "research_commit": "04074f7bc406599a87d81ac002e6a2900d2ab662",
+ "research_commit": "94e68a486103b959152d770ecbf45fc5702adc6a",
  "curation_code": "research data/curate/quality_model.py + review_log.py (unchanged) with this repository's data/curate/discrepancy.py (unchanged) and data/ingest/exfor.py (V2_FIXES = all six)",
  "entry_zip": {
   "path": "raw/exfor/entry_2026-10-14.zip",
@@ -11,7 +11,7 @@
   "exfor_version": "2026-10-14"
  },
  "staging_v2": {
-  "sha256": "8f89d04331b93ca1c14809801b2c5f824e71fd7b3ba6ed997d97d4a85fc0472a",
+  "sha256": "04224a467ca9ebb183b3fe0f7fdc4830698c4ae280daec8c0d5147b828d080c7",
   "rows": 12432,
   "where": "work directory, not shipped (rebuilt by this script)"
  },
@@ -26,7 +26,7 @@
   "peelle_final": {
    "cells_rebased": 16915,
    "cells_abs_units": 16915,
-   "median_abs_log_factor_x1000": 3
+   "median_abs_log_factor_x1000": 2
   },
   "peelle_clip": 3.0,
   "summary": {
@@ -34,8 +34,8 @@
     "n_cells": 35191,
     "n_datasets": 9286,
     "n_bins": 20113,
-    "last_delta": 0.004821252754800831,
-    "rms_delta": 9.26226642505795e-05,
+    "last_delta": 0.020125405417014797,
+    "rms_delta": 0.00017161299862279621,
     "iterations": 300,
     "converged": false
    },

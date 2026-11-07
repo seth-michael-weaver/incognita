@@ -61,16 +61,20 @@ benchmark fix) is applied to every capture dataset; COMBO_SUM / COMBO_DIFF / COM
 as of this build, so nothing here duplicates or conflicts with it).
 
 **D4. Uncertainties.** New split (exfor.py `_split_uncertainty`): stat = ERR-S; sys = ERR-SYS, else
-sqrt(ERR-T^2 - ERR-S^2) when both are given (568 datasets, `split_sys_derived`; v1 dropped ERR-T there); an unsplit
-total (ERR-T / DATA-ERR alone) goes to sys_sigma, so a cell mean does not divide it by sqrt(n) (9 503 datasets,
-`total_correlated`; v1 treated it as purely statistical); ERR-T with ERR-SYS but no ERR-S: stat = sqrt(T^2 - SYS^2)
-(62). Others: split 348, stat only 330, sys only 27, none 1 594. Effect on the cells' relative uncertainty (37 699 cells
-in both versions, 27 285 with an uncertainty in both): median ratio v2/v1 1.00 (single-point cells do not change),
-32 % of cells larger by > 5 %, median x2.23 for cells of >= 4 points.
+sqrt(ERR-T^2 - ERR-S^2) when both are given (568 datasets, `split_sys_derived`; v1 dropped ERR-T there); ERR-T with
+ERR-SYS but no ERR-S: stat = sqrt(T^2 - SYS^2) (62, `total_minus_sys`; v1 counted the systematic part twice). An unsplit
+total (ERR-T / DATA-ERR alone, 9 503 datasets, `total_unsplit`) stays stat_sigma as in v1, reduced by sqrt(n) in a
+cell mean: on dense time-of-flight scans it is mostly counting statistics, and the correlated normalisation belongs
+to the scatter model's per-dataset bias term (tau 3 %, 1 % floor). (A first build of 2026-11-06 sent it to sys_sigma
+as fully correlated; review found that it inflated dense cells, e.g. 1 583 usable Z 26-92 cells of >= 10 points at a
+median sys/sem of 2.2, 13742004 Sr-88 capped at 100 %, and double-counted the bias term. Reverted before release.)
+Others: split 348, stat only 330, sys only 27, none 1 594. Effect on the Z 26-92 cells' relative uncertainty (24 286
+cells with an uncertainty in v1 and v2): median ratio 1.00, 8.1 % larger by > 5 %, 0.5 % smaller by > 5 %. Usable cells
+of >= 10 points with a sys-only uncertainty: 23 (as v1).
 Peelle (PREAMBLE gate-calibration rule 8: no data uncertainty proportional to the observed value): the cells' relative
 uncertainties are already relative to the cell mean, not to each point; inside the consensus fit the 16 915 cells of
 the 9 257 datasets whose uncertainty columns are in absolute units are re-based on the expected value of a first fit,
-sigma / exp(mu + bias), instead of sigma / observed mean (factor clipped to [1/3, 3]; median |ln factor| 0.003).
+sigma / exp(mu + bias), instead of sigma / observed mean (factor clipped to [1/3, 3]; median |ln factor| 0.002).
 Uncertainties given in per cent are already independent of the observed value. The shipped cells carry the reported
 uncertainties; the re-basing is inside the fit only.
 
@@ -105,8 +109,8 @@ not the hard-coded 2026-08-27. The default ingest keeps the constant (reproducib
 | datasets | 10 619 | 10 728 | 1 695 | 1 704 |
 | points | 688 818 | 689 138 | 266 299 | 266 308 |
 | cells | 33 659 | 33 830 | 4 040 | 4 049 |
-| keep / downweight / exclude / fix-unit (datasets) | 6 829 / 1 327 / 2 458 / 5 | 6 707 / 912 / 3 104 / 5 | 1 148 / 158 / 388 / 1 | 1 148 / 107 / 448 / 1 |
-| cells keep / downweight / exclude / fix-unit | 23 878 / 8 344 / 1 424 / 13 | 23 700 / 6 478 / 3 647 / 5 | 3 115 / 675 / 249 / 1 | 3 161 / 456 / 431 / 1 |
+| keep / downweight / exclude / fix-unit (datasets) | 6 829 / 1 327 / 2 458 / 5 | 6 645 / 974 / 3 104 / 5 | 1 148 / 158 / 388 / 1 | 1 137 / 118 / 448 / 1 |
+| cells keep / downweight / exclude / fix-unit | 23 878 / 8 344 / 1 424 / 13 | 23 259 / 6 919 / 3 647 / 5 | 3 115 / 675 / 249 / 1 | 2 992 / 625 / 431 / 1 |
 
 No v1 dataset is missing from v2. The ladder (`ladder_v2.csv`, `counts_v2.json` "ladder") attributes every change:
 
@@ -116,11 +120,11 @@ No v1 dataset is missing from v2. The ladder (`ladder_v2.csv`, `counts_v2.json` 
 | S1 same parser, 2026-10-14 snapshot, current review files | 6 743 | 1 011 | 2 861 | 4 | 715 |
 | S2 + D1 number fix | 6 702 | 1 135 | 2 865 | 4 | 397 |
 | S3 + D2 parser gaps | 6 817 | 1 040 | 2 867 | 4 | 290 |
-| S4 + D4 uncertainty split | 6 913 | 945 | 2 866 | 4 | 262 |
-| S5 + D4 Peelle re-basing | 6 942 | 916 | 2 866 | 4 | 195 |
-| S6 + D3 sums, D6 slips | 6 851 | 992 | 2 879 | 6 | 182 |
-| S7 + D5 SPSDD / DEP | 6 786 | 833 | 3 104 | 5 | 434 |
-| S8 + D5 PRELM = v2 | 6 707 | 912 | 3 104 | 5 | 79 |
+| S4 + D4 uncertainty split | 6 847 | 1 011 | 2 866 | 4 | 200 |
+| S5 + D4 Peelle re-basing | 6 898 | 960 | 2 866 | 4 | 277 |
+| S6 + D3 sums, D6 slips | 6 912 | 931 | 2 879 | 6 | 136 |
+| S7 + D5 SPSDD / DEP | 6 724 | 895 | 3 104 | 5 | 423 |
+| S8 + D5 PRELM = v2 | 6 645 | 974 | 3 104 | 5 | 79 |
 
 Read this honestly: S1 alone (no fix, only the newer snapshot and review files) changes 715 decisions, and S2-S5 each
 move a few hundred datasets across the keep / downweight boundary (trust 0.5) because the metadata prior and the

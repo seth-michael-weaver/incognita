@@ -42,7 +42,7 @@ def test_uncertainty_split(v2) -> None:
     st, sy, m = X._split_uncertainty(s, t, None)
     assert m == "split_sys_derived" and st[0] == 3.0 and sy[0] == pytest.approx(4.0)
     st, sy, m = X._split_uncertainty(None, t, None)
-    assert m == "total_correlated" and st is None and sy[0] == 5.0
+    assert m == "total_unsplit" and sy is None and st[0] == 5.0
     st, sy, m = X._split_uncertainty(None, t, y)
     assert m == "total_minus_sys" and st[0] == pytest.approx(np.sqrt(21.0))
     st, sy, m = X._split_uncertainty(s, t, y)

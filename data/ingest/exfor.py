@@ -109,8 +109,9 @@ EXFOR_VERSION = "2026-08-27"  # entry.zip snapshot date (raw/MANIFEST.json); CAP
 #   ktdegc    KT-K (and KT-K-ERR) given in DEG-C: kT = k_B (T + 273.15) (an error column: k_B dT)
 #   eqroute   "(X(N,ABS),,SIG)=(X(N,G)...,,SIG)": an equivalence whose capture leaf is routed to the (N,G) leaf
 #   unc       uncertainty split: stat = ERR-S; sys = ERR-SYS, else sqrt(ERR-T^2 - ERR-S^2) when both are given;
-#             an unsplit total (ERR-T / DATA-ERR alone) goes to sys_sigma (correlated: not reduced by sqrt(n) in a
-#             cell mean); with ERR-T and ERR-SYS but no ERR-S, stat = sqrt(ERR-T^2 - ERR-SYS^2)
+#             with ERR-T and ERR-SYS but no ERR-S, stat = sqrt(ERR-T^2 - ERR-SYS^2); an unsplit total (ERR-T /
+#             DATA-ERR alone) stays stat_sigma as in v1 (dense TOF scans: mostly counting statistics; the scatter
+#             model's per-dataset bias term carries the correlated normalisation)
 V2_ALL = frozenset({"numfix", "ratio", "enminapx", "ktdegc", "eqroute", "unc"})
 _v2env = os.environ.get("INCOGNITA_X4_V2", "").strip()
 V2_FIXES: frozenset[str] = V2_ALL if _v2env == "1" else frozenset(x for x in _v2env.split(",") if x in V2_ALL)
@@ -1116,7 +1117,7 @@ def _split_uncertainty(
     if t is not None:
         if y is not None:
             return diff(t, y), y, "total_minus_sys"     # stat = sqrt(T^2 - SYS^2)
-        return None, t, "total_correlated"              # unsplit total: correlated, no sqrt(n) reduction
+        return t, None, "total_unsplit"                 # unsplit total: stat_sigma, as v1
     return None, y, "sys_only" if y is not None else "none"
 
 

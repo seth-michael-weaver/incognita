@@ -12,8 +12,8 @@ Fixes (numbers = the defect list of the 2026-11-06 hunt):
   D3 sums      REACTION combinations that are not one capture cross section (sums over targets / processes, weighted
                state sums such as G + 1.006 M x FCT) are excluded with the REACTION-code rule of
                research/scripts/channels/score_channels_fixed.reaction_flags (flags COMBO_SUM / COMBO_DIFF / COMBO_PROD).
-  D4 unc       stat = ERR-S, sys = ERR-SYS or sqrt(ERR-T^2 - ERR-S^2); an unsplit total goes to sys (correlated, no
-               sqrt(n) reduction in a cell mean). Peelle: absolute-unit uncertainties are re-based on the expected value of a
+  D4 unc       stat = ERR-S, sys = ERR-SYS or sqrt(ERR-T^2 - ERR-S^2); stat = sqrt(ERR-T^2 - ERR-SYS^2); an unsplit
+               total stays stat_sigma (as v1). Peelle: absolute-unit uncertainties are re-based on the expected value of a
                first fit (sigma / exp(mu + bias) instead of sigma / observed mean) before the final fit.
   D5 dupes     a dataset whose EXFOR STATUS says (SPSDD,X) or (DEP,X), where X is in the set with the same comparable
                quantity, is excluded (also across entries) and left out of the consensus fit; STATUS PRELM -> downweight.
