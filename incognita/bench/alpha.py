@@ -38,7 +38,7 @@ WANT_MTS = sorted({5, 107, *HE_MULT, *NA_LEVELS})
 
 
 def _f(s: str) -> float:
-    s = s.strip()
+    s = s.replace(' ', '')     # also "2.50550+ 4" (a blank inside the exponent; data/ingest/endf.endf_float)
     if not s:
         return 0.0
     m = re.match(r'^([+-]?[\d.]+)([+-]\d+)$', s)

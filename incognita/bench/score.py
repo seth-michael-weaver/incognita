@@ -406,7 +406,7 @@ def staged_library(key: str, evaluated: Path | None = None) -> Curves:
 
 # --- ENDF-6 ---------------------------------------------------------------------------------------------------------
 def _f(s):
-    s = s.strip()
+    s = s.replace(' ', '')     # also "2.50550+ 4" (a blank inside the exponent; data/ingest/endf.endf_float)
     if not s:
         return 0.0
     m = re.match(r'^([+-]?[\d.]+)([+-]\d+)$', s)
@@ -435,6 +435,15 @@ def _interp_law(x, y, nbt, law, e):
         lo = hi - 1
     out[(e < x[0]) | (e > x[-1])] = 0.0
     return out
+
+
+def _liso(path: Path) -> int:
+    """LISO of the material (MF1/MT451, second line, cols 34-44): 0 = ground-state target."""
+    with open(path, errors='replace') as fh:
+        for L in fh:
+            if len(L) >= 75 and L[70:75] == ' 1451':
+                return int(_f(next(fh)[33:44]))
+    return 0
 
 
 def read_endf(path: Path):
@@ -494,6 +503,8 @@ def endf_library(paths, njoy: str | None = None, workdir: Path | None = None) ->
     tab, warned = {}, []
     for p in paths:
         try:
+            if _liso(p) != 0:                      # an isomeric target (e.g. Am-242m1) is not the ground state's curve
+                continue
             z, a, lrp, t = read_endf(p)
         except Exception as ex:                    # noqa: BLE001 - one bad file must not stop the library
             print(f'  skip {p.name}: {ex}', file=sys.stderr); continue
