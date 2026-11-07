@@ -96,4 +96,12 @@ Object.assign(WT.L.ui, {
   cls_trail: "moteur derrière", cls_parity: "à peu près à égalité", cls_under: "moteur devant, non tranché",
   th_cell: "Comparaison", th_rival: "Rival", th_n: "Noyaux", th_gap: "Écart", th_ours: "Erreur du moteur", th_theirs: "Erreur du rival",th_ci: "Intervalle à 95 %", th_verdict: "Verdict",
   total: "Tous", vs: "face à",
+  // family-wise correction and the wins to read with care (js/scoreboard.js)
+  sb_fw_head: "{k} {W} après correction pour {m} types de mesure",
+  sb_keep_fw: "Avec une correction de Bonferroni pour les {m} types de mesure, {k} des {w} victoires subsisteraient.",
+  sb_how_fw_t: "Correction pour les comparaisons multiples",
+  sb_how_fw_d: "Bonferroni, avec m = {m} types de mesure (ou les {n} comparaisons) : une victoire subsiste si l'intervalle entre les centiles 0,05/2m et 1 − 0,05/2m des mêmes 2 000 rééchantillonnages est sous zéro. Avec 2 000 rééchantillonnages, ces centiles sont grossiers, si bien qu'une approximation normale est aussi utilisée ; les deux méthodes conservent {k} des {w} victoires ({kc} sur les {n} comparaisons). Les verdicts de cette page ne sont pas corrigés.",
+  sb_care_h: "Victoires à lire avec prudence",
+  sb_care_cap: "Victoires qui reposent sur {sn} noyaux ou moins (marquées †) ou dont l'intervalle s'arrête à moins de {nz} dex sous zéro. La dernière colonne applique la correction pour {m} types de mesure : centiles bootstrap / approximation normale.",
+  th_fw: "Corrigé",
 });

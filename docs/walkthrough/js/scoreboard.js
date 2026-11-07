@@ -36,6 +36,13 @@
   $("#sb-keep-5").innerHTML = fill(T("sb_keep_5", "The measurements were curated by this project: {exc} of {rows} rows were left out (curation register, documented defects, or estimates), and each capture value is a trust-weighted consensus of EXFOR datasets. All of it is in the <a href=\"{data}\">data package</a>."),
     { exc: big(C.excluded), rows: big(C.rows), data: DATA });
   $("#sb-keep-3").innerHTML = fill(T("sb_keep_3", "Some comparisons reuse the same measurements (for example a second scoring of the same (n,2n) data), so the {n} are not independent; no correction for multiple comparisons is applied."), { n: I.decided });
+  // family-wise count (WT.boardFW, in scoreboard.html, from data/board/familywise.csv): a range over two methods
+  const FW = WT.boardFW, rng = (a) => a[0] === a[1] ? String(a[0]) : `${a[0]}–${a[1]}`;
+  if (FW) {
+    const o = { k: rng(FW.views), kc: rng(FW.cells), m: FW.m_views, n: FW.m_cells, w: FW.wins, W: V.WIN };
+    $("#sb-keep-3").innerHTML += " " + fill(T("sb_keep_fw", "With a Bonferroni correction for the {m} kinds of measurement, {k} of the {w} wins would remain."), o);
+    $("#sb-how-fw").innerHTML = fill(T("sb_how_fw_d", "Bonferroni, for m = {m} kinds of measurement (or all {n} comparisons): a win remains when the interval from the 0.05/2m to the 1 − 0.05/2m percentile of the same 2,000 resamples lies below zero. With 2,000 resamples those percentiles are coarse, so a normal approximation is used as well; the two methods keep {k} of the {w} wins ({kc} over all {n} comparisons). The verdicts on this page are not corrected."), o);
+  }
   const KS = I.k_scope;
   if (KS) $("#sb-how-k").innerHTML = fill(T("sb_how_k_d", "Maxwellian-averaged capture cross sections (MACS) at 30 keV, grouped by proton number Z. They are scored on the {kn} nuclides whose compiled value is measured, not estimated ({knt} against TALYS-2.24, which has no stored value for the others). The bands Z &lt; 20 and Z ≥ 84 hold no such nuclide and are not counted."), { kn: KS.n, knt: KS.talys });
   if (es) WT.keepLang();   // after the text above: links inside translated text keep the language too
@@ -84,13 +91,29 @@
   const CLS = { trail: T("cls_trail", "engine behind"), parity: T("cls_parity", "about level"), underpowered: T("cls_under", "engine ahead, not resolved") };
   const open = I.open.slice().sort((a, b) => ((b.verdict === "LOSS") - (a.verdict === "LOSS")) || (b.hi - a.hi));   // losses, then closest to a loss
   // the interval as a small bar around zero (Seth 2026-11-06: "much more palatable"); numbers stay in text beside it
-  const span = Math.max(...open.map((c) => Math.max(Math.abs(c.lo), Math.abs(c.hi)))) * 1.08 || 1;
-  const X = (v) => (50 + 50 * v / span).toFixed(2);
-  const ci = (c) => `<span class="sb-ci" aria-hidden="true"><i class="z"></i><i class="bar ${c.verdict.toLowerCase()}" style="left:${X(c.lo)}%;width:${(X(c.hi) - X(c.lo)).toFixed(2)}%"></i><i class="pt" style="left:${X(c.gap)}%"></i></span>`;
+  const scale = (cs) => Math.max(...cs.map((c) => Math.max(Math.abs(c.lo), Math.abs(c.hi)))) * 1.08 || 1;
+  const span = scale(open);
+  const ci = (c, sp = span) => {
+    const X = (v) => (50 + 50 * v / sp).toFixed(2);
+    return `<span class="sb-ci" aria-hidden="true"><i class="z"></i><i class="bar ${c.verdict.toLowerCase()}" style="left:${X(c.lo)}%;width:${(X(c.hi) - X(c.lo)).toFixed(2)}%"></i><i class="pt" style="left:${X(c.gap)}%"></i></span>`;
+  };
   $("#sb-open").insertAdjacentHTML("beforeend",
     `<thead><tr><th scope="col">${T("th_cell", "Comparison")}</th><th scope="col" class="r">${T("th_n", "Nuclei")}</th><th scope="col" class="r">${T("th_ours", "Engine error")}</th><th scope="col" class="r">${T("th_theirs", "Rival error")}</th><th scope="col">${T("th_ci", "95 % interval")}</th><th scope="col">${T("th_verdict", "Verdict")}</th></tr></thead><tbody>`
     + open.map((c) => `<tr><td><div class="sb-cell">${esc(gloss(c.cell))}</div><div class="sb-gl">${T("vs", "vs")} ${esc(rname(c.rival))}</div></td><td class="r">${c.n}</td><td class="r num">${dex(c.ours)}</td><td class="r num">${dex(c.theirs)}</td><td class="sb-citd">${ci(c)}<div class="sb-cin num">${num(c.gap)} <span>[${num(c.lo)}, ${num(c.hi)}]</span></div></td><td class="sb-vd">${badge(c.verdict)}<div class="sb-gl">${CLS[c.cls] || ""}</div></td></tr>`).join("")
     + "</tbody>");
+
+  // wins to read with care: few nuclei (marked †) or an interval ending close to zero; last column: after the correction
+  if (FW) {
+    const care = FW.care.map((c) => Object.assign({ verdict: "WIN" }, c)).sort((a, b) => (b.small - a.small) || (b.hi - a.hi));
+    const sp = scale(care);
+    $("#sb-care-cap").innerHTML = fill(T("sb_care_cap", "Wins that rest on {sn} or fewer nuclei (marked †), or whose interval ends within {nz} dex of zero. The last column applies the correction for {m} kinds of measurement, by bootstrap percentiles / normal approximation."),
+      { sn: FW.small_n, nz: dex(FW.near_zero), m: FW.m_views });
+    const fwv = (c) => c.boot === c.normal ? badge(c.boot) : `${badge(c.boot)} / ${badge(c.normal)}`;
+    $("#sb-care").insertAdjacentHTML("beforeend",
+      `<thead><tr><th scope="col">${T("th_cell", "Comparison")}</th><th scope="col" class="r">${T("th_n", "Nuclei")}</th><th scope="col" class="r">${T("th_ours", "Engine error")}</th><th scope="col" class="r">${T("th_theirs", "Rival error")}</th><th scope="col">${T("th_ci", "95 % interval")}</th><th scope="col">${T("th_fw", "Corrected")}</th></tr></thead><tbody>`
+      + care.map((c) => `<tr><td><div class="sb-cell">${esc(gloss(c.cell))}</div><div class="sb-gl">${T("vs", "vs")} ${esc(rname(c.rival))}</div></td><td class="r">${c.n}${c.small ? " †" : ""}</td><td class="r num">${dex(c.ours)}</td><td class="r num">${dex(c.theirs)}</td><td class="sb-citd">${ci(c, sp)}<div class="sb-cin num">${num(c.gap)} <span>[${num(c.lo)}, ${num(c.hi)}]</span></div></td><td class="sb-vd">${fwv(c)}</td></tr>`).join("")
+      + "</tbody>");
+  }
 
   const rivals = ["TALYS-2.24", "R_T", "CoH3", "YAHFC"].filter((r) => I.by_rival[r]);
   const sum = (o, k) => rivals.reduce((s, r) => s + o[r][k], 0);
@@ -128,10 +151,11 @@
   // ---------- summary at the top: one calm row per board (label, counts, a thin proportional bar) ----------
   (function summary() {
     const box = document.querySelector(".sb-hero"); if (!box) return;
-    const rows = [[I, T("sb_h_eng", "The engine against other codes"), "#sb-inc-h"], [B.terra, T("sb_h_terra", "The data product (an in-sample fit) against evaluated libraries"), "#sb-terra-h"]].filter((r) => r[0]);
-    box.innerHTML = rows.map(([b, label, href]) => {
+    const fwh = FW ? fill(T("sb_fw_head", "{k} {W} after correcting for {m} kinds of measurement"), { k: rng(FW.views), m: FW.m_views, W: V.WIN }) : "";
+    const rows = [[I, T("sb_h_eng", "The engine against other codes"), "#sb-inc-h", fwh], [B.terra, T("sb_h_terra", "The data product (an in-sample fit) against evaluated libraries"), "#sb-terra-h", ""]].filter((r) => r[0]);
+    box.innerHTML = rows.map(([b, label, href, sub]) => {
       const tot = ORDER.reduce((n, v) => n + (b[v] || 0), 0) || 1;
-      return `<a class="sb-sumrow" href="${href}"><div class="sb-sumlab">${esc(label)}</div><div class="sb-sumnums">${ORDER.map((v) => `<span class="sb-${v.toLowerCase()}"><b>${b[v] || 0}</b> ${V[v]}</span>`).join("")}</div>`
+      return `<a class="sb-sumrow" href="${href}"><div class="sb-sumlab">${esc(label)}${sub ? `<span class="sb-gl" style="display:block;font-weight:400">(${sub})</span>` : ""}</div><div class="sb-sumnums">${ORDER.map((v) => `<span class="sb-${v.toLowerCase()}"><b>${b[v] || 0}</b> ${V[v]}</span>`).join("")}</div>`
         + `<div class="sb-sumbar" role="img" aria-label="${ORDER.map((v) => `${b[v] || 0} ${V[v]}`).join(", ")}">${ORDER.filter((v) => b[v]).map((v) => `<i class="sb-${v.toLowerCase()}" style="flex-grow:${b[v]}"></i>`).join("")}</div></a>`;
     }).join("");
   })();

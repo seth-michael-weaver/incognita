@@ -5,6 +5,13 @@
     python3 recompute.py --rows     # also rebuild d_pernuc.csv from the per-measurement residuals in d_rows.csv.gz
     python3 recompute.py --labels   # also compare capture labels with a trust-weighted mean of their EXFOR datasets (approximate)
     python3 recompute.py --table    # print every engine cell
+    python3 recompute.py --familywise   # also write familywise.csv (Bonferroni-corrected intervals, every counted cell)
+
+Every run also prints how many WINs stay WINs after a Bonferroni correction (family-wise error rate 5 %) over the
+distinct counted views and over the counted cells: the interval then runs from the alpha/2m to the 1 - alpha/2m
+percentile of the same 2,000 bootstrap gaps. With 2,000 draws those tail percentiles rest on the 2-4 most extreme draws
+and are coarse, so a normal-approximation count, z = -gap / ((ci_hi - ci_lo) / 3.92), is printed beside it. The verdicts
+in cells.csv are the uncorrected ones and are not changed.
 
 Standard library only, plus numpy if it is installed. With numpy (numpy.random.default_rng, PCG64) the bootstrap
 draws are the same as the census's, so the CIs are reproduced to rounding. Without numpy the gaps are still exact,
@@ -79,7 +86,7 @@ def d_cell(nucs):
     Sa = [float(r["S_ours"]) for r in nucs]; Sb = [float(r["S_rival"]) for r in nucs]
     a, b = d_score(Sa, W, agg), d_score(Sb, W, agg)
     d = [d_score(Sa, W, agg, c) - d_score(Sb, W, agg, c) for c in counts_iter(len(nucs), SEED_D)]
-    return dict(n=len(nucs), ours=a, rival=b, gap=a - b, lo=percentile(d, 2.5), hi=percentile(d, 97.5))
+    return dict(n=len(nucs), ours=a, rival=b, gap=a - b, lo=percentile(d, 2.5), hi=percentile(d, 97.5), boot=d)
 
 
 def pernuc_from_rows(ours_col):
@@ -122,7 +129,7 @@ def k_cell(a, b):
         rng = random.Random(SEED_K)
         for _ in range(NB):
             i = [rng.randrange(k) for _ in range(k)]; d.append(rms([a[j] for j in i]) - rms([b[j] for j in i]))
-    return dict(n=k, ours=rms(a), rival=rms(b), gap=rms(a) - rms(b), lo=percentile(d, 2.5), hi=percentile(d, 97.5))
+    return dict(n=k, ours=rms(a), rival=rms(b), gap=rms(a) - rms(b), lo=percentile(d, 2.5), hi=percentile(d, 97.5), boot=d)
 
 
 def k_cells():
@@ -156,6 +163,57 @@ def verdict(c):
     return "WIN" if c["hi"] < 0 else "LOSS" if c["lo"] > 0 else "TIE"
 
 
+ALPHA = 0.05             # family-wise error rate of the Bonferroni count
+SMALL_N = 10             # a WIN resting on this many nuclei or fewer is flagged small_n
+NEAR_ZERO = 0.005        # a WIN whose 95 % interval ends within this many dex of zero is flagged near_zero
+
+
+def familywise(fam, write=False):
+    """Bonferroni over the counted comparisons. fam: [(cells.csv row, recomputed cell, verdict)] for the counted, scored
+    (not N/A) engine cells. For m comparisons the interval runs from the alpha/2m to the 1 - alpha/2m percentile of the
+    SAME bootstrap gaps that give the 95 % interval; a WIN stays a WIN when that upper end is below 0. m is counted two
+    ways: the distinct views among these cells (the `view` column, e.g. "capture_all" or "K185 Z40-59", whatever the
+    rival) and the cells themselves. With 2,000 draws the extreme percentile sits between the 2nd and 4th largest draw,
+    so it is coarse; it is cross-checked with a normal approximation, z = -gap / ((ci_hi - ci_lo) / 3.92), against the
+    Bonferroni critical value z(1 - alpha/2m)."""
+    from statistics import NormalDist
+    views = sorted({r["view"] for r, c, v in fam})
+    ms = (("views", len(views)), ("cells", len(fam)))
+    nwin = sum(v == "WIN" for r, c, v in fam)
+    z95 = NormalDist().inv_cdf(1 - ALPHA / 2)
+    out = []
+    for r, c, v in fam:
+        se = (c["hi"] - c["lo"]) / (2 * z95)
+        row = OrderedDict(block=r["block"], view=r["view"], rival=r["rival"], n_nuclei=c["n"], gap=c["gap"], ci_lo=c["lo"], ci_hi=c["hi"],
+                          verdict=v, small_n=v == "WIN" and c["n"] <= SMALL_N, near_zero=v == "WIN" and c["hi"] > -NEAR_ZERO,
+                          z_normal=-c["gap"] / se if se > 0 else float("nan"))
+        for lab, m in ms:
+            q = 100 * ALPHA / (2 * m); lo, hi = percentile(c["boot"], q), percentile(c["boot"], 100 - q)
+            zc = NormalDist().inv_cdf(1 - ALPHA / (2 * m))
+            row[f"m_{lab}"] = m; row[f"ci_lo_bonf_{lab}"] = lo; row[f"ci_hi_bonf_{lab}"] = hi
+            row[f"verdict_bonf_{lab}"] = "WIN" if hi < 0 else "LOSS" if lo > 0 else "TIE"
+            row[f"verdict_normal_{lab}"] = "WIN" if row["z_normal"] > zc else "LOSS" if row["z_normal"] < -zc else "TIE"
+        out.append(row)
+    for lab, m in ms:
+        k = sum(r[f"verdict_bonf_{lab}"] == "WIN" for r in out); kn = sum(r[f"verdict_normal_{lab}"] == "WIN" for r in out)
+        q = 100 * ALPHA / (2 * m)
+        print(f"WIN after family-wise correction (Bonferroni over {m} {'views' if lab == 'views' else 'counted cells'}): {k} of {nwin}"
+              f"  (bootstrap percentiles {q:.4f}-{100 - q:.4f}; normal approximation: {kn} of {nwin})")
+    sm = [r for r in out if r["small_n"]]; nz = [r for r in out if r["near_zero"]]
+    print(f"WINs resting on {SMALL_N} or fewer nuclei: {len(sm)}; WINs whose 95 % interval ends within {NEAR_ZERO} dex of zero: {len(nz)}")
+    if write:
+        fmt = lambda x: str(x) if isinstance(x, (bool, int)) else f"{x:.10g}" if isinstance(x, float) else x
+        with open(os.path.join(HERE, "familywise.csv"), "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f, lineterminator="\n"); w.writerow(out[0].keys())
+            for r in out: w.writerow([fmt(x) for x in r.values()])
+        print(f"--familywise: wrote familywise.csv ({len(out)} counted scored cells, {len(views)} distinct views); flagged WINs:")
+        for r in sm + [r for r in nz if not r["small_n"]]:
+            print(f"  {r['view']:22} {r['rival']:10} n={r['n_nuclei']:3d} gap {r['gap']:+.4f} [{r['ci_lo']:+.4f}, {r['ci_hi']:+.4f}]"
+                  f"{'  small-n' if r['small_n'] else ''}{'  near-zero' if r['near_zero'] else ''}"
+                  f"  corrected: {r['verdict_bonf_views']} ({len(views)} views; normal {r['verdict_normal_views']}),"
+                  f" {r['verdict_bonf_cells']} ({len(fam)} cells; normal {r['verdict_normal_cells']})")
+
+
 def main():
     args = set(sys.argv[1:])
     cells = [r for r in read_csv("cells.csv") if r["section"] == "engine"]
@@ -174,7 +232,7 @@ def main():
     for r in pn: by[(r["view"], r["rival"])].append(r)
     for v in by.values(): v.sort(key=lambda r: int(r["order"]))
     K, ksize = k_cells()
-    worst = 0.0; bad = []; table = []; tally = defaultdict(int)
+    worst = 0.0; bad = []; table = []; tally = defaultdict(int); fam = []
     for r in cells:
         key = (r["view"], r["rival"])
         if r["block"] == "K" and ksize[r["view"]] == 0:   # empty band: not a comparison, never counted
@@ -182,7 +240,9 @@ def main():
             table.append((r["block"], r["view"], r["rival"], None, "N/A", r["verdict"])); continue
         c = d_cell(by.get(key, [])) if r["block"] == "D" else K[key]
         v = verdict(c)
-        if r["counted_on_board"] == "True": tally[v] += 1
+        if r["counted_on_board"] == "True":
+            tally[v] += 1
+            if v != "N/A": fam.append((r, c, v))
         if v != r["verdict"]: bad.append((key, v, r["verdict"]))
         why = na_reason(c)
         if why and c is not None and why != r.get("na_reason"): bad.append((key, "na_reason", why, r.get("na_reason")))
@@ -202,6 +262,7 @@ def main():
     print(f"max |difference| vs cells.csv over gap, scores" + (", CI ends" if np is not None else " (CIs skipped: numpy not installed)") + f": {worst:.1e} dex (tolerance {TOL:.0e})")
     if np is None:
         print("note: without numpy the bootstrap uses Python's random module, so CI ends differ slightly from cells.csv")
+    familywise(fam, write="--familywise" in args)
     if bad:
         print("MISMATCHES:", *bad, sep="\n  ")
     ok = worst <= TOL and (not bad or np is None)

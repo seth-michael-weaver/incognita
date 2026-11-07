@@ -40,7 +40,9 @@ def test_capture_blind_table():     # docs/release/expected/capblind/CAPTURE_BLI
     assert round(_r('capture-heldout', 'INCOGNITA capture, measured D0 used')['rms'], 4) == 0.1569
     assert round(_r('capture-heldout', 'INCOGNITA capture, measured D0 used', 'well_measured (trust >= 1)')['rms'], 4) == 0.1202
     r = _r('capture-nostructure', 'INCOGNITA capture, no structure data (STRIP)')
-    assert (r['rows'], round(r['rms'], 4), round(r['ref_rms_same_rows'], 4)) == (1966, 0.2101, 0.2042)
+    # 1966 -> 1962 rows on 2026-11-06: four cells whose only dataset is a sum reaction (score.CAPTURE_REVIEW_DROP); the
+    # published table (0.2101 vs 0.2042 on 1966 rows) is the same model on the old rows
+    assert (r['rows'], round(r['rms'], 4), round(r['ref_rms_same_rows'], 4)) == (1962, 0.2091, 0.2034)
 
 
 def test_retro_and_na_tables():     # expected/retro/RETRO.md, expected/na/NA_V1.md
