@@ -541,12 +541,45 @@ EXACTFIS_HW = 0.6  # MeV, half-width of the energy average (one well-flank inter
 EXACTFIS_DE = 0.02  # MeV, fine grid of the energy average
 
 
+#: PERFHF: `_t_exact_vec` results by their inputs' bytes. It is a pure function of them, and the barrier heights
+#: alone fix the energies, so every cascade of a process (the h-rule set-up cascades, the run itself, a warm
+#: worker's next job) asks for the same humps again. Bounded, oldest out first.
+_TEX_MEMO: dict = {}
+_TEX_KEEP = 128
+
+
 def _t_exact_vec(beta: np.ndarray, v: np.ndarray, mu: np.ndarray, lo: int, hi: int,
                  es: np.ndarray, nsub: int = EXACTFIS_NSUB) -> np.ndarray:
     """Exact 1-D transmission through the path between rows `lo` and `hi` (1-based) at energies
     `es` [MeV]: -(1/2) d/dx[(1/mu) dpsi/dx] + V psi = E psi (BenDaniel-Duke; psi and psi'/mu
     continuous) on the linear interpolation of the tabulated V, mu, as a staircase of `nsub`
-    pieces per row, with V and mu held flat outside [lo, hi]. NaN where E <= V(lo) or V(hi)."""
+    pieces per row, with V and mu held flat outside [lo, hi]. NaN where E <= V(lo) or V(hi).
+
+    PERFHF: memoised on the inputs' bytes (`_TEX_MEMO`); the transfer loop runs in C
+    (native/nx2_texact.c, numpy's arithmetic operation for operation, bit-identical) when the
+    nx2 build has it and `HF_NX2_TEXACT` is not 0, else in numpy (`_t_exact_vec_np`)."""
+    xs, vs, ms = (np.ascontiguousarray(t[lo:hi + 1], dtype=np.float64) for t in (beta, v, mu))
+    E = np.ascontiguousarray(es, dtype=np.float64)
+    key = (xs.tobytes(), vs.tobytes(), ms.tobytes(), E.tobytes(), E.shape, int(nsub))
+    got = _TEX_MEMO.get(key)
+    if got is None:
+        got = _t_exact_vec_np(beta, v, mu, lo, hi, es, nsub, native=True)
+        while len(_TEX_MEMO) >= _TEX_KEEP:
+            _TEX_MEMO.pop(next(iter(_TEX_MEMO)))
+        _TEX_MEMO[key] = got
+    return got.copy()
+
+
+def _texact_kernel():
+    """PERFHF: native/nx2_texact.c's transfer loop, or None (no build, `HF_NX2_TEXACT=0`)."""
+    from physics.hf.native import nx2
+
+    return nx2.kernel("nx2_fis_texact", [nx2.I64, nx2.I64, nx2.P, nx2.P, nx2.P, nx2.P], lever="texact")
+
+
+def _t_exact_vec_np(beta: np.ndarray, v: np.ndarray, mu: np.ndarray, lo: int, hi: int,
+                    es: np.ndarray, nsub: int = EXACTFIS_NSUB, native: bool = False) -> np.ndarray:
+    """`_t_exact_vec` without the memo; `native` runs the transfer loop in C when available."""
     xs, vs, ms = beta[lo:hi + 1], v[lo:hi + 1], mu[lo:hi + 1]
     vl, vr, ml, mr = vs[0], vs[-1], ms[0], ms[-1]
     edges = np.concatenate([np.linspace(xs[i], xs[i + 1], nsub + 1)[:-1] for i in range(len(xs) - 1)]
@@ -562,8 +595,27 @@ def _t_exact_vec(beta: np.ndarray, v: np.ndarray, mu: np.ndarray, lo: int, hi: i
     E = E[ok]
     k = np.sqrt((2.0 * M[:, None] * (E[None, :] - V[:, None])).astype(complex))
     k = np.where(np.abs(k) < 1e-12, 1e-12, k)
-    a = np.ones(E.shape, dtype=complex)
-    b = np.zeros(E.shape, dtype=complex)
+    fn = _texact_kernel() if native else None
+    if fn is not None:
+        from physics.hf.native import nx2
+
+        k = np.ascontiguousarray(k, dtype=np.complex128)
+        ed = np.ascontiguousarray(edges, dtype=np.float64)
+        Mc = np.ascontiguousarray(M, dtype=np.float64)
+        a = np.empty(E.shape, dtype=np.complex128)
+        if fn(int(E.size), int(ed.size), nx2.ptr(ed), nx2.ptr(Mc), nx2.ptr(k), nx2.ptr(a)) != 0:
+            fn = None
+    if fn is None:
+        a = _transfer_np(edges, k, M, E.shape)
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        out[ok] = (k[-1].real / mr) / (np.abs(a) ** 2 * k[0].real / ml)
+    return out
+
+
+def _transfer_np(edges: np.ndarray, k: np.ndarray, M: np.ndarray, shape) -> np.ndarray:
+    """`_t_exact_vec`'s transfer loop in numpy: the final `a` (the C kernel's twin)."""
+    a = np.ones(shape, dtype=complex)
+    b = np.zeros(shape, dtype=complex)
     for j in range(len(edges) - 1, -1, -1):
         x = edges[j]
         kr, kl = k[j + 1], k[j]
@@ -572,9 +624,7 @@ def _t_exact_vec(beta: np.ndarray, v: np.ndarray, mu: np.ndarray, lo: int, hi: i
         g = (1j * kr * (a * er - b / er) / M[j + 1]) * M[j] / (1j * kl)
         el = np.exp(1j * kl * x)
         a, b = 0.5 * (psi + g) / el, 0.5 * (psi - g) * el
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        out[ok] = (k[-1].real / mr) / (np.abs(a) ** 2 * k[0].real / ml)
-    return out
+    return a
 
 
 def exactfis_correction(path: FissionPath, nextr: int, vh: Tensor, vw: Tensor,
