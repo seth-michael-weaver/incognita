@@ -99,16 +99,47 @@ class EmissionGrid:
     maxen: Tensor | None = None  # (C,) int64
 
 
-def emission_limit(enincmax_mev: float, s_k0_mev: float, target_e_mev: float = 0.0) -> float:
+GRIDTOP_ENV = "INCOGNITA_GRIDTOP"
+
+
+def gridtop_on() -> bool:
+    """GRIDTOP (default ON): the outgoing grid reaches 1 MeV above the top energy of EVERY exit,
+    `Etotal - S(0,0,type)`, not only the photon's. `INCOGNITA_GRIDTOP` n/no/0/off/false = the
+    TALYS grid (grid.f90:120 as written). Same rule and semantics as the private engine's
+    `NUCLIDO_GRIDTOP` (default ON since engine-20261029-2).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: tests/hf/test_gridtop.py
+    """
+    return os.environ.get(GRIDTOP_ENV, "y").strip().lower() not in ("n", "no", "0", "off", "false")
+
+
+def emission_limit(enincmax_mev: float, s_k0_mev: float, target_e_mev: float = 0.0,
+                   s_exits_mev=None) -> float:
     """`Elimit = enincmax + S(0,0,k0) + targetE + 1.`, the energy the outgoing grid must reach
     (grid.f90:120). enincmax and targetE are real(sgl), S is real(dbl); the sum is real(sgl).
 
+    That is 1 MeV above the photon exit's top energy (E0 = Etotal) only. An exit with
+    S(0,0,type) < 0 -- alpha from nearly every compound nucleus with A >~ 140, the proton on the
+    proton-rich side (I-110: S(alpha) = -3.58 MeV) -- has E0 = Etotal - S(type) above that. When
+    E0 is above the grid top, energies.f90:137 leaves `eend(type) = maxen - 1`, `inverse` never
+    fills Tjl there, and every transition to the residual's lowest states gets T = 0. How much
+    is cut depends on how far the run's HIGHEST energy lifts the top above the current one, so
+    the same (nucleus, energy) gives different answers on different grids: I-109 capture at
+    20 keV is 7.54 mb as a one-energy run and 0.120 mb on a 1 keV - 20 MeV grid (production
+    deck), stock TALYS-2.25 6.66 vs 6.34 mb. GRIDTOP (`gridtop_on`) adds
+    max(0, -min S(0,0,type)) when `s_exits_mev` (S(0,0,type), type 0..6) is given: the same
+    1 MeV margin above E0 for every exit. When every S >= 0 the limit is TALYS's to the bit.
+
     TALYS: grid.f90:1 (grid)
-    Test: A-grid
+    Test: A-grid; tests/hf/test_gridtop.py
     """
-    return float(
-        f32(f64(f32(enincmax_mev)) + f64(s_k0_mev) + f64(f32(target_e_mev)) + f64(f32(1.0)))
-    )
+    lim = f64(f32(enincmax_mev)) + f64(s_k0_mev) + f64(f32(target_e_mev)) + f64(f32(1.0))
+    if s_exits_mev is not None and gridtop_on():
+        extra = max(0.0, -min(float(v) for v in s_exits_mev))
+        if extra > 0.0:
+            lim = lim + f64(extra)
+    return float(f32(lim))
 
 
 def egrid_values(

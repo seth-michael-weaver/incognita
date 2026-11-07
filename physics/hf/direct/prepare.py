@@ -158,7 +158,7 @@ def _grid(target: str, energies: tuple[float, ...]):
     parskip = {t: False for t in range(7)}
     s0 = {t: float(m.s_mev[0, 0, t]) for t in range(7)}
     eg, maxen = egrid_values(
-        emission_limit(max(energies), s0[k0], 0.0),
+        emission_limit(max(energies), s0[k0], 0.0, s_exits_mev=list(s0.values())),  # GRIDTOP: run_grid's top
         options.segment,
         NUMEN,
         options.flagequispec,

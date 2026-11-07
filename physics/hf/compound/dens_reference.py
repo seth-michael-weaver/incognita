@@ -308,7 +308,7 @@ def run_grid(Zt: int, At: int, enincmax_mev: float) -> _RunGrid:
     o, p, m = _structure_of(Zt, At)
     s0 = [float(m.s_mev[0, 0, t]) for t in range(7)]
     eg, maxen = egrid_values(
-        emission_limit(enincmax_mev, s0[o.k0], 0.0), o.segment, NUMEN, o.flagequispec, None)
+        emission_limit(enincmax_mev, s0[o.k0], 0.0, s_exits_mev=s0), o.segment, NUMEN, o.flagequispec, None)
     cb = coulomb_barriers(o)
     ebegin, _ = charged_particle_begin(
         eg, maxen, At, {t: cb[t] for t in range(7)}, {t: False for t in range(7)})

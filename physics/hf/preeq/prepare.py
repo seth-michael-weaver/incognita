@@ -416,7 +416,7 @@ def prepare(
 
     s0 = [float(m.s_mev[0, 0, t]) for t in range(7)]
     enincmax = float(enincmax_mev) if enincmax_mev is not None else max(energies)
-    elimit = emission_limit(enincmax, s0[k0], 0.0)
+    elimit = emission_limit(enincmax, s0[k0], 0.0, s_exits_mev=s0)  # GRIDTOP: run_grid's top
     eg, maxen = egrid_values(elimit, options.segment, NUMEN, options.flagequispec, None)
     de, etop, ebot = emission_bins(eg, maxen)
     coulbar = coulomb_barriers(options)
