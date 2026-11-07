@@ -266,7 +266,7 @@ def test_ewfc_memo_never_serves_another_options_object(monkeypatch):
 @pytest.mark.parametrize("var,val", [("INCOGNITA_ECMSTABLE", "0"), ("INCOGNITA_CCSOCB", "1"),
                                      ("INCOGNITA_OMP_REGION", "1"), ("INCOGNITA_OMP_DEFORMED", "1"),
                                      ("HF_INC_REFINE", "2"), ("HF_INC_REFINE_EMAX", "1.0"),
-                                     ("INCOGNITA_NUMEN", "300"), ("HF_CC_MODNUM", "0")])
+                                     ("HF_CC_MODNUM", "0")])
 def test_cc_cache_keys_follow_every_switch_per_call(monkeypatch, tmp_path, var, val):
     """The CC row cache's version and the row / batch-carry keys (`ccdisk.env_token`, which every
     `incident._SOLVED` key ends in) follow the switches without a cache reset."""
@@ -284,3 +284,17 @@ def test_cc_cache_keys_follow_every_switch_per_call(monkeypatch, tmp_path, var, 
     assert ccdisk.env_token() == t1
     monkeypatch.delenv(var)
     assert ccdisk._version() == v0 and ccdisk.env_token() == t0
+
+
+def test_cc_cache_keys_ignore_switches_the_solve_never_reads(monkeypatch):
+    """A production run sets hold-rule / pre-equilibrium switches between its set-up passes; they
+    are not CC inputs, so the rows the run already solved are reused (re-solving them in another
+    batch would move last bits)."""
+    from physics.hf.ecis import ccdisk
+
+    t0 = ccdisk.env_token()
+    for var, val in (("INCOGNITA_ISOHOLD", "79,198,0.98"), ("INCOGNITA_ISOE2", "e"), ("INCOGNITA_FEWRES", "off"),
+                     ("INCOGNITA_PEWINDOW", "g"), ("INCOGNITA_CC_BATCHCACHE", "/tmp/x"), ("INCOGNITA_TRAPFIX", "1")):
+        monkeypatch.setenv(var, val)
+    assert ccdisk.env_token() == t0
+    assert "INCOGNITA_ECMSTABLE" in ccdisk.env_names() and "HF_INC_REFINE" in ccdisk.env_names()

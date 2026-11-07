@@ -36,7 +36,8 @@ are hashed: a PSF edit no longer throws the whole cache away, while a build with
 (where `libnx2` really does serve the kernels) still keys on `libnx2`.
 
 The source / library part of the version is computed once per process; the switches part
-(`env_token`: every HF_* / INCOGNITA_* variable but stagedisk's deny-list) is read per call
+(`env_token`: every HF_* / INCOGNITA_* switch a CC-scope source names, less stagedisk's deny-lists)
+is read per call
 (ENGFIX4), and so is the cache DIRECTORY, so a test can turn the cache on and off in one process.
 
 **Storage.**  One file per key, `<dir>/<version>/<ab>/<digest>.npz`, float64 raw through
@@ -199,25 +200,57 @@ def _omp_providers() -> list[tuple[str, str, str | None]]:
     return out
 
 
+# ENGFIX4: the switches of the CC solve are found, not listed: every HF_* / INCOGNITA_* name written
+# in the CC scope's sources (the modules the solve runs, the optical-model package that builds its
+# potential, and the C kernels it calls), less stagedisk's deny-lists (cache locations,
+# diagnostics, derived *_EFF, LD / PSF / cascade levers). A switch only other code reads -- a
+# production run's hold-rule and pre-equilibrium passes set INCOGNITA_ISOHOLD, _ISOE2, _FEWRES,
+# _PEWINDOW between set-ups -- is not a CC input: keying on it would re-solve rows the run already
+# holds in another batch (last-bit changes, PERFCC2's batch rule) for nothing.
+_ENV_SCOPE_GLOBS: tuple[str, ...] = (
+    "physics/hf/ecis/*.py", "physics/hf/omp/*.py", "physics/hf/native/__init__.py",
+    "physics/hf/native/nx2.py", "physics/hf/native/setup_c.py", "physics/hf/core/angmom.py",
+    "physics/hf/native/ccfast.c", "physics/hf/native/ccprop.c", "physics/hf/native/ccsplit.h",
+    "physics/hf/native/hfnative.c", "physics/hf/native/nx2_omp.c",
+)
+
+
+@lru_cache(maxsize=1)
+def env_names() -> tuple[str, ...]:
+    """The environment switches the CC solve can read (see `_ENV_SCOPE_GLOBS`), sorted."""
+    import re
+
+    from physics.hf import stagedisk
+
+    root = Path(__file__).resolve().parents[3]
+    pat = re.compile(r"\b((?:HF|INCOGNITA)_[A-Z0-9_]*[A-Z0-9])\b")
+    names = set(_NUMERICS_ENV)
+    for g in _ENV_SCOPE_GLOBS:
+        for p in sorted(root.glob(g)):
+            names |= set(pat.findall(p.read_text(encoding="utf-8", errors="replace")))
+    names -= stagedisk.ENV_EXCLUDE | {ENV_VAR, BATCH_ENV_VAR}
+    return tuple(sorted(names))
+
+
 _ENV_TOKENS: dict = {}
 
 
 def env_token() -> str:
     """ENGFIX4: the switches part of every CC cache key, read on every call -- the row cache
-    (`_version`), `incident._SOLVED` and PERFCC2's batch carry (memory and disk). It is the stage
-    disk cache's environment digest (`stagedisk._env_part`): every `HF_*` and `INCOGNITA_*` variable
-    except `stagedisk.ENV_EXCLUDE` (cache locations, diagnostics, derived `*_EFF`, LD / PSF /
-    cascade levers) plus the evaluated ENGPHYS switches. So INCOGNITA_ECMSTABLE, INCOGNITA_CCSOCB,
-    the OMP region / deformed switches, HF_INC_REFINE and any switch added later are in the key
-    without being listed here."""
-    from physics.hf import stagedisk
-
-    raw = stagedisk._env_part()
-    tok = _ENV_TOKENS.get(raw)
+    (`_version`), `incident._SOLVED` and PERFCC2's batch carry (memory and INCOGNITA_CC_BATCHCACHE):
+    the values of `env_names()` (INCOGNITA_ECMSTABLE, INCOGNITA_CCSOCB, the OMP region / deformed
+    switches, HF_INC_REFINE(_EMAX), every HF_* numerics switch, and any switch a CC module reads
+    later, without a list to keep)."""
+    raw = os.environ._data  # bytes -> bytes
+    vals = tuple(raw.get(k.encode()) for k in env_names())
+    tok = _ENV_TOKENS.get(vals)
     if tok is None:
         if len(_ENV_TOKENS) > 64:
             _ENV_TOKENS.clear()
-        tok = _ENV_TOKENS[raw] = hashlib.sha256(raw).hexdigest()[:24]
+        h = hashlib.sha256(b"ccenv")
+        for k, v in zip(env_names(), vals):
+            h.update(k.encode() + b"=" + (b"\x01" if v is None else v) + b"\x00")
+        tok = _ENV_TOKENS[vals] = h.hexdigest()[:24]
     return tok
 
 
