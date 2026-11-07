@@ -7,7 +7,8 @@ no Atlas/RIPL resonance values, no TARES, no evaluated library as input. ENDF/B-
 - `rr_index.json`: `{schema, T_K, E_unit, xs_unit, engine, prereg, n, kinds, rows[]}`; one row per nuclide:
   `Z, A, sym, kind, n` (points), `anchored` (curve forced through the measured thermal capture), `thermal_exp`
   (an EXFOR thermal value exists), `hold` (RI held out for judging), `fallback`, `segments` [[lo, hi, kind]], `join`.
-- `rr/<Z>/<A>.json`, one per explorer row (6168), at most 600 points, 0 K:
+- `rr/<Z>/<A>.json`, 6168 files, one per `rr_index.json` row (every explorer nuclide from Z 8 up; the Z 1-7 nuclides
+  have none), at most 600 points, 0 K. The explorer's `index.json` column `rr` flags the nuclides that have a file:
   - `Z, A, sym, kind, label` (show `label` beside the curve), `T_K` = 0, `units` {E: eV, xs: b}
   - `segments`: [{lo, hi, kind, what}] describing what each energy range is
   - `E` (eV, ascending), `cap`, `el`, `tot`, and `fis` for fissile targets (barns, same grid as `E`)

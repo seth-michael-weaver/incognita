@@ -69,9 +69,11 @@
       .then((d) => { ndata.set(k, d); return d; }, (e) => { ncache.delete(k); throw e; }));
     return ncache.get(k); };
   // evaluated libraries (comparators only, never used by INCOGNITA): data/lib/<Z>.json, fetched only when the overlay box is ticked.
-  // Built offline by scripts/build_site_overlay.py (display-only); a missing file just means no library covers that element.
+  // Built offline by scripts/build_site_overlay.py (display-only); index.json "lib" lists the elements that have a file
+  // (scripts/build_site_data.py), so an absent one is never requested
   const lcache = new Map(), LIBS = ["endfb8.1", "jeff4.0", "tendl2025"];
-  const loadLib = (Z) => lcache.get(Z) || lcache.set(Z, fetch(`data/lib/${Z}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)).get(Z);
+  const loadLib = (Z) => { if (!IDX.libZ.has(Z)) return Promise.resolve(null);
+    return lcache.get(Z) || lcache.set(Z, fetch(`data/lib/${Z}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)).get(Z); };
   let libOn = true; // the comparison libraries show by default; untick the box to hide them
   // the same libraries POINTWISE below 1 keV (0 K NJOY RECONR, thinned; DISPLAY-ONLY, scripts/build_site_pointwise.py):
   // data/lib/pw/<Z>/<A|nat>.json, one file per nuclide, listed in data/lib/pw/index.json so absent files are never requested
@@ -82,9 +84,10 @@
   // measured thermal capture σγ(0.0253 eV) from EXFOR (scripts/build_site_thermal.py): data/thermal.json, fetched once.
   // A measurement, not a library value: it is drawn as a diamond whether or not the overlay is ticked
   // INCOGNITA's own capture below the 1 keV join (RESFILL, scripts/build_site_rr.py): data/rr/<Z>/<A>.json, one per isotope
-  // row (none for natural elements); kind own-fit, measured-params (EXFOR-reported resonance parameters, RESPEAKS2), statistical or smooth, each drawn and labelled differently
+  // row that has one (index.json column "rr"; none for natural elements, so absent files are never requested); kind own-fit,
+  // measured-params (EXFOR-reported resonance parameters, RESPEAKS2), statistical or smooth, each drawn and labelled differently
   const rrcache = new Map();
-  const loadRr = (Z, A) => { if (!A) return Promise.resolve(null); const k = nkey(Z, A);
+  const loadRr = (Z, A) => { const row = byKey.get(Z + "-" + A); if (!A || !row || !row.rr) return Promise.resolve(null); const k = nkey(Z, A);
     if (!rrcache.has(k)) rrcache.set(k, fetch(`data/rr/${k}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)); return rrcache.get(k); };
   let TH = null, thLoad = null;
   const loadTh = () => thLoad || (thLoad = fetch("data/thermal.json").then((r) => (r.ok ? r.json() : null)).then((j) => { TH = j && j.th; }, () => {}));
@@ -944,9 +947,9 @@
   // the chart fills the rest of the first screen (title, controls and legend stay visible), so it is never cut off at the fold
   function layout() { const top = cv.parentElement.getBoundingClientRect().top + window.scrollY; G = setupCanvas(cv, Math.round(clamp(window.innerHeight - top - 64, 300, 1100))); }
   fetch("data/index.json").then((r) => r.json()).then((idx) => {
-    IDX = idx; readColors();
+    IDX = idx; IDX.libZ = new Set(idx.lib || []); readColors();
     const k = Object.fromEntries(idx.cols.map((c, i) => [c, i]));
-    rows = idx.rows.map((a) => ({ Z: a[k.Z], A: a[k.A], tier: a[k.tier], macs: a[k.macs30_mb], u30: a[k.unc68_30], ncap: a[k.n_cap], nmxw: a[k.n_mxw], nds: a[k.n_ds], nn2n: a[k.n_n2n], nnp: a[k.n_np], nna: a[k.n_na], nuse: a[k.n_use] }));
+    rows = idx.rows.map((a) => ({ Z: a[k.Z], A: a[k.A], tier: a[k.tier], macs: a[k.macs30_mb], u30: a[k.unc68_30], ncap: a[k.n_cap], nmxw: a[k.n_mxw], nds: a[k.n_ds], nn2n: a[k.n_n2n], nnp: a[k.n_np], nna: a[k.n_na], nuse: a[k.n_use], rr: a[k.rr] === 1 }));
     rows.forEach((r) => (r.st = shownTier(r.Z, r.tier, r.ncap + r.nmxw, r.nuse)));
     for (const Z of idx.natural) rows.push({ Z, A: 0, tier: -1, ncap: 1, nmxw: 0, nds: 0, nn2n: 0, nnp: 0, nna: 0 });
     rows.forEach((r) => byKey.set(r.Z + "-" + r.A, r));
