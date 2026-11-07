@@ -437,15 +437,22 @@ def dtheory(
                         continue
                     rho[(l, J)] = (0.5 * J2, parity)
     D = torch.zeros(numl + 1, dtype=DTYPE)
+    # PERFCASC: every (J, parity) density at the one energy eex in one `density` call per parity (J as a vector) instead
+    # of one call per pair. Bit-identical: everything `density` computes before the spin distribution depends on eex
+    # only, and the J-dependent part (spindis: (2J+1)/2s exp(-(J+1/2)^2/2s), the table lookup) is elementwise
+    # (torch exp/x*x and the C table kernel give the same bits for a scalar and a vector element).
     cache: dict[tuple[float, int], Tensor] = {}
+    for parity in (-1, 1):
+        js = sorted({k[0] for k in rho.values() if k[1] == parity})
+        if js:
+            vals = density(ld, eex, torch.tensor(js, dtype=DTYPE), parity, 0)
+            for i, j in enumerate(js):
+                cache[(j, parity)] = vals[i]
     for l in range(numl + 1):
         rsum = _t(0.0)
         for J in range(NUMJ + 1):
             if (l, J) in rho:
-                key = rho[(l, J)]
-                if key not in cache:
-                    cache[key] = density(ld, eex, _t(key[0]), key[1], 0)
-                rsum = rsum + cache[key]
+                rsum = rsum + cache[rho[(l, J)]]
         if _fv(rsum) >= 1.0e-10:
             D[l] = 1.0e6 / rsum
     return D

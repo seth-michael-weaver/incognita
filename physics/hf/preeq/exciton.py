@@ -1448,6 +1448,35 @@ def pepauli_integral(f, lo: float, hi: float, cuts: np.ndarray) -> float:
 def _pepauli_cell(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, mode) -> dict:
     """PEPAULI for one acted (case, type) cell: corrections to WA's window integrals inside the endpoint segments only.
     Returns the updated `sh`/`union` and the endpoint book (segments, onsets used, self-check, fall-back reason)."""
+    out, pend = _pepauli_prep(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, mode)
+    if pend is None:
+        return out
+    spec, chk = pepauli_spectrum(res, pre, inp, ctx["options"], ctx["params"], ctx["states"], c, pend["xs"])
+    return _pepauli_finish(pend, spec, chk)
+
+
+def _pepauli_spectra(res, pre, inp, ctx, c, eps_list):
+    """PERFCASC: `pepauli_spectrum` of case c for several acted cells in ONE evaluation (the cells' energies concatenated
+    after the grid nodes, then split): [(spec_i, chk), ...]. One cell = exactly the single call."""
+    if len(eps_list) == 1:
+        return [pepauli_spectrum(res, pre, inp, ctx["options"], ctx["params"], ctx["states"], c, eps_list[0])]
+    spec, chk = pepauli_spectrum(res, pre, inp, ctx["options"], ctx["params"], ctx["states"], c, np.concatenate(eps_list))
+    cut = np.cumsum([0] + [len(e) for e in eps_list])
+    return [(spec[:, a:b], chk) for a, b in zip(cut[:-1], cut[1:])]
+
+
+def _pepauli_onsets_of(inp, ctx, c):
+    """`pepauli_onsets` of case c, once per case and peunits call (PERFCASC: it depends on the case only, not the type)."""
+    memo = ctx.setdefault("_pp_onsets", {})
+    got = memo.get(c)
+    if got is None:
+        got = memo[c] = pepauli_onsets(inp, ctx["options"], ctx["states"], c)
+    return got
+
+
+def _pepauli_prep(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, mode):
+    """`_pepauli_cell` up to the spectrum evaluation: (out, None) when the cell is done without one, else (out, pending)
+    with pending["xs"] the energies `pepauli_spectrum` must be evaluated at (`_pepauli_finish` completes the cell)."""
     sh = list(win["sh"])
     union = float(win["union"])
     utop = max(u1, float(win.get("utop", u1)))  # pewindow g `g`: the g.s. window [u1, E0] joins the endpoint range
@@ -1463,11 +1492,11 @@ def _pepauli_cell(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, mod
         segs.append((k, a, b))
     out = dict(pp_mode=mode, pp_nseg=len(segs), pp_fallback="", pp_chk=0.0, pp_segs=book)
     if not segs:
-        return out
+        return out, None
     if any(round(a, 12) not in nodes or round(b, 12) not in nodes for _, a, b in segs):
         out["pp_fallback"] = "nongrid"
-        return out
-    cuts_on = pepauli_onsets(inp, ctx["options"], ctx["states"], c)
+        return out, None
+    cuts_on = _pepauli_onsets_of(inp, ctx, c)
     q = []  # (seg, piece lo, piece hi) with every piece inside one window
     for k, a, b in segs:
         lo_, hi_ = max(a, elast), min(b, utop)
@@ -1483,7 +1512,16 @@ def _pepauli_cell(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, mod
         xs = (0.5 * (bb - aa)[:, None] * _GL_X[None, :] + 0.5 * (aa + bb)[:, None]).ravel()
     else:
         xs = np.array(sorted({v for k, a, b in segs for v in (a + (b - a) / 3.0, a + 2.0 * (b - a) / 3.0)}))
-    spec, chk = pepauli_spectrum(res, pre, inp, ctx["options"], ctx["params"], ctx["states"], c, xs)
+    return out, dict(out=out, xs=xs, q=q, segs=segs, cuts_on=cuts_on, sh=sh, union=union, x=x, y=y, t=t, win=win,
+                     elast=elast, u1=u1, mode=mode)
+
+
+def _pepauli_finish(pend, spec, chk) -> dict:
+    """`_pepauli_cell` from the spectrum evaluation on (see `_pepauli_prep`)."""
+    out, xs, q, segs, cuts_on = pend["out"], pend["xs"], pend["q"], pend["segs"], pend["cuts_on"]
+    sh, union, x, y, t, win = pend["sh"], pend["union"], pend["x"], pend["y"], pend["t"], pend["win"]
+    elast, u1, mode = pend["elast"], pend["u1"], pend["mode"]
+    book = out["pp_segs"]
     out["pp_chk"] = chk
     if not np.isfinite(chk) or chk > 1.0e-9:
         out["pp_fallback"] = "selfcheck"
@@ -1750,11 +1788,14 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
     xpre = pre["xspreeq"].detach().cpu().numpy()
     xpost = res["xspreeq"].detach().cpu().numpy()
     for c in range(C):
-        for t in range(7):
+        # PERFCASC: the cells (c, t) run as generators that pause before their book-keeping, so the PEPAULI spectra of
+        # every acted cell of case c are evaluated in ONE `pepauli_spectrum` call (`_pepauli_spectra`) instead of one per
+        # cell; the cells then finish in type order, as before.
+        def _cell(t, c=c):
             b, e_end = disc.ebegin[t], disc.eend[c][t]
             esd_all = disc.eoutdis_mev[c][t]
             if b >= e_end or esd_all is None:
-                continue
+                return
             nd, NL = disc.nendisc[c][t], disc.nlast[t]
             reached = True  # TALYS's level loop (preeqcorrect.f90:52-57) reaches NL unless a level energy is < 0
             for i in range(NL + 1):
@@ -1781,6 +1822,7 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
             old = float(xd[c, t, NL]) if NL < xd.shape[2] else 0.0
             new = float(xpre[c, t, nd]) * frac if why == "acts" else old
             own = float("nan")
+            pend = None
             if why == "acts":  # TALYS's own two-point window sample of NL (preeqcorrect.f90:96-122), un-scaled spectrum
                 esd1 = elast
                 esd2 = float(esd_all[0]) if NL == 0 else 0.5 * (elast + float(esd_all[NL - 1]))
@@ -1829,7 +1871,12 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
                 win = dict(lev=lev, lo=lo, up=up, sh=[float(v) for v in sh], union=union, direct_win=dsum, ndirect=len(dirw),
                            utop=float(utop), gs_over=float(gs_over), gs_talys=float(xd[c, t, 0]))
                 if window in ("p", "q", "g") and len(x) >= 2 and lev:
-                    win.update(_pepauli_cell(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, window))
+                    pp_out, pend = _pepauli_prep(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, window)
+                    if pend is None:
+                        win.update(pp_out)
+            got = yield (pend["xs"] if pend is not None else None)  # PERFCASC: every cell of case c pauses here
+            if pend is not None:
+                win.update(_pepauli_finish(pend, *got))
             if on and why == "acts":
                 if remove in ("1", "2"):
                     nofrac[c, t] = True
@@ -1863,6 +1910,22 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
                                    removed_twice=float(xpost[c, t, nd]) * frac if frac > 0.0 else 0.0,
                                    nl_talys=old,
                                    nl_u=new, disc_sum=float(xd[c, t].sum())))
+
+        cells = []
+        for t in range(7):
+            g = _cell(t)
+            try:
+                cells.append((t, g, next(g)))
+            except StopIteration:
+                pass
+        reqs = [(t, xs) for t, _, xs in cells if xs is not None]
+        got = dict(zip([t for t, _ in reqs], _pepauli_spectra(res, pre, inp, ctx, c, [xs for _, xs in reqs]))) if reqs else {}
+        for t, g, _ in cells:
+            try:
+                g.send(got.get(t))
+            except StopIteration:
+                continue
+            raise RuntimeError("peunits: a cell paused twice")
     if not on:
         return {}
     xdt = torch.from_numpy(xd).to(res["xspreeqdisc"].dtype)
