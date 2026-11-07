@@ -1398,12 +1398,21 @@ def pepauli_spectrum(res: dict, pre: dict, inp: PreeqInputs, options, params, st
     from physics.hf.preeq.complex import stripping
 
     eg = inp.egrid_mev[c].detach().cpu().numpy().astype(float)
-    E = len(eg)
     allx = np.concatenate([eg, np.asarray(eps, float)])
     sub = _case_inputs(inp, c, allx)
     em = emission_rates(sub, states, options, params)
-    F = (inp.xsflux_mb[c] * res["Spre"][c]).detach().cpu().numpy().astype(float)  # (S,)
-    ex = np.einsum("s,ste->te", F, em["wemission2"][0].detach().cpu().numpy().astype(float))
+    return _pepauli_from(res, pre, inp, options, params, c, sub, em["wemission2"][0].detach().cpu().numpy().astype(float))
+
+
+def _pepauli_from(res, pre, inp, options, params, c, sub, wem) -> tuple[np.ndarray, float]:
+    """`pepauli_spectrum` from its case inputs `sub` (grid nodes then the requested energies) and their photon/particle
+    emission rates `wem` (S, 7, len) on."""
+    from physics.hf.preeq.complex import stripping
+
+    E = int(inp.egrid_mev[c].shape[-1])
+    allx = sub.egrid_mev[0].detach().cpu().numpy().astype(float)  # = the energies `_case_inputs` was given
+    F =(inp.xsflux_mb[c] * res["Spre"][c]).detach().cpu().numpy().astype(float)  # (S,)
+    ex = np.einsum("s,ste->te", F, wem)
     ps_raw = stripping(sub, options, params).detach().cpu().numpy()[0].astype(float)
     ps0 = pre["xspreeqps"][c].detach().cpu().numpy().astype(float)
     ki0 = pre["xspreeqki"][c].detach().cpu().numpy().astype(float)
@@ -1424,6 +1433,9 @@ def pepauli_spectrum(res: dict, pre: dict, inp: PreeqInputs, options, params, st
     ref = pre["xspreeq"][c].detach().cpu().numpy().astype(float)
     chk = float(np.max(np.abs(tot[:, :E] - ref)) / max(float(np.max(np.abs(ref))), 1e-300))
     return tot[:, E:], chk
+
+
+_PEPAULI_SPECTRUM = pepauli_spectrum  # PERFCASC: the batched path runs only while this is the module's own
 
 
 _GL_X, _GL_W = np.polynomial.legendre.leggauss(24)
@@ -1463,6 +1475,61 @@ def _pepauli_spectra(res, pre, inp, ctx, c, eps_list):
     spec, chk = pepauli_spectrum(res, pre, inp, ctx["options"], ctx["params"], ctx["states"], c, np.concatenate(eps_list))
     cut = np.cumsum([0] + [len(e) for e in eps_list])
     return [(spec[:, a:b], chk) for a, b in zip(cut[:-1], cut[1:])]
+
+
+def _pepauli_spectra_all(res, pre, inp, ctx, reqs) -> dict:
+    """PERFCASC: the PEPAULI spectra of every acted cell of EVERY case, {(c, t): (spec, chk)}; `reqs` = [(c, t, eps)].
+    The photon/particle emission rates of all cases come from ONE `emission_rates` call on the cases' grids stacked along
+    the case axis (each case's nodes + its cells' energies, padded to a common length with its last energy, the padding
+    discarded); the rest of `pepauli_spectrum` (Kalbach pickup, knockout, self-check) runs per case as before. Every
+    per-energy quantity of `emission_rates` is elementwise in (case, state, type, energy), so each case's numbers are
+    those of its own call. `INCOGNITA_PEPAULI_BATCH=0` (or a replaced `pepauli_spectrum`): one call per case."""
+    by = {}
+    for c, t, eps in reqs:
+        by.setdefault(c, []).append((t, eps))
+    out = {}
+    if len(by) <= 1 or pepauli_spectrum is not _PEPAULI_SPECTRUM or os.environ.get("INCOGNITA_PEPAULI_BATCH", "1") == "0":
+        for c, cells in by.items():
+            out.update(zip([(c, t) for t, _ in cells], _pepauli_spectra(res, pre, inp, ctx, c, [e for _, e in cells])))
+        return out
+    from dataclasses import replace
+
+    cases = list(by)
+    subs, lens = [], []
+    for c in cases:
+        eg = inp.egrid_mev[c].detach().cpu().numpy().astype(float)
+        allx = np.concatenate([eg] + [np.asarray(e, float) for _, e in by[c]])
+        subs.append(_case_inputs(inp, c, allx))
+        lens.append(len(allx))
+    L = max(lens)
+
+    def pad(x, n, fill=None):  # last axis to L: the last value repeated (fill: that constant)
+        k = L - n
+        if k == 0:
+            return x
+        if fill is None:
+            tail = x[..., -1:].expand(*x.shape[:-1], k)
+        else:
+            tail = torch.full((*x.shape[:-1], k), fill, dtype=x.dtype)
+        return torch.cat([x, tail], dim=-1)
+
+    def cat(f):
+        return torch.cat([getattr(s_, f) for s_ in subs], dim=0)
+
+    big = replace(subs[0], **{f: cat(f) for f in ("einc_mev", "ecomp_mev", "esurf_mev", "s_mev", "wfac", "gp_cn", "gn_cn",
+                                                   "pair_cn_mev", "gp_res", "gn_res", "pair_res_mev", "xsflux_mb")},
+                  egrid_mev=torch.cat([pad(s_.egrid_mev, n) for s_, n in zip(subs, lens)], dim=0),
+                  deltae_mev=torch.cat([pad(s_.deltae_mev, n) for s_, n in zip(subs, lens)], dim=0),
+                  emask=torch.cat([pad(s_.emask, n, False) for s_, n in zip(subs, lens)], dim=0),
+                  xsreac_mb=torch.cat([pad(s_.xsreac_mb, n, 0.0) for s_, n in zip(subs, lens)], dim=0))
+    wall = emission_rates(big, ctx["states"], ctx["options"], ctx["params"])["wemission2"].detach().cpu().numpy()
+    for i, c in enumerate(cases):
+        wem = np.ascontiguousarray(wall[i][:, :, :lens[i]]).astype(float)
+        spec, chk = _pepauli_from(res, pre, inp, ctx["options"], ctx["params"], c, subs[i], wem)
+        cut = np.cumsum([0] + [len(e) for _, e in by[c]])
+        for (t, _), a, b in zip(by[c], cut[:-1], cut[1:]):
+            out[(c, t)] = (spec[:, a:b], chk)
+    return out
 
 
 def _pepauli_onsets_of(inp, ctx, c):
@@ -1787,10 +1854,12 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
     etopall = disc.etop_mev.detach().cpu().numpy().astype(float)
     xpre = pre["xspreeq"].detach().cpu().numpy()
     xpost = res["xspreeq"].detach().cpu().numpy()
+    cells = []
     for c in range(C):
         # PERFCASC: the cells (c, t) run as generators that pause before their book-keeping, so the PEPAULI spectra of
-        # every acted cell of case c are evaluated in ONE `pepauli_spectrum` call (`_pepauli_spectra`) instead of one per
-        # cell; the cells then finish in type order, as before.
+        # every acted cell of every case are evaluated together (`_pepauli_spectra_all`: one emission-rate call for all
+        # cases, the pickup/knockout part per case) instead of once per cell; the cells then finish in (case, type)
+        # order, as before.
         def _cell(t, c=c):
             b, e_end = disc.ebegin[t], disc.eend[c][t]
             esd_all = disc.eoutdis_mev[c][t]
@@ -1911,21 +1980,20 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
                                    nl_talys=old,
                                    nl_u=new, disc_sum=float(xd[c, t].sum())))
 
-        cells = []
         for t in range(7):
             g = _cell(t)
             try:
-                cells.append((t, g, next(g)))
+                cells.append((c, t, g, next(g)))
             except StopIteration:
                 pass
-        reqs = [(t, xs) for t, _, xs in cells if xs is not None]
-        got = dict(zip([t for t, _ in reqs], _pepauli_spectra(res, pre, inp, ctx, c, [xs for _, xs in reqs]))) if reqs else {}
-        for t, g, _ in cells:
-            try:
-                g.send(got.get(t))
-            except StopIteration:
-                continue
-            raise RuntimeError("peunits: a cell paused twice")
+    reqs = [(c, t, xs) for c, t, _, xs in cells if xs is not None]
+    got = _pepauli_spectra_all(res, pre, inp, ctx, reqs) if reqs else {}
+    for c, t, g, _ in cells:
+        try:
+            g.send(got.get((c, t)))
+        except StopIteration:
+            continue
+        raise RuntimeError("peunits: a cell paused twice")
     if not on:
         return {}
     xdt = torch.from_numpy(xd).to(res["xspreeqdisc"].dtype)
