@@ -74,7 +74,17 @@ Every nuclide carries one label. Counts from `uv run python -m incognita.library
 | INTERPOLATED | 316 | unmeasured, structure data known, Z 26–83, within two neutrons or protons of measured nuclei |
 | EXTRAPOLATED | 5,611 | everything else: the engine's no-data recipe with a calibrated interval |
 
-Only Z = 26–83 lies inside the range the benchmark tests (`in_validated_range`).
+Only Z = 26–83 lies inside the range the benchmark tests (`in_validated_range`). That flag is a Z cut only: it does not
+say that a given nuclide's value was validated.
+
+What the files show about the tier rule (BUGTIER3, 2026-11-07; the tiers are v0.1's and are kept by v0.2–v0.2.2):
+- "Within two" means |ΔZ| + |ΔN| ≤ 2 to a MEASURED nuclide (`chart_distance`), so one proton plus one neutron counts.
+- INTERPOLATED was not given to every nuclide that meets the row above: 205 EXTRAPOLATED nuclides in Z 26–83 with
+  structure data lie within 2 of a MEASURED one (Co-60 next to Co-59, for example). v0.1's build left 256 out as
+  "rich side" (`library/v0.1/BUILD.md`).
+- "Measured" is the tier data of v0.1. 57 INTERPOLATED or EXTRAPOLATED nuclides, and 3 ANCHORED ones (Zn-70, Ge-76,
+  Te-120), have curated capture data at keV energies that the curation keeps. The Data explorer shows the first group as
+  measured. `docs/release/amendments/BUGTIER3.md` has the list.
 
 ## Running the engine
 

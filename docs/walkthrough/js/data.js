@@ -31,13 +31,14 @@
   const decE = (k) => (k >= -2 ? fmtE(10 ** k) : pow10(k) + " eV"), decY = (k, u) => (k >= -2 && k <= 4 ? num(10 ** k) : pow10(k)) + " " + u;
   const TIERS = [T("dx_t0", "Measured"), T("dx_t1", "Anchored to a measured MACS"), T("dx_t2", "Interpolated (near measured nuclides)"), T("dx_t3", "Extrapolated"), T("dx_t4", "Not measured (Z < 26)"), T("dx_t5", "Measured (library tier not updated)"), T("dx_t6", "Measured (Z < 26)")];
   const TIER_SHORT = [T("dx_ts0", "measured"), T("dx_ts1", "anchored"), T("dx_ts2", "interpolated"), T("dx_ts3", "extrapolated"), T("dx_ts4", "not measured"), T("dx_ts5", "measured"), T("dx_ts6", "measured")];
-  // shown tier: the library v0.2.2 tier, except where it would mislead. A nucleus the library calls EXTRAPOLATED but with
-  // curated capture data that the curation did not exclude (tier kept from v0.1): 5; excluded-only data does not count. Below Z 26 the library assigns no real tier (all EXTRAPOLATED, its
+  // shown tier: the library v0.2.2 tier, except where it would mislead. A nucleus the library calls INTERPOLATED or
+  // EXTRAPOLATED (both mean "not measured") but with curated capture data that the curation did not exclude (tier kept
+  // from v0.1): 5 (33 INTERPOLATED and 41 EXTRAPOLATED in Z 26-92, BUGTIER3); excluded-only data does not count. Below Z 26 the library assigns no real tier (all EXTRAPOLATED, its
   // curated capture set started at Z 26), so the page uses the light-nucleus curation (data/curation/capture_v2/*Z1-25*, same
   // WP-12 curation as Z 26-92): 6 if the nucleus has a curated capture cell that the curation did not exclude (index
   // column n_use), else 4 (not measured); also for H..N (Z 1-7), which have measurements but no library v0.2.2 curve (index
   // tier -1). The library's own tier field is not changed. See scripts/build_site_data.py.
-  const shownTier = (Z, t, nm, nu) => (t == null ? t : Z < 26 ? (nu > 0 ? 6 : 4) : t < 0 ? t : t === 3 && nu > 0 ? 5 : t);
+  const shownTier = (Z, t, nm, nu) => (t == null ? t : Z < 26 ? (nu > 0 ? 6 : 4) : t < 0 ? t : (t === 2 || t === 3) && nu > 0 ? 5 : t);
   const DEC = { k: T("dx_keep", "kept"), d: T("dx_down", "down-weighted"), x: T("dx_excl", "excluded"), f: T("dx_fix", "unit fixed") };
   const CH = { cap: T("dx_cap", "Capture (n,γ)"), n2n: "(n,2n)", np: "(n,p)", na: "(n,α)", macs: T("dx_macs", "Stellar average (MACS)"), el: T("dx_el", "Elastic (n,n)") };
 
@@ -485,11 +486,11 @@
     if (d.tier == null || !r.A) { box.hidden = true; box.innerHTML = ""; return; }
     const TT = [
       T("dx_tr_t0", "Measured nucleus. The curve is still the engine’s own prediction, not fitted to these measurements; but the engine’s global settings were chosen using many nuclei, this one among them, so a match here is a check, not an independent test."),
-      T("dx_tr_t1", "Anchored. No measured cross sections, but a measured stellar average at 30 keV: the engine’s curve is scaled by one factor to match it, so its shape is still the model’s."),
+      T("dx_tr_t1", "Anchored. The engine’s curve is scaled by one factor to a measured stellar average at 30 keV, so its shape is still the model’s. The tier, kept from v0.1, means the library had no measured capture cross sections for this nucleus; curated measurements shown below, if any, were not used for the curve."),
       T("dx_tr_t2", "Interpolated. Not measured, but within two neutrons or protons of measured nuclei; the curve is the model’s prediction."),
-      T("dx_tr_t3", "Extrapolated. Not measured and not close to measured nuclei (or without structure data): the curve is the model alone, with no measurement to check it."),
+      T("dx_tr_t3", "Extrapolated. Not measured, and not in the library’s interpolated tier (that tier also needs structure data, and its rule leaves out some nuclei right next to measured ones): the curve is the model alone, with no measurement to check it."),
       T("dx_tr_t4", "Not measured. No curated capture measurement of this nucleus: none in EXFOR, or the curation excluded all of them. The curve is the model alone. Below about Z 20, capture goes through individual resonances that this statistical engine does not describe: read the curve as a rough estimate."),
-      T("dx_tr_t5", "Measured nucleus. The library still lists it as extrapolated (the tier was kept from v0.1), but curated capture measurements of it exist and are shown below. The curve is the engine’s own prediction, not fitted to them, so comparing the two is a check of the model."),
+      T("dx_tr_t5", "Measured nucleus. The library still lists it as interpolated or extrapolated (the tier was kept from v0.1), but curated capture measurements of it exist and are shown below. The curve is the engine’s own prediction, not fitted to them, so comparing the two is a check of the model."),
       T("dx_tr_t6", "Measured nucleus. Curated EXFOR capture measurements are shown below (the same automatic curation as for Z 26 and up; no person has reviewed its decisions for these light nuclei). The curve is the engine’s prediction, not fitted to them. Below about Z 20, capture goes through individual resonances that this statistical engine does not describe: read the curve as a rough estimate.")];
     const st = shownTier(r.Z, d.tier, r.ncap + r.nmxw, r.nuse);
     const h = [`<h3>${T("dx_tr_h", "How far to trust this")}</h3>`, `<p><span class="dx-chip t${st}">${TIER_SHORT[st]}</span> ${TT[st]}</p>`];
@@ -499,8 +500,9 @@
     else if (mk === "gg_deadend") h.push(`<p>${T("dx_tr_mf_gg", "Model-form flag: the value relies on the engine’s fix of a missing gamma-decay width (see the note above); the band is not widened for it.")}</p>`);
     const tabs = cur.tabs || ["cap"], li = [];
     for (const k of tabs) {
-      // the coverage check scored measured nuclei only, so for an unmeasured nucleus (tier 2, 3) it says nothing
-      const band = k === "cap" ? (!d.u68 ? "" : d.tier >= 2 ? T("dx_tr_b_unm", "bands checked only on measured nuclei, not on nuclei like this one") : T("dx_tr_b_ok", "bands cover as stated (if anything, wide)"))
+      // the coverage check scored measured nuclei only, so for any other library tier (ANCHORED included: no capture
+      // cross sections in its tier data, BUGTIER3) it says nothing
+      const band = k === "cap" ? (!d.u68 ? "" : d.tier !== 0 ? T("dx_tr_b_unm", "bands checked only on measured nuclei, not on nuclei like this one") : T("dx_tr_b_ok", "bands cover as stated (if anything, wide)"))
         : k === "macs" ? (d.macsU ? T("dx_tr_b_macs", "band not checked on its own") : "")
         : k === "np" && d.npL && d.npL.some((p) => p[2] != null) ? T("dx_tr_b_narrow", "band likely too narrow: it under-covered")
         : T("dx_tr_b_none", "no band shown");
