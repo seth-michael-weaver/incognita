@@ -60,6 +60,15 @@ Bi-204..206). If the tier is ever used to pick an interval again, that is worth 
 
 ## Amendment drafts (not applied)
 
+**Status 2026-11-07: A, B, D and F are applied in library v0.2.3**, an errata release of v0.2.2 with the same values
+(`library/v0.2.3/CHANGELOG.md`; `scripts/release/build_library_v023.py`, `verify_library_v023.py`). Their tests now
+read v0.2.3 and pass. C and E are separate decisions and stay open (xfail); the v0.2.3 README lists them as known
+issues. Two details differ from the drafts below:
+- A: `macs30_v022.csv` (and v0.2.1's) still carried v0.2's ANCHORED `value_source` text, with the v0.2 factor, so in
+  that file all 21 rows change (in `capture` 5). `macs_kt` has no `value_source` column.
+- F: applied as a per-kT flag (`macs_flag_<kT>keV`, `macs_flag` = any kT, `rate_flag_below_T9`). At high kT the
+  criterion is stricter than 3 keV, so 106 of v0.2.2's flags no longer apply at kT = 100 keV.
+
 | item | finding | files touched | published numbers touched |
 |---|---|---|---|
 | A | ANCHORED factors are listed from a rounded v0.2 factor | `anchored_rescale_v022.csv`, `value_source` of 5 rows, BUILD.md | none (curves, MACS, rates unchanged) |

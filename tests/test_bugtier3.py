@@ -4,6 +4,8 @@ Each test pins one finding of BUGTIER3 (docs/release/amendments/BUGTIER3.md).
 - Site display bugs (fixed): the tier the Data explorer shows and the "How far to trust this" panel.
 - Library findings that would change a shipped value or a published number are not fixed here. Their tests are marked
   xfail(strict=True) and name the amendment item, so they turn into failures (and must be unmarked) once it is applied.
+- Items A, B, D and F are applied in library v0.2.3 (errata of v0.2.2): their tests read library/v0.2.3 and pass.
+  C and E stay open (xfail).
 """
 from __future__ import annotations
 
@@ -23,6 +25,7 @@ pq = pytest.importorskip("pyarrow.parquet")
 
 REPO = Path(__file__).resolve().parents[1]
 LIB = REPO / "library" / "v0.2.2"
+LIB23 = REPO / "library" / "v0.2.3"  # errata of v0.2.2: items A, B, D, F applied
 SITE = REPO / "docs" / "walkthrough"
 DATA_JS = (SITE / "js" / "data.js").read_text(encoding="utf-8")
 LANGS = ["ar", "da", "de", "es", "fr", "hi", "it", "ja", "ko", "nl", "pt", "ru", "zh"]
@@ -36,6 +39,11 @@ def cap():
 @lru_cache(None)
 def below():
     return {r["nuclide_id"]: r for r in pq.read_table(LIB / "below1keV_engine_v022.parquet").to_pylist()}
+
+
+@lru_cache(None)
+def cap23():
+    return {r["nuclide_id"]: r for r in pq.read_table(LIB23 / "capture_v023.parquet").to_pylist()}
 
 
 @lru_cache(None)
@@ -177,34 +185,91 @@ def test_anchored_factor_applied_once():
 
 
 # ------------------------------------------------------------------------------------------------ library: amendment items
-@pytest.mark.xfail(strict=True, reason="BUGTIER3 item A: v02_factor parsed from the 3-decimal value_source text")
 def test_anchored_rescale_total_factor_is_the_curves_own():
-    """anchored_rescale_v022.csv v022_factor (and v02_factor) should be the factor the curve carries: sigma(1 keV) over
-    the unscaled engine value at 1 keV. build_library_v022.py parses the v0.2 factor from value_source, where it is
-    rounded to 3 decimals, so the listed total is off by up to 6.7e-4 (Ge-76); the curve itself is right."""
-    with open(LIB / "anchored_rescale_v022.csv", newline="") as f:
-        for x in csv.DictReader(f):
-            i = x["nuclide_id"]
-            true = cap()[i]["sigma_b"][0] / (below()[i]["engine_1keV_mb"] / 1e3)
-            assert float(x["v022_factor"]) == pytest.approx(true, rel=1e-6), i
+    """Item A, applied in v0.2.3. anchored_rescale v022_factor (and v02_factor) is the factor the curve carries:
+    sigma(1 keV) over the unscaled engine value at 1 keV. build_library_v022.py parsed the v0.2 factor from value_source,
+    where it is rounded to 3 decimals, so v0.2.2's listed total was off by up to 6.7e-4 (Ge-76)."""
+    with open(LIB23 / "anchored_rescale_v023.csv", newline="") as f:
+        rows = list(csv.DictReader(f))
+    assert len(rows) == 21
+    for x in rows:
+        i = x["nuclide_id"]
+        true = cap23()[i]["sigma_b"][0] / (below()[i]["engine_1keV_mb"] / 1e3)
+        assert float(x["v022_factor"]) == pytest.approx(true, rel=1e-12), i
+        assert float(x["v02_factor"]) == below()[i]["anchored_v02_factor"], i
+    with open(LIB / "anchored_rescale_v022.csv", newline="") as f:  # the v0.2.2 file keeps the defect (shipped)
+        worst = max(abs(float(x["v022_factor"]) / (cap()[x["nuclide_id"]]["sigma_b"][0]
+                                                   / (below()[x["nuclide_id"]]["engine_1keV_mb"] / 1e3)) - 1)
+                    for x in csv.DictReader(f))
+    assert worst > 6e-4
 
 
-@pytest.mark.xfail(strict=True, reason="BUGTIER3 item A: value_source 'blind curve x f' rounds the wrong total")
 def test_anchored_value_source_factor_rounds_the_true_factor():
-    for i, r in cap().items():
+    """Item A, applied in v0.2.3, in capture_v023.parquet and macs30_v023.csv alike."""
+    with open(LIB23 / "macs30_v023.csv", newline="") as f:
+        m30 = {x["nuclide_id"]: x["value_source"] for x in csv.DictReader(f)}
+    for i, r in cap23().items():
+        assert m30[i] == r["value_source"], i
         if r["tier"] == "ANCHORED":
             f = float(re.search(r"blind curve x ([0-9.]+) \(measured", r["value_source"]).group(1))
             assert f == round(r["sigma_b"][0] / (below()[i]["engine_1keV_mb"] / 1e3), 3), i
+    assert "blind curve x 0.818 (measured" in cap23()["Z026N034M0"]["value_source"]  # Fe-60; v0.2.2 said x 0.817
 
 
-@pytest.mark.xfail(strict=True, reason="BUGTIER3 item B: model_form_max_dex_sub1MeV is 0 for the 3 gg_deadend rows")
 def test_model_form_max_dex_covers_the_alternative():
-    e = np.asarray(next(iter(cap().values()))["energy_ev"], float)
+    """Item B, applied in v0.2.3: the 3 gg_deadend rows carried 0.0 in v0.2.2."""
+    e = np.asarray(next(iter(cap23().values()))["energy_ev"], float)
     k = int(np.argmin(abs(np.log(e / 3e4))))
-    for r in cap().values():
+    for r in cap23().values():
         if r["model_form_flag"] != "none":
             dex = abs(math.log10(r["alt_value_30keV_b"] / r["sigma_b"][k]))
             assert r["model_form_max_dex_sub1MeV"] >= dex - 1e-9, r["nuclide_id"]
+
+
+def test_alt_value_described_at_its_grid_point():
+    """Item B (wording), applied in v0.2.3: alt_value_30keV_b is the value at the grid point nearest 30 keV (31.8 keV)."""
+    e = np.asarray(next(iter(cap23().values()))["energy_ev"], float)
+    assert e[int(np.argmin(abs(np.log(e / 3e4))))] == pytest.approx(31765, rel=1e-4)
+    readme = " ".join((LIB23 / "README.md").read_text(encoding="utf-8").split())
+    assert "the grid point nearest 30 keV, E_lab = 31.8 keV" in readme
+
+
+def test_macs_flag_uses_each_kts_own_criterion():
+    """Item F, applied in v0.2.3: macs_flag_<kT>keV = resolved_upper_ev > kT/10; macs_flag set where any is. 334
+    nuclides with resolved resonances between 0.5 and 3 keV, unflagged in v0.2.2, are flagged at low kT."""
+    kts = [5, 8, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100]
+    with open(LIB23 / "macs_kt_v023.csv", newline="") as f:
+        mk = {x["nuclide_id"]: x for x in csv.DictReader(f)}
+    with open(LIB / "macs_kt_v022.csv", newline="") as f:
+        old = {x["nuclide_id"]: x["macs_flag"] for x in csv.DictReader(f)}
+    newly = 0
+    for i, r in cap23().items():
+        ru = r["resolved_upper_ev"]
+        ru = None if ru is None or math.isnan(ru) else ru
+        fl = [mk[i][f"macs_flag_{k}keV"] == "True" for k in kts]
+        assert fl == [ru is not None and ru > k * 100 for k in kts], i
+        assert bool(mk[i]["macs_flag"]) == any(fl), i
+        assert bool(r["macs30_flag"]) == fl[kts.index(30)], i   # macs30_flag unchanged: the 30 keV criterion
+        newly += any(fl) and not old[i]
+    assert newly == 334
+    with open(LIB23 / "rates_v023.csv", newline="") as f:
+        for x in csv.DictReader(f):
+            ru = cap23()[x["nuclide_id"]]["resolved_upper_ev"]
+            t = None if ru is None or math.isnan(ru) or 10 * ru / 86173.3 <= 0.01 else 10 * ru / 86173.3
+            assert (x["rate_flag_below_T9"] == "") == (t is None), x["nuclide_id"]
+            if t is not None:
+                assert float(x["rate_flag_below_T9"]) == pytest.approx(t, rel=1e-12)
+
+
+def test_library_docs_state_the_tier_and_range_rules():
+    """Item D, applied in the v0.2.3 README: the Z 26-83 condition and the rich-side exclusion of INTERPOLATED, and
+    in_validated_range as a Z cut (no "Only Z 26-83 is validated")."""
+    readme = (LIB23 / "README.md").read_text(encoding="utf-8")
+    interp = next(line for line in readme.splitlines() if line.startswith("| INTERPOLATED |"))
+    assert "Z 26–83" in interp and "rich side" in interp and "= 2 from a MEASURED" in interp
+    assert "Only Z 26–83 is validated" not in readme
+    assert "It is a Z cut only" in readme and "2,451 have no structure data" in readme
+    assert "Known issues" in readme and "item C" in readme and "item E" in readme
 
 
 def _kept_cells_by_nuclide(kev_only):

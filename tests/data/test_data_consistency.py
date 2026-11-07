@@ -1,6 +1,6 @@
 """Consistency checks over every nuclide of INCOGNITA's data products.
 
-Covers: library/v0.2.2 (curves, MACS, rates, below-1-keV joins, grid-dependent list, checksums), the curated capture
+Covers: library/v0.2.3 (curves, MACS, rates, below-1-keV joins, grid-dependent list, checksums), the curated capture
 set v2.1 (data/curation/capture_v2: keys, units, energies, duplicates, v2.1 review lines), the light
 threshold rows (review lines), the site data (docs/walkthrough/data: index.json
 against the per-nuclide files and the library) and the C-12 R-matrix evaluation (data/light_evals/C12RM9.json).
@@ -27,13 +27,13 @@ import pytest
 pq = pytest.importorskip("pyarrow.parquet")
 
 REPO = Path(__file__).resolve().parents[2]
-LIB = REPO / "library" / "v0.2.2"
+LIB = REPO / "library" / "v0.2.3"  # errata of v0.2.2: same values, corrected flags/factors
 CAP = REPO / "data" / "curation" / "capture_v2"
 INP = REPO / "data" / "curation" / "inputs"
 SITE = REPO / "docs" / "walkthrough" / "data"
 EVALS = REPO / "data" / "light_evals"
 KT = [5, 8, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100]
-MN = 1.00866  # u, as library/v0.2.2/RATES.md
+MN = 1.00866  # u, as library/v0.2.3/RATES.md
 NA = 6.02214076e23
 U_KEV = 931494.10242  # keV per u
 C_CMS = 2.99792458e10
@@ -54,7 +54,7 @@ def _sig(v, n=4):
 
 @lru_cache(None)
 def cap_lib():
-    return pq.read_table(LIB / "capture_v022.parquet").to_pylist()
+    return pq.read_table(LIB / "capture_v023.parquet").to_pylist()
 
 
 @lru_cache(None)
@@ -101,7 +101,7 @@ def parse_nuc(nuc):
 
 
 # ---------------------------------------------------------------- checksums
-@pytest.mark.parametrize("d", ["library/v0.2.2", "library/v0.2.1", "library/v0.2", "library/v0.1",
+@pytest.mark.parametrize("d", ["library/v0.2.3", "library/v0.2.2", "library/v0.2.1", "library/v0.2", "library/v0.1",
                                "data/curation/capture_v2", "data/curation/inputs"])
 def test_sha256sums(d):
     base = REPO / d
@@ -117,7 +117,7 @@ def test_sha256sums(d):
     assert not bad, f"{d}: checksum mismatch {bad}"
 
 
-# ---------------------------------------------------------------- library v0.2.2
+# ---------------------------------------------------------------- library v0.2.3
 def test_library_keys_and_curves():
     seen = set()
     for r in cap_lib():
@@ -130,16 +130,16 @@ def test_library_keys_and_curves():
         assert np.all(np.isfinite(s)) and np.all(s > 0), r["nuclide_id"]
         eb, sb = np.asarray(r["energy_below1keV_ev"]), np.asarray(r["sigma_below1keV_b"])
         assert len(eb) == 15 and np.all(np.diff(eb) > 0) and eb[-1] < 1e3 and np.all(sb > 0), r["nuclide_id"]
-    for name in ("macs30_v022.csv", "macs_kt_v022.csv", "rates_v022.csv", "masses_v022.csv",
-                 "compound_smin_v022.csv"):
+    for name in ("macs30_v023.csv", "macs_kt_v023.csv", "rates_v023.csv", "masses_v023.csv",
+                 "compound_smin_v023.csv"):
         ids = [(int(x["Z"]), int(x["A"])) for x in csv_rows(name)]
         assert set(ids) == seen and len(ids) == len(seen), name
 
 
 def test_library_macs_tables_agree():
     cap = {r["nuclide_id"]: r for r in cap_lib()}
-    m30 = {x["nuclide_id"]: x for x in csv_rows("macs30_v022.csv")}
-    for x in csv_rows("macs_kt_v022.csv"):
+    m30 = {x["nuclide_id"]: x for x in csv_rows("macs30_v023.csv")}
+    for x in csv_rows("macs_kt_v023.csv"):
         i = x["nuclide_id"]
         assert float(x["macs30_mb"]) == pytest.approx(cap[i]["macs30_mb"], rel=1e-12), i
         assert float(x["macs30_mb"]) == pytest.approx(float(m30[i]["macs30_mb"]), rel=1e-12), i
@@ -156,7 +156,7 @@ def _joined(r):
 
 
 def _macs(e, s, M, kt_kev, n=20001):
-    """MACS (mb), centre-of-mass definition of library/v0.2.2/README.md, log-log curve, 1/v below the first point."""
+    """MACS (mb), centre-of-mass definition of library/v0.2.3/README.md, log-log curve, 1/v below the first point."""
     kt = kt_kev * 1e3
     ec = np.logspace(-4, math.log10(kt * 50), n)
     el = ec * (M + MN) / M
@@ -170,8 +170,8 @@ def _macs(e, s, M, kt_kev, n=20001):
 
 def test_library_macs_match_curves_all_nuclides():
     """Every MACS(kT) recomputed from its own curve (below-1-keV points + 64-point grid), all 6168 nuclides."""
-    mass = {x["nuclide_id"]: float(x["mass_u"]) for x in csv_rows("masses_v022.csv")}
-    mk = {x["nuclide_id"]: x for x in csv_rows("macs_kt_v022.csv")}
+    mass = {x["nuclide_id"]: float(x["mass_u"]) for x in csv_rows("masses_v023.csv")}
+    mk = {x["nuclide_id"]: x for x in csv_rows("macs_kt_v023.csv")}
     bad = []
     for r in cap_lib():
         e, s = _joined(r)
@@ -184,10 +184,10 @@ def test_library_macs_match_curves_all_nuclides():
 
 
 def test_library_rates_reduced_mass():
-    mk = {x["nuclide_id"]: x for x in csv_rows("macs_kt_v022.csv")}
-    mass = {x["nuclide_id"]: float(x["mass_u"]) for x in csv_rows("masses_v022.csv")}
+    mk = {x["nuclide_id"]: x for x in csv_rows("macs_kt_v023.csv")}
+    mass = {x["nuclide_id"]: float(x["mass_u"]) for x in csv_rows("masses_v023.csv")}
     bad = []
-    for x in csv_rows("rates_v022.csv"):
+    for x in csv_rows("rates_v023.csv"):
         i, M = x["nuclide_id"], float(x["target_mass_u"])
         assert M == mass[i], i
         mu = 1.00866491595 * M / (1.00866491595 + M)  # RATES.md rounds m_n to 1.00866 u; the files use CODATA
@@ -205,8 +205,8 @@ def test_library_rates_reduced_mass():
 
 def test_grid_dependent_list_matches_flag():
     flag = {(r["Z"], r["A"]) for r in cap_lib() if r["engine_grid_dependent"]}
-    lst = {(int(x["Z"]), int(x["A"])) for x in csv_rows("grid_dependent_v022.csv")}
-    smin = {(int(x["Z"]), int(x["A"])): float(x["smin_MeV"]) for x in csv_rows("compound_smin_v022.csv")}
+    lst = {(int(x["Z"]), int(x["A"])) for x in csv_rows("grid_dependent_v023.csv")}
+    smin = {(int(x["Z"]), int(x["A"])): float(x["smin_MeV"]) for x in csv_rows("compound_smin_v023.csv")}
     assert flag == lst
     assert len(lst) == 2364
     assert lst == {k for k, v in smin.items() if v < -1.0}
@@ -235,7 +235,7 @@ def test_below1keV_join():
 
 def test_anchored_rescale_consistent():
     cap = {r["nuclide_id"]: r for r in cap_lib()}
-    rows = csv_rows("anchored_rescale_v022.csv")
+    rows = csv_rows("anchored_rescale_v023.csv")
     assert {x["nuclide_id"] for x in rows} == {i for i, r in cap.items() if r["tier"] == "ANCHORED"}
     for x in rows:
         assert float(x["anchor_equals_v02_macs30_mb"]) == pytest.approx(cap[x["nuclide_id"]]["macs30_mb"], rel=1e-9)
@@ -338,7 +338,7 @@ def test_site_files_match_index_and_library():
     idx = index()
     cols = idx["cols"]
     lib = {(r["Z"], r["A"]): r for r in cap_lib()}
-    mk = {(int(x["Z"]), int(x["A"])): x for x in csv_rows("macs_kt_v022.csv")}
+    mk = {(int(x["Z"]), int(x["A"])): x for x in csv_rows("macs_kt_v023.csv")}
     for row in idx["rows"]:
         x = dict(zip(cols, row))
         Z, A = x["Z"], x["A"]
@@ -426,7 +426,7 @@ def test_site_fix_unit_points_are_fixed():
 def _thr_outliers():
     """Measured (n,2n)/(n,p)/(n,alpha) points (mb) more than x200 from the library channel curve (mb), where the curve
     is above 1 mb."""
-    ch = {(r["Z"], r["A"]): r for r in pq.read_table(LIB / "channels_v022.parquet").to_pylist()}
+    ch = {(r["Z"], r["A"]): r for r in pq.read_table(LIB / "channels_v023.parquet").to_pylist()}
     out = []
     for p in SITE.glob("n/*/*.json"):
         if p.stem == "nat":
