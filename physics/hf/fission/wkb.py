@@ -541,8 +541,35 @@ EXACTFIS_HW = 0.6  # MeV, half-width of the energy average (one well-flank inter
 EXACTFIS_DE = 0.02  # MeV, fine grid of the energy average
 
 
+#: PERFCASC: `_t_exact_vec` results of this process by their complete input (a pure function of its arguments); the
+#: h-rule and the run rebuild the same nucleus's fission path up to four times per arm
+_TEX_MEMO: dict = {}
+_TEX_MEMO_MAX = 512
+
+
 def _t_exact_vec(beta: np.ndarray, v: np.ndarray, mu: np.ndarray, lo: int, hi: int,
                  es: np.ndarray, nsub: int = EXACTFIS_NSUB) -> np.ndarray:
+    """`_t_exact_vec_calc` once per distinct input (PERFCASC memo, bit-identical: the stored array is copied out)."""
+    import hashlib
+
+    h = hashlib.blake2b(digest_size=20)
+    for a in (beta, v, mu, es):
+        a = np.ascontiguousarray(np.asarray(a, dtype=np.float64))
+        h.update(repr(a.shape).encode())
+        h.update(a.tobytes())
+    key = (h.hexdigest(), int(lo), int(hi), int(nsub))
+    got = _TEX_MEMO.get(key)
+    if got is None:
+        got = _t_exact_vec_calc(beta, v, mu, lo, hi, es, nsub)
+        while len(_TEX_MEMO) >= _TEX_MEMO_MAX:
+            _TEX_MEMO.pop(next(iter(_TEX_MEMO)))
+        _TEX_MEMO[key] = got.copy()
+        return got
+    return got.copy()
+
+
+def _t_exact_vec_calc(beta: np.ndarray, v: np.ndarray, mu: np.ndarray, lo: int, hi: int,
+                      es: np.ndarray, nsub: int = EXACTFIS_NSUB) -> np.ndarray:
     """Exact 1-D transmission through the path between rows `lo` and `hi` (1-based) at energies
     `es` [MeV]: -(1/2) d/dx[(1/mu) dpsi/dx] + V psi = E psi (BenDaniel-Duke; psi and psi'/mu
     continuous) on the linear interpolation of the tabulated V, mu, as a staircase of `nsub`
