@@ -2,6 +2,8 @@
 
 EXFOR-derived (IAEA Nuclear Data Section and the NRDC network), CC BY 4.0. `SHA256SUMS` checks every data file.
 
+A corrected version of these capture tables, capture set v2 (2026-11-06: number format, parser gaps, sums, uncertainty split, SPSDD/DEP duplicates, slips, EXFOR version), is in `../capture_v2/` with its own README and ADOPTION.md. The files here are unchanged.
+
 | file | what |
 |---|---|
 | `exfor_capture_Z26-92_trust.parquet` | Z 26-92: one row per EXFOR capture dataset, with the WP-12 automatic curation (trust, inflation, decision keep / downweight / exclude / fix-unit and its reason) as run on 2026-09-12 |

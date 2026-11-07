@@ -33,7 +33,9 @@ negative, and it makes a 24 000-point resonance scan and a single activation
 point comparable as bin averages.
 
 Uncertainty rules (``data/ingest/exfor.py`` contract): ``stat_sigma`` is the
-statistical or unsplit total, ``sys_sigma`` is ``ERR-SYS``; a cell's relative
+statistical or unsplit total, ``sys_sigma`` is ``ERR-SYS`` (CAPSET-v2 staging, V2_FIXES "unc":
+also sqrt(ERR-T^2 - ERR-S^2) when only ERR-S and ERR-T are given; stat_sigma = sqrt(ERR-T^2 -
+ERR-SYS^2) when ERR-T and ERR-SYS are given without ERR-S); a cell's relative
 sigma is ``sqrt(stat_rel^2 + sys_rel^2)``. If nothing is reported, the standard
 error of the mean over >= 3 points is used, else the group's median reported
 sigma x 1.5, else 15 %. Every sigma is floored at 1 % and capped at 100 %.
