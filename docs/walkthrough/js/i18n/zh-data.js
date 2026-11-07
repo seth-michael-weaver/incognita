@@ -132,3 +132,5 @@ Object.assign(WT.L.ui, {
 // less text (2026-11-06)
 Object.assign(WT.L.ui, { dx_hint2: "拖动平移 · 滚动缩放 · 点击方格", dx_more_nuc: "详情:可信度、来源、代码", dx_about: "关于数据、下载与代码" });
 Object.assign(WT.L.ui, { dx_cmp: "对比" });
+// C12RM9 R-matrix evaluation (light nuclei, 2026-11-07)
+Object.assign(WT.L.ui, {"dx_el": "弹性散射 (n,n)", "dx_rm_name": "INCOGNITA R 矩阵评价 (C12RM9)", "dx_rm_h": "我们对这个核素的模型", "dx_rm_what": "中子在碳-12上的弹性散射，来自 INCOGNITA 自己对 EXFOR 全截面和弹性截面测量数据所做的多能级 R 矩阵拟合。发布之前，它通过了预先登记的检验：IAEA 碳标准、预留的全截面测量、NJOY 处理往返检验，以及一个含石墨的临界基准（PCI-001）。", "dx_rm_range": "能量范围：{lo} 至 {hi}；在此之上没有 INCOGNITA 曲线。", "dx_rm_caveat": "注意：样本内 χ²/自由度 {c}；标记了两个带倾斜的数据集；检验已校准，但检验功效较低。", "dx_rm_nocap": "没有对俘获建模：俘获标签页只显示测量数据。", "dx_rm_report": "阅读报告"});

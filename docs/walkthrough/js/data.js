@@ -35,7 +35,7 @@
   // tier -1). The library's own tier field is not changed. See scripts/build_site_data.py.
   const shownTier = (Z, t, nm, nu) => (t == null ? t : Z < 26 ? (nu > 0 ? 6 : 4) : t < 0 ? t : t === 3 && nu > 0 ? 5 : t);
   const DEC = { k: T("dx_keep", "kept"), d: T("dx_down", "down-weighted"), x: T("dx_excl", "excluded"), f: T("dx_fix", "unit fixed") };
-  const CH = { cap: T("dx_cap", "Capture (n,γ)"), n2n: "(n,2n)", np: "(n,p)", na: "(n,α)", macs: T("dx_macs", "Stellar average (MACS)") };
+  const CH = { cap: T("dx_cap", "Capture (n,γ)"), n2n: "(n,2n)", np: "(n,p)", na: "(n,α)", macs: T("dx_macs", "Stellar average (MACS)"), el: T("dx_el", "Elastic (n,n)") };
 
   // ---------- colours (CSS tokens on .dx, light and dark) ----------
   let C = {};
@@ -211,6 +211,7 @@
     if (r.macs > 0) bits.push(`MACS 30 keV ≈ ${num(r.macs)} mb${r.u30 ? ` (×/÷ ${num(r.u30, 2)})` : ""}`);
     const m = []; if (r.ncap + r.nmxw) m.push(`${r.nds} ${T("dx_capsets", "capture datasets")}`); for (const [k, n] of [["n2n", r.nn2n], ["np", r.nnp], ["na", r.nna]]) if (n) m.push(`${CH[k]} ${n}`);
     if (m.length) bits.push(T("dx_measured", "Measured") + ": " + m.join(", "));
+    if (IDX.light_evals && IDX.light_evals[`${r.Z}-${r.A}`]) bits.push(T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"));
     return bits.join("<br>");
   }
   document.querySelectorAll(".dx-seg button").forEach((b) => b.addEventListener("click", () => {
@@ -340,6 +341,7 @@
     if (d.meas) f.push(`<span>${d.meas.ds.length} ${T("dx_capsets", "capture datasets")}</span>`);
     if (d.tier != null && !d.valid) f.push(`<span class="dx-warn">${T("dx_outside", "outside the validated range (Z 26–83)")}</span>`);
     if (d.flag) f.push(`<span class="dx-warn">${T("dx_flag", "resolved resonances reach the MACS window: prefer a measured MACS")}</span>`);
+    if (d.rm) f.push(`<span class="dx-chip t0">${esc(T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"))}</span>`);
     if (cur.rr && cur.rr.caveat_short) f.push(`<span class="dx-warn" title="${esc(cur.rr.caveat || "")}">${esc(cur.rr.caveat_short)}</span>`);
     $("#dx-facts").innerHTML = f.join("");
     const mf = mformNote(d.mform), mfb = $("#dx-mf"); if (mfb) { mfb.hidden = !mf; mfb.innerHTML = mf || ""; }
@@ -379,6 +381,7 @@
   const libHas = (k) => !!(libOn && cur.lib && Object.values(cur.lib.n).some((v) => v[k]));
   function buildTabs() {
     const tabs = ["cap"], d = cur.d;
+    if (d.rm) tabs.push("el"); // light nuclei: INCOGNITA's R-matrix evaluation (data/light_evals), elastic only
     for (const k of ["n2n", "np", "na"]) if ((d.ch && d.ch[k]) || (d.thr && d.thr[k]) || libHas(k)) tabs.push(k);
     if (d.macs || (d.meas && d.meas.mxw.some((p) => p[0] >= 1000)) || libHas("macs")) tabs.push("macs");
     if (!tabs.includes(tab)) tab = "cap";
@@ -461,9 +464,20 @@
     macs: [["K185 Z20-39", 20, 20, 39, 0.1608116676], ["K185 Z40-59", 15, 40, 59, 0.1538501219], ["K185 Z60-83", 69, 60, 83, 0.1141666319]],
     n2n: [["thrA1_n2n", 35, 28, 92, 0.08696570963]], np: [["thrA1_np", 41, 26, 92, 0.1691835923]], na: [["thrA1_na", 25, 26, 82, 0.1860277146]],
   };
+  /** INCOGNITA's light-nuclide R-matrix evaluation (data/light_evals/<id>.json via scripts/add_light_evals.py): what it is, its
+   *  range, the caveat from its report, what it does not cover, and the report. Every number on its curve is INCOGNITA's own model. */
+  function rmText(rm) {
+    return `<b>${esc(T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"))}</b>. ` + [
+      T("dx_rm_what", "Elastic scattering of neutrons on carbon-12 from INCOGNITA's own multi-level R-matrix fit to measured EXFOR total and elastic data. Before it was published it passed its pre-registered checks: the IAEA carbon standard, held-out total cross-section measurements, an NJOY processing round trip and a graphite criticality benchmark (PCI-001)."),
+      T("dx_rm_range", "Energy range: {lo} to {hi}; no INCOGNITA curve above it.").replace("{lo}", fmtE(rm.e_min_ev)).replace("{hi}", fmtE(rm.e_max_ev)),
+      T("dx_rm_caveat", "Caveat: in-sample χ²/dof {c}; two tilted data sets flagged; the gates are calibrated but have low power.").replace("{c}", num(rm.chi2_dof, 2)),
+      T("dx_rm_nocap", "Capture is not modelled: the capture tab shows measurements only.")].join(" ")
+      + ` <a href="${esc(rm.report)}" target="_blank" rel="noopener">${T("dx_rm_report", "Read the report")}</a>`;
+  }
   function trustPanel() {
     const box = $("#dx-trust"); if (!box) return;
     const d = cur.d, r = cur.r, rr = cur.rr;
+    if (d.rm && r.A) { box.innerHTML = `<h3>${T("dx_rm_h", "Our model for this nuclide")}</h3><p>${rmText(d.rm)}</p>`; box.hidden = false; WT.keepLang(); return; }
     if (d.tier == null || !r.A) { box.hidden = true; box.innerHTML = ""; return; }
     const TT = [
       T("dx_tr_t0", "Measured nucleus. The curve is still the engine’s own prediction, not fitted to these measurements; but the engine’s global settings were chosen using many nuclei, this one among them, so a match here is a check, not an independent test."),
@@ -516,6 +530,9 @@
         for (const p of d.meas.mxw) if (p[0] < 1000) out.points.push({ x: p[0], xlo: p[0], xhi: p[1], y: p[2], e: p[3], ds: p[4], dec: p[5], st: p[6], kind: "mxw" }); }
       libCurves(out);
       if (d.res) out.note = { upto: d.res, text: T("dx_res", "resolved resonances: the curve is an average here") };
+    } else if (tab === "el") {
+      const rm = d.rm; out.unit = "b";
+      if (rm) out.curves.push({ name: T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"), col: C.curve, pts: rm.energy_ev.map((x, i) => [x, rm.sigma_b[i]]) });
     } else if (tab === "macs") {
       out.xlab = "kT"; out.unit = "mb";
       if (d.macs) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.1)"), col: C.curve, pts: IDX.kT_keV.map((k, i) => [k * 1e3, d.macs[i]]), b68: IDX.kT_keV.map((k, i) => (d.macsU && d.macsU[i] ? [k * 1e3, d.macs[i] / d.macsU[i], d.macs[i] * d.macsU[i]] : null)).filter(Boolean) });
@@ -600,7 +617,7 @@
     const ax0 = (x) => { if (x < x0) x0 = x; if (x > x1) x1 = x; }, ay0 = (y) => { if (y < y0) y0 = y; if (y > y1) y1 = y; };
     let lastX = 0; const ax = (x) => { lastX = x; if (inZ(x)) ax0(x); }, ay = (y) => { if (inZ(lastX)) ay0(y); };
     // (n,2n), (n,p), (n,α): the window from thrWindow unless "full energy range" is ticked; measured points always stay in range
-    const tw = tab !== "cap" && tab !== "macs" ? thrWindow(S, shown) : null, win = full ? null : tw, xf = win ? win.x0 : 0, yf = win ? win.yf : 0;
+    const tw = tab !== "cap" && tab !== "macs" && tab !== "el" ? thrWindow(S, shown) : null, win = full ? null : tw, xf = win ? win.x0 : 0, yf = win ? win.yf : 0;
     if (xf > 0) ax(xf);
     // a pointwise library curve's deepest interference dips do not stretch the y-axis: it reaches at most 9 decades below the top
     const ytop = Math.max(0, ...S.curves.flatMap((c) => c.pts.map(([, y]) => y || 0))), ypw = Math.max(yf, ytop * 1e-9);
@@ -611,6 +628,7 @@
     for (const c of [LAY.p, LAY.c]) layer(c);
     if (!(x1 > 0)) { ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H); ctx.fillStyle = C.soft; ctx.font = `500 14px ${SANS}`; ctx.textAlign = "center"; ctx.fillText(T("dx_empty", "Nothing to show for this reaction."), W / 2, H / 2); finishNuc(S); return; }
     x0 = log10(x0); x1 = log10(x1); y0 = log10(y0); y1 = log10(y1);
+    if (tab === "el" && y1 - y0 < 1) { y0 = Math.min(y0, Math.floor((y0 + y1) / 2)); y1 = Math.max(y1, Math.ceil((y0 + y1) / 2 + 1e-9)); } // a smooth elastic curve spans under a decade: keep at least one labelled decade line
     if (x1 - x0 < 1 && !win) { x0 -= 0.5; x1 += 0.5; } // a threshold window keeps its edge: it may span under a decade if (y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; }
     if (!zw) { x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); } y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0);
     const X = (x) => m.l + (log10(x) - x0) / (x1 - x0) * (W - m.l - m.r), Y = (y) => H - m.b - (log10(y) - y0) / (y1 - y0) * (H - m.t - m.b);
@@ -751,7 +769,7 @@
   function finishNuc(S) {
     const nPts = S.points.length, nEx = S.points.filter((p) => p.dec === "x").length;
     $("#dx-excl").parentElement.hidden = nEx === 0;
-    $("#dx-full").parentElement.hidden = tab === "cap" || tab === "macs";
+    $("#dx-full").parentElement.hidden = tab === "cap" || tab === "macs" || tab === "el";
     libNote();
     const pws = pwOf(S);
     const leg = S.curves.filter((c) => !c.pw).map((c) => c.dash ? `<span class="dx-key">${pws.some((q) => q.short === c.short) ? `<i class="ln thin" style="background:${c.col}"></i>` : ""}<i class="dash" style="color:${c.col}"></i>${esc(c.short || c.name)} · ${T("dx_cmp", "comparison")}</span>` /* short legend (2026-11-06); the full wording is in Details */ : c.rr ? `<span class="dx-key dx-rrkey">${rrSwatch(c)}<span>${esc(c.short || c.name)}</span></span>` : `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);
@@ -763,6 +781,7 @@
     if (bl) { const parts = [];
       const rrC = S.curves.find((c) => c.rr);
       if (tab === "cap" && ownC && xl < PW_E) parts.push(rrC ? rrSentence(rrC.rrd, S.th) : T("dx_below", "INCOGNITA’s own curve starts at 1 keV; below that only comparators and measurements are shown."));
+      if (tab === "el" && cur.d.rm) parts.push(rmText(cur.d.rm));
       if (S.th) { const t = S.th, links = t.subs.map((s) => { const ex = exforOf(s); return ex ? `<a href="${ex.url}" target="_blank" rel="noopener">${ex.id}</a>` : esc(s); }).join(", ");
         parts.push(`${T("dx_th_sent", "Diamond: measured thermal capture cross section σγ(0.0253 eV)")} = <b>${num(t.y, 4)} ± ${num(t.u, 2)} b</b>, ${T("dx_th_mean", "weighted mean of {n} EXFOR entries").replace("{n}", t.n)}${t.abs ? ` (${T("dx_th_abs", "absorption minus fission")})` : ""}: ${links}.`); }
       bl.innerHTML = parts.join(" "); bl.hidden = !parts.length; }
@@ -864,6 +883,9 @@
     const lr = Z < 26 && A ? byKey.get(Z + "-" + A) : null;
     if (lr) J.page_label_below_z26 = `${lr.st === 6 ? "measured" : "not measured"}: library v0.2.1 assigns tiers only from Z 26; this label is from the curated EXFOR capture cells of Z 1-25 (capture set v2, data/curation/capture_v2, README.md there)`;
     if (d.tier != null) Object.assign(J, { tier: IDX.tiers[d.tier], in_validated_range: !!d.valid, value_source: d.src || null, uncertainty_kind: d.unc || null, resolved_resonances_up_to_ev: d.res ?? null, macs30_mb: d.macs30 ?? null, macs30_flag: d.flag || null });
+    if (d.rm) J.rmatrix_evaluation = { id: d.rm.id, label: d.rm.label, reaction: d.rm.reaction, unit: "b", energy_ev: d.rm.energy_ev, sigma_b: d.rm.sigma_b,
+      mubar_cm: d.rm.mubar_cm || null, range_ev: [d.rm.e_min_ev, d.rm.e_max_ev], chi2_dof_in_sample: d.rm.chi2_dof ?? null, caveat: d.rm.caveat || null, report: d.rm.report,
+      note: "INCOGNITA's own R-matrix model (elastic only, 0 K); capture is not modelled by it. Every number comes from the frozen fit." };
     if (d.cap) J.capture = { unit: "b", energy_ev: grid, sigma_b: d.cap, unc68_log10: d.u68 || null, unc95_log10: d.u95 || null, note: "68 % and 95 % bands: sigma divided and multiplied by 10^unc" };
     if (d.mform) J.model_form = { flag: d.mform.kind, alt_value_30keV_b: d.mform.alt30 ?? null, alt_over_value_30keV: d.mform.ratio ?? null,
       note: { pe_kev: "keV capture depends on pre-equilibrium emission at low energies (on in this engine; TALYS starts it near 1 MeV); the 68 % and 95 % bands below 1 MeV are widened to contain the other choice",

@@ -206,6 +206,10 @@ def main():
           f"{sum(1 for r in light if r[5] + r[6] > 0 and r[-1] == 0)} with only excluded cells; "
           f"(n,2n) / (n,p) / (n,alpha) measured on {sum(1 for r in light if r[8])} / {sum(1 for r in light if r[9])} / "
           f"{sum(1 for r in light if r[10])} nuclides ({sum(r[8] for r in light)} / {sum(r[9] for r in light)} / {sum(r[10] for r in light)} points)")
+    # light-nuclide R-matrix evaluations that passed their gates (data/light_evals; scripts/add_light_evals.py)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import add_light_evals
+    add_light_evals.apply(OUT)
 
 
 if __name__ == "__main__":
