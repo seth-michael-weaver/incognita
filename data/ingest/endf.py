@@ -837,18 +837,26 @@ def ladder_stats(rows: list[dict[str, Any]], target_spin: float | None = None) -
         elif lru == 2 and r.get("l") == 0:
             if "D" not in d or "GN0" not in d:
                 continue
-            dj = float(np.asarray(d["D"], dtype=np.float64).ravel()[0])
-            if not dj > 0.0:
-                continue
-            gn0 = float(np.asarray(d["GN0"], dtype=np.float64).ravel()[0])
-            ggj = float(np.asarray(d.get("GG", [math.nan]), dtype=np.float64).ravel()[0])
-            j = r.get("j")
-            if j is None and "AJ" in d:
-                j = float(np.asarray(d["AJ"]).ravel()[0])
-            g = _g_factor(abs(float(j)), spi) if j is not None else math.nan
-            inv_d += 1.0 / dj
-            s0_urr += g * gn0 / dj
-            gg_w += ggj / dj if not math.isnan(ggj) else 0.0
+            dv = np.asarray(d["D"], dtype=np.float64).ravel()
+            gv = np.asarray(d["GN0"], dtype=np.float64).ravel()
+            ggv = np.asarray(d.get("GG", [math.nan]), dtype=np.float64).ravel()
+            ajv = np.asarray(d["AJ"], dtype=np.float64).ravel() if "AJ" in d else np.empty(0)
+            # case A (LFW=0, LRF=1) has no j_group: one l-row holds D, AJ, GN0, GG for EACH of its NJS spins; the
+            # other cases have one row per (l, J) whose arrays run over energy (the lowest tabulated energy is used)
+            per_j = r.get("j") is None and dv.size > 1
+            for k in range(dv.size if per_j else 1):
+                dj = float(dv[k])
+                if not dj > 0.0:
+                    continue
+                gn0 = float(gv[k]) if k < gv.size else math.nan
+                ggj = float(ggv[k]) if k < ggv.size else math.nan
+                j = r.get("j")
+                if j is None and k < ajv.size:
+                    j = float(ajv[k])
+                g = _g_factor(abs(float(j)), spi) if j is not None else math.nan
+                inv_d += 1.0 / dj
+                s0_urr += g * gn0 / dj
+                gg_w += ggj / dj if not math.isnan(ggj) else 0.0
             es = np.asarray(d.get("ES", [r.get("el_ev", math.nan)]), dtype=np.float64).ravel()
             urr_lower = min(urr_lower, float(es[0]))
     out["formalisms"] = sorted(f for f in forms if f)
