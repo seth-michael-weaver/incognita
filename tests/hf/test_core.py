@@ -353,7 +353,7 @@ def test_emission_grid_batch_and_indices():
         torch.tensor([26, 82]), torch.tensor([56, 208]), torch.tensor([1.0, 20.0], dtype=D)
     )
     g = grids.emission_grid(cb, None, elimit_mev=torch.tensor([10.0, 30.0], dtype=D))
-    assert g.e_mev.shape == (2, grids.NUMEN + 1)
+    assert g.e_mev.shape == (2, grids.numen() + 1)
     assert not g.mask[:, 0].any() and int(g.maxen[0]) < int(g.maxen[1])
     assert torch.equal(g.e_mev[0, : int(g.maxen[0]) + 1], g.e_mev[1, : int(g.maxen[0]) + 1])
     with pytest.raises(ValueError):

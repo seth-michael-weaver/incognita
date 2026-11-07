@@ -94,6 +94,9 @@ class CCBlocks:
 
 
 # ------------------------------------------------------------------------------------------------- the CC S-matrix
+# key -> (options, value). ENGFIX4: the key holds `id(options)`; the entry keeps the object itself and
+# a hit must be that same object, so a freed Options whose address is reused by a new one (another
+# deck, another run in the same worker) never gets the old run's blocks.
 _MEMO: dict = {}
 
 
@@ -102,8 +105,18 @@ def cc_blocks(Z: int, A: int, e_mev: float, band: dict, options, two_j_max: int)
     (J, parity), J up to `two_j_max` (both parities). Same OMP (T4, incl. fit cards through
     `options`), channel sets, form factors, radial grid and refinement as `incident_coupled`."""
     key = (Z, A, float(e_mev), int(two_j_max), id(options))
-    if key in _MEMO:
-        return _MEMO[key]
+    hit = _MEMO.get(key)
+    if hit is not None and hit[0] is options:
+        return hit[1]
+    out = _cc_blocks_compute(Z, A, e_mev, band, options, two_j_max)
+    if len(_MEMO) > 64:
+        _MEMO.clear()
+    _MEMO[key] = (options, out)
+    return out
+
+
+def _cc_blocks_compute(Z: int, A: int, e_mev: float, band: dict, options, two_j_max: int) -> CCBlocks:
+    """`cc_blocks`' solve, not memoised."""
     from physics.hf.ecis import solver as S
     from physics.hf.ecis.angular import _setup
     from physics.hf.ecis.incident import SOSWITCH_DEFAULT_MEV, _refine_axis, _t4_parameters, njmax_incident
@@ -141,12 +154,8 @@ def cc_blocks(Z: int, A: int, e_mev: float, band: dict, options, two_j_max: int)
             jj = ch.j.numpy()[o]
             ud = np.rint(2.0 * (jj - ll)).astype(int)
             blocks[(two_j, par)] = CCBlock(two_j, par, lv, ll, ud, pm)
-    out = CCBlocks(float(e_mev), band["e_mev"].numpy().copy(),
-                   np.rint(2 * band["spin"].numpy()).astype(int), blocks)
-    if len(_MEMO) > 64:
-        _MEMO.clear()
-    _MEMO[key] = out
-    return out
+    return CCBlocks(float(e_mev), band["e_mev"].numpy().copy(),
+                    np.rint(2 * band["spin"].numpy()).astype(int), blocks)
 
 
 def cc_blocks_batch(Z: int, A: int, energies, band: dict, options, chunk: int = 8, j_tol: float = 1.0e-12) -> dict:
@@ -234,14 +243,21 @@ def attach(inp, cas, e_inc_mev: float) -> None:
     # every incident energy: Moldauer in the eigen space where comptarget applies WFC (E <= ewfc), Hauser-Feshbach
     # (W = 1) in the eigen space above it -- the transform itself is not a width-fluctuation effect, and stopping it
     # at ewfc would put a step into the coupled-level exits there
+    # ENGFIX4: an entry is (options, {e: CCBlocks}) and serves only that same Options object (see `_MEMO`)
     key = (int(cas.Zt), int(cas.At), id(cas.options), tuple(getattr(cas, "energies", ()) or ()))
-    if key not in _BATCH and key[3]:
+    ent = _BATCH.get(key)
+    if ent is not None and ent[0] is not cas.options:
+        del _BATCH[key]
+        ent = None
+    if ent is None and key[3]:
         _BATCH.clear()
-        _BATCH[key] = cc_blocks_batch(key[0], key[1], key[3], band, cas.options)
-    got = _BATCH.get(key, {}).get(float(e_inc_mev))
+        ent = _BATCH[key] = (cas.options, cc_blocks_batch(key[0], key[1], key[3], band, cas.options))
+    if ent is None:
+        ent = _BATCH[key] = (cas.options, {})
+    got = ent[1].get(float(e_inc_mev))
     if got is None:
-        got = _BATCH.setdefault(key, {})[float(e_inc_mev)] = cc_blocks_batch(key[0], key[1], (float(e_inc_mev),), band,
-                                                                              cas.options)[float(e_inc_mev)]
+        got = ent[1][float(e_inc_mev)] = cc_blocks_batch(key[0], key[1], (float(e_inc_mev),), band,
+                                                         cas.options)[float(e_inc_mev)]
     inp.ew = got
 
 

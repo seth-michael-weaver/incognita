@@ -198,7 +198,7 @@ def pop_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float, targe
         inp.e_inc_mev, k0, float(rg.m.mass_amu[target_mass_index()]),
         float(rg.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
         float(rg.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), rg.options.flagrel)
-    ecomp = total_energy(eninccm, rg.s0[k0], 0.0)
+    ecomp = total_energy(eninccm, rg.s0[k0], rg.target_e)
     eend, _ = emission_end(rg.egrid, rg.maxen, ecomp, {t: rg.s0[t] for t in range(7)},
                            rg.ebegin, {t: False for t in range(7)})
     E = rg.maxen + 1

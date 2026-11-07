@@ -25,7 +25,8 @@ import torch
 
 from physics.hf.core.constants import talys_constants
 from physics.hf.core.grids import (
-    NUMEN,
+    gridtop_exits,
+    numen,
     charged_particle_begin,
     discrete_emission_begin,
     egrid_values,
@@ -157,17 +158,21 @@ def _grid(target: str, energies: tuple[float, ...]):
     k0 = options.k0
     parskip = {t: False for t in range(7)}
     s0 = {t: float(m.s_mev[0, 0, t]) for t in range(7)}
+    from physics.hf.structure.scalars import parinclude_of, target_energy_mev
+
+    te = target_energy_mev(Z, A, options, m, params)  # ENGFIX4: targetE (0 for a ground-state target)
     eg, maxen = egrid_values(
-        emission_limit(max(energies), s0[k0], 0.0, s_exits_mev=list(s0.values())),  # GRIDTOP: run_grid's top
+        emission_limit(max(energies), s0[k0], te,  # GRIDTOP: run_grid's top
+                       s_exits_mev=gridtop_exits(s0, m.mass_amu, parinclude_of(options))),
         options.segment,
-        NUMEN,
+        numen(),
         options.flagequispec,
-        None,
+        float(max(energies)) if options.flagequispec else None,  # ENGFIX4: equispec needs enincmax
     )
     de, _etop, ebot = emission_bins(eg, maxen)
     coulbar = coulomb_barriers(options)
     ebegin, _ = charged_particle_begin(eg, maxen, A, {t: coulbar[t] for t in range(7)}, parskip)
-    return s0, eg, maxen, de, ebot, ebegin, parskip
+    return s0, eg, maxen, de, ebot, ebegin, parskip, te
 
 
 @lru_cache(maxsize=256)
@@ -186,7 +191,7 @@ def case(target: str, e_inc_mev: float, energies: tuple[float, ...] | None = Non
     Z, A, options, params, m, struct = _base(target, energies)
     c = talys_constants()
     k0 = options.k0
-    s0, eg, maxen, de, ebot, ebegin, parskip = _grid(target, energies)
+    s0, eg, maxen, de, ebot, ebegin, parskip, te = _grid(target, energies)
     eninccm, _ = incident_kinematics(
         e_inc_mev,
         k0,
@@ -195,7 +200,7 @@ def case(target: str, e_inc_mev: float, energies: tuple[float, ...] | None = Non
         float(m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]),
         options.flagrel,
     )
-    etotal = total_energy(eninccm, s0[k0], 0.0)
+    etotal = total_energy(eninccm, s0[k0], te)
     eend, _ = emission_end(eg, maxen, etotal, s0, ebegin, parskip)
     # eoutdis runs over 0..numlev2 (energies.f90:166-168), past the discrete levels the
     # residual actually uses, because the collective continuum lives up there.

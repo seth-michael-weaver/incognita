@@ -114,11 +114,9 @@ def test_the_version_covers_the_numerics_switches(monkeypatch, tmp_path):
     monkeypatch.setenv(ccdisk.ENV_VAR, str(tmp_path))
     ccdisk._version.cache_clear()
     v0 = ccdisk._version()
-    monkeypatch.setenv("HF_CC_MODNUM", "0")
-    ccdisk._version.cache_clear()
+    monkeypatch.setenv("HF_CC_MODNUM", "0")  # ENGFIX4: read per call, no cache reset needed
     assert ccdisk._version() != v0
     monkeypatch.delenv("HF_CC_MODNUM")
-    ccdisk._version.cache_clear()
     assert ccdisk._version() == v0
 
 

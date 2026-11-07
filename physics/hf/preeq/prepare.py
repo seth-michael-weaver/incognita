@@ -50,7 +50,7 @@ from physics.hf.structure.masses import masses
 from physics.hf import stagetime
 from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
 
-NUMEN = int(__import__("os").environ.get("INCOGNITA_NUMEN", "250"))  # A0_talys_mod.f90 numen; INCOGNITA_NUMEN (PECOLLAPSE): reference runs only
+NUMEN_DEFAULT = 250  # A0_talys_mod.f90 numen of the reference runs; INCOGNITA_NUMEN (PECOLLAPSE) overrides it, read per call (ENGFIX4)
 PARSYM = ("g", "n", "p", "d", "t", "h", "a")
 
 
@@ -416,8 +416,14 @@ def prepare(
 
     s0 = [float(m.s_mev[0, 0, t]) for t in range(7)]
     enincmax = float(enincmax_mev) if enincmax_mev is not None else max(energies)
-    elimit = emission_limit(enincmax, s0[k0], 0.0, s_exits_mev=s0)  # GRIDTOP: run_grid's top
-    eg, maxen = egrid_values(elimit, options.segment, NUMEN, options.flagequispec, None)
+    from physics.hf.core.grids import gridtop_exits, numen
+    from physics.hf.structure.scalars import parinclude_of, target_energy_mev
+
+    te = target_energy_mev(Z, A, options, m, params)  # ENGFIX4: targetE (0 for a ground-state target)
+    elimit = emission_limit(enincmax, s0[k0], te,  # GRIDTOP: run_grid's top
+                            s_exits_mev=gridtop_exits(s0, m.mass_amu, parinclude_of(options)))
+    eg, maxen = egrid_values(elimit, options.segment, numen(NUMEN_DEFAULT), options.flagequispec,
+                             enincmax if options.flagequispec else None)  # ENGFIX4: equispec needs enincmax
     de, etop, ebot = emission_bins(eg, maxen)
     coulbar = coulomb_barriers(options)
     ebegin, _ = charged_particle_begin(
@@ -477,7 +483,7 @@ def prepare(
             float(m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]),
             options.flagrel,
         )
-        ecomp[i] = total_energy(eninccm, s0[k0], 0.0)
+        ecomp[i] = total_energy(eninccm, s0[k0], te)
         eend, _ = emission_end(
             eg,
             maxen,

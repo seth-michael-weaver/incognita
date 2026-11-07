@@ -90,16 +90,34 @@ SOSWITCH_DEFAULT_MEV = 10.0  # input_directpar.f90:64
 # default.  It is kept, not deleted: `HF_INC_REFINE=2` restores it, which is how the table above
 # was measured, and it is still the right lever if a future change puts the port back on a
 # discretisation of its own.
-INCIDENT_REFINE = int(os.environ.get("HF_INC_REFINE", "1"))
-INCIDENT_REFINE_EMAX_MEV = float(os.environ.get("HF_INC_REFINE_EMAX", "0.05"))
+#
+# ENGFIX4: both are read from the environment on every call (they used to be read once at import, so
+# a long-lived worker kept its parent's values).
+def incident_refine() -> int:
+    """`HF_INC_REFINE` (default 1 = off).
+
+    TALYS: (none -- port switch)
+    Test: tests/hf/test_fissc2.py
+    """
+    return int(os.environ.get("HF_INC_REFINE", "1"))
+
+
+def incident_refine_emax_mev() -> float:
+    """`HF_INC_REFINE_EMAX` (default 0.05 MeV).
+
+    TALYS: (none -- port switch)
+    Test: tests/hf/test_fissc2.py
+    """
+    return float(os.environ.get("HF_INC_REFINE_EMAX", "0.05"))
 
 
 def _refine_axis(e: Tensor, refine: int) -> Tensor:
     """The per-energy radial refinement of `incident_coupled` (one int per incident energy)."""
-    if int(refine) != 1 or INCIDENT_REFINE <= 1:
+    ref = incident_refine() if int(refine) == 1 else 1
+    if int(refine) != 1 or ref <= 1:
         return torch.full(e.shape, int(refine), dtype=torch.int64)
-    return torch.where(e <= INCIDENT_REFINE_EMAX_MEV,
-                       torch.tensor(int(INCIDENT_REFINE), dtype=torch.int64),
+    return torch.where(e <= incident_refine_emax_mev(),
+                       torch.tensor(int(ref), dtype=torch.int64),
                        torch.tensor(1, dtype=torch.int64))
 # the OMP fields the solver reads, in ECIS's card order (schrodinger._FIELDS without `ef`)
 _OMP_FIELDS: tuple[str, ...] = (
@@ -215,9 +233,10 @@ _SOLVED_MAX = 4096
 # (tests/hf/test_ccfast.py, batched LAPACK and vectorised tails), so a per-row carry would hand a
 # later caller a row from a different batch than the one it would have solved and move its result
 # by ~1e-15. A batch hit is the very computation the caller would repeat, on the same inputs, so
-# it is bit for bit what solving gives. The key also holds the values of every environment switch
-# that can move a solver number (`ccdisk._NUMERICS_ENV` and the two INCOGNITA_ switches the solve
-# reads); the source and the libraries cannot change inside a process. `HF_CC_CARRY=0` turns it
+# it is bit for bit what solving gives. The key also holds every environment switch that can move a
+# solver number, through the row keys' `ccdisk.env_token()` (ENGFIX4; it was `ccdisk._NUMERICS_ENV`
+# and the two INCOGNITA_ switches the solve reads); the source and the libraries cannot change
+# inside a process. `HF_CC_CARRY=0` turns it
 # off. With `INCOGNITA_CC_BATCHCACHE=<dir>` the same batches are also kept on disk (`ccdisk`, under
 # the cache's version directory), which carries them across processes: a warm-pool job, a rerun,
 # the next calculator request for the same nuclide. Least recently used batches go first.
@@ -229,9 +248,8 @@ def _carry_key(keys: list[tuple], miss: Tensor) -> tuple | None:
     """The carry key of solving the energies `miss` of `keys`, or None when carrying is off."""
     if os.environ.get("HF_CC_CARRY", "1") == "0":
         return None
-    env = tuple(os.environ.get(k) for k in ccdisk._NUMERICS_ENV) + (
-        os.environ.get("INCOGNITA_ECMSTABLE"), os.environ.get("INCOGNITA_CCSOCB"))
-    return ("perfcc2-batch", env, tuple(keys[i] for i in torch.nonzero(miss).reshape(-1).tolist()))
+    # ENGFIX4: the row keys already end in `ccdisk.env_token()` (every switch, read per call)
+    return ("perfcc2-batch", tuple(keys[i] for i in torch.nonzero(miss).reshape(-1).tolist()))
 
 
 def _carry_get(ck: tuple) -> CoupledResult | None:
@@ -436,7 +454,10 @@ def incident_coupled(
     keys = _energy_keys(omp, e, (Z, A, particle, _band_key(band), nj,
                                  bool(allow_undeformed_spin_orbit), soswitch))
     if keys is not None:  # FISSC2: the refinement is per energy, so the key must be too
-        keys = [k + (int(ref_ax[i]),) for i, k in enumerate(keys)]
+        # ENGFIX4: and every switch (`ccdisk.env_token`, read now), so `_SOLVED`, the row cache
+        # and the batch carry never serve a row solved under other switches
+        tok = ccdisk.env_token()
+        keys = [k + (int(ref_ax[i]), tok) for i, k in enumerate(keys)]
     from physics.hf.ecis import solver as _solver
 
     if keys is None:

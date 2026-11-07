@@ -39,7 +39,7 @@ from pathlib import Path
 from physics.hf import warmrun
 from physics.hf.record import codec
 
-FORMAT = 1
+FORMAT = 2  # 2: ENGFIX4, the key holds the run inputs (`_inputs_signature`)
 
 # `lru_cache`d functions (qualified `__wrapped__` name); `Cascade.incident` is per instance, keyed
 # on the run's Cascade
@@ -124,16 +124,44 @@ def code_signature() -> str:
     return h.hexdigest()[:16]
 
 
+def _inputs_signature(cas) -> dict:
+    """ENGFIX4: the run's inputs the recorded (optical-model / direct) caches depend on, hashed the
+    way the stage disk cache keys them (`stagedisk`): every Options field but the level-density /
+    photon-strength / fission ones, the optical-model Params, the masses, the deck (`fitlib` cards the
+    Cascade was built under) and the environment (every HF_* / INCOGNITA_* but `stagedisk.ENV_EXCLUDE`,
+    plus ENGADJ's token). A record written under another deck or switch set no longer matches."""
+    from physics.hf import eadj, stagedisk as sd
+
+    def h(b: bytes) -> str:
+        return hashlib.sha256(b).hexdigest()[:16]
+
+    out = {}
+    o = getattr(cas, "options", None)
+    out["options"] = h(sd._options_digest(o)) if o is not None else None
+    p = getattr(cas, "params", None)
+    out["params"] = h(sd._params_digest(p)) if p is not None else None
+    m = getattr(cas, "m", None)
+    out["masses"] = h(sd._value_digest(m)) if m is not None else None
+    cards = cas.__dict__.get("_fit_cards") if hasattr(cas, "__dict__") else None
+    out["deck"] = h(repr(cards).encode())
+    env = sd._env_part()
+    if eadj.on():
+        env += b"|eadj" + repr(eadj.token()).encode()
+    out["env"] = h(env)
+    return out
+
+
 def record_key(cas, code: bool = True) -> dict:
     """What a record is valid for: the nuclide, its run (maximum and declared energies,
-    projectile) and the three signatures (`code=False` leaves out the source hash).
+    projectile), its inputs (`_inputs_signature`: options, params, masses, deck, environment) and
+    the three signatures (`code=False` leaves out the source hash).
 
     TALYS: none (worker cache policy)
-    Test: scripts/hf_route100_record.py verify
+    Test: scripts/hf_route100_record.py verify; tests/hf/test_record.py
     """
     key = {"format": FORMAT, "Z": int(cas.Zt), "A": int(cas.At), "k0": int(cas.k0),
            "enincmax": float(cas.enincmax), "energies": [float(e) for e in cas.energies],
-           "taint": taint_signature(), "recorded": recorded_signature()}
+           "taint": taint_signature(), "recorded": recorded_signature(), **_inputs_signature(cas)}
     if code:
         key["code"] = code_signature()
     return key

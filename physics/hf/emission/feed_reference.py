@@ -54,7 +54,8 @@ FLOOR_MB = POP_FLOOR_MB
 
 
 def etotal_of(Zt: int, At: int, enincmax_mev: float, e_inc_mev: float, k0: int) -> float:
-    """`Etotal`, the compound system's total energy at one incident energy (energies.f90)."""
+    """`Etotal = eninccm + S(0,0,k0) + targetE`, the compound system's total energy at one incident
+    energy (energies.f90:131); targetE is the isomer's excitation for an `ltarget` > 0 run."""
     from physics.hf.compound.dens_reference import run_grid
 
     c = talys_constants()
@@ -63,7 +64,7 @@ def etotal_of(Zt: int, At: int, enincmax_mev: float, e_inc_mev: float, k0: int) 
         e_inc_mev, k0, float(rg.m.mass_amu[target_mass_index()]),
         float(rg.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
         float(rg.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), rg.options.flagrel)
-    return float(total_energy(eninccm, rg.s0[k0], 0.0))
+    return float(total_energy(eninccm, rg.s0[k0], rg.target_e))  # ENGFIX4: + targetE (energies.f90:131)
 
 
 @lru_cache(maxsize=16)

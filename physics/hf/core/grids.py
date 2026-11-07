@@ -56,7 +56,21 @@ f32 = np.float32
 f64 = np.float64
 
 # A0_talys_mod.f90 dimensions
-NUMEN = int(os.environ.get("INCOGNITA_NUMEN", "260"))  # A0_talys_mod.f90:59; INCOGNITA_NUMEN (PECOLLAPSE): larger only for refined-segment reference runs
+NUMEN_DEFAULT = 260  # A0_talys_mod.f90:59
+
+
+def numen(default: int = NUMEN_DEFAULT) -> int:
+    """`numen`, the outgoing-grid dimension: INCOGNITA_NUMEN (PECOLLAPSE: larger only for refined-segment
+    reference runs), else `default`. ENGFIX4: read on every call (it was read once at import, so a
+    long-lived worker kept its parent's value).
+
+    TALYS: (none -- the dimension numen of A0_talys_mod is a compile-time constant there)
+    Test: tests/hf/test_engfix4.py
+    """
+    return int(os.environ.get("INCOGNITA_NUMEN", str(default)))
+
+
+_numen = numen  # `egrid_values`' argument of the same name shadows it there
 NUMENIN = 600  # A0_talys_mod.f90:31
 NUMENLOW = 20  # A0_talys_mod.f90:99
 NUMLEV = 40  # A0_talys_mod.f90:43
@@ -128,8 +142,14 @@ def emission_limit(enincmax_mev: float, s_k0_mev: float, target_e_mev: float = 0
     the same (nucleus, energy) gives different answers on different grids: I-109 capture at
     20 keV is 7.54 mb as a one-energy run and 0.120 mb on a 1 keV - 20 MeV grid (production
     deck), stock TALYS-2.25 6.66 vs 6.34 mb. GRIDTOP (`gridtop_on`) adds
-    max(0, -min S(0,0,type)) when `s_exits_mev` (S(0,0,type), type 0..6) is given: the same
-    1 MeV margin above E0 for every exit. When every S >= 0 the limit is TALYS's to the bit.
+    max(0, -min S) over `s_exits_mev` when it is given: the same 1 MeV margin above E0 for every
+    exit. When every S >= 0 the limit is TALYS's to the bit.
+
+    `s_exits_mev` holds S(0,0,type) of the exits that can actually be taken -- callers build it with
+    `gridtop_exits`: an ejectile the run emits (`parinclude`) whose residual nucleus has a mass.
+    An exit to a residual with no mass (Li-7 -> h + "H-4"; anything leaving Z or N <= 0 for very
+    light targets) has an S made up from zero mass excesses, often far below zero, and before
+    ENGFIX4 it raised the grid top of very light targets by ~10 MeV for an exit that does not exist.
 
     TALYS: grid.f90:1 (grid)
     Test: A-grid; tests/hf/test_gridtop.py
@@ -142,10 +162,30 @@ def emission_limit(enincmax_mev: float, s_k0_mev: float, target_e_mev: float = 0
     return float(f32(lim))
 
 
+def gridtop_exits(s_mev, mass_amu, parinclude=None) -> list[float]:
+    """GRIDTOP's exits: S(0,0,type) for the types 0..6 the run emits (`parinclude`, default all)
+    whose residual (parZ(type), parN(type)) has a nonzero mass in `mass_amu` (the `Masses` grid
+    indexed (Zix, Nix)). `s_mev` is S(0,0,type), type 0..6 (a list, or a dict by type).
+
+    TALYS: (none -- Incognita extension, GRIDTOP; see `emission_limit`)
+    Test: tests/hf/test_gridtop.py
+    """
+    pz, pn = (0, 0, 1, 1, 1, 2, 2), (0, 1, 0, 1, 2, 1, 2)
+    m = np.asarray(mass_amu.detach().numpy() if hasattr(mass_amu, "detach") else mass_amu, dtype=f64)
+    out = []
+    for t in range(7):
+        if parinclude is not None and not parinclude[t]:
+            continue
+        if not (pz[t] < m.shape[0] and pn[t] < m.shape[1] and m[pz[t], pn[t]] > 0.0):
+            continue
+        out.append(float(s_mev[t]))
+    return out
+
+
 def egrid_values(
     elimit_mev: float,
     segment: int = SEGMENT_DEFAULT,
-    numen: int = NUMEN,
+    numen: int | None = None,
     flagequispec: bool = FLAGEQUISPEC_DEFAULT,
     enincmax_mev: float | None = None,
 ) -> tuple[np.ndarray, int]:
@@ -153,12 +193,17 @@ def egrid_values(
     exactly as grid.f90:118-156 does (step 0.001 MeV rising to 10/segment MeV above 300 MeV).
     Returns (float64 array of length numen+1 holding the float32 values, egrid[0] = 0; maxen).
     With `flagequispec` (keyword `equispec y`) the equidistant grid of grid.f90:147-156 replaces
-    it; that branch needs `enincmax_mev`.
+    it; that branch needs `enincmax_mev`. `numen` defaults to `numen()` (INCOGNITA_NUMEN, read now).
+
+    A grid that would need more than `numen` points to reach `elimit_mev` raises (ENGFIX4): TALYS
+    stops the loop at `numen` (grid.f90:128) and runs on a grid that ends below Elimit, silently
+    dropping the top of every spectrum; raise INCOGNITA_NUMEN or lower `segment` instead.
 
     TALYS: grid.f90:1 (grid)
     Test: A-grid
     """
-    eg, maxen = _egrid_values(float(elimit_mev), int(segment), int(numen), bool(flagequispec),
+    eg, maxen = _egrid_values(float(elimit_mev), int(segment),
+                              int(numen if numen is not None else _numen()), bool(flagequispec),
                               None if enincmax_mev is None else float(enincmax_mev))
     return eg.copy(), maxen
 
@@ -180,6 +225,11 @@ def _egrid_values(elimit_mev: float, segment: int, numen: int, flagequispec: boo
         if eeps > elimit:
             break
         if nen == numen:
+            if not flagequispec:  # ENGFIX4: TALYS exits here silently (grid.f90:128)
+                raise ValueError(
+                    f"outgoing energy grid: {numen} points (numen) end at {float(egrid[numen]):.4g} MeV, below "
+                    f"Elimit = {float(elimit):.4g} MeV (segment {segment}); set INCOGNITA_NUMEN larger or lower "
+                    "`segment`")
             break
         nen += 1
         egrid[nen] = eout
@@ -274,11 +324,12 @@ def emission_grid(
     if lim.shape[0] != cases.n:
         raise ValueError(f"elimit_mev has {lim.shape[0]} entries for {cases.n} cases")
     rows = []
+    n_en = numen()
     for c in range(cases.n):
         eg, maxen = egrid_values(
             float(lim[c]),
             segment,
-            NUMEN,
+            n_en,
             equispec,
             float(cases.e_inc_mev.max()) if equispec else None,
         )
@@ -287,7 +338,7 @@ def emission_grid(
     dev = cases.e_inc_mev.device
     stack = lambda i: torch.tensor(np.stack([r[i] for r in rows]), dtype=DTYPE, device=dev)  # noqa: E731
     maxen = torch.tensor([r[4] for r in rows], dtype=torch.int64, device=dev)
-    k = torch.arange(NUMEN + 1, device=dev)
+    k = torch.arange(n_en + 1, device=dev)
     mask = (k[None, :] >= 1) & (k[None, :] <= maxen[:, None])
     return EmissionGrid(stack(0), stack(1), mask, stack(2), stack(3), maxen)
 
