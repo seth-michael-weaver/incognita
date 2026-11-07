@@ -64,6 +64,16 @@ def run():
     json.dump([dict(z=z, a=a, **r) for (z, a), r in ids], open(os.path.join(OUT, "check_runs.json"), "w"), indent=0)
 
 
+def engine_capture_mb(r):
+    """The engine's own capture curve (mb) of a library capture row: an ANCHORED curve is the blind engine curve times its
+    anchor factor (value_source "blind curve x F (measured ..."), so it is divided by F; other tiers are the curve as is."""
+    f = 1.0
+    if r.tier == "ANCHORED":
+        import re
+        f = float(re.search(r"blind curve x ([0-9.]+) \(measured", r.value_source).group(1))
+    return np.asarray(r.sigma_b, float) * 1e3 / f
+
+
 def rel(eng, lb):
     e = 0.0 if eng is None or eng <= FLOOR else eng; l = 0.0 if lb <= FLOOR else lb
     if e == 0 and l == 0: return 0.0
@@ -79,11 +89,7 @@ def analyze():
         _, pts = client.run(z, a, E, quiet=True, poll=2)
         P = {round(p["e_ev"], 6): p for p in pts}
         r = C[(C.Z == z) & (C.A == a)].iloc[0]; n = r.nuclide_id; nm = f"{SYM[z]}-{a}"
-        f = 1.0
-        if r.tier == "ANCHORED":
-            import re
-            f = float(re.search(r"blind curve x ([0-9.]+) \(measured", r.value_source).group(1))
-        lc = np.asarray(r.sigma_b, float) * 1e3 / f
+        lc = engine_capture_mb(r)
         x = X.loc[n]
         libch = {"capture": lc, "np": np.asarray(x.sigma_np_mb, float), "n2n": np.asarray(x.sigma_n2n_mb, float),
                  "na": np.asarray(x.sigma_na_mb, float)}
@@ -160,7 +166,7 @@ def gridtop():
         P = {round(p["e_ev"], 6): p for p in pts}
         r = C[(C.Z == z) & (C.A == a)].iloc[0]; x = X.loc[r.nuclide_id]; nm = f"{SYM[z]}-{a}"
         okey = hashlib.sha256(json.dumps(["16606b356d6e", "libv02-inputs", z, a, info["comp"], ""]).encode()).hexdigest()[:16]
-        libch = {"capture": np.asarray(r.sigma_b, float) * 1e3, "np": np.asarray(x.sigma_np_mb, float),
+        libch = {"capture": engine_capture_mb(r), "np": np.asarray(x.sigma_np_mb, float),
                  "n2n": np.asarray(x.sigma_n2n_mb, float), "na": np.asarray(x.sigma_na_mb, float)}
         smin = next((p["s_min_mev"] for p in pts if "s_min_mev" in p), np.nan)
         for i in GT_IDX:

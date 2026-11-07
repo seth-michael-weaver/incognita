@@ -116,6 +116,13 @@
     words.forEach((w) => { const t = cur ? cur + " " + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; });
     if (cur) lines.push(cur); return lines;
   }
+  // keep at most n wrapped lines; when lines are dropped, the last kept one ends in "…" and still fits maxW (ctx.font set)
+  function clampLines(ctx, lines, n, maxW) {
+    if (lines.length <= n) return lines;
+    const out = lines.slice(0, n); let l = out[n - 1] + "…";
+    while (ctx.measureText(l).width > maxW && l.length > 1) l = l.slice(0, -2).trimEnd() + "…";
+    out[n - 1] = l; return out;
+  }
   function rrect(ctx, x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); }
   function pill(ctx, s, x, y, col, o = {}) {
     const size = o.size || 12; ctx.font = font(size, 600); const w = ctx.measureText(s).width + 16, h = size + 9;
@@ -230,7 +237,7 @@
         const tl = wrap(ctx, s.t, b.w - 22, 15, 600);
         tl.slice(0, 2).forEach((l, k) => text(ctx, l, b.x + 12, b.y + 40 + k * 18, { size: 15, weight: 600, color: sel ? "#fff" : C.ink, max: b.w - 20 }));
         const sl = wrap(ctx, s.sub, b.w - 22, 12, 500), y0 = b.y + 40 + Math.min(2, tl.length) * 18 + 2;
-        sl.slice(0, Math.max(1, Math.floor((b.y + b.h - 8 - y0) / 15))).forEach((l, k) => text(ctx, l, b.x + 12, y0 + k * 15, { size: 12, color: C.soft, max: b.w - 20 }));
+        clampLines(ctx, sl, Math.max(1, Math.floor((b.y + b.h - 8 - y0) / 15)), b.w - 22).forEach((l, k) => text(ctx, l, b.x + 12, y0 + k * 15, { size: 12, color: C.soft, max: b.w - 20 }));
       } else {
         text(ctx, String(i + 1).padStart(2, "0"), b.x + 26, b.y + b.h / 2, { size: 12, mono: true, color: s.col, align: "center" });
         text(ctx, s.t, b.x + 48, b.y + 18, { size: 15, weight: 600, color: sel ? "#fff" : C.ink, max: b.w - 86 });

@@ -30,3 +30,17 @@ def test_n_use_counts_everything_not_excluded():
     # unit-fixed cells are used with the factor applied, so they count; only excluded cells do not
     pts = [[0, 0, 1, 0.1, 0, "k", ""], [0, 0, 1, 0.1, 0, "d", ""], [0, 0, 1, 0.1, 0, "x", ""], [0, 0, 1, 0.1, 0, "f", ""]]
     assert S.n_use(pts) == 3
+
+
+def test_single_product_state_is_partial():
+    # capture into ONE product state (EXFOR SF4 -G, -M, -M1, -L ...) is a partial cross section, like a PAR branch
+    # (Seth, bug hunt round 3): counted under "other", not drawn as total capture, not in n_use
+    for st in ("G", "M", "M1", "M2", "L", "L1"):
+        assert S.partial_kind("", st) == st.lower()
+    assert S.partial_kind("M+", "G") == "g"        # ground state with the isomer's decay fed in: still labelled one state
+    assert S.partial_kind("PAR", "") == "par"
+    assert S.partial_kind("PAR", "G") == "par"     # the branch wins (as before)
+    for st in ("", None):
+        assert S.partial_kind("", st) is None      # total capture of the target
+    for st in ("M1+M2", "G+M1", "G+M2"):           # sums over states: not a single state (left as before)
+        assert S.partial_kind("", st) is None
