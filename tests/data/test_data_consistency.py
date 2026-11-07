@@ -452,11 +452,12 @@ def test_site_threshold_rows_units():
 def test_threshold_review_lines_applied():
     """Light (n,2n)/(n,p)/(n,alpha) rows: excluded series (or points) are gone, fix-unit series are scaled and marked."""
     rows = pq.read_table(INP / "exfor_threshold_Z1-25_rows.parquet").to_pylist()
-    by = defaultdict(list)
+    by, byp = defaultdict(list), defaultdict(list)
     for r in rows:
         by[r["series"].split(".")[0]].append(r)
+        byp[r["series"].replace(".nan", ".")].append(r)  # "subentry.pointer" ("subentry." without a pointer)
     for l in _review_lines(INP / "review_decisions_threshold_Z1-25.jsonl"):
-        got = by.get(l["subentry"], [])
+        got = byp.get(f"{l['subentry']}.{l.get('pointer') or ''}", [])
         if l["decision"] == "exclude" and not l.get("points"):
             assert not got, l["subentry"]
         elif l["decision"] == "exclude":
@@ -466,6 +467,48 @@ def test_threshold_review_lines_applied():
             assert got and all(r["review"] == f"fix-unit x{l['factor']:g}" for r in got), l["subentry"]
     cr52 = [r["data_mb"] for r in by["11132004"]]
     assert cr52 == [pytest.approx(82.7)], cr52
+
+
+def test_site_threshold_points_not_below_reaction_threshold():
+    """No measured (n,2n)/(n,p)/(n,alpha) point below the reaction's kinematic threshold E = -Q (A+1)/A (Q from the
+    site's own q.json, the values the page draws as the threshold mark); 1 % slack for the nominal energy of a point
+    whose energy spread straddles the threshold (Ti-46(n,2n) Prestwood 1961 at 13.40 +- 0.20 MeV, threshold 13.48).
+    BUGLIGHT5: C-12(n,2n) Ashby 1958 (11097006, 6 +- 6 mb at 14.1 MeV, threshold 20.3 MeV) and Ca-40(n,2n) Braun 1968
+    (22611002, 8 mb at 14.69 MeV, threshold 16.0 MeV) were shown."""
+    q = json.loads((SITE / "q.json").read_text())["q"]
+    bad = []
+    for p in SITE.glob("n/*/*.json"):
+        if p.stem == "nat":
+            continue
+        Z, A = int(p.parent.name), int(p.stem)
+        for k, pts in json.loads(p.read_text()).get("thr", {}).items():
+            Q = (q.get(f"{Z}-{A}") or [None] * 3)[{"np": 0, "na": 1, "n2n": 2}[k]]
+            assert Q is not None, (Z, A, k)
+            thr = max(0.0, -Q * (A + 1) / A * 1e6)
+            bad += [(Z, A, k, x[0], x[2]) for x in pts if x[0] < 0.99 * thr]
+    assert bad == []
+
+
+def test_site_threshold_no_measurement_counted_twice():
+    """BUGLIGHT5: light threshold series that repeat another series of the rows (the same measurement compiled twice, or
+    an average shown next to the runs it averages, EXFOR STATUS DEP) are shown once (review lines, rows version 1.2)."""
+    twice = [  # (Z, A, channel, energy eV, the copy that must go, the series that stays)
+        (14, 28, "np", 1.41e7, "41118005", "41036002"),     # Klochkova: conference 1990 = journal 1992
+        (22, 46, "np", 8.5e6, "30523004", "30733004"),      # Lu Hanlin revised set repeats Fan Peiguo 1985 at 8.5 MeV
+        (22, 46, "n2n", 1.47e7, "33001007.1", "30962002"),  # Pansare 1993 HPGe = Dighe/Pansare 1991
+        (24, 50, "n2n", 1.47e7, "33001006.1", "30962003"),
+        (8, 16, "np", 1.47e7, "21846006", "21846035.2"),    # Schantl: average (DEP 035-037) and its runs
+        (9, 19, "np", 1.47e7, "21846009", "21846040"),
+        (19, 41, "np", 1.47e7, "21846026", "21846052"),
+        (20, 40, "np", 1.47e7, "21846055", "21846027"),     # run relative to Al-27 shown next to the average that holds it
+        (13, 27, "np", 1.47e7, "40676002", "40676003"),     # average of 003 (beta-gamma) and 004 (gamma spectrometry)
+        (13, 27, "na", 1.48e7, "41051004", "41051002"),     # average of 002 and 003
+    ]
+    for Z, A, k, e, gone, stays in twice:
+        pts = nfile(Z, A)["thr"][k]
+        at = lambda s: [x for x in pts if x[2] == s and abs(x[0] / e - 1) < 0.02]
+        assert at(stays), (Z, A, k, stays)
+        assert not at(gone), (Z, A, k, gone)
 
 
 # ---------------------------------------------------------------- C-12 R-matrix evaluation

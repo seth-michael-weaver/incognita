@@ -13,9 +13,9 @@ A corrected version of these capture tables, capture set v2 (2026-11-06: number 
 | `exfor_capture_Z1-25_provenance.json` | inputs (SHA256), gates and decision counts of the Z 1-25 run |
 | `review_decisions_Z26-92.jsonl` | review lines for Z 26-92 capture datasets (same format, plus a `rekey` form), applied on top of the 2026-09-12 run by `scripts/apply_review_Z26-92.py` (added 2026-11-06; see below) |
 | `review_decisions_Z1-25.jsonl` | review lines for light capture datasets (format of the research repository's `data/curate/review_decisions.jsonl`), applied by the Z 1-25 run |
-| `exfor_threshold_Z1-25_rows.parquet` | Z 1-25 measured (n,2n), (n,p), (n,α): one row per EXFOR series and engine energy bin, columns of the benchmark `n2n_rows` / `np_rows` plus `reaction`, `first_author` and `review` (added 2026-11-06; version 1.1 of 2026-11-07, see below) |
+| `exfor_threshold_Z1-25_rows.parquet` | Z 1-25 measured (n,2n), (n,p), (n,α): one row per EXFOR series and engine energy bin, columns of the benchmark `n2n_rows` / `np_rows` plus `reaction`, `first_author` and `review` (added 2026-11-06; version 1.2 of 2026-11-07, see below) |
 | `exfor_threshold_Z1-25_provenance.json` | inputs (SHA256), rule counts and checks of that file |
-| `review_decisions_threshold_Z1-25.jsonl` | review lines for those rows (6 lines, 2026-11-07), applied by `scripts/build_light_channels.py` |
+| `review_decisions_threshold_Z1-25.jsonl` | review lines for those rows (18 lines, 2026-11-07), applied by `scripts/build_light_channels.py` |
 
 ## Z 26-92 review lines (2026-11-06)
 
@@ -92,3 +92,20 @@ Rows: 2 881 -> 2 865 (16 rows of excluded series or points removed, 2 rows resca
 1 086. The Z 26-92 check against the benchmark rows is unchanged (100 % reproduced). The v1 light capture tables
 (`exfor_capture_Z1-25_trust.parquet`, `exfor_cells_Z1-25.parquet`, `build_light_curation.py`) are not rebuilt: none of
 their inputs changed; the capture corrections of 2026-11-07 are in capture set v2.1 (`../capture_v2/`).
+
+### Version 1.2 of the light threshold rows (2026-11-07, BUGLIGHT5)
+
+No code change; 12 more review lines (reviewer `agent:claude-opus-5.5`, each reason quotes the EXFOR record):
+
+- **Below the reaction threshold** (the page draws the threshold from `docs/walkthrough/data/q.json`): C-12(n,2n) Ashby
+  1958 (11097006, 6 +- 6 mb at 14.1 MeV; threshold 20.28 MeV) and Ca-40(n,2n) Braun 1968 (22611002, 8 mb at 14.69 MeV;
+  threshold 16.03 MeV) excluded. C-12 has no (n,2n) row left.
+- **One measurement compiled twice** (the later copy excluded): Si-28(n,p) Klochkova 41118005 = 41036002; the 8.5 MeV
+  point of Ti-46(n,p) Lu Hanlin 30523004 = 30733004; Ti-46 and Cr-50(n,2n) Pansare 1993 pointer 1 (33001007, 33001006)
+  = Dighe/Pansare 1991 (30962002, 30962003).
+- **An average shown next to its runs** (EXFOR STATUS DEP, both in the rows; as capture rule D5 the average goes and the
+  runs stay): Schantl 1970 O-16 (21846006), F-19 (21846009), K-41 (21846026) (n,p); Al-27(n,p) 40676002; Al-27(n,alpha)
+  41051004. For Ca-40(n,p) Schantl the average 21846027 also holds a run that is not in the rows (a ratio to F-19), so
+  the average stays and the run 21846055 goes.
+
+Rows: 2 865 -> 2 853; (n,2n) 401, (n,p) 1 367, (n,alpha) 1 085. Z 26-92 check unchanged (100 %).
