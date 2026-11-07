@@ -28,7 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 SITE = os.path.join(ROOT, "docs", "walkthrough")
 WEB = os.path.join(HERE, "web")   # the calculator page lives here (local only; not on the public site since 2026-11-07)
-LIB = os.path.join(ROOT, "library", "v0.2.1")
+LIB = os.path.join(ROOT, "library", "v0.2.2")   # the library the site shows
 H = os.path.expanduser("~")
 ENG = os.environ.get("TW_ENG", f"{H}/fastgate_data/eng/16606b356d6e")
 PY = os.path.join(ENG, ".venv", "bin", "python")
@@ -85,11 +85,11 @@ def inside(base, rel):
 def load_library():
     global LIB_GRID
     import numpy as np, pandas as pd
-    C = pd.read_parquet(os.path.join(LIB, "capture_v021.parquet"), columns=["nuclide_id", "Z", "A", "tier", "energy_ev", "sigma_b",
+    C = pd.read_parquet(os.path.join(LIB, "capture_v022.parquet"), columns=["nuclide_id", "Z", "A", "tier", "energy_ev", "sigma_b",
                                                                             "value_source", "engine_points_repaired"])
-    X = pd.read_parquet(os.path.join(LIB, "channels_v021.parquet")).set_index("nuclide_id")
+    X = pd.read_parquet(os.path.join(LIB, "channels_v022.parquet")).set_index("nuclide_id")
     for r in C.itertuples(index=False):
-        vs = r.value_source; m = re.search(r"composed (.+?);", vs); f = re.search(r"blind curve x ([0-9.]+) \(measured MACS30 anchor\)", vs)
+        vs = r.value_source; m = re.search(r"composed (.+?);", vs); f = re.search(r"blind curve x ([0-9.]+) \(measured MACS30 anchor", vs)  # v0.2.1+: "(... anchor; centre-of-mass ...)"
         d = dict(nuclide_id=r.nuclide_id, Z=int(r.Z), A=int(r.A), tier=r.tier, energy_ev=[float(x) for x in r.energy_ev],
                  capture_mb=[float(x) * 1e3 for x in r.sigma_b], comp=(m.group(1).strip() if m else ""),
                  carried_v01="v0.1 value carried" in vs, anchored_factor=float(f.group(1)) if f else None,
@@ -128,8 +128,20 @@ def ekey(e):
     return f"{float(e):.6e}"
 
 
+def engine_id():
+    """The engine the jobs run (TW_ENG): its ENGINE_COMMIT (12 characters), else the install directory's name. The default
+    install gives 16606b356d6e either way, so its existing cache stays valid."""
+    try:
+        with open(os.path.join(ENG, "ENGINE_COMMIT")) as f:
+            c = f.read().strip()[:12]
+        if c: return c
+    except OSError:
+        pass
+    return os.path.basename(os.path.normpath(ENG))
+
+
 def cache_key(z, a, comp, kws):
-    tag = ["16606b356d6e", "libv02-inputs", z, a, comp, kws]
+    tag = [engine_id(), "libv02-inputs", z, a, comp, kws]
     if GRIDTOP: tag.append("gridtop-pad1")   # padded jobs differ from the old one-point jobs: separate cache
     return hashlib.sha256(json.dumps(tag).encode()).hexdigest()[:16]
 
@@ -340,7 +352,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._file(p)
             if u.path == "/api/meta":
                 return self._send(200, dict(engine=ENGINE_LABEL + (GRIDTOP_NOTE if GRIDTOP else ""), keywords=KEYWORDS, comps=COMPS, library_grid_ev=LIB_GRID,
-                                            library="v0.2.1", workers=pool._max_workers, gridrun=True, points=POINTS, bins=BINS, low_points=len(LOW15), nice=NICE, projectiles=["n"],
+                                            library=os.path.basename(LIB), workers=pool._max_workers, gridrun=True, points=POINTS, bins=BINS, low_points=len(LOW15), nice=NICE, projectiles=["n"],
                                             nuclides=sorted([k[0], k[1]] for k in LIBRARY)))
             if u.path == "/api/library":
                 d = LIBRARY.get((int(q["z"]), int(q["a"])))

@@ -157,3 +157,5 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "Le combustible usé, nucléide par nucléide", in_s_spentfuel: "Nucléide par nucléide",
   in_w_spentfuel: "Une tonne de combustible usé de REP, décroissance nucléide par nucléide (chaînes de Bateman, coefficients d'ingestion de la CIPR 72) : activité contre radiotoxicité, quel nucléide domine à quel moment, et comment retirer le plutonium et les actinides mineurs à 99 % ou 99,9 % raccourcit le temps nécessaire pour passer sous le minerai d'uranium.",
 });
+/* minutes, after a lesson length (instructors.js) */
+Object.assign(WT.L.ui, { in_min: "min" });

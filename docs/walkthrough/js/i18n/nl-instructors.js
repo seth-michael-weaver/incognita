@@ -156,3 +156,5 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "Gebruikte brandstof, nuclide voor nuclide", in_s_spentfuel: "Nuclide voor nuclide",
   in_w_spentfuel: "Eén ton gebruikte PWR-brandstof, nuclide voor nuclide vervallen (Bateman-ketens, ingestiecoëfficiënten volgens ICRP-72): activiteit tegenover radiotoxiciteit, welk nuclide wanneer domineert, en hoe het verwijderen van plutonium en de minor actiniden voor 99 % of 99,9 % de tijd verkort tot het onder het uraniumerts zakt.",
 });
+/* minutes, after a lesson length (instructors.js) */
+Object.assign(WT.L.ui, { in_min: "min" });

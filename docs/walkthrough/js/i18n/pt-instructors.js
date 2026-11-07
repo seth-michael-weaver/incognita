@@ -156,3 +156,5 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "O combustível irradiado, nuclídeo a nuclídeo", in_s_spentfuel: "Nuclídeo a nuclídeo",
   in_w_spentfuel: "Uma tonelada de combustível irradiado de PWR a decair nuclídeo a nuclídeo (cadeias de Bateman, coeficientes de ingestão da ICRP-72): atividade versus radiotoxicidade, que nuclídeo domina em cada momento, e como remover o plutónio e os actinídeos menores a 99 % ou 99,9 % encurta o tempo até ficar abaixo do minério de urânio.",
 });
+/* minutes, after a lesson length (instructors.js) */
+Object.assign(WT.L.ui, { in_min: "min" });

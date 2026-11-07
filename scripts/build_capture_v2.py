@@ -122,9 +122,15 @@ def stage(main: Path, work: Path, tag: str, fixes: frozenset[str]) -> dict:
     import pyarrow as pa, pyarrow.parquet as pq
     from data.ingest import exfor as X
     out, logp = work / f"stage_{tag}.parquet", work / f"stage_{tag}.json"
-    if out.exists() and logp.exists():
-        return json.loads(logp.read_text())
     zp = main / "raw" / "exfor" / ZIPNAME
+    # the cache is valid only for the same fixes, the same ingest code and the same snapshot (not just the same tag)
+    zst = zp.stat()
+    key = hashlib.sha256(json.dumps([sorted(fixes), sha(Path(X.__file__)), zp.name, zst.st_size, int(zst.st_mtime), EMAX]).encode()).hexdigest()[:16]
+    if out.exists() and logp.exists():
+        info = json.loads(logp.read_text())
+        if info.get("cache_key") == key:
+            return info
+        print(f"stage {tag}: cached staging was made with other inputs (fixes, exfor.py or snapshot): rebuilding", flush=True)
     X.V2_FIXES = frozenset(fixes)
     X.V2_LOG.clear()
     X.EXFOR_VERSION = X.exfor_version_of(zp) if fixes else "2026-08-27"
@@ -161,8 +167,8 @@ def stage(main: Path, work: Path, tag: str, fixes: frozenset[str]) -> dict:
     if buf:
         writer.write_table(pa.Table.from_pylist(buf, schema=X.ExforMeasurement.ARROW_SCHEMA))
     writer.close()
-    out.with_suffix(".tmp").rename(out)
-    info = {"tag": tag, "fixes": sorted(fixes), "exfor_version": X.EXFOR_VERSION, "seconds": round(time.time() - t0),
+    out.with_suffix(".tmp").replace(out)  # replace: a stale staging may be there
+    info = {"tag": tag, "fixes": sorted(fixes), "cache_key": key, "exfor_version": X.EXFOR_VERSION, "seconds": round(time.time() - t0),
             "stats": {k: v for k, v in stats.items() if k in ("entries", "clipped_out", "subentries", "subentries_parsed")},
             "v2_log": {k: sorted(v) for k, v in X.V2_LOG.items()}, "status": status}
     logp.write_text(json.dumps(info))

@@ -105,3 +105,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "Winsten die op {sn} of minder kernen berusten (gemarkeerd met †), of waarvan het interval minder dan {nz} dex onder nul eindigt. De laatste kolom past de correctie voor {m} soorten metingen toe: bootstrap-percentielen / normale benadering.",
   th_fw: "Gecorrigeerd",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "Meer nucleaire onderwerpen" });

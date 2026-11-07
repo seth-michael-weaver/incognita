@@ -157,3 +157,5 @@ Object.assign(WT.es.ui, {
   in_t_spentfuel: "El combustible gastado, nucleido a nucleido", in_s_spentfuel: "Nucleido a nucleido",
   in_w_spentfuel: "Una tonelada de combustible gastado de PWR que decae nucleido a nucleido (cadenas de Bateman, coeficientes de ingestión de ICRP-72): actividad frente a radiotoxicidad, qué nucleido domina en cada momento y cómo retirar el plutonio y los actínidos minoritarios al 99 % o al 99,9 % acorta el tiempo hasta quedar por debajo del mineral de uranio.",
 });
+/* minutes, after a lesson length (instructors.js) */
+Object.assign(WT.es.ui, { in_min: "min" });

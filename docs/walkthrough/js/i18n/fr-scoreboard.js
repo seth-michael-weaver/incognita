@@ -105,3 +105,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "Victoires qui reposent sur {sn} noyaux ou moins (marquées †) ou dont l'intervalle s'arrête à moins de {nz} dex sous zéro. La dernière colonne applique la correction pour {m} types de mesure : centiles bootstrap / approximation normale.",
   th_fw: "Corrigé",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "Autres sujets nucléaires" });

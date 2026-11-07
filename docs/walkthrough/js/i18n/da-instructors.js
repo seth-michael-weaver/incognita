@@ -156,3 +156,5 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "Brugt brændsel, nuklid for nuklid", in_s_spentfuel: "Nuklid for nuklid",
   in_w_spentfuel: "Ét ton brugt PWR-brændsel henfaldet nuklid for nuklid (Bateman-kæder, ingestionskoefficienter fra ICRP-72): aktivitet over for radiotoksicitet, hvilket nuklid der dominerer hvornår, og hvordan fjernelse af plutonium og de mindre actinider med 99 % eller 99,9 % forkorter tiden, til det falder under uranmalmen.",
 });
+/* minutes, after a lesson length (instructors.js) */
+Object.assign(WT.L.ui, { in_min: "min." });

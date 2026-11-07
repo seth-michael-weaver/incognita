@@ -17,25 +17,46 @@ REPO = "https://github.com/seth-michael-weaver/incognita/blob/main/data/light_ev
 KEEP = ("id", "label", "reaction", "e_min_ev", "e_max_ev", "energy_ev", "sigma_b", "mubar_cm", "chi2_dof", "caveat", "checks")
 
 
-def apply(out=OUT):
+def apply(out=OUT, src=SRC):
+    """Write every evaluation of `src` into its nuclide file under `out` and list them in index.json. An evaluation that
+    is no longer in `src` (withdrawn) loses its "rm" block, so running this alone never leaves a stale curve behind.
+    Files are read and written as UTF-8 (labels and caveats carry µ, χ², en dashes)."""
     idxf = os.path.join(out, "index.json")
-    idx = json.load(open(idxf))
+    with open(idxf, encoding="utf-8") as fh:
+        idx = json.load(fh)
     evals = {}
-    for f in sorted(glob.glob(os.path.join(SRC, "*.json"))):
-        ev = json.load(open(f))
+    for f in sorted(glob.glob(os.path.join(src, "*.json"))):
+        with open(f, encoding="utf-8") as fh:
+            ev = json.load(fh)
         Z, A = int(ev["Z"]), int(ev["A"])
         nf = os.path.join(out, "n", str(Z), f"{A}.json")
-        rec = json.load(open(nf)) if os.path.exists(nf) else {}
+        rec = _read(nf)
         rec["rm"] = {k: ev[k] for k in KEEP if k in ev}
         rec["rm"]["report"] = REPO + os.path.basename(f)[:-5] + ".md"
         os.makedirs(os.path.dirname(nf), exist_ok=True)
-        with open(nf, "w") as fh:
-            json.dump(rec, fh, separators=(",", ":"))
+        _write(nf, rec)
         evals[f"{Z}-{A}"] = ev["id"]
+    for za in set(idx.get("light_evals") or {}) - set(evals):   # withdrawn since the last run
+        Z, A = za.split("-")
+        nf = os.path.join(out, "n", Z, f"{A}.json")
+        rec = _read(nf)
+        if rec.pop("rm", None) is not None:
+            _write(nf, rec)
     idx["light_evals"] = evals
-    with open(idxf, "w") as fh:
-        json.dump(idx, fh, separators=(",", ":"))
+    _write(idxf, idx)
     print(f"light evaluations added: {evals or 'none'}")
+
+
+def _read(path):
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _write(path, obj):
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(obj, fh, separators=(",", ":"))
 
 
 if __name__ == "__main__":

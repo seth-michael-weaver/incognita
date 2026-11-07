@@ -105,3 +105,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "Vitórias que assentam em {sn} núcleos ou menos (marcadas com †) ou cujo intervalo termina a menos de {nz} dex abaixo de zero. A última coluna aplica a correção para {m} tipos de medição: percentis bootstrap / aproximação normal.",
   th_fw: "Corrigido",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "Mais temas nucleares" });

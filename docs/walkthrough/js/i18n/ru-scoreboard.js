@@ -105,3 +105,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "Победы, которые опираются на {sn} или меньше ядер (отмечены †), или чей интервал заканчивается менее чем в {nz} dex ниже нуля. В последнем столбце применена поправка на {m} видов измерений: бутстреп-перцентили / нормальное приближение.",
   th_fw: "С поправкой",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "Другие ядерные темы" });

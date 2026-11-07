@@ -106,3 +106,5 @@ Object.assign(WT.L.ui, {
   sb_care_cap: "वे जीतें जो {sn} या उससे कम नाभिकों पर टिकी हैं († से चिह्नित), या जिनका अंतराल शून्य से {nz} dex से कम नीचे समाप्त होता है। अंतिम स्तंभ {m} प्रकार के मापनों के लिए सुधार लागू करता है: बूटस्ट्रैप प्रतिशतक / सामान्य सन्निकटन।",
   th_fw: "सुधार के बाद",
 });
+/* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
+Object.assign(WT.L.ui, { nav_topics: "और नाभिकीय विषय" });

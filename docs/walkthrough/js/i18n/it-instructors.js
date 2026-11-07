@@ -156,3 +156,5 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "Il combustibile esaurito, nuclide per nuclide", in_s_spentfuel: "Nuclide per nuclide",
   in_w_spentfuel: "Una tonnellata di combustibile esaurito PWR che decade nuclide per nuclide (catene di Bateman, coefficienti di ingestione ICRP-72): attività contro radiotossicità, quale nuclide domina e quando, e come rimuovere plutonio e attinidi minori al 99 % o al 99,9 % accorcia il tempo per scendere sotto il minerale di uranio.",
 });
+/* minutes, after a lesson length (instructors.js) */
+Object.assign(WT.L.ui, { in_min: "min" });

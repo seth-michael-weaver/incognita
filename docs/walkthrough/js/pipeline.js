@@ -76,6 +76,14 @@
   WT.pipePhys = P;
   if (typeof document === "undefined" || !document.getElementById("pl-flow")) return;
 
+  // static page text (data-i18n in pipeline.html) and the title, as data.js does; the head is done by nav.js
+  if (WT.tl && WT.L && WT.L.ui) {
+    if (WT.L.ui.pl_title) document.title = WT.L.ui.pl_title;
+    document.querySelectorAll("main [data-i18n]").forEach((el) => { const t = WT.L.ui[el.dataset.i18n]; if (t != null) el.innerHTML = t; });
+    document.querySelectorAll("main [data-i18n-aria]").forEach((el) => { const t = WT.L.ui[el.dataset.i18nAria]; if (t != null) el.setAttribute("aria-label", t); });
+    if (WT.keepLang) WT.keepLang();
+  }
+
   // ===================================================================================================================
   // drawing helpers
   // ===================================================================================================================
