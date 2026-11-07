@@ -204,6 +204,61 @@ def _merge(parts: list[tuple[Tensor, CoupledResult]], n_e: int) -> CoupledResult
 _SOLVED: OrderedDict = OrderedDict()
 _SOLVED_MAX = 4096
 
+# PERFCC2: whole solves carried across `chartrun.drop_target_caches`, which empties `_SOLVED` at
+# every target (re)start -- 16 times in a two-arm calculator job (three hold-rule set-ups and the
+# run, per arm) -- so every set-up and the second arm re-solved what the first had just solved
+# (Au-197, one energy: 64 single-energy solves for 28 distinct rows; the 64-point curve: 278
+# solves, 37 of its 42 CPU-s).
+#
+# Keyed by the WHOLE batch a call would solve (the ordered keys of its missing energies), not by
+# row: a row solved alone and the same row solved inside a batch differ in the last bits
+# (tests/hf/test_ccfast.py, batched LAPACK and vectorised tails), so a per-row carry would hand a
+# later caller a row from a different batch than the one it would have solved and move its result
+# by ~1e-15. A batch hit is the very computation the caller would repeat, on the same inputs, so
+# it is bit for bit what solving gives. The key also holds the values of every environment switch
+# that can move a solver number (`ccdisk._NUMERICS_ENV` and the two INCOGNITA_ switches the solve
+# reads); the source and the libraries cannot change inside a process. `HF_CC_CARRY=0` turns it
+# off. With `INCOGNITA_CC_BATCHCACHE=<dir>` the same batches are also kept on disk (`ccdisk`, under
+# the cache's version directory), which carries them across processes: a warm-pool job, a rerun,
+# the next calculator request for the same nuclide. Least recently used batches go first.
+_CARRY: OrderedDict = OrderedDict()
+_CARRY_MAX = 2048
+
+
+def _carry_key(keys: list[tuple], miss: Tensor) -> tuple | None:
+    """The carry key of solving the energies `miss` of `keys`, or None when carrying is off."""
+    if os.environ.get("HF_CC_CARRY", "1") == "0":
+        return None
+    env = tuple(os.environ.get(k) for k in ccdisk._NUMERICS_ENV) + (
+        os.environ.get("INCOGNITA_ECMSTABLE"), os.environ.get("INCOGNITA_CCSOCB"))
+    return ("perfcc2-batch", env, tuple(keys[i] for i in torch.nonzero(miss).reshape(-1).tolist()))
+
+
+def _carry_get(ck: tuple) -> CoupledResult | None:
+    got = _CARRY.get(ck)
+    if got is not None:
+        _CARRY.move_to_end(ck)
+        stagetime.count("cc_carry_hits")
+        return got
+    raw = ccdisk.load(ck, root=ccdisk.batch_directory()) if ccdisk.batch_directory() else None
+    if raw is None:
+        return None
+    got = CoupledResult(*raw[:6], n_j=int(raw[6]), last_j_fraction=float(raw[7]))
+    _carry_put(ck, got, disk=False)
+    stagetime.count("cc_carry_disk_hits")
+    return got
+
+
+def _carry_put(ck: tuple, res: CoupledResult, disk: bool = True) -> None:
+    _CARRY[ck] = res
+    _CARRY.move_to_end(ck)
+    while len(_CARRY) > _CARRY_MAX:
+        _CARRY.popitem(last=False)
+    if disk and ccdisk.batch_directory():
+        ccdisk.store(ck, (res.sigma_tot_mb, res.sigma_reac_mb, res.sigma_abs_mb,
+                          res.sigma_shape_el_mb, res.sigma_direct_mb, res.tjl, res.n_j,
+                          res.last_j_fraction), root=ccdisk.batch_directory())
+
 
 def _band_key(band: dict) -> tuple:
     out = []
@@ -407,11 +462,16 @@ def incident_coupled(
                     else:
                         stagetime.count("cc_disk_misses")
         if bool(miss.any()):
-            stagetime.count("cc_solved_rows", int(miss.sum()))
-            with stagetime.stage("incident.cc_solve"):
-                got = solve_axis(miss)
-            if _solver._PLAN is not None:  # SPEED50 CCGPU planning pass: nothing was solved
-                raise _solver.Planned()
+            ck = _carry_key(keys, miss) if _solver._PLAN is None else None
+            got = None if ck is None else _carry_get(ck)
+            if got is None:
+                stagetime.count("cc_solved_rows", int(miss.sum()))
+                with stagetime.stage("incident.cc_solve"):
+                    got = solve_axis(miss)
+                if _solver._PLAN is not None:  # SPEED50 CCGPU planning pass: nothing was solved
+                    raise _solver.Planned()
+                if ck is not None:
+                    _carry_put(ck, got)
             with stagetime.stage("incident.cc_cache"):
                 for j, i in enumerate(torch.nonzero(miss).reshape(-1).tolist()):
                     _SOLVED[keys[i]] = _row(got, j)

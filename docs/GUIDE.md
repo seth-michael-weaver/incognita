@@ -297,6 +297,22 @@ laptop that was running other jobs, 12 targets (spherical, vibrational, rotation
 to 20 MeV, median CPU-seconds of three interleaved repeats. Protocol, per-target table and the reproduce command:
 [`performance.md`](performance.md).
 
+### Coupled-channels speed (2026-11-07, PERFCC2)
+
+Three changes to the incident coupled-channels solve of deformed targets. No number changes: every gate
+(`tests/hf/test_perfhf_gate.py`, `test_perfcasc_gate.py`, `scripts/perf/ompgate.py`, `scripts/perfstart/gate.py`,
+`scripts/talysworld/check_warm.py`, `scripts/perf/bench.py --gate-only`) is bit-identical to the engine before them.
+
+| change | default | switch |
+|---|---|---|
+| The two parity blocks of each total J are solved on two threads at once (the kernel runs without Python's lock; each block's numbers do not depend on the thread, and they are added in the same order). Wall time drops, CPU time does not. | 2 threads | `HF_CC_THREADS=1` |
+| Whole solves are kept in memory across target restarts within a process (a calculator job restarts the target 16 times: three hold-rule set-ups and the run, per arm), keyed by every row the solve computes and every numerics switch, so a repeat is the same computation and gives the same bits. | on | `HF_CC_CARRY=0` |
+| The same whole-solve memo on disk, shared across processes and runs: `INCOGNITA_CC_BATCHCACHE=<dir>`. The calculator and warm pool (`scripts/talysworld/engine_job.py`) set it to their coupled-channels cache directory. | off (on in the calculator) | unset it, or `TW_CC_BATCH=0` |
+
+The row cache `INCOGNITA_CC_CACHE` is unchanged, but its version hash covers the solver sources and `libccfast`, both
+of which changed, so **existing coupled-channels caches are bypassed once** (rebuilt on first use; the old version
+directories can be deleted). Measurements and what was left out: `scripts/perf/PROFILE.md`, section PERFCC2.
+
 ## Prospective registry
 
 [`docs/registry/`](registry/) holds predictions frozen before measurements exist, each with a SHA-256 manifest, an

@@ -971,16 +971,120 @@ def _ccgpu_lookup():
     return None if mod is None or not mod.active() else mod.lookup
 
 
+def cc_threads() -> int:
+    """PERFCC2: threads the (J, parity) blocks of one coupled-channels solve run on
+    (`HF_CC_THREADS`, default 2; 1 = every block on the calling thread, as before). Read per call.
+
+    The blocks of one total J are independent kernel calls (each integrates, stabilises and matches
+    on its own data and writes its own output; `ccfast.c` keeps its scratch per thread), and
+    `run_cc_tasks` returns their contributions in block order whichever thread computed them, so
+    `_sum_blocks_tasks` adds them in the same order: every number is the one-thread number, bit for
+    bit. The kernel runs without the GIL (ctypes), so the two parities of a J run side by side; the
+    process's CPU time is unchanged, its wall time drops (scripts/perf/PROFILE.md, PERFCC2).
+
+    TALYS: none (scheduling only, no Fortran counterpart)
+    Test: tests/hf/test_ccthreads.py
+    """
+    try:
+        n = int(os.environ.get("HF_CC_THREADS", "2"))
+    except ValueError:
+        n = 1
+    return max(1, n)
+
+
+class _BlockWorkers:
+    """PERFCC2: `n - 1` helper threads that live for one `_sum_blocks_tasks` call, so no thread
+    outlives a solve (the warm pool and `physics.hf.pool` fork only from a one-thread process).
+    `map(fn, items)` runs `fn` on every item, item k on thread k mod n (the calling thread is
+    thread 0), and returns the results in item order; an exception is re-raised on the caller.
+    Each helper frees its kernel scratch (`ccnative.thread_release`) before it exits."""
+
+    def __init__(self, n: int):
+        import queue
+        import threading
+
+        self.n = n
+        # the caller's intra-op thread count: OpenMP's (and so MKL's) is a per-thread setting, and
+        # a fresh thread would run the kernel's zgemm/LAPACK calls on every core -- other
+        # reductions, other bits -- unless OMP_NUM_THREADS pins it
+        self._omp = torch.get_num_threads()
+        self._q = [queue.SimpleQueue() for _ in range(n - 1)]
+        self._threads = [threading.Thread(target=self._loop, args=(q, self._omp), daemon=True,
+                                          name=f"cc-block-{k + 1}")
+                         for k, q in enumerate(self._q)]
+        for t in self._threads:
+            t.start()
+
+    @staticmethod
+    def _loop(q, omp: int) -> None:
+        try:
+            torch.set_num_threads(omp)
+            while True:
+                job = q.get()
+                if job is None:
+                    return
+                fn, items, out, done = job
+                try:
+                    for k, it in items:
+                        out[k] = fn(it)
+                except BaseException as exc:  # noqa: BLE001  (carried to the caller)
+                    out[-1] = exc
+                done.release()
+        finally:
+            _ccnative.thread_release()
+
+    def map(self, fn, items: list) -> list:
+        import threading
+
+        if self.n == 1 or len(items) < 2:
+            return [fn(it) for it in items]
+        out: dict = {}
+        done = threading.Semaphore(0)
+        used = 0
+        for k, q in enumerate(self._q, start=1):
+            mine = [(i, items[i]) for i in range(k, len(items), self.n)]
+            if mine:
+                q.put((fn, mine, out, done))
+                used += 1
+        err = None
+        try:
+            for i in range(0, len(items), self.n):
+                out[i] = fn(items[i])
+        except BaseException as exc:  # noqa: BLE001  (wait for the helpers first)
+            err = exc
+        for _ in range(used):
+            done.acquire()
+        if err is not None:
+            raise err
+        if -1 in out:
+            raise out[-1]
+        return [out[i] for i in range(len(items))]
+
+    def close(self) -> None:
+        for q in self._q:
+            q.put(None)
+        for t in self._threads:
+            t.join()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
+
+
 def run_cc_tasks(tasks: list[CCTask], make_channels, ff: FormFactors, kin: ChannelKinematics,
                  h: Tensor, nmatch: Tensor, r: Tensor, n_lev: int, lmax: int, target_spin: float,
-                 proj_spin: float, subsets: dict | None = None) -> list[tuple[int, int, Tensor, dict]]:
+                 proj_spin: float, subsets: dict | None = None,
+                 workers: _BlockWorkers | None = None) -> list[tuple[int, int, Tensor, dict]]:
     """Execute `tasks`, one kernel call per (J, parity) block on the energies its tasks name.
     Returns `(two_j, parity, rows, contributions)` per block that has channels, in the order the
     blocks first appear; `contributions` is `accumulate`'s dict on `rows`. `subsets` memoises
-    `_energy_subset` by row tuple across calls.
+    `_energy_subset` by row tuple across calls. PERFCC2: `workers` runs the blocks' kernel calls
+    on several threads; the list returned is the same, in the same order.
 
     TALYS: none (scheduling only, no Fortran counterpart)
-    Test: tests/hf/test_ccglue.py
+    Test: tests/hf/test_ccglue.py, tests/hf/test_ccthreads.py
     """
     n_e = h.shape[0]
     groups: dict[tuple[int, int], list[int]] = {}
@@ -1013,15 +1117,32 @@ def run_cc_tasks(tasks: list[CCTask], make_channels, ff: FormFactors, kin: Chann
         etas.append(kn.eta[:, ch.level].reshape(-1))
         rhos.append((k * rm[:, None].expand_as(k)).reshape(-1))
     coul = coulomb_functions_many(etas, rhos, [int(b[2].l.max()) for b in blocks])
-    out = []
     gpu = _ccgpu_lookup()
-    for (tj, par, ch, (rows, sub)), cf in zip(blocks, coul, strict=True):
-        # SPEED50 CCGPU: the block's radial loop may already have been integrated on the GPU
-        # (`ccgpu.plan`); a miss on any row runs the C kernel as before
-        keep = None if gpu is None else gpu(ch, sub)
-        got = _ccnative.cc_block_acc(ch, *sub, cf, n_lev, lmax, target_spin, proj_spin, keep=keep)
-        out.append((tj, par, rows, got))
-    return out
+    if workers is None or workers.n == 1 or len(blocks) < 2:
+        out = []
+        for (tj, par, ch, (rows, sub)), cf in zip(blocks, coul, strict=True):
+            # SPEED50 CCGPU: the block's radial loop may already have been integrated on the GPU
+            # (`ccgpu.plan`); a miss on any row runs the C kernel as before
+            keep = None if gpu is None else gpu(ch, sub)
+            got = _ccnative.cc_block_acc(ch, *sub, cf, n_lev, lmax, target_spin, proj_spin,
+                                         keep=keep)
+            out.append((tj, par, rows, got))
+        return out
+    # PERFCC2: the same calls on `workers`' threads; the GPU lookup and the kernel's switches stay
+    # on this thread, the results come back in block order
+    _ccnative.prepare_threads()
+    jobs = [(ch, sub, cf, None if gpu is None else gpu(ch, sub))
+            for (_tj, _par, ch, (_rows, sub)), cf in zip(blocks, coul, strict=True)]
+    # torch's grad and inference modes are per thread: the helpers take this thread's
+    inference, grad = torch.is_inference_mode_enabled(), torch.is_grad_enabled()
+
+    def one(j):
+        with torch.inference_mode(inference), torch.set_grad_enabled(grad):
+            return _ccnative.cc_block_acc(j[0], *j[1], j[2], n_lev, lmax, target_spin, proj_spin,
+                                          keep=j[3], set_sweeps=False)
+
+    got = workers.map(one, jobs)
+    return [(tj, par, rows, g) for (tj, par, _ch, (rows, _sub)), g in zip(blocks, got, strict=True)]
 
 
 # SPEED50 CCGPU: while `ccgpu.plan` runs, a callable that records each `_sum_blocks_tasks` side
@@ -1045,6 +1166,15 @@ def _sum_blocks_tasks(make_channels, ff, kin, h, nmatch, r, n_lev, lmax, target_
     if _PLAN is not None:  # SPEED50 CCGPU: record the side for the GPU, solve nothing
         _PLAN(make_channels, ff, kin, h, nmatch, r, target_spin, two_j0, j_cap)
         return _coupled_result(kin, acc, 0, torch.zeros(n_e, dtype=DTYPE))
+    with _BlockWorkers(cc_threads()) as workers:
+        return _sum_blocks_loop(make_channels, ff, kin, h, nmatch, r, n_lev, lmax, target_spin,
+                                proj_spin, j_tol, acc, two_j0, j_cap, workers)
+
+
+def _sum_blocks_loop(make_channels, ff, kin, h, nmatch, r, n_lev, lmax, target_spin, proj_spin,
+                     j_tol, acc, two_j0, j_cap, workers) -> CoupledResult:
+    """`_sum_blocks_tasks`'s J loop, its kernel calls on `workers` (PERFCC2)."""
+    n_e = h.shape[0]
     active = torch.arange(n_e)
     quiet = torch.zeros(n_e, dtype=torch.int64)
     frac = torch.zeros(n_e, dtype=DTYPE)
@@ -1055,7 +1185,8 @@ def _sum_blocks_tasks(make_channels, ff, kin, h, nmatch, r, n_lev, lmax, target_
         tasks = cc_tasks(twoJ, rows_l) if (twoJ - two_j0) // 2 < j_cap else []
         bmax = torch.zeros(n_e, dtype=DTYPE)
         for _tj, _par, rows, got in run_cc_tasks(tasks, make_channels, ff, kin, h, nmatch, r,
-                                                 n_lev, lmax, target_spin, proj_spin, subsets):
+                                                 n_lev, lmax, target_spin, proj_spin, subsets,
+                                                 workers):
             for key in ("reac", "tot", "el", "direct", "tjl"):
                 acc[key] = acc[key].index_add(0, rows, got[key])
             bmax[rows] = torch.maximum(bmax[rows], got["reac"].abs())

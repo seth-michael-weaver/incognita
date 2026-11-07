@@ -41,11 +41,13 @@ def _solve(Z, A, band, e_mev, refine_default, emax):
     old = (I.INCIDENT_REFINE, I.INCIDENT_REFINE_EMAX_MEV)
     I.INCIDENT_REFINE, I.INCIDENT_REFINE_EMAX_MEV = refine_default, emax
     I._SOLVED.clear()
+    I._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     try:
         ich, _ = I.incident_coupled(None, Z, A, torch.tensor(e_mev, dtype=DTYPE), band)
     finally:
         I.INCIDENT_REFINE, I.INCIDENT_REFINE_EMAX_MEV = old
         I._SOLVED.clear()
+        I._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     return ich
 
 

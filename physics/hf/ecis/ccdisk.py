@@ -127,6 +127,18 @@ def enabled() -> bool:
     return directory() is not None
 
 
+BATCH_ENV_VAR = "INCOGNITA_CC_BATCHCACHE"
+
+
+def batch_directory() -> Path | None:
+    """PERFCC2: the directory of `incident`'s whole-batch carry (`incident._CARRY` on disk), or None
+    when `INCOGNITA_CC_BATCHCACHE` is unset or empty. Same file format, same version directories
+    and the same guards as the row cache; only the keys differ (a whole batch's ordered row keys,
+    so a hit is bit for bit the solve it replaces). Read per call."""
+    d = os.environ.get(BATCH_ENV_VAR)
+    return Path(d) if d else None
+
+
 # ---------------------------------------------------------------------------------------------
 # the key
 
@@ -250,13 +262,14 @@ def _path(root: Path, key: tuple) -> tuple[Path, bytes]:
 # read / write
 
 
-def load(key: tuple):
+def load(key: tuple, root: Path | None = None):
     """The stored `incident._row` tuple for `key`, or None (cache off, miss, or unreadable).
+    `root`: another cache directory than `INCOGNITA_CC_CACHE`'s (PERFCC2's batch carry).
 
     Any failure at all -- a missing file, a truncated one, a key that does not match, a wrong
     shape -- returns None, so the caller recomputes.  It never raises.
     """
-    root = directory()
+    root = directory() if root is None else root
     if root is None:
         return None
     try:
@@ -325,10 +338,10 @@ def _row_of(raw: tuple) -> tuple:
             n_j, frac)
 
 
-def store(key: tuple, row) -> None:
+def store(key: tuple, row, root: Path | None = None) -> None:
     """Write `row` under `key`, atomically.  Silent on any failure: a cache that cannot be
-    written is a slow run, not a wrong one."""
-    root = directory()
+    written is a slow run, not a wrong one. `root` as for `load`."""
+    root = directory() if root is None else root
     if root is None:
         return
     try:
@@ -364,5 +377,5 @@ def store(key: tuple, row) -> None:
     _stats["write"] += 1
 
 
-__all__ = ["ENV_VAR", "directory", "enabled", "key_bytes", "load", "reset_stats", "stats",
-           "store"]
+__all__ = ["BATCH_ENV_VAR", "ENV_VAR", "batch_directory", "directory", "enabled", "key_bytes",
+           "load", "reset_stats", "stats", "store"]

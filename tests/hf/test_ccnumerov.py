@@ -54,11 +54,13 @@ def _solve(Z, A, band, e_mev, modnum, monkeypatch, refine=1):
     monkeypatch.setenv("HF_CC_MODNUM", "1" if modnum else "0")
     monkeypatch.setattr(I, "INCIDENT_REFINE", 1)  # FISSC2's halving off: this is the bare step
     I._SOLVED.clear()
+    I._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     try:
         ich, _ = I.incident_coupled(None, Z, A, torch.tensor(e_mev, dtype=DTYPE), band,
                                     refine=refine)
     finally:
         I._SOLVED.clear()
+        I._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     return ich
 
 

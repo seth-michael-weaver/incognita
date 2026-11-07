@@ -41,8 +41,10 @@ def _arm(level: str):
 def _run(Z: int, A: int):
     band = coupled_band(Z, A)
     inc_mod._SOLVED.clear()
+    inc_mod._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     _, res = incident_coupled(None, Z, A, torch.tensor(list(GRID), dtype=DTYPE), band)
     inc_mod._SOLVED.clear()
+    inc_mod._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     return res
 
 
@@ -76,13 +78,15 @@ def test_observables_match_reference(Z, A, level, restore_arm):
         assert d <= 1e-11, f"{Z}-{A} {name} level {level}: {d:.3e}"
 
 
-def test_deformed_block_keep_matches_reference(restore_arm):
+def test_deformed_block_keep_matches_reference(restore_arm, monkeypatch):
     """The seven `keep` arrays of every deformed block of one target. They are the raw solutions,
     so the bar is 1e-9 normwise, not the observables' 1e-11."""
+    # PERFCC2: the spy flips the kernel's switches per call, so the blocks must run on one thread
+    monkeypatch.setenv("HF_CC_THREADS", "1")
     seen = []
     real = ccnative._keep_raw
 
-    def spy(ch, ff, kin, h_fm, nmatch, r_fm, stab=ccnative.STABILISE_EVERY):
+    def spy(ch, ff, kin, h_fm, nmatch, r_fm, stab=ccnative.STABILISE_EVERY, set_sweeps=True):
         if not (ch.so_deriv_coef is not None and ff.so_r2 is not None):
             return real(ch, ff, kin, h_fm, nmatch, r_fm, stab)
         _arm("1")

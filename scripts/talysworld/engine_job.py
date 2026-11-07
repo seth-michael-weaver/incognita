@@ -38,6 +38,13 @@ os.environ.update(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS
                   NUCLIDO_GGDEADEND="1", NUCLIDO_NGNEXCL="1", NUCLIDO_DWBAUNIT="1", NUCLIDO_LEVCOMPLETE="tgt",
                   ENGAUDIT_PATH="c", NUCLIDO_BANDCHECK="1", NUCLIDO_TRAPFIX="1", NUCLIDO_WFCNORM="1",
                   NUCLIDO_CC_CACHE=CC, NUCLIDO_TALYS_FIT="nodata", NUCLIDO_ENGPHYS="dircap,pespin", NUCLIDO_SPECOUT_DA="0")
+# PERFCC2: a TW_ENG that is this repository's engine reads INCOGNITA_*, not NUCLIDO_*, so NUCLIDO_CC_CACHE never reached it
+# and every calculator / warm-pool job re-solved every coupled-channels solve (bench.py "cold" and "warm" were the same run).
+# It gets the coupled-channels BATCH cache instead (physics/hf/ecis/incident.py `_CARRY`): whole solves keyed by every row
+# they solve, so a hit is bit for bit the solve it replaces and the run's numbers are those of a run without any cache.
+# (The row cache, INCOGNITA_CC_CACHE, would serve a row solved in another batch: same values to ~1e-15, not the same bits.)
+# TW_CC_BATCH=0 leaves it off.
+if os.environ.get("TW_CC_BATCH", "1") != "0": os.environ["INCOGNITA_CC_BATCHCACHE"] = CC
 # worker.py
 os.environ.update(PP_PLINES=INP + "/lines_P", PP_ALINES=INP + "/lines_A", PP_SLTABLE=INP + "/sl_meas_b.csv", R52CODE=INP + "/code")
 

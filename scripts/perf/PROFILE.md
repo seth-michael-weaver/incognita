@@ -116,3 +116,61 @@ Next in line: incident channel / OMP (`omp/ripl.py:optmod`, 0.3-1.8 CPU-s on cur
   Au-197/U-238 curves take 42/59 s, so we already win there; Fe-56 (TALYS 4-6 s) is the case to attack, where h_rule + start-up
   + gc are ~10 s of the ~17 s.
 - Any change must keep `python3 scripts/perf/bench.py --gate-only` green (bit-level, rel 1e-9, against baseline.json).
+
+## PERFCC2 (2026-11-07): the coupled-channels solves of deformed targets
+
+Where Au-197's time went before (in-process `engine_grid.run`, cProfile, one thread, no CC cache: the public engine never
+received `NUCLIDO_CC_CACHE`, so every calculator job solved everything): 64-point curve 42.5 s, of which the incident
+coupled-channels solves 38.1 s and the C kernel (`ccnative._keep_raw`, 7,516 block calls) 31.1 s. By caller:
+CCEXITNB's per-node solves (`compound/ccexitnb.py:_node_tjl`, 3,246 lookups) 20.1 s, `Cascade.incident` at the 65
+incident energies 10.2 s, the direct deck (`direct/chain._coupled_cached`) 7.8 s. Half of all of it was the second arm and
+the hold-rule set-ups repeating the first arm's solves: `chartrun.drop_target_caches` empties `incident._SOLVED` at each
+of the 16 target restarts of a JS job (278 solves for ~140 distinct batches).
+
+What changed (all bit-identical; every gate below):
+
+1. **Two threads per solve** (`solver._BlockWorkers`, `HF_CC_THREADS`, default 2): the two parities of each total J run side
+   by side; ctypes drops the GIL in the kernel; results are added in block order. The helper takes the caller's intra-op
+   thread count (`torch.set_num_threads`), otherwise MKL inside the helper ran multithreaded and moved the last bits
+   (found by `tests/hf/test_ccglue.py` without `OMP_NUM_THREADS`); it frees its kernel scratch on exit
+   (`ccfast.c::cc_thread_release`) and lives only for one solve, so no thread outlives it (the warm pool and
+   `physics.hf.pool` fork only from one-thread processes).
+2. **Whole-solve carry** (`incident._CARRY`, `HF_CC_CARRY`): the result of `solve_axis(miss)` kept under the ordered keys
+   of every row it solves plus every numerics switch; survives target drops. Per-row reuse was tried first and is NOT
+   bit-identical (a row solved alone and inside a batch differ by ~1e-15: Au-197 64-point total at 1 keV moved
+   67404.09259397429 -> ...456), so the key is the whole batch.
+3. **The same carry on disk** (`INCOGNITA_CC_BATCHCACHE`, `ccdisk.load/store(root=...)`), set by
+   `scripts/talysworld/engine_job.py` to the job's CC directory: warm-pool jobs, reruns and the next request for the same
+   nuclide reuse the solves. The row cache (`INCOGNITA_CC_CACHE`) stays as it was; its version hash covers
+   `ecis/solver.py`, `ccnative.py`, `incident.py` and `libccfast`, so existing caches go cold once.
+
+Timings (laptop WSL, nice 10, shared with other agents; s wall):
+
+| case | before | after |
+|---|---|---|
+| warm pool (1 worker), empty CC cache: Au-197 one energy | 3.25 | 1.53 |
+| warm pool, empty CC cache: Au-197 64 points | 36.2 | 12.2 |
+| warm pool, empty CC cache: U-238 one energy | 1.19 | 0.93 |
+| warm pool, empty CC cache: U-238 64 points | 9.65 | 7.43 |
+| warm pool, same request again: Au-197 one energy / 64 points | 2.37 / 34.2 | 0.51 / 2.91 |
+| warm pool, same request again: U-238 one energy / 64 points | 0.90 / 9.39 | 0.57 / 3.22 |
+| fresh `engine_grid.py`, cold (bench curve64 cold): Au-197 / U-238 | 41.9 / 12.1 | 16.4 / 9.8 |
+| fresh `engine_grid.py`, primed cache (bench curve64 warm): Au-197 / U-238 | 42.2 / 11.8 | 5.8 / 5.1 |
+| fresh `engine_grid.py` one energy (bench pt1 cold / warm): Au-197 | 6.8 / 6.9 | 3.8 / 2.5 |
+
+Stock TALYS on the same machine (perfall): Au-197 0.90 s one energy, 42.6 s 64 points; U-238 60 s 64 points.
+
+Left out:
+
+- **(b) one solve for the incident channel and the direct deck.** `direct/chain._coupled_cached` solves the whole declared
+  grid with `njmax` of the grid maximum and the default options, `Cascade.incident` one energy at a time with its own
+  `njmax` and the run's options, so their rows differ (keys and batch). Merging them is a physics decision. What it would
+  save, one thread, after the changes above, 64 points: Au-197 the 5.2 CPU-s of incident-energy solves (direct deck 4.0,
+  CCEXITNB nodes 10.6, total CC 19.1 of 22.9 CPU-s); U-238 4.6 CPU-s (direct deck 3.0, total CC 6.8 of 11.0). One energy:
+  one solve each, ~0.1-0.3 s.
+- **Batching CCEXITNB's nodes** into one multi-energy solve: fewer kernel calls, but a batch moves rows in the last bits
+  (above), so it fails the gates.
+- **The C kernel itself.** On x86 every step is two `zgemm`s (MKL via torch) plus an elementwise update; the products
+  are the cost and any other product (own loop, zgemm3m, M^2 once per step, real-split dgemm) changes the summation order,
+  hence the bits. No bit-identical kernel change with a measurable gain was found; the gain here is from threads and from
+  not repeating solves.
