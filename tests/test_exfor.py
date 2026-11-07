@@ -72,6 +72,11 @@ def test_fission_mt() -> None:
         ("A", 107),
         ("ABS", 27),
         ("X", None),
+        # ENDF-102: (n,2nd) 11, (n,2nt) 154, (n,2n3He) 176; (n,n2d) has no MT (171 is (n,6nd))
+        ("2N+D", 11),
+        ("2N+T", 154),
+        ("2N+HE3", 176),
+        ("N+2D", None),
     ],
 )
 def test_mt_table(sf3: str, mt: int | None) -> None:
