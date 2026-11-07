@@ -9,21 +9,75 @@ cards: [`incognita/bench/tracks/README.md`](../../incognita/bench/tracks/README.
 Metric everywhere: rms of log10(prediction / measurement), in dex (0.1 dex ≈ 26 %). Brackets are 95 % nucleus-bootstrap
 intervals; Δ is a paired difference on the rows both entries cover (negative = the first entry is better).
 
+## Corrections of 2026-11-06 (they change the library rankings; read with every table below)
+
+An audit found defects in how the libraries were compared and in some rows. All are fixed in the scorer and the data;
+the numbers on this page are recomputed except where marked.
+
+1. **(n,α) and He-4 production were taken from a partial channel.** The scorer read (n,α) as MT 107 alone and He-4 as
+   MT 107 + 22 + 24 + 45 + 112 + 117. A file may put part of the alpha channel in MT 5 ("anything else") with its
+   products in MF6: ENDF/B-VIII.1 has 91-96 % of the 14 MeV (n,α) of Mn-55 and Fe-54/56/57 there (Fe-54: 4 mb in MT 107
+   against about 100 mb measured), ENDF/B-VII.1 does it for Mn-55. Now every library is read the same way
+   (`incognita/bench/alpha.py`): (n,α) = MT 107 (or MT 800-849) plus the (n,α) residual made inside MT 5, He-4 = the
+   alpha multiplicity of every alpha-emitting MT plus the alphas inside MT 5. Where σ(MT 5) exceeds 1 % of the value and
+   the file's MT 5 products could not be read, the row is *comparator-incomplete* for that library and left out of its
+   score (never counted as a miss); the leaderboard reports the score with and without those rows.
+2. **Some benchmark rows were not total cross sections.** The REACTION-code check that the light-nuclide rows already
+   passed was applied to every ch-n2n, ch-np, ch-na, ch-sacs and ch-capture row (`incognita/bench/reaction_check.py`).
+   1,672 rows were dropped, each listed with its reason in `incognita/bench/data/exam_rows/reaction_check_dropped.csv`:
+   (n,2n) 143 of 2,477 (isomer or level partials, G+M sums where a second long-lived isomer exists, SF9 DERIV / CALC,
+   Hf-176 (n,2n) + Hf-174 (n,γ)), (n,p) 68 of 1,593 (DERIV, natural-target sums such as Zn-67 (n,p) + Zn-68 (n,x),
+   Ni-58/60 (n,p) + (n,np)), (n,α) 89 of 1,151 (DERIV, 51 ground-state-only rows), SACS 5 of 417 (In-115 (n,γ) M1+M2),
+   capture 1,367 of 7,239 (1,179 ground-state or isomer partials, 120 DERIV, 62 partial-γ, 6 sums with another target
+   or with fission). capture-nostructure loses 4 cells whose only dataset is such a sum (1966 → 1962 rows).
+3. **Curated capture** (`data/curation/inputs`): 11 sum reactions kept as one isotope's capture (Pd-106 + Pd-108 as
+   Pd-106, Te-128 + Te-130 as Te-128, U-235 capture + fission as capture, eight activation sums) are now excluded by
+   review lines, and Pd-108 30567005/2 (ground + isomer) is keyed as the total, not the ground state.
+4. **Capture tracks are also scored with bin averages** (`incognita/bench/place_tracks.py`, the rule the dated tracks
+   use), for the libraries whose official files we could fetch: ENDF/B-VIII.1, -VII.1, -VII.0, TENDL-2025. The effect is
+   small on these tracks (their rows sit above the resolved resonances): at most 0.005 dex on capture-heldout and
+   capture-nostructure (ENDF/B-VII.0 0.136 → 0.131), 0.002 on ch-capture, 0.001 on capture-retro. The other libraries
+   stay point samples (marked). TENDL-2025's official file also covers 16 capture-heldout cells that its staged grid
+   misses (not checked; INPUTS.md lists a builder bug that stages 12 curves as zero), so it now covers all 1,947.
+5. `incognita/eval/spectra.py` was missing from the repository, so ch-sacs could not be scored from it; restored.
+6. The published He-production numbers of ENDF/B-VII.1 (0.192) and JENDL-4.0 (0.174) were MT 107 alone: the staged
+   grids they were scored from lack the other alpha MTs. With ENDF/B-VII.1's full file the number is 0.230.
+
+**Not re-scored here.** BROND-3.1, FENDL-3.2 and IRDFF-II: their official files are distributed only by IAEA-NDS, which
+answered with a browser challenge on 2026-11-06, and no staged grid of them is on our machines; their published numbers
+(old rows, old comparator) are shown separately and cannot be compared with the new ones. JEFF-3.3, CENDL-3.2 and
+JENDL-4.0: only part of their staged grids (MT 1, 2, 4, 16, 18, 102, 103, 107) is available, so they are re-scored on the
+new rows of the (n,2n), (n,p), capture and SACS tracks, but their MT 5 cannot be checked: on (n,α) and He-4 rows they are
+listed with the old comparator, marked. JEFF-4.0 and JENDL-5 are scored from staged grids that have MT 5 but not its
+products: their rows with σ(MT 5) above 1 % are comparator-incomplete (JEFF-4.0: 95 ch-na rows of Cr, Mn, Fe, Ta, W,
+44 na-heprod, 8 na-post2021, 7 SACS; JENDL-5: one ch-na row, Co-59 at 19.8 MeV).
+
+**What it changes.** On ch-na ENDF/B-VIII.1 goes from 0.554 to 0.317 and JEFF-4.0 from 0.466 to 0.281 (on its 967
+complete rows; 0.456 with the incomplete rows on the old comparator). On He production ENDF/B-VIII.1 goes from 0.655 to
+0.209 and now ties our v1 recipe (ours − ENDF/B-VIII.1 = +0.025 [−0.016, +0.057], 142 rows), where before it was far
+behind: **our (n,α) entries look relatively worse after the fix.** On na-post2021 the fix moves ENDF/B-VIII.1 the other
+way, 0.184 → 0.204. Dropping the partial-state rows lowers every library's ch-capture error by about 0.09 dex (ENDF/B-VIII.1
+0.317 → 0.224) and its ch-n2n error by about 0.03 dex, and reorders both tracks (tables below).
+
 ## Where we lose (read this first)
 
 1. **Capture on nuclei held out of our fit: every major evaluated library beats INCOGNITA.** The shipped model, on the
-   development folds 0–5 (1,947 cells, 122 nuclei): JENDL-5 0.137, ENDF/B-VIII.1 0.143, TENDL-2025 0.147, against ours
-   0.1765 (D0 withheld) and 0.1569 (measured D0 used). Ours − ENDF/B-VIII.1 = +0.034 [+0.011, +0.059]; ours − TENDL-2025 =
-   +0.030 [+0.008, +0.055]; ours − JENDL-5 = +0.039 [+0.015, +0.065]. The libraries are not blind on this track: their
+   development folds 0–5 (1,947 cells, 122 nuclei): JENDL-5 0.137 (point samples), ENDF/B-VIII.1 0.142, TENDL-2025
+   0.147 (bin averages), against ours 0.1765 (D0 withheld) and 0.1569 (measured D0 used). Ours − ENDF/B-VIII.1 = +0.034
+   [+0.011, +0.060]; ours − TENDL-2025 = +0.030 [+0.008, +0.054]; ours − JENDL-5 = +0.039 [+0.015, +0.065]. The libraries are not blind on this track: their
    evaluators fitted these measurements. We are. The only rival that is blind here too is default TALYS (TENDL's no-data
    recipe, run by our engine): ours 0.1765 vs 0.1898, Δ −0.0133 [−0.0229, −0.0035]. On the sealed reserve (folds 6–7,
    read once) that difference is a tie, −0.0055 [−0.021, +0.010] (README).
 2. **(n,α) measured after JENDL-5** (116 points, 12 nuclei): our frozen v2 0.222 vs JENDL-5 0.137, Δ +0.085
-   [+0.022, +0.164]. The best entry is BROND-3.1 (0.134), then JENDL-5.
+   [+0.022, +0.164]. JENDL-5 is the best re-scored entry; BROND-3.1 (0.134 as published) could not be re-scored. Against
+   ENDF/B-VIII.1 (0.204 after the comparator fix) ours is a tie, Δ +0.018 [−0.060, +0.113].
 3. **He production and (n,α) total**: JENDL-5 beats the v1 recipe on the rows a library file covers: 0.162 vs 0.234,
-   Δ +0.072 [+0.034, +0.109] (142 rows); (n,α) total 0.204 vs 0.311, Δ +0.107 [−0.012, +0.201] (55 rows).
-4. **No structure data**: the shipped value (the recipe with our E1 constant) 0.2101 vs default TALYS 0.2042, Δ +0.0059
-   [−0.0025, +0.0140], a tie; below 10 keV worse. With nothing known about a nucleus, we ship the recipe.
+   Δ +0.072 [+0.034, +0.109] (142 rows); (n,α) total 0.204 vs 0.311, Δ +0.107 [−0.012, +0.201] (55 rows). JENDL-5 is
+   unchanged by the comparator fix. ENDF/B-VIII.1, which was far behind us on He production before the fix (0.655), now
+   ties the recipe: Δ +0.025 [−0.016, +0.057] (142 rows); on (n,α) total Δ +0.007 [−0.102, +0.108] (46 rows).
+4. **No structure data**: the shipped value (the recipe with our E1 constant) 0.2091 vs default TALYS 0.2034, Δ +0.0057
+   [−0.0029, +0.0141], a tie (1,962 rows; 0.2101 vs 0.2042 on the 1,966 rows before four sum-reaction cells were dropped);
+   below 10 keV worse. With nothing known about a nucleus, we ship the recipe.
 5. **The four in-sample channel tracks and the SACS track have no INCOGNITA entry.** The v5 evaluation that used to sit
    there is the 9-library median (INDEP_AUDIT) and is retracted. They are published as a library-vs-library benchmark.
 
@@ -32,8 +86,8 @@ intervals; Δ is a paired difference on the rows both entries cover (negative = 
 | track | INCOGNITA | best rival that is fair on this track | Δ [95 %] |
 |---|---|---|---|
 | capture-retro (286 rows, 16 nuclei, measured after year Y) | 0.1373 | TENDL-Y, the release of year ≤ Y: 0.193 | −0.056 [−0.106, −0.020] |
-| same | 0.1377 (281 rows) | ENDF/B-VII.0 (2006): 0.149 | −0.011 [−0.068, +0.058] |
-| same | 0.130 (276 rows) | JENDL-4.0 (2010): 0.149 | −0.019 [−0.071, +0.026] |
+| same | 0.1377 (281 rows) | ENDF/B-VII.0 (2006), bin average: 0.149 | −0.011 [−0.069, +0.059] |
+| same | 0.130 (276 rows) | JENDL-4.0 (2010), point sample: 0.149 | −0.019 [−0.071, +0.026] |
 | capture-heldout, D0 withheld (DEV; in-sample for the E1 constant; a tie on the sealed reserve) | 0.1765 | default TALYS: 0.1898 | −0.0133 [−0.0229, −0.0035] |
 | capture-heldout, measured D0 (DEV) | 0.1569 | default TALYS with measured D0: 0.1684 | −0.0114 [−0.0198, −0.0028] |
 | na-pickup (920 rows) | 0.395 | default TALYS: 0.555 | −0.160 [−0.219, −0.097] |
@@ -42,7 +96,10 @@ intervals; Δ is a paired difference on the rows both entries cover (negative = 
 
 The retrodiction win is small in sample (16 nuclei). TENDL-Y's 0.193 is the reproducible placement; an earlier,
 unrecorded development placement gave 0.184 (mostly two Gd-154 rows). Against the 2006 / 2010 libraries, which
-are also genuine retrodictions, the difference is not significant.
+are also genuine retrodictions, the difference is not significant. The 2026-11-06 check of placement (point samples
+against bin averages) leaves this ranking as it was: ENDF/B-VII.0 scores 0.149 either way; JENDL-4.0 and the older
+TENDL releases behind TENDL-Y could not be bin-averaged here (files not reachable), and on the four libraries that
+could be, bin averaging moved capture-retro by at most 0.001 dex.
 
 ## Dated tracks (added 2026-09-23, DATEDEXAM)
 
@@ -54,31 +111,57 @@ there. Above 100 keV, DEFD (default engine + defect GP, trained on pre-release d
 95 % CI contains zero (e.g. vs ENDF/B-VII.1 −0.010 [−0.035, +0.015], 140 nuclei). JEFF-4.0 and TENDL-2025 have no
 post-release rows yet.
 
-## Leaderboard, primary rows (all rows of each track)
+The (n,α) correction of 2026-11-06 also applies to the dated tracks' library placement (`binavg.py`, `place_dated.py`),
+but the dated library table was rebuilt here only for ENDF/B-VII.1 (from its official file; old and new rule on the same
+RECONR curves). It moves DEFD − ENDF/B-VII.1 above 100 keV toward the library by 0.004-0.007 dex (dated-2011:
+−0.013 [−0.038, +0.012] → −0.006 [−0.027, +0.016], 189 nuclei; dated-2017: −0.018 [−0.044, +0.009] → −0.013
+[−0.037, +0.014]); the tie stands. On the (n,α) rows alone it turns the one interval that excluded zero, dated-2017
+−0.091 [−0.219, −0.001], into −0.068 [−0.187, +0.012]. The other libraries' dated numbers are not re-placed.
+
+## Leaderboard, primary rows (all rows of each track; recomputed 2026-11-06)
 
 | track | rows / nuclei | 1st | 2nd | 3rd | INCOGNITA | default TALYS (blind rival) |
 |---|---|---|---|---|---|---|
-| capture-heldout (DEV folds 0–5) | 1947 / 122 | BROND-3.1 0.126 (1629 rows) | ENDF/B-VII.1 0.131 (1744) | JENDL-4.0 0.133 (1795) | 0.1765 (D0 withheld), 0.1569 (D0 used) | 0.190 / 0.168 |
-| capture-nostructure | 1966 / 126 | BROND-3.1 0.127 (1648 rows) | ENDF/B-VII.1 0.131 (1763) | JENDL-4.0 0.134 (1814) | 0.2101 | 0.2042 |
-| capture-retro | 286 / 16 | INCOGNITA 0.1373 | ENDF/B-VII.0 0.149 (281 rows) | JENDL-4.0 0.149 (276) | 0.1373 | 0.1728 |
-| na-pickup (total rows only) | 55 / 55 targets | JENDL-5 0.204 | JENDL-4.0 0.214 (38) | JEFF-3.3 0.255 | 0.311 (5th) | 0.607 |
-| na-heprod | 197 / 52 | JENDL-5 0.162 (142 rows) | JENDL-4.0 0.174 (126) | ENDF/B-VII.1 0.192 (126) | 0.237 (197) | 0.308 |
-| na-post2021 | 116 / 12 | BROND-3.1 0.134 | JENDL-5 0.137 | JEFF-3.3 0.143 | 0.222 (v2) | — |
-| ch-na | 1151 / 126 | CENDL-3.2 0.282 (1007 rows) | JENDL-4.0 0.305 (1093) | JENDL-5 0.309 | none | — |
-| ch-n2n | 2477 / 150 | JEFF-3.3 0.146 (2439) | ENDF/B-VII.0 0.146 (2202) | TENDL-2025 0.147 | none | — |
-| ch-np | 1593 / 65 | IRDFF-II 0.148 (813, dosimetry reactions) | CENDL-3.2 0.184 (1459) | JEFF-3.3 0.190 | none | — |
-| ch-capture | 7239 / 147 | JENDL-5 0.311 | TENDL-2025 0.315 | ENDF/B-VIII.1 0.317 | none | — |
-| ch-sacs | 400 / 87 | IRDFF-II 0.136 (243, dosimetry reactions) | CENDL-3.2 0.235 (360) | FENDL-3.2 0.238 (347) | none | — |
+| capture-heldout (DEV folds 0–5) | 1947 / 122 | ENDF/B-VII.1 0.131 (1744 rows) | ENDF/B-VII.0 0.131 (1716) | JENDL-4.0 0.133 (1795; point sample) | 0.1765 (D0 withheld), 0.1569 (D0 used) | 0.190 / 0.168 |
+| capture-nostructure | 1962 / 125 | ENDF/B-VII.1 0.131 (1759 rows) | ENDF/B-VII.0 0.131 (1731) | JENDL-4.0 0.133 (1810; point sample) | 0.2091 | 0.2034 |
+| capture-retro | 286 / 16 | INCOGNITA 0.1373 | ENDF/B-VII.0 0.149 (281 rows) | JENDL-4.0 0.149 (276; point sample) | 0.1373 | 0.1728 |
+| na-pickup (total rows only) | 55 / 55 targets | JENDL-5 0.204 | ENDF/B-VIII.1 0.270 (46) | INCOGNITA 0.311 | 0.311 (3rd) | 0.607 |
+| na-heprod | 197 / 52 | JENDL-5 0.162 (142 rows) | ENDF/B-VIII.1 0.209 (142) | ENDF/B-VII.1 0.230 (142) | 0.237 (197) | 0.308 |
+| na-post2021 | 116 / 12 | JENDL-5 0.137 | TENDL-2025 0.157 | ENDF/B-VII.1 0.176 | 0.222 (v2) | — |
+| ch-na | 1062 / 124 | JEFF-4.0 0.281 (967 rows; 95 comparator-incomplete) | JENDL-5 0.283 (1059; 1) | ENDF/B-VII.0 0.307 (952) | none | — |
+| ch-n2n | 2334 / 148 | ENDF/B-VII.0 0.113 (2073) | JEFF-3.3 0.115 (2296) | JENDL-5 0.117 | none | — |
+| ch-np | 1525 / 65 | CENDL-3.2 0.172 (1402) | JEFF-3.3 0.181 | JENDL-4.0 0.182 (1511) | none | — |
+| ch-capture | 5872 / 124 | TENDL-2025 0.216 | JEFF-4.0 0.221 (point sample) | JENDL-5 0.224 (point sample) | none | — |
+| ch-sacs | 395 / 86 | CENDL-3.2 0.230 (307) | JENDL-4.0 0.251 (239) | JENDL-5 0.255 | none | — |
 
 Ranking = rms among entries covering at least half the rows; rows in brackets = the entry covers fewer rows than the
-track, so compare it on the paired Δ in the full table, not on rms. Libraries scored: ENDF/B-VIII.1, -VII.1, -VII.0,
-JENDL-5, JENDL-4.0, TENDL-2025 (+ TENDL-2015/17/19/21/23 for the dated entry), JEFF-4.0, JEFF-3.3, BROND-3.1,
-FENDL-3.2, CENDL-3.2, IRDFF-II. BRUSLIB and NON-SMOKER publish MACS / rates only; they enter once a MACS track can be
-published (below).
+track, so compare it on the paired Δ in the full table, not on rms. Capture tracks: ENDF/B-VIII.1, -VII.1, -VII.0 and
+TENDL-2025 are bin averages, the others point samples (marked when in the top three). Libraries re-scored on 2026-11-06:
+ENDF/B-VIII.1, -VII.1, -VII.0 (from the official NNDC files), TENDL-2025 (official file for the capture bin averages,
+staged grid otherwise), JENDL-5, JEFF-4.0 (staged grids), JEFF-3.3, CENDL-3.2, JENDL-4.0 (the MT 1/2/4/16/18/102/103/107
+part of their staged grids; JENDL-4.0 has no (n,2n) there). On (n,α) and He-4 rows JEFF-3.3, CENDL-3.2 and JENDL-4.0
+cannot be checked for MT 5 and are left out of the ranking; with the old comparator (MT 107 alone) they would read
+ch-na: JENDL-4.0 0.277 (1006 rows), CENDL-3.2 0.284 (923), JEFF-3.3 0.325 (1048); He production: JENDL-4.0 0.174
+(126 rows) and ENDF/B-VII.1 0.192 were MT 107 alone, which is why ENDF/B-VII.1 now reads 0.230. Their SACS scores
+leave out the 49-56 (n,α) rows for the same reason.
+
+Not re-scored (official files not reachable on 2026-11-06, no staged grid on our machines); the published values, on
+the old rows and with the old comparator, were: BROND-3.1 capture-heldout 0.126 (1629 rows), capture-nostructure 0.127
+(1648), na-post2021 0.134; IRDFF-II ch-np 0.148 (813, dosimetry reactions), ch-sacs 0.136 (243); FENDL-3.2 ch-sacs
+0.238 (347). They are not comparable with the table above. BRUSLIB and NON-SMOKER publish MACS / rates only; they enter
+once a MACS track can be published (below).
+
+Before the corrections (old rows, old comparator, point samples) the table read: ch-na CENDL-3.2 0.282 (1007 rows),
+JENDL-4.0 0.305 (1093), JENDL-5 0.309, with ENDF/B-VIII.1 at 0.554 and JEFF-4.0 at 0.466; ch-n2n JEFF-3.3 0.146 (2439),
+ENDF/B-VII.0 0.146 (2202), TENDL-2025 0.147; ch-np IRDFF-II 0.148 (813), CENDL-3.2 0.184 (1459), JEFF-3.3 0.190;
+ch-capture JENDL-5 0.311, TENDL-2025 0.315, ENDF/B-VIII.1 0.317; ch-sacs IRDFF-II 0.136 (243), CENDL-3.2 0.235 (360),
+FENDL-3.2 0.238 (347); na-heprod JENDL-5 0.162, JENDL-4.0 0.174 (126), ENDF/B-VII.1 0.192 (126); na-pickup (total)
+JENDL-5 0.204, JENDL-4.0 0.214 (38), JEFF-3.3 0.255, ours 5th; na-post2021 BROND-3.1 0.134, JENDL-5 0.137, JEFF-3.3 0.143;
+capture-heldout BROND-3.1 0.126 (1629), ENDF/B-VII.1 0.131 (1744), JENDL-4.0 0.133 (1795).
 
 ## The tracks, and what publishing them spends
 
-Twelve tracks, 19,873 rows (the two capture-heldout-based tracks share cells), cut from frozen files whose sha256 the scorer checks before it runs. **All twelve are
+Twelve tracks, 18,197 rows since the corrections of 2026-11-06 (19,873 before; the two capture-heldout-based tracks share cells), cut from frozen files whose sha256 the scorer checks before it runs. **All twelve are
 retired from our internal model selection at publication** (2026-09-27), including folds 6-7 of the capture exam (the
 internal vault, already spent on 2026-09-22) and the 48 TERRA-RESERVE nuclei it contains (read on 2026-09-23). From the
 release on, our held-out data are (a) the prospective registries and (b) EXFOR entries added after the 2026-09-09
@@ -114,6 +197,15 @@ Verified (V), by rerunning on 2026-09-23:
   ENDF/B-VIII.1 0.3174, (n,p) SACS TENDL-2025 0.2604).
 - The ENDF-6 path (raw ENDF/B-VIII.1 + RECONR) gives bit-identical values to the staged grid on 6 files, all tracks.
 - The one mismatch: the dated TENDL-Y retrodiction entry, 0.193 here vs 0.184 in development (placement rule, see above).
+- 2026-11-06, before the corrections were applied: the old scorer on the old rows reproduced the published numbers of
+  the nine libraries whose grids are on our machines (e.g. JENDL-5 ch-na 0.3087, ENDF/B-VIII.1 ch-capture 0.3174, JEFF-3.3
+  ch-n2n 0.146, ENDF/B-VII.0 and JENDL-4.0 capture-retro 0.149, JENDL-4.0 He production 0.174), except CENDL-3.2 on ch-na:
+  0.2842 here against 0.282 published (unexplained; the CENDL-3.2 grid available here is a partial copy).
+- 2026-11-06: the corrected comparator gives 42.7 mb for ENDF/B-VIII.1 Fe-56 (n,α) at 14 MeV (3.1 mb in MT 800-818
+  plus 39.6 mb of Cr-53 made inside MT 5; MT 107 alone was 3.1 mb); grids rebuilt from the official ENDF/B-VIII.1 files match the staged grid to
+  1e-15 relative; the ENDF-6 path (`--endf`) gives the same (n,α) / He-4 values as the rebuilt grid (2e-8 dex); our own
+  coverage files (engine-20261022-3; 40 checked) have no MT 5 and their He-4 sum equals their MT 207 exactly, so the rule does not
+  change them, and the frozen INCOGNITA entries are engine values, not library files.
 - The registry chain verifies: 3 links, every file against its manifest, all 1,929 per-row entry hashes, link hashes.
 
 Inferred (I), not checked:
