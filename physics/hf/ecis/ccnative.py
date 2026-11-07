@@ -104,6 +104,10 @@ def _load() -> ctypes.CDLL | None:
     if hasattr(lib, "cc_set_modnum"):
         lib.cc_set_modnum.argtypes = [_I64]
         lib.cc_set_modnum.restype = None
+    # PERFCC2: per-thread scratch release (`solver._BlockWorkers`); absent from an older build
+    if hasattr(lib, "cc_thread_release"):
+        lib.cc_thread_release.argtypes = []
+        lib.cc_thread_release.restype = None
     _LIB = lib
     return lib
 
@@ -216,10 +220,13 @@ def cc_block_w(ch, ff, kin, h_fm: Tensor, nmatch: Tensor, r_fm: Tensor,
 
 
 def _keep_raw(ch, ff, kin, h_fm: Tensor, nmatch: Tensor, r_fm: Tensor,
-              stab: int = STABILISE_EVERY) -> Tensor:
-    """`cc_block_w`'s output as the one (7, E, N, N) tensor the kernel wrote."""
+              stab: int = STABILISE_EVERY, set_sweeps: bool = True) -> Tensor:
+    """`cc_block_w`'s output as the one (7, E, N, N) tensor the kernel wrote. PERFCC2:
+    `set_sweeps=False` when the caller already called `_set_sweeps` for this batch of blocks (the
+    blocks then run on several threads, which must not write the kernel's switches concurrently)."""
     lib = _load()
-    _set_sweeps(lib)
+    if set_sweeps:
+        _set_sweeps(lib)
     n_e, n_r = r_fm.shape
     n = int(ch.level.numel())
     a = _common(ch, ff, kin, h_fm, nmatch, r_fm)
@@ -281,9 +288,26 @@ def sixj(args: list[Tensor]) -> Tensor | None:
     return torch.exp(expo) * mult
 
 
+def prepare_threads() -> None:
+    """PERFCC2: everything `cc_block_acc` initialises lazily or writes globally, done once on the
+    calling thread before blocks run on several: the kernel's per-call switches (`_set_sweeps`)
+    and the finite-difference weights table. Then call `cc_block_acc(..., set_sweeps=False)`."""
+    lib = _load()
+    _set_sweeps(lib)
+    _fd_weights_flat()
+
+
+def thread_release() -> None:
+    """PERFCC2: free the calling thread's kernel scratch (`ccfast.c::cc_thread_release`); a helper
+    thread calls it before it exits. No-op with an older build."""
+    lib = _load()
+    if lib is not None and hasattr(lib, "cc_thread_release"):
+        lib.cc_thread_release()
+
+
 def cc_block_acc(ch, ff, kin, h_fm: Tensor, nmatch: Tensor, r_fm: Tensor, coul, n_lev: int,
                  lmax: int, target_spin: float, proj_spin: float,
-                 keep: Tensor | None = None) -> dict:
+                 keep: Tensor | None = None, set_sweeps: bool = True) -> dict:
     """CCGLUE: one (J, parity) block from the radial loop to its cross-section contributions --
     `cc_block_w`, then `ccfast.c::cc_match_acc` in place of `solver._match(minus_identity=True)` and
     `solver.accumulate(minus_identity=True)`. `coul` is `_asymptotic`'s (F, dF, G, dG) of the block
@@ -291,7 +315,7 @@ def cc_block_acc(ch, ff, kin, h_fm: Tensor, nmatch: Tensor, r_fm: Tensor, coul, 
     when given, is the radial loop's output already computed (CCGPU) and is used in its place."""
     lib = _load()
     if keep is None:
-        keep = _keep_raw(ch, ff, kin, h_fm, nmatch, r_fm)
+        keep = _keep_raw(ch, ff, kin, h_fm, nmatch, r_fm, set_sweeps=set_sweeps)
     n_e, n = int(h_fm.shape[0]), int(ch.level.numel())
     lev = ch.level
     k = kin.k_fm[:, lev].to(DTYPE).contiguous()

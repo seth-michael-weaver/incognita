@@ -99,9 +99,11 @@ def test_one_energy_alone_sums_the_blocks_it_sums_in_a_batch():
     band = _band(60, 150)
     e = _grid()
     inc_mod._SOLVED.clear()
+    inc_mod._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     batch, rb = incident_coupled(None, 60, 150, e, band, lmax=20)
     for i in (0, 3, 6):
         inc_mod._SOLVED.clear()
+        inc_mod._CARRY.clear()  # PERFCC2: and the rows carried across target drops
         one, r1 = incident_coupled(None, 60, 150, e[i : i + 1], band, lmax=20)
         for k in ("sigma_tot_mb", "sigma_reac_mb", "sigma_shape_el_mb", "sigma_direct_mb"):
             x, y = getattr(rb, k)[i], getattr(r1, k)[0]
@@ -123,6 +125,7 @@ def test_incident_memo_serves_the_second_caller_and_misses_on_a_changed_potentia
     band = _band(60, 150)
     e = _grid(3)
     inc_mod._SOLVED.clear()
+    inc_mod._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     first, _ = incident_coupled(None, 60, 150, e, band, lmax=20)
     assert len(inc_mod._SOLVED) == 3
     calls = []
@@ -140,6 +143,7 @@ def test_incident_memo_serves_the_second_caller_and_misses_on_a_changed_potentia
     finally:
         inc_mod.solve_rotational = real
         inc_mod._SOLVED.clear()
+        inc_mod._CARRY.clear()  # PERFCC2: and the rows carried across target drops
 
 
 @pytest.mark.skipif(not ccnative.available(), reason="libccfast.so not built")

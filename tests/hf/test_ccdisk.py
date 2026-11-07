@@ -136,6 +136,7 @@ def test_incident_takes_the_disk_row(cache, monkeypatch):
     row = _row()
     ccdisk.store(KEY, row)
     incident._SOLVED.clear()
+    incident._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     got = ccdisk.load(KEY)
     incident._SOLVED[KEY] = got
     res = incident._stack_rows([got, got])
@@ -144,3 +145,4 @@ def test_incident_takes_the_disk_row(cache, monkeypatch):
     assert res.tjl.shape == (2, 21, 2)
     assert float(res.sigma_tot_mb[0]) == float(row[0])
     incident._SOLVED.clear()
+    incident._CARRY.clear()  # PERFCC2: and the rows carried across target drops

@@ -1799,3 +1799,26 @@ void cc_sixj(int64_t M, const double *j1, const double *j2, const double *j3, co
         mult[m] *= cos(pi * (j1[m] + j2[m] + j4[m] + j5[m]));
     }
 }
+
+/* PERFCC2: hand back the calling thread's scratch (the `_Thread_local` workspaces above, which grow
+ * on demand and are otherwise kept for the thread's lifetime). `solver._BlockWorkers` runs the
+ * (J, parity) blocks of one coupled-channels solve on short-lived helper threads and calls this
+ * from each before it exits, so a long-lived worker process does not keep one set per finished
+ * thread. Changes no number: the buffers are scratch, rebuilt on the next call. */
+void cc_thread_release(void)
+{
+    ws_t *w[3] = {&mm_ws, &nm_ws, &nz_ws};
+    for (int k = 0; k < 3; k++) {
+        free(w[k]->buf);
+        w[k]->buf = NULL;
+        w[k]->cap = 0;
+    }
+#ifdef CCFAST_SPLIT
+    free(sp_ws.buf);
+    sp_ws.buf = NULL;
+    sp_ws.cap = 0;
+    free(st_ws.buf);
+    st_ws.buf = NULL;
+    st_ws.cap = 0;
+#endif
+}
