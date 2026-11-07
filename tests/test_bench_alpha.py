@@ -120,3 +120,11 @@ def test_binavg_na_channel_adds_mt5_part():
     c = BA.channel_curves({107: (x, y107)}, [107], ('incomplete', x5, np.array([0.0, 0.5])))
     assert np.isnan(BA.lethargy_average(c['na'][0], c['na'][1], 1.9e7, 2e7)[0])
     assert np.isfinite(BA.lethargy_average(c['na'][0], c['na'][1], 1.5e6, 2e6)[0])
+
+
+def test_mt5_only_channel_needs_a_real_value():
+    n = len(S.G)
+    tiny = {5: np.full(n, 3e-6), AL.MT5_NA: np.full(n, 1e-9)}          # TENDL-2025 U-238-like: no MT 107, 1 nb in MT 5
+    assert AL.na_total(tiny) == (None, None)
+    real = {5: np.full(n, 0.1), AL.MT5_NA: np.full(n, 0.04)}           # (n,a) carried by MT 5 alone: counts
+    assert np.allclose(AL.na_total(real)[0], 0.04)

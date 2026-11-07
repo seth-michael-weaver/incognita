@@ -191,6 +191,10 @@ def mt5_alpha_parts(text: str, z: int, a: int, sigma5, grid) -> dict:
 
 
 TOL = 0.01   # sigma_5 is an upper bound of the alpha part that could not be read; below 1 % of the value it cannot matter
+# A file with no explicit (n,alpha) section (MT 107 / 800-849) evaluates the channel only through MT 5; that counts when
+# the MT 5 part reaches 1 mb somewhere. A vanishing MT 5 yield (TENDL-2025 U-238: 1e-9 b at 14.5 MeV against 1.5 mb
+# measured) means the channel is not evaluated, and the row stays not covered, as it was before the fix.
+NA_MIN_MT5_ONLY_B = 1e-3
 
 
 def na_total(curves: dict):
@@ -205,8 +209,8 @@ def na_total(curves: dict):
     part = curves.get(MT5_NA)
     if part is None and s5 is not None and np.any(np.asarray(s5) > 0):
         return base, np.asarray(s5, float)
-    if base is None and part is None:
-        return None, None
+    if base is None and (part is None or np.max(part) < NA_MIN_MT5_ONLY_B):
+        return None, None             # the file does not evaluate (n,alpha) for this nucleus: not covered (as before)
     v = (np.zeros_like(part) if base is None else np.asarray(base, float)) + (0 if part is None else part)
     return v, None
 

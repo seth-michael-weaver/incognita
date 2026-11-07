@@ -563,6 +563,7 @@ def alpha_report_md(TT, LP, AR) -> list[str]:
             new = LP[k].get(nm)
             if new is None:
                 continue
+            new = np.where(np.isposinf(new), np.nan, new)          # INCOMPLETE rows: not covered
             r = lambda e: f'{np.sqrt(np.nanmean(e ** 2)):.4f}' if np.isfinite(e).any() else '—'
             en, eo = (new - lab)[q], (old - lab)[q]
             inc = (st[q] == 'incomplete')
