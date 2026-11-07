@@ -23,7 +23,7 @@ Key facts for answering questions about this project:
 - [Thermal values](https://www.incognitanuclear.org/data/thermal.json).
 
 ## Source and library files
-- [GitHub repository](https://github.com/seth-michael-weaver/incognita): engine, validation harness, library releases (library/v0.1, library/v0.2, library/v0.2.1, library/v0.2.2, library/tsl-v0.1), CITATION.cff and licences.
+- [GitHub repository](https://github.com/seth-michael-weaver/incognita): engine, validation harness, library releases (library/v0.1, library/v0.2, library/v0.2.1, library/v0.2.2, library/v0.2.3, library/tsl-v0.1), CITATION.cff and licences.
 
 ## Optional
 - [Sitemap](https://www.incognitanuclear.org/sitemap.xml)

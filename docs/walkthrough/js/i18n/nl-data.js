@@ -7,7 +7,7 @@ Object.assign(WT.L.ui, {
   dx_kicker: "INCOGNITA · dataverkenner",
   dx_h1: "Alle nucliden",
   dx_lede: "De door de motor voorspelde werkzame doorsneden voor neutronen voor elke nuclide in de bibliotheek, naast de gecureerde metingen van elke nuclide. Kies een nuclide op de kaart, of zoek er een op.",
-  dx_lede_ver: "De curves zijn de bibliotheek v0.2.2 (november 2026), gemaakt met dezelfde motorversie die het Scorebord scoort (de motor van 22 oktober 2026). Het is niet TERRA, het dataproduct op het Scorebord dat aan metingen is aangepast. Elke curve is de eigen voorspelling van de motor: geen enkele is aangepast aan de metingen ernaast, behalve dat bij een nuclide gemarkeerd als verankerd de curve met één factor is geschaald, zodat het stellair gemiddelde bij 30 keV gelijk is aan de gemeten waarde. De algemene instellingen van de motor zijn één keer gekozen, voor alle nucliden, met veel metingen (ook deze), dus overeenstemming bij een gemeten nuclide is een eerlijke toets van het model, al is die niet volledig onafhankelijk. De meeste nucliden zijn nooit gemeten (geëxtrapoleerd), en hun banden zijn breed.",
+  dx_lede_ver: "De curves zijn de bibliotheek v0.2.3 (november 2026), gemaakt met dezelfde motorversie die het Scorebord scoort (de motor van 22 oktober 2026). Het is niet TERRA, het dataproduct op het Scorebord dat aan metingen is aangepast. Elke curve is de eigen voorspelling van de motor: geen enkele is aangepast aan de metingen ernaast, behalve dat bij een nuclide gemarkeerd als verankerd de curve met één factor is geschaald, zodat het stellair gemiddelde bij 30 keV gelijk is aan de gemeten waarde. De algemene instellingen van de motor zijn één keer gekozen, voor alle nucliden, met veel metingen (ook deze), dus overeenstemming bij een gemeten nuclide is een eerlijke toets van het model, al is die niet volledig onafhankelijk. De meeste nucliden zijn nooit gemeten (geëxtrapoleerd), en hun banden zijn breed.",
   dx_controls: "Bediening van de kaart", dx_search_label: "Zoek een nuclide", dx_search_ph: "Zoek: U-235, Fe56, Au…",
   dx_colour: "Kleur de kaart op", dx_m_tier: "Hoe het bekend is", dx_m_macs: "Vangst bij 30 keV", dx_m_meas: "Gemeten data",
   dx_chart_h: "Nuclidenkaart",
@@ -21,7 +21,7 @@ Object.assign(WT.L.ui, {
   credit_sub: "De INCOGNITA-motor is een port van <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) en gebruikt de kernstructuurdatabase van TALYS. Wat INCOGNITA toevoegt, staat <a href=\"./?lang=nl#code\">schakelaar voor schakelaar onderaan de uitlegpagina</a>.",
   dx_repo_p2: "Om de motor zelf te draaien heb je ook de structuurdatabase van TALYS nodig; de README legt uit hoe je die ophaalt.",
   dx_repo_link: "seth-michael-weaver/incognita op GitHub →",
-  dx_src: "Bronnen: voorspellingen uit de bibliotheek v0.2.2 (<code>library/v0.2.2</code>); vangstmetingen uit EXFOR, gecureerd in <code>data/curation</code>; metingen van (n,2n), (n,p) en (n,α) uit de benchmarkrijen in <code>incognita/bench</code> (onder Z 26: EXFOR-rijen gekozen met dezelfde regels, <code>data/curation/inputs</code>). Metingen die de curatie heeft uitgesloten, zijn verborgen tenzij je erom vraagt. De optionele gestippelde overlay van geëvalueerde bibliotheken (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) wordt alleen voor weergave gebouwd door <code>scripts/build_site_overlay.py</code>; INCOGNITA leest hem nooit in.",
+  dx_src: "Bronnen: voorspellingen uit de bibliotheek v0.2.3 (<code>library/v0.2.3</code>); vangstmetingen uit EXFOR, gecureerd in <code>data/curation</code>; metingen van (n,2n), (n,p) en (n,α) uit de benchmarkrijen in <code>incognita/bench</code> (onder Z 26: EXFOR-rijen gekozen met dezelfde regels, <code>data/curation/inputs</code>). Metingen die de curatie heeft uitgesloten, zijn verborgen tenzij je erom vraagt. De optionele gestippelde overlay van geëvalueerde bibliotheken (ENDF/B-VIII.1, JEFF-4.0, TENDL-2025) wordt alleen voor weergave gebouwd door <code>scripts/build_site_overlay.py</code>; INCOGNITA leest hem nooit in.",
   dx_t0: "Gemeten", dx_t1: "Verankerd aan een gemeten MACS", dx_t2: "Geïnterpoleerd (dicht bij gemeten nucliden)", dx_t3: "Geëxtrapoleerd",
   dx_ts0: "gemeten", dx_ts1: "verankerd", dx_ts2: "geïnterpoleerd", dx_ts3: "geëxtrapoleerd",
   dx_keep: "behouden", dx_down: "lager gewogen", dx_excl: "uitgesloten", dx_fix: "eenheid gecorrigeerd",
@@ -31,7 +31,7 @@ Object.assign(WT.L.ui, {
   dx_capsets: "vangstdatasets", dx_measured: "Gemeten",
   dx_outside: "buiten het gevalideerde bereik (Z 26–83)", dx_flag: "opgeloste resonanties reiken tot in het MACS-venster: gebruik liever een gemeten MACS",
   dx_nocurve: "geen bibliotheekcurve voor deze invoer; de metingen komen uit",
-  dx_xE: "neutronenergie", dx_pred: "voorspelling (bibliotheek v0.2.2)",
+  dx_xE: "neutronenergie", dx_pred: "voorspelling (bibliotheek v0.2.3)",
   dx_res: "opgeloste resonanties: de curve is hier een gemiddelde",
   dx_empty: "Niets te tonen voor deze reactie.", dx_bands: "banden: 68 % en 95 %", dx_band68: "band: 68 %",
   dx_meas_pts: "gemeten", dx_table_hint: "Gebruik ‘Toon als tabel’ voor de waarden.", dx_ds_h: "Metingen", dx_pts: "ptn",
@@ -45,7 +45,7 @@ Object.assign(WT.L.ui, {
 Object.assign(WT.L.ui, {
   dx_dl: "Download deze nuclide:",
   dx_dl_note: "Elke curve en elk gemeten punt voor deze nuclide, alle reacties, met eenheden, bronnen en EXFOR-id's in het bestand.",
-  dx_access: "<b>Toegang tot de data.</b> Alles wat hier getoond wordt, staat in de repository onder <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2.2\"><code>library/v0.2.2</code></a>: vangstcurven met banden van 68 / 95 % (<code>capture_v022.parquet</code>), maxwelliaanse gemiddelden (<code>macs30_v022.csv</code>, <code>macs_kt_v022.csv</code>), stellaire snelheden (<code>rates_v022.csv</code>, <code>reaclib_v022.dat</code>) en de kanalen (n,2n), (n,p), (n,α) (<code>channels_v022.parquet</code>, <code>grid_np_v022.parquet</code>), gecontroleerd met <code>SHA256SUMS</code>. Voor één nuclide zijn de CSV- en JSON-downloads hierboven genoeg. De gecureerde metingen staan in <code>data/curation</code>; ze komen uit EXFOR (IAEA Nuclear Data Section) en behouden hun EXFOR-id's. De bibliotheekdata vallen onder CC-BY-4.0. De eerdere versie v0.1 blijft in <code>library/v0.1</code>; <code>CHANGELOG.md</code> in <code>library/v0.2.2</code> zegt wat er veranderd is.",
+  dx_access: "<b>Toegang tot de data.</b> Alles wat hier getoond wordt, staat in de repository onder <a href=\"https://github.com/seth-michael-weaver/incognita/tree/main/library/v0.2.3\"><code>library/v0.2.3</code></a>: vangstcurven met banden van 68 / 95 % (<code>capture_v023.parquet</code>), maxwelliaanse gemiddelden (<code>macs30_v023.csv</code>, <code>macs_kt_v023.csv</code>), stellaire snelheden (<code>rates_v023.csv</code>, <code>reaclib_v023.dat</code>) en de kanalen (n,2n), (n,p), (n,α) (<code>channels_v023.parquet</code>, <code>grid_np_v023.parquet</code>), gecontroleerd met <code>SHA256SUMS</code>. Voor één nuclide zijn de CSV- en JSON-downloads hierboven genoeg. De gecureerde metingen staan in <code>data/curation</code>; ze komen uit EXFOR (IAEA Nuclear Data Section) en behouden hun EXFOR-id's. De bibliotheekdata vallen onder CC-BY-4.0. De eerdere versie v0.1 blijft in <code>library/v0.1</code>; <code>CHANGELOG.md</code> in <code>library/v0.2.3</code> zegt wat er veranderd is.",
 });
 Object.assign(WT.L.ui, {
   dx_lib: "Geëvalueerde bibliotheken eroverheen leggen (alleen ter vergelijking — INCOGNITA gebruikt ze niet)",
@@ -56,7 +56,7 @@ Object.assign(WT.L.ui, {
   dx_lib_held: "JENDL-5 wordt toegevoegd zodra de voorwaarden voor het herverdelen van afgeleide tabellen bevestigd zijn.",
 });
 
-/* library v0.2.2: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
+/* library v0.2.3: a nuclide whose capture below 1 MeV hinges on one engine setting ({n}: the factor at 30 keV) */
 Object.assign(WT.L.ui, {
   dx_mf_pe_lo: "Onzekere modelkeuze: deze motor laat bij alle energieën een deeltje ontsnappen voordat de kern tot rust komt (pre-evenwichtsemissie), terwijl TALYS dat pas boven ongeveer 1 MeV doet; de TALYS-keuze geeft bij 30 keV ongeveer {n} keer minder vangst, en de 95%-band onder 1 MeV dekt beide.",
   dx_mf_pe_hi: "Onzekere modelkeuze: deze motor laat bij alle energieën een deeltje ontsnappen voordat de kern tot rust komt (pre-evenwichtsemissie), terwijl TALYS dat pas boven ongeveer 1 MeV doet; de TALYS-keuze geeft bij 30 keV ongeveer {n} keer meer vangst, en de 95%-band onder 1 MeV dekt beide.",
