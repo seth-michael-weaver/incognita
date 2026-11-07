@@ -227,6 +227,8 @@ def env_names() -> tuple[str, ...]:
     names = set(_NUMERICS_ENV)
     for g in _ENV_SCOPE_GLOBS:
         for p in sorted(root.glob(g)):
+            if p.name == "ccdisk.py":  # this module: its switches are `_NUMERICS_ENV` and the cache dirs
+                continue
             names |= set(pat.findall(p.read_text(encoding="utf-8", errors="replace")))
     names -= stagedisk.ENV_EXCLUDE | {ENV_VAR, BATCH_ENV_VAR}
     return tuple(sorted(names))
