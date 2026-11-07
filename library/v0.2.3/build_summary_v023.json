@@ -1,0 +1,273 @@
+{
+ "release": "v0.2.3",
+ "base": "v0.2.2",
+ "nuclides": 6168,
+ "changed_fields": {
+  "capture_v023.parquet": {
+   "value_source": 5,
+   "model_form_max_dex_sub1MeV": 3
+  },
+  "anchored_rescale_v023.csv": {
+   "v02_factor": 21,
+   "v022_factor": 21
+  },
+  "macs30_v023.csv": {
+   "value_source": 21
+  },
+  "macs_kt_v023.csv": {
+   "macs_flag": 879,
+   "macs_flag_5keV (new)": 6168,
+   "macs_flag_8keV (new)": 6168,
+   "macs_flag_10keV (new)": 6168,
+   "macs_flag_15keV (new)": 6168,
+   "macs_flag_20keV (new)": 6168,
+   "macs_flag_25keV (new)": 6168,
+   "macs_flag_30keV (new)": 6168,
+   "macs_flag_40keV (new)": 6168,
+   "macs_flag_50keV (new)": 6168,
+   "macs_flag_60keV (new)": 6168,
+   "macs_flag_80keV (new)": 6168,
+   "macs_flag_100keV (new)": 6168
+  },
+  "rates_v023.csv": {
+   "rate_flag_below_T9 (new)": 6168
+  },
+  "below1keV_engine_v023.parquet": "byte-identical copy of below1keV_engine_v022.parquet",
+  "masses_v023.csv": "byte-identical copy of masses_v022.csv",
+  "compound_smin_v023.csv": "byte-identical copy of compound_smin_v022.csv",
+  "grid_dependent_v023.csv": "byte-identical copy of grid_dependent_v022.csv",
+  "channels_v023.parquet": "byte-identical copy of channels_v022.parquet",
+  "grid_np_v023.parquet": "byte-identical copy of grid_np_v022.parquet",
+  "reaclib_v023.dat": "byte-identical copy of reaclib_v022.dat"
+ },
+ "A_anchored": {
+  "nuclides": 21,
+  "value_source_text_changed": 5,
+  "max_rel_listed_v022_total_vs_curve": 0.0006695438047673585,
+  "max_abs_v02_text_vs_exact": 0.00042276520062911604,
+  "rows": {
+   "Z026N034M0": {
+    "v02_factor": 0.8173270880078776,
+    "v02_factor_text": 0.817,
+    "v022_factor": 0.8175540637068542,
+    "v022_factor_listed_v022": 0.8172268848650494,
+    "value_source_factor_v022": 0.817,
+    "value_source_factor_v023": 0.818
+   },
+   "Z030N040M0": {
+    "v02_factor": 0.8747705945036842,
+    "v02_factor_text": 0.875,
+    "v022_factor": 0.8748643813972984,
+    "v022_factor_listed_v022": 0.8750938114888955,
+    "value_source_factor_v022": 0.875,
+    "value_source_factor_v023": 0.875
+   },
+   "Z032N044M0": {
+    "v02_factor": 0.6314227652006291,
+    "v02_factor_text": 0.631,
+    "v022_factor": 0.6314230639194287,
+    "v022_factor_listed_v022": 0.6310002985187942,
+    "value_source_factor_v022": 0.631,
+    "value_source_factor_v023": 0.631
+   },
+   "Z034N042M0": {
+    "v02_factor": 0.9743638861652807,
+    "v02_factor_text": 0.974,
+    "v022_factor": 0.9736851932363183,
+    "v022_factor_listed_v022": 0.9733215605358579,
+    "value_source_factor_v022": 0.973,
+    "value_source_factor_v023": 0.974
+   },
+   "Z046N056M0": {
+    "v02_factor": 1.2672630566328729,
+    "v02_factor_text": 1.267,
+    "v022_factor": 1.2680691596777598,
+    "v022_factor_listed_v022": 1.2678059357151823,
+    "value_source_factor_v022": 1.268,
+    "value_source_factor_v023": 1.268
+   },
+   "Z052N068M0": {
+    "v02_factor": 1.1722009143641177,
+    "v02_factor_text": 1.172,
+    "v022_factor": 1.1686962050913727,
+    "v022_factor_listed_v022": 1.1684958914318153,
+    "value_source_factor_v022": 1.168,
+    "value_source_factor_v023": 1.169
+   },
+   "Z054N072M0": {
+    "v02_factor": 0.9631737390030074,
+    "v02_factor_text": 0.963,
+    "v022_factor": 0.9599372513413441,
+    "v022_factor_listed_v022": 0.9597640961417739,
+    "value_source_factor_v022": 0.96,
+    "value_source_factor_v023": 0.96
+   },
+   "Z055N080M0": {
+    "v02_factor": 1.7670989957415937,
+    "v02_factor_text": 1.767,
+    "v022_factor": 1.7530652456271507,
+    "v022_factor_listed_v022": 1.7529670360789185,
+    "value_source_factor_v022": 1.753,
+    "value_source_factor_v023": 1.753
+   },
+   "Z056N076M0": {
+    "v02_factor": 1.6720952937849842,
+    "v02_factor_text": 1.672,
+    "v022_factor": 1.6645493889511627,
+    "v022_factor_listed_v022": 1.6644545252121425,
+    "value_source_factor_v022": 1.664,
+    "value_source_factor_v023": 1.665
+   },
+   "Z058N078M0": {
+    "v02_factor": 0.9707568502915157,
+    "v02_factor_text": 0.971,
+    "v022_factor": 0.9650606939130361,
+    "v022_factor_listed_v022": 0.9653024168803518,
+    "value_source_factor_v022": 0.965,
+    "value_source_factor_v023": 0.965
+   },
+   "Z058N080M0": {
+    "v02_factor": 0.8446880872196331,
+    "v02_factor_text": 0.845,
+    "v022_factor": 0.842637194415827,
+    "v022_factor_listed_v022": 0.8429483498756085,
+    "value_source_factor_v022": 0.843,
+    "value_source_factor_v023": 0.843
+   },
+   "Z061N086M0": {
+    "v02_factor": 0.9361706539029254,
+    "v02_factor_text": 0.936,
+    "v022_factor": 0.926686222328751,
+    "v022_factor_listed_v022": 0.9265172973363169,
+    "value_source_factor_v022": 0.927,
+    "value_source_factor_v023": 0.927
+   },
+   "Z063N091M0": {
+    "v02_factor": 1.0161775045941308,
+    "v02_factor_text": 1.016,
+    "v022_factor": 1.0088974724299122,
+    "v022_factor_listed_v022": 1.0087212395025411,
+    "value_source_factor_v022": 1.009,
+    "value_source_factor_v023": 1.009
+   },
+   "Z063N092M0": {
+    "v02_factor": 0.972635532595976,
+    "v02_factor_text": 0.973,
+    "v022_factor": 0.9616758768376279,
+    "v022_factor_listed_v022": 0.9620362374234765,
+    "value_source_factor_v022": 0.962,
+    "value_source_factor_v023": 0.962
+   },
+   "Z067N096M0": {
+    "v02_factor": 0.5321332400154597,
+    "v02_factor_text": 0.532,
+    "v022_factor": 0.5270985430031495,
+    "v022_factor_listed_v022": 0.5269665636176548,
+    "value_source_factor_v022": 0.527,
+    "value_source_factor_v023": 0.527
+   },
+   "Z072N102M0": {
+    "v02_factor": 1.144094224109194,
+    "v02_factor_text": 1.144,
+    "v022_factor": 1.1371369800558775,
+    "v022_factor_listed_v022": 1.1370433289240742,
+    "value_source_factor_v022": 1.137,
+    "value_source_factor_v023": 1.137
+   },
+   "Z072N110M0": {
+    "v02_factor": 0.8763489330125454,
+    "v02_factor_text": 0.876,
+    "v022_factor": 0.8736618958091297,
+    "v022_factor_listed_v022": 0.8733140326854731,
+    "value_source_factor_v022": 0.873,
+    "value_source_factor_v023": 0.874
+   },
+   "Z076N108M0": {
+    "v02_factor": 0.6158948948505758,
+    "v02_factor_text": 0.616,
+    "v022_factor": 0.6113395222390519,
+    "v022_factor_listed_v022": 0.6114438499942761,
+    "value_source_factor_v022": 0.611,
+    "value_source_factor_v023": 0.611
+   },
+   "Z078N112M0": {
+    "v02_factor": 0.8584097420795584,
+    "v02_factor_text": 0.858,
+    "v022_factor": 0.8522298977246225,
+    "v022_factor_listed_v022": 0.8518231054511453,
+    "value_source_factor_v022": 0.852,
+    "value_source_factor_v023": 0.852
+   },
+   "Z080N116M0": {
+    "v02_factor": 0.6390691651028586,
+    "v02_factor_text": 0.639,
+    "v022_factor": 0.6347610443823304,
+    "v022_factor_listed_v022": 0.6346923455382573,
+    "value_source_factor_v022": 0.635,
+    "value_source_factor_v023": 0.635
+   },
+   "Z081N123M0": {
+    "v02_factor": 1.3320297095544744,
+    "v02_factor_text": 1.332,
+    "v022_factor": 1.3203754351412933,
+    "v022_factor_listed_v022": 1.320345985523439,
+    "value_source_factor_v022": 1.32,
+    "value_source_factor_v023": 1.32
+   }
+  }
+ },
+ "B_gg_deadend": {
+  "Z042N044M0": {
+   "v022": 0.0,
+   "v023": 3.5944878397398004
+  },
+  "Z043N044M0": {
+   "v022": 0.0,
+   "v023": 1.110162821692022
+  },
+  "Z045N060M0": {
+   "v022": 0.0,
+   "v023": 2.4338051668989937
+  }
+ },
+ "F_macs_flag": {
+  "resolved_upper_known": 1239,
+  "flagged_at_any_kT": 879,
+  "newly_flagged": 334,
+  "newly_flagged_by_tier": {
+   "EXTRAPOLATED": 163,
+   "MEASURED": 75,
+   "INTERPOLATED": 90,
+   "ANCHORED": 6
+  },
+  "flagged_per_kT": {
+   "5keV": 879,
+   "8keV": 772,
+   "10keV": 727,
+   "15keV": 660,
+   "20keV": 621,
+   "25keV": 567,
+   "30keV": 545,
+   "40keV": 523,
+   "50keV": 509,
+   "60keV": 493,
+   "80keV": 453,
+   "100keV": 439
+  },
+  "v022_flag_now_clear_per_kT": {
+   "5keV": 0,
+   "8keV": 0,
+   "10keV": 0,
+   "15keV": 0,
+   "20keV": 0,
+   "25keV": 0,
+   "30keV": 0,
+   "40keV": 22,
+   "50keV": 36,
+   "60keV": 52,
+   "80keV": 92,
+   "100keV": 106
+  },
+  "rate_flag_below_T9_set": 1061
+ }
+}

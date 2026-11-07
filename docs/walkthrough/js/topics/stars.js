@@ -9,7 +9,7 @@
  *    K. Lodders, H. Palme, H.-P. Gail, "Abundances of the elements in the Solar System", Landolt-Boernstein New Series VI/4B
  *    (Springer 2009) 712-770, arXiv:0901.1149, Table 10 "Nuclide abundances 4.56 Ga ago (normalized to N(Si) = 10^6 atoms)",
  *    rounded to 3 significant digits. The third number in AB is the Z of the most abundant isobar at that A.
- *  - MACS at kT = 30 keV (sigma, mb) and its 68 % factor in ST: INCOGNITA library v0.2.2 (library/v0.2.2/macs30_v022.csv in the
+ *  - MACS at kT = 30 keV (sigma, mb) and its 68 % factor in ST: INCOGNITA library v0.2.3 (library/v0.2.3/macs30_v023.csv in the
  *    repository): the production engine engine-20261022-3, a blind prediction (no nucleus's own capture data fitted; global
  *    parameters set on data from many nuclei, these included). Tier letter: M = the nucleus has capture data, A = ANCHORED
  *    (no capture data; the curve is scaled to a measured 30 keV MACS, so that value is not a prediction), I/E = unmeasured.

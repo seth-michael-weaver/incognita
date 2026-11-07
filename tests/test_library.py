@@ -80,3 +80,22 @@ def test_v022_engine_below_1kev_and_reduced_mass():
     rt = pd.read_csv(L.LIBRARY.parent / "v0.2.2" / "rates_v022.csv").set_index("nuclide_id")
     m = rt.loc["Z079N118M0"]
     assert m.reduced_mass_u == pytest.approx(1.00866491590 * m.target_mass_u / (1.00866491590 + m.target_mass_u), rel=1e-12)
+
+
+def test_v023_errata_same_values_as_v022(capsys):
+    """v0.2.3 (errata of v0.2.2, BUGTIER3 A/B/F): every curve, band and MACS is v0.2.2's; only the ANCHORED factor text,
+    the gg_deadend model-form column and the per-kT MACS flags change. The reader knows the version."""
+    t3, t2 = L.load_capture(version="v0.2.3"), L.load_capture(version="v0.2.2")
+    assert list(t3.nuclide_id) == list(t2.nuclide_id) and (t3.tier.values == t2.tier.values).all()
+    for c in ("sigma_b", "unc68_log10", "unc95_log10", "sigma_below1keV_b"):
+        assert all(np.array_equal(np.asarray(a), np.asarray(b)) for a, b in zip(t3[c], t2[c])), c
+    assert (t3.macs30_mb.values == t2.macs30_mb.values).all()
+    changed = set(t3.nuclide_id[t3.value_source.values != t2.value_source.values])
+    assert changed == {"Z026N034M0", "Z034N042M0", "Z052N068M0", "Z056N076M0", "Z072N110M0"}  # Fe-60 x 0.818 ...
+    assert "blind curve x 0.818 (measured" in t3.set_index("nuclide_id").at["Z026N034M0", "value_source"]
+    gg = t3[t3.model_form_flag == "gg_deadend"].set_index("nuclide_id").model_form_max_dex_sub1MeV
+    assert gg.round(2).to_dict() == {"Z042N044M0": 3.59, "Z043N044M0": 1.11, "Z045N060M0": 2.43}
+    mk = pd.read_csv(L.LIBRARY.parent / "v0.2.3" / "macs_kt_v023.csv").set_index("nuclide_id")
+    assert mk.macs_flag.notna().sum() == 879 and mk.macs_flag_5keV.sum() == 879 and mk.macs_flag_30keV.sum() == 545
+    assert L.main(["show", "Fe-60", "--version", "v0.2.3", "--every", "16"]) == 0
+    assert "Z026N034M0  tier ANCHORED" in capsys.readouterr().out
