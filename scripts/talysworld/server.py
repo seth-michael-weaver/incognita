@@ -145,9 +145,20 @@ def engine_id():
     return os.path.basename(os.path.normpath(ENG))
 
 
+def _flavour():
+    """engine_env.flavour of TW_ENG ('repo' | 'production'); 'production' when it cannot tell (the cache key then stays as
+    it always was)."""
+    try:
+        import engine_env
+        return engine_env.flavour(ENG)
+    except Exception:  # noqa: BLE001
+        return "production"
+
+
 def cache_key(z, a, comp, kws):
     tag = [engine_id(), "libv02-inputs", z, a, comp, kws]
     if GRIDTOP: tag.append("gridtop-pad1")   # padded jobs differ from the old one-point jobs: separate cache
+    if _flavour() == "repo": tag.append("switches-mapped")   # SWNAMES6: results from before engine_env reached this engine
     return hashlib.sha256(json.dumps(tag).encode()).hexdigest()[:16]
 
 

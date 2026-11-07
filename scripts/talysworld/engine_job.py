@@ -32,19 +32,26 @@ INP = os.environ.get("TW_INPUTS", f"{H}/libv02/inputs")      # = the v0.2 runs' 
 CC = os.environ.get("TW_CC", f"{H}/talysworld_data/cc")       # private copy of ~/fastgate_data/cc (as libv022/run.sh did)
 
 # the library run environment, verbatim from libv02/libv022 run.sh
-for v in [k for k in os.environ if k.startswith("NUCLIDO_")]: del os.environ[v]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import engine_env  # noqa: E402  (the one production-name -> repository-name switch table)
+
+engine_env.clear_switches()   # NUCLIDO_* and INCOGNITA_*: nothing from the caller's shell reaches the engine
 os.environ.update(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", CJ_FLOAT="1", LC_ALL="C", UV_NO_SYNC="1",
                   TALYS_DIR=f"{H}/relb61_strip", RL_CC=CC, RL_BOX="laptop", RL_ENGINES="/dev/null",
                   NUCLIDO_GGDEADEND="1", NUCLIDO_NGNEXCL="1", NUCLIDO_DWBAUNIT="1", NUCLIDO_LEVCOMPLETE="tgt",
                   ENGAUDIT_PATH="c", NUCLIDO_BANDCHECK="1", NUCLIDO_TRAPFIX="1", NUCLIDO_WFCNORM="1",
                   NUCLIDO_CC_CACHE=CC, NUCLIDO_TALYS_FIT="nodata", NUCLIDO_ENGPHYS="dircap,pespin", NUCLIDO_SPECOUT_DA="0")
-# PERFCC2: a TW_ENG that is this repository's engine reads INCOGNITA_*, not NUCLIDO_*, so NUCLIDO_CC_CACHE never reached it
-# and every calculator / warm-pool job re-solved every coupled-channels solve (bench.py "cold" and "warm" were the same run).
-# It gets the coupled-channels BATCH cache instead (physics/hf/ecis/incident.py `_CARRY`): whole solves keyed by every row
-# they solve, so a hit is bit for bit the solve it replaces and the run's numbers are those of a run without any cache.
-# (The row cache, INCOGNITA_CC_CACHE, would serve a row solved in another batch: same values to ~1e-15, not the same bits.)
-# TW_CC_BATCH=0 leaves it off.
-if os.environ.get("TW_CC_BATCH", "1") != "0": os.environ["INCOGNITA_CC_BATCHCACHE"] = CC
+# SWNAMES6: the switches above (and the ones the bundle's pprun / r52pool / engine_pool set per job) are the production
+# engine's NUCLIDO_* names. A TW_ENG that is this repository's engine reads INCOGNITA_*: engine_env.install mirrors every
+# switch of engine_env.SWITCHES to it (on every set and delete), so both engines run the library configuration.
+# Coupled-channels cache: for this repository's engine the job uses the BATCH cache (PERFCC2, physics/hf/ecis/incident.py
+# `_CARRY`): whole solves keyed by every row they solve, so a hit is bit for bit the solve it replaces and the run's
+# numbers are those of a run without any cache. The row cache NUCLIDO_CC_CACHE maps to (INCOGNITA_CC_CACHE) would serve
+# a row solved in another batch: same values to ~1e-15, not the same bits; it is therefore not mirrored unless
+# TW_CC_BATCH=0 (then the row cache, as production uses it). The production engine has no batch cache.
+_BATCH = os.environ.get("TW_CC_BATCH", "1") != "0"
+FLAVOUR = engine_env.install(ENG, skip=("NUCLIDO_CC_CACHE",) if _BATCH else ())
+if FLAVOUR == "repo" and _BATCH: os.environ["INCOGNITA_CC_BATCHCACHE"] = CC
 # worker.py
 os.environ.update(PP_PLINES=INP + "/lines_P", PP_ALINES=INP + "/lines_A", PP_SLTABLE=INP + "/sl_meas_b.csv", R52CODE=INP + "/code")
 

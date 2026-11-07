@@ -79,7 +79,8 @@ def _energy_subset(sub_ev):
 def _hrule_cache(d):
     """Cache the library's per-item ISOHOLD h rule (r52pool.h_rule: three extra target builds per arm, ~0.4-1.3 s) on disk
     under `d`, keyed by everything it reads: engine, Z, A, the lines file's content, the deck lines (incl. the job's
-    keywords), the item's own environment and the run's baseline NUCLIDO_* environment. NOT by the grid: h_rule builds its
+    keywords), the item's own environment and the run's baseline NUCLIDO_* and INCOGNITA_* environment (INCOGNITA_*: an h that
+    this repository's engine computed before engine_env mirrored the switches to it is not reused). NOT by the grid: h_rule builds its
     targets at the grid's first energy, but it reads only D0 and <Gamma_gamma> at S_n, and h came out bit-identical at
     1 keV, 1 MeV and 20 MeV (Fe-56, both arms, 2026-11-07); check_warm.py's 64-point checks run on an h cached by the
     1 MeV job. d=None: no-op. Used by the warm pool only (TW_HRULE_CACHE=0 turns it off there)."""
@@ -93,7 +94,7 @@ def _hrule_cache(d):
         _, Z, A, lf, gj, extra, tag = it[:7]
         key = hashlib.sha256(json.dumps([EJ.ENG, int(Z), int(A), hashlib.sha256(open(lf, "rb").read()).hexdigest(), extra,
                                          sorted((it[7] or {}).items()) if len(it) > 7 else [],
-                                         sorted((k, v) for k, v in base_env.items() if k.startswith(("NUCLIDO_", "TALYS", "CJ_", "RL_")))],
+                                         sorted((k, v) for k, v in base_env.items() if k.startswith(("NUCLIDO_", "INCOGNITA_", "TALYS", "CJ_", "RL_")))],
                                         default=str).encode()).hexdigest()[:24]
         f = os.path.join(d, key + ".json")
         try:
