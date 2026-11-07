@@ -16,7 +16,10 @@ high). The fix of the later engines (NUCLIDO_GRIDTOP, default ON since engine-20
 in engine-20261022-3, so the job runs the grid [E, E + |min S| + 1 MeV] instead (S = the CN's separation energies,
 S(0,0,type) from the engine's own masses) and reports only E. Nothing changes when every S >= 0 (no pad is added).
 
-usage: engine_job.py --z Z --a A --e E_EV --comp COMP [--kw "ldmodel 2;strength 9"] --work DIR
+usage: engine_job.py --z Z --a A --e E_EV --comp COMP [--kw "ldmodel 2;strength 9"] --work DIR [--cold]
+Warm pool: when a warmpool.py daemon answers on TW_WARM_SOCK (default ~/talysworld_data/warm.sock) the job is sent there
+(no ~5-6 s start-up, no separate separation-energy process; same numbers, same output line plus "warm": true). --cold
+(or TW_WARM=0) always runs here in this process, as before.
 COMP: library composition label (P | A(rotor) | ACTJS A(rotor) | JS(P,A) | ACTJS JS(P,A)) or a single arm P | A | AJ.
 Prints one JSON line: {"e_ev":..., "channels": {total, elastic, nonelastic, capture, np, na, n2n, inelastic, fission} in mb,
 "arms": [...], "cpu_s": ..., "err": ...}. Leaves nothing but that line (the work dir is removed).
@@ -51,7 +54,15 @@ def val(q, k):
 
 def cn_separation_mev(z, a):
     """S(0,0,type), type 0..6, of the compound nucleus of n + (z, a), from the engine's own masses (default options), in a
-    separate process so nothing the engine caches at import leaks into the job."""
+    separate process so nothing the engine caches at import leaks into the job. First the prebuilt table
+    (scripts/perfstart/smin_table.py: same values, keyed to this engine's commit and mass tables; ~10 ms), else that process."""
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "perfstart"))
+        import smin_table
+        v = smin_table.lookup(z, a, eng=ENG)
+        if v is not None: return [float(x) for x in v]
+    except Exception:  # noqa: BLE001  (no table / unreadable: compute it)
+        pass
     import subprocess
     code = ("import json,sys; from physics.hf.compound.dens_reference import _structure_of as S; "
             "o,p,m=S(int(sys.argv[1]),int(sys.argv[2])); print(json.dumps([float(m.s_mev[0,0,t]) for t in range(7)]))")
@@ -61,13 +72,44 @@ def cn_separation_mev(z, a):
     return json.loads(line[-1])
 
 
+def warm_job(a):
+    """The job through a running warm pool (warmpool.py), in this script's output format; None if no pool answers."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import warmpool as WP
+    P = WP.Pool()
+    if not P.alive(): return None
+    w0 = time.time(); comp = a.comp.replace(" [FEW->mean]", "").strip()
+    gridtop = not a.no_gridtop and os.environ.get("TW_GRIDTOP", "1").strip().lower() not in ("0", "n", "no", "off", "false")
+    out = dict(z=a.z, a=a.a, e_ev=a.e, comp=comp, kw=a.kw, arms=ARMS[comp], err="")
+    try:
+        sm = round(float(min(P.smin(a.z, a.a))), 4) if gridtop else None   # engine_grid.run pads with the rounded value
+        r = P.run(dict(z=a.z, a=a.a, grid=[a.e], comp=comp, kw=a.kw, work=os.path.abspath(a.work), smin=sm, gridtop=gridtop,
+                       skip_pad=True, keep=a.keep))
+    except (OSError, RuntimeError, ValueError) as ex:
+        return None if isinstance(ex, OSError) else dict(out, err=f"warm pool: {type(ex).__name__}: {ex}"[:400])
+    if sm is not None:
+        out["s_min_mev"] = round(sm, 4)
+    out["grid_ev"] = [a.e, a.e + (-sm + 1.0) * 1e6] if (sm is not None and sm < 0) else [a.e]
+    out["gridtop"] = gridtop; out["err"] = r.get("err", "")
+    if r.get("channels"): out["channels"] = {c: v[0] for c, v in r["channels"].items()}
+    if r.get("log_tail"): out["log_tail"] = r["log_tail"]
+    out["cpu_s"] = r.get("cpu_s"); out["wall_s"] = round(time.time() - w0, 2); out["warm"] = True
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--z", type=int, required=True); ap.add_argument("--a", type=int, required=True)
     ap.add_argument("--e", type=float, required=True); ap.add_argument("--comp", default="P"); ap.add_argument("--kw", default="")
     ap.add_argument("--work", required=True); ap.add_argument("--keep", action="store_true")
     ap.add_argument("--no-gridtop", action="store_true", help="bare one-point grid [E] (TALYS grid top; wrong when some S < 0)")
+    ap.add_argument("--cold", action="store_true", help="never use the warm pool")
     a = ap.parse_args(); t0 = time.process_time(); w0 = time.time()
+    if not a.cold and os.environ.get("TW_WARM", "1") != "0":
+        res = warm_job(a)
+        if res is not None:
+            if not a.keep: shutil.rmtree(a.work, ignore_errors=True)
+            sys.stdout.write(json.dumps(res) + "\n"); sys.stdout.flush(); return
     comp = a.comp.replace(" [FEW->mean]", "").strip()
     os.makedirs(a.work, exist_ok=True); grid = os.path.join(a.work, "grid.json")
     out = dict(z=a.z, a=a.a, e_ev=a.e, comp=comp, kw=a.kw, arms=ARMS[comp], err="")
@@ -75,7 +117,8 @@ def main():
     g = [a.e]
     if gridtop:
         try:
-            smin = min(cn_separation_mev(a.z, a.a))
+            # rounded as engine_grid.run pads (and as the warm pool's one-energy jobs pad): one grid for this nucleus everywhere
+            smin = round(float(min(cn_separation_mev(a.z, a.a))), 4)
         except Exception as ex:  # noqa: BLE001  (a job without S cannot be padded safely: report it)
             out["err"] = f"GRIDTOP pad: separation energies unavailable: {type(ex).__name__}: {ex}"[:400]
             out["cpu_s"] = round(time.process_time() - t0, 2); out["wall_s"] = round(time.time() - w0, 2)
