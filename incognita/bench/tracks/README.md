@@ -45,8 +45,9 @@ value; `leaderboard` prints the count. Before, (n,α) was MT 107 alone and He-4 
 so a file that lumps alpha emission into MT 5 was scored on a partial channel: ENDF/B-VIII.1 puts 91-96 % of the 14 MeV
 (n,α) of Mn-55 and Fe-54/56/57 (and half of V-51's) in MT 5, ENDF/B-VII.1 does it for Mn-55, and JEFF-4.0 has σ(MT 5)
 above 1 % of the (n,α) value on Cr, Mn, Fe, Ta and W rows. Known effect: inside resolved-resonance structure a point value is sensitive to the placement
-rule (the dated TENDL-Y entry of `capture-retro` gives 0.193 here and 0.184 with the lab's older placement; the difference
-sits on a few rows of a few nuclei, mostly 2 Gd-154 rows).
+rule (the dated TENDL-Y entry of `capture-retro` gave 0.193 here and 0.184 with the lab's older placement; the difference
+sits on a few rows of a few nuclei, mostly 2 Gd-154 rows). Since 2026-11-07 TENDL-Y takes the newest release whose
+release year is <= Y (TENDL-2015 counts from 2016, TENDL-2023 from 2024): 0.173 on 193 rows.
 
 **Corrections of 2026-11-06.** (1) The REACTION code of every ch-n2n / ch-np / ch-na / ch-sacs / ch-capture row was
 checked with the rule the light (Z 1-25) rows already follow (`incognita/bench/reaction_check.py`, applied by

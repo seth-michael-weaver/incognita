@@ -9,6 +9,25 @@ cards: [`incognita/bench/tracks/README.md`](../../incognita/bench/tracks/README.
 Metric everywhere: rms of log10(prediction / measurement), in dex (0.1 dex ≈ 26 %). Brackets are 95 % nucleus-bootstrap
 intervals; Δ is a paired difference on the rows both entries cover (negative = the first entry is better).
 
+## Corrections of 2026-11-07 (scoring audit BUGSCORE2; no ranking or verdict changes)
+
+Applied and recomputed on this page (details, impact tables and the drafts not applied:
+[`docs/release/amendments/BUGSCORE2.md`](amendments/BUGSCORE2.md)):
+
+1. **ch-sacs integrated the fission spectrum from 100 keV only** (`incognita/eval/spectra.py`). A measured
+   spectrum average covers the whole spectrum; 1.3 % of it lies below 100 keV, where capture rises as 1/v. Every
+   library's capture SACS was about 0.024 dex low and every threshold SACS 0.006 dex high. The integral now starts at
+   1e-5 eV. ch-sacs rms falls by 0.001-0.002 dex for every library (capture rows 0.010-0.015); the ranking is unchanged:
+   CENDL-3.2 0.230 → 0.228 (307 rows), JENDL-4.0 0.251 → 0.249 (239), JENDL-5 0.255 → 0.254.
+2. **capture-retro, the TENDL-Y entry chose releases by the year in their name**, so TENDL-2023 (released 2024) stood
+   for Y = 2023 and TENDL-2015 (released 2016) for Y = 2015. It now takes the newest release whose release year
+   (`DATED_Y`, the rule of the dated tracks) is ≤ Y; the Y = 2015 rows have no such release here and are not covered.
+   TENDL-Y: 0.193 (286 rows) → 0.173 (193 rows); ours − TENDL-Y: −0.056 [−0.106, −0.020] → −0.041 [−0.070, −0.013].
+   The retrodiction win stands. (Moving only TENDL-2023 gives 0.196, −0.058 [−0.108, −0.022], 286 rows.)
+3. Dated-track bin averages (`binavg.py`) now apply the same MT 5 rules as the point scorer (an (n,α) given only inside
+   MT 5 is kept; "comparator incomplete" only where σ(MT 5) can exceed 1 % of the value). No published row changes:
+   ENDF/B-VII.1, the one library re-placed on the dated tracks, has neither case.
+
 ## Corrections of 2026-11-06 (they change the library rankings; read with every table below)
 
 An audit found defects in how the libraries were compared and in some rows. All are fixed in the scorer and the data;
@@ -85,7 +104,7 @@ way, 0.184 → 0.204. Dropping the partial-state rows lowers every library's ch-
 
 | track | INCOGNITA | best rival that is fair on this track | Δ [95 %] |
 |---|---|---|---|
-| capture-retro (286 rows, 16 nuclei, measured after year Y) | 0.1373 | TENDL-Y, the release of year ≤ Y: 0.193 | −0.056 [−0.106, −0.020] |
+| capture-retro (286 rows, 16 nuclei, measured after year Y) | 0.132 (193 rows) | TENDL-Y, the newest release made public by year Y: 0.173 | −0.041 [−0.070, −0.013] |
 | same | 0.1377 (281 rows) | ENDF/B-VII.0 (2006), bin average: 0.149 | −0.011 [−0.069, +0.059] |
 | same | 0.130 (276 rows) | JENDL-4.0 (2010), point sample: 0.149 | −0.019 [−0.071, +0.026] |
 | capture-heldout, D0 withheld (DEV; in-sample for the E1 constant; a tie on the sealed reserve) | 0.1765 | default TALYS: 0.1898 | −0.0133 [−0.0229, −0.0035] |
@@ -94,8 +113,9 @@ way, 0.184 → 0.204. Dropping the partial-state rows lowers every library's ch-
 | na-heprod (197 rows) | 0.237 | default TALYS: 0.308 | −0.071 [−0.126, −0.025] |
 | na-neverread (51 rows) | 0.285 | default TALYS: 0.411 | −0.126 [−0.272, +0.088] |
 
-The retrodiction win is small in sample (16 nuclei). TENDL-Y's 0.193 is the reproducible placement; an earlier,
-unrecorded development placement gave 0.184 (mostly two Gd-154 rows). Against the 2006 / 2010 libraries, which
+The retrodiction win is small in sample (16 nuclei). TENDL-Y's 0.173 (193 rows, release-year rule of 2026-11-07) is the reproducible placement; before
+that correction it read 0.193 on 286 rows, and an earlier, unrecorded development placement gave 0.184 (mostly two
+Gd-154 rows). Against the 2006 / 2010 libraries, which
 are also genuine retrodictions, the difference is not significant. The 2026-11-06 check of placement (point samples
 against bin averages) leaves this ranking as it was: ENDF/B-VII.0 scores 0.149 either way; JENDL-4.0 and the older
 TENDL releases behind TENDL-Y could not be bin-averaged here (files not reachable), and on the four libraries that
@@ -132,7 +152,7 @@ RECONR curves). It moves DEFD − ENDF/B-VII.1 above 100 keV toward the library 
 | ch-n2n | 2334 / 148 | ENDF/B-VII.0 0.113 (2073) | JEFF-3.3 0.115 (2296) | JENDL-5 0.117 | none | — |
 | ch-np | 1525 / 65 | CENDL-3.2 0.172 (1402) | JEFF-3.3 0.181 | JENDL-4.0 0.182 (1511) | none | — |
 | ch-capture | 5872 / 124 | TENDL-2025 0.216 | JEFF-4.0 0.221 (point sample) | JENDL-5 0.224 (point sample) | none | — |
-| ch-sacs | 395 / 86 | CENDL-3.2 0.230 (307) | JENDL-4.0 0.251 (239) | JENDL-5 0.255 | none | — |
+| ch-sacs | 395 / 86 | CENDL-3.2 0.228 (307) | JENDL-4.0 0.249 (239) | JENDL-5 0.254 | none | — |
 
 Ranking = rms among entries covering at least half the rows; rows in brackets = the entry covers fewer rows than the
 track, so compare it on the paired Δ in the full table, not on rms. Capture tracks: ENDF/B-VIII.1, -VII.1, -VII.0 and
@@ -196,7 +216,8 @@ Verified (V), by rerunning on 2026-09-23:
   table for (n,α), (n,2n), (n,p), capture, differential and spectrum-averaged (e.g. (n,α) JENDL-5 0.3087, capture
   ENDF/B-VIII.1 0.3174, (n,p) SACS TENDL-2025 0.2604).
 - The ENDF-6 path (raw ENDF/B-VIII.1 + RECONR) gives bit-identical values to the staged grid on 6 files, all tracks.
-- The one mismatch: the dated TENDL-Y retrodiction entry, 0.193 here vs 0.184 in development (placement rule, see above).
+- The one mismatch: the dated TENDL-Y retrodiction entry, 0.193 here vs 0.184 in development (placement rule, see above);
+  0.173 on 193 rows since the release-year correction of 2026-11-07.
 - 2026-11-06, before the corrections were applied: the old scorer on the old rows reproduced the published numbers of
   the nine libraries whose grids are on our machines (e.g. JENDL-5 ch-na 0.3087, ENDF/B-VIII.1 ch-capture 0.3174, JEFF-3.3
   ch-n2n 0.146, ENDF/B-VII.0 and JENDL-4.0 capture-retro 0.149, JENDL-4.0 He production 0.174), except CENDL-3.2 on ch-na:
