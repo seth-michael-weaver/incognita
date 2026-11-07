@@ -1,11 +1,11 @@
 {
- "product": "CAPSET-v2.1 curated EXFOR capture set, Z 1-92 (data/curation/capture_v2)",
- "version": "2.1",
- "built": "2026-11-07 13:19",
+ "product": "CAPSET-v2.2 curated EXFOR capture set, Z 1-92 (data/curation/capture_v2)",
+ "version": "2.2",
+ "built": "2026-11-07 16:50",
  "script": "scripts/build_capture_v2.py",
- "public_commit_base": "e22decd6",
- "research_commit": "5348fb93eabe2f595b580bbde4ecf6b1533d1758",
- "curation_code": "research data/curate/quality_model.py + review_log.py (unchanged) with this repository's data/curate/discrepancy.py (unchanged) and data/ingest/exfor.py (V2_FIXES = all six for S1-S8; V21_ALL = the six + encm, and the ENERGY_FIX of the D10 lines, for the v2.1 tables)",
+ "public_commit_base": "3fe96822",
+ "research_commit": "7a7fb3597ab2c5d863eff3e1ff098703af75ac01",
+ "curation_code": "research data/curate/quality_model.py + review_log.py (unchanged) with this repository's data/curate/discrepancy.py (unchanged) and data/ingest/exfor.py (V2_FIXES = all six for S1-S8; V21_ALL = the six + encm, and the ENERGY_FIX of the D10 lines, for the v2.1 and v2.2 tables; v2.2 = v2.1 + the D11 lines on the same staging)",
  "entry_zip": {
   "path": "raw/exfor/entry_2026-10-14.zip",
   "sha256": "1f54ffe07100e7e276179824475dfe91863238b2e37f9425a40c0012cf7f39a9",
@@ -36,24 +36,24 @@
  "human_decision_files": {
   "research data/curate/review_decisions.jsonl": "87b34551c08b655cabcfc1bfad36de6287897822f1eb1ebbafb7f4f3055a9235",
   "data/curation/inputs/review_decisions_Z1-25.jsonl": "33def54877ca917587dd7240dfa6228b0f7186e2fa7396945efe339db8c215da",
-  "data/curation/capture_v2/review_decisions_capture_v2.jsonl": "b0986d77285940b974b0dc70247e51f205928132672d46065a21050c2d8ceadf"
+  "data/curation/capture_v2/review_decisions_capture_v2.jsonl": "8b898e7a0259cbbfd24c36cebaf76fbbb7b2ae983020d07dc93bb4483f5d1b9e"
  },
  "fit": {
-  "left_out_of_consensus_fit": 314,
+  "left_out_of_consensus_fit": 320,
   "peelle_rebased_datasets": 9257,
   "peelle_final": {
-   "cells_rebased": 17337,
-   "cells_abs_units": 17337,
-   "median_abs_log_factor_x1000": 2
+   "cells_rebased": 17324,
+   "cells_abs_units": 17324,
+   "median_abs_log_factor_x1000": 1
   },
   "peelle_clip": 3.0,
   "summary": {
    "fit": {
-    "n_cells": 35160,
-    "n_datasets": 9272,
+    "n_cells": 35154,
+    "n_datasets": 9266,
     "n_bins": 20107,
     "last_delta": 0.020125405417014797,
-    "rms_delta": 0.00017167709084173202,
+    "rms_delta": 0.0001716946753554009,
     "iterations": 300,
     "converged": false
    },
