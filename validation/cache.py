@@ -149,7 +149,13 @@ def _fresh(out: Path, *sources: Path) -> bool:
     if not out.is_file():
         return False
     t = out.stat().st_mtime
-    return all((not s.is_file()) or s.stat().st_mtime <= t for s in sources)
+
+    def newest(s: Path) -> float:  # a directory source (the <lib>_cov.zarr store) counts by its newest entry
+        if s.is_dir():
+            return max([s.stat().st_mtime] + [p.stat().st_mtime for p in s.rglob("*")])
+        return s.stat().st_mtime if s.is_file() else float("-inf")
+
+    return all(newest(s) <= t for s in sources)
 
 
 def cache_library_xs(lib: str, mt: int, *, force: bool = False) -> Path:

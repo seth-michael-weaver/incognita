@@ -90,7 +90,7 @@
     "exclude": 2861,
     "fix-unit": 4,
     "datasets": 10619,
-    "changed_vs_previous": 715
+    "changed_vs_previous": 606
    },
    {
     "step": "S2_numfix",
@@ -99,7 +99,7 @@
     "exclude": 2865,
     "fix-unit": 4,
     "datasets": 10706,
-    "changed_vs_previous": 397
+    "changed_vs_previous": 375
    },
    {
     "step": "S3_parser",
@@ -172,7 +172,7 @@
     "exclude": 388,
     "fix-unit": 0,
     "datasets": 1682,
-    "changed_vs_previous": 44
+    "changed_vs_previous": 37
    },
    {
     "step": "S2_numfix",
@@ -181,7 +181,7 @@
     "exclude": 388,
     "fix-unit": 1,
     "datasets": 1697,
-    "changed_vs_previous": 68
+    "changed_vs_previous": 61
    },
    {
     "step": "S3_parser",

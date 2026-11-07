@@ -165,10 +165,9 @@ MT_BY_CHANNEL: dict[frozenset[tuple[str, int]] | str, int] = {
     _k("8N"): 161,
     _k("4N+P"): 156,
     _k("3N+D"): 157,
-    _k("2N+D"): 154,
-    _k("2N+T"): 159,
-    _k("2N+HE3"): 174,
-    _k("N+2D"): 171,
+    _k("2N+D"): 11,    # ENDF-102: (n,2nd) 11, (n,2nt) 154, (n,2n3He) 176 (154 / 159 / 174 / 171 before 2026-11-07:
+    _k("2N+T"): 154,   # (n,2nt) / (n,2npa) / (n,5nt) / (n,6nd)); (n,n2d) has no MT
+    _k("2N+HE3"): 176,
     _k("3P"): 197,
 }
 # "G" is not a particle token in _channel_key; register explicitly

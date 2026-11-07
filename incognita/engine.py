@@ -11,7 +11,7 @@ fetches the part the engine reads). The default arm is the shipped no-data recip
 (``INCOGNITA_TALYS_FIT=nodata``: TALYS defaults with INCOGNITA's own E1-width constant).
 
 The engine returns central values only. Calibrated intervals exist for capture in the shipped
-library: :func:`incognita.library.capture`.
+library: :func:`incognita.library.capture_curve`.
 """
 
 from __future__ import annotations
@@ -51,6 +51,19 @@ class Result:
         self.channels.join(self.totals).to_csv(path)
 
 
+def _run_env(arm: str, cc_cache: str | None) -> None:
+    """The environment of one run: the arm, and the coupled-channels cache directory (``cc_cache`` when given, else the
+    caller's INCOGNITA_CC_CACHE, else ~/.cache/incognita-cc). An explicit ``cc_cache`` always wins, also on a later call."""
+    if arm:
+        os.environ["INCOGNITA_TALYS_FIT"] = arm
+    else:
+        os.environ.pop("INCOGNITA_TALYS_FIT", None)
+    if cc_cache:
+        os.environ["INCOGNITA_CC_CACHE"] = cc_cache
+    else:
+        os.environ.setdefault("INCOGNITA_CC_CACHE", os.path.join(os.path.expanduser("~"), ".cache", "incognita-cc"))
+
+
 def run(Z: int, A: int, energies_mev=None, *, arm: str = "nodata", cc_cache: str | None = None,
         keep_zero: bool = False, keep_raw: bool = False) -> Result:
     """Run the engine for neutrons on (Z, A) and return every exclusive channel in mb.
@@ -69,12 +82,7 @@ def run(Z: int, A: int, energies_mev=None, *, arm: str = "nodata", cc_cache: str
     if energies_mev is None:
         energies_mev = np.geomspace(1e-3, 20.0, 30)
     e = tuple(float(np.float32(x)) for x in np.asarray(energies_mev, float))
-    if arm:
-        os.environ["INCOGNITA_TALYS_FIT"] = arm
-    else:
-        os.environ.pop("INCOGNITA_TALYS_FIT", None)
-    default_cache = os.path.join(os.path.expanduser("~"), ".cache", "incognita-cc")
-    os.environ.setdefault("INCOGNITA_CC_CACHE", cc_cache or default_cache)
+    _run_env(arm, cc_cache)
 
     import torch
 

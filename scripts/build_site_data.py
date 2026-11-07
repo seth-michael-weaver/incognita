@@ -80,6 +80,20 @@ def relerr(r):
     return sig(m, 3) if m is not None and not math.isnan(m) else None
 
 
+def shown_value(mean_b, decision, factor):
+    """The value the page shows for a cell. A fix-unit dataset (a compiled unit slip, e.g. B for mb) is labelled
+    "unit fixed" on the page, so it is shown with the curation's factor applied (the cell keeps the compiled value)."""
+    if decision == "fix-unit" and factor is not None and not math.isnan(factor) and mean_b is not None:
+        return mean_b * factor
+    return mean_b
+
+
+def n_use(points):
+    """Measured points the curation did not exclude (index column n_use): kept, down-weighted, and unit-fixed cells
+    (a fix-unit cell is used with the curation's factor applied, so it counts as a measurement)."""
+    return sum(1 for p in points if p[5] != "x")
+
+
 def main():
     for old in ("z", "n"):  # data/z/<Z>.json was the per-element layout before per-nuclide files
         shutil.rmtree(os.path.join(OUT, old), ignore_errors=True)
@@ -134,7 +148,7 @@ def main():
              else ("exfor_capture_Z26-92_trust_v2.parquet", "exfor_capture_Z1-25_trust_v2.parquet"))
     CELLS = (("exfor_cells.parquet", "exfor_cells_Z1-25.parquet") if v1
              else ("exfor_cells_Z26-92_v2.parquet", "exfor_cells_Z1-25_v2.parquet"))
-    meta = {}
+    meta, ufix = {}, {}
     for fn in TRUST:
         for r in pq.read_table(os.path.join(CAP, fn), columns=["dataset_key", "first_author", "year", "facility", "unit_fix_factor"]).to_pylist():
             assert r["dataset_key"] not in meta, r["dataset_key"]
@@ -203,7 +217,7 @@ def main():
         index.append([Z, A, n.get("tier", -1), n.get("macs30"), (n.get("macs") and n.get("macsU") and n["macsU"][KT.index(30)]),
                       len(m["cap"]) if m else 0, len(m["mxw"]) if m else 0, len(m["ds"]) if m else 0,
                       len(t.get("n2n", [])), len(t.get("np", [])), len(t.get("na", [])), 1 if n.get("valid") else 0,
-                      sum(1 for p in (m["cap"] + m["mxw"] if m else []) if p[5] != "x")])
+                      n_use(m["cap"] + m["mxw"]) if m else 0])
     for (Z, A), m in meas.items():
         if A == 0:  # natural element
             byz[Z]["nat"] = {"meas": {"ds": m["ds"], "cap": m["cap"], "mxw": m["mxw"], "other": dict(m["other"])}}

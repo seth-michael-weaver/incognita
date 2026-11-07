@@ -15,7 +15,9 @@ continuum member MT649/849; otherwise part of the channel sits in MT5 and the ch
   - log-energy bin averages on the site's 64-point grid (data/index.json grid_ev, 1 keV - 20 MeV): bin edges at the
     geometric midpoints between grid points (first/last half-bins mirrored, top clipped at 20 MeV); the average is
     (1/ln(b/a)) * integral sigma(E) dE/E, exact for the lin-lin pointwise data;
-  - MACS at the site's 12 kT values: (2/sqrt(pi)) / (kT)^2 * integral sigma(E) E exp(-E/kT) dE (exact on lin-lin).
+  - MACS at the site's 12 kT values: (2/sqrt(pi)) / (kT)^2 * integral sigma(E) E exp(-E/kT) dE over the centre-of-mass
+    energy E = E_lab AWR/(AWR+1), as INCOGNITA's own MACS (library v0.2.1+); exact on lin-lin. (Before 2026-11-07 this
+    integrated over the lab energy, biased high by ~(1+1/A)^alpha: +3 % at A < 20; cached lab-frame reductions are redone.)
 Rounded to 4 significant digits. Capture in b, everything else in mb.
 
 Output docs/walkthrough/data/lib/<Z>.json, loaded by js/data.js only when the reader ticks the overlay box; never part of
@@ -115,16 +117,24 @@ def binavg(e, s, edges):
     return out
 
 
-def macs(e, s, kts_ev):
-    """(2/√π)/(kT)² ∫ σ E e^(−E/kT) dE, exact on lin-lin segments."""
+def macs(e, s, kts_ev, awr):
+    """MACS(kT) = (2/√π)/(kT)² ∫ σ E e^(−E/kT) dE over the CENTRE-OF-MASS energy E = r E_lab, r = awr/(awr+1) (the
+    definition library v0.2.1+ uses; KADoNiS), exact on lin-lin segments of σ(E_lab). Substituting E = r E_lab gives the
+    lab-energy integral at theta = kT/r: MACS(kT) = lab(kT/r). awr=None: the lab-energy integral (v0.2 and earlier)."""
+    from scipy.special import gammainc
+    r = 1.0 if awr is None else awr / (awr + 1.0)
+    e, s = np.asarray(e, float), np.asarray(s, float)
     x0, x1, y0, y1 = e[:-1], e[1:], s[:-1], s[1:]
     ok = x1 > x0
-    b = np.where(ok, (y1 - y0) / np.where(ok, x1 - x0, 1), 0); a = y0 - b * x0
+    b = np.where(ok, (y1 - y0) / np.where(ok, x1 - x0, 1), 0)
     res = []
-    for T in kts_ev:
-        F1 = lambda x: -T * np.exp(-x / T) * (x + T)
-        F2 = lambda x: -T * np.exp(-x / T) * (x * x + 2 * T * x + 2 * T * T)
-        I = np.sum(np.where(ok, a * (F1(x1) - F1(x0)) + b * (F2(x1) - F2(x0)), 0))
+    for T in (k / r for k in kts_ev):
+        # per segment, t = x - x0: (x0 + t)(y0 + b t) = x0 y0 + (y0 + b x0) t + b t^2, and
+        # int_0^L t^n e^(-t/T) dt = n! T^(n+1) P(n+1, L/T) (regularized lower incomplete gamma: no cancellation; the
+        # antiderivative form F(x1) - F(x0) lost the result to round-off, ~1 % at kT = 30 keV on a dense 1/v grid)
+        z = np.where(ok, (x1 - x0) / T, 0.0)
+        j0, j1, j2 = T * gammainc(1, z), T ** 2 * gammainc(2, z), 2 * T ** 3 * gammainc(3, z)
+        I = np.sum(np.where(ok, np.exp(-x0 / T) * (x0 * y0 * j0 + (y0 + b * x0) * j1 + b * j2), 0))
         res.append(2 / math.sqrt(math.pi) * I / T ** 2)
     return res
 
@@ -133,7 +143,12 @@ def reduce_one(job):
     lib, Z, A, path, edges, kts = job
     dst = os.path.join(WORK, lib, f"{Z}_{A}.json")
     if os.path.exists(dst):
-        return dst, "cached"
+        try:
+            old = json.load(open(dst))
+        except ValueError:
+            old = {}
+        if "macs" not in old or old.get("macs_frame") == "cm":  # a lab-frame MACS (before 2026-11-07) is redone
+            return dst, "cached"
     import openmc.data
     from openmc.data import endf
     os.environ["PATH"] = os.path.dirname(sys.executable) + os.pathsep + os.environ.get("PATH", "")  # njoy lives beside python in the env
@@ -166,7 +181,8 @@ def reduce_one(job):
                 continue
             rec[k] = [sig(v * scale) for v in binavg(e, s, edges)]
             if k == "cap":
-                rec["macs"] = [sig(v * 1e3) for v in macs(e, s, kts)]
+                rec["macs"] = [sig(v * 1e3) for v in macs(e, s, kts, float(ev.target["mass"]))]
+                rec["macs_frame"] = "cm"
         json.dump(rec, open(dst, "w"))
         return dst, "ok"
     except Exception as ex:  # noqa: BLE001

@@ -247,9 +247,10 @@
     else { const lo = Math.min(from, to), hi = Math.max(from, to); for (let i = lo; i < hi; i++) { const [x1, y1, x2, y2] = connector(null, i); path.push([x1, y1], [x2, y2]); } if (to < from) path.reverse(); }
     if (path.length < 2) return drawFlow();
     const t0 = performance.now(), dur = Math.min(900, 260 + 160 * Math.abs(to - from));
-    anim = { path, col: STAGES[to].col };
-    const step = (now) => { const t = clamp((now - t0) / dur, 0, 1); drawFlow(t < 1 ? t * t * (3 - 2 * t) : null); if (t < 1) anim.raf = requestAnimationFrame(step); else anim = null; };
-    if (anim.raf) cancelAnimationFrame(anim.raf); anim.raf = requestAnimationFrame(step);
+    if (anim && anim.raf) cancelAnimationFrame(anim.raf); // cancel the running pulse BEFORE replacing it (it used to keep running and null the new one)
+    const a = anim = { path, col: STAGES[to].col };
+    const step = (now) => { if (anim !== a) return; const t = clamp((now - t0) / dur, 0, 1); drawFlow(t < 1 ? t * t * (3 - 2 * t) : null); if (t < 1) a.raf = requestAnimationFrame(step); else anim = null; };
+    a.raf = requestAnimationFrame(step);
   }
 
   const hitBox = (x, y) => boxes.findIndex((b) => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h);

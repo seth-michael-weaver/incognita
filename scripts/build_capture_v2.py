@@ -461,6 +461,12 @@ def main():
     print(json.dumps({k: counts[k] for k in ("summary", "ladder")}, indent=1, default=str))
 
 
+def changed_count(cur, prev) -> int:
+    """Datasets whose decision differs between two ladder steps: a different decision, or present in one step only.
+    Absent in both (null == null) is not a change (polars' null != null is null, and null | False stays null)."""
+    return int(((cur != prev).fill_null(False) | (cur.is_null() != prev.is_null())).sum())
+
+
 def report(a, i_v1, i_nf, i_v2, chk, lines, audit, q, cells, lad, pstats, p2, r2) -> dict:
     """Before/after counts per defect, the decision ladder (ladder_v2.csv) and the change table (changes_v1_v2.csv)."""
     import polars as pl
@@ -522,7 +528,7 @@ def report(a, i_v1, i_nf, i_v2, chk, lines, audit, q, cells, lad, pstats, p2, r2
                    "datasets": int(x[c].is_not_null().sum())}
             if i:
                 p = cols[i - 1]
-                row["changed_vs_previous"] = int(((x[c] != x[p]) | (x[c].is_null() != x[p].is_null())).fill_null(True).sum())
+                row["changed_vs_previous"] = changed_count(x[c], x[p])
             ladder[lab].append(row)
     trans = {}
     for lab, lo, hi in (("Z26-92", 26, 200), ("Z1-25", 1, 25)):
