@@ -5,7 +5,7 @@ Runs ONE nuclide of the TALYSWORLD library job against an engine checkout: the l
 `libv02/inputs` bundle: lines_P / lines_A / actjs_lines_*, sl_meas_b.csv and its code/ prodrun -> pprun -> r52pool ->
 engine_pool, `fewres off`, `pewindow g`), the arms of the library composition (JS(P,A): P and A; ACTJS A(rotor): AJ), on
 an energy grid given as a JSON list of eV. The bundle sets the engine's switches under their pre-release NUCLIDO_* names;
-they are mirrored here to the INCOGNITA_* names this repository reads.
+they are mirrored here to the INCOGNITA_* names this repository reads (scripts/talysworld/engine_env.py).
 
 Writes a JSON file {arm: {key: [float.hex(), ...]}} with the gate channels of every arm (total, elastic, nonelastic,
 capture, (n,p), (n,a), (n,2n), inelastic, fission), exact to the bit.
@@ -19,19 +19,9 @@ import shutil
 import sys
 
 
-class _Mirror(type(os.environ)):
-    def __setitem__(self, k, v):
-        super().__setitem__(k, v)
-        if k.startswith("NUCLIDO_"):
-            super().__setitem__("INCOGNITA_" + k[8:], v)
-
-    def __delitem__(self, k):
-        super().__delitem__(k)
-        if k.startswith("NUCLIDO_"):
-            try:
-                super().__delitem__("INCOGNITA_" + k[8:])
-            except KeyError:
-                pass
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                                "scripts", "talysworld"))
+import engine_env  # noqa: E402  (the one NUCLIDO_* -> INCOGNITA_* switch table)
 
 
 ARMS = {"P": ["P"], "A": ["A"], "AJ": ["AJ"], "JS(P,A)": ["P", "A"], "ACTJS A(rotor)": ["AJ"]}
@@ -48,9 +38,8 @@ def main():
     ap.add_argument("--z", type=int, required=True)
     ap.add_argument("--a", type=int, required=True)
     a = ap.parse_args()
-    os.environ.__class__ = _Mirror
-    for v in [k for k in os.environ if k.startswith(("NUCLIDO_", "INCOGNITA_"))]:
-        del os.environ[v]
+    engine_env.clear_switches()
+    engine_env.install(a.repo)
     H, INP = os.path.expanduser("~"), a.inputs
     os.makedirs(a.cc, exist_ok=True)
     # the library run environment (libv02 run.sh + worker.py), as scripts/talysworld/engine_job.py sets it

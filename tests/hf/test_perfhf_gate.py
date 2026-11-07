@@ -7,7 +7,9 @@ Two parts:
 * the production gate (`slow`, `needs_data`): `scripts/talysworld/engine_grid.py` (the TALYSWORLD engine
   calculator: library v0.2 deck, environment, runner and inputs, P arm, GRIDTOP pad) on Fe-56, Zr-90, Au-197
   and U-238, at 14.1 MeV alone and on the 64-point library grid, against the golden channels written from
-  origin/main 3aac5ab1 before the work started (`data/perfhf_gate.json`). Every channel the calculator
+  origin/main 3aac5ab1 before the work started (`data/perfhf_gate.json`; rewritten at 3fe96822 + SWNAMES6, when
+  engine_grid.py began to pass the library switches to this repository's engine under its INCOGNITA_* names: the
+  earlier golden file was a run without them, capture off by up to 126 %). Every channel the calculator
   reports (total, elastic, nonelastic, capture, (n,p), (n,a), (n,2n), inelastic, fission) must match
   exactly: the JSON keeps each float's repr, which round-trips the double.
 
