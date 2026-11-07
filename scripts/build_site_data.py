@@ -16,6 +16,12 @@ Z < 26 row is EXTRAPOLATED there, because the library's curated capture set star
 the library's tier (field "tier" stays the library's), it shows "measured (Z < 26)" when n_use > 0 and "not measured
 (Z < 26)" otherwise. Measured means: at least one curated EXFOR capture cell that the curation kept or down-weighted.
 
+Only the capture cross section of the ground-state (or natural) target is drawn and counted: cells on an isomeric target
+(Ta-180m, Hf-178m2, Ho-166m, ...) are not put on the ground state's file, and partial branches (EXFOR SF5 PAR, CN, DI,
+M-, INC: gamma-line, level or component cross sections) are listed with the datasets but only counted under "other". A
+fix-unit cell is drawn with its logged unit factor applied (the curation tables keep the value as compiled).
+Checked by tests/data/test_data_consistency.py.
+
 usage:  uv run --no-project --with pyarrow python scripts/build_site_data.py [--curation v1]
 """
 import csv, json, math, os, re, shutil
@@ -35,6 +41,10 @@ SYM = ("n H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co
 TIERS = ["MEASURED", "ANCHORED", "INTERPOLATED", "EXTRAPOLATED"]
 KT = [5, 8, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100]
 DEC = {"keep": "k", "downweight": "d", "exclude": "x", "fix-unit": "f"}
+# EXFOR SF5 branches that are a part of capture (partial gamma-line or level cross sections, compound / direct components,
+# "metastable excluded"), not the capture cross section: listed with the nuclide's datasets, counted under "other", not
+# drawn as capture and not counted as a capture measurement (n_use)
+PARTIAL = {"PAR", "CN", "DI", "M-", "INC"}
 
 
 def sig(v, n=4):
@@ -51,9 +61,12 @@ def sigl(xs, n=4):
 
 
 def za(nuc):
-    """'Z028N032M0' -> (28, 60); 'Z036NAT' -> (36, 0)"""
-    m = re.match(r"Z(\d+)N(\d+)", nuc)
+    """'Z028N032M0' -> (28, 60); 'Z036NAT' -> (36, 0); an isomeric target ('Z073N107M1', Ta-180m) -> (None, None):
+    the site has one file per ground-state nuclide, and capture on an isomer is a different reaction"""
+    m = re.match(r"Z(\d+)N(\d+)(?:M(\d+))?$", nuc)
     if m:
+        if m.group(3) not in (None, "0"):
+            return None, None
         return int(m.group(1)), int(m.group(1)) + int(m.group(2))
     m = re.match(r"Z(\d+)NAT", nuc)
     return (int(m.group(1)), 0) if m else (None, None)
@@ -123,24 +136,33 @@ def main():
              else ("exfor_cells_Z26-92_v2.parquet", "exfor_cells_Z1-25_v2.parquet"))
     meta = {}
     for fn in TRUST:
-        for r in pq.read_table(os.path.join(CAP, fn), columns=["dataset_key", "first_author", "year", "facility"]).to_pylist():
+        for r in pq.read_table(os.path.join(CAP, fn), columns=["dataset_key", "first_author", "year", "facility", "unit_fix_factor"]).to_pylist():
             assert r["dataset_key"] not in meta, r["dataset_key"]
-            meta[r["dataset_key"]] = (r["first_author"] or "", r["year"], r["facility"] or "")
+            meta[r["dataset_key"]] = (r["first_author"] or "", r["year"], r["facility"] or "", r["unit_fix_factor"])
     meas = defaultdict(lambda: {"ds": [], "dsi": {}, "cap": [], "mxw": [], "other": defaultdict(int)})
     cells = [r for fn in CELLS for r in pq.read_table(os.path.join(CAP, fn)).to_pylist()]
+    n_iso = 0
     for r in cells:
         Z, A = za(r["nuclide"])
         if Z is None:
+            n_iso += 1
             continue
         m = meas[(Z, A)]
         key = r["dataset_key"]
         if key not in m["dsi"]:
-            au, yr, fac = meta.get(key, ("", r["year"], ""))
+            au, yr, fac, _ = meta.get(key, ("", r["year"], "", None))
             m["dsi"][key] = len(m["ds"])
             m["ds"].append([key, au, yr if yr is not None else r["year"], fac])
         i, kind = m["dsi"][key], r["kind"]
-        pt = [sig(r["e_lo_ev"], 5), sig(r["e_hi_ev"], 5), sig(r["mean_b"]), relerr(r), i, DEC.get(r["decision"], "k"), r["state"] or ""]
-        if kind in ("sig", "av"):
+        y = r["mean_b"]
+        if r["decision"] == "fix-unit":  # the curation logs the factor and leaves the value as compiled; the page says "unit fixed"
+            f = meta[key][3]
+            assert f is not None and f > 0 and not math.isnan(f), key
+            y *= f
+        pt = [sig(r["e_lo_ev"], 5), sig(r["e_hi_ev"], 5), sig(y), relerr(r), i, DEC.get(r["decision"], "k"), r["state"] or ""]
+        if (r["branch"] or "") in PARTIAL:
+            m["other"][f"{r['branch'].lower()}:{kind}"] += 1
+        elif kind in ("sig", "av"):
             m["cap"].append(pt)
         elif kind == "mxw":
             m["mxw"].append(pt)
@@ -200,7 +222,8 @@ def main():
     tot = sum(os.path.getsize(os.path.join(dp, x)) for dp, _, fs in os.walk(os.path.join(OUT, "n")) for x in fs)
     print(f"{len(index)} nuclides, {nfiles} nuclide files ({tot / 1e6:.1f} MB), "
           f"index {os.path.getsize(os.path.join(OUT, 'index.json')) / 1e3:.0f} kB, "
-          f"measured capture on {sum(1 for k in meas if k[1] > 0)} nuclides + {len(nat)} natural elements")
+          f"measured capture on {sum(1 for k in meas if k[1] > 0)} nuclides + {len(nat)} natural elements "
+          f"({n_iso} cells on isomeric targets not shown)")
     light = [r for r in index if r[0] < 26]
     print(f"Z 1-25: {len(light)} nuclides, {sum(1 for r in light if r[-1] > 0)} measured (n_use > 0), "
           f"{sum(1 for r in light if r[5] + r[6] > 0 and r[-1] == 0)} with only excluded cells; "
