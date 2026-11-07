@@ -1,6 +1,5 @@
 /* Simplified Chinese (简体中文): instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
-  nav_calc: "计算器",
   in_title: "教师指南 · 走进核反应",
   credit_sub: "INCOGNITA 引擎移植自 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>（A. J. Koning、S. Hilaire、S. Goriely），并使用 TALYS 的核结构数据库。INCOGNITA 新增的内容<a href=\"./?lang=zh#code\" data-keep-lang>在教学页面末尾逐个开关地列出</a>。",
   in_kicker: "INCOGNITA · 教学指南",

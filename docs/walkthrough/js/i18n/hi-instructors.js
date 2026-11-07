@@ -1,6 +1,5 @@
 /* Hindi: instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
-  nav_calc: "कैलकुलेटर",
   in_title: "शिक्षकों के लिए · एक नाभिकीय अभिक्रिया के भीतर",
   credit_sub: "INCOGNITA इंजन <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) का एक पोर्ट है और TALYS के नाभिकीय संरचना डेटाबेस का उपयोग करता है। INCOGNITA जो कुछ जोड़ता है, वह <a href=\"./#code\" data-keep-lang>शिक्षण पेज के अंत में, स्विच-दर-स्विच सूचीबद्ध है</a>।",
   in_kicker: "INCOGNITA · शिक्षण मार्गदर्शिका",

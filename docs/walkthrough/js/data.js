@@ -352,7 +352,6 @@
     const nThr = d.thr ? Object.values(d.thr).reduce((s, v) => s + v.length, 0) : 0; if (nThr) st.push([nThr, T("dx_s_thr", "(n,2n), (n,p), (n,α) points")]);
     $("#dx-stats").innerHTML = st.map(([v, l]) => `<div class="dx-stat"><b>${v}</b><span>${l}</span></div>`).join("");
     const nm = r.A ? `${IDX.sym[r.Z]}-${r.A}` : "";
-    { const cl = $("#dx-calc"); if (cl) { cl.hidden = !nm; cl.href = "calculator.html?n=" + encodeURIComponent(nm) + WT.langQ("&"); } }   // the engine calculator for this nuclide
     $("#dx-cmd").textContent = nm && d.cap ? `uv run python -m incognita.library show ${nm} --version v0.2.2\n\n# or from Python\nfrom incognita.library import capture_curve\ndf = capture_curve("${nm}", version="v0.2.2")   # energy_ev, sigma_b, lo68_b, hi68_b, lo95_b, hi95_b, tier`
       : `# ${T("dx_nocurve", "no library curve for this entry; the measurements come from")} data/curation/capture_v2/${r.Z < 26 ? "exfor_cells_Z1-25_v2.parquet" : "exfor_cells_Z26-92_v2.parquet"}`;
     sweep();

@@ -1,6 +1,5 @@
 /* Italian: instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
-  nav_calc: "Calcolatore",
   in_title: "Per i docenti · Dentro una reazione nucleare",
   credit_sub: "Il motore INCOGNITA è un port di <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) e usa la banca dati di struttura nucleare di TALYS. Ciò che INCOGNITA aggiunge è <a href=\"./?lang=it#code\" data-keep-lang>elencato, opzione per opzione, alla fine della pagina didattica</a>.",
   in_kicker: "INCOGNITA · guida per i docenti",

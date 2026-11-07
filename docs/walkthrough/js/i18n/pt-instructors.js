@@ -1,6 +1,5 @@
 /* Portuguese (pt-PT): instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
-  nav_calc: "Calculadora",
   in_title: "Para docentes · Dentro de uma reação nuclear",
   credit_sub: "O motor INCOGNITA é uma adaptação (port) do <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a> (A. J. Koning, S. Hilaire, S. Goriely) e usa a base de dados de estrutura nuclear do TALYS. O que o INCOGNITA acrescenta está <a href=\"./?lang=pt#code\">listado, interruptor a interruptor, no fim da página didática</a>.",
   in_kicker: "INCOGNITA · guia para docentes",

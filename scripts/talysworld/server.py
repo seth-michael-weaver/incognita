@@ -27,6 +27,7 @@ from urllib.parse import parse_qs, urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 SITE = os.path.join(ROOT, "docs", "walkthrough")
+WEB = os.path.join(HERE, "web")   # the calculator page lives here (local only; not on the public site since 2026-11-07)
 LIB = os.path.join(ROOT, "library", "v0.2.1")
 H = os.path.expanduser("~")
 ENG = os.environ.get("TW_ENG", f"{H}/fastgate_data/eng/16606b356d6e")
@@ -325,7 +326,7 @@ class Handler(BaseHTTPRequestHandler):
         u = urlparse(self.path); q = {k: v[0] for k, v in parse_qs(u.query).items()}
         try:
             # "/" is the site's calculator page (one engine job per curve, live here); the older one-job-per-energy page is /classic
-            if u.path in ("/", "/index.html", "/calculator", "/calculator.html"): return self._file(os.path.join(SITE, "calculator.html"))
+            if u.path in ("/", "/index.html", "/calculator", "/calculator.html"): return self._file(os.path.join(WEB, "calculator.html"))
             if u.path == "/classic": return self._file(os.path.join(HERE, "index.html"))
             if u.path.startswith("/site/"):
                 p = os.path.normpath(os.path.join(SITE, u.path[len("/site/"):]))
@@ -366,9 +367,10 @@ class Handler(BaseHTTPRequestHandler):
                     with LOCK:
                         if qq in R["q"]: R["q"].remove(qq)
                 return
-            if not u.path.startswith("/api/"):   # the calculator page's own files (style, scripts, site data)
-                p = os.path.normpath(os.path.join(SITE, u.path.lstrip("/")))
-                if p.startswith(SITE + os.sep) and os.path.isfile(p): return self._file(p)
+            if not u.path.startswith("/api/"):   # the calculator page's own files (web/ first), then the site's style, scripts and data
+                for base in (WEB, SITE):
+                    p = os.path.normpath(os.path.join(base, u.path.lstrip("/")))
+                    if p.startswith(base + os.sep) and os.path.isfile(p): return self._file(p)
             return self._send(404, {"error": "not found"})
         except (KeyError, ValueError) as ex:
             return self._send(400, {"error": str(ex)})

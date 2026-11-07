@@ -1,6 +1,5 @@
 /* Korean: instructors' guide (instructors.html, js/instructors.js) */
 Object.assign(WT.L.ui, {
-  nav_calc: "계산기",
   in_min: "분",
   in_title: "교수자용 · 핵반응의 내부",
   credit_sub: "INCOGNITA 엔진은 <a href=\"https://doi.org/10.1140/epja/s10050-023-01034-3\">TALYS-2</a>(A. J. Koning, S. Hilaire, S. Goriely)를 이식한 것으로, TALYS 핵구조 데이터베이스를 사용합니다. INCOGNITA가 더한 것은 <a href=\"./?lang=ko#code\">해설 페이지 끝에 스위치별로 정리되어 있습니다</a>.",

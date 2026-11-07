@@ -12,13 +12,6 @@
   //   const b = sl.querySelector('a[href^="scoreboard.html"]');
   //   sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
   // }
-  // "Calculator" link (every page), after "Every nuclide": the engine calculator (calculator.html, js/calc.js)
-  if (sl && !sl.querySelector('a[href^="calculator.html"]')) {
-    const a = document.createElement("a"); a.href = "calculator.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_calc"; a.textContent = WT.ui("nav_calc", "Calculator");
-    if (/\/calculator(\.html)?$/.test(location.pathname)) { a.className = "here"; a.setAttribute("aria-current", "page"); }
-    const b = sl.querySelector('a[href^="data.html"]');
-    sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
-  }
   // "More topics" link (every page): lessons beside the engine story (reactors, radiation, fusion), placed after Scoreboard
   if (sl && !head.querySelector('[data-i18n="nav_topics"]')) { // topics.html has it as its chapter menu instead
     const a = document.createElement("a"); a.href = "topics.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_topics"; a.textContent = WT.ui("nav_topics", "More Nuclear Topics");
