@@ -76,6 +76,12 @@ INFLIGHT = {}          # (key, e) -> threading.Event + slot
 LOCK = threading.Lock()
 
 
+def inside(base, rel):
+    """base/rel if it is a path strictly inside base (no '..' escape, not a sibling sharing base's name prefix), else None."""
+    p = os.path.normpath(os.path.join(base, rel))
+    return p if p.startswith(base + os.sep) else None
+
+
 def load_library():
     global LIB_GRID
     import numpy as np, pandas as pd
@@ -329,8 +335,8 @@ class Handler(BaseHTTPRequestHandler):
             if u.path in ("/", "/index.html", "/calculator", "/calculator.html"): return self._file(os.path.join(WEB, "calculator.html"))
             if u.path == "/classic": return self._file(os.path.join(HERE, "index.html"))
             if u.path.startswith("/site/"):
-                p = os.path.normpath(os.path.join(SITE, u.path[len("/site/"):]))
-                if not p.startswith(SITE): return self._send(403, {"error": "forbidden"})
+                p = inside(SITE, u.path[len("/site/"):])
+                if p is None: return self._send(403, {"error": "forbidden"})
                 return self._file(p)
             if u.path == "/api/meta":
                 return self._send(200, dict(engine=ENGINE_LABEL + (GRIDTOP_NOTE if GRIDTOP else ""), keywords=KEYWORDS, comps=COMPS, library_grid_ev=LIB_GRID,
@@ -369,8 +375,8 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if not u.path.startswith("/api/"):   # the calculator page's own files (web/ first), then the site's style, scripts and data
                 for base in (WEB, SITE):
-                    p = os.path.normpath(os.path.join(base, u.path.lstrip("/")))
-                    if p.startswith(base + os.sep) and os.path.isfile(p): return self._file(p)
+                    p = inside(base, u.path.lstrip("/"))
+                    if p is not None and os.path.isfile(p): return self._file(p)
             return self._send(404, {"error": "not found"})
         except (KeyError, ValueError) as ex:
             return self._send(400, {"error": str(ex)})
