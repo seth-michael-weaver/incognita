@@ -52,7 +52,7 @@ def _solve(Z, A, band, e_mev, modnum, monkeypatch, refine=1):
     from physics.hf.ecis import incident as I
 
     monkeypatch.setenv("HF_CC_MODNUM", "1" if modnum else "0")
-    monkeypatch.setattr(I, "INCIDENT_REFINE", 1)  # FISSC2's halving off: this is the bare step
+    monkeypatch.setenv("HF_INC_REFINE", "1")  # FISSC2's halving off: this is the bare step
     I._SOLVED.clear()
     I._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     try:

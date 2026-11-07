@@ -90,16 +90,26 @@ SOSWITCH_DEFAULT_MEV = 10.0  # input_directpar.f90:64
 # default.  It is kept, not deleted: `HF_INC_REFINE=2` restores it, which is how the table above
 # was measured, and it is still the right lever if a future change puts the port back on a
 # discretisation of its own.
-INCIDENT_REFINE = int(os.environ.get("HF_INC_REFINE", "1"))
-INCIDENT_REFINE_EMAX_MEV = float(os.environ.get("HF_INC_REFINE_EMAX", "0.05"))
+#
+# ENGFIX4: both are read from the environment on every call (they used to be read once at import, so
+# a long-lived worker kept its parent's values).
+def incident_refine() -> int:
+    """`HF_INC_REFINE` (default 1 = off)."""
+    return int(os.environ.get("HF_INC_REFINE", "1"))
+
+
+def incident_refine_emax_mev() -> float:
+    """`HF_INC_REFINE_EMAX` (default 0.05 MeV)."""
+    return float(os.environ.get("HF_INC_REFINE_EMAX", "0.05"))
 
 
 def _refine_axis(e: Tensor, refine: int) -> Tensor:
     """The per-energy radial refinement of `incident_coupled` (one int per incident energy)."""
-    if int(refine) != 1 or INCIDENT_REFINE <= 1:
+    ref = incident_refine() if int(refine) == 1 else 1
+    if int(refine) != 1 or ref <= 1:
         return torch.full(e.shape, int(refine), dtype=torch.int64)
-    return torch.where(e <= INCIDENT_REFINE_EMAX_MEV,
-                       torch.tensor(int(INCIDENT_REFINE), dtype=torch.int64),
+    return torch.where(e <= incident_refine_emax_mev(),
+                       torch.tensor(int(ref), dtype=torch.int64),
                        torch.tensor(1, dtype=torch.int64))
 # the OMP fields the solver reads, in ECIS's card order (schrodinger._FIELDS without `ef`)
 _OMP_FIELDS: tuple[str, ...] = (

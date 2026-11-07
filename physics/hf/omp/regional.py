@@ -104,9 +104,27 @@ _REGIONS: tuple[tuple[str, frozenset[tuple[int, int]], dict[str, dict[str, float
 
 #: Off by default -- OSENGINE measured the fix as an engine prior and it did not survive Stage C
 #: any better than as a retrofit (26 % vs 30 %), so nothing ships. See the module docstring.
-_ENABLED = os.environ.get("INCOGNITA_OMP_REGION", "0") == "1"
+#: ENGFIX4: both switches are read from the environment on every call (they used to be read once
+#: at import, so a long-lived worker kept the value its parent was imported with);
+#: `set_enabled` / `set_deformed` write the variable.
+REGION_ENV = "INCOGNITA_OMP_REGION"
 #: Off by default too (CHART1 measures TALYS fidelity); see "The deformed rotational region".
-_DEFORMED = os.environ.get("INCOGNITA_OMP_DEFORMED", "0") == "1"
+DEFORMED_ENV = "INCOGNITA_OMP_DEFORMED"
+
+
+def _env_on(var: str) -> bool:
+    return os.environ.get(var, "0") == "1"
+
+
+def _set_env(var: str, flag: bool) -> bool:
+    prev = _env_on(var)
+    if flag:
+        os.environ[var] = "1"
+    else:
+        os.environ.pop(var, None)
+    if prev != bool(flag):
+        _clear_caches()
+    return prev
 
 
 @lru_cache(maxsize=4096)
@@ -127,18 +145,18 @@ def deformed_member(Z: int, A: int) -> bool:
 
 def deformed_enabled() -> bool:
     """Whether the deformed-region rule is applied to new runs."""
-    return _DEFORMED
+    return _env_on(DEFORMED_ENV)
 
 
 def enabled() -> bool:
     """Whether the regional defaults are applied to new runs."""
-    return _ENABLED
+    return _env_on(REGION_ENV)
 
 
 def region_of(Z: int, A: int) -> str | None:
     """The name of the region (Z, A) belongs to, or None. Ignores the switches; the deformed
     region is reported only when its switch is on (it contains most of OSREGION's rows)."""
-    if _DEFORMED and deformed_member(Z, A):
+    if deformed_enabled() and deformed_member(Z, A):
         return "deformed"
     for name, members, _ in _REGIONS:
         if (int(Z), int(A)) in members:
@@ -152,9 +170,9 @@ def overrides_for(Z: int, A: int) -> dict[str, dict[str, float]] | None:
     TALYS: input_omppar.f90:1 (input_omppar), as the keywords `rvadjust n` / `avadjust n`
     Test: tests/hf/test_osengine.py
     """
-    if _DEFORMED and deformed_member(Z, A):
+    if deformed_enabled() and deformed_member(Z, A):
         return {k: dict(v) for k, v in DEFORMED_POINT.items()}
-    if not _ENABLED:
+    if not enabled():
         return None
     for _name, members, point in _REGIONS:
         if (int(Z), int(A)) in members:
@@ -179,24 +197,17 @@ def set_enabled(flag: bool) -> bool:
     """Switch the regional defaults on or off and drop every cache that holds a `Params` or
     anything built from one. Returns the previous setting.
 
-    Processes that only read the environment (`INCOGNITA_OMP_REGION`) never need this; it exists
-    for the port-fidelity harnesses and tests that toggle inside one process.
+    It sets (or removes) `INCOGNITA_OMP_REGION`, which `enabled()` reads on every call. Processes
+    that only read the environment never need this; it exists for the port-fidelity harnesses and
+    tests that toggle inside one process.
     """
-    global _ENABLED
-    prev, _ENABLED = _ENABLED, bool(flag)
-    if prev != _ENABLED:
-        _clear_caches()
-    return prev
+    return _set_env(REGION_ENV, flag)
 
 
 def set_deformed(flag: bool) -> bool:
     """Switch the deformed-region rule on or off (dropping the same caches as `set_enabled`).
     Returns the previous setting."""
-    global _DEFORMED
-    prev, _DEFORMED = _DEFORMED, bool(flag)
-    if prev != _DEFORMED:
-        _clear_caches()
-    return prev
+    return _set_env(DEFORMED_ENV, flag)
 
 
 @contextmanager

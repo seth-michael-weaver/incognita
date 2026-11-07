@@ -18,6 +18,7 @@ Task: FISSC2. Acceptance test: G-FISSC2 (docs/results/hf-fissc2.md).
 from __future__ import annotations
 
 import math
+import os
 
 import pytest
 import torch
@@ -38,14 +39,18 @@ def u232():
 
 
 def _solve(Z, A, band, e_mev, refine_default, emax):
-    old = (I.INCIDENT_REFINE, I.INCIDENT_REFINE_EMAX_MEV)
-    I.INCIDENT_REFINE, I.INCIDENT_REFINE_EMAX_MEV = refine_default, emax
+    old = {k: os.environ.get(k) for k in ("HF_INC_REFINE", "HF_INC_REFINE_EMAX")}
+    os.environ["HF_INC_REFINE"], os.environ["HF_INC_REFINE_EMAX"] = str(refine_default), repr(emax)
     I._SOLVED.clear()
     I._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     try:
         ich, _ = I.incident_coupled(None, Z, A, torch.tensor(e_mev, dtype=DTYPE), band)
     finally:
-        I.INCIDENT_REFINE, I.INCIDENT_REFINE_EMAX_MEV = old
+        for k, v in old.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
         I._SOLVED.clear()
         I._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     return ich
@@ -55,12 +60,15 @@ def test_refine_axis_applies_only_below_the_threshold():
     e = torch.tensor([0.001, 0.05, 0.0501, 20.0], dtype=DTYPE)
     assert I._refine_axis(e, 1).tolist() == [1, 1, 1, 1], "CCNUMEROV: off by default now"
     assert I._refine_axis(e, 4).tolist() == [4, 4, 4, 4], "an explicit refine wins everywhere"
-    old = I.INCIDENT_REFINE
-    I.INCIDENT_REFINE = 2
+    old = os.environ.get("HF_INC_REFINE")
+    os.environ["HF_INC_REFINE"] = "2"
     try:
         assert I._refine_axis(e, 1).tolist() == [2, 2, 1, 1], "HF_INC_REFINE=2 is the on-switch"
     finally:
-        I.INCIDENT_REFINE = old
+        if old is None:
+            os.environ.pop("HF_INC_REFINE", None)
+        else:
+            os.environ["HF_INC_REFINE"] = old
 
 
 def test_the_off_switch_is_bitwise_the_unrefined_solve(u232):

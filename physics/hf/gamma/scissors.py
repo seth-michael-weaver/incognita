@@ -46,17 +46,24 @@ from pathlib import Path
 import numpy as np
 
 MODES = ("", "k17", "s2")
-_MODE = os.environ.get("INCOGNITA_M1_SCISSORS", "").strip().lower()
-if _MODE == "0":
-    _MODE = ""
-if _MODE not in MODES:
-    raise ValueError(f"INCOGNITA_M1_SCISSORS={_MODE!r}: expected one of {MODES} (or 0)")
+ENV = "INCOGNITA_M1_SCISSORS"
+
+
+def _env_mode() -> str:
+    """ENGFIX4: the mode, read from the environment on every call (it used to be read once at import,
+    so a long-lived worker kept its parent's value). `set_mode` writes the variable."""
+    m = os.environ.get(ENV, "").strip().lower()
+    if m == "0":
+        m = ""
+    if m not in MODES:
+        raise ValueError(f"INCOGNITA_M1_SCISSORS={m!r}: expected one of {MODES} (or 0)")
+    return m
 
 
 def mode() -> str:
     """The active scissors systematics: "" (TALYS's SMLO-2019), "k17" (Kopecky 2017) or "s2"
     (SCISSORS2, rotational nuclei only)."""
-    return _MODE
+    return _env_mode()
 
 
 def k17(A: int, beta2: float) -> tuple[float, float, float]:
@@ -126,12 +133,15 @@ def s2(Z: int, A: int) -> tuple[float, float, float] | None:
 def set_mode(m: str) -> str:
     """Switch the systematics in-process and drop every per-target cache (the mode is in none of
     their keys). Returns the previous mode."""
-    global _MODE
     m = "" if m in ("0", None) else str(m).lower()
     if m not in MODES:
         raise ValueError(f"scissors mode {m!r}: expected one of {MODES}")
-    prev, _MODE = _MODE, m
-    if prev != _MODE:
+    prev = _env_mode()
+    if m:
+        os.environ[ENV] = m
+    else:
+        os.environ.pop(ENV, None)
+    if prev != m:
         from physics.hf.chartrun import drop_target_caches
 
         drop_target_caches(frozenset())

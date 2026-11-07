@@ -130,7 +130,7 @@ def _kinematics(e: float, m1: float, m2: float, z_prod: float, e_lev: np.ndarray
     cm = _s.ECIS_CM_MEV
     root = math.sqrt((m1 + m2) ** 2 + 2.0 * m2 * e / cm)
     ecm1 = cm * (root - m1 - m2)
-    if _solver.ECMSTABLE and ecm1 <= 0.0 and e > 0.0:  # CCNANTHERM, as `channel_kinematics`
+    if ecm1 <= 0.0 and e > 0.0 and _solver.ecmstable():  # CCNANTHERM, as `channel_kinematics`
         ecm1 = 2.0 * m2 * e / (root + m1 + m2)
     amr = ecm1 / cm + m1 + m2
     ecm = ecm1 - np.concatenate([[0.0], e_lev])

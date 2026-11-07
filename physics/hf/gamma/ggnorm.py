@@ -52,11 +52,13 @@ def _parse(v: str | None) -> str:
     return m
 
 
-_MODE = _parse(os.environ.get("INCOGNITA_GGAMMA_NORM"))
+ENV = "INCOGNITA_GGAMMA_NORM"
 
 
 def mode() -> str:
-    return _MODE
+    """ENGFIX4: read from the environment on every call (it used to be read once at import, so a
+    long-lived worker kept its parent's value). `set_mode` writes the variable."""
+    return _parse(os.environ.get(ENV))
 
 
 @cache
@@ -77,17 +79,21 @@ def factor(Z: int, A: int) -> float:
     TALYS: radwidtheory.f90:253 (the `gnorm` rescaling of the E1 ftable), run offline
     Test: tests/hf/test_gammaall_ggnorm.py
     """
-    if not _MODE or Z > ZMAX:
+    m = mode()
+    if not m or Z > ZMAX:
         return 1.0
-    return table(_COLUMN[_MODE]).get((int(Z), int(A)), 1.0)
+    return table(_COLUMN[m]).get((int(Z), int(A)), 1.0)
 
 
 def set_mode(m: str | None) -> str:
     """Switch in-process and drop every per-target cache (the mode is in none of their keys)."""
-    global _MODE
     new = _parse(m)
-    prev, _MODE = _MODE, new
-    if prev != _MODE:
+    prev = mode()
+    if new:
+        os.environ[ENV] = new
+    else:
+        os.environ.pop(ENV, None)
+    if prev != new:
         from physics.hf.chartrun import drop_target_caches
 
         drop_target_caches(frozenset())

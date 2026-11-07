@@ -45,40 +45,51 @@ GG_FACTOR: dict[tuple[int, int], tuple[float, float]] = {
     (92, 239): (3.2215738995205436, 2.6316048142634205),  # 23.6 meV; 11.21 / 14.50
 }
 
-_MODE = os.environ.get("INCOGNITA_ACTPHYS", "").strip().lower()
-if _MODE == "0":
-    _MODE = ""
-if _MODE not in MODES:
-    raise ValueError(f"INCOGNITA_ACTPHYS={_MODE!r}: expected one of {MODES} (or 0)")
+ENV = "INCOGNITA_ACTPHYS"
+
+
+def _env_mode() -> str:
+    """ENGFIX4: the mode, read from the environment on every call (it used to be read once at import,
+    so a long-lived worker kept its parent's value). `set_mode` writes the variable."""
+    m = os.environ.get(ENV, "").strip().lower()
+    if m == "0":
+        m = ""
+    if m not in MODES:
+        raise ValueError(f"INCOGNITA_ACTPHYS={m!r}: expected one of {MODES} (or 0)")
+    return m
 
 
 def mode() -> str:
-    return _MODE
+    return _env_mode()
 
 
 def scissors_k17(Z: int) -> bool:
     """Use the Kopecky-2017 scissors for this nucleus."""
-    return _MODE in ("sc", "both") and Z >= ZMIN
+    return mode() in ("sc", "both") and Z >= ZMIN
 
 
 def e1_factor(Z: int, A: int) -> float:
     """Default E1 ftable of nucleus (Z, A): 1 unless ``gg``/``both`` and RIPL-3 has its width."""
-    if _MODE not in ("gg", "both") or Z < ZMIN:
+    m = mode()
+    if m not in ("gg", "both") or Z < ZMIN:
         return 1.0
     f = GG_FACTOR.get((Z, A))
     if f is None:
         return 1.0
-    return f[1] if _MODE == "both" else f[0]
+    return f[1] if m == "both" else f[0]
 
 
 def set_mode(m: str) -> str:
     """Switch in-process and drop every per-target cache. Returns the previous mode."""
-    global _MODE
     m = "" if m in ("0", None) else str(m).lower()
     if m not in MODES:
         raise ValueError(f"actphys mode {m!r}: expected one of {MODES}")
-    prev, _MODE = _MODE, m
-    if prev != _MODE:
+    prev = _env_mode()
+    if m:
+        os.environ[ENV] = m
+    else:
+        os.environ.pop(ENV, None)
+    if prev != m:
         from physics.hf.chartrun import drop_target_caches
 
         drop_target_caches(frozenset())

@@ -59,7 +59,10 @@ CDTYPE = torch.complex128
 
 # CCNANTHERM (INCOGNITA_ECMSTABLE, default ON; "0" = old): cancellation-free c.m. energy where
 # ECIS's expression underflows to ecm <= 0 at a positive lab energy (`channel_kinematics`).
-ECMSTABLE = os.environ.get("INCOGNITA_ECMSTABLE", "") != "0"
+# ENGFIX4: read on every call (it used to be read once at import, so a long-lived worker kept its
+# parent's value).
+def ecmstable() -> bool:
+    return os.environ.get("INCOGNITA_ECMSTABLE", "") != "0"
 
 
 @dataclass(frozen=True)
@@ -93,7 +96,7 @@ def channel_kinematics(
     e = e_lab_mev.to(DTYPE)
     root = torch.sqrt((m1 + m2) ** 2 + 2.0 * m2 * e / cm)
     ecm1 = cm * (root - m1 - m2)
-    if ECMSTABLE:
+    if ecmstable():
         # CCNANTHERM: the subtraction cancels (2 m2 e/cm ~ 3e-12 against (m1+m2)**2 ~ 2.5e4 at
         # 1e-11 MeV) and gives exactly 0 for some masses, so k = 0 and lect's k/ecm is 0/0. Only
         # there, the identical 2 m2 e/(root + m1 + m2); every other row keeps ECIS's expression.
