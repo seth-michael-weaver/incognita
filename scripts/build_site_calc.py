@@ -33,7 +33,7 @@ def main():
     for nm in names:
         d = os.path.join(runs, nm)
         if not os.path.isdir(d): continue
-        V, same, z = {}, [], None
+        V, same, z, tt = {}, [], None, {}
         for v, kw in VARIANTS:
             f = os.path.join(d, v + ".json")
             if not os.path.exists(f):
@@ -43,6 +43,7 @@ def main():
             if r.get("err") or "channels" not in r: fails.append(f"{nm} {v}: {r.get('err', '')[:120]}"); continue
             z, a, comp = r["z"], r["a"], r["comp"]; cpu += r.get("cpu_s", 0)
             if grid is None: grid = [round(e, 1) for e in r["e_ev"]]
+            tt[v] = round(r.get("wall_s", 0), 1)
             V[v] = {c: [sig(x) for x in r["channels"][c]] for c in CH if c in r["channels"] and any(r["channels"][c])}
         if "base" not in V: continue
         b = V["base"]
@@ -50,7 +51,7 @@ def main():
             if v != "base" and set(V[v]) == set(b) and all(
                     all(abs(x - y) <= 1e-6 * max(abs(x), abs(y), 1e-30) for x, y in zip(V[v][c], b[c])) for c in b):
                 same.append(v)
-        rec = dict(name=nm, z=z, a=a, comp=comp, v=V, same=same)
+        rec = dict(name=nm, z=z, a=a, comp=comp, v=V, same=same, t={v: tt[v] for v in V}, points=len(grid), bins=40)
         os.makedirs(os.path.join(OUT, str(z)), exist_ok=True)
         s = json.dumps(rec, separators=(",", ":"))
         open(os.path.join(OUT, str(z), f"{a}.json"), "w").write(s); total += len(s)
