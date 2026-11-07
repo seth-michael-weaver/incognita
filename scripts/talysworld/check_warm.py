@@ -117,12 +117,15 @@ def main():
 
     # 2. the pool
     t0 = time.time()
-    P, proc = WP.ensure(sock, workers=a.workers, nice=10, data=data, python=PY, log=os.path.join(work, "pool.log"))
+    P, proc = WP.ensure(sock, workers=a.workers, nice=10, data=work, python=PY, log=os.path.join(work, "pool.log"))   # empty h-rule cache
     S["timing"]["pool start-up (once)"] = round(time.time() - t0, 2)
     try:
         SM = {}
         for t in T:
             t1 = time.time(); s = P.smin(*t); SM[t] = min(s)
+            sf = P._call(dict(op="smin", z=t[0], a=t[1]))["s"]   # the pool's own fork path, whatever the table says
+            S["rows"].append(dict(check="smin table == pool fork", target=f"{t[0]}-{t[1]}", ok=sf == s, where=f"{sf} vs {s}"))
+            if sf != s: fails.append(("smin fork", t, f"{sf} vs {s}"))
             S["timing"][f"{t[0]}-{t[1]} separation energies, pool"] = round(time.time() - t1, 2)
             ref_s = REF[(t, 1)].get("s_min_mev")
             ok = ref_s is None or round(SM[t], 4) == ref_s
@@ -162,6 +165,23 @@ def main():
         for (t, g), r in zip(jobs, got):
             ref = W[(t, "R64")] if g == 64 else REF[(t, 1)]
             check(f"{'64 points' if g == 64 else 'one energy'}: reverse order == fresh", t, {"ch": r.get("channels") or {}, "err": r.get("err")}, ref)
+
+        print("deck keywords varied between jobs, interleaved, all at once", flush=True)
+        KW = ["ldmodel 2", "strength 1", ""]
+        kt = [t for t in T if t in ((26, 56), (92, 238))] or T[:1]
+        for t in kt:
+            for k in KW[:2]:
+                REF[(t, 1, k)] = fresh([os.path.join(HERE, "engine_job.py"), "--z", str(t[0]), "--a", str(t[1]), "--e", repr(a.e1), "--comp", comps[t],
+                                        "--kw", k, "--work", os.path.join(work, f"fk_{t[0]}_{t[1]}_{k.replace(' ', '')}"), "--cold"])
+            REF[(t, 1, "")] = REF[(t, 1)]
+        jobs = [(t, k) for k in KW for t in kt][::-1]
+        with ThreadPoolExecutor(len(jobs)) as ex:
+            got = list(ex.map(lambda j: P.run(dict(z=j[0][0], a=j[0][1], grid=[a.e1], comp=comps[j[0]], kw=j[1], smin=SM[j[0]], skip_pad=True)), jobs))
+        for (t, k), r in zip(jobs, got):
+            check(f"one energy kw={k or '-'!s}: interleaved == fresh", t, {"ch": r.get("channels") or {}, "err": r.get("err")}, REF[(t, 1, k)])
+        for t in kt:   # the keywords really change something (else the test above proves little)
+            d, _ = rel_diff(as_lists(REF[(t, 1, "ldmodel 2")]), as_lists(REF[(t, 1)]))
+            S["rows"].append(dict(check="ldmodel 2 changes the result", target=f"{t[0]}-{t[1]}", ok=d > 0, where=f"max rel {d:.3g}"))
 
         print("engine_job.py through the pool", flush=True)
         env = dict(os.environ, TW_WARM_SOCK=sock)

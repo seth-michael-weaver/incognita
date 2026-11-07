@@ -14,7 +14,7 @@ process, ~5 s) when S is already known (the service caches it per nuclide).
 
 usage: engine_grid.py --z Z --a A --grid GRID.json --comp COMP [--kw "ldmodel 2;bins 60"] --work DIR [--smin S]
 Prints one JSON line: {"e_ev": [...], "channels": {total, elastic, nonelastic, capture, np, na, n2n, inelastic, fission: [mb]},
-"s_min_mev", "cpu_s", "wall_s", "err"}. The same work as a function: run(...) (used by engine_warm.py).
+"s_min_mev", "cpu_s", "wall_s", "err"}. The same work as a function: run(...) (used by warmpool.py, the warm pool).
 """
 import argparse, contextlib, io, json, os, shutil, sys, time
 
@@ -75,13 +75,50 @@ def _energy_subset(sub_ev):
         EP._setup = orig
 
 
-def run(z, a, grid, comp="P", kw="", work="", gridtop=None, smin=None, keep=False, energies=None, skip_pad=False, parallel_arms=False):
+@contextlib.contextmanager
+def _hrule_cache(d):
+    """Cache the library's per-item ISOHOLD h rule (r52pool.h_rule: three extra target builds per arm, ~0.4-1.3 s) on disk
+    under `d`, keyed by everything it reads: engine, Z, A, the lines file's content, the deck lines (incl. the job's
+    keywords), the item's own environment and the run's baseline NUCLIDO_* environment. NOT by the grid: h_rule builds its
+    targets at the grid's first energy, but it reads only D0 and <Gamma_gamma> at S_n, and h came out bit-identical at
+    1 keV, 1 MeV and 20 MeV (Fe-56, both arms, 2026-11-07); check_warm.py's 64-point checks run on an h cached by the
+    1 MeV job. d=None: no-op. Used by the warm pool only (TW_HRULE_CACHE=0 turns it off there)."""
+    if not d:
+        yield; return
+    import hashlib
+    import r52pool as RP
+    orig = RP.h_rule
+
+    def h_rule(M, base_env, it):
+        _, Z, A, lf, gj, extra, tag = it[:7]
+        key = hashlib.sha256(json.dumps([EJ.ENG, int(Z), int(A), hashlib.sha256(open(lf, "rb").read()).hexdigest(), extra,
+                                         sorted((it[7] or {}).items()) if len(it) > 7 else [],
+                                         sorted((k, v) for k, v in base_env.items() if k.startswith(("NUCLIDO_", "TALYS", "CJ_", "RL_")))],
+                                        default=str).encode()).hexdigest()[:24]
+        f = os.path.join(d, key + ".json")
+        try:
+            c = json.load(open(f)); return c["row"], c["env"]
+        except (OSError, ValueError, KeyError):
+            pass
+        row, env = orig(M, base_env, it)
+        os.makedirs(d, exist_ok=True); tmp = f"{f}.{os.getpid()}.tmp"
+        json.dump(dict(row=row, env=env), open(tmp, "w")); os.replace(tmp, f)
+        return row, env
+    RP.h_rule = h_rule
+    try:
+        yield
+    finally:
+        RP.h_rule = orig
+
+
+def run(z, a, grid, comp="P", kw="", work="", gridtop=None, smin=None, keep=False, energies=None, skip_pad=False, parallel_arms=False,
+        hrule_cache=None):
     """One engine run of the grid `grid` (+ the GRIDTOP pad). energies: compute and report only this subset of `grid`
     (the run-scoped quantities still come from the whole padded grid: see _energy_subset); skip_pad: do not compute the
     pad energy (same as energies=grid when a pad is added). Both give the full run's numbers at those energies.
     parallel_arms: a two-arm composition (JS) runs its second arm in a forked copy of this process, at the same time as
     the first (Linux; the warm pool uses it only when it has a free slot for it). Each arm's run starts from this
-    process's state as it was before either arm ran."""
+    process's state as it was before either arm ran. hrule_cache: a directory for _hrule_cache (warm pool)."""
     t0 = time.process_time(); w0 = time.time()
     comp = comp.replace(" [FEW->mean]", "").strip()
     es = sorted(float(x) for x in grid); work = os.path.abspath(work)
@@ -123,7 +160,7 @@ def run(z, a, grid, comp="P", kw="", work="", gridtop=None, smin=None, keep=Fals
                     PP.DECK = {k: v + (";" + X if X else "") for k, v in base.items()}
                     sys.argv = ["pprun", "--repo", EJ.ENG, "--out", os.path.join(work, arm), "--grid", gfile, "--arm", pa, "--fewres", "off",
                                 "--pewindow", "g", "--za", f"{z},{a}"]
-                    with _energy_subset(sub):
+                    with _energy_subset(sub), _hrule_cache(hrule_cache):
                         PP.main()
 
                 try:

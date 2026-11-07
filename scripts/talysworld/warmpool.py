@@ -41,6 +41,7 @@ from concurrent.futures import ThreadPoolExecutor
 HERE = os.path.dirname(os.path.abspath(__file__))
 H = os.path.expanduser("~")
 DEFAULT_SOCK = os.environ.get("TW_WARM_SOCK", f"{H}/talysworld_data/warm.sock")
+HRULE_CACHE = os.environ.get("TW_HRULE_CACHE", "1") != "0"   # engine_grid._hrule_cache in pool jobs (TW_HRULE_CACHE=0: off)
 MAX_WORKERS = int(os.environ.get("TW_MAX_WORKERS", "3"))   # laptop: at most 3 engine processes (the mini may set 6)
 
 
@@ -118,6 +119,14 @@ class Pool:
         return self._call(dict(op="ping"))
 
     def smin(self, z, a):
+        """S(0,0,type) of the compound nucleus: the prebuilt table (scripts/perfstart/smin_table.py) or a pool fork."""
+        try:
+            sys.path.insert(0, os.path.join(os.path.dirname(HERE), "perfstart"))
+            import smin_table
+            v = smin_table.lookup(z, a, eng=os.environ.get("TW_ENG", f"{H}/fastgate_data/eng/16606b356d6e"))
+            if v is not None: return [float(x) for x in v]
+        except Exception:  # noqa: BLE001
+            pass
         r = self._call(dict(op="smin", z=int(z), a=int(a)))
         if r.get("err"): raise RuntimeError(r["err"])
         return r["s"]
@@ -155,6 +164,7 @@ def _child(conn, req, data):
             if op == "run":
                 args = dict(req["args"])
                 args.setdefault("work", os.path.join(data, "jobs", f"w{os.getpid()}_{time.time_ns()}"))
+                if HRULE_CACHE: args.setdefault("hrule_cache", os.path.join(data, "hrule_cache"))
                 res = EG.run(**args)
             elif op == "smin":
                 res = dict(s=_smin_inproc(int(req["z"]), int(req["a"])))

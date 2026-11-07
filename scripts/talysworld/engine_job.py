@@ -54,7 +54,15 @@ def val(q, k):
 
 def cn_separation_mev(z, a):
     """S(0,0,type), type 0..6, of the compound nucleus of n + (z, a), from the engine's own masses (default options), in a
-    separate process so nothing the engine caches at import leaks into the job."""
+    separate process so nothing the engine caches at import leaks into the job. First the prebuilt table
+    (scripts/perfstart/smin_table.py: same values, keyed to this engine's commit and mass tables; ~10 ms), else that process."""
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "perfstart"))
+        import smin_table
+        v = smin_table.lookup(z, a, eng=ENG)
+        if v is not None: return [float(x) for x in v]
+    except Exception:  # noqa: BLE001  (no table / unreadable: compute it)
+        pass
     import subprocess
     code = ("import json,sys; from physics.hf.compound.dens_reference import _structure_of as S; "
             "o,p,m=S(int(sys.argv[1]),int(sys.argv[2])); print(json.dumps([float(m.s_mev[0,0,t]) for t in range(7)]))")

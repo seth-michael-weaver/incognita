@@ -10,10 +10,22 @@
  "e1_ev": 1000000.0,
  "rows": [
   {
+   "check": "smin table == pool fork",
+   "target": "26-56",
+   "ok": true,
+   "where": "[0.0, 7.646171337641974, 10.559248126296723, 15.60536269406471, 19.573468969357087, 18.17736600997266, 7.319017824302314] vs [0.0, 7.646171337641974, 10.559248126296723, 15.60536269406471, 19.573468969357087, 18.17736600997266, 7.319017824302314]"
+  },
+  {
    "check": "smin pool == fresh",
    "target": "26-56",
    "ok": true,
    "where": "0.0 vs 0.0"
+  },
+  {
+   "check": "smin table == pool fork",
+   "target": "40-90",
+   "ok": true,
+   "where": "[0.0, 7.194362337641962, 8.687577126296716, 13.3202776940647, 18.546261969357076, 14.904691009972652, 5.440134824302305] vs [0.0, 7.194362337641962, 8.687577126296716, 13.3202776940647, 18.546261969357076, 14.904691009972652, 5.440134824302305]"
   },
   {
    "check": "smin pool == fresh",
@@ -22,10 +34,22 @@
    "where": "0.0 vs 0.0"
   },
   {
+   "check": "smin table == pool fork",
+   "target": "79-197",
+   "ok": true,
+   "where": "[0.0, 6.512359337641971, 6.449915126296716, 10.07214269406471, 11.736613969357087, 12.819203009972654, -0.5263641756976867] vs [0.0, 6.512359337641971, 6.449915126296716, 10.07214269406471, 11.736613969357087, 12.819203009972654, -0.5263641756976867]"
+  },
+  {
    "check": "smin pool == fresh",
    "target": "79-197",
    "ok": true,
    "where": "-0.5263641756976867 vs -0.5264"
+  },
+  {
+   "check": "smin table == pool fork",
+   "target": "92-238",
+   "ok": true,
+   "where": "[0.0, 4.806381337641973, 7.610272126296721, 10.09084369406471, 9.71098596935709, 10.613263009972655, -4.13029517569769] vs [0.0, 4.806381337641973, 7.610272126296721, 10.09084369406471, 9.71098596935709, 10.613263009972655, -4.13029517569769]"
   },
   {
    "check": "smin pool == fresh",
@@ -174,6 +198,60 @@
    "where": ""
   },
   {
+   "check": "one energy kw=-: interleaved == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy kw=-: interleaved == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy kw=strength 1: interleaved == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy kw=strength 1: interleaved == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy kw=ldmodel 2: interleaved == fresh",
+   "target": "92-238",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "one energy kw=ldmodel 2: interleaved == fresh",
+   "target": "26-56",
+   "max_rel": 0.0,
+   "ok": true,
+   "where": ""
+  },
+  {
+   "check": "ldmodel 2 changes the result",
+   "target": "26-56",
+   "ok": true,
+   "where": "max rel 0.148"
+  },
+  {
+   "check": "ldmodel 2 changes the result",
+   "target": "92-238",
+   "ok": true,
+   "where": "max rel 0.996"
+  },
+  {
    "check": "engine_job.py via pool == fresh",
    "target": "26-56",
    "max_rel": 0.0,
@@ -203,41 +281,41 @@
   }
  ],
  "timing": {
-  "26-56 one energy, fresh engine_job.py (incl. S process)": 8.13,
-  "26-56 64 points, fresh engine_grid.py": 9.97,
-  "40-90 one energy, fresh engine_job.py (incl. S process)": 6.4,
-  "40-90 64 points, fresh engine_grid.py": 9.91,
-  "79-197 one energy, fresh engine_job.py (incl. S process)": 5.95,
-  "79-197 64 points, fresh engine_grid.py": 11.31,
-  "92-238 one energy, fresh engine_job.py (incl. S process)": 6.3,
-  "92-238 64 points, fresh engine_grid.py": 11.07,
-  "pool start-up (once)": 3.89,
-  "26-56 separation energies, pool": 0.05,
-  "40-90 separation energies, pool": 0.04,
-  "79-197 separation energies, pool": 0.05,
+  "26-56 one energy, fresh engine_job.py (incl. S process)": 3.8,
+  "26-56 64 points, fresh engine_grid.py": 9.71,
+  "40-90 one energy, fresh engine_job.py (incl. S process)": 6.71,
+  "40-90 64 points, fresh engine_grid.py": 11.35,
+  "79-197 one energy, fresh engine_job.py (incl. S process)": 4.0,
+  "79-197 64 points, fresh engine_grid.py": 13.42,
+  "92-238 one energy, fresh engine_job.py (incl. S process)": 5.27,
+  "92-238 64 points, fresh engine_grid.py": 12.14,
+  "pool start-up (once)": 5.08,
+  "26-56 separation energies, pool": 0.14,
+  "40-90 separation energies, pool": 0.08,
+  "79-197 separation energies, pool": 0.06,
   "92-238 separation energies, pool": 0.05,
-  "26-56 one energy, warm pool (run 1)": 1.76,
-  "26-56 one energy, warm pool (run 2)": 1.81,
-  "26-56 64 points, warm pool, 1 worker": 3.81,
-  "26-56 64 points, warm pool, 2 workers (chunked)": 4.62,
-  "40-90 one energy, warm pool (run 1)": 1.99,
-  "40-90 one energy, warm pool (run 2)": 1.9,
-  "40-90 64 points, warm pool, 1 worker": 5.88,
-  "40-90 64 points, warm pool, 2 workers (chunked)": 5.16,
-  "79-197 one energy, warm pool (run 1)": 1.48,
-  "79-197 one energy, warm pool (run 2)": 1.41,
-  "79-197 64 points, warm pool, 1 worker": 6.72,
-  "79-197 64 points, warm pool, 2 workers (chunked)": 7.31,
-  "92-238 one energy, warm pool (run 1)": 1.35,
-  "92-238 one energy, warm pool (run 2)": 1.24,
-  "92-238 64 points, warm pool, 1 worker": 6.33,
-  "92-238 64 points, warm pool, 2 workers (chunked)": 5.3,
-  "all 8 jobs at once, reverse order": 15.38,
+  "26-56 one energy, warm pool (run 1)": 1.87,
+  "26-56 one energy, warm pool (run 2)": 0.68,
+  "26-56 64 points, warm pool, 1 worker": 4.25,
+  "26-56 64 points, warm pool, 2 workers (chunked)": 3.59,
+  "40-90 one energy, warm pool (run 1)": 1.97,
+  "40-90 one energy, warm pool (run 2)": 0.71,
+  "40-90 64 points, warm pool, 1 worker": 4.44,
+  "40-90 64 points, warm pool, 2 workers (chunked)": 3.86,
+  "79-197 one energy, warm pool (run 1)": 1.51,
+  "79-197 one energy, warm pool (run 2)": 0.87,
+  "79-197 64 points, warm pool, 1 worker": 6.44,
+  "79-197 64 points, warm pool, 2 workers (chunked)": 7.03,
+  "92-238 one energy, warm pool (run 1)": 1.29,
+  "92-238 one energy, warm pool (run 2)": 0.74,
+  "92-238 64 points, warm pool, 1 worker": 5.73,
+  "92-238 64 points, warm pool, 2 workers (chunked)": 5.06,
+  "all 8 jobs at once, reverse order": 12.86,
   "26-56 one energy, engine_job.py via pool (incl. its own python start)": 2.23,
-  "40-90 one energy, engine_job.py via pool (incl. its own python start)": 2.18,
-  "79-197 one energy, engine_job.py via pool (incl. its own python start)": 2.04,
-  "92-238 one energy, engine_job.py via pool (incl. its own python start)": 2.1
+  "40-90 one energy, engine_job.py via pool (incl. its own python start)": 1.94,
+  "79-197 one energy, engine_job.py via pool (incl. its own python start)": 1.36,
+  "92-238 one energy, engine_job.py via pool (incl. its own python start)": 1.43
  },
- "n_checks": 28,
+ "n_checks": 40,
  "n_failed": 0
 }

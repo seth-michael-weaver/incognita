@@ -4,7 +4,8 @@ Unit tests (always): the energy split and the merge of slice results.
 Engine gate (Linux with the production engine, opt-in: TW_ENGINE_TESTS=1, several minutes, 2 engine processes at
 nice 10): scripts/talysworld/check_warm.py on Fe-56, Zr-90, Au-197, U-238 (library compositions), one energy and the
 64-point library grid: warm-pool (two-arm compositions with their arms side by side), chunked (2 workers), reverse-order/concurrent and engine_job.py-via-pool outputs
-must equal a fresh process per job to 1e-12 relative, and the pool's separation energies must equal the fresh ones.
+must equal a fresh process per job to 1e-12 relative (also with deck keywords varied between interleaved jobs and with
+the pool's cached h rule), and the pool's separation energies (table and fork) must equal the fresh ones.
 """
 import json
 import os
@@ -66,4 +67,4 @@ def test_engine_gate_warm_chunked_order_equal_fresh(tmp_path):
     S = json.loads(out.read_text())
     bad = [r for r in S["rows"] if not r["ok"]]
     assert not bad, bad
-    assert S["n_checks"] >= 4 * 7 and p.returncode == 0
+    assert S["n_checks"] >= 40 and p.returncode == 0
