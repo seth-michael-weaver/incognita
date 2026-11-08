@@ -133,6 +133,8 @@ def binary(inp, state=None, device=None):
 
     if not enabled() or (device is not None and torch.device(device).type != "cpu"):
         return None
+    if inp.pespinmodel >= 3:  # KWCOV B7: the J-resolved pre-equilibrium population is binary.binary's alone
+        return None
     types = sorted(inp.grids)
     st = state if state is not None else BinaryState()
     ins = [inp.xsbinary_mb]

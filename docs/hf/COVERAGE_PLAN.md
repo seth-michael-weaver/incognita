@@ -62,7 +62,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B4 | spectra, DDX, gamma lines on TALYS keywords (DONE, branch `kwcov4`; exclusive channel spectra -> B4b) | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
 | B5 | model keyword sweep: compound, gamma, levels, LD (DONE, branch `kwcov5`) | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
 | B6 | model keyword sweep: optical model, direct | vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
-| B7 | unported model branches (now refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
+| B7 | unported model branches (DONE, branch `kwcov7`; gnorm y and MSD stay refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
 | B7b | JLM and folding alpha OMP | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
 | B8 | fission extras | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
 | B9 | astrophysics | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
@@ -286,15 +286,72 @@ files (omppar.f90, `convert.f90`); `coulomb`, `ecisstep` incidentecis.f90; `ecis
 (ECIS compound); `rotational`, `sysreaction` (directmodel). Accept: response metric on Fe-56 (spherical) and
 U-238 (coupled), reaction and total cross section 1 %.
 
-### B7 / B7b -- unported model branches
+### B7 / B7b -- unported model branches (B7 done on branch `kwcov7`; B7b open)
 
-Refused today (`defaults.UNPORTED`): `gnorm y` (`radwidtheory.f90:1`; `gamma.transmission.radwidtheory` has the
-iteration, nothing calls it), `gshell y` (damping in the exciton model), `twocomponent n` (one-component exciton,
-`exciton.f90`), `preeqspin 3` (J-dependent PE population), `preeqmode 3` (`bonetti.f90:1`), MSD (`onestep`,
-`emsdmin`, `msdbins`: `msd.f90:1`, `msdinit.f90:1`, `msdcalc.f90:1`, `onestepA.f90:1`).
-B7b: JLM (`mom.f90:1` and the radial-density tables; `lv*`/`lw*` adjust, `jlmmode`, `radialmodel`, `radialfile`)
-and folding alpha OMPs 3-5 (`foldalpha.f90:1`, `adepthcor`, `aradialcor`).
-Accept: response metric on Fe-56 and Zr-90 at 14 MeV (PE-sensitive channels (n,p), (n,a), nprod).
+* **Ported** (all default-off: a run without them never enters the new code; Fe-56 611 and U-238 692 `Results` arrays
+  as before, `test_engine_c.py`). `physics/hf/preeq/exciton_b7.py` transcribes, one exciton state at a time (numpy
+  over the emission grid and the `nexcbins` points), the branches the vectorised `preeq/exciton.py` does not carry;
+  `exciton_model` hands a run to it when one of the three switches below is set (`PreeqInputs.b7`, built in
+  `preeq/prepare.py`). With all switches off it reproduces the vectorised emission and transition rates to 1e-16
+  (preeqmode 1 and 2; `test_kwcov_b7.py`), the check that it is the same physics.
+  * `twocomponent n`: one-component exciton model (exciton.f90, emissionrate.f90 with `Qfactor`, lambdaplus.f90,
+    lifetime.f90, matrix.f90's 0.5, phdens.f90).
+  * `gshell y`: g damped by ignatyuk(E)/alev in the emission and transition rates of both models, with TALYS's
+    quirks (each numerical rate damps all four collision densities with g of its FIRST channel's energy;
+    lambdanupi damps its residual with g(uu), not g(U - uu); the Pauli tables keep the undamped g).
+  * `preeqmode 3`: optical-model transition rates; bonetti.f90's `wvol` (the target's W + surface Wd averaged over
+    the Woods-Saxon volume, n and p, -8 MeV .. emax) through `omp.parameters.omp_parameters`.
+  * `preeqspin 3` (= `preeqspin y`) and `preeqspin 4` (Wigner, newspin.f90, now in `preeq/spin.py`): the exciton
+    model's J shares (`exciton.spin_fraction`: xspreeqJP = xs 0.5 (2J+1) RnJ/RnJsum, scaled as xspreeq through
+    preeqcomplex/preeqcorrect/preeqtotal) go to population.f90 (`feed_reference._spin_inputs`: xspreeqJP, the
+    collective continuum's xscollcontJP, the giant resonances' xsgrstate by multipolarity) and its `preeqpop` is
+    added by binary.f90 (`BinaryInputs.preeqpop_mb`, `binary.py`; the C binary kernels hand such a run to it).
+    `preeqspin y/n` is read as TALYS does (y = 3, n = 1).
+* **Bugs found.** `preeqmode 4` (MSD) was accepted and ran the exciton model with the analytic rates, without MSD
+  (stock Fe-56 14 MeV: (n,p) +32 %, engine -2.5 %): now refused. `preeqspin 4` ran with NO pre-equilibrium flux in
+  the binary population (binary.py adds it only for pespinmodel <= 2): now ported. The inventory had `onestep`,
+  `emsdmin`, `msdbins` as IGNORED: they act only inside MSD in TALYS too (inert, SUPPORTED with that note).
+* **Refused, with what is left:**
+  * `preeqmode 4` (MSD/MSC): msd.f90, msdinit, the continuum DWBA of dwbaecis.f90 (ECIS per outgoing-energy pair),
+    onestepA/B, onecontinuumA/B, multistepA/B, msdcalc/msdtotal/msdplusmsc, cmsd; several days with the ECIS port.
+  * `gnorm y`: TALYS-2.25 compares its theoretical <Gamma_gamma> (eV) with the resonance table's number in keV
+    (resonancepar.f90:96), so radwidtheory.f90's iteration drives the compound nucleus's E1 `ftable` to 0 (stock
+    Fe-57: 1.30 eV vs 9.2e-4, E1 ftable printed 0, C/E 120 from M1/E2; capture 1 MeV -70 %, 14 MeV -99 %; Zr-91
+    capture 1 MeV -54 %). Left: call `gamma.transmission.radwidtheory(flaggnorm=True)` with TALYS's gamgam (past its
+    GAMGAM_MIN_EV guard) before the run, again per incident energy as incident.f90:90 does, and feed the final
+    ftable(E1) of the compound nucleus to every strength user (PARAMWIRE's ftable path). Reproducing it means
+    reproducing the unit bug; `ftable Z A f` is the physical alternative.
+  * `twocomponent n` or `gshell y` with multiple pre-equilibrium (Einc >= `multipreeq` onset, 20 MeV):
+    multipreeq.f90 (one-component chain) is not ported, and the shell damping is not wired into multipreeq2's
+    cascade (`MultiPreeqInputs.damp` exists, `Cascade.mpe_inputs` does not fill it); refused in
+    `feed_reference.pop_inputs_of` with the reason. `preeqspin 4` with multiple pre-equilibrium likewise.
+  * `preeqspin 3` on the GPU path (`gpu_full_setup`): refused (engine_c has it).
+  * B7b (`alphaomp 3-5`, JLM) untouched.
+* **Response vs stock** (`scripts/kwcov/b7_response.py`, n + target at 1/5/14 MeV, channels of b2_response plus
+  nprod/pprod/aprod; `--pe` compares the binary pre-equilibrium totals with stock `preeq*.out`; stock JSON in
+  `~/kwcov/stock/b7`):
+
+  | deck lines | Fe-56 worst (stock moved) | Zr-90 worst (stock moved) |
+  |---|---|---|
+  | twocomponent n | 0.49 % (16.9 %) | 0.39 % (16.5 %) |
+  | gshell y | 0.39 % (17.9 %) | 0.50 % (14.9 %) |
+  | preeqspin 3 (= y) | 0.44 % (4.4 %) | 0.88 % (11.6 %) |
+  | preeqspin 4 | 0.35 % (3.5 %) | -- |
+  | **preeqmode 3** | **4.81 %** (n,d) 14 MeV (46 %) | **5.98 %** (n,p) 14 MeV (58 %) |
+  | twocomponent n; preeqspin 3 | 0.49 % (17.1 %) | -- |
+  | twocomponent n; preeqmode 3; gshell y | 0.61 % (8.6 %) | -- |
+  | twocomponent n; preeqmode 1 | 0.71 % (7.4 %) | -- |
+  | preeqmode 1 (already ported, check) | 0.25 % (16.2 %) | -- |
+
+  preeqmode 3, traced: the transition rates equal stock's exciton0014.000.out to 1e-6 and the binary
+  pre-equilibrium totals to 1e-4 (Fe-56 14 MeV n 77.029 vs 77.027 mb, p 5.8168 vs 5.8167), and the channels move by
+  the same millibarns: Fe-56 (n,d) -1.01 vs -1.04 mb, Zr-90 (n,p) -12.60 vs -12.86 mb (2 %). The relative gap is the
+  engine's default 14 MeV (n,p)/(n,d) excess (B5): preeqmode 3 moves ~200 mb of Fe-56 pre-equilibrium flux back to
+  the compound nucleus, which the engine decays into protons ~15 % more than stock (Fe-56 (n,p) +5.21 vs +1.98 mb
+  for -17.5 mb of PE protons on both sides). Same cause, smaller, in the other rows' (n,p) mb.
+  The pre-equilibrium totals of twocomponent n and gshell y also equal stock's preeq file to 1e-4 (test_kwcov_b7.py).
+* Tests: `tests/hf/test_kwcov_b7.py` (transcription = vectorised path, preeqmode 3 rates and PE totals = stock,
+  parsing, refusals, the giant-resonance J map); `test_unported_options.py` updated.
 
 ### B8 -- fission extras
 

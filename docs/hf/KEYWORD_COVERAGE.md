@@ -36,14 +36,14 @@ equivalent keyword.
 
 | status | keywords |
 |---|---|
-| SUPPORTED | 283 |
-| READ_ONLY_DEFAULT | 12 |
-| IGNORED | 54 |
+| SUPPORTED | 290 |
+| READ_ONLY_DEFAULT | 8 |
+| IGNORED | 51 |
 | MISSING | 40 |
 | NA | 57 |
 | **total** | 446 |
 
-Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path only (`grep`).
+Of the SUPPORTED rows, 175 have a test naming the keyword, 110 are code-path only (`grep`).
 
 ## By TALYS input group
 
@@ -75,14 +75,14 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | input_outfiles | 6 | 0 | 0 | 0 | 6 |
 | input_output | 7 | 0 | 0 | 0 | 19 |
 | input_path | 0 | 0 | 0 | 0 | 3 |
-| input_preeqmodel | 8 | 4 | 1 | 0 | 3 |
-| input_preeqpar | 32 | 0 | 2 | 0 | 0 |
+| input_preeqmodel | 13 | 0 | 0 | 0 | 3 |
+| input_preeqpar | 34 | 0 | 0 | 0 | 0 |
 
 ## Every keyword
 
 | keyword | group | type | default | status | evidence | where | notes |
 |---|---|---|---|---|---|---|---|
-| a | input_densitypar | per-nucleus | 0.0 | SUPPORTED | test:conftest.py,perfcasc_gate_run.py,test_actphys.py | input/defaults.py Params.alev -> capture_gpu.py, capture_gpu_setup.py, compound/dens_reference.py, compound/psf_fast.py (+10) |  |
+| a | input_densitypar | per-nucleus | 0.0 | SUPPORTED | test:conftest.py,perfcasc_gate_run.py,test_actphys.py | input/defaults.py Params.alev -> capture_gpu.py, capture_gpu_setup.py, compound/dens_reference.py, compound/psf_fast.py (+11) |  |
 | aadjust | input_densitypar | per-nucleus | 1.0 | SUPPORTED | test:test_cengld2.py,test_defaults.py,test_density.py | input/defaults.py Params.aadjust -> capture_fast.py, compound/dens_reference.py, density/ld_ceng.py, density/ld_nx2.py (+6) |  |
 | abundance |  | value |  | MISSING | manual |  | natural targets (mass 0 / abundance file): natural.f90 loop over isotopes |
 | adddiscrete | input_directpar | flag | y | SUPPORTED | test:test_specobs.py | input/defaults.py Options.eadd_mev -> specobs.energy_spectra | discrete peaks + fine grid in the spectra (spectra.f90 flagadd) |
@@ -159,7 +159,7 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | colldamp | input_densitymodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagcolldamp -> density/ld_nx2.py, density/parameters.py, native/ld.h |  |
 | components | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | compound | input_compoundmodel | flag | y | SUPPORTED | test:conftest.py,test_angout.py,test_binquad2.py | input/defaults.py Options.flagcomp -> emission/multiple.py, input/nuclides.py |  |
-| core | input_directpar | value | -1 | SUPPORTED | test:test_collrule.py,test_compound.py,test_open2.py | input/defaults.py Options.core -> angout.py, astro/stellar.py, capture_fast_batch.py, capture_gpu.py (+124) |  |
+| core | input_directpar | value | -1 | SUPPORTED | test:test_collrule.py,test_compound.py,test_open2.py | input/defaults.py Options.core -> angout.py, astro/stellar.py, capture_fast_batch.py, capture_gpu.py (+125) |  |
 | coulomb | input_directmodel | flag | y | IGNORED |  | input/defaults.py Options.flagcoulomb | parsed into Options/Params but no engine code reads flagcoulomb |
 | cpang | input_directmodel | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.flagcpang -> angout.flagcompang | compound angular distributions for charged projectiles |
 | cstrip | input_preeqpar | per-particle | 1.0 | SUPPORTED | test:conftest.py,test_na_v1.py,test_tfold.py | input/defaults.py Params.Cstrip -> omp/tfold.py |  |
@@ -196,7 +196,7 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | element | input_main | value | Fe | SUPPORTED | manual | engine run(Z, A) arguments | target is a run argument (TALYSworld: target) |
 | elow | input_basicpar | value | 1.00E-06 | SUPPORTED | test:test_defaults.py | input/defaults.py Options.eninclow_mev -> core/grids.py, structure/scalars.py |  |
 | elwidth | input_directpar | value | 0.5 | SUPPORTED | test:test_direct.py,test_specobs.py | input/defaults.py Params.elwidth -> compound/pop_reference.py, direct/chain.py, direct/dwba.py, direct/score.py (+1) |  |
-| emsdmin | input_preeqpar | value | 0.0 | IGNORED |  | input/defaults.py Params.Emsdmin | parsed into Options/Params but no engine code reads Emsdmin |
+| emsdmin | input_preeqpar | value | 0.0 | SUPPORTED | test:test_kwcov_b7.py | input/defaults.py Params.Emsdmin (inert) | acts only inside MSD (preeqmode 4, refused); inert otherwise, as in TALYS |
 | endf | input_basicreac | flag | n | IGNORED | test:test_angout.py,test_defaults.py,test_specobs.py | input/defaults.py | defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written |
 | endfdetail | input_basicreac | flag | y | IGNORED |  | input/defaults.py Options.flagendfdet | parsed into Options/Params but no engine code reads flagendfdet |
 | endfecis | input_basicreac | flag | y | NA |  | input/defaults.py Options.flagendfecis | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
@@ -248,7 +248,7 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | ftableadjust | input_gammapar | per-nucleus-radiation | 1.0 | SUPPORTED | test:test_etablefix.py | input/defaults.py Params.ftableadjust -> gamma/ftglobal.py, gamma/parameters.py |  |
 | fullhf | input_compoundmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagfullhf -> capture_fast_batch.py, capture_gpu_setup.py, compound/chain.py, compound/continuum.py (+9) |  |
 | fymodel | input_fissionmodel | value | 2 | IGNORED |  | input/defaults.py Options.fymodel | parsed into Options/Params but no engine code reads fymodel |
-| g | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py | input/defaults.py Params.g -> angout.py, astro/stellar.py, capture_gpu.py, capture_tasks.py (+99) |  |
+| g | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py | input/defaults.py Params.g -> angout.py, astro/stellar.py, capture_gpu.py, capture_tasks.py (+100) |  |
 | gadjust | input_preeqpar | per-nucleus | 1.0 | SUPPORTED | test:test_fitlib.py,test_pegq.py | input/defaults.py Params.gadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py |  |
 | gamgam | input_gammapar | per-nucleus | 0.0 | SUPPORTED | grep | input/defaults.py Params.gamgam -> gamma/actphys.py, gamma/ggnorm.py, gamma/transmission.py, structure/files.py (+1) |  |
 | gamgamadjust | input_gammapar | per-nucleus | 1.0 | SUPPORTED | grep | input/defaults.py Params.gamgamadjust -> structure/resonances.py |  |
@@ -267,11 +267,11 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | gmradjustd | input_preeqpar | value | 1.0 | SUPPORTED | grep | input/defaults.py Params.GMRadjustD -> direct/dwba.py |  |
 | gmradjuste | input_preeqpar | value | 1.0 | SUPPORTED | grep | input/defaults.py Params.GMRadjustE -> direct/dwba.py |  |
 | gmradjustg | input_preeqpar | value | 1.0 | SUPPORTED | grep | input/defaults.py Params.GMRadjustG -> direct/dwba.py |  |
-| gn | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:test_nx2_preeq.py,test_pegq.py | input/defaults.py Params.gn -> density/ld_nx2.py, density/parameters.py, density/particle_hole.py, emission/feeding.py (+11) |  |
+| gn | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:test_nx2_preeq.py,test_pegq.py | input/defaults.py Params.gn -> density/ld_nx2.py, density/parameters.py, density/particle_hole.py, emission/feeding.py (+12) |  |
 | gnadjust | input_preeqpar | per-nucleus | 1.0 | SUPPORTED | test:test_pegq.py | input/defaults.py Params.gnadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py |  |
 | gnfit | input_fit | flag | n | SUPPORTED | test:test_kwcov_b2.py | input/fitlib.py _cards (gn.par) | wired; xsfit.f90 does not match the projectile, so the library applies on any run; response untested (charged/photon projectiles behind INCOGNITA_CPINC) |
-| gnorm | input_gammamodel | flag | n | READ_ONLY_DEFAULT |  | input/defaults.py Options.flaggnorm | refused when set (defaults.UNPORTED): gnorm y |
-| gp | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:test_eadj.py,test_gamma.py,test_gammaall_ggnorm.py | input/defaults.py Params.gp -> capture_gpu_setup.py, compound/decay_fast.py, compound/dens_reference.py, compound/psf_fast.py (+22) |  |
+| gnorm | input_gammamodel | flag | n | READ_ONLY_DEFAULT | test:test_kwcov_b7.py | input/defaults.py Options.flaggnorm (refused when y) | REFUSED: TALYS-2.25 normalises to the resonance table's keV number read as eV (resonancepar.f90:96), so radwidtheory's iteration drives the compound nucleus's E1 ftable to 0 (stock Fe-57 1.30 eV vs 9.2e-4; capture 1 MeV -70 %, 14 MeV -99 %; Zr-91 capture 1 MeV -54 %). Left: call gamma.transmission.radwidtheory(flaggnorm) with TALYS's gamgam before the run and feed the final ftable(E1) of the compound nucleus to every strength user |
+| gp | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:test_eadj.py,test_gamma.py,test_gammaall_ggnorm.py | input/defaults.py Params.gp -> capture_gpu_setup.py, compound/decay_fast.py, compound/dens_reference.py, compound/psf_fast.py (+23) |  |
 | gpadjust | input_preeqpar | per-nucleus | 1.0 | SUPPORTED | test:test_pegq.py | input/defaults.py Params.gpadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py |  |
 | gpr | input_gammapar | per-nucleus-radiation | 0.0 | SUPPORTED | grep | input/defaults.py Params.gpr -> capture_gpu.py, compound/psf_fast.py, gamma/isoe2.py, gamma/parameters.py (+2) |  |
 | gpradjust | input_gammapar | per-nucleus-radiation | 1.0 | SUPPORTED | grep | input/defaults.py Params.gpradjust -> gamma/parameters.py |  |
@@ -279,7 +279,7 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | gqradjuste | input_preeqpar | value | 1.0 | SUPPORTED | grep | input/defaults.py Params.GQRadjustE -> direct/dwba.py |  |
 | gqradjustg | input_preeqpar | value | 1.0 | SUPPORTED | grep | input/defaults.py Params.GQRadjustG -> direct/dwba.py |  |
 | group | input_compoundmodel | flag | n | MISSING |  |  |  |
-| gshell | input_preeqmodel | flag | n | READ_ONLY_DEFAULT |  | input/defaults.py Options.flaggshell | refused when set (defaults.UNPORTED): gshell y |
+| gshell | input_preeqmodel | flag | n | SUPPORTED | test:test_kwcov_b7.py | input/defaults.py Options.flaggshell -> preeq/exciton_b7.py (_Damp: ignatyuk/alev) | shell-damped g in the exciton emission and transition rates, TALYS's quirks kept (first-channel damping, lambdanupi's g(uu)). PE totals = stock to 1e-4; response Fe-56 0.39 %, Zr-90 0.50 %. REFUSED with multiple pre-equilibrium (the damping is not wired into multipreeq2); racap y path needs optmodall (refused) |
 | hbstate | input_fissionmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flaghbstate -> fission/parameters.py |  |
 | hbtransfile | input_fissionmodel | per-nucleus-file |  | MISSING |  |  |  |
 | heoradjustd | input_preeqpar | value | 1.0 | SUPPORTED | grep | input/defaults.py Params.HEORadjustD -> direct/dwba.py |  |
@@ -292,7 +292,7 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | isomer | input_basicpar | value | 1.00E+00 | SUPPORTED | test:test_chanobs.py,test_resiso.py,test_kwcov_b2.py | input/defaults.py Options.isomer_s -> structure/levels.py | Fe-56 `isomer 0.001` 0.0 % both sides |
 | jlmmode | input_ompmodel | value | 0 | IGNORED |  | input/defaults.py Options.jlmmode | parsed into Options/Params but no engine code reads jlmmode |
 | jlmomp | input_ompmodel | flag | n | READ_ONLY_DEFAULT |  | input/defaults.py Options.flagjlm | refused when set (defaults.UNPORTED): jlmomp y |
-| kph | input_preeqpar | value | 15.0 | SUPPORTED | test:test_cengld2.py | input/defaults.py Params.Kph -> preeq/prepare.py |  |
+| kph | input_preeqpar | value | 15.0 | SUPPORTED | test:test_cengld2.py,test_kwcov_b7.py | input/defaults.py Params.Kph -> preeq/prepare.py |  |
 | krotconstant | input_densitypar | per-nucleus-barrier | 1.0 | SUPPORTED | grep | input/defaults.py Params.Krotconstant -> density/ld_nx2.py, density/models.py, density/parameters.py |  |
 | kvibmodel | input_densitymodel | value | 2 | SUPPORTED | grep | input/defaults.py Options.kvibmodel -> density/ld_nx2.py, density/parameters.py |  |
 | labddx | input_basicreac | flag | n | IGNORED |  | input/defaults.py Options.flaglabddx | parsed into Options/Params but no engine code reads flaglabddx |
@@ -340,7 +340,7 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | maxzrp | input_numerics | value | 12 | SUPPORTED | test:test_kwcov_b5.py | input/defaults.py Options.maxZrp (inert) | acts only with `rpevap y` (multiple.f90:270), which is refused |
 | micro | input_basicreac | flag | n | IGNORED | manual | input/defaults.py | cascade honoured (ldmodel 7, jlmomp y -> refused, autorot y) |
 | mpreeqmode | input_preeqmodel | value | 2 | SUPPORTED | test:test_mpe_fast.py | input/defaults.py Options.mpreeqmode -> preeq/exciton.py, preeq/mpe_fast.py, preeq/mpe_reference.py, preeq/multi.py |  |
-| msdbins | input_preeqpar | value |  | IGNORED |  | input/defaults.py Options.msdbins | parsed into Options/Params but no engine code reads msdbins |
+| msdbins | input_preeqpar | value |  | SUPPORTED | test:test_kwcov_b7.py | input/defaults.py Options.msdbins (inert) | acts only inside MSD (preeqmode 4, refused); inert otherwise, as in TALYS |
 | multipreeq | input_preeqmodel | flag | n | SUPPORTED | test:test_defaults.py | input/defaults.py Options.emulpre_mev -> compound/pop_reference.py, emission/feed_reference.py |  |
 | nafit | input_fit | flag | n | SUPPORTED | test:test_kwcov_b2.py | input/fitlib.py _cards | wired (xsfit.f90 order); its .par lines carry the gadjust / cstrip responses of the fit y loss: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %). B5 traced both to the engine's DEFAULT 14 MeV (n,p)/(n,a) excess, not to the keywords: cstrip a moves (n,a) by the same mb as stock (9.59 vs 9.63 mb, 0.4 %; the % differs because the engine's (n,a) is 11 % higher); gadjust acts only through pre-equilibrium (with `preequilibrium 20` neither side moves) and the flux it hands back to the compound nucleus decays into protons more in the engine (compound-only (n,p) 151.5 vs 131.5 mb). Fixing that changes defaults: a fidelity task, not a keyword batch |
 | ndfit | input_fit | flag | n | SUPPORTED | test:test_kwcov_b2.py | input/fitlib.py _cards | wired (xsfit.f90 order); its .par lines carry the gadjust / cstrip responses of the fit y loss: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %). B5 traced both to the engine's DEFAULT 14 MeV (n,p)/(n,a) excess, not to the keywords: cstrip a moves (n,a) by the same mb as stock (9.59 vs 9.63 mb, 0.4 %; the % differs because the engine's (n,a) is 11 % higher); gadjust acts only through pre-equilibrium (with `preequilibrium 20` neither side moves) and the flux it hands back to the compound nucleus decays into protons more in the engine (compound-only (n,p) 151.5 vs 131.5 mb). Fixing that changes defaults: a fidelity task, not a keyword batch |
@@ -354,7 +354,7 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | nulldev | input_path | value |  | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | ompenergyfile | input_basicreac | value |  | MISSING |  |  |  |
 | omponly | input_ompmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagomponly -> compound/population.py, core/constants.py, input/nuclides.py |  |
-| onestep | input_preeqmodel | flag | n | IGNORED |  | input/defaults.py Options.flagonestep | parsed into Options/Params but no engine code reads flagonestep |
+| onestep | input_preeqmodel | flag | n | SUPPORTED | test:test_kwcov_b7.py | input/defaults.py Options.flagonestep (inert) | acts only inside MSD (preeqmode 4, refused); inert otherwise, as in TALYS |
 | optmod | input_ompmodel | value |  | IGNORED |  |  | fitlib skips the line: external OMP file |
 | optmodall | input_ompmodel | flag | n | READ_ONLY_DEFAULT | test:test_kwcov_b5.py | input/defaults.py UNPORTED | WAS SILENTLY IGNORED (no engine code reads flagompall; the old SUPPORTED came from comments): stock Au-197 1 MeV `optmodall y` capture +93 %, inelastic -38 %, engine 0.0 %. Now REFUSED; port in B6 |
 | optmodfilen | input_ompmodel | per-element-file |  | IGNORED |  |  | fitlib skips the line: external OMP file |
@@ -385,21 +385,21 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | outpreequilibrium | input_preeqmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outspectra | input_output | flag | n | SUPPORTED | test:test_specobs.py | input/defaults.py Options.flagspec -> specobs.py | spectraout: <x>spec.tot columns, Eaverage; INCOGNITA_SPECOBS=1 is the port switch |
 | outtransenergy | input_directmodel | flag | y | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| pair | input_densitypar | per-nucleus | 1e-20 | SUPPORTED | test:test_ceang.py,test_cengld2.py,test_compound.py | input/defaults.py Params.pair -> angout.py, compound/ceang.py, compound/ceang_types.py, compound/target.py (+32) |  |
+| pair | input_densitypar | per-nucleus | 1e-20 | SUPPORTED | test:test_ceang.py,test_cengld2.py,test_compound.py | input/defaults.py Params.pair -> angout.py, compound/ceang.py, compound/ceang_types.py, compound/target.py (+33) |  |
 | pairconstant | input_densitypar | value | 12.0 | SUPPORTED | test:test_cengld2.py | input/defaults.py Params.pairconstant -> density/ld_nx2.py, density/parameters.py |  |
-| pairmodel | input_preeqmodel | value | 2 | SUPPORTED | grep | input/defaults.py Options.pairmodel -> density/particle_hole.py, preeq/complex.py, preeq/exciton.py |  |
+| pairmodel | input_preeqmodel | value | 2 | SUPPORTED | grep | input/defaults.py Options.pairmodel -> density/particle_hole.py, preeq/complex.py, preeq/exciton.py, preeq/exciton_b7.py |  |
 | parity | input_densitypar | flag | n | SUPPORTED | test:test_ccfast.py,test_ccglue.py,test_ccnumerov.py | input/defaults.py Options.flagparity -> compound/dens_reference.py, density/ld_nx2.py, density/parameters.py, density/tables.py |  |
 | partable | input_basicreac | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | pfnsmodel | input_fissionmodel | value | 1 | IGNORED |  | input/defaults.py Options.pfnsmodel | parsed into Options/Params but no engine code reads pfnsmodel |
 | pglobal | input_densitymodel | value | 1e-20 | SUPPORTED | grep | input/defaults.py Params.pglobal -> capture_fast.py |  |
-| phmodel | input_preeqmodel | value | 1 | SUPPORTED | test:test_phmicro.py,test_phmodel2_native.py | input/defaults.py Options.phmodel -> density/particle_hole.py, emission/multiple_native.py, engine_c.py, gpu_full_setup.py (+4) |  |
+| phmodel | input_preeqmodel | value | 1 | SUPPORTED | test:test_phmicro.py,test_phmodel2_native.py | input/defaults.py Options.phmodel -> density/particle_hole.py, emission/multiple_native.py, engine_c.py, gpu_full_setup.py (+5) |  |
 | pnfit | input_fit | flag | n | SUPPORTED | test:test_kwcov_b2.py | input/fitlib.py _cards (pn.par) | wired; xsfit.f90 does not match the projectile, so the library applies on any run; response untested (charged/photon projectiles behind INCOGNITA_CPINC) |
 | popeps | input_numerics | value | 1.00E-03 | SUPPORTED | test:conftest.py,test_defaults.py,test_gpu_full.py | input/defaults.py Options.popeps_mb -> capture_fast.py, capture_fast_batch.py, capture_gpu.py, capture_gpu_setup.py (+14) |  |
 | popmev | input_basicreac | flag | n | SUPPORTED | test:test_kwcov_b5.py | input/defaults.py Options.flagpopMeV (inert) | acts only on a population input (excitation.f90, projectile 0), which the port does not run: inert in TALYS too |
 | preeqcomplex | input_preeqmodel | flag | y | SUPPORTED | grep | input/defaults.py Options.flagpecomp -> preeq/complex.py, preeq/exciton.py |  |
-| preeqmode | input_preeqmodel | value | 2 | READ_ONLY_DEFAULT |  | input/defaults.py Options.preeqmode | refused when set (defaults.UNPORTED): preeqmode 3 |
-| preeqspin | input_preeqmodel | flag | 1 | READ_ONLY_DEFAULT |  | input/defaults.py Options.pespinmodel | refused when set (defaults.UNPORTED): preeqspin 3 |
-| preeqsurface | input_preeqmodel | flag | y | SUPPORTED | grep | input/defaults.py Options.flagsurface -> preeq/exciton.py |  |
+| preeqmode | input_preeqmodel | value | 2 | SUPPORTED | test:test_kwcov_b7.py | input/defaults.py Options.preeqmode -> preeq/exciton.py (1, 2), preeq/exciton_b7.py (3) | 1 analytic, 2 numerical (default), 3 optical-model rates (bonetti.f90 wvol: transition rates = stock to 1e-6, PE totals to 1e-4; response 4.8 % Fe-56 (n,d) and 6.0 % Zr-90 (n,p) relative but the SAME millibarns (-1.01 vs -1.04, -12.60 vs -12.86 mb): the engine's default 14 MeV (n,p)/(n,d) excess). 4 (MSD/MSC) REFUSED: msd.f90 + continuum DWBA not ported (stock Fe-56 (n,p) +32 %) |
+| preeqspin | input_preeqmodel | flag | 1 | SUPPORTED | test:test_kwcov_b7.py | input/defaults.py Options.pespinmodel -> preeq/exciton.py spin_fraction, emission/feed_reference._spin_inputs, emission/binary.py | 1/2 as before; 3 (= y) J-dependent PE population (xspreeqJP -> population.f90 preeqpop -> binary): response Fe-56 0.44 %, Zr-90 0.88 %; 4 Wigner (newspin.f90) Fe-56 0.35 %. Before B7, 4 dropped the PE flux silently (binary added nothing for pespinmodel > 2). preeqspin 4 with multiple PE refused |
+| preeqsurface | input_preeqmodel | flag | y | SUPPORTED | grep | input/defaults.py Options.flagsurface -> preeq/exciton.py, preeq/exciton_b7.py |  |
 | preequilibrium | input_preeqmodel | flag | n | SUPPORTED | manual | input/defaults.py Options.epreeq_mev -> preeq/* | onset energy honoured (automatic grep missed: variable is consumed under its resolved name) |
 | production | input_medical | flag | n | IGNORED |  | input/defaults.py Options.flagprod | parsed into Options/Params but no engine code reads flagprod |
 | projectile | input_main | value | n | SUPPORTED | test:test_charged_fidelity.py | projectile.py (INCOGNITA_CPINC: n default; p d t h a g) | n is production; p/d/t/h/a/g ported behind INCOGNITA_CPINC (g runs engine.run only) |
@@ -490,7 +490,7 @@ Of the SUPPORTED rows, 168 have a test naming the keyword, 110 are code-path onl
 | transeps | input_numerics | value | 1.00E-08 | SUPPORTED | test:test_e2e.py | input/defaults.py Options.transeps -> capture_fast_batch.py, capture_gpu_setup.py, compound/ccexitnb.py, compound/chain.py (+17) |  |
 | transpower | input_numerics | value | 5 | SUPPORTED | grep | input/defaults.py Options.transpower -> core/grids.py, omp/inverse.py |  |
 | tres | input_compoundpar | value | 293.16 | IGNORED |  | input/defaults.py Params.Tres | parsed into Options/Params but no engine code reads Tres |
-| twocomponent | input_preeqmodel | flag | y | READ_ONLY_DEFAULT |  | input/defaults.py Options.flag2comp | refused when set (defaults.UNPORTED): twocomponent n |
+| twocomponent | input_preeqmodel | flag | y | SUPPORTED | test:test_kwcov_b7.py | input/defaults.py Options.flag2comp -> preeq/exciton_b7.py one_component | `twocomponent n`: one-component exciton model (exciton.f90, emissionrate.f90, lambdaplus.f90, lifetime.f90, Qfactor). Binary PE totals = stock to 1e-4; response Fe-56 0.49 %, Zr-90 0.39 % (stock moved 17 %). REFUSED with multiple pre-equilibrium (Einc >= multipreeq onset, 20 MeV): multipreeq.f90 not ported |
 | ufermi | input_densitypar | per-nucleus-barrier | ufermi | SUPPORTED | test:test_defaults.py | input/defaults.py Params.Ufermi -> density/models.py, density/parameters.py, native/ld.c |  |
 | upbend | input_gammamodel | flag | y | SUPPORTED | test:test_defaults.py,test_etablefix.py,test_leeshell.py | input/defaults.py Options.flagupbend -> capture_gpu_setup.py, compound/psf_fast.py, compound/psf_nx2.py, gamma/parameters.py (+2) |  |
 | upbendc | input_gammapar | per-nucleus-radiation |  | SUPPORTED | grep | input/fitlib.py UPBEND_KEYS -> gamma/parameters.py:762 | upbend C/e/f cards (LEESHELL fix) |

@@ -736,7 +736,7 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "breakupmodel": ("preeqmodel", "breakupmodel", "int"),
     "mpreeqmode": ("preeqmodel", "mpreeqmode", "int"),
     "pairmodel": ("preeqmodel", "pairmodel", "int"),
-    "preeqspin": ("preeqmodel", "pespinmodel", "int"),
+    "preeqspin": ("preeqmodel", "pespinmodel", "preeqspin"),  # KWCOV B7: y = 3, n = 1, else the number
     "phmodel": ("preeqmodel", "phmodel", "int"),
     "preeqmode": ("preeqmodel", "preeqmode", "int"),
     "preequilibrium": ("preeqmodel", "epreeq_mev", "onset"),
@@ -816,6 +816,9 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
             o[name] = _yn(value)
         elif kind == "int":
             o[name] = int(value)
+        elif kind == "preeqspin":  # input_preeqmodel.f90:145-157
+            v = str(value).strip().lower()
+            o[name] = 3 if v[:1] == "y" else 1 if v[:1] == "n" else int(value)
         elif kind == "float":
             o[name] = float(value)
         elif kind == "str":
@@ -1297,14 +1300,10 @@ UNPORTED = (
      "cross section -12 %, engine -1.3 %)"),
     ("alphaomp", lambda v: 3 <= int(v) <= 5, "alphaomp 3-5: double-folding alpha potentials. Silently equal to "
      "the Watanabe potential (alphaomp 1)"),
-    ("preeqmode", lambda v: int(v) == 3, "preeqmode 3: exciton model with optical-model transition rates "
-     "(bonetti.f90)"),
-    ("pespinmodel", lambda v: int(v) == 3, "preeqspin 3: J-dependent pre-equilibrium population "
-     "(xspreeqjp is consumed but never produced)"),
-    ("flag2comp", lambda v: not bool(v), "twocomponent n: one-component exciton model (transition_rates has "
-     "only the two-component path)"),
-    ("flaggshell", lambda v: bool(v), "gshell y: shell-damped single-particle density in the exciton model "
-     "(damp_comp never reaches multiple pre-equilibrium)"),
+    ("preeqmode", lambda v: int(v) == 4, "preeqmode 4: multi-step direct / multi-step compound (msd.f90: msdinit, "
+     "the continuum DWBA of dwbaecis.f90, onestepA/B, multistepA/B, msdplusmsc) is not ported; the run silently "
+     "kept the exciton neutron/proton emission MSD replaces (stock Fe-56 14 MeV: (n,p) +32 %, engine -2.5 %; "
+     "KWCOV B7 2026-11-08). `onestep`, `emsdmin`, `msdbins` act only inside it"),
     ("parinclude", lambda v: not all(v), "ejectiles <subset>: skipping outgoing particles (parskip) reaches only the "
      "channel bookkeeping, not the compound / pre-equilibrium decay, so the run returned the all-ejectile numbers "
      "(Fe-56 `ejectiles g n p` 14 MeV: stock (n,2n) +3.4 %, (n,p) +3.1 %, engine 0.0 %; KWCOV B2 2026-11-08)"),
@@ -1314,9 +1313,12 @@ UNPORTED = (
     ("flagrpevap", lambda v: bool(v), "rpevap y: evaporation of the residual products past maxZrp/maxNrp "
      "(rpevap.f90, rp*.ex population files) is not ported; the run would have decayed them in the cascade instead "
      "(KWCOV B5 2026-11-08)"),
-    ("flaggnorm", lambda v: bool(v), "gnorm y: normalise the E1 strength to the measured <Gamma_gamma>. "
-     "gamma.transmission.radwidtheory has the iteration but no calculation calls it, so the run was "
-     "identical to gnorm n (223 nuclides, 2026-09-22); scale the strength with `ftable Z A f` instead"),
+    ("flaggnorm", lambda v: bool(v), "gnorm y: normalise the compound nucleus's E1 strength to the measured "
+     "<Gamma_gamma> (radwidtheory.f90:253-262 iterates ftable(E1) up to 101 times, again at every incident energy). "
+     "TALYS-2.25 compares its theoretical width in eV with the resonance table's keV number (resonancepar.f90:96), "
+     "so the iteration drives ftable(E1) to 0 (stock Fe-57: 1.30 eV vs 9.2e-4, ftable E1 -> 0, capture 1 MeV -70 %, "
+     "14 MeV -99 %; KWCOV B7 2026-11-08). gamma.transmission.radwidtheory has the iteration but no calculation "
+     "calls it, so the run was identical to gnorm n; scale the strength with `ftable Z A f` instead"),
 )
 
 

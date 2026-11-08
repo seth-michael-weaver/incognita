@@ -381,6 +381,8 @@ def setup_nuclide(Z: int, A: int, declared: tuple[float, ...], cascade=None) -> 
                                        float(sp0.sep_mev[cas.k0]), L, ccexitnb.fnorm_n(cas))
         rec["binary"] = _binary_shell(built, nin, e, binp)
         prq = population(pop_inputs_of(cas, binp, target, etot, add, declared))
+        if prq.preeqpop_mb:  # KWCOV B7: the GPU binary has no J-resolved pre-equilibrium population
+            raise NotImplementedError("not ported on the GPU path: preeqspin 3 (use engine_c)")
         rec["pex"] = {t: _np(prq.preeqpopex_mb[t]).copy() for t in prq.preeqpopex_mb}
         from physics.hf.emission import fluxclose
 

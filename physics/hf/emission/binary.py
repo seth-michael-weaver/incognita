@@ -140,6 +140,8 @@ class BinaryInputs:
     xspopnuc_mb: dict[int, float] = field(default_factory=dict)  # compound only
     xsdirdisc_mb: dict[int, Tensor] = field(default_factory=dict)  # (Nex,)
     preeqpopex_mb: dict[int, Tensor] = field(default_factory=dict)  # (Nex,)
+    # KWCOV B7 (pespinmodel >= 3): population.f90's J-resolved `preeqpop` (Nex, maxJph+1, 2); empty otherwise
+    preeqpop_mb: dict[int, Tensor] = field(default_factory=dict)
     xsdirdisctot_mb: dict[int, float] = field(default_factory=dict)
     xspreeqtot_mb: dict[int, float] = field(default_factory=dict)
     xsgrtot_mb: dict[int, float] = field(default_factory=dict)
@@ -294,6 +296,16 @@ def binary(inp: BinaryInputs, state: BinaryState | None = None, device=None) -> 
                     spread = engphys.spread_norm_torch(spread, None)
                 add = spread * ppx[sl][:, None, None]
                 pop[sl, :mj, :] = pop[sl, :mj, :] + add
+                pex[sl] = pex[sl] + ppx[sl]
+            elif ncont > 0:
+                # KWCOV B7 (pespinmodel >= 3): population.f90 made `preeqpop` itself; binary.f90:244-256 adds it
+                # and preeqpopex the same way (before, the pre-equilibrium flux of these runs was dropped)
+                sl = slice(nl + 1, nmax + 1)
+                pp = inp.preeqpop_mb.get(t)
+                if pp is not None:
+                    pp = torch.as_tensor(pp, dtype=DTYPE, device=device)
+                    mj = min(pp.shape[1], pop.shape[1])
+                    pop[sl, :mj, :] = pop[sl, :mj, :] + pp[sl, :mj, :]
                 pex[sl] = pex[sl] + ppx[sl]
             pt = torch.as_tensor(inp.xspreeqtot_mb.get(t, 0.0), dtype=DTYPE, device=device)
             gt = torch.as_tensor(inp.xsgrtot_mb.get(t, 0.0), dtype=DTYPE, device=device)

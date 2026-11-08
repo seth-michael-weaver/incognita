@@ -11,10 +11,7 @@ from physics.hf.input.defaults import UNPORTED, default_options, reject_unported
 REFUSED = [
     {"jlmomp": "y"},
     {"alphaomp": 3}, {"alphaomp": 4}, {"alphaomp": 5},
-    {"preeqmode": 3},
-    {"preeqspin": 3},
-    {"twocomponent": "n"},
-    {"gshell": "y"},
+    {"preeqmode": 4},   # KWCOV B7: MSD/MSC; preeqmode 3, preeqspin 3/4, twocomponent n, gshell y are ported
     {"gnorm": "y"},
 ]
 
@@ -27,7 +24,9 @@ def test_unported_keyword_is_refused(kw):
 
 
 @pytest.mark.parametrize("kw", [{}, {"alphaomp": 6}, {"alphaomp": 7}, {"alphaomp": 1}, {"preeqmode": 2},
-                                {"preeqspin": 2}, {"twocomponent": "y"}, {"jlmomp": "n"}, {"gnorm": "n"}, {"ldmodel": 2}])
+                                {"preeqspin": 2}, {"twocomponent": "y"}, {"jlmomp": "n"}, {"gnorm": "n"}, {"ldmodel": 2},
+                                {"preeqmode": 3}, {"preeqspin": 3}, {"preeqspin": 4}, {"twocomponent": "n"},
+                                {"gshell": "y"}])
 def test_ported_settings_still_resolve(kw):
     reject_unported(default_options(50, 120, "n", kw))
 

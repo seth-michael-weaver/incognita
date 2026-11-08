@@ -161,6 +161,12 @@ def pop_inputs_of(cas: Cascade, binp, target: str, etotal_mev: float, add: dict,
     xspreeq = pres["xspreeq"][i].detach().numpy()
     xstep2 = pres["xsstep2"][i].detach().numpy() if "xsstep2" in pres else None
     flagmulpre = not (binp.e_inc_mev < options.emulpre_mev)
+    if flagmulpre and (not options.flag2comp or options.flaggshell):
+        # KWCOV B7: the binary exciton model has both (preeq.exciton_b7); multiple pre-equilibrium does not
+        raise NotImplementedError(
+            "not ported: multiple pre-equilibrium (Einc >= multipreeq onset, default 20 MeV) with "
+            + ("twocomponent n (multipreeq.f90, the one-component chain)" if not options.flag2comp else
+               "gshell y (the shell damping of multipreeq2.f90 is not wired into the cascade)"))
     # preeqinit.f90:64-65: maxpar = maxexc / 2 = numexc / 2 = 6, NOT 5 -- with 5 the
     # (6, .) and (., 6) particle-hole columns `multipreeq2` reads are simply missing.
     maxpar = int(getattr(options, "maxpar", NUMPARX))
@@ -176,10 +182,42 @@ def pop_inputs_of(cas: Cascade, binp, target: str, etotal_mev: float, add: dict,
         pespinmodel=options.pespinmodel, flagmulpre=flagmulpre, flag2comp=options.flag2comp,
         maxpar=maxpar,
         **_seed_exciton(cas.k0),
+        **(_spin_inputs(pres, i, gres, cas.k0, E) if options.pespinmodel >= 3 else {}),
         xsstep2_mb=(_xsstep2_by_type(xstep2, pres.get("states"), maxpar, E)
                     if (flagmulpre and xstep2 is not None and pres.get("states") is not None)
                     else {}),
     )
+
+
+def _spin_inputs(pres: dict, i: int, gres, k0: int, E: int) -> dict:
+    """KWCOV B7 (`preeqspin 3`): the J-resolved spectra population.f90:184-198 interpolates, as
+    `PopulationInputs` takes them: `xspreeqJP` per type (E, maxJph+1, 2), the collective continuum's
+    `xscollcontJP` (giant.f90:161) and the giant resonances' `xsgrstate` by multipolarity l = J (E, 4, 2: GMR at
+    J = 0, GQR at 2, LEOR/HEOR at 3), all zero where TALYS has nothing.
+
+    TALYS: population.f90:1 (population)
+    Test: tests/hf/test_kwcov_b7.py
+    """
+    from physics.hf.preeq.spin import MAXJPH
+
+    nj = MAXJPH + 1
+    jp = pres["xspreeqjp"][i].detach().numpy()  # (7, E', J)
+    xjp = {}
+    for t in range(7):
+        a = np.zeros((E, nj, 2))
+        k = min(E, jp.shape[1])
+        a[:k, :, 0] = jp[t, :k, :nj]
+        a[:k, :, 1] = jp[t, :k, :nj]
+        xjp[t] = a
+    cc = np.zeros((E, nj, 2))
+    ccj = np.asarray(gres.xscollcontjp_mb.detach().numpy(), float)  # (J, 2, E)
+    jj, kk = min(nj, ccj.shape[0]), min(E, ccj.shape[2])
+    cc[:kk, :jj, :] = np.transpose(ccj[:jj, :, :kk], (2, 0, 1))
+    gs = np.zeros((E, 4, 2))
+    g4 = np.asarray(gres.xsgrstate_mb.detach().numpy(), float)  # (4, E): GMR, GQR, LEOR, HEOR
+    kk = min(E, g4.shape[1])
+    gs[:kk, 0, 0], gs[:kk, 2, 0], gs[:kk, 3, 0], gs[:kk, 3, 1] = g4[0, :kk], g4[1, :kk], g4[2, :kk], g4[3, :kk]
+    return {"maxjph": MAXJPH, "xspreeqjp_mb": xjp, "xscollcontjp_mb": {k0: cc}, "xsgrstate_mb": {k0: gs}}
 
 
 def chain_case(cas: Cascade, binp, cinp: ChannelInputs, *, bstate=None) -> tuple[dict, dict]:

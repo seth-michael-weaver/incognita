@@ -370,8 +370,10 @@ class ChainedFull:
                     # the TYPE record; here it is the population above the last discrete level.
                     extra["xscompcont_mb"] = {
                         t: float(xspop[t][binp.grids[t].nlast + 1:].sum()) for t in xspop}
+                from physics.hf.engine_c import _preeqpop_of  # KWCOV B7 (pespinmodel >= 3)
+
                 b2 = replace(binp, xspop_mb=xspop, xspopex_mb=xspopex, xspopnuc_mb=xspopnuc,
-                             xsbinary_mb=xsbinary, preeqpopex_mb=pex, **extra,
+                             xsbinary_mb=xsbinary, preeqpopex_mb=pex, **extra, **_preeqpop_of(prq, binp),
                              xsreacinc_mb=float(inc.sigma_reac_mb[0]),
                              xsdirdiscsum_mb=add[round(binp.e_inc_mev, 6)]["xsdirdiscsum_mb"],
                              xspreeqsum_mb=add[round(binp.e_inc_mev, 6)]["xspreeqsum_mb"],

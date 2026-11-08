@@ -144,6 +144,43 @@ B5: dict = {
 }
 
 
+_T7 = "test:test_kwcov_b7.py"
+#: KWCOV B7 rows (docs/hf/COVERAGE_PLAN.md B7); response = |ln(R/S)| max, stock > 1 mb, Fe-56 and Zr-90, 1/5/14 MeV
+B7: dict = {
+    "twocomponent": ("SUPPORTED", "input/defaults.py Options.flag2comp -> preeq/exciton_b7.py one_component",
+                     "`twocomponent n`: one-component exciton model (exciton.f90, emissionrate.f90, lambdaplus.f90, "
+                     "lifetime.f90, Qfactor). Binary PE totals = stock to 1e-4; response Fe-56 0.49 %, Zr-90 0.39 % "
+                     "(stock moved 17 %). REFUSED with multiple pre-equilibrium (Einc >= multipreeq onset, 20 MeV): "
+                     "multipreeq.f90 not ported", _T7),
+    "gshell": ("SUPPORTED", "input/defaults.py Options.flaggshell -> preeq/exciton_b7.py (_Damp: ignatyuk/alev)",
+               "shell-damped g in the exciton emission and transition rates, TALYS's quirks kept (first-channel damping, "
+               "lambdanupi's g(uu)). PE totals = stock to 1e-4; response Fe-56 0.39 %, Zr-90 0.50 %. REFUSED with "
+               "multiple pre-equilibrium (the damping is not wired into multipreeq2); racap y path needs optmodall "
+               "(refused)", _T7),
+    "preeqmode": ("SUPPORTED", "input/defaults.py Options.preeqmode -> preeq/exciton.py (1, 2), preeq/exciton_b7.py (3)",
+                  "1 analytic, 2 numerical (default), 3 optical-model rates (bonetti.f90 wvol: transition rates = stock "
+                  "to 1e-6, PE totals to 1e-4; response 4.8 % Fe-56 (n,d) and 6.0 % Zr-90 (n,p) relative but the SAME "
+                  "millibarns (-1.01 vs -1.04, -12.60 vs -12.86 mb): the engine's default 14 MeV (n,p)/(n,d) excess). "
+                  "4 (MSD/MSC) REFUSED: msd.f90 + continuum DWBA not ported (stock Fe-56 (n,p) +32 %)", _T7),
+    "preeqspin": ("SUPPORTED", "input/defaults.py Options.pespinmodel -> preeq/exciton.py spin_fraction, "
+                  "emission/feed_reference._spin_inputs, emission/binary.py",
+                  "1/2 as before; 3 (= y) J-dependent PE population (xspreeqJP -> population.f90 preeqpop -> binary): "
+                  "response Fe-56 0.44 %, Zr-90 0.88 %; 4 Wigner (newspin.f90) Fe-56 0.35 %. Before B7, 4 dropped the "
+                  "PE flux silently (binary added nothing for pespinmodel > 2). preeqspin 4 with multiple PE refused",
+                  _T7),
+    "onestep": ("SUPPORTED", "input/defaults.py Options.flagonestep (inert)", "acts only inside MSD (preeqmode 4, "
+                "refused); inert otherwise, as in TALYS", _T7),
+    "msdbins": ("SUPPORTED", "input/defaults.py Options.msdbins (inert)", "acts only inside MSD (preeqmode 4, refused); "
+                "inert otherwise, as in TALYS", _T7),
+    "emsdmin": ("SUPPORTED", "input/defaults.py Params.Emsdmin (inert)", "acts only inside MSD (preeqmode 4, refused); "
+                "inert otherwise, as in TALYS", _T7),
+    "gnorm": ("READ_ONLY_DEFAULT", "input/defaults.py Options.flaggnorm (refused when y)",
+              "REFUSED: TALYS-2.25 normalises to the resonance table's keV number read as eV (resonancepar.f90:96), so "
+              "radwidtheory's iteration drives the compound nucleus's E1 ftable to 0 (stock Fe-57 1.30 eV vs 9.2e-4; "
+              "capture 1 MeV -70 %, 14 MeV -99 %; Zr-91 capture 1 MeV -54 %). Left: call "
+              "gamma.transmission.radwidtheory(flaggnorm) with TALYS's gamgam before the run and feed the final "
+              "ftable(E1) of the compound nucleus to every strength user", _T7),
+}
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -167,6 +204,7 @@ MANUAL: dict = {
     # --- KWCOV B2 (2026-11-08): deck wiring; response vs stock = scripts/kwcov/b2_response.py, |ln(R/S)| max ---
     **B2,
     **B5,
+    **B7,
     "channels": ("SUPPORTED", "structure/scalars.py:144", "exclusive channels are always computed (flagchannels "
                  "hard-wired on); `channels n` has no effect, which is harmless", "manual"),
     "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete "

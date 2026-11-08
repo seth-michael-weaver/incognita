@@ -373,6 +373,15 @@ def _direct_discrete(target, variant, energies, k0, nlast):
 
 
 @stagetime.timed("preeq")
+def _b7_extras(Z, A, k0, options, params, m, enincmax):
+    """KWCOV B7: `preeq.exciton_b7.extras` when the run sets twocomponent n / gshell y / preeqmode 3, else None."""
+    from physics.hf.preeq import exciton_b7
+
+    if not exciton_b7.active(options):
+        return None
+    return exciton_b7.extras(Z, A, k0, options, params, m, enincmax, float(params.at("kph")))
+
+
 def prepare(
     target: str,
     variant: str = "default",
@@ -578,6 +587,7 @@ def prepare(
         a_init=Ac0,
         nbins=number_of_bins(enincmax, options.nbins0),
         primary=True,
+        b7=_b7_extras(Z, A, k0, options, params, m, enincmax),
     )
     hdr["energies"] = energies
     hdr["ebegin"] = ebegin

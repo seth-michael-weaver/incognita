@@ -7,14 +7,17 @@ Task: T8 (physics/hf/CONTRACT.md §7). Acceptance test: A-pe (§6).
 
 TALYS routines ported here (file:line of the subroutine/function statement):
     preeqspindis.f90:1 (preeqspindis)
+    newspin.f90:1 (newspin, spin_wigner)
 
-`pespinmodel 4` (the Wigner `spin_wigner`/`newspin` distribution) is not ported: TALYS's
-default is 1 for a neutron projectile and 2 for a charged one, and neither reaches this
-routine's alternative branch. `pespinmodel >= 3` is what makes `exciton2` build a J-dependent
+`pespinmodel 4` (the Wigner `spin_wigner`/`newspin` distribution) depends on the incident
+energy, so it needs `einc_mev` (KWCOV B7); TALYS's default is 1 for a neutron projectile and 2
+for a charged one. `pespinmodel >= 3` is what makes `exciton2` build a J-dependent
 pre-equilibrium cross section from `RnJ`.
 """
 
 from __future__ import annotations
+
+import math
 
 import torch
 from torch import Tensor
@@ -26,8 +29,21 @@ from physics.hf.density.particle_hole import NUMEXC
 MAXJPH = 30  # preeqspindis.f90:44
 
 
+def newspin(a: int, e_mev: float, n: int) -> float:
+    """The width of the Wigner pre-equilibrium spin distribution, global parameters (newspin.f90, iglob 1).
+
+    TALYS: newspin.f90:1 (newspin)
+    Test: tests/hf/test_kwcov_b7.py
+    """
+    a13 = float(a) ** (1.0 / 3.0)
+    fa = -0.680858 * a13 + 6.37643
+    fb = 0.0818127 * a13 - 0.557189
+    fc = 1.14442 * a13 - 7.1285
+    return 0.7 * (fa * e_mev ** 0.25 + fb * e_mev ** 0.75 + fc + 0.5) * float(n) ** 0.44
+
+
 def preeq_spin_distribution(
-    options, params, atarget: int, *, maxexc: int = NUMEXC, device=None
+    options, params, atarget: int, *, maxexc: int = NUMEXC, device=None, einc_mev: float | None = None
 ) -> dict[str, Tensor]:
     """`RnJ(n, J)` and `RnJsum(n)` (preeqspindis.f90:45-56), dimensionless.
 
@@ -41,11 +57,23 @@ def preeq_spin_distribution(
     TALYS: preeqspindis.f90:1 (preeqspindis)
     Test: A-pe
     """
-    if int(getattr(options, "pespinmodel", 1)) == 4:
-        raise NotImplementedError(
-            "T8: pespinmodel 4 (spin_wigner/newspin) is not ported; TALYS's default is 1 or 2"
-        )
     c = talys_constants()
+    if int(getattr(options, "pespinmodel", 1)) == 4:
+        # KWCOV B7: preeqspindis.f90:58-66, RnJ = spin_wigner(J, eta) / (2J+1), eta = sqrt(Rspincutpreeq) newspin
+        if einc_mev is None:
+            raise NotImplementedError("not ported: preeqspin 4 with multiple pre-equilibrium (the Wigner spin "
+                                      "distribution depends on the incident energy; only the binary exciton model "
+                                      "has it)")
+        rs = float(params.at("rspincutpreeq"))
+        sq = math.sqrt(4.0 * math.atan(1.0))
+        rnj = torch.zeros(maxexc + 1, MAXJPH + 1, dtype=DTYPE, device=device)
+        for n in range(1, maxexc + 1):
+            eta = math.sqrt(rs) * newspin(atarget, float(einc_mev), n)
+            for J in range(MAXJPH + 1):
+                rnj[n, J] = (2.0 * J + 1.0) ** 2 / (eta ** 3 * sq) * math.exp(-((J + 0.5) ** 2) / eta ** 2) / (
+                    2.0 * J + 1.0)
+        J = torch.arange(0, MAXJPH + 1, dtype=DTYPE, device=device).reshape(1, -1)
+        return {"RnJ": rnj, "RnJsum": ((2.0 * J + 1.0) * rnj).sum(-1)}
     twothird, sqrttwopi = c["twothird"], c["sqrttwopi"]
     rs = torch.as_tensor(params.at("rspincutpreeq"), dtype=DTYPE, device=device)
     n = torch.arange(0, maxexc + 1, dtype=DTYPE, device=device).reshape(-1, 1)

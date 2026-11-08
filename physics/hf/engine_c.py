@@ -1204,6 +1204,8 @@ def binary_lean(inp, state):
     kern = E._kernel()
     if kern is None or not E.enabled() or torch.is_grad_enabled():
         raise _Unsupported("binary kernel")
+    if inp.pespinmodel >= 3:  # KWCOV B7: the J-resolved pre-equilibrium population is binary.binary's alone
+        raise _Unsupported("pespinmodel >= 3")
     sfl = sfaclocal_on()
     tn = torch.from_numpy
     nj = inp.numj
@@ -1368,6 +1370,7 @@ def cases(zf, stats: dict | None = None):
                 t: float(xspop[t][binp.grids[t].nlast + 1:].sum()) for t in xspop}}
             b2 = replace(binp, xspop_mb=xspop, xspopex_mb=xspopex, xspopnuc_mb=xspopnuc,
                          xsbinary_mb=xsbinary, preeqpopex_mb=pex, **extra,
+                         **_preeqpop_of(prq, binp),
                          xsreacinc_mb=float(inc.sigma_reac_mb[0]),
                          xsdirdiscsum_mb=a_e["xsdirdiscsum_mb"],
                          xspreeqsum_mb=a_e["xspreeqsum_mb"], xsgrsum_mb=a_e["xsgrsum_mb"])
@@ -1543,3 +1546,25 @@ def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:
         return {k: torch.zeros(len(per_case), dtype=DTYPE) for k in keys}
     table = torch.tensor([[d.get(k, 0.0) for d in per_case] for k in keys], dtype=DTYPE)
     return dict(zip(keys, table.unbind(0)))  # noqa: B905
+
+
+def _preeqpop_of(prq, binp) -> dict:
+    """KWCOV B7 (pespinmodel >= 3): `BinaryInputs.preeqpop_mb` from population.f90's J-resolved `preeqpop`, cut
+    or padded to each residual's bins; {} on every other run (nothing changes).
+
+    TALYS: binary.f90:1 (binary) lines 244-256
+    Test: tests/hf/test_kwcov_b7.py
+    """
+    if prq is None or not prq.preeqpop_mb:
+        return {}
+    out = {}
+    for t, g in binp.grids.items():
+        a = prq.preeqpop_mb.get(t)
+        if a is None:
+            continue
+        n = g.ex_mev.shape[0]
+        v = torch.zeros((n,) + tuple(a.shape[1:]), dtype=DTYPE)
+        k = min(n, a.shape[0])
+        v[:k] = torch.as_tensor(a[:k], dtype=DTYPE)
+        out[t] = v
+    return {"preeqpop_mb": out}

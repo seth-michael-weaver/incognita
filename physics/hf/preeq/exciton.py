@@ -195,6 +195,8 @@ class PreeqInputs:
     a_init: int  # Ainit, mass number of the compound system
     nbins: int = 40
     primary: bool = True
+    # KWCOV B7: what `preeq.exciton_b7` reads (twocomponent n, gshell y, preeqmode 3); None on every other run
+    b7: dict | None = None
 
     @property
     def C(self) -> int:
@@ -857,6 +859,10 @@ def exciton_model(inp: PreeqInputs, options, params, states: ExcitonStates | Non
     TALYS: exciton2.f90:1 (exciton2)
     Test: A-pe
     """
+    if inp.b7 is not None:  # KWCOV B7: one-component / gshell / preeqmode 3 (preeq.exciton_b7)
+        from physics.hf.preeq import exciton_b7
+
+        return exciton_b7.exciton_model(inp, options, params, inp.b7, states)
     if states is None:
         states = exciton_states(inp.k0, NUMPARX, inp.egrid_mev.device)
     emis = emission_rates(inp, states, options, params)
@@ -1957,6 +1963,7 @@ def preequilibrium(
 
     kevleak2.sync(options)  # KEVLEAK3: run-scoped kevleak2 value for preeq_total (deck > env > default 2)
     res = exciton_model(inp, options, params, states)
+    jpfrac = spin_fraction(res, options, params, inp) if int(getattr(options, "pespinmodel", 1)) >= 3 else None
     if getattr(options, "flagpecomp", True) and coulbar_mev is not None:
         cx = complex_particle_spectra(
             inp,
@@ -2018,10 +2025,40 @@ def preequilibrium(
     if pcm != "n" or pcdiag:
         res.update(pecollapse(res, pre, inp, disc, pcm))
     res.update(preeq_total(res, inp, disc, ungate=ramp > 0.0, nofrac=nofrac))
+    if jpfrac is not None:
+        # KWCOV B7 (preeqspin 3): preeqcomplex.f90:104-113 gives the complex-particle part the exciton spectrum's
+        # J shares, preeqcorrect.f90:150/179 and preeqtotal.f90:179-185 scale xspreeqJP as xspreeq, so it is the
+        # exciton model's J fractions times the final xspreeq (zero where the exciton spectrum was zero)
+        res["xspreeqjp"] = jpfrac * res["xspreeq"].unsqueeze(-1)
     if pcdiag:
         PCDIAG.append(dict(post=True, mode=pcm, einc=inp.einc_mev.tolist(), Z_t=inp.Z, A_t=inp.A, preeqnorm=res["preeqnorm"].tolist(),
                            xspreeqtot=res["xspreeqtot"].tolist(), xspreeqdisctot=res["xspreeqdisctot"].tolist()))
     return res
+
+
+def spin_fraction(res: dict, options, params, inp: PreeqInputs) -> Tensor:
+    """KWCOV B7 (`preeqspin 3`): the J share of the exciton-model spectrum, `xspreeqJP / xspreeq` (C, 7, E, J),
+    the same for both parities, from the per-state spectra and `RnJ` (exciton2.f90:121-128, exciton.f90:100-107):
+    ``sum_s xs_s * 0.5 (2J+1) RnJ(n_s, J) / RnJsum(n_s) / sum_s xs_s``, J = 0 .. maxJph.
+
+    TALYS: exciton2.f90:1 (exciton2), exciton.f90:1 (exciton), preeqspindis.f90:1 (preeqspindis)
+    Test: tests/hf/test_kwcov_b7.py
+    """
+    from physics.hf.preeq.spin import MAXJPH, preeq_spin_distribution
+
+    n = res.get("n_state")
+    if n is None:
+        n = res["states"].n
+    xs = res["xsstep2"]  # (C, S, 7, E)
+    J = torch.arange(0, MAXJPH + 1, dtype=DTYPE)
+    jps = []
+    for c in range(inp.C):  # preeqspin 4: the Wigner RnJ depends on the incident energy (preeqspindis.f90:58-66)
+        rnj = preeq_spin_distribution(options, params, inp.A, einc_mev=float(inp.einc_mev[c]))
+        w = 0.5 * (2.0 * J + 1.0) * (rnj["RnJ"][n] / rnj["RnJsum"][n].unsqueeze(-1))  # (S, J)
+        jps.append(torch.einsum("ste,sj->tej", xs[c], w))
+    jp = torch.stack(jps)
+    tot = xs.sum(1).unsqueeze(-1)
+    return torch.where(tot != 0, jp / torch.where(tot != 0, tot, torch.ones_like(tot)), torch.zeros_like(jp))
 
 
 def exciton_spectra(cases, grid, trans, options, params) -> dict[str, Tensor]:
