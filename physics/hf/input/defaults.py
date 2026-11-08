@@ -311,6 +311,11 @@ class Options:
     flagecissave: bool = False  # input_directmodel.f90:88-92 (= flagompall)
     flaggiant0: bool = True  # input_directmodel.f90:93-98, true for k0 in (1, 2) without omponly
     flaglegendre: bool = False  # input_directmodel.f90:99-103 (= flagendf)
+    # KWCOV B3 (physics/hf/angout.py, output only): angleout.f90's switches
+    flagang: bool = False  # outangle, input_output.f90:101 (y with endf y, :128)
+    flagblockangle: bool = False  # blockangle, input_output.f90:91 (y with endf y, :133)
+    fileelastic: bool = False  # input_outfiles.f90:87 (y with endf y, :105)
+    fileangle: tuple = ()  # input_outfiles.f90:84, :252-256: levels with an angle file; every level with outangle y (:133)
     flagstate: bool = False  # input_directmodel.f90:105
     flagsys: bool = False  # input_directmodel.f90:106
     flagtransen: bool = True  # input_directmodel.f90:107
@@ -605,6 +610,10 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "ecissave": ("directmodel", "flagecissave", "yn"),
     "giantresonance": ("directmodel", "flaggiant0", "yn"),
     "outlegendre": ("directmodel", "flaglegendre", "yn"),
+    "outangle": ("directmodel", "flagang", "yn"),  # KWCOV B3: input_output.f90 (stage order is immaterial: output only)
+    "blockangle": ("directmodel", "flagblockangle", "yn"),  # KWCOV B3
+    "fileelastic": ("directmodel", "fileelastic", "yn"),  # KWCOV B3: input_outfiles.f90
+    "fileangle": ("directmodel", "fileangle", "levels"),  # KWCOV B3: `fileangle 2`; this port also takes `fileangle 1,2`
     "statepot": ("directmodel", "flagstate", "yn"),
     "maxband": ("directpar", "maxband", "int"),
     "maxrot": ("directpar", "maxrot", "int"),
@@ -744,6 +753,9 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
                 o[name] = 0.0 if _yn(value) else EMAXTALYS_MEV
             else:
                 o[name] = float(value)
+        elif kind == "levels":  # KWCOV B3: fileangle, one level per TALYS line (input_outfiles.f90:252-256)
+            got = {int(x) for x in str(value).replace(",", " ").split()}
+            o[name] = tuple(sorted(set(o[name]) | got))
         elif kind == "urr":  # input_compoundpar.f90 keyword loop: y/n or an onset energy
             if _is_yn(value) and not isinstance(value, (int, float)):
                 o["flagurr"] = _yn(value)
@@ -905,6 +917,7 @@ def default_options(
     o["flagecissave"] = o["flagompall"]  # :88-92
     o["flaggiant0"] = k0 in (1, 2) and not o["flagomponly"]  # :93-98
     o["flaglegendre"] = o["flagendf"]  # :99-103
+    o["flagang"] = o["flagblockangle"] = o["fileelastic"] = o["flagendf"]  # KWCOV B3: input_output.f90:128-133, input_outfiles.f90:105
     _apply_stage("directmodel", o, ov)
 
     # input_directpar.f90

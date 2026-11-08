@@ -883,7 +883,10 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     # LOWEPOT: no HF compound elastic below the resonance region, off unless INCOGNITA_LOWEPOT is set
     from physics.hf import lowepot
 
-    return lowepot.add_to_results(res, injection)
+    res = lowepot.add_to_results(res, injection)
+    from physics.hf import angout  # KWCOV B3: angular distributions, output only (off: unchanged)
+
+    return angout.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

@@ -53,4 +53,19 @@ MANUAL: dict = {
                    "property (automatic grep missed it); global form only", "test:test_defaults.py"),
     "maxlevelsbin": ("MISSING", "", "per-ejectile nlevbin; only maxlevelstar is read"),
     "ejectiles": ("MISSING", "", "all 7 ejectiles always on; `ejectiles g n` (parskip) not read"),
+    # --- KWCOV B3: angular distributions (physics/hf/angout.py) ---
+    "outangle": ("SUPPORTED", "input/defaults.py Options.flagang -> angout.py", "angleout + compound angular "
+                 "distributions (flagcompang); INCOGNITA_ANGOUT=1 is the port switch", "test:test_angout.py"),
+    "fileelastic": ("SUPPORTED", "input/defaults.py Options.fileelastic -> angout.py", "elastic angle file without "
+                    "outangle (isotropic compound, as TALYS)", "test:test_angout.py"),
+    "fileangle": ("SUPPORTED", "input/defaults.py Options.fileangle -> angout.py", "one level per line (TALYS); "
+                  "`fileangle 1,2` also accepted; repeated deck lines need B2's plumbing to merge", "test:test_angout.py"),
+    "outlegendre": ("SUPPORTED", "input/defaults.py Options.flaglegendre -> angout.py", "leg files (Total, Direct, "
+                    "Compound, Normalized, ENDF-6)", "test:test_angout.py"),
+    "blockangle": ("SUPPORTED", "input/defaults.py Options.flagblockangle -> angout.write_files", "nnang.L01 names, "
+                   "energies appended", "test:test_angout.py"),
+    "angles": ("SUPPORTED", "input/defaults.py Options.nangle -> angout.angles", "discrete angle grid "
+               "180/nangle", "test:test_angout.py"),
+    "cpang": ("SUPPORTED", "input/defaults.py Options.flagcpang -> angout.flagcompang", "compound angular "
+              "distributions for charged projectiles", "test:test_angout.py"),
 }

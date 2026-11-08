@@ -29,14 +29,14 @@ read; `physics/hf/eadj.py` (ENGADJ) is our own equivalent keyword.
 
 | status | keywords |
 |---|---|
-| SUPPORTED | 225 |
+| SUPPORTED | 230 |
 | READ_ONLY_DEFAULT | 8 |
 | IGNORED | 97 |
 | MISSING | 45 |
-| NA | 71 |
+| NA | 66 |
 | **total** | 446 |
 
-Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path only (`grep`).
+Of the SUPPORTED rows, 112 have a test naming the keyword, 113 are code-path only (`grep`).
 
 ## By TALYS input group
 
@@ -51,7 +51,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | input_compoundpar | 1 | 0 | 7 | 0 | 0 |
 | input_densitymodel | 14 | 0 | 0 | 0 | 1 |
 | input_densitypar | 31 | 0 | 3 | 2 | 1 |
-| input_directmodel | 4 | 0 | 1 | 2 | 8 |
+| input_directmodel | 5 | 0 | 1 | 2 | 7 |
 | input_directpar | 5 | 0 | 2 | 0 | 0 |
 | input_fissionmodel | 7 | 0 | 7 | 3 | 1 |
 | input_fissionpar | 14 | 0 | 5 | 1 | 1 |
@@ -65,8 +65,8 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | input_numerics | 11 | 0 | 4 | 0 | 0 |
 | input_ompmodel | 10 | 2 | 5 | 14 | 2 |
 | input_omppar | 31 | 0 | 11 | 1 | 0 |
-| input_outfiles | 0 | 0 | 0 | 0 | 12 |
-| input_output | 0 | 0 | 0 | 0 | 26 |
+| input_outfiles | 2 | 0 | 0 | 0 | 10 |
+| input_output | 2 | 0 | 0 | 0 | 24 |
 | input_path | 0 | 0 | 0 | 0 | 3 |
 | input_preeqmodel | 8 | 4 | 1 | 0 | 3 |
 | input_preeqpar | 29 | 0 | 5 | 0 | 0 |
@@ -85,7 +85,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | alphald | input_densitypar | value | ld_systematics | SUPPORTED | test:test_defaults.py | input/defaults.py Params.alphald -> density/ld_nx2.py, density/parameters.py |  |
 | alphaomp | input_ompmodel | value | 6 | READ_ONLY_DEFAULT |  | input/defaults.py Options.alphaomp | refused when set (defaults.UNPORTED): alphaomp 3-5 |
 | anfit | input_fit | flag | n | IGNORED | manual | input/fitlib.py (INCOGNITA_TALYS_FIT=ng/macs/gamgam) | deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks |
-| angles | input_numerics | value | 90 | SUPPORTED | grep | input/defaults.py Options.nangle -> core/grids.py |  |
+| angles | input_numerics | value | 90 | SUPPORTED | test:test_angout.py | input/defaults.py Options.nangle -> angout.angles | discrete angle grid 180/nangle |
 | anglescont | input_numerics | value | 18 | SUPPORTED | grep | input/defaults.py Options.nanglecont -> core/grids.py |  |
 | anglesrec | input_numerics | value | 1 | IGNORED |  | input/defaults.py Options.nanglerec | parsed into Options/Params but no engine code reads nanglerec |
 | aradialcor | input_omppar | value | 1.0 | IGNORED |  | input/defaults.py Params.aradialcor | parsed into Options/Params but no engine code reads aradialcor |
@@ -123,7 +123,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | betald | input_densitypar | value | ld_systematics | SUPPORTED | test:test_defaults.py | input/defaults.py Params.betald -> density/ld_nx2.py, density/parameters.py |  |
 | bins | input_numerics | value | 40 | SUPPORTED | test:test_binquad.py,test_cengfis.py,test_cengld.py | input/defaults.py Options.nbins0 -> core/grids.py, emission/feeding.py, fission/parameters.py, preeq/prepare.py |  |
 | block | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| blockangle | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| blockangle | input_output | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.flagblockangle -> angout.write_files | nnang.L01 names, energies appended |
 | blockastro | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | blockbin | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | blockdirect | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
@@ -151,10 +151,10 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | colenhance | input_densitymodel | flag / value+nucleus | n | SUPPORTED | test:test_defaults.py | input/defaults.py Options.flagcol() -> density/* | read through the Options.flagcol property (automatic grep missed it); global form only |
 | colldamp | input_densitymodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagcolldamp -> density/ld_nx2.py, density/parameters.py, native/ld.h |  |
 | components | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| compound | input_compoundmodel | flag | y | SUPPORTED | test:conftest.py,test_binquad2.py,test_ceang.py | input/defaults.py Options.flagcomp -> emission/multiple.py, input/nuclides.py |  |
-| core | input_directpar | value | -1 | SUPPORTED | test:test_collrule.py,test_compound.py,test_open2.py | input/defaults.py Options.core -> astro/stellar.py, capture_fast_batch.py, capture_gpu.py, capture_gpu_setup.py (+120) |  |
+| compound | input_compoundmodel | flag | y | SUPPORTED | test:conftest.py,test_angout.py,test_binquad2.py | input/defaults.py Options.flagcomp -> emission/multiple.py, input/nuclides.py |  |
+| core | input_directpar | value | -1 | SUPPORTED | test:test_collrule.py,test_compound.py,test_open2.py | input/defaults.py Options.core -> angout.py, astro/stellar.py, capture_fast_batch.py, capture_gpu.py (+122) |  |
 | coulomb | input_directmodel | flag | y | IGNORED |  | input/defaults.py Options.flagcoulomb | parsed into Options/Params but no engine code reads flagcoulomb |
-| cpang | input_directmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagcpang -> core/grids.py |  |
+| cpang | input_directmodel | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.flagcpang -> angout.flagcompang | compound angular distributions for charged projectiles |
 | cstrip | input_preeqpar | per-particle | 1.0 | SUPPORTED | test:conftest.py,test_na_v1.py,test_tfold.py | input/defaults.py Params.Cstrip -> omp/tfold.py |  |
 | ctable | input_densitypar | per-nucleus-barrier | cglobal | SUPPORTED | test:test_chunkfix.py,test_defaults.py,test_eadj.py | input/defaults.py Params.ctable -> capture_fast.py, density/ctwindow.py, density/ctwindow2.py, density/ld2_nx2.py (+8) |  |
 | ctableadjust | input_densitypar | per-nucleus-barrier | 0.0 | SUPPORTED | grep | input/defaults.py Params.ctableadjust -> density/ld_nx2.py, density/parameters.py |  |
@@ -209,13 +209,13 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | ffevaporation | input_fissionmodel | flag | y | IGNORED |  | input/defaults.py Options.flagffevap | parsed into Options/Params but no engine code reads flagffevap |
 | ffmodel | input_fissionmodel | value | 1 | IGNORED |  | input/defaults.py Options.ffmodel | parsed into Options/Params but no engine code reads ffmodel |
 | ffspin | input_fissionmodel | flag | n | IGNORED |  | input/defaults.py Options.flagffspin | parsed into Options/Params but no engine code reads flagffspin |
-| fileangle | input_outfiles | value |  | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| fileangle | input_outfiles | value |  | SUPPORTED | test:test_angout.py | input/defaults.py Options.fileangle -> angout.py | one level per line (TALYS); `fileangle 1,2` also accepted; repeated deck lines need B2's plumbing to merge |
 | filechannels | input_outfiles | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | fileddxa | input_outfiles | value |  | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | fileddxe | input_outfiles | value |  | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | filedensity | input_densitypar | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | filediscrete | input_outfiles | value |  | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| fileelastic | input_outfiles | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| fileelastic | input_outfiles | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.fileelastic -> angout.py | elastic angle file without outangle (isotropic compound, as TALYS) |
 | filefission | input_outfiles | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | filegamdis | input_outfiles | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | filepsf | input_gammamodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
@@ -233,7 +233,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | fiso | input_gammapar | per-particle | -1.0 | SUPPORTED | test:test_defaults.py | input/defaults.py Params.fiso -> capture_gpu_setup.py, compound/ccexitnb.py, compound/chain.py, emission/feeding.py (+5) |  |
 | fisom | input_gammapar | per-particle | -1.0 | SUPPORTED | grep | input/defaults.py Params.fisom -> capture_fast.py, capture_fast_batch.py, capture_gpu_setup.py, compound/decay_batch.py (+9) |  |
 | fispartdamp | input_fissionmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagfispartdamp -> fission/fis_ceng.py, fission/fission_batch_ladder.py, fission/parameters.py, fission/transmission.py (+1) |  |
-| fission | input_fissionmodel | flag | n | SUPPORTED | test:perfcasc_gate_run.py,test_ccexitnb.py,test_cengfis.py | input/defaults.py Options.flagfission -> capture_fast.py, capture_fast_batch.py, capture_gpu_setup.py, compound/ccexitnb.py (+24) |  |
+| fission | input_fissionmodel | flag | n | SUPPORTED | test:perfcasc_gate_run.py,test_ccexitnb.py,test_cengfis.py | input/defaults.py Options.flagfission -> capture_fast.py, capture_fast_batch.py, capture_gpu_setup.py, compound/ccexitnb.py (+25) |  |
 | fit | input_basicpar | flag | n | IGNORED | manual | input/fitlib.py (INCOGNITA_TALYS_FIT=fit) | deck line ignored; fitted libraries via INCOGNITA_TALYS_FIT |
 | format | input_basicpar | value | YANDF-0.4 | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | fsadjust | input_fissionpar | value | 1.0 | IGNORED |  | input/defaults.py Params.Fsadjust | parsed into Options/Params but no engine code reads Fsadjust |
@@ -241,7 +241,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | ftableadjust | input_gammapar | per-nucleus-radiation | 1.0 | SUPPORTED | test:test_etablefix.py | input/defaults.py Params.ftableadjust -> gamma/ftglobal.py, gamma/parameters.py |  |
 | fullhf | input_compoundmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagfullhf -> capture_fast_batch.py, capture_gpu_setup.py, compound/chain.py, compound/continuum.py (+9) |  |
 | fymodel | input_fissionmodel | value | 2 | IGNORED |  | input/defaults.py Options.fymodel | parsed into Options/Params but no engine code reads fymodel |
-| g | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py | input/defaults.py Params.g -> astro/stellar.py, capture_gpu.py, capture_tasks.py, compound/ccexitnb.py (+96) |  |
+| g | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py | input/defaults.py Params.g -> angout.py, astro/stellar.py, capture_gpu.py, capture_tasks.py (+97) |  |
 | gadjust | input_preeqpar | per-nucleus | 1.0 | SUPPORTED | test:test_fitlib.py,test_pegq.py | input/defaults.py Params.gadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py |  |
 | gamgam | input_gammapar | per-nucleus | 0.0 | SUPPORTED | grep | input/defaults.py Params.gamgam -> gamma/actphys.py, gamma/ggnorm.py, gamma/transmission.py, structure/files.py (+1) |  |
 | gamgamadjust | input_gammapar | per-nucleus | 1.0 | SUPPORTED | grep | input/defaults.py Params.gamgamadjust -> structure/resonances.py |  |
@@ -353,7 +353,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | optmodfilen | input_ompmodel | per-element-file |  | IGNORED |  |  | fitlib skips the line: external OMP file |
 | optmodfilep | input_ompmodel | per-element-file |  | MISSING |  |  |  |
 | outall | input_basicreac | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| outangle | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| outangle | input_output | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.flagang -> angout.py | angleout + compound angular distributions (flagcompang); INCOGNITA_ANGOUT=1 is the port switch |
 | outbasic | input_basicreac | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outbinspectra | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outcheck | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
@@ -370,7 +370,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | outgamma | input_gammamodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outinverse | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outkd | input_ompmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| outlegendre | input_directmodel | flag | n | NA |  | input/defaults.py Options.flaglegendre | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| outlegendre | input_directmodel | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.flaglegendre -> angout.py | leg files (Total, Direct, Compound, Normalized, ENDF-6) |
 | outlevels | input_levels | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outmain | input_output | flag | y | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outomp | input_ompmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
@@ -378,7 +378,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | outpreequilibrium | input_preeqmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outspectra | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outtransenergy | input_directmodel | flag | y | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| pair | input_densitypar | per-nucleus | 1e-20 | SUPPORTED | test:test_ceang.py,test_cengld2.py,test_compound.py | input/defaults.py Params.pair -> compound/ceang.py, compound/target.py, compound/wfc.py, density/ld_nx2.py (+30) |  |
+| pair | input_densitypar | per-nucleus | 1e-20 | SUPPORTED | test:test_ceang.py,test_cengld2.py,test_compound.py | input/defaults.py Params.pair -> angout.py, compound/ceang.py, compound/ceang_types.py, compound/target.py (+32) |  |
 | pairconstant | input_densitypar | value | 12.0 | SUPPORTED | test:test_cengld2.py | input/defaults.py Params.pairconstant -> density/ld_nx2.py, density/parameters.py |  |
 | pairmodel | input_preeqmodel | value | 2 | SUPPORTED | grep | input/defaults.py Options.pairmodel -> density/particle_hole.py, preeq/complex.py, preeq/exciton.py |  |
 | parity | input_densitypar | flag | n | SUPPORTED | test:test_ccfast.py,test_ccglue.py,test_ccnumerov.py | input/defaults.py Options.flagparity -> compound/dens_reference.py, density/ld_nx2.py, density/parameters.py, density/tables.py |  |
@@ -512,7 +512,7 @@ Of the SUPPORTED rows, 105 have a test naming the keyword, 115 are code-path onl
 | wso1adjust | input_omppar | per-particle | 1.0 | SUPPORTED | grep | input/defaults.py Params.wso1adjust -> omp/omp_nx2.py, omp/parameters.py |  |
 | wso2adjust | input_omppar | per-particle | 1.0 | SUPPORTED | grep | input/defaults.py Params.wso2adjust -> omp/omp_nx2.py, omp/parameters.py |  |
 | widthfluc | input_compoundmodel | flag | y | SUPPORTED | test:test_defaults.py | input/defaults.py Options.ewfc_mev -> compound/chain.py, emission/feeding.py, engine_c.py, gpu_full_setup.py |  |
-| widthmode | input_compoundmodel | value | 1 | SUPPORTED | test:test_compound.py,test_reference.py | input/defaults.py Options.wmode -> astro/stellar.py, capture_gpu_setup.py, compound/ceang.py, compound/chain.py (+7) |  |
+| widthmode | input_compoundmodel | value | 1 | SUPPORTED | test:test_compound.py,test_reference.py | input/defaults.py Options.wmode -> angout.py, astro/stellar.py, capture_gpu_setup.py, compound/ceang.py (+9) |  |
 | wtable | input_gammapar | per-nucleus-radiation | wtable | SUPPORTED | test:test_defaults.py,test_engproj_tarmass.py,test_etablefix.py | input/defaults.py Params.wtable -> capture_fast.py, capture_gpu.py, capture_gpu_setup.py, capture_gpu_tasks.py (+8) |  |
 | wtableadjust | input_gammapar | per-nucleus-radiation | 1.0 | SUPPORTED | test:test_etablefix.py | input/defaults.py Params.wtableadjust -> gamma/parameters.py |  |
 | xsalphatherm | input_compoundpar | value | 0.0 | IGNORED |  | input/defaults.py Params.xsalphatherm | parsed into Options/Params but no engine code reads xsalphatherm |
