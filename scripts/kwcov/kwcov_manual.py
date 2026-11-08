@@ -373,6 +373,7 @@ B10B: dict = {
                  "the sacs reader fills: 'cross section file .tot does not exist')", _T10B),
 }
 _T14 = "test:test_kwcov_b14.py"
+_T14B = "test:test_kwcov_b14b.py"
 _FY = "fisyield.py (engine_c.cases -> fisyield.record -> Results.fission_yields) "
 #: KWCOV B14 part 1 rows (docs/hf/COVERAGE_PLAN.md B14); stock TALYS-2.25 n + U-235 (1, 5 MeV) and U-238 (1, 5, 14 MeV)
 #: with `massdis y; fymodel 1`, TALYS mode; scripts/kwcov/b14_response.py
@@ -381,11 +382,13 @@ B14: dict = {
                 "fission fragment / product yields (yieldA, yieldZA, fpZZZAAA, fpAAA, rpZZZAAA files) with fymodel 1 "
                 "(Brosa): TALYS mode vs stock, FF yield peaks 0.06 %, FP peaks 0.7 %, isotopic FF 2.6 % (rows >= 1 % of "
                 "the max). Cascade defaults honoured as before, EXCEPT transpower 10 (see transpower): fission -1.0 % in "
-                "stock at U-238 14 MeV, not in ours. `massdis y` alone (TALYS's default fymodel 2 = GEF) is REFUSED "
-                "(B14 part 2); natural targets refused as TALYS", _T14),
+                "stock at U-238 14 MeV, not in ours. `massdis y` alone = TALYS's default fymodel 2 (GEF, B14 part 2, "
+                "gef.py): yields + nubarn.tot / Pnun / nunA / nunZA; natural targets refused as TALYS", _T14),
     "fymodel": ("SUPPORTED", "input/defaults.py Options.fymodel -> " + _FY + "settings",
-                "1 (Brosa) ported; 2 GEF, 3 GEF + evaporation, 4 FF files, 5 own populations are REFUSED with "
-                "massdis y (B14 parts 2/3); range 1..5 checked", _T14),
+                "1 (Brosa) and 2 (GEF, gef.py: stock's generator stream reproduces stock's sampled tables exactly; the "
+                "default vectorised lanes agree statistically, chi2/dof ~1 vs stock gefran 1e6) ported; 3 GEF + "
+                "evaporation, 4 FF files (reader fisyield.ff_files / ff_pairs ported, the engine run refused: ffevap), "
+                "5 own populations are REFUSED with massdis y (B14 part 3); range 1..5 checked", _T14 + "," + _T14B),
     "ffevaporation": ("SUPPORTED", "input/defaults.py Options.flagffevap -> fisyield.neck / brosafy",
                       "fymodel 1: neck step sizes and the post-neutron yields (n: FP yields 0, as stock). U-235 response "
                       "on the FF yields 0.005 % (stock moved 6.0 %)", _T14),
@@ -393,14 +396,18 @@ B14: dict = {
                 "fission-yield threshold per nucleus and bin (massdis.f90:226-272), 1e-9 with massdis; was inert "
                 "before B14. Response: U-235 `rfiseps 1e-3` 0.001 % (stock 0 %), U-238 `rfiseps 0.12` 0.16 % (stock moved 10.4 %). "
                 "Range 0..1 checked", _T14),
-    "outfy": ("SUPPORTED", "input/defaults.py Options.flagoutfy (inert)", "GEF's detailed output only (gefwrite, "
-              "massdis.f90:200-205): inert with fymodel 1, as stock (response 0.000 %)", _T14),
-    "gefran": ("SUPPORTED", "input/defaults.py Options.gefran (inert)", "GEF's event count: inert with fymodel 1, as "
-               "stock (response 0.000 %); fymodel 2/3 refused (B14 part 2). Range 1000..1e6 checked", _T14),
-    "ffmodel": ("SUPPORTED", "input/defaults.py Options.ffmodel (inert)", "acts only with fymodel 4, which is refused "
-                "(B14 part 2); range 0..4 checked", _T14),
-    "yieldfile": ("SUPPORTED", "input/defaults.py Options.yieldfile (inert)", "read since B14 (was refused as unknown); "
-                  "acts only with fymodel 4, which is refused (B14 part 2)", _T14),
+    "outfy": ("SUPPORTED", "input/defaults.py Options.flagoutfy (inert)", "GEF's detailed stdout tables only (gefwrite, "
+              "massdis.f90:265-269): no file changes, as stock (fymodel 1 response 0.000 %); the same per-bin tables "
+              "are geftalys(detail=True) in the port (checked digit for digit vs stock's printout)", _T14),
+    "gefran": ("SUPPORTED", "input/defaults.py Options.gefran -> fisyield.settings -> gef.geftalys (events per bin)",
+               "GEF's event count per excitation bin (fymodel 2): `gefran 1000` with INCOGNITA_GEF_STREAM=talys gives "
+               "stock's sampled numbers; inert with fymodel 1, as stock. Range 1000..1e6 checked", _T14 + "," + _T14B),
+    "ffmodel": ("SUPPORTED", "input/defaults.py Options.ffmodel -> fisyield.ff_files (fymodel 4 reader)",
+                "selects the fragment database of fymodel 4 (gef / hf3d / spy / langevin4d / user); the reader is "
+                "ported, the fymodel 4 run is refused until ffevap (B14 part 3); range 0..4 checked", _T14 + "," + _T14B),
+    "yieldfile": ("SUPPORTED", "input/defaults.py Options.yieldfile -> fisyield.ff_files (fymodel 4 reader)",
+                  "read since B14; replaces the database file with fymodel 4, whose run is refused until ffevap "
+                  "(B14 part 3)", _T14 + "," + _T14B),
     "ffspin": ("SUPPORTED", "input/defaults.py Options.flagffspin (inert)", "acts only with fymodel 3 (ff files of "
                "ffevap.f90), which is refused (B14 part 3)", _T14),
     "transpower": ("IGNORED", "input/defaults.py Options.transpower (no reader: core/grids.transmission_limit and "

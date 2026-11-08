@@ -71,7 +71,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B11 | medical isotope production (DONE, branch `kwcov11`) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
 | B12 | recoils and LAB frame (DONE, branch `kwcov12`) | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
 | B13 | ingredient outputs | outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
-| B14 | fission yields and fragment evaporation (part 1 Brosa DONE, branch `kwcov14`; parts 2 GEF, 3 FF evaporation open) | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
+| B14 | fission yields and fragment evaporation (part 1 Brosa DONE, branch `kwcov14`; part 2 GEF DONE, branch `kwcov14b`; part 3 FF evaporation open) | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
 | B15 | low value | endf, endfdetail, sacs, legacy, components | endf.cs helpers, sacs.dat, component split | 1 d |
 | GAP | isomeric (excited) targets | ltarget | everything for an excited target | 3+ d; separate design (the engine refuses `Ltarget /= 0`, structure/levels.py:171; astro/stellar.py already builds excited entrance channels and is the starting point) |
 
@@ -849,7 +849,7 @@ fymodel >= 3. The three parts follow those paths:
 | 2 | fymodel 2 (GEF, TALYS's default once massdis is on), gefran, outfy (gefwrite), the GEF nubar / nu(A) / P(nu) (nubarout, nudisout for fymodel 2); fymodel 4 file path (ffmodel 0-4, yieldfile, structure/fission/ff tables) | geftalys.f / gefsub.f / geffunctions.f (7,264 l., Monte Carlo with gefran events: compare statistically or port the RNG), nubarout, nudisout | yields + nubar*.tot, nuA, Pnu |
 | 3 | fymodel 3 / 4 / 5 with ffevap (fragment evaporation by TALYS's own decay), ffspin, pfnsmodel 2 (PFNS / PFGS from fragment decay), the isomer split (yieldfpex / fpratio, `fpZZZAAA.tot` i00/i01 files) | ffevap.f90, ffgammaspec.f90, the per-fragment population files (ff*.ex) | nu(A), P(nu), PFNS/PFGS, isomeric FP yields |
 
-Until parts 2/3 land, `massdis y` with fymodel 2-5 is REFUSED (`NotImplementedError` naming the part and `fymodel 1`);
+Since part 2, `massdis y` alone runs GEF (fymodel 2); fymodel 3-5 are REFUSED (`NotImplementedError` naming part 3);
 before B14 `massdis y` ran the cascade with its defaults and gave no yields.
 
 **Part 1 done on branch `kwcov14`** (kwcov12 + kwcov10b merged). New module `physics/hf/fisyield.py` (output only);
@@ -901,6 +901,73 @@ deck.py (natural targets with massdis refused, checkvalue.f90:1075). Without `ma
 * Tests: `tests/hf/test_kwcov_b14.py` (shape helpers, spline / bisection, file names, refusals and ranges, deck lines,
   Brosa modes on a model level density, U-235 1 MeV engine run vs stock numbers, no yields without massdis, natural
   targets refused).
+
+**Part 2 done on branch `kwcov14b`** (from kwcov14). New module `physics/hf/gef.py` (geftalys.f, 3,160 lines, with
+the geffunctions.f functions it calls: LyMass, ECOUL, TEgidy, Getyield, BFTFB/BFTF/LDMass/AME2012, Gaussintegral);
+`fisyield.py` gains massdis.f90's GEF branch (bins per fissioning nucleus, `xsApre += 0.5 ysum`, nubar / nu(A) / P(nu)
+with Fmulti), nubarout / nudisout's files (`nubarn.tot`, `Pnun<E>.fis`, `nunA<E>.fis`, `nunZA<E>.fis`) and the fymodel 4
+reader (`ff_files`, `ff_pairs`). gefsub.f (fymodel 3) is part 3 (it only feeds ffevap). Output only: without
+`massdis y` nothing runs and `test_engine_c.py` is unchanged.
+
+* **Random numbers, decided:** GEF's generator is the MCNP 48-bit LCG of geftalys.f (`ran2`, reseeded 5^19 at every
+  geftalys call; `rndm = sngl(ran2)`), ported exactly; PGauss's cached Gaussian is a SAVE variable (DATA ISet 1, GSet
+  0.5) that carries across nuclides and incident energies, also ported. Two layouts of the same event code:
+  `INCOGNITA_GEF_STREAM=talys` runs stock's single stream event by event (python speed: 2.8 s per 1000 events, for
+  checks); the default `lanes` runs all events of a bin in lockstep, one lane each (0.55 s per bin at 50,000 events,
+  60 MB), lane i on its own hashed odd 48-bit start (`gef.lane_seeds`, splitmix64; `INCOGNITA_GEF_SEED` shifts them).
+  Each lane draws exactly stock's per-event sequence, so the default agrees with stock statistically and is
+  deterministic.
+* **Exact match (stock stream):** stock `massdis y; outfy y; gefran 1000` prints geftalys's per-bin tables (yields per
+  mode, N and A yields pre/post, nu per A pre/post, P(nu), mean). U-235 1 MeV, all 30 bins of U-236 (30,000 events, 1.8M
+  draws) and 5 MeV, all 53 bins of U-236 + U-235: **every printed number equal** (5-9 digits). Engine end to end, TALYS
+  mode, U-235 gefran 1000: 1 MeV every yieldA / nunA / Pnun entry 1e-5 relative (the bin cross sections differ at that
+  level), nubar 0.001 %; 5 MeV FF yields 0.02 % (worst, 1 % of max), nubar 0.001 %, P(nu) 0.03 %, FP *cross sections*
+  1e-4, but FP *yields* per A up to 2 % (A = 94, 95) and stock-only rows at A = 110-121: see the loss below.
+* **Statistical match (default lanes, 4 seeds x 50,000 events vs stock gefran 1,000,000, TALYS mode):**
+
+  | target, E | mass-yield chi2/dof (FF, FP; A >= 1 % of max, Poisson) | worst peak bin (expected sd) | nubar ours / stock |
+  |---|---|---|---|
+  | U-235 1 MeV | 0.73, 0.89 | 1.7 %, 2.5 % (1.0, 1.2 %) | 3.0088 / 3.0099 (0.04 %) |
+  | U-235 5 MeV | 1.11, 0.78 | 2.9 %, 2.3 % (1.3, 1.1 %) | 3.5337 / 3.5341 (0.01 %) |
+  | U-238 1 MeV | 0.61, 0.77 | 1.7 %, 1.9 % (1.0, 0.9 %) | 2.7617 / 2.7606 (0.04 %) |
+  | U-238 5 MeV | 0.80, 0.90 | 1.7 %, 1.9 % (1.4, 1.2 %) | 3.4663 / 3.4671 (0.02 %) |
+  | U-238 14 MeV | 0.06, 0.07 (many bins: Poisson var overstated) | 0.56 %, 0.54 % (seed sd 0.13 %) | 4.6639 / 4.6624 (0.03 %) |
+
+  U-238 14 MeV keeps a ~0.5 % peak residual beyond its 4-seed spread: the fission cross section there is 1.0 % off
+  (part 1's transpower loss), which moves the chance mix; yields are normalised, so it shows only at this level.
+  Lanes vs the stock stream inside the port (one bin, 40,000 events, 4 seeds): chi2/dof 0.77-1.14 pre- and post-neutron.
+  The plan's "2 % at the peaks" is not testable bin by bin against stock's default 50,000 events: a peak mass bin
+  carries 1.8 % sampling noise on each side (worst of ~20 peak bins 4-6 %, as found first); hence the 1e6 stock runs.
+* **Bug found and fixed (ours):** the first lane layout jumped the stock stream by 2^26 per lane; for this LCG
+  G^(2^k) = 1 mod 2^(k+2), so the lanes were shifted copies of each other in their top bits and biased the Box-Muller /
+  rejection draws (peaks 3-5 %, z up to 8 vs stock). Hashed starts fixed it (chi2/dof ~1 above).
+* **Loss, traced (engine, not GEF):** stock lists fission in deeper sub-barrier bins than the engine (U-236 at 5 MeV:
+  34 bins down to Ex 3.11 MeV vs ours 31 down to 3.89; U-235 second chance 19 bins vs 12): their cross sections are
+  <= 0.03 mb (the engine's fisfeedex is 0 there). They matter only through two TALYS gates: (1) massdis counts a (Z,A)
+  FP yield only where that nuclide's FF cross section is non-zero, so rare (Z,A) seeded by those bins add FP yield in
+  stock (A = 94/95/120 at 5 MeV, up to 2 % of a peak bin; FP cross sections agree 1e-4); (2) nu(A) and P(nu) add
+  Fmulti/xsfistot (= Ncomp xsfeed / xsfistot, 0.11 for U-235 5 MeV) wherever a nucleus has any event, so rare masses
+  / multiplicities jump by 0.1 (nu(A) A = 110-120, P(nu > 8)). The same gates make these rows sampling-noise driven in
+  the statistical comparison (P(nu = 11) at U-238 14 MeV differs by the Fmulti step).
+* **TALYS / GEF quirks kept:** P(nu) counts only events with >= 1 neutron and nubar is the mean of that conditional
+  distribution (U-235 1 MeV: 3.01; evaluated about 2.5); Pdisnu normalised over nu = 1..numin (8), nu > 8 left raw plus
+  Fmulti; nu(A) per pre-neutron mass over fragments with 1..20 neutrons; the stale `A1` in the heavy-fragment spin and
+  the Fermi-gas energy split; mode 3's yield uses PShellS3 (not RShellS3eff) in TEgidy; mode 4's light width uses
+  beta(2,2,Z); mode 2's discarded PGauss before PBox; Ivenodd clamps the even-odd table in place; PEgammahigh never
+  fills sigma(N); `Erf` is Numerical Recipes in geftalys but the gfortran intrinsic in Gaussintegral (ERF typed, not
+  EXTERNAL). Diagnostic arrays (Edefo2d, Eintr2d, ...) dropped; stock indexes some out of bounds (Eintr2d with E < 0),
+  harmless in its static layout (the exact match holds).
+* **Keywords:** `gefran` acts (events per bin, range checked); `outfy` prints only, as stock (the tables are
+  `geftalys(detail=True)`); `ffmodel` / `yieldfile` feed the fymodel 4 reader, whose run stays refused (ffevap, part 3);
+  fymodel 3/4/5 refused naming part 3.
+* **fymodel 4 reader:** `ff_files` (database file at the two tabulated energies around Etotal, or `yieldfile`) and `ff_pairs` (filters, linear interpolation incl. TALYS's light-then-heavy overwrite of Y0 / TKE / TXE): U-235 1 MeV (U-236, Etotal 7.541 MeV, gef files at 7 and 8 MeV) all 207 pairs equal to stock's printed table (11 columns, <= 4.8e-6 relative = es12.5). The run itself stays refused (ffevap, part 3).
+* **Not given (part 3):** fymodel 3 (gefsub.f), 4 and 5 runs (ffevap), ffspin, pfnsmodel 2, isomer split, nuZA rows
+  (only ffevap fills nuZA / Pdisnuav). The engine.py driver computes no yields (engine_c only).
+* Tests: `tests/hf/test_kwcov_b14b.py` (generator = ran2, PGauss SAVE state, float32 helpers, BFTFB / mode yields of
+  U-236 bin 1, the bin-1 tables vs stock's printout on the stock stream, lanes statistics and determinism, settings and
+  refusals, the numin quirk, nubarout's zero rows, fymodel 4 files, U-235 1 MeV engine run vs stock); part 1's
+  test_kwcov_b14.py updated (fymodel 2 accepted). `scripts/kwcov/b14b_response.py` (exact `--stream talys`,
+  statistical `--stat N [--stock-kw "gefran 1000000"]`). Stock refs `~/kwcov/stock/b14b/` (trimmed).
 
 ### B15 -- low value
 

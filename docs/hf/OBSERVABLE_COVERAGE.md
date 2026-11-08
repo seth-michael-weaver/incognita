@@ -20,9 +20,9 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 | status | observables |
 |---|---|
 | SUPPORTED | 31 |
-| PARTIAL | 16 |
+| PARTIAL | 17 |
 | INTERNAL | 6 |
-| MISSING | 8 |
+| MISSING | 7 |
 | NA | 2 |
 | **total** | 63 |
 
@@ -52,9 +52,9 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 | fission per fissioning nuclide | rpZZZAAA.fis | fissionout.f90:1 | filefission, fisfeed, outfission | SUPPORTED | fisobs.py Results.extras['rpZZZAAA.fis'] (INCOGNITA_FISOBS) | B8 | xsfeed(Z, N, -1); U-238 / U-235 / Pu-239 / Th-232 vs stock within the engine's own (n,f) difference; sums to fission.tot |
 | fission per excitation bin | fisZZZAAAEeeee.eee.feed | multiple.f90:884 | fisfeed | PARTIAL | fisobs.py Results.spectra['fisZZZAAA.feed', ':Ex'] | B8 | Ex and Population columns (same rows as stock); the J-parity columns (fisfeedJP) are not given |
 | fission transmission / barrier info | talys.out, tfis* | tfissionout.f90:1 | outfission | PARTIAL | ingredients.py | B5 |  |
-| fission fragment / product yields | yieldA*.fis yieldZA*.fis fpZZZAAA.tot fpAAA.tot | massdisout.f90:1 | massdis, fymodel, ffevaporation, rfiseps | PARTIAL | fisyield.py Results.fission_yields (massdis y + fymodel 1) | B14 | Brosa (fymodel 1) ported: U-235 / U-238 TALYS mode vs stock, FF peaks 0.06 %, FP peaks 0.7 %, isotopic 2.6 %; GEF (fymodel 2, TALYS's default), fymodel 3-5 and the isomer split (ffevap.f90) are B14 parts 2/3 |
+| fission fragment / product yields | yieldA*.fis yieldZA*.fis fpZZZAAA.tot fpAAA.tot | massdisout.f90:1 | massdis, fymodel, ffevaporation, rfiseps, gefran | PARTIAL | fisyield.py / gef.py Results.fission_yields (massdis y + fymodel 1 or 2) | B14 | Brosa (fymodel 1): U-235 / U-238 TALYS mode vs stock, FF peaks 0.06 %, FP peaks 0.7 %, isotopic 2.6 %. GEF (fymodel 2, TALYS's default): stock's generator stream reproduces stock's per-bin tables exactly; the default vectorised lanes vs stock gefran 1e6: chi2/dof 0.7-1.1 on the mass yields (statistical). fymodel 3-5 and the isomer split (ffevap.f90) are B14 part 3 |
 | prompt nubar (Wahl systematics) | (not written by TALYS-2.25) | nubarWahl.f90:1, totalxs.f90:124 | cnubar1, cnubar2 | SUPPORTED | fisobs.py Results.extras['nubarn.tot:wahl'] | B8 | TALYS computes it and never writes it (massdis.f90:252 resets nubar before nubarout); transcription checked by hand |
-| prompt nubar, nu(A), P(nu) from fragments | nubar*.tot nuA*.fis | nubarout.f90:1, nudisout.f90:1 | massdis, ffevaporation | MISSING |  | B14 | requires FF evaporation |
+| prompt nubar, nu(A), P(nu) from fragments | nubar*.tot Pnu*.fis nuA*.fis nuZA*.fis | nubarout.f90:1, nudisout.f90:1 | massdis, fymodel, gefran | PARTIAL | fisyield.build_nu Results.fission_yields['nubarn.tot', 'Pnun*', 'nunA*', 'nunZA*'] | B14 | GEF (fymodel 2): nubar vs stock 0.01-0.06 % (U-235 1/5, U-238 5/14 MeV; U-238 1 MeV 0.4 %), P(nu) and nu(A) statistical; from TALYS's own fragment evaporation (fymodel 3-5, ffevap) B14 part 3 |
 | prompt fission neutron spectrum (Iwamoto) | pfnsEEEE.EEE.fis | pfnsout.f90:1, iwamoto.f90:1 | pfnsmodel 1, tmadjust, fsadjust | SUPPORTED | fisobs.py Results.spectra['pfns.fis', ':E', ':Maxwell_ratio', ':CM'], extras['pfns.fis:E-average'] | B8 | U-238 / U-235 / Pu-239 / Th-232 at 1/5/14 MeV vs stock: same 293-point grid, E-average 1e-5, every column 2e-5 |
 | prompt fission gamma spectra / PFNS from fragment decay | pfgs*, pfns (pfnsmodel 2) | ffevap.f90:1 | pfnsmodel 2, massdis | MISSING |  | B14 | pfnsmodel 2 without massdis writes no PFNS in TALYS either |
 | discrete gamma-ray production lines | gamZZZAAALnnLmm.tot | gamdisout.f90:1 | outgamdis, filegamdis | SUPPORTED | specobs.py Results.spectra['gamZZZAAALiiLjj.tot'] (+ files, INCOGNITA_SPECOBS_DIR) | B4 | conversion-corrected (cascade.f90:78); Fe-56 846.8 keV vs stock 1e-5 at 1, 5 MeV, 1.2 % at 14 MeV; other residuals' lines track the engine's channel xs (14 MeV (n,p) lines +12-17 %) |

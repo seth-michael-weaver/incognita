@@ -78,8 +78,7 @@ def test_settings_and_refusals():
     assert Y.settings(o) is None  # default: off
     o = D.default_options(92, 235, "n", overrides={"massdis": "y"})
     assert o.fymodel == 2 and o.pfnsmodel == 2 and o.Rfiseps == 1e-9
-    with pytest.raises(NotImplementedError, match="fymodel 2"):  # TALYS's default with massdis: GEF, part 2
-        Y.settings(o)
+    assert Y.settings(o)["fymodel"] == 2  # TALYS's default with massdis: GEF (B14 part 2, test_kwcov_b14b.py)
     for fy in (3, 4, 5):
         with pytest.raises(NotImplementedError, match=f"fymodel {fy}"):
             Y.settings(D.default_options(92, 235, "n", overrides={"massdis": "y", "fymodel": str(fy)}))
@@ -91,7 +90,7 @@ def test_settings_and_refusals():
         Y.settings(D.default_options(92, 235, "n", overrides={"gefran": "10"}))
     s = Y.settings(D.default_options(92, 235, "n", overrides={"massdis": "y", "fymodel": "1", "ffevaporation": "n",
                                                                "rfiseps": "1e-3", "yieldfile": "u.ff"}))
-    assert s == {"fymodel": 1, "ffevap": False, "Rfiseps": 1e-3}
+    assert s == {"fymodel": 1, "ffevap": False, "Rfiseps": 1e-3, "gefran": 50000}
     # no fission channel: massdis does nothing, as TALYS (flagfission .and. flagmassdis), whatever fymodel says
     assert Y.settings(D.default_options(26, 56, "n", overrides={"massdis": "y"})) is None
 
@@ -177,8 +176,8 @@ def test_u235_1mev_vs_stock(clean):
 def test_default_run_has_no_yields(clean):
     r = _run(clean, [])
     assert r.fission_yields == {}
-    with pytest.raises(NotImplementedError, match="fymodel 2"):
-        _run(clean, ["massdis y"])
+    with pytest.raises(NotImplementedError, match="fymodel 3"):
+        _run(clean, ["massdis y", "fymodel 3"])
 
 
 def test_natural_target_refused(clean, tmp_path):
