@@ -36,21 +36,21 @@ equivalent keyword.
 
 | status | keywords |
 |---|---|
-| SUPPORTED | 322 |
+| SUPPORTED | 328 |
 | READ_ONLY_DEFAULT | 11 |
-| IGNORED | 37 |
-| MISSING | 20 |
+| IGNORED | 33 |
+| MISSING | 18 |
 | NA | 56 |
 | **total** | 446 |
 
-Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path only (`grep`).
+Of the SUPPORTED rows, 214 have a test naming the keyword, 109 are code-path only (`grep`).
 
 ## By TALYS input group
 
 | group | SUPPORTED | READ_ONLY_DEFAULT | IGNORED | MISSING | NA |
 |---|---|---|---|---|---|
 | (main/readinput) | 0 | 0 | 0 | 1 | 0 |
-| input_astro | 0 | 0 | 3 | 2 | 0 |
+| input_astro | 5 | 0 | 0 | 0 | 0 |
 | input_basicpar | 6 | 1 | 0 | 0 | 3 |
 | input_basicreac | 5 | 1 | 7 | 0 | 6 |
 | input_best | 3 | 0 | 0 | 0 | 1 |
@@ -66,7 +66,7 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | input_gammamodel | 6 | 2 | 0 | 2 | 2 |
 | input_gammapar | 32 | 0 | 0 | 0 | 0 |
 | input_levels | 15 | 0 | 0 | 0 | 1 |
-| input_main | 5 | 1 | 1 | 0 | 0 |
+| input_main | 6 | 1 | 0 | 0 | 0 |
 | input_mass | 5 | 0 | 0 | 1 | 0 |
 | input_medical | 0 | 0 | 1 | 9 | 0 |
 | input_numerics | 13 | 0 | 2 | 0 | 0 |
@@ -97,11 +97,11 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | anglesrec | input_numerics | value | 1 | IGNORED |  | input/defaults.py Options.nanglerec | parsed into Options/Params but no engine code reads nanglerec |
 | aradialcor | input_omppar | value | 1.0 | IGNORED |  | input/defaults.py Params.aradialcor | parsed into Options/Params but no engine code reads aradialcor |
 | area | input_medical | value |  | MISSING |  |  |  |
-| astro | input_main | flag | n | IGNORED | manual | astro/stellar.py (INCOGNITA_STELLAR) | keyword ignored; thermalised-target stellar rate/SEF exists behind INCOGNITA_STELLAR on the C path. astro y also resets numerics (transpower 15, xseps 1e-17): that cascade IS honoured in default_options |
-| astroe | input_astro | value |  | MISSING |  |  |  |
-| astroex | input_astro | flag | n | IGNORED |  | input/defaults.py Options.flagastroex | parsed into Options/Params but no engine code reads flagastroex |
-| astrogs | input_astro | flag | n | IGNORED |  | input/defaults.py Options.flagastrogs | parsed into Options/Params but no engine code reads flagastrogs |
-| astrot | input_astro | value |  | MISSING |  |  |  |
+| astro | input_main | flag | n | SUPPORTED | test:test_kwcov_b9.py | astro/rates.py + astro/thermal.py (input/deck.py run_deck -> Results.astro) egridastro grid, partfunc, stellarrate, astroout files | astro y: TALYS's incident grid (= stock, 110 energies for Au-197), the T9 grid, rates/MACS/G(T) and the files astrorate.g/p/a(/f), astrorate.tot, astrorateZZZAAA.tot; with astrogs n (TALYS's default) the thermalised target inside the run (astrotarget lumped WFC + compprepare astro feed + ewfc = Einc switch-off). Fe-56: (n,g) rate 1.27 %, stellar enhancement response 1.25 %; see the plan for Au-197 (engine default (n,n')/(n,g) above 0.1 MeV) and Ge-74. Runs on the C driver (run_deck); engine.run refuses astrogs n; fissile targets with astrogs n and astro + racap refused |
+| astroe | input_astro | value |  | SUPPORTED | test:test_kwcov_b9.py | input/defaults.py Options.astroE (kind astroe) + astro/rates.py + astro/thermal.py (input/deck.py run_deck -> Results.astro)  | one temperature T9 = astroE/kT, sets astro y and astrogs y, grid to 50 kT, macs.g for 0.029-0.031 (with structure/gamma/macs Exp column): Au-197 30 keV MACS 929.9 vs stock 934.4 mb (0.48 %) |
+| astroex | input_astro | flag | n | SUPPORTED | test:test_kwcov_b9.py | astro/rates.py + astro/thermal.py (input/deck.py run_deck -> Results.astro) (isomer populations from CHANOBS xsNNNNNN.LMM) | astrorate.<g/p/a>.LNN and astrorateZZZAAA.LNN (rate, MACS, branching); turns CHANOBS on for the run |
+| astrogs | input_astro | flag | n | SUPPORTED | test:test_kwcov_b9.py | astro/rates.py + astro/thermal.py (input/deck.py run_deck -> Results.astro) (G = 1, no thermal add-on) | Fe-56 rates = stock to 0.06 % ((n,g)), 0.04 % ((n,n)); Au-197 (n,g) MACS = stock to 1e-5 at T9 <= 0.1 (the capture agrees there) |
+| astrot | input_astro | value |  | SUPPORTED | test:test_kwcov_b9.py | input/defaults.py Options.astroT9 (kind astrot) + astro/rates.py + astro/thermal.py (input/deck.py run_deck -> Results.astro)  | one temperature, sets astro y (astrogs stays n); range 1e-4..10 and astroE/astroT exclusion checked |
 | asys | input_densitymodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagasys -> density/ld_nx2.py, density/parameters.py |  |
 | autorot | input_directmodel | flag | n | SUPPORTED | test:test_collrule.py | input/defaults.py Options.flagautorot -> direct/dwbaunit.py, direct/prepare.py, ecis/dwba.py, omp/parameters.py (+1) |  |
 | avadjust | input_omppar | per-particle | 1.0 | SUPPORTED | test:test_ompdef.py,test_omprotor.py,test_osengine.py | input/defaults.py Params.avadjust -> capture_fast.py, ecis/ccdisk.py, omp/omp_nx2.py, omp/ompdeck.py (+4) |  |
@@ -159,7 +159,7 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | colldamp | input_densitymodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagcolldamp -> density/ld_nx2.py, density/parameters.py, native/ld.h |  |
 | components | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | compound | input_compoundmodel | flag | y | SUPPORTED | test:conftest.py,test_angout.py,test_binquad2.py | input/defaults.py Options.flagcomp -> emission/multiple.py, input/nuclides.py |  |
-| core | input_directpar | value | -1 | SUPPORTED | test:test_collrule.py,test_compound.py,test_open2.py | input/defaults.py Options.core -> angout.py, astro/stellar.py, capture_fast_batch.py, capture_gpu.py (+127) |  |
+| core | input_directpar | value | -1 | SUPPORTED | test:test_collrule.py,test_compound.py,test_open2.py | input/defaults.py Options.core -> angout.py, astro/rates.py, astro/stellar.py, astro/thermal.py (+129) |  |
 | coulomb | input_directmodel | flag | y | SUPPORTED | test:test_kwcov_b6.py | none needed | `coulomb n` = the port's ECIS (no Coulomb excitation, lo(11)); acts in TALYS only for charged projectiles on deformed targets, where the DEFAULT `coulomb y` is not reproduced (known gap, charged projectiles behind INCOGNITA_CPINC); Fe-56: 0.00 % |
 | cpang | input_directmodel | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.flagcpang -> angout.flagcompang | compound angular distributions for charged projectiles |
 | cstrip | input_preeqpar | per-particle | 1.0 | SUPPORTED | test:conftest.py,test_na_v1.py,test_tfold.py | input/defaults.py Params.Cstrip -> omp/tfold.py |  |
@@ -240,7 +240,7 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | fiso | input_gammapar | per-particle | -1.0 | SUPPORTED | test:test_defaults.py | input/defaults.py Params.fiso -> capture_gpu_setup.py, compound/ccexitnb.py, compound/chain.py, emission/feeding.py (+5) |  |
 | fisom | input_gammapar | per-particle | -1.0 | SUPPORTED | grep | input/defaults.py Params.fisom -> capture_fast.py, capture_fast_batch.py, capture_gpu_setup.py, compound/decay_batch.py (+9) |  |
 | fispartdamp | input_fissionmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagfispartdamp -> fission/fis_ceng.py, fission/fission_batch_ladder.py, fission/parameters.py, fission/transmission.py (+1) |  |
-| fission | input_fissionmodel | flag | n | SUPPORTED | test:perfcasc_gate_run.py,test_ccexitnb.py,test_cengfis.py | input/defaults.py Options.flagfission -> capture_fast.py, capture_fast_batch.py, capture_gpu_setup.py, compound/ccexitnb.py (+26) |  |
+| fission | input_fissionmodel | flag | n | SUPPORTED | test:perfcasc_gate_run.py,test_ccexitnb.py,test_cengfis.py | input/defaults.py Options.flagfission -> astro/rates.py, astro/thermal.py, capture_fast.py, capture_fast_batch.py (+29) |  |
 | fit | input_basicpar | flag | n | SUPPORTED | test:test_kwcov_b2.py | input/fitlib.py _cards (o.flagfit -> nn/ng/na/nf/nd .par) | works as a deck line; LOSS: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %). B5 traced both to the engine's DEFAULT 14 MeV (n,p)/(n,a) excess, not to the keywords: cstrip a moves (n,a) by the same mb as stock (9.59 vs 9.63 mb, 0.4 %; the % differs because the engine's (n,a) is 11 % higher); gadjust acts only through pre-equilibrium (with `preequilibrium 20` neither side moves) and the flux it hands back to the compound nucleus decays into protons more in the engine (compound-only (n,p) 151.5 vs 131.5 mb). Fixing that changes defaults: a fidelity task, not a keyword batch |
 | format | input_basicpar | value | YANDF-0.4 | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | fsadjust | input_fissionpar | value | 1.0 | SUPPORTED | test:test_kwcov_b8.py | fisobs.py (output only; Results.extras / Results.spectra) iwamoto (scission fraction x fsadjust) | PFNS E-average = stock 1e-5 (U-238 3; U-235, Pu-239 2); no cross section moves on either side |
@@ -248,7 +248,7 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | ftableadjust | input_gammapar | per-nucleus-radiation | 1.0 | SUPPORTED | test:test_etablefix.py | input/defaults.py Params.ftableadjust -> gamma/ftglobal.py, gamma/parameters.py |  |
 | fullhf | input_compoundmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagfullhf -> capture_fast_batch.py, capture_gpu_setup.py, compound/chain.py, compound/continuum.py (+9) |  |
 | fymodel | input_fissionmodel | value | 2 | IGNORED |  | input/defaults.py Options.fymodel | parsed into Options/Params but no engine code reads fymodel |
-| g | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py | input/defaults.py Params.g -> angout.py, astro/stellar.py, capture_gpu.py, capture_tasks.py (+101) |  |
+| g | input_preeqpar | per-nucleus | 0.0 | SUPPORTED | test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py | input/defaults.py Params.g -> angout.py, astro/rates.py, astro/stellar.py, capture_gpu.py (+102) |  |
 | gadjust | input_preeqpar | per-nucleus | 1.0 | SUPPORTED | test:test_fitlib.py,test_pegq.py | input/defaults.py Params.gadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py |  |
 | gamgam | input_gammapar | per-nucleus | 0.0 | SUPPORTED | grep | input/defaults.py Params.gamgam -> gamma/actphys.py, gamma/ggnorm.py, gamma/transmission.py, structure/files.py (+1) |  |
 | gamgamadjust | input_gammapar | per-nucleus | 1.0 | SUPPORTED | grep | input/defaults.py Params.gamgamadjust -> structure/resonances.py |  |
@@ -349,7 +349,7 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | nlevels | input_levels | per-nucleus |  | SUPPORTED | test:test_kwcov_b2.py | input/defaults.py Options.pernuc -> nlev_of | `nlevels 25 56 5` Fe-56 0.19 % |
 | nlow | input_densitypar | per-nucleus-barrier |  | SUPPORTED | test:test_kwcov_b5.py | input/defaults.py Options.nlow_of (`nlow Z A n [ibar]`) -> density/parameters.py, ld_nx2.py | Fe-56 `nlow 26 56 3` 0.05 % (stock moved 1.5 %) |
 | nnfit | input_fit | flag | n | SUPPORTED | test:test_kwcov_b2.py | input/fitlib.py _cards | wired (xsfit.f90 order); its .par lines carry the gadjust / cstrip responses of the fit y loss: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %). B5 traced both to the engine's DEFAULT 14 MeV (n,p)/(n,a) excess, not to the keywords: cstrip a moves (n,a) by the same mb as stock (9.59 vs 9.63 mb, 0.4 %; the % differs because the engine's (n,a) is 11 % higher); gadjust acts only through pre-equilibrium (with `preequilibrium 20` neither side moves) and the flux it hands back to the compound nucleus decays into protons more in the engine (compound-only (n,p) 151.5 vs 131.5 mb). Fixing that changes defaults: a fidelity task, not a keyword batch |
-| nonthermlev | input_astro | value | -1 | IGNORED |  | input/defaults.py Options.nonthermlev | parsed into Options/Params but no engine code reads nonthermlev |
+| nonthermlev | input_astro | value | -1 | SUPPORTED | test:test_kwcov_b9.py | astro/rates.py partition_function | the level left out of the partition function (partfunc.f90:101; TALYS-2.25 uses it nowhere else) |
 | ntop | input_densitypar | per-nucleus-barrier |  | SUPPORTED | test:test_kwcov_b5.py | input/defaults.py Options.ntop_of (`ntop Z A n [ibar]`) -> density/parameters.py, ld_nx2.py | Fe-56 `ntop 26 56 6` 0.77 % (stock moved 29 %), `ntop 26 57 8` 0.92 % (38 %) |
 | nulldev | input_path | value |  | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | ompenergyfile | input_basicreac | value |  | SUPPORTED | test:test_kwcov_b6.py | input/defaults.py Options.ompenergyfile + reject_unported | read by endfenergies.f90 under `endf y` only: accepted without effect otherwise (as TALYS), REFUSED with endf y (ENDF-6 incident grid not ported) |
@@ -460,7 +460,7 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | rwsoadjustf | input_ompmodel | value |  | SUPPORTED | test:test_kwcov_b6.py | omp/ompdeck.py range_cells -> Params ompadjustE1/E2/D/s -> omp/parameters.adjustF | `<key> p E1 E2 D s` (s required, as TALYS); Fe-56 awdadjustF n 0.10 %, rvadjustF n 0.04 %, rvadjustF p 0.12 %; U-238 awdadjustF n 0.14 % |
 | s2adjust | input_densitypar | per-nucleus-barrier | 1.0 | SUPPORTED | test:test_cengld2.py,test_fitlib.py | input/defaults.py Params.s2adjust -> capture_fast.py, density/ld_nx2.py, density/models.py, density/parameters.py (+3) |  |
 | sacs | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| segment | input_numerics | value | 1 | SUPPORTED | test:test_density.py,test_pewindow_gs.py,test_specobs.py | input/defaults.py Options.segment -> astro/stellar.py, compound/dens_reference.py, core/grids.py, density/matching.py (+10) |  |
+| segment | input_numerics | value | 1 | SUPPORTED | test:test_density.py,test_kwcov_b9.py,test_pewindow_gs.py | input/defaults.py Options.segment -> astro/rates.py, astro/stellar.py, compound/dens_reference.py, core/grids.py (+13) |  |
 | sfexp | input_gammapar | value / value+nucleus | sfexp | SUPPORTED | test:test_kwcov_b5.py | input/fitlib.py (class 15, value first) -> direct/capture.py spectroscopic_factors | Au-197 racap.tot `sfexp 0.5` and `sfexp 0.5 79 198 0`: 0.00 % (stock -1.6 % at 1 keV) |
 | sffactor | input_fissionmodel | flag | n | SUPPORTED | grep | input/defaults.py Options.flagsffactor -> fission/parameters.py |  |
 | sfth | input_gammapar | value / value+nucleus | 1.0 | SUPPORTED | test:test_kwcov_b5.py | input/fitlib.py (class 15, value first) -> direct/capture.py spectroscopic_factors | reaches the racap structure since B5 (it took the defaults); Au-197 / Fe-56 / Zr-90 racap.tot: 0.0 % on both sides (the continuum factor does not move xs(dir. cap.)) |
@@ -481,13 +481,13 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | strengthm1 | input_gammamodel | value | 3 | SUPPORTED | grep | input/defaults.py Options.strengthM1 -> capture_gpu_setup.py, compound/psf_fast.py, compound/psf_nx2.py, gamma/parameters.py (+4) |  |
 | strucpath | input_path | value |  | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | sysreaction | input_directmodel | value | sysreaction | READ_ONLY_DEFAULT | test:test_kwcov_b6.py | input/defaults.py Options.flagsys + UNPORTED | `sysreaction <particles>` REFUSED: Tripathi normalisation (tripathi.f90) not ported |
-| t | input_densitypar | per-nucleus-barrier | 0.0 | SUPPORTED | test:conftest.py,test_actphys.py,test_ccexitnb.py | input/defaults.py Params.T -> alphaentr.py, astro/stellar.py, capture_fast_batch.py, capture_gpu.py (+85) |  |
+| t | input_densitypar | per-nucleus-barrier | 0.0 | SUPPORTED | test:conftest.py,test_actphys.py,test_ccexitnb.py | input/defaults.py Params.T -> alphaentr.py, astro/rates.py, astro/stellar.py, astro/thermal.py (+87) |  |
 | tadjust | input_densitypar | per-nucleus-barrier | 1.0 | SUPPORTED | grep | input/defaults.py Params.Tadjust -> density/ld_ceng.py, density/ld_nx2.py, density/matching.py, density/parameters.py (+1) |  |
 | tcool | input_medical | value |  | MISSING |  |  |  |
 | tirrad | input_medical | value |  | MISSING |  |  |  |
 | tjadjust | input_compoundpar | per-nucleus-particle-file | 1.0 | SUPPORTED | test:test_kwcov_b5.py | input/fitlib.py _split (class 12 `tjadjust Z A <p> v`) -> Params.TJadjust | TALYS-2.25 BUG: a constant tjadjust never acts (comptarget.f90:331 / multiple.f90:429 scale by `adjust`'s factor, which has no entry for it; TJadjust is read nowhere; stock Fe-56 `tjadjust 26 57 p 1.5`: 0.0 %). Read, warned, inert, as stock. The `Ea Eb Em D` / file forms (which act: stock (n,p) +24 %) are REFUSED |
 | tmadjust | input_fissionpar | value | 1.0 | SUPPORTED | test:test_kwcov_b8.py | fisobs.py (output only; Results.extras / Results.spectra) iwamoto (Tm0 x tmadjust) | PFNS E-average = stock 1e-5 (U-238 1.3; U-235, Pu-239 0.8 with fsadjust 2); no cross section moves on either side |
-| transeps | input_numerics | value | 1.00E-08 | SUPPORTED | test:test_e2e.py | input/defaults.py Options.transeps -> capture_fast_batch.py, capture_gpu_setup.py, compound/ccexitnb.py, compound/chain.py (+17) |  |
+| transeps | input_numerics | value | 1.00E-08 | SUPPORTED | test:test_kwcov_b9.py | input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps | KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the Cascade constructor's 1e-8; now it does unless a caller passes its own |
 | transpower | input_numerics | value | 5 | SUPPORTED | grep | input/defaults.py Options.transpower -> core/grids.py, omp/inverse.py |  |
 | tres | input_compoundpar | value | 293.16 | IGNORED |  | input/defaults.py Params.Tres | parsed into Options/Params but no engine code reads Tres |
 | twocomponent | input_preeqmodel | flag | y | SUPPORTED | test:test_kwcov_b7.py | input/defaults.py Options.flag2comp -> preeq/exciton_b7.py one_component | `twocomponent n`: one-component exciton model (exciton.f90, emissionrate.f90, lambdaplus.f90, lifetime.f90, Qfactor). Binary PE totals = stock to 1e-4; response Fe-56 0.49 %, Zr-90 0.39 % (stock moved 17 %). REFUSED with multiple pre-equilibrium (Einc >= multipreeq onset, 20 MeV): multipreeq.f90 not ported |
@@ -519,12 +519,12 @@ Of the SUPPORTED rows, 208 have a test naming the keyword, 109 are code-path onl
 | wso1adjust | input_omppar | per-particle | 1.0 | SUPPORTED | grep | input/defaults.py Params.wso1adjust -> omp/omp_nx2.py, omp/ompdeck.py, omp/parameters.py |  |
 | wso2adjust | input_omppar | per-particle | 1.0 | SUPPORTED | grep | input/defaults.py Params.wso2adjust -> omp/omp_nx2.py, omp/ompdeck.py, omp/parameters.py |  |
 | widthfluc | input_compoundmodel | flag | y | SUPPORTED | test:test_defaults.py | input/defaults.py Options.ewfc_mev -> compound/chain.py, emission/feeding.py, engine_c.py, gpu_full_setup.py |  |
-| widthmode | input_compoundmodel | value | 1 | SUPPORTED | test:test_compound.py,test_reference.py | input/defaults.py Options.wmode -> angout.py, astro/stellar.py, capture_gpu_setup.py, compound/ceang.py (+9) |  |
+| widthmode | input_compoundmodel | value | 1 | SUPPORTED | test:test_compound.py,test_kwcov_b9.py,test_reference.py | input/defaults.py Options.wmode -> angout.py, astro/stellar.py, astro/thermal.py, capture_gpu_setup.py (+10) |  |
 | wtable | input_gammapar | per-nucleus-radiation | wtable | SUPPORTED | test:test_defaults.py,test_engproj_tarmass.py,test_etablefix.py | input/defaults.py Params.wtable -> capture_fast.py, capture_gpu.py, capture_gpu_setup.py, capture_gpu_tasks.py (+8) |  |
 | wtableadjust | input_gammapar | per-nucleus-radiation | 1.0 | SUPPORTED | test:test_etablefix.py | input/defaults.py Params.wtableadjust -> gamma/parameters.py |  |
 | xsalphatherm | input_compoundpar | value | 0.0 | IGNORED |  | input/defaults.py Params.xsalphatherm | parsed into Options/Params but no engine code reads xsalphatherm |
 | xscaptherm | input_compoundpar | value | 0.0 | IGNORED |  | input/defaults.py Params.xscaptherm | parsed into Options/Params but no engine code reads xscaptherm |
-| xseps | input_numerics | value | 1.00E-07 | SUPPORTED | test:test_engdefect.py | input/defaults.py Options.xseps_mb -> compound/chain.py, emission/binary.py, emission/binspec.py, emission/channels.py (+7) |  |
+| xseps | input_numerics | value | 1.00E-07 | SUPPORTED | test:test_engdefect.py | input/defaults.py Options.xseps_mb -> astro/thermal.py, compound/chain.py, emission/binary.py, emission/binspec.py (+8) |  |
 | xsptherm | input_compoundpar | value | 0.0 | IGNORED |  | input/defaults.py Params.xsptherm | parsed into Options/Params but no engine code reads xsptherm |
 | yieldfile | input_fissionmodel | value |  | MISSING |  |  |  |
 | yieldunit | input_medical | value |  | MISSING |  |  |  |

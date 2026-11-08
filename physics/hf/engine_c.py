@@ -1295,6 +1295,17 @@ def cases(zf, stats: dict | None = None):
             zf.Z, zf.A, float(enincmax), tuple(declared)):
         raise ValueError("ChainedFull(cascade=...) was built for another run")
     cas.set_fit_params(zf.params)
+    from physics.hf.astro import thermal as astro_thermal  # KWCOV B9 (astro y, astrogs n; off: never called)
+
+    astro_on = astro_thermal.active(cas.options)
+    if astro_on or getattr(cas, "astro_ewfc_mev", None) is not None:
+        astro_thermal.check(cas.options)
+        cas.astro_ewfc_mev = None  # comptarget.f90:803 sets it during the run
+        astro_thermal.LOG.clear()
+    if cas.options.flagastro:
+        from physics.hf.astro import rates as astro_rates
+
+        astro_rates.STATE.clear()
     trim = zf.trim_batches
     fis = fission_chain(zf.Z, zf.A, cas.options, fit=cas.fit + cas.fission_fit)
     set_energy_subset(zf.Z, zf.A, declared, run_axis if trim else None)
@@ -1348,6 +1359,25 @@ def cases(zf, stats: dict | None = None):
             if stellar.enabled():  # STELLARSEF (INCOGNITA_STELLAR, default OFF): read-only re-entrance per target level
                 with stagetime.stage("stellar"):
                     stellar.record(cas, st, binp, cinp, etot, a_e, fkw, pop)
+            astro_dnuc = None
+            if astro_on:  # KWCOV B9: thermalised target (astrotarget / compprepare astro feed), astro y + astrogs n
+                with stagetime.stage("astro"):
+                    from physics.hf.compound.target import _exact_incident_channel
+
+                    cia = _exact_incident_channel(compound_inputs(cas, st, binp, cinp, etot, a_e, **fkw))
+                    pm = pop.pop_mb[0]
+                    ad = astro_thermal.addon(cia, float(cas.options.xseps_mb), float(cas.options.transeps),
+                                             int(pm.shape[1]))
+                    pm += ad["dpop"][:, : pm.shape[1]]
+                    xsb = xsb + torch.as_tensor(ad["dxsb"], dtype=xsb.dtype)
+                    astro_dnuc = {t: float(ad["dxsb"][t]) - float(ad["dpop"][t].sum()) for t in range(7)}
+                    astro_thermal.after_energy(cas, cia)
+                    astro_thermal.LOG.append(dict(e_inc_mev=float(binp.e_inc_mev), **ad["info"],
+                                                  dxsb=[float(v) for v in ad["dxsb"]]))
+            if cas.options.flagastro:  # KWCOV B9: partfunc's grid (last energy) and the masses, read only
+                from physics.hf.astro import rates as astro_rates
+
+                astro_rates.record_energy(cas, st)
             p = pop.pop_mb[0]
             xspop, xspopex, xspopnuc = {}, {}, {}
             for t, g in binp.grids.items():
@@ -1355,6 +1385,8 @@ def cases(zf, stats: dict | None = None):
                 xspop[t] = p[t, :n].clone()
                 xspopex[t] = xspop[t].sum((-2, -1))
                 xspopnuc[t] = float(xspop[t].sum())
+                if astro_dnuc is not None:  # TALYS adds sumIPE (not the population sum) to xspopnuc
+                    xspopnuc[t] += astro_dnuc[t]
             xsbinary = binp.xsbinary_mb.clone() if binp.xsbinary_mb is not None else None
             if xsbinary is not None:
                 for t in range(7):
@@ -1458,6 +1490,13 @@ def cases(zf, stats: dict | None = None):
                               mres if mres is not None else (packed.result() if packed is not None else None))
             out.append((b2, chan, b, keys))
         specout.end_run(cas)
+        if cas.options.flagastro:  # KWCOV B9: partfunc.f90 after the energy loop
+            from physics.hf.astro import rates as astro_rates
+
+            o = cas.options
+            _, at9 = astro_rates.check_astro_input(float(o.astroE), float(o.astroT9), int(o.segment))
+            t9, _ = astro_rates.t9_grid(at9, 1 if at9 != 0.0 else astro_rates.NUMT)
+            astro_rates.finish_run(cas, t9, bool(o.flagastrogs), int(o.nonthermlev))
         return out
     finally:
         stagetime.set_energy(None)

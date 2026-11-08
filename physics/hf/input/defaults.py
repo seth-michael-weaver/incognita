@@ -171,6 +171,8 @@ class Options:
     flagastroex: bool = False  # input_astro.f90:49
     flagastrogs: bool = False  # input_astro.f90:50
     nonthermlev: int = -1  # input_astro.f90:51
+    astroE: float = 0.0  # input_astro.f90 line 47, MeV; `astroE` also sets flagastro and flagastrogs (:79-86)
+    astroT9: float = 0.0  # input_astro.f90 line 48, 10^9 K; `astroT` also sets flagastro (:87-93)
     flagprod: bool = False  # input_medical.f90:52
     # --- numerics (input_numerics.f90) ---
     maxenrec: int = NUMENREC  # :64
@@ -593,6 +595,8 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "astroex": ("astro", "flagastroex", "yn"),
     "astrogs": ("astro", "flagastrogs", "yn"),
     "nonthermlev": ("astro", "nonthermlev", "int"),
+    "astroe": ("astro", "astroE", "astroe"),  # KWCOV B9
+    "astrot": ("astro", "astroT9", "astrot"),  # KWCOV B9
     "maxenrec": ("numerics", "maxenrec", "int"),
     "maxn": ("numerics", "maxN", "int"),
     "maxnrp": ("numerics", "maxNrp", "int"),
@@ -853,6 +857,11 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
                 o["flagfit"] = True
                 if name in ("flaggamgamfit", "flagmacsfit"):
                     o["flagngfit"] = False
+        elif kind in ("astroe", "astrot"):  # KWCOV B9, input_astro.f90:79-93: a single temperature, sets astro y
+            o[name] = float(value)
+            o["flagastro"] = True
+            if kind == "astroe":
+                o["flagastrogs"] = True
         elif kind == "maxlevelstar":  # input_levels.f90, sets nlevmax and nlevbin(k0)
             o["nlevmax"] = int(value)
             nb = list(o["nlevbin"])

@@ -38,6 +38,10 @@ class Results:
     # SPECOBS (KWCOV B4: outspectra / ddxmode / outgamdis / INCOGNITA_SPECOBS, default empty): emission spectra, DDX,
     # discrete gamma lines and the (k0,g<p>) column under TALYS's file names; physics/hf/specobs.py lists them
     spectra: dict[str, Tensor] = field(default_factory=dict)
+    # ASTRO (KWCOV B9: astro / astroE / astroT in a deck, default empty): astroout.f90's files as
+    # {file name: {column: ndarray over T9}} (astrorate.g, astrorate.tot, astrorateZZZAAA.tot, macs.g, ...);
+    # physics/hf/astro/rates.py
+    astro: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:

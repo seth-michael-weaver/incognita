@@ -44,8 +44,8 @@ unresolved resonance parameters,urr*.dat urrtalys.tot,"urrout.f90:1, urr.f90:1",
 resonance-range / groupwise / integral data,resonance.tot group*.tot integral.dat,"resonance.f90:1, integral.f90:1","resonance, group, integral, reslib, tres",MISSING,,B6,uses external resonance libraries
 thermal cross sections,talys.out,"thermal.f90:1, thermalxs.f90:1","xscaptherm, xsptherm, xsalphatherm",MISSING,,B6,
 "S0, S1, R', D0, <Gamma_gamma> (resonance parameters)",talys.out,"incidentout.f90, densityout.f90",,PARTIAL,"ingredients.py (D0, Gg, S0)",B4,
-astrophysical reaction rates,astrorate.g ...,astroout.f90:1,"astro, astrogs, astroex, astroT, astroE",PARTIAL,astro/stellar.py (INCOGNITA_STELLAR),B9,"rate + SEF; keyword not wired, file format not matched"
-MACS,macs.g,astroout.f90:1,astro,PARTIAL,fewres.py / chart scripts,B9,post-processed from capture
+astrophysical reaction rates,"astrorate.g/p/a/f, astrorate.tot, astrorateZZZAAA.tot, .LNN",astroout.f90:1,"astro, astrogs, astroex, astroT, astroE, nonthermlev",SUPPORTED,"astro/rates.py, astro/thermal.py (run_deck -> Results.astro, rates.write_files)",B9,"test:test_kwcov_b9.py; Fe-56 (n,g) rate 1.27 % vs stock over T9 1e-4..10, G(T) 1.35 %; Au-197 limited by the engine's default (n,n')/(n,g) above 0.1 MeV (plan B9)"
+MACS,macs.g,astroout.f90:1,"astro, astroE",SUPPORTED,astro/rates.py (MACS column + macs.g),B9,"test:test_kwcov_b9.py; Au-197 30 keV 929.9 vs stock 934.4 mb. The published library's MACS are NOT this path (scripts/release, ground-state curve, exact log-log integral)"
 isotope production yields / activities (medical),Y*.tot,"prodout.f90:1, prodyield.f90:1","production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit",MISSING,,B10,post-processing of residual production + decay data
 level densities,ld*.tot nld*.tab,densityout.f90:1,"outdensity, filedensity",PARTIAL,ingredients.py,B11,
 photon strength functions,psf*.E1,gammaout.f90:1,"outgamma, filepsf",PARTIAL,ingredients.py,B11,

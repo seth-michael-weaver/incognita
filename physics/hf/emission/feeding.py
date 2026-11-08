@@ -241,6 +241,10 @@ class Cascade:
         self.flagfullhf, self.transeps = flagfullhf, transeps
         self.rg = run_grid(Zt, At, enincmax_mev)
         self.options, self.params, self.m = self.rg.options, self.rg.params, self.rg.m
+        if transeps == 1.0e-8 and float(self.options.transeps) != 1.0e-8:
+            # KWCOV B9: a deck `transeps` (or astro y's 1e-18, input_numerics.f90:89-94) reached Options but not the
+            # chain, which took this constructor default; an explicit constructor value still wins
+            self.transeps = float(self.options.transeps)
         from physics.hf.input.defaults import reject_unported
 
         reject_unported(self.options)  # a calculation must not run on an unported keyword
@@ -621,6 +625,9 @@ class Cascade:
         TALYS: nuclides.f90:251
         Test: E2E
         """
+        ov = getattr(self, "astro_ewfc_mev", None)  # KWCOV B9: comptarget.f90 line 803, astro with astrogs n; None = unset
+        if ov is not None:
+            return ov
         e = float(self.options.ewfc_mev)
         if self.k0 >= 1 and e == -1.0:
             e = self.sep_mev(PARZ[self.k0], PARN[self.k0])[self.k0]

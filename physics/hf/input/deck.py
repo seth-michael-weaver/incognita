@@ -107,18 +107,136 @@ def run_deck(path: str | os.PathLike, stats: dict | None = None):
     if d.projectile != projectile.symbol():
         raise ValueError(f"deck projectile {d.projectile!r}, engine projectile {projectile.symbol()!r} "
                          "(set INCOGNITA_CPINC for charged particles / photons)")
+    ast = astro_of(d.lines)
     old = os.environ.get(fitlib.ENV_LINES)
+    old_ch = os.environ.get("INCOGNITA_CHANOBS")
     try:
         if d.lines:
             os.environ[fitlib.ENV_LINES] = d.lines_env
         else:
             os.environ.pop(fitlib.ENV_LINES, None)
+        declared, energies = d.declared_mev, (None if d.energies_mev == d.declared_mev else d.energies_mev)
+        if ast is not None:  # KWCOV B9: egridastro.f90 replaces the deck's energies
+            declared, energies = _astro_energies(d, ast)
+            if ast["astroex"]:
+                os.environ["INCOGNITA_CHANOBS"] = "1"  # the isomer populations (xsNNNNNN.LMM) astroex folds
         with torch.inference_mode():
-            return engine_c.run(ChainedFull(Z=d.Z, A=d.A, declared_energies=d.declared_mev,
-                                            energies=None if d.energies_mev == d.declared_mev else d.energies_mev),
-                                stats)
+            res = engine_c.run(ChainedFull(Z=d.Z, A=d.A, declared_energies=declared, energies=energies), stats)
+        if ast is not None:
+            res = _astro_results(res, d, ast)
+        return res
     finally:
         if old is None:
             os.environ.pop(fitlib.ENV_LINES, None)
         else:
             os.environ[fitlib.ENV_LINES] = old
+        if old_ch is None:
+            os.environ.pop("INCOGNITA_CHANOBS", None)
+        else:
+            os.environ["INCOGNITA_CHANOBS"] = old_ch
+
+
+def astro_of(lines) -> dict | None:
+    """The astro keywords of a deck (input_main.f90:158-159, input_astro.f90:79-110), None without `astro y`,
+    `astroE` or `astroT`. Ranges and the astroE/astroT exclusion: checkvalue.f90:425-495.
+
+    TALYS: input_astro.f90:1 (input_astro), checkvalue.f90:1 (checkvalue)
+    Test: tests/hf/test_kwcov_b9.py
+    """
+    from physics.hf.astro.rates import check_astro_input
+
+    a = dict(astro=False, astrogs=False, astroex=False, nonthermlev=-1, astroE=0.0, astroT9=0.0, segment=1,
+             racap=False)
+    for s in lines:
+        w = s.split()
+        k, v = w[0].lower(), (w[1].lower() if len(w) > 1 else "")
+        if k == "astro":
+            a["astro"] = v[:1] == "y"
+        elif k in ("astrogs", "astroex", "racap"):
+            a[k] = v[:1] == "y"
+        elif k == "nonthermlev":
+            a["nonthermlev"] = int(v)
+        elif k == "astroe":
+            a["astroE"], a["astro"], a["astrogs"] = float(v), True, True
+        elif k == "astrot":
+            a["astroT9"], a["astro"] = float(v), True
+        elif k == "segment":
+            a["segment"] = int(v)
+    if not a["astro"]:
+        return None
+    if a["racap"]:
+        raise NotImplementedError("not ported: astro y with racap y (stellarrate.f90's separate direct-capture rate, "
+                                  "iloop 3, and its astrorate column)")
+    a["astroE"], a["astroT9"] = check_astro_input(a["astroE"], a["astroT9"], a["segment"])
+    a["nTmax"] = 1 if a["astroT9"] != 0.0 else 30
+    return a
+
+
+def _astro_energies(d: Deck, ast: dict):
+    """egridastro.f90's incident grid for this target (masses of the run), cut at estop like any grid.
+
+    TALYS: egridastro.f90:1 (egridastro)
+    Test: tests/hf/test_kwcov_b9.py
+    """
+    from physics.hf import projectile
+    from physics.hf.astro.rates import energy_grid
+    from physics.hf.compound.dens_reference import structure_of
+
+    from physics.hf.input import fitlib
+
+    k0 = projectile.k0()
+    fitlib.activate(d.Z, d.A)  # the deck's cards first: structure_of caches the run's options per target
+    _, _, m = structure_of(d.Z, d.A)
+    pz, pn = (0, 0, 1, 1, 1, 2, 2)[k0], (0, 1, 0, 1, 2, 1, 2)[k0]
+    e = energy_grid(k0, float(m.specmass[pz, pn, k0]), float(m.redumass_amu[pz, pn, k0]),
+                    {t: float(m.s_mev[0, 0, t]) for t in range(7)}, d.Z, ast["astroT9"], ast["nTmax"])
+    declared = tuple(float(x) for x in e)
+    estop = next((float(s.split()[1]) for s in d.lines if s.split()[0] == "estop"), 1000.0)
+    kept = tuple(x for x in declared if x <= estop)
+    return declared, (None if kept == declared else kept)
+
+
+def _astro_results(res, d: Deck, ast: dict):
+    """Results + astroout.f90's files (`Results.astro`), from the run's residual production.
+
+    TALYS: stellarrate.f90:1 (stellarrate), astroout.f90:1 (astroout), residual.f90:76-82 (xsastro)
+    Test: tests/hf/test_kwcov_b9.py
+    """
+    from dataclasses import replace
+
+    import numpy as np
+
+    from physics.hf import projectile
+    from physics.hf.astro import rates as R
+    from physics.hf.astro import thermal
+    from physics.hf.emission.chanobs import residual_of
+
+    k0 = projectile.k0()
+    Zcn, Acn = d.Z + R.PARZ[k0], d.A + R.PARZ[k0] + R.PARN[k0]
+    e = res.e_inc_mev.detach().numpy().astype(np.float64)
+    rp = {}
+    for zc in range(R.NUMZASTRO + 1):
+        for nc in range(R.NUMNASTRO + 1):
+            key = f"rp{Zcn - zc:03d}{Acn - zc - nc:03d}"
+            if key in res.residual_production_mb:
+                rp[(zc, nc)] = res.residual_production_mb[key].detach().numpy().astype(np.float64)
+    iso = {}
+    if ast["astroex"]:
+        for k, v in res.extras.items():
+            if not (k.startswith("xs") and ".L" in k) or ":" in k:
+                continue
+            code, lev = k[2:8], int(k.split(".L")[1])
+            z, a = residual_of(int(code), Zcn, Acn)
+            kk = (Zcn - z, (Acn - a) - (Zcn - z), lev)
+            iso[kk] = iso.get(kk, 0.0) + v.detach().numpy().astype(np.float64)
+    fis = res.totals_mb.get("fission")
+    st = R.STATE
+    t9, et9 = R.t9_grid(ast["astroT9"], ast["nTmax"])
+    out = R.astro_outputs(
+        Z=d.Z, A=d.A, k0=k0, e_lab=e, rp_mb=rp, fis_mb=None if fis is None else fis.detach().numpy(),
+        specmass=st["masses"]["specmass"], redumass=st["masses"]["redumass"], t9=t9, et9=et9,
+        partf=st["partf"], astrogs=ast["astrogs"], iso_mb=iso, flagastroex=ast["astroex"], astroE=ast["astroE"],
+        macs_exp=R.macs_experimental(d.Z, d.A), flagfission=bool(fis is not None and float(fis.abs().sum()) > 0))
+    out["_meta"].update(thermal=list(thermal.LOG), nonthermlev=ast["nonthermlev"])
+    thermal.LOG.clear()
+    return replace(res, astro=out)

@@ -65,7 +65,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B7 | unported model branches (DONE, branch `kwcov7`; gnorm y and MSD stay refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
 | B7b | JLM and folding alpha OMP | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
 | B8 | fission extras (DONE, branch `kwcov8`; fisfeed J-parity columns and fragment-based nubar/PFNS -> B14) | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
-| B9 | astrophysics | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
+| B9 | astrophysics (DONE, branch `kwcov9`; astro + racap, fissile astrogs n refused) | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
 | B10 | URR | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
 | B10b | thermal, natural targets, resonance range | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
 | B11 | medical isotope production | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
@@ -481,6 +481,76 @@ U-238 1/5/14 MeV, all 692 `Results` arrays bitwise equal to the merge commit; `t
 Exists: `astro/stellar.py` (thermalised target, SEF; `INCOGNITA_STELLAR`). Do: `astro y` and the `astro*` keywords
 drive it; reaction rate files and MACS as TALYS writes them (`astroout.f90:1`, `stellarrate.f90:1`,
 `partfunc.f90:1`), `nonthermlev`. Accept: Au-197 and Ge-74 rates at T9 = 0.1-10 and MACS at 30 keV vs stock 2 %.
+
+**Done (branch `kwcov9`).**
+
+* **What.** A deck with `astro y`, `astroE` or `astroT` (`input/deck.py run_deck`, C driver) runs on TALYS's own
+  incident grid (egridastro: = stock, 110 energies 2 eV - 50 MeV for n + Au-197; `astroE`/`astroT`: one temperature,
+  grid to 50 kT) and returns `Results.astro` = astroout's files as {file: {column: array}}: `astrorate.g/p/a(/f)`,
+  `astrorate.tot`, `astrorateZZZAAA.tot`, with `astroex y` the `.LNN` level files (isomer populations from CHANOBS),
+  with `astroE 0.029-0.031` `macs.g` (Exp column from structure/gamma/macs). `astro/rates.py` = egridastro (T9 and
+  energy grids), partfunc (G(T), `nonthermlev`), stellarrate (rates, MACS: centre-of-mass Maxwellian, TALYS's
+  half-interval sum), astroout; `rates.write_files` writes them. `astro/thermal.py` = the thermalised target of
+  `astrogs n` (TALYS's default with astro y) INSIDE the run: astrotarget/astroprepare (lumped incident and exit
+  channels, Moldauer W, the "elastic" (W_el + (rho-1) W_inel)/rho) while width fluctuations are on;
+  compprepare's astro feed + comptarget's sumIPas subtraction (J2end = 2 numJ) when they are off; and
+  comptarget.f90:803 (after the first WFC energy with more than 3 target bins open, ewfc = Einc: WFC off for every
+  later energy, ground state included; `Cascade.astro_ewfc_mev`). Keywords: `astroe`/`astrot` are new Options
+  (`astroE`, `astroT9`; they set astro y, astroE also astrogs y), ranges and `astroE` OR `astroT` and `segment 1`
+  checked as checkvalue.f90.
+* **Defaults untouched**: nothing runs unless the deck asks for astro (`Results.astro` empty; the thermal hook,
+  the ewfc override and the partition-function record are all behind `options.flagastro`).
+* **Refused:** `astro y` + `racap y` (stellarrate's separate direct-capture rate, iloop 3); `astrogs n` on a
+  fissile target (astrotarget.f90:68 calls tfission with the TARGET level index as the compound-nucleus bin, a
+  TALYS bug not reproduced; astrogs y works); `astrogs n` with widthmode 2/3; `astrogs n` on the Python driver
+  (`engine.run`).
+* **TALYS quirks kept** (ported as written): astrotarget's elastic sumIPE adds `suminl` without CNfactor (2J+1);
+  without WFC sumIPas = CNfactor (2J+1) enumhf^2/denomhf is subtracted from sumIPE of every type-k0 exit including
+  the ground state (whose compound elastic is already left out); J2cnend = 2 (lmaxhf + 1/2 + Ir) with the integer
+  Ir (one J short for odd-A targets), capped at numJ = 40; partfunc's continuum trapezoid starts from the last
+  discrete level's term; the elastic/last-cell test of astrotarget uses the last (P', Ir) visited.
+* **Bug fixed on the way:** the deck keyword `transeps` (and astro y's 1e-18, massdis y's 1e-12) reached `Options`
+  but never the chain: `Cascade.transeps` was the constructor default 1e-8. Now taken from Options unless a caller
+  passes its own (`emission/feeding.py`); default runs unchanged (both 1e-8).
+* **Vs stock** (`scripts/kwcov/b9_response.py`, `b9_table.py`; |ln(ours/stock)| max over T9 1e-4..10 where stock
+  > 1e-6 of its column maximum; response = (astro y) / (astro y; astrogs y), the stellar enhancement):
+
+  | deck | (n,g) rate / MACS | G(T) | (n,n) | (n,p) | (n,a) | response (n,g) | response other |
+  |---|---|---|---|---|---|---|---|
+  | Fe-56 astro y astrogs y | 0.06 % | 1 | 0.04 % | 2.3 % | 2.8 % | | |
+  | Fe-56 astro y | 1.27 % | 1.35 % (T9 10) | 0.9 % | 0.6 % | 0.4 % | **1.25 %** | (n,n) 0.9, (n,p) 1.7, (n,a) 2.25 % |
+  | Ge-74 astro y astrogs y | 0.13 % | 1 | 0.10 % | 0.01 % | 2.8 % | | |
+  | Ge-74 astro y | 1.17 % | 0.00 % | 1.5 % | 0.01 % | 0.4 % | **1.04 %** | (n,n) 2.6, (n,a) 2.4 % (rate ~1 cm3/mol/s) |
+  | Au-197 astroE 0.03 (macs.g) | **0.48 %** (929.9 vs 934.4 mb) | 1 | 79 % | = | floor | | |
+  | Au-197 astroT 0.348 (30 keV, thermal) | **0.24 %** | 0.00 % | 122 % | = | floor | | |
+  | Au-197 + nonthermlev 1 | 0.24 % | 0.00 % | | | | **0.00 %** (x1.038) | all 0.00 % |
+  | Au-197 + astroex y | g.L00 0.24 %, g.L30 (Au-198m) 3.6 % | | | | | | |
+  | Au-197 astro y astrogs y | 1e-5 at T9 <= 0.1; 0.3 % at 0.3; 2.8 % at 1; 24 % at 10 | 1 | 90 % | 27 % | floor | | |
+  | Au-197 astro y | 0.15 % at T9 0.3; 2.3 % at 1; 8.7 % at 3 | 0.00 % to T9 3, 10 % at T9 >= 7 | 129 % | 10 % | 160 % | **21 % (T9 4)**, 0.6 % at 30 keV | |
+
+  Residual products of astrorate.tot (Fe55, Mn54, Pt195 ...) with rates of 1e-12 - 1 cm3/mol/s follow the engine's
+  multi-particle channels at high T and are not part of the acceptance.
+* **Losses, traced.** (1) Au-197 above T9 ~ 0.5: the ENGINE's default n + Au-197 differs from stock above 0.1 MeV,
+  not the astro port: in a plain deck at 0.1-0.3 MeV the engine's (n,n') (rp079197) is ~2x stock (388 vs 157-242
+  mb), its (n,g) at 1 MeV 104 vs 144 mb (-27 %). The rate arithmetic is exact where the capture agrees (MACS 1e-5 at
+  T9 <= 0.1) and G(T) is exact to T9 = 3; the stellar response follows the excited-state neutron widths, which
+  carry the same excess (a default-fidelity item for the fidelity task, not B9). (2) G(T) at T9 >= 5 (Au-197 +10 %,
+  Fe-56 1.35 %): the continuum part of the partition function = the engine's level density 10-50 MeV and its
+  last-energy bins. (3) (n,a)/(n,p) "floor" rows: the engine's keV-energy (n,a) on Au-197 is 0 (rate = xseps
+  floor 1.7e-12) where stock has 4e-7; 1e-15 of the capture rate.
+* **INCOGNITA vs TALYS astro (deliberate, recorded):** the published library's MACS and rates (scripts/release
+  v0.2.1-v0.2.3) do NOT come from this path and are unchanged by it: they integrate the ground-state capture curve
+  (= TALYS `astrogs y`, no partition function, no stellar enhancement), with the same centre-of-mass definition as
+  stellarrate (sigma at E_lab, E = E_lab M/(M + m_n)), but exactly (log-log between the grid points, Gauss-Legendre)
+  on the 64/134-point production grid with the engine's own capture below 1 keV (v0.2.2) and the AME2020 reduced
+  mass, where TALYS sums half-interval rectangles on its astro grid from 2 eV with its own redumass. The library's
+  capture runs keep width fluctuations up to S_n; TALYS's astro y (astrogs n) switches them off above 3 open target
+  levels (Au-197 above 0.30 MeV, Fe-56 above 2.7 MeV), a TALYS quirk the library does not take. `astro/stellar.py`
+  (INCOGNITA_STELLAR, the SEF study) stays a separate, non-lumped method (full HF+WFC per entrance level, partition
+  function cut at 3 MeV) and is not what `astro y` runs.
+* Tests: `tests/hf/test_kwcov_b9.py` (grids vs stock, constant-sigma MACS, partition function by hand, macs file,
+  file round trip, keyword parsing and refusals, the transeps fix, the ewfc override default, Au-197 astroE 0.03 run
+  vs stock macs.g).
 
 ### B10 / B10b -- low energy
 

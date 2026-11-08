@@ -223,6 +223,31 @@ B8: dict = {
                    "0.67 %. `class2 y` itself: 6.2 % relative (U-238 rp092238.fis 5 MeV x4), +291 vs +297 mb (2.2 %)",
                    _T8),
 }
+_T9 = "test:test_kwcov_b9.py"
+_AR = "astro/rates.py + astro/thermal.py (input/deck.py run_deck -> Results.astro) "
+#: KWCOV B9 rows (docs/hf/COVERAGE_PLAN.md B9); stock TALYS-2.25 n + Au-197 / Fe-56 / Ge-74, scripts/kwcov/b9_response.py
+B9: dict = {
+    "astro": ("SUPPORTED", _AR + "egridastro grid, partfunc, stellarrate, astroout files",
+              "astro y: TALYS's incident grid (= stock, 110 energies for Au-197), the T9 grid, rates/MACS/G(T) and the "
+              "files astrorate.g/p/a(/f), astrorate.tot, astrorateZZZAAA.tot; with astrogs n (TALYS's default) the "
+              "thermalised target inside the run (astrotarget lumped WFC + compprepare astro feed + ewfc = Einc "
+              "switch-off). Fe-56: (n,g) rate 1.27 %, stellar enhancement response 1.25 %; see the plan for Au-197 "
+              "(engine default (n,n')/(n,g) above 0.1 MeV) and Ge-74. Runs on the C driver (run_deck); "
+              "engine.run refuses astrogs n; fissile targets with astrogs n and astro + racap refused", _T9),
+    "astrogs": ("SUPPORTED", _AR + "(G = 1, no thermal add-on)", "Fe-56 rates = stock to 0.06 % ((n,g)), 0.04 % "
+                "((n,n)); Au-197 (n,g) MACS = stock to 1e-5 at T9 <= 0.1 (the capture agrees there)", _T9),
+    "astroex": ("SUPPORTED", _AR + "(isomer populations from CHANOBS xsNNNNNN.LMM)",
+                "astrorate.<g|p|a>.LNN and astrorateZZZAAA.LNN (rate, MACS, branching); turns CHANOBS on for the run",
+                _T9),
+    "astroe": ("SUPPORTED", "input/defaults.py Options.astroE (kind astroe) + " + _AR,
+               "one temperature T9 = astroE/kT, sets astro y and astrogs y, grid to 50 kT, macs.g for 0.029-0.031 "
+               "(with structure/gamma/macs Exp column): Au-197 30 keV MACS 929.9 vs stock 934.4 mb (0.48 %)", _T9),
+    "astrot": ("SUPPORTED", "input/defaults.py Options.astroT9 (kind astrot) + " + _AR,
+               "one temperature, sets astro y (astrogs stays n); range 1e-4..10 and astroE/astroT exclusion checked",
+               _T9),
+    "nonthermlev": ("SUPPORTED", "astro/rates.py partition_function", "the level left out of the partition function "
+                    "(partfunc.f90:101; TALYS-2.25 uses it nowhere else)", _T9),
+}
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -240,14 +265,15 @@ MANUAL: dict = {
     **{k: ("SUPPORTED", _F + "UPBEND_KEYS -> gamma/parameters.py:762", "upbend C/e/f cards (LEESHELL fix)", "grep")
        for k in ("upbendc", "upbende", "upbendf", "upbendcadjust", "upbendeadjust", "upbendfadjust")},
     # --- switches that only exist as INCOGNITA_* env levers today ---
-    "astro": ("IGNORED", "astro/stellar.py (INCOGNITA_STELLAR)",
-              "keyword ignored; thermalised-target stellar rate/SEF exists behind INCOGNITA_STELLAR on the C path. "
-              "astro y also resets numerics (transpower 15, xseps 1e-17): that cascade IS honoured in default_options"),
     # --- KWCOV B2 (2026-11-08): deck wiring; response vs stock = scripts/kwcov/b2_response.py, |ln(R/S)| max ---
     **B2,
     **B5,
     **B7,
     **B8,
+    **B9,
+    "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps",
+                 "KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the "
+                 "Cascade constructor's 1e-8; now it does unless a caller passes its own", _T9),
     "channels": ("SUPPORTED", "structure/scalars.py:144", "exclusive channels are always computed (flagchannels "
                  "hard-wired on); `channels n` has no effect, which is harmless", "manual"),
     "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete "

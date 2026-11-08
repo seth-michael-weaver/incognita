@@ -284,6 +284,9 @@ class ChainedFull:
         if self.params and dumped:
             raise ValueError("ChainedFull(params=...) needs the dump-free chain (inject=())")
         cas.set_fit_params(self.params)
+        if getattr(cas.options, "flagastro", False) and not getattr(cas.options, "flagastrogs", False):
+            raise NotImplementedError("astro y with astrogs n (the thermalised target, astro/thermal.py) runs on the "
+                                      "C driver (engine_c / input.deck.run_deck) only")
         trim = self.trim_batches
         # TWOPH: T11's fission transmission, wired in. Before this `compound_inputs` was passed
         # `tfis=None` and `Cascade.decay` `flagfission=False`, so a chained actinide ran and
