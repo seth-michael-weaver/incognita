@@ -1435,9 +1435,6 @@ def _bestbranch(o: dict) -> None:
 #: NOT the TALYS model asked for (a silent fallback) or crash deep inside a calculation; checked
 #: against stock TALYS-2.24 on 2026-09-21 (THRESH-SCREEN, development notes).
 UNPORTED = (
-    ("flagjlm", lambda v: bool(v), "jlmomp y: JLM microscopic optical model. Silently kept the phenomenological "
-     "potential where a local OMP file exists and gave a different response elsewhere (Se-80: stock reaction "
-     "cross section -12 %, engine -1.3 %)"),
     ("alphaomp", lambda v: 3 <= int(v) <= 5, "alphaomp 3-5: double-folding alpha potentials. Silently equal to "
      "the Watanabe potential (alphaomp 1)"),
     ("preeqmode", lambda v: int(v) == 4, "preeqmode 4: multi-step direct / multi-step compound (msd.f90: msdinit, "
@@ -1485,6 +1482,16 @@ def reject_unported(options) -> None:
     check_values(options)  # KWCOV B15: TALYS-errors of checkvalue.f90 the port did not have
     o = options if isinstance(options, dict) else vars(options)
     bad = [msg for key, is_bad, msg in UNPORTED if key in o and is_bad(o[key])]
+    if o.get("flagjlm"):  # KWCOV B7b: JLM (omp/jlm.py) acts in the n / p transmission coefficients only
+        if int(o.get("preeqmode", 2)) == 3:
+            bad.append("jlmomp y with preeqmode 3: bonetti.f90 normalises the exciton W to the JLM imaginary volume "
+                       "integral (mom per emission energy); the port's preeqmode 3 reads the phenomenological W only")
+        if o.get("flagracap"):
+            bad.append("jlmomp y with racap y: racapinit.f90:375 / racap.f90:138 build the direct-capture initial "
+                       "and final states on the JLMB potential; the port's racap is Woods-Saxon only")
+        if o.get("flagompall"):
+            bad.append("jlmomp y with optmodall y: the per-nucleus transmission sets of optmodall are not wired to "
+                       "the JLM solve")
     if o.get("ompenergyfile") and o.get("flagendf"):  # KWCOV B6: endfenergies.f90:97, the ENDF incident grid
         bad.append("ompenergyfile with endf y: the ENDF-6 incident-energy grid (endfenergies.f90) is not ported")
     if bad:

@@ -121,9 +121,15 @@ def incident_channel(
             p = _ported_omp(Z, A, Z, A, k0, e, options, params)
         else:
             p = _slice_omp(omp, 0, idx, n_c) if _is_per_case(omp, n_c) else omp
-        tr = solve_spherical(
-            p, Z, A, k0, e, m_targ_amu=m_t, lmax=nj, integrator=integrator,
-        )
+        from physics.hf.omp import jlm as _jlm
+
+        if omp is None and _jlm.active(options, Z, A, k0):  # KWCOV B7b: jlmexist (incidentecis.f90:215), njmax 1600
+            nj = numl
+            tr = _jlm.solve(Z, A, k0, e, m_t, nj, options, params)
+        else:
+            tr = solve_spherical(
+                p, Z, A, k0, e, m_targ_amu=m_t, lmax=nj, integrator=integrator,
+            )
         tjl[idx, : nj + 1] = tr.tjl[0, 0]
         out["reac"][idx] = tr.sigma_reac_mb[0, 0]
         out["tot"][idx] = tr.sigma_tot_mb[0, 0]

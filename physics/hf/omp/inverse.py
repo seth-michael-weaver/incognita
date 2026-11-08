@@ -26,6 +26,7 @@ import torch
 from torch import Tensor
 
 from physics.hf.core.tensors import DTYPE
+from physics.hf.omp import jlm as _jlm
 from physics.hf.omp.schrodinger import (
     NJ,
     PARA,
@@ -249,6 +250,7 @@ def inverse_channels(
         zc = int(cases.Z[c]) + PARZ[projectile]
         ac = int(cases.A[c]) + PARA[projectile]
         todo = []
+        jlm_raw: dict = {}
         for k in range(1, 7):
             if parskip is not None and parskip.get(k, False):
                 continue
@@ -269,17 +271,24 @@ def inverse_channels(
                                 options, params)
             if edetach is not None and k in edetach:
                 p = _detach_outside(p, edetach[k].to(idx.device)[idx])
+            if omp is None and _jlm.active(options, zr, ar, k):  # KWCOV B7b: jlmexist (inverseecis.f90:312)
+                jlm_raw[k] = (zr, ar, idx, e_lab, _jlm.solve(zr, ar, k, e_lab, m_res, lmax, options, params))
+                continue
             todo.append((k, zr, ar, idx, e_lab, p, m_res))
         # SPEEDT: without a gradient the six particles share one radial loop and one pass of the
         # Coulomb recurrences (`schrodinger.solve_spherical_many`), bit-identical per particle
-        if todo and not any(_requires_grad(item[5]) for item in todo):
+        if not todo:
+            many = []
+        elif not any(_requires_grad(item[5]) for item in todo):
             many = solve_spherical_many([(p, zr, ar, k, e_lab, m_res, lmax)
                                          for k, zr, ar, idx, e_lab, p, m_res in todo])
         else:
             many = [solve_spherical(p, zr, ar, k, e_lab, m_targ_amu=m_res, lmax=lmax)
                     for k, zr, ar, idx, e_lab, p, m_res in todo]
-        for (k, zr, ar, idx, e_lab, _p, _m), raw in zip(todo, many, strict=True):
-            tr = _processed(raw, ar, k, e_lab)
+        done = [(k, zr, ar, idx, e_lab, _processed(raw, ar, k, e_lab))
+                for (k, zr, ar, idx, e_lab, _p, _m), raw in zip(todo, many, strict=True)]
+        done += [(k, zr, ar, idx, e_lab, _jlm.processed(raw, k)) for k, (zr, ar, idx, e_lab, raw) in jlm_raw.items()]
+        for k, zr, ar, idx, e_lab, tr in done:
             out[c, k - 1, idx] = tr.tjl[0, 0]
             sig[c, k - 1, idx] = tr.sigma_reac_mb[0, 0]
             lm[c, k - 1, idx] = tr.lmax[0, 0]

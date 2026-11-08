@@ -470,7 +470,7 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
     nen_ax = torch.arange(E)
     keep_e = {t: (nen_ax >= rg.ebegin[t]) & (nen_ax <= eendmax[t]) for t in range(1, 7)}
     tr = None
-    if not differentiable:  # NATIVEX2 `omp`: compiled, only the energies and l kept below
+    if not differentiable and not rg.options.flagjlm:  # NATIVEX2 `omp`: compiled (KWCOV B7b: JLM is Python only)
         from physics.hf.omp.omp_nx2 import inverse_kept
 
         tr = inverse_kept(Zf, Af, np.asarray(rg.egrid[:E], dtype=float), rg.maxen, rg.options,
