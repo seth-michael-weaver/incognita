@@ -174,6 +174,18 @@ class Options:
     astroE: float = 0.0  # input_astro.f90 line 47, MeV; `astroE` also sets flagastro and flagastrogs (:79-86)
     astroT9: float = 0.0  # input_astro.f90 line 48, 10^9 K; `astroT` also sets flagastro (:87-93)
     flagprod: bool = False  # input_medical.f90:52
+    # KWCOV B11: the other medical keywords (input_medical.f90:49-64); read only when flagprod (physics/hf/production.py)
+    Area: float = 1.0  # :49, cm^2
+    Eback: float = -1.0  # :50, MeV; -1 = max(Ebeam - 5, 0.1) (checkvalue.f90:507-508)
+    Ebeam: float = -1.0  # :51, MeV; must be given with production y (checkvalue.f90:502-505)
+    Ibeam: float = 1.0  # :53, mA
+    radiounit: str = "gbq"  # :54
+    rhotarget: float = -1.0  # :55, g/cm^3; -1 = prodinitial.f90's table by Z
+    Tcool: tuple = (1, 0, 0, 0, 0)  # :56-59, with unitTcool
+    unitTcool: tuple = ("d", " ", " ", " ", " ")
+    Tirrad: tuple = (1, 0, 0, 0, 0)  # :60-63, with unitTirrad
+    unitTirrad: tuple = ("d", " ", " ", " ", " ")
+    yieldunit: str = "num"  # :64
     # --- numerics (input_numerics.f90) ---
     maxenrec: int = NUMENREC  # :64
     maxN: int = NUMN - 2  # :65, then capped at Ninit - 3 (nuclides.f90:141)
@@ -794,6 +806,15 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "sigavcont": ("preeqmodel", "sigavcont", "yn"),  # Incognita extension (SIGAVCONT), n = OFF = TALYS
     "msdbins": ("preeqpar", "msdbins", "int"),
     "production": ("medical", "flagprod", "yn"),
+    "area": ("medical", "Area", "float"),  # KWCOV B11
+    "eback": ("medical", "Eback", "float"),  # KWCOV B11
+    "ebeam": ("medical", "Ebeam", "float"),  # KWCOV B11
+    "ibeam": ("medical", "Ibeam", "float"),  # KWCOV B11
+    "rho": ("medical", "rhotarget", "float"),  # KWCOV B11
+    "radiounit": ("medical", "radiounit", "str3"),  # KWCOV B11, character(len=3)
+    "yieldunit": ("medical", "yieldunit", "str3"),  # KWCOV B11, character(len=3)
+    "tirrad": ("medical", "Tirrad", "medtime"),  # KWCOV B11, `tirrad 2 d 6 h` (up to five value/unit pairs)
+    "tcool": ("medical", "Tcool", "medtime"),  # KWCOV B11
     "ngfit": ("fit", "flagngfit", "fitflag"),
     "nnfit": ("fit", "flagnnfit", "fitflag"),
     "nffit": ("fit", "flagnffit", "fitflag"),
@@ -857,6 +878,13 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
                 o["flagfit"] = True
                 if name in ("flaggamgamfit", "flagmacsfit"):
                     o["flagngfit"] = False
+        elif kind == "str3":  # KWCOV B11: read(value, *) into character(len=3)
+            w = str(value).split()
+            o[name] = w[0][:3].lower() if w else ""
+        elif kind == "medtime":  # KWCOV B11, input_medical.f90:127-150
+            from physics.hf.production import parse_time
+
+            o[name], o["unit" + name] = parse_time(value)
         elif kind in ("astroe", "astrot"):  # KWCOV B9, input_astro.f90:79-93: a single temperature, sets astro y
             o[name] = float(value)
             o["flagastro"] = True
@@ -974,7 +1002,7 @@ def default_options(
         )
     for k, v in ov.items():
         if isinstance(v, str) and len(v.split()) > 1 and _OPTION_KEYWORDS.get(k, ("", "", ""))[2] not in (
-                "ejectiles", "ddxpoints", "riplomp", "particles"):  # KWCOV B4, B6: `filespectrum n p`, `fileddxa n 30` are one TALYS line
+                "ejectiles", "ddxpoints", "riplomp", "particles", "medtime"):  # KWCOV B4, B6, B11 (`tirrad 2 d 6 h`): `filespectrum n p`, `fileddxa n 30` are one TALYS line
             raise ValueError(f"{k}: per-nucleus keyword forms are out of scope, got {v!r}")
 
     k0 = PARSYM.index(projectile)

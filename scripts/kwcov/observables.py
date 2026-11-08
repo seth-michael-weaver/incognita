@@ -146,8 +146,10 @@ ROWS = [
      "test:test_kwcov_b9.py; Au-197 30 keV 929.9 vs stock 934.4 mb. The published library's MACS are NOT this path "
      "(scripts/release, ground-state curve, exact log-log integral)"),
     ("isotope production yields / activities (medical)", "Y*.tot", "prodout.f90:1, prodyield.f90:1",
-     "production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit", "MISSING", "", "B10",
-     "post-processing of residual production + decay data"),
+     "production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit", "SUPPORTED",
+     "production.py (Results.production, write_files; charged projectiles)", "B11",
+     "test:test_kwcov_b11.py; port on stock rp = stock Y to 1e-6; engine vs stock = the production-rate difference "
+     "(Ga-68 0.001 %, Tc-99m 0.07 %, F-18 0.49 %, At-211 0.77 %); natural targets (mass 0) refused"),
     # --- ingredients / diagnostics ---
     ("level densities", "ld*.tot nld*.tab", "densityout.f90:1", "outdensity, filedensity", "PARTIAL", "ingredients.py", "B11", ""),
     ("photon strength functions", "psf*.E1", "gammaout.f90:1", "outgamma, filepsf", "PARTIAL", "ingredients.py", "B11", ""),

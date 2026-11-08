@@ -42,6 +42,10 @@ class Results:
     # {file name: {column: ndarray over T9}} (astrorate.g, astrorate.tot, astrorateZZZAAA.tot, macs.g, ...);
     # physics/hf/astro/rates.py
     astro: dict = field(default_factory=dict)
+    # PRODUCTION (KWCOV B11: `production y` with a charged projectile, default empty): prodout.f90's isotope production
+    # as {"files": {Y file name: {column: ndarray over time}}, "params": {Y file name: {...}}, "summary": [...],
+    # "meta": {...}}; physics/hf/production.py
+    production: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:

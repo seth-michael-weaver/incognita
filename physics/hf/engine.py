@@ -314,6 +314,9 @@ class ChainedFull:
             out = []
             bstate = BinaryState()
             specout.begin_run(cas)  # SPECOUT, output only
+            from physics.hf import production  # KWCOV B11: production y (off: nothing)
+
+            production.begin_run(cas, declared)
             for nin, (binp, cinp) in enumerate(pairs, start=1):
                 if not dumped:
                     binp, cinp = built.shell(nin, run_axis[nin - 1])
@@ -895,7 +898,9 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     res = lowepot.add_to_results(res, injection)
     from physics.hf import angout, specobs  # KWCOV B3 / B4: angular distributions, spectra, DDX, gamma lines (off: unchanged)
 
-    return specobs.add_to_results(angout.add_to_results(res, injection), injection)
+    from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
+
+    return production.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

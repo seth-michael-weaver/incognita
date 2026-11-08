@@ -1316,6 +1316,9 @@ def cases(zf, stats: dict | None = None):
     from physics.hf import fisobs  # KWCOV B8: fission extras (off: nothing recorded)
 
     fisobs.begin_run(cas)
+    from physics.hf import production  # KWCOV B11: production y (off: nothing); checkvalue before the run
+
+    production.begin_run(cas, declared)
     chst = _ChanState()
     keys = None
     from physics.hf.emission import chanobs
@@ -1584,7 +1587,10 @@ def run(injection, stats: dict | None = None):
     res = lowepot.add_to_results(res, injection)
     from physics.hf import angout, fisobs, specobs  # KWCOV B3 / B4 / B8 (off: unchanged)
 
-    return fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
+    from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
+
+    res = fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
+    return production.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:
