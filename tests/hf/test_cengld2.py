@@ -52,7 +52,8 @@ def test_key_plan_reads_the_body():
     assert {"aadjust", "alimit", "gammald", "pair", "s2adjust", "exmatchadjust"} <= names
     assert ("s2adjust", (0,)) in pfs and ("a", ()) in pfs
     assert {"pairconstant", "gammashell2", "kph", "rspincut"} <= set(pgs)
-    assert {"ldmodel_of", "flagcol_of", "flagfission", "nlow_default", "shellmodel"} <= set(opts)
+    # KWCOV B5: Nlow/Ntop are read per nucleus (`nlow Z A n` cards), through nlow_of / ntop_of
+    assert {"ldmodel_of", "flagcol_of", "flagfission", "nlow_of", "ntop_of", "shellmodel"} <= set(opts)
 
 
 @pytest.mark.parametrize("Z,A,Zt1,At1,Zt2,At2", SHARED)

@@ -70,12 +70,57 @@ def f32(x: float) -> float:
     return float(F32(x))
 
 
-def mode() -> str:
+def _deck(Z: int | None, A: int | None):
+    """KWCOV B5: the run's deck cards for (Z, A) (`input.fitlib`), or None (no deck, or no target given)."""
+    if Z is None or A is None:
+        return None
+    from physics.hf.input import fitlib
+
+    return fitlib.current(int(Z), int(A), "n")
+
+
+def _deck_key(Z: int | None, A: int | None) -> tuple:
+    """KWCOV B5: what of the deck the racap structure reads (options and cells), for the caches below."""
+    c = _deck(Z, A)
+    if c is None or c.empty():
+        return ()
+    return (c.options, c.cells, c.globals_, c.particles)
+
+
+def mode(Z: int | None = None, A: int | None = None) -> str:
     """`INCOGNITA_DIRECT_CAPTURE`: `0`/unset (off, TALYS default), `all` (discrete + continuum,
     TALYS's ispect=3) or `disc` (experimental levels only, TALYS's ispect=1).
-    TALYS: racap.f90:1 (racap; keyword racap, ispect)
-    Test: tests/hf/test_directcap.py
+
+    KWCOV B5: a deck `racap y|n` line for target (Z, A) wins over the variable (`racap y` = `all`, the
+    TALYS keyword; it used to be read and ignored), and like stock TALYS-2.25 it gives 0 mb without
+    `optmodall y` (the defect in the module docstring; stock Au-197 `racap y`: capture unchanged; `optmodall y`
+    itself is refused, `defaults.UNPORTED`). With direct capture on (deck or variable), an `ldmodelracap` other
+    than 3 is refused (racapinit.f90:176-312: the particle-hole level densities of 1/2 are not ported).
+
+    TALYS: racap.f90:1 (racap; keyword racap, ispect), input_gammamodel.f90:131-140
+    Test: tests/hf/test_directcap.py, tests/hf/test_kwcov_b5.py
     """
+    c = _deck(Z, A)
+    o = c.option_overrides if c is not None else {}
+    m = _env_mode()
+    if "racap" in o:
+        m = "all" if str(o["racap"]).strip().lower()[:1] == "y" else "off"
+        if m == "all" and str(o.get("optmodall", "n")).strip().lower()[:1] != "y":
+            # the TALYS-2.25 defect of the module docstring: without `optmodall y` the final-state well is 0 and
+            # racap returns exactly 0 mb, so the faithful run of a bare `racap y` deck is the run without it
+            import warnings
+
+            warnings.warn("racap y without optmodall y: TALYS-2.25 builds no compound-nucleus well (structure.f90:85) "
+                          "and its direct capture is exactly 0 mb; the run is TALYS's, without direct capture",
+                          stacklevel=2)
+            m = "off"
+    if m != "off" and int(o.get("ldmodelracap", 3)) != 3:
+        raise NotImplementedError(f"ldmodelracap {o['ldmodelracap']}: the particle-hole level densities of "
+                                  "racapinit.f90:176-312 are not ported (only ldmodelracap 3)")
+    return m
+
+
+def _env_mode() -> str:
     v = os.environ.get("INCOGNITA_DIRECT_CAPTURE", "0")
     v = v.strip().lower()
     if v in ("", "0", "n", "no", "off", "false"):
@@ -656,8 +701,18 @@ def _kd03_real(Zn: int, Nn: int, e_mev: list[float], options, params) -> list[tu
     return [(f32(o.v_mev[i]), f32(o.rv_fm[i]), f32(o.av_fm[i])) for i in range(len(e_mev))]
 
 
-@lru_cache(maxsize=64)
 def racap_structure(Z: int, A: int) -> RacapStructure:
+    """racapinit + the structure half of racap for a neutron on (Z, A), with the run's deck cards (KWCOV B5:
+    `sfth`, `sfexp`, and every structure keyword, reach it; before, it always took the defaults).
+
+    TALYS: racapinit.f90:1 (racapinit), racap.f90:1 (racap)
+    Test: tests/hf/test_directcap.py
+    """
+    return _racap_structure(int(Z), int(A), _deck_key(Z, A))
+
+
+@lru_cache(maxsize=64)
+def _racap_structure(Z: int, A: int, _key: tuple) -> RacapStructure:
     """racapinit + the structure half of racap for a neutron on (Z, A).
 
     TALYS: racapinit.f90:1 (racapinit), racap.f90:1 (racap)
@@ -671,6 +726,13 @@ def racap_structure(Z: int, A: int) -> RacapStructure:
     from physics.hf.structure.levels import discrete_levels
 
     options, params, m = _structure_of(Z, A)
+    if _key:  # KWCOV B5: the deck's options and Params cells, as every engine stage reads them
+        from physics.hf.input import fitlib
+        from physics.hf.input.defaults import default_options, default_params
+
+        fitlib.activate(Z, A, "n")  # a no-op inside an engine run (the Cascade made (Z, A) the active target)
+        options = default_options(Z, A, overrides=dict(_key[0]) or None)
+        params = fitlib.apply_params(Z, A, options, default_params(Z, A, options))
     Zc, Ac = Z, A + 1
     cix = m.index(Zc, Ac)
     tix = m.index(Z, A)
@@ -1177,8 +1239,12 @@ def _energy_pass(st: RacapStructure, bp: _BoundPass, ein: float, vtarget: tuple)
     }
 
 
-@lru_cache(maxsize=512)
 def _bound_cached(Z: int, A: int, ispect: int, ncall: int) -> _BoundPass:
+    return _bound_cached_k(Z, A, ispect, ncall, _deck_key(Z, A))
+
+
+@lru_cache(maxsize=512)
+def _bound_cached_k(Z: int, A: int, ispect: int, ncall: int, _key: tuple) -> _BoundPass:
     return _bound_pass(racap_structure(Z, A), ispect, ncall)
 
 
@@ -1225,15 +1291,15 @@ def direct_capture_mb(Z: int, A: int, energies, which: str | None = None) -> np.
     TALYS: binary.f90:273-277 (xsracape)
     Test: tests/hf/test_directcap.py
     """
-    w = mode() if which is None else which
+    w = mode(Z, A) if which is None else which
     es = np.atleast_1d(np.asarray(energies, dtype=float))
     if w == "off" or A < 1:
         return np.zeros(len(es))
-    return _cached_addend(Z, A, tuple(float(x) for x in es), w)
+    return _cached_addend(Z, A, tuple(float(x) for x in es), w, _deck_key(Z, A))
 
 
 @lru_cache(maxsize=4096)
-def _cached_addend(Z: int, A: int, es: tuple, w: str) -> np.ndarray:
+def _cached_addend(Z: int, A: int, es: tuple, w: str, _key: tuple = ()) -> np.ndarray:
     if w == "disc":
         r = racap_xs(Z, A, es, ispect=1)
     else:
@@ -1250,7 +1316,9 @@ def add_to_results(res, injection):
     TALYS: binary.f90:273-277 (xspopnuc(0,0) and xsbinary(0) grow by xsracape)
     Test: tests/hf/test_directcap.py
     """
-    if mode() == "off" or getattr(injection, "families", ()) or not hasattr(injection, "Z"):
+    if getattr(injection, "families", ()) or not hasattr(injection, "Z"):
+        return res
+    if mode(int(injection.Z), int(injection.A)) == "off":
         return res
     import torch
 

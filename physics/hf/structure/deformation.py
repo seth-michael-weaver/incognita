@@ -170,7 +170,8 @@ def deformation(
     nrot = 0
     ndef = 0
 
-    block = read_deformation_file(Z, A) if options.disctable != 3 else None
+    # KWCOV B5: a `deformfile Z <file>` card replaces deformation/<Sym>.def (deformpar.f90:128-131)
+    block = read_deformation_file(Z, A, options.deformfile_of(Zix)) if options.disctable != 3 else None
     # COLLRULE (off by default): the target's scheme from measured structure (physics.hf.structure.collrule)
     from physics.hf.structure import collrule as _collrule
 

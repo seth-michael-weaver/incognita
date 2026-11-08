@@ -75,6 +75,9 @@ class NucleusPopulation:
     xspopex_mb: Tensor  # (Nex,)
     xspopnuc_mb: float = 0.0
     skipcn: bool = False
+    #: KWCOV B5: `skipcn Z A` on the deck: multiple.f90:262 `cycle`s the nucleus -- never decayed, nothing booked
+    #: for it but the population it was fed (xspopnuc)
+    skipdeck: bool = False
     # multiple pre-equilibrium, live only at `Einc >= emulpre`: `mulpreZN(Zcomp, Ncomp)` and the
     # particle-hole population `xspopph2(Zcomp, Ncomp, nex, ipp, ihp, ipn, ihn)`, kept sparse in
     # `nex` because only the bins `population.f90` or `multipreeq2.f90` reached carry any.
@@ -314,6 +317,10 @@ def multiple_emission(
         for nc in range(maxn + 1):
             key = (zc, nc)
             nuc = nuclei.get(key)
+            if nuc is not None and nuc.skipdeck:
+                # KWCOV B5: TALYS's `skipcn` (multiple.f90:262): no decay, no exclusive-channel bookkeeping
+                res.xspopnuc_mb[key] = nuc.xspopnuc_mb
+                continue
             if nuc is not None and nuc.skipcn:
                 # FLUXCLOSE A: a terminal residual past the stock window (Cascade.stock_cap) keeps (and books)
                 # what it was fed; its bins are the exclusive channels' end points: each bin goes to the ground

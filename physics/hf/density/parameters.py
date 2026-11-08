@@ -591,8 +591,8 @@ def densitypar(
     Pshift = pb("pshift").clone()
     ctable = pb("ctable").clone()
     ptable = pb("ptable").clone()
-    Nlow = [options.nlow_default for _ in bars]
-    Ntop = [options.ntop_default for _ in bars]
+    Nlow = [options.nlow_of(Zix, Nix, ib) for ib in bars]  # KWCOV B5: `nlow Z A n [ibar]` cards
+    Ntop = [options.ntop_of(Zix, Nix, ib) for ib in bars]
     ldparexist = False
     if found:
         ldparexist = True
