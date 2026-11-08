@@ -218,6 +218,9 @@ class _Run:
 
         self.cas = cas
         self.ok = True
+        if getattr(cas.options, "flagompall", False):  # KWCOV B6: a set per compound nucleus -> the Python cascade
+            self.ok = False
+            return
         tls = [cas.trans[t] for t in range(1, 7)]
         Ltl = tls[0][1].shape[1]
         if any(isinstance(x[1], torch.Tensor) or x[1].shape[1] != Ltl for x in tls):

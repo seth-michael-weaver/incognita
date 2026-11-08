@@ -293,6 +293,8 @@ class Options:
         0,
     ) * 7  # input_omppar.f90:179, :186 (riplomp(1) = 2408), types 0..6
     flagriplomp: bool = False  # input_omppar.f90:180, :184
+    # KWCOV B6: particle lists of input_directmodel.f90:164-187 (default: none) and the ENDF OMP energy file
+    ompenergyfile: str = ""  # input_basicreac.f90:199, read by endfenergies.f90:97 (endf y) only
     # --- compound nucleus (input_compoundmodel.f90, input_compoundpar.f90) ---
     flagcomp: bool = True  # input_compoundmodel.f90:67-71, false with omponly
     flageciscomp: bool = False  # input_compoundmodel.f90:72
@@ -310,7 +312,7 @@ class Options:
     lurr: int = 2  # input_compoundpar.f90:70
     # --- direct reactions (input_directmodel.f90, input_directpar.f90) ---
     flagautorot: bool = False  # input_directmodel.f90:70-74 (= flagmicro)
-    flagrot: bool = False  # input_directmodel.f90:75
+    flagrot: tuple[str, ...] = ()  # input_directmodel.f90:75; KWCOV B6: `rotational n p` (the particles)
     flagcoulomb: bool = True  # input_directmodel.f90:76
     flagcpang: bool = False  # input_directmodel.f90:77
     flageciscalc: bool = True  # input_directmodel.f90:82
@@ -334,7 +336,7 @@ class Options:
     flagblockspectra: bool = False  # blockspectra, input_output.f90:90 (y with endf y)
     flagblockddx: bool = False  # blockddx, input_output.f90:89 (y with endf y)
     flagstate: bool = False  # input_directmodel.f90:105
-    flagsys: bool = False  # input_directmodel.f90:106
+    flagsys: tuple[str, ...] = ()  # input_directmodel.f90:106; KWCOV B6: `sysreaction n p` (the particles)
     flagtransen: bool = True  # input_directmodel.f90:107
     maxband: int = 0  # input_directpar.f90:52
     maxrot: int = 4  # input_directpar.f90:53
@@ -671,6 +673,10 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "deuteronomp": ("ompmodel", "deuteronomp", "int"),
     "pruittset": ("omppar", "pruittset", "int"),
     "ecisstep": ("omppar", "ecisstep_fm", "float"),
+    "riplomp": ("omppar", "riplomp", "riplomp"),  # KWCOV B6: `riplomp n` (all off) / `riplomp <p> <iref>`
+    "rotational": ("directmodel", "flagrot", "particles"),  # KWCOV B6 (refused when set: defaults.UNPORTED)
+    "sysreaction": ("directmodel", "flagsys", "particles"),  # KWCOV B6 (refused when set: defaults.UNPORTED)
+    "ompenergyfile": ("basicreac", "ompenergyfile", "str"),  # KWCOV B6 (endf y only; refused there)
     "spherical": ("omppar", "flagspher", "yn"),
     "compound": ("compoundmodel", "flagcomp", "yn"),
     "eciscompound": ("compoundmodel", "flageciscomp", "yn"),
@@ -873,6 +879,19 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
             else:
                 o["flagurr"] = True
                 o["eurr_mev"] = float(value)
+        elif kind == "riplomp":  # KWCOV B6, input_omppar.f90:488-498
+            w = str(value).split()
+            if len(w) == 1 and w[0][:1].lower() == "n":
+                o["riplomp"] = (0,) * 7  # `riplomp n`: no RIPL potential (flagriplomp keeps its value)
+            else:
+                if len(w) != 2 or w[0][:1].lower() not in "gnpdtha":
+                    raise ValueError(f"riplomp: expected `riplomp <particle> <RIPL index>` or `riplomp n`, got {value!r}")
+                rip = list(o["riplomp"])
+                rip["gnpdtha".index(w[0][:1].lower())] = int(w[1])
+                o["riplomp"] = tuple(rip)
+                o["flagriplomp"] = True
+        elif kind == "particles":  # KWCOV B6, input_directmodel.f90:164-187: the line replaces the set
+            o[name] = tuple(c for c in "gnpdtha" if c in {x[:1].lower() for x in str(value).replace(",", " ").split()})
         else:  # pragma: no cover - table is static
             raise AssertionError(kind)
 
@@ -928,7 +947,7 @@ def default_options(
         )
     for k, v in ov.items():
         if isinstance(v, str) and len(v.split()) > 1 and _OPTION_KEYWORDS.get(k, ("", "", ""))[2] not in (
-                "ejectiles", "ddxpoints"):  # KWCOV B4: `filespectrum n p`, `fileddxa n 30` are one TALYS line
+                "ejectiles", "ddxpoints", "riplomp", "particles"):  # KWCOV B4, B6: `filespectrum n p`, `fileddxa n 30` are one TALYS line
             raise ValueError(f"{k}: per-nucleus keyword forms are out of scope, got {v!r}")
 
     k0 = PARSYM.index(projectile)
@@ -1307,9 +1326,17 @@ UNPORTED = (
     ("parinclude", lambda v: not all(v), "ejectiles <subset>: skipping outgoing particles (parskip) reaches only the "
      "channel bookkeeping, not the compound / pre-equilibrium decay, so the run returned the all-ejectile numbers "
      "(Fe-56 `ejectiles g n p` 14 MeV: stock (n,2n) +3.4 %, (n,p) +3.1 %, engine 0.0 %; KWCOV B2 2026-11-08)"),
-    ("flagompall", lambda v: bool(v), "optmodall y: a separate optical model for every nucleus of the cascade "
-     "(structure.f90:85, basicxs per nucleus). No engine code reads the switch: the run kept the one OMP set "
-     "of optmodall n (stock Au-197 1 MeV: capture +93 %, inelastic -38 %; engine 0.0 %; KWCOV B5 2026-11-08, B6)"),
+    # KWCOV B6 (2026-11-08): optical-model / direct keywords whose TALYS branch the port does not have
+    ("flagstate", lambda v: bool(v), "statepot y: a separate optical potential for each excited state in the "
+     "coupled-channels / DWBA calculation (incidentecis.f90:252, directecis.f90:142); the port's ECIS uses the "
+     "incident-energy potential for every state"),
+    ("flagrot", lambda v: bool(v), "rotational <particles>: coupled-channels (rotational) transmission "
+     "coefficients for outgoing particles on deformed residuals (inverseecis.f90:301, :431); the port's inverse "
+     "channels are spherical"),
+    ("flagsys", lambda v: bool(v), "sysreaction <particles>: normalisation of reaction cross sections to the "
+     "Tripathi systematics (incidentnorm.f90, inversenorm.f90; tripathi.f90 is not ported)"),
+    ("ecisstep_fm", lambda v: float(v) != 0.0, "ecisstep: a user ECIS integration step; the port's radial solvers "
+     "take ECIS's own step (hint = 0)"),
     ("flagrpevap", lambda v: bool(v), "rpevap y: evaporation of the residual products past maxZrp/maxNrp "
      "(rpevap.f90, rp*.ex population files) is not ported; the run would have decayed them in the cascade instead "
      "(KWCOV B5 2026-11-08)"),
@@ -1332,6 +1359,8 @@ def reject_unported(options) -> None:
     """
     o = options if isinstance(options, dict) else vars(options)
     bad = [msg for key, is_bad, msg in UNPORTED if key in o and is_bad(o[key])]
+    if o.get("ompenergyfile") and o.get("flagendf"):  # KWCOV B6: endfenergies.f90:97, the ENDF incident grid
+        bad.append("ompenergyfile with endf y: the ENDF-6 incident-energy grid (endfenergies.f90) is not ported")
     if bad:
         raise NotImplementedError("not ported: " + "; ".join(bad))
 
@@ -1931,6 +1960,38 @@ def default_params(
     overrides: Mapping[str, object] | None = None,
     device: torch.device | str | None = None,
 ) -> Params:
+    """`_default_params` (below), then KWCOV B6's `incadjust n`: the projectile's `ompadjust` factors act on no channel
+    (ompadjust.f90:92 skips them on the incident channel, and the projectile leaving already takes type 0), so its row
+    takes type 0's. Default (`incadjust y`): the result of `_default_params` itself.
+
+    TALYS: ompadjust.f90:1 (ompadjust)
+    Test: tests/hf/test_kwcov_b6.py
+    """
+    return _incadjust(_default_params(Z, A, options, overrides, device), options)
+
+
+def _incadjust(p: Params, options: Options) -> Params:
+    """KWCOV B6: `incadjust n` -- the projectile's row of the 28 `ompadjust` factors takes type 0's (see default_params)."""
+    if getattr(options, "flagincadj", True):
+        return p
+    from physics.hf.omp.parameters import _ADJ
+
+    k0 = int(options.k0)
+    vals = dict(p.values)
+    for key in _ADJ.values():
+        t = vals[key].clone()
+        t[k0] = t[0]
+        vals[key] = t
+    return Params(vals)
+
+
+def _default_params(
+    Z: int,
+    A: int,
+    options: Options,
+    overrides: Mapping[str, object] | None = None,
+    device: torch.device | str | None = None,
+) -> Params:
     """Default values of every adjustable parameter (aadjust, wtable, rvadjust, ...) for the
     compound system of target (Z, A), resolved with `options` (which must be for the same target).
 
@@ -2012,7 +2073,7 @@ def default_params_shared(Z: int, A: int, options: Options) -> Params:
         p = Params(dict(_region_params_values(int(Z), int(A), options)))
     else:
         p = Params(dict(_default_params_values(int(Z), int(A), options)))
-    return fitlib.apply_params(Z, A, options, p)  # BESTFIT (clones only what it writes)
+    return _incadjust(fitlib.apply_params(Z, A, options, p), options)  # BESTFIT; KWCOV B6 incadjust n
 
 
 @lru_cache(maxsize=4)

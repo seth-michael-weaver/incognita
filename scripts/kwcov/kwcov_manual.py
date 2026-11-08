@@ -259,3 +259,63 @@ MANUAL: dict = {
     "anglescont": ("SUPPORTED", "input/defaults.py Options.nanglecont -> specobs.anglecont", "continuum DDX angle grid",
                    "test:test_specobs.py"),
 }
+
+# --- KWCOV B6 (2026-11-08): optical model and direct reactions (physics/hf/omp/ompdeck.py); response vs stock =
+# scripts/kwcov/b6_response.py, n + Fe-56 / U-238 at 1, 5, 14 MeV, |ln(R/S)| max over channels with stock > 1 mb ---
+_T6 = "test:test_kwcov_b6.py"
+_OD = "omp/ompdeck.py "
+B6: dict = {
+    "optmod": ("SUPPORTED", _OD + "tables -> omp/parameters.omp_parameters (tables=, before the RIPL default)",
+               "`optmod Z A file [p]` (omppar.f90:243-277, header Ef honoured). U-238 best n-U238.omp: 0.09 %; Fe-56 "
+               "table (Wd x1.15): 0.15 %. Files: cwd, then the best file's dir and its misc/tables", _T6),
+    "optmodfilen": ("SUPPORTED", _OD + "local_file -> omp/parameters.omppar/read_local_omp",
+                    "element OMP file instead of optical/neutron (omppar.f90:52-63); Fe-56 (v1 +2, d1 x1.1): 0.17 %", _T6),
+    "optmodfilep": ("SUPPORTED", _OD + "local_file -> omp/parameters.omppar/read_local_omp",
+                    "element OMP file instead of optical/proton; Fe-56 with a Mn file (outgoing protons): 0.86 % "
+                    "((n,np) 14 MeV)", _T6),
+    **{k: ("SUPPORTED", _OD + "range_cells -> Params ompadjustE1/E2/D/s -> omp/parameters.adjustF",
+           "`<key> p E1 E2 D s` (s required, as TALYS); Fe-56 awdadjustF n 0.10 %, rvadjustF n 0.04 %, rvadjustF p "
+           "0.12 %; U-238 awdadjustF n 0.14 %", _T6)
+       for k in ("rvadjustf", "avadjustf", "rwadjustf", "awadjustf", "rvdadjustf", "avdadjustf", "rwdadjustf",
+                 "awdadjustf", "rvsoadjustf", "avsoadjustf", "rwsoadjustf", "awsoadjustf")},
+    "incadjust": ("SUPPORTED", "input/defaults.py default_params/_incadjust + " + _OD + "drop_bumps",
+                  "`incadjust n`: the projectile's ompadjust factors act on no channel (ompadjust.f90:92 + flagompejec); "
+                  "Fe-56 `incadjust n; v1adjust n 1.02; d1adjust p 1.1`: 0.09 %", _T6),
+    "riplomp": ("SUPPORTED", "input/defaults.py Options.riplomp (kind riplomp) -> omp/parameters.omp_parameters",
+                "`riplomp n` (no RIPL potential) / `riplomp <p> <iref>`; U-238 `riplomp n` (KD03 instead of RIPL 2408, "
+                "stock moves 48 %): 0.38 %", _T6),
+    "vinfadjust": ("SUPPORTED", "input/defaults.py Params.Vinfadjust -> omp/parameters.opticalnp, omp_nx2._opticalnp",
+                   "acts above Ejoin (200 MeV) only, as in TALYS; Fe-56 at 1-14 MeV moves neither side (0.00 %); the "
+                   "high-energy value itself not compared with stock", _T6),
+    "coulomb": ("SUPPORTED", "none needed", "`coulomb n` = the port's ECIS (no Coulomb excitation, lo(11)); acts in "
+                "TALYS only for charged projectiles on deformed targets, where the DEFAULT `coulomb y` is not "
+                "reproduced (known gap, charged projectiles behind INCOGNITA_CPINC); Fe-56: 0.00 %", _T6),
+    "eciscompound": ("NA", "", "ECIS compound-nucleus run for reference only (comptarget.f90:814-820: not used by "
+                     "TALYS); no cross section moves in stock (Fe-56 0.00 %)", _T6),
+    "statepot": ("READ_ONLY_DEFAULT", "input/defaults.py UNPORTED",
+                 "`statepot y` REFUSED: a potential per excited state (incidentecis.f90:252); the port's ECIS uses the "
+                 "incident-energy potential for every state", _T6),
+    "rotational": ("READ_ONLY_DEFAULT", "input/defaults.py Options.flagrot + UNPORTED",
+                   "`rotational <particles>` REFUSED: coupled-channels inverse transmission coefficients on deformed "
+                   "residuals (inverseecis.f90:301) are not ported", _T6),
+    "sysreaction": ("READ_ONLY_DEFAULT", "input/defaults.py Options.flagsys + UNPORTED",
+                    "`sysreaction <particles>` REFUSED: Tripathi normalisation (tripathi.f90) not ported", _T6),
+    "ecisstep": ("READ_ONLY_DEFAULT", "input/defaults.py UNPORTED", "non-zero REFUSED: the port's radial solvers take "
+                 "ECIS's own step (hint 0)", _T6),
+    "ompenergyfile": ("SUPPORTED", "input/defaults.py Options.ompenergyfile + reject_unported",
+                      "read by endfenergies.f90 under `endf y` only: accepted without effect otherwise (as TALYS), "
+                      "REFUSED with endf y (ENDF-6 incident grid not ported)", _T6),
+    "best": ("SUPPORTED", _F + "_deck_best (= INCOGNITA_TALYS_FIT=best, cards identical; Fe-56 engine bitwise)",
+             "deck `best y` reads structure/best/<Nuc>/<p>-<Nuc>.talys before the deck (initial_best.f90). Since B6 its "
+             "OMP files act (Fe-56 awdadjust table, U-238 n-U238.omp optmod). RESPONSE LOSSES remain and are outside "
+             "B6: Fe-56 6.7 % ((n,np) 14 MeV; 6.8 % for the same deck without its B6 line), U-238 9.2 % (fission 5 MeV; "
+             "9.2 % without optmod), Co-59 8.2 % (B2): the 14 MeV (n,p)/(n,a) and U-238 LD/fission default-fidelity "
+             "task of B5", _T6),
+    "optmodall": ("SUPPORTED", "compound/ompall.py -> emission/feeding.Cascade.trans_of/front_trans, compound/chain.py",
+                  "a set per compound nucleus (multiple.f90:323) + TALYS-2.25's stale-eend primary set at the 2nd and "
+                  "later energies (talysreaction.f90:102 before `energies`); Python cascade. RESPONSE: U-238 1.1 %, Fe-56 6.9 % ((n,a) 14 MeV, a 65 % move), Au-197 LOSS 51 % (capture 1 MeV; the engine default Au-197 1 MeV composition differs, see COVERAGE_PLAN B6)", _T6),
+    "racap": ("SUPPORTED", "direct/racapcalc.py mode (deck `racap y|n` wins over INCOGNITA_DIRECT_CAPTURE)",
+              "0 mb without `optmodall y` as TALYS-2.25 (warned); with `optmodall y` (B6) the racapcalc model runs from "
+              "a deck: Au-197 `racap y; optmodall y` direct capture = stock (133.6 mb at 1 MeV); the L00 isomer extra lacks it", "test:test_directcap.py,test_kwcov_b5.py"),
+}
+MANUAL.update(B6)

@@ -466,6 +466,10 @@ def key(stage: str, args: tuple, *, options=(), params=(), values=()) -> bytes:
 
     if eadj.on():  # ENGADJ: the energy-local bumps reach the OMP / LD / PSF / fission stages outside Params
         out += b"|j" + hashlib.sha256(repr(eadj.token()).encode()).digest()
+    from physics.hf.omp import ompdeck
+
+    if ompdeck.active() is not None:  # KWCOV B6: optmod tables / OMP files / energy-local lines reach the OMP stages
+        out += b"|b6" + hashlib.sha256(repr(ompdeck.token()).encode()).digest()
     out += b"|V" + _version().encode()
     return bytes(out)
 

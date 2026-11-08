@@ -61,7 +61,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B3 | angular distributions on TALYS keywords | outangle, outlegendre, fileelastic, fileangle, angles, anglescont, cpang | elastic/inelastic ang + leg, Rutherford ratio (charged), compound ang. for charged particles | 1.5-2 d |
 | B4 | spectra, DDX, gamma lines on TALYS keywords (DONE, branch `kwcov4`; exclusive channel spectra -> B4b) | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
 | B5 | model keyword sweep: compound, gamma, levels, LD (DONE, branch `kwcov5`) | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
-| B6 | model keyword sweep: optical model, direct | vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
+| B6 | model keyword sweep: optical model, direct (DONE, branch `kwcov6`) | optmodall, vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
 | B7 | unported model branches (DONE, branch `kwcov7`; gnorm y and MSD stay refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
 | B7b | JLM and folding alpha OMP | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
 | B8 | fission extras | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
@@ -285,6 +285,62 @@ opticalnp.f90, `adjustf.f90:1`); `riplomp` omppar.f90 + riplomp_mod.f90; `optmod
 files (omppar.f90, `convert.f90`); `coulomb`, `ecisstep` incidentecis.f90; `eciscompound` comptarget.f90
 (ECIS compound); `rotational`, `sysreaction` (directmodel). Accept: response metric on Fe-56 (spherical) and
 U-238 (coupled), reaction and total cross section 1 %.
+
+**Done on branch `kwcov6`** (kwcov4 + kwcov2 + kwcov5 merged). New modules `physics/hf/omp/ompdeck.py` (files, ranges,
+energy-local adjustments) and `physics/hf/compound/ompall.py` (`optmodall`); small hooks in fitlib, defaults,
+omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stagedisk, record/caches.
+
+* **Now acting:**
+  * `optmodall y`: every compound nucleus of the cascade decays through transmission coefficients on its own residuals
+    (`dens_reference._transmission_build(cn=...)`), and the PRIMARY decay of the initial compound nucleus at the 2nd and
+    later incident energies uses the set TALYS reads at the top of the energy loop, before `energies`: Tl and lmax are
+    filled only up to the PREVIOUS energy's eend (inverseread.f90), lmax = 0 above it. **TALYS-2.25 behaviour, found with
+    a debug build of stock TALYS** (print of lmax(1, :) after `energies`: Au-197 at 1 MeV after 0.1 MeV has lmax 0 above
+    node 7 = eend(0.1 MeV)). A one-energy run is unchanged by `optmodall y` (stock Au-197 at 1 MeV alone: capture
+    145.65 mb both ways); the same 1 MeV after a 0.1 MeV energy: 144 -> 277 mb. The engine reproduces it; the C cascade
+    has one stack, so `optmodall y` runs the Python cascade (slower).
+  * `optmod Z A file [p]` (table read as omppar.f90:243-277, header Ef honoured, explicit table wins over the RIPL
+    default), `optmodfilen Z file`, `optmodfilep Z file` (element files, also for elements without a database file).
+  * the 12 `*adjustF p E1 E2 D s` ranges (s required, as TALYS), written into `Params.ompadjustE1/E2/D/s`.
+  * the energy-local forms of the 28 ompadjust keywords: `v1adjust n 1. Ea Eb Em D` and `awdadjust n 1. <table>`
+    (adjust.f90 shape / linear table, depth = value x D, last covering line wins), applied by TALYS's ktype rule: the
+    bump of particle k acts on the incident channel (with `incadjust y`) and on outgoing particles OTHER than the
+    projectile (the projectile leaving takes type 0, flagompejec). Files: cwd, then the best file's directory and its
+    `misc/tables`, case-insensitive. A word with `/` is a file too (TALYS would read it as a number and drop the bump).
+  * `incadjust n` (projectile's ompadjust factors and bumps act nowhere), `riplomp n` / `riplomp <p> <iref>`.
+  * `vinfadjust` (already consumed; acts above Ejoin = 200 MeV only), `coulomb n` (no Coulomb excitation, which the
+    port's ECIS never had), `eciscompound` (reference-only ECIS run in TALYS: NA), `ompenergyfile` (accepted; read by
+    TALYS only with `endf y`).
+* **Refused (`defaults.UNPORTED`):** `statepot y`, `rotational <particles>`, `sysreaction <particles>`, `ecisstep` != 0,
+  `ompenergyfile` with `endf y`.
+* **Merge fix:** deck lines with several words for an Options keyword (`fileddxa n 30`, B4) were refused by B2's
+  fitlib after the merge; `_MULTIWORD` lets the multi-word kinds through.
+* **Response vs stock** (`scripts/kwcov/b6_response.py`; stock runs trimmed in `~/kwcov/stock/b6_*`):
+  | deck lines | target | worst (stock moved) | | deck lines | target | worst (stock moved) |
+  |---|---|---|---|---|---|---|
+  | awdadjustF n 2 20 10 0 | Fe-56 | 0.10 % (4.0 %) | | optmod 26 56 (Wd x1.15 table) | Fe-56 | 0.15 % (8.2 %) |
+  | rvadjustF n 1 20 3 0 | Fe-56 | 0.04 % (5.7 %) | | optmodfilen 26 (v1 +2, d1 x1.1) | Fe-56 | 0.17 % (13 %) |
+  | rvadjustF p 1 20 5 0 | Fe-56 | 0.12 % (3.8 %) | | optmodfilep 25 (Mn file) | Fe-56 | 0.86 % (8.2 %) |
+  | v1adjust n 1. 3 16 10 1.03 | Fe-56 | 0.00 % (1.0 %) | | coulomb n / vinfadjust n 1.2 / eciscompound y | Fe-56 | 0.00 % (0 %) |
+  | d1adjust p 1. 1 15 8 1.2 | Fe-56 | 0.01 % (0.4 %) | | optmod 92 238 n-U238.omp | U-238 | 0.09 % (4.6 %) |
+  | awdadjust n 1. awdadjust-n.table | Fe-56 | 0.25 % (11 %) | | riplomp n | U-238 | 0.38 % (48 %) |
+  | incadjust n; v1adjust n 1.02; d1adjust p 1.1 | Fe-56 | 0.09 % (3.1 %) | | awdadjustF n 2 20 10 0 | U-238 | 0.14 % (5.8 %) |
+  | **optmodall y** | Fe-56 | **6.9 %** (n,a) 14 MeV (106 %) | | optmodall y | U-238 | 1.1 % (25 %) |
+  | **optmodall y** (0.01/0.1/1/5 MeV) | Au-197 | **51 %** capture 1 MeV (66 %) | | racap y; optmodall y | Au-197 | direct capture = stock (133.6 mb at 1 MeV) |
+  | **best y** | Fe-56 | **6.7 %** (n,np) 14 MeV | | **best y** | U-238 | **9.2 %** fission 5 MeV |
+
+  Losses, traced. `best y`: the B6 lines in the best files now act (Fe-56 awdadjust table, U-238 n-U238.omp), and
+  the same deck WITHOUT them misses by the same amount (Fe-56 6.8 %, U-238 9.2 %): what is left is outside B6 (B5's
+  default-fidelity task: 14 MeV (n,p)/(n,a) excess; U-238 level density / fission). `optmodall y` Fe-56: stock moves
+  (n,a) at 14 MeV to 0.35x, the engine to 0.32x; the miss is on the charged-particle channels the engine already
+  over-predicts at 14 MeV. Au-197: the engine's DEFAULT 1 MeV run is far from stock (capture 104 vs 144 mb,
+  inelastic 2004 vs 1734 mb) and most of its inelastic does not go through the first compound nucleus's neutron exits
+  (with every one of them zeroed the engine still has 1877 mb inelastic), so the exits TALYS's stale set cuts carry
+  less flux in the engine: capture x1.16 vs stock x1.93. A default-fidelity item (Au-197 1 MeV channel composition),
+  not the keyword. Also found: with `racap y` the isomer split `xs000000.L00` (CHANOBS extras) does not get the
+  direct-capture addend (racapcalc.add_to_results adds it to xs000000 only).
+* Tests: `tests/hf/test_kwcov_b6.py` (forms, refusals, adjust.f90 shape, ktype/incadjust, ranges, optmod, optmodfile,
+  riplomp, multi-word deck lines, optmodall cut/eend/Python cascade).
 
 ### B7 / B7b -- unported model branches (B7 done on branch `kwcov7`; B7b open)
 

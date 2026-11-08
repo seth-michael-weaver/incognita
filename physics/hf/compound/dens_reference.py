@@ -432,7 +432,7 @@ def _sfunc_inv_model(Zt: int, At: int, enincmax_mev: float, ls: tuple) -> tuple:
 
 @stagetime.timed("setup.omp_inverse")
 def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict | None,
-                        differentiable: bool) -> dict:
+                        differentiable: bool, cn: tuple | None = None) -> dict:
     from physics.hf.core.grids import EmissionGrid
     from physics.hf.omp.inverse import NJ, inverse_channels
     from physics.hf.core.tensors import CaseBatch
@@ -447,16 +447,24 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
     # the neutron (1), so a proton/alpha run dropped `rvadjust n` on outgoing neutrons and kept
     # the incident `rvadjust p` on outgoing protons. k0 = 1 is unchanged.
     rg_params = ejectile_params(rg_params, int(rg.options.k0))
+    # KWCOV B6 (`optmodall y`, compound/ompall.py): the set of compound nucleus cn = (Zix, Nix) of the run -- the
+    # same grid, keep windows, options and parameters, on the residuals of THAT nucleus (inverse.f90 per Zcomp, Ncomp)
+    Zf, Af = Zt, At
+    if cn is not None and tuple(cn) != (0, 0):
+        tc = talys_constants()
+        zc0, ac0 = compound_of(Zt, At)
+        zc, nc = zc0 - int(cn[0]), (ac0 - zc0) - int(cn[1])
+        Zf, Af = zc - tc["parZ"][rg.options.k0], zc + nc - tc["parA"][rg.options.k0]
     E = rg.maxen + 1
     de, _, _ = emission_bins(rg.egrid, rg.maxen)
     e_t = torch.tensor(rg.egrid[:E], dtype=DTYPE)[None]
     mask = (torch.arange(E) >= 1) & (torch.arange(E) <= rg.maxen)
     grid = EmissionGrid(e_t, torch.tensor(de[:E], dtype=DTYPE)[None], mask[None],
                         maxen=torch.tensor([rg.maxen]))
-    cases = CaseBatch(Z=torch.tensor([Zt]), A=torch.tensor([At]),
+    cases = CaseBatch(Z=torch.tensor([Zf]), A=torch.tensor([Af]),
                       e_inc_mev=torch.tensor([enincmax_mev], dtype=DTYPE),
                       projectile=PARSYM[rg.options.k0])  # CPINC: was "n"
-    njm = {t: _njmax(Zt, At, t, rg.egrid[:E]) for t in range(1, 7)}
+    njm = {t: _njmax(Zf, Af, t, rg.egrid[:E]) for t in range(1, 7)}
     lcap = int(max(int(v.max()) for v in njm.values()))
     eendmax = _eendmax(Zt, At, enincmax_mev)
     nen_ax = torch.arange(E)
@@ -465,7 +473,7 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
     if not differentiable:  # NATIVEX2 `omp`: compiled, only the energies and l kept below
         from physics.hf.omp.omp_nx2 import inverse_kept
 
-        tr = inverse_kept(Zt, At, np.asarray(rg.egrid[:E], dtype=float), rg.maxen, rg.options,
+        tr = inverse_kept(Zf, Af, np.asarray(rg.egrid[:E], dtype=float), rg.maxen, rg.options,
                           rg_params, lcap, {t: keep_e[t].numpy() for t in range(1, 7)})
     if tr is None:
         tr = inverse_channels(cases, grid, rg.options, rg_params, lmax=lcap,
