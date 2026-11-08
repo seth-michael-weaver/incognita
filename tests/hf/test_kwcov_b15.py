@@ -131,8 +131,7 @@ def test_deck_routes_sacs_and_components():
 def test_micro_cascade():
     o = _opts(micro="y")
     assert o.ldmodelall == 7 and o.flagjlm and o.flagautorot  # input_densitymodel.f90:84, ompmodel:98, directmodel:70
-    with pytest.raises(NotImplementedError, match="jlmomp y"):  # JLM is unported (B7b)
-        D.reject_unported(o)
+    D.reject_unported(o)  # KWCOV B7b: JLM ported
     o = _opts(micro="y", jlmomp="n")
     assert o.ldmodelall == 7 and not o.flagjlm and o.flagautorot
     D.reject_unported(o)

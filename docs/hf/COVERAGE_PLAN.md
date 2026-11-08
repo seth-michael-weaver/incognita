@@ -63,7 +63,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B5 | model keyword sweep: compound, gamma, levels, LD (DONE, branch `kwcov5`) | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
 | B6 | model keyword sweep: optical model, direct (DONE, branch `kwcov6`) | optmodall, vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
 | B7 | unported model branches (DONE, branch `kwcov7`; gnorm y and MSD stay refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
-| B7b | JLM and folding alpha OMP | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
+| B7b | JLM and folding alpha OMP (DONE, branch `kwcov7b`; JLM with preeqmode 3 / racap / optmodall / alphaomp 3-5 refused) | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
 | B8 | fission extras (DONE, branch `kwcov8`; fisfeed J-parity columns and fragment-based nubar/PFNS -> B14) | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
 | B9 | astrophysics (DONE, branch `kwcov9`; astro + racap, fissile astrogs n refused) | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
 | B10 | URR (DONE, branch `kwcov10`; widthmode 2/3 refused) | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
@@ -382,7 +382,7 @@ omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stag
     cascade (`MultiPreeqInputs.damp` exists, `Cascade.mpe_inputs` does not fill it); refused in
     `feed_reference.pop_inputs_of` with the reason. `preeqspin 4` with multiple pre-equilibrium likewise.
   * `preeqspin 3` on the GPU path (`gpu_full_setup`): refused (engine_c has it).
-  * B7b (`alphaomp 3-5`, JLM) untouched.
+  * B7b (`alphaomp 3-5`, JLM): done on branch `kwcov7b`, see the B7b section below.
 * **Response vs stock** (`scripts/kwcov/b7_response.py`, n + target at 1/5/14 MeV, channels of b2_response plus
   nprod/pprod/aprod; `--pe` compares the binary pre-equilibrium totals with stock `preeq*.out`; stock JSON in
   `~/kwcov/stock/b7`):
@@ -408,6 +408,66 @@ omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stag
   The pre-equilibrium totals of twocomponent n and gshell y also equal stock's preeq file to 1e-4 (test_kwcov_b7.py).
 * Tests: `tests/hf/test_kwcov_b7.py` (transcription = vectorised path, preeqmode 3 rates and PE totals = stock,
   parsing, refusals, the giant-resonance J map); `test_unported_options.py` updated.
+
+### B7b -- JLM and folding alpha OMP (done on branch `kwcov7b`)
+
+Branch `kwcov7b` = `kwcov15` + B7b. New modules `physics/hf/omp/jlm.py` (radialtable.f90, mom.f90, momjlmecis.f, and
+ECIS's tabulated-potential channel) and `physics/hf/omp/foldalpha.py` (foldalpha.f90, afold.f, mahaux); hooks in
+`omp/inverse.inverse_channels`, `omp/incident.incident_channel`, `compound/dens_reference._transmission_build` (the
+native inverse path stands aside under JLM / alphaomp 3-5), `omp/parameters` (alphaomp 3-5 keep the base potential, as
+opticalcomp.f90:323), `omp/ompdeck.extract` (`radialfile`), `input/fitlib` (energy-local l*adjust refused). Stock refs
+in `~/kwcov/stock/b7b`; responses by `scripts/kwcov/b7b_response.py` (n decks, `--base`) and
+`scripts/kwcov/b7b_alpha.py` (alpha projectile, run_deck with INCOGNITA_CPINC=a).
+
+* **What TALYS does, reproduced.** `jlmomp y` (also `micro y`) sets flagspher, so the incident channel is spherical;
+  every nucleus with a mass in `structure/optical/jlm/<d1m|bskg3>/<Sym>.rad` (or `radialfile Z file`) gets
+  jlmexist(n) = jlmexist(p) and runs ECIS on mom's tabulated potential (hint 0.1, rmatch 18, njmax 1600 = no l cap);
+  nuclei without a density keep the phenomenological OMP. `alphaomp 3-5` likewise for the alpha (jlmexist(6)): the
+  double-folded real part (afold, normalised to its volume integral; adepthcor / aradialcor and the beta2 radius
+  stretch), the WS volume (+surface) imaginary part, dispersion for 5. ECIS's tabulated form factors are read at the
+  integration nodes r = 0.1 n (the table's own points), U = -(s fext) with the strength s and the es20.6 values as
+  written; spin-orbit `-0.5 potjlm` times 2 (2 l.s) as for Woods-Saxon.
+* **Checks against stock** (tests/hf/test_kwcov_b7b.py): Fe-56 JLM potentials = omp.out to its 6 printed digits at
+  1/5/14 MeV (V, W, Vso, Wso); incident total / reaction / elastic and T_lj (all 56 inverse energies) to 7 digits;
+  alpha + Fe-56 alphaomp 3/4/5: V (Coulomb removed) and W = omp.out to 1e-5, reaction xs to 1e-4.
+* **Response** (|ln(R/S)| worst, channels > 1 mb, 1/5/14 MeV n, 10/15/20 MeV alpha; "stock moved" = largest |ln S|):
+
+  | deck lines | target | TALYS mode | default | stock moved |
+  |---|---|---|---|---|
+  | jlmomp y | Fe-56 | 0.04 % (n,d) 14 | 0.94 % (n,np) 14 | 69.7 % |
+  | jlmomp y | Pb-208 | 0.01 % | 0.01 % | 11.5 % |
+  | micro y | Fe-56 | 0.04 % | **80 %** (n,p) 14: NPWINDOW on ldmodel 7, deliberate default (B15) | 69.6 % |
+  | jlmomp y + jlmmode 1 / 2 / 3 | Fe-56 | 0.00 / 0.00 / 0.00 % | 0.03 / 0.08 / 0.46 % | 2.4 / 5.3 / 29.3 % |
+  | jlmomp y + radialmodel 1 | Fe-56 | 0.00 % | 0.35 % | 16.1 % |
+  | jlmomp y + lvadjust 1.05 / lwadjust 1.3 | Fe-56 | 0.00 / 0.00 % | 0.90 / 0.23 % | 44.0 / 14.8 % |
+  | jlmomp y + lv1adjust 1.3 / lw1adjust 1.3 | Fe-56 | 0.00 / 0.00 % | 0.10 / 0.07 % | 6.0 / 3.3 % |
+  | jlmomp y + lvsoadjust 1.5 / lwsoadjust 2 | Fe-56 | 0.00 / 0.00 % | 0.55 / 0.00 % | 15.8 / 0.0 % |
+  | alphaomp 3 / 4 / 5 (n,a) | Fe-56 | 0.00 % each | 0.03 / 0.02 / 0.07 % | 5.2 / 2.0 / 7.4 % |
+  | alphaomp 4 + adepthcor 1.1 / aradialcor 1.05 | Fe-56 | 0.00 / 0.00 % | 0.03 / 0.21 % | 7.4 / 36.2 % |
+  | alphaomp 4 | Pb-208 | 0.00 % | 0.00 % | 0.0 % |
+  | alpha + Fe-56: alphaomp 3 / 4 / 5 | Fe-56 | 0.42 / 0.43 / 0.40 % (a,a') 20 | -- | 9.3 / 11.2 / 12.2 % |
+  | alpha + Fe-56: alphaomp 4 + adepthcor 1.1 / aradialcor 1.05 | Fe-56 | 0.43 / 0.49 % (a,a') 20 | -- | 9.1 / 64.3 % |
+
+  The alpha-projectile worst cell is the inelastic (a,a') at 20 MeV, where the engine's own default (a,a') differs from
+  stock by ~0.3 %; nonelastic moves identically (0.00 %).
+* **Refused (`defaults.reject_unported`), with what is left:** `jlmomp y` with `preeqmode 3` (bonetti.f90 normalises
+  the exciton W to the JLM imaginary volume integral, one mom call per emission energy: port `bonetti` B), with
+  `racap y` (racapinit.f90:375 / racap.f90:138 JLMB direct-capture states: port racopt 3), with `optmodall y` (wire
+  `_transmission_build(cn=...)`'s set to the JLM solve and test), with `alphaomp 3-5` (TALYS writes the folded alpha
+  with normjlm(Zix, Nix, 1:2), which foldalpha never sets: the alpha strengths are whatever the last JLM n/p call on
+  that nucleus left there; reproducing that means tracking mom's call order); `alphaomp 3-5` with `optmodall y`; the
+  energy-local forms of lvadjust ... lwsoadjust, aradialcor, adepthcor (`<key> v Ea Eb Em D`, adjust.f90 inside mom /
+  foldalpha): the line is refused, the plain value acts.
+* **Quirks kept / found.** radial.out (outomp y) prints the COMPOUND nucleus's density under the target's title
+  (inverseecis.f90:213; not given by the port, NA). afold's alpha density takes r^2 of the previous grid point, its
+  target exp(-beta rho) factor takes 4 pi r^2 rho, and ftrans's Filon branch writes the end node of its last panel to
+  bcof(npoint) and never sets bcof(npoint-1) (stale in TALYS, 0 here; the integrands vanish there).
+* **Bug fixed on the way:** `omp_parameters` raised for alphaomp 3-5 on every alpha channel, including nuclei without
+  a density, where TALYS keeps the base (alphaomp 1-like) potential.
+* **Not given:** radial.out; the JLM path is Python only (no native / GPU kernel), so a JLM run's inverse solve is
+  slower than the default's. The differentiable path is not differentiable through JLM.
+* Tests: `tests/hf/test_kwcov_b7b.py`; `test_unported_options.py`, `test_kwcov_b15.py::test_micro_cascade`,
+  `test_charged_fidelity.py` updated.
 
 ### B8 -- fission extras
 
@@ -900,7 +960,7 @@ TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values
   densities / levels of every populated compound nucleus (flagpop); spr.opt only at the first energy or Einc <= 0.1;
   transmission_inc.out holds the last energy.
 * **Not given (NA rows / later).** outbasic's gamma*.tot decay schemes (gammadecay), population / check / direct
-  output; JLM `radial.out` (JLM is unported, B7b); `endf y`'s levelsout (B15: done). The parameters.dat nucleus list uses the
+  output; JLM `radial.out` (B7b: JLM ported, radial.out not given); `endf y`'s levelsout (B15: done). The parameters.dat nucleus list uses the
   run's residual production >= 1e-3 mb for TALYS's population test (keys identical on all four decks).
 * Tests: `tests/hf/test_kwcov_b13.py` (keyword cascade and deck lines, the D0 statistics, one Fe-56 engine run vs
   stock numbers, every other Results array bitwise unchanged, the file round trip, filepsf without outgamma).
@@ -931,7 +991,7 @@ Tests: `tests/hf/test_kwcov_b15.py`.
 | endfdetail | SUPPORTED | cascade only (gamdis / channels / filechannels defaults with endf y, tefal.inf's line); Fe-56 `endf y; endfdetail n` response 0.00 % |
 | sacs | SUPPORTED | `ingout.sacs_table` (sacs.dat): on stock's own Fe-56 xs files it is stock's sacs.dat; engine Fe-56 2-20 MeV: channel list, order and thresholds identical, xsmax / FWHM are the engine's default cross sections. Quirk kept: TALYS reads the xs*.tot it wrote, so without channel files (`sacs y` alone) sacs.dat is the header only |
 | components | READ_ONLY_DEFAULT (refused) | `components y`: Fdir / Fpreeq / Fcomp per residual (multiple.f90:649) and the extra xs*.tot / rp*.tot columns are not carried by the port's cascade; refused with a clear message (`defaults.UNPORTED`) |
-| micro | SUPPORTED | `micro y` alone is refused through jlmomp y (JLM, owner B7b); `micro y; jlmomp n` runs ldmodel 7 + autorot: response 0.00 % TALYS mode, **78 % default** ((n,p) 14 MeV: NPWINDOW acts on the ldmodel-7 Fe-56 density; deliberate default, as FIDELITY1) |
+| micro | SUPPORTED | B7b: `micro y` now runs (JLM ported; Fe-56 response 0.04 % TALYS mode); before B7b it was refused through jlmomp y; `micro y; jlmomp n` runs ldmodel 7 + autorot: response 0.00 % TALYS mode, **78 % default** ((n,p) 14 MeV: NPWINDOW acts on the ldmodel-7 Fe-56 density; deliberate default, as FIDELITY1) |
 | densfile, e1file, m1file, massdir | READ_ONLY_DEFAULT (refused) | external user tables; kept refused (decision): each needs its own reader path (densitytable.f90:113, gammapar.f90:521 incl. the forced wtable 1 and the strength 1/2/5 table branch, masses.f90:139) |
 | rescuefile, strucpath, bestpath | READ_ONLY_DEFAULT (refused) | were NA and skipped silently; rescuefile renormalises returned cross sections (normalization.f90), the two paths name another database. Deck line refused, best-file line warned |
 
@@ -951,7 +1011,7 @@ stock) -> 81.26 (0.00 %); every other cell <= 0.01 % (default fission 5 MeV -0.0
 FIDELITY_DEFAULTS.md section 6. Turning it on by default is the integration step's call.
 
 **Owners of what is left** (status IGNORED / MISSING after B15): massdis, fymodel, ffmodel, gefran, ffevaporation,
-ffspin (IGNORED), yieldfile (MISSING) -> B14; jlmmode, radialmodel (IGNORED), radialfile (MISSING) -> B7b. Every other
+ffspin (IGNORED), yieldfile (MISSING) -> B14; jlmmode, radialmodel, radialfile -> B7b (done, branch `kwcov7b`). Every other
 keyword is SUPPORTED, NA, or refused with a message (READ_ONLY_DEFAULT; `ltarget` -> the isomeric-target gap).
 
 ## Known gap: isomeric targets

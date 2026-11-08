@@ -6,6 +6,8 @@ Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 `momjlmecis.f` (E. Bauge) ships inside the TALYS repository under its MIT license.
 
+Task: T5 (physics/hf/CONTRACT.md §7). Acceptance test: KWCOV-B7B (tests/hf/test_kwcov_b7b.py).
+
 TALYS routines ported here (file:line of the subroutine/function statement):
     radialtable.f90:1 (radialtable)
     mom.f90:1 (mom)
@@ -101,7 +103,11 @@ def _read_rad(path: str, A: int):
 
 
 def radial_file(Z: int, radialmodel: int = 2) -> str | None:
-    """The density file radialtable.f90:82-93 reads for element Z: `radialfile Z file`, else the database's."""
+    """The density file radialtable.f90:82-93 reads for element Z: `radialfile Z file`, else the database's.
+
+    TALYS: radialtable.f90:1 (radialtable)
+    Test: tests/hf/test_kwcov_b7b.py
+    """
     from physics.hf.omp import ompdeck
 
     user = ompdeck.local_file(Z, RADIALFILE_K)
@@ -332,8 +338,19 @@ def normalisations(e_lab: np.ndarray, jlmmode: int = 0, params=None) -> np.ndarr
     out = np.stack([lv, lw, lv1, lw1, lvso, lwso])
     if params is not None:  # ompadjustp(1): factor (energy-local: 1) * l*adjust, real(sgl) (mom.f90:94-112)
         for i, name in enumerate(("lvadjust", "lwadjust", "lv1adjust", "lw1adjust", "lvsoadjust", "lwsoadjust")):
-            out[i] = float(np.float32(getattr(params, name, 1.0))) * out[i]
+            out[i] = float(np.float32(pvalue(params, name))) * out[i]
     return out
+
+
+def pvalue(params, name: str, default: float = 1.0) -> float:
+    """A scalar Params entry (`params["lvadjust"]`), or the default when absent.
+
+    TALYS: mom.f90:1 (mom) -- the l*adjust / aradialcor / adepthcor values
+    Test: tests/hf/test_kwcov_b7b.py
+    """
+    if params is None or name not in params:
+        return default
+    return float(torch.as_tensor(params[name]).reshape(-1)[0])
 
 
 def _card7(x: np.ndarray) -> np.ndarray:
@@ -349,7 +366,7 @@ def _f10_5(x):
 
 
 def potential(Z: int, A: int, particle: int, e_lab: np.ndarray, *, jlmmode: int = 0, params=None,
-              radialmodel: int = 2):
+              radialmodel: int = 2, alpha_options=None):
     """The ECIS form factors TALYS writes for the JLM channel (ecisinput.f90:173-226), on r = 0.1 n fm, n = 1..nrad:
     (central (E, nrad) complex, spin-orbit radial factor (E, nrad) complex, rc) in the convention of
     `schrodinger.optical_potential` (central = -(V + iW); the spin-orbit factor multiplies SPIN_ORBIT_FACTOR * 2 l.s),
@@ -363,6 +380,12 @@ def potential(Z: int, A: int, particle: int, e_lab: np.ndarray, *, jlmmode: int 
         return None
     _rad, rp, rn = tab
     e = np.asarray(e_lab, float)
+    if particle == 6:  # alphaomp 3-5 (foldalpha.f90): central only, strengths normjlm = 1 (strucinitial.f90:502)
+        from physics.hf.omp.foldalpha import foldalpha
+
+        vv, ww, rc = foldalpha(Z, A, e, alpha_options, params)
+        central = -_card7(-vv[:, :NRAD]) - 1j * _card7(-ww[:, :NRAD])
+        return central, np.zeros_like(central), rc
     norm = normalisations(e, jlmmode, params)
     zpi = 0.0 if particle == 1 else float(Z)
     vpot, rc = momjlmecis(Z, A - Z, zpi, e, norm[2], norm[3], rp, rn)
@@ -382,7 +405,12 @@ def active(options, Z: int, A: int, particle: int) -> bool:
     TALYS: radialtable.f90:1 (radialtable)
     Test: tests/hf/test_kwcov_b7b.py
     """
-    if options is None or not getattr(options, "flagjlm", False) or particle not in (1, 2):
+    if options is None:
+        return False
+    if particle == 6:  # radialtable.f90:149: alphaomp 3-5 -> jlmexist(., ., 6)
+        if not 3 <= int(getattr(options, "alphaomp", 6)) <= 5:
+            return False
+    elif not getattr(options, "flagjlm", False) or particle not in (1, 2):
         return False
     if particle in getattr(options, "flagrot", ()) or str(particle) in getattr(options, "flagrot", ()):
         return False
@@ -409,7 +437,7 @@ def solve(Z: int, A: int, particle: int, e_lab_mev, m_targ_amu: float, lmax: int
     # mom gets ecisinput's real(sgl) e (not the card value)
     e32 = e.numpy().astype(np.float32).astype(float)
     central, so, rc = potential(Z, A, particle, e32, jlmmode=int(getattr(options, "jlmmode", 0)), params=params,
-                                radialmodel=int(getattr(options, "radialmodel", 2)))
+                                radialmodel=int(getattr(options, "radialmodel", 2)), alpha_options=options)
     n_e = e.shape[0]
     ism = int(round(RMATCH / HINT))
     nmax = ism + 1
@@ -478,7 +506,7 @@ def token(options) -> tuple:
     TALYS: (none -- cache keys)
     Test: tests/hf/test_kwcov_b7b.py
     """
-    if options is None or not getattr(options, "flagjlm", False):
+    if options is None or not (getattr(options, "flagjlm", False) or 3 <= int(getattr(options, "alphaomp", 6)) <= 5):
         return ()
     return ("jlm", int(getattr(options, "jlmmode", 0)), int(getattr(options, "radialmodel", 2)),
             os.environ.get("TALYS_DIR", ""))

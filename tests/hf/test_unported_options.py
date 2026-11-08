@@ -9,8 +9,8 @@ import pytest
 from physics.hf.input.defaults import UNPORTED, default_options, reject_unported
 
 REFUSED = [
-    {"jlmomp": "y"},
-    {"alphaomp": 3}, {"alphaomp": 4}, {"alphaomp": 5},
+    {"jlmomp": "y", "preeqmode": 3}, {"jlmomp": "y", "racap": "y"},  # KWCOV B7b: JLM / alphaomp 3-5 ported
+    {"jlmomp": "y", "alphaomp": 4},
     {"preeqmode": 4},   # KWCOV B7: MSD/MSC; preeqmode 3, preeqspin 3/4, twocomponent n, gshell y are ported
     {"gnorm": "y"},
 ]
@@ -26,7 +26,8 @@ def test_unported_keyword_is_refused(kw):
 @pytest.mark.parametrize("kw", [{}, {"alphaomp": 6}, {"alphaomp": 7}, {"alphaomp": 1}, {"preeqmode": 2},
                                 {"preeqspin": 2}, {"twocomponent": "y"}, {"jlmomp": "n"}, {"gnorm": "n"}, {"ldmodel": 2},
                                 {"preeqmode": 3}, {"preeqspin": 3}, {"preeqspin": 4}, {"twocomponent": "n"},
-                                {"gshell": "y"}])
+                                {"gshell": "y"}, {"jlmomp": "y"}, {"alphaomp": 3}, {"alphaomp": 4},
+                                {"alphaomp": 5}, {"micro": "y"}])
 def test_ported_settings_still_resolve(kw):
     reject_unported(default_options(50, 120, "n", kw))
 
@@ -49,7 +50,7 @@ def test_a_cascade_refuses_an_unported_keyword():
     from tests._data import need_talys
 
     need_talys()  # the cascade is built in a subprocess
-    env = dict(os.environ, INCOGNITA_TALYS_FIT="lines", INCOGNITA_TALYS_FIT_LINES="jlmomp y")
+    env = dict(os.environ, INCOGNITA_TALYS_FIT="lines", INCOGNITA_TALYS_FIT_LINES="jlmomp y;racap y")
     code = "import numpy as np; from physics.hf import warmrun; warmrun.new_cascade(50, 120, (float(np.float32(1.0)),))"
     r = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True, timeout=600)
-    assert r.returncode != 0 and "not ported: jlmomp y" in r.stderr, r.stderr[-400:]
+    assert r.returncode != 0 and "not ported: jlmomp y with racap y" in r.stderr, r.stderr[-400:]

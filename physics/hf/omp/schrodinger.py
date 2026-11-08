@@ -817,7 +817,7 @@ def ecis_grid(p, m_targ_amu: float, kin: EcisKinematics) -> tuple[Tensor, Tensor
 
     TALYS hands ECIS hint = rmatch = 0 for a spherical non-JLM target (inverseecis.f90:189-190,
     incidentecis.f90:170-171), so these ECIS defaults are what is used; the rmatch = 18 branch
-    at inverseecis.f90:318 is JLM only and out of scope (contract §8).
+    at inverseecis.f90:318 is JLM only (omp/jlm.py, KWCOV B7b).
 
     Returns (h_fm, ism, rm_fm), each (E,).
 

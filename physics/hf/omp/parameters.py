@@ -1273,11 +1273,8 @@ def opticalcomp(
         if k == 3 and options.deuteronomp >= 2:
             alt = opticaldeut(Z, A, e, options.deuteronomp, F, o)
             i = options.deuteronomp
-        if k == 6 and 3 <= options.alphaomp <= 5:
-            # charged-projectile fidelity: the folding potentials (foldalpha.f90) are not ported; this branch used to fall
-            # through to the Watanabe alpha (alphaomp 1) silently: a-Ho165 alphaomp 5 reaction
-            # cross section -0.15..-0.20 dex vs the stored TALYS-2.25 sample at 12-20 MeV.
-            opticalalpha(Z, A, e, options.alphaomp, F, o)  # raises NotImplementedError
+        # KWCOV B7b: alphaomp 3-5 keep the base potential here, as opticalcomp.f90:323 does; a nucleus with a density
+        # file takes the folding potential in the solve instead (omp/jlm.py -> omp/foldalpha.py, jlmexist(., ., 6))
         if k == 6 and (options.alphaomp == 2 or options.alphaomp >= 6):
             alt = opticalalpha(Z, A, e, options.alphaomp, F, o)
             i = options.alphaomp

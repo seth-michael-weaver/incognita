@@ -624,3 +624,35 @@ B15: dict = {
                  "ignored)", _T15),
 }
 MANUAL.update(B15)
+
+# KWCOV B7b (2026-11-08): JLM microscopic OMP (omp/jlm.py) and the alpha folding potentials (omp/foldalpha.py)
+_T7B = "test:test_kwcov_b7b.py"
+_J = "omp/jlm.py "
+B7B = {
+    "jlmomp": ("SUPPORTED", _J + "(radialtable, mom, momjlmecis; incident + inverse n/p via omp/incident.py, "
+               "omp/inverse.py)",
+               "JLM on every nucleus with a density file (flagspher forced, njmax 1600, hint 0.1, rmatch 18). Fe-56 vs "
+               "stock: omp.out potentials 1e-5, incident total/reaction and T_lj 7 digits; response 0.04 % TALYS "
+               "mode. REFUSED with preeqmode 3 (bonetti JLM W), racap y (JLMB racap states), optmodall y, alphaomp "
+               "3-5 (stale normjlm in TALYS)", _T7B),
+    "jlmmode": ("SUPPORTED", _J + "normalisations", "lw1's lambda (1, 2) and lw x 2 (3), mom.f90:73-80", _T7B),
+    "radialmodel": ("SUPPORTED", _J + "radial_file", "1 = bskg3, 2 = d1m densities (radialtable.f90:86-91)", _T7B),
+    "radialfile": ("SUPPORTED", "omp/ompdeck.py extract (k = jlm.RADIALFILE_K) -> " + _J + "radial_file",
+                   "`radialfile Z file`: the element's density file (radialtable.f90:82); a mass not in it leaves "
+                   "jlmexist false, as TALYS", _T7B),
+    **{k: ("SUPPORTED", _J + "normalisations (Params." + k + ")",
+           "scales the JLM normalisation (mom.f90:94-112); acts only with jlmomp y, as in TALYS; the energy-local "
+           "form (adjust.f90) is not read", _T7B)
+       for k in ("lvadjust", "lwadjust", "lv1adjust", "lw1adjust", "lvsoadjust", "lwsoadjust")},
+    "alphaomp": ("SUPPORTED", "omp/foldalpha.py (foldalpha, afold, mahaux) via " + _J + "solve",
+                 "3-5: double-folding real part + WS imaginary (+ dispersion for 5) on every nucleus with a density "
+                 "file; others phenomenological as before. alpha + Fe-56: potentials 1e-5, reaction xs 1e-4 vs stock",
+                 _T7B),
+    "adepthcor": ("SUPPORTED", "omp/foldalpha.py (Params.adepthcor)", "depth factor of the folded real part "
+                  "(foldalpha.f90:276); acts only with alphaomp 3-5", _T7B),
+    "aradialcor": ("SUPPORTED", "omp/foldalpha.py (Params.aradialcor)", "radius factor of the folded real part "
+                   "(foldalpha.f90:275); acts only with alphaomp 3-5", _T7B),
+    "micro": ("SUPPORTED", "input/defaults.py cascade (ldmodel 7, jlmomp y, autorot y) + " + _J,
+              "micro y now runs (JLM ported in B7b)", _T7B),
+}
+MANUAL.update(B7B)

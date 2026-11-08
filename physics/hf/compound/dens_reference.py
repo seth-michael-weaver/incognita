@@ -430,6 +430,11 @@ def _sfunc_inv_model(Zt: int, At: int, enincmax_mev: float, ls: tuple) -> tuple:
     return e_lab, model
 
 
+def _jlm_on(options) -> bool:
+    """KWCOV B7b: a run whose n / p (jlmomp y) or alpha (alphaomp 3-5) channels may take a tabulated potential."""
+    return bool(options.flagjlm) or 3 <= int(options.alphaomp) <= 5
+
+
 @stagetime.timed("setup.omp_inverse")
 def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict | None,
                         differentiable: bool, cn: tuple | None = None) -> dict:
@@ -470,7 +475,7 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
     nen_ax = torch.arange(E)
     keep_e = {t: (nen_ax >= rg.ebegin[t]) & (nen_ax <= eendmax[t]) for t in range(1, 7)}
     tr = None
-    if not differentiable and not rg.options.flagjlm:  # NATIVEX2 `omp`: compiled (KWCOV B7b: JLM is Python only)
+    if not differentiable and not _jlm_on(rg.options):  # NATIVEX2 `omp`: compiled (KWCOV B7b: JLM is Python only)
         from physics.hf.omp.omp_nx2 import inverse_kept
 
         tr = inverse_kept(Zf, Af, np.asarray(rg.egrid[:E], dtype=float), rg.maxen, rg.options,

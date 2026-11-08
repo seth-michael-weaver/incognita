@@ -53,14 +53,16 @@ def test_inverse_channels_use_the_runs_projectile_as_ejectile_type0(cpinc, k0):
     assert _run(_PROBE, INCOGNITA_CPINC=cpinc) == f"K0={k0}"
 
 
-def test_alphaomp_folding_refuses():
+def test_alphaomp_folding_keeps_the_base_potential():
+    """KWCOV B7b: alphaomp 3-5 is ported (omp/foldalpha.py, on nuclei with a density file); the phenomenological
+    parameters keep opticalcomp.f90's base potential for 3-5, which is alphaomp 1's (no opticalalpha call)."""
     o = dataclasses.replace(default_options(29, 63), alphaomp=5)
+    o1 = dataclasses.replace(default_options(29, 63), alphaomp=1)
     from physics.hf.omp.parameters import omp_parameters
 
-    omp_parameters(29, 34, 6, torch.tensor([20.0]), default_params(29, 63, o),
-                   default_options(29, 63))  # alphaomp 6 (default) runs
-    with pytest.raises(NotImplementedError):
-        omp_parameters(29, 34, 6, torch.tensor([20.0]), default_params(29, 63, o), o)
+    a = omp_parameters(29, 34, 6, torch.tensor([20.0]), default_params(29, 63, o), o)
+    b = omp_parameters(29, 34, 6, torch.tensor([20.0]), default_params(29, 63, o1), o1)
+    assert float(a.v_mev[0]) == pytest.approx(float(b.v_mev[0]))
 
 
 _FLAGS = """

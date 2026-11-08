@@ -341,7 +341,7 @@ RESONANCE_REFUSAL = (
     "into total/elastic/fission/xs000000/xs010000/xs000001/rp*.tot below the URR; none of that is in the port. "
     "`reslib` and `tres` act only inside it")
 #: KWCOV B5: keywords whose value is a file name: the line keeps its case (convert.f90:36 keeps it for these)
-FILE_KEYS = frozenset({"levelfile", "deformfile", "optmod", "optmodfilen", "optmodfilep",  # + KWCOV B6
+FILE_KEYS = frozenset({"levelfile", "deformfile", "optmod", "optmodfilen", "optmodfilep", "radialfile",  # B6, B7b
                        "hbtransfile", "class2file"})  # + KWCOV B8 (class 11: `<key> Z A <file>`)
 
 
@@ -352,6 +352,12 @@ def _deck_case(x: str) -> str:
     if w and w[0].lower() in FILE_KEYS:
         return " ".join([w[0].lower()] + w[1:])
     return s.lower()
+
+
+#: KWCOV B7b: the JLM / alpha-folding scalars (getvalues class 9): `lvadjust 1.1` acts (omp/jlm.py, omp/foldalpha.py);
+#: the energy-local form `lvadjust 1.1 Ea Eb Em D` (mom.f90's / foldalpha.f90's `adjust` call) is refused
+_B7B_LOCAL = frozenset({"lvadjust", "lwadjust", "lv1adjust", "lw1adjust", "lvsoadjust", "lwsoadjust", "aradialcor",
+                        "adepthcor"})
 
 
 def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[list, list, list, list, list]:
@@ -398,6 +404,9 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
         if k == "ejectiles":  # KWCOV B2: a list of particle symbols (input_basicpar.f90:98)
             if want_options:
                 opts.append((k, " ".join(w[1:])))
+            continue
+        if k in _B7B_LOCAL and len(w) > 2:  # KWCOV B7b: class 9's energy-local tail (adjust.f90) is not read
+            skipped.append((line, "energy-local adjustment form (Ea Eb Em D or a file)"))
             continue
         form = _deck_form(k, w)  # KWCOV B2: per-nucleus / per-particle forms -> {"ldmodel 26 57": "2"}
         if form is not None:

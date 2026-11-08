@@ -1435,8 +1435,6 @@ def _bestbranch(o: dict) -> None:
 #: NOT the TALYS model asked for (a silent fallback) or crash deep inside a calculation; checked
 #: against stock TALYS-2.24 on 2026-09-21 (THRESH-SCREEN, development notes).
 UNPORTED = (
-    ("alphaomp", lambda v: 3 <= int(v) <= 5, "alphaomp 3-5: double-folding alpha potentials. Silently equal to "
-     "the Watanabe potential (alphaomp 1)"),
     ("preeqmode", lambda v: int(v) == 4, "preeqmode 4: multi-step direct / multi-step compound (msd.f90: msdinit, "
      "the continuum DWBA of dwbaecis.f90, onestepA/B, multistepA/B, msdplusmsc) is not ported; the run silently "
      "kept the exciton neutron/proton emission MSD replaces (stock Fe-56 14 MeV: (n,p) +32 %, engine -2.5 %; "
@@ -1492,6 +1490,13 @@ def reject_unported(options) -> None:
         if o.get("flagompall"):
             bad.append("jlmomp y with optmodall y: the per-nucleus transmission sets of optmodall are not wired to "
                        "the JLM solve")
+        if 3 <= int(o.get("alphaomp", 6)) <= 5:
+            bad.append("jlmomp y with alphaomp 3-5: TALYS writes the folded alpha potential with normjlm(Zix, Nix, 1:2), "
+                       "which foldalpha.f90 never sets, so the alpha strengths are whatever the last JLM n/p call on "
+                       "that nucleus left there (lv, lw); not reproduced")
+    if 3 <= int(o.get("alphaomp", 6)) <= 5 and o.get("flagompall"):
+        bad.append("alphaomp 3-5 with optmodall y: the per-nucleus transmission sets of optmodall are not wired to "
+                   "the folding-potential solve")
     if o.get("ompenergyfile") and o.get("flagendf"):  # KWCOV B6: endfenergies.f90:97, the ENDF incident grid
         bad.append("ompenergyfile with endf y: the ENDF-6 incident-energy grid (endfenergies.f90) is not ported")
     if bad:

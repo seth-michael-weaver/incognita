@@ -31,7 +31,7 @@ of the card values is applied with a straight-through estimator (`ecis_card=True
 forward value is what ECIS computed with and gradients are those of the unrounded parameters.
 
 `radialtable` (JLM radial matter densities) is listed for completeness of the stub contract: the
-JLM/folding potentials are out of scope (contract §8) and `jlm_radial_table` raises.
+JLM/folding potentials: `physics.hf.omp.jlm` / `foldalpha` (KWCOV B7b); `jlm_radial_table` forwards there.
 
 Reconstructing the true radii of omp.out needs ECIS's step before the f8.5 rounding; the dump
 does not carry it, so tests fit it in the one-digit window the rounding allows (see
@@ -209,9 +209,11 @@ def omp_out_radii(step_fm: float, n: int) -> Tensor:
 
 
 def jlm_radial_table(*args, **kwargs):
-    """JLM radial matter densities (flagjlm, alphaomp 3-5): out of scope for the port.
+    """JLM radial matter densities (flagjlm, alphaomp 3-5): `physics.hf.omp.jlm.radial_table` (KWCOV B7b).
 
     TALYS: radialtable.f90:1 (radialtable)
-    Test: A-omppot
+    Test: tests/hf/test_kwcov_b7b.py
     """
-    raise NotImplementedError("JLM/folding radial densities are out of scope (contract §8)")
+    from physics.hf.omp.jlm import radial_table
+
+    return radial_table(*args, **kwargs)

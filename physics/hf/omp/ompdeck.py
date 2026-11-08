@@ -241,10 +241,11 @@ def extract(lines, Z: int, A: int, dirs=()) -> tuple[tuple, OMPDeck | tuple]:
                 raise ValueError(f"deck line {line!r}: no optical model for photons")
             tables[(iz, ia, kk)] = read_table(resolve(w[3], dirs), iz, ia, kk)
             continue
-        if k in ("optmodfilen", "optmodfilep"):  # getvalues class 10: `optmodfilen Z file`
+        if k in ("optmodfilen", "optmodfilep", "radialfile"):  # getvalues class 10: `optmodfilen Z file`
             if len(w) < 3:
                 raise ValueError(f"deck line {line!r}: expected `{k} Z file`")
-            kk = 1 if k.endswith("n") else 2
+            # KWCOV B7b: `radialfile Z file` (input_ompmodel.f90:190, radialtable.f90:82) -> k = jlm.RADIALFILE_K
+            kk = -1 if k == "radialfile" else 1 if k.endswith("n") else 2
             files[(int(w[1]), kk)] = str(resolve(w[2], dirs))
             continue
         if k in ADJUSTF:  # input_ompmodel.f90:249-283: `rvadjustF p E1 E2 D s`
