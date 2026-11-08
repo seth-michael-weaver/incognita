@@ -19,8 +19,8 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 
 | status | observables |
 |---|---|
-| SUPPORTED | 15 |
-| PARTIAL | 20 |
+| SUPPORTED | 19 |
+| PARTIAL | 16 |
 | INTERNAL | 7 |
 | MISSING | 15 |
 | NA | 2 |
@@ -45,7 +45,7 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 | residual isomer production | rpZZZAAA.L02 ... | residualout.f90:1 | isomer, fileresidual | PARTIAL | Results.residual_production_mb['rpZZZAAA.LNN'] (INCOGNITA_RESISO) | B1 | off by default; isomeric ratios derive from it |
 | total residual production | (talys.out) | residualout.f90:1 |  | SUPPORTED | Results.totals_mb['residual_production'] |  |  |
 | discrete level cross sections (binary) | nn.L01 np.L00 ... | discreteout.f90:1 | outdiscrete, filediscrete | SUPPORTED | Results.levels_mb['nn.L01'] |  | inelastic per level incl. direct + compound |
-| exclusive discrete / continuum split | nn.tot np.tot cols 3-4, nn.con | discreteout.f90:1 | outdiscrete | PARTIAL | Results.extras['<k0><p>.tot:discrete', ':continuum'] (INCOGNITA_CHANOBS) | B1 | the (n,gn) column xsngn is MISSING |
+| exclusive discrete / continuum split | nn.tot np.tot cols 3-5, nn.con | discreteout.f90:1 | outdiscrete | PARTIAL | Results.extras['<k0><p>.tot:discrete', ':continuum'] (INCOGNITA_CHANOBS); Results.spectra['<k0><p>.tot:ngn'] (xsngn, any B4 switch) | B1, B4 | xsngn vs stock Fe-56: 1e-4 at 1, 5 MeV; 14 MeV +4 to +24 % (engine's own CN decay difference) |
 | direct / DWBA / giant-resonance / collective components | direct.tot, talys.out | directout.f90:1 | outdirect, components | INTERNAL | direct/chain.py xsdirdisctot, xsgrcoll, xscollconttot | B4 | r52pool dir-log hook captures them |
 | compound / pre-equilibrium components | talys.out, components | totalout.f90:1 | components | INTERNAL | binary / preeq | B4 |  |
 | fission cross section | fission.tot | fissionout.f90:1 | fission | SUPPORTED | Results.totals_mb['fission'] |  | TALYSworld channel |
@@ -54,18 +54,18 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 | fission fragment / product yields | yieldA*.fis yieldZA*.fis | massdisout.f90:1 | massdis, fymodel, ffmodel, outfy | MISSING |  | B8 | GEF/Brosa (massdis.f90 779 l.) or FF files |
 | prompt nubar, nu(A), P(nu) | nubar*.tot nuA*.fis | nubarout.f90:1, nudisout.f90:1 | massdis, ffevaporation | MISSING |  | B8 | requires FF evaporation |
 | prompt fission neutron/gamma spectra (PFNS/PFGS) | pfns*.fis pfgs* | pfnsout.f90:1, iwamoto.f90:1 | pfnsmodel | MISSING |  | B8 | pfnsmodel 1 (Iwamoto, 387 l.) is the cheap first step |
-| discrete gamma-ray production lines | gamZZZAAALnnLmm.tot | gamdisout.f90:1 | outgamdis, filegamdis | PARTIAL | specout.py (INCOGNITA_SPECOUT) | B3 | lines collected; TALYS file naming/units not checked |
-| photon production spectrum | gspec*.tot | spectraout.f90:1 | outspectra | PARTIAL | specout.py | B3 |  |
+| discrete gamma-ray production lines | gamZZZAAALnnLmm.tot | gamdisout.f90:1 | outgamdis, filegamdis | SUPPORTED | specobs.py Results.spectra['gamZZZAAALiiLjj.tot'] (+ files, INCOGNITA_SPECOBS_DIR) | B4 | conversion-corrected (cascade.f90:78); Fe-56 846.8 keV vs stock 1e-5 at 1, 5 MeV, 1.2 % at 14 MeV; other residuals' lines track the engine's channel xs (14 MeV (n,p) lines +12-17 %) |
+| photon production spectrum | gspec*.tot | spectraout.f90:1 | outspectra | SUPPORTED | specobs.py Results.spectra['gspec.tot'] (+ columns) | B4 | Fe-56 5 MeV 5e-5 per bin, 14 MeV 2 % |
 | elastic angular distribution | nn0014.000ang.L00 / nnang.L00 | angleout.f90:1 | outangle, fileelastic, angles | SUPPORTED | angout.py Results.angular['nnang.L00'] (+ TALYS files, INCOGNITA_ANGOUT_DIR) | B3 | shape + compound; vs stock Fe-56, Pb-208, U-238 at 1-14 MeV <= 0.5 % per angle (test:test_angout.py, b3_compare.py) |
 | inelastic discrete angular distributions | nn0014.000ang.L01 ... | angleout.f90:1 | outangle, fileangle | SUPPORTED | angout.py Results.angular['nnang.LNN'] (DWBA / coupled channels + compound + discrete PE Kalbach) | B3 | first levels vs stock Fe-56, Pb-208, U-238 <= 0.5 % per angle; compound part tracks the engine's own level xs |
 | other discrete angular distributions | np0014.000ang.L00, ng..., na... | angleout.f90:1, angdis.f90:1 | outangle, fileangle | SUPPORTED | angout.py + compound/ceang_types.py (cleg of every residual) | B3 | Fe-56/Pb-208 (n,p) (n,a) (n,d) (n,g) levels: shape 1e-5 of stock; absolute = the engine's level xs (14 MeV +15 %) |
 | Legendre coefficients | nn0014.000leg.L00 ... | angleout.f90:1 | outlegendre | PARTIAL | angout.py Results.angular['<k0><t>leg.LNN'] (Total, Direct, Compound, Normalized, ENDF-6) | B3 | L0-L4 to 1e-4; small high-L direct coefficients 1-5 %; charged-particle elastic Direct column (ECIS's Coulomb-subtracted expansion) MISSING |
 | charged-particle elastic ratio to Rutherford | pp0014.000ang.L00 (xs/Rutherford, Nuc+interfer.) | angleout.f90:1, incidentread.f90:1 | outangle | SUPPORTED | angout.charged_elastic (Coulomb amplitude + phases on the engine's S-matrix) | B3 | p + Nb-93 5, 14 MeV: ratio to 1e-4 of stock; spherical targets only (coupled charged targets: no shape elastic); 0 degrees written as ratio 1, xs 0 |
 | compound angular distributions for charged particles | pp*ang.L*, pn*ang.L* Compound column | angdis.f90:1 | cpang | SUPPORTED | angout.py (flagcompang = (k0 = 1 or cpang) and outangle and E <= 50) | B3 | p + Nb-93 14 MeV cpang y: 1e-5 of stock; HRTW/GOE widthmode: isotropic (CEANG is Moldauer-only) |
-| emission spectra (angle-integrated) | nspec010.000.tot ... | spectraout.f90:1 | outspectra, filespectrum | PARTIAL | specout.py (INCOGNITA_SPECOUT) | B3 | C path only |
-| double-differential cross sections | nddx*.deg nddxE*.mev | ddxout.f90:1 | outspectra, fileddxe, fileddxa, ddxmode | PARTIAL | specang.py Kalbach | B3 |  |
+| emission spectra (angle-integrated) | nspec0014.000.tot ... | spectraout.f90:1, spectra.f90:1 | outspectra, filespectrum, adddiscrete, addelastic, channelenergy, elwidth | SUPPORTED | specobs.py Results.spectra['<x>spec.tot'] (+ E, Direct, Preeq, Mult. preeq, Compound, ratios; Eaverage_<x>.out) | B4 | TALYS's espec grid exactly; Fe-56 vs stock per bin > 1 mb/MeV: 1e-5 (1 MeV), 2e-4 (5 MeV); 14 MeV n 5.5 %, p 15 % = the engine's own compound / (n,p) differences (pre-equilibrium column 4e-5) |
+| double-differential cross sections | nddxE0014.000A030.0.deg, nddxE0014.000E0003.0.MeV | ddxout.f90:1 | ddxmode, fileddxe, fileddxa, anglescont, blockddx | SUPPORTED | specobs.py Results.spectra['<x>ddx', '<x>ddxAaaa.a.deg', '<x>ddxEeeee.e.MeV'] | B4 | Kalbach PE / MPE, isotropic compound, discad peaks; Fe-56 30/90/150 deg: 1.4e-3 at 5 MeV, 14 MeV n 9 % p 15 % (engine's compound and level xs); giant-resonance / collective-continuum part isotropic (TALYS: DWBA shape) |
 | DDX in LAB frame | *.lab | ddxout.f90:1 | labddx | MISSING |  | B7 | needs recoil kinematics |
-| exclusive channel spectra | spNNNNNN*.tot | channelsout.f90:641 | channelenergy, filechannels | MISSING |  | B3 |  |
+| exclusive channel spectra | sp100000E0014.000.tot ... | channelsout.f90:641, channels.f90:330-420, specemission.f90:1 | outspectra + channels, filechannels | MISSING |  | B4b | needs specexcl carried through the channel loop (binemis per daughter bin + specemission, 306 l.); only the sp000000 (n,gx) columns exist (xsngnspec = specout per-nucleus emission of the CN). `channelenergy` is NOT this: it is spectra.f90's flagEchannel energy conversion (B4, supported) |
 | emission spectrum per excitation bin |  | binaryout.f90:1 | outbinspectra | NA |  |  | debug output |
 | recoil spectra of residuals | recZZZAAAspec*.tot | recoilout.f90:1 | recoil, filerecoil, maxenrec, anglesrec | MISSING |  | B7 | recoilinit.f90 576 l. + angdisrecoil 491 l. |
 | unresolved resonance parameters | urr*.dat urrtalys.tot | urrout.f90:1, urr.f90:1 | urr, lurr, urrnjoy | MISSING |  | B6 |  |

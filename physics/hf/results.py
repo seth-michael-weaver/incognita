@@ -35,6 +35,9 @@ class Results:
     # ANGOUT (KWCOV B3: outangle / fileelastic / INCOGNITA_ANGOUT, default empty): discrete angular distributions and
     # Legendre coefficients under TALYS's file names, (C, nangle+1) mb/sr or (C, J2end+1); physics/hf/angout.py
     angular: dict[str, Tensor] = field(default_factory=dict)
+    # SPECOBS (KWCOV B4: outspectra / ddxmode / outgamdis / INCOGNITA_SPECOBS, default empty): emission spectra, DDX,
+    # discrete gamma lines and the (k0,g<p>) column under TALYS's file names; physics/hf/specobs.py lists them
+    spectra: dict[str, Tensor] = field(default_factory=dict)
 
     @property
     def n(self) -> int:

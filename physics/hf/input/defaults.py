@@ -323,6 +323,16 @@ class Options:
     flagblockangle: bool = False  # blockangle, input_output.f90:91 (y with endf y, :133)
     fileelastic: bool = False  # input_outfiles.f90:87 (y with endf y, :105)
     fileangle: tuple = ()  # input_outfiles.f90:84, :252-256: levels with an angle file; every level with outangle y (:133)
+    # KWCOV B4 (physics/hf/specobs.py, output only): spectraout / ddxout / gamdisout switches
+    flagspec: bool = False  # outspectra, input_output.f90:117 (y with recoil, endf or ddxmode > 0)
+    ddxmode: int = 0  # input_output.f90:121, :279 (2 with endf y and k0 == 3)
+    flaggamdis: bool = False  # outgamdis, input_output.f90:111 (y with endf + endfdetail)
+    filegamdis: bool = False  # input_outfiles.f90:88
+    filespectrum: tuple = ()  # input_outfiles.f90:91, :178: ejectile symbols with a spectrum file (all with outspectra)
+    fileddxe: tuple = ()  # input_outfiles.f90:227: ((symbol, MeV), ...)
+    fileddxa: tuple = ()  # input_outfiles.f90:239: ((symbol, degrees), ...)
+    flagblockspectra: bool = False  # blockspectra, input_output.f90:90 (y with endf y)
+    flagblockddx: bool = False  # blockddx, input_output.f90:89 (y with endf y)
     flagstate: bool = False  # input_directmodel.f90:105
     flagsys: bool = False  # input_directmodel.f90:106
     flagtransen: bool = True  # input_directmodel.f90:107
@@ -684,6 +694,15 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "blockangle": ("directmodel", "flagblockangle", "yn"),  # KWCOV B3
     "fileelastic": ("directmodel", "fileelastic", "yn"),  # KWCOV B3: input_outfiles.f90
     "fileangle": ("directmodel", "fileangle", "levels"),  # KWCOV B3: `fileangle 2`; this port also takes `fileangle 1,2`
+    "outspectra": ("directmodel", "flagspec", "yn"),  # KWCOV B4: input_output.f90 (output only)
+    "ddxmode": ("directmodel", "ddxmode", "int"),  # KWCOV B4
+    "outgamdis": ("directmodel", "flaggamdis", "yn"),  # KWCOV B4
+    "filegamdis": ("directmodel", "filegamdis", "yn"),  # KWCOV B4: input_outfiles.f90
+    "filespectrum": ("directmodel", "filespectrum", "ejectiles"),  # KWCOV B4: `filespectrum n p`
+    "fileddxe": ("directmodel", "fileddxe", "ddxpoints"),  # KWCOV B4: `fileddxe n 3.0`; also `n 3,6`
+    "fileddxa": ("directmodel", "fileddxa", "ddxpoints"),  # KWCOV B4: `fileddxa n 30`; also `n 30,90,150`
+    "blockspectra": ("directmodel", "flagblockspectra", "yn"),  # KWCOV B4
+    "blockddx": ("directmodel", "flagblockddx", "yn"),  # KWCOV B4
     "statepot": ("directmodel", "flagstate", "yn"),
     "maxband": ("directpar", "maxband", "int"),
     "maxrot": ("directpar", "maxrot", "int"),
@@ -832,6 +851,19 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
         elif kind == "levels":  # KWCOV B3: fileangle, one level per TALYS line (input_outfiles.f90:252-256)
             got = {int(x) for x in str(value).replace(",", " ").split()}
             o[name] = tuple(sorted(set(o[name]) | got))
+        elif kind == "ejectiles":  # KWCOV B4: filespectrum (input_outfiles.f90:178-188), the line replaces the set
+            o[name] = tuple(c for c in "gnpdtha" if c in {w[:1].lower() for w in str(value).replace(",", " ").split()})
+        elif kind == "ddxpoints":  # KWCOV B4: fileddxe / fileddxa, `<symbol> value[,value...]` (input_outfiles.f90:227-250)
+            w = str(value).replace(",", " ").split()
+            got, sym = [], None
+            for x in w:
+                if x[:1].lower() in "gnpdtha" and not x[:1].isdigit():
+                    sym = x[:1].lower()
+                elif sym is not None:
+                    got.append((sym, float(x)))
+                else:
+                    raise ValueError(f"{name}: expected '<ejectile> value', got {value!r}")
+            o[name] = tuple(o[name]) + tuple(got)
         elif kind == "urr":  # input_compoundpar.f90 keyword loop: y/n or an onset energy
             if _is_yn(value) and not isinstance(value, (int, float)):
                 o["flagurr"] = _yn(value)
@@ -892,7 +924,8 @@ def default_options(
             "go to default_params(overrides=...)"
         )
     for k, v in ov.items():
-        if isinstance(v, str) and len(v.split()) > 1:
+        if isinstance(v, str) and len(v.split()) > 1 and _OPTION_KEYWORDS.get(k, ("", "", ""))[2] not in (
+                "ejectiles", "ddxpoints"):  # KWCOV B4: `filespectrum n p`, `fileddxa n 30` are one TALYS line
             raise ValueError(f"{k}: per-nucleus keyword forms are out of scope, got {v!r}")
 
     k0 = PARSYM.index(projectile)
@@ -1003,6 +1036,10 @@ def default_options(
     o["flaggiant0"] = k0 in (1, 2) and not o["flagomponly"]  # :93-98
     o["flaglegendre"] = o["flagendf"]  # :99-103
     o["flagang"] = o["flagblockangle"] = o["fileelastic"] = o["flagendf"]  # KWCOV B3: input_output.f90:128-133, input_outfiles.f90:105
+    o["flagspec"] = bool(o["flagendf"] or o["flagrecoil"])  # KWCOV B4: input_output.f90:118, :138
+    o["flagblockspectra"] = o["flagblockddx"] = o["flagendf"]  # :131-132
+    o["ddxmode"] = 2 if (o["flagendf"] and k0 == 3) else 0  # input_output.f90:134-137
+    o["flaggamdis"] = o["filegamdis"] = bool(o["flagendf"] and o["flagendfdet"])  # :139-141, input_outfiles.f90:110-113
     _apply_stage("directmodel", o, ov)
 
     # input_directpar.f90

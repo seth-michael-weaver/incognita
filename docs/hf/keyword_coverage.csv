@@ -2,15 +2,15 @@ keyword,group,talys_line,type,default,status,where,evidence,notes
 a,input_densitypar,input_densitypar.f90:246,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.alev -> capture_gpu.py, capture_gpu_setup.py, compound/dens_reference.py, compound/psf_fast.py (+10)","test:conftest.py,perfcasc_gate_run.py,test_actphys.py",
 aadjust,input_densitypar,input_densitypar.f90:252,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.aadjust -> capture_fast.py, compound/dens_reference.py, density/ld_ceng.py, density/ld_nx2.py (+6)","test:test_cengld2.py,test_defaults.py,test_density.py",
 abundance,,,value,,MISSING,,manual,natural targets (mass 0 / abundance file): natural.f90 loop over isotopes
-adddiscrete,input_directpar,input_directpar.f90:106,flag,y,IGNORED,input/defaults.py Options.eadd_mev,,parsed into Options/Params but no engine code reads eadd_mev
-addelastic,input_directpar,input_directpar.f90:119,flag,y,IGNORED,input/defaults.py Options.eaddel_mev,,parsed into Options/Params but no engine code reads eaddel_mev
+adddiscrete,input_directpar,input_directpar.f90:106,flag,y,SUPPORTED,input/defaults.py Options.eadd_mev -> specobs.energy_spectra,test:test_specobs.py,discrete peaks + fine grid in the spectra (spectra.f90 flagadd)
+addelastic,input_directpar,input_directpar.f90:119,flag,y,SUPPORTED,input/defaults.py Options.eaddel_mev -> specobs.energy_spectra,test:test_specobs.py,elastic peak in the spectra (flagaddel)
 adepthcor,input_omppar,input_omppar.f90:609,value,1.0,IGNORED,input/defaults.py Params.adepthcor,,parsed into Options/Params but no engine code reads adepthcor
 alimit,input_densitypar,input_densitypar.f90:258,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.alimit -> density/ld_ceng.py, density/ld_nx2.py, density/models.py, density/parameters.py (+4)","test:test_cengld2.py,test_density.py,test_rigidspin.py",
 alphald,input_densitypar,input_densitypar.f90:419,value,ld_systematics,SUPPORTED,"input/defaults.py Params.alphald -> density/ld_nx2.py, density/parameters.py",test:test_defaults.py,
 alphaomp,input_ompmodel,input_ompmodel.f90:319,value,6,READ_ONLY_DEFAULT,input/defaults.py Options.alphaomp,,refused when set (defaults.UNPORTED): alphaomp 3-5
 anfit,input_fit,input_fit.f90:162,flag,n,SUPPORTED,input/fitlib.py _cards (an.par),test:test_kwcov_b2.py,"wired; xsfit.f90 does not match the projectile, so the library applies on any run; response untested (charged/photon projectiles behind INCOGNITA_CPINC)"
 angles,input_numerics,input_numerics.f90:125,value,90,SUPPORTED,input/defaults.py Options.nangle -> angout.angles,test:test_angout.py,discrete angle grid 180/nangle
-anglescont,input_numerics,input_numerics.f90:130,value,18,SUPPORTED,input/defaults.py Options.nanglecont -> core/grids.py,grep,
+anglescont,input_numerics,input_numerics.f90:130,value,18,SUPPORTED,input/defaults.py Options.nanglecont -> specobs.anglecont,test:test_specobs.py,continuum DDX angle grid
 anglesrec,input_numerics,input_numerics.f90:120,value,1,IGNORED,input/defaults.py Options.nanglerec,,parsed into Options/Params but no engine code reads nanglerec
 aradialcor,input_omppar,input_omppar.f90:600,value,1.0,IGNORED,input/defaults.py Params.aradialcor,,parsed into Options/Params but no engine code reads aradialcor
 area,input_medical,input_medical.f90:91,value,,MISSING,,,
@@ -51,11 +51,11 @@ blockangle,input_output,input_output.f90:195,flag,n,SUPPORTED,input/defaults.py 
 blockastro,input_output,input_output.f90:231,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 blockbin,input_output,input_output.f90:225,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 blockdirect,input_output,input_output.f90:201,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-blockddx,input_output,input_output.f90:183,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
+blockddx,input_output,input_output.f90:183,flag,n,SUPPORTED,input/defaults.py Options.flagblockddx -> specobs.write_files,test:test_specobs.py,nddx.deg / nddx.MeV names
 blocklevels,input_output,input_output.f90:207,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 blockomp,input_output,input_output.f90:213,flag,y,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 blockpreeq,input_output,input_output.f90:219,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-blockspectra,input_output,input_output.f90:189,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
+blockspectra,input_output,input_output.f90:189,flag,n,SUPPORTED,input/defaults.py Options.flagblockspectra -> specobs.write_files,test:test_specobs.py,nspec.tot names
 blockyield,input_output,input_output.f90:237,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 blockza,input_output,input_output.f90:243,flag,y,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 branch,input_levels,input_levels.f90:142,value,,SUPPORTED,"input/defaults.py _apply_forms (parsed, checked, dropped with a warning)",test:test_kwcov_b2.py,"TALYS-2.25 BUG: strucinitial.f90:325 resets nbranch after the input, so `branch` lines never act (stock Co-59: 0.0 % change). The port reproduces that and warns"
@@ -64,7 +64,7 @@ cbarrier,input_fissionpar,input_fissionpar.f90:294,value,1.0,SUPPORTED,"input/de
 cbreak,input_preeqpar,input_preeqpar.f90:203,per-particle,cbreak,SUPPORTED,input/defaults.py Params.Cbreak -> preeq/complex.py,grep,
 cfermi,input_densitypar,input_densitypar.f90:458,per-nucleus-barrier,5.0,SUPPORTED,"input/defaults.py Params.cfermi -> density/ld_nx2.py, density/models.py, density/parameters.py, native/ld.c",grep,
 cglobal,input_densitymodel,input_densitymodel.f90:214,value,1e-20,SUPPORTED,input/defaults.py Params.cglobal -> capture_fast.py,test:test_defaults.py,
-channelenergy,input_basicreac,input_basicreac.f90:187,flag,n,IGNORED,input/defaults.py Options.flagEchannel,,parsed into Options/Params but no engine code reads flagEchannel
+channelenergy,input_basicreac,input_basicreac.f90:187,flag,n,SUPPORTED,input/defaults.py Options.flagEchannel -> specobs.energy_spectra,code,espec conversion of spectra.f90:152-158 (not checked against stock)
 channels,input_basicreac,input_basicreac.f90:127,flag,n,SUPPORTED,structure/scalars.py:144,manual,"exclusive channels are always computed (flagchannels hard-wired on); `channels n` has no effect, which is harmless"
 cknock,input_preeqpar,input_preeqpar.f90:197,per-particle,1.0,SUPPORTED,input/defaults.py Params.Cknock -> preeq/complex.py:354 (knockout.f90:158),test:test_kwcov_b5.py,"Fe-56 n `cknock a 2`, `cknock n 2`: stock and engine 0.0 % (no knockout cross section survives for an incident neutron)"
 class2,input_fissionmodel,input_fissionmodel.f90:146,flag,n,SUPPORTED,"input/defaults.py Options.flagclass2 -> fission/fis_ceng.py, fission/fission_batch_ladder.py, fission/parameters.py, fission/transmission.py",grep,
@@ -76,7 +76,7 @@ colenhance,input_densitymodel,input_densitymodel.f90:198,flag | value+nucleus,n,
 colldamp,input_densitymodel,input_densitymodel.f90:158,flag,n,SUPPORTED,"input/defaults.py Options.flagcolldamp -> density/ld_nx2.py, density/parameters.py, native/ld.h",grep,
 components,input_output,input_output.f90:313,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 compound,input_compoundmodel,input_compoundmodel.f90:117,flag,y,SUPPORTED,"input/defaults.py Options.flagcomp -> emission/multiple.py, input/nuclides.py","test:conftest.py,test_angout.py,test_binquad2.py",
-core,input_directpar,input_directpar.f90:101,value,-1,SUPPORTED,"input/defaults.py Options.core -> angout.py, astro/stellar.py, capture_fast_batch.py, capture_gpu.py (+123)","test:test_collrule.py,test_compound.py,test_open2.py",
+core,input_directpar,input_directpar.f90:101,value,-1,SUPPORTED,"input/defaults.py Options.core -> angout.py, astro/stellar.py, capture_fast_batch.py, capture_gpu.py (+124)","test:test_collrule.py,test_compound.py,test_open2.py",
 coulomb,input_directmodel,input_directmodel.f90:215,flag,y,IGNORED,input/defaults.py Options.flagcoulomb,,parsed into Options/Params but no engine code reads flagcoulomb
 cpang,input_directmodel,input_directmodel.f90:152,flag,n,SUPPORTED,input/defaults.py Options.flagcpang -> angout.flagcompang,test:test_angout.py,compound angular distributions for charged projectiles
 cstrip,input_preeqpar,input_preeqpar.f90:191,per-particle,1.0,SUPPORTED,input/defaults.py Params.Cstrip -> omp/tfold.py,"test:conftest.py,test_na_v1.py,test_tfold.py",
@@ -87,7 +87,7 @@ d0,input_densitypar,input_densitypar.f90:312,per-nucleus,0.0,SUPPORTED,"input/de
 d1adjust,input_omppar,input_omppar.f90:380,per-particle,1.0,SUPPORTED,"input/defaults.py Params.d1adjust -> capture_fast.py, omp/omp_nx2.py, omp/parameters.py",test:test_eadj.py,
 d2adjust,input_omppar,input_omppar.f90:389,per-particle,1.0,SUPPORTED,"input/defaults.py Params.d2adjust -> omp/omp_nx2.py, omp/parameters.py",grep,
 d3adjust,input_omppar,input_omppar.f90:398,per-particle,1.0,SUPPORTED,"input/defaults.py Params.d3adjust -> omp/omp_nx2.py, omp/parameters.py",grep,
-ddxmode,input_output,input_output.f90:279,value,0,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
+ddxmode,input_output,input_output.f90:279,value,0,SUPPORTED,input/defaults.py Options.ddxmode -> specobs.py,test:test_specobs.py,full DDX arrays + fileddxa/fileddxe; giant-resonance part isotropic
 deformfile,input_levels,input_levels.f90:228,per-element-file,,SUPPORTED,input/defaults.py Options.deformfile_of -> structure/deformation.py,test:test_kwcov_b5.py,Fe-56 beta2(2+) 0.239 -> 0.30: 0.06 % (stock moved 2.6 %). Best-file lines (Hf-174..180) still left out with a warning
 deltaw,input_densitypar,input_densitypar.f90:288,per-nucleus-barrier,0.0,SUPPORTED,"input/defaults.py Params.deltaW -> density/ld_ceng.py, density/ld_nx2.py, density/matching.py, density/npwindow.py (+3)",grep,
 densfile,input_densitypar,input_densitypar.f90:407,per-nucleus-file,,MISSING,input/fitlib.py _SKIP (refused on a deck line),test:test_kwcov_b5.py,external level-density table file not read: a deck line with it is REFUSED (was skipped silently)
@@ -109,12 +109,12 @@ egr,input_gammapar,input_gammapar.f90:196,per-nucleus-radiation,0.0,SUPPORTED,"i
 egradjust,input_gammapar,input_gammapar.f90:250,per-nucleus-radiation,1.0,SUPPORTED,input/defaults.py Params.egradjust -> gamma/parameters.py,test:test_etablefix.py,
 ejectiles,input_basicpar,input_basicpar.f90:98,value,g n p d t h a,READ_ONLY_DEFAULT,input/defaults.py Options.parinclude + UNPORTED,test:test_kwcov_b2.py,"a subset is REFUSED: parskip reaches only the channel bookkeeping, not the decay (Fe-56 `ejectiles g n p` 14 MeV: stock (n,2n) +3.4 %, engine 0.0 %)"
 ejoin,input_omppar,input_omppar.f90:499,per-particle,200.0,SUPPORTED,input/defaults.py Params.Ejoin -> omp/parameters.py,grep,
-electronconv,input_levels,input_levels.f90:195,flag,y,SUPPORTED,input/defaults.py Options.flagelectron -> structure/levels.py,grep,
+electronconv,input_levels,input_levels.f90:195,flag,y,SUPPORTED,"input/defaults.py Options.flagelectron -> specobs.py, structure/levels.py",grep,
 element,input_main,input_main.f90:117,value,Fe,SUPPORTED,"engine run(Z, A) arguments",manual,target is a run argument (TALYSworld: target)
 elow,input_basicpar,input_basicpar.f90:93,value,1.00E-06,SUPPORTED,"input/defaults.py Options.eninclow_mev -> core/grids.py, structure/scalars.py",test:test_defaults.py,
-elwidth,input_directpar,input_directpar.f90:132,value,0.5,SUPPORTED,"input/defaults.py Params.elwidth -> compound/pop_reference.py, direct/chain.py, direct/dwba.py, direct/score.py",test:test_direct.py,
+elwidth,input_directpar,input_directpar.f90:132,value,0.5,SUPPORTED,"input/defaults.py Params.elwidth -> compound/pop_reference.py, direct/chain.py, direct/dwba.py, direct/score.py (+1)","test:test_direct.py,test_specobs.py",
 emsdmin,input_preeqpar,input_preeqpar.f90:273,value,0.0,IGNORED,input/defaults.py Params.Emsdmin,,parsed into Options/Params but no engine code reads Emsdmin
-endf,input_basicreac,input_basicreac.f90:133,flag,n,IGNORED,input/defaults.py,manual,"defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"
+endf,input_basicreac,input_basicreac.f90:133,flag,n,IGNORED,input/defaults.py,"test:test_angout.py,test_defaults.py,test_specobs.py","defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"
 endfdetail,input_basicreac,input_basicreac.f90:139,flag,y,IGNORED,input/defaults.py Options.flagendfdet,,parsed into Options/Params but no engine code reads flagendfdet
 endfecis,input_basicreac,input_basicreac.f90:115,flag,y,NA,input/defaults.py Options.flagendfecis,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 energy,input_main,input_main.f90:136,value,1.000,SUPPORTED,"input/energies.py read_energies, input/deck.py read_deck/run_deck",test:test_kwcov_b2.py,"single, `E1 E2 dE` range (dE 0 = 10 points), file, and pre-defined `n0-20.grid` grids, equal to TALYS's own `energies` files"
@@ -135,17 +135,17 @@ ffmodel,input_fissionmodel,input_fissionmodel.f90:187,value,1,IGNORED,input/defa
 ffspin,input_fissionmodel,input_fissionmodel.f90:176,flag,n,IGNORED,input/defaults.py Options.flagffspin,,parsed into Options/Params but no engine code reads flagffspin
 fileangle,input_outfiles,input_outfiles.f90:252,value,,SUPPORTED,input/defaults.py Options.fileangle -> angout.py,test:test_angout.py,"one level per line (TALYS); `fileangle 1,2` also accepted; repeated deck lines need B2's plumbing to merge"
 filechannels,input_outfiles,input_outfiles.f90:215,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-fileddxa,input_outfiles,input_outfiles.f90:239,value,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-fileddxe,input_outfiles,input_outfiles.f90:227,value,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
+fileddxa,input_outfiles,input_outfiles.f90:239,value,,SUPPORTED,input/defaults.py Options.fileddxa -> specobs.py,test:test_specobs.py,"`fileddxa n 30`; deck line form `fileddxa n,30,90,p,150` until B2 merges repeated lines"
+fileddxe,input_outfiles,input_outfiles.f90:227,value,,SUPPORTED,input/defaults.py Options.fileddxe -> specobs.py,test:test_specobs.py,`fileddxe n 3.0` (same deck-line note as fileddxa)
 filedensity,input_densitypar,input_densitypar.f90:486,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 filediscrete,input_outfiles,input_outfiles.f90:259,value,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 fileelastic,input_outfiles,input_outfiles.f90:191,flag,n,SUPPORTED,input/defaults.py Options.fileelastic -> angout.py,test:test_angout.py,"elastic angle file without outangle (isotropic compound, as TALYS)"
 filefission,input_outfiles,input_outfiles.f90:209,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-filegamdis,input_outfiles,input_outfiles.f90:266,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
+filegamdis,input_outfiles,input_outfiles.f90:266,flag,n,SUPPORTED,input/defaults.py Options.filegamdis,test:test_specobs.py,files follow INCOGNITA_SPECOBS_DIR
 filepsf,input_gammamodel,input_gammamodel.f90:125,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 filerecoil,input_outfiles,input_outfiles.f90:221,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 fileresidual,input_outfiles,input_outfiles.f90:203,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-filespectrum,input_outfiles,input_outfiles.f90:178,value,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
+filespectrum,input_outfiles,input_outfiles.f90:178,value,,SUPPORTED,input/defaults.py Options.filespectrum -> specobs.write_files,test:test_specobs.py,which ejectiles get a file (Results carries all)
 filetotal,input_outfiles,input_outfiles.f90:197,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 fisbar,input_fissionpar,input_fissionpar.f90:190,per-nucleus-barrier,0.0,SUPPORTED,"input/defaults.py Params.fbarrier -> emission/feeding.py, fission/parameters.py, fission/systematics.py",test:test_fission.py,
 fisbaradjust,input_fissionpar,input_fissionpar.f90:210,per-nucleus-barrier,1.0,SUPPORTED,"input/defaults.py Params.fbaradjust -> emission/feeding.py, fission/barriers.py, fission/parameters.py","test:test_fisbarwire.py,test_fisbar_ld.py",
@@ -165,7 +165,7 @@ ftable,input_gammapar,input_gammapar.f90:313,per-nucleus-radiation,1.0,SUPPORTED
 ftableadjust,input_gammapar,input_gammapar.f90:341,per-nucleus-radiation,1.0,SUPPORTED,"input/defaults.py Params.ftableadjust -> gamma/ftglobal.py, gamma/parameters.py",test:test_etablefix.py,
 fullhf,input_compoundmodel,input_compoundmodel.f90:142,flag,n,SUPPORTED,"input/defaults.py Options.flagfullhf -> capture_fast_batch.py, capture_gpu_setup.py, compound/chain.py, compound/continuum.py (+9)",grep,
 fymodel,input_fissionmodel,input_fissionmodel.f90:182,value,2,IGNORED,input/defaults.py Options.fymodel,,parsed into Options/Params but no engine code reads fymodel
-g,input_preeqpar,input_preeqpar.f90:155,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.g -> angout.py, astro/stellar.py, capture_gpu.py, capture_tasks.py (+98)","test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py",
+g,input_preeqpar,input_preeqpar.f90:155,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.g -> angout.py, astro/stellar.py, capture_gpu.py, capture_tasks.py (+99)","test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py",
 gadjust,input_preeqpar,input_preeqpar.f90:167,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.gadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py","test:test_fitlib.py,test_pegq.py",
 gamgam,input_gammapar,input_gammapar.f90:375,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.gamgam -> gamma/actphys.py, gamma/ggnorm.py, gamma/transmission.py, structure/files.py (+1)",grep,
 gamgamadjust,input_gammapar,input_gammapar.f90:381,per-nucleus,1.0,SUPPORTED,input/defaults.py Params.gamgamadjust -> structure/resonances.py,grep,
@@ -184,7 +184,7 @@ globalwtable,input_gammamodel,input_gammamodel.f90:159,flag,y,SUPPORTED,input/de
 gmradjustd,input_preeqpar,input_preeqpar.f90:318,value,1.0,SUPPORTED,input/defaults.py Params.GMRadjustD -> direct/dwba.py,grep,
 gmradjuste,input_preeqpar,input_preeqpar.f90:278,value,1.0,SUPPORTED,input/defaults.py Params.GMRadjustE -> direct/dwba.py,grep,
 gmradjustg,input_preeqpar,input_preeqpar.f90:298,value,1.0,SUPPORTED,input/defaults.py Params.GMRadjustG -> direct/dwba.py,grep,
-gn,input_preeqpar,input_preeqpar.f90:173,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.gn -> density/ld_nx2.py, density/parameters.py, density/particle_hole.py, emission/feeding.py (+10)","test:test_nx2_preeq.py,test_pegq.py",
+gn,input_preeqpar,input_preeqpar.f90:173,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.gn -> density/ld_nx2.py, density/parameters.py, density/particle_hole.py, emission/feeding.py (+11)","test:test_nx2_preeq.py,test_pegq.py",
 gnadjust,input_preeqpar,input_preeqpar.f90:179,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.gnadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py",test:test_pegq.py,
 gnfit,input_fit,input_fit.f90:153,flag,n,SUPPORTED,input/fitlib.py _cards (gn.par),test:test_kwcov_b2.py,"wired; xsfit.f90 does not match the projectile, so the library applies on any run; response untested (charged/photon projectiles behind INCOGNITA_CPINC)"
 gnorm,input_gammamodel,input_gammamodel.f90:171,flag,n,READ_ONLY_DEFAULT,input/defaults.py Options.flaggnorm,,refused when set (defaults.UNPORTED): gnorm y
@@ -290,7 +290,7 @@ outecis,input_directmodel,input_directmodel.f90:191,flag,n,NA,,,output/path/plum
 outexcitation,input_output,input_output.f90:295,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 outfission,input_fissionpar,input_fissionpar.f90:311,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 outfy,input_fissionmodel,input_fissionmodel.f90:212,flag,n,NA,input/defaults.py Options.flagoutfy,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-outgamdis,input_output,input_output.f90:289,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
+outgamdis,input_output,input_output.f90:289,flag,n,SUPPORTED,input/defaults.py Options.flaggamdis -> specobs.py,test:test_specobs.py,gamZZZAAALiiLjj.tot (conversion corrected with electronconv y)
 outgamma,input_gammamodel,input_gammamodel.f90:119,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 outinverse,input_output,input_output.f90:261,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 outkd,input_ompmodel,input_ompmodel.f90:313,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
@@ -300,7 +300,7 @@ outmain,input_output,input_output.f90:171,flag,y,NA,,,output/path/plumbing switc
 outomp,input_ompmodel,input_ompmodel.f90:307,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 outpopulation,input_output,input_output.f90:249,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 outpreequilibrium,input_preeqmodel,input_preeqmodel.f90:215,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-outspectra,input_output,input_output.f90:273,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
+outspectra,input_output,input_output.f90:273,flag,n,SUPPORTED,input/defaults.py Options.flagspec -> specobs.py,test:test_specobs.py,"spectraout: <x>spec.tot columns, Eaverage; INCOGNITA_SPECOBS=1 is the port switch"
 outtransenergy,input_directmodel,input_directmodel.f90:227,flag,y,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 pair,input_densitypar,input_densitypar.f90:270,per-nucleus,1e-20,SUPPORTED,"input/defaults.py Params.pair -> angout.py, compound/ceang.py, compound/ceang_types.py, compound/target.py (+32)","test:test_ceang.py,test_cengld2.py,test_compound.py",
 pairconstant,input_densitypar,input_densitypar.f90:439,value,12.0,SUPPORTED,"input/defaults.py Params.pairconstant -> density/ld_nx2.py, density/parameters.py",test:test_cengld2.py,
@@ -377,7 +377,7 @@ rwsoadjust,input_omppar,input_omppar.f90:443,per-particle,omp_link,SUPPORTED,"in
 rwsoadjustf,input_ompmodel,input_ompmodel.f90:258,value,,MISSING,,,
 s2adjust,input_densitypar,input_densitypar.f90:330,per-nucleus-barrier,1.0,SUPPORTED,"input/defaults.py Params.s2adjust -> capture_fast.py, density/ld_nx2.py, density/models.py, density/parameters.py (+3)","test:test_cengld2.py,test_fitlib.py",
 sacs,input_output,input_output.f90:334,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-segment,input_numerics,input_numerics.f90:170,value,1,SUPPORTED,"input/defaults.py Options.segment -> astro/stellar.py, compound/dens_reference.py, core/grids.py, density/matching.py (+8)","test:test_density.py,test_pewindow_gs.py",
+segment,input_numerics,input_numerics.f90:170,value,1,SUPPORTED,"input/defaults.py Options.segment -> astro/stellar.py, compound/dens_reference.py, core/grids.py, density/matching.py (+9)","test:test_density.py,test_pewindow_gs.py,test_specobs.py",
 sfexp,input_gammapar,input_gammapar.f90:434,value | value+nucleus,sfexp,SUPPORTED,"input/fitlib.py (class 15, value first) -> direct/capture.py spectroscopic_factors",test:test_kwcov_b5.py,Au-197 racap.tot `sfexp 0.5` and `sfexp 0.5 79 198 0`: 0.00 % (stock -1.6 % at 1 keV)
 sffactor,input_fissionmodel,input_fissionmodel.f90:170,flag,n,SUPPORTED,input/defaults.py Options.flagsffactor -> fission/parameters.py,grep,
 sfth,input_gammapar,input_gammapar.f90:452,value | value+nucleus,1.0,SUPPORTED,"input/fitlib.py (class 15, value first) -> direct/capture.py spectroscopic_factors",test:test_kwcov_b5.py,reaches the racap structure since B5 (it took the defaults); Au-197 / Fe-56 / Zr-90 racap.tot: 0.0 % on both sides (the continuum factor does not move xs(dir. cap.))
