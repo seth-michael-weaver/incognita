@@ -36,14 +36,14 @@ equivalent keyword.
 
 | status | keywords |
 |---|---|
-| SUPPORTED | 357 |
+| SUPPORTED | 370 |
 | READ_ONLY_DEFAULT | 12 |
 | IGNORED | 16 |
 | MISSING | 6 |
-| NA | 55 |
+| NA | 42 |
 | **total** | 446 |
 
-Of the SUPPORTED rows, 237 have a test naming the keyword, 116 are code-path only (`grep`).
+Of the SUPPORTED rows, 250 have a test naming the keyword, 116 are code-path only (`grep`).
 
 ## By TALYS input group
 
@@ -52,28 +52,28 @@ Of the SUPPORTED rows, 237 have a test naming the keyword, 116 are code-path onl
 | (main/readinput) | 1 | 0 | 0 | 0 | 0 |
 | input_astro | 5 | 0 | 0 | 0 | 0 |
 | input_basicpar | 6 | 1 | 0 | 0 | 3 |
-| input_basicreac | 5 | 1 | 7 | 0 | 6 |
+| input_basicreac | 7 | 1 | 7 | 0 | 4 |
 | input_best | 3 | 0 | 0 | 0 | 1 |
 | input_compoundmodel | 8 | 1 | 0 | 0 | 1 |
 | input_compoundpar | 8 | 0 | 0 | 0 | 0 |
-| input_densitymodel | 14 | 0 | 0 | 0 | 1 |
-| input_densitypar | 35 | 0 | 0 | 1 | 1 |
-| input_directmodel | 5 | 3 | 0 | 0 | 7 |
+| input_densitymodel | 15 | 0 | 0 | 0 | 0 |
+| input_densitypar | 36 | 0 | 0 | 1 | 0 |
+| input_directmodel | 6 | 3 | 0 | 0 | 6 |
 | input_directpar | 7 | 0 | 0 | 0 | 0 |
 | input_fissionmodel | 11 | 0 | 5 | 1 | 1 |
 | input_fissionpar | 21 | 0 | 0 | 0 | 0 |
 | input_fit | 11 | 0 | 0 | 0 | 0 |
-| input_gammamodel | 6 | 2 | 0 | 2 | 2 |
+| input_gammamodel | 8 | 2 | 0 | 2 | 0 |
 | input_gammapar | 32 | 0 | 0 | 0 | 0 |
-| input_levels | 15 | 0 | 0 | 0 | 1 |
+| input_levels | 16 | 0 | 0 | 0 | 0 |
 | input_main | 6 | 1 | 0 | 0 | 0 |
 | input_mass | 5 | 0 | 0 | 1 | 0 |
 | input_medical | 10 | 0 | 0 | 0 | 0 |
 | input_numerics | 13 | 0 | 2 | 0 | 0 |
-| input_ompmodel | 26 | 2 | 2 | 1 | 2 |
+| input_ompmodel | 28 | 2 | 2 | 1 | 0 |
 | input_omppar | 42 | 1 | 0 | 0 | 0 |
 | input_outfiles | 7 | 0 | 0 | 0 | 5 |
-| input_output | 8 | 0 | 0 | 0 | 18 |
+| input_output | 11 | 0 | 0 | 0 | 15 |
 | input_path | 0 | 0 | 0 | 0 | 3 |
 | input_preeqmodel | 13 | 0 | 0 | 0 | 3 |
 | input_preeqpar | 34 | 0 | 0 | 0 | 0 |
@@ -135,8 +135,8 @@ Of the SUPPORTED rows, 237 have a test naming the keyword, 116 are code-path onl
 | blockbin | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | blockdirect | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | blockddx | input_output | flag | n | SUPPORTED | test:test_specobs.py | input/defaults.py Options.flagblockddx -> specobs.write_files | nddx.deg / nddx.MeV names |
-| blocklevels | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| blockomp | input_output | flag | y | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| blocklevels | input_output | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flagblocklevels -> ingout.write_files | levels.out with every levelsout call appended in TALYS's order; Fe-56 outbasic y deck: 3151 rows identical to stock |
+| blockomp | input_output | flag | y | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flagblockomp -> ingout.write_files | n: ompE<EEEE.EEE>_<p>.tot per energy (<= 0.023 %) |
 | blockpreeq | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | blockspectra | input_output | flag | n | SUPPORTED | test:test_specobs.py | input/defaults.py Options.flagblockspectra -> specobs.write_files | nspec.tot names |
 | blockyield | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
@@ -220,12 +220,12 @@ Of the SUPPORTED rows, 237 have a test naming the keyword, 116 are code-path onl
 | filechannels | input_outfiles | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | fileddxa | input_outfiles | value |  | SUPPORTED | test:test_specobs.py | input/defaults.py Options.fileddxa -> specobs.py | `fileddxa n 30`; deck line form `fileddxa n,30,90,p,150` until B2 merges repeated lines |
 | fileddxe | input_outfiles | value |  | SUPPORTED | test:test_specobs.py | input/defaults.py Options.fileddxe -> specobs.py | `fileddxe n 3.0` (same deck-line note as fileddxa) |
-| filedensity | input_densitypar | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| filedensity | input_densitypar | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.filedensity -> ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) densitycum statistics | default = outdensity; filedensity n leaves the D0 statistics and Exp_LD at 0 as densitycum.f90 (stock-identical) |
 | filediscrete | input_outfiles | value |  | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | fileelastic | input_outfiles | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.fileelastic -> angout.py | elastic angle file without outangle (isotropic compound, as TALYS) |
 | filefission | input_outfiles | flag | n | SUPPORTED | test:test_kwcov_b8.py | fisobs.py (output only; Results.extras / Results.spectra) rpZZZAAA.fis | turns FISOBS on: fission per fissioning nuclide (fissionout.f90), the Iwamoto PFNS and the Wahl nubar; vs stock within the engine's own (n,f) difference. y with endf y; TALYS's `channels y` default for it is not modelled |
 | filegamdis | input_outfiles | flag | n | SUPPORTED | test:test_specobs.py | input/defaults.py Options.filegamdis | files follow INCOGNITA_SPECOBS_DIR |
-| filepsf | input_gammamodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| filepsf | input_gammamodel | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.filepsf -> ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) gammaout psf files | psf<ZZZAAA>.E1/M1/E2/M2 (f, T, header with Gamma_gamma, C/E, S-wave): Fe-57 <= 0.0034 %, U-239 M1/M2 0.04 %, E1/E2 85-89 % at the same two energies; quirks kept: E2/M2 files carry f(l=1), filepsf without outgamma writes nothing |
 | filerecoil | input_outfiles | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | fileresidual | input_outfiles | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | filespectrum | input_outfiles | value |  | SUPPORTED | test:test_specobs.py | input/defaults.py Options.filespectrum -> specobs.write_files | which ejectiles get a file (Results carries all) |
@@ -361,11 +361,11 @@ Of the SUPPORTED rows, 237 have a test naming the keyword, 116 are code-path onl
 | optmodfilep | input_ompmodel | per-element-file |  | SUPPORTED | test:test_kwcov_b6.py | omp/ompdeck.py local_file -> omp/parameters.omppar/read_local_omp | element OMP file instead of optical/proton; Fe-56 with a Mn file (outgoing protons): 0.86 % ((n,np) 14 MeV) |
 | outall | input_basicreac | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outangle | input_output | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.flagang -> angout.py | angleout + compound angular distributions (flagcompang); INCOGNITA_ANGOUT=1 is the port switch |
-| outbasic | input_basicreac | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| outbasic | input_basicreac | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flagbasic -> the out* defaults (outlevels, outdensity, outgamma, outomp, outinverse, outfission) | also levels of every nucleus structure builds and densities of every populated compound nucleus (flagpop), as stock; its population / check / direct / gamma-decay (gamma*.tot) parts are not given |
 | outbinspectra | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outcheck | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outdecay | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| outdensity | input_densitymodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| outdensity | input_densitymodel | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flagdensity -> ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) densityout | ld<ZZZAAA>.gs (+ .bNN per fission barrier) and nld<ZZZAAA>.tab[_bNN]: header, per-level, per-parity and spin-distribution blocks; tables <= 0.012 %, header <= 0.07 % (Chi-2 D0 up to 8 % relative: a squared 1e-5 D0theo difference), nld (es9.2 print) <= 0.96 %, TALYS mode (default mode: NPWINDOW changes the Fe-56 density by design, 18.7 %) |
 | outdirect | input_directmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outdiscrete | input_directmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outdwba | input_preeqmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
@@ -374,22 +374,22 @@ Of the SUPPORTED rows, 237 have a test naming the keyword, 116 are code-path onl
 | outfission | input_fissionpar | flag | n | SUPPORTED | test:test_kwcov_b8.py | fisobs.py (output only; Results.extras / Results.spectra) (as filefission) | turns FISOBS on; the talys.out barrier / transmission tables stay PARTIAL (ingredients.py) |
 | outfy | input_fissionmodel | flag | n | NA |  | input/defaults.py Options.flagoutfy | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outgamdis | input_output | flag | n | SUPPORTED | test:test_specobs.py | input/defaults.py Options.flaggamdis -> specobs.py | gamZZZAAALiiLjj.tot (conversion corrected with electronconv y) |
-| outgamma | input_gammamodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| outinverse | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| outkd | input_ompmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| outgamma | input_gammamodel | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flaggamma -> ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) gammaout | cross_g.tot (photoabsorption, first energy): Fe-56 <= 1e-6; U-238 19.7 % at 0.4 / 0.6 MeV (the port's T-dependent E1 table at two grid energies; engine untouched, recorded) |
+| outinverse | input_output | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flaginverse -> ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) inverseout, incidentout | transmission_<p>.out, cross_<p>.tot, transmission_inc.out: <= 0.0008 % (TALYS mode, four targets; U-238 incident 0.035 %) |
+| outkd | input_ompmodel | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flagoutkd -> ingout.kd03_table (Results.ingout['kd03']) | talys.out's KD03 lines as one row per nucleon residual: Fe / Co / Pb <= 0.05 % (print precision); U-238 45 %: stock's first printed block is global KD03, the port's omppar has a local U-238 entry |
 | outlegendre | input_directmodel | flag | n | SUPPORTED | test:test_angout.py | input/defaults.py Options.flaglegendre -> angout.py | leg files (Total, Direct, Compound, Normalized, ENDF-6) |
-| outlevels | input_levels | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| outlevels | input_levels | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flaglevels -> ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) levelsout | levels<ZZZAAA>.out of target and compound nucleus (+ every nucleus structure builds and every populated compound nucleus with outbasic): mass, S_n/S_p/S_a, levels, branches, conversion, half-lives; identical to stock (Fe-56, Co-59, Pb-208, U-238), incl. TALYS's second-read conversion misalignment |
 | outmain | input_output | flag | y | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
-| outomp | input_ompmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| outomp | input_ompmodel | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flagoutomp -> ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) omppar, omp.out, spr.opt | omppar_<p>.out <= 0.0004 %; omp.out radial potential on ECIS's mesh (f8.5 step) <= 0.044 %; spr.opt exact to print |
 | outpopulation | input_output | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outpreequilibrium | input_preeqmodel | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
 | outspectra | input_output | flag | n | SUPPORTED | test:test_specobs.py | input/defaults.py Options.flagspec -> specobs.py | spectraout: <x>spec.tot columns, Eaverage; INCOGNITA_SPECOBS=1 is the port switch |
-| outtransenergy | input_directmodel | flag | y | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| outtransenergy | input_directmodel | flag | y | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flagtransen -> ingout.inverse_files | n: one block per L over energy (TALYS layout); <= 0.0006 % except alpha L=19 0.72 % (T ~1e-8) |
 | pair | input_densitypar | per-nucleus | 1e-20 | SUPPORTED | test:test_ceang.py,test_cengld2.py,test_compound.py | input/defaults.py Params.pair -> angout.py, compound/ceang.py, compound/ceang_types.py, compound/target.py (+37) |  |
 | pairconstant | input_densitypar | value | 12.0 | SUPPORTED | test:test_cengld2.py | input/defaults.py Params.pairconstant -> density/ld_nx2.py, density/parameters.py, ingout.py |  |
 | pairmodel | input_preeqmodel | value | 2 | SUPPORTED | grep | input/defaults.py Options.pairmodel -> density/particle_hole.py, preeq/complex.py, preeq/exciton.py, preeq/exciton_b7.py |  |
 | parity | input_densitypar | flag | n | SUPPORTED | test:test_ccfast.py,test_ccglue.py,test_ccnumerov.py | input/defaults.py Options.flagparity -> compound/dens_reference.py, density/ld_nx2.py, density/parameters.py, density/tables.py |  |
-| partable | input_basicreac | flag | n | NA |  |  | output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE |
+| partable | input_basicreac | flag | n | SUPPORTED | test:test_kwcov_b13.py | input/defaults.py Options.flagpartable -> ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) partable / finalout | parameters.dat: identical keys (Fe-56 1499, Co-59 1160, Pb-208 1345 rows); values to f10.5 except 9-14 rows per deck, the CT matching energy Exmatch / E0 (<= 1.3e-4, TALYS's single-precision root, inside the A-ld 1e-4 gate) |
 | pfnsmodel | input_fissionmodel | value | 1 | SUPPORTED | test:test_kwcov_b8.py | fisobs.py (output only; Results.extras / Results.spectra) iwamoto | 1: Iwamoto PFNS (iwamoto.f90, single precision as TALYS): grid, E-average and every column = stock to 2e-5 (U-238, U-235, Pu-239, Th-232). 2: no Iwamoto spectrum, as stock without massdis; the fragment-decay PFNS (ffevap.f90) is B14 |
 | pglobal | input_densitymodel | value | 1e-20 | SUPPORTED | grep | input/defaults.py Params.pglobal -> capture_fast.py, ingout.py |  |
 | phmodel | input_preeqmodel | value | 1 | SUPPORTED | test:test_phmicro.py,test_phmodel2_native.py | input/defaults.py Options.phmodel -> density/particle_hole.py, emission/multiple_native.py, engine_c.py, gpu_full_setup.py (+6) |  |

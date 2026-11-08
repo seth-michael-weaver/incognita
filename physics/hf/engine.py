@@ -320,6 +320,9 @@ class ChainedFull:
             from physics.hf import production  # KWCOV B11: production y (off: nothing)
 
             production.begin_run(cas, declared)
+            from physics.hf import ingout  # KWCOV B13: ingredient output files (off: nothing)
+
+            ingout.begin_run(cas)
             for nin, (binp, cinp) in enumerate(pairs, start=1):
                 if not dumped:
                     binp, cinp = built.shell(nin, run_axis[nin - 1])
@@ -912,6 +915,9 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
 
     res = production.add_to_results(res, injection)
+    from physics.hf import ingout  # KWCOV B13: ingredient output files (off: unchanged)
+
+    res = ingout.add_to_results(res, injection)
     return thermal.add_to_results(res, injection)
 
 

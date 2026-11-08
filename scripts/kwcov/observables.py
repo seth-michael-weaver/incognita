@@ -148,8 +148,9 @@ ROWS = [
      "test:test_kwcov_b10b.py; port on stock's eref row 2e-6; engine vs stock (TALYS mode) Fe-55/56/61, Ag-109 (isomer "
      "branches), U-238 <= 6e-6; default mode the elastic/total rows carry LOWEPOT's elastic (x274 lower for Fe-56). "
      "Not: rp*.Lnn rows (no engine residual-isomer output)"),
-    ("S0, S1, R', D0, <Gamma_gamma> (resonance parameters)", "talys.out", "incidentout.f90, densityout.f90", "",
-     "PARTIAL", "ingredients.py (D0, Gg, S0)", "B4", ""),
+    ("S0, S1, R', D0, <Gamma_gamma> (resonance parameters)", "spr.opt, ld*.gs, psf*.E1 headers",
+     "spr.f90, densityout.f90, gammaout.f90", "outomp, outdensity, filepsf", "SUPPORTED",
+     "ingredients.py (D0, Gg, S0) + ingout.py (the files)", "B13", "test:test_kwcov_b13.py"),
     # --- astro / medical ---
     ("astrophysical reaction rates", "astrorate.g/p/a/f, astrorate.tot, astrorateZZZAAA.tot, .LNN", "astroout.f90:1",
      "astro, astrogs, astroex, astroT, astroE, nonthermlev", "SUPPORTED",
@@ -165,16 +166,25 @@ ROWS = [
      "test:test_kwcov_b11.py; port on stock rp = stock Y to 1e-6; engine vs stock = the production-rate difference "
      "(Ga-68 0.001 %, Tc-99m 0.07 %, F-18 0.49 %, At-211 0.77 %); natural targets (mass 0) refused"),
     # --- ingredients / diagnostics ---
-    ("level densities", "ld*.tot nld*.tab", "densityout.f90:1", "outdensity, filedensity", "PARTIAL", "ingredients.py", "B11", ""),
-    ("photon strength functions", "psf*.E1", "gammaout.f90:1", "outgamma, filepsf", "PARTIAL", "ingredients.py", "B11", ""),
-    ("transmission coefficients / inverse cross sections", "talys.out", "inverseout.f90:1", "outinverse, outtransenergy",
-     "INTERNAL", "omp/*", "B11", ""),
-    ("optical-model parameters", "talys.out", "incidentout.f90", "outomp, outkd", "INTERNAL", "omp/parameters.py", "B11", ""),
+    ("level densities", "ld*.gs ld*.bNN nld*.tab", "densityout.f90:1", "outdensity, filedensity", "SUPPORTED",
+     "ingout.py (Results.ingout, write_files)", "B13", "test:test_kwcov_b13.py; tables <= 0.012 %, nld (es9.2) <= 1 % "
+     "in TALYS mode; fission barriers included"),
+    ("photon strength functions", "psf*.E1 psf*.M1 psf*.E2 psf*.M2 cross_g.tot", "gammaout.f90:1", "outgamma, filepsf",
+     "SUPPORTED", "ingout.py (Results.ingout)", "B13", "test:test_kwcov_b13.py; Fe-57 <= 0.0034 %; U-239 E1 85-89 % "
+     "at 0.4/0.6 MeV (T-dependent table, port difference recorded)"),
+    ("transmission coefficients / inverse cross sections", "transmission_*.out cross_*.tot transmission_inc.out",
+     "inverseout.f90:1, incidentout.f90:1", "outinverse, outtransenergy", "SUPPORTED", "ingout.py (Results.ingout)",
+     "B13", "test:test_kwcov_b13.py; <= 0.0008 % (TALYS mode)"),
+    ("optical-model parameters", "omppar_*.out omp.out ompE*.tot spr.opt, talys.out KD03", "inverseecis.f90, "
+     "incidentread.f90, spr.f90, opticalnp.f90", "outomp, outkd, blockomp", "SUPPORTED", "ingout.py (Results.ingout)",
+     "B13", "test:test_kwcov_b13.py; omppar <= 0.0004 %, omp.out <= 0.044 %"),
     ("populations / decay per bin", "population*.out", "multiple.f90", "outpopulation, outdecay", "INTERNAL", "emission/*", "", ""),
     ("pre-equilibrium output", "talys.out", "preeqout.f90:1", "outpreequilibrium", "INTERNAL", "preeq/*", "", ""),
-    ("discrete level / structure tables", "talys.out", "levelsout.f90:1", "outlevels", "NA", "", "", ""),
-    ("model parameter table (TASMAN/covariance input)", "parameters.dat", "nuclides.f90 (partable block)", "partable", "MISSING", "", "B11",
-     "covariances are TASMAN's (we have tmc.py); parameters.dat lets TASMAN-style sampling see every value used"),
+    ("discrete level / structure tables", "levels*.out levels.out", "levelsout.f90:1", "outlevels, blocklevels, outbasic",
+     "SUPPORTED", "ingout.py (Results.ingout)", "B13", "test:test_kwcov_b13.py; identical to stock"),
+    ("model parameter table (TASMAN/covariance input)", "parameters.dat", "partable.f90, finalout.f90, nuclides.f90",
+     "partable", "SUPPORTED", "ingout.py (Results.ingout['parameters.dat'])", "B13",
+     "test:test_kwcov_b13.py; identical keys, values to f10.5 except the CT matching energies (<= 1.3e-4)"),
     ("ENDF-6 helper outputs", "endf.cs, *.ang for ENDF", "endfinfo.f90", "endf, endfdetail", "MISSING", "", "B12",
      "TEFAL input; low value for us"),
     ("statistical analysis of cross sections", "sacs.dat", "sacs.f90:1", "sacs", "MISSING", "", "B12", ""),

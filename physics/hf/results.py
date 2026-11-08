@@ -61,6 +61,11 @@ class Results:
     # as {"files": {Y file name: {column: ndarray over time}}, "params": {Y file name: {...}}, "summary": [...],
     # "meta": {...}}; physics/hf/production.py
     production: dict = field(default_factory=dict)
+    # INGOUT (KWCOV B13: outlevels / outdensity / filedensity / outgamma / filepsf / outinverse / outomp / outkd /
+    # partable / outbasic, default empty): TALYS's ingredient files as {file name: {"header", "blocks"}} (levels*.out,
+    # ld*.gs, nld*.tab, psf*.E1, cross_g.tot, transmission_*.out, cross_*.tot, omppar_*.out, omp.out, spr.opt) plus
+    # "parameters.dat" and "kd03"; physics/hf/ingout.py
+    ingout: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:

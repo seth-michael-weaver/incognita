@@ -347,6 +347,58 @@ B11: dict = {
     "radiounit": ("SUPPORTED", "input/defaults.py Options.radiounit + " + _PR, "bq kbq mbq gbq ci kci mci; exact", _T11),
     "yieldunit": ("SUPPORTED", "input/defaults.py Options.yieldunit + " + _PR, "num mug mg g kg; exact", _T11),
 }
+_T13 = "test:test_kwcov_b13.py"
+_IO = "ingout.py (Options -> engine_c/engine begin_run, add_to_results -> Results.ingout; INCOGNITA_INGOUT_DIR) "
+#: KWCOV B13 rows (docs/hf/COVERAGE_PLAN.md B13); stock TALYS-2.25 n + Fe-56 / Co-59 / Pb-208 / U-238, every B13
+#: switch on; scripts/kwcov/b13_response.py (worst |ln(ours/stock)| per file, TALYS mode)
+B13: dict = {
+    "outlevels": ("SUPPORTED", "input/defaults.py Options.flaglevels -> " + _IO + "levelsout",
+                  "levels<ZZZAAA>.out of target and compound nucleus (+ every nucleus structure builds and every "
+                  "populated compound nucleus with outbasic): mass, S_n/S_p/S_a, levels, branches, conversion, "
+                  "half-lives; identical to stock (Fe-56, Co-59, Pb-208, U-238), incl. TALYS's second-read "
+                  "conversion misalignment", _T13),
+    "blocklevels": ("SUPPORTED", "input/defaults.py Options.flagblocklevels -> ingout.write_files",
+                    "levels.out with every levelsout call appended in TALYS's order; Fe-56 outbasic y deck: 3151 rows "
+                    "identical to stock", _T13),
+    "outdensity": ("SUPPORTED", "input/defaults.py Options.flagdensity -> " + _IO + "densityout",
+                   "ld<ZZZAAA>.gs (+ .bNN per fission barrier) and nld<ZZZAAA>.tab[_bNN]: header, per-level, per-parity "
+                   "and spin-distribution blocks; tables <= 0.012 %, header <= 0.07 % (Chi-2 D0 up to 8 % relative: a "
+                   "squared 1e-5 D0theo difference), nld (es9.2 print) <= 0.96 %, TALYS mode (default mode: NPWINDOW "
+                   "changes the Fe-56 density by design, 18.7 %)", _T13),
+    "filedensity": ("SUPPORTED", "input/defaults.py Options.filedensity -> " + _IO + "densitycum statistics",
+                    "default = outdensity; filedensity n leaves the D0 statistics and Exp_LD at 0 as densitycum.f90 "
+                    "(stock-identical)", _T13),
+    "outgamma": ("SUPPORTED", "input/defaults.py Options.flaggamma -> " + _IO + "gammaout",
+                 "cross_g.tot (photoabsorption, first energy): Fe-56 <= 1e-6; U-238 19.7 % at 0.4 / 0.6 MeV (the "
+                 "port's T-dependent E1 table at two grid energies; engine untouched, recorded)", _T13),
+    "filepsf": ("SUPPORTED", "input/defaults.py Options.filepsf -> " + _IO + "gammaout psf files",
+                "psf<ZZZAAA>.E1/M1/E2/M2 (f, T, header with Gamma_gamma, C/E, S-wave): Fe-57 <= 0.0034 %, U-239 M1/M2 "
+                "0.04 %, E1/E2 85-89 % at the same two energies; quirks kept: E2/M2 files carry f(l=1), filepsf "
+                "without outgamma writes nothing", _T13),
+    "outinverse": ("SUPPORTED", "input/defaults.py Options.flaginverse -> " + _IO + "inverseout, incidentout",
+                   "transmission_<p>.out, cross_<p>.tot, transmission_inc.out: <= 0.0008 % (TALYS mode, four "
+                   "targets; U-238 incident 0.035 %)", _T13),
+    "outtransenergy": ("SUPPORTED", "input/defaults.py Options.flagtransen -> ingout.inverse_files",
+                       "n: one block per L over energy (TALYS layout); <= 0.0006 % except alpha L=19 0.72 % (T ~1e-8)",
+                       _T13),
+    "outomp": ("SUPPORTED", "input/defaults.py Options.flagoutomp -> " + _IO + "omppar, omp.out, spr.opt",
+               "omppar_<p>.out <= 0.0004 %; omp.out radial potential on ECIS's mesh (f8.5 step) <= 0.044 %; spr.opt "
+               "exact to print", _T13),
+    "blockomp": ("SUPPORTED", "input/defaults.py Options.flagblockomp -> ingout.write_files",
+                 "n: ompE<EEEE.EEE>_<p>.tot per energy (<= 0.023 %)", _T13),
+    "outkd": ("SUPPORTED", "input/defaults.py Options.flagoutkd -> ingout.kd03_table (Results.ingout['kd03'])",
+              "talys.out's KD03 lines as one row per nucleon residual: Fe / Co / Pb <= 0.05 % (print precision); "
+              "U-238 45 %: stock's first printed block is global KD03, the port's omppar has a local U-238 entry", _T13),
+    "partable": ("SUPPORTED", "input/defaults.py Options.flagpartable -> " + _IO + "partable / finalout",
+                 "parameters.dat: identical keys (Fe-56 1499, Co-59 1160, Pb-208 1345 rows); values to f10.5 except "
+                 "9-14 rows per deck, the CT matching energy Exmatch / E0 (<= 1.3e-4, TALYS's single-precision root, "
+                 "inside the A-ld 1e-4 gate)", _T13),
+    "outbasic": ("SUPPORTED", "input/defaults.py Options.flagbasic -> the out* defaults (outlevels, outdensity, "
+                 "outgamma, outomp, outinverse, outfission)",
+                 "also levels of every nucleus structure builds and densities of every populated compound nucleus "
+                 "(flagpop), as stock; its population / check / direct / gamma-decay (gamma*.tot) parts are not given",
+                 _T13),
+}
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -370,6 +422,7 @@ MANUAL: dict = {
     **B10,
     **B10B,
     **B11,
+    **B13,
     "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps",
                  "KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the "
                  "Cascade constructor's 1e-8; now it does unless a caller passes its own", _T9),

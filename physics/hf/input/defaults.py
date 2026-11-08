@@ -381,6 +381,19 @@ class Options:
     # KWCOV B8 (physics/hf/fisobs.py, output only)
     filefission: bool = False  # input_outfiles.f90:128-131 (y with endf y; channels y is not modelled here)
     flagfisout: bool = False  # outfission, input_fissionpar.f90:113-118 (= outbasic, y with endf y; n without fission)
+    # KWCOV B13 (physics/hf/ingout.py, output only): ingredient output files
+    flagbasic: bool = False  # outbasic, input_basicreac.f90:66 (sets the out* defaults below)
+    flagpartable: bool = False  # partable, input_basicreac.f90:81 (parameters.dat)
+    flaglevels: bool = False  # outlevels, input_levels.f90:103 (= outbasic)
+    flagblocklevels: bool = False  # blocklevels, input_output.f90 (levels.out instead of levels<ZZZAAA>.out)
+    flagdensity: bool = False  # outdensity, input_densitymodel.f90:107 (= outbasic)
+    filedensity: bool = False  # filedensity, input_densitypar.f90:213 (= outdensity)
+    flaggamma: bool = False  # outgamma, input_gammamodel.f90:63 (= outbasic)
+    filepsf: bool = False  # filepsf, input_gammamodel.f90:62
+    flagoutomp: bool = False  # outomp, input_ompmodel.f90:109 (= outbasic)
+    flagoutkd: bool = False  # outkd, input_ompmodel.f90:110
+    flagblockomp: bool = True  # blockomp, input_output.f90 (omp.out instead of ompE<E>_<p>.tot)
+    flaginverse: bool = False  # outinverse, input_output.f90:113 (= outbasic)
     # --- pre-equilibrium (input_preeqmodel.f90, input_preeqpar.f90) ---
     flag2comp: bool = True  # input_preeqmodel.f90:59
     flagecisdwba: bool = True  # input_preeqmodel.f90:60
@@ -766,6 +779,19 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "pfnsmodel": ("fissionmodel", "pfnsmodel", "int"),
     "filefission": ("fissionmodel", "filefission", "yn"),  # KWCOV B8 (input_outfiles.f90:209)
     "outfission": ("fissionpar", "flagfisout", "yn"),  # KWCOV B8 (input_fissionpar.f90:311)
+    "outbasic": ("basicreac", "flagbasic", "yn"),  # KWCOV B13 (input_basicreac.f90:151)
+    "partable": ("basicreac", "flagpartable", "yn"),  # KWCOV B13 (input_basicreac.f90:209)
+    "outlevels": ("levels", "flaglevels", "yn"),  # KWCOV B13 (input_levels.f90:234)
+    "blocklevels": ("levels", "flagblocklevels", "yn"),  # KWCOV B13 (input_output.f90:207)
+    "outdensity": ("densitymodel", "flagdensity", "yn"),  # KWCOV B13 (input_densitymodel.f90:230)
+    "filedensity": ("densitypar", "filedensity", "yn"),  # KWCOV B13 (input_densitypar.f90:486)
+    "outgamma": ("gammamodel", "flaggamma", "yn"),  # KWCOV B13 (input_gammamodel.f90:119)
+    "filepsf": ("gammamodel", "filepsf", "yn"),  # KWCOV B13 (input_gammamodel.f90:125)
+    "outomp": ("ompmodel", "flagoutomp", "yn"),  # KWCOV B13 (input_ompmodel.f90:307)
+    "outkd": ("ompmodel", "flagoutkd", "yn"),  # KWCOV B13 (input_ompmodel.f90:313)
+    "blockomp": ("ompmodel", "flagblockomp", "yn"),  # KWCOV B13 (input_output.f90:213)
+    "outinverse": ("directmodel", "flaginverse", "yn"),  # KWCOV B13 (input_output.f90:261)
+    "outtransenergy": ("directmodel", "flagtransen", "yn"),  # KWCOV B13 (input_directmodel.f90:227)
     "gefran": ("fissionpar", "gefran", "int"),
     "rfiseps": ("fissionpar", "Rfiseps", "float"),
     "twocomponent": ("preeqmodel", "flag2comp", "yn"),
@@ -1039,6 +1065,7 @@ def default_options(
     nb = [30] * 7  # :107
     nb[k0] = o["nlevmax"]  # :109
     o["nlevbin"] = tuple(nb)
+    o["flaglevels"] = o["flagbasic"]  # KWCOV B13: :103
     _apply_stage("levels", o, ov)
     if forms:  # KWCOV B2: `maxlevelsbin <p> n` (class 7) and the per-nucleus cards
         _apply_forms(forms, o, order, ov)
@@ -1052,12 +1079,14 @@ def default_options(
         o["ldmodelall"] = 7
     o["ldmodelCN"] = 0  # :91
     o["flagcolall"] = A > FISLIM  # :95-99
+    o["flagdensity"] = o["flagbasic"]  # KWCOV B13: :107
     _apply_stage("densitymodel", o, ov)
     if o["ldmodelCN"] <= 0:  # :245-249
         o["ldmodelCN"] = o["ldmodelall"]
 
     # input_densitypar.f90
     o["flagparity"] = o["ldmodelall"] >= 5  # :176-180
+    o["filedensity"] = o["flagdensity"]  # KWCOV B13: :213
     _apply_stage("densitypar", o, ov)
 
     # input_gammamodel.f90
@@ -1077,11 +1106,13 @@ def default_options(
     if s <= 2:
         m1 = 2
     o["strengthM1"] = m1
+    o["flaggamma"] = o["flagbasic"]  # KWCOV B13: :63
     _apply_stage("gammamodel", o, ov)
     _apply_stage("gammapar", o, ov)
 
     # input_ompmodel.f90
     o["flagjlm"] = o["flagmicro"]  # :98-102
+    o["flagoutomp"] = o["flagbasic"]  # KWCOV B13: :109
     _apply_stage("ompmodel", o, ov)
 
     # input_omppar.f90
@@ -1117,6 +1148,7 @@ def default_options(
     o["flagblockspectra"] = o["flagblockddx"] = o["flagendf"]  # :131-132
     o["ddxmode"] = 2 if (o["flagendf"] and k0 == 3) else 0  # input_output.f90:134-137
     o["flaggamdis"] = o["filegamdis"] = bool(o["flagendf"] and o["flagendfdet"])  # :139-141, input_outfiles.f90:110-113
+    o["flaginverse"] = o["flagbasic"]  # KWCOV B13: input_output.f90:113
     _apply_stage("directmodel", o, ov)
 
     # input_directpar.f90
@@ -1136,7 +1168,7 @@ def default_options(
         o["Rfiseps"] = 1.0e-9
     if o["flagastro"]:
         o["Rfiseps"] = 1.0e-6
-    o["flagfisout"] = bool(o["flagfission"] and o["flagendf"])  # KWCOV B8: :113-118 (outbasic is not modelled)
+    o["flagfisout"] = bool(o["flagfission"] and (o["flagendf"] or o["flagbasic"]))  # KWCOV B8/B13: :113-118
     _apply_stage("fissionpar", o, ov)
     if not o["flagfission"]:
         o["flagfisout"] = False  # :116-118 (checked after the input as well, checkvalue.f90:1071)

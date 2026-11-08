@@ -70,7 +70,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B10b | thermal, natural targets, resonance range (DONE, branch `kwcov10b`; resonance y refused) | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
 | B11 | medical isotope production (DONE, branch `kwcov11`) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
 | B12 | recoils and LAB frame | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
-| B13 | ingredient outputs | outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
+| B13 | ingredient outputs (DONE, branch `kwcov13`) | outlevels, blocklevels, outbasic, outtransenergy, blockomp, outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
 | B14 | fission yields and fragment evaporation | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
 | B15 | low value | endf, endfdetail, sacs, legacy, components | endf.cs helpers, sacs.dat, component split | 1 d |
 | GAP | isomeric (excited) targets | ltarget | everything for an excited target | 3+ d; separate design (the engine refuses `Ltarget /= 0`, structure/levels.py:171; astro/stellar.py already builds excited entrance channels and is the starting point) |
@@ -776,6 +776,78 @@ Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same 
 `ingredients.py` already writes D0, Gg, S0. Add ld/psf tables, transmission and inverse cross sections, OMP
 parameters under TALYS names, and `partable y` = `parameters.dat` (every parameter value the run used; what a
 TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values 1e-5.
+
+**Done (branch `kwcov13`, from kwcov10b + kwcov11).**
+
+* **What.** New module `physics/hf/ingout.py` (output only). The deck keywords `outlevels`, `blocklevels`, `outdensity`,
+  `filedensity`, `outgamma`, `filepsf`, `outinverse`, `outtransenergy`, `outomp`, `blockomp`, `outkd`, `partable` and
+  the umbrella `outbasic` are Options now (`flaglevels`, `flagblocklevels`, `flagdensity`, `filedensity`,
+  `flaggamma`, `filepsf`, `flaginverse`, `flagtransen`, `flagoutomp`, `flagblockomp`, `flagoutkd`, `flagpartable`,
+  `flagbasic`; TALYS's cascade: outbasic sets outlevels / outdensity / outgamma / outomp / outinverse / outfission,
+  filedensity follows outdensity). Before B13 every one was an NA line that changed nothing. Both drivers remember the
+  run's Cascade at the start (`ingout.begin_run`) and fill `Results.ingout` (new field, empty by default) at the end with
+  TALYS's files as {name: {header, blocks}}: `levels<ZZZAAA>.out` (levels.out with blocklevels), `ld<ZZZAAA>.gs` + `.bNN`
+  per fission barrier, `nld<ZZZAAA>.tab[_bNN]`, `psf<ZZZAAA>.E1/M1/E2/M2`, `cross_g.tot`, `transmission_<p>.out`,
+  `cross_<p>.tot`, `transmission_inc.out`, `omppar_<p>.out`, `omp.out` / `ompE<E>_<p>.tot`, `spr.opt`,
+  `parameters.dat`, and `kd03` (talys.out's KD03 lines as a table). `INCOGNITA_INGOUT_DIR=<dir>` writes them with
+  TALYS's names and layouts. Every number is read off the run's own ingredients (level densities, gamma parameters,
+  transmission coefficients: cache hits) or recomputed with the run's functions (OMP parameters, ECIS mesh potential,
+  the raw OMP solve for xsopt / total / elastic).
+* **Defaults untouched**: nothing runs without one of the switches (`test_engine_c.py`); the Fe-56 run with every
+  switch on has every other Results array bitwise equal to the run without (`test_kwcov_b13.py`).
+* **Vs stock** (`scripts/kwcov/b13_response.py --all`; n + target at the energies listed, every B13 switch on; stock in
+  `~/kwcov/stock/b13`, trimmed to the B13 files; worst |ln(ours/stock)| per file over cells with stock > 1e-6 of the
+  column's maximum; TALYS mode = the INCOGNITA defaults that are not TALYS switched off):
+
+  | file family | Fe-56 (1, 14 MeV) | Co-59 (0.01, 5) | Pb-208 (14) | U-238 (1, 14) | tolerance used |
+  |---|---|---|---|---|---|
+  | levels*.out, levels.out (outbasic + blocklevels: 3151 rows) | identical | identical | identical | identical | exact |
+  | ld*.gs tables / header | 0.001 % / 0.007 % | 0.001 % / 0.06 % | <= 0.001 % | 0.0002 % / 0.07 % (b01-b03 incl.) | 0.1 % (header Chi-2 D0: see below) |
+  | nld*.tab (es9.2 print) | 0.63 % | 0.74 % | 0.69 % | 0.37 % | 1 % (3-digit print) |
+  | psf*.XL | 0.0034 % | 0.0034 % | < 0.001 % | M1/M2 0.04 %; **E1/E2 89 %** | 0.01 % |
+  | cross_g.tot | 1e-6 | < 1e-5 | < 1e-5 | **19.7 %** | 0.01 % |
+  | transmission_*.out, cross_*.tot, transmission_inc.out | 0.0008 % | < 0.001 % | < 0.001 % | 0.035 % (incident) | 0.1 % |
+  | omppar_*.out | 0.0004 % | < 0.001 % | < 0.001 % | < 0.001 % | 0.01 % |
+  | omp.out (ECIS mesh, f8.5 step) | 0.023 % | 0.044 % | 0.016 % | 0.034 % | 0.1 % |
+  | spr.opt | print | print | -- | print | print |
+  | parameters.dat | keys identical (1499); 14 rows > print, worst Exmatch 5.2e-5 | 1160; 10 rows | 1345; 9 rows, worst 1.3e-4 | 2896; all to print | f10.5 / 1e-4 |
+  | KD03 (outkd) | 0.05 % | 0.05 % | 0.04 % | **45 %** | print |
+
+  Fe-56 other decks: `outtransenergy n; blockomp n` (per-L layout, ompE*.tot) <= 0.0006 % (alpha L = 19, T ~ 1e-8:
+  0.72 %); `ldmodel 2; colenhance y; strength 8` (Krot / Kvib / Kcoll columns, D1M tables) ld <= 0.0004 %, header
+  0.29 %; `outdensity y; filedensity n` identical (zeroed statistics); `outbasic y; blocklevels y` levels.out identical,
+  ld / nld of every populated compound nucleus (Fe-55, Mn-56, Cr-52/53 ...) <= 0.012 % / 0.96 %.
+  Default mode (Fe-56): ld026056.gs 18.7 % (NPWINDOW, the target's continuum density by design), cross_h/t.tot and
+  transmission_h/t.out up to x5 at a few near-threshold energies and omppar_h/t `avd` 36 % at the first energy (an
+  INCOGNITA default of the composite-particle OMP; closed in TALYS mode, not isolated to one switch); the rest as TALYS mode.
+* **Losses, traced.** (1) U-239 E1 (strength 9, temperature-dependent SMLO table) at Egamma = 0.4 and 0.6 MeV on the
+  run's grid: port 9.08e-10 / 1.54e-9 vs stock 2.12e-9 / 1.01e-9 MeV^-3; every other energy to 1e-6. It moves psf E1/E2
+  (the f column of E2 is f_E1, quirk) and cross_g.tot at those two rows, and the engine's photon transmission there
+  (Tjl(E1) at 0.4 / 0.6 MeV): a port difference in the T-dependent table interpolation, **not fixed** (engine numbers;
+  the U-238 capture was 0.00 % vs stock in FIDELITY1's TALYS mode). (2) KD03 for U-238: talys.out's first neutron
+  block is global KD03 (Ef -5.01), the port's `omppar(92, 238)` returns a local entry (Ef -5.48, rv 1.244); the
+  run's neutron OMP is RIPL 2408 either way (omppar_n.out agrees to 1e-5), so only the outkd table differs. (3) The CT
+  matching energy Exmatch (and E0) of a few residuals, 2e-5..1.3e-4: TALYS's single-precision root; inside A-ld's 1e-4.
+  (4) ld*.gs `Chi-2 D0` up to 8 % relative: the squared 1e-5 difference of D0theo. (5) nld*.tab: es9.2 rounding.
+* **Bugs found.** (a) Port: `gamma/strength.fstrength_gp` tests `Egamma > 0.001` in double on the float32 grid point
+  0.001 (TALYS: single, false), so the 1 keV E2/M2/pygmy terms TALYS drops are kept: cross_g.tot 1 keV row +27 % before
+  the output-side fix (`ingout` evaluates that row at 0.001 exactly); the engine keeps it (T(E2) at 1 keV ~1e-24, no
+  visible number), recorded. (b) Port: `strength 1` (and the other legacy strengths) is accepted; TALYS-2.25 refuses it
+  without `legacy y` ("strength = 8, 9, 10, 11, 12 or 13 are recommended") -- checkvalue gap, not B13, left for B15
+  (`legacy`). (c) The B10b/B11 notes hold: no second-run cache issue seen (each b13_response engine run is its own process).
+* **TALYS quirks kept.** psf .E2/.M2 f column = f(l=1) (gammaout.f90 calls fstrength with l = 1); `filepsf y` without
+  `outgamma y` writes nothing; psf header "experimental Gamma_gamma [eV]" is TALYS's gamgam in keV and C/E uses it
+  (Fe-57: C/E 1417); `outdensity y; filedensity n` zeroes the D0 statistics and Exp_LD; the T column of psf files is
+  indexed by the row number (rows past eend(0) are 0); levels*.out written after a second `levels` read keeps the first
+  branch list with the conversion coefficients by file index (Co-59 level 11: conv 2.381e-3 on the branch to level 2);
+  with outbasic, structure.f90 writes levels for every nucleus it builds (even with outlevels n) and multiple.f90 the
+  densities / levels of every populated compound nucleus (flagpop); spr.opt only at the first energy or Einc <= 0.1;
+  transmission_inc.out holds the last energy.
+* **Not given (NA rows / later).** outbasic's gamma*.tot decay schemes (gammadecay), population / check / direct
+  output; JLM `radial.out` (JLM is unported, B7b); `endf y`'s levelsout (B15). The parameters.dat nucleus list uses the
+  run's residual production >= 1e-3 mb for TALYS's population test (keys identical on all four decks).
+* Tests: `tests/hf/test_kwcov_b13.py` (keyword cascade and deck lines, the D0 statistics, one Fe-56 engine run vs
+  stock numbers, every other Results array bitwise unchanged, the file round trip, filepsf without outgamma).
 
 ### B14 -- fission yields, fragment evaporation
 
