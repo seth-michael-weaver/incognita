@@ -498,15 +498,17 @@ def fission_parameters(
     # --- head band and class2 states (fissionpar.f90:319-383) -----------------------------
     fecont = torch.zeros(NUMBAR + 1, dtype=DTYPE, device=device)
     headband = tuple(TransitionStates() for _ in range(NUMBAR + 1))
+    # KWCOV B8: `hbtransfile Z A <file>` / `class2file Z A <file>` replace the structure files (fissionpar.f90:343-344)
+    zix, nix = int(options.Zinit) - Z, int(options.Ninit) - N
     if options.flaghbstate:
-        headband, fecont = read_headband_states(Z, N, nfisbar)
+        headband, fecont = read_headband_states(Z, N, nfisbar, options.fisstates_file_of("hbtransfile", zix, nix))
         fecont = fecont.to(device=device)
     if Z % 2 == 0 and N % 2 == 0 and nfisbar > 0 and fists2_on(options):
         headband, fecont = ts2_headband(Z, A, N, nfisbar, device)
     nclass2 = nfisbar - 1 if options.flagclass2 else 0
     class2 = tuple(TransitionStates() for _ in range(NUMBAR + 1))
     if options.flagclass2:
-        class2 = read_class2_states(Z, N, nclass2)
+        class2 = read_class2_states(Z, N, nclass2, options.fisstates_file_of("class2file", zix, nix))
 
     # --- default widths and moments of inertia (fissionpar.f90:385-396) --------------------
     if _zero(fwid[1]):

@@ -181,6 +181,48 @@ B7: dict = {
               "gamma.transmission.radwidtheory(flaggnorm) with TALYS's gamgam before the run and feed the final "
               "ftable(E1) of the compound nucleus to every strength user", _T7),
 }
+_T8 = "test:test_kwcov_b8.py"
+_FO = "fisobs.py (output only; Results.extras / Results.spectra) "
+#: KWCOV B8 rows (docs/hf/COVERAGE_PLAN.md B8); stock TALYS-2.25 n + U-238 / U-235 / Pu-239 / Th-232 at 1/5/14 MeV,
+#: scripts/kwcov/b8_response.py; response = |ln(R/S)| max, stock > 1 mb, over b2's channels + rpZZZAAA.fis
+B8: dict = {
+    "filefission": ("SUPPORTED", _FO + "rpZZZAAA.fis", "turns FISOBS on: fission per fissioning nuclide (fissionout.f90), "
+                    "the Iwamoto PFNS and the Wahl nubar; vs stock within the engine's own (n,f) difference. y with "
+                    "endf y; TALYS's `channels y` default for it is not modelled", _T8),
+    "outfission": ("SUPPORTED", _FO + "(as filefission)", "turns FISOBS on; the talys.out barrier / transmission "
+                   "tables stay PARTIAL (ingredients.py)", _T8),
+    "fisfeed": ("SUPPORTED", _FO + "fisZZZAAA.feed", "fission per excitation bin (multiple.f90:884): Ex and Population "
+                "columns, same rows as stock, sums = rpZZZAAA.fis; the J-parity columns (fisfeedJP) are NOT given "
+                "(the decay kernels sum the fission feed over J and parity)", _T8),
+    "pfnsmodel": ("SUPPORTED", _FO + "iwamoto",
+                  "1: Iwamoto PFNS (iwamoto.f90, single precision as TALYS): grid, E-average and every column = stock "
+                  "to 2e-5 (U-238, U-235, Pu-239, Th-232). 2: no Iwamoto spectrum, as stock without massdis; the "
+                  "fragment-decay PFNS (ffevap.f90) is B14", _T8),
+    "tmadjust": ("SUPPORTED", _FO + "iwamoto (Tm0 x tmadjust)", "PFNS E-average = stock 1e-5 (U-238 1.3; U-235, "
+                 "Pu-239 0.8 with fsadjust 2); no cross section moves on either side", _T8),
+    "fsadjust": ("SUPPORTED", _FO + "iwamoto (scission fraction x fsadjust)", "PFNS E-average = stock 1e-5 (U-238 3; "
+                 "U-235, Pu-239 2); no cross section moves on either side", _T8),
+    "cnubar1": ("SUPPORTED", _FO + "nubar_wahl -> extras['nubarn.tot:wahl']", "TALYS-2.25 computes nubarWahl "
+                "(totalxs.f90:124) and never writes it (massdis.f90:252 resets nubar before nubarout); the port's "
+                "extras give it; transcription checked by hand", _T8),
+    "cnubar2": ("SUPPORTED", _FO + "nubar_wahl -> extras['nubarn.tot:wahl']", "slope term of the Wahl nubar; as cnubar1",
+                _T8),
+    "rfiseps": ("SUPPORTED", "input/defaults.py Options.Rfiseps (inert)", "acts only in massdis.f90 / ffevap.f90 "
+                "(fission yields, B14); stock U-238 `rfiseps 0.01`: nothing moves. Range 0..1 checked", _T8),
+    "axtype": ("SUPPORTED", "input/defaults.py Options.axtype_of (`axtype Z A type [ibar]`) -> density/parameters.py",
+               "barrier axiality per nucleus and barrier. U-238 response: 92 239 2 1 0.42 %, 92 238 3 1 1.24 %; "
+               "92 239 3 2 4.7 % relative for a x2.5 move, the same millibarns (+886 vs +867 mb fission 5 MeV, 2.2 %); "
+               "Th-232 90 233 3 2: 12 % relative, +1081 vs +1032 mb (4.8 %): the engine's default Th-232 fission is "
+               "+20 % at 5 MeV (a default-fidelity item)", _T8),
+    "hbtransfile": ("SUPPORTED", "input/defaults.py Options.fisstates_file_of -> fission/parameters.py "
+                    "read_headband_states", "`hbtransfile Z A <file>` (read with hbstate y, as TALYS): U-238 response "
+                    "from `hbstate y` 1.93 % (fission 1 MeV -36.3 vs -39.3 mb); `hbstate y` itself 0.73 %. A missing "
+                    "file stops the run, as TALYS", _T8),
+    "class2file": ("SUPPORTED", "input/defaults.py Options.fisstates_file_of -> fission/parameters.py "
+                   "read_class2_states", "`class2file Z A <file>` (read with class2 y): U-238 response from `class2 y` "
+                   "0.67 %. `class2 y` itself: 6.2 % relative (U-238 rp092238.fis 5 MeV x4), +291 vs +297 mb (2.2 %)",
+                   _T8),
+}
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -205,6 +247,7 @@ MANUAL: dict = {
     **B2,
     **B5,
     **B7,
+    **B8,
     "channels": ("SUPPORTED", "structure/scalars.py:144", "exclusive channels are always computed (flagchannels "
                  "hard-wired on); `channels n` has no effect, which is harmless", "manual"),
     "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete "

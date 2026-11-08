@@ -1302,6 +1302,9 @@ def cases(zf, stats: dict | None = None):
     rn = _Run(cas) if lib() is not None else None
     specout.sync_c(lib())  # SPECOUT: (un)register the C sink per the switch; output only
     specout.begin_run(cas)
+    from physics.hf import fisobs  # KWCOV B8: fission extras (off: nothing recorded)
+
+    fisobs.begin_run(cas)
     chst = _ChanState()
     keys = None
     from physics.hf.emission import chanobs
@@ -1450,6 +1453,9 @@ def cases(zf, stats: dict | None = None):
                     chan = _Chan.of(exclusive_channels(built.channels(cinp, st, mres, b, xsbinary), py))
                     chst.from_py(py)
             specout.end_energy(pinp, binp.k0, b2)
+            if fisobs.active():  # KWCOV B8: output only (the arena is read, not changed)
+                fisobs.record(cas, st, binp.e_inc_mev, etot,
+                              mres if mres is not None else (packed.result() if packed is not None else None))
             out.append((b2, chan, b, keys))
         specout.end_run(cas)
         return out
@@ -1537,9 +1543,9 @@ def run(injection, stats: dict | None = None):
     from physics.hf import lowepot
 
     res = lowepot.add_to_results(res, injection)
-    from physics.hf import angout, specobs  # KWCOV B3 / B4: angular distributions, spectra, DDX, gamma lines (off: unchanged)
+    from physics.hf import angout, fisobs, specobs  # KWCOV B3 / B4 / B8 (off: unchanged)
 
-    return specobs.add_to_results(angout.add_to_results(res, injection), injection)
+    return fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

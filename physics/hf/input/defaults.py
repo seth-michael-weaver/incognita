@@ -67,6 +67,7 @@ How to read this module
 from __future__ import annotations
 
 import math
+import os
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field, fields, replace
@@ -363,6 +364,9 @@ class Options:
     pfnsmodel: int = 1  # input_fissionmodel.f90:97-101; 2 with massdis y
     gefran: int = 50000  # input_fissionpar.f90:122
     Rfiseps: float = 1.0e-3  # input_fissionpar.f90:123-125; 1e-9 massdis, 1e-6 astro
+    # KWCOV B8 (physics/hf/fisobs.py, output only)
+    filefission: bool = False  # input_outfiles.f90:128-131 (y with endf y; channels y is not modelled here)
+    flagfisout: bool = False  # outfission, input_fissionpar.f90:113-118 (= outbasic, y with endf y; n without fission)
     # --- pre-equilibrium (input_preeqmodel.f90, input_preeqpar.f90) ---
     flag2comp: bool = True  # input_preeqmodel.f90:59
     flagecisdwba: bool = True  # input_preeqmodel.f90:60
@@ -539,7 +543,19 @@ class Options:
             ax = 2
         if self.fismodel == 6 and ibar in (1, 2):
             ax = 1
+        if self.pernuc:  # KWCOV B8: `axtype Z A type [ibar]` (input_fissionpar.f90:257-262)
+            for k, z, n, v in self.pernuc:
+                if k == "axtype" and z == Zix and n == Nix and v[0] == ibar:
+                    ax = v[1]
         return ax
+
+    def fisstates_file_of(self, kind: str, Zix: int, Nix: int) -> str | None:
+        """KWCOV B8: hbtransfile(Zix, Nix) / clas2file(Zix, Nix), a `hbtransfile Z A <file>` / `class2file Z A <file>`
+        card: the head-band / class-II transition-state file read instead of structure/fission/states (fissionpar.f90:
+        343-344), or None."""
+        if self.pernuc:
+            return self._pernuc(kind, Zix, Nix)
+        return None
 
     def is_explicit(self, keyword: str) -> bool:
         return keyword.lower() in self.explicit
@@ -732,6 +748,8 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "fymodel": ("fissionmodel", "fymodel", "int"),
     "ffmodel": ("fissionmodel", "ffmodel", "int"),
     "pfnsmodel": ("fissionmodel", "pfnsmodel", "int"),
+    "filefission": ("fissionmodel", "filefission", "yn"),  # KWCOV B8 (input_outfiles.f90:209)
+    "outfission": ("fissionpar", "flagfisout", "yn"),  # KWCOV B8 (input_fissionpar.f90:311)
     "gefran": ("fissionpar", "gefran", "int"),
     "rfiseps": ("fissionpar", "Rfiseps", "float"),
     "twocomponent": ("preeqmodel", "flag2comp", "yn"),
@@ -1072,6 +1090,7 @@ def default_options(
     # input_fissionmodel.f90
     o["flagfission"] = A > FISLIM  # :78-80
     o["pfnsmodel"] = 2 if o["flagmassdis"] else 1  # :97-101
+    o["filefission"] = bool(o["flagendf"])  # KWCOV B8: input_outfiles.f90:130
     _apply_stage("fissionmodel", o, ov)
 
     # input_fissionpar.f90
@@ -1080,7 +1099,10 @@ def default_options(
         o["Rfiseps"] = 1.0e-9
     if o["flagastro"]:
         o["Rfiseps"] = 1.0e-6
+    o["flagfisout"] = bool(o["flagfission"] and o["flagendf"])  # KWCOV B8: :113-118 (outbasic is not modelled)
     _apply_stage("fissionpar", o, ov)
+    if not o["flagfission"]:
+        o["flagfisout"] = False  # :116-118 (checked after the input as well, checkvalue.f90:1071)
 
     # input_preeqmodel.f90
     o["flagpecomp"] = o["flagsurface"] = k0 >= 1  # :65-71
@@ -1162,9 +1184,12 @@ PER_FORMS = {"ldmodel": 14, "colenhance": 13, "nlevels": 2, "maxlevelsbin": 7, "
              # carries ibar, 0 when absent) and getvalues class 0 `skipcn Z A` (input_compoundmodel.f90:158)
              "nlow": 4, "ntop": 4, "skipcn": 40,
              # KWCOV B5: class 10 `levelfile Z <file>`, `deformfile Z <file>` (input_levels.f90:222-233), per element
-             "levelfile": 10, "deformfile": 10}
+             "levelfile": 10, "deformfile": 10,
+             # KWCOV B8: class 4 `axtype Z A type [ibar]` (input_fissionpar.f90:257, ibar 1 when absent), class 11
+             # `hbtransfile Z A <file>`, `class2file Z A <file>` (input_fissionmodel.f90:218-229)
+             "axtype": 4, "hbtransfile": 11, "class2file": 11}
 #: index words of each form's key ("branch Z A ilev0"; the value is "nbr ilev1 br1 ...")
-_FORM_NIDX = {14: 2, 13: 2, 2: 2, 7: 1, 0: 3, 4: 3, 40: 2, 10: 1}
+_FORM_NIDX = {14: 2, 13: 2, 2: 2, 7: 1, 0: 3, 4: 3, 40: 2, 10: 1, 11: 2}
 
 
 def _split_forms(ov: dict) -> tuple[dict, list]:
@@ -1173,7 +1198,7 @@ def _split_forms(ov: dict) -> tuple[dict, list]:
     for k, v in ov.items():
         w = k.split()
         if len(w) == 1:
-            if k in PER_FORMS and PER_FORMS[k] in (0, 2, 4, 7, 40, 10):
+            if k in PER_FORMS and PER_FORMS[k] in (0, 2, 4, 7, 40, 10, 11):
                 raise ValueError(f"{k}: needs its per-nucleus / per-particle form, got {v!r}")
             plain[k] = v
             continue
@@ -1249,6 +1274,19 @@ def _apply_forms(forms: list, o: dict, order: dict, ov: dict) -> None:
             continue
         if kw == "skipcn":
             per[(kw, zix, nix)] = 1
+            continue
+        if kw == "axtype":  # KWCOV B8: one value per (Zix, Nix, ibar); 1..4 (checkvalue.f90 range 1..4)
+            ibar = int(idx[2])
+            if not 0 <= ibar <= NUMBAR:
+                raise ValueError(f"axtype: barrier {ibar} outside 0..{NUMBAR}")
+            if not 1 <= int(v) <= 4:
+                raise ValueError(f"axtype: type {v} outside 1..4")
+            per[(kw, zix, nix, ibar)] = (ibar, int(v))
+            continue
+        if PER_FORMS[kw] == 11:  # KWCOV B8: a file name (TALYS stops if it does not exist, checkvalue.f90:635-646)
+            if not os.path.isfile(str(v)):
+                raise ValueError(f"{kw} {iz} {ia}: non-existent file {v!r}")
+            per[(kw, zix, nix)] = str(v)
             continue
         per[(kw, zix, nix)] = _yn(v) if kw == "colenhance" else int(v)
     o["nlevbin"] = tuple(nb)

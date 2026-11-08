@@ -64,7 +64,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B6 | model keyword sweep: optical model, direct (DONE, branch `kwcov6`) | optmodall, vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
 | B7 | unported model branches (DONE, branch `kwcov7`; gnorm y and MSD stay refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
 | B7b | JLM and folding alpha OMP | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
-| B8 | fission extras | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
+| B8 | fission extras (DONE, branch `kwcov8`; fisfeed J-parity columns and fragment-based nubar/PFNS -> B14) | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
 | B9 | astrophysics | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
 | B10 | URR | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
 | B10b | thermal, natural targets, resonance range | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
@@ -415,6 +415,66 @@ Per-fissioning-nucleus fission (`rpZZZAAA.fis`, `finalout.f90:396`), `fisfeed`, 
 (`colenhance.f90`, densitypar), `class2file`, `hbtransfile` (`fissionpar.f90`), `cnubar1/2` + `nubarWahl.f90:1`,
 PFNS Iwamoto (`iwamoto.f90:1`, `pfnsout.f90:1`, `tmadjust`, `fsadjust`). Accept: U-238 and Th-232 at 1, 5, 14 MeV:
 per-chance fission vs stock within the engine's own (n,f) band; nubar 0.5 %; PFNS mean energy 1 %, shape 3 %.
+
+**Done on branch `kwcov8`** (kwcov7 + kwcov6 merged). New module `physics/hf/fisobs.py` (output only); small hooks in
+engine_c (`cases`: `fisobs.begin_run` / `record` per kept energy off the cascade result, the arena read with
+`_Packed.result()` on the C path; `run`: `fisobs.add_to_results`), input/defaults (Options `filefission`,
+`flagfisout`, `axtype_of`, `fisstates_file_of`; per-nucleus forms `axtype`, `hbtransfile`, `class2file`), fitlib
+(deck forms) and fission/parameters (the states files). With none of the switches set nothing is recorded:
+U-238 1/5/14 MeV, all 692 `Results` arrays bitwise equal to the merge commit; `test_engine_c.py` passes.
+
+* **Now acting:**
+  * Switches: `filefission y`, `fisfeed y`, `outfission y`, an explicit `pfnsmodel`, `cnubar1/2`, `tmadjust`,
+    `fsadjust` != 1, or the port switch `INCOGNITA_FISOBS=1`, on a fission run. TALYS writes the PFNS of every fission
+    run and the per-nucleus files with `channels y`; the port keeps defaults unchanged and asks for a switch (decision,
+    as CHANOBS / SPECOBS). `endf y` sets filefission and outfission as TALYS does.
+  * `Results.extras['rpZZZAAA.fis']` (fissionout.f90, xsfeed(Z, N, -1); sums to fission.tot to 1e-12),
+    `Results.spectra['fisZZZAAA.feed', ':Ex']` (fisfeed, multiple.f90:884: the Ex and Population columns, the
+    initial compound nucleus with the binary fission as its top row), `Results.spectra['pfns.fis', ':E',
+    ':Maxwell_ratio', ':CM']` + `extras['pfns.fis:E-average']` (iwamoto.f90 in single precision, strucinitial's 293-point
+    grid), `extras['nubarn.tot:wahl']` (nubarWahl.f90).
+  * `axtype Z A type [ibar]` (class 4, ibar 1 when absent; range 1-4), `hbtransfile Z A <file>`,
+    `class2file Z A <file>` (class 11; read with `hbstate y` / `class2 y` as TALYS; a missing file stops the run).
+  * `tmadjust`, `fsadjust`, `cnubar1`, `cnubar2` (range 0.1-10), `pfnsmodel` (1-2), `rfiseps` (0-1) checked as
+    checkvalue.f90. `rfiseps` acts only in massdis/ffevap (B14): inert, as stock (U-238 `rfiseps 0.01`: nothing moves).
+    `pfnsmodel 2` gives no Iwamoto spectrum, as stock without massdis.
+* **TALYS-2.25 finding:** the Wahl nubar is computed (totalxs.f90:124) and never written: massdis.f90:252 resets
+  `nubar` before nubarout, and nubarout runs only from massdis (fymodel 2) and ffevap. So `cnubar1/2` change no stock
+  output; the port's `nubarn.tot:wahl` is their only reader (transcription checked by hand in the test).
+* **Before B8:** `cnubar1/2`, `tmadjust`, `fsadjust`, `rfiseps`, `fisfeed` were read and ignored; `axtype`,
+  `hbtransfile`, `class2file` deck lines were refused as unknown per-nucleus forms; `filefission`/`outfission` NA.
+* **Not given (PARTIAL):** the J-parity columns of the fisfeed file (fisfeedJP; the decay kernels sum the fission feed
+  over J and parity); the talys.out barrier / transmission tables of `outfission` (ingredients.py, as before);
+  fragment-based nubar, nu(A), P(nu), PFGS, `pfnsmodel 2` with massdis (B14).
+* **Observables vs stock** (`scripts/kwcov/b8_response.py`; stock JSON trimmed in `~/kwcov/stock/b8/b8_*.json`, states
+  files in `~/kwcov/stock/b8_files`): PFNS of U-238, U-235, Pu-239, Th-232 at 1/5/14 MeV, also with `tmadjust 1.3`,
+  `fsadjust 3`, `tmadjust 0.8; fsadjust 2`: same grid, E-average to 1e-5, spectrum / Maxwell ratio / CM to 2e-5 where
+  above 1e-3 of the peak. Per-nucleus fission within the engine's own (n,f) difference: U-238 (fission -6.0 / +9.2 /
+  +4.2 % at 1/5/14 MeV) U-239 -6.0 / +9.8 / +7.5 %, U-238 +6.1 / +4.7 %, U-237 -0.5 %; U-235 (+0.2 / +2.1 / +0.6 %)
+  U-236 -0.1 / -0.3 %, U-235 +17.6 % (5 MeV, 173 vs 145 mb) / +1.6 %, U-234 -3.5 %; Pu-239 (-1.0 / -0.3 / -0.4 %)
+  all nuclides within 1.3 % but Pu-239 at 5 MeV (3.9 vs 3.8 mb); Th-232 (+1.9 / +20 / +10 %) Th-233 +27 % at 14 MeV.
+  fisfeed: same files and rows as stock; each population sums to its rpZZZAAA.fis; the top row (binary fission)
+  follows the per-nucleus number.
+* **Response vs stock** (from the plain deck unless noted; U-238 at 1/5/14 MeV):
+
+  | deck lines | worst |ln(R/S)| (stock moved) | millibarns |
+  |---|---|---|
+  | axtype 92 239 2 1 | 0.42 % (8.2 %) | |
+  | axtype 92 238 3 1 | 1.24 % (10.4 %) | |
+  | **axtype 92 239 3 2** | **4.66 %** rp092239.fis 5 MeV (x2.6) | +886 vs +867 mb (2.2 %) |
+  | **axtype 90 233 3 2** (Th-232) | **12.1 %** rp090233.fis 14 MeV (x2.8) | fission 5 MeV +1081 vs +1032 mb (4.8 %) |
+  | hbstate y (existing) | 0.73 % (56 %) | |
+  | hbtransfile 92 239 hb_u239.eo, from `hbstate y` | 1.93 % (61 %) | fission 1 MeV -36.3 vs -39.3 mb |
+  | **class2 y** (existing) | **6.2 %** rp092238.fis 5 MeV (x4) | +291 vs +297 mb (2.2 %) |
+  | class2file 92 239 c2_u239.eo, from `class2 y` | 0.67 % (5.9 %) | |
+  | tmadjust 1.3, fsadjust 3, rfiseps 0.01, pfnsmodel 2 | 0.00 % (0 %) | |
+
+  Losses, traced: the relative misses are large moves on top of the engine's default fission, which is high where the
+  big axtype / class2 moves act (U-238 +9 % at 5 MeV, Th-232 +20 %): fission and inelastic share a fixed nonelastic,
+  so a fission that starts high gains less relatively. In millibarns the moves agree to 2-5 %. Th-232 is the worst
+  case because its default is the furthest off (default-fidelity, the separate fission task).
+* Tests: `tests/hf/test_kwcov_b8.py` (Iwamoto and grid vs stock numbers, Wahl by hand, switches, deck forms, ranges,
+  states files, output-only on/off at U-238 5 MeV with the sums).
 
 ### B9 -- astrophysics
 

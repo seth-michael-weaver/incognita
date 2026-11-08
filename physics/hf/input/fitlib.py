@@ -321,7 +321,8 @@ _NA_PREFIXES = ("out", "file", "block")
 _NA_WORDS = frozenset({"bestpath", "components", "ddxmode", "format", "integral", "nulldev", "partable", "sacs",
                        "source", "strucpath", "user"})
 #: KWCOV B5: keywords whose value is a file name: the line keeps its case (convert.f90:36 keeps it for these)
-FILE_KEYS = frozenset({"levelfile", "deformfile", "optmod", "optmodfilen", "optmodfilep"})  # + KWCOV B6
+FILE_KEYS = frozenset({"levelfile", "deformfile", "optmod", "optmodfilen", "optmodfilep",  # + KWCOV B6
+                       "hbtransfile", "class2file"})  # + KWCOV B8 (class 11: `<key> Z A <file>`)
 
 
 def _deck_case(x: str) -> str:
@@ -354,6 +355,12 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
         if k in FILE_KEYS:  # KWCOV B5: `levelfile Z <file>` / `deformfile Z <file>` from the deck (class 10)
             if line not in deck:  # a best file's names its own directory's files: not applied, warned
                 skipped.append((line, f"external {'level' if k == 'levelfile' else 'deformation'} file"))
+                continue
+            if k in ("hbtransfile", "class2file"):  # KWCOV B8: class 11 (input_fissionmodel.f90:218-229)
+                if len(w) != 4:
+                    raise ValueError(f"deck line {line!r}: expected `{k} Z A <file>`")
+                if want_options:
+                    opts.append((f"{k} {w[1]} {w[2]}", w[3]))
                 continue
             if len(w) != 3:
                 raise ValueError(f"deck line {line!r}: expected `{k} Z <file>`")
@@ -527,6 +534,10 @@ def _deck_form(k: str, w: list) -> tuple | None:
         if len(w) not in (4, 5):
             raise ValueError(f"deck line {text!r}: expected `{k} Z A n [ibar]`")
         return (f"{k} {w[1]} {w[2]} {w[4] if len(w) == 5 else 0}", w[3])
+    if k == "axtype":  # KWCOV B8: class 4 `axtype Z A type [ibar]`, ibar 1 when absent (input_fissionpar.f90:257)
+        if len(w) not in (4, 5):
+            raise ValueError(f"deck line {text!r}: expected `axtype Z A type [ibar]`")
+        return (f"axtype {w[1]} {w[2]} {w[4] if len(w) == 5 else 1}", w[3])
     if k == "skipcn":  # KWCOV B5: class 0, no value (input_compoundmodel.f90:158)
         if len(w) != 3:
             raise ValueError(f"deck line {text!r}: expected `skipcn Z A`")
