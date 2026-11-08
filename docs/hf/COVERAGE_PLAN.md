@@ -66,7 +66,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B7b | JLM and folding alpha OMP | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
 | B8 | fission extras (DONE, branch `kwcov8`; fisfeed J-parity columns and fragment-based nubar/PFNS -> B14) | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
 | B9 | astrophysics (DONE, branch `kwcov9`; astro + racap, fissile astrogs n refused) | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
-| B10 | URR | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
+| B10 | URR (DONE, branch `kwcov10`; widthmode 2/3 refused) | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
 | B10b | thermal, natural targets, resonance range | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
 | B11 | medical isotope production (DONE, branch `kwcov11`) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
 | B12 | recoils and LAB frame | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
@@ -558,6 +558,59 @@ URR: `urr.f90:1`, `urrout.f90:1` (`urr`, `lurr`, `urrnjoy`, `rprime`). Thermal: 
 `thermalxs.f90:1`. Natural targets: `natural.f90:1` (loop over isotopes, `abundance`). Resonance range:
 `resonance.f90:1`, `integral.f90:1` (needs external resonance libraries, lowest priority).
 Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weighted sum 1e-6.
+
+**B10 done (branch `kwcov10`, from kwcov9).** B10b (thermal, natural targets, resonance range) stays open.
+
+* **What.** New module `physics/hf/urr.py` (output only): comptarget.f90's two "Gilles Noguere" blocks (per compound
+  (J, parity) and incident (l, j) with l <= lurr: sumIPE per exit type without compound elastic, Turrlj = sumIPE
+  denomhf / (CNfactor (2J+1) Tinc Wab), xsbinarylj, nulj, Turrljinc, Purrlj, the (l, J) range that grows over the
+  run's energies), dtheory's D(l, J), strengthfunc, urr.f90 (widths D T / 2 pi, Gn = D S 1e-4, the NJOY Gx/Gf
+  renormalisation loop with csunr2 + unfac + gnrl, the TALYS and NJOY sums), urrout.f90's files and thermalxs.f90's
+  xscaptherm(-1) (the urr.dat header). `Results.urr` = {file: {column: array}} with TALYS's file names: `urr.dat`,
+  `urr<fis|gam|com|neu|pro|alp>width.lLL`, `urrspacingl(j).lLL`, `urrneustrengthl(j).lLL`, `urrtalys.tot`, with
+  `urrnjoy y` also `urrnjoy.tot`, `urrratio.tot`; `urr.write_files` writes them. Hooks: `engine_c.cases` and the
+  Python driver's `ChainedFull.cases` call `urr.record` at Einc <= eurr (a fresh `compound_inputs`, as B9's astro
+  hook), `run` adds `Results.urr`. Per incident channel the Moldauer sums are `wfc.moldauer_sums` with a one-hot
+  incident vector (they are linear in it).
+* **TALYS quirk kept:** `Wab` in Turrlj is the factor of the LAST widthfluc call before a type's loop ends (the last
+  exit channel visited in TALYS's loop order, including the elastic level; W(a, gamma) for photons; the last fission
+  hill with a non-zero ratio), not a channel average. Without it Gg/Gx/Gf are off by the WFC factor of that channel.
+* **Defaults bit-identical**: nothing runs unless `urr y` / `urr <E>` / `endf y` (A > 20); `test_engine_c.py` passes. In
+  TALYS too URR is output only: with and without `urr y`, Fe-56 552 and U-238 600 engine `Results` arrays are bitwise
+  equal and stock's channels identical (`b10_response.py --unmoved`).
+* **Refused:** `urr` with widthmode 2 / 3 at an energy with width fluctuations (HRTW/GOE per-incident-channel factors
+  not separated here), with INCOGNITA_EWFC on a coupled target, with the KEVCOLD cell options. checkvalue's `lurr`
+  0-60, `rprime` 0-10, incident neutrons only, compound model on.
+* **Vs stock** (`scripts/kwcov/b10_response.py`, energies 0.01 0.1 1 5 MeV, stock JSON in `~/kwcov/stock/b10`; every
+  number of every urr file where stock > 1e-6 of its column maximum, same files and rows):
+
+  | deck | default mode | TALYS mode | worst (TALYS mode) |
+  |---|---|---|---|
+  | Fe-56 `urr y` (+ `urrnjoy y`) | 5e-5 (7e-5) | same | capture 5 MeV (Gx 5 MeV) |
+  | Co-59 `urr y; urrnjoy y` | 1.0e-4 | 1.0e-4 | Gx 5 MeV |
+  | U-238 `urr y` (+ `urrnjoy y`) | **22 %** Gf (EXACTFIS), Ga 9e-10 vs 0 eV | **0.11 %** | Gg 1 MeV = the engine's own (n,g) at 1 MeV (65.28 vs 65.21 mb) |
+  | Au-197 `urr y; urrnjoy y` | **x2.0** Gx, capture **-30 %** (CCEXITNB2) | **2e-4** | Gx 1 MeV |
+  | `urr 0.5` (onset): Fe-56 / U-238 | | 4e-6 / 8e-5 | |
+
+  Keyword responses (TALYS mode, |ln(R/S)| or the same absolute change): `urrnjoy y` Fe-56 7e-5, U-238 2.8e-4 (Gx);
+  `lurr 0` / `1` Fe-56 1e-5 / 7e-6, U-238 8e-5 / 1.5e-5; `lurr 3` the l03 files = stock to 3e-5; `rprime 7` (with
+  urrnjoy) Fe-56 6e-7, U-238 6e-6. Default mode differs only through EXACTFIS (U-238 Gf, fission sums) and CCEXITNB2
+  (Au-197 competitive width and capture), FIDELITY_DEFAULTS.md's deliberate defaults.
+* **INCOGNITA vs TALYS URR (recorded, not touched).** The published/reactor library's URR is not this path: the
+  research repo's REACTORLIB `urr_build.py` (URRPROD) writes ENDF MF2 LRU=2 LRF=2 LSSF=1 from engine ingredients, with
+  D(l,J) from an Ericson spin distribution and an analytic energy dependence (TALYS: the full level density at S_n +
+  Einc per (J, parity)), <Gn> from the OMP S0/S1 with R = 1.35 A^(1/3) and S2 := S0 (TALYS: Tjlinc per (l, j) with the
+  ENDF radius 1.23 A^(1/3) + 0.8), <Gg> = the engine's energy-independent gamgam_th s/p (TALYS: D Turrlj(0) / 2 pi from
+  the capture sums, energy dependent and divided by the last Wab), <Gf> = the T_f(J) shape scaled to the engine's
+  sigma_f (TALYS: D Turrlj(-1) / 2 pi), Gx fitted to the inelastic with AMUX 4 (TALYS: nu = 1), AP = R'(1 keV) (TALYS
+  NJOY: R' of the first URR energy). The LSSF <Gamma_gamma> closure work stays in the research repo. B10's files
+  change none of it.
+* **Not given:** energies below eninclow (Ninclow > 0; urrout fills their rows from the current energy; the port has
+  no Ninclow energies: B10b); thermal.f90 (B10b). Observed: a second `run_deck` with a different deck in the same
+  process needs `chartrun.drop_target_caches()` first (the cached Cascade keeps the first deck's Options; the test
+  does it; not chased).
+* Tests: `tests/hf/test_kwcov_b10.py` (gnrl / unfac / strengthfunc by hand, keyword parsing, refusals, defaults record
+  nothing, thermal capture table, Fe-56 run vs stock numbers with every cross section bitwise unchanged).
 
 ### B11 -- medical isotope production
 

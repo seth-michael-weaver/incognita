@@ -46,6 +46,10 @@ class Results:
     # as {"files": {Y file name: {column: ndarray over time}}, "params": {Y file name: {...}}, "summary": [...],
     # "meta": {...}}; physics/hf/production.py
     production: dict = field(default_factory=dict)
+    # URR (KWCOV B10: `urr y` / `urr <E>` / `endf y` on an incident-neutron run, default empty): urr.f90 / urrout.f90's
+    # files as {file name: {column: ndarray over rows}} (urr.dat, urrgamwidth.l00, urrtalys.tot, urrnjoy.tot, ...);
+    # physics/hf/urr.py
+    urr: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:

@@ -1319,6 +1319,9 @@ def cases(zf, stats: dict | None = None):
     from physics.hf import production  # KWCOV B11: production y (off: nothing); checkvalue before the run
 
     production.begin_run(cas, declared)
+    from physics.hf import urr as urrobs  # KWCOV B10: URR output (urr y / endf y; off: nothing recorded)
+
+    urrobs.begin_run(cas)
     chst = _ChanState()
     keys = None
     from physics.hf.emission import chanobs
@@ -1377,6 +1380,13 @@ def cases(zf, stats: dict | None = None):
                     astro_thermal.after_energy(cas, cia)
                     astro_thermal.LOG.append(dict(e_inc_mev=float(binp.e_inc_mev), **ad["info"],
                                                   dxsb=[float(v) for v in ad["dxsb"]]))
+            if urrobs.wanted(cas, binp.e_inc_mev):  # KWCOV B10: urr.f90 at Einc <= eurr, output only
+                with stagetime.stage("urr"):
+                    from physics.hf.compound import ewfc
+
+                    ciu = compound_inputs(cas, st, binp, cinp, etot, a_e, **fkw)
+                    ewfc.attach(ciu, cas, binp.e_inc_mev)  # INCOGNITA_EWFC on a coupled target: urr refuses
+                    urrobs.record(cas, ciu, binp.e_inc_mev)
             if cas.options.flagastro:  # KWCOV B9: partfunc's grid (last energy) and the masses, read only
                 from physics.hf.astro import rates as astro_rates
 
@@ -1573,6 +1583,9 @@ def run(injection, stats: dict | None = None):
         residual_production_mb=_stack(resid), totals_mb=_stack(totals),
         injected=injection.families, extras=_stack(xtra) if xtra else {},
     )
+    from physics.hf import urr as urrobs  # KWCOV B10 (off: unchanged)
+
+    res = urrobs.add_to_results(res)
     # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
     from physics.hf.direct.racapcalc import add_to_results
 

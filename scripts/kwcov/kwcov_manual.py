@@ -274,6 +274,31 @@ B11: dict = {
     "radiounit": ("SUPPORTED", "input/defaults.py Options.radiounit + " + _PR, "bq kbq mbq gbq ci kci mci; exact", _T11),
     "yieldunit": ("SUPPORTED", "input/defaults.py Options.yieldunit + " + _PR, "num mug mg g kg; exact", _T11),
 }
+_T10 = "test:test_kwcov_b10.py"
+_UR = "urr.py (engine_c/engine cases -> urr.record per Einc <= eurr -> Results.urr) "
+#: KWCOV B10 rows (docs/hf/COVERAGE_PLAN.md B10); stock TALYS-2.25 n + Fe-56 / U-238 / Co-59 / Au-197 at 0.01-5 MeV,
+#: scripts/kwcov/b10_response.py
+B10: dict = {
+    "urr": ("SUPPORTED", "input/defaults.py Options.flagurr/eurr_mev -> " + _UR,
+            "urr y / urr <E> / urr n: urr.dat, urr<gam|com|fis|neu|pro|alp>width.lLL, urrspacingl(j), urrneustrengthl(j), "
+            "urrtalys.tot (comptarget's (l,J) blocks incl. the last-Wab quirk, dtheory D(l,J), strengthfunc, thermalxs). "
+            "Every number vs stock: Fe-56 5e-5, Co-59 1e-4, U-238 0.11 % in TALYS mode (Gg 1 MeV = the engine's capture; "
+            "default mode Gf 22 % = EXACTFIS), Au-197 2e-4 in TALYS mode (default Gx x2 / capture -30 % = CCEXITNB2). "
+            "Output only: Fe-56 552 / U-238 600 Results arrays bitwise with and without urr y. Refused: widthmode 2/3, "
+            "INCOGNITA_EWFC coupled targets, KEVCOLD cells", _T10),
+    "lurr": ("SUPPORTED", "input/defaults.py Options.lurr -> " + _UR,
+             "l range of the URR blocks and files (0-60 checked); response vs stock lurr 0/1/3: Fe-56 1e-5, U-238 8e-5 "
+             "(l03 files = stock to 3e-5)", _T10),
+    "urrnjoy": ("SUPPORTED", "input/defaults.py Options.flagurrnjoy -> urr.py (csunr2, unfac, gnrl)",
+                "NJOY-formalism cross sections and the Gx/Gf renormalisation loop: urrnjoy.tot, urrratio.tot; response "
+                "Fe-56 7e-5, U-238 2.8e-4 (Gx)", _T10),
+    "rprime": ("SUPPORTED", "input/defaults.py Params.RprimeU -> urr.py (NJOY potential scattering radius)",
+               "acts only with urrnjoy y, as TALYS (default: R' of the first URR energy); range 0-10 checked; response "
+               "rprime 7: Fe-56 6e-7, U-238 6e-6", _T10),
+    "xscaptherm": ("IGNORED", "urr.py thermal_capture_mb (thermalxs.f90 port, urr.dat column only)",
+                   "only urr.dat's `thermal capture cross section` reads it (B10; table/Kopecky = stock for Fe-56 "
+                   "2590, U-238 2670 mb); thermal.f90's normalisation of the low-energy capture is B10b"),
+}
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -298,13 +323,14 @@ MANUAL: dict = {
     **B8,
     **B9,
     **B11,
+    **B10,
     "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps",
                  "KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the "
                  "Cascade constructor's 1e-8; now it does unless a caller passes its own", _T9),
     "channels": ("SUPPORTED", "structure/scalars.py:144", "exclusive channels are always computed (flagchannels "
                  "hard-wired on); `channels n` has no effect, which is harmless", "manual"),
-    "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete "
-             "30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"),
+    "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y -> the B10 URR files, "
+             "channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"),
     "micro": ("IGNORED", "input/defaults.py", "cascade honoured (ldmodel 7, jlmomp y -> refused, autorot y)"),
     "massdis": ("IGNORED", "input/defaults.py", "cascade honoured (transeps, popeps, pfnsmodel 2); fission yields "
                 "not computed (MISSING observable)"),
