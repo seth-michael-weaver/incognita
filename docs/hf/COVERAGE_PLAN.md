@@ -68,7 +68,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B9 | astrophysics (DONE, branch `kwcov9`; astro + racap, fissile astrogs n refused) | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
 | B10 | URR (DONE, branch `kwcov10`; widthmode 2/3 refused) | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
 | B10b | thermal, natural targets, resonance range (DONE, branch `kwcov10b`; resonance y refused) | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
-| B11 | medical isotope production | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
+| B11 | medical isotope production (DONE, branch `kwcov11`) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
 | B12 | recoils and LAB frame | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
 | B13 | ingredient outputs | outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
 | B14 | fission yields and fragment evaporation | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
@@ -701,6 +701,70 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
 `prodinitial.f90:1`, `prodrates.f90:1`, `prodyield.f90:1`, `prodout.f90:1`, decay data `decaydata.f90:1`.
 Post-processing of residual (and isomer) production -- needs B1-style isomer output and RESISO on.
 Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same residual production.
+
+**Done (branch `kwcov11`).**
+
+* **What.** `physics/hf/production.py` = isoprod.f90 (prodinitial, decaydata, prodres, stoppingpower, prodrates,
+  prodyield, prodout) on the run's residual production. `production y` and the medical keywords are Options
+  (`Ebeam`, `Eback`, `Ibeam`, `Area`, `rhotarget`, `radiounit`, `yieldunit`, `Tirrad`/`unitTirrad`,
+  `Tcool`/`unitTcool`; `tirrad 2 d 6 h` = kind `medtime`, up to five value/unit pairs); before B11 every one of them
+  except `production` was refused on a deck line. Both drivers check the input at the start of the run
+  (checkvalue.f90:497-552: Ebeam given and inside the run's grid, Eback default max(Ebeam - 5, 0.1), units, ranges)
+  and fill `Results.production` at the end = {"files": Y<ZZZ><AAA>.tot/.L00/.L<NN> columns Time, Activity,
+  Isotopes, Yield, Isotopic_fract.; "params": the Y-file header numbers; "summary": the talys.out table; "meta":
+  target thickness/volume/mass, projectiles per second, heat, Ntar0, the total rate}. `INCOGNITA_PRODUCTION_DIR`
+  writes the Y files (`INCOGNITA_PRODUCTION_BLOCK=1` = blockyield's one Y.tot; the deck keyword `blockyield` stays
+  an NA output switch). The rp files TALYS reads back are the engine's `rpZZZAAA` and RESISO `rpZZZAAA.LNN` (on by
+  default for charged projectiles) and the non-elastic, rounded to es15.6 as on file; half-lives and decay types
+  from `structure/decay` (JEFF-3.1.1 ENDF-6 MF8, read as decaydata.f90 does).
+* **Proton (and alpha) runs work**; nothing needed refusing. **Refused** as TALYS refuses: neutron and photon
+  projectiles ("isotope production not yet enabled", checkvalue.f90:498), Ebeam missing or above the grid, Eback
+  below it, unknown radiounit/yieldunit/time unit. Natural targets (`mass 0`, e.g. Ni-nat) stay refused by the deck
+  reader (natural.f90 is B10b).
+* **Defaults untouched**: nothing runs without `production y` (`begin_run` returns at once, `Results.production`
+  empty).
+* **TALYS quirks kept** (ported as written, checked against stock): one generation of beta feeding, with the
+  daughter's isomer index for the parent; a beta- parent (Zix + 1) is processed after its daughter, so it feeds
+  nothing during cooling; a nuclide counts as produced only with xs > 0 on a GRID point inside [Eback, Ebeam]; the
+  target's L00 (if any) is subtracted from the non-elastic as well as its total; `Tcool 0` leaves the cooling grid at
+  t = 0 and TALYS then prints Niso(EOI) exp(+lambda Tirr) and NaN isotopic fractions (0 x exp overflow) -- the port
+  gives the same numbers and the same NaNs; a time value with no unit counts 0 s; `Area` does not change a
+  thick-target yield (rate per atom ~ 1/Area, atoms ~ Area: stock 1.00015).
+* **Vs stock** (`scripts/kwcov/b11_response.py --all`; stock runs `~/kwcov/stock/b11_*`, trimmed to Y/rp files and
+  the talys.out table). *book* = the port on stock's OWN rp files vs stock's Y files (the bookkeeping alone);
+  *abs* = engine run vs stock, activity (or isotopes if stable) at end of irradiation, worst over nuclides whose
+  production rate agrees to 0.5 %; *resp* = |ln(R/S)| of activity/isotopes at end of irradiation and of cooling,
+  over nuclides whose production rate agrees in both decks:
+
+  | deck | book | abs | resp | | deck | book | abs | resp |
+  |---|---|---|---|---|---|---|---|---|
+  | p + Zn-68 E 18->10, 1 d / 1 d | 1.3e-4 * | 0.013 % | | | Zn-68 Tcool 0 | 1.3e-4 * | 0.013 % | 0.003 % |
+  | Zn-68 Ibeam 0.5 | 3.3e-4 * | 0.013 % | 0.0000 % | | Zn-68 radiounit mbq / ci | 1.3e-4 * | 0.013 % | 0.0000 % |
+  | Zn-68 Area 2.5 | 2.4e-4 * | 0.013 % | 0.0001 % | | Zn-68 yieldunit mg | 1.3e-4 * | 0.013 % | 0.0000 % |
+  | Zn-68 rho 5 | 5e-6 | 0.013 % | 0.0001 % | | Zn-68 Eback default (13) | 4e-4 * | 0.015 % | 0.003 % |
+  | Zn-68 Tirrad 2 h 30 m | 5e-6 | 0.013 % | 0.007 % | | Zn-68 Ebeam 15 Eback 12 | 1.4e-4 * | 0.050 % | **0.062 %** |
+  | Zn-68 Tcool 3 h | 1.3e-4 * | 0.013 % | 0.0005 % | | Zn-68 blockyield y (Y.tot) | 1.3e-4 * | 0.013 % | 0.0000 % |
+  | Zn-68 Tirrad 3 d Tcool 2 d | 8.5e-5 * | 0.013 % | 0.0007 % | | p + Mo-100 E 24->15, 6 h / 2 h | 9e-5 * | 0.25 % | |
+  | Mo-100 mCi, mug, Ibeam 0.1 | 1.1e-4 * | 0.25 % | 0.0000 % | | Mo-100 Tcool 1 d, kBq, g | 9e-5 * | 0.25 % | 0.0001 % |
+  | p + O-18 E 14->4, 2 h / 1 h | 4e-6 | 0.49 % | | | a + Bi-209 E 29->21, 4 h / 1 h | **1.7e-3** ** | 0.38 % | |
+
+  \* the worst is a Yield entry near saturation, where stock's yield is a float32 difference of two activities
+  (e.g. Ga-68 at 13 h: stock 6.233334e-4, port 6.238889e-4 GBq/mAh); activities, isotopes and fractions agree to 1e-6.
+  \*\* Pb-207 at 0.1 h (15 atoms, a stable daughter of 31 y Bi-207): exp1 - exp2 cancels to the last bits in both
+  codes (double; libm ulps), noise.
+  Headline products, engine vs stock at end of irradiation = the production-rate difference each time: Ga-68
+  0.001 %, Ga-67 0.007 %, Cu-64 0.013 %; Tc-99m (Y043099.L02) 0.074 %, Mo-99 0.017 %, Tc-100 0.046 %; F-18 0.49 %,
+  F-17 0.57 %; At-211 0.77 %, At-210 1.24 %, Po-211 1.11 %, At-212 0.16 %.
+* **Losses (all residual production, not B11).** Small channels where the engine's cross section differs: Zn-66
+  from p + Zn-68 (0.3 mb, prate +75 %), Nb-98 from Mo-100 (+161 %), O-16 / C-12 from O-18 (+20 % / -98 %), Zr-93
+  (436 %: fed only by Y-93 decay, whose 1e-18/s rate is 80x stock's). Nuclides with a tiny engine cross section where
+  stock has none get Y files stock does not write (Co-61, Ni-61, Cu-66 from Zn-68; Y-92, Zr-92/94/95/96 from Mo-100;
+  Bi-210 and its isomer from Bi-209). The O-18 deck (light target) agrees for F-18; the light-nucleus physics itself
+  is outside B11.
+* Tests: `tests/hf/test_kwcov_b11.py` (time units, density table, time grid = stock's, JEFF half-lives and decay
+  types, the port on stock's p + Zn-68 cross sections vs stock's Y files and talys.out to 2e-6, units / Ibeam / Area,
+  file round trip and blockyield, Options and deck-line parsing, every refusal, one p + Zn-68 engine run, neutron
+  refusal through run_deck).
 
 ### B12 -- recoils and LAB frame
 

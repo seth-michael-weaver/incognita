@@ -321,6 +321,32 @@ B10B: dict = {
                  "<spectrum> <value>` never gives a row (integral.f90 rebuilds the file name from reacstr, which only "
                  "the sacs reader fills: 'cross section file .tot does not exist')", _T10B),
 }
+_T11 = "test:test_kwcov_b11.py"
+_PR = "production.py (Options flagprod -> engine_c/engine begin_run, add_to_results -> Results.production) "
+_B11N = ("the port on stock's own rp files = stock's Y files to 1e-6 (yields near saturation: stock's float32 noise); "
+         "keyword responses vs stock <= 0.07 % where the residual production agrees (scripts/kwcov/b11_response.py)")
+#: KWCOV B11 rows (docs/hf/COVERAGE_PLAN.md B11); stock TALYS-2.25 p + Zn-68 / Mo-100 / O-18, a + Bi-209
+B11: dict = {
+    "production": ("SUPPORTED", _PR + "isoprod: prodinitial, decaydata, prodres, prodrates, prodyield, prodout",
+                   "production y with a charged projectile: Y<ZZZ><AAA>.tot/.L<NN> (time, activity, isotopes, yield, "
+                   "isotopic fraction), the talys.out table, INCOGNITA_PRODUCTION_DIR writes the files. Engine vs stock: "
+                   "Ga-68 0.001 %, Ga-67 0.007 %, Tc-99m 0.07 %, F-18 0.49 %, At-211 0.77 % = the production-rate "
+                   "difference each time. n / g projectiles refused as TALYS (checkvalue.f90:498); " + _B11N, _T11),
+    "ebeam": ("SUPPORTED", "input/defaults.py Options.Ebeam + " + _PR, "required with production y; range and "
+              "grid checks of checkvalue (refused before the run); Ebeam 15 Eback 12 response 0.06 %", _T11),
+    "eback": ("SUPPORTED", "input/defaults.py Options.Eback + " + _PR, "default max(Ebeam - 5, 0.1); response 0.003 %",
+              _T11),
+    "ibeam": ("SUPPORTED", "input/defaults.py Options.Ibeam + " + _PR, "Ibeam 0.5 response 0.0000 %", _T11),
+    "area": ("SUPPORTED", "input/defaults.py Options.Area + " + _PR, "Area 2.5 response 0.0001 %", _T11),
+    "rho": ("SUPPORTED", "input/defaults.py Options.rhotarget + " + _PR, "default: prodinitial's table by Z; rho 5 "
+            "response 0.0001 %", _T11),
+    "tirrad": ("SUPPORTED", "input/defaults.py Options.Tirrad/unitTirrad (kind medtime) + " + _PR,
+               "up to five value/unit pairs (y d h m s); Tirrad 2 h 30 m response 0.007 %, 3 d 0.0007 %", _T11),
+    "tcool": ("SUPPORTED", "input/defaults.py Options.Tcool/unitTcool (kind medtime) + " + _PR,
+              "Tcool 3 h response 0.0005 %; `Tcool 0` keeps TALYS's quirk (cooling grid left at 0)", _T11),
+    "radiounit": ("SUPPORTED", "input/defaults.py Options.radiounit + " + _PR, "bq kbq mbq gbq ci kci mci; exact", _T11),
+    "yieldunit": ("SUPPORTED", "input/defaults.py Options.yieldunit + " + _PR, "num mug mg g kg; exact", _T11),
+}
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -343,6 +369,7 @@ MANUAL: dict = {
     **B9,
     **B10,
     **B10B,
+    **B11,
     "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps",
                  "KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the "
                  "Cascade constructor's 1e-8; now it does unless a caller passes its own", _T9),

@@ -514,7 +514,7 @@ def _multiword() -> dict:
     """KWCOV B6: Options keywords whose value is several words (`_apply_stage` kinds that parse them)."""
     from physics.hf.input.defaults import _OPTION_KEYWORDS
 
-    kinds = ("ejectiles", "ddxpoints", "riplomp", "particles")
+    kinds = ("ejectiles", "ddxpoints", "riplomp", "particles", "medtime")  # medtime: KWCOV B11 tirrad / tcool
     return {k: True for k, spec in _OPTION_KEYWORDS.items() if spec[2] in kinds}
 
 

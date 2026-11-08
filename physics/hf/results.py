@@ -57,6 +57,10 @@ class Results:
     # INTEGRAL (KWCOV B10b: `integral y` in a deck, default empty): integral.f90's effective cross sections,
     # {"integral.dat": {"file", "spectrum": list, "xseff_b", "xsexp_b", "ratio": ndarray}}. physics/hf/integral.py
     integral: dict = field(default_factory=dict)
+    # PRODUCTION (KWCOV B11: `production y` with a charged projectile, default empty): prodout.f90's isotope production
+    # as {"files": {Y file name: {column: ndarray over time}}, "params": {Y file name: {...}}, "summary": [...],
+    # "meta": {...}}; physics/hf/production.py
+    production: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:

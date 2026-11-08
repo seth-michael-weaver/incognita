@@ -1319,6 +1319,9 @@ def cases(zf, stats: dict | None = None):
     from physics.hf import urr as urrobs  # KWCOV B10: URR output (urr y / endf y; off: nothing recorded)
 
     urrobs.begin_run(cas)
+    from physics.hf import production  # KWCOV B11: production y (off: nothing); checkvalue before the run
+
+    production.begin_run(cas, declared)
     chst = _ChanState()
     keys = None
     from physics.hf.emission import chanobs
@@ -1600,6 +1603,9 @@ def run(injection, stats: dict | None = None):
     res = fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
     from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
 
+    from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
+
+    res = production.add_to_results(res, injection)
     return thermal.add_to_results(res, injection)
 
 

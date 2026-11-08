@@ -317,6 +317,9 @@ class ChainedFull:
             from physics.hf import urr as urrobs  # KWCOV B10: URR output (urr y / endf y; off: nothing recorded)
 
             urrobs.begin_run(cas)
+            from physics.hf import production  # KWCOV B11: production y (off: nothing)
+
+            production.begin_run(cas, declared)
             for nin, (binp, cinp) in enumerate(pairs, start=1):
                 if not dumped:
                     binp, cinp = built.shell(nin, run_axis[nin - 1])
@@ -906,6 +909,9 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     res = specobs.add_to_results(angout.add_to_results(res, injection), injection)
     from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
 
+    from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
+
+    res = production.add_to_results(res, injection)
     return thermal.add_to_results(res, injection)
 
 
