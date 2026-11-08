@@ -311,6 +311,7 @@
   if (atom.cv) atom.cv.parentElement.addEventListener("pointermove", (e) => { const r = atom.cv.getBoundingClientRect(); atom.tx = (e.clientX - r.left) / r.width - 0.5; atom.ty = (e.clientY - r.top) / r.height - 0.5; });
 
   // ---------- one nuclide ----------
+  let tabAsked = false; // the page link (#C-12/cap) named a tab
   let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false, full = false, ez = null; // ez: zoomed energy band [lo, hi] (eV), capture tab
   /** Loading state while nuclide r's file is on its way (r null: done); with err, say it failed and offer a retry. */
   function busy(r, err) {
@@ -336,6 +337,8 @@
     try { [d0, lz, , , pw, rr] = await Promise.all([loadNuc(r.Z, r.A), libOn ? loadLib(r.Z) : null, loadQ(), loadTh(), libOn ? loadPw(r.Z, r.A) : null, loadRr(r.Z, r.A)]); } catch (e) { if (sel === r) busy(r, e); return; }
     if (sel !== r) return;
     cur = { r, d: d0, lib: libOf(lz, r, pw), rr }; ez = null; busy(null);
+    if (d0 && d0.rm && tab === "cap" && !tabAsked) tab = "el"; // a light nuclide with INCOGNITA's R-matrix evaluation opens on it (elastic), unless a link asked for a tab
+    tabAsked = false;
     buildTabs(); setHash(r);
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
@@ -957,7 +960,7 @@
     layout(); fit(); legend(); paintChart();
     // other nuclides are fetched only when opened; a link like data.html#Fe-56 opens that one, otherwise U-238 opens by default
     const fromHash = () => { const [h, t] = decodeURIComponent(location.hash.slice(1)).split("/"), r0 = h && parseQ(h.replace(/-nat$/i, " nat")), t0 = tab;
-      if (t in CH) tab = t;
+      if (t in CH) { tab = t; tabAsked = true; }
       if (r0 && r0 !== sel) select(r0, true, true); else if (cur && tab !== t0) { buildTabs(); sweep(); } };
     fromHash(); window.addEventListener("hashchange", fromHash);
     if (!sel) { const u = byKey.get("92-238"); if (u) select(u, false, true); }
