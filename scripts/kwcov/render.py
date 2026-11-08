@@ -35,9 +35,14 @@ except the four main keywords and a handful read in `readinput.f90`/`getvalues.f
 
 **Caveat on SUPPORTED.** The automatic class is "read and reaches physics code". Only rows with `evidence` other than
 `grep` have a test; the batches in `COVERAGE_PLAN.md` upgrade `grep` rows as they compare with stock TALYS. Options
-keywords accept the global form only; per-nucleus forms such as `ldmodel 26 56 2` are refused (`Params` keywords take
-per-nucleus forms through `fitlib`). Energy-dependent adjustment forms (`v1adjust n 1. Ea Eb Em D`, adjust.f90) are not
-read; `physics/hf/eadj.py` (ENGADJ) is our own equivalent keyword.
+keywords take their global form; the per-nucleus / per-particle forms TALYS has for them (`ldmodel 2 26 57`,
+`colenhance y 26 57`, `nlevels 25 56 5`, `maxlevelsbin p 5`, `branch Z A ilev0 ...`) are read since KWCOV B2, and any
+other multi-word form of an Options keyword is refused (`Params` keywords take per-nucleus forms through `fitlib`).
+A deck is a talys.inp (`physics/hf/input/deck.py`) or deck lines in `INCOGNITA_TALYS_FIT_LINES`; the lines act with
+or without an `INCOGNITA_TALYS_FIT` arm (before B2 they were dropped without one). Energy-dependent adjustment forms
+(`v1adjust n 1. Ea Eb Em D`, `awdadjust n 1. file.table`, adjust.f90) are not read: as a deck line they are refused
+(B2), from a best file or fitted library they are left out with a warning; `physics/hf/eadj.py` (ENGADJ) is our own
+equivalent keyword.
 """
 
 OBS_HEAD = """# TALYS-2.25 observable coverage of the `physics/hf` engine

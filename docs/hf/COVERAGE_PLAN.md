@@ -57,7 +57,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | # | batch | keywords | observables | effort |
 |---|---|---|---|---|
 | B1 | channel observables (DONE, this branch) | -- | prod/multiplicity (gas production), binary.tot, xs*.tot gamma column, xs*.LMM isomeric channels, xs*.fis, discrete/continuum split | 0.5 d |
-| B2 | deck wiring of what exists | best, bestend, bestbranch, bestfile, fit, ngfit, nnfit, nffit, nafit, ndfit, pnfit, gnfit, dnfit, anfit, macsfit, gamgamfit, ejectiles, maxlevelsbin, maxlevelsres, nlevels, estop, liso, isomer (check), per-nucleus forms of ldmodel/colenhance, `energy E1 E2 dE` | CHANOBS default decision | 1-1.5 d |
+| B2 | deck wiring of what exists (DONE, branch `kwcov2`) | best, bestend, bestbranch, bestfile, fit, ngfit, nnfit, nffit, nafit, ndfit, pnfit, gnfit, dnfit, anfit, macsfit, gamgamfit, ejectiles, maxlevelsbin, maxlevelsres, nlevels, estop, liso, isomer (check), per-nucleus forms of ldmodel/colenhance, `energy E1 E2 dE` | CHANOBS default decision | 1-1.5 d |
 | B3 | angular distributions on TALYS keywords | outangle, outlegendre, fileelastic, fileangle, angles, anglescont, cpang | elastic/inelastic ang + leg, Rutherford ratio (charged), compound ang. for charged particles | 1.5-2 d |
 | B4 | spectra, DDX, gamma lines on TALYS keywords | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
 | B5 | model keyword sweep: compound, gamma, levels, LD | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
@@ -98,18 +98,58 @@ batches above.
 * Left for later: the (n,gn) column `xsngn` of `.con`/`.tot` files (B4); CHANOBS default ON (B2 decides after
   timing it on a chart sample: it costs the Python channels per energy).
 
-### B2 -- deck wiring of what exists
+### B2 -- deck wiring of what exists (done on branch `kwcov2`)
 
-* `best y` / `bestend` / `bestbranch` / `bestfile` and the `*fit` flags: today they work only through
-  `INCOGNITA_TALYS_FIT`; a deck line is ignored. Route them to `fitlib.modes()` when they come in deck lines
-  (`initial_best.f90:1`, `input_fit.f90:1`, `xsfit.f90:1`). `bestbranch` needs `branch` lines (B5).
-* `ejectiles` (parskip, `input_basicpar.f90:98`), `maxlevelsbin` (`nlevbin`, `nuclides.f90`), `maxlevelsres`
-  (`nlevmaxres`, `nuclides.f90`), `nlevels`, `estop` (`read_energies.f90`), `liso` (`levels.f90`).
-* Per-nucleus forms of Options keywords: `ldmodel Z A n`, `colenhance Z A y` (getvalues class 14/13); today
-  `default_options` raises.
-* `energy E1 E2 dE` range form and energy files with TALYS's own grid (`read_energies.f90`).
-* Accept: response metric on Fe-56 and U-238 for each switch; `best y` on Fe-56 and U-238 equals
-  `INCOGNITA_TALYS_FIT=best` bitwise.
+* **What a deck is now.** A talys.inp (`physics/hf/input/deck.py`: `read_deck`, `run_deck`) or deck lines in
+  `INCOGNITA_TALYS_FIT_LINES`. The lines now act without an `INCOGNITA_TALYS_FIT` arm (before, they were dropped
+  silently unless an arm was named: POPEPS2 (a)). A deck line the port cannot apply (energy-dependent table form,
+  unknown index / particle) is refused; the same line coming from a best file or a fitted library is left out with
+  a warning naming it (it was silent). A multi-word form of an Options keyword TALYS does not have is refused (it was
+  skipped).
+* **Wired** (all default-off; default runs bit-identical, `test_engine_c.py`):
+  `best` / `bestend` / `bestfile` (fitlib `_deck_best`: deck `best y` gives the same cards as
+  `INCOGNITA_TALYS_FIT=best` for Fe-56, Co-59, U-238 and the same Fe-56 engine arrays bitwise); `fit` and every
+  `*fit` flag (`fitflag` kind: sets `flagfit`, `macsfit`/`gamgamfit` turn `ngfit` off; an/dn/pn/gn libraries in
+  xsfit.f90 order, matched without the projectile as TALYS does); `bestbranch` (levels/branch file ->
+  `structure/levels.py`); per-nucleus `ldmodel v Z A`, `colenhance y Z A` (the TALYS form is value first, not
+  `ldmodel Z A v`), `nlevels Z A n`, `maxlevelsbin p n` (`Options.pernuc`, `nlev_of`/`ldmodel_of`/`flagcol_of`;
+  out-of-box nuclei ignored with TALYS's warning); `maxlevelsres` (was read but called IGNORED: `nlev_of` uses it);
+  `estop` (energies above it are not computed, the grid keeps `enincmax`, `input/energies.estop_subset` in both
+  drivers); `energy E1 E2 [dE]`, energy files and `n0-20.grid`-style grids (`input/energies.py`, equal to the
+  `energies` files TALYS-2.25 writes); `liso` (labels only, in TALYS too).
+* **Refused:** `ejectiles <subset>` (`defaults.UNPORTED`): parskip reaches only the channel bookkeeping in the
+  engine, not the compound or pre-equilibrium decay; Fe-56 `ejectiles g n p` at 14 MeV moved stock (n,2n) +3.4 %,
+  (n,p) +3.1 % and the engine 0.0 %.
+* **TALYS-2.25 bug found:** `branch` lines never act: strucinitial.f90:312-325 resets `branchratio`/`nbranch` after
+  the input is read (stock Co-59 `branch 27 58 2 1 0 1.0`: no cross section moves; `bestbranch y`, read after the
+  reset, does act). The port reproduces it, with a warning. Co-59's best file carries four such lines.
+* **Response vs stock** (`scripts/kwcov/b2_response.py`, n + target at 1/5/14 MeV, `|ln(R/S)|` max over channels
+  with stock > 1 mb; limit 2 %):
+
+  | deck lines | target | worst | | deck lines | target | worst |
+  |---|---|---|---|---|---|---|
+  | maxlevelsres 10 | Fe-56 / Co-59 / U-238 | 0.03 / 0.02 / 0.01 % | | ngfit y | Fe-56 | 0.23 % |
+  | maxlevelsbin p 5 | Fe-56 | 0.19 % | | macsfit y | Fe-56 | 0.38 % |
+  | nlevels 25 56 5 | Fe-56 | 0.19 % | | gamgamfit y | Fe-56 | 0.15 % |
+  | ldmodel 2 26 57 | Fe-56 | 0.99 % | | bestbranch y | Co-59 ((n,2n) isomers) | 0.02 % |
+  | colenhance y 26 57 | Fe-56 | 0.31 % | | branch 27 58 2 1 0 1.0 | Co-59 | 0.00 % (both 0) |
+  | estop 6 | Fe-56 | 0.00 % | | liso 1, isomer 0.001 | Fe-56 | 0.00 % (both 0) |
+  | **ldmodel 1 92 238** | U-238 | **3.1 %** (n,2n) 14 MeV, a 51 % move | | **fit y** | Fe-56 | **4.0 %** (n,p) 14 MeV |
+  | **best y** | Co-59 | **8.2 %** (n,g) isomer 1 MeV | | **best y** (no table / table) | Fe-56 | **6.8 / 11 %** |
+  | **best y** | U-238 | **8.1 %** fission 5 MeV | | | | |
+
+  Losses, traced: `fit y` = two engine responses, `gadjust 26 57` (CN g of the exciton model; (n,p) 2.7 %,
+  (n,d) 2.7 %) and `cstrip a` ((n,a) 2.2 %); `rvadjust p/a/d`, `cstrip d`, `gadjust` of the residuals pass
+  (<= 0.8 %). These are pre-equilibrium port issues for B5/B7, not wiring. `best y` carries the same knobs
+  (cknock/cstrip, m2constant, g*adjust) plus, for Fe-56, an energy-dependent `awdadjust` table and, for U-238, an
+  external OMP file (`optmod`), which the port does not read (B6; warned). U-238 `ldmodel 1` on the target: an
+  actinide level-density response, open.
+* **CHANOBS default decision: stays OFF.** Turning it on by default would change `Results` for every caller (new
+  `extras`) and cost the Python channels per energy on the C path, against the rule that defaults stay
+  bit-identical. The TALYS output keywords that ask for those files (`filechannels`, `fileresidual`, ...) are NA rows;
+  wiring them to CHANOBS belongs with the output batches (B4/B13).
+* Tests: `tests/hf/test_kwcov_b2.py` (parsing, precedence, refusals, energies vs TALYS's own files, deck `best y`
+  = best arm bitwise through the engine).
 
 ### B3 -- angular distributions
 

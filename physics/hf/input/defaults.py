@@ -203,6 +203,13 @@ class Options:
     nlevmax: int = 30  # :106, max(30, Ltarget)
     nlevmaxres: int = 30  # :108
     nlevbin: tuple[int, ...] = (30,) * 7  # :107 and :109 (nlevbin(k0) = nlevmax), types 0..6
+    # KWCOV B2: the per-nucleus deck forms `ldmodel v Z A` (class 14), `colenhance y Z A` (class 13),
+    # `nlevels Z A n` (class 2), plus the `bestbranch y` file's branching ratios (branching.f90), resolved to
+    # ((keyword, Zix, Nix, value), ...) sorted; () = none. (`branch` lines: TALYS-2.25 wipes them, see _apply_forms)
+    pernuc: tuple = ()
+    # KWCOV B2: `ejectiles g n p ...` (input_basicpar.f90:98-111) as `parinclude(0:6)` (particles.f90:58-93);
+    # all seven by default, the projectile always
+    parinclude: tuple = (True,) * 7
     # --- level density models (input_densitymodel.f90, input_densitypar.f90) ---
     ldmodelall: int = 1  # input_densitymodel.f90:84-90; 7 for micro y or k0 <= 1 with A > 215
     ldmodelCN: int = 1  # input_densitymodel.f90:91 and :245-249
@@ -418,20 +425,52 @@ class Options:
         return self.Zinit + self.Ninit
 
     # per-nucleus switches; (Zix, Nix) count protons/neutrons removed from the compound nucleus
+    def _pernuc(self, key: str, Zix: int, Nix: int):
+        """KWCOV B2: the value of a per-nucleus deck form for (Zix, Nix), or None."""
+        for k, z, n, v in self.pernuc:
+            if k == key and z == Zix and n == Nix:
+                return v
+        return None
+
+    def branches_of(self, Zix: int, Nix: int) -> tuple:
+        """KWCOV B2: the input branching ratios of (Zix, Nix) as ((ilev0, ((ilev1, ratio), ...)), ...):
+        `branch` lines, then the `bestbranch y` file for levels no line set (nbranch, input_levels.f90:142-182,
+        branching.f90:1)."""
+        if not self.pernuc:
+            return ()
+        return tuple(v for k, z, n, v in self.pernuc if k == "branch" and z == Zix and n == Nix)
+
     def ldmodel_of(self, Zix: int, Nix: int) -> int:
-        """ldmodel(Zix, Nix): ldmodelCN for the compound nucleus, ldmodelall elsewhere
-        (input_densitymodel.f90:245-255). Per-nucleus keyword forms are out of scope."""
+        """ldmodel(Zix, Nix) (input_densitymodel.f90:245-255): an explicit `ldmodelCN` for the
+        compound nucleus, else the per-nucleus `ldmodel v Z A` card, else ldmodelCN (= ldmodelall
+        when not given) for the compound nucleus and ldmodelall elsewhere."""
+        if (Zix, Nix) == (0, 0) and "ldmodelcn" in self.explicit:
+            return self.ldmodelCN
+        if self.pernuc:
+            v = self._pernuc("ldmodel", Zix, Nix)
+            if v is not None:
+                return v
         return self.ldmodelCN if (Zix, Nix) == (0, 0) else self.ldmodelall
 
     def flagcol_of(self, Zix: int, Nix: int) -> bool:
-        """flagcol(Zix, Nix) = flagcolall (input_densitymodel.f90:100, :253)."""
+        """flagcol(Zix, Nix): the per-nucleus `colenhance y Z A` card, else flagcolall
+        (input_densitymodel.f90:100, :253)."""
+        if self.pernuc:
+            v = self._pernuc("colenhance", Zix, Nix)
+            if v is not None:
+                return v
         return self.flagcolall
 
     def nlev_of(self, Zix: int, Nix: int) -> int:
-        """nlev(Zix, Nix): nlevmax for the target, nlevbin(type) for the first residual reached
-        by each ejectile, nlevmaxres elsewhere (nuclides.f90, the loops before `strucinitial`)."""
+        """nlev(Zix, Nix): nlevmax for the target, else the per-nucleus `nlevels Z A n` card, else
+        nlevbin(type) for the first residual reached by each ejectile, nlevmaxres elsewhere
+        (nuclides.f90:152-169: a card fills nlev before the two defaulting loops)."""
         if (Zix, Nix) == (PARZ[self.k0], PARN[self.k0]):
             return self.nlevmax
+        if self.pernuc:
+            v = self._pernuc("nlevels", Zix, Nix)
+            if v is not None and v != 0:
+                return v
         for t in range(7):
             if (Zix, Nix) == (PARZ[t], PARN[t]):
                 return self.nlevbin[t]
@@ -668,17 +707,17 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "sigavcont": ("preeqmodel", "sigavcont", "yn"),  # Incognita extension (SIGAVCONT), n = OFF = TALYS
     "msdbins": ("preeqpar", "msdbins", "int"),
     "production": ("medical", "flagprod", "yn"),
-    "ngfit": ("fit", "flagngfit", "yn"),
-    "nnfit": ("fit", "flagnnfit", "yn"),
-    "nffit": ("fit", "flagnffit", "yn"),
-    "nafit": ("fit", "flagnafit", "yn"),
-    "ndfit": ("fit", "flagndfit", "yn"),
-    "pnfit": ("fit", "flagpnfit", "yn"),
-    "gnfit": ("fit", "flaggnfit", "yn"),
-    "dnfit": ("fit", "flagdnfit", "yn"),
-    "anfit": ("fit", "flaganfit", "yn"),
-    "macsfit": ("fit", "flagmacsfit", "yn"),
-    "gamgamfit": ("fit", "flaggamgamfit", "yn"),
+    "ngfit": ("fit", "flagngfit", "fitflag"),
+    "nnfit": ("fit", "flagnnfit", "fitflag"),
+    "nffit": ("fit", "flagnffit", "fitflag"),
+    "nafit": ("fit", "flagnafit", "fitflag"),
+    "ndfit": ("fit", "flagndfit", "fitflag"),
+    "pnfit": ("fit", "flagpnfit", "fitflag"),
+    "gnfit": ("fit", "flaggnfit", "fitflag"),
+    "dnfit": ("fit", "flagdnfit", "fitflag"),
+    "anfit": ("fit", "flaganfit", "fitflag"),
+    "macsfit": ("fit", "flagmacsfit", "fitflag"),
+    "gamgamfit": ("fit", "flaggamgamfit", "fitflag"),
 }
 
 # the order of talysinput.f90 (input_main ... input_fit)
@@ -722,6 +761,12 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
             o[name] = float(value)
         elif kind == "str":
             o[name] = str(value)
+        elif kind == "fitflag":  # KWCOV B2, input_fit.f90:65-185: `<x>fit y` also sets flagfit, and
+            o[name] = _yn(value)  # gamgamfit y / macsfit y turn ngfit off
+            if o[name]:
+                o["flagfit"] = True
+                if name in ("flaggamgamfit", "flagmacsfit"):
+                    o["flagngfit"] = False
         elif kind == "maxlevelstar":  # input_levels.f90, sets nlevmax and nlevbin(k0)
             o["nlevmax"] = int(value)
             nb = list(o["nlevbin"])
@@ -794,6 +839,9 @@ def default_options(
         fit_ov = fitlib.option_overrides()
         if fit_ov:
             ov = {**{str(k).lower(): v for k, v in fit_ov.items()}, **ov}
+    order = {k: i for i, k in enumerate(ov)}  # KWCOV B2: deck order (maxlevelsbin vs maxlevelstar)
+    ejectiles = ov.pop("ejectiles", None)  # KWCOV B2: a list of particle symbols, not one value
+    ov, forms = _split_forms(ov)
     unknown = sorted(set(ov) - OPTION_KEYWORDS)
     if unknown:
         raise KeyError(
@@ -818,6 +866,8 @@ def default_options(
     # input_basicpar.f90 (runs after read_energies)
     o["eninclow_mev"] = 0.0 if (k0 == 1 and o["flagendf"]) else 1.0e-6  # :54-58
     _apply_stage("basicpar", o, ov)
+    if ejectiles is not None:  # KWCOV B2: input_basicpar.f90:98-111, particles.f90:58-93
+        _apply_ejectiles(o, ejectiles)
     _apply_stage("astro", o, ov)
 
     # input_numerics.f90
@@ -837,6 +887,10 @@ def default_options(
     nb[k0] = o["nlevmax"]  # :109
     o["nlevbin"] = tuple(nb)
     _apply_stage("levels", o, ov)
+    if forms:  # KWCOV B2: `maxlevelsbin <p> n` (class 7) and the per-nucleus cards
+        _apply_forms(forms, o, order, ov)
+    if o["flagbestbr"]:  # KWCOV B2: bestbranch y (branching.f90, after the input)
+        _bestbranch(o)
 
     # input_densitymodel.f90
     o["ldmodelall"] = 7 if o["flagmicro"] else 1  # :84-88
@@ -977,7 +1031,158 @@ def default_options(
 
     o["npwindow"] = "y" if npwindow.flag(o["npwindow"]) else "n"
 
-    return Options(**o, explicit=frozenset(ov))
+    return Options(**o, explicit=frozenset(ov) | frozenset(" ".join((k,) + i) for k, i, _ in forms)
+                   | (frozenset({"ejectiles"}) if ejectiles is not None else frozenset()))
+
+
+def _apply_ejectiles(o: dict, value) -> None:
+    """`ejectiles g n p ...`: the competing outgoing particles (the first character of each word that is a
+    particle symbol, up to seven), the projectile always included.
+
+    TALYS: input_basicpar.f90:1 (input_basicpar), particles.f90:1 (particles)
+    Test: tests/hf/test_kwcov_b2.py
+    """
+    words = value.split() if isinstance(value, str) else [str(x) for x in value]
+    syms = [w[:1].lower() for w in words if w[:1].lower() in PARSYM][:7]
+    if not syms:
+        raise ValueError(f"ejectiles: no particle symbol in {value!r}")
+    inc = [PARSYM[t] in syms for t in range(7)]
+    inc[o["k0"]] = True
+    o["parinclude"] = tuple(inc)
+
+
+#: KWCOV B2: Options keywords with a per-nucleus / per-particle deck form, and its getvalues class
+#: (getvalues.f90): class 14 `ldmodel v Z A`, class 13 `colenhance y Z A`, class 2 `nlevels Z A n`,
+#: class 7 `maxlevelsbin <p> n`. An override key carries the indices: {"ldmodel 26 57": 2}.
+PER_FORMS = {"ldmodel": 14, "colenhance": 13, "nlevels": 2, "maxlevelsbin": 7, "branch": 0}
+#: index words of each form's key ("branch Z A ilev0"; the value is "nbr ilev1 br1 ...")
+_FORM_NIDX = {14: 2, 13: 2, 2: 2, 7: 1, 0: 3}
+
+
+def _split_forms(ov: dict) -> tuple[dict, list]:
+    """Plain keywords, and the per-nucleus / per-particle forms as (keyword, indices, value)."""
+    plain, forms = {}, []
+    for k, v in ov.items():
+        w = k.split()
+        if len(w) == 1:
+            if k in PER_FORMS and PER_FORMS[k] in (0, 2, 7):
+                raise ValueError(f"{k}: needs its per-nucleus / per-particle form, got {v!r}")
+            plain[k] = v
+            continue
+        if w[0] not in PER_FORMS:
+            raise ValueError(f"{w[0]}: TALYS has no per-nucleus or per-particle form of this keyword the port "
+                             f"reads (got {k!r}); per-nucleus forms are {sorted(PER_FORMS)}")
+        need = _FORM_NIDX[PER_FORMS[w[0]]]
+        if len(w) != 1 + need:
+            raise ValueError(f"{k!r}: expected {need} index word(s)")
+        forms.append((w[0], tuple(w[1:]), v))
+    return plain, forms
+
+
+def _apply_forms(forms: list, o: dict, order: dict, ov: dict) -> None:
+    """Resolve the per-nucleus / per-particle forms into `o` the way getvalues does: absolute (Z, A) ->
+    (Zix, Nix) below the initial compound nucleus; a nucleus outside the (numZ, numN) box is ignored with
+    TALYS's own warning (getvalues.f90:200, range_index_error 'continue').
+
+    TALYS: getvalues.f90:1 (getvalues), input_levels.f90:240-251, input_densitymodel.f90:187-213,
+    nuclides.f90:152-169
+    Test: tests/hf/test_kwcov_b2.py
+    """
+    import warnings
+
+    k0 = o["k0"]
+    zinit, ninit = o["Ztarget"] + PARZ[k0], o["Atarget"] - o["Ztarget"] + PARN[k0]
+    per = {}
+    nb = list(o["nlevbin"])
+    for kw, idx, v in forms:
+        if kw == "maxlevelsbin":
+            ch = str(idx[0]).lower()[:1]
+            ch = "g" if ch == "e" else ch  # getvalues.f90: `e` is read as `g`
+            if ch not in PARSYM:
+                raise ValueError(f"maxlevelsbin: wrong particle symbol {idx[0]!r}")
+            t = PARSYM.index(ch)
+            nb[t] = int(v)
+            # maxlevelstar (input_levels.f90:252-258) also sets nlevbin(k0): the later deck line wins
+            if t == k0 and "maxlevelstar" in ov and order.get("maxlevelstar", -1) > order.get(
+                    " ".join((kw,) + idx), -1):
+                nb[t] = o["nlevmax"]
+            continue
+        iz, ia = int(idx[0]), int(idx[1])
+        if 1 <= PER_FORMS[kw] <= 5 and iz <= 2 and ia <= 4:  # getvalues.f90: (Zix, Nix) given directly
+            zix, nix = iz, ia - iz
+        else:
+            zix, nix = zinit - iz, ninit - (ia - iz)
+        if not (0 <= zix <= NUMZ and 0 <= nix <= NUMN):
+            warnings.warn(f"TALYS-warning: {kw} Z={iz} A={ia} out of range, keyword ignored (as TALYS does)",
+                          stacklevel=3)
+            continue
+        if kw == "branch":
+            # TALYS-2.25 reads the line (input_levels.f90:142-182) and then wipes it: strucinitial.f90:312-325
+            # resets branchratio/nbranch after the input, before levels.f90 reads them. Faithful = no effect
+            # (stock Co-59 `branch 27 58 2 1 0 1.0`: every cross section unchanged); checked, then dropped LOUDLY.
+            _branch_value(int(idx[2]), str(v).split())
+            warnings.warn(f"branch {' '.join(idx)} {v}: TALYS-2.25 drops `branch` lines (strucinitial.f90:325 "
+                          "resets nbranch after the input); the run is TALYS's, without it. `bestbranch y` "
+                          "is read after that reset and does act", stacklevel=3)
+            continue
+        per[(kw, zix, nix)] = _yn(v) if kw == "colenhance" else int(v)
+    o["nlevbin"] = tuple(nb)
+    _pernuc_store(o, per)
+
+
+def _branch_value(ilev0: int, w: list) -> tuple:
+    """`nbr ilev1 br1 ilev2 br2 ...` -> (ilev0, ((ilev1, ratio), ...)), ratios normalised to their sum in
+    single precision (input_levels.f90:159-181, branching.f90:58-75)."""
+    nbr = int(w[0])
+    if not 0 <= ilev0 <= NUMLEV or not 0 <= nbr <= NUMLEV:
+        raise ValueError(f"branch: level {ilev0} / {nbr} branchings outside 0..{NUMLEV}")
+    pairs = [(int(w[1 + 2 * k]), np.float32(float(w[2 + 2 * k]))) for k in range(nbr)]
+    tot = np.float32(0.0)
+    for _, b in pairs:
+        if not 0.0 <= b <= 1.0:
+            raise ValueError(f"branch: ratio {b} outside 0..1")
+        tot = np.float32(tot + b)
+    if tot > 0:
+        pairs = [(l1, np.float32(b / tot)) for l1, b in pairs]
+    return (ilev0, tuple((l1, float(b)) for l1, b in pairs))
+
+
+def _pernuc_store(o: dict, per: dict) -> None:
+    """`per` {(keyword, Zix, Nix[, ilev0]): value} -> the sorted `Options.pernuc` tuple."""
+    o["pernuc"] = tuple(sorted(((k[0], k[1], k[2], v) for k, v in per.items()), key=lambda x: (x[0], x[1], x[2],
+                                                                                              repr(x[3]))))
+
+
+def _bestbranch(o: dict) -> None:
+    """`bestbranch y`: the target's `structure/levels/branch/<El><AAA>.branch` lines, for every level no
+    `branch` line set (branching.f90:1, called from nuclides.f90:194 after the input is read).
+
+    TALYS: branching.f90:1 (branching)
+    Test: tests/hf/test_kwcov_b2.py
+    """
+    from physics.hf.core.constants import nuclide_symbol
+    from physics.hf.gamma.parameters import structure_dir
+
+    p = structure_dir() / "levels" / "branch" / f"{nuclide_symbol(int(o['Ztarget']))}{int(o['Atarget']):03d}.branch"
+    if not p.is_file():
+        return
+    k0 = o["k0"]
+    zinit, ninit = o["Ztarget"] + PARZ[k0], o["Atarget"] - o["Ztarget"] + PARN[k0]
+    per = {}
+    for k, z, n, v in o["pernuc"]:
+        per[(k, z, n, v[0]) if k == "branch" else (k, z, n)] = v
+    for line in p.read_text(errors="replace").splitlines():
+        w = line.split()
+        if len(w) < 5:
+            continue
+        iz, ia, ilev0 = int(w[1]), int(w[2]), int(w[3])
+        zix, nix = zinit - iz, ninit - (ia - iz)
+        if not (0 <= zix <= NUMZ and 0 <= nix <= NUMN):
+            continue
+        if ("branch", zix, nix, ilev0) in per:  # branching.f90:52 (no input line survives strucinitial)
+            continue
+        per[("branch", zix, nix, ilev0)] = _branch_value(ilev0, w[4:])
+    _pernuc_store(o, per)
 
 
 #: Keyword settings the port does not implement. Each one used to run and return numbers that are
@@ -997,6 +1202,9 @@ UNPORTED = (
      "only the two-component path)"),
     ("flaggshell", lambda v: bool(v), "gshell y: shell-damped single-particle density in the exciton model "
      "(damp_comp never reaches multiple pre-equilibrium)"),
+    ("parinclude", lambda v: not all(v), "ejectiles <subset>: skipping outgoing particles (parskip) reaches only the "
+     "channel bookkeeping, not the compound / pre-equilibrium decay, so the run returned the all-ejectile numbers "
+     "(Fe-56 `ejectiles g n p` 14 MeV: stock (n,2n) +3.4 %, (n,p) +3.1 %, engine 0.0 %; KWCOV B2 2026-11-08)"),
     ("flaggnorm", lambda v: bool(v), "gnorm y: normalise the E1 strength to the measured <Gamma_gamma>. "
      "gamma.transmission.radwidtheory has the iteration but no calculation calls it, so the run was "
      "identical to gnorm n (223 nuclides, 2026-09-22); scale the strength with `ftable Z A f` instead"),

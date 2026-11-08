@@ -497,7 +497,7 @@ def gamma_parameters(
     # wtable defaults at input_gammapar.f90:117-136, so read the one for THIS nucleus -- an
     # actinide resolves ldmodelall to 7 (input_densitymodel.f90:90) and a hard-wired 1 would
     # silently pick the wrong global wtable.
-    ldmodel = int(options.ldmodelCN if (zix, nix) == (0, 0) else options.ldmodelall)
+    ldmodel = int(options.ldmodel_of(zix, nix))  # KWCOV B2: per-nucleus `ldmodel v Z A` cards too
     flagupbend = bool(options.flagupbend)  # input_gammamodel.f90:64-68
     flagpsfglobal = bool(options.flagpsfglobal)  # input_gammamodel.f90:69
     gmax = int(gammax if gammax is not None else options.gammax)  # input_gammapar.f90:30

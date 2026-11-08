@@ -257,6 +257,10 @@ class ChainedFull:
             pairs = [(None, None)] * len(declared)
         enincmax = max(declared)
         want = None if self.energies is None else {round(e, 6) for e in self.energies}
+        if not dumped:  # KWCOV B2: a deck `estop` line (read_energies.f90:188-194)
+            from physics.hf.input.energies import estop_subset
+
+            want = estop_subset(self.Z, self.A, declared, want)
         # OPEN4. binary.f90's `sfactor` lives for the whole energy loop (`BinaryState`), and the
         # multiple emission below is seeded from it, so a subset still has to walk every declared
         # energy before its last wanted one: those run as far as `binary` (`keep` False) and

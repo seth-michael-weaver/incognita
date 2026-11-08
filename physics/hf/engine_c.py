@@ -1274,6 +1274,9 @@ def cases(zf, stats: dict | None = None):
     declared = tuple(float(np.float32(e)) for e in zf.declared_energies)
     enincmax = max(declared)
     want = None if zf.energies is None else {round(e, 6) for e in zf.energies}
+    from physics.hf.input.energies import estop_subset  # KWCOV B2: a deck `estop` line
+
+    want = estop_subset(zf.Z, zf.A, declared, want)
     run_axis = list(declared)
     keep = [want is None or round(e, 6) in want for e in run_axis]
     n_run = max((i + 1 for i, k in enumerate(keep) if k), default=0)

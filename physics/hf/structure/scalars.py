@@ -156,7 +156,7 @@ def _parinclude(options) -> list[bool]:
     TALYS: input_basicreac.f90:1 (input_basicreac)
     Test: A-struct
     """
-    inc = list(getattr(options, "parinclude", [True] * 7))
+    inc = list(getattr(options, "parinclude", [True] * 7))  # KWCOV B2: `ejectiles` (Options.parinclude)
     if len(inc) != 7:
         inc = [True] * 7
     return [bool(options.flagfission), *[bool(x) for x in inc]]

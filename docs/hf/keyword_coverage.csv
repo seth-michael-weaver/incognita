@@ -8,7 +8,7 @@ adepthcor,input_omppar,input_omppar.f90:609,value,1.0,IGNORED,input/defaults.py 
 alimit,input_densitypar,input_densitypar.f90:258,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.alimit -> density/ld_ceng.py, density/ld_nx2.py, density/models.py, density/parameters.py (+4)","test:test_cengld2.py,test_density.py,test_rigidspin.py",
 alphald,input_densitypar,input_densitypar.f90:419,value,ld_systematics,SUPPORTED,"input/defaults.py Params.alphald -> density/ld_nx2.py, density/parameters.py",test:test_defaults.py,
 alphaomp,input_ompmodel,input_ompmodel.f90:319,value,6,READ_ONLY_DEFAULT,input/defaults.py Options.alphaomp,,refused when set (defaults.UNPORTED): alphaomp 3-5
-anfit,input_fit,input_fit.f90:162,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
+anfit,input_fit,input_fit.f90:162,flag,n,SUPPORTED,input/fitlib.py _cards (an.par),test:test_kwcov_b2.py,"wired; xsfit.f90 does not match the projectile, so the library applies on any run; response untested (charged/photon projectiles behind INCOGNITA_CPINC)"
 angles,input_numerics,input_numerics.f90:125,value,90,SUPPORTED,input/defaults.py Options.nangle -> core/grids.py,grep,
 anglescont,input_numerics,input_numerics.f90:130,value,18,SUPPORTED,input/defaults.py Options.nanglecont -> core/grids.py,grep,
 anglesrec,input_numerics,input_numerics.f90:120,value,1,IGNORED,input/defaults.py Options.nanglerec,,parsed into Options/Params but no engine code reads nanglerec
@@ -29,17 +29,17 @@ avsoadjust,input_omppar,input_omppar.f90:416,per-particle,1.0,SUPPORTED,"input/d
 avsoadjustf,input_ompmodel,input_ompmodel.f90:258,value,,MISSING,,,
 awadjust,input_omppar,input_omppar.f90:337,per-particle,omp_link,SUPPORTED,"input/defaults.py Params.awadjust -> omp/omp_nx2.py, omp/omprotor.py, omp/parameters.py, omp/regional.py (+1)","test:test_ompdef.py,test_osengine.py",
 awadjustf,input_ompmodel,input_ompmodel.f90:256,value,,MISSING,,,
-awdadjust,input_omppar,input_omppar.f90:371,per-particle,1.0,SUPPORTED,"input/defaults.py Params.awdadjust -> omp/omp_nx2.py, omp/omprotor.py, omp/parameters.py, omp/tfold.py",test:test_omprotor.py,
+awdadjust,input_omppar,input_omppar.f90:371,per-particle,1.0,SUPPORTED,"input/defaults.py Params.awdadjust -> omp/omp_nx2.py, omp/omprotor.py, omp/parameters.py, omp/tfold.py","test:test_kwcov_b2.py,test_omprotor.py",
 awdadjustf,input_ompmodel,input_ompmodel.f90:257,value,,MISSING,,,
 awsoadjust,input_omppar,input_omppar.f90:452,per-particle,omp_link,SUPPORTED,"input/defaults.py Params.awsoadjust -> omp/omp_nx2.py, omp/parameters.py",grep,
 awsoadjustf,input_ompmodel,input_ompmodel.f90:258,value,,MISSING,,,
 axtype,input_fissionpar,input_fissionpar.f90:257,per-nucleus-barrier,,MISSING,,,
 bdamp,input_fissionpar,input_fissionpar.f90:230,per-nucleus-barrier,0.01,SUPPORTED,"input/defaults.py Params.bdamp -> fission/parameters.py, fission/wkb.py",test:test_defaults.py,
 bdampadjust,input_fissionpar,input_fissionpar.f90:240,per-nucleus-barrier,1.0,SUPPORTED,input/defaults.py Params.bdampadjust -> fission/parameters.py,grep,
-best,input_best,input_best.f90:89,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=best),manual,deck line ignored; the best-file recipe runs via INCOGNITA_TALYS_FIT=best|tendl
-bestbranch,input_levels,input_levels.f90:189,flag,n,IGNORED,input/defaults.py Options.flagbestbr,,parsed into Options/Params but no engine code reads flagbestbr
-bestend,input_best,input_best.f90:95,flag,n,IGNORED,input/defaults.py Options.flagbestend,,fitlib skips the line: flag
-bestfile,input_best,input_best.f90:101,value,,IGNORED,,,fitlib skips the line: handled by activate()
+best,input_best,input_best.f90:89,flag,n,SUPPORTED,"input/fitlib.py _deck_best (= INCOGNITA_TALYS_FIT=best, cards identical; Fe-56 engine bitwise)",test:test_kwcov_b2.py,"deck `best y` reads structure/best/<Nuc>/<p>-<Nuc>.talys before the deck (initial_best.f90). Lines the port cannot apply (adjustment tables, optmod/levelfile/deformfile files) are left out WITH A WARNING. Wiring exact; the RESPONSE has LOSSES from the physics knobs the files hold: Co-59 8.2 % ((n,g) isomer 1 MeV), 7.3 % ((n,np) 14 MeV); Fe-56 without its awdadjust table 6.8 % ((n,np) 14 MeV), with it 11 % (nonelastic 5 MeV); U-238 8.1 % (fission 5 MeV: its n-U238.omp optmod file is not read, B6). Same family as the fit y loss (gadjust, cstrip/cknock)"
+bestbranch,input_levels,input_levels.f90:189,flag,n,SUPPORTED,input/defaults.py _bestbranch -> structure/levels.py,test:test_kwcov_b2.py,"levels/branch/<Nuc>.branch (branching.f90); Co-59 (n,2n) isomers vs stock 0.02 %"
+bestend,input_best,input_best.f90:95,flag,n,SUPPORTED,input/fitlib.py _deck_best,test:test_kwcov_b2.py,best lines after the deck's (initial_best.f90:113-124)
+bestfile,input_best,input_best.f90:101,value,,SUPPORTED,input/fitlib.py _deck_best,test:test_kwcov_b2.py,explicit best file path; missing file = TALYS's warning
 bestpath,input_path,input_path.f90:66,value,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 beta2,input_mass,input_mass.f90:107,per-nucleus-barrier,beta2,SUPPORTED,"input/defaults.py Params.beta2 -> capture_gpu.py, capture_gpu_setup.py, compound/dens_reference.py, compound/psf_fast.py (+21)","test:test_collrule.py,test_corex.py,test_ftglobal.py",
 betafiscor,input_fissionpar,input_fissionpar.f90:282,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.betafiscor -> fission/parameters.py, fission/wkb.py",grep,
@@ -58,7 +58,7 @@ blockpreeq,input_output,input_output.f90:219,flag,n,NA,,,output/path/plumbing sw
 blockspectra,input_output,input_output.f90:189,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 blockyield,input_output,input_output.f90:237,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 blockza,input_output,input_output.f90:243,flag,y,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-branch,input_levels,input_levels.f90:142,value,,IGNORED,,,fitlib skips the line: discrete branching ratios (per level)
+branch,input_levels,input_levels.f90:142,value,,SUPPORTED,"input/defaults.py _apply_forms (parsed, checked, dropped with a warning)",test:test_kwcov_b2.py,"TALYS-2.25 BUG: strucinitial.f90:325 resets nbranch after the input, so `branch` lines never act (stock Co-59: 0.0 % change). The port reproduces that and warns"
 breakupmodel,input_preeqmodel,input_preeqmodel.f90:226,value,1,SUPPORTED,input/defaults.py Options.breakupmodel -> preeq/complex.py,grep,
 cbarrier,input_fissionpar,input_fissionpar.f90:294,value,1.0,SUPPORTED,"input/defaults.py Params.Cbarrier -> fission/parameters.py, fission/wkb.py",grep,
 cbreak,input_preeqpar,input_preeqpar.f90:203,per-particle,cbreak,SUPPORTED,input/defaults.py Params.Cbreak -> preeq/complex.py,grep,
@@ -72,11 +72,11 @@ class2file,input_fissionmodel,input_fissionmodel.f90:224,per-nucleus-file,,MISSI
 class2width,input_fissionpar,input_fissionpar.f90:250,per-nucleus-barrier,0.2,SUPPORTED,"input/defaults.py Params.widthc2 -> fission/parameters.py, fission/transmission.py",grep,
 cnubar1,input_fissionpar,input_fissionpar.f90:322,value,1.0,IGNORED,input/defaults.py Params.Cnubar1,,parsed into Options/Params but no engine code reads Cnubar1
 cnubar2,input_fissionpar,input_fissionpar.f90:327,value,1.0,IGNORED,input/defaults.py Params.Cnubar2,,parsed into Options/Params but no engine code reads Cnubar2
-colenhance,input_densitymodel,input_densitymodel.f90:198,flag | value+nucleus,n,SUPPORTED,input/defaults.py Options.flagcol() -> density/*,test:test_defaults.py,read through the Options.flagcol property (automatic grep missed it); global form only
+colenhance,input_densitymodel,input_densitymodel.f90:198,flag | value+nucleus,n,SUPPORTED,input/defaults.py Options.flagcol_of (global + `colenhance y Z A`) -> density/*,"test:test_defaults.py,test_kwcov_b2.py",per-nucleus form since B2: Fe-56 `colenhance y 26 57` 0.31 %
 colldamp,input_densitymodel,input_densitymodel.f90:158,flag,n,SUPPORTED,"input/defaults.py Options.flagcolldamp -> density/ld_nx2.py, density/parameters.py, native/ld.h",grep,
 components,input_output,input_output.f90:313,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 compound,input_compoundmodel,input_compoundmodel.f90:117,flag,y,SUPPORTED,"input/defaults.py Options.flagcomp -> emission/multiple.py, input/nuclides.py","test:conftest.py,test_binquad2.py,test_ceang.py",
-core,input_directpar,input_directpar.f90:101,value,-1,SUPPORTED,"input/defaults.py Options.core -> astro/stellar.py, capture_fast_batch.py, capture_gpu.py, capture_gpu_setup.py (+120)","test:test_collrule.py,test_compound.py,test_open2.py",
+core,input_directpar,input_directpar.f90:101,value,-1,SUPPORTED,"input/defaults.py Options.core -> astro/stellar.py, capture_fast_batch.py, capture_gpu.py, capture_gpu_setup.py (+121)","test:test_collrule.py,test_compound.py,test_open2.py",
 coulomb,input_directmodel,input_directmodel.f90:215,flag,y,IGNORED,input/defaults.py Options.flagcoulomb,,parsed into Options/Params but no engine code reads flagcoulomb
 cpang,input_directmodel,input_directmodel.f90:152,flag,n,SUPPORTED,input/defaults.py Options.flagcpang -> core/grids.py,grep,
 cstrip,input_preeqpar,input_preeqpar.f90:191,per-particle,1.0,SUPPORTED,input/defaults.py Params.Cstrip -> omp/tfold.py,"test:conftest.py,test_na_v1.py,test_tfold.py",
@@ -94,7 +94,7 @@ densfile,input_densitypar,input_densitypar.f90:407,per-nucleus-file,,MISSING,,,
 deuteronomp,input_ompmodel,input_ompmodel.f90:329,value,4,SUPPORTED,"input/defaults.py Options.deuteronomp -> omp/omp_nx2.py, omp/parameters.py",test:test_defaults.py,
 disctable,input_levels,input_levels.f90:184,value,1,SUPPORTED,"input/defaults.py Options.disctable -> omp/parameters.py, structure/deformation.py, structure/files.py, structure/levels.py (+1)",grep,
 dispersion,input_ompmodel,input_ompmodel.f90:214,flag,n,SUPPORTED,input/defaults.py Options.flagdisp -> omp/parameters.py,grep,
-dnfit,input_fit,input_fit.f90:144,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
+dnfit,input_fit,input_fit.f90:144,flag,n,SUPPORTED,input/fitlib.py _cards (dn.par),test:test_kwcov_b2.py,"wired; xsfit.f90 does not match the projectile, so the library applies on any run; response untested (charged/photon projectiles behind INCOGNITA_CPINC)"
 e0,input_densitypar,input_densitypar.f90:306,per-nucleus-barrier,1e-20,SUPPORTED,"input/defaults.py Params.E0 -> compound/psf_nx2.py, core/grids.py, density/ctwindow.py, density/ctwindow2.py (+10)","test:test_corex.py,test_nx2_preeq.py,test_setb.py",
 e0adjust,input_densitypar,input_densitypar.f90:381,per-nucleus-barrier,1.0,SUPPORTED,"input/defaults.py Params.E0adjust -> density/ld_ceng.py, density/ld_nx2.py, density/matching.py, density/parameters.py (+1)",grep,
 e1file,input_gammamodel,input_gammamodel.f90:113,per-nucleus-file,,MISSING,,,
@@ -107,7 +107,7 @@ ecissave,input_directmodel,input_directmodel.f90:197,flag,n,NA,input/defaults.py
 ecisstep,input_omppar,input_omppar.f90:618,value,0.00E+00,IGNORED,input/defaults.py Options.ecisstep_fm,,parsed into Options/Params but no engine code reads ecisstep_fm
 egr,input_gammapar,input_gammapar.f90:196,per-nucleus-radiation,0.0,SUPPORTED,"input/defaults.py Params.egr -> capture_gpu.py, capture_gpu_setup.py, gamma/parameters.py, native/nx2_psf.c",test:test_etablefix.py,
 egradjust,input_gammapar,input_gammapar.f90:250,per-nucleus-radiation,1.0,SUPPORTED,input/defaults.py Params.egradjust -> gamma/parameters.py,test:test_etablefix.py,
-ejectiles,input_basicpar,input_basicpar.f90:98,value,g n p d t h a,MISSING,,manual,all 7 ejectiles always on; `ejectiles g n` (parskip) not read
+ejectiles,input_basicpar,input_basicpar.f90:98,value,g n p d t h a,READ_ONLY_DEFAULT,input/defaults.py Options.parinclude + UNPORTED,test:test_kwcov_b2.py,"a subset is REFUSED: parskip reaches only the channel bookkeeping, not the decay (Fe-56 `ejectiles g n p` 14 MeV: stock (n,2n) +3.4 %, engine 0.0 %)"
 ejoin,input_omppar,input_omppar.f90:499,per-particle,200.0,SUPPORTED,input/defaults.py Params.Ejoin -> omp/parameters.py,grep,
 electronconv,input_levels,input_levels.f90:195,flag,y,SUPPORTED,input/defaults.py Options.flagelectron -> structure/levels.py,grep,
 element,input_main,input_main.f90:117,value,Fe,SUPPORTED,"engine run(Z, A) arguments",manual,target is a run argument (TALYSworld: target)
@@ -117,13 +117,13 @@ emsdmin,input_preeqpar,input_preeqpar.f90:273,value,0.0,IGNORED,input/defaults.p
 endf,input_basicreac,input_basicreac.f90:133,flag,n,IGNORED,input/defaults.py,manual,"defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"
 endfdetail,input_basicreac,input_basicreac.f90:139,flag,y,IGNORED,input/defaults.py Options.flagendfdet,,parsed into Options/Params but no engine code reads flagendfdet
 endfecis,input_basicreac,input_basicreac.f90:115,flag,y,NA,input/defaults.py Options.flagendfecis,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-energy,input_main,input_main.f90:136,value,1.000,SUPPORTED,ChainedFull(declared_energies=...),manual,"single energy, list or grid file; TALYS `energy E1 E2 dE` range form must be expanded by the caller"
+energy,input_main,input_main.f90:136,value,1.000,SUPPORTED,"input/energies.py read_energies, input/deck.py read_deck/run_deck",test:test_kwcov_b2.py,"single, `E1 E2 dE` range (dE 0 = 10 points), file, and pre-defined `n0-20.grid` grids, equal to TALYS's own `energies` files"
 epr,input_gammapar,input_gammapar.f90:223,per-nucleus-radiation,0.0,SUPPORTED,"input/defaults.py Params.epr -> capture_gpu.py, compound/psf_fast.py, gamma/isoe2.py, gamma/parameters.py (+2)",grep,
 epradjust,input_gammapar,input_gammapar.f90:277,per-nucleus-radiation,1.0,SUPPORTED,input/defaults.py Params.epradjust -> gamma/parameters.py,grep,
 emaxpseudores,input_levels,input_levels.f90:207,value,-1.0,IGNORED,input/defaults.py Params.Emaxpseudores,,parsed into Options/Params but no engine code reads Emaxpseudores
 equidistant,input_basicpar,input_basicpar.f90:123,flag,y,SUPPORTED,"input/defaults.py Options.flagequi -> core/exgrid_nx2.py, core/grids.py, emission/feeding.py, native/nx2_exgrid.c",test:test_nx2_exgrid.py,
 equispec,input_basicpar,input_basicpar.f90:129,flag,n,SUPPORTED,"input/defaults.py Options.flagequispec -> compound/dens_reference.py, core/grids.py, direct/prepare.py, preeq/prepare.py",test:test_engfix4.py,
-estop,input_main,input_main.f90:152,value,1000.000,IGNORED,input/defaults.py Options.Estop_mev,,parsed into Options/Params but no engine code reads Estop_mev
+estop,input_main,input_main.f90:152,value,1000.000,SUPPORTED,input/energies.py estop_subset -> engine.py / engine_c.py,test:test_kwcov_b2.py,"energies above estop not computed, grid (enincmax) kept as read_energies.f90; Fe-56 0.00 %"
 esurf,input_preeqpar,input_preeqpar.f90:258,value,-1.0,IGNORED,input/defaults.py Params.Esurf0,,parsed into Options/Params but no engine code reads Esurf0
 etable,input_gammapar,input_gammapar.f90:304,per-nucleus-radiation,0.0,SUPPORTED,"input/defaults.py Params.etable -> capture_gpu.py, gamma/parameters.py",test:test_etablefix.py,
 etableadjust,input_gammapar,input_gammapar.f90:332,per-nucleus-radiation,0.0,SUPPORTED,input/defaults.py Params.etableadjust -> gamma/parameters.py,test:test_etablefix.py,
@@ -158,18 +158,18 @@ fiso,input_gammapar,input_gammapar.f90:360,per-particle,-1.0,SUPPORTED,"input/de
 fisom,input_gammapar,input_gammapar.f90:366,per-particle,-1.0,SUPPORTED,"input/defaults.py Params.fisom -> capture_fast.py, capture_fast_batch.py, capture_gpu_setup.py, compound/decay_batch.py (+9)",grep,
 fispartdamp,input_fissionmodel,input_fissionmodel.f90:164,flag,n,SUPPORTED,"input/defaults.py Options.flagfispartdamp -> fission/fis_ceng.py, fission/fission_batch_ladder.py, fission/parameters.py, fission/transmission.py (+1)",grep,
 fission,input_fissionmodel,input_fissionmodel.f90:134,flag,n,SUPPORTED,"input/defaults.py Options.flagfission -> capture_fast.py, capture_fast_batch.py, capture_gpu_setup.py, compound/ccexitnb.py (+24)","test:perfcasc_gate_run.py,test_ccexitnb.py,test_cengfis.py",
-fit,input_basicpar,input_basicpar.f90:150,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=fit),manual,deck line ignored; fitted libraries via INCOGNITA_TALYS_FIT
+fit,input_basicpar,input_basicpar.f90:150,flag,n,SUPPORTED,input/fitlib.py _cards (o.flagfit -> nn/ng/na/nf/nd .par),test:test_kwcov_b2.py,"works as a deck line; LOSS: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %); B5/B7"
 format,input_basicpar,input_basicpar.f90:145,value,YANDF-0.4,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 fsadjust,input_fissionpar,input_fissionpar.f90:338,value,1.0,IGNORED,input/defaults.py Params.Fsadjust,,parsed into Options/Params but no engine code reads Fsadjust
 ftable,input_gammapar,input_gammapar.f90:313,per-nucleus-radiation,1.0,SUPPORTED,"input/defaults.py Params.ftable -> capture_fast.py, capture_gpu.py, capture_gpu_setup.py, capture_gpu_tasks.py (+10)","test:test_actphys.py,test_chunkfix.py,test_etablefix.py",
 ftableadjust,input_gammapar,input_gammapar.f90:341,per-nucleus-radiation,1.0,SUPPORTED,"input/defaults.py Params.ftableadjust -> gamma/ftglobal.py, gamma/parameters.py",test:test_etablefix.py,
 fullhf,input_compoundmodel,input_compoundmodel.f90:142,flag,n,SUPPORTED,"input/defaults.py Options.flagfullhf -> capture_fast_batch.py, capture_gpu_setup.py, compound/chain.py, compound/continuum.py (+9)",grep,
 fymodel,input_fissionmodel,input_fissionmodel.f90:182,value,2,IGNORED,input/defaults.py Options.fymodel,,parsed into Options/Params but no engine code reads fymodel
-g,input_preeqpar,input_preeqpar.f90:155,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.g -> astro/stellar.py, capture_gpu.py, capture_tasks.py, compound/ccexitnb.py (+96)","test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py",
+g,input_preeqpar,input_preeqpar.f90:155,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.g -> astro/stellar.py, capture_gpu.py, capture_tasks.py, compound/ccexitnb.py (+97)","test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py",
 gadjust,input_preeqpar,input_preeqpar.f90:167,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.gadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py","test:test_fitlib.py,test_pegq.py",
 gamgam,input_gammapar,input_gammapar.f90:375,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.gamgam -> gamma/actphys.py, gamma/ggnorm.py, gamma/transmission.py, structure/files.py (+1)",grep,
 gamgamadjust,input_gammapar,input_gammapar.f90:381,per-nucleus,1.0,SUPPORTED,input/defaults.py Params.gamgamadjust -> structure/resonances.py,grep,
-gamgamfit,input_fit,input_fit.f90:171,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
+gamgamfit,input_fit,input_fit.f90:171,flag,n,SUPPORTED,input/fitlib.py _cards,test:test_kwcov_b2.py,turns ngfit off; Fe-56 response 0.15 %
 gammald,input_densitypar,input_densitypar.f90:264,per-nucleus,-1.0,SUPPORTED,"input/defaults.py Params.gammald -> density/ld_ceng.py, density/ld_nx2.py, density/matching.py, density/models.py (+3)",test:test_cengld2.py,
 gammashell1,input_densitypar,input_densitypar.f90:429,value,ld_systematics,SUPPORTED,"input/defaults.py Params.gammashell1 -> density/ld_nx2.py, density/parameters.py",test:test_defaults.py,
 gammashell2,input_densitypar,input_densitypar.f90:434,value,0.0,SUPPORTED,"input/defaults.py Params.gammashell2 -> density/ld_nx2.py, density/parameters.py",test:test_cengld2.py,
@@ -186,7 +186,7 @@ gmradjuste,input_preeqpar,input_preeqpar.f90:278,value,1.0,SUPPORTED,input/defau
 gmradjustg,input_preeqpar,input_preeqpar.f90:298,value,1.0,SUPPORTED,input/defaults.py Params.GMRadjustG -> direct/dwba.py,grep,
 gn,input_preeqpar,input_preeqpar.f90:173,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.gn -> density/ld_nx2.py, density/parameters.py, density/particle_hole.py, emission/feeding.py (+10)","test:test_nx2_preeq.py,test_pegq.py",
 gnadjust,input_preeqpar,input_preeqpar.f90:179,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.gnadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py",test:test_pegq.py,
-gnfit,input_fit,input_fit.f90:153,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
+gnfit,input_fit,input_fit.f90:153,flag,n,SUPPORTED,input/fitlib.py _cards (gn.par),test:test_kwcov_b2.py,"wired; xsfit.f90 does not match the projectile, so the library applies on any run; response untested (charged/photon projectiles behind INCOGNITA_CPINC)"
 gnorm,input_gammamodel,input_gammamodel.f90:171,flag,n,READ_ONLY_DEFAULT,input/defaults.py Options.flaggnorm,,refused when set (defaults.UNPORTED): gnorm y
 gp,input_preeqpar,input_preeqpar.f90:161,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.gp -> capture_gpu_setup.py, compound/decay_fast.py, compound/dens_reference.py, compound/psf_fast.py (+22)","test:test_eadj.py,test_gamma.py,test_gammaall_ggnorm.py",
 gpadjust,input_preeqpar,input_preeqpar.f90:185,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.gpadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py",test:test_pegq.py,
@@ -206,7 +206,7 @@ ibeam,input_medical,input_medical.f90:106,value,,MISSING,,,
 incadjust,input_ompmodel,input_ompmodel.f90:245,flag,y,IGNORED,input/defaults.py Options.flagincadj,,parsed into Options/Params but no engine code reads flagincadj
 inccalc,input_directmodel,input_directmodel.f90:146,flag,y,NA,input/defaults.py Options.flaginccalc,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 integral,input_output,input_output.f90:319,flag,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-isomer,input_basicpar,input_basicpar.f90:118,value,1.00E+00,SUPPORTED,input/defaults.py Options.isomer_s -> structure/levels.py,"test:test_chanobs.py,test_engfix4.py,test_resiso.py",
+isomer,input_basicpar,input_basicpar.f90:118,value,1.00E+00,SUPPORTED,input/defaults.py Options.isomer_s -> structure/levels.py,"test:test_chanobs.py,test_resiso.py,test_kwcov_b2.py",Fe-56 `isomer 0.001` 0.0 % both sides
 jlmmode,input_ompmodel,input_ompmodel.f90:291,value,0,IGNORED,input/defaults.py Options.jlmmode,,parsed into Options/Params but no engine code reads jlmmode
 jlmomp,input_ompmodel,input_ompmodel.f90:226,flag,n,READ_ONLY_DEFAULT,input/defaults.py Options.flagjlm,,refused when set (defaults.UNPORTED): jlmomp y
 kph,input_preeqpar,input_preeqpar.f90:209,value,15.0,SUPPORTED,input/defaults.py Params.Kph -> preeq/prepare.py,test:test_cengld2.py,
@@ -214,8 +214,8 @@ krotconstant,input_densitypar,input_densitypar.f90:336,per-nucleus-barrier,1.0,S
 kvibmodel,input_densitymodel,input_densitymodel.f90:153,value,2,SUPPORTED,"input/defaults.py Options.kvibmodel -> density/ld_nx2.py, density/parameters.py",grep,
 labddx,input_basicreac,input_basicreac.f90:169,flag,n,IGNORED,input/defaults.py Options.flaglabddx,,parsed into Options/Params but no engine code reads flaglabddx
 ldglobal,input_densitymodel,input_densitymodel.f90:176,flag,n,SUPPORTED,"input/defaults.py Options.flagldglobal -> compound/dens_reference.py, density/ld_ceng.py, density/ld_nx2.py, density/matching.py (+1)",grep,
-ldmodel,input_densitymodel,input_densitymodel.f90:187,value | value+nucleus,1,SUPPORTED,"input/defaults.py Options.ldmodelall -> gamma/parameters.py, gamma/score.py","test:test_defaults.py,test_density.py,test_fission_systematics.py",global form only: the per-nucleus/per-particle form is refused (defaults.default_options)
-ldmodelcn,input_densitymodel,input_densitymodel.f90:182,value,1,SUPPORTED,input/defaults.py Options.ldmodelCN -> gamma/parameters.py,test:test_fitlib.py,
+ldmodel,input_densitymodel,input_densitymodel.f90:187,value | value+nucleus,1,SUPPORTED,"input/defaults.py Options.ldmodel_of (global + `ldmodel v Z A`) -> density/*, gamma/*","test:test_defaults.py,test_density.py,test_kwcov_b2.py","per-nucleus form since B2: Fe-56 `ldmodel 2 26 57` 0.99 %; U-238 `ldmodel 1 92 238` LOSS (n,2n) 14 MeV 3.1 % (a 51 % move), capture 1.1 %"
+ldmodelcn,input_densitymodel,input_densitymodel.f90:182,value,1,SUPPORTED,input/defaults.py Options.ldmodelCN -> gamma/parameters.py,"test:test_fitlib.py,test_kwcov_b2.py",
 ldmodelracap,input_gammamodel,input_gammamodel.f90:131,value,3,IGNORED,input/defaults.py Options.ldmodelracap,,parsed into Options/Params but no engine code reads ldmodelracap
 legacy,input_basicreac,input_basicreac.f90:221,flag,n,NA,input/defaults.py Options.flaglegacy,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 leoradjustd,input_preeqpar,input_preeqpar.f90:328,value,1.0,SUPPORTED,input/defaults.py Params.LEORadjustD -> direct/dwba.py,grep,
@@ -223,7 +223,7 @@ leoradjuste,input_preeqpar,input_preeqpar.f90:288,value,1.0,SUPPORTED,input/defa
 leoradjustg,input_preeqpar,input_preeqpar.f90:308,value,1.0,SUPPORTED,input/defaults.py Params.LEORadjustG -> direct/dwba.py,grep,
 levelfile,input_levels,input_levels.f90:222,per-element-file,,IGNORED,,,fitlib skips the line: external level file
 levinger,input_gammapar,input_gammapar.f90:428,value,6.5,SUPPORTED,input/defaults.py Params.levinger -> gamma/transmission.py,grep,
-liso,input_basicpar,input_basicpar.f90:113,value,,IGNORED,input/defaults.py Options.Lisoinp,,parsed into Options/Params but no engine code reads Lisoinp
+liso,input_basicpar,input_basicpar.f90:113,value,,SUPPORTED,input/defaults.py Options.Lisoinp (output label only in TALYS too),test:test_kwcov_b2.py,no cross section moves in stock TALYS (Fe-56 0.0 %) nor in the engine
 localomp,input_ompmodel,input_ompmodel.f90:196,flag,y,SUPPORTED,input/defaults.py Options.flaglocalomp -> omp/parameters.py,grep,
 ltarget,input_main,input_main.f90:131,value,0,READ_ONLY_DEFAULT,structure/levels.py:171,manual,KNOWN GAP: excited/isomeric targets refused (NotImplementedError); only astro/stellar.py uses excited entrance states internally
 lurr,input_compoundpar,input_compoundpar.f90:125,value,2,IGNORED,input/defaults.py Options.lurr,,parsed into Options/Params but no engine code reads lurr
@@ -237,7 +237,7 @@ m1file,input_gammamodel,input_gammamodel.f90:177,per-nucleus-file,,MISSING,,,
 m2constant,input_preeqpar,input_preeqpar.f90:214,value,1.0,SUPPORTED,input/defaults.py Params.M2constant -> preeq/exciton.py,"test:test_defaults.py,test_nx2_preeq.py,test_preeq.py",
 m2limit,input_preeqpar,input_preeqpar.f90:223,value,1.0,SUPPORTED,input/defaults.py Params.M2limit -> preeq/exciton.py,test:test_nx2_preeq.py,
 m2shift,input_preeqpar,input_preeqpar.f90:228,value,1.0,SUPPORTED,input/defaults.py Params.M2shift -> preeq/exciton.py,test:test_nx2_preeq.py,
-macsfit,input_fit,input_fit.f90:181,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
+macsfit,input_fit,input_fit.f90:181,flag,n,SUPPORTED,input/fitlib.py _cards,test:test_kwcov_b2.py,turns ngfit off (input_fit.f90); Fe-56 response 0.38 %
 mass,input_main,input_main.f90:111,value,56,SUPPORTED,"engine run(Z, A) arguments",manual,mass 0 (natural element) is MISSING: no abundance loop (natural.f90)
 massdir,input_mass,input_mass.f90:119,value,,MISSING,,,
 massdis,input_basicreac,input_basicreac.f90:203,flag,n,IGNORED,input/defaults.py,manual,"cascade honoured (transeps, popeps, pfnsmodel 2); fission yields not computed (MISSING observable)"
@@ -247,9 +247,9 @@ massnucleus,input_mass,input_mass.f90:135,per-nucleus,0.0,SUPPORTED,"input/defau
 maxband,input_directpar,input_directpar.f90:91,value,0,SUPPORTED,"input/defaults.py Options.maxband -> ecis/reference.py, ecis/weakcore.py, structure/deformation.py",test:test_open2.py,
 maxchannel,input_numerics,input_numerics.f90:135,value,4,SUPPORTED,"input/defaults.py Options.maxchannel -> emission/channels.py, emission/dumps.py, emission/emit_nx2.py, emission/multiple.py (+6)",grep,
 maxenrec,input_numerics,input_numerics.f90:140,value,20,IGNORED,input/defaults.py Options.maxenrec,,parsed into Options/Params but no engine code reads maxenrec
-maxlevelsbin,input_levels,input_levels.f90:246,per-particle,30,MISSING,,manual,per-ejectile nlevbin; only maxlevelstar is read
-maxlevelsres,input_levels,input_levels.f90:259,value,30,IGNORED,input/defaults.py Options.nlevmaxres,,parsed into Options/Params but no engine code reads nlevmaxres
-maxlevelstar,input_levels,input_levels.f90:252,value,30,SUPPORTED,input/defaults.py Options.nlevmax -> core/grids.py,grep,
+maxlevelsbin,input_levels,input_levels.f90:246,per-particle,30,SUPPORTED,input/defaults.py Options.nlevbin -> nlev_of -> structure/levels.py,test:test_kwcov_b2.py,`maxlevelsbin p 5` Fe-56 response 0.19 %
+maxlevelsres,input_levels,input_levels.f90:259,value,30,SUPPORTED,input/defaults.py Options.nlevmaxres -> nlev_of -> structure/levels.py,test:test_kwcov_b2.py,"Fe-56 0.03 %, Co-59 0.02 %, U-238 0.01 %"
+maxlevelstar,input_levels,input_levels.f90:252,value,30,SUPPORTED,input/defaults.py Options.nlevmax -> core/grids.py,test:test_kwcov_b2.py,
 maxn,input_numerics,input_numerics.f90:160,value,28,SUPPORTED,"input/defaults.py Options.maxN -> density/rigidspin.py, emission/feeding.py, emission/fluxclose.py, input/nuclides.py (+2)",grep,
 maxnrp,input_numerics,input_numerics.f90:150,value,32,IGNORED,input/defaults.py Options.maxNrp,,parsed into Options/Params but no engine code reads maxNrp
 maxrot,input_directpar,input_directpar.f90:96,value,4,SUPPORTED,"input/defaults.py Options.maxrot -> omp/parameters.py, structure/collrule.py, structure/deformation.py",grep,
@@ -259,13 +259,13 @@ micro,input_basicreac,input_basicreac.f90:145,flag,n,IGNORED,input/defaults.py,m
 mpreeqmode,input_preeqmodel,input_preeqmodel.f90:193,value,2,SUPPORTED,"input/defaults.py Options.mpreeqmode -> preeq/exciton.py, preeq/mpe_fast.py, preeq/mpe_reference.py, preeq/multi.py",test:test_mpe_fast.py,
 msdbins,input_preeqpar,input_preeqpar.f90:268,value,,IGNORED,input/defaults.py Options.msdbins,,parsed into Options/Params but no engine code reads msdbins
 multipreeq,input_preeqmodel,input_preeqmodel.f90:132,flag,n,SUPPORTED,"input/defaults.py Options.emulpre_mev -> compound/pop_reference.py, emission/feed_reference.py",test:test_defaults.py,
-nafit,input_fit,input_fit.f90:117,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
-ndfit,input_fit,input_fit.f90:126,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
-nffit,input_fit,input_fit.f90:99,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
-ngfit,input_fit,input_fit.f90:90,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
-nlevels,input_levels,input_levels.f90:240,per-nucleus,,MISSING,,,
+nafit,input_fit,input_fit.f90:117,flag,n,SUPPORTED,input/fitlib.py _cards,test:test_kwcov_b2.py,"wired (xsfit.f90 order); its .par lines carry the gadjust / cstrip responses of the fit y loss: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %); B5/B7"
+ndfit,input_fit,input_fit.f90:126,flag,n,SUPPORTED,input/fitlib.py _cards,test:test_kwcov_b2.py,"wired (xsfit.f90 order); its .par lines carry the gadjust / cstrip responses of the fit y loss: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %); B5/B7"
+nffit,input_fit,input_fit.f90:99,flag,n,SUPPORTED,input/fitlib.py _cards,test:test_kwcov_b2.py,wired (nf.par matched on fismodel); not response-tested (U-238 fit run not made)
+ngfit,input_fit,input_fit.f90:90,flag,n,SUPPORTED,input/fitlib.py _cards,test:test_kwcov_b2.py,Fe-56 response 0.23 % (capture)
+nlevels,input_levels,input_levels.f90:240,per-nucleus,,SUPPORTED,input/defaults.py Options.pernuc -> nlev_of,test:test_kwcov_b2.py,`nlevels 25 56 5` Fe-56 0.19 %
 nlow,input_densitypar,input_densitypar.f90:318,per-nucleus-barrier,,MISSING,,,
-nnfit,input_fit,input_fit.f90:108,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
+nnfit,input_fit,input_fit.f90:108,flag,n,SUPPORTED,input/fitlib.py _cards,test:test_kwcov_b2.py,"wired (xsfit.f90 order); its .par lines carry the gadjust / cstrip responses of the fit y loss: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %); B5/B7"
 nonthermlev,input_astro,input_astro.f90:106,value,-1,IGNORED,input/defaults.py Options.nonthermlev,,parsed into Options/Params but no engine code reads nonthermlev
 ntop,input_densitypar,input_densitypar.f90:324,per-nucleus-barrier,,IGNORED,,,fitlib skips the line: not in PARAM_SPECS
 nulldev,input_path,input_path.f90:62,value,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
@@ -310,7 +310,7 @@ partable,input_basicreac,input_basicreac.f90:209,flag,n,NA,,,output/path/plumbin
 pfnsmodel,input_fissionmodel,input_fissionmodel.f90:202,value,1,IGNORED,input/defaults.py Options.pfnsmodel,,parsed into Options/Params but no engine code reads pfnsmodel
 pglobal,input_densitymodel,input_densitymodel.f90:219,value,1e-20,SUPPORTED,input/defaults.py Params.pglobal -> capture_fast.py,grep,
 phmodel,input_preeqmodel,input_preeqmodel.f90:198,value,1,SUPPORTED,"input/defaults.py Options.phmodel -> density/particle_hole.py, emission/multiple_native.py, engine_c.py, gpu_full_setup.py (+4)","test:test_phmicro.py,test_phmodel2_native.py",
-pnfit,input_fit,input_fit.f90:135,flag,n,IGNORED,input/fitlib.py (INCOGNITA_TALYS_FIT=ng|macs|gamgam),manual,deck flag ignored; ng/macs/gamgam .par entries applied via INCOGNITA_TALYS_FIT; nn/nf/na/nd/pn/gn/dn/an only when a best file asks
+pnfit,input_fit,input_fit.f90:135,flag,n,SUPPORTED,input/fitlib.py _cards (pn.par),test:test_kwcov_b2.py,"wired; xsfit.f90 does not match the projectile, so the library applies on any run; response untested (charged/photon projectiles behind INCOGNITA_CPINC)"
 popeps,input_numerics,input_numerics.f90:190,value,1.00E-03,SUPPORTED,"input/defaults.py Options.popeps_mb -> capture_fast.py, capture_fast_batch.py, capture_gpu.py, capture_gpu_setup.py (+14)","test:conftest.py,test_defaults.py,test_gpu_full.py",
 popmev,input_basicreac,input_basicreac.f90:175,flag,n,IGNORED,input/defaults.py Options.flagpopMeV,,parsed into Options/Params but no engine code reads flagpopMeV
 preeqcomplex,input_preeqmodel,input_preeqmodel.f90:164,flag,y,SUPPORTED,"input/defaults.py Options.flagpecomp -> preeq/complex.py, preeq/exciton.py",grep,
@@ -371,7 +371,7 @@ rvsoadjust,input_omppar,input_omppar.f90:407,per-particle,1.0,SUPPORTED,"input/d
 rvsoadjustf,input_ompmodel,input_ompmodel.f90:258,value,,MISSING,,,
 rwadjust,input_omppar,input_omppar.f90:328,per-particle,omp_link,SUPPORTED,"input/defaults.py Params.rwadjust -> capture_fast.py, omp/omp_nx2.py, omp/parameters.py, omp/regional.py","test:test_defaults.py,test_ompdef.py,test_osengine.py",
 rwadjustf,input_ompmodel,input_ompmodel.f90:256,value,,MISSING,,,
-rwdadjust,input_omppar,input_omppar.f90:362,per-particle,1.0,SUPPORTED,"input/defaults.py Params.rwdadjust -> omp/omp_nx2.py, omp/parameters.py",grep,
+rwdadjust,input_omppar,input_omppar.f90:362,per-particle,1.0,SUPPORTED,"input/defaults.py Params.rwdadjust -> omp/omp_nx2.py, omp/parameters.py",test:test_kwcov_b2.py,
 rwdadjustf,input_ompmodel,input_ompmodel.f90:257,value,,MISSING,,,
 rwsoadjust,input_omppar,input_omppar.f90:443,per-particle,omp_link,SUPPORTED,"input/defaults.py Params.rwsoadjust -> omp/omp_nx2.py, omp/parameters.py",grep,
 rwsoadjustf,input_ompmodel,input_ompmodel.f90:258,value,,MISSING,,,
