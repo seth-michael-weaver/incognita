@@ -10,7 +10,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>Un neutrone non ha carica: entra a qualsiasi velocità. Niente lo respinge, quindi non c'è nessuna collina da scalare; deve solo raggiungere il nucleo, e poi la forza forte lo attira dentro.</p>
   <div class="ctl"><label for="wn-e2">Energia del neutrone (lento → veloce)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"><output id="wn-en-out"></output></div>
-  <p>Il cursore va da 0,025 eV, la velocità di un neutrone a temperatura ambiente, fino a 20 MeV, quasi un miliardo di volte di più. Fino all'estremo più lento, il neutrone entra comunque.</p>
+  <p>Il cursore va da 0,025 eV, l'energia di un neutrone a temperatura ambiente, fino a 20 MeV, quasi un miliardo di volte di più. Fino all'estremo più lento, il neutrone entra comunque.</p>
 </div>
 <div class="step">
   <p>Perciò in un reattore anche i neutroni lenti possono spezzare l'uranio. Un nucleo di uranio-235 che ne inghiotte uno diventa uranio-236 con un po' di energia in più, abbastanza da oscillare, allungarsi in un collo e rompersi in due. I due pezzi volano via con circa 200 MeV, e i due o tre nuovi neutroni che emettono possono spezzare i nuclei successivi: una reazione a catena.</p>

@@ -10,7 +10,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>En neutron har ingen ladning: den kommer ind ved enhver hastighed. Intet skubber den væk, så der er ingen bakke at komme over; den skal bare nå frem til kernen, og så trækker den stærke kraft den ind.</p>
   <div class="ctl"><label for="wn-e2">Neutronenergi (langsom → hurtig)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"><output id="wn-en-out"></output></div>
-  <p>Skyderen løber fra 0,025 eV, hastigheden af en neutron ved stuetemperatur, op til 20 MeV, næsten en milliard gange mere. Hele vejen ned kommer neutronen stadig ind.</p>
+  <p>Skyderen løber fra 0,025 eV, energien af en neutron ved stuetemperatur, op til 20 MeV, næsten en milliard gange mere. Hele vejen ned kommer neutronen stadig ind.</p>
 </div>
 <div class="step">
   <p>Så selv langsomme neutroner kan spalte uran i en reaktor. En uran-235-kerne, der sluger en, bliver til uran-236 med lidt ekstra energi, nok til at svinge, strække sig til en hals og briste i to. De to stykker flyver fra hinanden med omkring 200 MeV, og de to eller tre nye neutroner, de kaster af sig, kan spalte de næste kerner: en kædereaktion.</p>

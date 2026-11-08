@@ -10,7 +10,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>Ein Neutron hat keine Ladung: Es dringt bei jeder Geschwindigkeit ein. Nichts stößt es ab, es gibt also keinen Berg zu erklimmen; es muss nur den Kern erreichen, dann zieht die starke Kraft es hinein.</p>
   <div class="ctl"><label for="wn-e2">Neutronenenergie (langsam → schnell)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"><output id="wn-en-out"></output></div>
-  <p>Der Regler reicht von 0,025 eV, der Geschwindigkeit eines Neutrons bei Raumtemperatur, bis 20 MeV, fast eine Milliarde Mal mehr. Selbst ganz unten dringt das Neutron noch ein.</p>
+  <p>Der Regler reicht von 0,025 eV, der Energie eines Neutrons bei Raumtemperatur, bis 20 MeV, fast eine Milliarde Mal mehr. Selbst ganz unten dringt das Neutron noch ein.</p>
 </div>
 <div class="step">
   <p>Deshalb können selbst langsame Neutronen in einem Reaktor Uran spalten. Ein Uran-235-Kern, der eines verschluckt, wird zu Uran-236 mit etwas Zusatzenergie, genug, um zu wackeln, sich zu einem Hals zu strecken und in zwei Teile zu brechen. Die beiden Stücke fliegen mit etwa 200 MeV auseinander, und die zwei oder drei neuen Neutronen, die sie abgeben, können die nächsten Kerne spalten: eine Kettenreaktion.</p>

@@ -10,7 +10,7 @@ WT.L.ch.neutrons = {
 <div class="step">
   <p>Een neutron heeft geen lading: het komt bij elke snelheid binnen. Niets duwt het weg, dus er is geen heuvel te beklimmen; het hoeft alleen de kern te bereiken, en dan trekt de sterke kernkracht het naar binnen.</p>
   <div class="ctl"><label for="wn-e2">Neutronenergie (langzaam → snel)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"><output id="wn-en-out"></output></div>
-  <p>De schuif loopt van 0,025 eV, de snelheid van een neutron bij kamertemperatuur, tot 20 MeV, bijna een miljard keer meer. Helemaal naar beneden komt het neutron nog steeds binnen.</p>
+  <p>De schuif loopt van 0,025 eV, de energie van een neutron bij kamertemperatuur, tot 20 MeV, bijna een miljard keer meer. Helemaal naar beneden komt het neutron nog steeds binnen.</p>
 </div>
 <div class="step">
   <p>Dus zelfs langzame neutronen kunnen in een reactor uranium splijten. Een uranium-235-kern die er een opslokt, wordt uranium-236 met een beetje extra energie, genoeg om te wiebelen, zich uit te rekken tot een hals en in tweeën te breken. De twee stukken vliegen met ongeveer 200 MeV uit elkaar, en de twee of drie nieuwe neutronen die ze uitwerpen kunnen de volgende kernen splijten: een kettingreactie.</p>

@@ -10,7 +10,7 @@ WT.es.ch.neutrons = {
 <div class="step">
   <p>Un neutrón no tiene carga: entra a cualquier velocidad. Nada lo empuja hacia fuera, así que no hay colina que subir; solo tiene que llegar al núcleo, y entonces la fuerza fuerte lo atrae hacia dentro.</p>
   <div class="ctl"><label for="wn-e2">Energía del neutrón (lento → rápido)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"><output id="wn-en-out"></output></div>
-  <p>El deslizador va desde 0,025 eV, la velocidad de un neutrón a temperatura ambiente, hasta 20 MeV, casi mil millones de veces más. Hasta el extremo más lento, el neutrón sigue entrando.</p>
+  <p>El deslizador va desde 0,025 eV, la energía de un neutrón a temperatura ambiente, hasta 20 MeV, casi mil millones de veces más. Hasta el extremo más lento, el neutrón sigue entrando.</p>
 </div>
 <div class="step">
   <p>Por eso incluso los neutrones lentos pueden partir uranio en un reactor. Un núcleo de uranio-235 que traga uno se convierte en uranio-236 con un poco de energía extra, suficiente para oscilar, estirarse formando un cuello y romperse en dos. Los dos pedazos salen disparados con unos 200 MeV, y los dos o tres neutrones nuevos que sueltan pueden partir los núcleos siguientes: una reacción en cadena.</p>

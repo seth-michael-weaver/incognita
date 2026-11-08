@@ -35,7 +35,7 @@
 <div class="step">
   <p>A neutron has no charge: it gets in at any speed. Nothing pushes it away, so there is no hill to climb; it only has to reach the nucleus, and then the strong force pulls it in.</p>
   <div class="ctl"><label for="wn-e2">Neutron energy (slow → fast)</label><input id="wn-e2" type="range" data-bind="lgEn" data-instant min="-1.6" max="7.3" step="0.01" value="-1.6"><output id="wn-en-out"></output></div>
-  <p>The slider runs from 0.025 eV, the speed of a neutron at room temperature, up to 20 MeV, nearly a billion times more. All the way down, the neutron still gets in.</p>
+  <p>The slider runs from 0.025 eV, the energy of a neutron at room temperature, up to 20 MeV, nearly a billion times more. All the way down, the neutron still gets in.</p>
 </div>
 <div class="step">
   <p>So even slow neutrons can split uranium in a reactor. A uranium-235 nucleus that swallows one becomes uranium-236 with a little extra energy, enough to wobble, stretch into a neck and break in two. The two pieces fly apart with about 200 MeV, and the two or three new neutrons they throw off can split the next nuclei: a chain reaction.</p>
