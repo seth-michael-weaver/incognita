@@ -100,10 +100,14 @@ _FIT_FLAGS = frozenset({"fit", "ngfit", "nnfit", "nffit", "nafit", "ndfit", "pnf
 _SKIP = {
     "optmod": "external OMP file", "optmodfilen": "external OMP file",
     "deformfile": "external deformation file", "levelfile": "external level file",
-    "branch": "discrete branching ratios (per level)", "ntop": "not in PARAM_SPECS",
+    "ntop": "not in PARAM_SPECS",
     "rescuefile": "output renormalisation, not a model parameter",
-    "bestfile": "handled by activate()", "best": "flag", "bestend": "flag",
+    # KWCOV B2: consumed by `_deck_best` (a deck's `best y` reads the best file into the deck)
+    "bestfile": "read by _deck_best", "best": "read by _deck_best", "bestend": "read by _deck_best",
 }
+#: KWCOV B2: the projectile each fitted library is made for (every entry of the file has it); xsfit.f90
+#: does not match on the projectile, so a `pnfit y` line applies pn.par's entry whatever the run's projectile
+_FILE_PROJ = {"an": "a", "dn": "d", "pn": "p", "gn": "g"}
 
 
 # ------------------------------------------------------------------------------------- the arm
@@ -119,7 +123,9 @@ def modes() -> frozenset[str]:
     if _na_v1_on():
         raw = (raw + ",nav1") if raw and raw not in ("0", "off", "none", "n", "no") else "nav1"
     if not raw or raw in ("0", "off", "none", "n", "no"):
-        return frozenset()
+        # KWCOV B2: deck lines are the run's deck whether or not an arm is named; before, lines without
+        # INCOGNITA_TALYS_FIT were dropped silently (POPEPS2 (a))
+        return frozenset({"lines"}) if (os.environ.get(ENV_LINES) or os.environ.get(ENV_LINES_FILE)) else frozenset()
     toks = {t for t in raw.replace("+", ",").replace(" ", ",").split(",") if t}
     unknown = toks - {"best", "ng", "macs", "gamgam", "nodata", "fit", "s8", "tendl", "mf1",
                       "lines", "nav1"}
@@ -325,13 +331,25 @@ def _split(lines, want_options: bool) -> tuple[list, list, list, list, list]:
         if k in _SKIP:
             skipped.append((line, _SKIP[k]))
             continue
+        if k == "ejectiles":  # KWCOV B2: a list of particle symbols (input_basicpar.f90:98)
+            if want_options:
+                opts.append((k, " ".join(w[1:])))
+            continue
+        form = _deck_form(k, w)  # KWCOV B2: per-nucleus / per-particle forms -> {"ldmodel 26 57": "2"}
+        if form is not None:
+            if want_options:
+                opts.append(form)
+            continue
         if k in OPTION_KEYWORDS:
             if len(w) == 2:
                 if want_options:
                     opts.append((k, w[1]))
                 continue
-            skipped.append((line, "per-nucleus form of an option keyword"))
-            continue
+            # KWCOV B2: was skipped ("per-nucleus form of an option keyword"), i.e. the run silently
+            # took the default; TALYS has no such form of any other option keyword the port reads
+            raise ValueError(f"deck line {line!r}: TALYS has no per-nucleus or per-particle form of `{k}` the "
+                             "port reads (per-nucleus forms: ldmodel v Z A, colenhance y Z A, nlevels Z A n, "
+                             "maxlevelsbin p n, branch Z A ilev0 nbr ...)")
         if k in UPBEND_KEYS:  # LEESHELL fidelity fix: `upbendc Z A value [m1|e1]` (class 5, input_gammapar.f90:392-425)
             try:
                 z, a, v = int(w[1]), int(w[2]), float(w[3])
@@ -371,6 +389,111 @@ def _split(lines, want_options: bool) -> tuple[list, list, list, list, list]:
         except (ValueError, IndexError):
             skipped.append((line, "could not be parsed"))
     return opts, cells, globs, parts, skipped
+
+
+def _deck_form(k: str, w: list) -> tuple | None:
+    """KWCOV B2: a per-nucleus / per-particle deck form as a `default_options` override (key, value), or None.
+
+    `ldmodel v Z A` (getvalues class 14) and `colenhance y Z A` (class 13) are told from the global form by a
+    third word (input_densitymodel.f90:188, :202); `nlevels Z A n` (class 2), `maxlevelsbin p n` (class 7),
+    `branch Z A ilev0 nbr ilev1 br1 ...` (input_levels.f90:142) have only this form.
+
+    TALYS: getvalues.f90:1 (getvalues)
+    Test: tests/hf/test_kwcov_b2.py
+    """
+    text = " ".join(w)
+    if k in ("ldmodel", "colenhance") and len(w) >= 3:
+        if len(w) != 4:
+            raise ValueError(f"deck line {text!r}: expected `{k} <value> Z A`")
+        return (f"{k} {w[2]} {w[3]}", w[1])
+    if k == "nlevels":
+        if len(w) != 4:
+            raise ValueError(f"deck line {text!r}: expected `nlevels Z A n`")
+        return (f"nlevels {w[1]} {w[2]}", w[3])
+    if k == "maxlevelsbin":
+        if len(w) != 3:
+            raise ValueError(f"deck line {text!r}: expected `maxlevelsbin <particle> n`")
+        return (f"maxlevelsbin {w[1]}", w[2])
+    if k == "branch":
+        if len(w) < 5 or len(w) != 5 + 2 * int(w[4]):
+            raise ValueError(f"deck line {text!r}: expected `branch Z A ilev0 nbr ilev1 br1 ...`")
+        return (f"branch {w[1]} {w[2]} {w[3]}", " ".join(w[4:]))
+    return None
+
+
+#: KWCOV B2: skip reasons that mean a model input the run asked for is NOT applied
+_LOUD = frozenset({"energy-dependent table form", "index form not understood", "particle symbol not understood",
+                   "could not be parsed", "external OMP file", "external deformation file", "external level file"})
+
+
+def _loud_skips(skipped, deck) -> None:
+    """KWCOV B2: a deck line (`INCOGNITA_TALYS_FIT_LINES`) the port cannot apply is refused; the same line from a
+    best file or a fitted library is applied without it, with a warning naming it (before, both were silent).
+
+    TALYS: getvalues.f90:1 (getvalues) -- the forms each keyword takes
+    Test: tests/hf/test_kwcov_b2.py
+    """
+    dk = set(deck)
+    bad = [(ln, why) for ln, why in skipped if why in _LOUD]
+    for ln, why in bad:
+        if ln in dk:
+            raise ValueError(f"deck line {ln!r} is not applied by the port ({why}); remove it or port it")
+    if bad:
+        import warnings
+
+        warnings.warn("best/fit lines not applied by the port: " + "; ".join(f"{ln!r} ({why})" for ln, why in bad),
+                      stacklevel=3)
+
+
+def _read_best(p: Path) -> tuple[str, ...]:
+    """A best file's keyword lines, lowercased as `convert` does, comments and blank lines dropped."""
+    out = []
+    for line in p.read_text(errors="replace").splitlines():
+        s = line.strip()
+        if s and not s.startswith("#"):
+            out.append(s.lower())
+    return tuple(out)
+
+
+def _deck_best(Z: int, A: int, projectile: str, Ltarget: int, deck: tuple, arms: frozenset):
+    """KWCOV B2: a deck's own `best y` [+ `bestend y`, `bestfile <path>`]: (best lines, at_end, source) or None.
+
+    The last line of each keyword wins (input_best.f90's loop). The lines go BEFORE the deck's, so the deck's
+    win, or after them with `bestend y` (initial_best.f90:113-124). A missing file is TALYS's warning
+    (initial_best.f90:104-107), raised here as a Python warning and nothing is added. With the `best` arm already
+    on the file is in already.
+
+    TALYS: input_best.f90:1 (input_best), initial_best.f90:1 (initial_best)
+    Test: tests/hf/test_kwcov_b2.py
+    """
+    from physics.hf.input.defaults import _yn
+
+    flag = end = False
+    bfile = ""
+    for line in deck:
+        w = line.split()
+        if len(w) < 2:
+            continue
+        if w[0] == "best":
+            flag = _yn(w[1])
+        elif w[0] == "bestend":
+            end = _yn(w[1])
+        elif w[0] == "bestfile":
+            bfile = w[1]
+    if not flag or "best" in arms:
+        return None
+    if bfile:  # the deck lines are lowercased; a path keeps its case (the last raw `bestfile` line)
+        for x in os.environ.get(ENV_LINES, "").split(";"):
+            w = x.split()
+            if len(w) >= 2 and w[0].lower() == "bestfile" and w[1].lower() == bfile:
+                bfile = w[1]
+    p = Path(os.path.expanduser(bfile)) if bfile else best_file(Z, A, projectile, Ltarget)
+    if not p.is_file():
+        import warnings
+
+        warnings.warn(f"TALYS-warning: best file does not exist: {p}", stacklevel=2)
+        return None
+    return (_read_best(p) if bfile else best_lines(Z, A, projectile, Ltarget)), end, f"deck best y: {p}"
 
 
 def _extra_index(k: str, dims, rest) -> tuple | None:
@@ -514,15 +637,22 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
         bl = bl + na_v1_lines(Z, A)
         src.append("NA_V1")
     if "lines" in arms:
+        deck: tuple[str, ...] = ()
         tl, tsrc = table_lines(Z, A, projectile)
         if tl:
-            bl = bl + tl
+            deck = deck + tl
             src.append(tsrc)
         extra = tuple(x.strip().lower() for x in os.environ.get(ENV_LINES, "").split(";")
                       if x.strip())
         if extra:
-            bl = bl + extra
+            deck = deck + extra
             src.append("ENV lines")
+        best = _deck_best(Z, A, projectile, Ltarget, deck, arms)  # KWCOV B2: the deck's own `best y`
+        if best is not None:
+            blines, at_end, bsrc = best
+            deck = deck + blines if at_end else blines + deck
+            src.append(bsrc)
+        bl = bl + deck
     ead: list = []
     if any(x.split()[:1] == ["eadj"] for x in bl):  # ENGADJ: `eadj ...` lines are the engine's own, not TALYS keywords
         from physics.hf import eadj as _eadj
@@ -535,6 +665,7 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
                 ead.append(_eadj.parse_line(x))  # a malformed eadj line raises: a dial must not be dropped silently
         bl = tuple(keep)
     opts, cells, globs, parts, skipped = _split(bl, want_options=True)
+    _loud_skips(skipped, extra if "lines" in arms else ())  # KWCOV B2
     if "s8" in arms and not any(k == "strength" for k, _ in opts):
         opts = [("strength", 8)] + opts
     o = _resolved(Z, A, projectile, dict(opts))
@@ -552,7 +683,9 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
     # then walks them in this order, so a later file's value wins. `ngfit y` on its own leaves
     # the others off (their defaults are read before the keyword loop, when flagfit is still n).
     flags = {"nn": o.flagnnfit, "ng": o.flagngfit, "na": o.flagnafit, "nf": o.flagnffit,
-             "nd": o.flagndfit, "gamgam": o.flaggamgamfit, "macs": o.flagmacsfit}
+             "nd": o.flagndfit, "gamgam": o.flaggamgamfit, "macs": o.flagmacsfit,
+             # KWCOV B2: the other projectiles' libraries (input_fit.f90; off unless asked for)
+             "an": o.flaganfit, "dn": o.flagdnfit, "pn": o.flagpnfit, "gn": o.flaggnfit}
     if not ("best" in arms or "mf1" in arms or "lines" in arms):
         flags = dict.fromkeys(flags, False)   # nothing asked for the fits; the arms below do
     for arm_kind in ("ng", "macs", "gamgam"):
@@ -562,19 +695,24 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
                 flags["ng"] = False
     if "fit" in arms:
         flags.update({"nn": True, "ng": True, "na": True, "nf": True, "nd": True})
-    kinds = [k for k in ("nn", "ng", "na", "nf", "gamgam", "macs", "nd") if flags.get(k)]
+    # xsfit.f90:96-118 order: nn ng na nf an dn pn gn gamgam macs nd (a later file's value wins)
+    kinds = [k for k in ("nn", "ng", "na", "nf", "an", "dn", "pn", "gn", "gamgam", "macs", "nd")
+             if flags.get(k)]
     for kind in kinds:
         # xsfit.f90:145 matches on `ldmodel(0, 0)`, the INITIAL COMPOUND NUCLEUS's level density
         # model -- `ldmodelCN` when the input sets it (input_densitymodel.f90:245-252), which is
         # not `ldmodelall`: Fe-56's best file says `ldmodel 2` and `ldmodelCN 1`, and TENDL's own
         # adjust.dat then carries the ldmodel-1 entry of ng.par.
-        lines = par_lines(kind, Z, A, ldmodel=o.ldmodelCN, flagcol=o.flagcolall,
+        # KWCOV B2: ldmodel(0,0) / flagcol(0,0) including per-nucleus cards (equal to ldmodelCN /
+        # flagcolall without them)
+        ldm0, col0 = o.ldmodel_of(0, 0), o.flagcol_of(0, 0)
+        lines = par_lines(kind, Z, A, ldmodel=ldm0, flagcol=col0,
                           strength=o.strength, alphaomp=o.alphaomp, fismodel=o.fismodel,
-                          projectile=projectile, Ltarget=Ltarget)
+                          projectile=_FILE_PROJ.get(kind, projectile), Ltarget=Ltarget)
         if not lines:
             continue
-        src.append(f"{_FILES[kind][0]}[ldmodel {o.ldmodelCN} colenhance "
-                   f"{'y' if o.flagcolall else 'n'} strength {o.strength}]")
+        src.append(f"{_FILES[kind][0]}[ldmodel {ldm0} colenhance "
+                   f"{'y' if col0 else 'n'} strength {o.strength}]")
         # xsfit runs after the input is read, so its values overwrite the best file's
         _, c2, g2, p2, s2 = _split(lines, want_options=False)
         cells, globs, parts = cells + c2, globs + g2, parts + p2

@@ -184,9 +184,10 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
         risomer = float(params.at("risomer", Zix, Nix))
     # COREX: everything below reads only these values and the level file, so the result is a
     # pure function of them (no target in the key: Zix/Nix only chose gs_j, gs_p, nlev0, risomer)
+    brs = options.branches_of(Zix, Nix) if getattr(options, "pernuc", ()) else ()  # KWCOV B2: branch / bestbranch
     lv = _levels_of_values(int(Z), int(A), gs_j, gs_p, int(nlev0), risomer,
                            int(options.disctable), float(options.isomer_s),
-                           int(options.massmodel), bool(prior_call), levjpar.enabled())
+                           int(options.massmodel), bool(prior_call), levjpar.enabled(), *((brs,) if brs else ()))
     from physics.hf.structure import ggdeadend
 
     if ggdeadend.enabled() and 0 <= Zix < masses.gsspin.shape[0] and 0 <= Nix + 1 < masses.gsspin.shape[1]:
@@ -203,7 +204,8 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
 
             cut = _levels_of_values(int(Z), int(A), gs_j, gs_p, n_cut, risomer,
                                     int(options.disctable), float(options.isomer_s),
-                                    int(options.massmodel), bool(prior_call), levjpar.enabled())
+                                    int(options.massmodel), bool(prior_call), levjpar.enabled(),
+                                    *((brs,) if brs else ()))
             ggdeadend.LAST[(int(Z), int(A))] = dict(nlev=int(lv.nlev), n_cut=int(cut.nlev), sn=sn,
                                                      parent_j=parent_j, e_nlev=float(lv.e_mev[lv.nlev]))
             lv = replace(cut, nlev_ld=int(lv.nlev),
@@ -217,7 +219,8 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
 
             cut = _levels_of_values(int(Z), int(A), gs_j, gs_p, n_cut, risomer,
                                     int(options.disctable), float(options.isomer_s),
-                                    int(options.massmodel), bool(prior_call), levjpar.enabled())
+                                    int(options.massmodel), bool(prior_call), levjpar.enabled(),
+                                    *((brs,) if brs else ()))
             if int(cut.nlev) < int(lv.nlev):
                 n_ld = int(lv.nlev_ld) if int(lv.nlev_ld) >= 0 else int(lv.nlev)
                 levcomplete.LAST[(int(Z), int(A))] = dict(nlev=int(lv.nlev), n_cut=int(cut.nlev),
@@ -237,7 +240,7 @@ def _target_ix(k0: int) -> tuple[int, int]:
 @lru_cache(maxsize=2048)
 def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risomer: float,
                       disctable: int, isomer_s: float, massmodel: int,
-                      prior_call: bool, levj: bool = False) -> Levels:
+                      prior_call: bool, levj: bool = False, branches: tuple = ()) -> Levels:
     """COREX: `_discrete_levels` by value, shared across targets (`chartrun.KEEP`). `Levels` is
     frozen and nothing writes into its tensors: the id-keyed `_LEVELS_CACHE` already hands one
     object to every caller of a run."""
@@ -257,6 +260,12 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
     branchratio = np.zeros((NUMLEV + 1, NUMLEV + 1))
     conv = np.zeros((NUMLEV + 1, NUMLEV + 1))
     bassign = [[" "] * (NUMLEV + 1) for _ in range(NUMLEV + 1)]
+
+    for ilev0, brs in branches:  # KWCOV B2: input branching ratios (input_levels.f90:142, branching.f90)
+        for k, (l1, b) in enumerate(brs, 1):
+            branchlevel[ilev0, k] = l1
+            branchratio[ilev0, k] = b
+        nbranch[ilev0] = len(brs)
 
     notes: list[str] = []
     # levels() runs again for a nucleus whose levels were already read -- dtheory.f90:80 calls it
