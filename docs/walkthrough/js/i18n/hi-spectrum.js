@@ -63,7 +63,7 @@ Object.assign(WT.L.labels, {
   "most neutrons stay between {#} keV and {#} MeV": "अधिकांश न्यूट्रॉन {#} keV और {#} MeV के बीच रहते हैं",
   "many linger at in-between energies": "कई बीच की ऊर्जाओं पर ठहरते हैं",
   "many neutrons linger at in-between energies": "कई न्यूट्रॉन बीच की ऊर्जाओं पर ठहरे रहते हैं",
-  "thermal ≈ {#} eV, ~{#} km/s": "तापीय ≈ {#} eV, ~{#} km/s",
+  "hot water: kT ≈ {#} eV": "गर्म पानी: kT ≈ {#} eV",
   "thermal: kT ≈ {#} eV in hot water, about {#} km/s": "तापीय: गर्म पानी में kT ≈ {#} eV, लगभग {#} km/s",
   "the rest are captured and grow heavier": "बाकी प्रग्रहित होकर भारी हो जाते हैं",
   "the rest are captured: the nucleus just grows heavier": "बाकी प्रग्रहित होते हैं: नाभिक बस भारी हो जाता है",

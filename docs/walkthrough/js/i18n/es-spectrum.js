@@ -58,7 +58,7 @@ Object.assign(WT.L.labels, {
   "most neutrons stay between {#} keV and {#} MeV": "la mayoría de los neutrones siguen entre {#} keV y {#} MeV",
   "many linger at in-between energies": "muchos se quedan en energías intermedias",
   "many neutrons linger at in-between energies": "muchos neutrones se quedan en energías intermedias",
-  "thermal ≈ {#} eV, ~{#} km/s": "térmico ≈ {#} eV, ~{#} km/s",
+  "hot water: kT ≈ {#} eV": "agua caliente: kT ≈ {#} eV",
   "thermal: kT ≈ {#} eV in hot water, about {#} km/s": "térmico: kT ≈ {#} eV en agua caliente, unos {#} km/s",
   "the rest are captured and grow heavier": "los demás capturan y se hacen más pesados",
   "the rest are captured: the nucleus just grows heavier": "el resto son capturas: el núcleo solo se vuelve más pesado",

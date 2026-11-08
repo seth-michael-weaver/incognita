@@ -63,7 +63,7 @@ Object.assign(WT.L.labels, {
   "most neutrons stay between {#} keV and {#} MeV": "большинство нейтронов остаётся между {#} keV и {#} MeV",
   "many linger at in-between energies": "многие задерживаются на промежуточных энергиях",
   "many neutrons linger at in-between energies": "многие нейтроны задерживаются на промежуточных энергиях",
-  "thermal ≈ {#} eV, ~{#} km/s": "тепловые ≈ {#} eV, ~{#} км/с",
+  "hot water: kT ≈ {#} eV": "горячая вода: kT ≈ {#} eV",
   "thermal: kT ≈ {#} eV in hot water, about {#} km/s": "тепловые: kT ≈ {#} eV в горячей воде, около {#} км/с",
   "the rest are captured and grow heavier": "остальные захватывают нейтрон и тяжелеют",
   "the rest are captured: the nucleus just grows heavier": "остальные захватывают нейтрон: ядро просто становится тяжелее",

@@ -54,7 +54,7 @@ Object.assign(WT.L.labels, {
   "most neutrons stay between {#} keV and {#} MeV": "대부분의 중성자가 {#} keV와 {#} MeV 사이에 머묾",
   "many linger at in-between energies": "많은 중성자가 중간 에너지에 머묾",
   "many neutrons linger at in-between energies": "많은 중성자가 중간 에너지에 오래 머묾",
-  "thermal ≈ {#} eV, ~{#} km/s": "열 ≈ {#} eV, ~{#} km/s",
+  "hot water: kT ≈ {#} eV": "뜨거운 물: kT ≈ {#} eV",
   "thermal: kT ≈ {#} eV in hot water, about {#} km/s": "열: 뜨거운 물에서 kT ≈ {#} eV, 약 {#} km/s",
   "η = {#}: one to continue, one to breed": "η = {#}: 하나는 연쇄용, 하나는 증식용",
   "average η: U{#} {#} · Pu{#} {#}": "평균 η: U{#} {#} · Pu{#} {#}",

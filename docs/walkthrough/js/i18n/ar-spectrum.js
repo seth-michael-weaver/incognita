@@ -63,7 +63,7 @@ Object.assign(WT.L.labels, {
   "most neutrons stay between {#} keV and {#} MeV": "معظم النيوترونات تبقى بين {#} keV و{#} MeV",
   "many linger at in-between energies": "كثير منها يمكث عند طاقات وسطى",
   "many neutrons linger at in-between energies": "كثير من النيوترونات يمكث عند طاقات وسطى",
-  "thermal ≈ {#} eV, ~{#} km/s": "حرارية ≈ {#} eV، ~{#} km/s",
+  "hot water: kT ≈ {#} eV": "في الماء الساخن: kT ≈ {#} eV",
   "thermal: kT ≈ {#} eV in hot water, about {#} km/s": "حرارية: kT ≈ {#} eV في الماء الساخن، نحو {#} km/s",
   "the rest are captured and grow heavier": "والباقي يُؤسر فيزداد ثقلًا",
   "the rest are captured: the nucleus just grows heavier": "والباقي يُؤسر: تزداد النواة ثقلًا فحسب",

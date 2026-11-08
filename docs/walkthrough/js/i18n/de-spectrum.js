@@ -51,7 +51,7 @@ Object.assign(WT.L.labels, {
   "the rest are captured and grow heavier": "der Rest wird eingefangen und wird schwerer",
   "the rest are captured: the nucleus just grows heavier": "der Rest wird eingefangen: der Kern wird nur schwerer",
   "thermal": "thermisch",
-  "thermal ≈ {#} eV, ~{#} km/s": "thermisch ≈ {#} eV, ~{#} km/s",
+  "hot water: kT ≈ {#} eV": "heißes Wasser: kT ≈ {#} eV",
   "thermal: kT ≈ {#} eV in hot water, about {#} km/s": "thermisch: kT ≈ {#} eV in heißem Wasser, etwa {#} km/s",
   "water": "Wasser",
   "water reactor: hydrogen slows the neutrons": "Wasserreaktor: Wasserstoff bremst die Neutronen",

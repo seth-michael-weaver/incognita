@@ -52,7 +52,7 @@ Object.assign(WT.L.labels, {
   "most neutrons stay between {#} keV and {#} MeV": "大半の中性子は {#} keV〜{#} MeV にとどまる",
   "many linger at in-between energies": "多くが中間のエネルギーにとどまる",
   "many neutrons linger at in-between energies": "多くの中性子が中間のエネルギーにとどまる",
-  "thermal ≈ {#} eV, ~{#} km/s": "熱 ≈ {#} eV、約 {#} km/s",
+  "hot water: kT ≈ {#} eV": "高温の水：kT ≈ {#} eV",
   "thermal: kT ≈ {#} eV in hot water, about {#} km/s": "熱中性子：高温の水で kT ≈ {#} eV、約 {#} km/s",
   // eta
   "η = {#}: one to continue, one to breed": "η = {#}：1個は連鎖に、1個は増殖に",

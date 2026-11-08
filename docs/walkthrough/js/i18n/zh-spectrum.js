@@ -55,7 +55,7 @@ Object.assign(WT.L.labels, {
   "most neutrons stay between {#} keV and {#} MeV": "大多数中子停留在 {#} keV 到 {#} MeV 之间",
   "many linger at in-between energies": "许多中子滞留在中间能量",
   "many neutrons linger at in-between energies": "许多中子在中间能量上滞留",
-  "thermal ≈ {#} eV, ~{#} km/s": "热中子 ≈ {#} eV，约 {#} km/s",
+  "hot water: kT ≈ {#} eV": "热水中：kT ≈ {#} eV",
   "thermal: kT ≈ {#} eV in hot water, about {#} km/s": "热中子：在热水中 kT ≈ {#} eV，约 {#} km/s",
   // eta
   "η = {#}: one to continue, one to breed": "η = {#}：一个维持链式反应，一个用于增殖",

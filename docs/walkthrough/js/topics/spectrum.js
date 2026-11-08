@@ -193,7 +193,7 @@
       }
       if (st === 0) {
         g.label(m > 0.6 ? (phone ? "most neutrons end up thermal" : "most neutrons are slowed all the way to thermal") : m < 0.25 ? (phone ? "most stay between 10 keV and 2 MeV" : "most neutrons stay between 10 keV and 2 MeV") : (phone ? "many linger at in-between energies" : "many neutrons linger at in-between energies"), W / 2, H * 0.93, { color: c.ink, size: fs + 1, weight: 600, serif: true });
-        if (m > 0.5) g.label(phone ? "thermal ≈ 0.05 eV, ~3 km/s" : "thermal: kT ≈ 0.05 eV in hot water, about 3 km/s", X(-1.1), Ys(SP.mx) - 4 < ytop + 24 ? ytop + 24 : Ys(SP.mx) - 14, { color: c.neutron, size: fs - 1, weight: 600, align: "left", bg: true });
+        if (m > 0.5) g.label(phone ? "hot water: kT ≈ 0.05 eV" : "thermal: kT ≈ 0.05 eV in hot water, about 3 km/s", X(-1.1), Ys(SP.mx) - 4 < ytop + 24 ? ytop + 24 : Ys(SP.mx) - 14, { color: c.neutron, size: fs - 1, weight: 600, align: "left", bg: true });
       }
       if (st === 2) g.label(phone ? "the rest are captured and grow heavier" : "the rest are captured: the nucleus just grows heavier", W / 2, H * 0.93, { color: c.proton, size: fs + 1, weight: 600, serif: true });
       g.label("illustrative shapes", W - 6, H - 10, { color: c.faint, size: 10, align: "right" });
