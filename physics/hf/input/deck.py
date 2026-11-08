@@ -139,6 +139,10 @@ def _run_natural(d: Deck, cwd: Path, stats, integ):
         if w[:1] == ["abundance"] and len(w) > 1:
             abf = w[1] if os.path.isabs(w[1]) else str(cwd / w[1])
     ab = natural.abundances(d.Z, abf)
+    lw = [ln.split()[:2] for ln in d.lines]
+    if ["massdis", "y"] in lw and ["fission", "n"] not in lw and any(a > 215 for a in ab):  # flagfission: A > 215
+        raise ValueError("TALYS-error: Fission yield calculation not possible for natural targets "
+                         "(checkvalue.f90:1075; KWCOV B14)")
     runs = {a: _run_one(d, a, stats) for a in ab}
     return natural.combine(runs, ab)
 

@@ -1316,6 +1316,9 @@ def cases(zf, stats: dict | None = None):
     from physics.hf import fisobs  # KWCOV B8: fission extras (off: nothing recorded)
 
     fisobs.begin_run(cas)
+    from physics.hf import fisyield  # KWCOV B14: massdis y + fymodel 1 (off: nothing computed); refusals before the run
+
+    fisyield.begin_run(cas)
     from physics.hf import production  # KWCOV B11: production y (off: nothing); checkvalue before the run
 
     production.begin_run(cas, declared)
@@ -1498,9 +1501,12 @@ def cases(zf, stats: dict | None = None):
                     chan = _Chan.of(exclusive_channels(built.channels(cinp, st, mres, b, xsbinary), py))
                     chst.from_py(py)
             specout.end_energy(pinp, binp.k0, b2)
-            if fisobs.active():  # KWCOV B8: output only (the arena is read, not changed)
-                fisobs.record(cas, st, binp.e_inc_mev, etot,
-                              mres if mres is not None else (packed.result() if packed is not None else None))
+            if fisobs.active() or fisyield.active():  # KWCOV B8 / B14: output only (the arena is read, not changed)
+                mr = mres if mres is not None else (packed.result() if packed is not None else None)
+                if fisobs.active():
+                    fisobs.record(cas, st, binp.e_inc_mev, etot, mr)
+                if fisyield.active():
+                    fisyield.record(cas, st, binp.e_inc_mev, etot, mr)
             out.append((b2, chan, b, keys))
         specout.end_run(cas)
         if cas.options.flagastro:  # KWCOV B9: partfunc.f90 after the energy loop
@@ -1604,6 +1610,9 @@ def run(injection, stats: dict | None = None):
     from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
 
     res = fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
+    from physics.hf import fisyield  # KWCOV B14 part 1: fission yields (massdis y + fymodel 1; off: unchanged)
+
+    res = fisyield.add_to_results(res, injection)
     return thermal.add_to_results(production.add_to_results(res, injection), injection)
 
 

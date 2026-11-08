@@ -372,6 +372,42 @@ B10B: dict = {
                  "<spectrum> <value>` never gives a row (integral.f90 rebuilds the file name from reacstr, which only "
                  "the sacs reader fills: 'cross section file .tot does not exist')", _T10B),
 }
+_T14 = "test:test_kwcov_b14.py"
+_FY = "fisyield.py (engine_c.cases -> fisyield.record -> Results.fission_yields) "
+#: KWCOV B14 part 1 rows (docs/hf/COVERAGE_PLAN.md B14); stock TALYS-2.25 n + U-235 (1, 5 MeV) and U-238 (1, 5, 14 MeV)
+#: with `massdis y; fymodel 1`, TALYS mode; scripts/kwcov/b14_response.py
+B14: dict = {
+    "massdis": ("SUPPORTED", "input/defaults.py Options.flagmassdis -> " + _FY + "massdis, brosafy, neck, massdisout",
+                "fission fragment / product yields (yieldA, yieldZA, fpZZZAAA, fpAAA, rpZZZAAA files) with fymodel 1 "
+                "(Brosa): TALYS mode vs stock, FF yield peaks 0.06 %, FP peaks 0.7 %, isotopic FF 2.6 % (rows >= 1 % of "
+                "the max). Cascade defaults honoured as before, EXCEPT transpower 10 (see transpower): fission -1.0 % in "
+                "stock at U-238 14 MeV, not in ours. `massdis y` alone (TALYS's default fymodel 2 = GEF) is REFUSED "
+                "(B14 part 2); natural targets refused as TALYS", _T14),
+    "fymodel": ("SUPPORTED", "input/defaults.py Options.fymodel -> " + _FY + "settings",
+                "1 (Brosa) ported; 2 GEF, 3 GEF + evaporation, 4 FF files, 5 own populations are REFUSED with "
+                "massdis y (B14 parts 2/3); range 1..5 checked", _T14),
+    "ffevaporation": ("SUPPORTED", "input/defaults.py Options.flagffevap -> fisyield.neck / brosafy",
+                      "fymodel 1: neck step sizes and the post-neutron yields (n: FP yields 0, as stock). U-235 response "
+                      "on the FF yields 0.005 % (stock moved 6.0 %)", _T14),
+    "rfiseps": ("SUPPORTED", "input/defaults.py Options.Rfiseps -> fisyield.massdis (fpeps)",
+                "fission-yield threshold per nucleus and bin (massdis.f90:226-272), 1e-9 with massdis; was inert "
+                "before B14. Response: U-235 `rfiseps 1e-3` 0.001 % (stock 0 %), U-238 `rfiseps 0.12` 0.16 % (stock moved 10.4 %). "
+                "Range 0..1 checked", _T14),
+    "outfy": ("SUPPORTED", "input/defaults.py Options.flagoutfy (inert)", "GEF's detailed output only (gefwrite, "
+              "massdis.f90:200-205): inert with fymodel 1, as stock (response 0.000 %)", _T14),
+    "gefran": ("SUPPORTED", "input/defaults.py Options.gefran (inert)", "GEF's event count: inert with fymodel 1, as "
+               "stock (response 0.000 %); fymodel 2/3 refused (B14 part 2). Range 1000..1e6 checked", _T14),
+    "ffmodel": ("SUPPORTED", "input/defaults.py Options.ffmodel (inert)", "acts only with fymodel 4, which is refused "
+                "(B14 part 2); range 0..4 checked", _T14),
+    "yieldfile": ("SUPPORTED", "input/defaults.py Options.yieldfile (inert)", "read since B14 (was refused as unknown); "
+                  "acts only with fymodel 4, which is refused (B14 part 2)", _T14),
+    "ffspin": ("SUPPORTED", "input/defaults.py Options.flagffspin (inert)", "acts only with fymodel 3 (ff files of "
+               "ffevap.f90), which is refused (B14 part 3)", _T14),
+    "transpower": ("IGNORED", "input/defaults.py Options.transpower (no reader: core/grids.transmission_limit and "
+                   "omp/inverse.py keep translimit 1e-5)", "FOUND IN B14: the value never reaches the transmission "
+                   "tables. Stock U-238 14 MeV `transpower 10` moves fission -0.75 % (massdis y, which sets it, -1.0 %); "
+                   "ours does not move (1270.682 mb with and without). Left for a numerics batch (touches the OMP / inverse lmax cut)"),
+}
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -404,8 +440,6 @@ MANUAL: dict = {
     "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y -> the B10 URR files, "
              "channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"),
     "micro": ("IGNORED", "input/defaults.py", "cascade honoured (ldmodel 7, jlmomp y -> refused, autorot y)"),
-    "massdis": ("IGNORED", "input/defaults.py", "cascade honoured (transeps, popeps, pfnsmodel 2); fission yields "
-                "not computed (MISSING observable)"),
     "riplomp": ("MISSING", "", "per-particle RIPL OMP index; the actinide RIPL 2408 default is applied automatically "
                 "(defaults.py omppar stage) but the keyword is not read"),
     "preequilibrium": ("SUPPORTED", "input/defaults.py Options.epreeq_mev -> preeq/*", "onset energy honoured "
@@ -452,6 +486,7 @@ MANUAL: dict = {
                       "of spectra.f90:152-158 (not checked against stock)", "code"),
     "anglescont": ("SUPPORTED", "input/defaults.py Options.nanglecont -> specobs.anglecont", "continuum DDX angle grid",
                    "test:test_specobs.py"),
+    **B14,
 }
 
 # --- KWCOV B6 (2026-11-08): optical model and direct reactions (physics/hf/omp/ompdeck.py); response vs stock =

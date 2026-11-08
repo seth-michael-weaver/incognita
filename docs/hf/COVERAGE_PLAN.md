@@ -71,7 +71,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B11 | medical isotope production (DONE, branch `kwcov11`) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
 | B12 | recoils and LAB frame (DONE, branch `kwcov12`) | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
 | B13 | ingredient outputs | outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
-| B14 | fission yields and fragment evaporation | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
+| B14 | fission yields and fragment evaporation (part 1 Brosa DONE, branch `kwcov14`; parts 2 GEF, 3 FF evaporation open) | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
 | B15 | low value | endf, endfdetail, sacs, legacy, components | endf.cs helpers, sacs.dat, component split | 1 d |
 | GAP | isomeric (excited) targets | ltarget | everything for an excited target | 3+ d; separate design (the engine refuses `Ltarget /= 0`, structure/levels.py:171; astro/stellar.py already builds excited entrance channels and is the starting point) |
 
@@ -836,9 +836,71 @@ TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values
 ### B14 -- fission yields, fragment evaporation
 
 `massdis.f90:1` (Brosa, 779 l.), GEF (7,264 l., `fymodel 2` default), `ffevap.f90:1`, `massdisout.f90:1`,
-`nudisout.f90:1`. Split into three sub-batches (Brosa; GEF or an external-yield-file path via `ffmodel 0` /
-`yieldfile`; FF evaporation for nu(A), P(nu), PFNS model 2). Accept: U-235 thermal and U-238 14 MeV Y(A) vs stock
-5 % at the peaks.
+`nudisout.f90:1`. Accept: Y(A) vs stock 2 % at the peaks (TALYS mode), keyword responses 2 % on the change.
+
+**Split (decided in part 1).** TALYS-2.25 runs, with `massdis y` on a fission run: `massdis` (yields per fissioning
+nucleus and excitation bin), `massdisout` (yield files) for fymodel <= 2, `nubarout` + `nudisout` for fymodel 2, and
+`ffevap` (fragment decay: nu(A), P(nu), PFNS/PFGS, isomer split, then massdisout/nubarout/nudisout/pfnsout) for
+fymodel >= 3. The three parts follow those paths:
+
+| part | models / keywords | TALYS routines | output |
+|---|---|---|---|
+| **1 (done, branch `kwcov14`)** | massdis, fymodel 1 (Brosa), ffevaporation (Brosa's step sizes and FP estimate), rfiseps (fpeps), outfy / gefran / ffmodel / yieldfile / ffspin read (inert with fymodel 1, as stock) | massdis (fymodel 1 branch, normalisation), brosafy, neck, trans/trapzd/funcfismode, fmin/fidi, shape helpers, massdisout | yieldA / yieldZA / fpZZZAAA / fpAAA / rpZZZAAA (FP xs) |
+| 2 | fymodel 2 (GEF, TALYS's default once massdis is on), gefran, outfy (gefwrite), the GEF nubar / nu(A) / P(nu) (nubarout, nudisout for fymodel 2); fymodel 4 file path (ffmodel 0-4, yieldfile, structure/fission/ff tables) | geftalys.f / gefsub.f / geffunctions.f (7,264 l., Monte Carlo with gefran events: compare statistically or port the RNG), nubarout, nudisout | yields + nubar*.tot, nuA, Pnu |
+| 3 | fymodel 3 / 4 / 5 with ffevap (fragment evaporation by TALYS's own decay), ffspin, pfnsmodel 2 (PFNS / PFGS from fragment decay), the isomer split (yieldfpex / fpratio, `fpZZZAAA.tot` i00/i01 files) | ffevap.f90, ffgammaspec.f90, the per-fragment population files (ff*.ex) | nu(A), P(nu), PFNS/PFGS, isomeric FP yields |
+
+Until parts 2/3 land, `massdis y` with fymodel 2-5 is REFUSED (`NotImplementedError` naming the part and `fymodel 1`);
+before B14 `massdis y` ran the cascade with its defaults and gave no yields.
+
+**Part 1 done on branch `kwcov14`** (kwcov12 + kwcov10b merged). New module `physics/hf/fisyield.py` (output only);
+hooks in engine_c (`cases`: `fisyield.begin_run`, `fisyield.record` next to fisobs's on the same cascade result;
+`run`: `fisyield.add_to_results`), `Results.fission_yields` (new field, empty by default), `Options.yieldfile` (read),
+deck.py (natural targets with massdis refused, checkvalue.f90:1075). Without `massdis y` nothing is computed:
+`test_engine_c.py` passes unchanged.
+
+* **What it gives:** `Results.fission_yields` = {TALYS file name: {column: ndarray}}: `yieldA<E>.fis` (A, FP_yield,
+  FF_yield, FP_xs, FF_xs, `Tot`), `yieldZA<E>.fis` (the rows TALYS writes), `fpZZZAAA.tot` / `fpAAA.tot` over the run's
+  energies, `rpZZZAAA.tot` (TALYS's name for the fission-product cross section; kept in this dict, apart from residual
+  production). Brosa in TALYS's single precision (np.float32), double where TALYS has dbl (mode transmissions, level
+  density through the engine's `ignatyuk` / `density(..., ldmodel 1)` of each fissioning nucleus).
+* **TALYS quirks kept:** trapzd.f90 resets `snew` at entry (no running trapezoid: each refinement is half the midpoint
+  sum); fidi.f90 sets the neck globals as a side effect, so neck.f90 continues from the LAST simplex evaluation, not the
+  best vertex; fmin returns the value of the last ranking; massdis skips the bins nex = 0-2 (`nex - istep + 1 < 0`);
+  every bin above 30 MeV is merged by four. Zeroed where TALYS reads stale static arrays (neck's zdis / wgt for
+  skipped charge steps; never reached for actinides).
+* **Vs stock** (`scripts/kwcov/b14_response.py`, TALYS mode = fidelity.py's TALYS_DECK / TALYS_ENV; stock files
+  trimmed to yieldA / yieldZA in `~/kwcov/stock/b14/`), worst |ln(ours/stock)| over the energies:
+
+  | target, energies | FF peaks (>= 50 % max) | FF (>= 1 %) | FP peaks | FP (>= 1 %) | isotopic FF (>= 1 %) | FF cross section |
+  |---|---|---|---|---|---|---|
+  | U-235 1, 5 MeV | 0.011 % | 0.029 % | 0.17 % | 0.35 % | 0.23 % | 0.01 % |
+  | U-238 1, 5, 14 MeV | 0.061 % | 0.22 % | 0.68 % | 1.15 % | **2.6 %** (Br-87, 1 MeV) | 1.0 % (14 MeV) |
+  | U-235, default mode | 2.1 % | 2.1 % | 2.3 % | 2.3 % | 2.6 % | 2.1 % |
+  | U-238, default mode | 0.34 % | 1.4 % | 0.68 % | 1.5 % | 2.6 % | 9.1 % (5 MeV: the engine's default fission, EXACTFIS) |
+
+  Default mode differs by the deliberate fission defaults (EXACTFIS changes the per-chance fission and so the mix of
+  fissioning nuclei and excitation energies; NPWINDOW the densities); that is why acceptance is in TALYS mode.
+  The isotopic 2.6 % is a charge-wing row (yield 1-2 % of the max) and follows the float32 neck sums.
+* **Responses** (|ln(R/S)|, FF and FP mass yields where stock >= 10 % of the max):
+
+  | deck line (from `massdis y; fymodel 1`) | worst | stock moved |
+  |---|---|---|
+  | ffevaporation n (U-235) | 0.005 % (FP: 0 on both sides) | 6.0 % |
+  | rfiseps 1e-3 (U-235) | 0.001 % | 0.0 % |
+  | rfiseps 0.12 (U-238: drops U-239 below fpeps) | 0.16 % | 10.4 % |
+  | outfy y; gefran 1000 (U-235) | 0.000 % | 0.0 % |
+
+* **Loss, traced (bug found):** the FF cross section at U-238 14 MeV is 1270.7 vs 1257.5 mb (1.0 %): `massdis y` sets
+  `transpower 10` (input_numerics.f90:83-88) and the engine never reads `transpower` (translimit stays 1e-5 in
+  core/grids.py / omp/inverse.py). Stock `transpower 10` alone moves U-238 14 MeV fission -0.75 %, ours 0 (1270.682 mb both; the rest is
+  transeps / xseps / popeps). Yields are normalised and do not see it. `transpower` is now IGNORED in the keyword table
+  (was SUPPORTED by grep); wiring it touches the OMP / inverse lmax cut and is left for a numerics batch.
+* **Not given:** GEF and fymodel 3-5 (parts 2/3, refused); the isomer split of fission products (only ffevap fills it:
+  with fymodel 1 TALYS writes none either); nubar / nu(A) / P(nu) (nubarout / nudisout run for fymodel 2 only); the
+  engine.py (Python) driver computes no yields (as fisobs, engine_c only).
+* Tests: `tests/hf/test_kwcov_b14.py` (shape helpers, spline / bisection, file names, refusals and ranges, deck lines,
+  Brosa modes on a model level density, U-235 1 MeV engine run vs stock numbers, no yields without massdis, natural
+  targets refused).
 
 ### B15 -- low value
 

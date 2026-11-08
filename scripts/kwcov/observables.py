@@ -65,8 +65,10 @@ ROWS = [
      "fisobs.py Results.spectra['fisZZZAAA.feed', ':Ex']", "B8",
      "Ex and Population columns (same rows as stock); the J-parity columns (fisfeedJP) are not given"),
     ("fission transmission / barrier info", "talys.out, tfis*", "tfissionout.f90:1", "outfission", "PARTIAL", "ingredients.py", "B5", ""),
-    ("fission fragment / product yields", "yieldA*.fis yieldZA*.fis", "massdisout.f90:1", "massdis, fymodel, ffmodel, outfy",
-     "MISSING", "", "B14", "GEF/Brosa (massdis.f90 779 l.) or FF files"),
+    ("fission fragment / product yields", "yieldA*.fis yieldZA*.fis fpZZZAAA.tot fpAAA.tot", "massdisout.f90:1",
+     "massdis, fymodel, ffevaporation, rfiseps", "PARTIAL", "fisyield.py Results.fission_yields (massdis y + fymodel 1)",
+     "B14", "Brosa (fymodel 1) ported: U-235 / U-238 TALYS mode vs stock, FF peaks 0.06 %, FP peaks 0.7 %, isotopic 2.6 %; "
+     "GEF (fymodel 2, TALYS's default), fymodel 3-5 and the isomer split (ffevap.f90) are B14 parts 2/3"),
     ("prompt nubar (Wahl systematics)", "(not written by TALYS-2.25)", "nubarWahl.f90:1, totalxs.f90:124", "cnubar1, cnubar2",
      "SUPPORTED", "fisobs.py Results.extras['nubarn.tot:wahl']", "B8",
      "TALYS computes it and never writes it (massdis.f90:252 resets nubar before nubarout); transcription checked by hand"),

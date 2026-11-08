@@ -65,6 +65,10 @@ class Results:
     # INTEGRAL (KWCOV B10b: `integral y` in a deck, default empty): integral.f90's effective cross sections,
     # {"integral.dat": {"file", "spectrum": list, "xseff_b", "xsexp_b", "ratio": ndarray}}. physics/hf/integral.py
     integral: dict = field(default_factory=dict)
+    # FISSION YIELDS (KWCOV B14 part 1: `massdis y` with `fymodel 1` on a fission run, default empty): massdisout.f90's
+    # files as {file name: {column: ndarray}} (yieldA<E>.fis, yieldZA<E>.fis, fpZZZAAA.tot, rpZZZAAA.tot, fpAAA.tot);
+    # physics/hf/fisyield.py
+    fission_yields: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:
