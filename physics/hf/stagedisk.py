@@ -470,6 +470,10 @@ def key(stage: str, args: tuple, *, options=(), params=(), values=()) -> bytes:
 
     if ompdeck.active() is not None:  # KWCOV B6: optmod tables / OMP files / energy-local lines reach the OMP stages
         out += b"|b6" + hashlib.sha256(repr(ompdeck.token()).encode()).digest()
+    from physics.hf.omp import inverse as _inv
+
+    if _inv.eps_token() is not None:  # KWCOV B15: a non-default transpower / transeps moves every lmax cut
+        out += b"|tp" + hashlib.sha256(repr(_inv.eps_token()).encode()).digest()
     out += b"|V" + _version().encode()
     return bytes(out)
 

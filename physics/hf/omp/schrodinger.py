@@ -1322,9 +1322,13 @@ def _requires_grad(p) -> bool:
                for v in (getattr(p, f, None) for f in _FIELDS))
 
 
-def _lmax_talys(tjl: Tensor, particle: int, translimit: float = 1.0e-5, transeps: float = 1.0e-8) -> Tensor:
+def _lmax_talys(tjl: Tensor, particle: int, translimit: float | None = None, transeps: float | None = None) -> Tensor:
     # inverseread.f90 "Processing of transmission coefficients": first l where every T_lj of
     # that l is below max(T_l(0) * translimit / (2l+1), transeps), minus one.
+    from physics.hf.omp import inverse as _inv  # KWCOV B15: the run's transpower / transeps
+
+    translimit = _inv.eps()[0] if translimit is None else translimit
+    transeps = _inv.eps()[1] if transeps is None else transeps
     t = tjl.detach()
     nj = NJ[particle]
     L = torch.arange(t.shape[1], dtype=DTYPE)

@@ -102,7 +102,11 @@ _SKIP = {
     # KWCOV B5: TALYS keywords that name an external file the port does not read (refused on a deck line)
     "densfile": "external level-density table", "e1file": "external E1 strength file",
     "m1file": "external M1 strength file", "massdir": "external mass-table directory",
-    "rescuefile": "output renormalisation, not a model parameter",
+    # KWCOV B15: was "output renormalisation, not a model parameter" and skipped silently; it renormalises the cross
+    # sections the run returns (normalization.f90 + rescue files), so a deck line with it is refused now
+    "rescuefile": "rescue (renormalisation) file",
+    # KWCOV B15: another structure database / best-file directory; the port reads its own (TALYS_DIR) only
+    "strucpath": "another structure database", "bestpath": "another best-file directory",
     # KWCOV B2: consumed by `_deck_best` (a deck's `best y` reads the best file into the deck)
     "bestfile": "read by _deck_best", "best": "read by _deck_best", "bestend": "read by _deck_best",
 }
@@ -318,8 +322,8 @@ class Cards:
 #: KWCOV B5: TALYS keywords with no meaning for an engine that returns arrays (output files, paths, labels; the NA rows
 #: of docs/hf/KEYWORD_COVERAGE.md): a deck line with one is accepted and changes nothing
 _NA_PREFIXES = ("out", "file", "block")
-_NA_WORDS = frozenset({"bestpath", "components", "ddxmode", "format", "integral", "nulldev", "partable", "sacs",
-                       "source", "strucpath", "user"})
+_NA_WORDS = frozenset({"ddxmode", "format", "integral", "nulldev", "partable",
+                       "source", "user"})  # KWCOV B15: sacs / components are Options keywords now
 #: KWCOV B10b: accepted deck words that change no engine number (why, as the skip reason)
 _B10B_WORDS = {
     "resonance": "resonance n (the default: no resonance-range reconstruction)",
@@ -596,7 +600,9 @@ _LOUD = frozenset({"energy-dependent table form", "index form not understood", "
                    # KWCOV B5: an unknown keyword was skipped silently (TALYS itself stops on it, checkkeyword.f90)
                    "not a TALYS keyword the port knows", "external level-density table", "external E1 strength file",
                    "external M1 strength file", "external mass-table directory",
-                   "energy-local adjustment form (Ea Eb Em D or a file)"})
+                   "energy-local adjustment form (Ea Eb Em D or a file)",
+                   # KWCOV B15
+                   "rescue (renormalisation) file", "another structure database", "another best-file directory"})
 
 
 def _loud_skips(skipped, deck) -> None:

@@ -163,3 +163,28 @@ max(Ecut+2, S_n-6), which a 30 keV neutron cannot reach as (n,n')).
 B8's per-chance numbers (Th-233 +27 % at 14 MeV, U-235 first chance +17.6 % at 5 MeV) are pieces of these totals; the
 totals close to 0.00 % in TALYS mode with the same one or two switches, so no fission port bug is indicated. Not
 checked here: the per-chance split itself in TALYS mode (B8's harness, `~/kwcov/stock/b8/`).
+
+## 6. psfsgl (KWCOV B15, branch `kwcov15`): tabulated PSF energies in single precision
+
+The fourth opt-in fix, `INCOGNITA_FIDFIX=psfsgl` (default OFF; `fidfix.py` docstring, `gamma/parameters.py`
+`table_arrays` and the Tqrpa grid). It closes B13's loss (1): U-239 f_E1 (strength 9, T-dependent smlo2019 table) at
+Egamma = 0.4 / 0.6 MeV was 9.08e-10 / 1.54e-9 against stock 2.12e-9 / 1.01e-9 (psf092239.E1 89 %, cross_g.tot
+19.7 %). Cause: gammapar.f90 stores `ee + etable` and the wtable stretch `Emid + (Eq - Emid) * wt` in real(sgl), so
+even at wt = 1 the energies become 0.39999962 / 0.60000038, and Tqrpa is the single-precision sum of 0.2 steps; the
+port did both in double (0.40000000000000036), so `locate` and the `eb <= et` / `ee <= et` choice of
+fstrength.f90:401-411 (temperature column vs photoabsorption column) flipped wherever a table energy equals a Tqrpa
+temperature. With the fix: 2.1185e-9 / 1.0096e-9 = stock; other energies move ~5e-7 relative.
+
+Engine impact (fidelity.py, default and TALYS mode, with and without the fix; mb):
+
+| target | cell | default | default + psfsgl | TALYS mode | TALYS mode + psfsgl | stock |
+|---|---|---|---|---|---|---|
+| U-238 | capture 0.1 MeV | 113.52 | 113.52 | 113.62 | 113.61 | 113.61 |
+| U-238 | capture 0.5 MeV | 81.32 | **81.23** | 81.36 (+0.12 %) | **81.26 (0.00 %)** | 81.26 |
+| U-238 | capture 1 MeV | 86.82 | 86.82 | 86.70 | 86.70 | 86.70 |
+| U-238 | fission 5 MeV | 685.20 | 685.14 | 625.09 | 625.03 | 625.03 |
+| U-238 | every other cell (0.1-14 MeV) | | <= 0.01 % | | <= 0.01 % | |
+| Fe-56, Co-59 | every channel, 0.03 / 0.5 / 1 / 5 / 14 MeV | | identical to 0.01 mb | | | |
+| Au-197 | capture 0.03 / 0.5 / 1 / 5 MeV | 834.36 / 207.81 / 104.37 / 16.51 | identical | 834.35 / 238.59 / 143.60 / 17.12 | identical | |
+
+So on by default it would move U-238 capture at 0.5 MeV by -0.11 % (towards stock) and leave the rest at print level.

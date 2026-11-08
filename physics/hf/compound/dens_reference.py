@@ -648,12 +648,13 @@ def _lmax_inverseread(tjl: torch.Tensor, tl: torch.Tensor, particle: int) -> np.
     TALYS: inverseread.f90:1 (inverseread)
     Test: A-trans
     """
-    from physics.hf.omp.inverse import NJ, TRANSEPS_DEFAULT, TRANSLIMIT_DEFAULT
+    from physics.hf.omp.inverse import NJ, eps
 
+    translimit, transeps = eps()  # KWCOV B15: the run's transpower / transeps (defaults 1e-5, 1e-8)
     nj = NJ[particle]
     L = tjl.shape[-2]
     ll = torch.arange(L, dtype=DTYPE)
-    teps = torch.clamp_min(tl[:, :1] * TRANSLIMIT_DEFAULT / (2 * ll + 1), TRANSEPS_DEFAULT)
+    teps = torch.clamp_min(tl[:, :1] * translimit / (2 * ll + 1), transeps)
     small = (tjl[..., :nj] < teps[..., None]).all(-1)
     first = torch.where(small.any(-1), small.to(torch.int64).argmax(-1),
                         torch.full(small.shape[:-1], L))

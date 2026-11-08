@@ -384,6 +384,8 @@ class Options:
     # KWCOV B13 (physics/hf/ingout.py, output only): ingredient output files
     flagbasic: bool = False  # outbasic, input_basicreac.f90:66 (sets the out* defaults below)
     flagpartable: bool = False  # partable, input_basicreac.f90:81 (parameters.dat)
+    flagsacs: bool = False  # KWCOV B15: sacs, input_output.f90:116 (sacs.dat, physics/hf/ingout.py; output only)
+    flagcompo: bool = False  # KWCOV B15: components, input_output.f90:313 (refused when y: defaults.UNPORTED)
     flaglevels: bool = False  # outlevels, input_levels.f90:103 (= outbasic)
     flagblocklevels: bool = False  # blocklevels, input_output.f90 (levels.out instead of levels<ZZZAAA>.out)
     flagdensity: bool = False  # outdensity, input_densitymodel.f90:107 (= outbasic)
@@ -786,6 +788,8 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "outfission": ("fissionpar", "flagfisout", "yn"),  # KWCOV B8 (input_fissionpar.f90:311)
     "outbasic": ("basicreac", "flagbasic", "yn"),  # KWCOV B13 (input_basicreac.f90:151)
     "partable": ("basicreac", "flagpartable", "yn"),  # KWCOV B13 (input_basicreac.f90:209)
+    "sacs": ("directmodel", "flagsacs", "yn"),  # KWCOV B15 (input_output.f90:334)
+    "components": ("directmodel", "flagcompo", "yn"),  # KWCOV B15 (input_output.f90:313; refused when y)
     "outlevels": ("levels", "flaglevels", "yn"),  # KWCOV B13 (input_levels.f90:234)
     "blocklevels": ("levels", "flagblocklevels", "yn"),  # KWCOV B13 (input_output.f90:207)
     "outdensity": ("densitymodel", "flagdensity", "yn"),  # KWCOV B13 (input_densitymodel.f90:230)
@@ -1220,6 +1224,11 @@ def default_options(
     o["maxZ"] = min(o["maxZ"], zinit - cut)
     o["maxN"] = min(o["maxN"], ninit - cut)
 
+    # KWCOV B15: transpower / transeps reach the lmax cut of every transmission read (inverseread / incidentread)
+    from physics.hf.omp import inverse as _inv
+
+    _inv.set_eps(o["transpower"], o["transeps"])
+
     # CHANCAP: run-scoped for the option-less channel sites (channels.caps / numchantot); INCOGNITA_CHANCAP wins
     import os
 
@@ -1452,6 +1461,10 @@ UNPORTED = (
     ("flagrpevap", lambda v: bool(v), "rpevap y: evaporation of the residual products past maxZrp/maxNrp "
      "(rpevap.f90, rp*.ex population files) is not ported; the run would have decayed them in the cascade instead "
      "(KWCOV B5 2026-11-08)"),
+    ("flagcompo", lambda v: bool(v), "components y: the direct / pre-equilibrium / compound split of every exclusive "
+     "channel and residual (multiple.f90:649-665 Fdir / Fpreeq / Fcomp from xspopdir and preeqpopex below the "
+     "largest separation energy; channelsout.f90:299-345 and normalization.f90 columns 5-7) is not carried through "
+     "the port's cascade (KWCOV B15 2026-11-08)"),
     ("flaggnorm", lambda v: bool(v), "gnorm y: normalise the compound nucleus's E1 strength to the measured "
      "<Gamma_gamma> (radwidtheory.f90:253-262 iterates ftable(E1) up to 101 times, again at every incident energy). "
      "TALYS-2.25 compares its theoretical width in eV with the resonance table's keV number (resonancepar.f90:96), "
@@ -1469,12 +1482,43 @@ def reject_unported(options) -> None:
     TALYS: (none -- a port guard)
     Test: tests/hf/test_unported_options.py
     """
+    check_values(options)  # KWCOV B15: TALYS-errors of checkvalue.f90 the port did not have
     o = options if isinstance(options, dict) else vars(options)
     bad = [msg for key, is_bad, msg in UNPORTED if key in o and is_bad(o[key])]
     if o.get("ompenergyfile") and o.get("flagendf"):  # KWCOV B6: endfenergies.f90:97, the ENDF incident grid
         bad.append("ompenergyfile with endf y: the ENDF-6 incident-energy grid (endfenergies.f90) is not ported")
     if bad:
         raise NotImplementedError("not ported: " + "; ".join(bad))
+
+
+def check_values(options) -> None:
+    """checkvalue.f90's checks the port lacked (KWCOV B15), raised as TALYS stops, at the start of a calculation.
+
+    * legacy models (checkvalue.f90:803-813, :953-966): without `legacy y`, strength <= 7, strengthM1 not in
+      3/8/10/11/12, ldmodelCN or any ldmodel 3/4/6 stop the run;
+    * transpower 2..20 (checkvalue.f90:475).
+
+    TALYS: checkvalue.f90:1 (checkvalue) lines 475, 803-813, 953-966
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    o = options if isinstance(options, dict) else vars(options)
+    tp = o.get("transpower", 5)
+    if not 2 <= int(tp) <= 20:
+        raise ValueError(f"TALYS-error: 2 <= transpower <= 20, transpower = {tp} (checkvalue.f90:475)")
+    if o.get("flaglegacy", False):
+        return
+    if int(o.get("strength", 9)) <= 7:
+        raise ValueError("TALYS-error: strength = 8, 9, 10, 11, 12 or 13 are recommended. If you want to use legacy "
+                         f"models put legacy y (strength = {o.get('strength')}; checkvalue.f90:803-807)")
+    if int(o.get("strengthM1", 3)) not in (3, 8, 10, 11, 12):
+        raise ValueError("TALYS-error: strengthM1 = 3, 8, 10, 11 or 12 are recommended. If you want to use legacy "
+                         f"models put legacy y (strengthM1 = {o.get('strengthM1')}; checkvalue.f90:808-811)")
+    lds = [("ldmodelCN", int(o.get("ldmodelCN", 1))), ("ldmodel", int(o.get("ldmodelall", 1)))]  # :953 then :964
+    lds += [("ldmodel", int(v)) for k, _z, _n, v in (o.get("pernuc") or ()) if k == "ldmodel"]
+    for name, v in lds:
+        if v in (3, 4, 6):
+            raise ValueError(f"TALYS-error: {name} = 1, 2, 5, or 7 are recommended. If you want to use legacy models "
+                             f"put legacy y ({name} = {v}; checkvalue.f90:953-966)")
 
 
 def resolve_structure_defaults(

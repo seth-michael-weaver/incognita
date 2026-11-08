@@ -5,8 +5,9 @@ named in `where`; "env" means the feature exists behind an INCOGNITA_* switch ra
 """
 NA_PREFIXES = ("out", "file", "block")
 NA_WORDS = frozenset({
-    "user", "source", "format", "nulldev", "strucpath", "bestpath", "partable", "sacs", "ecissave", "eciscalc",
-    "inccalc", "endfecis", "ecisdwba", "legacy", "reaction", "rescuefile", "components", "integral",
+    "user", "source", "format", "nulldev", "partable", "ecissave", "eciscalc",
+    "inccalc", "endfecis", "ecisdwba", "reaction", "integral",  # KWCOV B15: sacs legacy components rescuefile
+    # strucpath bestpath have rows of their own (B15)
 })
 
 _F = "input/fitlib.py "
@@ -370,7 +371,7 @@ B13: dict = {
                     "(stock-identical)", _T13),
     "outgamma": ("SUPPORTED", "input/defaults.py Options.flaggamma -> " + _IO + "gammaout",
                  "cross_g.tot (photoabsorption, first energy): Fe-56 <= 1e-6; U-238 19.7 % at 0.4 / 0.6 MeV (the "
-                 "port's T-dependent E1 table at two grid energies; engine untouched, recorded)", _T13),
+                 "port's double-precision table energies; B15: INCOGNITA_FIDFIX=psfsgl gives stock)", _T13),
     "filepsf": ("SUPPORTED", "input/defaults.py Options.filepsf -> " + _IO + "gammaout psf files",
                 "psf<ZZZAAA>.E1/M1/E2/M2 (f, T, header with Gamma_gamma, C/E, S-wave): Fe-57 <= 0.0034 %, U-239 M1/M2 "
                 "0.04 %, E1/E2 85-89 % at the same two energies; quirks kept: E2/M2 files carry f(l=1), filepsf "
@@ -566,3 +567,60 @@ B6: dict = {
               "a deck: Au-197 `racap y; optmodall y` direct capture = stock (133.6 mb at 1 MeV); the L00 isomer extra lacks it", "test:test_directcap.py,test_kwcov_b5.py"),
 }
 MANUAL.update(B6)
+
+_T15 = "test:test_kwcov_b15.py"
+_REF = "READ_ONLY_DEFAULT"
+#: KWCOV B15 rows (docs/hf/COVERAGE_PLAN.md B15); stock TALYS-2.25 n + Fe-56 decks in ~/kwcov/stock/b15
+#: (endf y 1/5/14 MeV, sacs y 2-20 MeV, the refused decks), responses by scripts/kwcov/fidelity.py --response
+B15: dict = {
+    "legacy": ("SUPPORTED", "input/defaults.py check_values (reject_unported, at the start of a calculation)",
+               "checkvalue.f90:803-813, :953-966 ported: without `legacy y` strength <= 7, strengthM1 not 3/8/10/11/12, "
+               "ldmodelCN or any (per-nucleus) ldmodel 3/4/6 stop the run with TALYS's message (stock Fe-56 "
+               "`strength 1` / `strengthm1 2` / `ldmodel 3`: same TALYS-error); `legacy y` runs them (Fe-56 `legacy y; "
+               "strength 1` / `legacy y; ldmodel 3` responses in the plan). Before B15 they ran without a word", _T15),
+    "transpower": ("SUPPORTED", "input/defaults.py -> omp/inverse.set_eps -> process_tjl, schrodinger._lmax_talys, "
+                   "dens_reference._lmax_inverseread (+ stagedisk key token)",
+                   "translimit = 1/10**transpower in every lmax cut (incidentread.f90 / inverseread.f90); was read but "
+                   "never reached the cut (B14 found it: massdis y sets 10). U-238 `transpower 10`: stock fission 14 MeV "
+                   "1270.62 -> 1261.01 mb, engine TALYS mode 1270.68 -> 1261.07; worst response 0.43 % (capture 14). "
+                   "Fe-56 0.00 %; range 2-20 checked (checkvalue.f90:475). Defaults bitwise (1e-5 as before)", _T15),
+    "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps and "
+                 "omp/inverse.set_eps (lmax cut)",
+                 "KWCOV B9: the deck value (and astro y's / massdis y's) reaches the chain's T cut; B15: also the lmax "
+                 "cut of every transmission read (max(T_0 translimit/(2l+1), transeps)). Fe-56 `transeps 1e-12` "
+                 "response 0.00 %", _T15),
+    "endf": ("SUPPORTED", "input/defaults.py cascade + ingout.py (levels*.out, gamma*.tot, tefal.inf, energies.endf)",
+             "cascade (eninclow from D0, urr y, channels y, adddiscrete 30 MeV, the output switches) + B15: levelsout "
+             "and gammadecay of every nucleus structure builds and endfinfo's tefal.inf / energies.endf (Ninc > 1). "
+             "Stock Fe-56 endf y: the same 46 files, levels identical, gamma*.tot <= 1e-6, tefal / energies identical. "
+             "Not given: endfenergies / endfecis / endfread's ECIS ENDF-grid files (endf.cs, endf.tot, endftot.tot, "
+             "endfel.tot, endfnon.tot) and channelsout's discrete-gamma xs*.gam files (TEFAL inputs). Energies below "
+             "eninclow refused (B10b)", _T15),
+    "endfdetail": ("SUPPORTED", "input/defaults.py Options.flagendfdet (cascade)",
+                   "with endf y: n drops the gamdis / channels / filechannels defaults (input_output.f90:140-143, "
+                   "input_outfiles.f90:110-115) and tefal.inf's detail line; no cross section moves (as stock)", _T15),
+    "sacs": ("SUPPORTED", "input/defaults.py Options.flagsacs -> ingout.sacs_table (Results.ingout['sacs.dat'])",
+             "sacs.f90: per exclusive channel threshold, peak energy / value and FWHM. On stock's own xs files = stock "
+             "sacs.dat; engine Fe-56 2-20 MeV: thresholds and channel list identical, xsmax / width the engine's "
+             "default cross sections. Quirk kept: without channels y (no xs files) only the header", _T15),
+    "components": (_REF, "input/defaults.py UNPORTED (components y)",
+                   "components y REFUSED: the direct / pre-equilibrium / compound split per residual (multiple.f90:649 "
+                   "Fdir / Fpreeq / Fcomp) is not carried through the port's cascade; components n accepted", _T15),
+    "micro": ("SUPPORTED", "input/defaults.py cascade (ldmodel 7, jlmomp y, autorot y)",
+              "micro y alone is refused through jlmomp y (JLM unported, B7b); `micro y; jlmomp n` runs ldmodel 7 + "
+              "autorot (response vs stock in the plan)", _T15),
+    **{k: (_REF, "input/fitlib.py _SKIP (refused on a deck line)", "B15 decision: stays REFUSED: an external " + w +
+           " the user supplies (" + t + "); the port reads only its structure database", _T15)
+       for k, w, t in (("densfile", "level-density table", "densitytable.f90:113"),
+                       ("e1file", "E1 strength table", "gammapar.f90:521"),
+                       ("m1file", "M1 strength table", "gammapar.f90:521"),
+                       ("massdir", "mass-table directory", "masses.f90:139"))},
+    "rescuefile": (_REF, "input/fitlib.py _SKIP + _LOUD (refused on a deck line)",
+                   "was skipped silently (NA); it renormalises the returned cross sections (normalization.f90), so "
+                   "B15 refuses the deck line (a best file's line is warned)", _T15),
+    "strucpath": (_REF, "input/fitlib.py _SKIP + _LOUD", "another structure database: refused (was accepted and "
+                  "ignored); the port reads TALYS_DIR's", _T15),
+    "bestpath": (_REF, "input/fitlib.py _SKIP + _LOUD", "another best-file directory: refused (was accepted and "
+                 "ignored)", _T15),
+}
+MANUAL.update(B15)

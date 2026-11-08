@@ -29,6 +29,17 @@ Fixes:
          against stock). Arguably a TALYS ordering bug that the port "corrected"; the fix restores stock. A `risomer` on
          the deck or in a best file (read with the input) and fitted values for other nuclei are untouched.
 
+  psfsgl  tabulated photon strength functions (strength 3-13, the E1 table and a tabulated M1) with TALYS's
+         single-precision energies: qrpa%e = ee + etable and the wtable stretch `Emid + (Eq - Emid) * wt`
+         (gammapar.f90:268, :574-578) are real(sgl), so even at wt = 1 the stretch moves a table energy by a few 1e-7
+         (U-239 smlo2019: 0.4 -> 0.39999962, 0.6 -> 0.60000038), and Tqrpa is the single-precision sum of 0.2 steps
+         (gammapar.f90:311-321). The port did both in double (0.40000000000000036 > Tqrpa 0.4), so at a gamma energy on
+         a table point that equals a Tqrpa temperature, locate and the `eb <= et` / `ee <= et` choice between the
+         T-dependent column and the photoabsorption column (fstrength.f90:401-411) went the other way: U-239 f_E1 at
+         0.4 / 0.6 MeV 9.08e-10 / 1.54e-9 vs stock 2.12e-9 / 1.01e-9 (psf*.E1 89 %, cross_g.tot 19.7 %, and the
+         engine's photon transmission there). With the fix the port has TALYS's numbers (values straight-through, so
+         the etable / wtable gradients are kept). KWCOV B15 (docs/hf/FIDELITY_DEFAULTS.md section 4).
+
 TALYS: (none -- Incognita switch module; each fix names the TALYS lines it restores)
 Test: tests/hf/test_fidfix.py
 """
@@ -37,7 +48,7 @@ from __future__ import annotations
 import os
 
 ENV = "INCOGNITA_FIDFIX"
-FIXES = ("ldcn", "besttables", "fitrisomer")
+FIXES = ("ldcn", "besttables", "fitrisomer", "psfsgl")
 
 
 def on(name: str) -> bool:
@@ -61,3 +72,43 @@ def ldcn_pseudo(options) -> bool:
     if c is None:
         return False
     return (int(options.Ztarget), int(options.Atarget)) != (int(c.Z), int(c.A))
+
+
+def f32(x):
+    """Round to IEEE single precision and back (TALYS real(sgl) arithmetic, one operation at a time).
+
+    TALYS: gammapar.f90:1 (gammapar) -- the real(sgl) it emulates
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    import torch
+
+    if isinstance(x, torch.Tensor):
+        return x.detach().to(torch.float32).to(x.dtype if x.dtype != torch.float32 else torch.float64)
+    import numpy as np
+
+    return float(np.float32(x))
+
+
+def sgl_straight(value, sgl):
+    """`sgl`'s numbers with `value`'s gradient (straight-through), in `value`'s dtype.
+
+    TALYS: (none -- autograd helper)
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    return value + (sgl.to(value.dtype) - value).detach()
+
+
+def tqrpa_sgl(n_t: int, dtemp: float):
+    """gammapar.f90:311-321: Tqrpa(it) = the single-precision running sum -dtemp + it * dtemp, as float64.
+
+    TALYS: gammapar.f90:1 (gammapar) lines 311-321
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    import numpy as np
+
+    out = np.zeros(n_t)
+    t = np.float32(-dtemp)
+    for it in range(n_t):
+        t = np.float32(t + np.float32(dtemp))
+        out[it] = float(t)
+    return out

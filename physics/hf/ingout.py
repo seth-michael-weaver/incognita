@@ -30,6 +30,11 @@ TALYS routines ported here (file:line of the subroutine statement):
     spr.f90:1 (spr)                        spr.opt (outomp)
     opticalnp.f90:1 (opticalnp)            the KD03 lines of talys.out (outkd)
     partable.f90:1 (partable), finalout.f90:1 (finalout), nuclides.f90:1 (nuclides)   parameters.dat (partable)
+    gammadecay.f90:1 (gammadecay)          gamma<ZZZAAA>.tot, cumulative discrete gamma decay (outbasic / endf y;
+                                           KWCOV B15)
+    endfinfo.f90:1 (endfinfo)              tefal.inf, energies.endf (endf y, more than one energy; KWCOV B15)
+    sacs.f90:1 (sacs)                      sacs.dat: per exclusive channel threshold, peak energy, peak and FWHM
+                                           (sacs y; KWCOV B15)
 TALYS quirks kept: the psf .E2/.M2 files' f column is the l = 1 strength (gammaout.f90 calls fstrength with l = 1);
 `filepsf y` without `outgamma y` writes nothing (gammaout is called only for outgamma); `outdensity y; filedensity n`
 leaves the D0 statistics and the experimental level density of ld*.gs at 0 (densitycum fills them for filedensity
@@ -69,13 +74,15 @@ def active(options) -> dict:
     """
     o = options
     want = {
-        "levels": _yn(o, "flaglevels") or _yn(o, "flagbasic"),
+        "levels": _yn(o, "flaglevels") or _yn(o, "flagbasic") or _yn(o, "flagendf"),  # B15: structure.f90:75
         "density": _yn(o, "flagdensity") or _yn(o, "filedensity"),
         "gamma": _yn(o, "flaggamma"),
         "inverse": _yn(o, "flaginverse"),
         "omp": _yn(o, "flagoutomp"),
         "kd": _yn(o, "flagoutkd"),
         "partable": _yn(o, "flagpartable"),
+        "endf": _yn(o, "flagendf"),  # KWCOV B15: endfinfo (tefal.inf, energies.endf)
+        "sacs": _yn(o, "flagsacs"),  # KWCOV B15: sacs.dat
     }
     return {k: v for k, v in want.items() if v}
 
@@ -204,6 +211,193 @@ def levels_file(cas, zix: int, nix: int, prior: bool = False) -> tuple[str, dict
     b["branch_assign"] = [tuple(lv.branch_assign[i]) if i < len(lv.branch_assign) else () for i in range(n)]
     f = _file(f"{_nuc(Z, A)} Nuclear masses and levels", Z, A, blocks=[b])
     return f"levels{_za_str(Z, A)}.out", f
+
+
+def gamma_decay_file(cas, zix: int, nix: int, prior: bool = False) -> tuple[str, dict]:
+    """gamma<ZZZAAA>.tot: per discrete level, every gamma of its cumulative decay to the ground state (branching flux
+    followed down the level scheme, isomers stop it), sorted by gamma energy, with the total gamma yield.
+
+    TALYS: gammadecay.f90:1 (gammadecay)
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    Z, A = (int(v) for v in cas.zn(zix, nix))
+    lv = cas._levels(zix, nix)
+    if prior:  # levels.f90:179-183: the nucleus's levels were read before structure() (conversion by file index)
+        from physics.hf.structure.levels import discrete_levels
+
+        lv = discrete_levels(Z, A, cas.options, cas.m, cas.params, prior_call=True)
+    nlev = int(lv.nlev)
+    edis, tau = _a(lv.e_mev), _a(lv.half_life_s)
+    nbr, bto = _a(lv.nbranch).astype(int), _a(lv.branch_to).astype(int)
+    brr, conv = _a(lv.branch_ratio), _a(lv.conversion)
+    electron = bool(getattr(cas.options, "flagelectron", True))
+    rows, gams = [], []
+    for i in range(1, nlev + 1):
+        flux = np.zeros(nlev + 1)
+        flux[i] = 1.0
+        g, total, totalg = [], 0.0, 0.0
+        for j in range(i, 0, -1):
+            if tau[j] != 0.0:
+                continue
+            for k in range(int(nbr[j])):
+                lto = int(bto[j, k])
+                if flux[j] == 0.0:
+                    continue
+                b = float(brr[j, k]) * flux[j]
+                g.append([j, lto, edis[j] - edis[lto], b, edis[j], edis[lto]])
+                flux[lto] += b
+                total += b
+                totalg = totalg + b / (1.0 + float(conv[j, k])) if electron else total
+        if total != 0.0:
+            for r in g:
+                r[3] /= total
+            for jj in range(len(g)):  # gammadecay.f90's exchange sort (descending gamma energy), kept literally
+                for kk in range(jj + 1):
+                    if g[jj][2] > g[kk][2]:
+                        g[jj], g[kk] = g[kk], g[jj]
+        rows.append([i, edis[i], len(g), totalg])
+        gams.append(np.asarray(g, dtype=float).reshape(-1, 6))
+    b = _block("Cumulative discrete gamma decay",
+               ["Level", "Energy", "Num._branch", "Total_yield", "Parent_level", "Daughter_level", "Gamma_energy",
+                "Branch._ratio", "Parent_energy", "Daughter_energy"],
+               ["", "MeV", "", "", "", "", "MeV", "", "MeV", "MeV"], np.zeros((0, 10)))
+    b["data"] = np.asarray(rows, dtype=float).reshape(-1, 4)
+    b["gammas"] = gams
+    tZ, tA = (int(v) for v in cas.zn(*_target_ix(cas)))
+    f = _file(f"{_nuc(tZ, tA)} Cumulative discrete gamma decay", tZ, tA, kind="target", blocks=[b])
+    return f"gamma{_za_str(Z, A)}.tot", f
+
+
+def _gammadecay_text(f: dict) -> str:
+    b = f["blocks"][0]
+    lines = _header_lines(f["header"])
+    n = int(b["data"].shape[0]) + sum(int(x.shape[0]) for x in b["gammas"])
+    lines += ["# quantity: ", f"#   type: {b['quantity']}", "# datablock: ", f"#   columns: {len(b['columns'])}",
+              f"#   entries: {n}"]
+    lines.append("##" + "".join(f"{c:^15}" for c in b["columns"]))
+    lines.append("##" + "".join(f"{('[' + u + ']'):^15}" for u in b["units"]))
+    for r, gs in zip(b["data"], b["gammas"]):
+        lines.append(f"{int(r[0]):6d}{'':9s}{r[1]:15.6E}{int(r[2]):6d}{'':9s}{r[3]:15.6E}")
+        for x in gs:
+            lines.append(f"{'':60s}{int(x[0]):6d}{'':9s}{int(x[1]):6d}{'':9s}" + "".join(f"{v:15.6E}" for v in x[2:]))
+    return "\n".join(lines) + "\n"
+
+
+def endf_info(cas, energies, res=None) -> dict:
+    """tefal.inf (the run's facts for TEFAL) and energies.endf (the incident energies), `endf y` with Ninc > 1.
+
+    TALYS: endfinfo.f90:1 (endfinfo)
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    o = cas.options
+    tz, tn = _target_ix(cas)
+    lv = cas._levels(tz, tn)
+
+    def yn(b) -> str:
+        return "y" if b else "n"
+
+    urr = bool(res is not None and getattr(res, "urr", None))
+    lines = [f"{int(cas.k0):3d}       : projectile type", f"{int(o.Ztarget):3d}       : Z of target",
+             f"{int(o.Atarget):3d}       : A of target",
+             f"{_f(cas.m.mass_amu[tz, tn]):10.6f}: mass of target in a.m.u.",
+             f"{_f(lv.spin[0]):4.1f}      : spin of target", f"{0.0:10.6f}: energy of target",
+             f"{int(o.Ltarget):4d}{int(getattr(o, 'Liso', 0) or 0):4d}  : level and isomeric number of target",
+             f"{len(energies):4d}      : number of incident energies",
+             f"{int(o.nlevmax):4d}      : number of discrete levels", "energies.endf : file with incident energies",
+             f"{yn(o.flagendfdet)}         : detailed ENDF-6 information per channel",
+             "y         : keep elastic cross section in normalization",
+             f"{yn(o.flagrecoil)}         : recoils", f"{yn(urr)}         : urr", "y         : block"]
+    return {"tefal.inf": {"text": "\n".join(lines) + "\n"},
+            "energies.endf": {"text": "".join(f"{_es(e)}\n" for e in energies)}}
+
+
+def _channel_q(cas, code: str) -> float:
+    """Qexcl(idc, 0) of an exclusive channel (channels.f90:283-318): S(0, 0, k0) + targetE minus the separation energy
+    of every particle on the way down (n, p, d, t, h, a removed in that order; the sum is path independent)."""
+    m = cas.m
+    q = _f(m.s_mev[0, 0, int(cas.k0)])
+    zix = nix = 0
+    for t, cnt in zip(range(1, 7), (int(c) for c in code)):
+        for _ in range(cnt):
+            q -= _f(m.s_mev[zix, nix, t])
+            zix, nix = zix + PARZ[t], nix + PARN[t]
+    return q
+
+
+def sacs_table(cas, res) -> dict:
+    """sacs.dat: for every exclusive channel the run has (xs<code>.tot), its threshold Ethrexcl(idc, 0), the energy
+    and value of the largest cross section on the incident grid and its full width at half maximum (pol1 on the
+    two crossings, 0 without both). Rows in sacs.f90's loop order (number of particles, then a h t d p n).
+
+    TALYS: sacs.f90:1 (sacs), channels.f90:306-312 / :656-661 (Ethrexcl; (n,n') takes its first excited level)
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    e = np.asarray(res.e_inc_mev.tolist(), dtype=float)
+    o = cas.options
+    tz, tn = _target_ix(cas)
+    mt, mp = _f(cas.m.mass_amu[tz, tn]), _parmass(int(cas.k0))
+    specmass = mt / (mt + mp)
+    rows = []
+    codes = sorted((k[2:] for k in res.channels_mb if k.startswith("xs") and len(k) == 8 and k[2:].isdigit()),
+                   key=lambda c: (sum(int(x) for x in c), c[5], c[4], c[3], c[2], c[1], c[0]))
+    # sacs.f90 reads the xs<code>.tot files the run wrote: channelsout writes them only with channels y and filechannels
+    # (input_outfiles.f90: filechannels follows flagexc = more than one energy, or endf y + endfdetail); without them
+    # sacs.dat is the two header lines (stock Fe-56 `sacs y` alone)
+    if not (bool(getattr(o, "flagchannels", False))
+            and (len(e) > 1 or (bool(o.flagendf) and bool(o.flagendfdet)))):
+        codes = []
+    for code in codes:
+        xs = np.asarray(res.channels_mb["xs" + code].tolist(), dtype=float)
+        q = _channel_q(cas, code)
+        if int(cas.k0) == 1 and code == "100000":  # channels.f90:656-661: (n,n') threshold = its first excited level
+            lv = cas._levels(*_cas_ix(code))
+            q -= _f(lv.e_mev[1]) if int(lv.nlev) >= 1 else 0.0
+        ethr = 0.0 if q >= 0.0 else -q / specmass
+        ex = np.concatenate([[0.0], e])
+        xv = np.concatenate([[0.0], xs])
+        imax, xsmax = 0, 0.0
+        for n in range(1, len(ex)):
+            if xv[n] > xsmax:
+                imax, xsmax = n, xv[n]
+        emax = ex[imax] if imax else 0.0
+        half = 0.5 * xsmax
+        eh1 = eh2 = 0.0
+        for n in range(1, len(ex)):
+            if xv[n - 1] < half <= xv[n]:
+                eh1 = _pol1(xv[n - 1], xv[n], ex[n - 1], ex[n], half)
+            if xv[n - 1] > half >= xv[n]:
+                eh2 = _pol1(xv[n - 1], xv[n], ex[n - 1], ex[n], half)
+                break
+        width = eh2 - eh1 if (eh1 > 0.0 and eh2 > 0.0) else 0.0
+        rows.append((int(o.Ztarget), int(o.Atarget), f"xs{code}.tot", ethr, emax, xsmax, width))
+    head = (f"# {PARSYM[int(cas.k0)]} + {_nuc(int(o.Ztarget), int(o.Atarget))}: Statistical analysis of cross "
+            "sections\n# Z   A     channel    E-thresh.   Emax     xsmax    width \n")
+    text = head + "".join(f"{z:4d}{a:4d} {f:15s}{t:8.3f}{em:8.3f}{_es(x)}{w:10.3f}\n" for z, a, f, t, em, x, w in rows)
+    return {"rows": rows, "text": text}
+
+
+def _cas_ix(code: str) -> tuple[int, int]:
+    """(Zix, Nix) of the residual of exclusive channel `code` (relative to the compound nucleus)."""
+    zix = sum(int(c) * PARZ[t] for t, c in zip(range(1, 7), code))
+    nix = sum(int(c) * PARN[t] for t, c in zip(range(1, 7), code))
+    return zix, nix
+
+
+def _pol1(x1: float, x2: float, y1: float, y2: float, x: float) -> float:
+    """pol1.f90: linear interpolation of y at x between (x1, y1) and (x2, y2)."""
+    return y1 if x2 == x1 else y1 + (x - x1) * (y2 - y1) / (x2 - x1)
+
+
+def _parmass(k: int) -> float:
+    from physics.hf.omp.schrodinger import PARMASS_AMU
+
+    return float(PARMASS_AMU[k])
+
+
+def _es(x: float) -> str:
+    """Fortran es12.5."""
+    m, ex = f"{x:.5E}".split("E")
+    return f"{m}E{int(ex):+03d}".rjust(12)
 
 
 # --------------------------------------------------------------------------------------------- level density
@@ -1119,7 +1313,7 @@ def _history(cas, energies, res=None):
 _POP: dict = {}
 
 
-def _levels_sequence(cas, energies, res, h, nuclei) -> list:
+def _levels_sequence(cas, energies, res, h, nuclei, struct: list | None = None) -> list:
     """levelsout's calls in TALYS's order: structure.f90:75 per built nucleus (outbasic / endf), mainout.f90:154-161
     for target and compound nucleus (outlevels), then per incident energy multiple.f90:76-140 (new residuals' structure
     first, then the compound nucleus with flagpop = outbasic). (zix, nix) list, repeats included.
@@ -1140,6 +1334,8 @@ def _levels_sequence(cas, energies, res, h, nuclei) -> list:
         built.add(zn)
         if on_struct:
             seq.append(zn)
+            if struct is not None:  # KWCOV B15: structure.f90:75-78 also calls gammadecay for this nucleus
+                struct.append(zn)
 
     for typ in range(0, 7):
         if typ != 0 and typ not in inc:
@@ -1201,10 +1397,17 @@ def build(cas, want: dict, energies: list[float], res=None) -> dict:
                 prior, prior_s, order = h.prior_call, h.prior_call_at_structure, list(h.order)
             except Exception:  # noqa: BLE001
                 prior, prior_s, order = frozenset(), frozenset(), []
+            struct: list = []
             try:
-                seq = [(z, n, (z, n) in prior) for z, n in _levels_sequence(cas, energies, res, h, nuclei)]
+                seq = [(z, n, (z, n) in prior) for z, n in _levels_sequence(cas, energies, res, h, nuclei, struct)]
             except Exception:  # noqa: BLE001
                 seq = [(z, n, (z, n) in prior) for z, n in nuclei] if bool(o.flaglevels) else []
+            for zix, nix in struct:  # KWCOV B15: gamma<ZZZAAA>.tot of every nucleus structure builds (outbasic / endf)
+                Z, A = (int(v) for v in cas.zn(zix, nix))
+                if Z < 1 or A <= Z:
+                    continue
+                name, f = gamma_decay_file(cas, zix, nix, (zix, nix) in prior_s)
+                out[name] = f
             block = bool(getattr(o, "flagblocklevels", False))
             names = []
             for zix, nix, pr in seq:
@@ -1226,6 +1429,10 @@ def build(cas, want: dict, energies: list[float], res=None) -> dict:
             out.update(incident_files(cas, energies, bool(want.get("inverse")), bool(want.get("omp")), ing))
         if want.get("kd"):
             out["kd03"] = kd03_table(cas, g)
+        if want.get("endf") and len(energies) > 1:  # endf.f90: `if (Ninc == 1) return`
+            out.update(endf_info(cas, energies, res))
+        if want.get("sacs") and res is not None:
+            out["sacs.dat"] = sacs_table(cas, res)
         if want.get("partable"):
             rows = []
             for zix, nix in partable_order(cas, energies, res):
@@ -1440,8 +1647,10 @@ def write_files(ingout: dict, outdir) -> list[str]:
             text = "".join(_levels_text(ingout[n]) for n in f["sequence"])
         elif name.startswith("levels") and "levels.out" in ingout:
             continue
-        elif name == "parameters.dat":
+        elif name in ("parameters.dat", "tefal.inf", "energies.endf", "sacs.dat"):
             text = f["text"]
+        elif name.startswith("gamma") and name.endswith(".tot"):
+            text = _gammadecay_text(f)
         elif name.startswith("nld"):
             text = _nld_text(f)
         elif name == "kd03":

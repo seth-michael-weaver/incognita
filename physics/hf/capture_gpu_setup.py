@@ -401,6 +401,10 @@ def gamma_pack(Z: int, A: int) -> dict:
         raise Unsupported(f"photon strength model of {Z}-{A + 1}")
     if gp.eadj_e1 or gp.eadj_m1:  # ENGADJ: energy-local strength bumps are evaluated on the CPU paths
         raise Unsupported(f"ENGADJ photon strength bumps on {Z}-{A + 1}")
+    from physics.hf import fidfix
+
+    if fidfix.on("psfsgl"):  # B15: the single-precision table energies live in gamma.parameters.table_arrays (CPU paths)
+        raise Unsupported("INCOGNITA_FIDFIX psfsgl: tabulated photon strength on the CPU paths")
     tab = gp.tables[(1, 1)]
     e_raw = tab.e_raw_mev.numpy()
     if not np.all(np.diff(e_raw[1:]) > 0) or not e_raw[1] > 0.0:

@@ -72,7 +72,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B12 | recoils and LAB frame (DONE, branch `kwcov12`) | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
 | B13 | ingredient outputs (DONE, branch `kwcov13`) | outlevels, blocklevels, outbasic, outtransenergy, blockomp, outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
 | B14 | fission yields and fragment evaporation | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
-| B15 | low value | endf, endfdetail, sacs, legacy, components | endf.cs helpers, sacs.dat, component split | 1 d |
+| B15 | low value (DONE, branch `kwcov15`; components y, densfile/e1file/m1file/massdir, rescuefile/strucpath/bestpath refused; endf.cs ECIS files not given; transpower ported; U-239 E1 fix behind INCOGNITA_FIDFIX=psfsgl) | endf, endfdetail, sacs, legacy, components, micro, transpower | tefal.inf, gamma*.tot, sacs.dat | 1 d |
 | GAP | isomeric (excited) targets | ltarget | everything for an excited target | 3+ d; separate design (the engine refuses `Ltarget /= 0`, structure/levels.py:171; astro/stellar.py already builds excited entrance channels and is the starting point) |
 
 NA keywords (71: `out*`, `file*`, `block*`, paths, labels, ECIS plumbing) stay NA; the observables they gate are
@@ -879,7 +879,7 @@ TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values
 * **Losses, traced.** (1) U-239 E1 (strength 9, temperature-dependent SMLO table) at Egamma = 0.4 and 0.6 MeV on the
   run's grid: port 9.08e-10 / 1.54e-9 vs stock 2.12e-9 / 1.01e-9 MeV^-3; every other energy to 1e-6. It moves psf E1/E2
   (the f column of E2 is f_E1, quirk) and cross_g.tot at those two rows, and the engine's photon transmission there
-  (Tjl(E1) at 0.4 / 0.6 MeV): a port difference in the T-dependent table interpolation, **not fixed** (engine numbers;
+  (Tjl(E1) at 0.4 / 0.6 MeV): a port difference in the T-dependent table interpolation, **not fixed** in B13 (B15: cause = the double-precision table energies; fixed behind `INCOGNITA_FIDFIX=psfsgl`) (engine numbers;
   the U-238 capture was 0.00 % vs stock in FIDELITY1's TALYS mode). (2) KD03 for U-238: talys.out's first neutron
   block is global KD03 (Ef -5.01), the port's `omppar(92, 238)` returns a local entry (Ef -5.48, rv 1.244); the
   run's neutron OMP is RIPL 2408 either way (omppar_n.out agrees to 1e-5), so only the outkd table differs. (3) The CT
@@ -900,7 +900,7 @@ TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values
   densities / levels of every populated compound nucleus (flagpop); spr.opt only at the first energy or Einc <= 0.1;
   transmission_inc.out holds the last energy.
 * **Not given (NA rows / later).** outbasic's gamma*.tot decay schemes (gammadecay), population / check / direct
-  output; JLM `radial.out` (JLM is unported, B7b); `endf y`'s levelsout (B15). The parameters.dat nucleus list uses the
+  output; JLM `radial.out` (JLM is unported, B7b); `endf y`'s levelsout (B15: done). The parameters.dat nucleus list uses the
   run's residual production >= 1e-3 mb for TALYS's population test (keys identical on all four decks).
 * Tests: `tests/hf/test_kwcov_b13.py` (keyword cascade and deck lines, the D0 statistics, one Fe-56 engine run vs
   stock numbers, every other Results array bitwise unchanged, the file round trip, filepsf without outgamma).
@@ -912,10 +912,47 @@ TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values
 `yieldfile`; FF evaporation for nu(A), P(nu), PFNS model 2). Accept: U-235 thermal and U-238 14 MeV Y(A) vs stock
 5 % at the peaks.
 
-### B15 -- low value
+### B15 -- low value (DONE, branch `kwcov15`)
 
-ENDF helper outputs (`endf y`: `endfinfo.f90:1`), `sacs` (`sacs.f90:1`), `legacy`, `components`. Do only after
-everything above.
+Branch `kwcov15` = `kwcov13` (B1-B11, B10b, B13) + `kwcov12` (B12, merged) + `fidelity1`'s fidfix commit
+(cherry-picked, `INCOGNITA_FIDFIX`) + B15. Stock TALYS-2.25 references: `~/kwcov/stock/b15/` (n + Fe-56: `endf y` at
+1/5/14 MeV, `sacs y` at 2-20 MeV with and without channel files, `components y`, and the refused decks' TALYS-error
+lines). Responses by `scripts/kwcov/fidelity.py --response` (`|ln(R/S)|`, worst over channels > 1 mb at 1/5/14 MeV).
+Tests: `tests/hf/test_kwcov_b15.py`.
+
+**Decisions (no questions, recorded).**
+
+| keyword | now | how / why |
+|---|---|---|
+| legacy | SUPPORTED | `defaults.check_values` (called by `reject_unported` at the start of a calculation): without `legacy y`, strength <= 7, strengthM1 not 3/8/10/11/12, ldmodelCN or any (per-nucleus) ldmodel 3/4/6 stop the run with TALYS's own message (checkvalue.f90:803-813, :953-966; stock Fe-56 `strength 1` / `strengthm1 2` / `ldmodel 3` print the same lines). They ran silently before. `legacy y` runs them: Fe-56 `legacy y; strength 1` response 0.60 % default / 0.66 % TALYS mode ((n,np) 14 MeV), `legacy y; ldmodel 3` 1.62 % default / 0.00 % TALYS mode |
+| transpower | SUPPORTED (coordinator item from B14) | was parsed and never reached the cut. Now `translimit = 1/10**transpower` and `transeps` go to every lmax cut of a transmission read (`omp/inverse.set_eps` from `default_options`; `process_tjl`, `schrodinger._lmax_talys`, `dens_reference._lmax_inverseread`), and a non-default pair adds a token to the stage-cache key. Range 2-20 checked (checkvalue.f90:475). Defaults bitwise (1e-5 / 1e-8, key unchanged). U-238 `transpower 10`: stock fission 14 MeV 1270.62 -> 1261.01 mb (-0.76 %), engine TALYS mode 1270.68 -> 1261.07; worst response 0.44 % default / 0.43 % TALYS mode (capture 14 MeV, 1.12 -> 1.11 mb). Fe-56 `transpower 10` / `transeps 1e-12` 0.00 %, `transpower 2` 0.29 % / 0.00 %. `massdis y` (transpower 10, transeps 1e-12) and `astro y` (15, 1e-18) now act through it too |
+| transeps | SUPPORTED | B9 took it to the chain's T cut; B15 adds the lmax cut (above) |
+| endf | SUPPORTED | cascade as before (eninclow from D0, urr y, channels y, adddiscrete 30 MeV, output switches) + structure.f90:75's levelsout and gammadecay for every nucleus structure builds (`ingout.gamma_decay_file`, gamma<ZZZAAA>.tot) + endfinfo.f90's tefal.inf / energies.endf (Ninc > 1). Stock Fe-56 `endf y`: the same 46 files; levels*.out identical, gamma*.tot <= 1e-6 (print), tefal.inf / energies.endf identical. Response Fe-56 0.00 % (both modes), U-238 0.00 % (TALYS mode). **Not given:** endfenergies / endfecis / endfread (ECIS on the ENDF incident grid: endf.cs, endf.tot, endftot.tot, endfel.tot, endfnon.tot) and channelsout's discrete-gamma xs*.gam -- TEFAL inputs, recorded in the observable row (PARTIAL) |
+| endfdetail | SUPPORTED | cascade only (gamdis / channels / filechannels defaults with endf y, tefal.inf's line); Fe-56 `endf y; endfdetail n` response 0.00 % |
+| sacs | SUPPORTED | `ingout.sacs_table` (sacs.dat): on stock's own Fe-56 xs files it is stock's sacs.dat; engine Fe-56 2-20 MeV: channel list, order and thresholds identical, xsmax / FWHM are the engine's default cross sections. Quirk kept: TALYS reads the xs*.tot it wrote, so without channel files (`sacs y` alone) sacs.dat is the header only |
+| components | READ_ONLY_DEFAULT (refused) | `components y`: Fdir / Fpreeq / Fcomp per residual (multiple.f90:649) and the extra xs*.tot / rp*.tot columns are not carried by the port's cascade; refused with a clear message (`defaults.UNPORTED`) |
+| micro | SUPPORTED | `micro y` alone is refused through jlmomp y (JLM, owner B7b); `micro y; jlmomp n` runs ldmodel 7 + autorot: response 0.00 % TALYS mode, **78 % default** ((n,p) 14 MeV: NPWINDOW acts on the ldmodel-7 Fe-56 density; deliberate default, as FIDELITY1) |
+| densfile, e1file, m1file, massdir | READ_ONLY_DEFAULT (refused) | external user tables; kept refused (decision): each needs its own reader path (densitytable.f90:113, gammapar.f90:521 incl. the forced wtable 1 and the strength 1/2/5 table branch, masses.f90:139) |
+| rescuefile, strucpath, bestpath | READ_ONLY_DEFAULT (refused) | were NA and skipped silently; rescuefile renormalises returned cross sections (normalization.f90), the two paths name another database. Deck line refused, best-file line warned |
+
+**Port bug fixed (opt-in, `INCOGNITA_FIDFIX=psfsgl`, default OFF): U-239 E1 at 0.4 / 0.6 MeV (B13 loss (1)).** Cause:
+TALYS holds the tabulated PSF energies in single precision: `qrpa%e = ee + etable` and the wtable stretch
+`Emid + (Eq - Emid) * wt` (gammapar.f90:268, :574-578) are real(sgl), so even at wt = 1 the stretch moves a table
+energy by a few 1e-7 (U-239 smlo2019 Emid 13.1: 0.4 -> 0.39999962, 0.6 -> 0.60000038), and Tqrpa is the
+single-precision running sum of 0.2 steps (gammapar.f90:311-321). The port did both in double (0.40000000000000036 >
+Tqrpa 0.4). At a gamma energy on a table point that equals a Tqrpa temperature, `locate` and fstrength.f90:401-411's
+`eb <= et` / `ee <= et` choice between the temperature column jt and the photoabsorption column went the other way.
+Fix (`gamma/parameters.py` table_arrays + Tqrpa, `fidfix.py`): the energies are TALYS's single-precision values
+(straight-through, the etable / wtable gradients are kept); the GPU capture path refuses under the fix and the CPU
+paths (strength.py, psf_fast.py, nx2 C) read table_arrays. U-239 f_E1: 0.4 MeV 9.08e-10 -> 2.1185e-9 (stock
+2.1185e-9), 0.6 MeV 1.536e-9 -> 1.0096e-9 (stock 1.0096e-9); every other energy moves ~5e-7 relative. Impact (engine,
+U-238, 0.1/0.5/1/5/14 MeV): capture 0.5 MeV 81.32 -> 81.23 mb (-0.11 %) at default, TALYS mode 81.36 (+0.12 % vs
+stock) -> 81.26 (0.00 %); every other cell <= 0.01 % (default fission 5 MeV -0.01 %). More targets in
+FIDELITY_DEFAULTS.md section 6. Turning it on by default is the integration step's call.
+
+**Owners of what is left** (status IGNORED / MISSING after B15): massdis, fymodel, ffmodel, gefran, ffevaporation,
+ffspin (IGNORED), yieldfile (MISSING) -> B14; jlmmode, radialmodel (IGNORED), radialfile (MISSING) -> B7b. Every other
+keyword is SUPPORTED, NA, or refused with a message (READ_ONLY_DEFAULT; `ltarget` -> the isomeric-target gap).
 
 ## Known gap: isomeric targets
 

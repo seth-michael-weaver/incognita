@@ -46,11 +46,42 @@ if TYPE_CHECKING:
 
 TRANSLIMIT_DEFAULT = 1.0e-5  # grid.f90:256 translimit = 1/10**transpower, transpower 5
 TRANSEPS_DEFAULT = 1.0e-8  # input_numerics.f90:80
+#: KWCOV B15: the run's (translimit, transeps) of the lmax cut (inverseread.f90 / incidentread.f90), set from the deck's
+#: `transpower` / `transeps` (and the massdis y / astro y cascades) by input.defaults.default_options -> set_eps
+_EPS: tuple = (TRANSLIMIT_DEFAULT, TRANSEPS_DEFAULT)
+
+
+def set_eps(transpower: int, transeps: float) -> None:
+    """Run-scoped lmax cut: translimit = 1 / 10**transpower (grid.f90:256), transeps (input_numerics.f90:80).
+
+    TALYS: grid.f90:1 (grid) line 256
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    global _EPS
+    _EPS = (1.0 / 10 ** int(transpower), float(transeps))
+
+
+def eps() -> tuple:
+    """(translimit, transeps) of the current run.
+
+    TALYS: grid.f90:1 (grid) line 256, input_numerics.f90:80
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    return _EPS
+
+
+def eps_token():
+    """None at the TALYS defaults (transpower 5, transeps 1e-8: stage keys unchanged), else the pair.
+
+    TALYS: (none -- a cache-key helper)
+    Test: tests/hf/test_kwcov_b15.py
+    """
+    return None if _EPS == (TRANSLIMIT_DEFAULT, TRANSEPS_DEFAULT) else _EPS
 
 
 def process_tjl(
-    tjl: Tensor, particle: int, translimit: float = TRANSLIMIT_DEFAULT,
-    transeps: float = TRANSEPS_DEFAULT,
+    tjl: Tensor, particle: int, translimit: float | None = None,
+    transeps: float | None = None,
 ) -> tuple[Tensor, Tensor, Tensor]:
     """TALYS's processing of the T_lj read from ECIS: fill in the (l+s) value ECIS omits at the
     highest l with the (l-s) one (and vice versa for l > 0), spin-average to T_l, and find lmax,
@@ -61,6 +92,8 @@ def process_tjl(
     TALYS: inverseread.f90:1 (inverseread)
     Test: A-trans
     """
+    translimit = _EPS[0] if translimit is None else translimit  # KWCOV B15: the run's transpower / transeps
+    transeps = _EPS[1] if transeps is None else transeps
     t = tjl.clone()
     nj = NJ[particle]
     L = torch.arange(t.shape[-2], dtype=DTYPE)

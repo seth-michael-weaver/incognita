@@ -54,7 +54,8 @@ ROWS = [
     ("direct / DWBA / giant-resonance / collective components", "direct.tot, talys.out", "directout.f90:1", "outdirect, components",
      "INTERNAL", "direct/chain.py xsdirdisctot, xsgrcoll, xscollconttot", "B4", "r52pool dir-log hook captures them"),
     ("compound / pre-equilibrium components", "talys.out, components", "totalout.f90:1", "components", "INTERNAL",
-     "binary / preeq", "B4", ""),
+     "binary / preeq", "B4", "the xs*.tot / rp*.tot Direct / Preequilibrium / Compound columns of `components y` "
+     "(multiple.f90:649 Fdir/Fpreeq/Fcomp) are not given: components y is refused (B15)"),
     # --- fission ---
     ("fission cross section", "fission.tot", "fissionout.f90:1", "fission", "SUPPORTED", "Results.totals_mb['fission']", "",
      "TALYSworld channel"),
@@ -190,9 +191,17 @@ ROWS = [
     ("model parameter table (TASMAN/covariance input)", "parameters.dat", "partable.f90, finalout.f90, nuclides.f90",
      "partable", "SUPPORTED", "ingout.py (Results.ingout['parameters.dat'])", "B13",
      "test:test_kwcov_b13.py; identical keys, values to f10.5 except the CT matching energies (<= 1.3e-4)"),
-    ("ENDF-6 helper outputs", "endf.cs, *.ang for ENDF", "endfinfo.f90", "endf, endfdetail", "MISSING", "", "B12",
-     "TEFAL input; low value for us"),
-    ("statistical analysis of cross sections", "sacs.dat", "sacs.f90:1", "sacs", "MISSING", "", "B12", ""),
+    ("ENDF-6 helper outputs", "tefal.inf energies.endf; endf.cs endf.tot endftot.tot endfel.tot endfnon.tot; xs*.gam",
+     "endfinfo.f90, endfenergies.f90, endfecis.f90, endfread.f90, channelsout.f90:400", "endf, endfdetail", "PARTIAL",
+     "ingout.py endf_info (Results.ingout['tefal.inf', 'energies.endf'])", "B15",
+     "test:test_kwcov_b15.py; tefal.inf / energies.endf identical to stock (Fe-56). Not given: the ECIS runs on the "
+     "ENDF incident grid (endf.cs, endf*.tot) and the discrete-gamma xs*.gam files (TEFAL inputs)"),
+    ("cumulative discrete gamma decay", "gamma<ZZZAAA>.tot", "gammadecay.f90:1", "endf, outbasic", "SUPPORTED",
+     "ingout.py gamma_decay_file (Results.ingout)", "B15",
+     "test:test_kwcov_b15.py; every nucleus structure builds; stock Fe-56 endf y: 22 files <= 1e-6"),
+    ("statistical analysis of cross sections", "sacs.dat", "sacs.f90:1", "sacs", "SUPPORTED",
+     "ingout.py sacs_table (Results.ingout['sacs.dat'])", "B15",
+     "test:test_kwcov_b15.py; on stock's xs files = stock sacs.dat; header only without channel files, as stock"),
     # --- projectiles ---
     ("charged-particle induced reactions (p d t h a)", "all", "", "projectile", "PARTIAL", "projectile.py (INCOGNITA_CPINC)", "",
      "ported, behind env switch"),

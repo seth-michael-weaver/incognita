@@ -631,6 +631,10 @@ def gamma_parameters(
     tq = None
     if n_t > 1 and (1, 1) in tables:  # gammapar.f90:250-262: Tqrpa only set on a table hit
         tq = np.arange(n_t) * 0.2
+        from physics.hf import fidfix  # B15 `psfsgl` (default OFF): TALYS's single-precision Tqrpa grid
+
+        if fidfix.on("psfsgl"):
+            tq = fidfix.tqrpa_sgl(n_t, 0.2)
 
     # gammapar.f90:275-300 -- M1 systematics
     if strengthM1 <= 2 or strengthM1 == 4:
@@ -953,6 +957,11 @@ def table_arrays(gp: GammaParameters, irad: int, l: int) -> tuple[Tensor, Tensor
     e = tab.e_raw_mev + et
     e = torch.cat([tab.e_raw_mev[:1], e[1:]])  # index 0 is never read, stays 0
     f = tab.f_raw_mev3 * ft
+    from physics.hf import fidfix  # B15 `psfsgl` (default OFF): the energies as TALYS holds them, in single precision
+
+    sgl = fidfix.on("psfsgl")
+    if sgl:
+        e = fidfix.sgl_straight(e, torch.cat([e[:1], fidfix.f32(fidfix.f32(tab.e_raw_mev[1:]) + fidfix.f32(et))]))
     if not gp.flagpsfglobal:
         wt = gp.wtable[irad, l]
         f0 = f[1:, 0]
@@ -962,7 +971,11 @@ def table_arrays(gp: GammaParameters, irad: int, l: int) -> tuple[Tensor, Tensor
             imax = gp.e1_imax
         if imax is not None:
             emid = e[imax]
-            e = torch.cat([e[:1], emid + (e[1:] - emid) * wt])
+            stretched = emid + (e[1:] - emid) * wt
+            if sgl:  # gammapar.f90:574-578 in real(sgl): Emid + (Eq - Emid) * wt rounds even at wt = 1
+                f32 = fidfix.f32
+                stretched = fidfix.sgl_straight(stretched, f32(f32(emid) + f32(f32(f32(e[1:]) - f32(emid)) * f32(wt))))
+            e = torch.cat([e[:1], stretched])
     return e, f
 
 
