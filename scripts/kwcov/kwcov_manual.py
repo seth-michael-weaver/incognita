@@ -12,7 +12,12 @@ NA_WORDS = frozenset({
 _F = "input/fitlib.py "
 _T = "test:test_kwcov_b2.py"
 _FITLOSS = ("fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: "
-            "gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %); B5/B7")
+            "gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %). B5 traced both "
+            "to the engine's DEFAULT 14 MeV (n,p)/(n,a) excess, not to the keywords: cstrip a moves (n,a) by the same "
+            "mb as stock (9.59 vs 9.63 mb, 0.4 %; the % differs because the engine's (n,a) is 11 % higher); gadjust "
+            "acts only through pre-equilibrium (with `preequilibrium 20` neither side moves) and the flux it hands "
+            "back to the compound nucleus decays into protons more in the engine (compound-only (n,p) 151.5 vs 131.5 "
+            "mb). Fixing that changes defaults: a fidelity task, not a keyword batch")
 #: KWCOV B2 rows (docs/hf/COVERAGE_PLAN.md B2 has the full table)
 B2: dict = {
     "best": ("SUPPORTED", _F + "_deck_best (= INCOGNITA_TALYS_FIT=best, cards identical; Fe-56 engine bitwise)",
@@ -56,13 +61,89 @@ B2: dict = {
                "Fe-56 `isomer 0.001` 0.0 % both sides", "test:test_chanobs.py,test_resiso.py,test_kwcov_b2.py"),
     "ldmodel": ("SUPPORTED", "input/defaults.py Options.ldmodel_of (global + `ldmodel v Z A`) -> density/*, gamma/*",
                 "per-nucleus form since B2: Fe-56 `ldmodel 2 26 57` 0.99 %; U-238 `ldmodel 1 92 238` LOSS (n,2n) 14 MeV "
-                "3.1 % (a 51 % move), capture 1.1 %", "test:test_defaults.py,test_density.py,test_kwcov_b2.py"),
+                "3.1 % (a 51 % move), capture 1.1 %. B5: the keyword is exact (with it, (n,2n) 14 MeV engine 1537.6 vs "
+                "stock 1540.8 mb, 0.2 %); the loss is the DEFAULT run's own 14 MeV disagreement ((n,2n) -3.3 %, fission "
+                "+4 %). Global `ldmodel 2` on Fe-56: 2.85 % ((n,a) 14 MeV, the same default (n,a) excess)",
+                "test:test_defaults.py,test_density.py,test_kwcov_b2.py"),
     "colenhance": ("SUPPORTED", "input/defaults.py Options.flagcol_of (global + `colenhance y Z A`) -> density/*",
                    "per-nucleus form since B2: Fe-56 `colenhance y 26 57` 0.31 %", "test:test_defaults.py,test_kwcov_b2.py"),
     "energy": ("SUPPORTED", "input/energies.py read_energies, input/deck.py read_deck/run_deck",
                "single, `E1 E2 dE` range (dE 0 = 10 points), file, and pre-defined `n0-20.grid` grids, equal to "
                "TALYS's own `energies` files", _T),
 }
+_T5 = "test:test_kwcov_b5.py"
+_R5 = "scripts/kwcov/b5_response.py"
+#: KWCOV B5 rows (docs/hf/COVERAGE_PLAN.md B5 has the full table); response = |ln(R/S)| max, stock > 1 mb, 1/5/14 MeV
+B5: dict = {
+    "tjadjust": ("SUPPORTED", "input/fitlib.py _split (class 12 `tjadjust Z A <p> v`) -> Params.TJadjust",
+                 "TALYS-2.25 BUG: a constant tjadjust never acts (comptarget.f90:331 / multiple.f90:429 scale by "
+                 "`adjust`'s factor, which has no entry for it; TJadjust is read nowhere; stock Fe-56 `tjadjust 26 57 p "
+                 "1.5`: 0.0 %). Read, warned, inert, as stock. The `Ea Eb Em D` / file forms (which act: stock (n,p) "
+                 "+24 %) are REFUSED", _T5),
+    "rgamma": ("SUPPORTED", "input/defaults.py Params.Rgamma -> preeq/exciton.py:318",
+               "Fe-56 `rgamma 4` 0.82 % (stock capture 14 MeV +63 %)", _T5),
+    "cknock": ("SUPPORTED", "input/defaults.py Params.Cknock -> preeq/complex.py:354 (knockout.f90:158)",
+               "Fe-56 n `cknock a 2`, `cknock n 2`: stock and engine 0.0 % (no knockout cross section survives for an "
+               "incident neutron)", _T5),
+    "esurf": ("SUPPORTED", "input/defaults.py Params.Esurf0 -> preeq/exciton.py:231", "Fe-56 `esurf 20` 0.28 % "
+              "(stock (n,d) -3.9 %)", _T5),
+    "pshiftadjust": ("SUPPORTED", "input/defaults.py Params.Pshiftadjust -> density/parameters.py, density/ld_nx2.py",
+                     "Fe-56 `pshiftadjust 26 57 0.5` 0.01 % (stock moved 0.4 %)", _T5),
+    "pshiftconstant": ("SUPPORTED", "input/fitlib.py (global form, input_densitypar.f90:444) -> density/*",
+                       "global form now read (was refused as unparsable); acts only where Pshift is not in the ld "
+                       "parameter file: Fe-56 `ldmodel 2; pshiftconstant 1.5` 0.0 % on both sides. A per-nucleus card "
+                       "beats the global form here, while TALYS's global form overwrites every cell", _T5),
+    "spradjust": ("SUPPORTED", "input/fitlib.py GAMMA_FIELDS -> gamma/parameters.py:914",
+                  "Fe-56 `spradjust 26 57 2.0 m1` 0.00 % (stock moved 4.6 %)", _T5),
+    "popmev": ("SUPPORTED", "input/defaults.py Options.flagpopMeV (inert)", "acts only on a population input "
+               "(excitation.f90, projectile 0), which the port does not run: inert in TALYS too", _T5),
+    **{k: ("SUPPORTED", "input/defaults.py Params." + v + " (inert)", "acts only with `pseudoresonances y` "
+           "(levels.f90:348), which is refused (structure/levels.py)", _T5)
+       for k, v in (("emaxpseudores", "Emaxpseudores"), ("pseudoreswidth", "pseudoreswidth"),
+                    ("pseudoresfade", "pseudoresfade"))},
+    "ntop": ("SUPPORTED", "input/defaults.py Options.ntop_of (`ntop Z A n [ibar]`) -> density/parameters.py, ld_nx2.py",
+             "Fe-56 `ntop 26 56 6` 0.77 % (stock moved 29 %), `ntop 26 57 8` 0.92 % (38 %)", _T5),
+    "nlow": ("SUPPORTED", "input/defaults.py Options.nlow_of (`nlow Z A n [ibar]`) -> density/parameters.py, ld_nx2.py",
+             "Fe-56 `nlow 26 56 3` 0.05 % (stock moved 1.5 %)", _T5),
+    "skipcn": ("SUPPORTED", "input/defaults.py Options.skipcn_of -> emission/feeding.py, multiple.py (C cascade -> "
+               "Python walk)", "multiple.f90:262: the nucleus keeps what it is fed, never decays. Fe-56 `skipcn 26 56` "
+               "LOSS 9.4 % on (n,np) 14 MeV (stock moved 105 %; every other channel 0.0 %): what is left of (n,np) "
+               "goes through Mn-56, i.e. the engine's default (n,p) excess at 14 MeV (+12 %)", _T5),
+    "maxzrp": ("SUPPORTED", "input/defaults.py Options.maxZrp (inert)", "acts only with `rpevap y` (multiple.f90:270), "
+               "which is refused", _T5),
+    "maxnrp": ("SUPPORTED", "input/defaults.py Options.maxNrp (inert)", "acts only with `rpevap y` (multiple.f90:270), "
+               "which is refused", _T5),
+    "rpevap": ("READ_ONLY_DEFAULT", "input/defaults.py UNPORTED", "rpevap y REFUSED: residual-product evaporation "
+               "(rpevap.f90) is not ported", _T5),
+    "levelfile": ("SUPPORTED", "input/defaults.py Options.levelfile_of -> structure/levels.py, files.level_records",
+                  "deck `levelfile Z <file>` (path keeps its case; relative to the deck's directory): Fe-56 with the "
+                  "2+ level moved to 0.95 MeV 0.02 % (stock moved 38 %); a missing file stops the run, as TALYS. A "
+                  "best file's own levelfile line (Mo-95/97) is still left out with a warning", _T5),
+    "deformfile": ("SUPPORTED", "input/defaults.py Options.deformfile_of -> structure/deformation.py",
+                   "Fe-56 beta2(2+) 0.239 -> 0.30: 0.06 % (stock moved 2.6 %). Best-file lines (Hf-174..180) still "
+                   "left out with a warning", _T5),
+    **{k: ("MISSING", "input/fitlib.py _SKIP (refused on a deck line)", "external " + w + " file not read: a deck "
+           "line with it is REFUSED (was skipped silently)", _T5)
+       for k, w in (("densfile", "level-density table"), ("e1file", "E1 strength"), ("m1file", "M1 strength"),
+                    ("massdir", "mass-table directory"))},
+    "sfth": ("SUPPORTED", "input/fitlib.py (class 15, value first) -> direct/capture.py spectroscopic_factors",
+             "reaches the racap structure since B5 (it took the defaults); Au-197 / Fe-56 / Zr-90 racap.tot: 0.0 % on "
+             "both sides (the continuum factor does not move xs(dir. cap.))", _T5),
+    "sfexp": ("SUPPORTED", "input/fitlib.py (class 15, value first) -> direct/capture.py spectroscopic_factors",
+              "Au-197 racap.tot `sfexp 0.5` and `sfexp 0.5 79 198 0`: 0.00 % (stock -1.6 % at 1 keV)", _T5),
+    "ldmodelracap": ("READ_ONLY_DEFAULT", "direct/racapcalc.py mode", "3 only (the port's racap level density); 1/2 "
+                     "REFUSED when direct capture is on, inert otherwise (as TALYS)", _T5),
+    "racap": ("SUPPORTED", "direct/racapcalc.py mode (deck `racap y|n` wins over INCOGNITA_DIRECT_CAPTURE)",
+              "a deck `racap y` was read and ignored; now it is TALYS-2.25's: exactly 0 mb without `optmodall y` "
+              "(stock Au-197: capture 0.0 %; structure.f90:85 defect, warned), and `optmodall y` is refused, so the "
+              "racapcalc model runs only through INCOGNITA_DIRECT_CAPTURE (the KD03 well stock builds under "
+              "optmodall y)", "test:test_directcap.py,test_kwcov_b5.py"),
+    "optmodall": ("READ_ONLY_DEFAULT", "input/defaults.py UNPORTED", "WAS SILENTLY IGNORED (no engine code reads "
+                  "flagompall; the old SUPPORTED came from comments): stock Au-197 1 MeV `optmodall y` capture +93 %, "
+                  "inelastic -38 %, engine 0.0 %. Now REFUSED; port in B6", _T5),
+}
+
+
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -85,10 +166,9 @@ MANUAL: dict = {
               "astro y also resets numerics (transpower 15, xseps 1e-17): that cascade IS honoured in default_options"),
     # --- KWCOV B2 (2026-11-08): deck wiring; response vs stock = scripts/kwcov/b2_response.py, |ln(R/S)| max ---
     **B2,
+    **B5,
     "channels": ("SUPPORTED", "structure/scalars.py:144", "exclusive channels are always computed (flagchannels "
                  "hard-wired on); `channels n` has no effect, which is harmless", "manual"),
-    "racap": ("SUPPORTED", "direct/capture.py, direct/racapcalc.py (INCOGNITA_DIRECT_CAPTURE)",
-              "direct capture added to (n,g) when INCOGNITA_DIRECT_CAPTURE is set; verify keyword-alone path", "test:test_directcap.py"),
     "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete "
              "30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"),
     "micro": ("IGNORED", "input/defaults.py", "cascade honoured (ldmodel 7, jlmomp y -> refused, autorot y)"),

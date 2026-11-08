@@ -1480,6 +1480,7 @@ class Cascade:
                 n = sp.maxex + 1
                 out[(zc, nc)] = NucleusPopulation(
                     skipcn=zc > zcap or nc > ncap,  # FLUXCLOSE A: a terminal residual (booked, not decayed)
+                    skipdeck=self.options.skipcn_of(zc, nc),  # KWCOV B5: a `skipcn Z A` card
                     zcomp=zc, ncomp=nc, Z=sp.Z, A=sp.A, maxex=sp.maxex, nlast=sp.nlast_grid,
                     ex_mev=torch.as_tensor(sp.ex_mev, dtype=DTYPE),
                     dex_mev=torch.as_tensor(sp.dex_mev, dtype=DTYPE),

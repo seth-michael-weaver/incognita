@@ -466,6 +466,37 @@ class Options:
                 return v
         return self.flagcolall
 
+    def nlow_of(self, Zix: int, Nix: int, ibar: int = 0) -> int:
+        """KWCOV B5: Nlow(Zix, Nix, ibar), the first discrete level of the level-density matching: the
+        `nlow Z A n [ibar]` card, else the global default (-1 = resolved by densitypar.f90:344-355)."""
+        if self.pernuc:
+            for k, z, n, v in self.pernuc:
+                if k == "nlow" and z == Zix and n == Nix and v[0] == ibar:
+                    return v[1]
+        return self.nlow_default
+
+    def ntop_of(self, Zix: int, Nix: int, ibar: int = 0) -> int:
+        """KWCOV B5: Ntop(Zix, Nix, ibar), the last discrete level of the matching (`ntop Z A n [ibar]`)."""
+        if self.pernuc:
+            for k, z, n, v in self.pernuc:
+                if k == "ntop" and z == Zix and n == Nix and v[0] == ibar:
+                    return v[1]
+        return self.ntop_default
+
+    def levelfile_of(self, Zix: int) -> str | None:
+        """KWCOV B5: levelfile(Zix), a `levelfile Z <file>` card: the discrete-level file read for every isotope of
+        element Zinit - Zix instead of levels/<disctable>/<Sym>.lev (levels.f90:137-145), or None."""
+        return self._pernuc("levelfile", Zix, -1) if self.pernuc else None
+
+    def deformfile_of(self, Zix: int) -> str | None:
+        """KWCOV B5: deformfile(Zix), a `deformfile Z <file>` card (deformpar.f90:128-131), or None."""
+        return self._pernuc("deformfile", Zix, -1) if self.pernuc else None
+
+    def skipcn_of(self, Zix: int, Nix: int) -> bool:
+        """KWCOV B5: skipCN(Zix, Nix) = 1 from a `skipcn Z A` card: the nucleus keeps what it is fed and is
+        never decayed (multiple.f90:262)."""
+        return bool(self.pernuc) and self._pernuc("skipcn", Zix, Nix) is not None
+
     def nlev_of(self, Zix: int, Nix: int) -> int:
         """nlev(Zix, Nix): nlevmax for the target, else the per-nucleus `nlevels Z A n` card, else
         nlevbin(type) for the first residual reached by each ejectile, nlevmaxres elsewhere
@@ -1067,9 +1098,14 @@ def _apply_ejectiles(o: dict, value) -> None:
 #: KWCOV B2: Options keywords with a per-nucleus / per-particle deck form, and its getvalues class
 #: (getvalues.f90): class 14 `ldmodel v Z A`, class 13 `colenhance y Z A`, class 2 `nlevels Z A n`,
 #: class 7 `maxlevelsbin <p> n`. An override key carries the indices: {"ldmodel 26 57": 2}.
-PER_FORMS = {"ldmodel": 14, "colenhance": 13, "nlevels": 2, "maxlevelsbin": 7, "branch": 0}
+PER_FORMS = {"ldmodel": 14, "colenhance": 13, "nlevels": 2, "maxlevelsbin": 7, "branch": 0,
+             # KWCOV B5: class 4 `nlow Z A n [ibar]`, `ntop Z A n [ibar]` (input_densitypar.f90:318-329; the key
+             # carries ibar, 0 when absent) and getvalues class 0 `skipcn Z A` (input_compoundmodel.f90:158)
+             "nlow": 4, "ntop": 4, "skipcn": 40,
+             # KWCOV B5: class 10 `levelfile Z <file>`, `deformfile Z <file>` (input_levels.f90:222-233), per element
+             "levelfile": 10, "deformfile": 10}
 #: index words of each form's key ("branch Z A ilev0"; the value is "nbr ilev1 br1 ...")
-_FORM_NIDX = {14: 2, 13: 2, 2: 2, 7: 1, 0: 3}
+_FORM_NIDX = {14: 2, 13: 2, 2: 2, 7: 1, 0: 3, 4: 3, 40: 2, 10: 1}
 
 
 def _split_forms(ov: dict) -> tuple[dict, list]:
@@ -1078,7 +1114,7 @@ def _split_forms(ov: dict) -> tuple[dict, list]:
     for k, v in ov.items():
         w = k.split()
         if len(w) == 1:
-            if k in PER_FORMS and PER_FORMS[k] in (0, 2, 7):
+            if k in PER_FORMS and PER_FORMS[k] in (0, 2, 4, 7, 40, 10):
                 raise ValueError(f"{k}: needs its per-nucleus / per-particle form, got {v!r}")
             plain[k] = v
             continue
@@ -1120,8 +1156,16 @@ def _apply_forms(forms: list, o: dict, order: dict, ov: dict) -> None:
                     " ".join((kw,) + idx), -1):
                 nb[t] = o["nlevmax"]
             continue
+        if kw in ("levelfile", "deformfile"):  # KWCOV B5: per element, Zix = Zinit - Z (getvalues.f90:228-233)
+            zix = zinit - int(idx[0])
+            if not 0 <= zix <= NUMZ:
+                warnings.warn(f"TALYS-warning: {kw} Z={idx[0]} out of range, keyword ignored (as TALYS does)",
+                              stacklevel=3)
+                continue
+            per[(kw, zix, -1)] = str(v)
+            continue
         iz, ia = int(idx[0]), int(idx[1])
-        if 1 <= PER_FORMS[kw] <= 5 and iz <= 2 and ia <= 4:  # getvalues.f90: (Zix, Nix) given directly
+        if (1 <= PER_FORMS[kw] <= 5 or PER_FORMS[kw] == 40) and iz <= 2 and ia <= 4:  # getvalues.f90: (Zix, Nix) given directly
             zix, nix = iz, ia - iz
         else:
             zix, nix = zinit - iz, ninit - (ia - iz)
@@ -1137,6 +1181,15 @@ def _apply_forms(forms: list, o: dict, order: dict, ov: dict) -> None:
             warnings.warn(f"branch {' '.join(idx)} {v}: TALYS-2.25 drops `branch` lines (strucinitial.f90:325 "
                           "resets nbranch after the input); the run is TALYS's, without it. `bestbranch y` "
                           "is read after that reset and does act", stacklevel=3)
+            continue
+        if kw in ("nlow", "ntop"):  # KWCOV B5: one value per (Zix, Nix, ibar)
+            ibar = int(idx[2])
+            if not 0 <= ibar <= NUMBAR:
+                raise ValueError(f"{kw}: barrier {ibar} outside 0..{NUMBAR}")
+            per[(kw, zix, nix, ibar)] = (ibar, int(v))
+            continue
+        if kw == "skipcn":
+            per[(kw, zix, nix)] = 1
             continue
         per[(kw, zix, nix)] = _yn(v) if kw == "colenhance" else int(v)
     o["nlevbin"] = tuple(nb)
@@ -1218,6 +1271,12 @@ UNPORTED = (
     ("parinclude", lambda v: not all(v), "ejectiles <subset>: skipping outgoing particles (parskip) reaches only the "
      "channel bookkeeping, not the compound / pre-equilibrium decay, so the run returned the all-ejectile numbers "
      "(Fe-56 `ejectiles g n p` 14 MeV: stock (n,2n) +3.4 %, (n,p) +3.1 %, engine 0.0 %; KWCOV B2 2026-11-08)"),
+    ("flagompall", lambda v: bool(v), "optmodall y: a separate optical model for every nucleus of the cascade "
+     "(structure.f90:85, basicxs per nucleus). No engine code reads the switch: the run kept the one OMP set "
+     "of optmodall n (stock Au-197 1 MeV: capture +93 %, inelastic -38 %; engine 0.0 %; KWCOV B5 2026-11-08, B6)"),
+    ("flagrpevap", lambda v: bool(v), "rpevap y: evaporation of the residual products past maxZrp/maxNrp "
+     "(rpevap.f90, rp*.ex population files) is not ported; the run would have decayed them in the cascade instead "
+     "(KWCOV B5 2026-11-08)"),
     ("flaggnorm", lambda v: bool(v), "gnorm y: normalise the E1 strength to the measured <Gamma_gamma>. "
      "gamma.transmission.radwidtheory has the iteration but no calculation calls it, so the run was "
      "identical to gnorm n (223 nuclides, 2026-09-22); scale the strength with `ftable Z A f` instead"),

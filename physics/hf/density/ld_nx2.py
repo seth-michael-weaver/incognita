@@ -498,8 +498,8 @@ def _densitypar_floats(Z, A, options, params, masses, levels, deformation, bar, 
     Pshift = pf("pshift", 0)
     ctable = pf("ctable", 0)
     ptable = pf("ptable", 0)
-    Nlow = options.nlow_default
-    Ntop = options.ntop_default
+    Nlow = options.nlow_of(Zix, Nix)  # KWCOV B5: `nlow Z A n` / `ntop Z A n` cards (ibar 0)
+    Ntop = options.ntop_of(Zix, Nix)
     ldparexist = False
     if found:
         ldparexist = True

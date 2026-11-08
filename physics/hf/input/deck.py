@@ -70,7 +70,9 @@ def read_deck(text: str, cwd: str | os.PathLike = ".") -> Deck:
         else:
             if k == "estop":
                 estop = float(w[1])
-            rest.append(s.lower() if k not in ("bestfile",) else " ".join([k] + w[1:]))
+            if k in ("levelfile", "deformfile") and len(w) == 3 and not os.path.isabs(w[2]):
+                w = w[:2] + [str(Path(cwd) / w[2])]  # KWCOV B5: TALYS opens it in its working directory
+            rest.append(s.lower() if k not in ("bestfile", "levelfile", "deformfile") else " ".join([k] + w[1:]))
     for k, v in (("projectile", proj), ("element", elem), ("mass", mass), ("energy", energy)):
         if v is None:
             raise ValueError(f"TALYS-error: {k} must be given")

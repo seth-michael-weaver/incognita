@@ -60,7 +60,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B2 | deck wiring of what exists (DONE, branch `kwcov2`) | best, bestend, bestbranch, bestfile, fit, ngfit, nnfit, nffit, nafit, ndfit, pnfit, gnfit, dnfit, anfit, macsfit, gamgamfit, ejectiles, maxlevelsbin, maxlevelsres, nlevels, estop, liso, isomer (check), per-nucleus forms of ldmodel/colenhance, `energy E1 E2 dE` | CHANOBS default decision | 1-1.5 d |
 | B3 | angular distributions on TALYS keywords | outangle, outlegendre, fileelastic, fileangle, angles, anglescont, cpang | elastic/inelastic ang + leg, Rutherford ratio (charged), compound ang. for charged particles | 1.5-2 d |
 | B4 | spectra, DDX, gamma lines on TALYS keywords | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
-| B5 | model keyword sweep: compound, gamma, levels, LD | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
+| B5 | model keyword sweep: compound, gamma, levels, LD (DONE, branch `kwcov5`) | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
 | B6 | model keyword sweep: optical model, direct | vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
 | B7 | unported model branches (now refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
 | B7b | JLM and folding alpha OMP | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
@@ -190,19 +190,62 @@ batches above.
 * Accept: Fe-56 14 MeV n and p spectra (energy-integrated within 2 % of `nprod`, shape 5 % per bin above 1 mb/MeV),
   DDX at 30/90/150 degrees, the 846.8 keV Fe-56 line vs stock 2 %.
 
-### B5 -- model keywords: compound, gamma, levels, level densities
+### B5 -- model keywords: compound, gamma, levels, level densities (done on branch `kwcov5`)
 
-Read in `defaults.py` today but nothing uses them. Where TALYS consumes each: `tjadjust` comptarget.f90 and
-multiple.f90; `rgamma` emissionrate.f90; `cknock` knockout.f90; `esurf` preeq.f90; `pshiftadjust` densitypar.f90;
-`spradjust` fstrength.f90; `popmev` excitation.f90; `emaxpseudores`/`pseudores*` pseudo_resonance.f90;
-`ntop`/`nlow` densitymatch.f90; `densfile` densitytable.f90; `e1file`/`m1file` (convert.f90 + fstrength);
-`skipcn`, `maxzrp`, `maxnrp`, `rpevap` multiple.f90; `branch` branching.f90; `levelfile` levels.f90;
-`deformfile` deformpar.f90; `sfth`, `sfexp`, `ldmodelracap` racapinit.f90.
-Accept: response metric, one deck per keyword family (Fe-56 for CN/LD/gamma, Au-197 for racap at 1 keV-1 MeV).
-Anything not done by the end of the batch goes to `defaults.UNPORTED` so it refuses instead of being ignored.
+* **Wired** (default-off; Fe-56 611 and U-238 692 `Results` arrays bitwise with nothing set, `test_engine_c.py`):
+  `nlow`/`ntop Z A n [ibar]` (`Options.nlow_of`/`ntop_of` -> `density/parameters.py`, `ld_nx2.py`; they were
+  skipped); `skipcn Z A` (`Options.skipcn_of`: the Python walk does not decay the nucleus, multiple.f90:262; the C
+  cascade hands such a run to it); `levelfile Z <file>`, `deformfile Z <file>` (deck lines keep the file name's case,
+  relative to the deck's directory; a missing level file stops the run as TALYS does; a best file's own lines,
+  Mo-95/97, Hf-174..180, are still left out with a warning); the global form of `pshiftconstant`; `sfth v [Z A]`,
+  `sfexp v [Z A ilev]` (class 15, value first) now reach the direct-capture structure, which took the defaults;
+  `racap y|n` on a deck (it was read and ignored; it now wins over `INCOGNITA_DIRECT_CAPTURE`).
+* **Already acting, now tested:** `rgamma`, `esurf`, `cknock`, `pshiftadjust`, `spradjust` (the inventory's grep missed
+  them: they are read under their keyword names through `Params.at`).
+* **TALYS-2.25 behaviour reproduced, with a warning:** a constant `tjadjust Z A <p> v` never acts (comptarget.f90:331
+  and multiple.f90:429 use `adjust`'s factor, which has no entry for a constant line; `TJadjust` is read nowhere;
+  stock Fe-56 0.0 %); `racap y` without `optmodall y` gives exactly 0 mb (the final-state well is never built,
+  structure.f90:85; stock Au-197 capture 0.0 %).
+* **Inert, as in TALYS:** `maxzrp`/`maxnrp` (only with `rpevap y`), `popmev` (only with a population input,
+  projectile 0), `emaxpseudores`/`pseudoreswidth`/`pseudoresfade` (only with `pseudoresonances y`, refused).
+* **Refused:** `rpevap y`, `optmodall y` (`defaults.UNPORTED`); `ldmodelracap` 1/2 with direct capture on; the
+  `Ea Eb Em D` / file forms of `tjadjust`; `densfile`, `e1file`, `m1file`, `massdir` (external files, refused on a
+  deck line). **Deck lines with a keyword the port does not know are now refused**; before B5 they were skipped
+  without a word (every MISSING row, 36 keywords, was silently accepted on a deck). Output switches, paths and
+  labels (the NA rows: `out*`, `file*`, `block*`, `partable`, ...) stay accepted and change nothing.
+* **Bug found (B6):** `optmodall y` was SUPPORTED in the matrix (the grep hit comments) but no engine code reads
+  `flagompall`: stock Au-197 1 MeV capture +93 %, inelastic -38 %, engine 0.0 %. Refused until B6 ports it.
+* **Response vs stock** (`scripts/kwcov/b5_response.py`, n + target at 1/5/14 MeV; `racap` subcommand: racap.tot
+  `xs(dir. cap.)` of stock `racap y optmodall y` vs `racapcalc.direct_capture_mb`; limit 2 %):
+
+  | deck lines | target | worst (stock moved) | | deck lines | target | worst (stock moved) |
+  |---|---|---|---|---|---|---|
+  | rgamma 4 | Fe-56 | 0.82 % (63 %) | | ntop 26 56 6 | Fe-56 | 0.77 % (29 %) |
+  | esurf 20 | Fe-56 | 0.28 % (4.0 %) | | ntop 26 57 8 | Fe-56 | 0.92 % (38 %) |
+  | pshiftadjust 26 57 0.5 | Fe-56 | 0.01 % (0.4 %) | | nlow 26 56 3 | Fe-56 | 0.05 % (1.5 %) |
+  | spradjust 26 57 2.0 m1 | Fe-56 | 0.00 % (4.6 %) | | levelfile 26 (2+ at 0.95 MeV) | Fe-56 | 0.02 % (38 %) |
+  | cknock a 2, cknock n 2 | Fe-56 | 0.00 % (0 %) | | deformfile 26 (beta2 0.30) | Fe-56 | 0.06 % (2.6 %) |
+  | tjadjust 26 57 p 1.5 | Fe-56 | 0.00 % (0 %) | | racap y | Au-197 | 0.00 % (0 %) |
+  | ldmodel 2; pshiftconstant 1.5 | Fe-56 | = ldmodel 2 (0 %) | | sfexp 0.5 (racap.tot) | Au-197 | 0.00 % (1.6 %) |
+  | **skipcn 26 56** | Fe-56 | **9.4 %** (n,np) 14 MeV (105 %) | | sfth 0.5 / 0.01 (racap.tot) | Fe-56, Zr-90, Au-197 | 0.00 % (0 %) |
+
+  Loss, traced: with Fe-56 skipped, what is left of (n,np) is the Mn-56 path, i.e. the engine's default (n,p) excess at
+  14 MeV (139.9 vs 124.8 mb); every other channel 0.0 %.
+* **B2's open losses, traced (not keyword bugs, so not fixable here without moving defaults):**
+  `cstrip a` moves (n,a) by the same millibarns as stock (9.59 vs 9.63 mb, 0.4 %); the 2.2 % is the engine's default
+  (n,a) being 11 % higher at 14 MeV. `gadjust 26 57` acts only through pre-equilibrium (with `preequilibrium 20` both
+  sides are unmoved); the flux it returns to the compound nucleus decays to protons more in the engine (compound-only
+  (n,p) 151.5 vs 131.5 mb): the same default excess. `ldmodel 1 92 238`: with the keyword the engine's (n,2n) at 14 MeV
+  is 1537.6 vs stock 1540.8 mb (0.2 %); the 3.1 % is the default run's own (n,2n) -3.3 % / fission +4 %. Global
+  `ldmodel 2` on Fe-56: 2.85 % ((n,a) 14 MeV), same cause. All four go to a default-fidelity task (14 MeV
+  compound proton/alpha emission, U-238 default level density / fission), which B6/B7 should not mistake for theirs.
+* Tests: `tests/hf/test_kwcov_b5.py` (forms, refusals, inert keywords, racap deck logic, a level file through
+  `discrete_levels`, global vs per-nucleus precedence).
 
 ### B6 -- model keywords: optical model, direct
 
+`optmodall` first (refused since B5: no engine code read it; stock Au-197 1 MeV capture +93 %). Once it acts, the deck
+`racap y; optmodall y` reaches TALYS's own direct-capture path and `racap` can be checked end to end.
 `vinfadjust` opticalnp.f90; `incadjust` ompadjust.f90; the 12 `*adjustf` keywords (`ompadjustF`, opticalcomp.f90,
 opticalnp.f90, `adjustf.f90:1`); `riplomp` omppar.f90 + riplomp_mod.f90; `optmod*`/`ompenergyfile` external OMP
 files (omppar.f90, `convert.f90`); `coulomb`, `ecisstep` incidentecis.f90; `eciscompound` comptarget.f90

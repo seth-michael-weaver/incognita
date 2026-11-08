@@ -409,6 +409,8 @@ def cascade(run: _Run, st, maxz: int, maxn: int, seed: dict, popeps_mb: float, k
             propagated.update(first)
     nuclei = grid_set()
     zcap, ncap = cas.stock_cap()
+    if cas.options.pernuc and any(cas.options.skipcn_of(zc, nc) for zc, nc in nuclei):
+        raise _Unsupported("skipcn cards (KWCOV B5): the Python walk")
     if any(zc > zcap or nc > ncap for zc, nc in nuclei):
         # FLUXCLOSE A: a reachable terminal residual (`skipCN`, multiple.py) is the Python walk's only; a widened
         # window with nothing reachable past the stock cap (Fe-56 Ncomp 29-30) is the stock cascade

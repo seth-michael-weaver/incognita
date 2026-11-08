@@ -185,9 +185,13 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
     # COREX: everything below reads only these values and the level file, so the result is a
     # pure function of them (no target in the key: Zix/Nix only chose gs_j, gs_p, nlev0, risomer)
     brs = options.branches_of(Zix, Nix) if getattr(options, "pernuc", ()) else ()  # KWCOV B2: branch / bestbranch
+    lf = options.levelfile_of(Zix) if getattr(options, "pernuc", ()) else None  # KWCOV B5: `levelfile Z <file>`
+    if lf is not None and not os.path.isfile(lf):
+        raise FileNotFoundError(f"levelfile {options.Zinit - Zix} {lf}: no such file (TALYS stops: levels.f90:150)")
+    lfk = {"levelfile": lf} if lf is not None else {}
     lv = _levels_of_values(int(Z), int(A), gs_j, gs_p, int(nlev0), risomer,
                            int(options.disctable), float(options.isomer_s),
-                           int(options.massmodel), bool(prior_call), levjpar.enabled(), *((brs,) if brs else ()))
+                           int(options.massmodel), bool(prior_call), levjpar.enabled(), *((brs,) if brs else ()), **lfk)
     from physics.hf.structure import ggdeadend
 
     if ggdeadend.enabled() and 0 <= Zix < masses.gsspin.shape[0] and 0 <= Nix + 1 < masses.gsspin.shape[1]:
@@ -196,7 +200,7 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
         # file value by the mass table's only for unassigned spins, levels.f90:200-204)
         parent = _levels_of_values(int(Z), int(A) - 1, float(masses.gsspin[Zix, Nix + 1]),
                                    int(masses.gsparity[Zix, Nix + 1]), 1, 1.0, int(options.disctable),
-                                   float(options.isomer_s), int(options.massmodel), False, levjpar.enabled())
+                                   float(options.isomer_s), int(options.massmodel), False, levjpar.enabled(), **lfk)
         parent_j = float(parent.spin[0])
         n_cut = ggdeadend.new_nlev(int(Z), int(A), lv.e_mev, lv.spin, int(lv.nlev), sn, parent_j)
         if n_cut < int(lv.nlev):
@@ -205,7 +209,7 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
             cut = _levels_of_values(int(Z), int(A), gs_j, gs_p, n_cut, risomer,
                                     int(options.disctable), float(options.isomer_s),
                                     int(options.massmodel), bool(prior_call), levjpar.enabled(),
-                                    *((brs,) if brs else ()))
+                                    *((brs,) if brs else ()), **lfk)
             ggdeadend.LAST[(int(Z), int(A))] = dict(nlev=int(lv.nlev), n_cut=int(cut.nlev), sn=sn,
                                                      parent_j=parent_j, e_nlev=float(lv.e_mev[lv.nlev]))
             lv = replace(cut, nlev_ld=int(lv.nlev),
@@ -220,7 +224,7 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
             cut = _levels_of_values(int(Z), int(A), gs_j, gs_p, n_cut, risomer,
                                     int(options.disctable), float(options.isomer_s),
                                     int(options.massmodel), bool(prior_call), levjpar.enabled(),
-                                    *((brs,) if brs else ()))
+                                    *((brs,) if brs else ()), **lfk)
             if int(cut.nlev) < int(lv.nlev):
                 n_ld = int(lv.nlev_ld) if int(lv.nlev_ld) >= 0 else int(lv.nlev)
                 levcomplete.LAST[(int(Z), int(A))] = dict(nlev=int(lv.nlev), n_cut=int(cut.nlev),
@@ -240,7 +244,7 @@ def _target_ix(k0: int) -> tuple[int, int]:
 @lru_cache(maxsize=2048)
 def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risomer: float,
                       disctable: int, isomer_s: float, massmodel: int,
-                      prior_call: bool, levj: bool = False, branches: tuple = ()) -> Levels:
+                      prior_call: bool, levj: bool = False, branches: tuple = (), levelfile: str | None = None) -> Levels:
     """COREX: `_discrete_levels` by value, shared across targets (`chartrun.KEEP`). `Levels` is
     frozen and nothing writes into its tensors: the id-keyed `_LEVELS_CACHE` already hands one
     object to every caller of a run."""
@@ -287,7 +291,7 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
         conv[1, 0] = 0.0
         tau[1] = 0.0
 
-        block = _level_block(int(Z), int(A), int(disctable))
+        block = _level_block(int(Z), int(A), int(disctable), levelfile)
         if block is None:
             notes.append("no level file: TALYS returns before nlev is adjusted (levels.f90:140)")
             return _pack(
@@ -454,7 +458,7 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
 
 
 @cache
-def _level_block(Z: int, A: int, disctable: int):
+def _level_block(Z: int, A: int, disctable: int, levelfile: str | None = None):
     """COREX: `read_level_file`'s block for (Z, A) read with levels.f90's formats once per process
     (a pure function of the file; `chartrun.KEEP`): None without a level file, else (nnn, whether
     the block has records, levels 0..min(nnn, numlev) as (E, J, P, tau, 3 assignment flags, ENSDF,
@@ -464,7 +468,7 @@ def _level_block(Z: int, A: int, disctable: int):
     NATIVEX2 `struct`: the records are indexed in the file's text (`files.level_records`) rather
     than copied out as a tuple, only the lines up to level numlev2 are touched, and the real(sgl)
     columns are gathered while reading; the same reads, the same float32 rounding per column."""
-    block = level_records(Z, A, disctable)
+    block = level_records(Z, A, disctable, levelfile)
     if block is None:
         return None
     nnn, records = block
