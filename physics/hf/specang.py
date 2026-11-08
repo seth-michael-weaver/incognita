@@ -86,7 +86,9 @@ def sync_target(on: bool) -> None:
         return
     so.nx_set_targetsink.argtypes = [_ct.c_void_p, _ct.c_int64]
     so.nx_set_targetsink.restype = None
-    so.nx_set_targetsink(_ct.cast(_TG, _ct.c_void_p) if on else None, NLEV)
+    from physics.hf import angout
+
+    so.nx_set_targetsink(_ct.cast(_TG, _ct.c_void_p) if on else None, angout.nlev_target(NLEV))
 
 
 def blocks_from_cells(cells: list[dict], nlev: int) -> dict:
@@ -179,7 +181,9 @@ def record_energy(cas, st, binp, cinp, etot, a_e, fkw, ci, pop, b2, b) -> None:
         g = binp.grids[k0]
         rec["level_e"] = _np(g.ex_mev)[: len(disc)]
         p = pop.pop_mb[0]
-        nl = min(NLEV, len(disc) - 1)
+        from physics.hf import angout
+
+        nl = min(angout.nlev_target(NLEV), len(disc) - 1)
         rec["comp_pop"] = np.array([float(p[k0, n].sum()) for n in range(nl + 1)]) if nl >= 0 else np.zeros(0)
         rec["comp_pop"][rec["ltarget"]] = float(_np(pop.xs_comp_el_mb[0])) if nl >= rec["ltarget"] else 0.0
         from physics.hf.compound import ceang
@@ -225,6 +229,13 @@ def record_energy(cas, st, binp, cinp, etot, a_e, fkw, ci, pop, b2, b) -> None:
     except Exception as exc:  # noqa: BLE001 -- output only
         rec["error"] = f"{type(exc).__name__}: {exc}"
         cur.setdefault("errors", []).append(f"specang.record_energy {rec['error']}")
+    from physics.hf import angout
+
+    if angout.active():  # KWCOV B3: every residual's levels for the angle files (also when the CEANG part failed)
+        try:
+            angout.record(rec, cas, st, binp, cinp, etot, a_e, fkw, ci, pop, b2, b)
+        except Exception as exc:  # noqa: BLE001 -- output only
+            cur.setdefault("errors", []).append(f"angout.record {type(exc).__name__}: {exc}")
     cur["ang"] = rec
 
 
@@ -359,7 +370,7 @@ def dwba_sigma(ri: dict, b: int, lam: int, vibbeta_b: float) -> float:
     return float((W * np.abs(ri["I"][b]) ** 2).sum()) * fac * pre
 
 
-def dwba_levels(Z: int, A: int, energies: list[float], nlev: int) -> dict:
+def dwba_levels(Z: int, A: int, energies: list[float], nlev: int, k0: int = 1) -> dict:
     """Direct DWBA level DA per energy as Legendre coefficients (E, nlev+1, L+1), each normalised to the engine's own
     DWBA cross section of that level; so_dwba_chk = (engine sigma, the deck's own sigma / engine sigma)."""
     from physics.hf.ecis import dwba_angular as DA
@@ -374,7 +385,7 @@ def dwba_levels(Z: int, A: int, energies: list[float], nlev: int) -> dict:
         if not lev:
             continue
         ri = DA.radial_integrals(omp, Z, A, float(case.e_inc_mev), case.e_mev, case.spin, case.parity, case.vibbeta,
-                                 case.deformation_length, refine=refine, parts=parts)
+                                 case.deformation_length, refine=refine, parts=parts, particle=k0)
         lout = 2 * int(ri["njmax"]) + 2 * int(max(case.spin.tolist())) + 4
         x, w = _gauss(lout + 4)
         th = np.degrees(np.arccos(x))
@@ -573,7 +584,9 @@ def run_level(cas, energies: list[float]) -> None:
     recorded energy, into specout.RUN["ang"]. INCOGNITA_SPECOUT_DA=0 skips them."""
     from physics.hf import specout
 
-    if specout.RUN is None or not energies or os.environ.get("INCOGNITA_SPECOUT_DA", "1") == "0":
+    from physics.hf import angout
+
+    if specout.RUN is None or not energies or (os.environ.get("INCOGNITA_SPECOUT_DA", "1") == "0" and not angout.active()):
         return
     try:
         import time
@@ -583,9 +596,11 @@ def run_level(cas, energies: list[float]) -> None:
             r = shape_elastic_spherical(cas, energies)
         else:
             r = coupled(cas, energies)
+        if angout.active() and int(cas.k0) > 1:  # KWCOV B3: charged-particle elastic with the Coulomb amplitude
+            r.update(angout.charged_elastic(cas, energies))
         r["da_cpu_s"] = np.array(time.process_time() - t0)
         t1 = time.process_time()
-        r.update(dwba_levels(int(cas.Zt), int(cas.At), energies, NLEV))
+        r.update(dwba_levels(int(cas.Zt), int(cas.At), energies, angout.nlev_target(NLEV), k0=int(cas.k0)))
         r["dwba_cpu_s"] = np.array(time.process_time() - t1)
         specout.RUN["ang"] = r
     except Exception as exc:  # noqa: BLE001 -- output only

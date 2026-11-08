@@ -98,4 +98,19 @@ MANUAL: dict = {
                 "(defaults.py omppar stage) but the keyword is not read"),
     "preequilibrium": ("SUPPORTED", "input/defaults.py Options.epreeq_mev -> preeq/*", "onset energy honoured "
                        "(automatic grep missed: variable is consumed under its resolved name)", "manual"),
+    # --- KWCOV B3: angular distributions (physics/hf/angout.py) ---
+    "outangle": ("SUPPORTED", "input/defaults.py Options.flagang -> angout.py", "angleout + compound angular "
+                 "distributions (flagcompang); INCOGNITA_ANGOUT=1 is the port switch", "test:test_angout.py"),
+    "fileelastic": ("SUPPORTED", "input/defaults.py Options.fileelastic -> angout.py", "elastic angle file without "
+                    "outangle (isotropic compound, as TALYS)", "test:test_angout.py"),
+    "fileangle": ("SUPPORTED", "input/defaults.py Options.fileangle -> angout.py", "one level per line (TALYS); "
+                  "`fileangle 1,2` also accepted; repeated deck lines need B2's plumbing to merge", "test:test_angout.py"),
+    "outlegendre": ("SUPPORTED", "input/defaults.py Options.flaglegendre -> angout.py", "leg files (Total, Direct, "
+                    "Compound, Normalized, ENDF-6)", "test:test_angout.py"),
+    "blockangle": ("SUPPORTED", "input/defaults.py Options.flagblockangle -> angout.write_files", "nnang.L01 names, "
+                   "energies appended", "test:test_angout.py"),
+    "angles": ("SUPPORTED", "input/defaults.py Options.nangle -> angout.angles", "discrete angle grid "
+               "180/nangle", "test:test_angout.py"),
+    "cpang": ("SUPPORTED", "input/defaults.py Options.flagcpang -> angout.flagcompang", "compound angular "
+              "distributions for charged projectiles", "test:test_angout.py"),
 }

@@ -53,7 +53,33 @@ def enabled() -> bool:
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
     """
+    if env_enabled():
+        return True
+    from physics.hf import angout  # KWCOV B3: angular output (outangle / fileelastic / INCOGNITA_ANGOUT) needs the recorders
+
+    return angout.wanted()
+
+
+def env_enabled() -> bool:
+    """The INCOGNITA_SPECOUT switch itself (the caller collects and resets the recorded run).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: tests/hf/test_angout.py
+    """
     return os.environ.get("INCOGNITA_SPECOUT", "").strip().lower() in ("1", "y", "yes", "on")
+
+
+def clear_run() -> None:
+    """Drop the recorded energies and run context (not the DWBA decks: a cached direct chain does not record them again).
+
+    TALYS: (none -- Incognita extension, not a TALYS routine)
+    Test: tests/hf/test_angout.py
+    """
+    global _CUR, RUN
+    ENERGIES.clear()
+    _ACC.clear()
+    _CUR = None
+    RUN = None
 
 
 def active() -> bool:
@@ -259,6 +285,16 @@ def begin_run(cas) -> None:
     Test: none in the public suite
     """
     global RUN
+    from physics.hf import angout
+
+    if angout.begin_run(cas) and not env_enabled():  # KWCOV B3: this run records for the angle output only
+        clear_run()
+        try:
+            from physics.hf.engine_c import lib
+
+            sync_c(lib())
+        except Exception:  # noqa: BLE001 -- output only
+            pass
     if not enabled():
         return
     k0 = int(cas.k0)

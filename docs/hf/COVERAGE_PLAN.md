@@ -151,15 +151,34 @@ batches above.
 * Tests: `tests/hf/test_kwcov_b2.py` (parsing, precedence, refusals, energies vs TALYS's own files, deck `best y`
   = best arm bitwise through the engine).
 
-### B3 -- angular distributions
+### B3 -- angular distributions (done on branch `kwcov3`)
 
-* Exists: `specang.py` behind `INCOGNITA_SPECOUT` (shape + compound elastic, discrete inelastic, Legendre).
-* Do: `outangle`/`outlegendre`/`fileelastic`/`fileangle` switch it on; `angles`, `anglescont` set the grid
-  (already in `core/grids.py`); put the distributions in `Results` under TALYS names (`nnang.L00`, `nnleg.L00`,
-  `elastic.ang`); add the Coulomb amplitude for charged projectiles (ratio to Rutherford) and `cpang`
-  (`angdis.f90:1`, `angleout.f90:1`).
-* Accept: Fe-56 and Pb-208 elastic + first two inelastic levels at 1, 5, 14 MeV vs stock, 2 % per angle where
-  dsigma/dOmega > 1 mb/sr; Nb-93 (p,p) ratio to Rutherford 2 %.
+* What: `physics/hf/angout.py` (output only). The deck keywords `outangle`, `fileelastic` (angleout runs when either is
+  y, output.f90:65), `fileangle`, `outlegendre`, `blockangle`, `angles`, `cpang` (new Options fields `flagang`,
+  `fileelastic`, `fileangle`, `flagblockangle`; `endf y` sets them as TALYS does) or the port switch
+  `INCOGNITA_ANGOUT=1` turn the SPECOUT recorders on for the run and fill `Results.angular` (new field, empty by
+  default) under TALYS's names: `<k0><t>ang.LNN` (+ `:direct`, `:compound`, charged elastic `:ruth`, `:nucint`) on the
+  `angles` grid, `<k0><t>leg.LNN` (+ `:direct`, `:compound`, `:normalized`, `:endf6`), `angle`.
+  `INCOGNITA_ANGOUT_DIR=<dir>` also writes the YANDF files with TALYS's names (`nn0014.000ang.L01`, `nnang.L01` with
+  `blockangle y`); headers and the file set equal stock's (Fe-56 run: same 666 names).
+* Physics: shape elastic and direct levels from specang (engine OMP / DWBA deck / coupled channels); discrete
+  pre-equilibrium x Kalbach (preeqang.f90); compound cleg of EVERY residual (`compound/ceang_types.py`, the generalised
+  CEANG with each particle's own spin and TALYS's phase), normalised to the engine's level populations; isotropic
+  without flagcompang ((k0 = 1 or cpang) and outangle and E <= 50). Charged projectiles: Coulomb amplitude and phases on
+  the engine's S-matrix (`angout.charged_elastic`), ratio to Rutherford and nuclear+interference as angdis.f90.
+* Found on the way: the photon exit channel's Moldauer factor is 1 in TALYS (comptarget.f90:510 sends every photon to
+  channel tnum+1, whose `tav` molprepare never fills); with the particle formula (n,g) level shapes were off by up to
+  6 % (Fe-56 1 MeV) and Legendre terms by 30 % (Pb-208 1 MeV); with it they agree to 1e-6.
+* Acceptance (`tests/hf/test_angout.py`, `scripts/kwcov/b3_compare.py`, stock runs in `~/kwcov/stock/b3_*`): switch on
+  vs off, every Results array identical (Fe-56 three energies, U-238 692 arrays). Per angle where stock > 1 mb/sr:
+  Fe-56 elastic + levels 1-2 at 1, 5, 14 MeV worst 0.39 %; Pb-208 0.25 %; U-238 (coupled) levels 0-3 at 1, 14 MeV
+  0.48 %. p + Nb-93 5, 14 MeV ratio to Rutherford 1e-5, elastic 2e-5; cpang y compound distributions 1e-5. Other
+  residuals' discrete distributions (n,p) (n,a) (n,d) (n,g): shapes 1e-5 of stock; their absolute level cross sections
+  are the engine's (14 MeV: compound +15 %, the known level-population difference; (n,t) (n,h) < 1e-5 mb off by x3-70).
+* Left: the charged-particle elastic Legendre Direct column (ECIS's Coulomb-subtracted expansion), HRTW/GOE pair weights
+  (isotropic then), charged projectiles on coupled targets (no shape elastic), repeated `fileangle` deck lines (one
+  value per key until B2 merges them; `fileangle 1,2` works), `Results.angular` through `pool.py` (not carried),
+  `anglescont` (continuum DDX grid) belongs to B4.
 
 ### B4 -- spectra, DDX, discrete gamma lines
 
