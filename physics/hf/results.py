@@ -42,6 +42,10 @@ class Results:
     # {file name: {column: ndarray over T9}} (astrorate.g, astrorate.tot, astrorateZZZAAA.tot, macs.g, ...);
     # physics/hf/astro/rates.py
     astro: dict = field(default_factory=dict)
+    # URR (KWCOV B10: `urr y` / `urr <E>` / `endf y` on an incident-neutron run, default empty): urr.f90 / urrout.f90's
+    # files as {file name: {column: ndarray over rows}} (urr.dat, urrgamwidth.l00, urrtalys.tot, urrnjoy.tot, ...);
+    # physics/hf/urr.py
+    urr: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:

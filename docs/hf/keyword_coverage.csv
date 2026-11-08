@@ -1,5 +1,5 @@
 keyword,group,talys_line,type,default,status,where,evidence,notes
-a,input_densitypar,input_densitypar.f90:246,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.alev -> capture_gpu.py, capture_gpu_setup.py, compound/dens_reference.py, compound/psf_fast.py (+11)","test:conftest.py,perfcasc_gate_run.py,test_actphys.py",
+a,input_densitypar,input_densitypar.f90:246,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.alev -> capture_gpu.py, capture_gpu_setup.py, compound/dens_reference.py, compound/psf_fast.py (+12)","test:conftest.py,perfcasc_gate_run.py,test_actphys.py",
 aadjust,input_densitypar,input_densitypar.f90:252,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.aadjust -> capture_fast.py, compound/dens_reference.py, density/ld_ceng.py, density/ld_nx2.py (+6)","test:test_cengld2.py,test_defaults.py,test_density.py",
 abundance,,,value,,MISSING,,manual,natural targets (mass 0 / abundance file): natural.f90 loop over isotopes
 adddiscrete,input_directpar,input_directpar.f90:106,flag,y,SUPPORTED,input/defaults.py Options.eadd_mev -> specobs.energy_spectra,test:test_specobs.py,discrete peaks + fine grid in the spectra (spectra.f90 flagadd)
@@ -75,8 +75,8 @@ cnubar2,input_fissionpar,input_fissionpar.f90:327,value,1.0,SUPPORTED,fisobs.py 
 colenhance,input_densitymodel,input_densitymodel.f90:198,flag | value+nucleus,n,SUPPORTED,input/defaults.py Options.flagcol_of (global + `colenhance y Z A`) -> density/*,"test:test_defaults.py,test_kwcov_b2.py",per-nucleus form since B2: Fe-56 `colenhance y 26 57` 0.31 %
 colldamp,input_densitymodel,input_densitymodel.f90:158,flag,n,SUPPORTED,"input/defaults.py Options.flagcolldamp -> density/ld_nx2.py, density/parameters.py, native/ld.h",grep,
 components,input_output,input_output.f90:313,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-compound,input_compoundmodel,input_compoundmodel.f90:117,flag,y,SUPPORTED,"input/defaults.py Options.flagcomp -> emission/multiple.py, input/nuclides.py","test:conftest.py,test_angout.py,test_binquad2.py",
-core,input_directpar,input_directpar.f90:101,value,-1,SUPPORTED,"input/defaults.py Options.core -> angout.py, astro/rates.py, astro/stellar.py, astro/thermal.py (+129)","test:test_collrule.py,test_compound.py,test_open2.py",
+compound,input_compoundmodel,input_compoundmodel.f90:117,flag,y,SUPPORTED,"input/defaults.py Options.flagcomp -> emission/multiple.py, input/nuclides.py, urr.py","test:conftest.py,test_angout.py,test_binquad2.py",
+core,input_directpar,input_directpar.f90:101,value,-1,SUPPORTED,"input/defaults.py Options.core -> angout.py, astro/rates.py, astro/stellar.py, astro/thermal.py (+130)","test:test_collrule.py,test_compound.py,test_open2.py",
 coulomb,input_directmodel,input_directmodel.f90:215,flag,y,SUPPORTED,none needed,test:test_kwcov_b6.py,"`coulomb n` = the port's ECIS (no Coulomb excitation, lo(11)); acts in TALYS only for charged projectiles on deformed targets, where the DEFAULT `coulomb y` is not reproduced (known gap, charged projectiles behind INCOGNITA_CPINC); Fe-56: 0.00 %"
 cpang,input_directmodel,input_directmodel.f90:152,flag,n,SUPPORTED,input/defaults.py Options.flagcpang -> angout.flagcompang,test:test_angout.py,compound angular distributions for charged projectiles
 cstrip,input_preeqpar,input_preeqpar.f90:191,per-particle,1.0,SUPPORTED,input/defaults.py Params.Cstrip -> omp/tfold.py,"test:conftest.py,test_na_v1.py,test_tfold.py",
@@ -114,7 +114,7 @@ element,input_main,input_main.f90:117,value,Fe,SUPPORTED,"engine run(Z, A) argum
 elow,input_basicpar,input_basicpar.f90:93,value,1.00E-06,SUPPORTED,"input/defaults.py Options.eninclow_mev -> core/grids.py, structure/scalars.py",test:test_defaults.py,
 elwidth,input_directpar,input_directpar.f90:132,value,0.5,SUPPORTED,"input/defaults.py Params.elwidth -> compound/pop_reference.py, direct/chain.py, direct/dwba.py, direct/score.py (+1)","test:test_direct.py,test_specobs.py",
 emsdmin,input_preeqpar,input_preeqpar.f90:273,value,0.0,SUPPORTED,input/defaults.py Params.Emsdmin (inert),test:test_kwcov_b7.py,"acts only inside MSD (preeqmode 4, refused); inert otherwise, as in TALYS"
-endf,input_basicreac,input_basicreac.f90:133,flag,n,IGNORED,input/defaults.py,"test:test_angout.py,test_defaults.py,test_kwcov_b6.py","defaults cascade honoured (eninclow 0, urr y, channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"
+endf,input_basicreac,input_basicreac.f90:133,flag,n,IGNORED,input/defaults.py,"test:test_angout.py,test_defaults.py,test_kwcov_b6.py","defaults cascade honoured (eninclow 0, urr y -> the B10 URR files, channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"
 endfdetail,input_basicreac,input_basicreac.f90:139,flag,y,IGNORED,input/defaults.py Options.flagendfdet,,parsed into Options/Params but no engine code reads flagendfdet
 endfecis,input_basicreac,input_basicreac.f90:115,flag,y,NA,input/defaults.py Options.flagendfecis,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 energy,input_main,input_main.f90:136,value,1.000,SUPPORTED,"input/energies.py read_energies, input/deck.py read_deck/run_deck",test:test_kwcov_b2.py,"single, `E1 E2 dE` range (dE 0 = 10 points), file, and pre-defined `n0-20.grid` grids, equal to TALYS's own `energies` files"
@@ -157,7 +157,7 @@ fismodelalt,input_fissionmodel,input_fissionmodel.f90:197,value,3,SUPPORTED,"inp
 fiso,input_gammapar,input_gammapar.f90:360,per-particle,-1.0,SUPPORTED,"input/defaults.py Params.fiso -> capture_gpu_setup.py, compound/ccexitnb.py, compound/chain.py, emission/feeding.py (+5)",test:test_defaults.py,
 fisom,input_gammapar,input_gammapar.f90:366,per-particle,-1.0,SUPPORTED,"input/defaults.py Params.fisom -> capture_fast.py, capture_fast_batch.py, capture_gpu_setup.py, compound/decay_batch.py (+9)",grep,
 fispartdamp,input_fissionmodel,input_fissionmodel.f90:164,flag,n,SUPPORTED,"input/defaults.py Options.flagfispartdamp -> fission/fis_ceng.py, fission/fission_batch_ladder.py, fission/parameters.py, fission/transmission.py (+1)",grep,
-fission,input_fissionmodel,input_fissionmodel.f90:134,flag,n,SUPPORTED,"input/defaults.py Options.flagfission -> astro/rates.py, astro/thermal.py, capture_fast.py, capture_fast_batch.py (+29)","test:perfcasc_gate_run.py,test_ccexitnb.py,test_cengfis.py",
+fission,input_fissionmodel,input_fissionmodel.f90:134,flag,n,SUPPORTED,"input/defaults.py Options.flagfission -> astro/rates.py, astro/thermal.py, capture_fast.py, capture_fast_batch.py (+30)","test:perfcasc_gate_run.py,test_ccexitnb.py,test_cengfis.py",
 fit,input_basicpar,input_basicpar.f90:150,flag,n,SUPPORTED,input/fitlib.py _cards (o.flagfit -> nn/ng/na/nf/nd .par),test:test_kwcov_b2.py,"works as a deck line; LOSS: fit y Fe-56 14 MeV: (n,p) 4.0 %, (n,a) 3.3 %, (n,d) 2.8 % off, traced to two engine responses: gadjust on the compound nucleus ((n,p) 2.7 %, (n,d) 2.7 %) and cstrip a ((n,a) 2.2 %). B5 traced both to the engine's DEFAULT 14 MeV (n,p)/(n,a) excess, not to the keywords: cstrip a moves (n,a) by the same mb as stock (9.59 vs 9.63 mb, 0.4 %; the % differs because the engine's (n,a) is 11 % higher); gadjust acts only through pre-equilibrium (with `preequilibrium 20` neither side moves) and the flux it hands back to the compound nucleus decays into protons more in the engine (compound-only (n,p) 151.5 vs 131.5 mb). Fixing that changes defaults: a fidelity task, not a keyword batch"
 format,input_basicpar,input_basicpar.f90:145,value,YANDF-0.4,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 fsadjust,input_fissionpar,input_fissionpar.f90:338,value,1.0,SUPPORTED,fisobs.py (output only; Results.extras / Results.spectra) iwamoto (scission fraction x fsadjust),test:test_kwcov_b8.py,"PFNS E-average = stock 1e-5 (U-238 3; U-235, Pu-239 2); no cross section moves on either side"
@@ -165,7 +165,7 @@ ftable,input_gammapar,input_gammapar.f90:313,per-nucleus-radiation,1.0,SUPPORTED
 ftableadjust,input_gammapar,input_gammapar.f90:341,per-nucleus-radiation,1.0,SUPPORTED,"input/defaults.py Params.ftableadjust -> gamma/ftglobal.py, gamma/parameters.py",test:test_etablefix.py,
 fullhf,input_compoundmodel,input_compoundmodel.f90:142,flag,n,SUPPORTED,"input/defaults.py Options.flagfullhf -> capture_fast_batch.py, capture_gpu_setup.py, compound/chain.py, compound/continuum.py (+9)",grep,
 fymodel,input_fissionmodel,input_fissionmodel.f90:182,value,2,IGNORED,input/defaults.py Options.fymodel,,parsed into Options/Params but no engine code reads fymodel
-g,input_preeqpar,input_preeqpar.f90:155,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.g -> angout.py, astro/rates.py, astro/stellar.py, capture_gpu.py (+102)","test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py",
+g,input_preeqpar,input_preeqpar.f90:155,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.g -> angout.py, astro/rates.py, astro/stellar.py, capture_gpu.py (+103)","test:perfcasc_gate_run.py,test_angular.py,test_ccdisk.py",
 gadjust,input_preeqpar,input_preeqpar.f90:167,per-nucleus,1.0,SUPPORTED,"input/defaults.py Params.gadjust -> density/ld_nx2.py, density/parameters.py, preeq/prepare.py","test:test_fitlib.py,test_pegq.py",
 gamgam,input_gammapar,input_gammapar.f90:375,per-nucleus,0.0,SUPPORTED,"input/defaults.py Params.gamgam -> gamma/actphys.py, gamma/ggnorm.py, gamma/transmission.py, structure/files.py (+1)",grep,
 gamgamadjust,input_gammapar,input_gammapar.f90:381,per-nucleus,1.0,SUPPORTED,input/defaults.py Params.gamgamadjust -> structure/resonances.py,grep,
@@ -226,7 +226,7 @@ levinger,input_gammapar,input_gammapar.f90:428,value,6.5,SUPPORTED,input/default
 liso,input_basicpar,input_basicpar.f90:113,value,,SUPPORTED,input/defaults.py Options.Lisoinp (output label only in TALYS too),test:test_kwcov_b2.py,no cross section moves in stock TALYS (Fe-56 0.0 %) nor in the engine
 localomp,input_ompmodel,input_ompmodel.f90:196,flag,y,SUPPORTED,input/defaults.py Options.flaglocalomp -> omp/parameters.py,grep,
 ltarget,input_main,input_main.f90:131,value,0,READ_ONLY_DEFAULT,structure/levels.py:171,manual,KNOWN GAP: excited/isomeric targets refused (NotImplementedError); only astro/stellar.py uses excited entrance states internally
-lurr,input_compoundpar,input_compoundpar.f90:125,value,2,IGNORED,input/defaults.py Options.lurr,,parsed into Options/Params but no engine code reads lurr
+lurr,input_compoundpar,input_compoundpar.f90:125,value,2,SUPPORTED,input/defaults.py Options.lurr -> urr.py (engine_c/engine cases -> urr.record per Einc <= eurr -> Results.urr) ,test:test_kwcov_b10.py,"l range of the URR blocks and files (0-60 checked); response vs stock lurr 0/1/3: Fe-56 1e-5, U-238 8e-5 (l03 files = stock to 3e-5)"
 lv1adjust,input_omppar,input_omppar.f90:564,value,1.0,IGNORED,input/defaults.py Params.lv1adjust,,parsed into Options/Params but no engine code reads lv1adjust
 lvadjust,input_omppar,input_omppar.f90:546,value,1.0,IGNORED,input/defaults.py Params.lvadjust,,parsed into Options/Params but no engine code reads lvadjust
 lvsoadjust,input_omppar,input_omppar.f90:582,value,1.0,IGNORED,input/defaults.py Params.lvsoadjust,,parsed into Options/Params but no engine code reads lvsoadjust
@@ -302,7 +302,7 @@ outpopulation,input_output,input_output.f90:249,flag,n,NA,,,output/path/plumbing
 outpreequilibrium,input_preeqmodel,input_preeqmodel.f90:215,flag,n,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 outspectra,input_output,input_output.f90:273,flag,n,SUPPORTED,input/defaults.py Options.flagspec -> specobs.py,test:test_specobs.py,"spectraout: <x>spec.tot columns, Eaverage; INCOGNITA_SPECOBS=1 is the port switch"
 outtransenergy,input_directmodel,input_directmodel.f90:227,flag,y,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
-pair,input_densitypar,input_densitypar.f90:270,per-nucleus,1e-20,SUPPORTED,"input/defaults.py Params.pair -> angout.py, compound/ceang.py, compound/ceang_types.py, compound/target.py (+33)","test:test_ceang.py,test_cengld2.py,test_compound.py",
+pair,input_densitypar,input_densitypar.f90:270,per-nucleus,1e-20,SUPPORTED,"input/defaults.py Params.pair -> angout.py, compound/ceang.py, compound/ceang_types.py, compound/target.py (+34)","test:test_ceang.py,test_cengld2.py,test_compound.py",
 pairconstant,input_densitypar,input_densitypar.f90:439,value,12.0,SUPPORTED,"input/defaults.py Params.pairconstant -> density/ld_nx2.py, density/parameters.py",test:test_cengld2.py,
 pairmodel,input_preeqmodel,input_preeqmodel.f90:221,value,2,SUPPORTED,"input/defaults.py Options.pairmodel -> density/particle_hole.py, preeq/complex.py, preeq/exciton.py, preeq/exciton_b7.py",grep,
 parity,input_densitypar,input_densitypar.f90:480,flag,n,SUPPORTED,"input/defaults.py Options.flagparity -> compound/dens_reference.py, density/ld_nx2.py, density/parameters.py, density/tables.py","test:test_ccfast.py,test_ccglue.py,test_ccnumerov.py",
@@ -340,7 +340,7 @@ rclass2mom,input_densitypar,input_densitypar.f90:400,per-nucleus-barrier,1.0,SUP
 reaction,input_basicreac,input_basicreac.f90:193,flag,n,NA,input/defaults.py Options.flagreaction,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 recoil,input_basicreac,input_basicreac.f90:163,flag,n,IGNORED,input/defaults.py Options.flagrecoil,,parsed into Options/Params but no engine code reads flagrecoil
 recoilaverage,input_basicreac,input_basicreac.f90:181,flag,n,IGNORED,input/defaults.py Options.flagrecoilav,,parsed into Options/Params but no engine code reads flagrecoilav
-relativistic,input_basicreac,input_basicreac.f90:121,flag,y,SUPPORTED,"input/defaults.py Options.flagrel -> astro/stellar.py, compound/dens_reference.py, compound/norm_reference.py, compound/ompall.py (+6)",test:test_ecmstable.py,
+relativistic,input_basicreac,input_basicreac.f90:121,flag,y,SUPPORTED,"input/defaults.py Options.flagrel -> astro/stellar.py, compound/dens_reference.py, compound/norm_reference.py, compound/ompall.py (+7)",test:test_ecmstable.py,
 rescuefile,input_best,input_best.f90:105,value,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 reslib,input_compoundpar,input_compoundpar.f90:109,value,,IGNORED,input/defaults.py Options.reslib,,parsed into Options/Params but no engine code reads reslib
 resonance,input_compoundmodel,input_compoundmodel.f90:164,flag,n,MISSING,,,
@@ -358,7 +358,7 @@ rotational,input_directmodel,input_directmodel.f90:164,value,rotational,READ_ONL
 rpevap,input_basicreac,input_basicreac.f90:215,flag,n,READ_ONLY_DEFAULT,input/defaults.py UNPORTED,test:test_kwcov_b5.py,rpevap y REFUSED: residual-product evaporation (rpevap.f90) is not ported
 rpinu,input_preeqpar,input_preeqpar.f90:243,value,1.0,SUPPORTED,input/defaults.py Params.Rpinu -> preeq/exciton.py,test:test_nx2_preeq.py,
 rpipi,input_preeqpar,input_preeqpar.f90:233,value,1.0,SUPPORTED,input/defaults.py Params.Rpipi -> preeq/exciton.py,test:test_nx2_preeq.py,
-rprime,input_omppar,input_omppar.f90:233,value,0.0,IGNORED,input/defaults.py Params.RprimeU,,parsed into Options/Params but no engine code reads RprimeU
+rprime,input_omppar,input_omppar.f90:233,value,0.0,SUPPORTED,input/defaults.py Params.RprimeU -> urr.py (NJOY potential scattering radius),test:test_kwcov_b10.py,"acts only with urrnjoy y, as TALYS (default: R' of the first URR energy); range 0-10 checked; response rprime 7: Fe-56 6e-7, U-238 6e-6"
 rspincut,input_densitypar,input_densitypar.f90:413,value,1.0,SUPPORTED,"input/defaults.py Params.Rspincut -> density/ld_nx2.py, density/parameters.py, density/tables.py, emission/feeding.py",test:test_cengld2.py,
 rspincutff,input_densitymodel,input_densitymodel.f90:224,value,4.0,SUPPORTED,input/defaults.py Params.Rspincutff -> density/parameters.py,grep,
 rspincutpreeq,input_preeqpar,input_preeqpar.f90:253,value,1.0,SUPPORTED,input/defaults.py Params.Rspincutpreeq -> preeq/spin.py,grep,
@@ -393,12 +393,12 @@ spincutmodel,input_densitymodel,input_densitymodel.f90:143,value,1,SUPPORTED,"in
 spr,input_gammapar,input_gammapar.f90:241,per-nucleus-radiation,0.0,SUPPORTED,"input/defaults.py Params.tpr -> capture_gpu.py, capture_gpu_setup.py, gamma/isoe2.py, gamma/parameters.py (+3)",test:test_etablefix.py,
 spradjust,input_gammapar,input_gammapar.f90:295,per-nucleus-radiation,1.0,SUPPORTED,input/fitlib.py GAMMA_FIELDS -> gamma/parameters.py:914,test:test_kwcov_b5.py,Fe-56 `spradjust 26 57 2.0 m1` 0.00 % (stock moved 4.6 %)
 statepot,input_directmodel,input_directmodel.f90:158,flag,n,READ_ONLY_DEFAULT,input/defaults.py UNPORTED,test:test_kwcov_b6.py,`statepot y` REFUSED: a potential per excited state (incidentecis.f90:252); the port's ECIS uses the incident-energy potential for every state
-strength,input_densitymodel,input_densitymodel.f90:236,value,9,SUPPORTED,"input/defaults.py Options.strength -> capture_fast.py, capture_fast_batch.py, capture_gpu.py, capture_gpu_setup.py (+49)","test:test_actphys.py,test_chunkfix.py,test_defaults.py",
+strength,input_densitymodel,input_densitymodel.f90:236,value,9,SUPPORTED,"input/defaults.py Options.strength -> capture_fast.py, capture_fast_batch.py, capture_gpu.py, capture_gpu_setup.py (+50)","test:test_actphys.py,test_chunkfix.py,test_defaults.py",
 strengthjp,input_gammamodel,input_gammamodel.f90:165,flag,n,SUPPORTED,input/defaults.py Options.flagstrengthjp -> compound/prepare.py,grep,
 strengthm1,input_gammamodel,input_gammamodel.f90:142,value,3,SUPPORTED,"input/defaults.py Options.strengthM1 -> capture_gpu_setup.py, compound/psf_fast.py, compound/psf_nx2.py, gamma/parameters.py (+4)",grep,
 strucpath,input_path,input_path.f90:58,value,,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 sysreaction,input_directmodel,input_directmodel.f90:176,value,sysreaction,READ_ONLY_DEFAULT,input/defaults.py Options.flagsys + UNPORTED,test:test_kwcov_b6.py,`sysreaction <particles>` REFUSED: Tripathi normalisation (tripathi.f90) not ported
-t,input_densitypar,input_densitypar.f90:300,per-nucleus-barrier,0.0,SUPPORTED,"input/defaults.py Params.T -> alphaentr.py, astro/rates.py, astro/stellar.py, astro/thermal.py (+87)","test:conftest.py,test_actphys.py,test_ccexitnb.py",
+t,input_densitypar,input_densitypar.f90:300,per-nucleus-barrier,0.0,SUPPORTED,"input/defaults.py Params.T -> alphaentr.py, astro/rates.py, astro/stellar.py, astro/thermal.py (+88)","test:conftest.py,test_actphys.py,test_ccexitnb.py",
 tadjust,input_densitypar,input_densitypar.f90:375,per-nucleus-barrier,1.0,SUPPORTED,"input/defaults.py Params.Tadjust -> density/ld_ceng.py, density/ld_nx2.py, density/matching.py, density/parameters.py (+1)",grep,
 tcool,input_medical,input_medical.f90:127,value,,MISSING,,,
 tirrad,input_medical,input_medical.f90:139,value,,MISSING,,,
@@ -416,8 +416,8 @@ upbende,input_gammapar,input_gammapar.f90:398,per-nucleus-radiation,,SUPPORTED,i
 upbendeadjust,input_gammapar,input_gammapar.f90:416,per-nucleus-radiation,,SUPPORTED,input/fitlib.py UPBEND_KEYS -> gamma/parameters.py:762,grep,upbend C/e/f cards (LEESHELL fix)
 upbendf,input_gammapar,input_gammapar.f90:404,per-nucleus-radiation,,SUPPORTED,input/fitlib.py UPBEND_KEYS -> gamma/parameters.py:762,grep,upbend C/e/f cards (LEESHELL fix)
 upbendfadjust,input_gammapar,input_gammapar.f90:422,per-nucleus-radiation,,SUPPORTED,input/fitlib.py UPBEND_KEYS -> gamma/parameters.py:762,grep,upbend C/e/f cards (LEESHELL fix)
-urr,input_compoundpar,input_compoundpar.f90:113,flag,n,SUPPORTED,"input/defaults.py Options.flagurr -> core/grids.py, structure/scalars.py",test:test_defaults.py,
-urrnjoy,input_compoundmodel,input_compoundmodel.f90:176,flag,n,IGNORED,input/defaults.py Options.flagurrnjoy,,parsed into Options/Params but no engine code reads flagurrnjoy
+urr,input_compoundpar,input_compoundpar.f90:113,flag,n,SUPPORTED,input/defaults.py Options.flagurr/eurr_mev -> urr.py (engine_c/engine cases -> urr.record per Einc <= eurr -> Results.urr) ,test:test_kwcov_b10.py,"urr y / urr <E> / urr n: urr.dat, urr<gam|com|fis|neu|pro|alp>width.lLL, urrspacingl(j), urrneustrengthl(j), urrtalys.tot (comptarget's (l,J) blocks incl. the last-Wab quirk, dtheory D(l,J), strengthfunc, thermalxs). Every number vs stock: Fe-56 5e-5, Co-59 1e-4, U-238 0.11 % in TALYS mode (Gg 1 MeV = the engine's capture; default mode Gf 22 % = EXACTFIS), Au-197 2e-4 in TALYS mode (default Gx x2 / capture -30 % = CCEXITNB2). Output only: Fe-56 552 / U-238 600 Results arrays bitwise with and without urr y. Refused: widthmode 2/3, INCOGNITA_EWFC coupled targets, KEVCOLD cells"
+urrnjoy,input_compoundmodel,input_compoundmodel.f90:176,flag,n,SUPPORTED,"input/defaults.py Options.flagurrnjoy -> urr.py (csunr2, unfac, gnrl)",test:test_kwcov_b10.py,"NJOY-formalism cross sections and the Gx/Gf renormalisation loop: urrnjoy.tot, urrratio.tot; response Fe-56 7e-5, U-238 2.8e-4 (Gx)"
 user,input_basicpar,input_basicpar.f90:140,value,Unknown,NA,,,output/path/plumbing switch; observable tracked in OBSERVABLE_COVERAGE
 v1adjust,input_omppar,input_omppar.f90:238,per-particle,1.0,SUPPORTED,"input/defaults.py Params.v1adjust -> capture_fast.py, omp/omp_nx2.py, omp/ompdeck.py, omp/parameters.py (+1)","test:test_eadj.py,test_kwcov_b6.py,test_nx2_omp.py",
 v2adjust,input_omppar,input_omppar.f90:247,per-particle,1.0,SUPPORTED,"input/defaults.py Params.v2adjust -> omp/omp_nx2.py, omp/ompdeck.py, omp/parameters.py",grep,
@@ -436,11 +436,11 @@ wfcfactor,input_compoundmodel,input_compoundmodel.f90:153,value,1,SUPPORTED,"inp
 wso1adjust,input_omppar,input_omppar.f90:461,per-particle,1.0,SUPPORTED,"input/defaults.py Params.wso1adjust -> omp/omp_nx2.py, omp/ompdeck.py, omp/parameters.py",grep,
 wso2adjust,input_omppar,input_omppar.f90:470,per-particle,1.0,SUPPORTED,"input/defaults.py Params.wso2adjust -> omp/omp_nx2.py, omp/ompdeck.py, omp/parameters.py",grep,
 widthfluc,input_compoundmodel,input_compoundmodel.f90:123,flag,y,SUPPORTED,"input/defaults.py Options.ewfc_mev -> compound/chain.py, emission/feeding.py, engine_c.py, gpu_full_setup.py",test:test_defaults.py,
-widthmode,input_compoundmodel,input_compoundmodel.f90:148,value,1,SUPPORTED,"input/defaults.py Options.wmode -> angout.py, astro/stellar.py, astro/thermal.py, capture_gpu_setup.py (+10)","test:test_compound.py,test_kwcov_b9.py,test_reference.py",
+widthmode,input_compoundmodel,input_compoundmodel.f90:148,value,1,SUPPORTED,"input/defaults.py Options.wmode -> angout.py, astro/stellar.py, astro/thermal.py, capture_gpu_setup.py (+11)","test:test_compound.py,test_kwcov_b10.py,test_kwcov_b9.py",
 wtable,input_gammapar,input_gammapar.f90:322,per-nucleus-radiation,wtable,SUPPORTED,"input/defaults.py Params.wtable -> capture_fast.py, capture_gpu.py, capture_gpu_setup.py, capture_gpu_tasks.py (+8)","test:test_defaults.py,test_engproj_tarmass.py,test_etablefix.py",
 wtableadjust,input_gammapar,input_gammapar.f90:350,per-nucleus-radiation,1.0,SUPPORTED,input/defaults.py Params.wtableadjust -> gamma/parameters.py,test:test_etablefix.py,
 xsalphatherm,input_compoundpar,input_compoundpar.f90:145,value,0.0,IGNORED,input/defaults.py Params.xsalphatherm,,parsed into Options/Params but no engine code reads xsalphatherm
-xscaptherm,input_compoundpar,input_compoundpar.f90:135,value,0.0,IGNORED,input/defaults.py Params.xscaptherm,,parsed into Options/Params but no engine code reads xscaptherm
+xscaptherm,input_compoundpar,input_compoundpar.f90:135,value,0.0,IGNORED,"urr.py thermal_capture_mb (thermalxs.f90 port, urr.dat column only)",test:test_kwcov_b10.py,"only urr.dat's `thermal capture cross section` reads it (B10; table/Kopecky = stock for Fe-56 2590, U-238 2670 mb); thermal.f90's normalisation of the low-energy capture is B10b"
 xseps,input_numerics,input_numerics.f90:185,value,1.00E-07,SUPPORTED,"input/defaults.py Options.xseps_mb -> astro/thermal.py, compound/chain.py, emission/binary.py, emission/binspec.py (+8)",test:test_engdefect.py,
 xsptherm,input_compoundpar,input_compoundpar.f90:140,value,0.0,IGNORED,input/defaults.py Params.xsptherm,,parsed into Options/Params but no engine code reads xsptherm
 yieldfile,input_fissionmodel,input_fissionmodel.f90:230,value,,MISSING,,,

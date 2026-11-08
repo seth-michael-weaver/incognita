@@ -314,6 +314,9 @@ class ChainedFull:
             out = []
             bstate = BinaryState()
             specout.begin_run(cas)  # SPECOUT, output only
+            from physics.hf import urr as urrobs  # KWCOV B10: URR output (urr y / endf y; off: nothing recorded)
+
+            urrobs.begin_run(cas)
             for nin, (binp, cinp) in enumerate(pairs, start=1):
                 if not dumped:
                     binp, cinp = built.shell(nin, run_axis[nin - 1])
@@ -333,6 +336,8 @@ class ChainedFull:
                 from physics.hf.compound import ewfc
                 ewfc.attach(ci, cas, binp.e_inc_mev)
                 pop = compound_target_inputs(ci)
+                if urrobs.wanted(cas, binp.e_inc_mev):  # KWCOV B10, output only
+                    urrobs.record(cas, ci, binp.e_inc_mev)
                 xsb = binary_cross_sections(pop, [ci])[0]
                 p = pop.pop_mb[0]
                 xspop, xspopex, xspopnuc = {}, {}, {}
@@ -881,6 +886,9 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
         residual_production_mb=_stack(resid), totals_mb=_stack(totals),
         injected=injection.families, extras=_stack(xtra) if xtra else {},
     )
+    from physics.hf import urr as urrobs  # KWCOV B10 (off: unchanged)
+
+    res = urrobs.add_to_results(res)
     # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
     from physics.hf.direct.racapcalc import add_to_results
 
