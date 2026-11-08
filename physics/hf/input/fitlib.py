@@ -320,6 +320,22 @@ class Cards:
 _NA_PREFIXES = ("out", "file", "block")
 _NA_WORDS = frozenset({"bestpath", "components", "ddxmode", "format", "integral", "nulldev", "partable", "sacs",
                        "source", "strucpath", "user"})
+#: KWCOV B10b: accepted deck words that change no engine number (why, as the skip reason)
+_B10B_WORDS = {
+    "resonance": "resonance n (the default: no resonance-range reconstruction)",
+    "group": "group: acts only inside resonance y (resonance.f90 -> prepro), which the port refuses; no effect "
+             "without it, as in TALYS",
+    "abundance": "abundance <file>: read by input.deck.run_deck for mass 0 (natural.f90); ignored otherwise, as in "
+                 "TALYS (abundance.f90 is called only for mass 0)",
+}
+#: KWCOV B10b: checkvalue.f90 ranges (lo, hi, default allowed outside): elow :480, tres :553, xscaptherm :922
+_B10B_RANGES = {"elow": (1.0e-11, 1.0, 0.0), "tres": (0.0, 1.0e12, None), "xscaptherm": (1.0e-20, 1.0e10, 0.0)}
+RESONANCE_REFUSAL = (
+    "not ported: resonance y (resonance.f90): TALYS copies structure/resfiles/<reslib>/n-<Nuc>.res.<reslib> (ENDF-6 "
+    "resonance parameters) and runs Cullen's PREPRO codes on it (prepro.f, 29,688 lines: LINEAR / RECENT resonance "
+    "reconstruction, SIGMA1 Doppler broadening to `tres`, GROUPIE for `group y`), then splices the pointwise MF3 "
+    "into total/elastic/fission/xs000000/xs010000/xs000001/rp*.tot below the URR; none of that is in the port. "
+    "`reslib` and `tres` act only inside it")
 #: KWCOV B5: keywords whose value is a file name: the line keeps its case (convert.f90:36 keeps it for these)
 FILE_KEYS = frozenset({"levelfile", "deformfile", "optmod", "optmodfilen", "optmodfilep",  # + KWCOV B6
                        "hbtransfile", "class2file"})  # + KWCOV B8 (class 11: `<key> Z A <file>`)
@@ -349,6 +365,14 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
         if not w:
             continue
         k = w[0].lower()
+        if k in _B10B_RANGES and len(w) == 2:  # KWCOV B10b: checkvalue.f90:480, :553, :922
+            lo, hi, dflt = _B10B_RANGES[k]
+            try:
+                v = float(w[1])
+            except ValueError as e:
+                raise ValueError(f"deck line {line!r}: TALYS-error (read_error)") from e
+            if not (lo <= v <= hi) and v != dflt:
+                raise ValueError(f"deck line {line!r}: TALYS-error: {k} out of range {lo:g}-{hi:g} (checkvalue)")
         if k in _SKIP:
             skipped.append((line, _SKIP[k]))
             continue
@@ -435,6 +459,14 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
             except ValueError:
                 skipped.append((line, "could not be parsed"))
             continue
+        if k in _B10B_WORDS:  # KWCOV B10b: resonance / group / abundance
+            if k == "resonance" and len(w) > 1 and w[1].lower()[:1] == "y":
+                raise NotImplementedError(RESONANCE_REFUSAL)
+            if len(w) < 2 or (k != "abundance" and w[1].lower()[:1] not in ("y", "n")):
+                raise ValueError(f"deck line {line!r}: TALYS-error (read_error), expected `{k} y|n`"
+                                 if k != "abundance" else f"deck line {line!r}: expected `abundance <file>`")
+            skipped.append((line, _B10B_WORDS[k]))
+            continue
         spec = PARAM_SPECS.get(k)
         if spec is None:
             # KWCOV B5: output switches, paths and labels (the matrix's NA rows) change no number: accepted as before;
@@ -444,6 +476,15 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
             continue
         dims = spec.dims
         try:
+            if k in ("xscaptherm", "xsptherm", "xsalphatherm"):
+                # KWCOV B10b: `xscaptherm v` sets xscaptherm(-1) (input_compoundpar.f90:135-149); the isomer axis made
+                # it fall to "unsupported index form" and the line was dropped without a word. Written to every
+                # isomer cell; physics/hf/thermal.py reads only (-1), as thermalxs.f90
+                if len(w) != 2:
+                    skipped.append((line, "could not be parsed"))
+                    continue
+                globs.append((k, float(w[1])))
+                continue
             if not dims:
                 globs.append((k, float(w[1])))
             elif dims[0] == (0, 14) and len(dims) >= 2:  # (Zix, Nix) leading -- class 1/2/3/5
@@ -725,6 +766,33 @@ def table_lines(Z: int, A: int, projectile: str = "n") -> tuple[tuple[str, ...],
     return tuple(out), f"lines table {os.path.abspath(p)} sha256 {sha}"
 
 
+_DECK_SEEN: list = []  # the deck key the per-target caches of this process were built under
+
+
+def drop_caches_on_new_deck() -> bool:
+    """KWCOV B10b fix: the per-target caches (`dens_reference._structure_of` keys on (Z, A) only, and every
+    lru_cache below it) hold the Options / Params of the FIRST deck a process ran, so a second run with other deck
+    lines (`INCOGNITA_TALYS_FIT_LINES`, a lines file, the `INCOGNITA_TALYS_FIT` arms) silently reused them (B10:
+    Fe-56 `ldmodel 2` after a default run gave the default capture). Called where every run starts (`Cascade`):
+    when the deck key differs from the one the caches were built under, `chartrun.drop_target_caches()`. A process
+    that never changes its deck (every default run) never drops anything.
+
+    TALYS: (none -- a port guard)
+    Test: tests/hf/test_kwcov_b10b.py
+    """
+    key = (os.environ.get(ENV, ""), _lines_key())
+    if not _DECK_SEEN:
+        _DECK_SEEN.append(key)
+        return False
+    if _DECK_SEEN[0] == key:
+        return False
+    _DECK_SEEN[0] = key
+    from physics.hf import chartrun
+
+    chartrun.drop_target_caches()
+    return True
+
+
 def _lines_key() -> tuple:
     """What the `lines` arm reads from the environment, so `cards` is never served from a stale cache entry."""
     p = os.environ.get(ENV_LINES_FILE, "").strip()
@@ -889,6 +957,8 @@ def activate(Z: int, A: int, projectile: str | None = None, Ltarget: int = 0) ->
     """
     global _ACTIVE
     if not enabled():
+        if _ACTIVE is not None:  # KWCOV B10b: a deck without lines after one with them ran on the old cards
+            deactivate()
         return None
     if projectile is None:  # CPINC: the run's projectile (neutron unless INCOGNITA_CPINC)
         from physics.hf import projectile as _proj

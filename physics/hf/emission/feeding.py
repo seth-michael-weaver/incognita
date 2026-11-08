@@ -219,6 +219,7 @@ class Cascade:
 
         # BESTFIT: this is the run's target, and it is where every path (Python, C, fast, GPU)
         # starts. `activate` is a no-op unless INCOGNITA_TALYS_FIT asks for TENDL's knobs.
+        fitlib.drop_caches_on_new_deck()  # KWCOV B10b: per-target caches built under another deck are dropped
         fitlib.activate(int(Zt), int(At))
         # SPEEDFIX (warmrun trap): the cards this Cascade's caches are built under; a run on it
         # under other cards is refused (`check_cards`)

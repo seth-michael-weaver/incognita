@@ -67,7 +67,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B8 | fission extras (DONE, branch `kwcov8`; fisfeed J-parity columns and fragment-based nubar/PFNS -> B14) | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
 | B9 | astrophysics (DONE, branch `kwcov9`; astro + racap, fissile astrogs n refused) | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
 | B10 | URR (DONE, branch `kwcov10`; widthmode 2/3 refused) | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
-| B10b | thermal, natural targets, resonance range | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
+| B10b | thermal, natural targets, resonance range (DONE, branch `kwcov10b`; resonance y refused) | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
 | B11 | medical isotope production | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
 | B12 | recoils and LAB frame | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
 | B13 | ingredient outputs | outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
@@ -559,7 +559,7 @@ URR: `urr.f90:1`, `urrout.f90:1` (`urr`, `lurr`, `urrnjoy`, `rprime`). Thermal: 
 `resonance.f90:1`, `integral.f90:1` (needs external resonance libraries, lowest priority).
 Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weighted sum 1e-6.
 
-**B10 done (branch `kwcov10`, from kwcov9).** B10b (thermal, natural targets, resonance range) stays open.
+**B10 done (branch `kwcov10`, from kwcov9).** B10b: below, after B10.
 
 * **What.** New module `physics/hf/urr.py` (output only): comptarget.f90's two "Gilles Noguere" blocks (per compound
   (J, parity) and incident (l, j) with l <= lurr: sumIPE per exit type without compound elastic, Turrlj = sumIPE
@@ -606,11 +606,95 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
   NJOY: R' of the first URR energy). The LSSF <Gamma_gamma> closure work stays in the research repo. B10's files
   change none of it.
 * **Not given:** energies below eninclow (Ninclow > 0; urrout fills their rows from the current energy; the port has
-  no Ninclow energies: B10b); thermal.f90 (B10b). Observed: a second `run_deck` with a different deck in the same
-  process needs `chartrun.drop_target_caches()` first (the cached Cascade keeps the first deck's Options; the test
-  does it; not chased).
+  no Ninclow energies: B10b gives thermal.f90's rows, not urrout's); thermal.f90 (done in B10b). Observed: a second
+  `run_deck` with a different deck in the same process reused the first deck's Options (traced and fixed in B10b:
+  stale `fitlib._ACTIVE` + (Z, A)-keyed caches).
 * Tests: `tests/hf/test_kwcov_b10.py` (gnrl / unfac / strengthfunc by hand, keyword parsing, refusals, defaults record
   nothing, thermal capture table, Fe-56 run vs stock numbers with every cross section bitwise unchanged).
+
+**B10b done (branch `kwcov10b`, from kwcov10).**
+
+* **Energies below eninclow** (new module `physics/hf/thermal.py`, output only). TALYS computes nothing below
+  `eninclow` (`elow`, default 1e-6 MeV): grid.f90 inserts E1v = 0.2 eninclow and eninclow when the grid starts below
+  E1v, and at the first computed energy eref (talysreaction.f90:201) thermal.f90 fills every lower energy from eref's
+  numbers: 1/v through the thermal value below E1v (R = xstherm / xs1), log-log between (E1v, xs(eref) Rres) and eref
+  above it; capture's ratio for every channel, the (n,p) / (n,a) ones when xsptherm / xsalphatherm are set; elastic and
+  compound elastic constant at eref's; non-elastic = the filled channels; inelastic, the projectile's own levels and
+  binary column and fission 0; below E1v a capture / (n,p) / (n,a) isomer gets the table's branching. thermalxs.f90
+  (structure/thermal, deck, Kopecky) is ported in full. `Results.thermal` = TALYS's rows ({"E", result_arrays key: rows,
+  eninclow, E1v, eref, xscaptherm/xsptherm/xsalphatherm(-1..10)}); when eninclow is not one of the run's energies (it
+  was inserted), eref is a one-energy engine run at it, as TALYS's first energy. Hooked at the end of `engine_c.run` and
+  `engine.run`; a run with no energy below eninclow returns `res` itself (no Cascade built).
+* **Natural targets** (`physics/hf/natural.py`, `run_deck`): `mass 0` reads structure/abundance/<El>.abun or the deck's
+  `abundance <file>` (normalised, abundance.f90), runs every isotope with the same deck and grid and returns the first
+  isotope's Results with channels, levels, residual production, totals, CHANOBS extras and the thermal rows replaced by
+  abundance-weighted sums (union of keys, missing = 0; `:branch` ratios and LOWEPOT's weight not summed), plus
+  `Results.natural` = {abundance, isotopes}. Refused with astro / urr / integral (natural.f90 sums none of their files).
+* **integral y** (`physics/hf/integral.py`, `run_deck`, `Results.integral` = integral.dat): the target's
+  structure/integral/sacs triples, the group spectra of structure/integral/spectra, xs linear on the file rows with a
+  (0, 0) point in front (thermal rows included), groups above the last row left out; `m` = the first L01.. file, `g` =
+  L00 (CHANOBS is switched on for the run, output only).
+* **Refused / accepted.** `resonance y` refused at deck parse and in `run_deck` before any run: resonance.f90 runs
+  Cullen's PREPRO (prepro.f, 29,688 lines: RECENT, SIGMA1 Doppler to `tres`, GROUPIE for `group y`) on the ENDF-6 file
+  of `reslib` and splices the pointwise MF3 into the .tot files; not ported. `resonance n`, `group`, `reslib`, `tres`
+  are accepted and change no number, as in TALYS without resonance y (flaggroup / Tres / reslib are read only by
+  resonance.f90). checkvalue ranges ported for `elow` (1e-11-1), `tres` (0-1e12), `xscaptherm` (1e-20-1e10). `endf y`
+  (eninclow from D0) with energies below eninclow refused (B15).
+* **Bugs found and fixed (port).** (1) `xscaptherm` / `xsptherm` / `xsalphatherm` deck lines were DROPPED silently:
+  the isomer axis of their Params made `_split` file them as "unsupported index form", which is not a loud reason (B10's
+  "a deck xscaptherm wins" was never exercised). (2) The run_deck cache bug B10 observed, traced: `fitlib.activate` is
+  a no-op when no deck lines are set, so after a deck WITH lines a deck WITHOUT them still ran on the old cards
+  (`_ACTIVE` stale), and the per-target caches (`dens_reference._structure_of` keyed on (Z, A) only, and every
+  lru_cache under it) are never dropped on the way from no cards to cards. Fixed: `activate` deactivates stale cards,
+  and `Cascade.__init__` calls `fitlib.drop_caches_on_new_deck()`, which drops the per-target caches when the deck key
+  (INCOGNITA_TALYS_FIT + the lines key) differs from the one they were built under (a process that never changes its
+  deck drops nothing). Fe-56 1 MeV capture default / `ldmodel 2` / default in one process: 3.0452 / 2.1757 / 3.0452 mb
+  (before: 3.0452 / 3.0452 / 3.0452). B10's test keeps its explicit drop; it is no longer needed.
+* **TALYS-2.25 quirks / bugs kept.** (1) thermalxs.f90 reads the table after the input: a table row of the target's
+  mass overwrites a deck `xscaptherm` / `xsptherm` / `xsalphatherm` (stock Fe-56 `xscaptherm 5000`: no number moves;
+  the deck acts only on targets with no row, e.g. Fe-61, or on a column the row leaves empty, e.g. Fe-55 (n,p)). B10's
+  urr.dat header now follows it too (output only). (2) The table is matched on A only, the last row of that mass wins.
+  (3) A deck `integral <file> <spectrum> <value>` never gives a row: integral.f90:111-143 rebuilds the file name from
+  reacstr, which only the sacs reader fills (stock: "cross section file .tot does not exist"); kept, with the warning.
+  (4) natural.f90 sums all/total/elastic/nonelastic/reaction, <p>prod, rp*.tot/.Lnn, xs*.tot, fission, spectra
+  (interpolated), the elastic angular file, recoils and yields; binary.tot, xs*.Lnn and the discrete-level files of a
+  TALYS natural run are the LAST isotope's. The port sums every Results array (binary, isomer channels and levels
+  included) and does not sum spectra / angular (left per isotope).
+* **Vs stock** (`scripts/kwcov/b10b_response.py`; energies 2.53e-8 1e-7 5e-7 1e-3 0.1 1 MeV, TALYS adds 2e-7 and 1e-6;
+  stock JSON in ~/kwcov/stock/b10b; every file stock writes for the rows below eninclow, stock > 1e-6 of its maximum):
+
+  | deck | port (fill on stock's eref row) | engine vs stock, TALYS mode | default mode |
+  |---|---|---|---|
+  | Fe-56 | 2e-6 | 2.5e-6 | elastic / total rows x274 low (LOWEPOT elastic at 1 eV); every other row 2e-6 |
+  | Fe-56 `xscaptherm 5000` | 2e-6 | 2e-6, response 0 (stock 0: table quirk) | |
+  | Fe-56 `elow 1e-4` | 0 | 5e-6, response 4e-6 | |
+  | Fe-55 `xsptherm 2000` / `xsalphatherm 500` | 2e-6 | 5e-6 / 3e-6; response 2e-6 / 5e-6 (x70 / x76 moves) | |
+  | Fe-61 (Kopecky) / `xscaptherm 5000` | -- / 2e-6 | 1e-6 / 2e-6, response 0.0 | |
+  | Ag-109 (capture isomer branches) | 1e-6 | 4e-6 | elastic / total x9 low (LOWEPOT); every other row 3e-6, isomer L00 / L02 included |
+  | U-238 | 2e-6 | 6e-6 | elastic / total x3.7 low (LOWEPOT); capture 0.22 % (the default-mode 1 eV capture) |
+
+  Natural Fe (1 / 5 / 14 MeV, abundances 5.845 / 91.754 / 2.119 / 0.282 %): engine sums = weighted sums of its isotope
+  runs to 2.2e-16; stock's natural files = weighted sums of stock's isotope runs to 3.8e-7 (binary.tot and xs*.Lnn
+  excepted, see quirk 4); engine vs stock natural worst 15 % (rp025054 14 MeV), the engine's own Fe-56 14 MeV (n,p) /
+  (n,a) excess (B1), nothing from the sum. integral y: port (integral.effective_b on stock's own xs files) <= 1.3e-6;
+  engine vs stock in TALYS mode 3e-5 (Fe-56, five (n,p) rows; Co-59 (n,2n) L01 and total, (n,g) FNG-eurofer with the
+  thermal rows, (n,a)); default mode Fe-56 (n,p) +10.5-10.8 % (the engine's default 14 MeV (n,p) excess, B1), Co-59 (n,a) 4.3 %, (n,2n) 0.9 %, (n,g) 0.0 %.
+* **INCOGNITA vs TALYS below eninclow (recorded, not touched).** TALYS computes no model below eninclow (1 eV): its
+  rows there are thermal.f90's 1/v extrapolation through the thermal value and a log-log join to the 1 eV
+  Hauser-Feshbach number (Fe-56: capture 2.59 b at 0.0253 eV, 148 b at 1 eV, elastic 2399 b constant). The engine
+  runs Hauser-Feshbach at every energy it is given (Fe-56 0.0253 eV capture 3,703 b, elastic ~8.8 b after LOWEPOT,
+  which removes the compound elastic below the resonance region; TALYS keeps it, 2399 b). The published library
+  takes neither below 1 keV: RESFILL curves (capture / elastic / total from resonance parameters, the v0.2.2 engine
+  above the 1 keV join). B10b's rows are output only (`Results.thermal`); no default number moved
+  (`test_engine_c.py`, B10b tests).
+* **Not given:** rp*.Lnn rows below eninclow (the engine has no residual-isomer production output at any energy);
+  thresholds between a low energy and eref (thermal.f90's Ethresh / Ethrexcl checks; a channel open at eref is open
+  below it in practice); the URR files' rows below eninclow (urrout); resonance y, group y (PREPRO).
+* Tests: `tests/hf/test_kwcov_b10b.py` (thermalxs table quirks and Kopecky, the grid insertion, the fill on stock's
+  Fe-56 row, keyword parsing / ranges / refusals, Fe-56 run vs stock rows, Fe-55 xsptherm thermal point, the
+  deck-change cache drop, natural Fe sums and `abundance`, the integral fold, sacs / spectrum readers and the deck
+  triple bug).
+
 
 ### B11 -- medical isotope production
 

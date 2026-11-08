@@ -1597,7 +1597,10 @@ def run(injection, stats: dict | None = None):
     res = lowepot.add_to_results(res, injection)
     from physics.hf import angout, fisobs, specobs  # KWCOV B3 / B4 / B8 (off: unchanged)
 
-    return fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
+    res = fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
+    from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
+
+    return thermal.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

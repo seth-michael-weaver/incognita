@@ -76,8 +76,6 @@ def read_deck(text: str, cwd: str | os.PathLike = ".") -> Deck:
     for k, v in (("projectile", proj), ("element", elem), ("mass", mass), ("energy", energy)):
         if v is None:
             raise ValueError(f"TALYS-error: {k} must be given")
-    if mass == 0:
-        raise NotImplementedError("mass 0 (natural element, natural.f90) is not ported")
     if elem.isdigit():
         Z = int(elem)
     else:
@@ -93,13 +91,13 @@ def run_deck(path: str | os.PathLike, stats: dict | None = None):
     in `INCOGNITA_TALYS_FIT_LINES` (restored afterwards). The run's projectile must be the engine's
     (`physics.hf.projectile`, neutron unless INCOGNITA_CPINC says otherwise).
 
-    TALYS: talysreaction.f90:1 (talysreaction) -- the run the deck asks for
-    Test: tests/hf/test_kwcov_b2.py
-    """
-    import torch
+    KWCOV B10b: `mass 0` runs every isotope and returns the abundance-weighted sums (`Results.natural`), `integral y`
+    adds `Results.integral`, `resonance y` is refused.
 
-    from physics.hf import engine_c, projectile
-    from physics.hf.engine import ChainedFull
+    TALYS: talysreaction.f90:1 (talysreaction) -- the run the deck asks for
+    Test: tests/hf/test_kwcov_b2.py, tests/hf/test_kwcov_b10b.py
+    """
+    from physics.hf import projectile
     from physics.hf.input import fitlib
 
     p = Path(path)
@@ -107,10 +105,58 @@ def run_deck(path: str | os.PathLike, stats: dict | None = None):
     if d.projectile != projectile.symbol():
         raise ValueError(f"deck projectile {d.projectile!r}, engine projectile {projectile.symbol()!r} "
                          "(set INCOGNITA_CPINC for charged particles / photons)")
+    from physics.hf import integral as integ_mod
+
+    if any(ln.split()[:1] == ["resonance"] and ln.split()[1:2] and ln.split()[1][:1] == "y" for ln in d.lines):
+        raise NotImplementedError(fitlib.RESONANCE_REFUSAL)  # KWCOV B10b: refused before any run
+    integ = integ_mod.parse_deck(d.lines)  # KWCOV B10b: integral y / integral <file> <spectrum> <value>
+    if d.A == 0:  # KWCOV B10b: natural element (natural.f90)
+        return _run_natural(d, p.parent, stats, integ)
+    res = _run_one(d, d.A, stats, chanobs=integ is not None)
+    if integ is not None:
+        from dataclasses import replace
+
+        res = replace(res, integral=integ_mod.integral_table(res, d.Z, d.A, integ["triples"]))
+    return res
+
+
+def _run_natural(d: Deck, cwd: Path, stats, integ):
+    """mass 0: every isotope of the abundance file with the same deck, then the weighted sums (natural.f90).
+
+    TALYS: input_main.f90:197-205, abundance.f90:1 (abundance), natural.f90:1 (natural)
+    Test: tests/hf/test_kwcov_b10b.py
+    """
+    from physics.hf import natural
+
+    bad = [k for k in ("astro", "astroe", "astrot", "urr", "integral")
+           if any(ln.split()[:1] == [k] and ln.split()[1:2] != ["n"] for ln in d.lines)]
+    if bad or integ is not None:
+        raise NotImplementedError(f"not ported: mass 0 with {', '.join(sorted(set(bad)))} (natural.f90 sums no "
+                                  "astro / urr / integral file; TALYS leaves the last isotope's)")
+    abf = None
+    for ln in d.lines:
+        w = ln.split()
+        if w[:1] == ["abundance"] and len(w) > 1:
+            abf = w[1] if os.path.isabs(w[1]) else str(cwd / w[1])
+    ab = natural.abundances(d.Z, abf)
+    runs = {a: _run_one(d, a, stats) for a in ab}
+    return natural.combine(runs, ab)
+
+
+def _run_one(d: Deck, A: int, stats, chanobs: bool = False):
+    """One engine run of the deck on target (d.Z, A)."""
+    import torch
+
+    from physics.hf import engine_c
+    from physics.hf.engine import ChainedFull
+    from physics.hf.input import fitlib
+
     ast = astro_of(d.lines)
     old = os.environ.get(fitlib.ENV_LINES)
     old_ch = os.environ.get("INCOGNITA_CHANOBS")
     try:
+        if chanobs:
+            os.environ["INCOGNITA_CHANOBS"] = "1"  # KWCOV B10b integral: the isomer files (xsNNNNNN.Lnn), output only
         if d.lines:
             os.environ[fitlib.ENV_LINES] = d.lines_env
         else:
@@ -121,7 +167,7 @@ def run_deck(path: str | os.PathLike, stats: dict | None = None):
             if ast["astroex"]:
                 os.environ["INCOGNITA_CHANOBS"] = "1"  # the isomer populations (xsNNNNNN.LMM) astroex folds
         with torch.inference_mode():
-            res = engine_c.run(ChainedFull(Z=d.Z, A=d.A, declared_energies=declared, energies=energies), stats)
+            res = engine_c.run(ChainedFull(Z=d.Z, A=A, declared_energies=declared, energies=energies), stats)
         if ast is not None:
             res = _astro_results(res, d, ast)
         return res

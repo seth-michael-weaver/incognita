@@ -269,23 +269,68 @@ B10: dict = {
     "rprime": ("SUPPORTED", "input/defaults.py Params.RprimeU -> urr.py (NJOY potential scattering radius)",
                "acts only with urrnjoy y, as TALYS (default: R' of the first URR energy); range 0-10 checked; response "
                "rprime 7: Fe-56 6e-7, U-238 6e-6", _T10),
-    "xscaptherm": ("IGNORED", "urr.py thermal_capture_mb (thermalxs.f90 port, urr.dat column only)",
-                   "only urr.dat's `thermal capture cross section` reads it (B10; table/Kopecky = stock for Fe-56 "
-                   "2590, U-238 2670 mb); thermal.f90's normalisation of the low-energy capture is B10b"),
+}
+_T10B = "test:test_kwcov_b10b.py"
+_TH = "thermal.py (engine_c/engine run -> thermal.add_to_results -> Results.thermal) "
+#: KWCOV B10b rows (docs/hf/COVERAGE_PLAN.md B10b); stock TALYS-2.25 n + Fe-55/56/61, Ag-109, U-238 at
+#: 2.53e-8 1e-7 5e-7 1e-3 0.1 1 MeV, natural Fe at 1/5/14 MeV, integral y on Fe-56 / Co-59 (30 energies, 2.53e-8-20 MeV);
+#: scripts/kwcov/b10b_response.py
+B10B: dict = {
+    "xscaptherm": ("SUPPORTED", "input/fitlib.py (global) -> Params.xscaptherm(-1) -> " + _TH + "and urr.py",
+                   "thermal.f90's 1/v rows below eninclow and urr.dat's header. TALYS-2.25 quirk kept: thermalxs.f90 "
+                   "reads structure/thermal after the input, so a table row of the target's mass OVERWRITES the deck "
+                   "value (stock Fe-56 `xscaptherm 5000`: no number moves; engine the same); without a row it acts "
+                   "(Fe-61 response 0.0 vs stock). Was dropped silently before B10b (isomer axis -> 'unsupported index "
+                   "form'). Range 1e-20-1e10 checked", _T10B),
+    "xsptherm": ("SUPPORTED", "input/fitlib.py (global) -> Params.xsptherm(-1) -> " + _TH,
+                 "(n,p) ratio of thermal.f90 (rows of (n,p) channel / residual / binary); same table quirk. Fe-55 "
+                 "`xsptherm 2000` response vs stock 2e-6 (a x70 move)", _T10B),
+    "xsalphatherm": ("SUPPORTED", "input/fitlib.py (global) -> Params.xsalphatherm(-1) -> " + _TH,
+                     "(n,a) ratio of thermal.f90; same table quirk. Fe-55 `xsalphatherm 500` response vs stock 5e-6 "
+                     "(a x76 move)", _T10B),
+    "elow": ("SUPPORTED", "input/defaults.py Options.eninclow_mev -> " + _TH + "(grid.f90 E1v / eninclow insertion)",
+             "B10b: energies below it get thermal.f90's rows in Results.thermal (the engine's own arrays there are its "
+             "Hauser-Feshbach numbers, untouched); Fe-56 `elow 1e-4` rows vs stock 5e-6 (TALYS mode), response 4e-6. "
+             "Range 1e-11-1 checked. `endf y` (eninclow from D0) with energies below it is refused", _T10B),
+    "mass": ("SUPPORTED", "input/deck.py run_deck -> natural.py (mass 0)",
+             "mass 0: every isotope of structure/abundance/<El>.abun with the same deck, Results = abundance-weighted "
+             "sums (+ Results.natural); natural Fe = weighted sum of its isotope runs to 2e-16; stock natural files = "
+             "stock isotope sums to 4e-7. Refused with astro / urr / integral (natural.f90 sums none of their files)",
+             _T10B),
+    "abundance": ("SUPPORTED", "input/deck.py run_deck -> natural.abundances",
+                  "abundance <file> (relative to the deck's directory) replaces the structure file for mass 0; "
+                  "ignored otherwise, as TALYS", _T10B),
+    "resonance": ("READ_ONLY_DEFAULT", "input/fitlib.py RESONANCE_REFUSAL (deck line and run_deck)",
+                  "resonance y REFUSED: resonance.f90 copies the ENDF-6 resonance file of `reslib` and runs Cullen's "
+                  "PREPRO (prepro.f, 29,688 lines: RECENT reconstruction, SIGMA1 Doppler to `tres`, GROUPIE for "
+                  "`group y`) before splicing the pointwise MF3 into the .tot files; not ported. resonance n accepted",
+                  _T10B),
+    "group": ("SUPPORTED", "input/fitlib.py (accepted, no number)",
+              "acts only inside resonance y (refused); no effect without it, as in TALYS (flaggroup is read only by "
+              "resonance.f90)", _T10B),
+    "reslib": ("SUPPORTED", "input/defaults.py Options.reslib (no engine reader)",
+               "acts only inside resonance y (refused); no effect without it, as in TALYS (checkvalue checks the name "
+               "only when resonance y)", _T10B),
+    "tres": ("SUPPORTED", "input/defaults.py Params.Tres (no engine reader)",
+             "acts only inside resonance y (refused); no effect without it, as in TALYS; range 0-1e12 checked "
+             "(checkvalue.f90:553)", _T10B),
+    "integral": ("SUPPORTED", "input/deck.py run_deck -> integral.py (Results.integral = integral.dat)",
+                 "integral y: structure/integral/sacs triples folded with the spectra (thermal rows included); port on "
+                 "stock's own xs files 1e-6, engine vs stock 3e-5 in TALYS mode (Fe-56 5 (n,p) rows, Co-59 (n,2n) "
+                 "isomer / total, (n,g) FNG-eurofer, (n,a)). TALYS-2.25 BUG kept: the deck triple `integral <file> "
+                 "<spectrum> <value>` never gives a row (integral.f90 rebuilds the file name from reacstr, which only "
+                 "the sacs reader fills: 'cross section file .tot does not exist')", _T10B),
 }
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
                    "n is production; p/d/t/h/a/g ported behind INCOGNITA_CPINC (g runs engine.run only)", "test:test_charged_fidelity.py"),
     "element": ("SUPPORTED", "engine run(Z, A) arguments", "target is a run argument (TALYSworld: target)", "manual"),
-    "mass": ("SUPPORTED", "engine run(Z, A) arguments", "mass 0 (natural element) is MISSING: no abundance loop "
-             "(natural.f90)", "manual"),
     "energy": ("SUPPORTED", "ChainedFull(declared_energies=...)", "single energy, list or grid file; TALYS "
                "`energy E1 E2 dE` range form must be expanded by the caller", "manual"),
     "ltarget": ("READ_ONLY_DEFAULT", "structure/levels.py:171",
                 "KNOWN GAP: excited/isomeric targets refused (NotImplementedError); only astro/stellar.py uses "
                 "excited entrance states internally", "manual"),
-    "abundance": ("MISSING", "", "natural targets (mass 0 / abundance file): natural.f90 loop over isotopes"),
     # --- per-nucleus gamma cards that fitlib reads under its own table ---
     **{k: ("SUPPORTED", _F + "UPBEND_KEYS -> gamma/parameters.py:762", "upbend C/e/f cards (LEESHELL fix)", "grep")
        for k in ("upbendc", "upbende", "upbendf", "upbendcadjust", "upbendeadjust", "upbendfadjust")},
@@ -297,6 +342,7 @@ MANUAL: dict = {
     **B8,
     **B9,
     **B10,
+    **B10B,
     "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps",
                  "KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the "
                  "Cascade constructor's 1e-8; now it does unless a caller passes its own", _T9),

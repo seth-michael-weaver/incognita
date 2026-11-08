@@ -19,12 +19,12 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 
 | status | observables |
 |---|---|
-| SUPPORTED | 25 |
+| SUPPORTED | 28 |
 | PARTIAL | 15 |
 | INTERNAL | 6 |
-| MISSING | 14 |
+| MISSING | 12 |
 | NA | 2 |
-| **total** | 62 |
+| **total** | 63 |
 
 ## Every observable family
 
@@ -72,8 +72,9 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 | emission spectrum per excitation bin |  | binaryout.f90:1 | outbinspectra | NA |  |  | debug output |
 | recoil spectra of residuals | recZZZAAAspec*.tot | recoilout.f90:1 | recoil, filerecoil, maxenrec, anglesrec | MISSING |  | B7 | recoilinit.f90 576 l. + angdisrecoil 491 l. |
 | unresolved resonance parameters | urr.dat urr*.lLL urrtalys.tot urrnjoy.tot urrratio.tot | urrout.f90:1, urr.f90:1 | urr, lurr, urrnjoy, rprime | SUPPORTED | urr.py (Results.urr, urr.write_files) | B10 | test:test_kwcov_b10.py; every number vs stock: Fe-56 5e-5, Co-59 1e-4, U-238 0.11 % and Au-197 2e-4 in TALYS mode (default mode: U-238 Gf 22 % = EXACTFIS, Au-197 Gx/capture = CCEXITNB2); keyword responses <= 3e-4. Not: Ninclow energies, widthmode 2/3 |
-| resonance-range / groupwise / integral data | resonance.tot group*.tot integral.dat | resonance.f90:1, integral.f90:1 | resonance, group, integral, reslib, tres | MISSING |  | B6 | uses external resonance libraries |
-| thermal cross sections | talys.out | thermal.f90:1, thermalxs.f90:1 | xscaptherm, xsptherm, xsalphatherm | MISSING |  | B6 |  |
+| resonance-range pointwise / groupwise data | total.tot elastic.tot xs*.tot rp*.tot below the URR, *.point, *.group | resonance.f90:1 | resonance, group, reslib, tres | MISSING | input/fitlib.py RESONANCE_REFUSAL | B10b | resonance y REFUSED: needs Cullen's PREPRO (prepro.f, 29,688 lines) on the ENDF-6 resonance files; group / reslib / tres act only inside it |
+| effective cross sections in integral spectra | integral.dat | integral.f90:1 | integral | SUPPORTED | integral.py (run_deck -> Results.integral) | B10b | test:test_kwcov_b10b.py; port on stock's xs files 1e-6, engine vs stock 3e-5 (TALYS mode, Fe-56 / Co-59 sacs rows). Deck triples give no row (TALYS-2.25 bug, kept) |
+| cross sections below eninclow (thermal / 1/v region) | every .tot file's rows below eninclow | thermal.f90:1, thermalxs.f90:1 | xscaptherm, xsptherm, xsalphatherm, elow | SUPPORTED | thermal.py (Results.thermal, output only) | B10b | test:test_kwcov_b10b.py; port on stock's eref row 2e-6; engine vs stock (TALYS mode) Fe-55/56/61, Ag-109 (isomer branches), U-238 <= 6e-6; default mode the elastic/total rows carry LOWEPOT's elastic (x274 lower for Fe-56). Not: rp*.Lnn rows (no engine residual-isomer output) |
 | S0, S1, R', D0, <Gamma_gamma> (resonance parameters) | talys.out | incidentout.f90, densityout.f90 |  | PARTIAL | ingredients.py (D0, Gg, S0) | B4 |  |
 | astrophysical reaction rates | astrorate.g/p/a/f, astrorate.tot, astrorateZZZAAA.tot, .LNN | astroout.f90:1 | astro, astrogs, astroex, astroT, astroE, nonthermlev | SUPPORTED | astro/rates.py, astro/thermal.py (run_deck -> Results.astro, rates.write_files) | B9 | test:test_kwcov_b9.py; Fe-56 (n,g) rate 1.27 % vs stock over T9 1e-4..10, G(T) 1.35 %; Au-197 limited by the engine's default (n,n')/(n,g) above 0.1 MeV (plan B9) |
 | MACS | macs.g | astroout.f90:1 | astro, astroE | SUPPORTED | astro/rates.py (MACS column + macs.g) | B9 | test:test_kwcov_b9.py; Au-197 30 keV 929.9 vs stock 934.4 mb. The published library's MACS are NOT this path (scripts/release, ground-state curve, exact log-log integral) |
@@ -90,5 +91,5 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 | statistical analysis of cross sections | sacs.dat | sacs.f90:1 | sacs | MISSING |  | B12 |  |
 | charged-particle induced reactions (p d t h a) | all |  | projectile | PARTIAL | projectile.py (INCOGNITA_CPINC) |  | ported, behind env switch |
 | photonuclear reactions | all |  | projectile g | PARTIAL | projectile.py (engine.run only) |  |  |
-| natural-element targets | all + natural sums | natural.f90 | mass 0, abundance | MISSING |  | B6 |  |
+| natural-element targets | all + natural sums | natural.f90:1 | mass 0, abundance | SUPPORTED | natural.py (run_deck mass 0 -> weighted Results + Results.natural) | B10b | test:test_kwcov_b10b.py; sums = weighted isotope runs to 2e-16; stock natural = stock isotope sums 4e-7. Spectra / angular not summed (natural.f90 interpolates them); binary.tot and xs*.Lnn ARE summed here (TALYS leaves the last isotope's) |
 | isomeric (excited) targets | all |  | ltarget | MISSING | structure/levels.py:171 refuses | KNOWN GAP | engine refuses Ltarget /= 0 |

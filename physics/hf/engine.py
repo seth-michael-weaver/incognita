@@ -903,7 +903,10 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     res = lowepot.add_to_results(res, injection)
     from physics.hf import angout, specobs  # KWCOV B3 / B4: angular distributions, spectra, DDX, gamma lines (off: unchanged)
 
-    return specobs.add_to_results(angout.add_to_results(res, injection), injection)
+    res = specobs.add_to_results(angout.add_to_results(res, injection), injection)
+    from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
+
+    return thermal.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:
