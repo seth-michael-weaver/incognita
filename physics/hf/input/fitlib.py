@@ -98,7 +98,7 @@ _FIT_FLAGS = frozenset({"fit", "ngfit", "nnfit", "nffit", "nafit", "ndfit", "pnf
 
 #: keyword lines this module knows it does NOT apply, with the reason (BESTFIT report)
 _SKIP = {
-    "optmod": "external OMP file", "optmodfilen": "external OMP file",
+    # KWCOV B6: optmod / optmodfilen / optmodfilep are read by omp.ompdeck.extract before this table is consulted
     "deformfile": "external deformation file", "levelfile": "external level file",
     "ntop": "not in PARAM_SPECS",
     "rescuefile": "output renormalisation, not a model parameter",
@@ -304,13 +304,14 @@ class Cards:
     skipped: tuple[tuple[str, str], ...] = ()             # (line, reason)
     source: tuple[str, ...] = ()                          # which files it came from
     eadj: tuple = ()                                      # ENGADJ energy-local bumps (physics/hf/eadj.py)
+    omp: object = ()                                      # KWCOV B6: OMP files / ranges / tables (omp/ompdeck.py)
 
     @property
     def option_overrides(self) -> dict:
         return dict(self.options)
 
     def empty(self) -> bool:
-        return not (self.options or self.cells or self.globals_ or self.particles or self.eadj)
+        return not (self.options or self.cells or self.globals_ or self.particles or self.eadj or self.omp)
 
 
 def _split(lines, want_options: bool) -> tuple[list, list, list, list, list]:
@@ -341,6 +342,10 @@ def _split(lines, want_options: bool) -> tuple[list, list, list, list, list]:
                 opts.append(form)
             continue
         if k in OPTION_KEYWORDS:
+            if len(w) > 2 and _MULTIWORD.get(k):  # KWCOV B4/B6: one TALYS line with several words (`fileddxa n 30`)
+                if want_options:
+                    opts.append((k, " ".join(w[1:])))
+                continue
             if len(w) == 2:
                 if want_options:
                     opts.append((k, w[1]))
@@ -389,6 +394,24 @@ def _split(lines, want_options: bool) -> tuple[list, list, list, list, list]:
         except (ValueError, IndexError):
             skipped.append((line, "could not be parsed"))
     return opts, cells, globs, parts, skipped
+
+
+def _multiword() -> dict:
+    """KWCOV B6: Options keywords whose value is several words (`_apply_stage` kinds that parse them)."""
+    from physics.hf.input.defaults import _OPTION_KEYWORDS
+
+    kinds = ("ejectiles", "ddxpoints", "riplomp", "particles")
+    return {k: True for k, spec in _OPTION_KEYWORDS.items() if spec[2] in kinds}
+
+
+class _LazyMulti(dict):
+    def get(self, k, default=None):
+        if not self:
+            self.update(_multiword())
+        return dict.get(self, k, default)
+
+
+_MULTIWORD = _LazyMulti()
 
 
 def _deck_form(k: str, w: list) -> tuple | None:
@@ -664,11 +687,21 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
             elif not _eadj.disabled():
                 ead.append(_eadj.parse_line(x))  # a malformed eadj line raises: a dial must not be dropped silently
         bl = tuple(keep)
+    from physics.hf.omp import ompdeck  # KWCOV B6: optmod, optmodfile*, *adjustF, energy-local OMP adjustments
+
+    bdirs = [best_file(Z, A, projectile, Ltarget).parent]
+    for x in src:
+        if x.startswith("deck best y: "):
+            bdirs.insert(0, Path(x[len("deck best y: "):]).parent)
+    bdirs += [d / "misc" / "tables" for d in list(bdirs)]
+    bl, omp_deck = ompdeck.extract(bl, Z, A, bdirs)
     opts, cells, globs, parts, skipped = _split(bl, want_options=True)
     _loud_skips(skipped, extra if "lines" in arms else ())  # KWCOV B2
     if "s8" in arms and not any(k == "strength" for k, _ in opts):
         opts = [("strength", 8)] + opts
     o = _resolved(Z, A, projectile, dict(opts))
+    if not o.flagincadj:  # KWCOV B6, ompadjust.f90:92: the projectile's energy-local factors never act
+        omp_deck = ompdeck.drop_bumps(omp_deck, o.k0)
     # OMPROTOR (COMBINE4, Incognita extension): the rotor CC diffuseness un-fold's per-particle cards, after the run's own lines
     # (where OMPROTOR's runs carried them as extra lines); none for OFF or a non-member target (omp/omprotor.py)
     from physics.hf.omp import omprotor
@@ -718,7 +751,7 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
         cells, globs, parts = cells + c2, globs + g2, parts + p2
         skipped = skipped + s2
     return Cards(Z, A, projectile, tuple(opts), tuple(cells), tuple(globs), tuple(parts),
-                 tuple(skipped), tuple(src), tuple(ead))
+                 tuple(skipped), tuple(src), tuple(ead), omp_deck)
 
 
 # ------------------------------------------------------------------------- the run's active set
@@ -963,6 +996,11 @@ def apply_params(Z: int, A: int, options, params):
         _t(k)[...] = v
     for k, i, v in parts:
         _t(k)[i] = v
+    if c.omp:  # KWCOV B6: `rvadjustF p E1 E2 D s` ranges (input_ompmodel.f90:249-283)
+        from physics.hf.omp import ompdeck
+
+        for k, pos, v in ompdeck.range_cells(c.omp):
+            _t(k)[pos] = v
     return Params({**params.values, **new}) if new else params
 
 

@@ -276,7 +276,10 @@ def read_local_omp(
     """
     base = structure if structure is not None else talys_structure_path()
     sub, sym = ("neutron", "n") if k == 1 else ("proton", "p")
-    lines = _local_omp_file(str(base / "optical" / sub / f"{sym}-{nuclide_symbol(Z)}.omp"))
+    from physics.hf.omp import ompdeck  # KWCOV B6: `optmodfilen Z file` / `optmodfilep Z file` (omppar.f90:52-63)
+
+    own = ompdeck.local_file(Z, k)
+    lines = _local_omp_file(own or str(base / "optical" / sub / f"{sym}-{nuclide_symbol(Z)}.omp"))
     if lines is None:
         return None
     i = 0
@@ -450,6 +453,9 @@ def omppar(
             base = structure
             sub, sym = ("neutron", "n") if k == 1 else ("proton", "p")
             path = base / "optical" / sub / f"{sym}-{nuclide_symbol(Z)}.omp"
+            from physics.hf.omp import ompdeck  # KWCOV B6: optmodfilen / optmodfilep (omppar.f90:52-63)
+
+            path = ompdeck.local_file(Z, k) or path
             exists = _local_omp_file(str(path)) is not None  # cached; the file's is_file()
             if not exists:
                 continue
@@ -586,15 +592,19 @@ def ejectile_params(params: Params | None, projectile: int = 1) -> Params | None
     """
     if params is None:
         return None
+    from physics.hf.omp import ompdeck
+
     keys = list(_ADJ.values())
-    if all(bool(torch.equal(params[k][projectile], params[k][0])) for k in keys):
+    marked = ompdeck.has_bumps(projectile) or ompdeck.has_bumps(0)  # KWCOV B6: energy-local lines go by ktype
+    if not marked and all(bool(torch.equal(params[k][projectile], params[k][0])) for k in keys):
         return params
     vals = dict(params.values)
     for k in keys:
         t = vals[k].clone()
         t[projectile] = t[0]
         vals[k] = t
-    return type(params)(values=vals)
+    out = type(params)(values=vals)
+    return ompdeck.mark_ejectile(out, projectile) if marked else out
 
 
 def adjustF(e_mev: Tensor, params: Params | None, k: int, omptype: int) -> Tensor | float:
@@ -832,6 +842,9 @@ def opticalnp(
     F = ompadjust(params, k if adjust_type is None else adjust_type)
     if eadj_on:
         F = eadj_F(F, k, e)
+    from physics.hf.omp import ompdeck  # KWCOV B6: TALYS's energy-local adjustment lines (adjust.f90)
+
+    F = ompdeck.factors(F, adjust_type if adjust_type is not None else ompdeck.ktype(params, k, options), e)
     ejoin = 200.0 if params is None else params["ejoin"][k]
     vinfadjust = 1.0 if params is None else params["vinfadjust"][k]
     flagsoukho = options.flagsoukho if options is not None else True
@@ -1211,6 +1224,9 @@ def opticalcomp(
     n, p = np_(1, ea), np_(2, ea)
     n_e, p_e = np_(1, e), np_(2, e)
     F = eadj_F(ompadjust(params, k), k, e)
+    from physics.hf.omp import ompdeck  # KWCOV B6
+
+    F = ompdeck.factors(F, ompdeck.ktype(params, k, options), e)
     iz, in_, ia = PARZ[k], PARN[k], PARA[k]
     o = {
         "v_mev": F["Fv1"] * (in_ * n["v_mev"] + iz * p["v_mev"]),
@@ -1388,8 +1404,11 @@ def omp_parameters(
     TALYS: optical.f90:1 (optical), kd03.f90:1 (kd03)
     Test: A-omppar
     """
-    from physics.hf.omp import omp_nx2
+    from physics.hf.omp import omp_nx2, ompdeck
 
+    own = ompdeck.tables(Z, Z + N)  # KWCOV B6: `optmod Z A file [p]` (omppar.f90:243-277)
+    if own:
+        tables = {**{kk: t for kk, (t, _ef) in own.items()}, **dict(tables or {})}
     fast = omp_nx2.omp_parameters(  # NATIVEX2 `omp`: on floats, no gradient
         Z, N, particle, e_mev, params, options, colltype=colltype, tables=tables,
         enincmax_mev=enincmax_mev, soukho_eferm_mev=soukho_eferm_mev,
@@ -1417,6 +1436,9 @@ def omp_parameters(
             )
             if k in nucleon:  # omppar.f90:363-366: `Ef =` in the table header overwrites ef
                 nucleon[k] = replace(nucleon[k], ef_mev=ef_ripl)
+    for kk, (_t_, ef_own) in own.items():  # omppar.f90:254: `if (eferm > 0.) ef = eferm`
+        if ef_own > 0.0 and kk in nucleon:
+            nucleon[kk] = replace(nucleon[kk], ef_mev=ef_own)
     joins: dict[int, JoinValues] = {}
     for k in (1, 2):
         ejoin = float(params["ejoin"][k])

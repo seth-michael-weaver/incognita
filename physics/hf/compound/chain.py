@@ -65,7 +65,7 @@ def primary_dens_inputs(cas, st, etotal_mev: float, *, gammax: int,
             nexmax=d.maxex, sep_mev=sp.sep_mev[t], ex_mev=d.ex_mev, dex_mev=d.dex_mev,
             maxj=d.maxj, parlev=d.parlev, jdis=d.jdis, rhogrid=d.rhogrid, ncum_nl=d.ncum_nl)
         if t >= 1:
-            tjl, tl, lmax = cas.trans_of(0, 0)[t]  # SLFIRST: the first compound nucleus's set
+            tjl, tl, lmax = cas.front_trans()[t]  # SLFIRST: the first compound nucleus's set; KWCOV B6 optmodall
             trans[t] = DensTrans(
                 egrid_mev=cas.rg.egrid, ebegin=cas.rg.ebegin[t],
                 eend=min(int(eend[t]), cas.rg.maxen), maxen=cas.rg.maxen,

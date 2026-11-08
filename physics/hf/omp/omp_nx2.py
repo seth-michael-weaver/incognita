@@ -671,6 +671,10 @@ def omp_columns(Z: int, N: int, particle: int, e_mev, params, options, *, collty
 
     if eadj.any_target(eadj.OMP_TARGETS):  # ENGADJ: energy-local F* bumps are built by the torch path only
         return None
+    from physics.hf.omp import ompdeck
+
+    if ompdeck.on():  # KWCOV B6: optmod / optmodfile* / energy-local adjustment lines: the torch path only
+        return None
     fac = _factors(params)
     if fac is None:
         return None

@@ -305,11 +305,28 @@ class Cascade:
         """The emission-grid set that compound nucleus (zix, nix) emits through: `trans`, except under SLFIRST
         (INCOGNITA_SFUNC_SCOPE=first) where the first compound nucleus (0, 0) -- whose neutron exits leave the
         measured target -- gets SLINPUT's measured-S_l set and every other nucleus the model set."""
+        if getattr(self.options, "flagompall", False) and not self.omp_overrides and not self.diff_params:
+            from physics.hf.compound import ompall  # KWCOV B6: optmodall y, a set per compound nucleus
+
+            return ompall.cascade_set(self, zix, nix)
         if (int(zix), int(nix)) == (0, 0) and not self.omp_overrides and not self.diff_params \
                 and self._sfunc_first():
             from physics.hf.compound.dens_reference import _transmission
             return _transmission(self.Zt, self.At, self.enincmax)
         return self.trans
+
+    def front_trans(self) -> dict:
+        """The set of the initial compound nucleus's primary decay: `trans_of(0, 0)`, except with `optmodall y`,
+        where TALYS reads it before `energies` (compound/ompall.py `front_set`).
+
+        TALYS: talysreaction.f90:1 (talysreaction)
+        Test: tests/hf/test_kwcov_b6.py
+        """
+        if getattr(self.options, "flagompall", False) and not self.omp_overrides and not self.diff_params:
+            from physics.hf.compound import ompall
+
+            return ompall.front_set(self)
+        return self.trans_of(0, 0)
 
     def trans_cont_of(self, zix: int, nix: int):
         """ROTEXIT1CN (`sfunc.exit_cont`, default OFF): the set nucleus (zix, nix)'s exits into CONTINUUM rows use when it
@@ -920,6 +937,7 @@ class Cascade:
         e0 = np.zeros((NUMZ + 1, NUMN + 1), np.float32)
         em = np.zeros((NUMZ + 1, NUMN + 1), np.float32)
         e0[0, 0] = em[0, 0] = np.float32(etotal_mev)
+        self._ompall_e = e_inc_mev  # KWCOV B6 (optmodall y): the energy the per-nucleus sets are read at
         return ChainState(e0, em, lmaxinc=int(lmaxinc), e_inc_mev=e_inc_mev,
                           first_energy=self.is_first_energy(e_inc_mev))
 

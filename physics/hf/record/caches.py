@@ -147,6 +147,10 @@ def _inputs_signature(cas) -> dict:
     env = sd._env_part()
     if eadj.on():
         env += b"|eadj" + repr(eadj.token()).encode()
+    from physics.hf.omp import ompdeck
+
+    if ompdeck.active() is not None:  # KWCOV B6
+        env += b"|b6" + repr(ompdeck.token()).encode()
     out["env"] = h(env)
     return out
 

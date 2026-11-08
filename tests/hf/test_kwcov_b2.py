@@ -110,12 +110,12 @@ def test_bad_forms_are_refused_not_dropped(clean):
 
 
 def test_unapplied_deck_line_is_refused_best_file_line_warns(clean):
-    clean.setenv(F.ENV_LINES, "awdadjust n 1. awdadjust-n.table")     # energy-dependent table: not ported
+    clean.setenv(F.ENV_LINES, "cknock a 1. cknock-a.table")          # energy-dependent table of a non-OMP keyword
     with pytest.raises(ValueError, match="not applied by the port"):
         F.cards(26, 56)
-    clean.setenv(F.ENV_LINES, "best y")                                # Fe-56's best file has that line
-    with pytest.warns(UserWarning, match="awdadjust-n.table"):
-        F.cards(26, 56)
+    # KWCOV B6: OMP adjustment tables are read now; Fe-56's best file finds its table in best/Fe056/misc/tables
+    clean.setenv(F.ENV_LINES, "best y")
+    assert F.cards(26, 56).omp.bumps[0].key == "awdadjust"
 
 
 def test_deck_lines_reach_the_options(clean):
