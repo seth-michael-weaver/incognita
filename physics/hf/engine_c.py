@@ -895,11 +895,12 @@ class _ChanState:
 class _Chan:
     """What `run` reads of a `ChannelResult`."""
 
-    __slots__ = ("xschannel_mb", "residual", "xsfistot_mb", "xsresprod_mb")
+    __slots__ = ("xschannel_mb", "residual", "xsfistot_mb", "xsresprod_mb", "full")
 
-    def __init__(self, xschannel_mb, residual, xsfistot_mb, xsresprod_mb):
+    def __init__(self, xschannel_mb, residual, xsfistot_mb, xsresprod_mb, full=None):
         self.xschannel_mb, self.residual = xschannel_mb, residual
         self.xsfistot_mb, self.xsresprod_mb = xsfistot_mb, xsresprod_mb
+        self.full = full  # CHANOBS: the whole ChannelResult (Python channels only)
 
     @classmethod
     def of(cls, ch):
@@ -909,7 +910,7 @@ class _Chan:
 
         resid = {residual_key(Z, A): v for (Z, A), v in ch.residual_mb.items()}
         resid.update(resiso_keys(ch.residual_mb, ch.xsbranch))  # RESISO (nothing when off)
-        return cls(ch.xschannel_mb, resid, ch.xsfistot_mb, ch.xsresprod_mb)
+        return cls(ch.xschannel_mb, resid, ch.xsfistot_mb, ch.xsresprod_mb, full=ch)
 
 
 class _Keys:
@@ -1293,6 +1294,9 @@ def cases(zf, stats: dict | None = None):
     specout.begin_run(cas)
     chst = _ChanState()
     keys = None
+    from physics.hf.emission import chanobs
+
+    chanobs_on = chanobs.enabled()
     try:
         add = addends(target, zf.Z, zf.A, run_axis, declared, fit=cas.fit)
         built = _BuiltInputs(cas, target, declared, add)
@@ -1410,7 +1414,10 @@ def cases(zf, stats: dict | None = None):
                 except _Unsupported as ex:
                     packed = None
                     stats.setdefault("fallback", []).append((binp.e_inc_mev, str(ex)))
-            if packed is not None:
+            if packed is not None and chanobs_on:  # CHANOBS: the Python channels keep every ChannelResult field
+                with stagetime.stage("multiple_emission"):
+                    mres = packed.result()
+            elif packed is not None:
                 try:
                     chan = packed.channels(cinp, b, xsbinary, chst, keys)
                     stats["channels_c"] = stats.get("channels_c", 0) + 1
@@ -1475,6 +1482,10 @@ def run(injection, stats: dict | None = None):
         return engine.run(injection=injection)
     per_case = cases(injection, stats)
     e_inc, chans, levels, resid, totals = [], [], [], [], []
+    from physics.hf.emission import chanobs
+
+    xtra = [] if chanobs.enabled() else None
+    xstate = BinaryState() if xtra is not None else None  # CHANOBS: the full binary for xsbinary/xsdisctot
     reuse = os.environ.get("HF_ENGINE_C_REBINARY", "0") != "1"
     bstate = None if reuse else BinaryState()
     PARSYM = engine.PARSYM
@@ -1485,6 +1496,9 @@ def run(injection, stats: dict | None = None):
         chans.append(keys.chans(xsch))
         levels.append(keys.levels(binp.k0, b.xsdisc_mb))
         resid.append(ch.residual)
+        if xtra is not None:  # CHANOBS: output only
+            bx = b if hasattr(b, "xsbinary_mb") else binary(binp, xstate)  # binary_lean keeps no xsbinary
+            xtra.append({} if ch.full is None else chanobs.extras(ch.full, bx, binp.k0, int(injection.Z), int(injection.A), binp=binp))
         # totalxs.f90's xsexclusive: the one-particle channel of each ejectile (parskip off)
         excl = {t: xsch.get(0 if t == 0 else 10 ** (6 - t), 0.0) for t in keys.live_t}
         totals.append({
@@ -1498,7 +1512,7 @@ def run(injection, stats: dict | None = None):
         e_inc_mev=torch.tensor(e_inc, dtype=DTYPE),
         channels_mb=_stack(chans), levels_mb=_stack(levels),
         residual_production_mb=_stack(resid), totals_mb=_stack(totals),
-        injected=injection.families,
+        injected=injection.families, extras=_stack(xtra) if xtra else {},
     )
     # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
     from physics.hf.direct.racapcalc import add_to_results

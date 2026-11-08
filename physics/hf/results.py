@@ -29,6 +29,9 @@ class Results:
     totals_mb: dict[str, Tensor] = field(default_factory=dict)  # "total", "elastic", ...
     # what the engine injected rather than computed, per family: "fission", "direct", "ecis", ...
     injected: tuple[str, ...] = ()
+    # CHANOBS (INCOGNITA_CHANOBS, default off = empty): TALYS file/column names -> (C,), mb unless the name ends in
+    # ":multiplicity" or ":branch" (physics/hf/emission/chanobs.py lists them)
+    extras: dict[str, Tensor] = field(default_factory=dict)
 
     @property
     def n(self) -> int:

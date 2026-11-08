@@ -156,8 +156,8 @@ def new_cascade(Z: int, A: int, declared_energies: tuple[float, ...]):
 def result_arrays(res) -> dict[str, np.ndarray]:
     """Every array of an `engine.run` `Results`, flat: "channels_mb/xs000000" -> (C,)."""
     out = {"e_inc_mev": res.e_inc_mev.detach().numpy().copy()}
-    for part in ("channels_mb", "levels_mb", "residual_production_mb", "totals_mb"):
-        for k, v in getattr(res, part).items():
+    for part in ("channels_mb", "levels_mb", "residual_production_mb", "totals_mb", "extras"):
+        for k, v in getattr(res, part, {}).items():
             out[f"{part}/{k}"] = np.asarray(v.detach().numpy() if hasattr(v, "detach") else v,
                                             dtype=np.float64).copy()
     return out

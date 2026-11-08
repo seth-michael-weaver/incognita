@@ -841,11 +841,16 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     # TALYS's own set, which is what the injected gate scores. With nothing injected there is no
     # set to carry, so the engine keeps its own across the ascending energy loop, as TALYS does.
     cstate = ExclusiveState() if not injection.families else None
+    from physics.hf.emission import chanobs
+
+    xtra = [] if chanobs.enabled() else None
     for binp, cinp in per_case:
         e_inc.append(binp.e_inc_mev)
         b = binary(binp, bstate)
         ch = exclusive_channels(cinp, cstate)
         chans.append({f"xs{code:06d}": v for code, v in ch.xschannel_mb.items()})
+        if xtra is not None:  # CHANOBS: output only
+            xtra.append(chanobs.extras(ch, b, binp.k0, int(getattr(injection, "Z", 0)), int(getattr(injection, "A", 0)), binp=binp))
         levels.append({
             level_key(binp.k0, t, nex): float(v[nex])
             for t, v in b.xsdisc_mb.items() for nex in range(v.shape[0])
@@ -865,7 +870,7 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
         e_inc_mev=torch.tensor(e_inc, dtype=DTYPE),
         channels_mb=_stack(chans), levels_mb=_stack(levels),
         residual_production_mb=_stack(resid), totals_mb=_stack(totals),
-        injected=injection.families,
+        injected=injection.families, extras=_stack(xtra) if xtra else {},
     )
     # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
     from physics.hf.direct.racapcalc import add_to_results

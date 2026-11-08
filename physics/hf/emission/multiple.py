@@ -890,18 +890,39 @@ def full_xsbinary(binp, xsbinary):
     TALYS: binary.f90:215,259,277; multiple.f90:948-950
     Test: development notes (stored stock TALYS-2.24 production, G1/G2)
     """
+    if xsbinary is None or not tritfid_on():  # charged-projectile fidelity: default ON for k0 > 1
+        return xsbinary
+    out = xsbinary.clone()
+    for t, add in binary_adds(binp):
+        out[t + 1] = out[t + 1] + add
+    return out
+
+
+def tritfid_on() -> bool:
+    """TRITFID: whether `full_xsbinary` adds the non-compound binary emission (see there).
+
+    TALYS: (none -- a port switch)
+    Test: tests/hf/test_chanobs.py
+    """
     import os
 
     v = os.environ.get("INCOGNITA_TRITFID", "")
-    if xsbinary is None or v == "0" or (v == "" and not _charged_run()):  # charged-projectile fidelity: default ON for k0 > 1
-        return xsbinary
-    out = xsbinary.clone()
+    return not (v == "0" or (v == "" and not _charged_run()))
+
+
+def binary_adds(binp) -> list[tuple[int, float]]:
+    """[(type, mb)] that `full_xsbinary` adds, in order, to the compound part of `xsbinary` (direct capture last).
+
+    TALYS: binary.f90:215,259,277
+    Test: tests/hf/test_chanobs.py
+    """
+    out: list[tuple[int, float]] = []
     for t in sorted(binp.grids):
         add = float(binp.xsdirdisctot_mb.get(t, 0.0))
         if binp.flagpreeq:
             add += float(binp.xspreeqtot_mb.get(t, 0.0)) + float(binp.xsgrtot_mb.get(t, 0.0))
-        out[t + 1] = out[t + 1] + add
-    out[1] = out[1] + float(binp.xsracape_mb)
+        out.append((t, add))
+    out.append((0, float(binp.xsracape_mb)))
     return out
 
 
