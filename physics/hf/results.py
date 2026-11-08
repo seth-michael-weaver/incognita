@@ -50,6 +50,10 @@ class Results:
     # files as {file name: {column: ndarray over rows}} (urr.dat, urrgamwidth.l00, urrtalys.tot, urrnjoy.tot, ...);
     # physics/hf/urr.py
     urr: dict = field(default_factory=dict)
+    # RECOIL (KWCOV B12: `recoil y` (+ `labddx y`) in a deck, default empty): residual recoil spectra
+    # (rec<ZZZ><AAA>spec.tot, sp<nnnnnn>.rec) and LAB-frame spectra / DDX (<x>spec.lab, <x>ddx.lab, <x>ddxE....lab,
+    # <x>ddxA....lab) under TALYS's file names, (C, ...); physics/hf/recoil.py lists them
+    recoil: dict[str, Tensor] = field(default_factory=dict)
 
     @property
     def n(self) -> int:

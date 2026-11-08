@@ -274,6 +274,31 @@ B11: dict = {
     "radiounit": ("SUPPORTED", "input/defaults.py Options.radiounit + " + _PR, "bq kbq mbq gbq ci kci mci; exact", _T11),
     "yieldunit": ("SUPPORTED", "input/defaults.py Options.yieldunit + " + _PR, "num mug mg g kg; exact", _T11),
 }
+_T12 = "test:test_kwcov_b12.py"
+_RC = "recoil.py + native/recoil.c (specobs.add_to_results -> recoil.add_to_results -> Results.recoil) "
+#: KWCOV B12 rows (docs/hf/COVERAGE_PLAN.md B12); stock TALYS-2.25 n + Fe-56 / Co-59 / U-238, p + Nb-93 at 1 5 14 MeV,
+#: scripts/kwcov/b12_response.py (TALYS mode = fidelity.py's TALYS_DECK / TALYS_ENV)
+B12: dict = {
+    "recoil": ("SUPPORTED", "input/defaults.py Options.flagrecoil -> " + _RC + "recoilinit, binaryrecoil, angdisrecoil, "
+               "comprecoil, cm2lab, labsurface, binsurface, totalrecoil, recoilout",
+               "rec<ZZZ><AAA>spec.tot (recoil spectrum, integral, production) and exclusive sp<nnnnnn>.rec; "
+               "INCOGNITA_RECOIL_DIR writes the files. TALYS mode vs stock, bins > 1 % of the peak: Fe-56 1/5 MeV "
+               "1e-3, 14 MeV 1.7 % (acceptance 3 %); p + Nb-93 0.03 %; Co-59 / U-238 5.7 / 4.5 % in the 1-5 % tail "
+               "(backward-angle discrete scattering), integrals 0.3 %. TALYS's float32 kinematics kept (Erecinit, "
+               "Emaxlab, last-level drop); output only (Results arrays bitwise with and without)", _T12),
+    "labddx": ("SUPPORTED", "input/defaults.py Options.flaglabddx -> " + _RC + "(ejectile LAB grid, ddxejlab)",
+               "<x>spec.lab, <x>ddx.lab, <x>ddxE<e>.lab (fileddxe), <x>ddxA<a>.lab (fileddxa); anglesrec 9. Fe-56 TALYS "
+               "mode: LAB spectra 0.8 %, LAB DDX 3.9 % (150 deg, 14 MeV: the B4 isotropic GR/collective CM part); "
+               "gamma LAB spectrum needs TALYS's single precision (kernel built in float32)", _T12),
+    "recoilaverage": ("SUPPORTED", "input/defaults.py Options.flagrecoilav -> recoil.py _comprecoil_nucleus",
+                      "one average CN velocity per decaying bin; response vs stock 0.04 % (shape changes up to x5)", _T12),
+    "maxenrec": ("SUPPORTED", "input/defaults.py Options.maxenrec -> recoil.py", "recoil energy bins (1-20 checked); "
+                 "maxenrec 10 vs stock 1.6 % (14 MeV tail), grid identical", _T12),
+    "anglesrec": ("SUPPORTED", "input/defaults.py Options.nanglerec -> recoil.py", "recoil angle bins (1-9 checked); "
+                  "anglesrec 4 response 0.02 %", _T12),
+    "channelenergy": ("SUPPORTED", "input/defaults.py Options.flagEchannel -> specobs.energy_spectra",
+                      "spectra.f90:152-158 espec conversion; vs stock (B12): <x>spec.tot grid and xs 0.05 %", _T12),
+}
 _T10 = "test:test_kwcov_b10.py"
 _UR = "urr.py (engine_c/engine cases -> urr.record per Einc <= eurr -> Results.urr) "
 #: KWCOV B10 rows (docs/hf/COVERAGE_PLAN.md B10); stock TALYS-2.25 n + Fe-56 / U-238 / Co-59 / Au-197 at 0.01-5 MeV,
@@ -324,6 +349,7 @@ MANUAL: dict = {
     **B9,
     **B11,
     **B10,
+    **B12,
     "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps",
                  "KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the "
                  "Cascade constructor's 1e-8; now it does unless a caller passes its own", _T9),

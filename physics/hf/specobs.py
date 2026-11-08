@@ -597,15 +597,22 @@ def add_to_results(res, injection):
     TALYS: spectraout.f90:1, ddxout.f90:1, gamdisout.f90:1
     Test: tests/hf/test_specobs.py
     """
+    from physics.hf import recoil, specout
+
     if _SET is None:
+        if recoil.active():  # KWCOV B12: `recoil y` with `outspectra n` (discrete recoils only, as TALYS)
+            try:
+                res = recoil.add_to_results(res, injection)
+            finally:
+                if not specout.env_enabled():
+                    specout.clear_run()
         return res
     from dataclasses import replace
 
     import torch
 
-    from physics.hf import specout
-
     try:
+        res = recoil.add_to_results(res, injection)  # KWCOV B12: before the recorders are cleared (no-op without recoil)
         arr = build(res)
         out_dir = os.environ.get(ENV_DIR, "").strip()
         if out_dir and arr:

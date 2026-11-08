@@ -50,9 +50,9 @@ def enabled() -> bool:
     """
     if any(os.environ.get(k, "").strip().lower() in ("1", "y", "yes", "on") for k in ("INCOGNITA_BINSPEC", "INCOGNITA_SPECOUT")):
         return True
-    from physics.hf import specobs  # KWCOV B4: the TALYS spectrum / DDX output of this run needs them
+    from physics.hf import recoil, specobs  # KWCOV B4 / B12: the TALYS spectrum / DDX / recoil output needs them
 
-    return specobs.active()
+    return specobs.active() or recoil.active()
 
 
 def specclose_on() -> bool:

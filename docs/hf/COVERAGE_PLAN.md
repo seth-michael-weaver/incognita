@@ -69,7 +69,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B10 | URR (DONE, branch `kwcov10`; widthmode 2/3 refused) | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
 | B10b | thermal, natural targets, resonance range | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
 | B11 | medical isotope production (DONE, branch `kwcov11`) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
-| B12 | recoils and LAB frame | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
+| B12 | recoils and LAB frame (DONE, branch `kwcov12`) | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
 | B13 | ingredient outputs | outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
 | B14 | fission yields and fragment evaporation | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
 | B15 | low value | endf, endfdetail, sacs, legacy, components | endf.cs helpers, sacs.dat, component split | 1 d |
@@ -682,10 +682,66 @@ Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same 
   file round trip and blockyield, Options and deck-line parsing, every refusal, one p + Zn-68 engine run, neutron
   refusal through run_deck).
 
-### B12 -- recoils and LAB frame
+### B12 -- recoils and LAB frame (done on branch `kwcov12`)
 
 `recoilinit.f90:1` (576 l.), `angdisrecoil.f90:1`, `recoilout.f90:1`, LAB DDX in `ddxout.f90`. Accept: Fe-56
 14 MeV residual recoil spectra vs stock 3 %.
+
+**Done (branch `kwcov12` = `kwcov11` + merge of `kwcov10`).**
+
+* **What.** `physics/hf/recoil.py` + `physics/hf/native/recoil.c` (`scripts/build_recoil_native.sh` ->
+  `native/lib/librecoil.so`; Python twin `recoil.scatter_py` when the library is missing). TALYS's recoil module on the
+  run's SPECOUT records (binary spectra, every cascade nucleus' mcontrib / mpecontrib with its grid) and angout's
+  discad of every level: recoilinit (angle bins, LAB ejectile grid, the 50-bin kinematic sweep for Erecmaxmax, recoil
+  grids, the initial CN bin), binaryrecoil, angdisrecoil (incl. the elastic), comprecoil inside a re-run of
+  compemission, cm2lab, labsurface, binsurface (as written, with intri/sideline's quirk), totalrecoil, recoilout,
+  the exclusive `sp*.rec` of channelsout, the LAB parts of spectraout / ddxout. New `Results.recoil`:
+  `rec<ZZZ><AAA>spec.tot` (+ `:E`, `:integral`, `:production`), `sp<nnnnnn>.rec`, and with `labddx y`
+  `<x>spec.lab`, `<x>ddx.lab`, `<x>ddxE<eeee.e>.lab`, `<x>ddxA<aaa.a>.lab`. `INCOGNITA_RECOIL_DIR` writes the files
+  under TALYS's names. Keywords: `recoil`, `labddx`, `recoilaverage`, `maxenrec`, `anglesrec` (ranges refused as
+  checkvalue.f90:483-484), `channelenergy` checked against stock; `filerecoil` stays NA (the arrays are always there).
+* **Defaults untouched**: nothing runs without `recoil y`; with it, every other Results array is bitwise the same
+  (test). Hooks: specout.begin_run / enabled, binspec.enabled, angout (discad of every level when recoil y),
+  specobs.add_to_results.
+* **TALYS quirks kept (all checked against stock):** the initial CN recoil energy is `sqrt(P^2+M^2)-M` in real(sgl),
+  i.e. a multiple of the float32 spacing of M (1/256 MeV for Fe-57: Fe-57 recoil at 1 MeV centred 1.3 bins low;
+  `INCOGNITA_RECOIL_EXACT=1` = double); `Emaxlab` and the residual's `Exmax` in real(sgl) (Fe-56 1 MeV: the LAB grid
+  gets an 11th point, and level 1, the last one below Exmax, is DROPPED from the recoils because
+  `Etotal - S - Exmax` rounds negative: stock's Fe-56 recoil integral is the elastic alone, 3199 mb, not
+  3199 + 584 inelastic); the CN moves along the beam (angcm = 0); only the 0-degree discrete bin is renormalised
+  (angnorm); the last recoil bin's extension leaves the mirrored areas; the LAB DDX at an energy interpolates with
+  the CM grid's deltaE; binsurface's intri compares sideline's distances for equality (vertical/horizontal sides);
+  the LAB gamma spectrum depends on the last bit of the angle/energy edges, so the kernel computes in single
+  precision as TALYS (double: 25 % per bin on Fe-56 1 MeV gamma, single: 0.2 %).
+* **Vs stock** (`scripts/kwcov/b12_response.py --all`, TALYS mode = fidelity.py's TALYS_DECK/TALYS_ENV; stock in
+  `~/kwcov/stock/b12/`, worst |ln| over 1/5/14 MeV and bins > 1 % of the file's peak):
+
+  | deck | rec | excl | LAB spectra | LAB DDX | response |
+  |---|---|---|---|---|---|
+  | Fe-56 recoil y | **1.70 %** (14 MeV, 0.72 MeV tail) | 1.70 % | | | |
+  | Fe-56 + labddx y, ddxmode 3, fileddxa/e | 0.89 % | 0.89 % | 0.83 % | **3.92 %** (n 150 deg, 8.6 MeV, 14 MeV) | 0.80 % |
+  | + recoilaverage y | 0.89 % | 0.89 % | 0.83 % | 3.92 % | 0.04 % |
+  | + anglesrec 4 | 0.89 % | 0.89 % | 0.83 % | 3.92 % | 0.02 % |
+  | Fe-56 maxenrec 10 | 1.62 % | 1.62 % | | | |
+  | Fe-56 channelenergy y | 1.70 % | | CM espec + xs 0.05 % | | |
+  | Co-59 recoil y | **5.67 %** (14 MeV, 0.69 MeV) | 5.67 % | | | |
+  | U-238 recoil y | **4.47 %** (5 MeV, 0.05 MeV) | 4.47 % | | | |
+  | p + Nb-93 recoil y | 0.03 % | 0.03 % | | | |
+
+  Fe-56 at 1 and 5 MeV: every recoil and LAB file to 1e-3 (gamma LAB 1 MeV 0.2 %). The engine-default run (no TALYS
+  mode) differs at 14 MeV by the channels' own NPWINDOW offset ((n,p) residual +12 %), not by the recoils.
+* **Losses.** Co-59 / U-238: integrals and residual production agree to 0.3 % / 0.01 %, the worst bins are the
+  high-recoil tail (1-5 % of the peak: backward-angle elastic / inelastic, i.e. the B3 discrete angular distributions
+  at large angles), within 0.2 % above 10 % of the peak. LAB DDX 3.9 %: the CM DDX's isotropic giant-resonance /
+  collective part (B4 approximation). Sub-mb ejectiles (h, t LAB spectra at 14 MeV, 1e-7 mb) follow the engine's own
+  tiny channels. `blockspectra` / `blockddx` merged files are not written (one file per energy).
+* **Bugs found:** in the port: none outside B12 (a charged projectile's `xselastot` is NaN in the angout record; the
+  recoil code now takes TALYS's xselasinc = 0). In TALYS: the float32 cancellation of Erecinit and the dropped last
+  level above (both reproduced, documented).
+* Tests: `tests/hf/test_kwcov_b12.py` (binsurface incl. the quirk, labsurface area, C kernel vs Python twin,
+  recoil grids = stock's 14 MeV grids, Erecinit quirk, Options / deck lines / refusals, one Fe-56 1 MeV engine run vs
+  stock's recoil, LAB and LAB-DDX files to 0.5 %, `recoil y; outspectra n` = stock's discrete-only recoils, files
+  written, every Results array unchanged).
 
 ### B13 -- ingredient outputs
 
