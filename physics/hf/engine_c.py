@@ -1601,9 +1601,10 @@ def run(injection, stats: dict | None = None):
     from physics.hf import angout, fisobs, specobs  # KWCOV B3 / B4 / B8 (off: unchanged)
 
     from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
+    from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
 
     res = fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
-    return production.add_to_results(res, injection)
+    return thermal.add_to_results(production.add_to_results(res, injection), injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

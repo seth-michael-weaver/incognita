@@ -474,35 +474,20 @@ def thermal_capture_mb(cas) -> float:
     TALYS: thermalxs.f90:1 (thermalxs)
     Test: tests/hf/test_kwcov_b10.py
     """
-    from physics.hf.core.constants import nuclide_symbol
-    from physics.hf.structure.files import talys_structure_dir
+    # KWCOV B10b: physics/hf/thermal.py's thermalxs port. The table is read after the input, so a table row of this
+    # mass overwrites a deck `xscaptherm` (B10 let the deck win; stock TALYS-2.25 prints the table value).
+    from physics.hf import thermal
 
-    p = getattr(cas, "params", None)
-    try:
-        if p is not None and "xscaptherm" in p:
-            v = float(p.at("xscaptherm", -1))
-            if v != 0.0:
-                return v
-    except (KeyError, TypeError, ValueError, IndexError):
-        pass
+    return thermal.therm_of_run(cas)["cap"][-1]
+
+
+def kopecky_mb(cas) -> float:
+    """Kopecky's thermal capture systematics of the compound nucleus, 1.5e-3 (a max(S - pair, 1))^3.5 mb.
+
+    TALYS: thermalxs.f90:1 (thermalxs) lines 104-109
+    Test: tests/hf/test_kwcov_b10.py
+    """
     Z, A = int(cas.Zt), int(cas.At)
-    f = talys_structure_dir() / "thermal" / f"{nuclide_symbol(Z).capitalize()}.ther"
-    xs: dict[int, float] = {}
-    if f.is_file():
-        for line in f.read_text(errors="replace").splitlines()[1:]:
-            try:
-                ia, iso_r = int(line[4:8]), int(line[12:16])
-                v = line[16:31].strip()
-                val = float(v) if v else 0.0
-            except ValueError:
-                continue
-            if ia == A and val != 0.0:
-                xs[iso_r] = val
-        if -1 in xs:
-            return xs[-1]
-        tot = sum(v for k, v in xs.items() if k >= 0)
-        if tot != 0.0:
-            return tot
     ld = cas.ld_of(Z, A + 1)[0]
     ald = float(np.asarray(ld.alev.detach() if hasattr(ld.alev, "detach") else ld.alev).ravel()[0])
     pair = float(np.asarray(ld.pair_mev.detach() if hasattr(ld.pair_mev, "detach") else ld.pair_mev).ravel()[0])

@@ -907,8 +907,10 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     from physics.hf import angout, specobs  # KWCOV B3 / B4: angular distributions, spectra, DDX, gamma lines (off: unchanged)
 
     from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
+    from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
 
-    return production.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
+    res = production.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
+    return thermal.add_to_results(res, injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:

@@ -54,6 +54,17 @@ class Results:
     # (rec<ZZZ><AAA>spec.tot, sp<nnnnnn>.rec) and LAB-frame spectra / DDX (<x>spec.lab, <x>ddx.lab, <x>ddxE....lab,
     # <x>ddxA....lab) under TALYS's file names, (C, ...); physics/hf/recoil.py lists them
     recoil: dict[str, Tensor] = field(default_factory=dict)
+    # THERMAL (KWCOV B10b: an incident-neutron run with energies below eninclow, default empty): TALYS's rows for those
+    # energies (thermal.f90), {"E": ndarray, "<result_arrays key>": ndarray over E, "eninclow", "E1v", "eref",
+    # "xscaptherm"/"xsptherm"/"xsalphatherm" (isomer -1..10)}; the engine's own arrays at those energies are untouched.
+    # physics/hf/thermal.py
+    thermal: dict = field(default_factory=dict)
+    # NATURAL (KWCOV B10b: `mass 0` in a deck, default empty): {"abundance": {A: fraction}, "isotopes": {A: Results}};
+    # the Results' own arrays are then the abundance-weighted sums (natural.f90). physics/hf/natural.py
+    natural: dict = field(default_factory=dict)
+    # INTEGRAL (KWCOV B10b: `integral y` in a deck, default empty): integral.f90's effective cross sections,
+    # {"integral.dat": {"file", "spectrum": list, "xseff_b", "xsexp_b", "ratio": ndarray}}. physics/hf/integral.py
+    integral: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:
