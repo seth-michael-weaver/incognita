@@ -152,7 +152,7 @@ def test_output_only_keywords_stay_accepted(clean):
 # ---------------------------------------------------------------------------------------------- refusals
 
 def test_rpevap_and_optmodall_are_refused_their_dependants_are_inert():
-    for ov, key in (({"rpevap": "y"}, "rpevap"), ({"optmodall": "y"}, "optmodall")):
+    for ov, key in (({"rpevap": "y"}, "rpevap"),):  # KWCOV B6 ports optmodall (tests/hf/test_kwcov_b6.py)
         with pytest.raises(NotImplementedError, match=key):
             D.reject_unported(D.default_options(26, 56, overrides=ov))
     # maxZrp/maxNrp act only with rpevap y (multiple.f90:270), popmev only on a population input (projectile 0),

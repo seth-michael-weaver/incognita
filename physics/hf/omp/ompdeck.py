@@ -373,6 +373,11 @@ def local_file(Z: int, k: int) -> str | None:
 
 
 def has_bumps(k: int) -> bool:
+    """Any energy-local adjustment line for particle type k in the active run.
+
+    TALYS: ompadjust.f90:1 (ompadjust)
+    Test: tests/hf/test_kwcov_b6.py
+    """
     d = active()
     return d is not None and any(b.k == k for b in d.bumps)
 

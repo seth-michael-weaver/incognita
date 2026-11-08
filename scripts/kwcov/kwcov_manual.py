@@ -267,6 +267,17 @@ B6: dict = {
     "ompenergyfile": ("SUPPORTED", "input/defaults.py Options.ompenergyfile + reject_unported",
                       "read by endfenergies.f90 under `endf y` only: accepted without effect otherwise (as TALYS), "
                       "REFUSED with endf y (ENDF-6 incident grid not ported)", _T6),
-    # energy-local forms of the 28 OMP keywords: the keywords themselves keep their automatic rows; noted here
+    "best": ("SUPPORTED", _F + "_deck_best (= INCOGNITA_TALYS_FIT=best, cards identical; Fe-56 engine bitwise)",
+             "deck `best y` reads structure/best/<Nuc>/<p>-<Nuc>.talys before the deck (initial_best.f90). Since B6 its "
+             "OMP files act (Fe-56 awdadjust table, U-238 n-U238.omp optmod). RESPONSE LOSSES remain and are outside "
+             "B6: Fe-56 6.7 % ((n,np) 14 MeV; 6.8 % for the same deck without its B6 line), U-238 9.2 % (fission 5 MeV; "
+             "9.2 % without optmod), Co-59 8.2 % (B2): the 14 MeV (n,p)/(n,a) and U-238 LD/fission default-fidelity "
+             "task of B5", _T6),
+    "optmodall": ("SUPPORTED", "compound/ompall.py -> emission/feeding.Cascade.trans_of/front_trans, compound/chain.py",
+                  "a set per compound nucleus (multiple.f90:323) + TALYS-2.25's stale-eend primary set at the 2nd and "
+                  "later energies (talysreaction.f90:102 before `energies`); Python cascade. RESPONSE: U-238 1.1 %, Fe-56 6.9 % ((n,a) 14 MeV, a 65 % move), Au-197 LOSS 51 % (capture 1 MeV; the engine default Au-197 1 MeV composition differs, see COVERAGE_PLAN B6)", _T6),
+    "racap": ("SUPPORTED", "direct/racapcalc.py mode (deck `racap y|n` wins over INCOGNITA_DIRECT_CAPTURE)",
+              "0 mb without `optmodall y` as TALYS-2.25 (warned); with `optmodall y` (B6) the racapcalc model runs from "
+              "a deck: Au-197 `racap y; optmodall y` direct capture = stock (133.6 mb at 1 MeV); the L00 isomer extra lacks it", "test:test_directcap.py,test_kwcov_b5.py"),
 }
 MANUAL.update(B6)

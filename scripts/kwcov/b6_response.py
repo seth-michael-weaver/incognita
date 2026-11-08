@@ -133,6 +133,7 @@ def decks() -> dict:
         "fe_best_rest": ("fe56", ";".join(FE_REST), "\n".join(FE_REST), ()),
         # optmodall y (B5 refused it): a set per compound nucleus + TALYS reading the initial one before `energies`
         "au_optmodall": ("au197", "optmodall y", "optmodall y", (), AU_E),
+        "au_racap_optmodall": ("au197", "racap y;optmodall y", "racap y\noptmodall y", (), AU_E),
         "fe_optmodall": ("fe56", "optmodall y", "optmodall y", ()),
         "u_optmodall": ("u238", "optmodall y", "optmodall y", ()),
         "u_riplomp_n": ("u238", "riplomp n", "riplomp n", ()),

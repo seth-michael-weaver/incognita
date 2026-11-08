@@ -208,3 +208,34 @@ def test_unported_are_refused(ov):
 def test_accepted_without_effect_as_in_talys():
     for ov in ({"ompenergyfile": "e.dat"}, {"coulomb": "n"}, {"eciscompound": "y"}, {"sysreaction": ""}):
         D.reject_unported(D.default_options(26, 56, overrides=ov))
+
+
+# ------------------------------------------------------------------------------------------------ optmodall y
+
+def test_optmodall_is_accepted_and_takes_the_python_cascade():
+    from types import SimpleNamespace
+
+    from physics.hf import engine_c
+
+    o = D.default_options(26, 56, overrides={"optmodall": "y"})
+    D.reject_unported(o)                                       # B5 refused it; B6 ports it
+    run = engine_c._Run(SimpleNamespace(options=o))
+    assert run.ok is False                                     # one C stack cannot hold a set per nucleus
+
+
+def test_optmodall_cut_is_inverseread():
+    from physics.hf.compound import ompall
+
+    tjl = np.ones((10, 4, 3))
+    base = {t: (tjl, np.ones((10, 4)), np.full(10, 3)) for t in range(1, 7)}
+    out = ompall._cut(base, {t: 5 for t in range(7)})
+    tj, tl, lm = out[1]
+    assert tj is tjl                                            # Tjl is read to eendmax
+    assert tl[:6].all() and not tl[6:].any() and (lm[:6] == 3).all() and (lm[6:] == 0).all()
+
+
+def test_optmodall_eend_follows_the_energy():
+    from physics.hf.compound import ompall
+
+    lo, hi, mx = (ompall.eend_at(26, 56, 14.0, e) for e in (1.0, 5.0, None))
+    assert lo[1] < hi[1] <= mx[1]
