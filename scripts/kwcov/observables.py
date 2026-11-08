@@ -118,7 +118,10 @@ ROWS = [
      "specobs.py Results.spectra['<x>ddx', '<x>ddxAaaa.a.deg', '<x>ddxEeeee.e.MeV']", "B4",
      "Kalbach PE / MPE, isotropic compound, discad peaks; Fe-56 30/90/150 deg: 1.4e-3 at 5 MeV, 14 MeV n 9 % p 15 % "
      "(engine's compound and level xs); giant-resonance / collective-continuum part isotropic (TALYS: DWBA shape)"),
-    ("DDX in LAB frame", "*.lab", "ddxout.f90:1", "labddx", "MISSING", "", "B7", "needs recoil kinematics"),
+    ("DDX in LAB frame", "<x>spec*.lab, <x>ddxE*E*.lab, <x>ddxE*A*.lab", "ddxout.f90:200, :338; spectraout.f90:165",
+     "labddx, recoil, fileddxa, fileddxe, ddxmode", "SUPPORTED",
+     "recoil.py Results.recoil['<x>spec.lab', '<x>ddx.lab', '<x>ddxEeeee.e.lab', '<x>ddxAaaa.a.lab']", "B12",
+     "test:test_kwcov_b12.py; Fe-56 TALYS mode: LAB spectra 0.8 %, LAB DDX 3.9 % (150 deg, 14 MeV)"),
     ("exclusive channel spectra", "sp100000E0014.000.tot ...", "channelsout.f90:641, channels.f90:330-420, "
      "specemission.f90:1", "outspectra + channels, filechannels", "MISSING", "", "B4b",
      "needs specexcl carried through the channel loop (binemis per daughter bin + specemission, 306 l.); "
@@ -126,8 +129,10 @@ ROWS = [
      "`channelenergy` is NOT this: it is spectra.f90's flagEchannel energy conversion (B4, supported)"),
     ("emission spectrum per excitation bin", "", "binaryout.f90:1", "outbinspectra", "NA", "", "", "debug output"),
     # --- recoil ---
-    ("recoil spectra of residuals", "recZZZAAAspec*.tot", "recoilout.f90:1", "recoil, filerecoil, maxenrec, anglesrec",
-     "MISSING", "", "B7", "recoilinit.f90 576 l. + angdisrecoil 491 l."),
+    ("recoil spectra of residuals", "recZZZAAAspec*.tot, spNNNNNNE*.rec", "recoilout.f90:1, channelsout.f90:811",
+     "recoil, filerecoil, maxenrec, anglesrec, recoilaverage", "SUPPORTED",
+     "recoil.py Results.recoil['recZZZAAAspec.tot', 'spNNNNNN.rec']", "B12",
+     "test:test_kwcov_b12.py; Fe-56 TALYS mode 1/5 MeV 1e-3, 14 MeV 1.7 %; p + Nb-93 0.03 %"),
     # --- low energy / resonances ---
     ("unresolved resonance parameters", "urr.dat urr*.lLL urrtalys.tot urrnjoy.tot urrratio.tot", "urrout.f90:1, urr.f90:1",
      "urr, lurr, urrnjoy, rprime", "SUPPORTED", "urr.py (Results.urr, urr.write_files)", "B10",

@@ -55,9 +55,9 @@ def enabled() -> bool:
     """
     if env_enabled():
         return True
-    from physics.hf import angout, specobs  # KWCOV B3 / B4: angle, spectrum, DDX and gamma-line output need the recorders
+    from physics.hf import angout, recoil, specobs  # KWCOV B3 / B4 / B12: angle, spectrum, DDX, gamma-line and recoil
 
-    return angout.wanted() or specobs.wanted()
+    return angout.wanted() or specobs.wanted() or recoil.wanted()
 
 
 def env_enabled() -> bool:
@@ -285,10 +285,11 @@ def begin_run(cas) -> None:
     Test: none in the public suite
     """
     global RUN
-    from physics.hf import angout, specobs
+    from physics.hf import angout, recoil, specobs
 
     sp = specobs.begin_run(cas)  # KWCOV B4 first: angout records every level when the DDX needs them
-    if (angout.begin_run(cas) or sp) and not env_enabled():  # KWCOV B3/B4: this run records for the TALYS outputs only
+    rc = recoil.begin_run(cas)  # KWCOV B12: recoils need every level's discad too
+    if (angout.begin_run(cas) or sp or rc) and not env_enabled():  # KWCOV B3/B4: this run records for the TALYS outputs only
         clear_run()
         try:
             from physics.hf.engine_c import lib

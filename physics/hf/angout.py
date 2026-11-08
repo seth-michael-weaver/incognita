@@ -90,7 +90,10 @@ def settings(options=None) -> dict | None:
         flagang, leg = True, True
     from physics.hf import specobs
 
-    ddx = options is not None and specobs.ddx_wanted(options)  # KWCOV B4: the DDX needs discad of every level
+    from physics.hf import recoil
+
+    # KWCOV B4 / B12: the DDX and the recoils (angdisrecoil.f90) need discad of every level
+    ddx = options is not None and (specobs.ddx_wanted(options) or recoil.wanted_for(options))
     if not (flagang or fe or ddx):
         return None
     return dict(flagang=flagang, fileelastic=fe, fileangle_all=flagang, fileangle=fa, legendre=leg, block=block,
@@ -515,6 +518,9 @@ def add_to_results(res, injection):
     try:
         arr = build()
         specobs.take_discad(arr, s["nangle"])  # KWCOV B4: discrete-peak angular distributions for the DDX
+        from physics.hf import recoil
+
+        recoil.take_discad(arr, s["nangle"])  # KWCOV B12: angdisrecoil.f90
         if s.get("ddx") and not s["fileangle_all"]:  # the DDX made build visit every level: keep angleout's selection
             arr = {k: v for k, v in arr.items() if _selected(k, s)}
             META["present"] = {k: v for k, v in META.get("present", {}).items() if _selected(k, s)}
@@ -526,7 +532,9 @@ def add_to_results(res, injection):
             ang = {k: torch.as_tensor(v, dtype=torch.float64) for k, v in arr.items()}
             res = replace(res, angular=ang)
     finally:
-        if not specout.env_enabled() and not specobs.active():  # KWCOV B4: specobs.add_to_results clears after it
+        from physics.hf import recoil
+
+        if not specout.env_enabled() and not specobs.active() and not recoil.active():  # KWCOV B4/B12: cleared later
             specout.clear_run()
         end_run()
     return res
