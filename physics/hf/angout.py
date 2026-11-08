@@ -88,10 +88,13 @@ def settings(options=None) -> dict | None:
         nangle, cpang, k0 = int(ov.get("angles", 90)), _on(ov.get("cpang", "n")), None
     if env:
         flagang, leg = True, True
-    if not (flagang or fe):
+    from physics.hf import specobs
+
+    ddx = options is not None and specobs.ddx_wanted(options)  # KWCOV B4: the DDX needs discad of every level
+    if not (flagang or fe or ddx):
         return None
     return dict(flagang=flagang, fileelastic=fe, fileangle_all=flagang, fileangle=fa, legendre=leg, block=block,
-                nangle=nangle, cpang=cpang, k0=k0)
+                nangle=nangle, cpang=cpang, k0=k0, ddx=ddx, internal=not (flagang or fe))
 
 
 def wanted() -> bool:
@@ -393,7 +396,7 @@ def build() -> dict[str, np.ndarray]:
             for n in range(nl + 1):
                 elastic = t == k0 and n == lt
                 if not elastic:
-                    if d["xsdisc"][n] == 0.0 or not (s["fileangle_all"] or n in s["fileangle"]):
+                    if d["xsdisc"][n] == 0.0 or not (s["fileangle_all"] or n in s["fileangle"] or s.get("ddx")):
                         continue
                 # compound (angdis.f90:68-87): cleg with flagcompang, else isotropic
                 cl = None
@@ -506,18 +509,36 @@ def add_to_results(res, injection):
 
     from physics.hf import specout
 
+    from physics.hf import specobs
+
+    s = _SET
     try:
         arr = build()
-        out_dir = os.environ.get(ENV_DIR, "").strip()
-        if out_dir and arr:
-            write_files(arr, META, out_dir)
-        ang = {k: torch.as_tensor(v, dtype=torch.float64) for k, v in arr.items()}
-        res = replace(res, angular=ang)
+        specobs.take_discad(arr, s["nangle"])  # KWCOV B4: discrete-peak angular distributions for the DDX
+        if s.get("ddx") and not s["fileangle_all"]:  # the DDX made build visit every level: keep angleout's selection
+            arr = {k: v for k, v in arr.items() if _selected(k, s)}
+            META["present"] = {k: v for k, v in META.get("present", {}).items() if _selected(k, s)}
+            META["levels"] = {k: v for k, v in META.get("levels", {}).items() if k[1] in s["fileangle"]}
+        if not s.get("internal"):
+            out_dir = os.environ.get(ENV_DIR, "").strip()
+            if out_dir and arr:
+                write_files(arr, META, out_dir)
+            ang = {k: torch.as_tensor(v, dtype=torch.float64) for k, v in arr.items()}
+            res = replace(res, angular=ang)
     finally:
-        if not specout.env_enabled():
+        if not specout.env_enabled() and not specobs.active():  # KWCOV B4: specobs.add_to_results clears after it
             specout.clear_run()
         end_run()
     return res
+
+
+def _selected(name: str, s: dict) -> bool:
+    """KWCOV B4: is an angle/Legendre array one angleout.f90 writes (elastic, or a level in `fileangle`)?"""
+    if ".L" not in name or name[2:5] not in ("ang", "leg"):
+        return True
+    n = int(name.split(".L")[1][:2])
+    k0 = int(s["k0"])
+    return (name[0] == PARSYM[k0] and name[1] == PARSYM[k0] and n == 0) or n in s["fileangle"]  # Ltarget = 0
 
 
 # ------------------------------------------------------------------------------------------------ TALYS files

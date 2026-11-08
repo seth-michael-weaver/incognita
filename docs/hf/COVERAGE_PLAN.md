@@ -59,7 +59,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B1 | channel observables (DONE, this branch) | -- | prod/multiplicity (gas production), binary.tot, xs*.tot gamma column, xs*.LMM isomeric channels, xs*.fis, discrete/continuum split | 0.5 d |
 | B2 | deck wiring of what exists | best, bestend, bestbranch, bestfile, fit, ngfit, nnfit, nffit, nafit, ndfit, pnfit, gnfit, dnfit, anfit, macsfit, gamgamfit, ejectiles, maxlevelsbin, maxlevelsres, nlevels, estop, liso, isomer (check), per-nucleus forms of ldmodel/colenhance, `energy E1 E2 dE` | CHANOBS default decision | 1-1.5 d |
 | B3 | angular distributions on TALYS keywords | outangle, outlegendre, fileelastic, fileangle, angles, anglescont, cpang | elastic/inelastic ang + leg, Rutherford ratio (charged), compound ang. for charged particles | 1.5-2 d |
-| B4 | spectra, DDX, gamma lines on TALYS keywords | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
+| B4 | spectra, DDX, gamma lines on TALYS keywords (DONE, branch `kwcov4`; exclusive channel spectra -> B4b) | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
 | B5 | model keyword sweep: compound, gamma, levels, LD | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
 | B6 | model keyword sweep: optical model, direct | vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
 | B7 | unported model branches (now refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
@@ -95,7 +95,7 @@ batches above.
   (measured worst 7 %, tracking the engine's own (n,p)/(n,a) differences). Fe-56 and U-238 checked by the script,
   same picture (14 MeV pprod +10 %, aprod +11 % = the engine's (n,p)/(n,a) at 14 MeV; xs*.fis within 10 % = its
   (n,f)).
-* Left for later: the (n,gn) column `xsngn` of `.con`/`.tot` files (B4); CHANOBS default ON (B2 decides after
+* Left for later: the (n,gn) column `xsngn` of `.con`/`.tot` files (B4: done, `Results.spectra[".tot:ngn"]`); CHANOBS default ON (B2 decides after
   timing it on a chart sample: it costs the Python channels per energy).
 
 ### B2 -- deck wiring of what exists
@@ -140,15 +140,49 @@ batches above.
   value per key until B2 merges them; `fileangle 1,2` works), `Results.angular` through `pool.py` (not carried),
   `anglescont` (continuum DDX grid) belongs to B4.
 
-### B4 -- spectra, DDX, discrete gamma lines
+### B4 -- spectra, DDX, discrete gamma lines (done on branch `kwcov4`)
 
-* Exists: `specout.py` (spectra, gamma lines, C path), `specang.py` (Kalbach DDX), behind `INCOGNITA_SPECOUT`.
-* Do: TALYS keywords drive them; TALYS names; `adddiscrete`/`addelastic` peaks (`spectra.f90:1`);
-  `channelenergy` exclusive spectra (`channelsout.f90:641`); `xsngn`.
-  Anchors: `spectra.f90:1`, `spectraout.f90:1`, `ddxout.f90:1`, `gamdisout.f90:1`, `kalbach.f90:1`,
-  `kalbachsep.f90:1`.
-* Accept: Fe-56 14 MeV n and p spectra (energy-integrated within 2 % of `nprod`, shape 5 % per bin above 1 mb/MeV),
-  DDX at 30/90/150 degrees, the 846.8 keV Fe-56 line vs stock 2 %.
+* What: `physics/hf/specobs.py` (output only). The deck keywords `outspectra`, `ddxmode` (> 0 implies outspectra),
+  `fileddxa`, `fileddxe`, `anglescont`, `outgamdis`, `filespectrum`, `filegamdis`, `blockspectra`, `blockddx`,
+  `adddiscrete`, `addelastic`, `channelenergy` (spectra.f90's espec conversion), `elwidth`, `segment` (new Options
+  fields `flagspec`, `ddxmode`, `flaggamdis`, `filegamdis`, `filespectrum`, `fileddxa`, `fileddxe`, `flagblockspectra`,
+  `flagblockddx`; `endf y` / `recoil y` set them as TALYS does) or the port switch `INCOGNITA_SPECOBS=1` (= outspectra y,
+  ddxmode 3, outgamdis y) turn the SPECOUT recorders on and fill `Results.spectra` (new field, empty by default) under
+  TALYS's names: `<x>spec.tot` (+ `:E` espec, `:direct`, `:preeq`, `:multiple_preeq`, `:compound`, `:preeq_ratio`, and
+  for d t h a / charged projectiles `:breakup_ratio`, `:stripping`, `:knockout`, `:breakup`), `Eaverage_<x>.out`,
+  `<x>ddx` (C, M, nanglecont+1) + columns, `<x>ddxAaaa.a.deg`, `<x>ddxEeeee.e.MeV`, `anglecont`,
+  `gamZZZAAALiiLjj.tot` (+ `:E`), `<k0><x>.tot:ngn` (xsngn, the B1 gap). `INCOGNITA_SPECOBS_DIR=<dir>` writes the files
+  with TALYS's names (`nspec0014.000.tot`, `nddxE0014.000A030.0.deg`, `nddxE0014.000E0003.0.MeV`, `gam026056L01L00.tot`,
+  `Eaverage_n.out`; `blockspectra`/`blockddx` names).
+* Physics: spectra.f90 on the recorded parts taken as TALYS has them (SPECCLOSE's closing undone: raw binary parts,
+  compemission without the discrete-parent addition): espec = egrid up to eoutdis(NL) - elwidth, then the 1/(segment
+  fine) grid with Gaussian discrete peaks (elastic with addelastic); Eaverage from Eaveragebin / Eaveragemul / xsfeed;
+  DDX = Kalbach (pre-equilibrium, multiple pre-equilibrium) + isotropic compound + discad (angout, run internally for
+  every level when only the DDX asks) for the peaks; gamma lines = the cascade's discrete transitions / (1 + conv)
+  (cascade.f90:78, electronconv y); xsngn = the initial compound nucleus' own emission (multiple.f90:945).
+* Found on the way: gamma lines need the conversion coefficient (Mn-56 26 keV line x2.5 without it); the engine's
+  SPECOUT spectra are SPECCLOSE-closed by default (not TALYS), so TALYS names use the raw parts; deck values with two
+  words (`fileddxa n 30`) were refused by `default_options` -- `ejectiles` / `ddxpoints` kinds now pass. Not fixed
+  (outside B4): with `equispec y` the engine builds the equidistant grid with numen 250 (`preeq/prepare.py`,
+  `compound/dens_reference.py`: the reference build) where stock 2.25 has 260, so above 12.5 MeV its step is 0.108
+  instead of 0.1 MeV (Fe-56 at 14 MeV); below that the spectra agree as without equispec (5 MeV 2e-4).
+* Acceptance (`tests/hf/test_specobs.py`, `scripts/kwcov/b4_compare.py`, `scripts/kwcov/b4_onoff.py`, stock run
+  `~/kwcov/stock/b4_fe56`): switches on vs off, every Results array identical (Fe-56 611, U-238 692 arrays bitwise).
+  Fe-56 vs stock, espec grids identical; per bin where stock > 1 mb/MeV: 1 MeV 1e-5, 5 MeV 2e-4 (n, g); DDX 30/90/150
+  degrees 1.4e-3 at 5 MeV; Eaverage 1e-4; xsngn 1e-4 at 1, 5 MeV; 846.8 keV line 1e-5 at 1, 5 MeV and 1.2 % at 14 MeV.
+  14 MeV: n spectrum 5.5 % (integral -1.1 %), p 15 % (integral +9.8 %), DDX n 9 % (150 deg), p 15 % -- the compound
+  column carries the engine's own channel differences ((n,2n)/(n,np) composition, (n,p) +10 %); the pre-equilibrium
+  column agrees to 4e-5 at every energy; shapes normalised to the integral: n 6.7 %, p 10 %. TALYS's own spectrum
+  integral minus elastic equals nprod to 0.25 % at 5 and 14 MeV; ours is the same construction. U-238
+  (`~/kwcov/stock/b4_u238`): spectra 1 MeV 1e-3, 5 MeV 2.5 %, 14 MeV 3 % (its compound column); DDX 1 MeV 1.5e-3, but
+  14 MeV up to 28 % at 150 deg in the 8-13 MeV band: the collective continuum of the deformed levels above Nlast and
+  the giant resonances are isotropic here (their discrete levels' discad agree with stock to 0.5 %); 14 MeV alpha
+  espec breaks from egrid to the fine grid 2 MeV later than stock (eoutdis(a, Nlast) of Th-235, sub-mb channel).
+* Left: exclusive channel spectra `spNNNNNN*.tot` (B4b: specexcl through the channel loop, specemission.f90);
+  the giant-resonance / collective-continuum DDX is isotropic (TALYS: grcollad / directad, DWBA shapes; Fe-56 14 MeV
+  <= 0.05 mb/MeV/sr of a few mb/MeV/sr); break-up (kalbachBU, xspreeqbu) is zero (only d/alpha projectiles have it);
+  LAB-frame spectra/DDX (B12); repeated `fileddxa`/`fileddxe`/`filespectrum` deck lines need B2's merge (one line per
+  key until then: `fileddxa n,30,90,p,150`); `channelenergy y` follows spectra.f90 but is not checked against stock.
 
 ### B5 -- model keywords: compound, gamma, levels, level densities
 

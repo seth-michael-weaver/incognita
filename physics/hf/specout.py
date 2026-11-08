@@ -55,9 +55,9 @@ def enabled() -> bool:
     """
     if env_enabled():
         return True
-    from physics.hf import angout  # KWCOV B3: angular output (outangle / fileelastic / INCOGNITA_ANGOUT) needs the recorders
+    from physics.hf import angout, specobs  # KWCOV B3 / B4: angle, spectrum, DDX and gamma-line output need the recorders
 
-    return angout.wanted()
+    return angout.wanted() or specobs.wanted()
 
 
 def env_enabled() -> bool:
@@ -285,9 +285,10 @@ def begin_run(cas) -> None:
     Test: none in the public suite
     """
     global RUN
-    from physics.hf import angout
+    from physics.hf import angout, specobs
 
-    if angout.begin_run(cas) and not env_enabled():  # KWCOV B3: this run records for the angle output only
+    sp = specobs.begin_run(cas)  # KWCOV B4 first: angout records every level when the DDX needs them
+    if (angout.begin_run(cas) or sp) and not env_enabled():  # KWCOV B3/B4: this run records for the TALYS outputs only
         clear_run()
         try:
             from physics.hf.engine_c import lib
@@ -392,12 +393,17 @@ def end_energy(pinp, k0: int, b2=None) -> None:
 
         closed = specclose_on()
         discpar = np.zeros((7, len(eg)))
+        xsemis_t, xsmpe_t = np.zeros((7, len(eg))), np.zeros((7, len(eg)))  # KWCOV B4: compemission only (TALYS)
+        per_nuc_t = {}
         for key in sorted(cur["walks"]):
             rec = cur["walks"][key]
             if rec["lines_only"]:
                 glines += _gamma_lines(rec)
                 continue
             ce, cm = compemission(rec, eg, eb, et, de, ebegin, eend, speceps)
+            xsemis_t += ce
+            xsmpe_t += cm
+            per_nuc_t[key] = (ce.copy(), cm.copy())  # KWCOV B4: TALYS's per-nucleus emission (Eaveragemul, xsngnspec)
             if closed:  # SPECCLOSE: + the particle emission of discrete parents above threshold (both paths)
                 dc, dm = discrete_parent_emission(rec, eg, eb, et, de, ebegin, eend, speceps)
                 ce, cm = ce + dc, cm + dm
@@ -410,6 +416,7 @@ def end_energy(pinp, k0: int, b2=None) -> None:
                    eninccm=eninccm, xsemis_mul=xsemis, xsmpeemis=xsmpe, gamma_lines=glines, per_nucleus=per_nuc)
         if closed:
             cur["xsemis_discpar"] = discpar
+        cur.update(xsemis_mul_talys=xsemis_t, xsmpeemis_talys=xsmpe_t, per_nucleus_talys=per_nuc_t)
     except Exception as exc:  # noqa: BLE001 -- output only
         cur.setdefault("errors", []).append(f"end_energy {type(exc).__name__}: {exc}")
     ENERGIES.append(cur)

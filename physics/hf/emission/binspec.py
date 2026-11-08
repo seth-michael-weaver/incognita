@@ -48,8 +48,11 @@ def enabled() -> bool:
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
     """
-    return any(os.environ.get(k, "").strip().lower() in ("1", "y", "yes", "on")
-               for k in ("INCOGNITA_BINSPEC", "INCOGNITA_SPECOUT"))
+    if any(os.environ.get(k, "").strip().lower() in ("1", "y", "yes", "on") for k in ("INCOGNITA_BINSPEC", "INCOGNITA_SPECOUT")):
+        return True
+    from physics.hf import specobs  # KWCOV B4: the TALYS spectrum / DDX output of this run needs them
+
+    return specobs.active()
 
 
 def specclose_on() -> bool:
@@ -257,6 +260,8 @@ def record(e_inc_mev: float, pinp, b2, b, k0: int, ctx=None) -> dict | None:
         mask = np.zeros(len(eg), bool)
         mask[sl] = True
         closed = specclose_on() and ie > ib
+        raw = dict(xsemis=np.where(mask, xsemis, 0.0).tolist(), xspreeq=np.where(mask, xspre, 0.0).tolist(),
+                   xsgr=np.where(mask, xsgr, 0.0).tolist()) if closed else None  # KWCOV B4: TALYS's (unclosed) parts
         if closed:
             cut = None
             if nl >= 0 and eoutdis[nl] > 0:
@@ -286,6 +291,7 @@ def record(e_inc_mev: float, pinp, b2, b, k0: int, ctx=None) -> dict | None:
         if closed:
             ent["continuum_sum"] = float(np.sum(xsbinemis[sl] * de[sl]))
             ent["specclose"] = True
+            ent["raw"] = raw
         if pres is not None:
             for key, name in (("xspreeqps", "pe_ps"), ("xspreeqki", "pe_ki")):
                 if key in pres:

@@ -6,7 +6,7 @@ named in `where`; "env" means the feature exists behind an INCOGNITA_* switch ra
 NA_PREFIXES = ("out", "file", "block")
 NA_WORDS = frozenset({
     "user", "source", "format", "nulldev", "strucpath", "bestpath", "partable", "sacs", "ecissave", "eciscalc",
-    "inccalc", "endfecis", "ecisdwba", "legacy", "reaction", "rescuefile", "components", "ddxmode", "integral",
+    "inccalc", "endfecis", "ecisdwba", "legacy", "reaction", "rescuefile", "components", "integral",
 })
 
 _F = "input/fitlib.py "
@@ -68,4 +68,31 @@ MANUAL: dict = {
                "180/nangle", "test:test_angout.py"),
     "cpang": ("SUPPORTED", "input/defaults.py Options.flagcpang -> angout.flagcompang", "compound angular "
               "distributions for charged projectiles", "test:test_angout.py"),
+    # --- KWCOV B4: spectra, DDX, gamma lines (physics/hf/specobs.py) ---
+    "outspectra": ("SUPPORTED", "input/defaults.py Options.flagspec -> specobs.py", "spectraout: <x>spec.tot columns, "
+                   "Eaverage; INCOGNITA_SPECOBS=1 is the port switch", "test:test_specobs.py"),
+    "ddxmode": ("SUPPORTED", "input/defaults.py Options.ddxmode -> specobs.py", "full DDX arrays + fileddxa/fileddxe; "
+                "giant-resonance part isotropic", "test:test_specobs.py"),
+    "fileddxa": ("SUPPORTED", "input/defaults.py Options.fileddxa -> specobs.py", "`fileddxa n 30`; deck line form "
+                 "`fileddxa n,30,90,p,150` until B2 merges repeated lines", "test:test_specobs.py"),
+    "fileddxe": ("SUPPORTED", "input/defaults.py Options.fileddxe -> specobs.py", "`fileddxe n 3.0` (same deck-line "
+                 "note as fileddxa)", "test:test_specobs.py"),
+    "filespectrum": ("SUPPORTED", "input/defaults.py Options.filespectrum -> specobs.write_files", "which ejectiles get "
+                     "a file (Results carries all)", "test:test_specobs.py"),
+    "outgamdis": ("SUPPORTED", "input/defaults.py Options.flaggamdis -> specobs.py", "gamZZZAAALiiLjj.tot (conversion "
+                  "corrected with electronconv y)", "test:test_specobs.py"),
+    "filegamdis": ("SUPPORTED", "input/defaults.py Options.filegamdis", "files follow INCOGNITA_SPECOBS_DIR",
+                   "test:test_specobs.py"),
+    "blockspectra": ("SUPPORTED", "input/defaults.py Options.flagblockspectra -> specobs.write_files", "nspec.tot names",
+                     "test:test_specobs.py"),
+    "blockddx": ("SUPPORTED", "input/defaults.py Options.flagblockddx -> specobs.write_files", "nddx.deg / nddx.MeV names",
+                 "test:test_specobs.py"),
+    "adddiscrete": ("SUPPORTED", "input/defaults.py Options.eadd_mev -> specobs.energy_spectra", "discrete peaks + fine "
+                    "grid in the spectra (spectra.f90 flagadd)", "test:test_specobs.py"),
+    "addelastic": ("SUPPORTED", "input/defaults.py Options.eaddel_mev -> specobs.energy_spectra", "elastic peak in the "
+                   "spectra (flagaddel)", "test:test_specobs.py"),
+    "channelenergy": ("SUPPORTED", "input/defaults.py Options.flagEchannel -> specobs.energy_spectra", "espec conversion "
+                      "of spectra.f90:152-158 (not checked against stock)", "code"),
+    "anglescont": ("SUPPORTED", "input/defaults.py Options.nanglecont -> specobs.anglecont", "continuum DDX angle grid",
+                   "test:test_specobs.py"),
 }

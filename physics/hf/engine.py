@@ -884,9 +884,9 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     from physics.hf import lowepot
 
     res = lowepot.add_to_results(res, injection)
-    from physics.hf import angout  # KWCOV B3: angular distributions, output only (off: unchanged)
+    from physics.hf import angout, specobs  # KWCOV B3 / B4: angular distributions, spectra, DDX, gamma lines (off: unchanged)
 
-    return angout.add_to_results(res, injection)
+    return specobs.add_to_results(angout.add_to_results(res, injection), injection)
 
 
 def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:
