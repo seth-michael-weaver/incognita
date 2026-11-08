@@ -492,13 +492,18 @@ class Options:
         """ldmodel(Zix, Nix) (input_densitymodel.f90:245-255): an explicit `ldmodelCN` for the
         compound nucleus, else the per-nucleus `ldmodel v Z A` card, else ldmodelCN (= ldmodelall
         when not given) for the compound nucleus and ldmodelall elsewhere."""
-        if (Zix, Nix) == (0, 0) and "ldmodelcn" in self.explicit:
-            return self.ldmodelCN
+        cn = (Zix, Nix) == (0, 0)
+        if cn and "ldmodelcn" in self.explicit:
+            from physics.hf import fidfix  # FIDELITY1 `ldcn` (default OFF): a pseudo-target's (0, 0) is not the run's CN
+
+            if not fidfix.ldcn_pseudo(self):
+                return self.ldmodelCN
+            cn = False
         if self.pernuc:
             v = self._pernuc("ldmodel", Zix, Nix)
             if v is not None:
                 return v
-        return self.ldmodelCN if (Zix, Nix) == (0, 0) else self.ldmodelall
+        return self.ldmodelCN if cn else self.ldmodelall
 
     def flagcol_of(self, Zix: int, Nix: int) -> bool:
         """flagcol(Zix, Nix): the per-nucleus `colenhance y Z A` card, else flagcolall

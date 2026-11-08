@@ -798,7 +798,8 @@ def _lines_key() -> tuple:
     p = os.environ.get(ENV_LINES_FILE, "").strip()
     st = os.stat(p) if p and os.path.exists(p) else None
     return (os.environ.get(ENV_LINES, ""), p, st.st_mtime_ns if st else 0, st.st_size if st else 0,
-            os.environ.get("INCOGNITA_OMPROTOR", ""), os.environ.get("INCOGNITA_ENGADJ", ""))
+            os.environ.get("INCOGNITA_OMPROTOR", ""), os.environ.get("INCOGNITA_ENGADJ", ""),
+            os.environ.get("INCOGNITA_FIDFIX", ""))  # FIDELITY1 `besttables` changes which table a card reads
 
 
 def cards(Z: int, A: int, projectile: str = "n", Ltarget: int = 0,
@@ -869,7 +870,10 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
     for x in src:
         if x.startswith("deck best y: "):
             bdirs.insert(0, Path(x[len("deck best y: "):]).parent)
-    bdirs += [d / "misc" / "tables" for d in list(bdirs)]
+    from physics.hf import fidfix  # FIDELITY1 `besttables` (default OFF): <best dir>/tables before misc/tables
+
+    bdirs += ([d / "tables" for d in list(bdirs)] if fidfix.on("besttables") else []) + [
+        d / "misc" / "tables" for d in list(bdirs)]
     bl, omp_deck = ompdeck.extract(bl, Z, A, bdirs)
     opts, cells, globs, parts, skipped = _split(bl, want_options=True,
                                                 deck=frozenset(extra) if "lines" in arms else frozenset())
@@ -925,6 +929,14 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
                    f"{'y' if col0 else 'n'} strength {o.strength}]")
         # xsfit runs after the input is read, so its values overwrite the best file's
         _, c2, g2, p2, s2 = _split(lines, want_options=False)
+        from physics.hf import fidfix  # FIDELITY1 `fitrisomer` (default OFF)
+
+        if fidfix.on("fitrisomer"):
+            # structure.f90:74 reads the initial compound nucleus's levels (levels.f90:313 applies Risomer there)
+            # BEFORE structure.f90:80 calls xsfit, so a fitted `risomer` of that nucleus never acts in TALYS
+            dz, dn = _PARZN.get(projectile, (0, 1))
+            cn = (int(Z) + dz, int(A) + dz + dn)
+            c2 = [c for c in c2 if not (str(c[0]).lower() == "risomer" and (int(c[1]), int(c[2])) == cn)]
         cells, globs, parts = cells + c2, globs + g2, parts + p2
         skipped = skipped + s2
     return Cards(Z, A, projectile, tuple(opts), tuple(cells), tuple(globs), tuple(parts),
