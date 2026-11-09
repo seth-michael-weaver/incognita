@@ -79,7 +79,7 @@ def test_settings_and_refusals():
     o = D.default_options(92, 235, "n", overrides={"massdis": "y"})
     assert o.fymodel == 2 and o.pfnsmodel == 2 and o.Rfiseps == 1e-9
     assert Y.settings(o)["fymodel"] == 2  # TALYS's default with massdis: GEF (B14 part 2, test_kwcov_b14b.py)
-    for fy in (3, 4, 5):
+    for fy in (3,):  # KWCOV B14c: fymodel 4 and 5 run (test_kwcov_b14c.py)
         with pytest.raises(NotImplementedError, match=f"fymodel {fy}"):
             Y.settings(D.default_options(92, 235, "n", overrides={"massdis": "y", "fymodel": str(fy)}))
     with pytest.raises(ValueError, match="outside 1..5"):

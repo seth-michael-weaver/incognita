@@ -391,7 +391,8 @@ B14: dict = {
                 "default vectorised lanes agree statistically, chi2/dof ~1 vs stock gefran 1e6) ported; 4 (FF files) and "
                 "5 (own populations) run TALYS's fragment evaporation (ffevap.py, B14 part 3): U-235 1 MeV fymodel 4, "
                 "TALYS mode, 411 fragments: nubar_n 0.01 %, FP yield peaks 0.5 %, nu(A) 0.4 %, isomeric ratios 0.05 %, "
-                "nubar_g 0.7 % (see COVERAGE_PLAN B14c); fymodel 5: every number = stock. 3 (GEF + evaporation, gefsub.f) "
+                "nubar_g 0.7 % (U-238 5 MeV, 432 fragments: nubar_n 0.02 %, FP peaks 0.2 %, nubar_g 0.6 %; see "
+                "COVERAGE_PLAN B14c); fymodel 5: every number = stock. 3 (GEF + evaporation, gefsub.f) "
                 "is REFUSED (open slice); range 1..5 checked", _T14 + "," + _T14B + "," + _T14C),
     "ffevaporation": ("SUPPORTED", "input/defaults.py Options.flagffevap -> fisyield.neck / brosafy",
                       "fymodel 1: neck step sizes and the post-neutron yields (n: FP yields 0, as stock). U-235 response "

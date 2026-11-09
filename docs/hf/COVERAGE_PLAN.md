@@ -985,21 +985,21 @@ unchanged.
   `Cascade.ffruns_rspincut`, None on every other run), the (0, 0) population from excitation.f90 as the cascade's
   type-0 seed, multiplicity = (sum of xsfeed + the discrete gammas over 1 + conversion) / xsinitpop, residual.f90's
   xseps floor. Speed: U-235 1 MeV, 411 fragments, 167 s for the whole run (stock 12.5 min).
-* **fymodel 4 vs stock** (U-235 1 MeV, TALYS mode, `scripts/kwcov/b14c_response.py`, |ln(ours/stock)|):
+* **fymodel 4 vs stock** (TALYS mode, `scripts/kwcov/b14c_response.py --target u235|u238`, |ln(ours/stock)|, worst):
 
-  | quantity | worst | where |
+  | quantity | U-235 1 MeV | U-238 5 MeV |
   |---|---|---|
-  | fragments evaporated / their initial population | 411 = 411 / 0.005 % | |
-  | FF yields (A, Z-A) | 0.000 % | |
-  | FP (post-neutron) yields, peaks / >= 1 % of max | 0.51 % / 2.0 % | A = 91 / A = 153 (Nd-154 wing) |
-  | FP isotopic >= 1 % of max | 3.5 % | Nd-153 |
-  | isomer rows / isomeric ratios (FP >= 1 % of max) | 126 = 126 / 0.054 % | Y-97 |
-  | nubar_n | 0.012 % (2.48133 vs 2.48162) | |
-  | nu_n(A), FF yield >= 1 % of max | 0.36 % | A = 154 |
-  | per-fragment neutron multiplicity (>= 0.05) | 0.61 % | Nd-154 |
-  | nubar_g | 0.71 % (7.8373 vs 7.7821) | |
-  | per-fragment gamma multiplicity | 5.6 % | Sb-130; Zr-100 +1.3 %, Sr-96 +1.0 % |
-  | P(nu) | 0 = 0 (channels n) | |
+  | fragments evaporated / their initial population | 411 = 411 / 0.005 % | 432 = 432 / 0.096 % (the run's fission xs) |
+  | FF yields (A, Z-A) | 0.000 % | 0.000 % |
+  | FP (post-neutron) yields, peaks / >= 1 % of max | 0.51 % (A 91) / 2.0 % (A 153) | 0.20 % (A 104) / 0.84 % (A 153) |
+  | FP isotopic >= 1 % of max | 3.5 % (Nd-153) | 4.7 % (Nd-152) |
+  | isomer rows / isomeric ratios (FP >= 1 % of max) | 126 = 126 / 0.054 % (Y-97) | 106 = 106 / 0.072 % (Y-97) |
+  | nubar_n | 0.012 % (2.48133 vs 2.48162) | 0.018 % (3.06189 vs 3.06243) |
+  | nu_n(A), FF yield >= 1 % of max | 0.36 % (A 154) | 0.29 % (A 92) |
+  | per-fragment neutron multiplicity (>= 0.05) | 0.61 % (Nd-154) | 0.81 % (Ga-82) |
+  | nubar_g | 0.71 % (7.8373 vs 7.7821) | 0.60 % (7.9157 vs 7.8684) |
+  | per-fragment gamma multiplicity | 5.6 % (Sb-130; Zr-100 +1.3 %, Sr-96 +1.0 %) | 5.0 % (I-134) |
+  | P(nu) | 0 = 0 (channels n) | 0 = 0 |
 
 * **fymodel 5 vs stock** (own spin-dependent populations of Kr-92, Ba-144, Sr-96, Xe-140 at U-235 1 MeV,
   `--fy 5`): every number equal to print precision (nubar_n, nubar_g 0.0000 %, per-fragment multiplicities <= 3e-6).
