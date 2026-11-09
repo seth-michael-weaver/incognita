@@ -95,16 +95,18 @@ def _pad(v, n: int):
 _SPINCUT_PARTS: dict = {}
 
 
-def _spincut_parts(ld) -> tuple:
+def _spincut_parts(ld, rs_ff: float | None = None) -> tuple:
     """The Eex-independent half of `density.parameters.spincut(ld, ald, Eex, ibar=0, ipop=0)`,
-    computed by its own torch expressions once per level-density record and kept as floats."""
-    got = _SPINCUT_PARTS.get(id(ld))
+    computed by its own torch expressions once per level-density record and kept as floats.
+    KWCOV B14c: `rs_ff` given is ipop = 1 (spincut.f90:25-28: a fission-fragment run's exgrid uses Rspincutff)."""
+    ck = id(ld) if rs_ff is None else (id(ld), "ff", float(rs_ff))
+    got = _SPINCUT_PARTS.get(ck)
     if got is not None and got[0] is ld:
         return got[1]
     from physics.hf.density.parameters import _fv, ignatyuk
 
     ibar = 0
-    Rs, s2, ldmod = ld.Rspincut, ld.s2adjust[ibar], ld.ldmodel
+    Rs, s2, ldmod = (ld.Rspincut if rs_ff is None else rs_ff), ld.s2adjust[ibar], ld.ldmodel
     scutconst = (Rs * s2 * ld.Irigid0 / ld.alimit if ld.spincutmodel == 1
                  else Rs * s2 * ld.Irigid0)
     Em = ld.Exmatch_mev[ibar]
@@ -128,15 +130,15 @@ def _spincut_parts(ld) -> tuple:
     denom = float(Em - Ed) if interp else 1.0
     parts = (float(scutconst), float(Em), float(sdisc), float(s2m), float(Ed), denom, interp,
              float(ld.delta_mev[ibar]), int(ld.spincutmodel))
-    _SPINCUT_PARTS[id(ld)] = (ld, parts)
+    _SPINCUT_PARTS[ck] = (ld, parts)
     return parts
 
 
-def _spincut_np(ld, ald: float, eex: np.ndarray) -> np.ndarray:
+def _spincut_np(ld, ald: float, eex: np.ndarray, rs_ff: float | None = None) -> np.ndarray:
     """`density.parameters.spincut(ld, ald, eex, 0, 0)` for a scalar `ald`, on numpy. The per-bin
     half is +, -, *, / (numpy) and one torch sqrt in the torch function's order: the same double
-    arithmetic, bit for bit."""
-    scutconst, Em, sdisc, s2m, Ed, denom, interp, delta, model = _spincut_parts(ld)
+    arithmetic, bit for bit. `rs_ff`: ipop = 1 (KWCOV B14c)."""
+    scutconst, Em, sdisc, s2m, Ed, denom, interp, delta, model = _spincut_parts(ld, rs_ff)
     below = np.where(interp & (eex > Ed), sdisc + (eex - Ed) / denom * (s2m - sdisc), sdisc)
     U = eex - delta
     okU = U > 0.0
@@ -148,10 +150,10 @@ def _spincut_np(ld, ald: float, eex: np.ndarray) -> np.ndarray:
     return np.maximum(sdisc, np.where(eex <= Em, below, above))
 
 
-def _maxj_of(ld, ald: float, eex: np.ndarray) -> np.ndarray:
+def _maxj_of(ld, ald: float, eex: np.ndarray, rs_ff: float | None = None) -> np.ndarray:
     """`max_spin_index(spincut(ld, ald, eex))`: exgrid.f90's maxJ with a = A/8, the float32 cast
-    and truncation as torch does them."""
-    s = _spincut_np(ld, ald, eex).astype(np.float32)
+    and truncation as torch does them. `rs_ff`: a fission-fragment run (exgrid.f90:250-254, ipop = 1)."""
+    s = _spincut_np(ld, ald, eex, rs_ff).astype(np.float32)
     root = torch.sqrt(torch.from_numpy(s)).numpy()
     return np.minimum((np.float32(4.0) + np.float32(3.0) * root).astype(np.int64), NUMJ)
 
@@ -1089,7 +1091,10 @@ class Cascade:
         # `reacinitial` leaves maxJ at numJ and exgrid writes only NL+1..maxex, so a nucleus whose
         # grid stops below NL keeps numJ everywhere -- hence the unclamped `nl` in this test.
         rows = None
-        if not self.density_overrides and not self.diff_params:
+        # KWCOV B14c: a fission-fragment run (ffevap) takes maxJ with ipop = 1 (exgrid.f90:250-254, Rspincutff) on the
+        # Python rows; None on every other run
+        rs_ff = getattr(self, "ffruns_rspincut", None)
+        if not self.density_overrides and not self.diff_params and rs_ff is None:
             from physics.hf.density.ld_ceng import spec_rows
 
             # CENGLD2: maxJ and rhogrid in one C call on the record's floats
@@ -1101,7 +1106,7 @@ class Cascade:
                 sc = spincut(ld, torch.full_like(exc, A / 8.0), exc, 0, 0)
                 maxj[nl + 1 :] = max_spin_index(sc).numpy()
             else:
-                maxj[nl + 1 :] = _maxj_of(ld, A / 8.0, np.asarray(ex[nl + 1 : n], np.float64))
+                maxj[nl + 1 :] = _maxj_of(ld, A / 8.0, np.asarray(ex[nl + 1 : n], np.float64), rs_ff)
         parlev = np.zeros(n, np.int64)
         jdis = np.zeros(n)
         tau = np.zeros(n)

@@ -197,7 +197,8 @@ B8: dict = {
     "pfnsmodel": ("SUPPORTED", _FO + "iwamoto",
                   "1: Iwamoto PFNS (iwamoto.f90, single precision as TALYS): grid, E-average and every column = stock "
                   "to 2e-5 (U-238, U-235, Pu-239, Th-232). 2: no Iwamoto spectrum, as stock without massdis; the "
-                  "fragment-decay PFNS (ffevap.f90) is B14", _T8),
+                  "fragment-decay PFNS / PFGS (ffevap.f90 with outspectra y) are REFUSED with fymodel >= 3 (B14 part 3 "
+                  "open slice; massdis's own fymodel 4/5 nubar, nu(A), yields run without spectra)", _T8),
     "tmadjust": ("SUPPORTED", _FO + "iwamoto (Tm0 x tmadjust)", "PFNS E-average = stock 1e-5 (U-238 1.3; U-235, "
                  "Pu-239 0.8 with fsadjust 2); no cross section moves on either side", _T8),
     "fsadjust": ("SUPPORTED", _FO + "iwamoto (scission fraction x fsadjust)", "PFNS E-average = stock 1e-5 (U-238 3; "
@@ -374,6 +375,7 @@ B10B: dict = {
 }
 _T14 = "test:test_kwcov_b14.py"
 _T14B = "test:test_kwcov_b14b.py"
+_T14C = "test:test_kwcov_b14c.py"
 _FY = "fisyield.py (engine_c.cases -> fisyield.record -> Results.fission_yields) "
 #: KWCOV B14 part 1 rows (docs/hf/COVERAGE_PLAN.md B14); stock TALYS-2.25 n + U-235 (1, 5 MeV) and U-238 (1, 5, 14 MeV)
 #: with `massdis y; fymodel 1`, TALYS mode; scripts/kwcov/b14_response.py
@@ -386,9 +388,11 @@ B14: dict = {
                 "gef.py): yields + nubarn.tot / Pnun / nunA / nunZA; natural targets refused as TALYS", _T14),
     "fymodel": ("SUPPORTED", "input/defaults.py Options.fymodel -> " + _FY + "settings",
                 "1 (Brosa) and 2 (GEF, gef.py: stock's generator stream reproduces stock's sampled tables exactly; the "
-                "default vectorised lanes agree statistically, chi2/dof ~1 vs stock gefran 1e6) ported; 3 GEF + "
-                "evaporation, 4 FF files (reader fisyield.ff_files / ff_pairs ported, the engine run refused: ffevap), "
-                "5 own populations are REFUSED with massdis y (B14 part 3); range 1..5 checked", _T14 + "," + _T14B),
+                "default vectorised lanes agree statistically, chi2/dof ~1 vs stock gefran 1e6) ported; 4 (FF files) and "
+                "5 (own populations) run TALYS's fragment evaporation (ffevap.py, B14 part 3): U-235 1 MeV fymodel 4, "
+                "TALYS mode, 411 fragments: nubar_n 0.01 %, FP yield peaks 0.5 %, nu(A) 0.4 %, isomeric ratios 0.05 %, "
+                "nubar_g 0.7 % (see COVERAGE_PLAN B14c); fymodel 5: every number = stock. 3 (GEF + evaporation, gefsub.f) "
+                "is REFUSED (open slice); range 1..5 checked", _T14 + "," + _T14B + "," + _T14C),
     "ffevaporation": ("SUPPORTED", "input/defaults.py Options.flagffevap -> fisyield.neck / brosafy",
                       "fymodel 1: neck step sizes and the post-neutron yields (n: FP yields 0, as stock). U-235 response "
                       "on the FF yields 0.005 % (stock moved 6.0 %)", _T14),
@@ -402,18 +406,23 @@ B14: dict = {
     "gefran": ("SUPPORTED", "input/defaults.py Options.gefran -> fisyield.settings -> gef.geftalys (events per bin)",
                "GEF's event count per excitation bin (fymodel 2): `gefran 1000` with INCOGNITA_GEF_STREAM=talys gives "
                "stock's sampled numbers; inert with fymodel 1, as stock. Range 1000..1e6 checked", _T14 + "," + _T14B),
-    "ffmodel": ("SUPPORTED", "input/defaults.py Options.ffmodel -> fisyield.ff_files (fymodel 4 reader)",
-                "selects the fragment database of fymodel 4 (gef / hf3d / spy / langevin4d / user); the reader is "
-                "ported, the fymodel 4 run is refused until ffevap (B14 part 3); range 0..4 checked", _T14 + "," + _T14B),
-    "yieldfile": ("SUPPORTED", "input/defaults.py Options.yieldfile -> fisyield.ff_files (fymodel 4 reader)",
-                  "read since B14; replaces the database file with fymodel 4, whose run is refused until ffevap "
-                  "(B14 part 3)", _T14 + "," + _T14B),
-    "ffspin": ("SUPPORTED", "input/defaults.py Options.flagffspin (inert)", "acts only with fymodel 3 (ff files of "
-               "ffevap.f90), which is refused (B14 part 3)", _T14),
-    "transpower": ("IGNORED", "input/defaults.py Options.transpower (no reader: core/grids.transmission_limit and "
-                   "omp/inverse.py keep translimit 1e-5)", "FOUND IN B14: the value never reaches the transmission "
-                   "tables. Stock U-238 14 MeV `transpower 10` moves fission -0.75 % (massdis y, which sets it, -1.0 %); "
-                   "ours does not move (1270.682 mb with and without). Left for a numerics batch (touches the OMP / inverse lmax cut)"),
+    "ffmodel": ("SUPPORTED", "input/defaults.py Options.ffmodel -> fisyield.ff_files -> ffevap.evaporate",
+                "selects the fragment database of fymodel 4 (gef / hf3d / spy / langevin4d / user; a missing database "
+                "is TALYS's error); fymodel 4 runs since B14 part 3 (ffevap.py); range 0..4 checked",
+                _T14 + "," + _T14B + "," + _T14C),
+    "yieldfile": ("SUPPORTED", "input/defaults.py Options.yieldfile -> fisyield.ff_files -> ffevap.evaporate",
+                  "replaces the database file with fymodel 4 (one table, no energy interpolation, as massdis.f90:630)",
+                  _T14 + "," + _T14B),
+    "ffspin": ("SUPPORTED", "input/defaults.py Options.flagffspin (inert)", "acts only with fymodel 3 (the J-dependent "
+               "ff files massdis writes, massdis.f90:554), which is refused (B14 part 3 open slice); inert with "
+               "fymodel 1, 2, 4, 5, as stock", _T14 + "," + _T14C),
+    "transpower": ("SUPPORTED", "input/defaults.py Options.transpower -> compound/dens_reference._trans_cut -> "
+                   "_lmax_inverseread (the outgoing channels' lmax)", "FOUND IN B14, wired in B14c with transeps: the "
+                   "inverse channels' lmax cut max(T0 translimit / (2l+1), transeps) took the defaults 1e-5 / 1e-8 "
+                   "whatever the deck said. Fragment evaporation (Sb-134, massdis y numerics): neutron multiplicity "
+                   "stock 1.00455, ours 0.8836 before / 1.00438 after; transpower 10 alone 0.90413 / 0.90392. The "
+                   "incident channel's lmax (incidentread.f90:287) still takes 1e-5 (main-run fission at U-238 14 MeV)",
+                   _T14C),
 }
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
@@ -441,7 +450,8 @@ MANUAL: dict = {
     **B10B,
     "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps",
                  "KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the "
-                 "Cascade constructor's 1e-8; now it does unless a caller passes its own", _T9),
+                 "Cascade constructor's 1e-8; now it does unless a caller passes its own. KWCOV B14c: it also sets the "
+                 "outgoing channels' lmax cut (inverseread.f90:172, with transpower), which kept 1e-8", _T9 + "," + _T14C),
     "channels": ("SUPPORTED", "structure/scalars.py:144", "exclusive channels are always computed (flagchannels "
                  "hard-wired on); `channels n` has no effect, which is harmless", "manual"),
     "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y -> the B10 URR files, "

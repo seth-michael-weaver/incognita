@@ -1,5 +1,6 @@
-"""KWCOV B14 parts 1-2 (FISYIELD): fission fragment / product yields and GEF prompt neutrons, `massdis y` +
-`fymodel 1` (Brosa) or `fymodel 2` (GEF, TALYS's default once massdis is on).
+"""KWCOV B14 parts 1-3 (FISYIELD): fission fragment / product yields and prompt neutrons, `massdis y` +
+`fymodel 1` (Brosa), `fymodel 2` (GEF, TALYS's default once massdis is on), `fymodel 4` (fragment files) or
+`fymodel 5` (own fragment populations); 4 and 5 evaporate the fragments by TALYS's own decay (physics/hf/ffevap.py).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning (Brosa model: M. Duijvestijn). See physics/hf/NOTICE-TALYS.md.
@@ -27,9 +28,11 @@ With fymodel 2 also (nubarout.f90, nudisout.f90):
     nunZA<E>.fis        Z, A, nu: no rows (only ffevap fills nuZA)
 
 Models: fymodel 1 (Brosa) and 2 (GEF, physics/hf/gef.py; gefran events per excitation bin; `outfy` only prints) are
-ported. fymodel 3 (GEF + TALYS evaporation), 4 (fragment files: ffmodel, yieldfile) and 5 (own population files) are
-refused with an error (B14 part 3: they all end in ffevap.f90). The isomer split of the fission products (yieldfpex /
-fpratio) is only filled by ffevap.f90 (fymodel >= 3): with fymodel 1-2 TALYS writes none, and neither does the port.
+ported. fymodel 4 (fragment files: ffmodel, yieldfile) and 5 (ff<ZZZ><AAA>.ex of the run directory) run through
+ffevap.py after the energy loop (B14 part 3): post-neutron yields, the isomer split (yieldfpex / fpratio: isomer rows of
+yieldZA, fp/rpZZZAAA.i0N), nubar / P(nu) / nu(A) / nu(Z,A) per ejectile (nubar<x>.tot, Pnu<x>, nu<x>A, nu<x>ZA, Eav*).
+fymodel 3 (GEF + TALYS evaporation, gefsub.f) is refused, and so are outspectra (pfnsmodel 2 spectra) and channels y
+with fymodel >= 3. With fymodel 1-2 TALYS writes no isomer split, and neither does the port.
 GEF random numbers: `INCOGNITA_GEF_STREAM=talys` runs the stock generator stream event by event (stock's numbers, slow);
 the default `lanes` runs the events of a bin vectorised, each on its own substream of the same generator (statistically
 equal to stock, deterministic); `INCOGNITA_GEF_SEED=k` shifts the lane substreams (noise estimates).
@@ -37,7 +40,9 @@ equal to stock, deterministic); `INCOGNITA_GEF_SEED=k` shifts the lane substream
 TALYS routines ported here (file:line of the subroutine / function statement):
     massdis.f90:1 (massdis) [fymodel 1-2 branches, normalisation] per-bin loop, fpeps, sums, GEF nubar / nu(A) / P(nu)
     massdisout.f90:1 (massdisout)                                the yield files
-    nubarout.f90:1 (nubarout), nudisout.f90:1 (nudisout)        nubarn.tot, Pnun / nunA / nunZA (fymodel 2)
+    nubarout.f90:1 (nubarout), nudisout.f90:1 (nudisout)        nubarn.tot, Pnun / nunA / nunZA (fymodel 2), per
+                                                                 ejectile + Eav* (fymodel >= 3)
+    massdis.f90:471-742 [fymodel 4 / 5]                          _fymodel4 (pairs), _fymodel5 (own files)
     (GEF itself: physics/hf/gef.py)
     brosafy.f90:1 (brosafy)                                      the three Brosa modes (SL, ST I, ST II)
     neck.f90:1 (neck)                                            mass / charge / evaporation per mode
@@ -94,14 +99,29 @@ def settings(options) -> dict | None:
         raise ValueError(f"gefran {gr}: outside 1000..1000000 (TALYS-error, checkvalue.f90:1088)")
     if not (bool(getattr(options, "flagmassdis", False)) and bool(getattr(options, "flagfission", False))):
         return None
-    if fy >= 3:
-        what = {3: "GEF + TALYS fragment evaporation (gefsub.f + ffevap.f90)",
-                4: "fission fragment files (ffmodel / yieldfile) + ffevap.f90", 5: "own fragment populations + ffevap.f90"}
+    if fy == 3:
         raise NotImplementedError(
-            f"massdis y with fymodel {fy} ({what[fy]}) is not ported (KWCOV B14 part 3: fragment evaporation); "
-            f"fymodel 1 (Brosa) and 2 (GEF, TALYS's default) give fission yields.")
+            "massdis y with fymodel 3 (GEF + TALYS fragment evaporation: gefsub.f + ffevap.f90) is not ported (KWCOV B14 "
+            "part 3, open slice); fymodel 1 (Brosa), 2 (GEF, TALYS's default), 4 (fragment files + ffevap) and 5 (own "
+            "fragment populations + ffevap) give fission yields.")
+    if fy >= 3 and (bool(getattr(options, "flagspec", False)) or bool(getattr(options, "flagddx", False))):
+        raise NotImplementedError(
+            f"massdis y, fymodel {fy} with outspectra / ddx: the prompt fission neutron and gamma spectra from fragment "
+            f"decay (pfnsmodel 2: ffevap.f90 spectra, ffgammaspec.f90, pfnsout.f90) are not ported (KWCOV B14 part 3, "
+            f"open slice); without outspectra nubar, nu(A), nu(Z,A) and the post-neutron yields are given.")
+    if fy >= 3 and bool(getattr(options, "flagchannels", False)):
+        raise NotImplementedError(
+            f"massdis y, fymodel {fy} with channels y: P(nu) per fragment from the fragment runs' exclusive channels "
+            f"(ffevap.f90:292-319) is not ported (KWCOV B14 part 3, open slice); with channels n (TALYS's default) "
+            f"stock's ffevap P(nu) is zero, as here.")
     s = {"fymodel": fy, "ffevap": bool(getattr(options, "flagffevap", True)),
          "Rfiseps": float(getattr(options, "Rfiseps", 1e-9)), "gefran": gr}
+    if fy >= 4:
+        import os
+
+        s.update(ffmodel=ff, yieldfile=str(getattr(options, "yieldfile", "") or ""),
+                 parskip=[not b for b in getattr(options, "parinclude", [True] * 7)],
+                 ffdir=os.environ.get("INCOGNITA_FFDIR", "") or os.getcwd())  # fymodel 5: TALYS's run directory
     if fy == 2:
         import os
 
@@ -1036,6 +1056,16 @@ def massdis(cas, st, etot_mev: float, mres, s: dict) -> dict:
     if fpeps == 0.0 or mres is None:
         out.update(_normalise(xsApre, xsApost, xsZApre, xsZApost, Zt, At))
         return out
+    if s["fymodel"] == 4:  # KWCOV B14c: the fragment pairs; ffevap (after the run) gives the post-neutron side
+        files, efftab = ff_files(s["Zinit"], s["Ainit"], etot_mev, s["ffmodel"], s["yieldfile"])
+        pr = ff_pairs(files, efftab, s["Ainit"], etot_mev)
+        out["ff"] = _fymodel4(pr["pairs"], xsfistot, xsApre, xsZApre)
+        out.update(_normalise(xsApre, xsApost, xsZApre, xsZApost, Zt, At))
+        return out
+    if s["fymodel"] == 5:  # KWCOV B14c: own fragment populations ff<ZZZ><AAA>.ex in the run directory
+        out["ff"] = _fymodel5(s["ffdir"], s["Zinit"], s["Ainit"], xsApre, xsZApre)
+        out.update(_normalise(xsApre, xsApost, xsZApre, xsZApost, Zt, At))
+        return out
     for key in sorted(feeds, key=lambda k: (k[0], k[1])):
         if not float(feeds[key].get(-1, 0.0)) > fpeps:
             continue
@@ -1227,6 +1257,67 @@ def ff_pairs(files: list[str], efftab: list[float], Ainit: int, etotal_mev: floa
     return {"files": files, "efac": float(efac), "pairs": out}
 
 
+def _fymodel4(pairs, xsfistot, xsApre, xsZApre) -> dict:
+    """fymodel 4: each pair's cross section xsfistot * Y0 to both fragments (A and (Z, A)), and the fragments'
+    excitation energy, width and TKE (the last pair naming a fragment wins). Returns {(Z, N): (Excff, dExcff, TKE)}.
+
+    TALYS: massdis.f90:683-698
+    Test: tests/hf/test_kwcov_b14c.py
+    """
+    ff = {}
+    for izl, ial, izh, iah, y0, tk, tx, ell, del_, eh, deh in pairs:
+        xs = F(F(xsfistot) * F(y0))
+        inl, inh = ial - izl, iah - izh
+        xsApre[ial] = F(xsApre[ial] + xs)
+        xsApre[iah] = F(xsApre[iah] + xs)
+        xsZApre[izl, inl] = F(xsZApre[izl, inl] + xs)
+        xsZApre[izh, inh] = F(xsZApre[izh, inh] + xs)
+        ff[(izl, inl)] = (F(ell), F(del_), F(tk))
+        ff[(izh, inh)] = (F(eh), F(deh), F(tk))
+    return ff
+
+
+def _fymodel5(ffdir: str, Zinit: int, Ainit: int, xsApre, xsZApre) -> dict:
+    """fymodel 5: every ff<ZZZ><AAA>.ex of the run directory (Z <= Zinit, A <= Ainit) is a fragment; its cross section
+    is the sum of its populations (all parities, energies and spins). Returns {(Z, N): file path}.
+
+    TALYS: massdis.f90:709-742
+    Test: tests/hf/test_kwcov_b14c.py
+    """
+    import os
+
+    out = {}
+    for iz in range(1, Zinit + 1):
+        for ia in range(iz + 1, Ainit + 1):
+            inn = ia - iz
+            if inn < 1 or inn > NUMNEU:
+                continue
+            fn = os.path.join(ffdir, f"ff{iz:03d}{ia:03d}.ex")
+            if not os.path.isfile(fn):
+                continue
+            with open(fn) as f:
+                head = f.readline().split()
+                try:
+                    npope, npopj, npopp = int(head[0]), int(head[1]), int(head[2])
+                except (IndexError, ValueError) as ex:
+                    raise ValueError(f"TALYS-error: reading {fn}: {ex}") from ex
+                if not 1 <= npope <= 1000:
+                    raise ValueError(f"TALYS-error: invalid number of population energies in {fn}")
+                if not 1 <= npopj <= 41:
+                    raise ValueError(f"TALYS-error: invalid number of spins in {fn}")
+                if not 1 <= npopp <= 2:
+                    raise ValueError(f"TALYS-error: fymodel 5 requires one or two parities in {fn}")
+                xs = F(0.0)
+                for _ in range(npopp * npope):
+                    t = f.readline().split()
+                    for v in t[1:1 + npopj]:
+                        xs = F(xs + F(v))
+            xsZApre[iz, inn] = F(xsZApre[iz, inn] + xs)
+            xsApre[ia] = F(xsApre[ia] + xs)
+            out[(iz, inn)] = fn
+    return out
+
+
 def _pdisnu_norm(pd) -> None:
     """Pdisnu normalised by its sum over i = 1..numin (= 8, not numnu; kept as TALYS: P(nu > 8) stays unnormalised).
 
@@ -1309,6 +1400,8 @@ def build(rec: list, s: dict) -> dict:
     C = len(rec)
     fpz: dict = {}
     fpa: dict = {}
+    fpi: dict = {}
+    nan = float("nan")
     for c, r in enumerate(rec):
         es = estring(r["E"])
         A = np.arange(1, At + 1)
@@ -1329,24 +1422,101 @@ def build(rec: list, s: dict) -> dict:
                 fpz.setdefault((iz, ia), np.zeros((C, 4)))
                 fpz[(iz, ia)][c] = (r["yieldZApost"][iz, inn], r["yieldZApre"][iz, inn], post, pre)
                 if pre >= fpeps and post >= fpeps:
-                    rows.append((iz, ia, -1, r["yieldZApost"][iz, inn], r["yieldZApre"][iz, inn], post, pre))
+                    rows.append((iz, ia, -1, r["yieldZApost"][iz, inn], r["yieldZApre"][iz, inn], post, pre, nan))
+                xf = r.get("xsfpex")
+                if xf is not None and xf[iz, inn, 1] > 0.0:  # KWCOV B14c: massdisout.f90:174-226 (ffevap's isomers)
+                    for j in (0, 1):
+                        fpi.setdefault((iz, ia, j), np.zeros((C, 4)))
+                        fpi[(iz, ia, j)][c] = (r["yieldfpex"][iz, inn, j], xf[iz, inn, j], r["fpratio"][iz, inn, j],
+                                               post)
+                        if pre >= fpeps and post >= fpeps:
+                            rows.append((iz, ia, j, r["yieldfpex"][iz, inn, j], nan, xf[iz, inn, j], nan,
+                                         r["fpratio"][iz, inn, j]))
             if r["xsApre"][ia] < fpeps and r["xsApost"][ia] < fpeps and ia not in fpa:
                 continue
             fpa.setdefault(ia, np.zeros((C, 4)))
             fpa[ia][c] = (r["yieldApost"][ia], r["yieldApre"][ia], r["xsApost"][ia], r["xsApre"][ia])
-        rows.sort(key=lambda x: (x[1], x[0]))
-        arr = np.array(rows, dtype=float).reshape(-1, 7)
-        out[f"yieldZA{es}.fis"] = {k: arr[:, j] for j, k in enumerate(
-            ("Z", "A", "isomer", "FP_yield", "FF_yield", "FP_xs", "FF_xs"))}
+        rows.sort(key=lambda x: (x[1], x[0], x[2]))
+        arr = np.array(rows, dtype=float).reshape(-1, 8)
+        cols = ("Z", "A", "isomer", "FP_yield", "FF_yield", "FP_xs", "FF_xs", "Isomeric_ratio")
+        out[f"yieldZA{es}.fis"] = {k: arr[:, j] for j, k in enumerate(cols[:8 if s.get("fymodel", 1) >= 3 else 7])}
     for (iz, ia), v in sorted(fpz.items(), key=lambda x: (x[0][1], x[0][0])):
         out[f"fp{iz:03d}{ia:03d}.tot"] = {"E": E, "FP_yield": v[:, 0], "FF_yield": v[:, 1], "FP_xs": v[:, 2],
                                           "FF_xs": v[:, 3]}
         out[f"rp{iz:03d}{ia:03d}.tot"] = {"E": E, "FP_xs": v[:, 2]}
+    for (iz, ia, j), v in sorted(fpi.items(), key=lambda x: (x[0][1], x[0][0], x[0][2])):
+        # fp<ZZZ><AAA>.i0N: E, FP_yield (yieldfpex), FP_xs (xsfpex), Ratio; rp<ZZZ><AAA>.i0N: E and xsZApost (the
+        # total, as massdisout.f90:221 writes it)
+        out[f"fp{iz:03d}{ia:03d}.i{j:02d}"] = {"E": E, "FP_yield": v[:, 0], "FP_xs": v[:, 1], "Ratio": v[:, 2]}
+        out[f"rp{iz:03d}{ia:03d}.i{j:02d}"] = {"E": E, "FP_xs": v[:, 3]}
     for ia, v in sorted(fpa.items()):
         out[f"fp{ia:03d}.tot"] = {"E": E, "FP_yield": v[:, 0], "FF_yield": v[:, 1], "FP_xs": v[:, 2],
                                   "FF_xs": v[:, 3]}
     if s.get("fymodel") == 2:
         out.update(build_nu(rec, s))
+    elif s.get("fymodel", 1) >= 3:
+        out.update(build_nu_ff(rec, s))
+    return out
+
+
+def build_nu_ff(rec: list, s: dict) -> dict:
+    """nubarout.f90 / nudisout.f90 files after ffevap (fymodel >= 3), per ejectile x with nubar(x) != 0:
+    nubar<x>.tot, Pnu<x><E>.fis, nu<x>A<E>.fis, nu<x>ZA<E>.fis; and EavZA<E>.fis / EavA<E>.fis.
+
+    TALYS: nubarout.f90:1 (nubarout), nudisout.f90:1 (nudisout) incl. lines 191-259
+    Test: tests/hf/test_kwcov_b14c.py
+    """
+    from physics.hf.core.constants import PARSYM
+
+    out: dict = {}
+    Zt, At = s["Ztarget"], s["Atarget"]
+    for t in range(7):
+        nb_e, nb_v = [], []
+        started = False
+        for c, r in enumerate(rec):
+            nub = float(r["nubar"][t])
+            if nub == 0.0:
+                continue
+            if not started:  # nubarout.f90:84-105
+                nb_e += [rec[k]["E"] for k in range(c)]
+                nb_v += [0.0] * c
+                started = True
+            nb_e.append(r["E"])
+            nb_v.append(nub)
+        if started:
+            out[f"nubar{PARSYM[t]}.tot"] = {"E": np.array(nb_e), "nubar": np.array(nb_v)}
+    for r in rec:
+        es = estring(r["E"])
+        for t in range(7):
+            nub = float(r["nubar"][t])
+            if nub == 0.0:
+                continue
+            x = PARSYM[t]
+            pd = r["Pdisnu"][t]
+            idx = np.array([i for i in range(NUMNU + 1) if pd[i] > 0 or i <= 4])
+            out[f"Pnu{x}{es}.fis"] = {"number": idx, "nu": pd[idx].astype(float), "nubar_prompt": np.array([nub]),
+                                      "average_Pnu": np.array([float(r["Pdisnuav"][t])])}
+            out[f"nu{x}A{es}.fis"] = {"A": np.arange(1, At + 1), "nu": r["nuA"][t, 1:At + 1].astype(float),
+                                      "nubar_prompt": np.array([nub])}
+            za = sorted((iz, iz + inn, float(v)) for (tt, iz, inn), v in r["nuZA"].items()
+                        if tt == t and v > 0 and inn < NUMNEU and iz <= Zt and iz + inn <= At)
+            za = np.array(za, dtype=float).reshape(-1, 3)
+            out[f"nu{x}ZA{es}.fis"] = {"Z": za[:, 0].astype(int), "A": za[:, 1].astype(int), "nu": za[:, 2]}
+        ez = sorted({(iz, iz + inn) for (tt, iz, inn), v in r["eavZA"].items() if tt in (0, 1) and v > 0})
+        g = np.array([float(r["eavZA"].get((0, iz, ia - iz), 0.0)) for iz, ia in ez])
+        n = np.array([float(r["eavZA"].get((1, iz, ia - iz), 0.0)) for iz, ia in ez])
+        out[f"EavZA{es}.fis"] = {"Z": np.array([z for z, _ in ez], int), "A": np.array([a for _, a in ez], int),
+                                 "gamma": g, "neutron": n}
+        out[f"EavA{es}.fis"] = {"A": np.arange(1, At + 1), "gamma": r["eavA"][0, 1:At + 1].astype(float),
+                                "neutron": r["eavA"][1, 1:At + 1].astype(float)}
+        fr = r.get("fragments") or {}
+        if fr:  # not a TALYS file: talys.out's per-fragment reaction summary (initial population, multiplicities)
+            keys = sorted(fr, key=lambda k: (k[1], k[0]))
+            m = np.array([fr[k]["mult"] for k in keys], dtype=float).reshape(-1, 7)
+            out[f"ff_fragments{es}"] = {"Z": np.array([k[0] for k in keys]), "A": np.array([k[1] for k in keys]),
+                                        "Einc": np.array([fr[k]["Einc"] for k in keys]),
+                                        "xsinitpop": np.array([fr[k]["xsinitpop"] for k in keys]),
+                                        **{f"mult_{PARSYM[t]}": m[:, t] for t in range(7)}}
     return out
 
 
@@ -1400,6 +1570,22 @@ def add_to_results(res, injection=None):
     try:
         if len(_REC) != res.n:
             raise RuntimeError(f"FISYIELD: {len(_REC)} recorded energies for {res.n} results")
+        if _SET["fymodel"] >= 3:  # KWCOV B14c: ffevap.f90 per energy, after the run (output only)
+            from physics.hf import ffevap
+
+            for r in _REC:
+                if r.get("fpeps", 0.0) == 0.0 or "ff" not in r:
+                    continue
+                ev = ffevap.evaporate(r, _SET)
+                for k in ("xsZApost", "xsApost", "yieldZApost", "yieldApost"):
+                    r[k] = ev[k]
+                r["tot"][0], r["tot"][2] = ev["yieldtotpost"], ev["xstotpost"]
+                r.update({k: ev[k] for k in ("xsfpex", "yieldfpex", "fpratio", "nubar", "nuA", "nuZA", "eavZA",
+                                              "eavA", "Pdisnu", "Pdisnuav", "fragments")})
+            for r in _REC:  # an energy without fission: TALYS's arrays stay zero
+                if "nubar" not in r:
+                    r.update(nubar=np.zeros(7, F), Pdisnu=np.zeros((7, NUMNU + 1), F), Pdisnuav=np.zeros(7, F),
+                             nuA=np.zeros((7, NUMMASS + 1), F), nuZA={}, eavZA={}, eavA=np.zeros((7, NUMMASS + 1), F))
         res = replace(res, fission_yields=build(_REC, _SET))
     finally:
         _SET = None

@@ -503,7 +503,7 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
                   + (2 * ll - 1) * tjl[..., 0]) / (3 * (2 * ll + 1))
         else:
             tl = tjl[..., 0]
-        lm = _lmax_inverseread(tjl, tl, t)
+        lm = _lmax_inverseread(tjl, tl, t, *_trans_cut(rg.options))
         # outside [ebegin, eend] TALYS never computes lmax; the array keeps reacinitial's 0, and
         # densprepare copies it into lmaxhf whenever Eout falls below egrid(ebegin) (nen = 0).
         lm[: rg.ebegin[t]] = 0
@@ -639,7 +639,27 @@ def _njmax(Zt: int, At: int, particle: int, egrid: np.ndarray) -> np.ndarray:
     return np.clip(nj, 20, NUML - 2)
 
 
-def _lmax_inverseread(tjl: torch.Tensor, tl: torch.Tensor, particle: int) -> np.ndarray:
+def _trans_cut(options) -> tuple[float, float]:
+    """(translimit, transeps) of the run for the inverse channels' lmax: `transpower` (grid.f90:256) and `transeps`
+    (input_numerics.f90:79-94; massdis y: 10 / 1e-12, astro y: 15 / 1e-18). KWCOV B14c: before, the defaults 1e-5 /
+    1e-8 were used whatever the deck said (found in B14 part 1; it matters for fragment evaporation: Sb-134 neutron
+    multiplicity 12 %). The defaults are returned as before (bit-identical default runs).
+
+    TALYS: grid.f90:256, inverseread.f90:163-215
+    Test: tests/hf/test_kwcov_b14c.py
+    """
+    from physics.hf.core.grids import transmission_limit
+    from physics.hf.omp.inverse import TRANSEPS_DEFAULT, TRANSLIMIT_DEFAULT
+
+    tp = int(getattr(options, "transpower", 5))
+    te = float(getattr(options, "transeps", TRANSEPS_DEFAULT))
+    tlim = TRANSLIMIT_DEFAULT if tp == 5 else transmission_limit(tp)
+    teps = TRANSEPS_DEFAULT if te == TRANSEPS_DEFAULT else float(np.float32(te))
+    return tlim, teps
+
+
+def _lmax_inverseread(tjl: torch.Tensor, tl: torch.Tensor, particle: int, translimit: float | None = None,
+                      transeps: float | None = None) -> np.ndarray:
     """`lmax(type, nen)`, the last l before every T_lj falls under
     max(T_l(0) translimit / (2l+1), transeps) (inverseread.f90:163-215). -1 when even l = 0 is
     under it; 0 outside [ebegin, eend], where TALYS never computes it and the array keeps its
@@ -653,7 +673,8 @@ def _lmax_inverseread(tjl: torch.Tensor, tl: torch.Tensor, particle: int) -> np.
     nj = NJ[particle]
     L = tjl.shape[-2]
     ll = torch.arange(L, dtype=DTYPE)
-    teps = torch.clamp_min(tl[:, :1] * TRANSLIMIT_DEFAULT / (2 * ll + 1), TRANSEPS_DEFAULT)
+    tlim = TRANSLIMIT_DEFAULT if translimit is None else translimit
+    teps = torch.clamp_min(tl[:, :1] * tlim / (2 * ll + 1), TRANSEPS_DEFAULT if transeps is None else transeps)
     small = (tjl[..., :nj] < teps[..., None]).all(-1)
     first = torch.where(small.any(-1), small.to(torch.int64).argmax(-1),
                         torch.full(small.shape[:-1], L))

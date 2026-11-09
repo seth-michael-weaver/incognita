@@ -161,7 +161,7 @@ def test_settings_fymodel2(clean):
     with pytest.raises(ValueError, match="lanes"):
         Y.settings(o)
     clean.delenv("INCOGNITA_GEF_STREAM")
-    for fy in (3, 4, 5):
+    for fy in (3,):  # KWCOV B14c: fymodel 4 and 5 run (test_kwcov_b14c.py)
         with pytest.raises(NotImplementedError, match="part 3"):
             Y.settings(D.default_options(92, 235, "n", overrides={"massdis": "y", "fymodel": str(fy)}))
     assert Y.settings(D.default_options(92, 235, "n", overrides={"massdis": "y", "gefran": "1000"}))["gefran"] == 1000
