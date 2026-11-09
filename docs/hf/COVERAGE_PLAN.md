@@ -71,7 +71,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B11 | medical isotope production (DONE, branch `kwcov11`) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
 | B12 | recoils and LAB frame (DONE, branch `kwcov12`) | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
 | B13 | ingredient outputs (DONE, branch `kwcov13`) | outlevels, blocklevels, outbasic, outtransenergy, blockomp, outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
-| B14 | fission yields and fragment evaporation | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
+| B14 | fission yields and fragment evaporation (part 1 Brosa DONE, branch `kwcov14`; part 2 GEF DONE, branch `kwcov14b`; part 3 FF evaporation: fymodel 4 + 5, isomer split, per-ejectile nu DONE, branch `kwcov14c`; pfnsmodel 2 spectra and fymodel 3 open) | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
 | B15 | low value (DONE, branch `kwcov15`; components y (B4b: ported since), densfile/e1file/m1file/massdir, rescuefile/strucpath/bestpath refused; endf.cs ECIS files not given; transpower ported; U-239 E1 fix behind INCOGNITA_FIDFIX=psfsgl) | endf, endfdetail, sacs, legacy, components, micro, transpower | tefal.inf, gamma*.tot, sacs.dat | 1 d |
 | GAP | isomeric (excited) targets (DONE, branch `kwcoviso`; design `ISOMERIC_TARGETS.md`; n only, channel / level / total xs; ltarget + liso, Ltarget > 40 (Hf-178m2, as stock) and the angular / spectra / recoil / astro / urr / endf / components / racap / production / massdis outputs refused) | ltarget | everything for an excited target | 3+ d |
 
@@ -1007,9 +1007,203 @@ TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values
 ### B14 -- fission yields, fragment evaporation
 
 `massdis.f90:1` (Brosa, 779 l.), GEF (7,264 l., `fymodel 2` default), `ffevap.f90:1`, `massdisout.f90:1`,
-`nudisout.f90:1`. Split into three sub-batches (Brosa; GEF or an external-yield-file path via `ffmodel 0` /
-`yieldfile`; FF evaporation for nu(A), P(nu), PFNS model 2). Accept: U-235 thermal and U-238 14 MeV Y(A) vs stock
-5 % at the peaks.
+`nudisout.f90:1`. Accept: Y(A) vs stock 2 % at the peaks (TALYS mode), keyword responses 2 % on the change.
+
+**Split (decided in part 1).** TALYS-2.25 runs, with `massdis y` on a fission run: `massdis` (yields per fissioning
+nucleus and excitation bin), `massdisout` (yield files) for fymodel <= 2, `nubarout` + `nudisout` for fymodel 2, and
+`ffevap` (fragment decay: nu(A), P(nu), PFNS/PFGS, isomer split, then massdisout/nubarout/nudisout/pfnsout) for
+fymodel >= 3. The three parts follow those paths:
+
+| part | models / keywords | TALYS routines | output |
+|---|---|---|---|
+| **1 (done, branch `kwcov14`)** | massdis, fymodel 1 (Brosa), ffevaporation (Brosa's step sizes and FP estimate), rfiseps (fpeps), outfy / gefran / ffmodel / yieldfile / ffspin read (inert with fymodel 1, as stock) | massdis (fymodel 1 branch, normalisation), brosafy, neck, trans/trapzd/funcfismode, fmin/fidi, shape helpers, massdisout | yieldA / yieldZA / fpZZZAAA / fpAAA / rpZZZAAA (FP xs) |
+| 2 | fymodel 2 (GEF, TALYS's default once massdis is on), gefran, outfy (gefwrite), the GEF nubar / nu(A) / P(nu) (nubarout, nudisout for fymodel 2); fymodel 4 file path (ffmodel 0-4, yieldfile, structure/fission/ff tables) | geftalys.f / gefsub.f / geffunctions.f (7,264 l., Monte Carlo with gefran events: compare statistically or port the RNG), nubarout, nudisout | yields + nubar*.tot, nuA, Pnu |
+| 3 | fymodel 3 / 4 / 5 with ffevap (fragment evaporation by TALYS's own decay), ffspin, pfnsmodel 2 (PFNS / PFGS from fragment decay), the isomer split (yieldfpex / fpratio, `fpZZZAAA.tot` i00/i01 files) | ffevap.f90, ffgammaspec.f90, the per-fragment population files (ff*.ex) | nu(A), P(nu), PFNS/PFGS, isomeric FP yields |
+
+Since part 2, `massdis y` alone runs GEF (fymodel 2); fymodel 3-5 were REFUSED (`NotImplementedError` naming part 3; since part 3 only fymodel 3 is);
+before B14 `massdis y` ran the cascade with its defaults and gave no yields.
+
+**Part 1 done on branch `kwcov14`** (kwcov12 + kwcov10b merged). New module `physics/hf/fisyield.py` (output only);
+hooks in engine_c (`cases`: `fisyield.begin_run`, `fisyield.record` next to fisobs's on the same cascade result;
+`run`: `fisyield.add_to_results`), `Results.fission_yields` (new field, empty by default), `Options.yieldfile` (read),
+deck.py (natural targets with massdis refused, checkvalue.f90:1075). Without `massdis y` nothing is computed:
+`test_engine_c.py` passes unchanged.
+
+* **What it gives:** `Results.fission_yields` = {TALYS file name: {column: ndarray}}: `yieldA<E>.fis` (A, FP_yield,
+  FF_yield, FP_xs, FF_xs, `Tot`), `yieldZA<E>.fis` (the rows TALYS writes), `fpZZZAAA.tot` / `fpAAA.tot` over the run's
+  energies, `rpZZZAAA.tot` (TALYS's name for the fission-product cross section; kept in this dict, apart from residual
+  production). Brosa in TALYS's single precision (np.float32), double where TALYS has dbl (mode transmissions, level
+  density through the engine's `ignatyuk` / `density(..., ldmodel 1)` of each fissioning nucleus).
+* **TALYS quirks kept:** trapzd.f90 resets `snew` at entry (no running trapezoid: each refinement is half the midpoint
+  sum); fidi.f90 sets the neck globals as a side effect, so neck.f90 continues from the LAST simplex evaluation, not the
+  best vertex; fmin returns the value of the last ranking; massdis skips the bins nex = 0-2 (`nex - istep + 1 < 0`);
+  every bin above 30 MeV is merged by four. Zeroed where TALYS reads stale static arrays (neck's zdis / wgt for
+  skipped charge steps; never reached for actinides).
+* **Vs stock** (`scripts/kwcov/b14_response.py`, TALYS mode = fidelity.py's TALYS_DECK / TALYS_ENV; stock files
+  trimmed to yieldA / yieldZA in `~/kwcov/stock/b14/`), worst |ln(ours/stock)| over the energies:
+
+  | target, energies | FF peaks (>= 50 % max) | FF (>= 1 %) | FP peaks | FP (>= 1 %) | isotopic FF (>= 1 %) | FF cross section |
+  |---|---|---|---|---|---|---|
+  | U-235 1, 5 MeV | 0.011 % | 0.029 % | 0.17 % | 0.35 % | 0.23 % | 0.01 % |
+  | U-238 1, 5, 14 MeV | 0.061 % | 0.22 % | 0.68 % | 1.15 % | **2.6 %** (Br-87, 1 MeV) | 1.0 % (14 MeV) |
+  | U-235, default mode | 2.1 % | 2.1 % | 2.3 % | 2.3 % | 2.6 % | 2.1 % |
+  | U-238, default mode | 0.34 % | 1.4 % | 0.68 % | 1.5 % | 2.6 % | 9.1 % (5 MeV: the engine's default fission, EXACTFIS) |
+
+  Default mode differs by the deliberate fission defaults (EXACTFIS changes the per-chance fission and so the mix of
+  fissioning nuclei and excitation energies; NPWINDOW the densities); that is why acceptance is in TALYS mode.
+  The isotopic 2.6 % is a charge-wing row (yield 1-2 % of the max) and follows the float32 neck sums.
+* **Responses** (|ln(R/S)|, FF and FP mass yields where stock >= 10 % of the max):
+
+  | deck line (from `massdis y; fymodel 1`) | worst | stock moved |
+  |---|---|---|
+  | ffevaporation n (U-235) | 0.005 % (FP: 0 on both sides) | 6.0 % |
+  | rfiseps 1e-3 (U-235) | 0.001 % | 0.0 % |
+  | rfiseps 0.12 (U-238: drops U-239 below fpeps) | 0.16 % | 10.4 % |
+  | outfy y; gefran 1000 (U-235) | 0.000 % | 0.0 % |
+
+* **Loss, traced (bug found):** the FF cross section at U-238 14 MeV is 1270.7 vs 1257.5 mb (1.0 %): `massdis y` sets
+  `transpower 10` (input_numerics.f90:83-88) and the engine never reads `transpower` (translimit stays 1e-5 in
+  core/grids.py / omp/inverse.py). Stock `transpower 10` alone moves U-238 14 MeV fission -0.75 %, ours 0 (1270.682 mb both; the rest is
+  transeps / xseps / popeps). Yields are normalised and do not see it. `transpower` is now IGNORED in the keyword table
+  (was SUPPORTED by grep); wiring it touches the OMP / inverse lmax cut and is left for a numerics batch.
+* **Not given:** GEF and fymodel 3-5 (parts 2/3, refused); the isomer split of fission products (only ffevap fills it:
+  with fymodel 1 TALYS writes none either); nubar / nu(A) / P(nu) (nubarout / nudisout run for fymodel 2 only); the
+  engine.py (Python) driver computes no yields (as fisobs, engine_c only).
+* Tests: `tests/hf/test_kwcov_b14.py` (shape helpers, spline / bisection, file names, refusals and ranges, deck lines,
+  Brosa modes on a model level density, U-235 1 MeV engine run vs stock numbers, no yields without massdis, natural
+  targets refused).
+
+**Part 2 done on branch `kwcov14b`** (from kwcov14). New module `physics/hf/gef.py` (geftalys.f, 3,160 lines, with
+the geffunctions.f functions it calls: LyMass, ECOUL, TEgidy, Getyield, BFTFB/BFTF/LDMass/AME2012, Gaussintegral);
+`fisyield.py` gains massdis.f90's GEF branch (bins per fissioning nucleus, `xsApre += 0.5 ysum`, nubar / nu(A) / P(nu)
+with Fmulti), nubarout / nudisout's files (`nubarn.tot`, `Pnun<E>.fis`, `nunA<E>.fis`, `nunZA<E>.fis`) and the fymodel 4
+reader (`ff_files`, `ff_pairs`). gefsub.f (fymodel 3) is part 3 (it only feeds ffevap). Output only: without
+`massdis y` nothing runs and `test_engine_c.py` is unchanged.
+
+* **Random numbers, decided:** GEF's generator is the MCNP 48-bit LCG of geftalys.f (`ran2`, reseeded 5^19 at every
+  geftalys call; `rndm = sngl(ran2)`), ported exactly; PGauss's cached Gaussian is a SAVE variable (DATA ISet 1, GSet
+  0.5) that carries across nuclides and incident energies, also ported. Two layouts of the same event code:
+  `INCOGNITA_GEF_STREAM=talys` runs stock's single stream event by event (python speed: 2.8 s per 1000 events, for
+  checks); the default `lanes` runs all events of a bin in lockstep, one lane each (0.55 s per bin at 50,000 events,
+  60 MB), lane i on its own hashed odd 48-bit start (`gef.lane_seeds`, splitmix64; `INCOGNITA_GEF_SEED` shifts them).
+  Each lane draws exactly stock's per-event sequence, so the default agrees with stock statistically and is
+  deterministic.
+* **Exact match (stock stream):** stock `massdis y; outfy y; gefran 1000` prints geftalys's per-bin tables (yields per
+  mode, N and A yields pre/post, nu per A pre/post, P(nu), mean). U-235 1 MeV, all 30 bins of U-236 (30,000 events, 1.8M
+  draws) and 5 MeV, all 53 bins of U-236 + U-235: **every printed number equal** (5-9 digits). Engine end to end, TALYS
+  mode, U-235 gefran 1000: 1 MeV every yieldA / nunA / Pnun entry 1e-5 relative (the bin cross sections differ at that
+  level), nubar 0.001 %; 5 MeV FF yields 0.02 % (worst, 1 % of max), nubar 0.001 %, P(nu) 0.03 %, FP *cross sections*
+  1e-4, but FP *yields* per A up to 2 % (A = 94, 95) and stock-only rows at A = 110-121: see the loss below.
+* **Statistical match (default lanes, 4 seeds x 50,000 events vs stock gefran 1,000,000, TALYS mode):**
+
+  | target, E | mass-yield chi2/dof (FF, FP; A >= 1 % of max, Poisson) | worst peak bin (expected sd) | nubar ours / stock |
+  |---|---|---|---|
+  | U-235 1 MeV | 0.73, 0.89 | 1.7 %, 2.5 % (1.0, 1.2 %) | 3.0088 / 3.0099 (0.04 %) |
+  | U-235 5 MeV | 1.11, 0.78 | 2.9 %, 2.3 % (1.3, 1.1 %) | 3.5337 / 3.5341 (0.01 %) |
+  | U-238 1 MeV | 0.61, 0.77 | 1.7 %, 1.9 % (1.0, 0.9 %) | 2.7617 / 2.7606 (0.04 %) |
+  | U-238 5 MeV | 0.80, 0.90 | 1.7 %, 1.9 % (1.4, 1.2 %) | 3.4663 / 3.4671 (0.02 %) |
+  | U-238 14 MeV | 0.06, 0.07 (many bins: Poisson var overstated) | 0.56 %, 0.54 % (seed sd 0.13 %) | 4.6639 / 4.6624 (0.03 %) |
+
+  U-238 14 MeV keeps a ~0.5 % peak residual beyond its 4-seed spread: the fission cross section there is 1.0 % off
+  (part 1's transpower loss), which moves the chance mix; yields are normalised, so it shows only at this level.
+  Lanes vs the stock stream inside the port (one bin, 40,000 events, 4 seeds): chi2/dof 0.77-1.14 pre- and post-neutron.
+  The plan's "2 % at the peaks" is not testable bin by bin against stock's default 50,000 events: a peak mass bin
+  carries 1.8 % sampling noise on each side (worst of ~20 peak bins 4-6 %, as found first); hence the 1e6 stock runs.
+* **Bug found and fixed (ours):** the first lane layout jumped the stock stream by 2^26 per lane; for this LCG
+  G^(2^k) = 1 mod 2^(k+2), so the lanes were shifted copies of each other in their top bits and biased the Box-Muller /
+  rejection draws (peaks 3-5 %, z up to 8 vs stock). Hashed starts fixed it (chi2/dof ~1 above).
+* **Loss, traced (engine, not GEF):** stock lists fission in deeper sub-barrier bins than the engine (U-236 at 5 MeV:
+  34 bins down to Ex 3.11 MeV vs ours 31 down to 3.89; U-235 second chance 19 bins vs 12): their cross sections are
+  <= 0.03 mb (the engine's fisfeedex is 0 there). They matter only through two TALYS gates: (1) massdis counts a (Z,A)
+  FP yield only where that nuclide's FF cross section is non-zero, so rare (Z,A) seeded by those bins add FP yield in
+  stock (A = 94/95/120 at 5 MeV, up to 2 % of a peak bin; FP cross sections agree 1e-4); (2) nu(A) and P(nu) add
+  Fmulti/xsfistot (= Ncomp xsfeed / xsfistot, 0.11 for U-235 5 MeV) wherever a nucleus has any event, so rare masses
+  / multiplicities jump by 0.1 (nu(A) A = 110-120, P(nu > 8)). The same gates make these rows sampling-noise driven in
+  the statistical comparison (P(nu = 11) at U-238 14 MeV differs by the Fmulti step).
+* **TALYS / GEF quirks kept:** P(nu) counts only events with >= 1 neutron and nubar is the mean of that conditional
+  distribution (U-235 1 MeV: 3.01; evaluated about 2.5); Pdisnu normalised over nu = 1..numin (8), nu > 8 left raw plus
+  Fmulti; nu(A) per pre-neutron mass over fragments with 1..20 neutrons; the stale `A1` in the heavy-fragment spin and
+  the Fermi-gas energy split; mode 3's yield uses PShellS3 (not RShellS3eff) in TEgidy; mode 4's light width uses
+  beta(2,2,Z); mode 2's discarded PGauss before PBox; Ivenodd clamps the even-odd table in place; PEgammahigh never
+  fills sigma(N); `Erf` is Numerical Recipes in geftalys but the gfortran intrinsic in Gaussintegral (ERF typed, not
+  EXTERNAL). Diagnostic arrays (Edefo2d, Eintr2d, ...) dropped; stock indexes some out of bounds (Eintr2d with E < 0),
+  harmless in its static layout (the exact match holds).
+* **Keywords:** `gefran` acts (events per bin, range checked); `outfy` prints only, as stock (the tables are
+  `geftalys(detail=True)`); `ffmodel` / `yieldfile` feed the fymodel 4 reader, whose run stays refused (ffevap, part 3);
+  fymodel 3/4/5 refused naming part 3.
+* **fymodel 4 reader:** `ff_files` (database file at the two tabulated energies around Etotal, or `yieldfile`) and `ff_pairs` (filters, linear interpolation incl. TALYS's light-then-heavy overwrite of Y0 / TKE / TXE): U-235 1 MeV (U-236, Etotal 7.541 MeV, gef files at 7 and 8 MeV) all 207 pairs equal to stock's printed table (11 columns, <= 4.8e-6 relative = es12.5). The run itself stays refused (ffevap, part 3).
+* **Not given (part 3):** fymodel 3 (gefsub.f), 4 and 5 runs (ffevap), ffspin, pfnsmodel 2, isomer split, nuZA rows
+  (only ffevap fills nuZA / Pdisnuav). The engine.py driver computes no yields (engine_c only).
+* Tests: `tests/hf/test_kwcov_b14b.py` (generator = ran2, PGauss SAVE state, float32 helpers, BFTFB / mode yields of
+  U-236 bin 1, the bin-1 tables vs stock's printout on the stock stream, lanes statistics and determinism, settings and
+  refusals, the numin quirk, nubarout's zero rows, fymodel 4 files, U-235 1 MeV engine run vs stock); part 1's
+  test_kwcov_b14.py updated (fymodel 2 accepted). `scripts/kwcov/b14b_response.py` (exact `--stream talys`,
+  statistical `--stat N [--stock-kw "gefran 1000000"]`). Stock refs `~/kwcov/stock/b14b/` (trimmed).
+
+**Part 3 (slices 1, 3 and 5 done, branch `kwcov14c` from kwcov14b).** New module `physics/hf/ffevap.py` (ffevap.f90,
+excitation.f90, read_energies.f90's projectile-0 branch); fisyield gains massdis.f90's fymodel 4 / 5 branches
+(`_fymodel4`, `_fymodel5`), the isomer rows / files and the per-ejectile nu files (`build_nu_ff`). Output only: the
+fragment loop runs in `fisyield.add_to_results` after the energy loop (TALYS runs it after each energy's output and
+re-initialises the target, so the main run cannot see it). Without `massdis y` nothing runs; `test_engine_c.py` is
+unchanged.
+
+* **How a fragment is evaporated (decided):** TALYS runs a whole TALYS calculation per fragment (evaptalys.f90): the
+  fragment is the target, `projectile 0` with the population file ff<ZZZ><AAA>.ex, fission off, the deck's other
+  lines. The port does the same through the engine's own C cascade (`engine_c.cascade`) on a `Cascade(Zff, Aff,
+  k0 = 0)`: `INCOGNITA_CPINC=g` for the loop (the photon projectile's defaults are projectile 0's), deck + `fission n`
+  + `nnleak n` (NNLEAK's premise -- a top bin fed by primary photons -- does not hold for an input population),
+  Etotal = Einc (energies.f90:130), lmaxhf(0, 0) = gammax, maxJ with ipop = 1 (Rspincutff, exgrid.f90:250; new
+  `Cascade.ffruns_rspincut`, None on every other run), the (0, 0) population from excitation.f90 as the cascade's
+  type-0 seed, multiplicity = (sum of xsfeed + the discrete gammas over 1 + conversion) / xsinitpop, residual.f90's
+  xseps floor. Speed: U-235 1 MeV, 411 fragments, 167 s for the whole run (stock 12.5 min).
+* **fymodel 4 vs stock** (TALYS mode, `scripts/kwcov/b14c_response.py --target u235|u238`, |ln(ours/stock)|, worst):
+
+  | quantity | U-235 1 MeV | U-238 5 MeV |
+  |---|---|---|
+  | fragments evaporated / their initial population | 411 = 411 / 0.005 % | 432 = 432 / 0.096 % (the run's fission xs) |
+  | FF yields (A, Z-A) | 0.000 % | 0.000 % |
+  | FP (post-neutron) yields, peaks / >= 1 % of max | 0.51 % (A 91) / 2.0 % (A 153) | 0.20 % (A 104) / 0.84 % (A 153) |
+  | FP isotopic >= 1 % of max | 3.5 % (Nd-153) | 4.7 % (Nd-152) |
+  | isomer rows / isomeric ratios (FP >= 1 % of max) | 126 = 126 / 0.054 % (Y-97) | 106 = 106 / 0.072 % (Y-97) |
+  | nubar_n | 0.012 % (2.48133 vs 2.48162) | 0.018 % (3.06189 vs 3.06243) |
+  | nu_n(A), FF yield >= 1 % of max | 0.36 % (A 154) | 0.29 % (A 92) |
+  | per-fragment neutron multiplicity (>= 0.05) | 0.61 % (Nd-154) | 0.81 % (Ga-82) |
+  | nubar_g | 0.71 % (7.8373 vs 7.7821) | 0.60 % (7.9157 vs 7.8684) |
+  | per-fragment gamma multiplicity | 5.6 % (Sb-130; Zr-100 +1.3 %, Sr-96 +1.0 %) | 5.0 % (I-134) |
+  | P(nu) | 0 = 0 (channels n) | 0 = 0 |
+
+* **fymodel 5 vs stock** (own spin-dependent populations of Kr-92, Ba-144, Sr-96, Xe-140 at U-235 1 MeV,
+  `--fy 5`): every number equal to print precision (nubar_n, nubar_g 0.0000 %, per-fragment multiplicities <= 3e-6).
+* **Bug found and fixed (ours): transpower / transeps never reached the outgoing channels' lmax** (part 1 found
+  transpower ignored). `compound/dens_reference._lmax_inverseread` took the defaults 1e-5 / 1e-8 whatever the deck
+  said; `massdis y` sets 10 / 1e-12 (input_numerics.f90:83-88). Near-threshold neutron emission of high-spin fragment
+  states needs those extra partial waves: Sb-134 neutron multiplicity stock 1.00455, ours 0.8836 before, 1.00438
+  after (standalone population run; `transpower 10` alone 0.90413 / 0.90392). Now `_trans_cut(options)`; the
+  defaults return the old constants (bit-identical default runs). The incident channel's lmax (incidentread.f90:287)
+  still takes 1e-5 (left; it is the main run's).
+* **TALYS quirk kept: misaligned conversion coefficients.** levels.f90:177-183: a nucleus whose levels are read a second
+  time (dtheory of its (Z, N-1) neighbour reads (Z, N)) keeps its first branch list but re-takes the conversion
+  coefficients by FILE branch index, misaligned where a zero-ratio branch was dropped. Zr-99 level 7 (two zero
+  branches with alpha = 2780, 18250 first): its lines in stock are 2,800 and 18,000 times smaller than the cascade
+  intensity. The gamma multiplicity counts them that way; the port uses `discrete_levels(prior_call=True)` for every
+  nucleus whose (Z, N-1) neighbour is in the cascade (nubar_g 0.88 % -> 0.71 %).
+* **Loss, partly traced: gamma multiplicity of spin-less (fymodel 4) populations.** With spins given (fymodel 5) the
+  gammas are exact; with fymodel 4's Wigner spins (sc = spincut(ipop = 1) at the population maximum, ~4x the normal
+  cutoff) and maxJ(ipop = 1) truncation ours is +0.7 % on nubar_g. Sr-96 (largest fragment): the discrete lines per
+  nucleus agree 0.0-0.3 % (outgamdis), the continuum gammas are +2.5 % while its neutron multiplicity agrees 0.06 %:
+  more photons per cascade at the same neutron count, i.e. a slightly higher spin population; the J tail at maxJ ~ 30
+  (~1-3 % of the Wigner distribution) is the suspect. Neutron observables and yields are not affected at that level.
+* **Not given (open slices):** pfnsmodel 2 spectra (ffevap.f90:322-341 lab transform, ffgammaspec.f90, pfnsout.f90;
+  `outspectra y` with fymodel >= 3 is refused -- they need the fragment runs' emission spectra xssumout and Eaverage,
+  and EavZA / EavA stay zero as stock without spectra); fymodel 3 (gefsub.f, 2,057 lines: GEF per fission event with
+  excitation and spin per fragment, then the same ffevap; refused); P(nu) from the fragment runs' exclusive channels
+  (`channels y` refused with fymodel >= 3; TALYS's default channels n gives zero P(nu), as here); `popmev y` and
+  one-bin populations (refused in excitation). ffspin acts only with fymodel 3: inert, as stock.
+* Tests: `tests/hf/test_kwcov_b14c.py` (fymodel 4 population rows = stock's file, spindis / Edistmax, excitation
+  spin-less and with spins, the run directory of fymodel 5, pairs to fragments, settings and refusals, the new files,
+  three fragment runs vs stock's talys.out incl. the Ga-74m / Zn-77m isomer split); part 2's refusal test now fymodel 3
+  only. Stock refs `~/kwcov/stock/b14c/` (trimmed: yield / nu / Eav files, frag_summary.json = talys.out's per-fragment
+  reaction summary).
 
 ### B15 -- low value (DONE, branch `kwcov15`)
 

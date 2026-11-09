@@ -67,19 +67,37 @@ ROWS = [
      "fisobs.py Results.spectra['fisZZZAAA.feed', ':Ex']", "B8",
      "Ex and Population columns (same rows as stock); the J-parity columns (fisfeedJP) are not given"),
     ("fission transmission / barrier info", "talys.out, tfis*", "tfissionout.f90:1", "outfission", "PARTIAL", "ingredients.py", "B5", ""),
-    ("fission fragment / product yields", "yieldA*.fis yieldZA*.fis", "massdisout.f90:1", "massdis, fymodel, ffmodel, outfy",
-     "MISSING", "", "B14", "GEF/Brosa (massdis.f90 779 l.) or FF files"),
+    ("fission fragment / product yields", "yieldA*.fis yieldZA*.fis fpZZZAAA.tot fpAAA.tot", "massdisout.f90:1",
+     "massdis, fymodel, ffevaporation, rfiseps, gefran, ffmodel, yieldfile", "PARTIAL",
+     "fisyield.py / gef.py / ffevap.py Results.fission_yields (massdis y + fymodel 1, 2, 4 or 5)",
+     "B14", "Brosa (fymodel 1): U-235 / U-238 TALYS mode vs stock, FF peaks 0.06 %, FP peaks 0.7 %, isotopic 2.6 %. GEF "
+     "(fymodel 2, TALYS's default): stock's generator stream reproduces stock's per-bin tables exactly; the default "
+     "vectorised lanes vs stock gefran 1e6: chi2/dof 0.7-1.1 on the mass yields (statistical). fymodel 4 (fragment "
+     "evaporation, ffevap.py): U-235 1 MeV TALYS mode FF yields = stock, FP yield peaks 0.5 % (wings 2 %); fymodel 5 = "
+     "stock. fymodel 3 (gefsub.f) not given"),
+    ("isomeric fission product yields", "yieldZA*.fis isomer rows, fpZZZAAA.i0N, rpZZZAAA.i0N", "ffevap.f90:257-273, "
+     "massdisout.f90:174-226", "massdis, fymodel 4/5", "SUPPORTED", "ffevap.evaporate -> Results.fission_yields "
+     "(yieldZA isomer rows, 'fpZZZAAA.i00' / 'i01', 'rpZZZAAA.i00' / 'i01')", "B14",
+     "U-235 1 MeV fymodel 4, TALYS mode: the same 126 isomer rows as stock, isomeric ratios 0.05 % (nuclides with FP "
+     "yield >= 1 % of the max); TALYS writes none with fymodel 1-2, nor does the port"),
     ("prompt nubar (Wahl systematics)", "(not written by TALYS-2.25)", "nubarWahl.f90:1, totalxs.f90:124", "cnubar1, cnubar2",
      "SUPPORTED", "fisobs.py Results.extras['nubarn.tot:wahl']", "B8",
      "TALYS computes it and never writes it (massdis.f90:252 resets nubar before nubarout); transcription checked by hand"),
-    ("prompt nubar, nu(A), P(nu) from fragments", "nubar*.tot nuA*.fis", "nubarout.f90:1, nudisout.f90:1",
-     "massdis, ffevaporation", "MISSING", "", "B14", "requires FF evaporation"),
+    ("prompt nubar, nu(A), P(nu) from fragments", "nubar*.tot Pnu*.fis nuA*.fis nuZA*.fis", "nubarout.f90:1, nudisout.f90:1",
+     "massdis, fymodel, gefran", "PARTIAL", "fisyield.build_nu / build_nu_ff Results.fission_yields['nubar<x>.tot', "
+     "'Pnu<x>*', 'nu<x>A*', 'nu<x>ZA*', 'EavZA*', 'EavA*']", "B14",
+     "GEF (fymodel 2): nubar vs stock 0.01-0.06 % (U-235 1/5, U-238 5/14 MeV; U-238 1 MeV 0.4 %), P(nu) and nu(A) "
+     "statistical. Fragment evaporation (fymodel 4, ffevap.py; U-235 1 MeV TALYS mode): nubar_n 0.01 %, nu_n(A) 0.4 %, "
+     "nubar_g 0.7 %, per-fragment gamma multiplicity up to 5.6 %; fymodel 5 = stock. P(nu) after ffevap is zero with "
+     "channels n (stock too); channels y refused. Eav* zero without spectra (as stock)"),
     ("prompt fission neutron spectrum (Iwamoto)", "pfnsEEEE.EEE.fis", "pfnsout.f90:1, iwamoto.f90:1",
      "pfnsmodel 1, tmadjust, fsadjust", "SUPPORTED",
      "fisobs.py Results.spectra['pfns.fis', ':E', ':Maxwell_ratio', ':CM'], extras['pfns.fis:E-average']", "B8",
      "U-238 / U-235 / Pu-239 / Th-232 at 1/5/14 MeV vs stock: same 293-point grid, E-average 1e-5, every column 2e-5"),
     ("prompt fission gamma spectra / PFNS from fragment decay", "pfgs*, pfns (pfnsmodel 2)", "ffevap.f90:1",
-     "pfnsmodel 2, massdis", "MISSING", "", "B14", "pfnsmodel 2 without massdis writes no PFNS in TALYS either"),
+     "pfnsmodel 2, massdis", "MISSING", "", "B14", "pfnsmodel 2 without massdis writes no PFNS in TALYS either; with "
+     "massdis y + fymodel 4/5 + outspectra y REFUSED (B14 part 3 open slice: ffevap.f90:322-341, ffgammaspec.f90, "
+     "pfnsout.f90)"),
     # --- gamma ---
     ("discrete gamma-ray production lines", "gamZZZAAALnnLmm.tot", "gamdisout.f90:1", "outgamdis, filegamdis", "SUPPORTED",
      "specobs.py Results.spectra['gamZZZAAALiiLjj.tot'] (+ files, INCOGNITA_SPECOBS_DIR)", "B4",

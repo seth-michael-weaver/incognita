@@ -199,7 +199,8 @@ B8: dict = {
     "pfnsmodel": ("SUPPORTED", _FO + "iwamoto",
                   "1: Iwamoto PFNS (iwamoto.f90, single precision as TALYS): grid, E-average and every column = stock "
                   "to 2e-5 (U-238, U-235, Pu-239, Th-232). 2: no Iwamoto spectrum, as stock without massdis; the "
-                  "fragment-decay PFNS (ffevap.f90) is B14", _T8),
+                  "fragment-decay PFNS / PFGS (ffevap.f90 with outspectra y) are REFUSED with fymodel >= 3 (B14 part 3 "
+                  "open slice; massdis's own fymodel 4/5 nubar, nu(A), yields run without spectra)", _T8),
     "tmadjust": ("SUPPORTED", _FO + "iwamoto (Tm0 x tmadjust)", "PFNS E-average = stock 1e-5 (U-238 1.3; U-235, "
                  "Pu-239 0.8 with fsadjust 2); no cross section moves on either side", _T8),
     "fsadjust": ("SUPPORTED", _FO + "iwamoto (scission fraction x fsadjust)", "PFNS E-average = stock 1e-5 (U-238 3; "
@@ -426,6 +427,51 @@ B12: dict = {
     "channelenergy": ("SUPPORTED", "input/defaults.py Options.flagEchannel -> specobs.energy_spectra",
                       "spectra.f90:152-158 espec conversion; vs stock (B12): <x>spec.tot grid and xs 0.05 %", _T12),
 }
+_T14 = "test:test_kwcov_b14.py"
+_T14B = "test:test_kwcov_b14b.py"
+_T14C = "test:test_kwcov_b14c.py"
+_FY = "fisyield.py (engine_c.cases -> fisyield.record -> Results.fission_yields) "
+#: KWCOV B14 part 1 rows (docs/hf/COVERAGE_PLAN.md B14); stock TALYS-2.25 n + U-235 (1, 5 MeV) and U-238 (1, 5, 14 MeV)
+#: with `massdis y; fymodel 1`, TALYS mode; scripts/kwcov/b14_response.py
+B14: dict = {
+    "massdis": ("SUPPORTED", "input/defaults.py Options.flagmassdis -> " + _FY + "massdis, brosafy, neck, massdisout",
+                "fission fragment / product yields (yieldA, yieldZA, fpZZZAAA, fpAAA, rpZZZAAA files) with fymodel 1 "
+                "(Brosa): TALYS mode vs stock, FF yield peaks 0.06 %, FP peaks 0.7 %, isotopic FF 2.6 % (rows >= 1 % of "
+                "the max). Cascade defaults honoured, transpower 10 / transeps 1e-12 included (B15 + B14c: "
+                "stock's -1.0 % U-238 14 MeV fission move is reproduced). `massdis y` alone = TALYS's default fymodel 2 (GEF, B14 part 2, "
+                "gef.py): yields + nubarn.tot / Pnun / nunA / nunZA; natural targets refused as TALYS", _T14),
+    "fymodel": ("SUPPORTED", "input/defaults.py Options.fymodel -> " + _FY + "settings",
+                "1 (Brosa) and 2 (GEF, gef.py: stock's generator stream reproduces stock's sampled tables exactly; the "
+                "default vectorised lanes agree statistically, chi2/dof ~1 vs stock gefran 1e6) ported; 4 (FF files) and "
+                "5 (own populations) run TALYS's fragment evaporation (ffevap.py, B14 part 3): U-235 1 MeV fymodel 4, "
+                "TALYS mode, 411 fragments: nubar_n 0.01 %, FP yield peaks 0.5 %, nu(A) 0.4 %, isomeric ratios 0.05 %, "
+                "nubar_g 0.7 % (U-238 5 MeV, 432 fragments: nubar_n 0.02 %, FP peaks 0.2 %, nubar_g 0.6 %; see "
+                "COVERAGE_PLAN B14c); fymodel 5: every number = stock. 3 (GEF + evaporation, gefsub.f) "
+                "is REFUSED (open slice); range 1..5 checked", _T14 + "," + _T14B + "," + _T14C),
+    "ffevaporation": ("SUPPORTED", "input/defaults.py Options.flagffevap -> fisyield.neck / brosafy",
+                      "fymodel 1: neck step sizes and the post-neutron yields (n: FP yields 0, as stock). U-235 response "
+                      "on the FF yields 0.005 % (stock moved 6.0 %)", _T14),
+    "rfiseps": ("SUPPORTED", "input/defaults.py Options.Rfiseps -> fisyield.massdis (fpeps)",
+                "fission-yield threshold per nucleus and bin (massdis.f90:226-272), 1e-9 with massdis; was inert "
+                "before B14. Response: U-235 `rfiseps 1e-3` 0.001 % (stock 0 %), U-238 `rfiseps 0.12` 0.16 % (stock moved 10.4 %). "
+                "Range 0..1 checked", _T14),
+    "outfy": ("SUPPORTED", "input/defaults.py Options.flagoutfy (inert)", "GEF's detailed stdout tables only (gefwrite, "
+              "massdis.f90:265-269): no file changes, as stock (fymodel 1 response 0.000 %); the same per-bin tables "
+              "are geftalys(detail=True) in the port (checked digit for digit vs stock's printout)", _T14),
+    "gefran": ("SUPPORTED", "input/defaults.py Options.gefran -> fisyield.settings -> gef.geftalys (events per bin)",
+               "GEF's event count per excitation bin (fymodel 2): `gefran 1000` with INCOGNITA_GEF_STREAM=talys gives "
+               "stock's sampled numbers; inert with fymodel 1, as stock. Range 1000..1e6 checked", _T14 + "," + _T14B),
+    "ffmodel": ("SUPPORTED", "input/defaults.py Options.ffmodel -> fisyield.ff_files -> ffevap.evaporate",
+                "selects the fragment database of fymodel 4 (gef / hf3d / spy / langevin4d / user; a missing database "
+                "is TALYS's error); fymodel 4 runs since B14 part 3 (ffevap.py); range 0..4 checked",
+                _T14 + "," + _T14B + "," + _T14C),
+    "yieldfile": ("SUPPORTED", "input/defaults.py Options.yieldfile -> fisyield.ff_files -> ffevap.evaporate",
+                  "replaces the database file with fymodel 4 (one table, no energy interpolation, as massdis.f90:630)",
+                  _T14 + "," + _T14B),
+    "ffspin": ("SUPPORTED", "input/defaults.py Options.flagffspin (inert)", "acts only with fymodel 3 (the J-dependent "
+               "ff files massdis writes, massdis.f90:554), which is refused (B14 part 3 open slice); inert with "
+               "fymodel 1, 2, 4, 5, as stock", _T14 + "," + _T14C),
+}
 MANUAL: dict = {
     # --- the four main keywords: the run's arguments, not deck lines ---
     "projectile": ("SUPPORTED", "projectile.py (INCOGNITA_CPINC: n default; p d t h a g)",
@@ -464,8 +510,6 @@ MANUAL: dict = {
     "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y -> the B10 URR files, "
              "channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"),
     "micro": ("IGNORED", "input/defaults.py", "cascade honoured (ldmodel 7, jlmomp y -> refused, autorot y)"),
-    "massdis": ("IGNORED", "input/defaults.py", "cascade honoured (transeps, popeps, pfnsmodel 2); fission yields "
-                "not computed (MISSING observable)"),
     "riplomp": ("MISSING", "", "per-particle RIPL OMP index; the actinide RIPL 2408 default is applied automatically "
                 "(defaults.py omppar stage) but the keyword is not read"),
     "preequilibrium": ("SUPPORTED", "input/defaults.py Options.epreeq_mev -> preeq/*", "onset energy honoured "
@@ -513,6 +557,7 @@ MANUAL: dict = {
                       "of spectra.f90:152-158 (not checked against stock)", "code"),
     "anglescont": ("SUPPORTED", "input/defaults.py Options.nanglecont -> specobs.anglecont", "continuum DDX angle grid",
                    "test:test_specobs.py"),
+    **B14,
 }
 
 # --- KWCOV B6 (2026-11-08): optical model and direct reactions (physics/hf/omp/ompdeck.py); response vs stock =
@@ -590,7 +635,10 @@ B15: dict = {
                    "translimit = 1/10**transpower in every lmax cut (incidentread.f90 / inverseread.f90); was read but "
                    "never reached the cut (B14 found it: massdis y sets 10). U-238 `transpower 10`: stock fission 14 MeV "
                    "1270.62 -> 1261.01 mb, engine TALYS mode 1270.68 -> 1261.07; worst response 0.43 % (capture 14). "
-                   "Fe-56 0.00 %; range 2-20 checked (checkvalue.f90:475). Defaults bitwise (1e-5 as before)", _T15),
+                   "Fe-56 0.00 %; range 2-20 checked (checkvalue.f90:475). Defaults bitwise (1e-5 as before). B14c: "
+                   "the outgoing channels' cut also takes the deck's value (dens_reference._trans_cut); Sb-134 fragment "
+                   "evaporation (massdis y numerics) neutron multiplicity stock 1.00455, ours 0.8836 before / 1.00438 "
+                   "after", _T15 + "," + _T14C),
     "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps and "
                  "omp/inverse.set_eps (lmax cut)",
                  "KWCOV B9: the deck value (and astro y's / massdis y's) reaches the chain's T cut; B15: also the lmax "

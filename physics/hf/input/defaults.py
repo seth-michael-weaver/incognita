@@ -377,6 +377,7 @@ class Options:
     ffmodel: int = 1  # input_fissionmodel.f90:96
     pfnsmodel: int = 1  # input_fissionmodel.f90:97-101; 2 with massdis y
     gefran: int = 50000  # input_fissionpar.f90:122
+    yieldfile: str = ""  # input_fissionmodel.f90:82, 230 (fymodel 4 only; KWCOV B14: read, refused with fymodel 4)
     Rfiseps: float = 1.0e-3  # input_fissionpar.f90:123-125; 1e-9 massdis, 1e-6 astro
     # KWCOV B8 (physics/hf/fisobs.py, output only)
     filefission: bool = False  # input_outfiles.f90:128-131 (y with endf y; channels y is not modelled here)
@@ -802,6 +803,7 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "outinverse": ("directmodel", "flaginverse", "yn"),  # KWCOV B13 (input_output.f90:261)
     "outtransenergy": ("directmodel", "flagtransen", "yn"),  # KWCOV B13 (input_directmodel.f90:227)
     "gefran": ("fissionpar", "gefran", "int"),
+    "yieldfile": ("fissionmodel", "yieldfile", "str"),  # KWCOV B14 (fymodel 4 only, part 2)
     "rfiseps": ("fissionpar", "Rfiseps", "float"),
     "twocomponent": ("preeqmodel", "flag2comp", "yn"),
     "ecisdwba": ("preeqmodel", "flagecisdwba", "yn"),

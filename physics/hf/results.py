@@ -70,6 +70,10 @@ class Results:
     # (rec<ZZZ><AAA>spec.tot, sp<nnnnnn>.rec) and LAB-frame spectra / DDX (<x>spec.lab, <x>ddx.lab, <x>ddxE....lab,
     # <x>ddxA....lab) under TALYS's file names, (C, ...); physics/hf/recoil.py lists them
     recoil: dict[str, Tensor] = field(default_factory=dict)
+    # FISSION YIELDS (KWCOV B14 part 1: `massdis y` with `fymodel 1` on a fission run, default empty): massdisout.f90's
+    # files as {file name: {column: ndarray}} (yieldA<E>.fis, yieldZA<E>.fis, fpZZZAAA.tot, rpZZZAAA.tot, fpAAA.tot);
+    # physics/hf/fisyield.py
+    fission_yields: dict = field(default_factory=dict)
 
     @property
     def n(self) -> int:
