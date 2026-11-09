@@ -259,7 +259,7 @@ batches above.
   not B4b. (3) `block y` names (sp100000.tot, appended) are not written (non-block names only; `endf y` implies block in
   TALYS); the arrays are the same.
 * **Bugs.** No new engine bug: the U-238 differences are the engine's gamma cascade (above) and B15's known U-239 E1
-  table bug (`INCOGNITA_FIDFIX=psfsgl`, still default off).
+  table bug (`INCOGNITA_FIDFIX=psfsgl`, default ON since the KWCOV integration).
 * Tests: `tests/hf/test_kwcov_b4b.py` (switches, reaction strings, specemission flux conservation, the components
   quirks, Fe-56 14 MeV TALYS mode vs stock integrals 0.5 % and components 1 %, bitwise on/off, the files).
 
@@ -381,7 +381,7 @@ omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stag
 * Tests: `tests/hf/test_kwcov_b6.py` (forms, refusals, adjust.f90 shape, ktype/incadjust, ranges, optmod, optmodfile,
   riplomp, multi-word deck lines, optmodall cut/eend/Python cascade).
 
-### B7 / B7b -- unported model branches (B7 done on branch `kwcov7`; B7b open)
+### B7 / B7b -- unported model branches (B7 done on branch `kwcov7`; B7b done, see below)
 
 * **Ported** (all default-off: a run without them never enters the new code; Fe-56 611 and U-238 692 `Results` arrays
   as before, `test_engine_c.py`). `physics/hf/preeq/exciton_b7.py` transcribes, one exciton state at a time (numpy
@@ -1223,12 +1223,12 @@ Tests: `tests/hf/test_kwcov_b15.py`.
 | endf | SUPPORTED | cascade as before (eninclow from D0, urr y, channels y, adddiscrete 30 MeV, output switches) + structure.f90:75's levelsout and gammadecay for every nucleus structure builds (`ingout.gamma_decay_file`, gamma<ZZZAAA>.tot) + endfinfo.f90's tefal.inf / energies.endf (Ninc > 1). Stock Fe-56 `endf y`: the same 46 files; levels*.out identical, gamma*.tot <= 1e-6 (print), tefal.inf / energies.endf identical. Response Fe-56 0.00 % (both modes), U-238 0.00 % (TALYS mode). **Not given:** endfenergies / endfecis / endfread (ECIS on the ENDF incident grid: endf.cs, endf.tot, endftot.tot, endfel.tot, endfnon.tot) and channelsout's discrete-gamma xs*.gam -- TEFAL inputs, recorded in the observable row (PARTIAL) |
 | endfdetail | SUPPORTED | cascade only (gamdis / channels / filechannels defaults with endf y, tefal.inf's line); Fe-56 `endf y; endfdetail n` response 0.00 % |
 | sacs | SUPPORTED | `ingout.sacs_table` (sacs.dat): on stock's own Fe-56 xs files it is stock's sacs.dat; engine Fe-56 2-20 MeV: channel list, order and thresholds identical, xsmax / FWHM are the engine's default cross sections. Quirk kept: TALYS reads the xs*.tot it wrote, so without channel files (`sacs y` alone) sacs.dat is the header only |
-| components | READ_ONLY_DEFAULT (refused) | `components y`: Fdir / Fpreeq / Fcomp per residual (multiple.f90:649) and the extra xs*.tot / rp*.tot columns are not carried by the port's cascade; refused with a clear message (`defaults.UNPORTED`) |
+| components | READ_ONLY_DEFAULT (refused) in B15; **SUPPORTED since B4b** (compoobs.py, see B4b; this row is the B15 state) | `components y`: Fdir / Fpreeq / Fcomp per residual (multiple.f90:649) and the extra xs*.tot / rp*.tot columns are not carried by the port's cascade; refused with a clear message (`defaults.UNPORTED`) |
 | micro | SUPPORTED | B7b: `micro y` now runs (JLM ported; Fe-56 response 0.04 % TALYS mode); before B7b it was refused through jlmomp y; `micro y; jlmomp n` runs ldmodel 7 + autorot: response 0.00 % TALYS mode, **78 % default** ((n,p) 14 MeV: NPWINDOW acts on the ldmodel-7 Fe-56 density; deliberate default, as FIDELITY1) |
 | densfile, e1file, m1file, massdir | READ_ONLY_DEFAULT (refused) | external user tables; kept refused (decision): each needs its own reader path (densitytable.f90:113, gammapar.f90:521 incl. the forced wtable 1 and the strength 1/2/5 table branch, masses.f90:139) |
 | rescuefile, strucpath, bestpath | READ_ONLY_DEFAULT (refused) | were NA and skipped silently; rescuefile renormalises returned cross sections (normalization.f90), the two paths name another database. Deck line refused, best-file line warned |
 
-**Port bug fixed (opt-in, `INCOGNITA_FIDFIX=psfsgl`, default OFF): U-239 E1 at 0.4 / 0.6 MeV (B13 loss (1)).** Cause:
+**Port bug fixed (`INCOGNITA_FIDFIX=psfsgl`, opt-in in B15, default ON since the KWCOV integration): U-239 E1 at 0.4 / 0.6 MeV (B13 loss (1)).** Cause:
 TALYS holds the tabulated PSF energies in single precision: `qrpa%e = ee + etable` and the wtable stretch
 `Emid + (Eq - Emid) * wt` (gammapar.f90:268, :574-578) are real(sgl), so even at wt = 1 the stretch moves a table
 energy by a few 1e-7 (U-239 smlo2019 Emid 13.1: 0.4 -> 0.39999962, 0.6 -> 0.60000038), and Tqrpa is the
