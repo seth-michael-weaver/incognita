@@ -144,8 +144,8 @@ stock numbers transcribed). Defaults stay bit-identical: `tests/hf/test_engine_c
 
 ## 5. Left out (refused, with the reason in the error)
 
-* `ltarget` with `liso` (the renumbering path of 1.1), and so every isomer above level 40 (Hf-178m2, Ta-180m is
-  level 1 and fine).
+* `ltarget` with `liso` (the renumbering path of 1.1), and so every isomer above level 40 (Hf-178m2). Isomers
+  inside the first 40 levels (Am-242m = 2, and the usual low-lying ones) run.
 * The outputs of item 8 (they read level 0 as the elastic level or were not checked with an excited target).
 * Projectiles other than the neutron.
 * Physics question, not a port item: TALYS's incident coupled channels for an excited deformed target are the ground
@@ -154,4 +154,36 @@ stock numbers transcribed). Defaults stay bit-identical: `tests/hf/test_engine_c
 
 ## 6. Results
 
-(filled in after the runs)
+Done on `kwcoviso` as planned (items 1, 3, 4, 8), plus one port bug the first run found:
+
+* **Bug: complex-particle pre-equilibrium at the wrong energy.** `preeq/complex.py` (knockout, stripping, breakup)
+  rebuilt eninccm as `Etotal - S(0,0,k0)`, which is eninccm + targetE for an excited target (TALYS uses eninccm
+  itself, knockout.f90 / stripping.f90). Fe-56 `ltarget 1` 14 MeV: (n,a) -1.63 % vs stock, (n,2n) / (n,p) /
+  inelastic +0.04-0.06 %. Fixed: `PreeqInputs.targete_mev` and `complex._eninccm`; 0 for a ground-state target.
+* Small one: an explicit `maxlevelstar` did not keep `max(value, Ltarget)` (input_levels.f90:255); fixed in
+  `input/defaults.py`.
+* Items 5-7 needed nothing: the compound, binary and Q-value code was already written on `ltarget`.
+
+TALYS mode vs stock TALYS-2.25 (`scripts/kwcov/biso_compare.py`, 1 / 5 / 14 MeV, channels > 1 mb), worst
+`|ours/stock - 1|`, on the production C driver (`engine_c`; the Python driver, which the run takes when the native
+libraries are not built, gives the same numbers to the digits shown):
+
+| case | main channels (total, elastic, nonelastic, capture, inelastic, n2n, np, na, fission) | discrete inelastic nn.Lnn | ground state of the same target |
+|---|---|---|---|
+| Fe-56 `ltarget 1` (2+, 0.847 MeV) | 0.001 % | 0.001 % (nn.L00 at 1 MeV = the whole inelastic, 343.69 mb: superelastic) | main 0.003 %, levels 0.06 % |
+| Fe-56 `ltarget 2` (4+, 2.085 MeV) | 0.001 % | 0.001 % (nn.L00 57.91, nn.L01 511.99 mb at 1 MeV) | as above |
+| Am-242m `ltarget 2` (5-, 48.6 keV) | 0.02 %, except (n,p) 14 MeV +1.30 % (2.71 mb) | 0.02 % (nn.L03 / nn.L04: the ground band's CC inelastic, 119.21 / 244.78 mb at 1 MeV; nn.L00 / L01 superelastic) | 0.03 %, (n,p) 14 MeV +0.47 %, levels 0.25 % |
+
+Fission of Am-242m: 2376.48 / 2319.57 / 2538.50 mb vs stock 2376.45 / 2319.55 / 2538.38 (the ground state:
+2003.17 / 2124.74 / 2456.91 stock; the isomer raises it by 19 % at 1 MeV). Capture 1 MeV: 50.62 vs 50.61 mb (ground
+state 70.70). Engine wall time per run (three energies, TALYS mode, after import): Fe-56 9-11 s, Am-242m 6 s.
+The Am-242m (n,p) at 14 MeV is the one cell above 0.1 %: 2.7 mb, 0.08 % of the nonelastic, and the ground state
+has the same sign (+0.47 %); not chased further.
+
+Default mode (the deliberate defaults on) runs too and differs from stock by the same deliberate defaults as the
+ground state (`FIDELITY_DEFAULTS.md`): Fe-56 `ltarget 1` 14 MeV (n,p) +11.2 %, (n,a) +10.7 % (NPWINDOW; ground state
++12.1 / +11.0 %), Am-242m 1 MeV fission -2.4 %, capture +13.6 % (exactfis and the other actinide defaults).
+
+Tests: `tests/hf/test_kwcov_biso.py` (checks, refusals, target state, the direct and pre-equilibrium gates, Fe-56
+`ltarget 1` at 1 and 14 MeV and Am-242m at 1 MeV against the transcribed stock numbers). `test_engfix4.py`: the
+Hf-178m2 test (`ltarget 109`) now stops on TALYS's range check, as stock does.

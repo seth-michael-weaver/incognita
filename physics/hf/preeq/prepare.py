@@ -545,6 +545,7 @@ def prepare(
         etop_mev=torch.tensor(etop[:E], dtype=DTYPE).expand(C, E).contiguous(),
         ebegin=tuple(ebegin[t] for t in range(7)),
         eend=eend_all,
+        ltarget=int(getattr(options, "Ltarget", 0)),
     )
 
     hdr = {}
@@ -588,6 +589,7 @@ def prepare(
         nbins=number_of_bins(enincmax, options.nbins0),
         primary=True,
         b7=_b7_extras(Z, A, k0, options, params, m, enincmax),
+        targete_mev=float(te),
     )
     hdr["energies"] = energies
     hdr["ebegin"] = ebegin

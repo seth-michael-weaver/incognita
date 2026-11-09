@@ -163,8 +163,8 @@ def test_gridtop_ignores_exits_without_a_residual(fresh, Z, A):
 def test_isomer_energy_enters_etotal_and_grid(fresh, monkeypatch):
     """targetE (nuclides.f90:234) is in Etotal (energies.f90:131) and the grid top (grid.f90:123).
 
-    The port still refuses an excited target (`structure.levels`: Ltarget /= 0 is not ported), so a
-    real Hf-178m2 run cannot be made; targetE is injected here as Hf-178m2's 2.446090 MeV."""
+    Stock TALYS-2.25 cannot run Hf-178m2 (level 109 > numlev = 40), so targetE is injected here as
+    Hf-178m2's 2.446090 MeV on a ground-state run (the real excited-target runs: tests/hf/test_kwcov_biso.py)."""
     from physics.hf import chartrun
     from physics.hf.compound.dens_reference import run_grid
     from physics.hf.core.grids import f32
@@ -184,15 +184,20 @@ def test_isomer_energy_enters_etotal_and_grid(fresh, monkeypatch):
     chartrun.drop_target_caches()
 
 
-def test_excited_target_still_refused(fresh):
+def test_excited_target_hf178m2_out_of_talys_range(fresh):
+    """KWCOV GAP (isomeric targets, docs/hf/ISOMERIC_TARGETS.md): the excited target is ported now, but Hf-178m2 is
+    level 109 and the run stops where stock TALYS-2.25 does (checkvalue.f90:467, numlev = 40), before any level is
+    read; the energy bookkeeping itself is the test above."""
     from physics.hf.compound.dens_reference import _structure_of
+    from physics.hf.input.defaults import reject_unported
     from physics.hf.structure.scalars import target_energy_mev
 
     fresh(72, 178, "ltarget 109", Ltarget=109)
     o, p, m = _structure_of(72, 178)
     assert o.Ltarget == 109
-    with pytest.raises(NotImplementedError, match="Ltarget"):
-        target_energy_mev(72, 178, o, m, p)
+    for call in (lambda: target_energy_mev(72, 178, o, m, p), lambda: reject_unported(o)):
+        with pytest.raises(ValueError, match="0 <= Ltarget <= 40"):
+            call()
 
 
 # ---------------------------------------------------------------------------------------- 4. CREC record key

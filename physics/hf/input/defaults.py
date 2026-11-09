@@ -925,10 +925,10 @@ def _apply_stage(stage: str, o: dict, overrides: Mapping[str, object]) -> None:
             o["flagastro"] = True
             if kind == "astroe":
                 o["flagastrogs"] = True
-        elif kind == "maxlevelstar":  # input_levels.f90, sets nlevmax and nlevbin(k0)
-            o["nlevmax"] = int(value)
+        elif kind == "maxlevelstar":  # input_levels.f90:252-258, sets nlevmax and nlevbin(k0)
+            o["nlevmax"] = max(int(value), int(o.get("Ltarget", 0)))  # KWCOV GAP: :255 max(nlevmax, Ltarget)
             nb = list(o["nlevbin"])
-            nb[o["k0"]] = int(value)
+            nb[o["k0"]] = o["nlevmax"]
             o["nlevbin"] = tuple(nb)
         elif kind == "soukho":  # input_ompmodel.f90 keyword loop: also flagsoukhoinp
             o["flagsoukho"] = _yn(value)
@@ -1465,6 +1465,19 @@ UNPORTED = (
 )
 
 
+#: KWCOV GAP (isomeric targets): keyword -> option of the outputs / models an `ltarget > 0` run refuses. Each reads
+#: level 0 as the elastic level or the ground state as the target somewhere (angout.py:549, specobs.py:284, the
+#: recoil / ENDF / astro / URR / components writers) or was not checked against stock with an excited target.
+LTARGET_UNPORTED = (
+    ("outangle", "flagang"), ("outlegendre", "flaglegendre"), ("fileelastic", "fileelastic"),
+    ("fileangle", "fileangle"), ("outspectra", "flagspec"), ("filespectrum", "filespectrum"),
+    ("fileddxe", "fileddxe"), ("fileddxa", "fileddxa"), ("outgamdis", "flaggamdis"), ("recoil", "flagrecoil"),
+    ("labddx", "flaglabddx"), ("astro", "flagastro"), ("urr", "flagurr"), ("endf", "flagendf"),
+    ("components", "flagcompo"), ("eciscompound", "flageciscomp"), ("racap", "flagracap"),
+    ("production", "flagprod"), ("massdis", "flagmassdis"), ("channelenergy", "flagEchannel"),
+)
+
+
 def reject_unported(options) -> None:
     """Refuse, at the start of a CALCULATION, keyword settings the port does not implement, instead
     of returning wrong numbers. Option resolution itself stays faithful (the echo tests replay TALYS
@@ -1493,6 +1506,13 @@ def reject_unported(options) -> None:
     if 3 <= int(o.get("alphaomp", 6)) <= 5 and o.get("flagompall"):
         bad.append("alphaomp 3-5 with optmodall y: the per-nucleus transmission sets of optmodall are not wired to "
                    "the folding-potential solve")
+    if int(o.get("Ltarget", 0)) != 0:  # KWCOV GAP: what an excited target is not ported for (ISOMERIC_TARGETS.md)
+        isobad = [kw for kw, key in LTARGET_UNPORTED if o.get(key)]
+        if int(o.get("k0", 1)) != 1:
+            isobad.append(f"projectile {('g', 'n', 'p', 'd', 't', 'h', 'a')[int(o.get('k0', 1))]}")
+        if isobad:
+            bad.append("ltarget > 0 with " + ", ".join(isobad) + ": the excited-target run is ported for an incident "
+                       "neutron and the channel / level / total cross sections only (docs/hf/ISOMERIC_TARGETS.md)")
     if o.get("ompenergyfile") and o.get("flagendf"):  # KWCOV B6: endfenergies.f90:97, the ENDF incident grid
         bad.append("ompenergyfile with endf y: the ENDF-6 incident-energy grid (endfenergies.f90) is not ported")
     if bad:
@@ -1504,12 +1524,21 @@ def check_values(options) -> None:
 
     * legacy models (checkvalue.f90:803-813, :953-966): without `legacy y`, strength <= 7, strengthM1 not in
       3/8/10/11/12, ldmodelCN or any ldmodel 3/4/6 stop the run;
-    * transpower 2..20 (checkvalue.f90:475).
+    * transpower 2..20 (checkvalue.f90:475);
+    * KWCOV GAP: 0 <= Ltarget <= numlev unless liso is given (checkvalue.f90:467); ltarget with liso is refused.
 
-    TALYS: checkvalue.f90:1 (checkvalue) lines 475, 803-813, 953-966
-    Test: tests/hf/test_kwcov_b15.py
+    TALYS: checkvalue.f90:1 (checkvalue) lines 467, 475, 803-813, 953-966
+    Test: tests/hf/test_kwcov_b15.py, tests/hf/test_kwcov_biso.py
     """
     o = options if isinstance(options, dict) else vars(options)
+    lt, liso = int(o.get("Ltarget", 0)), int(o.get("Lisoinp", -1))
+    if liso == -1 and not 0 <= lt <= NUMLEV:  # KWCOV GAP (isomeric targets): checkvalue.f90:467
+        raise ValueError(f"TALYS-error: 0 <= Ltarget <= {NUMLEV}, Ltarget = {lt} (checkvalue.f90:467; a target "
+                         "isomer above level 40, e.g. Hf-178m2 = level 109, cannot be named by ltarget)")
+    if lt != 0 and liso != -1:
+        raise NotImplementedError(
+            "not ported: ltarget with liso (levels.f90:270-307: a user isomer number skips the level-range checks "
+            "and the continuum-isomer renumbering moves Ltarget; docs/hf/ISOMERIC_TARGETS.md)")
     tp = o.get("transpower", 5)
     if not 2 <= int(tp) <= 20:
         raise ValueError(f"TALYS-error: 2 <= transpower <= 20, transpower = {tp} (checkvalue.f90:475)")

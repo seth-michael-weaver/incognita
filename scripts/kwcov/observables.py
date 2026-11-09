@@ -215,8 +215,10 @@ ROWS = [
      "test:test_kwcov_b10b.py; sums = weighted isotope runs to 2e-16; stock natural = stock isotope sums 4e-7. Spectra / "
      "angular not summed (natural.f90 interpolates them); binary.tot and xs*.Lnn ARE summed here (TALYS leaves the last "
      "isotope's)"),
-    ("isomeric (excited) targets", "all", "", "ltarget", "MISSING", "structure/levels.py:171 refuses", "KNOWN GAP",
-     "engine refuses Ltarget /= 0"),
+    ("isomeric (excited) targets", "all", "nuclides.f90:231-234, direct.f90:33, preeqcorrect.f90:90", "ltarget", "PARTIAL",
+     "structure/scalars.py, direct/chain.py, preeq/complex.py, input/defaults.py LTARGET_UNPORTED", "GAP",
+     "test:test_kwcov_biso.py; n + excited target: channel, level and total cross sections (stock Fe-56 L1/L2, Am-242m, "
+     "docs/hf/ISOMERIC_TARGETS.md); angular / spectra / recoil / astro / urr / endf outputs and projectiles but n refused"),
 ]
 
 

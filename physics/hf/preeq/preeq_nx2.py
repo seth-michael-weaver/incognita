@@ -210,7 +210,7 @@ def preeq_correct(spectra: dict, inp, disc) -> dict | None:
             nd = disc.nendisc[c][t]
             esd_all = disc.eoutdis_mev[c][t]
             NL = disc.nlast[t]
-            if esd_all is not None:
+            if esd_all is not None and not getattr(disc, "ltarget", 0):  # KWCOV GAP: preeqcorrect.f90:90
                 esd_l = [float(v) for v in esd_all[:NL + 2]]
                 dd = disc.xsdirdisc_mb[c][t]
                 lev, e1, e2 = [], [], []

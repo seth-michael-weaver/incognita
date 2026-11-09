@@ -36,14 +36,14 @@ equivalent keyword.
 
 | status | keywords |
 |---|---|
-| SUPPORTED | 386 |
-| READ_ONLY_DEFAULT | 17 |
+| SUPPORTED | 387 |
+| READ_ONLY_DEFAULT | 16 |
 | IGNORED | 6 |
 | MISSING | 1 |
 | NA | 36 |
 | **total** | 446 |
 
-Of the SUPPORTED rows, 278 have a test naming the keyword, 105 are code-path only (`grep`).
+Of the SUPPORTED rows, 279 have a test naming the keyword, 105 are code-path only (`grep`).
 
 ## By TALYS input group
 
@@ -66,7 +66,7 @@ Of the SUPPORTED rows, 278 have a test naming the keyword, 105 are code-path onl
 | input_gammamodel | 8 | 4 | 0 | 0 | 0 |
 | input_gammapar | 32 | 0 | 0 | 0 | 0 |
 | input_levels | 16 | 0 | 0 | 0 | 0 |
-| input_main | 6 | 1 | 0 | 0 | 0 |
+| input_main | 7 | 0 | 0 | 0 | 0 |
 | input_mass | 5 | 1 | 0 | 0 | 0 |
 | input_medical | 10 | 0 | 0 | 0 | 0 |
 | input_numerics | 15 | 0 | 0 | 0 | 0 |
@@ -306,9 +306,9 @@ Of the SUPPORTED rows, 278 have a test naming the keyword, 105 are code-path onl
 | leoradjustg | input_preeqpar | value | 1.0 | SUPPORTED | grep | input/defaults.py Params.LEORadjustG -> direct/dwba.py, ingout.py |  |
 | levelfile | input_levels | per-element-file |  | SUPPORTED | test:test_kwcov_b5.py | input/defaults.py Options.levelfile_of -> structure/levels.py, files.level_records | deck `levelfile Z <file>` (path keeps its case; relative to the deck's directory): Fe-56 with the 2+ level moved to 0.95 MeV 0.02 % (stock moved 38 %); a missing file stops the run, as TALYS. A best file's own levelfile line (Mo-95/97) is still left out with a warning |
 | levinger | input_gammapar | value | 6.5 | SUPPORTED | grep | input/defaults.py Params.levinger -> gamma/transmission.py, ingout.py |  |
-| liso | input_basicpar | value |  | SUPPORTED | test:test_kwcov_b2.py | input/defaults.py Options.Lisoinp (output label only in TALYS too) | no cross section moves in stock TALYS (Fe-56 0.0 %) nor in the engine |
+| liso | input_basicpar | value |  | SUPPORTED | test:test_kwcov_b2.py | input/defaults.py Options.Lisoinp (output label only in TALYS too) | no cross section moves in stock TALYS (Fe-56 0.0 %) nor in the engine; with ltarget > 0 refused (levels.f90 renumbering path, ISOMERIC_TARGETS.md) |
 | localomp | input_ompmodel | flag | y | SUPPORTED | grep | input/defaults.py Options.flaglocalomp -> omp/parameters.py |  |
-| ltarget | input_main | value | 0 | READ_ONLY_DEFAULT | manual | structure/levels.py:171 | KNOWN GAP: excited/isomeric targets refused (NotImplementedError); only astro/stellar.py uses excited entrance states internally |
+| ltarget | input_main | value | 0 | SUPPORTED | test:test_kwcov_biso.py | structure/scalars.py (target level), direct/chain.py (direct.f90:33), preeq (preeqcorrect.f90:90, complex.py eninccm), input/defaults.py checks + LTARGET_UNPORTED | KWCOV GAP (docs/hf/ISOMERIC_TARGETS.md): n + excited target, channel / level / total xs; TALYS mode vs stock Fe-56 L1/L2, Am-242m (see the note). Refused: liso with it, Ltarget > 40 (TALYS range; Hf-178m2), angular / spectra / recoil / astro / urr / endf / components / racap / production / massdis outputs, projectiles but n |
 | lurr | input_compoundpar | value | 2 | SUPPORTED | test:test_kwcov_b10.py | input/defaults.py Options.lurr -> urr.py (engine_c/engine cases -> urr.record per Einc <= eurr -> Results.urr)  | l range of the URR blocks and files (0-60 checked); response vs stock lurr 0/1/3: Fe-56 1e-5, U-238 8e-5 (l03 files = stock to 3e-5) |
 | lv1adjust | input_omppar | value | 1.0 | SUPPORTED | test:test_kwcov_b7b.py | omp/jlm.py normalisations (Params.lv1adjust) | scales the JLM normalisation (mom.f90:94-112); acts only with jlmomp y, as in TALYS; the energy-local form (adjust.f90) is not read |
 | lvadjust | input_omppar | value | 1.0 | SUPPORTED | test:test_kwcov_b7b.py | omp/jlm.py normalisations (Params.lvadjust) | scales the JLM normalisation (mom.f90:94-112); acts only with jlmomp y, as in TALYS; the energy-local form (adjust.f90) is not read |
@@ -332,7 +332,7 @@ Of the SUPPORTED rows, 278 have a test naming the keyword, 105 are code-path onl
 | maxenrec | input_numerics | value | 20 | SUPPORTED | test:test_kwcov_b12.py | input/defaults.py Options.maxenrec -> recoil.py | recoil energy bins (1-20 checked); maxenrec 10 vs stock 1.6 % (14 MeV tail), grid identical |
 | maxlevelsbin | input_levels | per-particle | 30 | SUPPORTED | test:test_kwcov_b2.py | input/defaults.py Options.nlevbin -> nlev_of -> structure/levels.py | `maxlevelsbin p 5` Fe-56 response 0.19 % |
 | maxlevelsres | input_levels | value | 30 | SUPPORTED | test:test_kwcov_b2.py | input/defaults.py Options.nlevmaxres -> nlev_of -> structure/levels.py | Fe-56 0.03 %, Co-59 0.02 %, U-238 0.01 % |
-| maxlevelstar | input_levels | value | 30 | SUPPORTED | test:test_kwcov_b2.py | input/defaults.py Options.nlevmax -> core/grids.py, ingout.py |  |
+| maxlevelstar | input_levels | value | 30 | SUPPORTED | test:test_kwcov_b2.py,test_kwcov_biso.py | input/defaults.py Options.nlevmax -> core/grids.py, ingout.py |  |
 | maxn | input_numerics | value | 28 | SUPPORTED | grep | input/defaults.py Options.maxN -> density/rigidspin.py, emission/feeding.py, emission/fluxclose.py, ingout.py (+5) |  |
 | maxnrp | input_numerics | value | 32 | SUPPORTED | test:test_kwcov_b5.py | input/defaults.py Options.maxNrp (inert) | acts only with `rpevap y` (multiple.f90:270), which is refused |
 | maxrot | input_directpar | value | 4 | SUPPORTED | grep | input/defaults.py Options.maxrot -> omp/parameters.py, structure/collrule.py, structure/deformation.py |  |

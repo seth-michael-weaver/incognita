@@ -73,7 +73,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B13 | ingredient outputs (DONE, branch `kwcov13`) | outlevels, blocklevels, outbasic, outtransenergy, blockomp, outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
 | B14 | fission yields and fragment evaporation | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
 | B15 | low value (DONE, branch `kwcov15`; components y (B4b: ported since), densfile/e1file/m1file/massdir, rescuefile/strucpath/bestpath refused; endf.cs ECIS files not given; transpower ported; U-239 E1 fix behind INCOGNITA_FIDFIX=psfsgl) | endf, endfdetail, sacs, legacy, components, micro, transpower | tefal.inf, gamma*.tot, sacs.dat | 1 d |
-| GAP | isomeric (excited) targets | ltarget | everything for an excited target | 3+ d; separate design (the engine refuses `Ltarget /= 0`, structure/levels.py:171; astro/stellar.py already builds excited entrance channels and is the starting point) |
+| GAP | isomeric (excited) targets (DONE, branch `kwcoviso`; design `ISOMERIC_TARGETS.md`; n only, channel / level / total xs; ltarget + liso, Ltarget > 40 (Hf-178m2, as stock) and the angular / spectra / recoil / astro / urr / endf / components / racap / production / massdis outputs refused) | ltarget | everything for an excited target | 3+ d |
 
 NA keywords (71: `out*`, `file*`, `block*`, paths, labels, ECIS plumbing) stay NA; the observables they gate are
 batches above.
@@ -1051,12 +1051,20 @@ FIDELITY_DEFAULTS.md section 6. Turning it on by default is the integration step
 
 **Owners of what is left** (status IGNORED / MISSING after B15): massdis, fymodel, ffmodel, gefran, ffevaporation,
 ffspin (IGNORED), yieldfile (MISSING) -> B14; jlmmode, radialmodel, radialfile -> B7b (done, branch `kwcov7b`). Every other
-keyword is SUPPORTED, NA, or refused with a message (READ_ONLY_DEFAULT; `ltarget` -> the isomeric-target gap).
+keyword is SUPPORTED, NA, or refused with a message (READ_ONLY_DEFAULT). `ltarget`: the isomeric-target gap, done on
+branch `kwcoviso` (below).
 
-## Known gap: isomeric targets
+## Isomeric targets (done on branch `kwcoviso`)
 
-`ltarget /= 0` is refused (`structure/levels.py:171`). TALYS runs an excited target as an ordinary run with the
-entrance channel on level `ltarget` (`Ltarget` in comptarget.f90, direct.f90 skips direct reactions). The pieces
-exist in `astro/stellar.py` (excited entrance channels through the engine's own comptarget). Needs its own design
-note before a batch: grids, binary, level removal, the isomer as residual vs target, and the best files of `m`
-targets (`best/<El><AAA>m`).
+Design and results: `ISOMERIC_TARGETS.md`. `ltarget L` runs the target on its level `L` as TALYS does: the level's
+spin, parity and energy (`structure/scalars.py`; targetE in Etotal and the grid top since ENGFIX4), no DWBA level and
+no giant resonance (direct.f90:33, `direct/chain.py`) while the incident coupled-channels inelastic of a deformed
+target is kept (incidentread.f90:381-394), no collapse of the pre-equilibrium continuum onto the levels
+(preeqcorrect.f90:90), level `L` as the elastic channel (the binary / compound code was already written on
+`ltarget`). Port bug found on the way: the complex-particle pre-equilibrium (knockout / stripping / breakup) took
+eninccm = Etotal - S(0,0,k0), i.e. eninccm + targetE (Fe-56 `ltarget 1` 14 MeV (n,a) -1.6 %); fixed
+(`preeq/complex._eninccm`). TALYS mode vs stock TALYS-2.25 (1/5/14 MeV): Fe-56 levels 1 and 2 <= 0.01 % on every
+main channel and level; Am-242m (level 2, 5-, fission, coupled channels) <= 0.03 %, (n,p) 14 MeV +1.3 % (2.7 mb;
+ground state +0.47 %). TALYS's checks (Ltarget <= 40, the level must exist, no natural target) are made. Refused:
+ltarget with liso, projectiles other than n, the outputs of `defaults.LTARGET_UNPORTED`. Test:
+`tests/hf/test_kwcov_biso.py`; comparison `scripts/kwcov/biso_compare.py` / `biso_stock.sh`.

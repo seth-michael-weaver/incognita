@@ -175,23 +175,29 @@ def computed_cross_sections(cs, levels, *, refine: int = 4, energies=None,
         cc_levels = np.asarray(cs.struct.cc_levels).reshape(-1)
         return (torch.zeros(len(levels.index), dtype=DTYPE), torch.zeros(len(cc_levels), dtype=DTYPE),
                 torch.zeros(4, dtype=DTYPE))
-    omp = _omp_for(cs.Z, cs.A, float(cs.e_inc_mev), int(cs.options.k0), energies)
-    case = prepare_case(omp, cs.target, float(cs.e_inc_mev), direct_case=cs,
-                        levels=levels if levels_are_dwba else None)
-    # CPINC: the distorted waves are the projectile's (Coulomb, mass, spin); a neutron run passes
-    # nothing, so its call is unchanged
-    pkw = {} if int(cs.options.k0) == 1 else {"particle": int(cs.options.k0)}
-    xs_by_level, xsgr = dwba_case(omp, case, refine=refine, parts=dwba_parts(cs.options),  # VIBLEN
-                                  **pkw)
-    from physics.hf import specang  # SPECOUT: keep this energy's DWBA deck for the level angular distributions (output only)
-
-    specang.record_dwba(cs.Z, cs.A, float(cs.e_inc_mev), omp, case, dwba_parts(cs.options), refine, xs_by_level)
-    by = {int(i): float(v) for i, v in zip(case.level_index.tolist(),
-                                           xs_by_level.tolist(), strict=True)}
-    xs = torch.tensor([by.get(int(i), 0.0) for i in levels.index], dtype=DTYPE)
     grc = torch.zeros(4, dtype=DTYPE)
-    if case.gr_which.numel():
-        grc[np.asarray(case.gr_which)] = xsgr.to(DTYPE)
+    if int(getattr(cs.options, "Ltarget", 0)) != 0:
+        # KWCOV GAP (isomeric targets): direct.f90:33 returns before directecis / directread / giant, so an excited
+        # target gets no DWBA level and no giant resonance; the incident coupled-channels inelastic below
+        # (incidentread.f90:381-394) is read all the same
+        xs = torch.zeros(len(levels.index), dtype=DTYPE)
+    else:
+        omp = _omp_for(cs.Z, cs.A, float(cs.e_inc_mev), int(cs.options.k0), energies)
+        case = prepare_case(omp, cs.target, float(cs.e_inc_mev), direct_case=cs,
+                            levels=levels if levels_are_dwba else None)
+        # CPINC: the distorted waves are the projectile's (Coulomb, mass, spin); a neutron run passes
+        # nothing, so its call is unchanged
+        pkw = {} if int(cs.options.k0) == 1 else {"particle": int(cs.options.k0)}
+        xs_by_level, xsgr = dwba_case(omp, case, refine=refine, parts=dwba_parts(cs.options),  # VIBLEN
+                                      **pkw)
+        from physics.hf import specang  # SPECOUT: keep this energy's DWBA deck for the level angular distributions (output only)
+
+        specang.record_dwba(cs.Z, cs.A, float(cs.e_inc_mev), omp, case, dwba_parts(cs.options), refine, xs_by_level)
+        by = {int(i): float(v) for i, v in zip(case.level_index.tolist(),
+                                               xs_by_level.tolist(), strict=True)}
+        xs = torch.tensor([by.get(int(i), 0.0) for i in levels.index], dtype=DTYPE)
+        if case.gr_which.numel():
+            grc[np.asarray(case.gr_which)] = xsgr.to(DTYPE)
 
     cc_levels = np.asarray(cs.struct.cc_levels).reshape(-1)
     cc = torch.zeros(len(cc_levels), dtype=DTYPE)
@@ -269,6 +275,10 @@ def _direct_result(target: str, e_inc_mev: float, energies: tuple, refine: int):
     gr = D.giant_resonance_parameters_of(cs.struct, cs.params)
     xs, xscc, xsgrcoll = computed_cross_sections(cs, lv, refine=refine, energies=energies,
                                                  levels_are_dwba=True)
+    if int(getattr(cs.options, "Ltarget", 0)) != 0:  # KWCOV GAP: direct.f90:33, no `giant` call (xsgrsum = 0)
+        from dataclasses import replace as _replace
+
+        cs = _replace(cs, flaggiant=False)
     def _run(xs_, gr_):
         return D.direct(
             cs.struct, gr, lv, xs_, gr_, cs.eoutdis_mev, cs.eninccm_mev,

@@ -167,8 +167,6 @@ def discrete_levels(
 def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
     if options.flagpseudores:
         raise NotImplementedError("pseudoresonances y (levels.f90:347) is not ported")
-    if options.Ltarget != 0:
-        raise NotImplementedError("excited/isomeric targets (Ltarget /= 0) are not ported")
     Zix, Nix = options.Zinit - Z, options.Ninit - (A - Z)
     if masses is None:
         from physics.hf.structure.masses import masses as _masses
@@ -231,6 +229,14 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
                                                           e_nlev=float(lv.e_mev[lv.nlev]), e_cut=float(cut.e_mev[cut.nlev]))
                 lv = replace(cut, nlev_ld=n_ld,
                              notes=tuple(lv.notes) + (f"levcomplete: nlev {int(lv.nlev)} -> {int(cut.nlev)}",))
+    if int(options.Ltarget) != 0 and (Zix, Nix) == _target_ix(options.k0):
+        from physics.hf.input.defaults import check_values
+
+        check_values(options)  # checkvalue.f90:467 (0 <= Ltarget <= numlev) comes before levels.f90 in TALYS
+    if int(options.Ltarget) != 0 and (Zix, Nix) == _target_ix(options.k0) and int(options.Ltarget) > int(lv.nlev):
+        # KWCOV GAP (isomeric targets): levels.f90:252-257, the check TALYS makes when `liso` is not given
+        raise ValueError(f"TALYS-error: excited level of target does not exist (ltarget {int(options.Ltarget)}, "
+                         f"{int(lv.nlev)} discrete levels of Z={int(Z)} A={int(A)}; levels.f90:252-257)")
     return lv
 
 

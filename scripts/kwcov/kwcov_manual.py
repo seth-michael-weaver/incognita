@@ -57,7 +57,8 @@ B2: dict = {
     "estop": ("SUPPORTED", "input/energies.py estop_subset -> engine.py / engine_c.py",
               "energies above estop not computed, grid (enincmax) kept as read_energies.f90; Fe-56 0.00 %", _T),
     "liso": ("SUPPORTED", "input/defaults.py Options.Lisoinp (output label only in TALYS too)",
-             "no cross section moves in stock TALYS (Fe-56 0.0 %) nor in the engine", _T),
+             "no cross section moves in stock TALYS (Fe-56 0.0 %) nor in the engine; with ltarget > 0 refused (levels.f90 "
+             "renumbering path, ISOMERIC_TARGETS.md)", _T),
     "isomer": ("SUPPORTED", "input/defaults.py Options.isomer_s -> structure/levels.py",
                "Fe-56 `isomer 0.001` 0.0 % both sides", "test:test_chanobs.py,test_resiso.py,test_kwcov_b2.py"),
     "ldmodel": ("SUPPORTED", "input/defaults.py Options.ldmodel_of (global + `ldmodel v Z A`) -> density/*, gamma/*",
@@ -432,9 +433,12 @@ MANUAL: dict = {
     "element": ("SUPPORTED", "engine run(Z, A) arguments", "target is a run argument (TALYSworld: target)", "manual"),
     "energy": ("SUPPORTED", "ChainedFull(declared_energies=...)", "single energy, list or grid file; TALYS "
                "`energy E1 E2 dE` range form must be expanded by the caller", "manual"),
-    "ltarget": ("READ_ONLY_DEFAULT", "structure/levels.py:171",
-                "KNOWN GAP: excited/isomeric targets refused (NotImplementedError); only astro/stellar.py uses "
-                "excited entrance states internally", "manual"),
+    "ltarget": ("SUPPORTED", "structure/scalars.py (target level), direct/chain.py (direct.f90:33), preeq (preeqcorrect.f90:90, "
+                "complex.py eninccm), input/defaults.py checks + LTARGET_UNPORTED",
+                "KWCOV GAP (docs/hf/ISOMERIC_TARGETS.md): n + excited target, channel / level / total xs; TALYS mode vs stock "
+                "Fe-56 L1/L2, Am-242m (see the note). Refused: liso with it, Ltarget > 40 (TALYS range; Hf-178m2), angular / "
+                "spectra / recoil / astro / urr / endf / components / racap / production / massdis outputs, projectiles but n",
+                "test:test_kwcov_biso.py"),
     # --- per-nucleus gamma cards that fitlib reads under its own table ---
     **{k: ("SUPPORTED", _F + "UPBEND_KEYS -> gamma/parameters.py:762", "upbend C/e/f cards (LEESHELL fix)", "grep")
        for k in ("upbendc", "upbende", "upbendf", "upbendcadjust", "upbendeadjust", "upbendfadjust")},

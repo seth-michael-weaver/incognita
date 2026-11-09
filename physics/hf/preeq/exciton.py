@@ -197,6 +197,9 @@ class PreeqInputs:
     primary: bool = True
     # KWCOV B7: what `preeq.exciton_b7` reads (twocomponent n, gshell y, preeqmode 3); None on every other run
     b7: dict | None = None
+    # KWCOV GAP (isomeric targets): targetE, the excitation of the target level Ltarget (nuclides.f90:234); 0 for a
+    # ground-state target. `ecomp_mev` = Etotal holds it, so eninccm = Etotal - S(0,0,k0) - targetE (energies.f90:131)
+    targete_mev: float = 0.0
 
     @property
     def C(self) -> int:
@@ -905,6 +908,7 @@ class DiscreteInputs:
     etop_mev: Tensor  # (C, E)
     ebegin: tuple  # (7,) int
     eend: list  # [C][7] int
+    ltarget: int = 0  # KWCOV GAP: Ltarget /= 0 skips the collapse onto the discrete levels (preeqcorrect.f90:90)
 
 
 
@@ -971,7 +975,7 @@ def preeq_correct(
             nd = disc.nendisc[c][t]
             esd_all = disc.eoutdis_mev[c][t]
             NL = disc.nlast[t]
-            if esd_all is not None:
+            if esd_all is not None and not disc.ltarget:  # KWCOV GAP: preeqcorrect.f90:90 (goto 100)
                 for i in range(NL + 1):
                     if disc.xsdirdisc_mb[c][t][i] != 0.0:
                         continue

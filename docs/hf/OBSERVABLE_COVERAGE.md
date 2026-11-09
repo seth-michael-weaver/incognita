@@ -20,9 +20,9 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 | status | observables |
 |---|---|
 | SUPPORTED | 42 |
-| PARTIAL | 13 |
+| PARTIAL | 14 |
 | INTERNAL | 3 |
-| MISSING | 5 |
+| MISSING | 4 |
 | NA | 1 |
 | **total** | 64 |
 
@@ -93,4 +93,4 @@ capture, (n,p), (n,a), (n,2n), inelastic and fission: all SUPPORTED.
 | charged-particle induced reactions (p d t h a) | all |  | projectile | PARTIAL | projectile.py (INCOGNITA_CPINC) |  | ported, behind env switch |
 | photonuclear reactions | all |  | projectile g | PARTIAL | projectile.py (engine.run only) |  |  |
 | natural-element targets | all + natural sums | natural.f90:1 | mass 0, abundance | SUPPORTED | natural.py (run_deck mass 0 -> weighted Results + Results.natural) | B10b | test:test_kwcov_b10b.py; sums = weighted isotope runs to 2e-16; stock natural = stock isotope sums 4e-7. Spectra / angular not summed (natural.f90 interpolates them); binary.tot and xs*.Lnn ARE summed here (TALYS leaves the last isotope's) |
-| isomeric (excited) targets | all |  | ltarget | MISSING | structure/levels.py:171 refuses | KNOWN GAP | engine refuses Ltarget /= 0 |
+| isomeric (excited) targets | all | nuclides.f90:231-234, direct.f90:33, preeqcorrect.f90:90 | ltarget | PARTIAL | structure/scalars.py, direct/chain.py, preeq/complex.py, input/defaults.py LTARGET_UNPORTED | GAP | test:test_kwcov_biso.py; n + excited target: channel, level and total cross sections (stock Fe-56 L1/L2, Am-242m, docs/hf/ISOMERIC_TARGETS.md); angular / spectra / recoil / astro / urr / endf outputs and projectiles but n refused |

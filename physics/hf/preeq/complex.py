@@ -35,6 +35,20 @@ from physics.hf.preeq.exciton import PreeqInputs, surface_well_depth
 from physics.hf.preeq.prepare import pickup_densities
 
 
+def _eninccm(inp: PreeqInputs) -> Tensor:
+    """(C, 1) eninccm = Etotal - S(0,0,k0) - targetE (energies.f90:131). KWCOV GAP (isomeric targets): the targetE
+    term was missing, so an excited target's knockout / stripping / breakup ran at eninccm + targetE (Fe-56
+    `ltarget 1` 14 MeV: (n,a) -1.6 % vs stock); 0 for a ground-state target (unchanged).
+
+    TALYS: energies.f90:1 (energies)
+    Test: tests/hf/test_kwcov_biso.py
+    """
+    C, k0 = inp.C, inp.k0
+    e = inp.ecomp_mev.reshape(C, 1) - inp.s_mev[:, k0].reshape(C, 1)
+    te = float(getattr(inp, "targete_mev", 0.0))
+    return e - te if te else e
+
+
 def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor:
     """Kalbach pickup/stripping spectra `xspreeqps(type, nen)` [mb/MeV], shape (C, 7, E).
 
@@ -55,8 +69,8 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
     Ainit = inp.a_init
     out = torch.zeros(C, 7, E, dtype=DTYPE, device=dev)
     einc = inp.einc_mev.reshape(C, 1)
-    # eninccm is not dumped separately; Etotal - S(0,0,k0) is exactly it (energies.f90:79)
-    eninccm = inp.ecomp_mev.reshape(C, 1) - inp.s_mev[:, k0].reshape(C, 1)
+    # eninccm is not dumped separately; Etotal - S(0,0,k0) - targetE is exactly it (energies.f90:79, :131)
+    eninccm = _eninccm(inp)
     projmass = parmass[k0]
     proj2sp1 = 2.0 * parspin[k0] + 1.0
     gsp_cn = inp.gp_cn.reshape(C, 1)
@@ -261,7 +275,7 @@ def knockout(inp: PreeqInputs, options, params, coulbar_mev, xsreacinc_mb: Tenso
     Z, A = inp.Z, inp.A
     N = A - Z
     out = torch.zeros(C, 7, E, dtype=DTYPE, device=dev)
-    eninccm = inp.ecomp_mev.reshape(C, 1) - inp.s_mev[:, k0].reshape(C, 1)
+    eninccm = _eninccm(inp)
     projmass = parmass[k0]
     proj2sp1 = 2.0 * parspin[k0] + 1.0
 
@@ -430,7 +444,7 @@ def breakup(inp: PreeqInputs, options, cbreak) -> Tensor:
     Zt, At = inp.Z, inp.A
     Zcomp = Zt + parZ[k0]
     einc = inp.einc_mev.reshape(C, 1)
-    eninccm = inp.ecomp_mev.reshape(C, 1) - inp.s_mev[:, k0].reshape(C, 1)
+    eninccm = _eninccm(inp)
     ksig, widthsig = 112.0, 13.0
     for t, t2 in _BU_PAIRS[k0].items():
         if parskip is not None and bool(parskip[t]):

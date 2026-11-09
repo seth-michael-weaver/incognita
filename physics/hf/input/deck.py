@@ -111,6 +111,9 @@ def run_deck(path: str | os.PathLike, stats: dict | None = None):
         raise NotImplementedError(fitlib.RESONANCE_REFUSAL)  # KWCOV B10b: refused before any run
     integ = integ_mod.parse_deck(d.lines)  # KWCOV B10b: integral y / integral <file> <spectrum> <value>
     if d.A == 0:  # KWCOV B10b: natural element (natural.f90)
+        lt = [ln.split()[1] for ln in d.lines if ln.split()[:1] == ["ltarget"] and len(ln.split()) > 1]
+        if lt and int(lt[-1]) > 0:  # KWCOV GAP (isomeric targets): checkvalue.f90:429-432
+            raise ValueError("TALYS-error: Excited level for target not possible for natural targets")
         return _run_natural(d, p.parent, stats, integ)
     res = _run_one(d, d.A, stats, chanobs=integ is not None)
     if integ is not None:
