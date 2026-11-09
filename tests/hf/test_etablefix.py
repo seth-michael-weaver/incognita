@@ -43,17 +43,30 @@ def _gp(monkeypatch, lines: str):
     return gp, gov
 
 
+def _sgl() -> bool:
+    """FIDFIX psfsgl (default ON): TALYS holds the table energies in real(sgl), and so does the port."""
+    from physics.hf import fidfix
+
+    return fidfix.on("psfsgl")
+
+
+#: energy tolerance of the table comparisons: exact in double, a few 1e-7 MeV of real(sgl) rounding with psfsgl
+def _e_atol() -> float:
+    return 1e-5 if _sgl() else 1e-12
+
+
 def _talys_table(gp, et, ft, wt, irad=1):
     """gammapar.f90:257-270 + 564-585 written out: e = ee + et, f = f_raw * ft, then the
-    stretch about the first T = 0 maximum by wt."""
+    stretch about the first T = 0 maximum by wt (in real(sgl) as TALYS when psfsgl is on)."""
+    s = (lambda x: np.asarray(x, dtype=np.float32).astype(np.float64)) if _sgl() else (lambda x: x)
     tab = gp.tables[(irad, 1)]
     e = tab.e_raw_mev.numpy().copy()
-    e[1:] = e[1:] + et
+    e[1:] = s(s(e[1:]) + s(et))
     f = tab.f_raw_mev3.numpy() * ft
     f0 = f[1:, 0]
     imax = int(np.argmax(f0 == f0.max())) + 1
     emid = e[imax]
-    e[1:] = emid + (e[1:] - emid) * wt
+    e[1:] = s(s(emid) + s(s(s(e[1:]) - s(emid)) * s(wt)))
     return e, f
 
 
@@ -83,11 +96,11 @@ def test_etable_shifts_table_exactly(monkeypatch):
         e, f = table_arrays(gp, 1, 1)
         e_ref, f_ref = _talys_table(gp, et, float(gp.ftable[1, 1]), wt)
         np.testing.assert_array_equal(f.numpy(), f_ref)
-        np.testing.assert_allclose(e.numpy(), e_ref, rtol=0, atol=1e-12)
+        np.testing.assert_allclose(e.numpy(), e_ref, rtol=0, atol=1e-12)  # the TALYS formula, same precision
     # the whole curve moves up by 0.5 MeV: f1(E + 0.5) == f0(E)
     e0, f0 = table_arrays(gp0, 1, 1)
     e1, f1 = table_arrays(gp1, 1, 1)
-    np.testing.assert_allclose((e1 - e0).numpy()[1:], 0.5, rtol=0, atol=1e-12)
+    np.testing.assert_allclose((e1 - e0).numpy()[1:], 0.5, rtol=0, atol=_e_atol())
     np.testing.assert_array_equal(f1.numpy(), f0.numpy())
 
 
@@ -103,7 +116,7 @@ def test_etable_moves_fstrength(monkeypatch):
     eg = torch.tensor([2.0, 4.0, 6.0, 8.0, 12.0, 16.0], dtype=torch.float64)
     f0 = _table_strength(gp0, 0.0, eg, 1, 1)
     f1 = _table_strength(gp1, 0.0, eg + 0.5, 1, 1)
-    np.testing.assert_allclose(f1.numpy(), f0.numpy(), rtol=1e-9)
+    np.testing.assert_allclose(f1.numpy(), f0.numpy(), rtol=1e-6 if _sgl() else 1e-9)  # psfsgl: sgl table energies
     # and the full fstrength moves: at 8 MeV the table term is ~all of f(E1)
     full0 = fstrength_gp(gp0, 0.0, eg, 1, 1)
     full1 = fstrength_gp(gp1, 0.0, eg, 1, 1)

@@ -75,7 +75,7 @@ OPTION_EXCLUDE: frozenset[str] = frozenset({
     "flagctwcont", "nnleak", "flagparity", "flaggshell", "nlow_default", "ntop_default",
     # photon strength
     "strength", "strengthM1", "flagupbend", "flagpsfglobal", "flagglobalwtable", "m1share",
-    "leeshell", "flagstrengthjp", "flaggnorm", "ldmodelracap", "gammax",
+    "leeshell", "flagstrengthjp", "flaggnorm", "gammax",  # ldmodelracap keyed: direct/racapcalc reads it (B5)
     # fission models (`flagfission` itself stays keyed)
     "fismodel", "fismodelalt", "flaghbstate", "flagfists2", "flagexactfis", "flagclass2",
     "flagfispartdamp", "flagsffactor", "flagffevap", "flagfisfeed", "flagffspin", "flagoutfy",

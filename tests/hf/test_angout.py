@@ -133,6 +133,10 @@ _ENGINE = (TALYS_DIR / "structure").is_dir() and _built()
 def test_fe56_against_stock_talys(monkeypatch):
     sys.path.insert(0, str(ROOT / "scripts/kwcov"))
     import b3_compare as B
+
+    monkeypatch.setenv(angout.ENV, "0")  # b3_compare sets os.environ directly: teardown restores the state before it
+    monkeypatch.setenv("INCOGNITA_ANGOUT_DIR", "")
+    monkeypatch.delenv("INCOGNITA_ANGOUT_DIR")
     import torch
 
     torch.set_num_threads(1)
@@ -175,6 +179,10 @@ def test_fe56_against_stock_talys(monkeypatch):
 def test_nb93_proton_rutherford(monkeypatch):
     sys.path.insert(0, str(ROOT / "scripts/kwcov"))
     import b3_compare as B
+
+    monkeypatch.setenv(angout.ENV, "0")  # b3_compare sets os.environ directly: teardown restores the state before it
+    monkeypatch.setenv("INCOGNITA_ANGOUT_DIR", "")
+    monkeypatch.delenv("INCOGNITA_ANGOUT_DIR")
     import torch
 
     from physics.hf.chartrun import drop_target_caches

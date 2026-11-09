@@ -109,6 +109,7 @@ def test_co59_against_stock_talys(monkeypatch):
     import b1_compare as B
     import numpy as np
 
+    monkeypatch.setenv(chanobs.ENV, "0")  # b1_compare sets os.environ directly: record the state so teardown restores it
     st = B.stock_values(STOCK / "co59")
     E = st.pop("E")
     off, _, _ = B.engine_values(27, 59, E, False)
