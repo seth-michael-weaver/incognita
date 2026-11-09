@@ -36,8 +36,10 @@ TALYS_ENV = {"INCOGNITA_GRIDTOP": "n", "INCOGNITA_SPECCLOSE": "0", "INCOGNITA_LO
              "INCOGNITA_TARMASSFIX": "0", "INCOGNITA_ISOROTPASS": "0"}
 STOCK_CACHE = B.CACHE
 ENGINE_CACHE = Path(os.path.expanduser("~/kwcov/fid"))
-#: FIDELITY1 opt-in port fixes (default OFF in the engine)
-FIX_ENV: dict = {"INCOGNITA_FIDFIX": "ldcn,besttables,fitrisomer"}  # named, so a cached run never predates a fix
+#: FIDELITY1 port fixes. ON by default in the engine since the KWCOV integration (INCOGNITA_FIDFIX=0 opts out), so
+#: `default` = `default+fix` for engine runs made after it; engine runs cached in ENGINE_CACHE before the flip are the
+#: pre-fix default. Named in full, so a cached `+fix` run never predates a fix.
+FIX_ENV: dict = {"INCOGNITA_FIDFIX": "ldcn,besttables,fitrisomer,psfsgl"}
 
 
 def mode_args(mode: str) -> tuple[str, dict]:

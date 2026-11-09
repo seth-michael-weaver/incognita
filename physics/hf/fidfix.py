@@ -1,12 +1,19 @@
-"""FIDELITY1: opt-in port-fidelity fixes (default OFF; docs/hf/FIDELITY_DEFAULTS.md).
+"""FIDELITY1: port-fidelity fixes, ON by default since KWCOV integration (docs/hf/FIDELITY_DEFAULTS.md).
 
-Each fix here corrects a place where the port departs from stock TALYS-2.25 on a deck TALYS accepts. They are OFF by
-default because the published library and the scoring were calibrated on the engine as it is; turning one on by default
-is Seth's decision (the doc estimates what would move).
+Each fix here corrects a place where the port departs from stock TALYS-2.25 on a deck TALYS accepts. They were opt-in
+(default OFF) while the decision was open; Seth approved fixing port bugs in the default engine (2026-11-08), so every
+fix is now ON unless switched off. The deliberate INCOGNITA defaults (NPWINDOW, EXACTFIS, CCEXITNB2, LOWEPOT, ...)
+are not port bugs and are not touched here.
 
-Switch: `INCOGNITA_FIDFIX` = comma list of fix names, or `all` / `y` / `1` for every fix; unset / `0` / `n` = OFF (the
-engine is then bit-identical to before: every hook asks `on(name)` first). Being an INCOGNITA_* variable, it is part of
-the stage-cache key (stagedisk.ENV_PREFIXES).
+Switch: `INCOGNITA_FIDFIX` unset / `all` / `y` / `1` = every fix (the default); a comma list = only those fixes;
+`0` / `n` / `off` / `none` = OFF (opt-out: the engine is then bit-identical to the pre-fix port, every hook asks
+`on(name)` first). Being an INCOGNITA_* variable, it is part of the stage-cache key (stagedisk.ENV_PREFIXES), and the
+stage cache's source hash covers this module, so entries computed before the default flip are not reused.
+
+Default-number change of the flip (only `psfsgl` acts on default decks; ldcn / besttables / fitrisomer act only on
+decks with ldmodelCN, best-file tables or fitted risomer): U-238 capture 0.5 MeV 81.32 -> 81.23 mb (-0.11 %, towards
+stock 81.26 in TALYS mode), other cells of nuclei with a tabulated E1 at the ~1e-7 relative level (section 6 of
+FIDELITY_DEFAULTS.md).
 
 Fixes:
   ldcn   `ldmodelCN` belongs to the run's INITIAL compound nucleus only (input_densitymodel.f90:245-249 sets ldmodel(0,0)
@@ -52,12 +59,13 @@ FIXES = ("ldcn", "besttables", "fitrisomer", "psfsgl")
 
 
 def on(name: str) -> bool:
-    """True when fix `name` is switched on in INCOGNITA_FIDFIX."""
+    """True when fix `name` is on: every fix by default (INCOGNITA_FIDFIX unset), none with `0`/`n`/`off`/`none`,
+    only the named ones with a comma list."""
     v = os.environ.get(ENV, "").strip().lower()
-    if not v or v in ("0", "n", "no", "off"):
-        return False
-    if v in ("1", "y", "yes", "on", "all"):
+    if not v or v in ("1", "y", "yes", "on", "all"):
         return True
+    if v in ("0", "n", "no", "off", "none"):
+        return False
     return name in {x.strip() for x in v.split(",")}
 
 

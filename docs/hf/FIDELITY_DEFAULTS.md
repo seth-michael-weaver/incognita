@@ -2,7 +2,7 @@
 
 Branch `fidelity1` (from `kwcov6`). Driver: `scripts/kwcov/fidelity.py` (b2_response's runner; stock cached in
 `~/kwcov/b2` / `~/kwcov/b6`, engine in `~/kwcov/fid`, JSON of the final tables in `~/kwcov/fid/final_*.json`).
-Fixes: `physics/hf/fidfix.py`, switch `INCOGNITA_FIDFIX` (default OFF). Tests: `tests/hf/test_fidfix.py`.
+Fixes: `physics/hf/fidfix.py`, switch `INCOGNITA_FIDFIX` (default ON since the KWCOV integration, section 7; `INCOGNITA_FIDFIX=0` opts out). Tests: `tests/hf/test_fidfix.py`.
 
 Modes in every table:
 
@@ -19,7 +19,7 @@ Modes in every table:
 
 Decision recorded: a gap counts as **deliberate** when TALYS mode closes it and a single INCOGNITA switch accounts for
 all of it. Deliberate defaults are not flipped (they are calibrated, promoted engine options). A gap that survives TALYS
-mode is a **port bug** and gets an opt-in fix.
+mode is a **port bug** and gets a fix (opt-in at first; ON by default since the KWCOV integration, section 7).
 
 ## 1. Losses (what does not match stock, and why)
 
@@ -87,7 +87,7 @@ U-238's were EXACTFIS (under the U-238 best file EXACTFIS has no effect: `best y
 | U-238 capture 14 MeV, default deck | 1.12 mb | 1.14 | -1.5 % (0.02 mb) | in every mode, also TALYS mode; total -0.01 %, elastic -0.02 %, (n,n') -0.25 % at 14 MeV too, so the incident coupled-channels solve at 14 MeV is the first suspect (ECIS numerics, within A-inc 1 %). Not chased: sub-0.1 mb. |
 | U-238 capture 14 MeV, `best y` | 1.15 | 1.21 | -4.2 % (0.06 mb) | same cell; makes U-238 `best y` / `ldmodel 1 92 238` responses 2.77 / 1.08 % |
 
-## 2. The fixes (opt-in, `INCOGNITA_FIDFIX`, default OFF)
+## 2. The fixes (`INCOGNITA_FIDFIX`; opt-in when written, default ON since section 7)
 
 `physics/hf/fidfix.py`: `INCOGNITA_FIDFIX` = comma list of `ldcn`, `besttables`, `fitrisomer`, or `all`. OFF never
 changes a value (each hook asks `fidfix.on(name)` first); the switch is part of the stage-cache key (INCOGNITA_ prefix)
@@ -166,7 +166,7 @@ checked here: the per-chance split itself in TALYS mode (B8's harness, `~/kwcov/
 
 ## 6. psfsgl (KWCOV B15, branch `kwcov15`): tabulated PSF energies in single precision
 
-The fourth opt-in fix, `INCOGNITA_FIDFIX=psfsgl` (default OFF; `fidfix.py` docstring, `gamma/parameters.py`
+The fourth fix, `INCOGNITA_FIDFIX=psfsgl` (opt-in when written, default ON since section 7; `fidfix.py` docstring, `gamma/parameters.py`
 `table_arrays` and the Tqrpa grid). It closes B13's loss (1): U-239 f_E1 (strength 9, T-dependent smlo2019 table) at
 Egamma = 0.4 / 0.6 MeV was 9.08e-10 / 1.54e-9 against stock 2.12e-9 / 1.01e-9 (psf092239.E1 89 %, cross_g.tot
 19.7 %). Cause: gammapar.f90 stores `ee + etable` and the wtable stretch `Emid + (Eq - Emid) * wt` in real(sgl), so
@@ -188,3 +188,28 @@ Engine impact (fidelity.py, default and TALYS mode, with and without the fix; mb
 | Au-197 | capture 0.03 / 0.5 / 1 / 5 MeV | 834.36 / 207.81 / 104.37 / 16.51 | identical | 834.35 / 238.59 / 143.60 / 17.12 | identical | |
 
 So on by default it would move U-238 capture at 0.5 MeV by -0.11 % (towards stock) and leave the rest at print level.
+
+## 7. Default ON (KWCOV integration, 2026-11-08)
+
+Seth approved fixing port bugs in the default engine. `fidfix.on()` now returns True for every fix when
+`INCOGNITA_FIDFIX` is unset (or `all` / `y` / `1`); `0` / `n` / `off` / `none` is the opt-out (the pre-fix port,
+bitwise), a comma list keeps only the named fixes. The deliberate INCOGNITA defaults of section 1 (NPWINDOW,
+EXACTFIS, CCEXITNB2, LOWEPOT, ...) are unchanged. The GPU capture path (`capture_gpu.psf_params`) now applies the
+same single-precision table energies instead of refusing `psfsgl`, so it keeps matching the CPU paths.
+
+Default-number change, measured with `engine_c.run` on the test grid (1e-3, 0.5, 2, 5, 8, 11, 14, 20 MeV), every
+`Results` array, `INCOGNITA_FIDFIX=0` vs unset (a second `0` run is bitwise equal to the first, so every difference
+below is the fix):
+
+| target | arrays that move | largest move | cells >= 1 mb |
+|---|---|---|---|
+| Fe-56 | 254 of 650 | 3.2e-7 relative (levels_mb/ng.L26) | none moves > 1e-6 |
+| Co-59 | 259 of 678 | 2.6e-7 (levels_mb/ng.L20) | none moves > 1e-6 |
+| Au-197 | 256 of 690 | 2.5e-7 (levels_mb/ng.L16) | none moves > 1e-6 |
+| U-238 | 258 of 697 | **capture 0.5 MeV 81.3240 -> 81.2272 mb, -0.119 %** (totals_mb/ng, channels_mb/xs000000, residual_production_mb/rp092239) | 58 arrays; after capture: (n,n'+fission) channel xs110000 1.0e-4, fission 9.2e-5 (5 MeV 685.20 -> 685.14 mb), the rest <= 6.3e-5 |
+
+Only `psfsgl` acts on these default runs (ldcn / besttables / fitrisomer need ldmodelCN, best-file tables or a
+fitted risomer). `tests/hf/test_engine_c.py` compares the C driver with the Python driver in the same mode, so it
+has no stored numbers to update; `test_fidfix.py` and `test_kwcov_b15.py` now check the default ON and the `0`
+opt-out.
+

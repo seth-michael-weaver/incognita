@@ -372,11 +372,13 @@ B13: dict = {
                     "default = outdensity; filedensity n leaves the D0 statistics and Exp_LD at 0 as densitycum.f90 "
                     "(stock-identical)", _T13),
     "outgamma": ("SUPPORTED", "input/defaults.py Options.flaggamma -> " + _IO + "gammaout",
-                 "cross_g.tot (photoabsorption, first energy): Fe-56 <= 1e-6; U-238 19.7 % at 0.4 / 0.6 MeV (the "
-                 "port's double-precision table energies; B15: INCOGNITA_FIDFIX=psfsgl gives stock)", _T13),
+                 "cross_g.tot (photoabsorption, first energy): Fe-56 <= 1e-6; U-238 = stock with the FIDFIX psfsgl "
+                 "port fix (default ON since the KWCOV integration; 19.7 % at 0.4 / 0.6 MeV with INCOGNITA_FIDFIX=0, "
+                 "the port's double-precision table energies, B15)", _T13),
     "filepsf": ("SUPPORTED", "input/defaults.py Options.filepsf -> " + _IO + "gammaout psf files",
                 "psf<ZZZAAA>.E1/M1/E2/M2 (f, T, header with Gamma_gamma, C/E, S-wave): Fe-57 <= 0.0034 %, U-239 M1/M2 "
-                "0.04 %, E1/E2 85-89 % at the same two energies; quirks kept: E2/M2 files carry f(l=1), filepsf "
+                "0.04 %, E1/E2 = stock with FIDFIX psfsgl (default ON; 85-89 % at the same two energies with "
+                "INCOGNITA_FIDFIX=0); quirks kept: E2/M2 files carry f(l=1), filepsf "
                 "without outgamma writes nothing", _T13),
     "outinverse": ("SUPPORTED", "input/defaults.py Options.flaginverse -> " + _IO + "inverseout, incidentout",
                    "transmission_<p>.out, cross_<p>.tot, transmission_inc.out: <= 0.0008 % (TALYS mode, four "

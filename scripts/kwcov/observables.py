@@ -148,7 +148,7 @@ ROWS = [
      "B4b", "test:test_kwcov_b4b.py; TALYS mode, main bins (stock >= 1 % of the column peak): Fe-56 5/14 MeV and "
      "Co-59 14 MeV <= 0.6 %, U-238 particle columns and .fis <= 1.6 %; U-238 14 MeV gamma columns up to 59 % "
      "(Pa-238 E-gamma < 0.6 MeV) = the engine's own gamma cascade ((n,p) gamma production 1.217 vs 1.293 mb); "
-     "U-238 fission gamma columns need INCOGNITA_FIDFIX=psfsgl (17 % -> 1e-4). `channelenergy` is NOT this: it is "
+     "U-238 fission gamma columns: 1e-4 with the FIDFIX psfsgl port fix (default ON; 17 % with INCOGNITA_FIDFIX=0). `channelenergy` is NOT this: it is "
      "spectra.f90's flagEchannel energy conversion (B4)"),
     ("emission spectrum per excitation bin", "", "binaryout.f90:1", "outbinspectra", "NA", "", "", "debug output"),
     # --- recoil ---

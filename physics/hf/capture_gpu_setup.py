@@ -403,15 +403,14 @@ def gamma_pack(Z: int, A: int) -> dict:
         raise Unsupported(f"ENGADJ photon strength bumps on {Z}-{A + 1}")
     from physics.hf import fidfix
 
-    if fidfix.on("psfsgl"):  # B15: the single-precision table energies live in gamma.parameters.table_arrays (CPU paths)
-        raise Unsupported("INCOGNITA_FIDFIX psfsgl: tabulated photon strength on the CPU paths")
+    psfsgl = fidfix.on("psfsgl")  # B15 (default ON): capture_gpu.psf_params rounds the table energies as table_arrays
     tab = gp.tables[(1, 1)]
     e_raw = tab.e_raw_mev.numpy()
     if not np.all(np.diff(e_raw[1:]) > 0) or not e_raw[1] > 0.0:
         raise Unsupported("E1 table energies do not ascend")
     f = lambda t: float(t.detach()) if isinstance(t, torch.Tensor) else float(t)  # noqa: E731
     return dict(
-        e_raw=e_raw, f_raw=tab.f_raw_mev3.numpy(), tq=gp.tqrpa_mev.numpy(),
+        e_raw=e_raw, f_raw=tab.f_raw_mev3.numpy(), tq=gp.tqrpa_mev.numpy(), psfsgl=psfsgl,
         ftable=f(gp.ftable[1, 1]), wtable=f(gp.wtable[1, 1]),
         S=f(gp.S_k0_mev), delta=f(gp.delta_mev), alev=f(gp.alev_per_mev),
         beta2=f(gp.beta2),

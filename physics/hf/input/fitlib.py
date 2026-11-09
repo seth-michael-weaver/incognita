@@ -885,7 +885,7 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
     for x in src:
         if x.startswith("deck best y: "):
             bdirs.insert(0, Path(x[len("deck best y: "):]).parent)
-    from physics.hf import fidfix  # FIDELITY1 `besttables` (default OFF): <best dir>/tables before misc/tables
+    from physics.hf import fidfix  # FIDELITY1 `besttables` (default ON): <best dir>/tables before misc/tables
 
     bdirs += ([d / "tables" for d in list(bdirs)] if fidfix.on("besttables") else []) + [
         d / "misc" / "tables" for d in list(bdirs)]
@@ -944,7 +944,7 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
                    f"{'y' if col0 else 'n'} strength {o.strength}]")
         # xsfit runs after the input is read, so its values overwrite the best file's
         _, c2, g2, p2, s2 = _split(lines, want_options=False)
-        from physics.hf import fidfix  # FIDELITY1 `fitrisomer` (default OFF)
+        from physics.hf import fidfix  # FIDELITY1 `fitrisomer` (default ON)
 
         if fidfix.on("fitrisomer"):
             # structure.f90:74 reads the initial compound nucleus's levels (levels.f90:313 applies Risomer there)

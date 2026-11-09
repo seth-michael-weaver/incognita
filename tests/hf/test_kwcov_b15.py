@@ -228,10 +228,12 @@ def test_tqrpa_single_precision():
     assert "psfsgl" in fidfix.FIXES
 
 
-@pytest.mark.parametrize("fix, want", [("", (9.07574576e-10, 1.53618015e-09)), ("psfsgl", (2.11851e-09, 1.00962e-09))])
+@pytest.mark.parametrize("fix, want", [("0", (9.07574576e-10, 1.53618015e-09)), ("psfsgl", (2.11851e-09, 1.00962e-09)),
+                                       ("", (2.11851e-09, 1.00962e-09))])
 def test_u239_e1_at_tqrpa_points(monkeypatch, fix, want):
     """U-239 smlo2019 E1 at 0.4 / 0.6 MeV: stock 2.1185e-9 / 1.0096e-9 (psf092239.E1); the port's double-precision
-    table energies gave 9.08e-10 / 1.54e-9 (B13 loss (1)); `psfsgl` restores stock."""
+    table energies gave 9.08e-10 / 1.54e-9 (B13 loss (1)); `psfsgl` restores stock and is the default ("" = unset),
+    `0` is the opt-out."""
     from physics.hf.compound.psf_fast import _TABLES
     from physics.hf.emission.feeding import Cascade
     from physics.hf.gamma.strength import fstrength_gp
@@ -239,8 +241,9 @@ def test_u239_e1_at_tqrpa_points(monkeypatch, fix, want):
     monkeypatch.setenv(fidfix.ENV, fix)
     _TABLES.clear()
     gp = Cascade(92, 238, 1.0, energies=[1.0]).gamma_params(92, 238)
-    if fix:  # the cached gamma parameters may predate the switch: rebuild the T grid as gammapar does
-        gp = __import__("dataclasses").replace(gp, tqrpa_mev=torch.as_tensor(fidfix.tqrpa_sgl(11, 0.2)))
+    # the cached gamma parameters may predate the switch: rebuild the T grid as gammapar does
+    tq = fidfix.tqrpa_sgl(11, 0.2) if fidfix.on("psfsgl") else np.arange(11) * 0.2
+    gp = __import__("dataclasses").replace(gp, tqrpa_mev=torch.as_tensor(tq))
     f = fstrength_gp(gp, 0.0, torch.tensor([0.3, 0.4, 0.6], dtype=torch.float64), 1, 1).numpy()
     assert f[1:] == pytest.approx(want, rel=1e-5)
     assert f[0] == pytest.approx(1.784112e-09, rel=1e-5)  # off the T grid: both agree with stock

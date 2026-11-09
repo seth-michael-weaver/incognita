@@ -631,7 +631,7 @@ def gamma_parameters(
     tq = None
     if n_t > 1 and (1, 1) in tables:  # gammapar.f90:250-262: Tqrpa only set on a table hit
         tq = np.arange(n_t) * 0.2
-        from physics.hf import fidfix  # B15 `psfsgl` (default OFF): TALYS's single-precision Tqrpa grid
+        from physics.hf import fidfix  # B15 `psfsgl` (default ON, INCOGNITA_FIDFIX=0 opts out): TALYS's single-precision Tqrpa grid
 
         if fidfix.on("psfsgl"):
             tq = fidfix.tqrpa_sgl(n_t, 0.2)
@@ -957,7 +957,7 @@ def table_arrays(gp: GammaParameters, irad: int, l: int) -> tuple[Tensor, Tensor
     e = tab.e_raw_mev + et
     e = torch.cat([tab.e_raw_mev[:1], e[1:]])  # index 0 is never read, stays 0
     f = tab.f_raw_mev3 * ft
-    from physics.hf import fidfix  # B15 `psfsgl` (default OFF): the energies as TALYS holds them, in single precision
+    from physics.hf import fidfix  # B15 `psfsgl` (default ON, INCOGNITA_FIDFIX=0 opts out): the energies as TALYS holds them, in single precision
 
     sgl = fidfix.on("psfsgl")
     if sgl:

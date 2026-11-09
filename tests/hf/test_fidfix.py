@@ -1,4 +1,5 @@
-"""FIDELITY1 opt-in fixes (physics/hf/fidfix.py; docs/hf/FIDELITY_DEFAULTS.md): OFF changes nothing, ON restores TALYS.
+"""FIDELITY1 fixes (physics/hf/fidfix.py; docs/hf/FIDELITY_DEFAULTS.md): ON by default (restores TALYS),
+INCOGNITA_FIDFIX=0 is the opt-out (the pre-fix port).
 
 The end-to-end numbers (stock TALYS-2.25 vs engine, Fe-56 `best y` and `ldmodel 2; ldmodelCN 1`) come from
 scripts/kwcov/fidelity.py and are recorded in the doc; these tests pin the mechanism without running a reaction.
@@ -30,11 +31,17 @@ def run_target(monkeypatch):
 
 def test_switch_parsing(monkeypatch):
     monkeypatch.delenv(fidfix.ENV, raising=False)
-    assert not any(fidfix.on(f) for f in fidfix.FIXES)
-    for v, want in (("0", set()), ("n", set()), ("all", set(fidfix.FIXES)), ("y", set(fidfix.FIXES)),
+    assert all(fidfix.on(f) for f in fidfix.FIXES)  # default ON (Seth 2026-11-08: port bugs fixed in the default engine)
+    for v, want in (("", set(fidfix.FIXES)), ("0", set()), ("n", set()), ("off", set()), ("none", set()),
+                    ("all", set(fidfix.FIXES)), ("y", set(fidfix.FIXES)),
                     ("ldcn", {"ldcn"}), ("besttables, ldcn", {"ldcn", "besttables"})):
         monkeypatch.setenv(fidfix.ENV, v)
         assert {f for f in fidfix.FIXES if fidfix.on(f)} == want, v
+
+
+def test_default_is_on_for_ldcn(monkeypatch, run_target):
+    monkeypatch.delenv(fidfix.ENV, raising=False)
+    assert _opts(26, 55).ldmodel_of(0, 0) == 2  # the chain compound nucleus takes ldmodelall, as TALYS
 
 
 class _Ld:
@@ -63,7 +70,7 @@ def _opts(Z, A):
 
 
 def test_ldcn_off_is_the_old_rule(monkeypatch, run_target):
-    monkeypatch.delenv(fidfix.ENV, raising=False)
+    monkeypatch.setenv(fidfix.ENV, "0")  # the opt-out
     # the run's own options and a pseudo-target's (Fe-55 + n: the chained compound nucleus Fe-56) both give (0, 0) = 1
     assert _opts(26, 56).ldmodel_of(0, 0) == 1
     assert _opts(26, 55).ldmodel_of(0, 0) == 1

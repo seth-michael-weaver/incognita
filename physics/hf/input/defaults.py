@@ -497,7 +497,7 @@ class Options:
         when not given) for the compound nucleus and ldmodelall elsewhere."""
         cn = (Zix, Nix) == (0, 0)
         if cn and "ldmodelcn" in self.explicit:
-            from physics.hf import fidfix  # FIDELITY1 `ldcn` (default OFF): a pseudo-target's (0, 0) is not the run's CN
+            from physics.hf import fidfix  # FIDELITY1 `ldcn` (default ON): a pseudo-target's (0, 0) is not the run's CN
 
             if not fidfix.ldcn_pseudo(self):
                 return self.ldmodelCN

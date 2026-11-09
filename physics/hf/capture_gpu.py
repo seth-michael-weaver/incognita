@@ -282,6 +282,10 @@ def pack(targets: list[dict], device="cuda", jcut: int | None = None) -> Packed:
         if x["m2"][0] != x["m1"][0] * 8.0e-4:
             raise ValueError("M2 strength is not the M1 default chain")
     g["tq"] = torch.as_tensor(tq, dtype=F64, device=device)
+    sgl = {bool(x.get("psfsgl", False)) for x in ok}
+    if len(sgl) != 1:
+        raise ValueError("INCOGNITA_FIDFIX psfsgl differs between targets")
+    g["psfsgl"] = sgl.pop()
     g["e_raw"] = torch.as_tensor(np.stack([x["e_raw"] for x in ok]), dtype=F64, device=device)
     g["f_raw"] = torch.as_tensor(np.stack([x["f_raw"] for x in ok]), dtype=F64, device=device)
     for k in ("ftable", "wtable", "S", "delta", "alev", "beta2"):
@@ -338,6 +342,11 @@ def _interp_de(e, eb, ee, gamb, game, deb, dee):
     return torch.where(both, logv, lin), dv
 
 
+def _f32(x: Tensor) -> Tensor:
+    """IEEE single-precision rounding of a float64 tensor, kept in float64 (fidfix.f32 on the batch axis)."""
+    return x.to(torch.float32).to(x.dtype)
+
+
 def psf_params(pk: Packed, theta: Tensor, want_d: bool = False) -> dict:
     """Every point's photon-strength parameters at theta = (ftable(E1), wtable(E1), sgr(M1)),
     per target as gammapar.f90 holds them, gathered onto the point axis.
@@ -351,12 +360,19 @@ def psf_params(pk: Packed, theta: Tensor, want_d: bool = False) -> dict:
     # gammapar.table_arrays: etable (0 here), ftable, then the wtable stretch about the T = 0
     # maximum (first maximum wins)
     e = g["e_raw"]
+    sgl = g.get("psfsgl", False)
+    if sgl:  # FIDFIX psfsgl (default ON): gammapar.f90:268 ee + etable (etable 0 here) in real(sgl), as table_arrays
+        e = torch.cat([e[:, :1], _f32(e[:, 1:])], dim=1)
     f = g["f_raw"] * ft[:, None, None]
     f0 = f[:, 1:, 0]
     fmax = f0.max(dim=1).values
     imax = torch.argmax((f0 == fmax[:, None]).to(torch.int64), dim=1) + 1
     emid = torch.gather(e, 1, imax[:, None])
-    stretched = torch.cat([e[:, :1], emid + (e[:, 1:] - emid) * wt[:, None]], dim=1)
+    if sgl:  # gammapar.f90:574-578 in real(sgl): Emid + (Eq - Emid) * wt
+        st = _f32(_f32(emid) + _f32(_f32(_f32(e[:, 1:]) - _f32(emid)) * _f32(wt[:, None])))
+    else:
+        st = emid + (e[:, 1:] - emid) * wt[:, None]
+    stretched = torch.cat([e[:, :1], st], dim=1)
     stretch = (fmax > 0.0)[:, None]
     e_tab = torch.where(stretch, stretched, e)
 
