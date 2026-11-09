@@ -26,6 +26,29 @@
   const bandAt = (b, x) => { if (!b || !b.length) return null; const q = b.find((r) => r[0] === x); if (q) return q; if (x < b[0][0] || x > b[b.length - 1][0]) return null;
     const i = b.findIndex((r) => r[0] > x), a = b[i - 1], c = b[i]; if (!a || !c || !(a[1] > 0 && a[2] > 0 && c[1] > 0 && c[2] > 0)) return null; const t = Math.log(x / a[0]) / Math.log(c[0] / a[0]);
     return [x, Math.exp(Math.log(a[1]) + t * Math.log(c[1] / a[1])), Math.exp(Math.log(a[2]) + t * Math.log(c[2] / a[2]))]; };
+  // C-12 elastic tab (rm.cmp, data/light_evals/cmp; scripts/export_c12_compare.py): INCOGNITA's curve composed to natural
+  // carbon like the measurements and the standard (98.93 % its own C-12 + 1.07 % ENDF/B-VIII.1 C-13, labelled so), else the
+  // pure C-12 curve; ENDF/B-VIII.1 natC (dashed) only with the library overlay on: a comparator, never INCOGNITA's curve.
+  // nm = { ours, pure, endf, col, lcol }: names and colours
+  const elCurves = (rm, lib, nm) => { const c = rm.cmp, out = [];
+    if (c && c.e_ev && c.natc_b) out.push({ name: nm.ours, col: nm.col, pts: c.e_ev.map((x, i) => [x, c.natc_b[i]]) });
+    else out.push({ name: nm.pure, col: nm.col, pts: rm.energy_ev.map((x, i) => [x, rm.sigma_b[i]]) });
+    if (lib && c && c.e_ev && c.endf_b) out.push({ name: nm.endf, short: "ENDF/B-VIII.1", col: nm.lcol, dash: true, pts: c.e_ev.map((x, i) => [x, c.endf_b[i]]) });
+    return out; };
+  // its points: the held-out natC totals (faint dots; e relative, null when the set gives none), their log-energy bin averages
+  // (standard error) and the IAEA neutron standard 2017 natC elastic (1σ; dev = INCOGNITA natC / standard − 1)
+  const elPoints = (c) => (!c ? [] : [
+    ...(c.ho || []).map(([x, y, e, ds]) => ({ x, y, e, ds, dec: "k", kind: "ho" })),
+    ...(c.bins || []).map(([x, y, se, n]) => ({ x, y, e: se / y, n, ds: -1, dec: "k", kind: "bin" })),
+    ...(c.std || []).map(([x, y, u, dev]) => ({ x, y, e: u / y, dev, ds: (c.ds || []).length, dec: "k", kind: "std" }))]);
+  // linear y range (b) of the elastic tab: the curves and the averaged and standard points with their bars (the faint
+  // scatter may run off it), padded, on 0.5 b below and 0.1 b above
+  const elRange = (curves, pts) => { let lo = Infinity, hi = -Infinity;
+    for (const c of curves) for (const [, y] of c.pts) if (y > 0) { lo = Math.min(lo, y); hi = Math.max(hi, y); }
+    for (const p of pts) if (p.kind !== "ho" && p.y > 0) { lo = Math.min(lo, p.y * (1 - (p.e || 0))); hi = Math.max(hi, p.y * (1 + (p.e || 0))); }
+    if (!(hi > lo)) return null; const s = hi - lo;
+    return [Math.max(0, Math.floor((lo - 0.1 * s) * 2) / 2), Math.ceil((hi + 0.14 * s) * 10 - 1e-9) / 10]; };
+  const linTicks = (y0, y1) => { const st = y1 - y0 > 6 ? 1 : 0.5, out = []; for (let v = Math.ceil(y0 / st - 1e-9) * st; v <= y1 + 1e-9; v += st) out.push(+v.toFixed(6)); return out; };
   const SUP = { "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
   const pow10 = (k) => "10" + String(k).split("").map((c) => SUP[c]).join("");
   const decE = (k) => (k >= -2 ? fmtE(10 ** k) : pow10(k) + " eV"), decY = (k, u) => (k >= -2 && k <= 4 ? num(10 ** k) : pow10(k)) + " " + u;
@@ -311,6 +334,7 @@
   if (atom.cv) atom.cv.parentElement.addEventListener("pointermove", (e) => { const r = atom.cv.getBoundingClientRect(); atom.tx = (e.clientX - r.left) / r.width - 0.5; atom.ty = (e.clientY - r.top) / r.height - 0.5; });
 
   // ---------- one nuclide ----------
+  let tabAsked = false; // the page link (#C-12/cap) named a tab
   let tab = "cap", cur = null, hl = null, P = null, showExcl = false, tableOpen = false, full = false, ez = null; // ez: zoomed energy band [lo, hi] (eV), capture tab
   /** Loading state while nuclide r's file is on its way (r null: done); with err, say it failed and offer a retry. */
   function busy(r, err) {
@@ -336,6 +360,8 @@
     try { [d0, lz, , , pw, rr] = await Promise.all([loadNuc(r.Z, r.A), libOn ? loadLib(r.Z) : null, loadQ(), loadTh(), libOn ? loadPw(r.Z, r.A) : null, loadRr(r.Z, r.A)]); } catch (e) { if (sel === r) busy(r, e); return; }
     if (sel !== r) return;
     cur = { r, d: d0, lib: libOf(lz, r, pw), rr }; ez = null; busy(null);
+    if (d0 && d0.rm && tab === "cap" && !tabAsked) tab = "el"; // a light nuclide with INCOGNITA's R-matrix evaluation opens on it (elastic), unless a link asked for a tab
+    tabAsked = false;
     buildTabs(); setHash(r);
     $("#dx-nuc").hidden = false; hl = null;
     $("#dx-name").textContent = nameOf(r.Z, r.A);
@@ -417,6 +443,7 @@
     return x1 > x0 && y0 > 0 && y1 > 0 ? y0 * (y1 / y0) ** (Math.log(x / x0) / Math.log(x1 / x0)) : y0; }
   function libNote() {
     const box = $("#dx-libnote"); box.hidden = !libOn; if (!libOn || !cur) return;
+    if (tab === "el" && cur.d.rm && cur.d.rm.cmp) { box.innerHTML = `<p>${T("dx_lib_el", "Dashed line: ENDF/B-VIII.1 elastic for natural carbon (98.93 % C-12 + 1.07 % C-13), pointwise at 0 K, shown only for comparison: INCOGNITA does not use it and it is not in the downloads.")}</p>`; return; }
     const L = cur.lib || { libs: {}, n: {} }, have = LIBS.filter((k) => L.n[k] && L.libs[k]), miss = LIBS.filter((k) => !L.n[k]);
     const LAB = { "endfb8.1": "ENDF/B-VIII.1", "jeff4.0": "JEFF-4.0", "tendl2025": "TENDL-2025" };
     const lic = (s) => (s === "US public domain" ? T("dx_lib_pd", "US public domain") : s);
@@ -482,6 +509,13 @@
       T("dx_rm_nocap", "Capture is not modelled: the capture tab shows measurements only.")].join(" ")
       + ` <a href="${esc(rm.report)}" target="_blank" rel="noopener">${T("dx_rm_report", "Read the report")}</a>`;
   }
+  // one caption for the elastic tab's comparison: what the curve is (natural carbon), the standard, the held-out test, one set's offset
+  function elCaption(c) {
+    const s = c.stats || {}, o = (s.offsets || {})["22610002"] || {};
+    return T("dx_rm_cmp", "Here the curve is natural carbon, like the measurements and the standard: 98.93 % INCOGNITA's C-12 plus 1.07 % C-13 from ENDF/B-VIII.1, which makes the narrow peak at 153 keV; the pure C-12 curve is in the downloads. It agrees with the IAEA neutron standard 2017 within {dev} % (largest |z| {z}); on the held-out totals χ²/N = {chi}; all pre-registered gates passed. EXFOR {set} lies {off} % below both INCOGNITA and ENDF/B-VIII.1: an offset in that set's normalisation.")
+      .replace("{dev}", num(Math.ceil((s.std_max_dev_pct || 0) * 10) / 10, 2)).replace("{z}", num(s.std_max_z, 2)).replace("{chi}", num(s.heldout_chi2n, 2))
+      .replace("{set}", "22610002").replace("{off}", num(Math.abs(o.vs_incognita_pct || 0), 2));
+  }
   function trustPanel() {
     const box = $("#dx-trust"); if (!box) return;
     const d = cur.d, r = cur.r, rr = cur.rr;
@@ -540,8 +574,10 @@
       libCurves(out);
       if (d.res) out.note = { upto: d.res, text: T("dx_res", "resolved resonances: the curve is an average here") };
     } else if (tab === "el") {
-      const rm = d.rm; out.unit = "b";
-      if (rm) out.curves.push({ name: T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"), col: C.curve, pts: rm.energy_ev.map((x, i) => [x, rm.sigma_b[i]]) });
+      const rm = d.rm, c = rm && rm.cmp; out.unit = "b";
+      if (rm) out.curves.push(...elCurves(rm, libOn, { ours: T("dx_rm_natc", "INCOGNITA R-matrix (C12RM9), natural carbon"), pure: T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"),
+        endf: `ENDF/B-VIII.1, natC (${T("dx_eval_cmp", "evaluated library · comparator, not INCOGNITA")})`, col: C.curve, lcol: C.l1 }));
+      if (c) { out.ds = [...(c.ds || []), ["", T("dx_std", "IAEA neutron standard 2017 (natC elastic)"), 2017, ""]]; out.points.push(...elPoints(c)); }
     } else if (tab === "macs") {
       out.xlab = "kT"; out.unit = "mb";
       if (d.macs) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.3)"), col: C.curve, pts: IDX.kT_keV.map((k, i) => [k * 1e3, d.macs[i]]), b68: IDX.kT_keV.map((k, i) => (d.macsU && d.macsU[i] ? [k * 1e3, d.macs[i] / d.macsU[i], d.macs[i] * d.macsU[i]] : null)).filter(Boolean) });
@@ -614,12 +650,18 @@
       { lo: PW_E, hi: 1e5, lab: T("dx_band_ur", "averaged resonances"), sh: T("dx_band_ur_s", "averaged"), xs: T("dx_band_ur_x", "avg.") },
       { lo: 1e5, hi: 3e7, lab: T("dx_band_f", "fast"), sh: T("dx_band_f_s", "fast"), xs: T("dx_band_f_x", "fast") }];
   }
+  // elastic energy bands: the whole range, or tap to zoom into 1 keV – 1.8 MeV, where the cross section falls
+  function elBands() {
+    const a = decE(-5) + " – " + fmtE(PW_E), b = fmtE(PW_E) + " – " + fmtE(1.8e6);
+    return [{ lo: 1e-5, hi: PW_E, lab: a, sh: "< " + fmtE(PW_E), xs: "< " + fmtE(PW_E) }, { lo: PW_E, hi: 2e6, lab: b, sh: "> " + fmtE(PW_E), xs: "> " + fmtE(PW_E) }];
+  }
   function buildNuc() {
     if (!cur) return;
     const S = series(), shown = S.points.filter((p) => showExcl || p.dec !== "x");
     const W = pcv.parentElement.clientWidth, H = Math.round(clamp(W * 0.55, 300, 460));
     P = { ...setupCanvas(pcv, H), S, shown };
-    const bands = tab === "cap" ? capBands() : null, zw = bands && ez, ctx = layer(LAY.a), m = { l: 62, r: 16, t: bands ? 34 : 16, b: 44 };
+    const lin = tab === "el"; // elastic: under a factor 3 over the whole range, so a linear y-axis (b) shows its shape; log everywhere else
+    const bands = tab === "cap" ? capBands() : lin && cur.d.rm && cur.d.rm.cmp ? elBands() : null, zw = bands && ez, ctx = layer(LAY.a), m = { l: 62, r: 16, t: bands ? 34 : 16, b: 44 };
     const inZ = (x) => !zw || (x >= ez[0] && x <= ez[1]);
     // ranges (log-log)
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -637,12 +679,12 @@
     for (const c of [LAY.p, LAY.c]) layer(c);
     if (!(x1 > 0)) { ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H); ctx.fillStyle = C.soft; ctx.font = `500 14px ${SANS}`; ctx.textAlign = "center"; ctx.fillText(T("dx_empty", "Nothing to show for this reaction."), W / 2, H / 2); finishNuc(S); return; }
     x0 = log10(x0); x1 = log10(x1); y0 = log10(y0); y1 = log10(y1);
-    if (tab === "el" && y1 - y0 < 1) { y0 = Math.min(y0, Math.floor((y0 + y1) / 2)); y1 = Math.max(y1, Math.ceil((y0 + y1) / 2 + 1e-9)); } // a smooth elastic curve spans under a decade: keep at least one labelled decade line
+    if (lin) { const r = elRange(S.curves, shown) || [10 ** y0, 10 ** y1]; y0 = r[0]; y1 = r[1]; } // linear, in b: from the curves and the averaged and standard points
     if (x1 - x0 < 1 && !win) { x0 -= 0.5; x1 += 0.5; } // a threshold window keeps its edge: it may span under a decade
     if (!(x1 > x0)) { x0 -= 0.5; x1 += 0.5; } // a single energy (even inside a threshold window) still needs a width
-    if (y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; } // at least one decade: a flat or narrow range gets a labelled decade line and no 0/0
-    if (!zw) { x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); } y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0);
-    const X = (x) => m.l + (log10(x) - x0) / (x1 - x0) * (W - m.l - m.r), Y = (y) => H - m.b - (log10(y) - y0) / (y1 - y0) * (H - m.t - m.b);
+    if (!lin && y1 - y0 < 1) { y0 -= 0.5; y1 += 0.5; } // at least one decade: a flat or narrow range gets a labelled decade line and no 0/0
+    if (!zw) { x0 -= 0.05 * (x1 - x0); x1 += 0.05 * (x1 - x0); } if (!lin) { y0 -= 0.08 * (y1 - y0); y1 += 0.08 * (y1 - y0); }
+    const X = (x) => m.l + (log10(x) - x0) / (x1 - x0) * (W - m.l - m.r), Y = (y) => H - m.b - ((lin ? y : log10(y)) - y0) / (y1 - y0) * (H - m.t - m.b);
     Object.assign(P, { X, Y, m, x0, x1, y0, y1, W, H });
     ctx.fillStyle = C.surface; ctx.fillRect(0, 0, W, H);
     // grid and axes (decades)
@@ -653,7 +695,8 @@
         const x = X(v); ctx.strokeStyle = f === 1 ? C.grid : rgba(C.soft, 0.08); ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, H - m.b); ctx.stroke(); if (x - lastX >= step) { ctx.fillText(f === 1 ? decE(k) : fmtE(v), x, H - m.b + 6); lastX = x; } }
       ctx.strokeStyle = C.grid; }
     ctx.textAlign = "right"; ctx.textBaseline = "middle";
-    for (let k = Math.ceil(y0); k <= Math.floor(y1); k++) { const y = Y(10 ** k); ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke(); ctx.fillText(decY(k, S.unit), m.l - 8, y); }
+    if (lin) for (const v of linTicks(y0, y1)) { const y = Y(v); ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke(); ctx.fillText(num(v) + " " + S.unit, m.l - 8, y); }
+    else for (let k = Math.ceil(y0); k <= Math.floor(y1); k++) { const y = Y(10 ** k); ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke(); ctx.fillText(decY(k, S.unit), m.l - 8, y); }
     ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(S.xlab + " →", m.l, H - 6);
     // energy bands (capture): a strip of tappable labels above the plot, faint boundaries inside it; tap = zoom, tap again = all energies
     P.hits = [];
@@ -733,7 +776,7 @@
       for (const [x, y] of TH.has(c) ? TH.get(c).line : c.pts) { if (!(y > 0)) { on = false; continue; } on ? cc.lineTo(X(x), Y(y)) : cc.moveTo(X(x), Y(y)); on = true; }
       cc.stroke(); cc.globalAlpha = 1;
     }
-    cc.shadowBlur = 0; cc.setLineDash([]); cc.font = `500 12px ${SANS}`; cc.textAlign = "left"; cc.textBaseline = "alphabetic"; cc.lineJoin = "round"; cc.lineWidth = 3; cc.strokeStyle = document.documentElement.dataset.theme === "light" ? C.surface : "rgba(8,13,28,.85)"; cc.fillStyle = C.soft;
+    cc.shadowBlur = 0; cc.setLineDash([]); drawMarks(cc); cc.font = `500 12px ${SANS}`; cc.textAlign = "left"; cc.textBaseline = "alphabetic"; cc.lineJoin = "round"; cc.lineWidth = 3; cc.strokeStyle = document.documentElement.dataset.theme === "light" ? C.surface : "rgba(8,13,28,.85)"; cc.fillStyle = C.soft;
     for (const [lines, x0n] of [[note, nx], [below, m.l]]) if (lines) lines.forEach((l, i) => { cc.strokeText(l, x0n + 8, m.t + 14 + i * 15); cc.fillText(l, x0n + 8, m.t + 14 + i * 15); });
     cc.restore();
     finishNuc(S);
@@ -743,8 +786,9 @@
     const ctx = clear === false ? LAY.p.getContext("2d") : layer(LAY.p), { X, Y, m, W, H } = P;
     ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, W - m.l - m.r, H - m.t - m.b); ctx.clip();
     for (const p of P.shown) {
-      if (!(p.y > 0)) continue;
+      if (!(p.y > 0) || p.kind === "bin" || p.kind === "std") continue; // drawn over the curves (drawMarks)
       const dim = hl != null && p.ds !== hl, x = X(p.x), y = Y(p.y);
+      if (p.kind === "ho") { ctx.globalAlpha = dim ? 0.08 : 0.4; ctx.fillStyle = C.meas; ctx.beginPath(); ctx.arc(x, y, 1.7, 0, Math.PI * 2); ctx.fill(); continue; } // held-out totals: small faint dots
       ctx.globalAlpha = dim ? 0.15 : p.dec === "d" ? 0.55 : 1; ctx.strokeStyle = C.meas; ctx.lineWidth = 1.2;
       if (p.e > 0) { ctx.beginPath(); ctx.moveTo(x, Y(p.y * (1 + p.e))); ctx.lineTo(x, Y(Math.max(p.y * (1 - p.e), p.y * 0.05))); ctx.stroke(); }
       if (p.xhi > p.xlo * 1.02) { ctx.beginPath(); ctx.moveTo(X(p.xlo), y); ctx.lineTo(X(p.xhi), y); ctx.stroke(); }
@@ -759,6 +803,17 @@
       ctx.fillStyle = C.meas; ctx.fill(); ctx.strokeStyle = C.ink; ctx.lineWidth = 1.6; ctx.stroke(); }
     ctx.globalAlpha = 1;
     ctx.restore();
+  }
+  // elastic tab, over the curves: the log-energy bin averages (diamond, standard error) and the IAEA standard (open square, 1σ)
+  function drawMarks(ctx) {
+    const { X, Y } = P, bar = (x, a, b) => { ctx.beginPath(); ctx.moveTo(x, a); ctx.lineTo(x, b); ctx.moveTo(x - 3, a); ctx.lineTo(x + 3, a); ctx.moveTo(x - 3, b); ctx.lineTo(x + 3, b); ctx.stroke(); };
+    for (const p of P.shown) { if (!(p.y > 0) || (p.kind !== "bin" && p.kind !== "std")) continue;
+      const x = X(p.x), y = Y(p.y), r = p.kind === "bin" ? 5 : 3.3; ctx.strokeStyle = C.ink; ctx.lineWidth = 1.3;
+      if (p.e > 0) bar(x, Y(p.y * (1 + p.e)), Y(p.y * (1 - p.e)));
+      ctx.beginPath();
+      if (p.kind === "bin") { ctx.moveTo(x, y - r); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r, y); ctx.closePath(); ctx.fillStyle = C.meas; }
+      else { ctx.rect(x - r, y - r, 2 * r, 2 * r); ctx.fillStyle = C.surface; }
+      ctx.fill(); ctx.stroke(); }
   }
   const setHl = (v) => { if (hl === v) return; hl = v; if (P && P.X) { drawPoints(); compose(); } };
   // one frame: the base, the points fading in over the 30 px behind the sweep, the curves up to it
@@ -784,9 +839,14 @@
     libNote();
     const pws = pwOf(S);
     const leg = S.curves.filter((c) => !c.pw).map((c) => c.dash ? `<span class="dx-key">${pws.some((q) => q.short === c.short) ? `<i class="ln thin" style="background:${c.col}"></i>` : ""}<i class="dash" style="color:${c.col}"></i>${esc(c.short || c.name)} · ${T("dx_cmp", "comparison")}</span>` /* short legend (2026-11-06); the full wording is in Details */ : c.rr ? `<span class="dx-key dx-rrkey">${rrSwatch(c)}<span>${esc(c.short || c.name)}</span></span>` : `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);
-    if (nPts) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas}"></i>${T("dx_meas_pts", "measured")} (${nPts}${nEx ? `, ${nEx} ${T("dx_excl", "excluded")}` : ""})</span>`);
+    const elc = tab === "el" && cur.d.rm && cur.d.rm.cmp;
+    if (elc) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas};opacity:.55"></i>${T("dx_ho", "held-out measured totals, natC")} (${S.points.filter((p) => p.kind === "ho").length})</span>`,
+      `<span class="dx-key"><i class="dia" style="background:${C.meas};border-color:${C.ink}"></i>${T("dx_bin", "averaged in log-energy bins")}</span>`,
+      `<span class="dx-key"><i class="sq" style="border-color:${C.ink}"></i>${T("dx_std", "IAEA neutron standard 2017 (natC elastic)")}</span>`);
+    else if (nPts) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas}"></i>${T("dx_meas_pts", "measured")} (${nPts}${nEx ? `, ${nEx} ${T("dx_excl", "excluded")}` : ""})</span>`);
     if (S.th) leg.push(`<span class="dx-key"><i class="dia" style="background:${C.meas};border-color:${C.ink}"></i>${T("dx_th", "measured thermal value (EXFOR)")}</span>`);
     $("#dx-plegend").innerHTML = leg.join("");
+    const ec = $("#dx-elcap"); if (ec) { ec.innerHTML = elc ? elCaption(cur.d.rm.cmp) : ""; ec.hidden = !elc; } // elastic tab: one short caption under the plot
     // under the plot, in plain words: where INCOGNITA's own curve starts, and what the diamond is (with its EXFOR entries)
     const bl = $("#dx-below"), xl = P && P.X ? 10 ** P.x0 : Infinity, ownC = S.curves.some((c) => !c.dash && !c.pw);
     if (bl) { const parts = [];
@@ -808,7 +868,7 @@
   }
   function table(S) {
     const rowsC = S.curves.flatMap((c) => c.pts.filter(([, y]) => y > 0).map(([x, y], i) => { const b = bandAt(c.b68, x); return `<tr><td>${esc(c.name)}</td><td>${fmtE(x)}</td><td>${num(y)} ${S.unit}</td><td>${b ? `${num(b[1])}–${num(b[2])}` : ""}</td><td></td></tr>`; }));
-    const rowsP = S.points.filter((p) => showExcl || p.dec !== "x").map((p) => { const d = S.ds[p.ds] || []; return `<tr><td>${esc(d[1] || d[0] || "")} ${d[2] || ""}</td><td>${p.xhi > p.xlo * 1.02 ? `${fmtE(p.xlo)}–${fmtE(p.xhi)}` : fmtE(p.x)}</td><td>${num(p.y)} ${S.unit}</td><td>${p.e ? "± " + num(p.e * 100, 2) + " %" : ""}</td><td>${DEC[p.dec] || ""}</td></tr>`; });
+    const rowsP = S.points.filter((p) => showExcl || p.dec !== "x").map((p) => { const d = S.ds[p.ds] || (p.kind === "bin" ? ["", T("dx_bin", "averaged in log-energy bins")] : []); return `<tr><td>${esc(d[1] || d[0] || "")} ${d[2] || ""}</td><td>${p.xhi > p.xlo * 1.02 ? `${fmtE(p.xlo)}–${fmtE(p.xhi)}` : fmtE(p.x)}</td><td>${num(p.y)} ${S.unit}</td><td>${p.e ? "± " + num(p.e * 100, 2) + " %" : ""}</td><td>${DEC[p.dec] || ""}</td></tr>`; });
     if (S.th) rowsP.push(`<tr><td>${T("dx_th", "measured thermal value (EXFOR)")} · ${S.th.subs.map(esc).join(", ")}</td><td>${fmtE(S.th.x)}</td><td>${num(S.th.y, 4)} b</td><td>± ${num(S.th.u, 2)} b</td><td></td></tr>`);
     $("#dx-table").innerHTML = `<table><thead><tr><th>${T("dx_th_src", "Source")}</th><th>${S.xlab}</th><th>${T("dx_th_val", "Value")}</th><th>${T("dx_th_unc", "Range / uncertainty")}</th><th>${T("dx_th_cur", "Curation")}</th></tr></thead><tbody>${rowsC.join("")}${rowsP.join("")}</tbody></table>`;
   }
@@ -831,9 +891,12 @@
       if (ex.length) html += lastPT === "mouse" ? `<br><span class="dx-exhint">${T("dx_exfor_click", "click the point to open")} EXFOR ${ex[0].id} ↗</span>`
         : `<br><a class="dx-exhint" href="${ex[0].url}" target="_blank" rel="noopener">${T("dx_exfor_tap", "tap again, or here, to open")} EXFOR ${ex[0].id} ↗</a>`;
       return { html, url: ex.length ? ex[0].url : null, p: th }; }
-    for (const p of P.shown) { if (!(p.y > 0)) continue; const d = (P.X(p.x) - x) ** 2 + (P.Y(p.y) - y) ** 2; if (d < bd) { bd = d; best = p; } }
+    for (const p of P.shown) { if (!(p.y > 0)) continue; const d = ((P.X(p.x) - x) ** 2 + (P.Y(p.y) - y) ** 2) * (p.kind === "bin" || p.kind === "std" ? 0.3 : 1); if (d < bd) { bd = d; best = p; } } // an average or standard point wins over the faint dots under it
+    if (best && best.kind === "bin") return { html: `<b>${T("dx_bin", "averaged in log-energy bins")}</b><br>${fmtE(best.x)}: <b>${num(best.y)} ± ${num(best.y * best.e, 2)} ${P.S.unit}</b><br><span class="dx-faint">${T("dx_bin_tip", "mean of {n} held-out measured points ± its standard error").replace("{n}", best.n)}</span>`, url: null, p: best };
+    if (best && best.kind === "std") { const z = best.dev / best.e;
+      return { html: `<b>${T("dx_std", "IAEA neutron standard 2017 (natC elastic)")}</b><br>${fmtE(best.x)}: <b>${num(best.y, 4)} ± ${num(best.y * best.e, 2)} ${P.S.unit}</b> (1σ)<br><span class="dx-faint">${T("dx_std_dev", "INCOGNITA / standard − 1")}: ${best.dev >= 0 ? "+" : ""}${num(best.dev * 100, 2)} % (z = ${num(z, 2)})</span>`, url: null, p: best }; }
     if (best) { const d = P.S.ds[best.ds] || [], ex = exforOf(d[0]);
-      let html = `<b>${esc(d[1] || "EXFOR " + (ex ? ex.id : String(d[0]).split("/").filter(Boolean).pop() || ""))}</b> ${d[2] || ""}<br>${best.xhi > best.xlo * 1.02 ? `${fmtE(best.xlo)}–${fmtE(best.xhi)}` : fmtE(best.x)}: <b>${num(best.y)} ${P.S.unit}</b>${best.e ? ` ± ${num(best.e * 100, 2)} %` : ""}${best.kind === "mxw" ? ` · ${T("dx_mxw", "Maxwellian average")}` : ""}${best.st ? ` · ${T("dx_state", "state")} ${esc(best.st)}` : ""}<br><span class="dx-faint">${T("dx_cur", "curation")}: ${DEC[best.dec]}</span>`;
+      let html = `<b>${esc(d[1] || "EXFOR " + (ex ? ex.id : String(d[0]).split("/").filter(Boolean).pop() || ""))}</b> ${d[2] || ""}<br>${best.xhi > best.xlo * 1.02 ? `${fmtE(best.xlo)}–${fmtE(best.xhi)}` : fmtE(best.x)}: <b>${num(best.y)} ${P.S.unit}</b>${best.e ? ` ± ${num(best.e * 100, 2)} %` : ""}${best.kind === "mxw" ? ` · ${T("dx_mxw", "Maxwellian average")}` : ""}${best.st ? ` · ${T("dx_state", "state")} ${esc(best.st)}` : ""}<br><span class="dx-faint">${best.kind === "ho" ? T("dx_ho_tip", "held out from the fit: read once, after the fit was frozen") : `${T("dx_cur", "curation")}: ${DEC[best.dec]}`}</span>`;
       if (ex) html += lastPT === "mouse" ? `<br><span class="dx-exhint">${T("dx_exfor_click", "click the point to open")} EXFOR ${ex.id} ↗</span>`
         : `<br><a class="dx-exhint" href="${ex.url}" target="_blank" rel="noopener">${T("dx_exfor_tap", "tap again, or here, to open")} EXFOR ${ex.id} ↗</a>`;
       return { html, url: ex && ex.url, p: best }; }
@@ -851,7 +914,7 @@
       if (j >= 0 && jd < 0.2 && (!(pws.length || rrC) || xv >= PW_E * 0.98)) { const xe = c.pts[j][0], lines = [], anyLib = P.S.curves.some((cc) => cc.dash);
         for (const cc of P.S.curves) { if (cc.pw || cc.rr) continue; const q =cc.pts.find((p) => p[0] === xe); if (!q || !(q[1] > 0)) continue; const b = bandAt(cc.b68, xe);
           lines.push(cc.dash ? `<span class="dx-faint">${esc(cc.short)}: ${num(q[1])} ${P.S.unit}</span>` : `<b>${num(q[1])} ${P.S.unit}</b>${b ? ` <span class="dx-faint">(68 %: ${num(b[1])}–${num(b[2])})</span>` : ""}${anyLib ? ` <span class="dx-faint">· ${esc(cc.name)}</span>` : ""}`); }
-        if (lines.length) return { html: `${fmtE(xe)}${anyLib && tab !== "macs" ? ` <span class="dx-faint">· ${T("dx_lib_bin", "libraries: bin averages")}</span>` : ""}<br>${lines.join("<br>")}`, url: null, p: null }; } }
+        if (lines.length) return { html: `${fmtE(xe)}${anyLib && tab !== "macs" && tab !== "el" ? ` <span class="dx-faint">· ${T("dx_lib_bin", "libraries: bin averages")}</span>` : ""}<br>${lines.join("<br>")}`, url: null, p: null }; } }
     return null;
   }
   function showTip(h, x, y) {
@@ -896,7 +959,14 @@
     if (d.tier != null) Object.assign(J, { tier: IDX.tiers[d.tier], in_validated_range: !!d.valid, value_source: d.src || null, uncertainty_kind: d.unc || null, resolved_resonances_up_to_ev: d.res ?? null, macs30_mb: d.macs30 ?? null, macs30_flag: d.flag || null });
     if (d.rm) J.rmatrix_evaluation = { id: d.rm.id, label: d.rm.label, reaction: d.rm.reaction, unit: "b", energy_ev: d.rm.energy_ev, sigma_b: d.rm.sigma_b,
       mubar_cm: d.rm.mubar_cm || null, range_ev: [d.rm.e_min_ev, d.rm.e_max_ev], chi2_dof_in_sample: d.rm.chi2_dof ?? null, caveat: d.rm.caveat || null, report: d.rm.report,
-      note: "INCOGNITA's own R-matrix model (elastic only, 0 K); capture is not modelled by it. Every number comes from the frozen fit." };
+      note: "INCOGNITA's own R-matrix model (elastic only, 0 K, pure C-12); capture is not modelled by it. Every number comes from the frozen fit." };
+    const cm = d.rm && d.rm.cmp;
+    if (cm) J.rmatrix_evaluation.comparison = {
+      note: "Shown on the elastic tab against natural-carbon data: natC = 0.9893 x this C-12 curve + 0.0107 x ENDF/B-VIII.1 C-13 elastic. The ENDF/B-VIII.1 comparator curve is not in the downloads.",
+      heldout_totals_natC: { note: "EXFOR natC total cross sections held out of the fit and read once after it was frozen (sets over 300 points rebinned at 1 %, as the gate read them)", datasets: cm.ds.map((x, i) => ({ index: i, exfor_id: x[0], author: x[1], year: x[2] })),
+        columns: ["energy_ev", "sigma_b", "rel_unc", "dataset"], rows: cm.ho },
+      iaea_standard_2017_natC_elastic: { columns: ["energy_ev", "sigma_b", "unc_1sigma_b", "incognita_natC_over_standard_minus_1"], rows: cm.std },
+      stats: cm.stats };
     if (d.cap) J.capture = { unit: "b", energy_ev: grid, sigma_b: d.cap, unc68_log10: d.u68 || null, unc95_log10: d.u95 || null, note: "68 % and 95 % bands: sigma divided and multiplied by 10^unc" };
     if (d.mform) J.model_form = { flag: d.mform.kind, alt_value_30keV_b: d.mform.alt30 ?? null, alt_over_value_30keV: d.mform.ratio ?? null,
       note: { pe_kev: "keV capture depends on pre-equilibrium emission at low energies (on in this engine; TALYS starts it near 1 MeV); the 68 % and 95 % bands below 1 MeV are widened to contain the other choice",
@@ -924,6 +994,8 @@
     if (d.npL) d.npL.forEach((p) => rows.push(["prediction (benchmark energies, 68 % band)", "(n,p)", p[0], "", p[1], "mb", p[2] ?? "", p[3] ?? ""]));
     if (d.macs) kT.forEach((k, i) => { const f = d.macsU && d.macsU[i]; rows.push(["prediction", "MACS (kT)", k * 1e3, "", d.macs[i], "mb", f ? r4(d.macs[i] / f) : "", f ? r4(d.macs[i] * f) : ""]); });
     const mline = (kind, reac, p) => { const s = ds[p[4]] || {}; rows.push([kind, reac, p[0], p[1], p[2], "b", "", "", "", "", p[3] ?? "", s.exfor_id || "", s.author || "", s.year ?? "", DECW[p[5]] || p[5], p[6] || ""]); };
+    if (cm) { cm.ho.forEach((p) => { const s = cm.ds[p[3]] || []; rows.push(["measured (EXFOR, held out)", "total (natC)", p[0], "", p[1], "b", "", "", "", "", p[2] ?? "", s[0] || "", s[1] || "", s[2] ?? "", "", ""]); });
+      cm.std.forEach((p) => rows.push(["IAEA neutron standard 2017", "elastic (natC)", p[0], "", p[1], "b", r4(p[1] - p[2]), r4(p[1] + p[2]), "", "", r4(p[2] / p[1]), "", "", 2017, "", ""])); }
     if (d.meas) { d.meas.cap.forEach((p) => mline("measured (EXFOR)", "capture (n,g)", p)); d.meas.mxw.forEach((p) => mline("measured (EXFOR)", "Maxwellian average (kT)", p)); }
     if (d.thr) for (const [k, v] of Object.entries(d.thr)) v.forEach((p) => rows.push([Z < 26 ? "measured (EXFOR, benchmark rules)" : "measured (EXFOR, benchmark)", k === "na" ? "(n,alpha)" : `(${k[0]},${k.slice(1)})`, p[0], "", p[1], "mb", "", "", "", "", "", p[2] || "", "", p[3] ?? "", "", ""]));
     const head = [`INCOGNITA · ${id} (Z=${Z}${A ? `, A=${A}` : ""})`, `Source: ${meta.source}`, `Page: ${page} (generated ${meta.generated})`, `Engine: ${meta.engine}`, `License: ${meta.license}`,
@@ -957,7 +1029,7 @@
     layout(); fit(); legend(); paintChart();
     // other nuclides are fetched only when opened; a link like data.html#Fe-56 opens that one, otherwise U-238 opens by default
     const fromHash = () => { const [h, t] = decodeURIComponent(location.hash.slice(1)).split("/"), r0 = h && parseQ(h.replace(/-nat$/i, " nat")), t0 = tab;
-      if (t in CH) tab = t;
+      if (t in CH) { tab = t; tabAsked = true; }
       if (r0 && r0 !== sel) select(r0, true, true); else if (cur && tab !== t0) { buildTabs(); sweep(); } };
     fromHash(); window.addEventListener("hashchange", fromHash);
     if (!sel) { const u = byKey.get("92-238"); if (u) select(u, false, true); }
