@@ -57,7 +57,9 @@ def enabled() -> bool:
         return True
     from physics.hf import angout, recoil, specobs  # KWCOV B3 / B4 / B12: angle, spectrum, DDX, gamma-line and recoil
 
-    return angout.wanted() or specobs.wanted() or recoil.wanted()
+    from physics.hf import compoobs  # KWCOV B4b: components y reads the multiple pre-equilibrium records
+
+    return angout.wanted() or specobs.wanted() or recoil.wanted() or compoobs.wanted()
 
 
 def env_enabled() -> bool:
@@ -289,7 +291,10 @@ def begin_run(cas) -> None:
 
     sp = specobs.begin_run(cas)  # KWCOV B4 first: angout records every level when the DDX needs them
     rc = recoil.begin_run(cas)  # KWCOV B12: recoils need every level's discad too
-    if (angout.begin_run(cas) or sp or rc) and not env_enabled():  # KWCOV B3/B4: this run records for the TALYS outputs only
+    from physics.hf import compoobs
+
+    co = compoobs.begin_run(cas)  # KWCOV B4b: components y
+    if (angout.begin_run(cas) or sp or rc or co) and not env_enabled():  # KWCOV B3/B4: this run records for the TALYS outputs only
         clear_run()
         try:
             from physics.hf.engine_c import lib

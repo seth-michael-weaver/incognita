@@ -3,7 +3,7 @@
 * TALYS input checks the port lacked (checkvalue.f90): legacy models without `legacy y`, `transpower` 2..20;
 * `transpower` / `transeps` reach the lmax cut of every transmission read (inverseread.f90 / incidentread.f90);
 * `endf y`'s structure files (levels*.out and gamma*.tot of every nucleus structure builds) and endfinfo.f90's
-  tefal.inf / energies.endf; `sacs y` (sacs.dat); `components y` refused; `micro`, `endfdetail` cascades;
+  tefal.inf / energies.endf; `sacs y` (sacs.dat); `components y` refused (B4b: ported since); `micro`, `endfdetail` cascades;
 * INCOGNITA_FIDFIX `psfsgl` (U-239 E1 at 0.4 / 0.6 MeV: the single-precision table energies of gammapar.f90).
 
 Stock numbers: TALYS-2.25 n + Fe-56 decks under ~/kwcov/stock/b15 (endf y at 1/5/14 MeV, sacs y at 2..20 MeV, the
@@ -113,8 +113,8 @@ def test_stage_key_unchanged_at_defaults():
 
 # ------------------------------------------------------------------------------------------------ keywords
 def test_components_refused_sacs_accepted():
-    with pytest.raises(NotImplementedError, match="components y"):
-        D.reject_unported(_opts(components="y"))
+    # KWCOV B4b: components y is ported now (physics/hf/compoobs.py; tests/hf/test_kwcov_b4b.py)
+    D.reject_unported(_opts(components="y"))
     D.reject_unported(_opts(components="n"))
     o = _opts(sacs="y")
     assert o.flagsacs and G.active(o) == {"sacs": True}

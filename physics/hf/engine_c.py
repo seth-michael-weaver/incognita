@@ -1330,6 +1330,12 @@ def cases(zf, stats: dict | None = None):
     from physics.hf.emission import chanobs
 
     chanobs_on = chanobs.enabled()
+    from physics.hf import exclspec  # KWCOV B4b: exclusive spectra need the Python channels' inputs (as CHANOBS)
+
+    excl_on = exclspec.active()
+    from physics.hf import compoobs  # KWCOV B4b: components y (the same inputs)
+
+    compo_on = compoobs.active()
     try:
         add = addends(target, zf.Z, zf.A, run_axis, declared, fit=cas.fit)
         built = _BuiltInputs(cas, target, declared, add)
@@ -1476,7 +1482,7 @@ def cases(zf, stats: dict | None = None):
                 except _Unsupported as ex:
                     packed = None
                     stats.setdefault("fallback", []).append((binp.e_inc_mev, str(ex)))
-            if packed is not None and chanobs_on:  # CHANOBS: the Python channels keep every ChannelResult field
+            if packed is not None and (chanobs_on or excl_on or compo_on):  # CHANOBS: the Python channels keep every ChannelResult field
                 with stagetime.stage("multiple_emission"):
                     mres = packed.result()
             elif packed is not None:
@@ -1493,14 +1499,21 @@ def cases(zf, stats: dict | None = None):
                     st, mres = _py_cascade(cas, st, cinp, binp, b, seed, prq, xsb_by_type,
                                            fis if cinp.flagfission else None,
                                            float(inc.sigma_reac_mb[0]), etot, propagated or None)
+            xin = None
             if chan is None:
-                from physics.hf.emission.channels import exclusive_channels
+                from physics.hf.emission.channels import ExclusiveState, exclusive_channels
 
                 with stagetime.stage("channels"):
                     py = chst.to_py()
-                    chan = _Chan.of(exclusive_channels(built.channels(cinp, st, mres, b, xsbinary), py))
+                    cfull = built.channels(cinp, st, mres, b, xsbinary)
+                    if excl_on or compo_on:  # KWCOV B4b: the inputs and the channel state before this energy
+                        xin = (cfull, ExclusiveState(set(py.chanopen), py.idnumfull))
+                    chan = _Chan.of(exclusive_channels(cfull, py))
                     chst.from_py(py)
             specout.end_energy(pinp, binp.k0, b2)
+            if xin is not None:  # KWCOV B4b: output only
+                exclspec.record(xin[0], st, xin[1])
+                compoobs.record(xin[0], st, b2)
             if fisobs.active():  # KWCOV B8: output only (the arena is read, not changed)
                 fisobs.record(cas, st, binp.e_inc_mev, etot,
                               mres if mres is not None else (packed.result() if packed is not None else None))
@@ -1604,6 +1617,9 @@ def run(injection, stats: dict | None = None):
     from physics.hf import angout, fisobs, specobs  # KWCOV B3 / B4 / B8 (off: unchanged)
 
     res = fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
+    from physics.hf import compoobs  # KWCOV B4b: components y (off: unchanged)
+
+    res = compoobs.add_to_results(res)
     from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
 
     from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)

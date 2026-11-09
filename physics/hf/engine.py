@@ -417,7 +417,15 @@ class ChainedFull:
                 if dumped:
                     out.append((b2, _with_computed_feeding(cinp, mres)))
                 else:
-                    out.append((b2, built.channels(cinp, st, mres, b, xsbinary)))
+                    cfull = built.channels(cinp, st, mres, b, xsbinary)
+                    from physics.hf import exclspec  # KWCOV B4b: output only (off: nothing)
+
+                    if exclspec.active():
+                        exclspec.record(cfull, st)
+                    from physics.hf import compoobs  # KWCOV B4b: components y (off: nothing)
+
+                    compoobs.record(cfull, st, b2)
+                    out.append((b2, cfull))
             specout.end_run(cas)
             return out
         finally:
@@ -910,6 +918,9 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     from physics.hf import angout, specobs  # KWCOV B3 / B4: angular distributions, spectra, DDX, gamma lines (off: unchanged)
 
     res = specobs.add_to_results(angout.add_to_results(res, injection), injection)
+    from physics.hf import compoobs  # KWCOV B4b: components y (off: unchanged)
+
+    res = compoobs.add_to_results(res)
     from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
 
     from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)

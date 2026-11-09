@@ -53,9 +53,10 @@ ROWS = [
      "decay difference)"),
     ("direct / DWBA / giant-resonance / collective components", "direct.tot, talys.out", "directout.f90:1", "outdirect, components",
      "INTERNAL", "direct/chain.py xsdirdisctot, xsgrcoll, xscollconttot", "B4", "r52pool dir-log hook captures them"),
-    ("compound / pre-equilibrium components", "talys.out, components", "totalout.f90:1", "components", "INTERNAL",
-     "binary / preeq", "B4", "the xs*.tot / rp*.tot Direct / Preequilibrium / Compound columns of `components y` "
-     "(multiple.f90:649 Fdir/Fpreeq/Fcomp) are not given: components y is refused (B15)"),
+    ("compound / pre-equilibrium components", "xs*.tot / rp*.tot cols Direct, Preequilibrium, Compound", "multiple.f90:649",
+     "components", "SUPPORTED", "compoobs.py Results.extras['xsNNNNNN.tot:direct|:preeq|:compound', "
+     "'rpZZZAAA.tot:direct|:preeq|:compound']", "B4b", "test:test_kwcov_b4b.py; TALYS mode Fe-56 5/14 MeV, Co-59 "
+     "14 MeV <= 0.1 %; U-238 14 MeV 3.4 % (U-239 compound, 1.1 mb). binaryout's talys.out split (no file) not given"),
     # --- fission ---
     ("fission cross section", "fission.tot", "fissionout.f90:1", "fission", "SUPPORTED", "Results.totals_mb['fission']", "",
      "TALYSworld channel"),
@@ -124,10 +125,13 @@ ROWS = [
      "recoil.py Results.recoil['<x>spec.lab', '<x>ddx.lab', '<x>ddxEeeee.e.lab', '<x>ddxAaaa.a.lab']", "B12",
      "test:test_kwcov_b12.py; Fe-56 TALYS mode: LAB spectra 0.8 %, LAB DDX 3.9 % (150 deg, 14 MeV)"),
     ("exclusive channel spectra", "sp100000E0014.000.tot ...", "channelsout.f90:641, channels.f90:330-420, "
-     "specemission.f90:1", "outspectra + channels, filechannels", "MISSING", "", "B4b",
-     "needs specexcl carried through the channel loop (binemis per daughter bin + specemission, 306 l.); "
-     "only the sp000000 (n,gx) columns exist (xsngnspec = specout per-nucleus emission of the CN). "
-     "`channelenergy` is NOT this: it is spectra.f90's flagEchannel energy conversion (B4, supported)"),
+     "specemission.f90:1", "outspectra + channels, filechannels", "SUPPORTED",
+     "exclspec.py Results.spectra['spNNNNNN.tot:<x>', ':E', 'spNNNNNN.fis:<x>'] (INCOGNITA_SPECOBS_DIR writes files)",
+     "B4b", "test:test_kwcov_b4b.py; TALYS mode, main bins (stock >= 1 % of the column peak): Fe-56 5/14 MeV and "
+     "Co-59 14 MeV <= 0.6 %, U-238 particle columns and .fis <= 1.6 %; U-238 14 MeV gamma columns up to 59 % "
+     "(Pa-238 E-gamma < 0.6 MeV) = the engine's own gamma cascade ((n,p) gamma production 1.217 vs 1.293 mb); "
+     "U-238 fission gamma columns need INCOGNITA_FIDFIX=psfsgl (17 % -> 1e-4). `channelenergy` is NOT this: it is "
+     "spectra.f90's flagEchannel energy conversion (B4)"),
     ("emission spectrum per excitation bin", "", "binaryout.f90:1", "outbinspectra", "NA", "", "", "debug output"),
     # --- recoil ---
     ("recoil spectra of residuals", "recZZZAAAspec*.tot, spNNNNNNE*.rec", "recoilout.f90:1, channelsout.f90:811",

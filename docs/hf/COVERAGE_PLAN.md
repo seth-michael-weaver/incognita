@@ -59,7 +59,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B1 | channel observables (DONE, this branch) | -- | prod/multiplicity (gas production), binary.tot, xs*.tot gamma column, xs*.LMM isomeric channels, xs*.fis, discrete/continuum split | 0.5 d |
 | B2 | deck wiring of what exists (DONE, branch `kwcov2`) | best, bestend, bestbranch, bestfile, fit, ngfit, nnfit, nffit, nafit, ndfit, pnfit, gnfit, dnfit, anfit, macsfit, gamgamfit, ejectiles, maxlevelsbin, maxlevelsres, nlevels, estop, liso, isomer (check), per-nucleus forms of ldmodel/colenhance, `energy E1 E2 dE` | CHANOBS default decision | 1-1.5 d |
 | B3 | angular distributions on TALYS keywords | outangle, outlegendre, fileelastic, fileangle, angles, anglescont, cpang | elastic/inelastic ang + leg, Rutherford ratio (charged), compound ang. for charged particles | 1.5-2 d |
-| B4 | spectra, DDX, gamma lines on TALYS keywords (DONE, branch `kwcov4`; exclusive channel spectra -> B4b) | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
+| B4 | spectra, DDX, gamma lines on TALYS keywords (DONE, branch `kwcov4`; exclusive channel spectra: B4b DONE, branch `kwcov4b`, with `components y`) | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
 | B5 | model keyword sweep: compound, gamma, levels, LD (DONE, branch `kwcov5`) | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
 | B6 | model keyword sweep: optical model, direct (DONE, branch `kwcov6`) | optmodall, vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
 | B7 | unported model branches (DONE, branch `kwcov7`; gnorm y and MSD stay refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
@@ -72,7 +72,7 @@ keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 | B12 | recoils and LAB frame (DONE, branch `kwcov12`) | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
 | B13 | ingredient outputs (DONE, branch `kwcov13`) | outlevels, blocklevels, outbasic, outtransenergy, blockomp, outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
 | B14 | fission yields and fragment evaporation | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
-| B15 | low value (DONE, branch `kwcov15`; components y, densfile/e1file/m1file/massdir, rescuefile/strucpath/bestpath refused; endf.cs ECIS files not given; transpower ported; U-239 E1 fix behind INCOGNITA_FIDFIX=psfsgl) | endf, endfdetail, sacs, legacy, components, micro, transpower | tefal.inf, gamma*.tot, sacs.dat | 1 d |
+| B15 | low value (DONE, branch `kwcov15`; components y (B4b: ported since), densfile/e1file/m1file/massdir, rescuefile/strucpath/bestpath refused; endf.cs ECIS files not given; transpower ported; U-239 E1 fix behind INCOGNITA_FIDFIX=psfsgl) | endf, endfdetail, sacs, legacy, components, micro, transpower | tefal.inf, gamma*.tot, sacs.dat | 1 d |
 | GAP | isomeric (excited) targets | ltarget | everything for an excited target | 3+ d; separate design (the engine refuses `Ltarget /= 0`, structure/levels.py:171; astro/stellar.py already builds excited entrance channels and is the starting point) |
 
 NA keywords (71: `out*`, `file*`, `block*`, paths, labels, ECIS plumbing) stay NA; the observables they gate are
@@ -223,6 +223,45 @@ batches above.
   <= 0.05 mb/MeV/sr of a few mb/MeV/sr); break-up (kalbachBU, xspreeqbu) is zero (only d/alpha projectiles have it);
   LAB-frame spectra/DDX (B12); repeated `fileddxa`/`fileddxe`/`filespectrum` deck lines need B2's merge (one line per
   key until then: `fileddxa n,30,90,p,150`); `channelenergy y` follows spectra.f90 but is not checked against stock.
+
+### B4b -- exclusive channel spectra and `components y` (done on branch `kwcov4b` = `kwcov7b` + B4b)
+
+* **What.** `physics/hf/exclspec.py` (output only): channels.f90's exclusive-channel loop walked again on the energy's
+  channel inputs with `specexcl` (binemission.f90's `binemis` per binary residual bin from the raw binary parts
+  SPECOUT recorded; the first term = source channel spectrum x feedexcl / popexcl; specemission.f90's smearing of the
+  last emitted particle over mother and residual bins; the photon source walked down the channel's own bins); final
+  spectra = ground state + isomer bins, fission spectra = fisfeedex-weighted bins. `Results.spectra`:
+  `spNNNNNN.tot:E` / `:g` ... `:a` (C, M) on egrid(ebegin(0)..eendhigh), `spNNNNNN.fis:*` for fissile targets;
+  `sp000000.tot` particle columns = xsngnspec (zero unless `endf y`, as TALYS). A channel is present when TALYS writes
+  its file (chanopen, xs >= xseps incl. the non-threshold xseps floor; xsfis > xseps). `INCOGNITA_SPECOBS_DIR` writes
+  `spNNNNNNE0014.000.tot` / `.fis` (YANDF headers). Switch: `outspectra y` (or ddxmode > 0, endf y, recoil y,
+  INCOGNITA_SPECOBS=1) AND `channels y`; with it the C driver takes the Python channels (as CHANOBS: same numbers).
+* **`components y`** (refused since B15) is ported: `physics/hf/compoobs.py`, multiple.f90:649-668 on the SPECOUT
+  records (binary xsdirdisctot; binary preeqpopex with the target level zeroed + received - emitted multiple
+  pre-equilibrium up to Smax; quirk kept: xspopcomp = pop - (preeq - dir)). `Results.extras`:
+  `xsNNNNNN.tot:direct|:preeq|:compound` (F x xschannel) and `rpZZZAAA.tot:direct|:preeq|:compound`. `components y`
+  turns the SPECOUT recorders on (specout.enabled). binaryout.f90's talys.out-only split is not given.
+* **Defaults** bitwise: nothing runs without the keywords; with them every other Results array is bitwise the same
+  (Fe-56 14 MeV TALYS mode, test). Python driver (engine.run) wired too (smoke: Fe-56 5 MeV, the stock channel set).
+* **Vs stock** (`scripts/kwcov/b4b_compare.py`, TALYS mode, stock `~/kwcov/stock/b4b/{fe56,co59,u238,fe56_endf,
+  fe56_maxch2}` from `scripts/kwcov/b4b_stock.sh`; worst |ours/stock - 1| on the main bins = stock >= 1 % of the
+  column peak): Fe-56 5/14 MeV 0.15 % (gamma column of (n,g)), every particle column <= 0.06 %, channel set identical;
+  Co-59 14 MeV 0.62 % ((n,n') gamma), particles <= 0.02 %; `endf y` (xsngnspec columns of sp000000: n 3e-5) and
+  `maxchannel 2` respond as stock (Fe-56 14 MeV has no 3-particle channel: no change on either side). U-238 5/14 MeV:
+  particle columns <= 1.6 % ((n,n') 14 MeV, the channel's own -0.25 %), every .fis file 1e-4 WITH
+  `INCOGNITA_FIDFIX=psfsgl` (without: fission gamma columns 17 % = B15's U-239 E1 table bug). Components: Fe-56,
+  Co-59 <= 0.1 %; U-238 14 MeV 3.4 % (U-239 compound, 1.1 mb), tiny channels (< 0.01 mb) up to 10 %.
+* **Losses (recorded).** (1) U-238 14 MeV gamma columns: (n,p) up to 59 % low at E-gamma < 0.6 MeV (integral -8 %),
+  (n,g) 14 %, (n,n') 4 %: the engine's own Pa-238 / U-239 gamma cascade (xs010000 gamma production 1.217 vs stock
+  1.293 mb, xs000000 5.98 vs 5.83 mb), not the spectrum port (Fe-56 / Co-59 gamma columns agree to 0.6 %). (2) U-238:
+  the engine keeps 9 sub-xseps floor channels stock does not open (sp001102, sp002002, sp010102, sp011002, sp020002,
+  sp100012, sp100102, sp101002, sp110002: Q > 0, 1e-7 mb, zero spectra) -- the engine's channel set (xs files too),
+  not B4b. (3) `block y` names (sp100000.tot, appended) are not written (non-block names only; `endf y` implies block in
+  TALYS); the arrays are the same.
+* **Bugs.** No new engine bug: the U-238 differences are the engine's gamma cascade (above) and B15's known U-239 E1
+  table bug (`INCOGNITA_FIDFIX=psfsgl`, still default off).
+* Tests: `tests/hf/test_kwcov_b4b.py` (switches, reaction strings, specemission flux conservation, the components
+  quirks, Fe-56 14 MeV TALYS mode vs stock integrals 0.5 % and components 1 %, bitwise on/off, the files).
 
 ### B5 -- model keywords: compound, gamma, levels, level densities (done on branch `kwcov5`)
 

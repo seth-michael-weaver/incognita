@@ -385,7 +385,7 @@ class Options:
     flagbasic: bool = False  # outbasic, input_basicreac.f90:66 (sets the out* defaults below)
     flagpartable: bool = False  # partable, input_basicreac.f90:81 (parameters.dat)
     flagsacs: bool = False  # KWCOV B15: sacs, input_output.f90:116 (sacs.dat, physics/hf/ingout.py; output only)
-    flagcompo: bool = False  # KWCOV B15: components, input_output.f90:313 (refused when y: defaults.UNPORTED)
+    flagcompo: bool = False  # KWCOV B15/B4b: components, input_output.f90:313 (compoobs.py, output only)
     flaglevels: bool = False  # outlevels, input_levels.f90:103 (= outbasic)
     flagblocklevels: bool = False  # blocklevels, input_output.f90 (levels.out instead of levels<ZZZAAA>.out)
     flagdensity: bool = False  # outdensity, input_densitymodel.f90:107 (= outbasic)
@@ -789,7 +789,7 @@ _OPTION_KEYWORDS: dict[str, tuple[str, str, str]] = {
     "outbasic": ("basicreac", "flagbasic", "yn"),  # KWCOV B13 (input_basicreac.f90:151)
     "partable": ("basicreac", "flagpartable", "yn"),  # KWCOV B13 (input_basicreac.f90:209)
     "sacs": ("directmodel", "flagsacs", "yn"),  # KWCOV B15 (input_output.f90:334)
-    "components": ("directmodel", "flagcompo", "yn"),  # KWCOV B15 (input_output.f90:313; refused when y)
+    "components": ("directmodel", "flagcompo", "yn"),  # KWCOV B15/B4b (input_output.f90:313; compoobs.py)
     "outlevels": ("levels", "flaglevels", "yn"),  # KWCOV B13 (input_levels.f90:234)
     "blocklevels": ("levels", "flagblocklevels", "yn"),  # KWCOV B13 (input_output.f90:207)
     "outdensity": ("densitymodel", "flagdensity", "yn"),  # KWCOV B13 (input_densitymodel.f90:230)
@@ -1456,10 +1456,6 @@ UNPORTED = (
     ("flagrpevap", lambda v: bool(v), "rpevap y: evaporation of the residual products past maxZrp/maxNrp "
      "(rpevap.f90, rp*.ex population files) is not ported; the run would have decayed them in the cascade instead "
      "(KWCOV B5 2026-11-08)"),
-    ("flagcompo", lambda v: bool(v), "components y: the direct / pre-equilibrium / compound split of every exclusive "
-     "channel and residual (multiple.f90:649-665 Fdir / Fpreeq / Fcomp from xspopdir and preeqpopex below the "
-     "largest separation energy; channelsout.f90:299-345 and normalization.f90 columns 5-7) is not carried through "
-     "the port's cascade (KWCOV B15 2026-11-08)"),
     ("flaggnorm", lambda v: bool(v), "gnorm y: normalise the compound nucleus's E1 strength to the measured "
      "<Gamma_gamma> (radwidtheory.f90:253-262 iterates ftable(E1) up to 101 times, again at every incident energy). "
      "TALYS-2.25 compares its theoretical width in eV with the resonance table's keV number (resonancepar.f90:96), "

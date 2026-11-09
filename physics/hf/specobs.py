@@ -167,6 +167,9 @@ def begin_run(cas) -> bool:
                  eadd=float(o.eadd_mev), eaddel=float(o.eaddel_mev), flagelectron=bool(getattr(o, "flagelectron", True)),
                  cas=cas)
     _SET = s
+    from physics.hf import exclspec  # KWCOV B4b: sp*.tot needs outspectra + channels y
+
+    exclspec.begin_run(cas)
     return s is not None
 
 
@@ -617,11 +620,22 @@ def add_to_results(res, injection):
         out_dir = os.environ.get(ENV_DIR, "").strip()
         if out_dir and arr:
             write_files(arr, META, out_dir)
+        from physics.hf import exclspec  # KWCOV B4b: exclusive channel spectra (outspectra + channels y)
+
+        if exclspec.active():
+            xarr, xmeta = exclspec.build([float(r["e_inc_mev"]) for r in specout.ENERGIES])
+            META["exclspec"] = xmeta
+            if out_dir and xarr:
+                exclspec.write_files(xarr, xmeta, out_dir)
+            arr = {**arr, **xarr}
         res = replace(res, spectra={k: torch.as_tensor(v, dtype=torch.float64) for k, v in arr.items()})
     finally:
         if not specout.env_enabled():
             specout.clear_run()
         end_run()
+        from physics.hf import exclspec
+
+        exclspec.end_run()
     return res
 
 

@@ -453,8 +453,10 @@ MANUAL: dict = {
     "transeps": ("SUPPORTED", "input/defaults.py Options.transeps -> emission/feeding.py Cascade.transeps",
                  "KWCOV B9 fix: the deck value (and astro y's / massdis y's) did not reach the chain, which kept the "
                  "Cascade constructor's 1e-8; now it does unless a caller passes its own", _T9),
-    "channels": ("SUPPORTED", "structure/scalars.py:144", "exclusive channels are always computed (flagchannels "
-                 "hard-wired on); `channels n` has no effect, which is harmless", "manual"),
+    "channels": ("SUPPORTED", "structure/scalars.py:144; input/defaults.py Options.flagchannels -> exclspec.py",
+                 "exclusive channels are always computed (flagchannels hard-wired on); `channels n` has no effect on "
+                 "the cross sections. B4b: with outspectra, `channels y` gives the exclusive spectra sp*.tot / sp*.fis "
+                 "(channels.f90 specexcl, as TALYS: none without it)", "test:test_kwcov_b4b.py"),
     "endf": ("IGNORED", "input/defaults.py", "defaults cascade honoured (eninclow 0, urr y -> the B10 URR files, "
              "channels y, adddiscrete 30 MeV); ENDF-6 output files (endf.cs, MF6 data) not written"),
     "micro": ("IGNORED", "input/defaults.py", "cascade honoured (ldmodel 7, jlmomp y -> refused, autorot y)"),
@@ -481,7 +483,8 @@ MANUAL: dict = {
               "distributions for charged projectiles", "test:test_angout.py"),
     # --- KWCOV B4: spectra, DDX, gamma lines (physics/hf/specobs.py) ---
     "outspectra": ("SUPPORTED", "input/defaults.py Options.flagspec -> specobs.py", "spectraout: <x>spec.tot columns, "
-                   "Eaverage; INCOGNITA_SPECOBS=1 is the port switch", "test:test_specobs.py"),
+                   "Eaverage; INCOGNITA_SPECOBS=1 is the port switch; with channels y also the exclusive spectra sp*.tot (B4b, "
+                   "test_kwcov_b4b.py)", "test:test_specobs.py"),
     "ddxmode": ("SUPPORTED", "input/defaults.py Options.ddxmode -> specobs.py", "full DDX arrays + fileddxa/fileddxe; "
                 "giant-resonance part isotropic", "test:test_specobs.py"),
     "fileddxa": ("SUPPORTED", "input/defaults.py Options.fileddxa -> specobs.py", "`fileddxa n 30`; deck line form "
@@ -603,9 +606,11 @@ B15: dict = {
              "sacs.f90: per exclusive channel threshold, peak energy / value and FWHM. On stock's own xs files = stock "
              "sacs.dat; engine Fe-56 2-20 MeV: thresholds and channel list identical, xsmax / width the engine's "
              "default cross sections. Quirk kept: without channels y (no xs files) only the header", _T15),
-    "components": (_REF, "input/defaults.py UNPORTED (components y)",
-                   "components y REFUSED: the direct / pre-equilibrium / compound split per residual (multiple.f90:649 "
-                   "Fdir / Fpreeq / Fcomp) is not carried through the port's cascade; components n accepted", _T15),
+    "components": ("SUPPORTED", "input/defaults.py Options.flagcompo -> compoobs.py (Results.extras)",
+                   "B4b: multiple.f90:649-668 Fdir / Fpreeq / Fcomp per residual on the SPECOUT multiple pre-equilibrium "
+                   "records; xs*.tot / rp*.tot Direct / Preequilibrium / Compound columns. TALYS mode vs stock: Fe-56, "
+                   "Co-59 <= 0.1 %, U-238 3.4 % (1.1 mb U-239 compound). Quirk kept: xspopcomp = pop - (preeq - dir). "
+                   "Output only (Results arrays bitwise)", "test:test_kwcov_b4b.py"),
     "micro": ("SUPPORTED", "input/defaults.py cascade (ldmodel 7, jlmomp y, autorot y)",
               "micro y alone is refused through jlmomp y (JLM unported, B7b); `micro y; jlmomp n` runs ldmodel 7 + "
               "autorot (response vs stock in the plan)", _T15),
