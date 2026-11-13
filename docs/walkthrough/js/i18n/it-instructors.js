@@ -158,3 +158,12 @@ Object.assign(WT.L.ui, {
 });
 /* minutes, after a lesson length (instructors.js) */
 Object.assign(WT.L.ui, { in_min: "min" });
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "Lezioni su topics.html, accanto alla storia principale: radiazioni, come funzionano i reattori, tutti i tipi di reattore, stabilità e controllo, fusione, gli elementi nelle stelle, e la storia e il controllo delle armi nucleari.",
+  in_t_nwhist: "Dalla scoperta a Trinity", in_s_nwhist: "Dalla scoperta a Trinity", in_w_nwhist: "La scoperta della fissione (Hahn, Strassmann, Meitner, Frisch), l'idea di reazione a catena di Szilard e la lettera di Einstein e Szilard, la prima reazione a catena controllata, i siti del Progetto Manhattan, Trinity. Solo storia.",
+  in_t_nwcities: "Hiroshima e Nagasaki", in_s_nwcities: "Hiroshima, Nagasaki", in_w_nwcities: "I bombardamenti dell'agosto 1945 e il loro costo umano (stime della RERF), i quattro effetti di un'esplosione nucleare in termini generali, i sopravvissuti (hibakusha) e il Life Span Study.",
+  in_t_nwrace: "La corsa agli armamenti e i trattati", in_s_nwrace: "Corsa e trattati", in_w_nwrace: "I primi test di ciascun paese, la bomba all'idrogeno in termini storici, la ricaduta di Castle Bravo, il numero di testate nel mondo nel tempo (FAS) e i trattati sul bando dei test, sulla non proliferazione e sulla riduzione degli armamenti.",
+  in_t_nwverify: "Sorvegliare i test, custodire il materiale", in_s_nwverify: "Verifica", in_w_nwverify: "La rete di monitoraggio della CTBTO (sismica, infrasuoni, idroacustica, radionuclidi), lo xeno radioattivo come orologio e le misure delle salvaguardie AIEA, tutto basato su dati nucleari.",
+  in_t_nwdata: "Reattori, armi e dati nucleari", in_s_nwdata: "Reattori e armi", in_w_nwdata: "Fissione e fusione; perché un reattore di potenza non può esplodere come una bomba; livelli di arricchimento (naturale, combustibile per reattori, la soglia del 20 % del LEU); i dati nucleari nella sicurezza di criticità e nella verifica.",
+});

@@ -158,3 +158,12 @@ Object.assign(WT.L.ui, {
 });
 /* minutes, after a lesson length (instructors.js) */
 Object.assign(WT.L.ui, { in_min: "Min." });
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "Lektionen auf topics.html, neben der Hauptgeschichte: Strahlung, wie Reaktoren arbeiten, alle Arten von Reaktoren, Stabilität und Regelung, Fusion, die Elemente in den Sternen sowie Geschichte und Kontrolle der Kernwaffen.",
+  in_t_nwhist: "Von der Entdeckung bis Trinity", in_s_nwhist: "Entdeckung bis Trinity", in_w_nwhist: "Die Entdeckung der Kernspaltung (Hahn, Strassmann, Meitner, Frisch), Szilards Idee der Kettenreaktion und der Einstein-Szilard-Brief, die erste kontrollierte Kettenreaktion, die Standorte des Manhattan-Projekts, Trinity. Nur Geschichte.",
+  in_t_nwcities: "Hiroshima und Nagasaki", in_s_nwcities: "Hiroshima, Nagasaki", in_w_nwcities: "Die Bombenabwürfe vom August 1945 und ihre Opfer (Schätzungen der RERF), die vier Wirkungen einer Kernexplosion in allgemeinen Worten, die Überlebenden (Hibakusha) und die Life Span Study.",
+  in_t_nwrace: "Das Wettrüsten und die Verträge", in_s_nwrace: "Wettrüsten, Verträge", in_w_nwrace: "Die ersten Tests jedes Landes, die Wasserstoffbombe historisch betrachtet, der Fallout von Castle Bravo, die Zahl der Sprengköpfe weltweit über die Zeit (FAS) und die Teststopp-, Nichtverbreitungs- und Abrüstungsverträge.",
+  in_t_nwverify: "Tests aufspüren, Material überwachen", in_s_nwverify: "Verifikation", in_w_nwverify: "Das Überwachungsnetz der CTBTO (seismisch, Infraschall, Hydroakustik, Radionuklide), radioaktives Xenon als Uhr und die Messungen der IAEO-Safeguards, alle gestützt auf Kerndaten.",
+  in_t_nwdata: "Reaktoren, Waffen und Kerndaten", in_s_nwdata: "Reaktor oder Waffe", in_w_nwdata: "Spaltung und Fusion; warum ein Leistungsreaktor nicht wie eine Bombe explodieren kann; Anreicherungsstufen (natürlich, Reaktorbrennstoff, die 20-%-Grenze für LEU); Kerndaten in der Kritikalitätssicherheit und der Verifikation.",
+});

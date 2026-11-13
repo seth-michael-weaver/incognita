@@ -158,3 +158,12 @@ Object.assign(WT.L.ui, {
 });
 /* minutes, after a lesson length (instructors.js) */
 Object.assign(WT.L.ui, { in_min: "min" });
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "Lessen op topics.html, naast het hoofdverhaal: straling, hoe reactoren werken, alle soorten reactoren, stabiliteit en regeling, fusie, de elementen in de sterren, en de geschiedenis en beheersing van kernwapens.",
+  in_t_nwhist: "Van de ontdekking tot Trinity", in_s_nwhist: "Ontdekking tot Trinity", in_w_nwhist: "De ontdekking van splijting (Hahn, Strassmann, Meitner, Frisch), Szilards idee van een kettingreactie en de brief van Einstein en Szilard, de eerste gecontroleerde kettingreactie, de locaties van het Manhattanproject, Trinity. Alleen geschiedenis.",
+  in_t_nwcities: "Hiroshima en Nagasaki", in_s_nwcities: "Hiroshima, Nagasaki", in_w_nwcities: "De bombardementen van augustus 1945 en hun menselijke tol (schattingen van de RERF), de vier effecten van een kernexplosie in algemene termen, de overlevenden (hibakusha) en de Life Span Study.",
+  in_t_nwrace: "De wapenwedloop en de verdragen", in_s_nwrace: "Wedloop, verdragen", in_w_nwrace: "De eerste proeven van elk land, de waterstofbom in historische termen, de neerslag van Castle Bravo, het aantal kernkoppen in de wereld door de tijd (FAS), en de kernstop-, non-proliferatie- en ontwapeningsverdragen.",
+  in_t_nwverify: "Proeven opsporen, materiaal bewaken", in_s_nwverify: "Verificatie", in_w_nwverify: "Het meetnet van de CTBTO (seismisch, infrageluid, hydroakoestisch, radionucliden), radioactief xenon als klok en de metingen van de IAEA-safeguards, alle gebaseerd op kerngegevens.",
+  in_t_nwdata: "Reactoren, wapens en kerngegevens", in_s_nwdata: "Reactor of wapen", in_w_nwdata: "Splijting en fusie; waarom een vermogensreactor niet als een bom kan ontploffen; verrijkingsniveaus (natuurlijk, reactorbrandstof, de LEU-grens van 20 %); kerngegevens in kriticaliteitsveiligheid en verificatie.",
+});

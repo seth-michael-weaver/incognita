@@ -158,3 +158,12 @@ Object.assign(WT.L.ui, {
 });
 /* minutes, after a lesson length (instructors.js) */
 Object.assign(WT.L.ui, { in_min: "min" });
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "Lições em topics.html, ao lado da história principal: radiação, como funcionam os reatores, todos os tipos de reator, estabilidade e controle, fusão, os elementos nas estrelas, e a história e o controle das armas nucleares.",
+  in_t_nwhist: "Da descoberta a Trinity", in_s_nwhist: "Da descoberta a Trinity", in_w_nwhist: "A descoberta da fissão (Hahn, Strassmann, Meitner, Frisch), a ideia da reação em cadeia de Szilard e a carta de Einstein e Szilard, a primeira reação em cadeia controlada, os locais do Projeto Manhattan, Trinity. Só história.",
+  in_t_nwcities: "Hiroshima e Nagasaki", in_s_nwcities: "Hiroshima, Nagasaki", in_w_nwcities: "Os bombardeios de agosto de 1945 e seu custo humano (estimativas da RERF), os quatro efeitos de uma explosão nuclear em termos gerais, os sobreviventes (hibakusha) e o Life Span Study.",
+  in_t_nwrace: "A corrida armamentista e os tratados", in_s_nwrace: "Corrida e tratados", in_w_nwrace: "Os primeiros testes de cada país, a bomba de hidrogênio em termos históricos, a precipitação de Castle Bravo, o número de ogivas no mundo ao longo do tempo (FAS) e os tratados de proibição de testes, não proliferação e redução de armas.",
+  in_t_nwverify: "Vigiar os testes, guardar o material", in_s_nwverify: "Verificação", in_w_nwverify: "A rede de monitoramento da CTBTO (sísmica, infrassom, hidroacústica, radionuclídeos), o xenônio radioativo como relógio e as medidas das salvaguardas da AIEA, tudo baseado em dados nucleares.",
+  in_t_nwdata: "Reatores, armas e dados nucleares", in_s_nwdata: "Reatores e armas", in_w_nwdata: "Fissão e fusão; por que um reator de potência não pode explodir como uma bomba; níveis de enriquecimento (natural, combustível de reator, o limite de 20 % do LEU); dados nucleares na segurança de criticidade e na verificação.",
+});

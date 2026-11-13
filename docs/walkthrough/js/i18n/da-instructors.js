@@ -158,3 +158,12 @@ Object.assign(WT.L.ui, {
 });
 /* minutes, after a lesson length (instructors.js) */
 Object.assign(WT.L.ui, { in_min: "min." });
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "Lektioner på topics.html, ved siden af hovedhistorien: stråling, hvordan reaktorer virker, alle slags reaktorer, stabilitet og styring, fusion, grundstofferne i stjernerne, og atomvåbens historie og kontrol.",
+  in_t_nwhist: "Fra opdagelsen til Trinity", in_s_nwhist: "Opdagelse til Trinity", in_w_nwhist: "Opdagelsen af fission (Hahn, Strassmann, Meitner, Frisch), Szilards idé om en kædereaktion og Einstein-Szilard-brevet, den første kontrollerede kædereaktion, Manhattanprojektets steder, Trinity. Kun historie.",
+  in_t_nwcities: "Hiroshima og Nagasaki", in_s_nwcities: "Hiroshima, Nagasaki", in_w_nwcities: "Bombningerne i august 1945 og deres menneskelige pris (RERF's skøn), de fire virkninger af en kernesprængning i generelle vendinger, de overlevende (hibakusha) og Life Span Study.",
+  in_t_nwrace: "Våbenkapløbet og traktaterne", in_s_nwrace: "Kapløb, traktater", in_w_nwrace: "Hvert lands første prøvesprængninger, brintbomben set historisk, nedfaldet fra Castle Bravo, antallet af sprænghoveder i verden over tid (FAS) samt prøvestop-, ikke-sprednings- og nedrustningstraktaterne.",
+  in_t_nwverify: "Overvåge prøver, vogte materiale", in_s_nwverify: "Verifikation", in_w_nwverify: "CTBTO's overvågningsnet (seismisk, infralyd, hydroakustik, radionuklider), radioaktivt xenon som ur og målingerne i IAEA's sikkerhedskontrol, alt sammen baseret på kernedata.",
+  in_t_nwdata: "Reaktorer, våben og kernedata", in_s_nwdata: "Reaktor eller våben", in_w_nwdata: "Fission og fusion; hvorfor en kraftreaktor ikke kan eksplodere som en bombe; berigelsesniveauer (naturligt, reaktorbrændsel, LEU-grænsen på 20 %); kernedata i kritikalitetssikkerhed og verifikation.",
+});

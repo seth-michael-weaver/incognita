@@ -156,3 +156,12 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "使用済み燃料を核種ごとに", in_s_spentfuel: "核種ごとに",
   in_w_spentfuel: "PWR使用済み燃料1トンを核種ごとに崩壊させる（Bateman連鎖、ICRP-72経口摂取係数）：放射能と放射性毒性の比較、いつどの核種が支配的か、そしてプルトニウムとマイナーアクチノイドを99 %または99.9 %取り除くとウラン鉱石以下になるまでの時間がどれだけ縮むか。",
 });
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "本編と並ぶ topics.html のレッスン：放射線、原子炉のしくみ、さまざまな型の原子炉、安定性と制御、核融合、星の中の元素、そして核兵器の歴史と管理。",
+  in_t_nwhist: "発見からトリニティまで", in_s_nwhist: "発見からトリニティへ", in_w_nwhist: "核分裂の発見（ハーン、シュトラスマン、マイトナー、フリッシュ）、シラードの連鎖反応の着想とアインシュタイン=シラードの手紙、初の制御された連鎖反応、マンハッタン計画の拠点、トリニティ。歴史のみ。",
+  in_t_nwcities: "広島と長崎", in_s_nwcities: "広島、長崎", in_w_nwcities: "1945年8月の原爆投下とその人的被害（放影研の推計）、核爆発の四つの効果の概要、被爆者と寿命調査。",
+  in_t_nwrace: "軍拡競争と条約", in_s_nwrace: "軍拡と条約", in_w_nwrace: "各国の最初の核実験、歴史としての水素爆弾、キャッスル・ブラボーの降下物、世界の核弾頭数の推移（FAS）、核実験禁止・不拡散・軍備削減の条約。",
+  in_t_nwverify: "核実験を見張り、核物質を守る", in_s_nwverify: "検証", in_w_nwverify: "CTBTO の監視網（地震、微気圧振動、水中音波、放射性核種）、時計としての放射性キセノン、IAEA 保障措置の測定。いずれも核データに基づく。",
+  in_t_nwdata: "原子炉、兵器、核データ", in_s_nwdata: "原子炉と兵器", in_w_nwdata: "核分裂と核融合、発電用原子炉が爆弾のように爆発できない理由、濃縮度の区分（天然、原子炉燃料、LEU の20 %の線）、臨界安全と検証における核データ。",
+});

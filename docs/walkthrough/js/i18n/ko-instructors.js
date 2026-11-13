@@ -157,4 +157,12 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "사용후핵연료, 핵종별로", in_s_spentfuel: "핵종별로",
   in_w_spentfuel: "PWR 사용후핵연료 1톤을 핵종별로 붕괴시킨다(Bateman 사슬, ICRP-72 섭취 선량계수): 방사능 대 방사독성, 언제 어떤 핵종이 지배하는지, 그리고 플루토늄과 부악티늄족을 99 % 또는 99.9 % 제거하면 우라늄 광석 수준 아래로 떨어지는 시간이 얼마나 줄어드는지.",
 });
-
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "본편 옆에 있는 topics.html의 강의: 방사선, 원자로의 작동 원리, 모든 종류의 원자로, 안정성과 제어, 핵융합, 별 속의 원소, 그리고 핵무기의 역사와 통제.",
+  in_t_nwhist: "발견에서 트리니티까지", in_s_nwhist: "발견에서 트리니티까지", in_w_nwhist: "핵분열의 발견(한, 슈트라스만, 마이트너, 프리슈), 실라르드의 연쇄 반응 구상과 아인슈타인–실라르드 편지, 최초의 제어된 연쇄 반응, 맨해튼 프로젝트의 기지들, 트리니티. 역사만 다룸.",
+  in_t_nwcities: "히로시마와 나가사키", in_s_nwcities: "히로시마, 나가사키", in_w_nwcities: "1945년 8월의 원폭 투하와 그 인명 피해(RERF 추정), 핵폭발의 네 가지 효과에 대한 일반적 설명, 생존자(피폭자)와 수명 조사.",
+  in_t_nwrace: "군비 경쟁과 조약", in_s_nwrace: "군비 경쟁과 조약", in_w_nwrace: "각국의 첫 핵실험, 역사 속의 수소폭탄, 캐슬 브라보의 낙진, 시간에 따른 세계 핵탄두 수(FAS), 핵실험 금지·비확산·군비 감축 조약.",
+  in_t_nwverify: "핵실험 감시, 핵물질 보호", in_s_nwverify: "검증", in_w_nwverify: "CTBTO 감시망(지진, 초저주파, 수중음향, 방사성 핵종), 시계로서의 방사성 제논, IAEA 안전조치 측정. 모두 핵자료에 기반함.",
+  in_t_nwdata: "원자로, 무기, 그리고 핵자료", in_s_nwdata: "원자로와 무기", in_w_nwdata: "핵분열과 핵융합, 발전용 원자로가 폭탄처럼 폭발할 수 없는 이유, 농축도 수준(천연, 원자로 연료, LEU의 20 % 경계), 임계 안전과 검증에서의 핵자료.",
+});

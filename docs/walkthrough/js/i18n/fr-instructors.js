@@ -159,3 +159,12 @@ Object.assign(WT.L.ui, {
 });
 /* minutes, after a lesson length (instructors.js) */
 Object.assign(WT.L.ui, { in_min: "min" });
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "Des leçons sur topics.html, à côté du récit principal : rayonnements, fonctionnement des réacteurs, tous les types de réacteurs, stabilité et contrôle, fusion, les éléments dans les étoiles, et l'histoire et le contrôle des armes nucléaires.",
+  in_t_nwhist: "De la découverte à Trinity", in_s_nwhist: "De la découverte à Trinity", in_w_nwhist: "La découverte de la fission (Hahn, Strassmann, Meitner, Frisch), l'idée de réaction en chaîne de Szilard et la lettre Einstein-Szilard, la première réaction en chaîne contrôlée, les sites du projet Manhattan, Trinity. Histoire uniquement.",
+  in_t_nwcities: "Hiroshima et Nagasaki", in_s_nwcities: "Hiroshima, Nagasaki", in_w_nwcities: "Les bombardements d'août 1945 et leur coût humain (estimations du RERF), les quatre effets d'une explosion nucléaire en termes généraux, les survivants (hibakusha) et la Life Span Study.",
+  in_t_nwrace: "La course aux armements et les traités", in_s_nwrace: "Course et traités", in_w_nwrace: "Les premiers essais de chaque pays, la bombe à hydrogène d'un point de vue historique, les retombées de Castle Bravo, le nombre d'ogives dans le monde au fil du temps (FAS), et les traités d'interdiction des essais, de non-prolifération et de réduction des armements.",
+  in_t_nwverify: "Surveiller les essais, garder les matières", in_s_nwverify: "Vérification", in_w_nwverify: "Le réseau de surveillance de l'OTICE (sismique, infrasons, hydroacoustique, radionucléides), le xénon radioactif comme horloge, et les mesures des garanties de l'AIEA, toutes fondées sur les données nucléaires.",
+  in_t_nwdata: "Réacteurs, armes et données nucléaires", in_s_nwdata: "Réacteurs et armes", in_w_nwdata: "Fission et fusion ; pourquoi un réacteur de puissance ne peut pas exploser comme une bombe ; niveaux d'enrichissement (naturel, combustible de réacteur, la limite de 20 % de l'UFE) ; les données nucléaires dans la sûreté-criticité et la vérification.",
+});

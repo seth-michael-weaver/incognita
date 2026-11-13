@@ -156,3 +156,12 @@ Object.assign(WT.L.ui, {
   in_t_spentfuel: "乏燃料，逐个核素", in_s_spentfuel: "逐个核素",
   in_w_spentfuel: "一吨压水堆乏燃料逐个核素地衰变（Bateman 链，ICRP-72 食入剂量系数）：活度与放射毒性的对比、各时期由哪个核素主导，以及以 99 % 或 99.9 % 的比例分离钚和次锕系元素能把降到铀矿水平以下的时间缩短多少。",
 });
+/* part seven, nuclear weapons: history and control (topics.html lessons); the topics.html sentence now names it */
+Object.assign(WT.L.ui, {
+  in_tp_p: "topics.html 上与主线并列的课程：辐射、反应堆如何工作、各种类型的反应堆、稳定性与控制、聚变、恒星中的元素，以及核武器的历史与管控。",
+  in_t_nwhist: "从发现到“三位一体”", in_s_nwhist: "从发现到“三位一体”", in_w_nwhist: "裂变的发现（哈恩、施特拉斯曼、迈特纳、弗里施），西拉德的链式反应设想与爱因斯坦–西拉德信，首次受控链式反应，曼哈顿计划的基地，“三位一体”。仅限历史。",
+  in_t_nwcities: "广岛和长崎", in_s_nwcities: "广岛、长崎", in_w_nwcities: "1945年8月的原子弹轰炸及其人员伤亡（RERF 估计），核爆炸四种效应的概述，幸存者（被爆者）与寿命研究。",
+  in_t_nwrace: "军备竞赛与条约", in_s_nwrace: "军备竞赛与条约", in_w_nwrace: "各国的首次核试验，历史上的氢弹，“喝彩城堡”的放射性沉降，世界核弹头数量随时间的变化（FAS），以及禁止核试验、不扩散和削减军备的条约。",
+  in_t_nwverify: "监测核试验，看护核材料", in_s_nwverify: "核查", in_w_nwverify: "全面禁核试条约组织的监测网络（地震、次声、水声、放射性核素），作为时钟的放射性氙，以及国际原子能机构保障监督的测量，全都依赖核数据。",
+  in_t_nwdata: "反应堆、武器与核数据", in_s_nwdata: "反应堆与武器", in_w_nwdata: "裂变与聚变；为什么动力堆不会像炸弹那样爆炸；浓缩度等级（天然铀、反应堆燃料、低浓铀的20 %界限）；核临界安全与核查中的核数据。",
+});
