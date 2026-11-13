@@ -72,6 +72,11 @@
     ["tokamak", 31, 2, 12, 3, "Magnetic confinement", "Confinement", "Gyration in a magnetic field, the twisted field of a tokamak and its safety factor, Poincaré sections, magnetic islands and chaos (the tokamap).", 1],
     ["blanket", 32, 3, 15, 3, "Breeding blanket and first wall", "Blanket", "Monte Carlo neutron transport in a breeding blanket: tritium breeding ratio, ⁶Li enrichment, (n,2n) multiplication; helium and hydrogen in the first wall from INCOGNITA's 14.1 MeV cross sections.", 1],
     ["stars", 0, 1, 10, 6, "Where the elements come from", "Elements from stars", "Fusion up to iron, then neutron capture: the s-process path along the valley of stability, the r-process in neutron-star mergers, abundance peaks at the magic numbers, and σN ≈ constant with INCOGNITA's computed 30 keV capture rates.", 1],
+    ["nwhist", 0, 0, 8, 4, "From discovery to Trinity", "Discovery to Trinity", "The discovery of fission (Hahn, Strassmann, Meitner, Frisch), Szilard's chain-reaction idea and the Einstein–Szilard letter, the first controlled chain reaction, the Manhattan Project sites, Trinity. History only.", 1],
+    ["nwcities", 0, 0, 8, 3, "Hiroshima and Nagasaki", "Hiroshima, Nagasaki", "The bombings of August 1945 and their human cost (RERF estimates), the four effects of a nuclear explosion in general terms, the survivors (hibakusha) and the Life Span Study.", 1],
+    ["nwrace", 0, 1, 10, 4, "The arms race and the treaties", "Arms race, treaties", "The first tests of each country, the hydrogen bomb in historical terms, Castle Bravo fallout, the world warhead count over time (FAS), and the test-ban, non-proliferation and arms-reduction treaties.", 1],
+    ["nwverify", 0, 1, 10, 4, "Watching for tests, guarding material", "Verification", "The CTBTO monitoring network (seismic, infrasound, hydroacoustic, radionuclide), radioactive xenon as a clock, and IAEA safeguards measurements, all resting on nuclear data.", 1],
+    ["nwdata", 0, 0, 8, 4, "Reactors, weapons and nuclear data", "Reactors vs weapons", "Fission and fusion; why a power reactor cannot explode like a bomb; enrichment levels (natural, reactor fuel, the 20 % LEU line); nuclear data in criticality safety and verification.", 1],
   ].map(([id, n, lv, min, steps, title, topic, what, tp], i) => ({ id, lv, min, steps, tp: !!tp, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
   // numbers per page: main story 1..26, then the More topics lessons 1..28 (topics.html)
   { let a = 0, b = 0; CH.forEach((c) => (c.n = c.tp ? ++b : ++a)); }
@@ -83,7 +88,7 @@
 
   // ---------- chapter list with a level filter ----------
   const list = $("#in-list"), chips = $("#in-filter");
-  const tpHead = `<li class="in-part"><h3>${T("way4_t", "More Nuclear Topics")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, every kind of reactor, stability and control, fusion.")}</p></li>`;
+  const tpHead = `<li class="in-part"><h3>${T("way4_t", "More Nuclear Topics")}</h3><p class="in-faint">${T("in_tp_p", "Lessons on topics.html, beside the main story: radiation, how reactors work, every kind of reactor, stability and control, fusion, the elements in stars, and the history and control of nuclear weapons.")}</p></li>`;
   list.innerHTML = CH.map((c, i) => (c.tp && !(CH[i - 1] || {}).tp ? tpHead : "") + `<li class="in-ch" data-lv="${c.lv}" data-min="${c.min}"><a class="in-ch-a" href="${href(c.id)}"><span class="in-n">${c.n}</span><span class="in-body"><span class="in-top"><b>${c.title}</b><span class="in-topic">${c.topic}</span></span><span class="in-what">${c.what}</span><span class="in-meta">${pill(c.lv)}<span>${mins(c.min)}</span><span>${c.steps} ${T("in_steps", "steps")}</span><code>#${c.id}</code></span></span></a></li>`).join("");
   const opts = [["all", T("in_all", "All")], ["0", LV[0]], ["1", LV[1]], ["2", LV[2]], ["3", LV[3]]];
   chips.innerHTML = opts.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${v === "all"}">${t}</button>`).join("");

@@ -100,7 +100,7 @@ Object.assign(WT.es.ui, {
   in_t_blanket: "Manto regenerador y primera pared", in_s_blanket: "Manto",
   in_w_blanket: "Transporte de neutrones Monte Carlo en un manto regenerador: tasa de regeneración de tritio, enriquecimiento en ⁶Li, multiplicación (n,2n); helio e hidrógeno en la primera pared a partir de las secciones eficaces de INCOGNITA a 14,1 MeV.",
   // topics.html lessons
-  in_tp_p: "Lecciones en topics.html, junto a la historia principal: radiación, cómo funcionan los reactores, todos los tipos de reactor, estabilidad y control, fusión.",
+  in_tp_p: "Lecciones en topics.html, junto a la historia principal: radiación, cómo funcionan los reactores, todos los tipos de reactor, estabilidad y control, fusión, los elementos en las estrellas, y la historia y el control de las armas nucleares.",
   in_t_halflife: "Radiactividad y semivida", in_s_halflife: "Semivida",
   in_w_halflife: "La desintegración aleatoria de núcleos individuales, la semivida como ley estadística, las curvas de decaimiento exponencial y la actividad.",
   in_t_rays: "Alfa, beta, gamma y neutrones", in_s_rays: "Radiación",
@@ -158,4 +158,10 @@ Object.assign(WT.es.ui, {
   in_w_spentfuel: "Una tonelada de combustible gastado de PWR que decae nucleido a nucleido (cadenas de Bateman, coeficientes de ingestión de ICRP-72): actividad frente a radiotoxicidad, qué nucleido domina en cada momento y cómo retirar el plutonio y los actínidos minoritarios al 99 % o al 99,9 % acorta el tiempo hasta quedar por debajo del mineral de uranio.",
 });
 /* minutes, after a lesson length (instructors.js) */
-Object.assign(WT.es.ui, { in_min: "min" });
+Object.assign(WT.es.ui, { in_min: "min",
+  in_t_nwhist: "Del descubrimiento a Trinity", in_s_nwhist: "Del descubrimiento a Trinity", in_w_nwhist: "El descubrimiento de la fisión (Hahn, Strassmann, Meitner, Frisch), la idea de la reacción en cadena de Szilard y la carta de Einstein y Szilard, la primera reacción en cadena controlada, los emplazamientos del Proyecto Manhattan, Trinity. Solo historia.",
+  in_t_nwcities: "Hiroshima y Nagasaki", in_s_nwcities: "Hiroshima, Nagasaki", in_w_nwcities: "Los bombardeos de agosto de 1945 y su coste humano (estimaciones de la RERF), los cuatro efectos de una explosión nuclear en términos generales, los supervivientes (hibakusha) y el Life Span Study.",
+  in_t_nwrace: "La carrera de armamentos y los tratados", in_s_nwrace: "Carrera y tratados", in_w_nwrace: "Las primeras pruebas de cada país, la bomba de hidrógeno en términos históricos, la lluvia radiactiva de Castle Bravo, el número de cabezas nucleares en el mundo a lo largo del tiempo (FAS) y los tratados de prohibición de pruebas, no proliferación y reducción de armas.",
+  in_t_nwverify: "Vigilar las pruebas, custodiar el material", in_s_nwverify: "Verificación", in_w_nwverify: "La red de vigilancia de la OTPCE (sísmica, infrasonido, hidroacústica, radionúclidos), el xenón radiactivo como reloj y las medidas de salvaguardias del OIEA, todo basado en datos nucleares.",
+  in_t_nwdata: "Reactores, armas y datos nucleares", in_s_nwdata: "Reactores frente a armas", in_w_nwdata: "Fisión y fusión; por qué un reactor de potencia no puede estallar como una bomba; niveles de enriquecimiento (natural, combustible de reactor, el límite del 20 % del LEU); los datos nucleares en la seguridad frente a la criticidad y en la verificación.",
+});
