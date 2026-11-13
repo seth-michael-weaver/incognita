@@ -77,7 +77,6 @@ Running the engine itself needs the TALYS structure database: see [Running the e
 | [`scripts/`](scripts/) | `reproduce.sh`, scorers, engine driver, native-kernel builds |
 | [`docs/release/`](docs/release/), [`docs/registry/`](docs/registry/) | frozen exam inputs and expected tables; pre-registered predictions |
 | [`predictions/`](predictions/) | dated prediction registries (blind targets, fixed scoring rule) |
-| [`emu/`](emu/) | fast emulators of the engine |
 | [`docs/walkthrough/`](docs/walkthrough/) | the explainer website |
 
 The full layout is in the [guide](docs/GUIDE.md#repository-layout).
@@ -98,10 +97,6 @@ numbers come from the v0.1 engine; the scoreboard uses the current engine (22 Oc
   [reproducing the numbers](docs/GUIDE.md#reproducing-the-numbers)
 - [Prospective registry](docs/GUIDE.md#prospective-registry)
 - [Acknowledgements](docs/GUIDE.md#acknowledgements)
-
-## Emulator
-
-Millisecond emulators of the engine, with Jacobians and sampling: [`emu/README.md`](emu/README.md).
 
 ## Citing
 

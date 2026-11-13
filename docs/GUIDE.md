@@ -35,7 +35,6 @@ made, every benchmark table, and every known limitation.
 | [`data/`](../data/) | EXFOR ingest code and the open curation register ([`data/curation/`](../data/curation/)): which datasets are excluded, down-weighted or renormalised, and why |
 | [`docs/release/`](release/) | frozen exam inputs (`exam/`, `uq/`), expected tables (`expected/`), benchmark guide, curation rules, uncertainty evidence |
 | [`docs/registry/`](registry/) | frozen prospective predictions with SHA-256 manifests and OpenTimestamps proofs |
-| [`emu/`](../emu/) | fast emulators of the engine at tag `engine-2026-10` ([`emu/README.md`](../emu/README.md)) |
 | [`docs/walkthrough/`](walkthrough/) | "Inside a Nuclear Reaction", the explorable explanation and scoreboard (static site; view locally with `cd docs/walkthrough && python3 serve.py 8765`, then open http://localhost:8765) |
 | [`tests/`](../tests/) | the test suite (`uv run pytest`; tests that need external data are skipped, not failed) |
 
@@ -301,7 +300,7 @@ to 20 MeV, median CPU-seconds of three interleaved repeats. Protocol, per-target
 ### Coupled-channels speed (2026-11-07, PERFCC2)
 
 Three changes to the incident coupled-channels solve of deformed targets. No number changes: every gate
-(`tests/hf/test_perfhf_gate.py`, `test_perfcasc_gate.py`, `scripts/perf/ompgate.py`, `scripts/perfstart/gate.py`,
+(`tests/hf/test_perfhf_gate.py`, `test_perfcasc_gate.py`, `scripts/perfstart/gate.py`,
 `scripts/talysworld/check_warm.py`, `scripts/perf/bench.py --gate-only`) is bit-identical to the engine before them.
 
 | change | default | switch |
