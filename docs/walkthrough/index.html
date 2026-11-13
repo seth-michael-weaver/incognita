@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=156">
+<link rel="stylesheet" href="style.css?v=157">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -101,6 +101,28 @@
   <section class="chapter" data-ch="strength"></section>
   <section class="chapter" data-ch="exciton"></section>
   <section class="chapter" data-ch="averages"></section>
+  <section class="part-head" id="reactor" aria-labelledby="reactor-h">
+    <div class="part-in">
+      <div class="part-kicker" data-i18n="pl_part_k">Part three · Reactor data</div>
+      <h2 id="reactor-h" data-i18n="pl_h1">From measurement to reactor</h2>
+      <p data-i18n="pl_part_p">So far the story has followed a neutron through the engine. This part follows the data on: from measurements to an evaluated file, to the library a reactor code reads, to a calculation checked against real critical experiments. The last three chapters are work we are developing.</p>
+    </div>
+  </section>
+  <section class="chapter" data-ch="pipeline"></section>
+  <section class="chapter" data-ch="workflow"></section>
+  <section class="chapter" data-ch="light"></section>
+  <section class="chapter" data-ch="resonances"></section>
+  <section class="chapter" data-ch="emulator"></section>
+  <section class="pl-now" aria-labelledby="pl-now-h">
+    <h2 id="pl-now-h" data-i18n="pl_now_h">What we have</h2>
+    <ul class="pl-have">
+      <li style="--c: var(--cool)"><a href="https://github.com/seth-michael-weaver/incognita/releases/tag/res-v0.1"><b>7</b><span data-i18n="pl_t_res">resonance files</span></a></li>
+      <li style="--c: var(--alpha)"><a href="https://github.com/seth-michael-weaver/incognita/releases/tag/tsl-v0.1"><b>2</b><span data-i18n="pl_t_tsl">thermal scattering laws</span></a></li>
+      <li style="--c: var(--fission)"><div><b>62</b><span data-i18n="pl_t_bench">benchmark cases</span></div></li>
+      <li style="--c: var(--warm)"><a href="data.html" data-keep-lang><b>6,168</b><span data-i18n="pl_t_expl">nuclides in the Explorer</span></a></li>
+      <li style="--c: var(--photon)"><div><b>EXFOR</b><span data-i18n="pl_t_judge">only reference</span></div></li>
+    </ul>
+  </section>
 </main>
 
 <section class="coda" id="code">
@@ -162,14 +184,20 @@
   <p data-i18n="coda_repo">The code, the library and the curated measurements are open: <a href="https://github.com/seth-michael-weaver/incognita">seth-michael-weaver/incognita on GitHub</a>. You can look up any prediction yourself on the <a href="data.html" data-keep-lang>Every nuclide</a> page, or clone the repository and run it.</p>
 </section>
 
+<script>(function () { /* the Pipeline page is now part three of this page (2026-11-13): /pipeline redirects to /?from=pipeline; its stage ids map to steps */
+  var M = { meas: 1, fit: 2, file: 3, proc: 4, lib: 5, bench: 6, judge: 7 }, h = location.hash.slice(1), q = location.search, from = /[?&]from=pipeline(&|$)/.test(q);
+  if (!M[h] && !from) return;
+  h = M[h] ? "pipeline-" + M[h] : h || "reactor";
+  q = q.replace(/[?&]from=pipeline(?=&|$)/, "").replace(/^&/, "?");
+  history.replaceState(null, "", location.pathname + q + "#" + h); })();</script>
 <script>(function () { var h = location.hash.slice(1), id = h.split("-")[0]; if (["doppler", "critical", "fusion", "gamow", "tokamak", "blanket"].indexOf(id) >= 0) location.replace("topics.html" + location.search + "#" + h); })(); /* chapters moved to topics.html (2026-11-05) */</script>
 <script src="js/scoreboard-data.js?v=91"></script>
 <script src="js/i18n.js?v=154"></script>
 <!-- Spanish text loads only for Spanish readers (synchronous, in order, before the chapters) -->
-<script>WT.load(["ui", "instructors", "glossary", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "intro", "layers", "hauser", "optical", "densities", "strength", "exciton", "averages", "xsec", "binding", "landscape", "neutrons", "fisout", "products", "tof", "slowing"], 138);</script>
+<script>WT.load(["ui", "instructors", "glossary", "structure", "omp", "direct", "preeq", "compound", "decay", "gamma", "cascade", "fission", "resonance", "measure", "intro", "layers", "hauser", "optical", "densities", "strength", "exciton", "averages", "xsec", "binding", "landscape", "neutrons", "fisout", "products", "tof", "slowing", "pipeline"], 139);</script>
 <script src="js/glossary.js?v=146"></script>
-<script src="js/nav.js?v=150"></script>
-<script src="js/kit.js?v=150"></script>
+<script src="js/nav.js?v=151"></script>
+<script src="js/kit.js?v=151"></script>
 <script src="js/data/chart3d.js?v=2"></script>
 <script src="js/ch/intro.js?v=132"></script>
 <script src="js/ch/structure.js?v=127"></script>
@@ -198,6 +226,7 @@
 <script src="js/ch/strength.js?v=120"></script>
 <script src="js/ch/exciton.js?v=127"></script>
 <script src="js/ch/averages.js?v=120"></script>
+<script src="js/ch/pipeline.js?v=98"></script>
 <script>WT.start();</script>
 </body>
 </html>

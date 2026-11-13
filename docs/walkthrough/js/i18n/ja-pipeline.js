@@ -1,4 +1,4 @@
-/* Japanese (日本語): pipeline page (pipeline.html, js/pipeline.js) */
+/* Japanese (日本語): part three of the main page, from measurement to reactor (index.html, js/ch/pipeline.js) */
 Object.assign(WT.L.ui, {
   pl_kicker: "INCOGNITA · 原子炉用データ",
   pl_h1: "測定から原子炉へ",
@@ -171,3 +171,31 @@ Object.assign(WT.L.ui, {
   pl_em_p3: "二つの近道は、二つの遅い段階を狙います。一つ目は<i>モデル、ファイル、処理</i>を、物理パラメータから輸送コードが読むライブラリへの、学習した一つの写像で置き換えます。二つ目は、何百万もの中性子を一つずつ追うモンテカルロを、中性子の平均的な分布を直接解く決定論的計算で置き換えます。単純な体系ならはるかに速いものの、汎用性は劣ります。これは私たちが開発中の手法で、公開しているファイルには含まれていません。",
   pl_rt_aria: "物理モデルから答えへの三つのルート。標準:物理モデル、評価済みファイル、処理、モンテカルロ輸送、答え。一つ目の近道:モデルのエミュレータがファイルと処理を省いてライブラリを直接書き、その後モンテカルロ。二つ目の近道:ライブラリをモンテカルロの代わりに高速な決定論的解法へ。",
 });
+
+/* part three of the main page (the pipeline page merged into index.html, 2026-11-13): part heading, short names, labels;
+   chapter titles in the instructors' guide alias the pl_* titles above */
+Object.assign(WT.L.ui, {
+  pl_part_k: "第3部 · 原子炉のためのデータ",
+  pl_part_p: "ここまでは、エンジンの中を進む中性子を追ってきました。この部ではデータを追います。測定から評価済みファイルへ、原子炉コードが読むライブラリへ、そして実際の臨界実験で確かめる計算へ。最後の3章は、私たちが開発中の取り組みです。",
+  pl_part_lead: "7つの段階が、測定された共鳴を原子炉コードが読むファイルへと運び、検査に落ちれば前へ戻します。図の段階を選ぶか、スクロールしてください。",
+  in_s_pipeline: "パイプライン",
+  in_s_workflow: "標準の流れ",
+  in_s_light: "軽い原子核",
+  in_s_resonances: "分離・非分離",
+  in_s_emulator: "エミュレーター",
+  pl_li_heavy: "重い原子核",
+  pl_li_light: "軽い原子核",
+  pl_li_in: "内側：原子核の準位",
+  pl_li_a: "チャネル半径",
+  pl_li_out: "外側：既知の力だけ",
+  in_w_pipeline: "測定、各実験のモデルを通したR行列フィット、ENDF-6ファイル、NJOYによる処理、OpenMCライブラリ、臨界ベンチマーク、固定された検査。それぞれに動く図があります。",
+  in_w_workflow: "評価を作るのは誰か、ENDF-6形式（MFとMT）、NJOYのモジュールごとの役割、OpenMCがk-effを求める方法、不確かさを伝える2つの道筋。",
+  in_w_light: "軽い原子核に統計理論ではなくR行列フィットが必要な理由：少数の幅広い準位、1/v吸収、チャネルとユニタリー性。",
+  in_w_resonances: "分離共鳴と非分離共鳴：Breit–WignerとReich–Moore、統計的な共鳴列、確率テーブル。",
+  in_w_emulator: "物理モデルのエミュレーター：不確かさ・感度・フィッティングで速さが重要な理由と、遅い段階を省く2つの近道。",
+});
+WT.L.ui.in_t_pipeline = WT.L.ui.pl_flow_h;
+WT.L.ui.in_t_workflow = WT.L.ui.pl_wf_h;
+WT.L.ui.in_t_light = WT.L.ui.pl_li_h;
+WT.L.ui.in_t_resonances = WT.L.ui.pl_rs_h;
+WT.L.ui.in_t_emulator = WT.L.ui.pl_em_h;

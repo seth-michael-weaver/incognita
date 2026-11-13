@@ -1,4 +1,4 @@
-/* Dutch (Nederlands): pipeline page (pipeline.html, js/pipeline.js) */
+/* Dutch (Nederlands): part three of the main page, from measurement to reactor (index.html, js/ch/pipeline.js) */
 Object.assign(WT.L.ui, {
   pl_kicker: "INCOGNITA · reactordata",
   pl_h1: "Van meting tot reactor",
@@ -171,3 +171,31 @@ Object.assign(WT.L.ui, {
   pl_em_p3: "De twee kortere wegen pakken de twee trage stappen aan. De eerste vervangt <i>model, bestand, verwerking</i> door één aangeleerde afbeelding van de natuurkundige parameters naar de bibliotheek die een transportcode leest. De tweede vervangt Monte Carlo, dat miljoenen afzonderlijke neutronen volgt, door een deterministische berekening die rechtstreeks de gemiddelde neutronenpopulatie oplost: veel sneller voor eenvoudige systemen, maar minder algemeen. Dit is een aanpak die we ontwikkelen; hij is geen onderdeel van de vrijgegeven bestanden.",
   pl_rt_aria: "Drie routes van een natuurkundig model naar een antwoord. Standaard: natuurkundig model, geëvalueerd bestand, verwerking, Monte-Carlotransport, antwoord. Eerste kortere weg: een emulator van het model schrijft de bibliotheek rechtstreeks, zonder bestand en verwerking, daarna Monte Carlo. Tweede kortere weg: de bibliotheek gaat naar een snelle deterministische oplossing in plaats van Monte Carlo.",
 });
+
+/* part three of the main page (the pipeline page merged into index.html, 2026-11-13): part heading, short names, labels;
+   chapter titles in the instructors' guide alias the pl_* titles above */
+Object.assign(WT.L.ui, {
+  pl_part_k: "Deel drie · Reactordata",
+  pl_part_p: "Tot nu toe volgde het verhaal een neutron door de engine. Dit deel volgt de data verder: van metingen naar een geëvalueerd bestand, naar de bibliotheek die een reactorcode leest, naar een berekening die met echte kritikaliteitsexperimenten wordt getoetst. De laatste drie hoofdstukken gaan over werk dat we ontwikkelen.",
+  pl_part_lead: "Zeven stappen brengen een gemeten resonantie naar een bestand dat een reactorcode leest, en terug als een controle faalt. Kies een stap in het diagram of scrol.",
+  in_s_pipeline: "Pijplijn",
+  in_s_workflow: "Standaardwerkwijze",
+  in_s_light: "Lichte kernen",
+  in_s_resonances: "Opgelost, onopgelost",
+  in_s_emulator: "Emulatoren",
+  pl_li_heavy: "zware kern",
+  pl_li_light: "lichte kern",
+  pl_li_in: "binnen: de niveaus van de kern",
+  pl_li_a: "kanaalstraal",
+  pl_li_out: "buiten: alleen bekende krachten",
+  in_w_pipeline: "Metingen, de R-matrixfit via een model van elk experiment, het ENDF-6-bestand, verwerking met NJOY, de OpenMC-bibliotheek, kritikaliteitsbenchmarks en de vaste controles, elk met een levende tekening.",
+  in_w_workflow: "Wie evaluaties maakt, het ENDF-6-formaat (MF en MT), NJOY module voor module, hoe OpenMC k-eff vindt, en de twee routes om onzekerheid door te geven.",
+  in_w_light: "Waarom lichte kernen R-matrixfits nodig hebben in plaats van statistische theorie: weinig brede niveaus, 1/v-absorptie, kanalen en unitariteit.",
+  in_w_resonances: "Opgeloste en onopgeloste resonanties: Breit–Wigner en Reich–Moore, statistische ladders, waarschijnlijkheidstabellen.",
+  in_w_emulator: "Emulatoren van het fysicamodel: waarom snelheid telt voor onzekerheid, gevoeligheid en fitten, en twee kortere routes langs de trage stappen.",
+});
+WT.L.ui.in_t_pipeline = WT.L.ui.pl_flow_h;
+WT.L.ui.in_t_workflow = WT.L.ui.pl_wf_h;
+WT.L.ui.in_t_light = WT.L.ui.pl_li_h;
+WT.L.ui.in_t_resonances = WT.L.ui.pl_rs_h;
+WT.L.ui.in_t_emulator = WT.L.ui.pl_em_h;

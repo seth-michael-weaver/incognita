@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[1]
 SITE = REPO / "docs" / "walkthrough"
 LANGS = ["ar", "da", "de", "es", "fr", "hi", "it", "ja", "ko", "nl", "pt", "ru", "zh"]
 
-_KEY = re.compile(r'(?:^|[{,])\s*"?([A-Za-z][A-Za-z0-9_]*)"?\s*:\s*["`]', re.M)
+_KEY = re.compile(r'(?:^|[{,])\s*"?([A-Za-z][A-Za-z0-9_]*)"?\s*:\s*["`\']', re.M)   # single quotes too (es-ui.js 'audience')
 _USE = re.compile(r'(?:\bT|WT\.ui)\(\s*"([A-Za-z0-9_]+)"\s*,')
 
 
@@ -27,7 +27,7 @@ def _defined(lang: str, files: list[str]) -> set[str]:
     return keys
 
 
-@pytest.mark.parametrize("page", ["data.html", "pipeline.html", "instructors.html", "scoreboard.html"])
+@pytest.mark.parametrize("page", ["data.html", "index.html", "instructors.html", "scoreboard.html"])
 def test_every_page_key_is_translated(page):
     """Every key a page uses (data-i18n* in the page, T(...) / WT.ui(...) in its scripts, nav.js included) exists in each
     language's files that the page loads. Round 1 found the energy-band strip, the below-1-keV texts, the whole pipeline
@@ -44,8 +44,14 @@ def test_every_page_key_is_translated(page):
     assert not {k: v for k, v in miss.items() if v}, miss
 
 
-def test_pipeline_page_applies_its_translations():
-    """pipeline.js never applied the static data-i18n text of pipeline.html (kicker, heading, 'What we have' counts) nor
-    a translated title, so those stayed English in every language."""
-    src = (SITE / "js" / "pipeline.js").read_text(encoding="utf-8")
-    assert "[data-i18n]" in src and "pl_title" in src
+def test_pipeline_part_is_translated_on_the_main_page():
+    """The pipeline page became part three of index.html (2026-11-13). Its static text (part heading, 'What we have'
+    counts) is data-i18n, applied by kit.js; the chapters read their text through T(); index.html loads the pipeline
+    files; the old page only redirects."""
+    html = (SITE / "index.html").read_text(encoding="utf-8")
+    assert '"pipeline"' in re.search(r"WT\.load\(\[([^\]]*)\]", html).group(1)
+    assert 'js/ch/pipeline.js' in html and 'data-i18n="pl_part_k"' in html and 'data-i18n="pl_now_h"' in html
+    src = (SITE / "js" / "ch" / "pipeline.js").read_text(encoding="utf-8")
+    for ch in ("pipeline", "workflow", "light", "resonances", "emulator"):
+        assert f'WT.chapter("{ch}"' in src
+    assert "from=pipeline" in (SITE / "pipeline.html").read_text(encoding="utf-8")

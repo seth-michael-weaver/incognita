@@ -1,4 +1,4 @@
-/* German (Deutsch): pipeline page (pipeline.html, js/pipeline.js) */
+/* German (Deutsch): part three of the main page, from measurement to reactor (index.html, js/ch/pipeline.js) */
 Object.assign(WT.L.ui, {
   pl_kicker: "INCOGNITA · Reaktordaten",
   pl_h1: "Von der Messung zum Reaktor",
@@ -171,3 +171,31 @@ Object.assign(WT.L.ui, {
   pl_em_p3: "Die beiden Abkürzungen setzen an den beiden langsamen Schritten an. Die erste ersetzt <i>Modell, Datei, Aufbereitung</i> durch eine einzige gelernte Abbildung von den Physikparametern auf die Bibliothek, die ein Transportcode liest. Die zweite ersetzt Monte Carlo, das Millionen einzelner Neutronen verfolgt, durch eine deterministische Rechnung, die direkt nach der mittleren Neutronenpopulation löst: für einfache Systeme viel schneller, aber weniger allgemein. Dies ist ein Ansatz, den wir entwickeln; er ist nicht Teil der veröffentlichten Dateien.",
   pl_rt_aria: "Drei Wege von einem Physikmodell zu einer Antwort. Standard: Physikmodell, evaluierte Datei, Aufbereitung, Monte-Carlo-Transport, Antwort. Erste Abkürzung: Ein Emulator des Modells schreibt die Bibliothek direkt, ohne Datei und Aufbereitung, dann Monte Carlo. Zweite Abkürzung: Die Bibliothek geht an eine schnelle deterministische Lösung statt an Monte Carlo.",
 });
+
+/* part three of the main page (the pipeline page merged into index.html, 2026-11-13): part heading, short names, labels;
+   chapter titles in the instructors' guide alias the pl_* titles above */
+Object.assign(WT.L.ui, {
+  pl_part_k: "Teil drei · Reaktordaten",
+  pl_part_p: "Bisher folgte die Geschichte einem Neutron durch die Engine. Dieser Teil folgt den Daten weiter: von Messungen zu einer evaluierten Datei, zur Bibliothek, die ein Reaktorcode liest, bis zu einer Rechnung, die an echten Kritikalitätsexperimenten geprüft wird. Die letzten drei Kapitel beschreiben Arbeit, die wir entwickeln.",
+  pl_part_lead: "Sieben Stufen bringen eine gemessene Resonanz in eine Datei, die ein Reaktorcode liest, und zurück, wenn eine Prüfung scheitert. Wählen Sie eine Stufe im Diagramm oder scrollen Sie.",
+  in_s_pipeline: "Pipeline",
+  in_s_workflow: "Standardablauf",
+  in_s_light: "Leichte Kerne",
+  in_s_resonances: "Aufgelöst, unaufgelöst",
+  in_s_emulator: "Emulatoren",
+  pl_li_heavy: "schwerer Kern",
+  pl_li_light: "leichter Kern",
+  pl_li_in: "innen: die Niveaus des Kerns",
+  pl_li_a: "Kanalradius",
+  pl_li_out: "außen: nur bekannte Kräfte",
+  in_w_pipeline: "Messungen, der R-Matrix-Fit über ein Modell jedes Experiments, die ENDF-6-Datei, die Verarbeitung mit NJOY, die OpenMC-Bibliothek, Kritikalitäts-Benchmarks und die festen Prüfungen, jeweils mit einer lebendigen Zeichnung.",
+  in_w_workflow: "Wer Evaluierungen erstellt, das ENDF-6-Format (MF und MT), NJOY Modul für Modul, wie OpenMC k-eff bestimmt, und die zwei Wege, Unsicherheiten weiterzutragen.",
+  in_w_light: "Warum leichte Kerne R-Matrix-Fits statt statistischer Theorie brauchen: wenige breite Niveaus, 1/v-Absorption, Kanäle und Unitarität.",
+  in_w_resonances: "Aufgelöste und unaufgelöste Resonanzen: Breit–Wigner und Reich–Moore, statistische Leitern, Wahrscheinlichkeitstabellen.",
+  in_w_emulator: "Emulatoren des Physikmodells: warum Geschwindigkeit für Unsicherheit, Sensitivität und Anpassung zählt, und zwei Abkürzungen an den langsamen Schritten vorbei.",
+});
+WT.L.ui.in_t_pipeline = WT.L.ui.pl_flow_h;
+WT.L.ui.in_t_workflow = WT.L.ui.pl_wf_h;
+WT.L.ui.in_t_light = WT.L.ui.pl_li_h;
+WT.L.ui.in_t_resonances = WT.L.ui.pl_rs_h;
+WT.L.ui.in_t_emulator = WT.L.ui.pl_em_h;

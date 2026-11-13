@@ -1,4 +1,4 @@
-/* Danish (Dansk): pipeline page (pipeline.html, js/pipeline.js) */
+/* Danish (Dansk): part three of the main page, from measurement to reactor (index.html, js/ch/pipeline.js) */
 Object.assign(WT.L.ui, {
   pl_kicker: "INCOGNITA · reaktordata",
   pl_h1: "Fra måling til reaktor",
@@ -171,3 +171,31 @@ Object.assign(WT.L.ui, {
   pl_em_p3: "De to genveje angriber de to langsomme trin. Den første erstatter <i>model, fil, behandling</i> med én indlært afbildning fra fysikparametrene til det bibliotek, en transportkode læser. Den anden erstatter Monte Carlo, der følger millioner af enkelte neutroner, med en deterministisk beregning, der direkte løser for den gennemsnitlige neutronpopulation: meget hurtigere for simple systemer, men mindre generel. Det er en tilgang, vi udvikler; den er ikke en del af de udgivne filer.",
   pl_rt_aria: "Tre veje fra en fysikmodel til et svar. Standard: fysikmodel, evalueret fil, behandling, Monte Carlo-transport, svar. Første genvej: en emulator af modellen skriver biblioteket direkte, uden fil og behandling, derefter Monte Carlo. Anden genvej: biblioteket går til en hurtig deterministisk løsning i stedet for Monte Carlo.",
 });
+
+/* part three of the main page (the pipeline page merged into index.html, 2026-11-13): part heading, short names, labels;
+   chapter titles in the instructors' guide alias the pl_* titles above */
+Object.assign(WT.L.ui, {
+  pl_part_k: "Del tre · Reaktordata",
+  pl_part_p: "Indtil nu har historien fulgt en neutron gennem motoren. Denne del følger dataene videre: fra målinger til en evalueret fil, til det bibliotek en reaktorkode læser, til en beregning der kontrolleres mod rigtige kritikalitetseksperimenter. De sidste tre kapitler er arbejde, vi udvikler.",
+  pl_part_lead: "Syv trin fører en målt resonans frem til en fil, som en reaktorkode læser, og tilbage igen, når en kontrol fejler. Vælg et trin i diagrammet, eller rul.",
+  in_s_pipeline: "Pipeline",
+  in_s_workflow: "Standardforløb",
+  in_s_light: "Lette kerner",
+  in_s_resonances: "Opløste, uopløste",
+  in_s_emulator: "Emulatorer",
+  pl_li_heavy: "tung kerne",
+  pl_li_light: "let kerne",
+  pl_li_in: "indeni: kernens niveauer",
+  pl_li_a: "kanalradius",
+  pl_li_out: "udenfor: kun kendte kræfter",
+  in_w_pipeline: "Målinger, R-matrix-fittet gennem en model af hvert eksperiment, ENDF-6-filen, behandling med NJOY, OpenMC-biblioteket, kritikalitetsbenchmarks og de faste kontroller, hver med en levende tegning.",
+  in_w_workflow: "Hvem laver evalueringer, ENDF-6-formatet (MF og MT), NJOY modul for modul, hvordan OpenMC finder k-eff, og de to veje til at føre usikkerhed videre.",
+  in_w_light: "Hvorfor lette kerner kræver R-matrix-fit frem for statistisk teori: få brede niveauer, 1/v-absorption, kanaler og unitaritet.",
+  in_w_resonances: "Opløste og uopløste resonanser: Breit–Wigner og Reich–Moore, statistiske stiger, sandsynlighedstabeller.",
+  in_w_emulator: "Emulatorer af fysikmodellen: hvorfor hastighed betyder noget for usikkerhed, følsomhed og fit, og to genveje uden om de langsomme trin.",
+});
+WT.L.ui.in_t_pipeline = WT.L.ui.pl_flow_h;
+WT.L.ui.in_t_workflow = WT.L.ui.pl_wf_h;
+WT.L.ui.in_t_light = WT.L.ui.pl_li_h;
+WT.L.ui.in_t_resonances = WT.L.ui.pl_rs_h;
+WT.L.ui.in_t_emulator = WT.L.ui.pl_em_h;

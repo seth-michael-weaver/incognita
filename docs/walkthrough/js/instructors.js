@@ -39,6 +39,11 @@
     ["strength", 26, 3, 18, 5, "Photon strength, in detail", "Photon strength", "E1 (SLO and SMLO) and M1 (spin-flip, scissors, upbend), the Brink–Axel hypothesis, the average radiative width ⟨Γγ⟩ and the γ cascade."],
     ["exciton", 27, 3, 20, 6, "The exciton model, in numbers", "Exciton model", "Particle–hole state densities, transition and emission rates, the exciton chain in time, the hard tail of spectra, the pre-equilibrium share and the two-component model."],
     ["averages", 28, 3, 18, 5, "From resonances to averages", "Resonances to averages", "The R-matrix formula, the statistics of resonance parameters, Doppler broadening, the energy average that becomes Hauser–Feshbach, and resolved, unresolved and smooth ranges."],
+    ["pipeline", 29, 1, 15, 7, "The pipeline, stage by stage", "Pipeline", "Measurements, the R-matrix fit through a model of each experiment, the ENDF-6 file, NJOY processing, the OpenMC library, critical benchmarks and the fixed checks, each with a live drawing."],
+    ["workflow", 30, 2, 15, 5, "How nuclear data reach a reactor calculation", "Standard workflow", "Who makes evaluations, the ENDF-6 format (MF and MT), NJOY module by module, how OpenMC finds k-eff, and the two routes for carrying uncertainty."],
+    ["light", 31, 2, 8, 4, "Light nuclei: resonances all the way up", "Light nuclei", "Why light nuclei need R-matrix fits rather than statistical theory: a few broad levels, 1/v absorption, channels and unitarity."],
+    ["resonances", 32, 2, 6, 3, "Resonances, resolved and unresolved", "Resolved, unresolved", "Resolved and unresolved resonances: Breit–Wigner and Reich–Moore, statistical ladders, probability tables."],
+    ["emulator", 33, 2, 6, 3, "Emulators: a fast stand-in for the physics model", "Emulators", "Emulators of the physics model: why speed matters for uncertainty, sensitivity and fitting, and two shortcuts around the slow steps."],
     ["halflife", 0, 0, 10, 5, "Radioactivity and half-life", "Half-life", "Random decay of single nuclei, the half-life as a statistical law, exponential decay curves and activity.", 1],
     ["rays", 0, 0, 10, 5, "Alpha, beta, gamma and neutrons", "Radiation", "The four kinds of radiation, what stops each (paper, aluminium, lead, water), and shielding by thickness.", 1],
     ["dose", 0, 0, 8, 4, "Radiation dose", "Dose", "Gray and sievert, everyday doses from a banana to a CT scan, and the doses at which tissue damage begins.", 1],
@@ -78,7 +83,7 @@
     ["nwverify", 0, 1, 10, 4, "Watching for tests, guarding material", "Verification", "The CTBTO monitoring network (seismic, infrasound, hydroacoustic, radionuclide), radioactive xenon as a clock, and IAEA safeguards measurements, all resting on nuclear data.", 1],
     ["nwdata", 0, 0, 8, 4, "Reactors, weapons and nuclear data", "Reactors vs weapons", "Fission and fusion; why a power reactor cannot explode like a bomb; enrichment levels (natural, reactor fuel, the 20 % LEU line); nuclear data in criticality safety and verification.", 1],
   ].map(([id, n, lv, min, steps, title, topic, what, tp], i) => ({ id, lv, min, steps, tp: !!tp, title: T("in_t_" + id, title), topic: T("in_s_" + id, topic), what: T("in_w_" + id, what) }));
-  // numbers per page: main story 1..26, then the More topics lessons 1..28 (topics.html)
+  // numbers per page: main story 1..31 (part three, from measurement to reactor: 27-31), then the More topics lessons 1..28 (topics.html)
   { let a = 0, b = 0; CH.forEach((c) => (c.n = c.tp ? ++b : ++a)); }
   const byId = Object.fromEntries(CH.map((c) => [c.id, c]));
   const lang = WT.langQ();

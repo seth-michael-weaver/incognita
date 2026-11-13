@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/pipeline", "destination": "/?from=pipeline", "permanent": false },
+    { "source": "/pipeline.html", "destination": "/?from=pipeline", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/(.*)",

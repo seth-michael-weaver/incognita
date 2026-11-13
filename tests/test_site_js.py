@@ -1,4 +1,4 @@
-"""Site JS regressions (docs/walkthrough/js): data.js formatting, band lookup and axis range; pipeline.js pulse; nav.js."""
+"""Site JS regressions (docs/walkthrough/js): data.js formatting, band lookup and axis range; ch/pipeline.js pulse; nav.js."""
 import json
 import re
 import shutil
@@ -48,7 +48,7 @@ def test_y_padding_is_code_not_comment():
 
 
 def test_pulse_cancels_the_running_animation_first():
-    src = (JS / "pipeline.js").read_text(encoding="utf-8")
+    src = (JS / "ch" / "pipeline.js").read_text(encoding="utf-8")
     body = src[src.index("function pulseTo"):]
     body = body[:body.index("\n  }")]
     assert body.index("cancelAnimationFrame") < body.index("= { path,")
@@ -63,7 +63,7 @@ def test_expert_menu_uses_chapter_short_names():
 
 
 def _pipeline_fn(name):
-    src = (JS / "pipeline.js").read_text(encoding="utf-8")
+    src = (JS / "ch" / "pipeline.js").read_text(encoding="utf-8")
     body = src[src.index(f"  function {name}("):]
     return body[:body.index("\n  }\n") + 4]
 
@@ -102,7 +102,7 @@ def test_stage_subtitle_long_word_stays_in_its_box():
 
 
 def test_stage_subtitle_uses_clamp():
-    src = (JS / "pipeline.js").read_text(encoding="utf-8")
+    src = (JS / "ch" / "pipeline.js").read_text(encoding="utf-8")
     assert "clampLines(ctx, sl," in src
 
 

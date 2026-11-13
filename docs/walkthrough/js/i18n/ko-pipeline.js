@@ -1,4 +1,4 @@
-/* Korean (한국어): pipeline page (pipeline.html, js/pipeline.js) */
+/* Korean (한국어): part three of the main page, from measurement to reactor (index.html, js/ch/pipeline.js) */
 Object.assign(WT.L.ui, {
   pl_kicker: "INCOGNITA · 원자로용 데이터",
   pl_h1: "측정에서 원자로까지",
@@ -171,3 +171,31 @@ Object.assign(WT.L.ui, {
   pl_em_p3: "두 지름길은 느린 두 단계를 겨냥합니다. 첫째는 <i>모형, 파일, 처리</i>를 물리 매개변수에서 수송 코드가 읽는 라이브러리로 가는 학습된 사상 하나로 바꿉니다. 둘째는 수백만 개의 중성자를 하나씩 따라가는 몬테카를로를, 평균 중성자 분포를 직접 푸는 결정론적 계산으로 바꿉니다. 단순한 계에서는 훨씬 빠르지만 범용성은 떨어집니다. 이는 우리가 개발 중인 접근법이며, 공개된 파일에는 포함되지 않습니다.",
   pl_rt_aria: "물리 모형에서 답에 이르는 세 경로. 표준: 물리 모형, 평가 파일, 처리, 몬테카를로 수송, 답. 첫째 지름길: 모형 에뮬레이터가 파일과 처리 없이 라이브러리를 바로 쓰고, 이어서 몬테카를로. 둘째 지름길: 라이브러리가 몬테카를로 대신 빠른 결정론적 풀이로 감.",
 });
+
+/* part three of the main page (the pipeline page merged into index.html, 2026-11-13): part heading, short names, labels;
+   chapter titles in the instructors' guide alias the pl_* titles above */
+Object.assign(WT.L.ui, {
+  pl_part_k: "3부 · 원자로를 위한 데이터",
+  pl_part_p: "지금까지 이야기는 엔진 속을 지나는 중성자를 따라왔습니다. 이번 부에서는 데이터를 따라갑니다. 측정에서 평가 파일로, 원자로 코드가 읽는 라이브러리로, 그리고 실제 임계 실험으로 검증하는 계산까지. 마지막 세 장은 우리가 개발 중인 작업입니다.",
+  pl_part_lead: "일곱 단계가 측정된 공명을 원자로 코드가 읽는 파일까지 옮기고, 검사에 실패하면 다시 되돌립니다. 도표에서 단계를 고르거나 스크롤하세요.",
+  in_s_pipeline: "파이프라인",
+  in_s_workflow: "표준 흐름",
+  in_s_light: "가벼운 핵",
+  in_s_resonances: "분해·미분해",
+  in_s_emulator: "에뮬레이터",
+  pl_li_heavy: "무거운 핵",
+  pl_li_light: "가벼운 핵",
+  pl_li_in: "안쪽: 핵의 준위",
+  pl_li_a: "채널 반지름",
+  pl_li_out: "바깥쪽: 알려진 힘만",
+  in_w_pipeline: "측정, 각 실험의 모델을 거친 R-행렬 피팅, ENDF-6 파일, NJOY 처리, OpenMC 라이브러리, 임계 벤치마크와 고정 검사. 단계마다 움직이는 그림이 있습니다.",
+  in_w_workflow: "평가를 누가 만드는지, ENDF-6 형식(MF와 MT), NJOY 모듈별 역할, OpenMC가 k-eff를 구하는 방법, 불확도를 전달하는 두 가지 길.",
+  in_w_light: "가벼운 핵에 통계 이론 대신 R-행렬 피팅이 필요한 이유: 몇 개의 넓은 준위, 1/v 흡수, 채널과 유니터리성.",
+  in_w_resonances: "분해 공명과 미분해 공명: Breit–Wigner와 Reich–Moore, 통계적 공명 사다리, 확률표.",
+  in_w_emulator: "물리 모델의 에뮬레이터: 불확도·민감도·피팅에서 속도가 중요한 이유와 느린 단계를 건너뛰는 두 가지 지름길.",
+});
+WT.L.ui.in_t_pipeline = WT.L.ui.pl_flow_h;
+WT.L.ui.in_t_workflow = WT.L.ui.pl_wf_h;
+WT.L.ui.in_t_light = WT.L.ui.pl_li_h;
+WT.L.ui.in_t_resonances = WT.L.ui.pl_rs_h;
+WT.L.ui.in_t_emulator = WT.L.ui.pl_em_h;

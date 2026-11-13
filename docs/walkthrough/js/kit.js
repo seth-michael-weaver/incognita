@@ -510,6 +510,7 @@
     const LEVELS = ["Intro", "Intermediate", "Advanced", "Expert"]; // course level of each chapter (also listed on instructors.html)
     const LEVEL = { structure: 0, xsec: 0, binding: 0, landscape: 0, neutrons: 0, omp: 0, direct: 0, preeq: 1, compound: 1, decay: 1, gamma: 2, cascade: 1, fission: 1, fisout: 1, products: 1, resonance: 2, tof: 1, measure: 1, slowing: 1, doppler: 1, critical: 1, layers: 2,
       hauser: 3, optical: 3, densities: 3, strength: 3, exciton: 3, averages: 3, // the Expert part (chapters 23-28)
+      pipeline: 1, workflow: 2, light: 2, resonances: 2, emulator: 2, // part three, from measurement to reactor (chapters 27-31)
       fusion: 0, gamow: 1, tokamak: 2, blanket: 3 }; // fusion (on topics.html): one chapter per level
     Object.keys(WT.mods).forEach((id) => { if (WT.mods[id].level != null) LEVEL[id] = WT.mods[id].level; }); // a chapter may carry its own level (topics.html)
     // chapter numbers follow page order (1..N), in the reader's language: "Chapter 1" (or its translation) with the number replaced
@@ -676,7 +677,7 @@
     // deep links (#omp, #omp-3): scroll there once the page has its final layout; a step lands where it becomes active
     const goHash = (smooth) => {
       const t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (!t || m) return;
-      const isStep = t.classList.contains("step"); if (!isStep && !t.matches("[data-ch]")) return;
+      const isStep = t.classList.contains("step"); if (!isStep && !t.matches("[data-ch], .part-head")) return; // a part heading (#expert, #reactor) too
       const nh = document.querySelector(".toc") ? document.querySelector(".toc").offsetHeight : 0;
       const y = t.getBoundingClientRect().top + window.scrollY - (isStep ? window.innerHeight * (PHONE ? 0.5 : 0.38) : nh);
       window.scrollTo({ top: Math.max(0, y), behavior: smooth ? "smooth" : "instant" });

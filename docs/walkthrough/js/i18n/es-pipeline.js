@@ -1,4 +1,4 @@
-/* Spanish (Español): pipeline page (pipeline.html, js/pipeline.js) */
+/* Spanish (Español): part three of the main page, from measurement to reactor (index.html, js/ch/pipeline.js) */
 Object.assign(WT.es.ui, {
   pl_kicker: "INCOGNITA · datos para reactores",
   pl_h1: "De la medida al reactor",
@@ -171,3 +171,31 @@ Object.assign(WT.es.ui, {
   pl_em_p3: "Los dos atajos atacan los dos pasos lentos. El primero sustituye <i>modelo, archivo, procesamiento</i> por una sola relación aprendida entre los parámetros físicos y la biblioteca que lee un código de transporte. El segundo sustituye el Monte Carlo, que sigue a millones de neutrones uno a uno, por un cálculo determinista que resuelve directamente la población media de neutrones, mucho más rápido para sistemas sencillos aunque menos general. Es un enfoque que estamos desarrollando; no forma parte de los archivos publicados.",
   pl_rt_aria: "Tres vías de un modelo físico a una respuesta. Estándar: modelo físico, archivo evaluado, procesamiento, transporte Monte Carlo, respuesta. Primer atajo: un emulador del modelo escribe la biblioteca directamente, sin archivo ni procesamiento, y luego Monte Carlo. Segundo atajo: la biblioteca pasa a un cálculo determinista rápido en lugar de Monte Carlo.",
 });
+
+/* part three of the main page (the pipeline page merged into index.html, 2026-11-13): part heading, short names, labels;
+   chapter titles in the instructors' guide alias the pl_* titles above */
+Object.assign(WT.es.ui, {
+  pl_part_k: "Tercera parte · Datos para reactores",
+  pl_part_p: "Hasta aquí la historia ha seguido a un neutrón por el motor. Esta parte sigue a los datos: de las medidas a un archivo evaluado, a la biblioteca que lee un código de reactores y a un cálculo comprobado con experimentos críticos reales. Los tres últimos capítulos son trabajo que estamos desarrollando.",
+  pl_part_lead: "Siete etapas llevan una resonancia medida hasta un archivo que lee un código de reactores, y de vuelta cuando falla una comprobación. Elige una etapa en el diagrama o desplázate.",
+  in_s_pipeline: "La cadena",
+  in_s_workflow: "Flujo estándar",
+  in_s_light: "Núcleos ligeros",
+  in_s_resonances: "Resueltas, no resueltas",
+  in_s_emulator: "Emuladores",
+  pl_li_heavy: "núcleo pesado",
+  pl_li_light: "núcleo ligero",
+  pl_li_in: "dentro: los niveles del núcleo",
+  pl_li_a: "radio de canal",
+  pl_li_out: "fuera: solo fuerzas conocidas",
+  in_w_pipeline: "Medidas, el ajuste de matriz R a través de un modelo de cada experimento, el archivo ENDF-6, el procesamiento con NJOY, la biblioteca de OpenMC, los benchmarks críticos y las comprobaciones fijas, cada uno con un dibujo vivo.",
+  in_w_workflow: "Quién hace las evaluaciones, el formato ENDF-6 (MF y MT), NJOY módulo a módulo, cómo obtiene OpenMC la k-eff y las dos vías para propagar la incertidumbre.",
+  in_w_light: "Por qué los núcleos ligeros necesitan ajustes de matriz R y no teoría estadística: pocos niveles anchos, absorción 1/v, canales y unitariedad.",
+  in_w_resonances: "Resonancias resueltas y no resueltas: Breit–Wigner y Reich–Moore, escaleras estadísticas, tablas de probabilidad.",
+  in_w_emulator: "Emuladores del modelo físico: por qué la velocidad importa para la incertidumbre, la sensibilidad y el ajuste, y dos atajos que evitan los pasos lentos.",
+});
+WT.es.ui.in_t_pipeline = WT.es.ui.pl_flow_h;
+WT.es.ui.in_t_workflow = WT.es.ui.pl_wf_h;
+WT.es.ui.in_t_light = WT.es.ui.pl_li_h;
+WT.es.ui.in_t_resonances = WT.es.ui.pl_rs_h;
+WT.es.ui.in_t_emulator = WT.es.ui.pl_em_h;

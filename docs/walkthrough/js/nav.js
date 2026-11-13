@@ -5,13 +5,6 @@
   const head = document.querySelector(".site"); if (!head) return;
   // "Instructors" link (every page): the teaching guide, placed before GitHub
   const sl = head.querySelector(".site-links");
-  // "Pipeline" link hidden for now; pipeline.html stays reachable by URL. Uncomment to restore.
-  // if (sl && !sl.querySelector('a[href^="pipeline.html"]')) {
-  //   const a = document.createElement("a"); a.href = "pipeline.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_pipe"; a.textContent = WT.ui("nav_pipe", "Pipeline");
-  //   if (/\/pipeline(\.html)?$/.test(location.pathname)) { a.className = "here"; a.setAttribute("aria-current", "page"); }
-  //   const b = sl.querySelector('a[href^="scoreboard.html"]');
-  //   sl.insertBefore(a, b ? b.nextSibling : sl.querySelector(".gh"));
-  // }
   // "More topics" link (every page): lessons beside the engine story (reactors, radiation, fusion), placed after Comparisons
   if (sl && !head.querySelector('[data-i18n="nav_topics"]')) { // topics.html has it as its chapter menu instead
     const a = document.createElement("a"); a.href = "topics.html"; a.dataset.keepLang = ""; a.dataset.i18n = "nav_topics"; a.textContent = WT.ui("nav_topics", "More Nuclear Topics");
@@ -25,7 +18,7 @@
   }
   // cross-page menus: "The Physics" and "More topics" open a chapter list on every page, like the
   // current page's own menu (filled by kit.js). Wide screens: a button and a list; phones keep the plain link in the ☰ menu.
-  const MENUS = { "./": [["structure",0,"Structure"],["xsec",0,"Cross section"],["binding",0,"Binding"],["landscape",0,"Landscape"],["neutrons",0,"Why neutrons"],["omp",0,"Optical model"],["direct",0,"Direct reactions"],["preeq",1,"Pre-equilibrium"],["compound",1,"Compound nucleus"],["decay",1,"Decay"],["gamma",2,"Photons"],["cascade",1,"Cascade"],["fission",1,"Fission"],["fisout",1,"Fission neutrons"],["products",1,"Fission products"],["resonance",2,"Resonances"],["tof",1,"Measuring peaks"],["measure",1,"Observables"],["slowing",1,"Slowing down"],["layers",2,"Layers"],["#expert","xp_kicker","Part two · Expert","xp_h","Into the weeds"],["hauser",3,"Hauser–Feshbach"],["optical",3,"Optical model, solved"],["densities",3,"Level densities"],["strength",3,"Photon strength"],["exciton",3,"Exciton model"],["averages",3,"Resonances to averages"]],
+  const MENUS = { "./": [["structure",0,"Structure"],["xsec",0,"Cross section"],["binding",0,"Binding"],["landscape",0,"Landscape"],["neutrons",0,"Why neutrons"],["omp",0,"Optical model"],["direct",0,"Direct reactions"],["preeq",1,"Pre-equilibrium"],["compound",1,"Compound nucleus"],["decay",1,"Decay"],["gamma",2,"Photons"],["cascade",1,"Cascade"],["fission",1,"Fission"],["fisout",1,"Fission neutrons"],["products",1,"Fission products"],["resonance",2,"Resonances"],["tof",1,"Measuring peaks"],["measure",1,"Observables"],["slowing",1,"Slowing down"],["layers",2,"Layers"],["#expert","xp_kicker","Part two · Expert","xp_h","Into the weeds"],["hauser",3,"Hauser–Feshbach"],["optical",3,"Optical model, solved"],["densities",3,"Level densities"],["strength",3,"Photon strength"],["exciton",3,"Exciton model"],["averages",3,"Resonances to averages"],["#reactor","pl_part_k","Part three · Reactor data","pl_h1","From measurement to reactor"],["pipeline",1,"Pipeline"],["workflow",2,"Standard workflow"],["light",2,"Light nuclei"],["resonances",2,"Resolved, unresolved"],["emulator",2,"Emulators"]],
     "topics.html": [["#part-radiation","tp_p1_k","Part one","tp_p1_h","Radiation"],["halflife",0,"Half-life"],["rays",0,"Radiation"],["dose",0,"Dose"],["chains",1,"Decay chains"],["waste",1,"Spent fuel"],["#part-reactor","tp_p2_k","Part two","tp_p2_h","Inside a reactor"],["reactor",0,"Reactor"],["economy",1,"Neutron economy"],["spectrum",1,"Fast vs thermal"],["breeding",1,"Breeding"],["burnup",1,"Burnup"],["afterheat",0,"Afterheat"],["#part-control","tp_p3_k","Part three","tp_p3_h","Stability and control"],["critical",1,"Criticality"],["doppler",1,"Doppler"],["feedback",2,"Feedback"],["xenon",2,"Xenon"],["diffusion",2,"Critical size"],["kinetics",3,"Kinetics"],["transport",3,"Monte Carlo"],["#part-fusion","tp_p4_k","Part four","fu_h","Joining light nuclei"],["fusion",0,"Fusion"],["gamow",1,"Gamow peak"],["tokamak",2,"Confinement"],["blanket",3,"Blanket"]] };
   const LVN = ["Intro", "Intermediate", "Advanced", "Expert"];
   if (sl) sl.querySelectorAll('a[href="./"], a[href="topics.html"]').forEach((a) => {

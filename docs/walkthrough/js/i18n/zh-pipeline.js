@@ -1,4 +1,4 @@
-/* Chinese (中文): pipeline page (pipeline.html, js/pipeline.js) */
+/* Chinese (中文): part three of the main page, from measurement to reactor (index.html, js/ch/pipeline.js) */
 Object.assign(WT.L.ui, {
   pl_kicker: "INCOGNITA · 反应堆数据",
   pl_h1: "从测量到反应堆",
@@ -171,3 +171,31 @@ Object.assign(WT.L.ui, {
   pl_em_p3: "两条捷径针对两个慢步骤。第一条用一个学到的映射,从物理参数直接得到输运程序读取的数据库,取代<i>模型、文件、处理</i>。第二条用确定论计算直接求解平均中子分布,取代逐个追踪数百万中子的蒙特卡罗:对简单系统快得多,但通用性较差。这是我们正在开发的方法,不属于已发布的文件。",
   pl_rt_aria: "从物理模型到答案的三条路线。标准:物理模型、评价文件、处理、蒙特卡罗输运、答案。第一条捷径:模型仿真器跳过文件和处理,直接写出数据库,然后进行蒙特卡罗计算。第二条捷径:数据库交给快速确定论求解,而不是蒙特卡罗。",
 });
+
+/* part three of the main page (the pipeline page merged into index.html, 2026-11-13): part heading, short names, labels;
+   chapter titles in the instructors' guide alias the pl_* titles above */
+Object.assign(WT.L.ui, {
+  pl_part_k: "第三部分 · 反应堆数据",
+  pl_part_p: "到目前为止，故事一直跟随中子穿过引擎。这一部分继续跟随数据：从测量到评价文件，到反应堆程序读取的数据库，再到用真实临界实验检验的计算。最后三章是我们正在开发的工作。",
+  pl_part_lead: "七个阶段把测得的共振送到反应堆程序读取的文件里，检查不通过时再送回去。在图上选择一个阶段，或继续滚动。",
+  in_s_pipeline: "流程",
+  in_s_workflow: "标准流程",
+  in_s_light: "轻核",
+  in_s_resonances: "可分辨与不可分辨",
+  in_s_emulator: "仿真器",
+  pl_li_heavy: "重核",
+  pl_li_light: "轻核",
+  pl_li_in: "内部：原子核的能级",
+  pl_li_a: "道半径",
+  pl_li_out: "外部：只有已知的力",
+  in_w_pipeline: "测量、通过每个实验模型进行的 R 矩阵拟合、ENDF-6 文件、NJOY 处理、OpenMC 数据库、临界基准和固定检查，每一步都有动态图。",
+  in_w_workflow: "谁来做评价，ENDF-6 格式（MF 和 MT），NJOY 各模块的作用，OpenMC 如何求出 k-eff，以及传递不确定度的两条途径。",
+  in_w_light: "为什么轻核需要 R 矩阵拟合而不是统计理论：少数几个宽能级、1/v 吸收、反应道和幺正性。",
+  in_w_resonances: "可分辨与不可分辨共振：Breit–Wigner 与 Reich–Moore、统计共振序列、概率表。",
+  in_w_emulator: "物理模型的仿真器：为什么速度对不确定度、灵敏度和拟合很重要，以及绕过慢步骤的两条捷径。",
+});
+WT.L.ui.in_t_pipeline = WT.L.ui.pl_flow_h;
+WT.L.ui.in_t_workflow = WT.L.ui.pl_wf_h;
+WT.L.ui.in_t_light = WT.L.ui.pl_li_h;
+WT.L.ui.in_t_resonances = WT.L.ui.pl_rs_h;
+WT.L.ui.in_t_emulator = WT.L.ui.pl_em_h;
