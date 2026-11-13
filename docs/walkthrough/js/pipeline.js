@@ -75,6 +75,8 @@
 
   WT.pipePhys = P;
   if (typeof document === "undefined" || !document.getElementById("pl-flow")) return;
+  // the page also has prose sections below the stages; a hash naming one of them is not a stage
+  const SECHASH = location.hash.length > 1 && !/^#(meas|fit|file|proc|lib|bench|judge)$/.test(location.hash) && document.getElementById(location.hash.slice(1)) ? location.hash.slice(1) : "";
 
   // static page text (data-i18n in pipeline.html) and the title, as data.js does; the head is done by nav.js
   if (WT.tl && WT.L && WT.L.ui) {
@@ -306,7 +308,7 @@
     if (V && V.stop) V.stop();
     tip.hidden = true; ctl.innerHTML = ""; V = VIZ[s.viz]; vcv.setAttribute("aria-label", s.t + ": " + s.lead); V.init(ctl); sizeViz();
     pulseTo(prev, i);
-    try { history.replaceState(null, "", "#" + s.id); } catch (e) {}
+    if (fromClick || !SECHASH) try { history.replaceState(null, "", "#" + s.id); } catch (e) {} // a link to a prose section (#workflow, #emulator) keeps its hash
     if (fromClick && !horiz) { const r = stEl.getBoundingClientRect(); if (r.top > innerHeight * 0.8) stEl.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" }); }
   }
   document.getElementById("pl-prev").addEventListener("click", () => select(Math.max(0, cur - 1)));
@@ -664,6 +666,7 @@
   // start
   // ===================================================================================================================
   const start = Math.max(0, STAGES.findIndex((s) => "#" + s.id === location.hash));
+  if (SECHASH) { const go = () => { const e = document.getElementById(SECHASH); if (e) e.scrollIntoView({ block: "start" }); }; if (document.fonts && document.fonts.ready) document.fonts.ready.then(go); else setTimeout(go, 0); }
   layoutFlow(); cur = start; select(start);
   let rt = 0, lastW = 0;
   const onResize = () => { cancelAnimationFrame(rt); rt = requestAnimationFrame(() => { layoutFlow(); if (vW() !== lastW) { lastW = vW(); sizeViz(); } }); };
