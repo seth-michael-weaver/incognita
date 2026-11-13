@@ -74,7 +74,7 @@ _STRUCTURE_DIRS: dict[str, Path] = {}
 
 
 def _structure_dir(env: str) -> Path:
-    """COREX: the resolved directory per $TALYS_DIR value, remembered once it exists."""
+    """Fast path: the resolved directory per $TALYS_DIR value, remembered once it exists."""
     path = _STRUCTURE_DIRS.get(env)
     if path is None:
         from physics.hf.core.constants import default_talys_root
@@ -152,7 +152,7 @@ def fortran_read(line: str, fmt: str) -> list:
 
 
 def fortran_reader(fmt: str):
-    """`functools.partial(fortran_read, fmt=fmt)` without the extra call per record (COREX).
+    """`functools.partial(fortran_read, fmt=fmt)` without the extra call per record.
 
     TALYS: levels.f90:1 (levels)
     Test: A-struct
@@ -168,7 +168,7 @@ _NOT_PLAIN = ("_", "n", "N", "i", "I")
 
 
 def _make_parser(fmt: str):
-    """COREX: `fortran_read` for one format as generated code, one conversion per field.
+    """Fast path: `fortran_read` for one format as generated code, one conversion per field.
 
     A real field containing '.' and none of '_', 'n', 'N', 'i', 'I' is read by Python's `float`,
     which then agrees with gfortran's BLANK='NULL' read: it skips the blanks around the number,
@@ -230,7 +230,7 @@ def _lines(path: str) -> tuple[str, ...]:
 
 
 class LazyLines:
-    """COREX: `tuple(text.splitlines())` of a file whose only line break is '\\n', without building
+    """Fast path: `tuple(text.splitlines())` of a file whose only line break is '\\n', without building
     the tuple: the text is kept whole with the offsets of its line starts and ends, and a line is
     sliced out when it is indexed (a reader that walks block headers touches a few hundred of an
     element file's ~40,000 lines). Indexing and len as a tuple; slices return tuples."""
@@ -264,7 +264,7 @@ def lazy_lines(path: str, encoding: str = "latin-1") -> LazyLines | tuple[str, .
         data = f.read()
     if encoding != "latin-1" and not data.isascii():
         return tuple(data.decode(encoding).splitlines())
-    # NATIVEX2 `struct`: one pass for every control byte instead of seven substring scans and a
+    # Native `struct`: one pass for every control byte instead of seven substring scans and a
     # newline pass: the file takes the plain split exactly when a control byte other than '\n'
     # is one of str.splitlines' breaks (\r \x0b \x0c \x1c \x1d \x1e) or it holds \x85
     arr = np.frombuffer(data, dtype=np.uint8)
@@ -334,7 +334,7 @@ def read_level_file(Z: int, A: int, disctable: int = 1, levelfile: str | None = 
 
 
 class LevelRecords:
-    """NATIVEX2 `struct`: a block's records as `read_level_file` returns them -- the slice
+    """Native `struct`: a block's records as `read_level_file` returns them -- the slice
     `lines[start:stop]` -- without building the tuple (`levels._level_block` reads the level
     lines up to numlev2 and skips the rest of a block that may hold thousands). Length and
     non-negative integer indexing as that tuple."""
@@ -374,7 +374,7 @@ class LevelRecords:
 
 
 def level_records(Z: int, A: int, disctable: int = 1, levelfile: str | None = None):
-    """`read_level_file` with the records as a `LevelRecords` view (NATIVEX2 `struct`).
+    """`read_level_file` with the records as a `LevelRecords` view (native `struct`).
 
     TALYS: levels.f90:1 (levels)
     Test: tests/hf/test_nx2_struct.py
@@ -389,7 +389,7 @@ def level_records(Z: int, A: int, disctable: int = 1, levelfile: str | None = No
     if not path.is_file():
         return None
     lines = _lazy_lines(str(path))
-    got = _level_headers(str(path)).get(A)  # NATIVEX2: the walk below, done once per file
+    got = _level_headers(str(path)).get(A)  # Native: the walk below, done once per file
     if got is not None:
         i, nlevlines, nnn = got
         return nnn, LevelRecords(lines, i + 1, i + 1 + nlevlines)
@@ -404,7 +404,7 @@ def level_records(Z: int, A: int, disctable: int = 1, levelfile: str | None = No
 
 @cache
 def _level_headers(path: str) -> dict[int, tuple[int, int, int]]:
-    """NATIVEX2: `read_level_file`'s header walk over one file, once: {A: (header line, nlevlines,
+    """Native: `read_level_file`'s header walk over one file, once: {A: (header line, nlevlines,
     nnn)} for the first block of each mass, up to the first header the walk could not read (a mass
     not in the dict takes the walk itself, which then raises or returns as before)."""
     lines = _lazy_lines(path)

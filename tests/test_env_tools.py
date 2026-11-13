@@ -97,7 +97,7 @@ def test_talys_fe56_capture_1mev(tmp_path):
 
 @needs_njoy
 def test_njoy_banner_on_stop():
-    """A lone ``stop`` card prints the version banner and exits 0."""
+    """A lone ``stop`` keyword prints the version banner and exits 0."""
     proc = _run([str(NJOY)], stdin="stop\n")
     assert proc.returncode == 0, proc.stderr
     assert "njoy 2016" in proc.stdout.lower(), proc.stdout[:500]

@@ -78,11 +78,11 @@ def barrier_height(fp: FissionParameters, ibar: int, deltaw_mev: Tensor) -> tupl
     For `fismodel >= 3`, and for a single-humped tabulated barrier, the liquid-drop height is
     corrected with the ground-state shell correction ``deltaW(0) - deltaW(1)``. `deltaw_mev` is
     T6's `LDNucleus.deltaW_mev`, indexed by barrier. `fisbaradjust`/`fishwadjust` multiply the
-    height (before the shell correction) and the curvature (FISBARWIRE); TALYS applies them only
+    height (before the shell correction) and the curvature; TALYS applies them only
     when `fisadjust` is set, i.e. when a fission keyword was given, and they are 1 otherwise.
     The energy-dependent `adjust` factors of a keyword given with an energy range are not ported
-    (they are 1 without one). Every live path -- this torch code, `fission_batch_ladder`, NATIVEX2's
-    `fis2` C kernels and CENGFIS's `fission.c` -- takes its Hill-Wheeler height and curvature from
+    (they are 1 without one). Every live path -- this torch code, `fission_batch_ladder`, the native
+    `fis2` C kernels and `fission.c` -- takes its Hill-Wheeler height and curvature from
     here; under `fismodel >= 5` the WKB table is read instead and neither is used.
 
     TALYS: t1barrier.f90:99-121 (t1barrier)
@@ -118,9 +118,9 @@ def _band_index(band, eex: Tensor, odd: int, maxj: int, dev):
 
 
 def fistsc_on() -> bool:
-    """FISTSC switch: the batched fission paths (`fission_batch_ladder`, CENGFIS, NX2 `fis2`'s ladder) accept
+    """`fistsc` switch: the batched fission paths (`fission_batch_ladder`, `fis_ceng`, NX2 `fis2`'s ladder) accept
     barriers that carry a rotational band (`fists2 y`, `hbstate y`) by adding `band_ladder` to their continuum
-    sum, so the C cascade keeps those compounds. `HF_NX2_FISTSC=0` restores the refusal (B71). Speed only.
+    sum, so the C cascade keeps those compounds. `HF_NX2_FISTSC=0` refuses such barriers instead. Speed only.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite

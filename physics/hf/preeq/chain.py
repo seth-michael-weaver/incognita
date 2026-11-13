@@ -4,7 +4,7 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NODUMP (physics/hf/CONTRACT.md §7). Acceptance test: A-pe / E2E (§6).
+Task: the dump-free chain (physics/hf/CONTRACT.md §7). Acceptance test: A-pe / E2E (§6).
 
 T8 ported the exciton model itself; what it injected (contract §5, and its module docstring says
 so) are the five inputs `preeq.prepare.prepare` reads off a reference run:
@@ -52,11 +52,11 @@ def target_tag(Z: int, A: int) -> str:
 class _ByEnergy(Mapping):
     """A read-only `{rounded energy: value}` map whose values are computed on FIRST LOOKUP.
 
-    SPEEDP. The chained arm's expensive per-energy quantities -- the DWBA/giant block of
-    `chained_direct` and the incident reaction cross section -- used to be built for the whole
-    declared grid the moment anything asked for one energy. A run that computes a subset of the
-    grid (`engine.ChainedFull(energies=...)`, `capture_fast`, any scoring pass that walks the
-    grid one energy at a time) then paid for 23 ECIS solves to read six. The value at a key is
+    Laziness. The chained arm's expensive per-energy quantities -- the DWBA/giant block of
+    `chained_direct` and the incident reaction cross section -- are built per energy on first
+    lookup, not for the whole declared grid. A run that computes a subset of the grid
+    (`engine.ChainedFull(energies=...)`, `capture_fast`, any scoring pass that walks the grid one
+    energy at a time) would otherwise pay for 23 ECIS solves to read six. The value at a key is
     exactly what the eager dict held there -- the same call with the same arguments -- so this is
     a scheduling change and not a physics one.
 
@@ -93,16 +93,16 @@ class _ByEnergy(Mapping):
         return len(self._memo)
 
 
-# ---------------------------------------------------------------- the run's one Cascade (SPEEDP)
+# ---------------------------------------------------------------- the run's one Cascade
 
 # `Cascade.incident` is an instance-level `lru_cache`, so two Cascades over the same target solve
-# the incident channel twice. `incident_reaction_xs` used to build its own, which meant the
-# engine's six solves and the chained pre-equilibrium's were never shared -- and on a `colltype
+# the incident channel twice. If `incident_reaction_xs` built its own, the
+# engine's six solves and the chained pre-equilibrium's would never be shared -- and on a `colltype
 # R`/`V` target each one is a coupled-channels ECIS deck. `Cascade.incident(e)` reads only
 # (Zt, At, k0, options, run grid), never `Cascade.energies` (that is `fisom`'s alone), so one
 # Cascade per (Zt, At, enincmax, k0) serves every caller. The engine LENDS its own rather than
 # having one handed to it: the borrower must not outlive the run that owns it, and must not
-# inherit a Cascade some other run has hung DIFFPARAM overrides on.
+# inherit a Cascade some other run has hung differentiable overrides on.
 _LENT: dict[tuple, weakref.ReferenceType] = {}
 
 
@@ -111,11 +111,11 @@ def lend_cascade(cas) -> None:
 
     Held weakly and keyed by (Zt, At, enincmax, k0); a lender with parameter overrides on it is
     refused, because the chained pre-equilibrium's `xsreacinc` is not on the override graph yet
-    and silently putting it there would change numbers nothing has gated.
+    and silently putting it there would change numbers nothing has tested.
     """
     from physics.hf.density.overrides import torch_path
 
-    # PARAMWIRE: the incident channel reads the optical model only, so a parameter set and float
+    # The incident channel reads the optical model only, so a parameter set and float
     # level-density / photon-strength overrides do not stop the lending; a graph or an optical
     # override does
     if (getattr(cas, "diff_params", False) or getattr(cas, "omp_overrides", None)
@@ -197,14 +197,14 @@ def inverse_reaction_xs(Zt: int, At: int, enincmax_mev: float, model: bool | tup
     """
     from physics.hf.compound.dens_reference import _eendmax, _transmission, _transmission_cached, run_grid
 
-    # SPEEDP: `_transmission` runs exactly this `inverse_channels` solve -- same run grid, same
+    # `_transmission` runs exactly this `inverse_channels` solve -- same run grid, same
     # `CaseBatch`, same `lmax` cap -- for the emission-grid `Tjl` the cascade needs, and now
     # carries `sigma_reac_mb` out of it. Building it here a second time was the single most
-    # expensive thing NODUMP added per target after the DWBA.
+    # expensive per-target step of the dump-free chain after the DWBA.
     rg = run_grid(Zt, At, enincmax_mev)
     E = rg.maxen + 1
-    # ROTEXIT1CN (`model`, default False): the model set's inverse sigma_reac (PE neutrons leave into the continuum)
-    if isinstance(model, tuple):  # ROTEXIT1CN3 (`sfexit ccf`): ((l, f_l), ...) = the CC-ratio set
+    # `model` (default False): the model set's inverse sigma_reac (PE neutrons leave into the continuum)
+    if isinstance(model, tuple):  # `sfexit ccf`: ((l, f_l), ...) = the CC-ratio set
         import os
 
         from physics.hf.compound.dens_reference import _transmission_sfunc
@@ -230,7 +230,7 @@ def incident_reaction_xs(Zt: int, At: int, energies: tuple[float, ...]) -> Mappi
     The same choice `emission.feeding.Cascade.incident` makes: a `colltype R`/`V` target is
     solved coupled-channels, and reading it as spherical costs Ca-40's sigma_reac 40% at 1 keV.
 
-    SPEEDP: solved on the run's one Cascade (`_incident_cascade`) and only at the energies that
+    Solved on the run's one Cascade (`_incident_cascade`) and only at the energies that
     are read (`_ByEnergy`). `Cascade.incident` does not look at `Cascade.energies`, so which
     grid the Cascade was built on cannot move the answer -- only how many times it is solved.
 
@@ -254,7 +254,7 @@ def chained_direct(Zt: int, At: int, energies: tuple[float, ...]) -> Mapping:
     Cached because `preeq.prepare` needs it twice (the flux and the discrete cross sections) and
     `compound.pop_reference` a third time.
 
-    SPEEDP: an energy's DWBA is solved on FIRST LOOKUP, not on construction. `energies` stays in
+    An energy's DWBA is solved on FIRST LOOKUP, not on construction. `energies` stays in
     the key and is still handed to `direct_result` whole, because `direct.chain._coupled` stitches
     `soswitch` across the axis and `direct.prepare.case` resolves the onsets on it -- what changes
     is only which rows are ever built. `engine._BuiltInputs` asks for the six energies its run
@@ -283,11 +283,11 @@ def chained_flux(Zt: int, At: int, energies: tuple[float, ...], grid=None) -> np
     The collective continuum is part of `xsgrsum` only through `giant` (giant.f90:129-131), and
     direct.f90:37 calls `giant` only when `flaggiant` -- never for d/t/h/alpha (input_directmodel.f90:93-97)
     nor below `epreeq`. There `xsgrsum = 0` and TALYS's flux keeps the collective continuum
-    (ENGPROJ9: subtracting it anyway left that flux, 4.1 mb for t+Y-89 at 45 MeV, to the compound nucleus).
+    (subtracting it anyway would leave that flux, 4.1 mb for t+Y-89 at 45 MeV, to the compound nucleus).
 
     `grid` is the energy axis the direct calculation belongs to. It is the pre-equilibrium
-    energy list of the WHOLE declared grid even when `energies` is the subset a run computes
-    (SPEEDP): `direct.chain._coupled` and `direct.prepare.case` both read that axis, so trimming
+    energy list of the WHOLE declared grid even when `energies` is the subset a run computes:
+    `direct.chain._coupled` and `direct.prepare.case` both read that axis, so trimming
     it would move numbers rather than only save work.
 
     TALYS: preeq.f90:1 (preeq), giant.f90:122-131
@@ -338,7 +338,7 @@ def chained_pairing(Zr: int, Ar: int, options, params, m) -> float:
     `densitypar` computes it the same way for every level-density model
     (densitypar.f90:397-405), which is why the header and this agree even for the tabulated
     models that print no pairing energy at all. `params` is the run's, with a parameter set's
-    `aadjust` applied by the caller (PARAMWIRE); `pair` does not read `aadjust`, so that routing
+    `aadjust` applied by the caller; `pair` does not read `aadjust`, so that routing
     moves nothing today and is there for a set that carries `pair`/`pshift`.
 
     TALYS: densitypar.f90:1 (densitypar)
@@ -361,7 +361,7 @@ def chained_photoabsorption(Zt: int, At: int, egrid: np.ndarray, nmax: int,
     `preeq.prepare._photoabsorption` already computes this from `gammaxs`; the only injected
     part was the `GammaParameters`, which it built from the `ld<ZZZ><AAA>.gs` and `psf*.M1`
     headers. `compound.dens_reference._gamma_parameters` builds the same object from T2, T6 and
-    T7 (gate A-psf), which is what the rest of the chain already uses.
+    T7 (test A-psf), which is what the rest of the chain already uses.
 
     TALYS: gammaxs.f90:1 (gammaxs), tgamma.f90:1 (tgamma)
     Test: A-psf / A-pe
@@ -370,7 +370,7 @@ def chained_photoabsorption(Zt: int, At: int, egrid: np.ndarray, nmax: int,
     from physics.hf.density.overrides import gamma_token
     from physics.hf.gamma.transmission import gammaxs
 
-    # PARAMWIRE: the compound nucleus's `aadjust` (its `alev`) and E1 `ftable`/`wtable`
+    # The compound nucleus's `aadjust` (its `alev`) and E1 `ftable`/`wtable`
     from physics.hf.projectile import compound_of
 
     tok = gamma_token(fit, *compound_of(Zt, At))

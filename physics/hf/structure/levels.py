@@ -71,7 +71,7 @@ def _f32(x: float) -> float:
 
 
 def _isolevnum() -> bool:
-    """ISOMAPT: uncapped TALYS file level number for moved continuum isomers (default OFF = TALYS min(i, 99))."""
+    """`INCOGNITA_ISOLEVNUM`: uncapped TALYS file level number for moved continuum isomers (default OFF = TALYS min(i, 99))."""
     return os.environ.get("INCOGNITA_ISOLEVNUM", "") == "1"
 
 
@@ -110,19 +110,19 @@ class Levels:
     Lisomer: tuple[int, ...]
     file_found: bool
     notes: tuple[str, ...] = field(default=())
-    # FIXENG F14 (INCOGNITA_GGDEADEND): the uncut nlev when ggdeadend cut the decay list; -1 = not cut.
+    # `INCOGNITA_GGDEADEND`: the uncut nlev when ggdeadend cut the decay list; -1 = not cut.
     # Only the level-density Ntop default reads it, so the LD matching keeps the file's list.
     nlev_ld: int = -1
 
 
-# SPEEDP. `discrete_levels` re-parses `levels/z<ZZZ>` from disk on every call, and the chain asks
+# `discrete_levels` re-parses `levels/z<ZZZ>` from disk on every call, and the chain asks
 # for the same nucleus over and over: the emission cascade's `_levels`, T6's level-density build,
 # T7's gamma parameters, T8's residual pairing energies and T12's direct levels each ask
 # independently, 75 times per target in the dump-free harness for ~20 distinct nuclei. The result
 # is a frozen dataclass nothing writes into, so it can be shared.
 #
 # Keyed on the IDENTITY of `options`/`masses`/`params` rather than their value: `Params` holds
-# tensors and is not hashable, and DIFFPARAM hands out a fresh one per override set, which must
+# tensors and is not hashable, and differentiable hands out a fresh one per override set, which must
 # not collide with the default run's. The key objects are kept alive by the cache, so an id can
 # never be reused while its entry lives.
 _LEVELS_CACHE: dict[tuple, tuple] = {}
@@ -180,10 +180,10 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
     risomer = 1.0
     if params is not None and "risomer" in params:
         risomer = float(params.at("risomer", Zix, Nix))
-    # COREX: everything below reads only these values and the level file, so the result is a
+    # Fast path: everything below reads only these values and the level file, so the result is a
     # pure function of them (no target in the key: Zix/Nix only chose gs_j, gs_p, nlev0, risomer)
-    brs = options.branches_of(Zix, Nix) if getattr(options, "pernuc", ()) else ()  # KWCOV B2: branch / bestbranch
-    lf = options.levelfile_of(Zix) if getattr(options, "pernuc", ()) else None  # KWCOV B5: `levelfile Z <file>`
+    brs = options.branches_of(Zix, Nix) if getattr(options, "pernuc", ()) else ()  # branch / bestbranch
+    lf = options.levelfile_of(Zix) if getattr(options, "pernuc", ()) else None  # `levelfile Z <file>`
     if lf is not None and not os.path.isfile(lf):
         raise FileNotFoundError(f"levelfile {options.Zinit - Zix} {lf}: no such file (TALYS stops: levels.f90:150)")
     lfk = {"levelfile": lf} if lf is not None else {}
@@ -234,7 +234,7 @@ def _discrete_levels(Z, A, options, masses, params, nlev, prior_call) -> Levels:
 
         check_values(options)  # checkvalue.f90:467 (0 <= Ltarget <= numlev) comes before levels.f90 in TALYS
     if int(options.Ltarget) != 0 and (Zix, Nix) == _target_ix(options.k0) and int(options.Ltarget) > int(lv.nlev):
-        # KWCOV GAP (isomeric targets): levels.f90:252-257, the check TALYS makes when `liso` is not given
+        # (isomeric targets): levels.f90:252-257, the check TALYS makes when `liso` is not given
         raise ValueError(f"TALYS-error: excited level of target does not exist (ltarget {int(options.Ltarget)}, "
                          f"{int(lv.nlev)} discrete levels of Z={int(Z)} A={int(A)}; levels.f90:252-257)")
     return lv
@@ -251,7 +251,7 @@ def _target_ix(k0: int) -> tuple[int, int]:
 def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risomer: float,
                       disctable: int, isomer_s: float, massmodel: int,
                       prior_call: bool, levj: bool = False, branches: tuple = (), levelfile: str | None = None) -> Levels:
-    """COREX: `_discrete_levels` by value, shared across targets (`chartrun.KEEP`). `Levels` is
+    """Fast path: `_discrete_levels` by value, shared across targets (`chartrun.KEEP`). `Levels` is
     frozen and nothing writes into its tensors: the id-keyed `_LEVELS_CACHE` already hands one
     object to every caller of a run."""
     size = NUMLEV2 + 1
@@ -271,7 +271,7 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
     conv = np.zeros((NUMLEV + 1, NUMLEV + 1))
     bassign = [[" "] * (NUMLEV + 1) for _ in range(NUMLEV + 1)]
 
-    for ilev0, brs in branches:  # KWCOV B2: input branching ratios (input_levels.f90:142, branching.f90)
+    for ilev0, brs in branches:  # input branching ratios (input_levels.f90:142, branching.f90)
         for k, (l1, b) in enumerate(brs, 1):
             branchlevel[ilev0, k] = l1
             branchratio[ilev0, k] = b
@@ -335,7 +335,7 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
         if nnn or has_records:
             nlev2 = min(nnn, NUMLEV)
             n1 = nlev2 + 1
-            # NATIVEX2 `struct`: the per-level scalar stores of the loop below as slice stores
+            # Native `struct`: the per-level scalar stores of the loop below as slice stores
             # (the loop reads each level's own row only)
             cols = tuple(zip(*main[:n1]))
             edis[:n1], jdis[:n1], parlev[:n1], tau[:n1] = cols[0], cols[1], cols[2], cols[3]
@@ -360,7 +360,7 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
                             conv[i, ii] = con[jj]
                             bassign[i][ii] = bas[jj]
                     nbranch[i] = ii
-            if levj:  # LEVJPAR: wrong-integrality spins re-assigned (structure/levjpar.py), before the numJ cap
+            if levj:  # `levjpar`: wrong-integrality spins re-assigned (structure/levjpar.py), before the numJ cap
                 fix = [(i, j) for i, j in levjpar.corrections(int(Z), int(A), int(disctable)) if i < n1]
                 for i, j in fix:
                     jdis[i] = j
@@ -380,7 +380,7 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
                 sl = slice(nlev2 + 1, nlevmax2 + 1)
                 edis[sl], jdis[sl], parlev[sl], tau[sl] = re_, rj, rp, rt
                 eas[sl], jas[sl], pas[sl] = ra1, ra2, ra3
-                if levj:  # LEVJPAR (the rest list's spins are capped at numJ in _level_block)
+                if levj:  # `levjpar` (the rest list's spins are capped at numJ in _level_block)
                     for i, j in levjpar.corrections(int(Z), int(A), int(disctable)):
                         if nlev2 < i <= nlevmax2:
                             jdis[i] = min(j, float(NUMJ))
@@ -388,7 +388,7 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
         nlevmax2 = max(min(nnn, NUMLEV2), 1)
 
         isomer = isomer_s
-        # NATIVEX2 `struct`: the two scans over levels 1..nlevmax2 as array comparisons; the second
+        # Native `struct`: the two scans over levels 1..nlevmax2 as array comparisons; the second
         # loop only writes slots N <= nlev_final and its own i, so the levels it acts on are the
         # ones above nlev_final with tau > isomer, read before it starts
         lisomer: list[int] = (np.flatnonzero(tau[1 : nlevmax2 + 1] >= isomer)[:NUMISOM]
@@ -402,7 +402,7 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
             lis -= 1
             N = nlev_final - nisomer + lis
             if lis >= 0 and N >= 0:
-                # ISOMAPT (INCOGNITA_ISOLEVNUM=1, default OFF): keep the true file level number. TALYS caps it at 99
+                # `INCOGNITA_ISOLEVNUM=1` (default OFF): keep the true file level number. TALYS caps it at 99
                 # (two-digit rpZZZAAA.LNN names), so a continuum isomer above file level 99 (Hf-178m2 = level 109)
                 # was keyed L99, an unrelated level (2349.7 keV 9+); the RESISO key is the only consumer of levnum.
                 levnum[N] = i if _isolevnum() else min(i, 99)
@@ -465,13 +465,13 @@ def _levels_of_values(Z: int, A: int, gs_j: float, gs_p: int, nlev0: int, risome
 
 @cache
 def _level_block(Z: int, A: int, disctable: int, levelfile: str | None = None):
-    """COREX: `read_level_file`'s block for (Z, A) read with levels.f90's formats once per process
+    """Fast path: `read_level_file`'s block for (Z, A) read with levels.f90's formats once per process
     (a pure function of the file; `chartrun.KEEP`): None without a level file, else (nnn, whether
     the block has records, levels 0..min(nnn, numlev) as (E, J, P, tau, 3 assignment flags, ENSDF,
     branches (klev, ratio, conv, flag)), levels up to min(nnn, numlev2) as columns). Real fields
     are rounded to real(sgl) and spins capped at numJ, as `_discrete_levels` did per read.
 
-    NATIVEX2 `struct`: the records are indexed in the file's text (`files.level_records`) rather
+    native `struct`: the records are indexed in the file's text (`files.level_records`) rather
     than copied out as a tuple, only the lines up to level numlev2 are touched, and the real(sgl)
     columns are gathered while reading; the same reads, the same float32 rounding per column."""
     block = level_records(Z, A, disctable, levelfile)
@@ -481,7 +481,7 @@ def _level_block(Z: int, A: int, disctable: int, levelfile: str | None = None):
     if not (nnn or records):
         return nnn, False, (), None
     got = _level_block_nx2(nnn, records)
-    if got is not None:  # NATIVEX2 `struct`: the plain records read in C (native/nx2_struct.c)
+    if got is not None:  # Native `struct`: the plain records read in C (native/nx2_struct.c)
         return got
     return _level_block_py(nnn, records)
 
@@ -538,7 +538,7 @@ def _level_block_py(nnn: int, records):
 
 
 def _level_block_nx2(nnn: int, records):
-    """NATIVEX2 `struct`: `_level_block`'s (nnn, True, main, rest) with the records read by
+    """Native `struct`: `_level_block`'s (nnn, True, main, rest) with the records read by
     `nx2_struct_levels`, or None when there is no build (`HF_NX2_STRUCT=0`), the file is not held
     as one text, or any field of the block is not in the plain form the kernel converts (the
     Python readers then read the block, and raise where they raised).

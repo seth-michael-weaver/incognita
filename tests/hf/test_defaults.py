@@ -33,7 +33,7 @@ import torch
 
 from physics.hf.input import defaults as D
 
-TALYS_POPEPS = "1e-3"  # input_numerics.f90:82; ours is 1e-9 mb (POPEPS3), the echo cases are TALYS runs
+TALYS_POPEPS = "1e-3"  # input_numerics.f90:82; ours is 1e-9 mb, the echo cases are TALYS runs
 
 ROOT = Path(__file__).resolve().parents[2]
 RAW = Path(os.environ.get("INCOGNITA_T3_ECHO_RAW", ROOT / "features" / "hf_reference" / "t3_echo"))
@@ -165,7 +165,7 @@ def _structure_from_grid(cases: dict) -> dict[tuple[str, str], tuple[float, floa
 
 @pytest.fixture
 def talys_bookkeeping(monkeypatch):
-    """FLUXPROMO2 pin: `fluxclose y` (default) widens the residual window past TALYS's Ninit - 3 / Zinit - 3, so the
+    """`fluxclose` pin: `fluxclose y` (default) widens the residual window past TALYS's Ninit - 3 / Zinit - 3, so the
     TALYS-reference checks run with `fluxclose n` (INCOGNITA_FLUXCLOSE=0); the _EFF delenv restores sync()'s write."""
     monkeypatch.setenv("INCOGNITA_FLUXCLOSE", "0")
     monkeypatch.delenv("INCOGNITA_FLUXCLOSE_EFF", raising=False)
@@ -175,7 +175,7 @@ def _expected_for_case(name: str, c: dict, structure: dict):
     Z, A, proj, energy, opt, par = _split_inp(c["inp"])
     o = D.default_options(Z, A, proj, opt)
     if "popeps" not in opt and not (o.flagastro or o.flagmassdis):
-        # the echo is TALYS's, whose popeps default is 1e-3 mb; ours is 1e-9 (POPEPS3). astro/massdis
+        # the echo is TALYS's, whose popeps default is 1e-3 mb; ours is 1e-9. astro/massdis
         # cases keep the value those switches set
         o = D.default_options(Z, A, proj, {**opt, "popeps": TALYS_POPEPS})
     st = structure.get((proj, name.split("__")[1]))

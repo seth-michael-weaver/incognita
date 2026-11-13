@@ -1,11 +1,11 @@
-"""NATIVEX2 lever `preeq`: the exciton-model set-up off the autograd graph.
+"""Native `preeq` path: the exciton-model set-up off the autograd graph.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test:
-`tests/hf/test_nx2_preeq.py` (every path here against the numpy/torch path it replaces) and the
-G-NATIVEX2 closeness gate.
+A speed path with no physics of its own. Acceptance test:
+`tests/hf/test_nx2_preeq.py` (every path here against the numpy/torch path it replaces) and a
+closeness check.
 
 TALYS routines computed here:
     phdens2.f90:1 (phdens2), finitewell.f90:1 (finitewell)
@@ -33,7 +33,7 @@ _DTYPES = (np.int64, np.int64, np.int64, np.int64, np.float64, np.float64, np.fl
 
 
 def enabled() -> bool:
-    """The lever's switch (read at every call): off with `HF_NATIVE`, `HF_NATIVEX`, `HF_NX2` or
+    """The switch (read at every call): off with `HF_NATIVE`, `HF_NATIVEX`, `HF_NX2` or
     `HF_NX2_PREEQ` set to 0.
 
     TALYS: none (selection only)
@@ -45,7 +45,7 @@ def enabled() -> bool:
 
 
 def off_graph(*xs) -> bool:
-    """The lever is on and no tensor among `xs` is on the autograd graph or off the CPU.
+    """The native path is on and no tensor among `xs` is on the autograd graph or off the CPU.
 
     TALYS: none (selection only)
     Test: tests/hf/test_nx2_preeq.py
@@ -62,7 +62,7 @@ def off_graph(*xs) -> bool:
 def _kernel():
     from physics.hf.native import nx2, setup_c
 
-    # CENGSETUP: the same source compiled into libsetup (-O3, vector flags) when built
+    # The same source compiled into libsetup (-O3, vector flags) when built
     return setup_c.swap("nx2_preeq_phdens2", nx2.kernel(
         "nx2_preeq_phdens2", [nx2.P] * 12 + [nx2.DBL, nx2.DBL, nx2.P, nx2.I64, nx2.P, nx2.I64,
                                              nx2.I64, nx2.P], nx2.INT, lever="preeq"))
@@ -130,7 +130,7 @@ def _tab(hmax: int) -> np.ndarray:
 
 def stripping_sum(terms, xnt, gsp, gsn, eres, ewell, gsp_cn, gsn_cn):
     """The two exciton sums of `stripping` (stripping.f90:158-172) in one density call, or None
-    off the lever / on the graph / without the kernel. `terms` lists `(power, ppi, hpi, pnu, hnu)`
+    off the native path / on the graph / no kernel. `terms` lists `(power, ppi, hpi, pnu, hnu)`
     in TALYS's order, `power` None for the second sum's unweighted terms; `xnt` (C, 1), `gsp`,
     `gsn` (1, 1), `eres`, `ewell` (C, E), `gsp_cn`, `gsn_cn` (C, 1) as `stripping` has them.
     Returns the (C, E) tensor `acc`, added term by term in TALYS's order.
@@ -174,7 +174,7 @@ def _locate_many(xs32: np.ndarray, ib: int, ie: int, x: np.ndarray, xx: np.ndarr
 
 
 def preeq_correct(spectra: dict, inp, disc) -> dict | None:
-    """`preeq.exciton.preeq_correct` on numpy views of the cloned spectra, or None off the lever
+    """`preeq.exciton.preeq_correct` on numpy views of the cloned spectra, or None off the path
     or on the graph. The level loop is TALYS's; the `locate` calls of each (case, ejectile) are
     one sorted search and the `xs1` products one array expression (the same float64 operations
     per level).
@@ -210,7 +210,7 @@ def preeq_correct(spectra: dict, inp, disc) -> dict | None:
             nd = disc.nendisc[c][t]
             esd_all = disc.eoutdis_mev[c][t]
             NL = disc.nlast[t]
-            if esd_all is not None and not getattr(disc, "ltarget", 0):  # KWCOV GAP: preeqcorrect.f90:90
+            if esd_all is not None and not getattr(disc, "ltarget", 0):  # preeqcorrect.f90:90
                 esd_l = [float(v) for v in esd_all[:NL + 2]]
                 dd = disc.xsdirdisc_mb[c][t]
                 lev, e1, e2 = [], [], []
@@ -273,7 +273,7 @@ def preeq_correct(spectra: dict, inp, disc) -> dict | None:
 def transition_rates(inp, states, emis: dict, m2: dict, nexcbins: int, numeric: bool,
                      tph: float) -> dict | None:
     """The four transition rates of `preeq.exciton.transition_rates` (C, S) in one C call
-    (`nx2_preeq_transition`), or None off the lever, on the graph, without the kernel or without
+    (`nx2_preeq_transition`), or None off the path, on the graph, without the kernel or without
     the two-component matrix elements. `numeric` is preeqmode 2 (bin integrals, the closed form
     at n = 1); otherwise the closed form everywhere.
 

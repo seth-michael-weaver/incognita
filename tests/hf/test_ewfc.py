@@ -1,4 +1,4 @@
-"""EWCC: the Engelbrecht-Weidenmueller transform of Moldauer's WFC (physics/hf/compound/ewfc.py).
+"""The Engelbrecht-Weidenmueller transform of Moldauer's WFC (physics/hf/compound/ewfc.py).
 
 1. P diagonal -> the transform is Moldauer exactly (<= 1e-12).
 2. Sum rule: summed over every exit the EW population of incident a is sum_alpha |U_alpha a|^2 F_alpha, F_alpha the

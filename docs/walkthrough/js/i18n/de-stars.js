@@ -28,7 +28,7 @@ WT.L.ch.stars = {
 </div>
 <div class="step">
   <h3>Mit Messungen verglichen</h3>
-  <p>Die 30-keV-Werte von INCOGNITA geteilt durch gemessene, für 94 stabile Nuklide (<a href="scoreboard.html">Rangliste</a>).</p>
+  <p>Die 30-keV-Werte von INCOGNITA geteilt durch gemessene, für 94 stabile Nuklide (<a href="scoreboard.html">Vergleiche</a>).</p>
 </div>`,
 };
 
@@ -98,7 +98,7 @@ Object.assign(WT.L.labels, {
   "r-process: a flood of neutrons makes very neutron-rich nuclei": "r-Prozess: eine Neutronenflut erzeugt sehr neutronenreiche Kerne",
   "r-process: very neutron-rich nuclei": "r-Prozess: sehr neutronenreiche Kerne",
   "ringed: s-only · measured: KADoNiS": "umringt: nur s · gemessen: KADoNiS",
-  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test": "umringt: reine s-Isotope · gemessen: kompilierte Werte (KADoNiS) · ein Entwicklungsvergleich, kein Blindtest",
+  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test": "umringt: reine s-Isotope · gemessen: kompilierte Werte (KADoNiS) · ein Entwicklungsvergleich, kein unabhängiger Test",
   "s Ba": "s Ba",
   "s Pb": "s Pb",
   "s Sr": "s Sr",

@@ -8,7 +8,7 @@
 Every deck is the target's base deck (massdis y, fymodel 1) plus `--kw` lines (';'-separated), at the target's energies
 (U-235: 1 and 5 MeV; U-238: 1, 5, 14 MeV). Stock runs keep only yieldA*.fis / yieldZA*.fis in
 ~/kwcov/stock/b14/<target>_<hash>/ (scratch deleted); engine runs (engine_c.run on the deck lines; `--mode talys` adds
-fidelity.py's TALYS_DECK / TALYS_ENV, every deliberate INCOGNITA default at its TALYS value: EXACTFIS and NPWINDOW change
+fidelity.py's TALYS_DECK / TALYS_ENV, every deliberate INCOGNITA default at its TALYS value: `EXACTFIS` and `NPWINDOW` change
 the default fission, so the fragment yields are compared there) keep Results.fission_yields' yieldA / yieldZA tables in
 ~/kwcov/eng/b14_<target>_<hash>_<mode>.npz.
 Metrics, |ln(ours/stock)| in %, worst over the energies:

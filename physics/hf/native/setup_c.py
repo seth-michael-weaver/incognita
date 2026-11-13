@@ -1,11 +1,11 @@
-"""CENGSETUP: loader of the set-up kernels (`native/setup.c` plus `native/nx2_omp.c` and
+"""Native: loader of the set-up kernels (`native/setup.c` plus `native/nx2_omp.c` and
 `native/nx2_preeq.c` compiled again at -O3 with the vector flags, built by
 scripts/build_setup_native.sh into libsetup).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: CENGSETUP (ROUTE100 WP9; the speed work, no physics of its own). Acceptance test:
+Speed path (no physics of its own). Acceptance test:
 `tests/hf/test_cengsetup.py` (every kernel here against the libnx2 / libhfnative kernel it stands
 in for, to the bit).
 

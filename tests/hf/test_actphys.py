@@ -1,9 +1,9 @@
-"""ACTPHYS: `INCOGNITA_ACTPHYS=gg|sc|both` changes the photon strength of Z >= 88 nuclei only.
+"""`INCOGNITA_ACTPHYS=gg|sc|both` changes the photon strength of Z >= 88 nuclei only.
 
 Off by default; `gg` sets the E1 ftable default to the RIPL-3 <Gamma_gamma> factor, `sc` swaps in
 the Kopecky-2017 scissors, `both` does both with the factors re-derived under the scissors; a
 non-actinide is untouched in every mode. The end-to-end check against stock TALYS on every engine
-path is `scripts/actphys/wiring.py` (docs/results/actphys-prereg.md, step 0).
+path is `scripts/actphys/wiring.py`.
 """
 
 from __future__ import annotations

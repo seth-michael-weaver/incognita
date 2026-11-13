@@ -1,4 +1,4 @@
-/* German (Deutsch): layers (Kapitel 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* German (Deutsch): layers (Kapitel 21). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>Schicht 1 · Eine Regel für jeden Kern</h3>
   <p>Die blaue Linie ist die Vorhersage der Engine für eine Reaktion. Die Engine ist die unterste Schicht: dieselbe Physik und dieselben globalen Einstellungen für jedes Nuklid, ohne dass etwas an die Wirkungsquerschnitte eines einzelnen Kerns angepasst ist.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Messungen zeigen</button></div>
-  <p>Das macht sie überprüfbar, an Messungen und im Vergleich mit anderen Modellcodes, die auf denselben Kernen laufen. Ein Blindtest ist es nicht: Die globalen Einstellungen wurden mit Blick auf genau diese Vergleiche gewählt.${engineScore}</p>
+  <p>Das macht sie überprüfbar, an Messungen und im Vergleich mit anderen Modellcodes, die auf denselben Kernen laufen. Ein unabhängiger Test ist es nicht: Die globalen Einstellungen wurden mit Blick auf genau diese Vergleiche gewählt.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>Aktueller Stand</h3>
   <p>Eine Schicht wird erst übernommen, nachdem sie an Messungen getestet wurde, und sie bleibt aus, wenn sie nicht hilft. Heute ist die Engine in Gebrauch und TERRA ein Kandidat; die Schicht mit gemessener Struktur und das Unsicherheitsband der Engine werden noch getestet.</p>
-  <p><a href="scoreboard.html" data-keep-lang>Zur vollständigen Rangliste →</a> Jeder Vergleich, den wir nicht gewinnen, jeder Konkurrent und wie man das liest.</p>
-  <div class="aside">${ASOF ? `Ergebnisse mit Stand ${ASOF}, aus` : "Ergebnisse aus"} dem Forschungsprotokoll des Projekts. Die Kurven im Bild dienen der Veranschaulichung.</div>
+  <p><a href="scoreboard.html" data-keep-lang>Alle Vergleiche ansehen →</a> Jeder Vergleich, den wir nicht gewinnen, jeder Konkurrent und wie man das liest.</p>
+  <div class="aside">${ASOF ? `Ergebnisse mit Stand ${ASOF}, aus` : "Ergebnisse aus"} den Vergleichsdaten des Projekts. Die Kurven im Bild dienen der Veranschaulichung.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} von {#} Messungen im Band (Ziel: etwa {#} %)",
   "no measurements to check the band against": "keine Messungen, an denen sich das Band prüfen lässt",
 });
-Object.assign(WT.L.ui, { nav_board: "Rangliste" });
+Object.assign(WT.L.ui, { nav_board: "Vergleiche" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

@@ -2,7 +2,7 @@
 
 recoil / labddx / recoilaverage / maxenrec / anglesrec: TALYS's recoil module (recoilinit, binaryrecoil, angdisrecoil,
 comprecoil, cm2lab, labsurface, binsurface, totalrecoil, recoilout and the LAB parts of spectraout / ddxout /
-channelsout) on the run's SPECOUT records, physics/hf/recoil.py + physics/hf/native/recoil.c. The decks were compared
+channelsout) on the run's specout records, physics/hf/recoil.py + physics/hf/native/recoil.c. The decks were compared
 with stock TALYS-2.25 by scripts/kwcov/b12_response.py (numbers in the plan); the tests here pin the geometry, the
 kinematics against stock's recoil grids, the parsing and the refusals, and one engine run against stock's n + Fe-56
 1 MeV files (`recoil y`, `labddx y`, `ddxmode 3`, `fileddxa n 30`; stock TALYS-2.25, default deck otherwise).

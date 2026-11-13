@@ -123,7 +123,7 @@ def incident_channel(
             p = _slice_omp(omp, 0, idx, n_c) if _is_per_case(omp, n_c) else omp
         from physics.hf.omp import jlm as _jlm
 
-        if omp is None and _jlm.active(options, Z, A, k0):  # KWCOV B7b: jlmexist (incidentecis.f90:215), njmax 1600
+        if omp is None and _jlm.active(options, Z, A, k0):  # jlmexist (incidentecis.f90:215), njmax 1600
             nj = numl
             tr = _jlm.solve(Z, A, k0, e, m_t, nj, options, params)
         else:
@@ -152,7 +152,7 @@ def incident_channel(
 
 
 def incident_gamma(cases: CaseBatch, options, params) -> IncidentChannel:
-    """ENGPROJ: the photon entrance (k0 = 0). Tjlinc(irad, l) = 2 pi Einc^(2l+1) f(Einc, Einc, irad, l) * factor for
+    """The photon entrance (k0 = 0). Tjlinc(irad, l) = 2 pi Einc^(2l+1) f(Einc, Einc, irad, l) * factor for
     l = 1..gammax, factor = xsreacinc / xsgdr, and xsreacinc = gammaxs(0, 0, Einc) = GDR + quasideuteron
     photoabsorption of the compound nucleus, which for a photon is the target itself. lmaxinc = gammax.
     Stored on the (l, irad + 1) slot of the updown axis (compnorm.f90:133-135 reads Tjlinc(updown = irad, l)).

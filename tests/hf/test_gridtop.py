@@ -1,4 +1,4 @@
-"""GRIDTOP (`INCOGNITA_GRIDTOP`, default ON): the outgoing grid reaches 1 MeV above the top energy of every exit.
+"""`INCOGNITA_GRIDTOP` (default ON): the outgoing grid reaches 1 MeV above the top energy of every exit.
 
 TALYS's `Elimit = enincmax + S(0,0,k0) + targetE + 1` (grid.f90:120) covers the photon exit only. For a compound
 nucleus unbound to some ejectile (I-110: S(alpha) = -3.58 MeV) the fastest alphas are above the grid top, get T = 0,

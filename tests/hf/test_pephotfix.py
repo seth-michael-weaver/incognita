@@ -1,8 +1,8 @@
-"""PEPHOTFIX: `pewindow g` (and a/l/p/q) on a photon entrance (k0 = 0).
+"""`pewindow g` (and a/l/p/q) on a photon entrance (k0 = 0).
 
 engine-2026-10-19 raised `KeyError: 0` in `pepauli_onsets` (the Kalbach-pickup onsets read gscomp[k0] for k0 <= 2, k0 = 0
-included) on every photon run with the production `PEWINDOW g`. A photon entrance has no discrete PE collapse (preeq.f90:134:
-preeqcorrect only for k0 > 0), so the window has nothing to correct: the photon run must be the PEWINDOW n run, bit for bit.
+included) on every photon run with the production `pewindow g`. A photon entrance has no discrete PE collapse (preeq.f90:134:
+preeqcorrect only for k0 > 0), so the window has nothing to correct: the photon run must be the `pewindow n` run, bit for bit.
 The run happens in a subprocess: in-memory (Z, A) caches assume one projectile per process (physics/hf/projectile.py).
 """
 from __future__ import annotations
@@ -49,5 +49,5 @@ def test_photon_pewindow_is_the_n_run():
     ref = _photon_run("n")
     assert ref["n"] > 10
     for w in ("g", "a"):
-        got = _photon_run(w)  # g raised KeyError 0 before PEPHOTFIX
+        got = _photon_run(w)  # g must not raise KeyError 0 here
         assert got["h"] == ref["h"], sorted(k for k in ref["h"] if got["h"].get(k) != ref["h"][k])[:10]

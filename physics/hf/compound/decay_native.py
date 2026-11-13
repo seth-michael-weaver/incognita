@@ -1,9 +1,9 @@
-"""SPEEDD: loader for the compiled decay kernels (`decay_native.c`), used by `compound.decay_fast`.
+"""Loader for the compiled decay kernels (`decay_native.c`), used by `compound.decay_fast`.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: SPEEDD (the speed wave; no physics of its own). Acceptance test: `tests/hf/test_decay_fast.py`
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_decay_fast.py`
 (every kernel against the numpy path) and the speed-wave golden.
 
 TALYS routines the kernels compute, in decay_fast's arrangement:

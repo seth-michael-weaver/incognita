@@ -1,11 +1,11 @@
 /* Derived from TALYS-2.x / ECIS-06 (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning (ECIS-06: J. Raynal). See physics/hf/NOTICE-TALYS.md. */
-/* CCPROP (ROUTE100 WP8): the log-derivative propagator of one coupled-channels (J, parity) block,
+/* The log-derivative propagator of one coupled-channels (J, parity) block,
  * as the candidate replacement for the renormalised Numerov step of `ccfast.c::cc_block_w`.
  *
- * It exists so that CCPROP's gate-1 FLOP claim is made about code that runs, not about a count on
- * paper. `physics/hf/ecis/ccprop.py` is the same method in torch and the two agree; the verdict on
- * both is a kill (`docs/results/hf-ccprop.md`).
+ * It exists so that its FLOP count is measured on code that runs, not counted on paper.
+ * `physics/hf/ecis/ccprop.py` is the same method in torch and the two agree; neither replaces the
+ * Numerov step (`docs/results/hf-ccprop.md`).
  *
  * What it computes: Y = u' u^-1 at each energy's matching radius, which is exactly the `L` that
  * `solver._match` forms from the Numerov loop's kept solutions. The recursion over ECIS's own
@@ -109,7 +109,7 @@ static void build_m(const blk_t *b, int64_t e, int64_t i, double *M)
 /* A <- A^-1, column-major complex.
  *
  * zgetrf + zgetri is (8/3 + 16/3) N^3 = 8 N^3, the textbook complex inversion and the count the
- * gate model uses. torch's CPU library re-exports zgetrf and zgetrs but NOT zgetri, so when the
+ * cost model uses. torch's CPU library re-exports zgetrf and zgetrs but NOT zgetri, so when the
  * loader could not find it the kernel falls back to zgetrs against an identity right-hand side --
  * the same result, (8/3 + 8) N^3 = 10.67 N^3. `cc_prop_flops` reports whichever was issued, so the
  * gap between the kernel and the model is visible rather than hidden: the model is the one that

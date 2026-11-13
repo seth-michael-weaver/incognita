@@ -1,6 +1,6 @@
-"""A-mult gate for the direct/giant-resonance subsystem, and the precision floor it is read at.
+"""A-mult test for the direct/giant-resonance subsystem, and the precision floor it is read at.
 
-    uv run python -m physics.hf.direct.score          # gate -> docs/results/hf-direct-gate.json
+    uv run python -m physics.hf.direct.score          # test -> docs/results/hf-direct-gate.json
     uv run python -m physics.hf.direct.score --floor  # TALYS-sgl vs TALYS-dbl, direct family
 
 What is scored, and what is injected (contract §5). The per-level DWBA cross sections come out
@@ -16,7 +16,7 @@ own ratio is 1 by construction. Everything around them is ported here and is sco
     spectra  xsgrstate, xscollcont and their sum xsgr on the emission grid (giant.f90), from
              T12's own `t12spec` runs (`outspectra y`), which are the only ones that write them.
 
-The metric is the contract's `r = |ln(p/t)|` over points above a floor, and the gate bounds its
+The metric is the contract's `r = |ln(p/t)|` over points above a floor, and the threshold bounds its
 95th percentile at the A-mult tolerance 0.05, widened by T14's rule to `max(tol, 2 delta)` if
 the measured single/double-precision spread of the family demands it.
 """
@@ -191,7 +191,7 @@ def _case_records(target: str, e: float, variant: str, dump) -> list[dict]:
 
 
 def gate(targets: list[str] | None = None, variants=("default", "wfc_off")) -> dict:
-    """Run the gate over T0's archives plus every T12 `t12spec` run available."""
+    """Run the A-mult test over T0's archives plus every T12 `t12spec` run available."""
     recs: list[dict] = []
     t0 = time.time()
     tags = targets or sorted({t for t, _ in [(k, 0) for k in SHAPE]})

@@ -26,7 +26,7 @@ Two notes on faithfulness.
 
 * `ParabFit` calls `WPLFT`, a standardised-variable formulation of an unweighted
   least-squares fit of ``y = a1 + a2 x + a3 x^2``. :func:`parab_fit` solves the same centred
-  normal equations in closed form with scalar tensor ops in a fixed order (CENGFIS13), which is the
+  normal equations in closed form with scalar tensor ops in a fixed order, which is the
   same estimator, so that the fitted half-width stays differentiable in the path energies and is
   bitwise reproducible (`torch.linalg.lstsq`, used before and kept under `HF_WKB_LSTSQ=1`, goes
   through MKL LAPACK, whose last bit depends on the heap alignment of its inputs). Only ``a3`` reaches the physics: the
@@ -113,7 +113,7 @@ _PARSED: dict[tuple[str, int], tuple] = {}
 
 
 def _parsed_blocks(path: str, fismodel: int) -> tuple:
-    """CENGFIS: `_blocks` of one `<Sym>.fis` file with its rows' numbers read (as `read_hfbpath`
+    """`_blocks` of one `<Sym>.fis` file with its rows' numbers read (as `read_hfbpath`
     reads them, float32), once per file per process instead of once per nucleus: `(A, nbeta,
     rows)` with rows `(beta2, V)` (fismodel 5) or `(beta2, V, MI_ATD, IP)` (fismodel 6). A plain
     dict, not an `lru_cache`, so `chartrun.drop_target_caches` keeps it: the result is a pure
@@ -410,7 +410,7 @@ def _gauss_legendre41(f, ea: Tensor, eb: Tensor) -> tuple[Tensor, Tensor]:
     """
     centr = 0.5 * (ea + eb)
     hlgth = 0.5 * (eb - ea)
-    # FISSB: `f` is elementwise, so the 41 abscissae go through it in one call (the same values
+    # `f` is elementwise, so the 41 abscissae go through it in one call (the same values
     # as 41 calls); the sums below are TALYS's, term by term in its order
     absc = [hlgth * _XGK[j] for j in range(20)]
     fv = f(torch.stack([centr] + [centr - a for a in absc] + [centr + a for a in absc]))
@@ -500,7 +500,7 @@ def wkbfis(
 
 
 def _wkbfis_native(path: FissionPath, uexcs: list[float], vheight: Tensor, vwidth: Tensor):
-    """NATIVEX2: `wkbfis`' (tff, tdir) at every energy of `uexcs` from `native/nx2_fis.c`, as
+    """`wkbfis`' (tff, tdir) at every energy of `uexcs` from `native/nx2_fis.c`, as
     numpy ((len, 2*NUMBAR+1), (len,)), or None (no build, `HF_NX2_FIS=0`, anything on a graph).
 
     TALYS: wkb.f90:212 (wkbfis), wkbfunctions.f:33 (GaussLegendre41)
@@ -539,7 +539,7 @@ def _wkbfis_native(path: FissionPath, uexcs: list[float], vheight: Tensor, vwidt
 
 
 def exactfis_on(options=None) -> bool:
-    """IDEA_EXACTFIS switch: keyword `exactfis y|n` (an explicit keyword wins), else env
+    """`exactfis` switch: keyword `exactfis y|n` (an explicit keyword wins), else env
     `INCOGNITA_EXACTFIS=1`. Default OFF (TALYS's Kemble-WKB per hump).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
@@ -555,7 +555,7 @@ def exactfis_on(options=None) -> bool:
     return bool(getattr(options, "flagexactfis", False))
 
 
-EXACTFIS_NSUB = 20  # staircase pieces per path-row interval (table ln T within 4e-4 of 40 pieces, development notes)
+EXACTFIS_NSUB = 20  # staircase pieces per path-row interval (table ln T within 4e-4 of 40 pieces)
 EXACTFIS_HW = 0.6  # MeV, half-width of the energy average (one well-flank interference period)
 EXACTFIS_DE = 0.02  # MeV, fine grid of the energy average
 
@@ -648,7 +648,7 @@ def _transfer_np(edges: np.ndarray, k: np.ndarray, M: np.ndarray, shape) -> np.n
 
 def exactfis_correction(path: FissionPath, nextr: int, vh: Tensor, vw: Tensor,
                         uexcs: list[float]) -> np.ndarray:
-    """IDEA_EXACTFIS: per-hump correction C_k(U) = < ln T_exact - ln T_WKB >_{|E-U| <= HW} at the
+    """`exactfis`: per-hump correction C_k(U) = < ln T_exact - ln T_WKB >_{|E-U| <= HW} at the
     table energies `uexcs`, shape (len, 2*NUMBAR+1) (odd columns = barriers, 0 elsewhere).
 
     Each hump is isolated between the V minima on either side (wells, g.s. or path end) and
@@ -783,7 +783,7 @@ def wkb(
     vh = torch.stack(vheight)
     vw = torch.stack(vwidth)
     if not flagfispartdamp:
-        # NATIVEX2: `wkbfis` at every tabulation energy in one C call (native/nx2_fis.c)
+        # `wkbfis` at every tabulation energy in one C call (native/nx2_fis.c)
         uexcs, uexc = [], 0.0
         for i in range(1, nbinswkb + 1):
             uexc += float(uexc1) / n1 if i <= n1 else 0.2

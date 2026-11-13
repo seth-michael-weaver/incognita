@@ -3,7 +3,7 @@ that writes the exact arrays `binary.f90` and `channels.f90` consume, beside the
 files (`xs*.tot`, `*.Lnn`, `rp*.tot`, `binE*.out`) those routines produce.
 
 Why an instrumented run rather than the standard dumps. The contract's injection rule says a
-component must pass its gate on TALYS's own upstream values. For T10 those values are the
+component must pass its test on TALYS's own upstream values. For T10 those values are the
 post-multiple-emission bookkeeping arrays -- `feedexcl`, `popexcl`, `fisfeedex`, `xspopnuc`,
 `xspopex` -- and the pre-binary compound population `xspop`. TALYS writes none of them at its
 defaults: `populationE*.out` holds the population per bin but not the bin-to-bin feeding terms

@@ -2,7 +2,7 @@
 `incident_scalars` on every coupled-channels reference target and every incident energy -- the
 eleven `colltype R` ones (stages a1 and a2-SO) and Ca-40, `colltype V` (stage a2-V).
 
-Metric of contract §6: r = |ln(port/TALYS)| over points above the floor; the gate bounds p95 at
+Metric of contract §6: r = |ln(port/TALYS)| over points above the floor; the threshold bounds p95 at
 1e-2 and the median and max are reported.
 
 Task: T13 (physics/hf/CONTRACT.md §7). Acceptance test: A-inc (§6).
@@ -10,7 +10,7 @@ Task: T13 (physics/hf/CONTRACT.md §7). Acceptance test: A-inc (§6).
 Usage:
     uv run python -m physics.hf.ecis.score                 # injected OMP, all 23 energies
     uv run python -m physics.hf.ecis.score --chained       # T4's OMP where it exists
-    uv run python -m physics.hf.ecis.score --above-soswitch          # the E > soswitch gate
+    uv run python -m physics.hf.ecis.score --above-soswitch          # the E > soswitch check
     uv run python -m physics.hf.ecis.score --above-soswitch --undeformed-so
                                                 # the same points with lo(13) left F: the A/B
                                                 # that says what the deformed spin-orbit is worth
@@ -62,7 +62,7 @@ def score_target(target, variant: str = "default", e_max_mev: float = float("inf
                  undeformed_so: bool = False) -> dict:
     """Score one target's A-inc quantities.
 
-    `e_min_mev` cuts the energy axis from below (the `--above-soswitch` gate uses it);
+    `e_min_mev` cuts the energy axis from below (the `--above-soswitch` check uses it);
     `undeformed_so` forces ECIS's `lo(13) = F` branch above the switch, which is NOT what TALYS
     does there and exists only as the A/B arm that says what the deformed spin-orbit is worth.
     """
@@ -124,7 +124,7 @@ def main(argv=None) -> int:
     ap.add_argument(
         "--undeformed-so", action="store_true",
         help="leave the spin-orbit SPHERICAL above soswitch, which is not what TALYS does there "
-             "-- the A/B arm of the deformed spin-orbit, not a gate",
+             "-- the A/B arm of the deformed spin-orbit, not a check",
     )
     a = ap.parse_args(argv)
     e_min, und = 0.0, a.undeformed_so

@@ -1,10 +1,9 @@
 """Every relative link in the docs resolves.
 
-A release ships these files. A dead link in a data card or a model card is the kind of thing
-nobody sees until someone else follows it, and the four this caught on its first run were all
-introduced the same afternoon by writing `results/x.md` in PLAN.md, which lives at the repo
-root, where the correct form is `docs/results/x.md`. mkdocs --strict does not cover PLAN.md or
-README.md, and it does not run in the default test suite.
+A release ships these files. A dead link in a data sheet or a model description is the kind of thing
+nobody sees until someone else follows it; a typical one comes from writing `results/x.md`
+in PLAN.md, which lives at the repo root, where the correct form is `docs/results/x.md`.
+mkdocs --strict does not cover PLAN.md or README.md, and it does not run in the default test suite.
 """
 from __future__ import annotations
 
@@ -38,6 +37,6 @@ def test_relative_doc_links_resolve():
 
 def test_the_check_sees_a_useful_number_of_links():
     """Guard against the glob quietly matching nothing and the test passing on an empty set.
-    The public tree ships the data and model cards but not docs/results/, so far fewer links."""
+    The public tree ships the data and model documentation but not docs/results/, so far fewer links."""
     lab = any((REPO / "docs" / "results").glob("*.md"))
     assert sum(1 for _ in _targets()) > (100 if lab else 0)

@@ -1,14 +1,14 @@
-"""ENGADJ: energy-dependent (local) parameter adjustment inside the engine, TALYS adjust.f90 style.
+"""Energy-dependent (local) parameter adjustment inside the engine, TALYS adjust.f90 style.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: ENGADJ (2026-10-13). Acceptance test: tests/hf/test_eadj.py.
+Task: energy-local adjustment. Acceptance test: tests/hf/test_eadj.py.
 
 Why. Evaluators fit with energy-local PARAMETER adjustments inside the model (TALYS `v1adjust n 1. Ea Eb Em D`, adjust.f90),
 so a change in one channel takes its flux from the competing ones. The port skipped those line forms (fitlib._split reads
 `v1adjust n 1. Ea ...` as an "energy-dependent table form" and drops the whole line; a per-nucleus one reads Ea as a barrier
-index). EMUWIDE had to fake 24 channel bumps as post-hoc output multipliers. This module gives the engine its own, explicit
+index). Without it, channel bumps could only be faked as post-hoc output multipliers. This module gives the engine its own, explicit
 keyword instead of overloading the TALYS lines (whose port behaviour existing decks may depend on).
 
 Keyword (Incognita extension; one bump per line; deck/lines-file line, any number of them):
@@ -185,12 +185,12 @@ def _npw():
 
 
 def on() -> bool:
-    """Any bump this run (deck lines, or the NPWINDOW rule's target ctable bumps, physics/hf/density/npwindow.py)."""
+    """Any bump this run (deck lines, or the `npwindow` rule's target ctable bumps, physics/hf/density/npwindow.py)."""
     return bool(active()) or _npw().applies_run()
 
 
 def select(target: str, sel: tuple) -> tuple:
-    """The active bumps of one target and selector, in card order; () when none."""
+    """The active bumps of one target and selector, in input order; () when none."""
     bs = active()
     if not bs:
         return ()
@@ -202,8 +202,8 @@ def any_target(targets) -> bool:
     return bool(bs) and any(b.target in targets for b in bs)
 
 
-#: NPWPROMO: the nuclei whose level density the native LD kernels are being asked about (innermost last); pushed by
-#: `per_nucleus` wrappers only while the NPWINDOW rule applies to the run
+#: the nuclei whose level density the native LD kernels are being asked about (innermost last); pushed by
+#: `per_nucleus` wrappers only while the `npwindow` rule applies to the run
 _NUC: list = []
 
 
@@ -234,13 +234,13 @@ _NULL = _Null()
 
 
 def nucleus(Z, A):
-    """Context: native LD kernels called inside are about nucleus (Z, A) (no-op unless the NPWINDOW rule applies)."""
+    """Context: native LD kernels called inside are about nucleus (Z, A) (no-op unless the `npwindow` rule applies)."""
     return _Nuc(Z, A) if _npw().target() is not None else _NULL
 
 
 def per_nucleus(fn):
     """Decorator for an LD function whose first argument is the nucleus's `LDNucleus`: its native kernels are asked
-    for that nucleus (`ld_native_ok`). Off the NPWINDOW rule it calls `fn` directly."""
+    for that nucleus (`ld_native_ok`). Off the `npwindow` rule it calls `fn` directly."""
     import functools
 
     @functools.wraps(fn)
@@ -256,15 +256,15 @@ def per_nucleus(fn):
 def ld_native_ok(Z=None, A=None) -> bool:
     """False while a deck level-density bump is active (every nucleus: the native LD kernels ld_nx2 / ld_ceng / ld2_nx2,
     which evaluate a(Eex) and rho in C, are skipped and the Python twins, which carry the bumps, run), or, under the
-    NPWINDOW rule, for the rule's target nucleus ((Z, A) given, else the innermost `nucleus` context; none: False).
+    `npwindow` rule, for the rule's target nucleus ((Z, A) given, else the innermost `nucleus` context; none: False).
     True (the default) otherwise."""
     if any_target(LD_TARGETS):  # a deck LD bump: every nucleus on the Python twins (it may name any nucleus)
         return False
     t = _npw().target()
     if t is None:
         return True
-    # NPWINDOW: only the rule's target needs the Python twins (its bumps live in models._adjusted); every other
-    # nucleus keeps the native kernels. Unknown nucleus (no context): Python, as an ENGADJ run.
+    # `npwindow`: only the rule's target needs the Python twins (its bumps live in models._adjusted); every other
+    # nucleus keeps the native kernels. Unknown nucleus (no context): Python, as an energy-local-bump run.
     if Z is None:
         if not _NUC:
             return False
@@ -273,7 +273,7 @@ def ld_native_ok(Z=None, A=None) -> bool:
 
 
 def token() -> tuple:
-    """Hashable identity of the active bump set (for cache keys); () when off. NPWINDOW: + the rule's marker."""
+    """Hashable identity of the active bump set (for cache keys); () when off. `npwindow`: + the rule's marker."""
     return tuple(active()) + _npw().token()
 
 
@@ -353,7 +353,7 @@ def fission_factors(Z: int, A: int, ex) -> tuple:
 
 def fission_weights(nv: tuple, nm: tuple, sv: np.ndarray, sm: np.ndarray, bilin: bool | None = None) -> np.ndarray:
     """Tensor-product Lagrange weights (rows, len(nv) * len(nm)), node order (iv, im) row-major.
-    ENGNAN: `bilin` (default: `INCOGNITA_EADJFIS=bilin`) gives the tensor-product piecewise-linear (hat) weights instead."""
+    `bilin` (default: `INCOGNITA_EADJFIS=bilin`) gives the tensor-product piecewise-linear (hat) weights instead."""
     if bilin is None:
         bilin = fis_bilin()
     f = hat if bilin else lagrange
@@ -361,7 +361,7 @@ def fission_weights(nv: tuple, nm: tuple, sv: np.ndarray, sm: np.ndarray, bilin:
     return (wv[:, :, None] * wm[:, None, :]).reshape(wv.shape[0], -1)
 
 
-# ------------------------------------------------------------------------------- ENGNAN: well-conditioned fission combine
+# ------------------------------------------------------------------------------- well-conditioned fission combine
 #: `INCOGNITA_EADJFIS=bilin`: piecewise-linear (hat) node weights everywhere (default OFF = degree-(K-1) Lagrange)
 FIS_ENV = "INCOGNITA_EADJFIS"
 
@@ -374,7 +374,7 @@ def hat(nodes: tuple, x: np.ndarray) -> np.ndarray:
     """Piecewise-linear (hat) weights (len(x), len(nodes)) of `nodes` at x: exactly 1 / 0 at a node, in [0, 1], summing to 1;
     x outside the node range is clamped to it. Unlike `lagrange` they cannot amplify: node sets whose spacing differs by
     orders of magnitude (e.g. (0.981, 0.991, 1, 1.0001, 1.0002), a one-sided bump product with a tiny excursion past 1)
-    give Lagrange weights ~1e5 there, and exp(sum w log v) overflowed (ENGNAN: NaN Th-232 tot_fission)."""
+    give Lagrange weights ~1e5 there, and exp(sum w log v) overflowed (NaN Th-232 tot_fission)."""
     x = np.asarray(x, dtype=np.float64).reshape(-1)
     nd = np.asarray(nodes, dtype=np.float64)
     w = np.zeros((x.size, nd.size))

@@ -1,7 +1,7 @@
-"""CCBLOCKD: the cheaper `cc_block_d` step against the reference one.
+"""Cheaper coupled-channels block step: the cheaper `cc_block_d` step against the reference one.
 
-`physics/hf/native/ccfast.c` keeps `cc_block_d_ref` -- the four-complex-product step CCFAST2
-shipped -- as the A arm, and `HF_CCBLOCKD` selects between them per kernel call. These tests hold
+`physics/hf/native/ccfast.c` keeps `cc_block_d_ref` -- the four-complex-product step of the
+first native kernel -- as the reference arm, and `HF_CCBLOCKD` selects between them per kernel call. These tests hold
 the new step to it on real coupled-channels blocks: same discretisation, same grid, same matching
 point, so the only differences allowed are the ones summation order makes.
 
@@ -10,7 +10,6 @@ The bar is `docs/results/hf-ccblockd.md`'s: the coupled-channels observables wit
 floor is 1.3e-12), and the raw `keep` solutions within 1e-9 -- they are defined only up to the
 stabilisation's change of basis, which is why the observables and not `keep` are the real bar.
 
-Task: CCBLOCKD. Test: tests/hf/test_ccblockd.py
 """
 
 from __future__ import annotations
@@ -28,7 +27,7 @@ from physics.hf.ecis.reference import coupled_band
 
 pytestmark = pytest.mark.skipif(
     not ccnative.available() or not hasattr(ccnative._load(), "cc_set_blockd"),
-    reason="libccfast without CCBLOCKD; run scripts/build_ccfast_native.sh")
+    reason="libccfast without cc_set_blockd; run scripts/build_ccfast_native.sh")
 
 GRID = (1.0, 4.5, 11.0, 14.0, 18.0)  # two energies below soswitch and three above it
 OBS = ("sigma_tot_mb", "sigma_reac_mb", "sigma_abs_mb", "sigma_shape_el_mb", "sigma_direct_mb")
@@ -66,7 +65,7 @@ def restore_arm():
 @pytest.mark.parametrize("Z,A", [(60, 150), (92, 238)])
 @pytest.mark.parametrize("level", ["1", "2"])
 def test_observables_match_reference(Z, A, level, restore_arm):
-    """Both levers, and the default one alone, reproduce the reference kernel's coupled-channels
+    """Both arms, and the default one alone, reproduce the reference kernel's coupled-channels
     cross sections. Above `soswitch` this exercises `cc_block_d`; below it, `cc_block_w`, which
     the change does not touch and which must therefore stay bit-identical."""
     _arm(level)

@@ -1,4 +1,4 @@
-"""SPINQUENCH (Incognita extension, 2026-10-05): superfluid quenching of the spin-cutoff moment of inertia at low excitation.
+"""`spinquench` (Incognita extension): superfluid quenching of the spin-cutoff moment of inertia at low excitation.
 
 Physics: below the pairing phase transition the nuclear moment of inertia is reduced from the rigid-body value (pairing correlations;
 BCS gives I(T = 0) ~ 1/2 rigid in heavy nuclei, rising to rigid at the critical temperature T_c = 0.567 Delta_0). TALYS's analytical
@@ -20,7 +20,7 @@ sigma_d^2 are TALYS's.
 
 Modes (env INCOGNITA_SPINQUENCH): n (default, OFF: never enters this module's arithmetic), q (arm Q), qd (arm QD: the quenched value
 only for E <= E_cut + 2 MeV (E_cut = energy of the last discrete level, the continuum start), the cascade-entry window; the engine's value above).
-Sites: density.models.density (rho(E, J), Python), native ld.h rho_row (C rhogrid: ld.c CENGLD / nx2_ld.c NATIVEX2; scalars from
+Sites: density.models.density (rho(E, J), Python), native ld.h rho_row (C rhogrid: ld.c native / nx2_ld.c native; scalars from
 ld_nx2._par), emission.binary.bin_spin_cutoff (the pre-equilibrium spin spread of the binary grids: Python, nx2_emit.c, GPU).
 """
 
@@ -88,7 +88,7 @@ def scalars(ld, ibar: int = 0):
         if m == "qd":
             key = (int(ld.Z), int(ld.A), int(ld.Z) + int(ld.Zix), int(ld.A) - int(ld.Z) + int(ld.Nix))
             if key not in ECUT:
-                raise RuntimeError(f"SPINQUENCH qd: no E_cut recorded for {key}")
+                raise RuntimeError(f"spinquench qd: no E_cut recorded for {key}")
             xmax = ECUT[key] + QD_WINDOW_MEV
         else:
             xmax = 1.0e30

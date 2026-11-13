@@ -7,7 +7,7 @@
     uv run python -m incognita.bench.score score   --track all --endf DIR --name "my lib"      # ENDF-6 / PENDF files
     uv run python -m incognita.bench.score leaderboard --out docs/release/bench                # frozen entries + staged libraries
 
-Track definitions, sources and their sha256 live in `TRACKS` below and `tracks/<id>.md` (the data cards). Every
+Track definitions, sources and their sha256 live in `TRACKS` below and `tracks/<id>.md` (the dataset descriptions). Every
 track is a fixed list of measured points (row = 0..n-1 in the exported order). The label is log10 of the measured
 cross section in barns (spectrum-averaged for the SACS track).
 
@@ -75,19 +75,19 @@ LIBRARIES = [('ENDF/B-VIII.1', 'endfb81', 2024), ('JENDL-5', 'jendl5', 2021), ('
              ('ENDF/B-VII.1', 'endfb71', 2011), ('JENDL-4.0', 'jendl40', 2010), ('ENDF/B-VII.0', 'endfb70', 2006)]
 # TENDL releases for the dated (retrodiction) entry: per row, the newest release no later than the row's cutoff year
 TENDL_DATED = [(2015, 'tendl2015'), (2017, 'tendl2017'), (2019, 'tendl2019'), (2021, 'tendl2021'), (2023, 'tendl2023')]
-# dated tracks (DATEDEXAM): freeze year Y of every scored library = calendar year of the release of the files we score (no
-# library documents a data-freeze date; sources in docs/release/DATED.md). A library is blind to a dated-Y track iff its Y <= track Y.
+# dated tracks: freeze year Y of every scored library = calendar year of the release of the files we score (no
+# library documents a data-freeze date; sources in docs/release/DATED.md). A library is unfitted to a dated-Y track iff its Y <= track Y.
 DATED_Y = {'ENDF/B-VII.0': 2006, 'JENDL-4.0': 2010, 'ENDF/B-VII.1': 2011, 'TENDL-2015': 2016, 'BROND-3.1': 2016,
            'JEFF-3.3': 2017, 'TENDL-2017': 2017, 'TENDL-2019': 2019, 'CENDL-3.2': 2020, 'IRDFF-II': 2020, 'JENDL-5': 2021,
            'TENDL-2021': 2021, 'FENDL-3.2': 2022, 'TENDL-2023': 2024, 'ENDF/B-VIII.1': 2024, 'JEFF-4.0': 2025,
            'TENDL-2025': 2025}
 DATED_TRACK_YEARS = (2006, 2010, 2011, 2016, 2017, 2019, 2020, 2021, 2024)
 
-SRC = {  # sha256 of every frozen source file a track reads (capture_blind_cells / retro_rows: the SHIPEXAMS files of f165e5a3,
-       # = docs/release/exam/SHA256SUMS; re-pinned by DATEDEXAM2)
+SRC = {  # sha256 of every frozen source file a track reads (capture_blind_cells / retro_rows:
+       # = docs/release/exam/SHA256SUMS)
     'capture_blind_cells': (EXAM / 'capture_blind_cells.parquet', '5617e404c08455976a7e3c5552f58b2d01474b25ebc041f950985f0a244b7af6'),
     'dated_rows': (EXAM / 'dated_rows.parquet', 'c102bee1a5922d63d9007f7ede879a11fd75ba9f5d5de53101a0ef1505edc55e'),
-    # DATEDEXAM2: [E_lo, E_hi] of each dated row's own EXFOR points (energies only), the bin-average window above 100 keV
+    # [E_lo, E_hi] of each dated row's own EXFOR points (energies only), the bin-average window above 100 keV
     'dated_row_spans': (EXAM / 'dated_row_spans.parquet', 'f55093143c230bb096273168a5ee556757d6081589287b9c7338782f9ea987f2'),
     'retro_rows': (EXAM / 'retro_rows.parquet', '78a6e30080200b5e8aa41062aee55f95e19ebe364fda267bd0e6663bc856a9ab'),
     'na_v1_rows': (EXAM / 'na_v1_rows.parquet', 'a94267abd85f83c0959725f17a503373e7b03f19f4655de25833dd20a6bd7467'),
@@ -181,8 +181,8 @@ def _dated(y):
         for q in ('capture', 'n2n', 'np', 'na', 'total', 'elastic', 'inelastic'):
             if (R.quantity == q).any():
                 out[f'sub:{q}'] = (R.quantity == q).to_numpy()
-        # energy regions (DATEDEXAM2): libraries are placed as bin averages (binavg.py), so every region is scored,
-        # including below 100 keV; 'E >= 100 keV' is DATEDEXAM's post-hoc subset, kept for continuity
+        # energy regions: libraries are placed as bin averages (binavg.py), so every region is scored,
+        # including below 100 keV; 'E >= 100 keV' is the earlier post-hoc subset, kept for continuity
         for b, lo, hi in (('< 10 keV', 0, 1e4), ('10-100 keV', 1e4, 1e5), ('0.1-1 MeV', 1e5, 1e6), ('1-10 MeV', 1e6, 1e7),
                           ('> 10 MeV', 1e7, np.inf)):
             out[f'sub:{b}'] = ((R.energy_ev >= lo) & (R.energy_ev < hi)).to_numpy()
@@ -289,7 +289,7 @@ def dated_library_values(y: int, path=None) -> dict:
     curve over the row's own 0.1 ln E bin (incognita/bench/binavg.py).  No library value ships with the benchmark: the
     table is built from the official files by `uv run python -m incognita.bench.place_dated` and passed as `--dated-library PATH`
     (or $INCOGNITA_DATED_LIBRARY).  Without it the dated tracks score no library: grid SAMPLES of resolved resonances
-    against 0.1 ln E bin means are wrong below ~100 keV (DATEDEXAM), so there is no fallback.  NaN = no curve."""
+    against 0.1 ln E bin means are wrong below ~100 keV, so there is no fallback.  NaN = no curve."""
     p = path or os.environ.get(DATED_LIBRARY_ENV)
     if not p:
         print(f'dated-{y}: no --dated-library table (build it with uv run python -m incognita.bench.place_dated); libraries not scored',
@@ -817,7 +817,7 @@ def cmd_leaderboard(a):
                 if k in AR:
                     AR[k][nm] = predict_alpha_report(TT[k], cur)
             del cur
-    for k in dated:     # DATEDEXAM2: libraries as bin averages on the rows' own bins (frozen table), not grid samples
+    for k in dated:     # libraries as bin averages on the rows' own bins (frozen table), not grid samples
         LP[k].update(dated_library_values(int(k[6:]), a.dated_library))
     BAV = {k: set() for k in tracks}             # (track, library) placed as bin averages (place_tracks.py)
     tl = getattr(a, 'track_library', None) or os.environ.get(TRACK_LIBRARY_ENV)

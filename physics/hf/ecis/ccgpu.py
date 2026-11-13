@@ -23,7 +23,7 @@ each row's form factors, kinematics, step, matching index and radii up to its ma
 hit is the same integration, never a neighbour's.
 
 The GPU recurrence is `ccfast.c`'s: the modified Numerov step below `soswitch` (`cc_block_mn`) and
-the implicit derivative-coupling step above it (`cc_block_d`, CCBLOCKD arm 1), same grid, same
+the implicit derivative-coupling step above it (`cc_block_d` mode 1), same grid, same
 matching point. It differs in three places, none of which is a physics change:
   * channels are padded to the largest block of a bucket with DECOUPLED dummy channels (zero
     potential and coupling); M is block diagonal, so the real channels never see them;
@@ -435,7 +435,7 @@ BOUND_MAX = 1.0e-13  # a pair whose truncation bound rho^(sweeps+1) ever exceeds
 
 def _jacobi(L: Tensor, W: Tensor, rho_max: Tensor, sweeps: int = SWEEPS) -> Tensor:
     """X = L^-1 W for the strongly diagonal implicit Numerov matrix L = 1 - c M - c G, by SWEEPS
-    Jacobi sweeps X <- D^-1 W - (D^-1 O) X (ccfast.c `nm_solve_split`, NATIVEX2 ccx): products
+    Jacobi sweeps X <- D^-1 W - (D^-1 O) X (ccfast.c `nm_solve_split`, ccx): products
     only. The contraction rho = max_a sum_b |O_ab| / |D_a| (|Re| + |Im|, as ccfast.c) of every pair
     raised to sweeps + 1 (the truncation bound) is folded into `rho_max`, so that a pair where the
     sweeps are not converged to rounding can be refused afterwards."""
@@ -714,7 +714,7 @@ class _Side:
                 up = _right_tri(R, up)
 
     def _run_deformed(self, u1: Tensor) -> None:
-        """`ccfast.c::cc_block_d` (CCBLOCKD arm 1): the implicit Numerov step with r du/dr on the
+        """`ccfast.c::cc_block_d` (mode 1): the implicit Numerov step with r du/dr on the
         one-sided 7-point stencil, M_i u_i formed, one solve per step."""
         fdw = _fdw_rows()
         c = self.cP.to(torch.complex128)[:, None, None]

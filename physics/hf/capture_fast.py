@@ -1,12 +1,12 @@
 """The capture cross section from the chained port, without dumps and without the cascade.
 
-Task: SPEED0 gate G0.2 (the speed plan's capture fast path). No physics of its own: every number
+Task: the capture fast path. No physics of its own: every number
 comes from the same modules `engine.ChainedFull` runs, in the same order.
 
 **Why the capture channel needs only one nucleus.** TALYS's (n,gamma) exclusive cross section
 `xs000000` is the flux that never leaves the initial compound nucleus, and nothing can flow back
 into that nucleus once it has left. So it is exactly the compound nucleus's final population
-`xspopnuc(0, 0)` after `multiple.f90` has decayed it (checked on the SPEED0 golden record: equal to
+`xspopnuc(0, 0)` after `multiple.f90` has decayed it (checked on the golden record: equal to
 the last bit on 24 of 24 cases, 1.5e-16 on the 25th). That needs the binary photon population
 (`comptarget`) and the decay of the compound nucleus's own bins -- not the residual nuclei, not
 `channels.f90`.
@@ -22,7 +22,7 @@ defaults. That is the fast path's domain; outside it `capture_xs` returns NaN ra
 number with an injected family silently set to zero. Also outside: fissile compound nuclei
 (T11's fission transmission is not built here).
 
-Identity with the full chain is gated by `tests/hf/test_capture_fast.py` against the golden
+Identity with the full chain is checked by `tests/hf/test_capture_fast.py` against the golden
 record's `xs000000` at every in-domain harness energy.
 """
 
@@ -68,7 +68,7 @@ def target(Z: int, A: int, enincmax_mev: float = 20.0,
     differentiable=True)` then returns a tensor carrying all of them at once:
 
     * `gamma_overrides` -- T7's `gamma_parameters` fields for the compound nucleus (`ftable`,
-      `wtable`, `sgr_mb`, ... as requires_grad tensors). SPEED0's G0.3.
+      `wtable`, `sgr_mb`, ... as requires_grad tensors).
     * `density_overrides` -- level-density TALYS keywords (`aadjust`, `pshift`, `s2adjust`,
       `ctable`, `ptable`, `tadjust`, ...): `physics.hf.density.overrides.DENSITY_KEYS`.
     * `optical_overrides` -- optical-model TALYS keywords (`v1adjust`, `w1adjust`, `d1adjust`,
@@ -79,10 +79,10 @@ def target(Z: int, A: int, enincmax_mev: float = 20.0,
     through `input.defaults.default_params`, so TALYS's post-resolution links still run
     (`rwadjust` follows `rvadjust`, `ctable`/`ptable` follow `cglobal`/`pglobal`). An unknown
     keyword raises rather than being dropped -- a dropped override is a zero gradient that looks
-    like a converged one. DIFFPARAM, gate G0.4.
+    like a converged one.
 
     `matching_xacc` overrides `rtbis`'s tolerance in the CTM matching (`density.matching`);
-    `None` is TALYS's 1e-4 MeV and is what every reproduction of TALYS uses. The gradient gate
+    `None` is TALYS's 1e-4 MeV and is what every reproduction of TALYS uses. The gradient check
     passes 1e-10, because at 1e-4 Exmatch is a staircase in the level-density parameters and a
     finite difference measures the step rather than the slope. See `density.matching.matching`.
 
@@ -95,7 +95,7 @@ def target(Z: int, A: int, enincmax_mev: float = 20.0,
     reference grid (`talys_reference.ENERGIES_MEV`) to reproduce a reference run.
 
     TALYS: talysreaction.f90:1 (talysreaction)
-    Test: G0.2 / tests/hf/test_capture_fast.py
+    Test: tests/hf/test_capture_fast.py
     """
     from physics.hf.emission.feeding import Cascade
 
@@ -125,7 +125,7 @@ def capture_xs(tg: CaptureTarget, e_inc_mev: float, differentiable: bool = False
     `differentiable` the result is a 0-d tensor on the graph of the target's gamma overrides.
 
     TALYS: comptarget.f90:1 (comptarget), multiple.f90:1 (multiple) for (Zcomp, Ncomp) = (0, 0)
-    Test: G0.2 / tests/hf/test_capture_fast.py
+    Test: tests/hf/test_capture_fast.py
     """
     from physics.hf.compound.chain import compound_inputs
     from physics.hf.compound.target import compound_target_inputs
@@ -164,7 +164,7 @@ def capture_xs(tg: CaptureTarget, e_inc_mev: float, differentiable: bool = False
 
     res = multiple_emission(nuclei, decay, popeps_mb=tg.popeps_mb, maxz=0, maxn=0, k0=k0,
                             xsreacinc_mb=float(inc.sigma_reac_mb[0]))
-    # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set; a
+    # direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set; a
     # constant in the photon-strength / level-density / OMP knobs of this path
     from physics.hf.direct.racapcalc import direct_capture_mb
 

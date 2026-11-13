@@ -49,7 +49,7 @@ from physics.hf.input.nuclides import coulomb_barriers, weak_coupling_core
 from physics.hf.structure.deformation import deformation, weak_coupling
 from physics.hf.structure.levels import NUMLEV2, discrete_levels
 from physics.hf.structure.masses import masses
-from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
+from physics.hf.projectile import target_mass_index
 
 
 @dataclass(frozen=True)
@@ -98,7 +98,7 @@ def _base(target: str, energies: tuple[float, ...]):
     m = masses(options, params)
     c = talys_constants()
     k0 = options.k0
-    Zr, Ar = Z, A  # residual of the k0 channel = the target (CPINC: any projectile)
+    Zr, Ar = Z, A  # residual of the k0 channel = the target (any projectile)
     lev = discrete_levels(Zr, Ar, options, m, params)
     dfm = deformation(Zr, Ar, options, lev, m, params)
     if Ar % 2 == 1:  # nuclides.f90:227 -- an odd-A target gets its deformations by weak coupling
@@ -106,7 +106,7 @@ def _base(target: str, energies: tuple[float, ...]):
         cz = options.Zinit - zc
         ca = cz + options.Ninit - nc
         clev = discrete_levels(cz, ca, options, m, params)
-        # FIXDWBA: the core of a target decided 'R' is a rotor too (no systematics 2+ beta)
+        # The core of a target decided 'R' is a rotor too (no systematics 2+ beta)
         from physics.hf.direct.dwbaunit import core_autorot
 
         cdf = deformation(cz, ca, options, clev, m, params, flagautorot=core_autorot(options))
@@ -114,8 +114,7 @@ def _base(target: str, energies: tuple[float, ...]):
     # nuclides.f90:251-259 -- `ewfc`, `eurr` and `epreeq` are -1 sentinels in the raw record and
     # `energy_flags` raises on them, so `case` would fall back to `flaggiant0` (true at EVERY
     # energy) and put a giant-resonance block below the pre-equilibrium onset, where TALYS
-    # writes none. This call used to be guarded by `except TypeError` on a signature that never
-    # matched, so the fallback was the only path taken (NODUMP).
+    # writes none. This call resolves them first.
     options = resolve_structure_defaults(
         options,
         s_projectile_mev=float(m.s_mev[c["parZ"][k0], c["parN"][k0], k0]),
@@ -146,7 +145,7 @@ def _base(target: str, energies: tuple[float, ...]):
 
 @lru_cache(maxsize=32)
 def _grid(target: str, energies: tuple[float, ...]):
-    """NATIVEX2: the part of `case` that does not depend on the incident energy -- the emission
+    """The part of `case` that does not depend on the incident energy -- the emission
     grid up to the run's largest energy, its bins and the charged-particle begin -- built once per
     (target, declared grid) instead of at every energy; the same calls on the same arguments.
     Dropped between targets with every other `lru_cache` (`chartrun.drop_target_caches`).
@@ -160,14 +159,14 @@ def _grid(target: str, energies: tuple[float, ...]):
     s0 = {t: float(m.s_mev[0, 0, t]) for t in range(7)}
     from physics.hf.structure.scalars import parinclude_of, target_energy_mev
 
-    te = target_energy_mev(Z, A, options, m, params)  # ENGFIX4: targetE (0 for a ground-state target)
+    te = target_energy_mev(Z, A, options, m, params)  # targetE (0 for a ground-state target)
     eg, maxen = egrid_values(
-        emission_limit(max(energies), s0[k0], te,  # GRIDTOP: run_grid's top
+        emission_limit(max(energies), s0[k0], te,  # run_grid's top
                        s_exits_mev=gridtop_exits(s0, m.mass_amu, parinclude_of(options))),
         options.segment,
         numen(),
         options.flagequispec,
-        float(max(energies)) if options.flagequispec else None,  # ENGFIX4: equispec needs enincmax
+        float(max(energies)) if options.flagequispec else None,  # equispec needs enincmax
     )
     de, _etop, ebot = emission_bins(eg, maxen)
     coulbar = coulomb_barriers(options)
@@ -179,7 +178,7 @@ def _grid(target: str, energies: tuple[float, ...]):
 def case(target: str, e_inc_mev: float, energies: tuple[float, ...] | None = None) -> DirectCase:
     """Build the `DirectCase` for one incident energy, on ported inputs only.
 
-    NATIVEX2: cached per (target, energy, declared grid) like `_base` -- a chained run asks for
+    Cached per (target, energy, declared grid) like `_base` -- a chained run asks for
     the same case from `compound.pop_reference._giant` and `direct.chain.direct_result`. The
     returned case is shared; treat it as read-only. Dropped between targets with every other
     `lru_cache` (`chartrun.drop_target_caches`).

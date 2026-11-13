@@ -1,10 +1,10 @@
-"""NATIVEX: `target_batch.case_nowfc` and `case_moldauer` in one compiled call per incident energy.
+"""Native: `target_batch.case_nowfc` and `case_moldauer` in one compiled call per incident energy.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nativex.py`,
-which holds it to `target_batch`'s torch path, and the G-NATIVEX closeness gate.
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_nativex.py`,
+which holds it to `target_batch`'s torch path, and the native closeness test.
 
 TALYS routines this computes (in `native/nativex.c`, arranged as `target_batch` arranges them):
     comptarget.f90:1 (comptarget)      -- the (J, parity) sum, with and without Moldauer
@@ -56,12 +56,12 @@ def target(inp, wfc: bool, max_nex: int | None):
     so = nativex.lib()
     if so is None or isinstance(inp.tjlinc, torch.Tensor):
         return None
-    if inp.k0 == 0:  # ENGPROJ: the kernel's incident loop is the particle one; a photon takes the Python path
+    if inp.k0 == 0:  # the kernel's incident loop is the particle one; a photon takes the Python path
         return None
     if wfc and inp.wfcfactor not in (1, 2, 3):
         return None
     nexmax = max_nex or max(r.maxex + 1 for r in inp.residuals.values())
-    sel = getattr(inp, "cellsel", None)  # KEVCOLD (default None = every cell)
+    sel = getattr(inp, "cellsel", None)  # Cold-alpha domain (default None = every cell)
     cells = [(J2, p) for p in (-1, 1) for J2 in range(inp.j2beg, inp.j2end + 1, 2) if sel is None or (J2, p) in sel]
     pop = np.zeros((7, nexmax, NUMJ + 1, 2))
     if not cells:

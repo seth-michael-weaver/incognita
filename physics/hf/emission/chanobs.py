@@ -1,4 +1,4 @@
-"""KWCOV B1 (CHANOBS): the channel observables TALYS writes by default that `Results` did not carry, OUTPUT ONLY.
+"""`INCOGNITA_CHANOBS`: the channel observables TALYS writes by default that `Results` does not otherwise carry, OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -20,7 +20,7 @@ comparison with a stock TALYS run is a join on the name. Names (all mb unless th
 `MM` is the level's number in the level file (`levnum`, as TALYS and `multiple.isomer_files` write it), not the
 index `nex`. Isomer files exist only for a channel whose residual has an isomer.
 
-Switch: `INCOGNITA_CHANOBS` = 1/y/yes/on (default unset: nothing is computed or added, every array of every gate is
+Switch: `INCOGNITA_CHANOBS` = 1/y/yes/on (default unset: nothing is computed or added, every array of every test is
 unchanged). On the C driver it makes each energy take the Python channels (`exclusive_channels` on the C cascade's
 `packed.result()`), the documented fallback of `engine_c.cases`, because `ce_channels` returns only the channel
 cross sections.
@@ -28,7 +28,7 @@ cross sections.
 TALYS routines ported here (file:line of the subroutine statement):
     totalxs.f90:1 (totalxs)            xsexclcont, multiplicity -- the parts `channels._channel_result` did not fill
     channelsout.f90:1 (channelsout)    file names and columns
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B1, output only). Acceptance test: KWCOV-B1
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test: KWCOV-B1
 (tests/hf/test_chanobs.py, docs/hf/COVERAGE_PLAN.md).
 """
 
@@ -67,7 +67,7 @@ def extras(ch, b, k0: int, Z: int, A: int, levnum=None, binp=None) -> dict[str, 
     """The CHANOBS names of one incident energy from a `ChannelResult` `ch` and a `BinaryResult` `b`.
 
     `levnum(Z, A)` gives {nex: level number} of a residual's isomers (default `multiple.LEVNUM`). `binp` (the
-    energy's `BinaryInputs`) completes particle production: unless TRITFID already did it, the cascade got only the
+    energy's `BinaryInputs`) completes particle production: unless the triton binary rule already did it, the cascade got only the
     compound part of `xsbinary`, so the direct, pre-equilibrium, giant-resonance and direct-capture emission that
     multiple.f90:950 adds to xsfeed(0,0,type) is added here (xsparticle is a sum over xsfeed, so this is exact).
 

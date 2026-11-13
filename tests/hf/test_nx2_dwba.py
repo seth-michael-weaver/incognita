@@ -1,5 +1,5 @@
-"""NATIVEX2 lever `dwba`: `ecis.dwba_nx2.case_cross_sections` (the compiled DWBA deck) against
-`ecis.dwba.dwba_case` with the lever off, on the chained direct cases of a few targets and energies.
+"""Compiled `dwba` path: `ecis.dwba_nx2.case_cross_sections` (the compiled DWBA deck) against
+`ecis.dwba.dwba_case` with the switch off, on the chained direct cases of a few targets and energies.
 Skipped without a `libnx2` build (scripts/build_nx2_native.sh)."""
 
 from __future__ import annotations

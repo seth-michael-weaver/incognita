@@ -3,7 +3,7 @@
  * matched exactly as written, and kit.js adds no plurals for Arabic: definite and indefinite forms, plurals, duals and the
  * forms with attached prefixes (و، ب، ل، ف: والنواة، بالنواة، للنواة) are listed explicitly where the prose uses them.
  * Tanween spellings (نيوترونًا) are separate surface forms too. Like the English file, bare everyday words are avoided
- * ("الطاقة", "المستوى", "الموجة" are never aliased alone; "فترة" alone is skipped because the scoreboard uses it for intervals). */
+ * ("الطاقة", "المستوى", "الموجة" are never aliased alone; "فترة" alone is skipped because the comparison page uses it for intervals). */
 (function () {
   WT.L.glossary = {
     /* ---------- اللبنات الأساسية ---------- */

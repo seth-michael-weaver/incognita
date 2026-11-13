@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-"""BESTFIT: capture curves from the exact engine with one `INCOGNITA_TALYS_FIT` arm.
+"""Capture curves from the exact engine with one `INCOGNITA_TALYS_FIT` arm.
 
     .venv/bin/python scripts/bestfit/engine_curves.py --arm tendl --out bestfit_scratch/tendl \
         --cpus 0-5 --only 79-197,69-169 --cc-cache ~/.cache/incognita-cc
 
 One worker per CPU, one torch thread each, one `Cascade` per target on Stage C's 64-point grid
 (1 keV .. 20 MeV), `engine_c.run` (C path). Output per target: `<Z>_<A>.npz` with `capture_mb[64]`,
-`e_ev[64]`, the arm and the resolved keyword cards (so a table can say what was applied).
+`e_ev[64]`, the arm and the resolved keyword lines (so a table can say what was applied).
 
-INGRED: it also saves the physics ingredients the curves were built FROM -- `ing_*`, from
+It also saves the physics ingredients the curves were built FROM -- `ing_*`, from
 `physics.hf.ingredients` off the `Cascade` the run just used (theoretical D0 at Sn, s-wave
 <Gamma_gamma>, S0/S1/R', the level-density a(Sn), pairing and shift, spin cut-off, Sn, the
 ldmodel/strength actually used, and the fission barrier heights and widths per barrier of a
 fissile system) -- so a chart arm can be put next to measured D0 / <Gamma_gamma> / S0 without
 re-running it. On by default; `--no-ingredients` restores the previous output exactly.
 
-STAGETIME: every npz also carries where the CPU went -- `stage_cpu_s`, `stage_wall_s`,
+Every npz also carries where the CPU went -- `stage_cpu_s`, `stage_wall_s`,
 `stage_calls`, `stage_cpu_s_by_e` (JSON strings, `physics.hf.stagetime` exclusive per-stage
 time; whatever no stage claims is booked to `other`, so the stage sum is the run's CPU),
 `stage_counters` (CC cache rows: memory hits, disk hits / misses, rows solved), `cc_cache_hits` /
@@ -204,7 +204,7 @@ def _worker(cpu: int, jobs, out_dir: str, arm: str, grid_ev, cc_cache: str = "",
 
 
 def _stage_record(snap: dict, stats: dict, cpu_s: float | None = None) -> dict:
-    """STAGETIME: the npz fields of one run's `stagetime.snapshot()` and `engine_c.run` stats.
+    """The npz fields of one run's `stagetime.snapshot()` and `engine_c.run` stats.
     `unstaged` = the run's cpu_s minus the stage sum (collecting the output arrays, outside any stage)."""
     ctr = snap.get("counters", {})
     if cpu_s is not None and snap["stage_cpu_s"]:
@@ -237,15 +237,15 @@ def main() -> int:
     ap.add_argument("--cpus", default="0-5")
     ap.add_argument("--only", default="", help="Z-A,Z-A,...")
     ap.add_argument("--grid", default="stagec", help="stagec | a json file of eV values")
-    ap.add_argument("--cc-cache", default="", help="CCCACHE: directory for the coupled-channels "
+    ap.add_argument("--cc-cache", default="", help="directory for the coupled-channels "
                     "disk cache (sets INCOGNITA_CC_CACHE in every worker); '' = off")
     ap.add_argument("--no-ingredients", dest="ingredients", action="store_false",
-                    help="INGRED: do not save the `ing_*` physics ingredients (on by default)")
-    ap.add_argument("--lines-table", default="", help="CHUNKFIX: chart-wide recipe table (sets "
+                    help="do not save the `ing_*` physics ingredients (on by default)")
+    ap.add_argument("--lines-table", default="", help="chart-wide recipe table (sets "
                     "INCOGNITA_TALYS_FIT_LINES_FILE): each target takes the lines of the nuclei in its own box")
-    ap.add_argument("--shared-lines", action="store_true", help="CHUNKFIX: allow one per-nucleus "
+    ap.add_argument("--shared-lines", action="store_true", help="allow one per-nucleus "
                     "INCOGNITA_TALYS_FIT_LINES string for several targets (chunk-dependent; only to reproduce a "
-                    "pre-CHUNKFIX freeze in its exact chunks)")
+                    "chunk-dependent freeze in its exact chunks)")
     a = ap.parse_args()
     from physics.hf.gamma.e1_width import ENV as E1_ENV, resolve as e1_resolve
     if E1_ENV not in os.environ and e1_resolve(a.arm, a.e1):
@@ -260,7 +260,7 @@ def main() -> int:
     from physics.hf.input import fitlib
     if a.lines_table:
         os.environ[fitlib.ENV_LINES_FILE] = str(Path(a.lines_table).resolve())  # spawned workers inherit it
-    # CHUNKFIX: keyword lines are in absolute coordinates and land on every nucleus of a run's box, so ONE per-nucleus
+    # Keyword lines are in absolute coordinates and land on every nucleus of a run's box, so ONE per-nucleus
     # line string shared by several targets puts one target's lines on another's residual nuclei: the curve then
     # depends on the chunk. Per-nucleus recipes go in --lines-table, which every target reads the same way.
     bag = [x for x in os.environ.get(fitlib.ENV_LINES, "").split(";") if x.strip()]
@@ -268,7 +268,7 @@ def main() -> int:
         raise SystemExit(f"CHUNKFIX: {fitlib.ENV_LINES} holds per-nucleus lines and this run has {len(tg)} targets: "
                          "each target would also take the other targets' lines on its residual nuclei. Put the "
                          "recipe for every nucleus in --lines-table, or pass --shared-lines to reproduce a "
-                         "pre-CHUNKFIX freeze in its exact chunks.")
+                         "chunk-dependent freeze in its exact chunks.")
     Path(a.out).mkdir(parents=True, exist_ok=True)
     ctx = get_context("spawn")
     q = ctx.Queue()

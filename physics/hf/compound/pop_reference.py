@@ -1,4 +1,4 @@
-"""Gate driver for `population.f90`: build its inputs from the ported T8 / T12 components and
+"""Test driver for `population.f90`: build its inputs from the ported T8 / T12 components and
 score `preeqpopex` against TALYS's own, dumped by `talys_instrument/cndump.f90` (`PEPX`).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
@@ -11,7 +11,7 @@ What is built and what is injected, so the number below is read correctly. Built
 `population.f90` (this task), `xspreeq`/`xspreeqtot` from T8's exciton model, `xsgr`/`xsgrtot` from
 T12's giant-resonance model, the emission grid and `ebegin`/`eend` from T1's grid code. Injected:
 the residuals' excitation grids (`Ex`, `deltaEx`, `Nlast`, `maxex`, `S`), which come from the same
-dump the reference does and are covered by gates A-grid and A-struct; T8's own `xsreac` and T12's
+dump the reference does and are covered by checks A-grid and A-struct; T8's own `xsreac` and T12's
 own DWBA cross sections, which those tasks inject and which are not this task's seam.
 
 `flagpreeq` is false below `epreeq`, so TALYS never calls `population` at the low energies and
@@ -36,12 +36,12 @@ from physics.hf.core.grids import emission_end, incident_kinematics, total_energ
 from physics.hf.preeq.multi import NUMPARX
 from physics.hf.core.tensors import DTYPE
 from physics.hf.emission.score import POP_FLOOR_MB, _r
-from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
+from physics.hf.projectile import target_mass_index  # projectile bookkeeping
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT_JSON = ROOT / "docs" / "results" / "hf-population-gate.json"
 TOL = 1.0e-2  # A-cn1 / A-pe: this is T8's and T12's spectrum tolerance, not a new one
-# §2's pre-registered floors: 1e-3 mb for cross sections, 1e-6 mb for populations. `preeqpopex`
+# §2's fixed floors: 1e-3 mb for cross sections, 1e-6 mb for populations. `preeqpopex`
 # is a population, so the population floor applies.
 FLOOR_MB = POP_FLOOR_MB
 
@@ -54,8 +54,8 @@ def _preeq(target: str, variant: str = "default",
     Cached: `norm_reference.addends` and `feed_reference._preeq_of` both need it for the same
     target, and it is the most expensive run-scoped set-up of the chain. Callers only read it.
 
-    `declared` is the run's incident energy grid. Pass it and the whole set-up is CHAINED
-    (NODUMP): the energies come from `flagpreeq` rather than from the list of `exciton*.out`
+    `declared` is the run's incident energy grid. Pass it and the whole set-up is CHAINED:
+    the energies come from `flagpreeq` rather than from the list of `exciton*.out`
     files, `xsreac` from T5, `xsreacinc` from T5's incident channel, and `xsflux`/`xsdirdisc`
     from T12/T13 -- see `preeq.chain`. `None` keeps the injected arm, which is what A-pe scores.
     """
@@ -65,7 +65,7 @@ def _preeq(target: str, variant: str = "default",
     from physics.hf.preeq.exciton import preequilibrium
     from physics.hf.preeq.prepare import parse_target, prepare
 
-    # PARAMWIRE: `fit` is the part of the run's parameter set this set-up reads
+    # Parameter set: `fit` is the part of the run's parameter set this set-up reads
     # (`preeq_fit`: the compound nucleus and the binary residuals), and part of the key
 
     chained = declared is not None
@@ -77,18 +77,18 @@ def _preeq(target: str, variant: str = "default",
         )
 
         Z, A = parse_target(target)
-        # `preeq.f90` runs at every declared energy above `epreeq`; SPEEDP lets a run that
-        # computes a SUBSET of the declared grid say so (`preeq.chain.set_energy_subset`), and
+        # `preeq.f90` runs at every declared energy above `epreeq`; a run that
+        # computes a SUBSET of the declared grid can say so (`preeq.chain.set_energy_subset`), and
         # then the exciton model is batched over that subset instead of over all of them.
         #
         # `direct_grid` is the DECLARED grid, not the pre-equilibrium subset of it. That axis is
         # read by `direct.chain._coupled` (which stitches `soswitch` across it) and by
         # `direct.prepare.case` (which resolves the onsets on it), and `directecis.f90` /
         # `incidentecis.f90` run one deck per DECLARED incident energy -- the pre-equilibrium
-        # list only decides where `preeq.f90` itself runs. Handing the subset here was a NODUMP
-        # wiring artefact: it made `engine._BuiltInputs` and the flux ask `chained_direct` two
-        # different questions about the same (target, energy), so a coupled target solved its
-        # whole incident deck twice and every shared energy solved its DWBA twice. On a
+        # list only decides where `preeq.f90` itself runs. Handing the subset here would be a
+        # wiring artefact: it would make `engine._BuiltInputs` and the flux ask `chained_direct` two
+        # different questions about the same (target, energy), so a coupled target would solve its
+        # whole incident deck twice and every shared energy its DWBA twice. On a
         # `colltype R`/`V` target the two answers differ in the last bits of the coupled
         # stitch (Ca-40: 1.8e-14 in `xsdirdisc`); a spherical one is bit-identical.
         grid = preeq_energies(Z, A, declared)
@@ -128,7 +128,7 @@ def preeq_fit(fit, Zt: int, At: int) -> tuple:
     c = talys_constants()
     from physics.hf.projectile import compound_of
 
-    Zc, Ac = compound_of(Zt, At)  # CPINC
+    Zc, Ac = compound_of(Zt, At)
     return fit_subset(fit, [(Zc - c["parZ"][t], Ac - c["parA"][t]) for t in range(7)])
 
 
@@ -222,8 +222,7 @@ def pop_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float, targe
         pespinmodel=options.pespinmodel, flagmulpre=flagmulpre, flag2comp=options.flag2comp,
         maxpar=maxpar,
         # preeq.f90:63-79: ppi0 = parZ(k0), pnu0 = parN(k0); a photon starts as one neutron
-        # particle. CPINC: the old (0 or 1, 1 if k0 == 1) form was right for n and p only (an
-        # alpha starts with 2 + 2, not 1 + 0)
+        # particle (an alpha starts with 2 + 2, not 1 + 0)
         ppi0=0 if k0 == 0 else int(c["parZ"][k0]), pnu0=1 if k0 == 0 else int(c["parN"][k0]),
         xsstep2_mb=(_xsstep2_by_type(xsstep2, states, maxpar, E)
                     if (flagmulpre and xsstep2 is not None and states is not None) else {}),

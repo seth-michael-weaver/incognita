@@ -3,8 +3,8 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning (racapcalc.f: S. Goriely, Xu Yi). See physics/hf/NOTICE-TALYS.md.
 
-Task: T12 (DIRECTCAP job). Acceptance test: DIRECTCAP (`tests/hf/test_directcap.py` and
-`scripts/directcap/talys_agree.py` (engine vs stock TALYS `racap y optmodall y`, racap.tot)).
+Task: T12 (direct capture). Acceptance test: DIRECT-CAPTURE, `tests/hf/test_directcap.py` and an agreement
+script (engine vs stock TALYS `racap y optmodall y`, racap.tot).
 
 TALYS routines ported here (file:line of the subroutine statement):
     racapcalc.f:1 (racapcalc), racapcalc.f:880 (sixj), racapcalc.f:1052 (clebs),
@@ -24,7 +24,7 @@ the target at the incident energy.
 `optical(0, 0, k0, 1e-6)`, but `structure.f90:85` only fills the compound nucleus's OMP arrays
 (`omppar(0, 0)`) under `optmodall y`. With TALYS defaults the well depth is 0, no bound state is
 found, and `racap y` returns exactly 0 mb for every target at every energy (measured: 10 targets
-x 8 energies, DIRECTCAP). The port always uses the KD03 compound-nucleus well, which is what
+x 8 energies). The port always uses the KD03 compound-nucleus well, which is what
 TALYS computes under `optmodall y`; the agreement test runs stock TALYS that way and compares the
 direct-capture column of racap.tot only (optmodall also changes other channels).
 
@@ -71,7 +71,7 @@ def f32(x: float) -> float:
 
 
 def _deck(Z: int | None, A: int | None):
-    """KWCOV B5: the run's deck cards for (Z, A) (`input.fitlib`), or None (no deck, or no target given)."""
+    """The run's deck lines for (Z, A) (`input.fitlib`), or None (no deck, or no target given)."""
     if Z is None or A is None:
         return None
     from physics.hf.input import fitlib
@@ -80,7 +80,7 @@ def _deck(Z: int | None, A: int | None):
 
 
 def _deck_key(Z: int | None, A: int | None) -> tuple:
-    """KWCOV B5: what of the deck the racap structure reads (options and cells), for the caches below."""
+    """what of the deck the racap structure reads (options and cells), for the caches below."""
     c = _deck(Z, A)
     if c is None or c.empty():
         return ()
@@ -91,8 +91,8 @@ def mode(Z: int | None = None, A: int | None = None) -> str:
     """`INCOGNITA_DIRECT_CAPTURE`: `0`/unset (off, TALYS default), `all` (discrete + continuum,
     TALYS's ispect=3) or `disc` (experimental levels only, TALYS's ispect=1).
 
-    KWCOV B5: a deck `racap y|n` line for target (Z, A) wins over the variable (`racap y` = `all`, the
-    TALYS keyword; it used to be read and ignored), and like stock TALYS-2.25 it gives 0 mb without
+    A deck `racap y|n` line for target (Z, A) wins over the variable (`racap y` = `all`, the
+    TALYS keyword), and like stock TALYS-2.25 it gives 0 mb without
     `optmodall y` (the defect in the module docstring; stock Au-197 `racap y`: capture unchanged; `optmodall y`
     itself is refused, `defaults.UNPORTED`). With direct capture on (deck or variable), an `ldmodelracap` other
     than 3 is refused (racapinit.f90:176-312: the particle-hole level densities of 1/2 are not ported).
@@ -440,9 +440,9 @@ def coufra(rho: float, eta: float, ll: int) -> tuple[float, float]:
     """(F_l(eta, rho), G_l(eta, rho)) with minl = maxl = l. TALYS: racapcalc.f:1504 (coufra)
     Test: tests/hf/test_directcap.py
 
-    ENGAUDIT RACAPBESSEL (INCOGNITA_RACAPBESSEL=1, default OFF): for eta = 0 (neutrons) F_l = rho j_l(rho), G_l = -rho y_l(rho)
-    exactly. Steed's continued fraction below fails at small rho: ZeroDivisionError (l = 2, rho = 1e-4; Mg-26 at thermal,
-    LIGHTCAP) and wrong values (l = 2, rho = 1e-5: G = -5.4e7 against 3e10).
+    INCOGNITA_RACAPBESSEL=1 (default OFF): for eta = 0 (neutrons) F_l = rho j_l(rho), G_l = -rho y_l(rho)
+    exactly. Steed's continued fraction below fails at small rho: ZeroDivisionError (l = 2, rho = 1e-4; Mg-26 at thermal)
+    and wrong values (l = 2, rho = 1e-5: G = -5.4e7 against 3e10).
     """
     if eta == 0.0 and os.environ.get("INCOGNITA_RACAPBESSEL", "0") == "1":
         from scipy.special import spherical_jn, spherical_yn
@@ -702,8 +702,8 @@ def _kd03_real(Zn: int, Nn: int, e_mev: list[float], options, params) -> list[tu
 
 
 def racap_structure(Z: int, A: int) -> RacapStructure:
-    """racapinit + the structure half of racap for a neutron on (Z, A), with the run's deck cards (KWCOV B5:
-    `sfth`, `sfexp`, and every structure keyword, reach it; before, it always took the defaults).
+    """racapinit + the structure half of racap for a neutron on (Z, A), with the run's deck lines (so
+    `sfth`, `sfexp`, and every structure keyword reach it).
 
     TALYS: racapinit.f90:1 (racapinit), racap.f90:1 (racap)
     Test: tests/hf/test_directcap.py
@@ -726,7 +726,7 @@ def _racap_structure(Z: int, A: int, _key: tuple) -> RacapStructure:
     from physics.hf.structure.levels import discrete_levels
 
     options, params, m = _structure_of(Z, A)
-    if _key:  # KWCOV B5: the deck's options and Params cells, as every engine stage reads them
+    if _key:  # the deck's options and Params cells, as every engine stage reads them
         from physics.hf.input import fitlib
         from physics.hf.input.defaults import default_options, default_params
 

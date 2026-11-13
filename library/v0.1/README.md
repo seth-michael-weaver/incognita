@@ -17,7 +17,7 @@ below from the files themselves. BUILD.md records the build (tier counts, interv
 | tier | meaning |
 |---|---|
 | MEASURED | the nucleus has capture data; the value is the learned model trained on all EXFOR data |
-| ANCHORED | no capture cross-section data, but a measured MACS at 30 keV; the blind curve is scaled to it |
+| ANCHORED | no capture cross-section data, but a measured MACS at 30 keV; the predicted curve is scaled to it |
 | INTERPOLATED | unmeasured, with structure data, within two neutrons or protons of measured nuclei |
 | EXTRAPOLATED | everything else: the engine's no-data recipe (default TALYS-2 physics with this project's E1-width constant) with a calibrated interval |
 

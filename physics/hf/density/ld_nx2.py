@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `ld`: the level-density set-up of a residual nucleus and its rhogrid in C
+"""Native kernel `ld`: the level-density set-up of a residual nucleus and its rhogrid in C
 (`native/nx2_ld.c`), for the calls where nothing carries a gradient and the model is the
 analytical constant-temperature + Fermi gas without collective enhancement (ldmodel 1, every
 nucleus with A <= 215 under TALYS's defaults).
@@ -6,8 +6,8 @@ nucleus with A <= 215 under TALYS's defaults).
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nx2_ld.py`
-(each kernel against the torch/numpy path it replaces) and the G-NATIVEX2 closeness gate.
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_nx2_ld.py`
+(each kernel against the torch/numpy path it replaces) and the native closeness test.
 
 Where the time went (spherical 12, in-process): `Cascade.spec` 1.0 CPU-s of 6.5, of which the
 matching root (zbrak's 101 energies and rtbis's bisection, one torch `match_vec` per energy)
@@ -63,7 +63,7 @@ def _par(ld) -> np.ndarray | None:
     got = memo.get("nx2_ld", False)
     if got is not False:
         return got
-    # CENGLD: "nograd" marks a record built on floats (every tensor fresh, none on a graph)
+    # Native: "nograd" marks a record built on floats (every tensor fresh, none on a graph)
     ok = (not ld.flagcol and ld.ldmodel not in (2, 3) and not ld.has_table(0)
           and (memo.get("nograd", False)
                or not any(isinstance(v, Tensor) and v.requires_grad for v in vars(ld).values())))
@@ -83,7 +83,7 @@ def _par(ld) -> np.ndarray | None:
     return par
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def fermi_tables(ld, ibar: int, nEx: int, dEx: float) -> tuple[Tensor, Tensor, int] | None:
     """`matching._fermi_tables`'s logrho(0..nEx+1), temprho(0..nEx+1) and Nstart, or None.
 
@@ -127,7 +127,7 @@ def match_roots(logrho: Tensor, temprho: Tensor, x1: float, x2: float, nseg: int
     return [float(roots[k]) for k in range(nb)]
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def ncum(ld, NL: int, index: int) -> float | None:
     """`densitycum(ld)["Ncum"][index]` (`dens_reference._ncum_no_grad`), or None.
 
@@ -147,7 +147,7 @@ def ncum(ld, NL: int, index: int) -> float | None:
 _RHOGRID_FN = None
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def rhogrid(ld, A: int, ex_mev, dex_mev, maxj, nlast: int, numj: int) -> np.ndarray | None:
     """`dens_reference.rhogrid_of`'s numpy result, (n, numj+1, 2), or None.
 
@@ -161,12 +161,12 @@ def rhogrid(ld, A: int, ex_mev, dex_mev, maxj, nlast: int, numj: int) -> np.ndar
     if fn is None:
         fn = _RHOGRID_FN = _k("nx2_ld_rhogrid", [_P, _P, _P, _P, _P, _I, _I, _D, _P])
     if fn is not None and nlast + 1 >= len(ex_mev):
-        # CENGLD: no continuum bin, whatever the model: `rhogrid_of`'s empty selection
+        # Native: no continuum bin, whatever the model: `rhogrid_of`'s empty selection
         return np.zeros((len(ex_mev), numj + 1, 2))
     par = _par(ld) if fn is not None else None
     if par is None:
         return None
-    got = _ceng_rhogrid(par, A, ex_mev, dex_mev, maxj, nlast, numj)  # CENGLD: rows to maxJ only
+    got = _ceng_rhogrid(par, A, ex_mev, dex_mev, maxj, nlast, numj)  # Native: rows to maxJ only
     if got is not None:
         return got
     n = len(ex_mev)
@@ -296,7 +296,7 @@ def _key_plan():
 
 def densitypar_key(Z: int, A: int, options, params, masses, levels, deformation=None,
                    barriers=None) -> tuple | None:
-    """CENGLD2: every value `densitypar_floats` reads for (Z, A), as a hashable float record, or
+    """Shared record: every value `densitypar_floats` reads for (Z, A), as a hashable float record, or
     None where it would not run (a barrier set, a gradient, a read it would raise on).
 
     `densitypar_floats` is a function of (Z, A) and these values alone -- the target enters only as
@@ -304,7 +304,7 @@ def densitypar_key(Z: int, A: int, options, params, masses, levels, deformation=
     those reads are the key's -- so two targets whose records have equal keys get the same record
     up to its `Zix`/`Nix` fields. The chart builds each cascade nucleus's level density once per
     target (12,677 builds for ~5,000 distinct records); `parameters.densitypar` and
-    `dens_reference._ld_build` share them across targets by this key. A fit's `aadjust` (PARAMWIRE)
+    `dens_reference._ld_build` share them across targets by this key. A fit's `aadjust` (parameter set)
     is a `pf` read, so a new parameter point is a new key.
 
     TALYS: densitypar.f90:1 (densitypar)
@@ -408,7 +408,7 @@ def _gather_key(Z, A, options, params, masses, levels, deformation):
     return tuple(out)
 
 
-#: CENGLD2: records by `densitypar_key` (and the matched `_ld_build` results by that key and the
+#: Shared record: records by `densitypar_key` (and the matched `_ld_build` results by that key and the
 #: matching inputs), across targets. Pure: a key holds every value its record was made from. Kept
 #: over `chartrun.drop_target_caches` (a plain dict); bounded.
 _SHARED: dict = {}
@@ -458,7 +458,7 @@ def _check_same(a, b, key) -> None:
 
     if not same(a, b):
         CHECK["bad"] += 1
-        raise AssertionError(f"CENGLD2 shared record differs from a fresh build: Z,A={key[:2]}")
+        raise AssertionError(f"shared level-density record differs from a fresh build: Z,A={key[:2]}")
     CHECK["ok"] += 1
 
 
@@ -466,7 +466,7 @@ CHECK = {"ok": 0, "bad": 0}
 
 
 def retarget(ld, Zix: int, Nix: int):
-    """CENGLD2: `ld` for another target: the same tensors and floats (nothing writes into a
+    """Shared record: `ld` for another target: the same tensors and floats (nothing writes into a
     record), its own `Zix`/`Nix`, and a copy of the memoised floats (`parameters._ld_memo`: none of
     them reads Zix or Nix)."""
     from physics.hf.density.parameters import _ld_memo
@@ -498,7 +498,7 @@ def _densitypar_floats(Z, A, options, params, masses, levels, deformation, bar, 
     Pshift = pf("pshift", 0)
     ctable = pf("ctable", 0)
     ptable = pf("ptable", 0)
-    Nlow = options.nlow_of(Zix, Nix)  # KWCOV B5: `nlow Z A n` / `ntop Z A n` cards (ibar 0)
+    Nlow = options.nlow_of(Zix, Nix)  # `nlow Z A n` / `ntop Z A n` lines (ibar 0)
     Ntop = options.ntop_of(Zix, Nix)
     ldparexist = False
     if found:
@@ -533,7 +533,7 @@ def _densitypar_floats(Z, A, options, params, masses, levels, deformation, bar, 
     # --- Nlast/Ntop/Nlow (densitypar.f90:344-355)
     Nlast = int(levels.nlev)
     if Ntop == -1:
-        # FIXENG F14: the LD matching keeps the uncut list when ggdeadend cut the decay list
+        # `ggdeadend`: the LD matching keeps the uncut list when ggdeadend cut the decay list
         Ntop = Nlast if getattr(levels, "nlev_ld", -1) < 0 else int(levels.nlev_ld)
     if Nlow == -1:
         Nlow = 2
@@ -640,7 +640,7 @@ def _densitypar_floats(Z, A, options, params, masses, levels, deformation, bar, 
     else:
         irigid0, irigid = deformation.irigid0, deformation.irigid
 
-    # CENGLD: the zero-dim and (1,) tensors as views of two float64 buffers, one tensor each
+    # Native: the zero-dim and (1,) tensors as views of two float64 buffers, one tensor each
     # instead of one per field (nothing writes into a record's tensors in place)
     s0 = torch.from_numpy(np.array([
         alev, alimit, gammald, pair, delta0, pg("rspincut"), irigid0, S, 0.0, g, gn, gp,
@@ -674,4 +674,4 @@ def _densitypar_floats(Z, A, options, params, masses, levels, deformation, bar, 
     )
 
 
-from physics.hf.density.ld_ceng import rhogrid as _ceng_rhogrid  # noqa: E402  (CENGLD)
+from physics.hf.density.ld_ceng import rhogrid as _ceng_rhogrid  # noqa: E402  (native)

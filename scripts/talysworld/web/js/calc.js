@@ -5,7 +5,7 @@
  * greyed out ("live only"): they are never faked.
  * Local live mode: when the engine service runs on this machine (scripts/talysworld/server.py, http://localhost:8765,
  * never exposed publicly; looked for only on localhost, with ?live=1, or after it was once found) all four work. Any curve
- * not precomputed runs as ONE engine job per curve (whole grid + bins in one call, GRIDTOP pad, a warm worker), with a
+ * not precomputed runs as ONE engine job per curve (whole grid + bins in one call, `INCOGNITA_GRIDTOP` pad, a warm worker), with a
  * spinner; "More" holds every other engine setting. Plain script, no build; colours from calc.css tokens. */
 (function () {
   "use strict";

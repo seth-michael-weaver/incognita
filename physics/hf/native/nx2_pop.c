@@ -1,4 +1,4 @@
-/* GLUEFINISH: TALYS's `population.f90` inner loop -- the pre-equilibrium (plus giant-resonance)
+/* Native: TALYS's `population.f90` inner loop -- the pre-equilibrium (plus giant-resonance)
  * spectra folded onto each binary residual's excitation grid -- as one C call per residual type.
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.

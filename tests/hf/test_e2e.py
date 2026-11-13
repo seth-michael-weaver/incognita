@@ -1,9 +1,9 @@
 """The engine driver, the `densprepare` adapter and the end-to-end statistic
-(E2E, docs/results/hf-engine-gates.md §4).
+(end-to-end, docs/results/hf-engine-gates.md §4).
 
 `densprepare` is the seam T10 named: it builds `compound.prepare`'s rho0 / Tjlnex / Tlnex / Tgam
 from T5, T6 and T7, so `comptarget` can run without those four arrays being injected. The unit
-tests below pin its arithmetic against densprepare.f90 line by line; the gate that measures it
+tests below pin its arithmetic against densprepare.f90 line by line; the check that measures it
 against TALYS's own arrays is `physics.hf.compound.dens_reference`.
 
 Two seams remain open (compnorm.f90 + population.f90, and multiple.f90's feeding chain), so §4's
@@ -304,7 +304,7 @@ DP_GATE = Path("docs/results/hf-densprepare-gate.json")
 
 def test_densprepare_gate_numbers_are_inside_the_component_tolerances():
     if not DP_GATE.is_file():
-        pytest.skip("densprepare gate not scored yet")
+        pytest.skip("densprepare comparison not scored yet")
     g = json.loads(DP_GATE.read_text())
     assert g["runs"], "no run scored"
     for r in g["runs"]:
@@ -327,9 +327,9 @@ def test_densprepare_gate_numbers_are_inside_the_component_tolerances():
 def test_chained_full_names_only_the_families_that_have_no_port():
     """`ChainedFull.families` is the §4 premise's audit trail, and it is now EMPTY.
 
-    EXCL3 removed "multiple_preequilibrium" (`multipreeq2.f90` is ported and driven by
-    `emission.feeding.Cascade.mpe`); NODUMP removed the last three. `inject=` keeps the old arm
-    reachable, because it is the other column of the A/B that gates each family."""
+    "multiple_preequilibrium" is not listed (`multipreeq2.f90` is ported and driven by
+    `emission.feeding.Cascade.mpe`), nor are the last three. `inject=` keeps the old arm
+    reachable, because it is the other column of the A/B that checks each family."""
     from physics.hf.engine import ChainedFull, DumpInjection
 
     assert ChainedFull(Z=26, A=56, declared_energies=(1.0,)).families == ()
@@ -347,7 +347,7 @@ def test_chained_full_runs_the_whole_engine_on_one_energy():
     """One low incident energy of Fe-56, end to end: compnorm -> densprepare -> comptarget ->
     population -> binary -> the feeding chain -> channels.
 
-    NODUMP: this no longer needs the instrumented run at all, and no longer monkeypatches
+    This needs no instrumented run and does not monkeypatch
     `DumpInjection.cases` to cut the energy axis down -- `ChainedFull` takes (Z, A) and the run's
     declared grid, and `energies=` is the subset to compute."""
     from physics.hf.engine import ChainedFull
@@ -387,9 +387,8 @@ def test_excl_chained_arm_verdict_matches_the_preregistered_thresholds():
     # the KILL clause of §4 names five channels; none of them may exceed 0.15
     for ch in ("(n,g)", "elastic", "total inelastic", "(n,2n)", "(n,p)"):
         assert g["statistic"][ch]["statistic"] <= 0.15, (ch, g["statistic"][ch])
-    # EXCL2: the recorded verdict word is derived from the statistics rather than hardcoded, so
-    # this keeps pinning the doc against its own numbers through a change of outcome. EXCL's
-    # version asserted "NOT YET", which is exactly the staleness it was written to prevent.
+    # the recorded verdict word is derived from the statistics rather than hardcoded, so
+    # this keeps pinning the doc against its own numbers through a change of outcome.
     outcomes = {v["outcome"] for v in g["statistic"].values()}
     want = ("KILL" if "KILL-level" in outcomes
             else "PASS" if outcomes == {"PASS-level"} else "NOT YET")
@@ -397,7 +396,7 @@ def test_excl_chained_arm_verdict_matches_the_preregistered_thresholds():
 
 
 # ---------------------------------------------------------------------------------------------
-# EXCL2: the two per-run switches the chained arm was reading from the wrong place (hf-e2e.md §4.2)
+# the two per-run switches the chained arm reads (hf-e2e.md §4.2)
 # ---------------------------------------------------------------------------------------------
 
 
@@ -461,7 +460,7 @@ def test_fiso_does_not_latch_fisom():
      # and Tjlinc are ~2e-3 off, and elastic and total carry the same 2e-3.
      ("Ca040", 20, 40, 2.0e-3, 1.0e-2)])
 def test_chained_capture_at_one_kev_matches_talys(tag, Z, A, tol_ng, tol_nonel):
-    """The gate on both fixes, at the energy where they bite hardest. At 1 keV the only open
+    """The check on both fixes, at the energy where they bite hardest. At 1 keV the only open
     channels are capture and compound elastic, so `(n,gamma)` and `nonelastic` are a direct read of
     the primary compound decay. Before the fixes: Fe-56 7.7e-2 / 1.8e-2 and Ca-40 2.9e-1 / 2.1e-1.
     """
@@ -474,7 +473,7 @@ def test_chained_capture_at_one_kev_matches_talys(tag, Z, A, tol_ng, tol_nonel):
     d = RUNS / f"default__{tag}"
     if not (d / "xs000000.tot").is_file():
         pytest.skip(f"no TALYS reference column for {tag} on this box")
-    # NODUMP: the port side of this comparison opens no file belonging to `tag`; `d` is only the
+    # the port side of this comparison opens no file belonging to `tag`; `d` is only the
     # reference column.
     res = engine_run(injection=ChainedFull(Z=Z, A=A, declared_energies=ENERGIES_MEV,
                                            energies=(0.001,)))
@@ -489,7 +488,7 @@ def test_chained_capture_at_one_kev_matches_talys(tag, Z, A, tol_ng, tol_nonel):
 
 
 # ================================================================================================
-# EXCL3: multipreeq2.f90 (gate A-mpe) and the `fisom` reset
+# multipreeq2.f90 (check A-mpe) and the `fisom` reset
 # ================================================================================================
 
 
@@ -501,9 +500,9 @@ def test_fisom_is_reset_to_fisominit_after_the_first_cascade_nucleus():
     the run's first energy. Every other nucleus, at every energy, decays with `Fnorm = 1`.
 
     Latching it instead divides the gamma transmission of Ca-40's whole cascade by Ca-41's
-    `ff(0) = 1.5`, which is |ln(1.5)| = 0.405 -- A-mult's only failing row before EXCL3.
+    `ff(0) = 1.5`, which is |ln(1.5)| = 0.405 -- A-mult's only failing row without this reset.
     `Fnorm` is formed ABOVE multiple.f90:488's `do nex` loop, so it is that nucleus's whole
-    decay and not its first bin: NODUMP's half of the fix."""
+    decay and not its first bin."""
     from physics.hf.emission.feeding import Cascade
 
     grid = (0.001, 14.0)

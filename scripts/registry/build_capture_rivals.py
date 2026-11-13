@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Build the capture registry's rival table from libraries YOU stage (we do not redistribute library values: licences and the
-INCOGNITA independence rule; libraries are scoring rivals only).
+"""Build the capture registry's comparison-library table from libraries YOU stage (we do not redistribute library values: licences and the
+INCOGNITA independence rule; libraries are scoring comparisons only).
 
     build_capture_rivals.py --registry docs/registry/blind-2026-09-13-v0 --out DIR [--evaluated $INCOGNITA_EVALUATED]
 

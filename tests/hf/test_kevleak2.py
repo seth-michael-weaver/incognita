@@ -1,4 +1,4 @@
-"""KEVLEAK2 (`pe` part = KEVLEAK re-ported; `dup` part below). pe: the projectile's continuum pre-equilibrium is zero where its last discrete level is closed (Elast <= 0).
+"""`INCOGNITA_KEVLEAK2` (`pe` part; `dup` part below). pe: the projectile's continuum pre-equilibrium is zero where its last discrete level is closed (Elast <= 0).
 
 Synthetic `preeq_total` inputs (no data files): type 1 = neutron = projectile (k0 = 1), type 2 = proton.
 """
@@ -12,7 +12,7 @@ from physics.hf.preeq import exciton as X
 
 
 @pytest.fixture(autouse=True)
-def _no_eff(monkeypatch):  # KEVLEAK3 gate candidate: a run's kevleak2.sync value must not leak into these unit tests
+def _no_eff(monkeypatch):  # a run's kevleak2.sync value must not leak into these unit tests
     monkeypatch.delenv("INCOGNITA_KEVLEAK2_EFF", raising=False)
 
 E, P = 6, 3
@@ -55,7 +55,7 @@ def test_on_zeroes_projectile_only(monkeypatch):
     assert float(on["xspreeqtot"][0, 1]) == 0.0
     assert float(on["xssteptot"][0, 1].abs().sum()) == 0.0
     assert float(on["xspreeq"][0, 1].abs().sum()) == 0.0 and float(on["xsstep2"][0, :, 1].abs().sum()) == 0.0
-    for t in (0, 2):  # photon and proton books untouched (proton keeps flux, so the photon gate does not fire)
+    for t in (0, 2):  # photon and proton books untouched (proton keeps flux, so the photon cut-off does not fire)
         assert torch.equal(off["xspreeqtot"][0, t], on["xspreeqtot"][0, t])
     assert np.isclose(float(off["xspreeqsum"][0]) - float(on["xspreeqsum"][0]), float(off["xspreeqtot"][0, 1]))
 
@@ -108,5 +108,5 @@ def test_parts_select(monkeypatch):
     assert K.on("pe") and K.on("dup")
     monkeypatch.setenv("INCOGNITA_KEVLEAK2", "0")
     assert not K.on("pe") and not K.on("dup")
-    monkeypatch.delenv("INCOGNITA_KEVLEAK2")  # KEVLEAK3 gate candidate: unset = default 2 = dup2 + pe2
+    monkeypatch.delenv("INCOGNITA_KEVLEAK2")  # unset = default 2 = dup2 + pe2
     assert K.on("dup") and K.on("dup2") and K.on("pe2") and not K.on("pe")

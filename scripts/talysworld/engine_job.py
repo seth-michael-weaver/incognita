@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """TALYSWORLD-style calculator, one engine job: ONE target, ONE incident energy, the production engine.
 
-Runs on laptop WSL / Linux with the production engine engine-20261022-3 (nucleus 16606b356d6e), the same environment,
-runner (FASTGATE worker -> prodrun -> pprun, `fewres off`, `pewindow g`), deck and inputs as the library v0.2 runs
-(nucleus research/rl/libv02/code/run.sh + worker.py; the v0.2.2 copy is ~/libv022/code/worker.py on the mini). The only
-difference is the energy grid: [E], padded by default with one dummy top energy (GRIDTOP pad, below). Extra deck
+Runs on Linux / WSL with the production engine engine-20261022-3 (build 16606b356d6e), the same environment,
+runner (library worker -> prodrun -> pprun, `fewres off`, `pewindow g`), deck and inputs as the library v0.2 runs
+(the library's run.sh + worker.py runner bundle). The only
+difference is the energy grid: [E], padded by default with one dummy top energy (grid-top pad, below). Extra deck
 keywords (TALYS spelling, ';'-joined) are appended to the arm deck the way worker.py --repro does.
 
-GRIDTOP pad (default on; TW_GRIDTOP=0 or --no-gridtop for the bare one-point grid [E]). This engine sets the outgoing grid
+grid-top pad (default on; TW_GRIDTOP=0 or --no-gridtop for the bare one-point grid [E]). This engine sets the outgoing grid
 top from the run's highest incident energy as TALYS does (grid.f90:120: enincmax + S_n(CN) + 1 MeV), i.e. 1 MeV above the
 photon exit only. When the compound nucleus is unbound to an ejectile (S < 0: alpha for nearly every CN above A ~ 140,
 proton on the proton-rich side) that exit's top energy E + S_n - S lies above the grid top and the transitions to the
@@ -134,7 +134,7 @@ def main():
             # rounded as engine_grid.run pads (and as the warm pool's one-energy jobs pad): one grid for this nucleus everywhere
             smin = round(float(min(cn_separation_mev(a.z, a.a))), 4)
         except Exception as ex:  # noqa: BLE001  (a job without S cannot be padded safely: report it)
-            out["err"] = f"GRIDTOP pad: separation energies unavailable: {type(ex).__name__}: {ex}"[:400]
+            out["err"] = f"grid-top pad: separation energies unavailable: {type(ex).__name__}: {ex}"[:400]
             out["cpu_s"] = round(time.process_time() - t0, 2); out["wall_s"] = round(time.time() - w0, 2)
             if not a.keep: shutil.rmtree(a.work, ignore_errors=True)
             sys.stdout.write(json.dumps(out) + "\n"); sys.stdout.flush(); return

@@ -31,7 +31,7 @@
   <div class="site-links">
     <a href="./" data-keep-lang data-i18n="nav_physics">The Physics</a>
     <a href="data.html" class="here" aria-current="page" data-keep-lang data-i18n="nav_data">Every nuclide</a>
-    <a href="scoreboard.html" data-keep-lang data-i18n="nav_board">Scoreboard</a>
+    <a href="scoreboard.html" data-keep-lang data-i18n="nav_board">Comparisons</a>
     <a class="gh" href="https://github.com/seth-michael-weaver/incognita"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
   </div>
   <button type="button" class="site-burger" aria-expanded="false" aria-label="Menu" data-i18n-aria="menu">☰</button>
@@ -113,7 +113,7 @@
     <summary data-i18n="dx_about">About the data, downloads and code</summary>
     <section class="dx-repo">
     <p class="dx-lede" data-i18n="dx_lede">The engine's predicted neutron cross sections for every nuclide in the library, beside the curated measurements of each nuclide. Pick a nuclide on the chart, or search for one.</p>
-    <p class="dx-lede" data-i18n="dx_lede_ver">The curves are library v0.2.3 (November 2026), made with the same engine version that is scored on the Scoreboard (the engine of 22 October 2026). They are not TERRA, the Scoreboard's data product that is fitted to measurements. Every curve is the engine's own prediction: none was fitted to the measurements shown beside it, except that a nuclide marked anchored has its curve scaled by a single factor so that its stellar average at 30 keV equals the measured value. The engine's general settings were chosen once, for all nuclides, using many measurements (these among them), so a match on a measured nuclide is a fair check of the model, though not a fully independent one. Most nuclides have never been measured (extrapolated), and their bands are wide.</p>
+    <p class="dx-lede" data-i18n="dx_lede_ver">The curves are library v0.2.3 (November 2026), made with the same engine version that is scored on the Comparisons page (the engine of 22 October 2026). They are not TERRA, the data product on that page that is fitted to measurements. Every curve is the engine's own prediction: none was fitted to the measurements shown beside it, except that a nuclide marked anchored has its curve scaled by a single factor so that its stellar average at 30 keV equals the measured value. The engine's general settings were chosen once, for all nuclides, using many measurements (these among them), so a match on a measured nuclide is a fair check of the model, though not a fully independent one. Most nuclides have never been measured (extrapolated), and their bands are wide.</p>
     </section>
   <section class="dx-repo dx-tsl" aria-labelledby="dx-tsl-h">
     <h2 id="dx-tsl-h">Moderators: thermal scattering</h2>
@@ -121,11 +121,11 @@
     <div class="dx-tsl-wrap"><table class="dx-tsl-t">
       <thead><tr><th>Material</th><th>Passes</th><th>Losses</th></tr></thead>
       <tbody>
-        <tr><td><b>H in H₂O</b><br><span>molecular dynamics</span></td><td>12/12 criticality cases within ±35 pcm of VIII.1 (6 held out, mean +38 ± 14 pcm); total cross section C/E 1.004–1.036 (VIII.1 1.000–1.037)</td><td>diffusion 8–11 % slow; +3–4 % above measurement below 10 meV (VIII.1 too); table ends at 4.9 eV</td></tr>
+        <tr><td><b>H in H₂O</b><br><span>molecular dynamics</span></td><td>12/12 criticality cases within ±35 pcm of VIII.1 (6 not used in the fit, mean +38 ± 14 pcm); total cross section C/E 1.004–1.036 (VIII.1 1.000–1.037)</td><td>diffusion 8–11 % slow; +3–4 % above measurement below 10 meV (VIII.1 too); table ends at 4.9 eV</td></tr>
         <tr><td><b>Be metal</b><br><span>DFT phonons</span></td><td>14/14 ICSBEP Be cases within 3σ, Δk vs VIII.1 −17 ± 17 pcm; ultracold up-scattering C/E 0.93</td><td>double-differential spectra R 0.57 (VIII.1 0.58); Bragg-edge positions fail, VIII.1 too; C/E 0.76 below 200 K</td></tr>
-        <tr><td><b>Graphite</b></td><td>—</td><td>not released: every own law so far fails a pre-registered gate</td></tr>
+        <tr><td><b>Graphite</b></td><td>—</td><td>not released: every own law so far fails one of its validation checks</td></tr>
       </tbody></table></div>
-    <p>Download the ENDF-6 tapes from <a href="https://github.com/seth-michael-weaver/incognita/tree/main/library/tsl-v0.1"><code>library/tsl-v0.1</code></a>, where the README lists every gate.</p>
+    <p>Download the ENDF-6 tapes from <a href="https://github.com/seth-michael-weaver/incognita/tree/main/library/tsl-v0.1"><code>library/tsl-v0.1</code></a>, where the README lists every check.</p>
   </section>
 
   <section class="dx-repo" aria-labelledby="dx-repo-h">

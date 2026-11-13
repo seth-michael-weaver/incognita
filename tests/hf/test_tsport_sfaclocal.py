@@ -46,8 +46,8 @@ def calls():
     from physics.hf.input import fitlib
 
     torch.set_num_threads(1)
-    # ENGSYNC: the stale-sfactor effect lives at TALYS's popeps 1e-3 residual cut; the engine default
-    # (POPEPS3, 1e-9) removes it, so the premise run is pinned to TALYS's value (as conftest.talys_popeps).
+    # the stale-sfactor effect lives at TALYS's popeps 1e-3 residual cut; the engine default
+    # (1e-9) removes it, so the premise run is pinned to TALYS's value (as conftest.talys_popeps).
     mp = pytest.MonkeyPatch()
     mp.setenv(fitlib.ENV, "lines")
     mp.setenv(fitlib.ENV_LINES, "popeps 1e-3")

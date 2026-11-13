@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `ld`: the level-density kernels (`density/ld_nx2.py`, `native/nx2_ld.c`) against
+"""Compiled `ld` path: the level-density kernels (`density/ld_nx2.py`, `native/nx2_ld.c`) against
 the torch/numpy paths they replace, `HF_NX2_LD=0` against `=1` (closeness, not bits). Skipped
 without a `libnx2` build (scripts/build_nx2_native.sh)."""
 

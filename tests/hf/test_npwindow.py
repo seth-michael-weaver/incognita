@@ -1,4 +1,4 @@
-"""NPWINDOW / NPWPROMO: windowed target-rho rule on D0-unanchored targets (physics/hf/density/npwindow.py)."""
+"""`npwindow` (default ON): windowed target-rho rule on D0-unanchored targets (physics/hf/density/npwindow.py)."""
 
 import hashlib
 from types import SimpleNamespace
@@ -54,7 +54,7 @@ def test_state_neutron_unanchored_only(monkeypatch):
 
 
 def test_lines_reproduce_npwindow_record():
-    # the NPWINDOW record's MX/033_075.eadj (development notes; dc = target_dctable.csv, Ecut/S_n = INGDUMP chart P)
+    # the `npwindow` record's MX/033_075.eadj (dc = target_dctable.csv, Ecut/S_n = the ingredient dump's chart P)
     txt = "".join(x + "\n" for x in N.lines(33, 75, 0.2079, 1.420199990272522, 10.245456337641983))
     assert len(txt.splitlines()) == 116
     assert hashlib.sha256(txt.encode()).hexdigest() == "89cf37dcca02bdbf0d16cfc099c6c31ea1c37c1f6ddcd3101cf152653fb57c4d"

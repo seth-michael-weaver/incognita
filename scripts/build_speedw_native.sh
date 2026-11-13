@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPEEDW: build the compiled kernels of the whole-run speed work (physics/hf/native/speedw.c: the
+# Build the compiled whole-run speed kernels (physics/hf/native/speedw.c: the
 # DWBA Numerov loop and the multiple pre-equilibrium bin) into physics/hf/native/lib/libspeedw.so
 # (gitignored build output; `lib/` is not a package, so pkgutil does not walk the .so as a module).
 #

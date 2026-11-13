@@ -1,4 +1,4 @@
-"""KWCOV B12 (RECOIL): residual recoil spectra and LAB-frame emission spectra / DDX on TALYS's keywords, OUTPUT ONLY.
+"""Residual recoil spectra and LAB-frame emission spectra / DDX on TALYS's keywords, OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -20,9 +20,9 @@ Switches: `recoil y` (Options.flagrecoil; TALYS then sets outspectra y), `labddx
 `maxenrec`, `anglesrec`; `fileddxa` / `fileddxe` / `ddxmode` name the LAB DDX files as for the CM ones (specobs.py).
 `INCOGNITA_RECOIL_DIR=<dir>` also writes the files (rec026056spec0014.000.tot, nspec0014.000.lab,
 nddxE0014.000E0003.0.lab, nddxE0014.000A030.0.lab, sp100000E0014.000.rec). Default: nothing is computed and every array
-of every gate is unchanged (`recoil n`).
+engine array is unchanged (`recoil n`).
 
-How (none of it feeds back into the engine): TALYS's recoil module on the run's SPECOUT records (specout.py: the binary
+How (none of it feeds back into the engine): TALYS's recoil module on the run's `specout` records (specout.py: the binary
 spectra, every cascade nucleus' mcontrib / mpecontrib with its excitation grid) and angout's discrete angular
 distributions (discad of every level, angdis.f90):
     recoilinit.f90:1 (recoilinit)      angle bins, the LAB ejectile grid, the classical maximum recoil energy per
@@ -40,7 +40,7 @@ twice (xsCMlev = xselastot + xsdisc). Precision: double (TALYS: single).
 Approximation (META["approx"]): the binary giant-resonance / collective part of the CM DDX is isotropic (as B4);
 binsurface is ported as written, intri's equality test on sideline's values included.
 
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B12, output only). Acceptance test: KWCOV-B12
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test:
 (tests/hf/test_kwcov_b12.py, scripts/kwcov/b12_response.py, docs/hf/COVERAGE_PLAN.md).
 """
 
@@ -99,7 +99,7 @@ def settings(options=None) -> dict | None:
 
 
 def wanted() -> bool:
-    """The run being set up asks for recoils (the SPECOUT recorders and every level's discad must be on).
+    """The run being set up asks for recoils (the `specout` recorders and every level's discad must be on).
 
     TALYS: (none -- a port switch)
     Test: tests/hf/test_kwcov_b12.py

@@ -1,4 +1,4 @@
-"""ALPHATEMP: residual-excitation-dependent alpha transmission (physics/hf/omp/alphatemp.py), default ON (0.64)."""
+"""Residual-excitation-dependent alpha transmission (physics/hf/omp/alphatemp.py), default ON (0.64)."""
 import numpy as np
 
 import dataclasses
@@ -34,7 +34,7 @@ def test_weight_scale():
 
 
 def test_kevcold_domain_default_n(monkeypatch):
-    """ALPHAPROMO: the global rule (n) is the default; gd stays a keyword."""
+    """The global rule (n) is the default; gd stays a keyword."""
     monkeypatch.delenv("INCOGNITA_ALPHATEMP_DOM", raising=False)
     f = {x.name: x for x in dataclasses.fields(Options)}["alphatemp_dom"]
     assert f.default == "n" == alphatemp.DEFAULT_DOM

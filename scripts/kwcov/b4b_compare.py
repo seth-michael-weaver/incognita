@@ -5,7 +5,7 @@ stock TALYS-2.25 run (scripts/kwcov/b4b_stock.sh, ~/kwcov/stock/b4b/<deck>).
     python scripts/kwcov/b4b_compare.py --z 26 --a 56 --stock ~/kwcov/stock/b4b/fe56 [--mode talys|default]
                                         [--kw "endf y"] [--frac 0.01] [--json out.json] [--write DIR] [--onoff]
 
-Engine in TALYS mode by default (fidelity.py's TALYS_DECK / TALYS_ENV: NPWINDOW etc. change the 14 MeV channels) with
+Engine in TALYS mode by default (fidelity.py's TALYS_DECK / TALYS_ENV: `INCOGNITA_NPWINDOW` etc. change the 14 MeV channels) with
 `outspectra y; channels y` + --kw. Per channel file and energy and ejectile column: the integral ratio (ours / stock),
 the worst |ours/stock - 1| over the MAIN bins (stock >= --frac x the column's peak), the same after normalising both to
 their integrals (shape), and the channel cross section ratio (xs*.tot) the spectrum carries. `--onoff` also runs the

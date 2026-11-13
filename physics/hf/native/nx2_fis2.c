@@ -1,4 +1,4 @@
-/* NATIVEX2 lever `fis2`: the continuum fission transmission through one barrier at a set of
+/* Native kernel `fis2`: the continuum fission transmission through one barrier at a set of
  * excitation energies, off the autograd graph.
  *
  *   nx2_fis2_coef      t1barrier.f90:151-168: the `eintfis` triples of a barrier and the two

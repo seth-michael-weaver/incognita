@@ -1,7 +1,7 @@
 [project]
 name = "incognita"
 version = "0.1.0"
-description = "Open, calibrated predictions of neutron reaction cross sections across the chart of nuclides, with a public blind benchmark and a registry of predictions made before the data."
+description = "Open, calibrated predictions of neutron reaction cross sections across the chart of nuclides, with a public benchmark and a registry of predictions made before the data."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.12,<3.13"
@@ -49,7 +49,7 @@ target-version = "py312"
 extend-exclude = ["raw", "staging", "curated", "features", "out"]
 
 [tool.ruff.lint]
-# CI gate: errors that indicate real defects (syntax, undefined names, unused imports that shadow).
+# CI check: errors that indicate real defects (syntax, undefined names, unused imports that shadow).
 select = ["E9", "F63", "F7", "F82"]
 
 [tool.pytest.ini_options]

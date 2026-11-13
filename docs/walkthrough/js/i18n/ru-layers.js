@@ -1,4 +1,4 @@
-/* Russian: layers (глава 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Russian: layers (глава 21). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>Слой 1 · Одно правило для всех ядер</h3>
   <p>Синяя линия — предсказание программы для одной реакции. Программа — это нижний слой: одна и та же физика и одни и те же глобальные параметры для всех нуклидов, и ничто не подогнано к сечениям какого-либо отдельного ядра.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Показать измерения</button></div>
-  <p>Именно это делает её проверяемой — по измерениям и в сравнении с другими модельными кодами, рассчитанными для тех же ядер. Это не слепой тест: глобальные параметры выбирались с оглядкой на эти же сравнения.${engineScore}</p>
+  <p>Именно это делает её проверяемой — по измерениям и в сравнении с другими модельными кодами, рассчитанными для тех же ядер. Это не независимый тест: глобальные параметры выбирались с оглядкой на эти же сравнения.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>Текущее состояние</h3>
   <p>Слой принимается только после проверки на измерениях и остаётся выключенным, если не помогает. Сегодня программа используется, TERRA — кандидат; слой измеренной структуры и полоса неопределённости программы всё ещё проходят проверку.</p>
-  <p><a href="scoreboard.html" data-keep-lang>Полная таблица результатов →</a> Все сравнения, которые мы не выиграли, каждый соперник и как её читать.</p>
-  <div class="aside">${ASOF ? `Результаты на ${ASOF}, из` : "Результаты из"} исследовательского журнала проекта. Кривые на рисунке иллюстративные.</div>
+  <p><a href="scoreboard.html" data-keep-lang>Все сравнения →</a> Все сравнения, которые мы не выиграли, каждый соперник и как их читать.</p>
+  <div class="aside">${ASOF ? `Результаты на ${ASOF}, из` : "Результаты из"} данных сравнений проекта. Кривые на рисунке иллюстративные.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} из {#} измерений внутри полосы (цель: около {#} %)",
   "no measurements to check the band against": "нет измерений для проверки полосы",
 });
-Object.assign(WT.L.ui, { nav_board: "Таблица результатов" });
+Object.assign(WT.L.ui, { nav_board: "Сравнения" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

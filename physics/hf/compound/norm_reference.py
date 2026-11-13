@@ -1,4 +1,4 @@
-"""Drive `compnorm.f90` from the ported components instead of from the instrumented dump, and gate
+"""Drive `compnorm.f90` from the ported components instead of from the instrumented dump, and check
 the result: `CNfactor`, `xsflux`, `xsreacsum`, `J2beg`/`J2end` and the three addends they are built
 from.
 
@@ -8,7 +8,7 @@ Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 Task: T9, continued by EXCL (physics/hf/CONTRACT.md §7). Acceptance test: A-cn1 (§6).
 
 `compnorm.f90` itself was already ported by T9 (`compound.normalization.compound_formation`) and
-gated with TALYS's own `Tjlinc` injected. What was missing -- and what `engine.ChainedCompound`
+checked with TALYS's own `Tjlinc` injected. What was missing -- and what `engine.ChainedCompound`
 listed as injected -- is the *wiring*: `Tjlinc`, `lmaxinc` and `xsreacinc` from T5's incident
 channel, `xspreeqsum` from T8, `xsgrsum` and `xsdirdiscsum` from T12. With those built, nothing
 `comptarget` reads about the compound nucleus's normalisation comes from a dump.
@@ -26,7 +26,7 @@ Three things worth knowing about the addends, because they are not where a reade
   which is not the same `xsgrtot` that `population.f90` normalises against.
 
 Below `epreeq` there is no pre-equilibrium at all (`flagpreeq` false) and those addends are zero;
-the gate scores every energy the dump carries and reports the two groups separately.
+the check scores every energy the dump carries and reports the two groups separately.
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ from physics.hf.core.constants import talys_constants
 from physics.hf.core.grids import incident_kinematics
 from physics.hf.core.tensors import DTYPE
 from physics.hf import stagetime
-from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
+from physics.hf.projectile import target_mass_index  # projectile bookkeeping
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT_JSON = ROOT / "docs" / "results" / "hf-compnorm-gate.json"
@@ -59,10 +59,10 @@ def addends(target: str, Zt: int, At: int, energies: list[float],
 
     `declared` is the run's incident energy grid; pass it and T8's and T12's own inputs are
     computed rather than injected (`preeq.chain`, `direct.chain`), which is what makes
-    `engine.ChainedFull(inject=())` dump-free (NODUMP)."""
+    `engine.ChainedFull(inject=())` dump-free."""
     from physics.hf.compound.pop_reference import _giant, _preeq, preeq_fit
 
-    # PARAMWIRE: the exciton model reads the compound nucleus's photon strength
+    # Parameter set: the exciton model reads the compound nucleus's photon strength
     pfit = preeq_fit(fit, Zt, At) if declared is not None else ()
     pe_energies, pres, _o = (_preeq(target, declared=declared, fit=pfit) if pfit
                              else _preeq(target, declared=declared))
@@ -108,7 +108,7 @@ def chained_formation(cas, inp, add: dict):
     from physics.hf.compound import wfcnorm
 
     if xscoupled is not None and wfcnorm.enabled():
-        # FIXENG F15 B (INCOGNITA_WFCNORM, default OFF): pi/k^2 at the energy ECIS solved at
+        # `INCOGNITA_WFCNORM` (default OFF): pi/k^2 at the energy ECIS solved at
         from physics.hf.omp.schrodinger import ecis_card_energy
 
         e_card = float(ecis_card_energy(torch.tensor(float(inp.e_inc_mev), dtype=DTYPE)))
@@ -116,12 +116,12 @@ def chained_formation(cas, inp, add: dict):
             e_card, k0, float(cas.m.mass_amu[target_mass_index()]),
             float(cas.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
             float(cas.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), cas.options.flagrel)
-    # OPEN4: compnorm.f90:163-166 -- a coupled-channels target (colltype /= 'S', no `spherical y`)
+    # compnorm.f90:163-166 -- a coupled-channels target (colltype /= 'S', no `spherical y`)
     # takes the flux from its own sum over `Tjlinc` plus `xscoupled`, and does NOT renormalise
-    # to `xsreacinc`. The two differ where ECIS solved at the card-rounded energy
+    # to `xsreacinc`. The two differ where ECIS solved at the rounded input energy
     # (`schrodinger.ecis_card_energy`) while pi/k^2 is taken at `Einc`, which is what puts
-    # TALYS's keV nonelastic (`xsreacinc - xscompel`) below its own capture (INCOGNITA_WFCNORM: k at the card energy).
-    # DIFFPARAM: `torch.tensor(float(...))` on sigma_reac would cut the optical parameters out
+    # TALYS's keV nonelastic (`xsreacinc - xscompel`) below its own capture (INCOGNITA_WFCNORM: k at the ECIS input energy).
+    # Differentiable: `torch.tensor(float(...))` on sigma_reac would cut the optical parameters out
     # of the compound normalisation, which is the one place they enter it. `as_tensor` keeps the
     # graph when there is one and is the same object when there is not.
     return compound_formation(
@@ -171,7 +171,7 @@ def score_run(work: Path, Zt: int, At: int, target: str) -> dict:
         cf, lm = chained_formation(cas, c, add[round(c.e_inc_mev, 6)])
         acc["cnfactor"].append(_r1(float(cf.cn_factor_mb), c.cnfactor_mb, 1.0e-12))
         acc["xsflux"].append(_r1(float(cf.xs_flux_mb), c.xsflux_mb))
-        # DIAGNOSTIC, not a gate: `xsreacsum` is TALYS's own check column B, the sum over the
+        # DIAGNOSTIC, not a pass/fail check: `xsreacsum` is TALYS's own check column B, the sum over the
         # incident T(j,l), and the dump carries `xsreacinc`. compnorm.f90:163 divides one by the
         # other precisely because they differ -- for a coupled-channels target `xsreacinc` also
         # holds the direct cross section to the coupled levels, so `norm` is genuinely not 1 and

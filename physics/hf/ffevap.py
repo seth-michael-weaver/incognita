@@ -1,4 +1,4 @@
-"""KWCOV B14 part 3 (FFEVAP): fission fragment evaporation, `massdis y` with `fymodel 4` (fragment files) or
+"""Fission fragment evaporation, `massdis y` with `fymodel 4` (fragment files) or
 `fymodel 5` (own fragment populations ff<ZZZ><AAA>.ex in the run directory, or INCOGNITA_FFDIR).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
@@ -14,8 +14,8 @@ isomer split; its particle multiplicities give nubar, nu(A), nu(Z,A) per ejectil
 The port runs the same per-fragment calculation through the engine's own cascade (`engine_c.cascade`, the C walk of
 multiple.f90) on a `Cascade` of the fragment with k0 = 0 (`INCOGNITA_CPINC=g` for the duration of the loop: the
 photon projectile's defaults are TALYS's `projectile 0` defaults but for the lines input_*.f90 change for a
-fragment run; the one that acts goes on the deck: `fission n` (input_fissionmodel.f90:80); NNLEAK goes off too (its
-premise, a top bin fed by primary photons only, does not hold for an input population; decided, COVERAGE_PLAN B14c).
+fragment run; the one that acts goes on the deck: `fission n` (input_fissionmodel.f90:80); `nnleak` goes off too (its
+premise, a top bin fed by primary photons only, does not hold for an input population).
 `epreeq = Emaxtalys` (input_preeqmodel.f90:84) and `flagdisc` (input_directmodel.f90:81) act only in the binary
 reaction, which a population run never calls. What is specific to a population run:
 
@@ -50,7 +50,7 @@ TALYS routines ported here (file:line of the subroutine / function statement):
     massdis.f90:576-742              fymodel 4 fragment pairs / 5 own files (fisyield._fymodel4 / _fymodel5)
 Single precision where TALYS has it (np.float32); the population file goes through its print formats (f10.5,
 es12.5) as stock reads back what it wrote.
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B14 part 3, output only). Acceptance test: KWCOV-B14c
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test: KW-B14
 (tests/hf/test_kwcov_b14c.py, scripts/kwcov/b14c_response.py, docs/hf/COVERAGE_PLAN.md).
 """
 
@@ -190,7 +190,7 @@ def excitation(pop: dict, ex, dex, maxj, jdis, parlev, nl: int, maxex: int, A: i
     Test: tests/hf/test_kwcov_b14c.py
     """
     if popmev:
-        raise NotImplementedError("popmev y (population per MeV, excitation.f90:178-199) is not ported (KWCOV B14c)")
+        raise NotImplementedError("popmev y (population per MeV, excitation.f90:178-199) is not ported")
     npope, npopj = int(pop["npopE"]), int(pop["npopJ"])
     E = pop["E"].copy()
     P = pop["P"].copy()
@@ -286,7 +286,7 @@ def excitation(pop: dict, ex, dex, maxj, jdis, parlev, nl: int, maxex: int, A: i
                     s = F(s + F(xspop[nex, J, ip] / factor2))
             xspopex[nex] = s
     if npope == 1:
-        raise NotImplementedError("a one-bin population (npopE = 1, excitation.f90:221-243) is not ported (KWCOV B14c)")
+        raise NotImplementedError("a one-bin population (npopE = 1, excitation.f90:221-243) is not ported")
     xsinitpop = np.add.accumulate(xspopex.astype(np.float64))[-1] if n else 0.0
     return {"xspop": xspop, "xspopex": xspopex, "xsinitpop": float(xsinitpop)}
 
@@ -356,7 +356,7 @@ def run_fragment(Z: int, A: int, pop: dict) -> dict:
         o = cas.options
         if bool(getattr(o, "flagchannels", False)):
             raise NotImplementedError("channels y on a fragment run (ffevap.f90:292-319, P(nu) per fragment) is not "
-                                      "ported (KWCOV B14c)")
+                                      "ported")
         cas.ffruns_rspincut = float(cas.params.at("rspincutff"))
         st = cas.new_energy(einc, lmaxinc=int(cas.gammax), e_inc_mev=einc)
         cas.propagate_exmax(st, 0, 0)
@@ -517,7 +517,7 @@ def evaporate(r: dict, s: dict, progress=None) -> dict:
                                             f"file ff{iz:03d}{ia:03d}.ex (read_energies.f90:36)")
                 pop = read_population(fn)
             else:
-                raise NotImplementedError(f"fymodel {s['fymodel']}: no fragment populations (KWCOV B14 part 3)")
+                raise NotImplementedError(f"fymodel {s['fymodel']}: no fragment populations")
             res = run_fragment(iz, ia, pop)
             frag[(iz, ia)] = {"xsinitpop": res["xsinitpop"], "mult": res["mult"].copy(), "Einc": res["Einc"]}
             if progress is not None:

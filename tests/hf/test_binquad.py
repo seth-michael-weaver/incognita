@@ -1,4 +1,4 @@
-"""BINQUAD: `binquad n|y` (env INCOGNITA_BINQUAD), population-weighted in-bin quadrature of the emission
+"""`binquad n|y` (env INCOGNITA_BINQUAD), population-weighted in-bin quadrature of the emission
 (native/binquad.h, compound/prepare.binquad_nodes, Gauss sub-points of the mother bins in nx_walk)."""
 from dataclasses import replace
 

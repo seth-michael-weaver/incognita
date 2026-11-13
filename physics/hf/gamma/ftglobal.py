@@ -1,15 +1,15 @@
-"""FTGLOBAL (card FTPROMO): the E1/M1 `ftable` of every nucleus is the ONE global form
-f(Z, A) = 10^(W clip(k3 + k4 |beta2|, -1, 1)) (CTREFIT k3, k4; W = B18 out-of-range shrink weight of the B13 features),
-tabulated in ftglobal_table.csv (development notes, 6 decimals as the deck lines were written).
+"""`ftglobal`: the E1/M1 `ftable` of every nucleus is the ONE global form
+f(Z, A) = 10^(W clip(k3 + k4 |beta2|, -1, 1)) (fitted k3, k4; W = the out-of-range shrink weight of the features),
+tabulated in ftglobal_table.csv (6 decimals as the deck lines were written).
 
-It replaces every nonzero E1/M1 (l = 1) `ftable` override of a nucleus in the table: the per-nucleus <Gamma_gamma> anchors
-(JS / ISOROTPASS / ACTJS), the PATTERN delta and the stale-base residual lines stop reaching the prediction. Other cells,
+It replaces every nonzero E1/M1 (l = 1) `ftable` override of a nucleus in the table: the per-nucleus <Gamma_gamma> anchors,
+the pattern delta and the residual lines stop reaching the prediction. Other cells,
 `ftableadjust`, the TMC factor and every nucleus outside the table are untouched. Default ON (`ftglobal y`); `ftglobal n`
-or INCOGNITA_FTGLOBAL=0 = the previous behaviour (deck lines verbatim). Tensors that require grad are never rewritten (fits).
+or INCOGNITA_FTGLOBAL=0 = deck lines verbatim. Tensors that require grad are never rewritten (fits).
 
-HEAVYMACS2 (rebuild of HEAVYMACS rule R1, default ON since the HEAVYMACS2 gate commit; `heavymacs2 n` / INCOGNITA_HEAVYMACS2=0 = previous production): `heavymacs2 y` or INCOGNITA_HEAVYMACS2=1 sets the global value to 1 (no rotor
+`heavymacs2` (default ON; `heavymacs2 n` / INCOGNITA_HEAVYMACS2=0 = off): `heavymacs2 y` or INCOGNITA_HEAVYMACS2=1 sets the global value to 1 (no rotor
 dipole boost) for every nucleus with 60 <= Z <= 83 and |beta2| >= 0.2 (same beta2 table as f_glob; heavymacs2_domain.csv). Only acts where
-FTGLOBAL acts (nonzero l=1 override, nucleus tabulated, ftglobal on)."""
+`ftglobal` acts (nonzero l=1 override, nucleus tabulated, ftglobal on)."""
 from __future__ import annotations
 
 import os
@@ -63,7 +63,7 @@ def apply(options, Z: int, A: int, ov: dict) -> dict:
     if g is None:
         return ov
     if (int(Z), int(A)) in hm2_domain() and hm2_enabled(options):
-        g = 1.0  # HEAVYMACS2 R1
+        g = 1.0  # heavymacs2: no rotor dipole boost
     if getattr(v, "requires_grad", False):
         return ov
     a = np.array(v.detach().cpu().numpy() if hasattr(v, "detach") else v, dtype=float)

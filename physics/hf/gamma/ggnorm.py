@@ -1,10 +1,10 @@
-"""GAMMAALL: normalise each nucleus's E1 photon strength to its measured s-wave radiative
+"""Normalise each nucleus's E1 photon strength to its measured s-wave radiative
 strength <Gamma_gamma>/D0 (RIPL-3, 2009), as an engine option.
 
 TALYS-2.24's default photon strength (SMLO-2019 tables, `strength 9`, no `gnorm`) with its
 default level density gives a theoretical s-wave <Gamma_gamma> that scatters around the measured
-one by ~0.24 dex (x1.7) over the chart, with a median offset near zero
-(`docs/results/gammaall.md`). At keV energies, where Gamma_n >> Gamma_gamma, capture is
+one by ~0.24 dex (x1.7) over the chart, with a median offset near zero.
+At keV energies, where Gamma_n >> Gamma_gamma, capture is
 proportional to the radiative strength Gamma_gamma/D0 = the gamma sum over final states
 (radwidtheory's `swaveth`); D0 itself cancels. So the capture-relevant anchor is
 Gamma_gamma/D0, and TALYS's own `gnorm y` (which matches Gamma_gamma alone) is the same thing
@@ -14,15 +14,15 @@ but not all: K-42 0.17, Zr-97 0.23, Cs-136 1.40).
 `INCOGNITA_GGAMMA_NORM` selects a factor g on the default E1 `ftable` of every nucleus (Z, A)
 that has one in `ggnorm_ripl3.csv`:
 
-    ""/0     off (TALYS defaults; CHART1 and the fidelity harnesses measure this)
+    ""/0     off (TALYS defaults; the fidelity harnesses measure this)
     ripl3d0  g such that TALYS's Gamma_gamma_th / D0_th = RIPL-3 Gamma_gamma / RIPL-3 D0
     ripl3    g such that Gamma_gamma_th = RIPL-3 Gamma_gamma (TALYS `gnorm y` done in eV)
 
 Both factors come from stock TALYS-2.24's own radwidtheory iteration (`gnorm y` with an explicit
-`gamgam` in eV -- never the keV resonance-table number, GNORMFIX), run once per compound nucleus
-by `scripts/gammaall/`. Only RIPL-3 values (Capote et al. 2009; per-entry references 1981-2008)
+`gamgam` in eV -- never the keV resonance-table number), run once per compound nucleus
+offline. Only RIPL-3 values (Capote et al. 2009; per-entry references 1981-2008)
 are used, never BNL-2018, so no post-2012 measurement reaches a factor. Actinides (Z > 82) are
-never touched (another work package owns them). A nucleus without a measured Gamma_gamma (or,
+never touched (`actphys` covers them). A nucleus without a measured Gamma_gamma (or,
 for ripl3d0, without a RIPL-3 D0) keeps g = 1.
 
 The factor multiplies the default before user keywords are applied, so an explicit `ftable`
@@ -40,7 +40,7 @@ from pathlib import Path
 
 MODES = ("", "ripl3d0", "ripl3")
 TABLE = Path(__file__).with_name("ggnorm_ripl3.csv")
-ZMAX = 82  # actinides (Z > 82) are left to ACTPHYS
+ZMAX = 82  # actinides (Z > 82) are left to `actphys`
 _COLUMN = {"ripl3d0": "g_ripl3d0", "ripl3": "g_ripl3"}
 
 
@@ -56,8 +56,8 @@ ENV = "INCOGNITA_GGAMMA_NORM"
 
 
 def mode() -> str:
-    """ENGFIX4: read from the environment on every call (it used to be read once at import, so a
-    long-lived worker kept its parent's value). `set_mode` writes the variable."""
+    """Read from the environment on every call (not once at import, so a long-lived worker sees
+    the current value). `set_mode` writes the variable."""
     return _parse(os.environ.get(ENV))
 
 

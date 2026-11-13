@@ -1,4 +1,4 @@
-/* NATIVEX2 lever `emit`: the array work of binary.f90 for one ejectile's residual nucleus.
+/* Native kernel `emit`: the array work of binary.f90 for one ejectile's residual nucleus.
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
  *

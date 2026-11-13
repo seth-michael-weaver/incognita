@@ -120,9 +120,9 @@ class CompoundInputs:
     preeqpopex_mb: dict[tuple[int, int], float] = field(default_factory=dict)  # (type, bin)
     popeps_mb: float = 0.0
     flagpreeq: bool = False
-    ew: object = None  # EWCC: ewfc.CCBlocks when INCOGNITA_EWFC is on for a coupled target (else None)
-    alphadom: object = None  # KEVCOLD (default None): type 6 ResidualChannels with the ALPHATEMP mix, for Gamma/D < 1 cells
-    cellsel: frozenset | None = None  # KEVCOLD: only these (J2, parity) cells (None = every cell)
+    ew: object = None  # `ewfc`: ewfc.CCBlocks when INCOGNITA_EWFC is on for a coupled target (else None)
+    alphadom: object = None  # Cold-alpha domain (default None): type 6 ResidualChannels with the `alphatemp` mix, for Gamma/D < 1 cells
+    cellsel: frozenset | None = None  # Cold-alpha domain: only these (J2, parity) cells (None = every cell)
 
 
 def _pidx(p: int) -> int:
@@ -371,7 +371,7 @@ def exit_channel_sums(inp: CompoundInputs, J2: int, parity: int, device=None) ->
         pprime = torch.tensor([-1, 1], device=device)
         pardif2 = (parity - pprime).abs() // 2  # (2,)
         lmaxhf = torch.as_tensor(r.lmaxhf, device=device)
-        # OPEN3M: TALYS's truncation into a discrete level of impossible 2J parity
+        # TALYS's truncation into a discrete level of impossible 2J parity
         anom = (J2 + irs2 + r.parspin2) % 2  # (Nex, Jx); 0 on continuum rows
         anomalous = bool((anom * valid.any(-1)).any())
         if t == 0:
@@ -445,13 +445,13 @@ def incident_channels(inp: CompoundInputs, J2: int, parity: int) -> tuple[list[t
             ud = (jj2 - l2) // spin2
             chans.append((l, ud))
             t.append(inp.tjlinc[l, ud + 1])
-    if isinstance(inp.tjlinc, Tensor):  # DIFFPARAM: an optical override on the incident channel
+    if isinstance(inp.tjlinc, Tensor):  # Differentiable: an optical override on the incident channel
         return chans, (torch.stack(t) if t else torch.zeros(0, dtype=DTYPE))
     return chans, np.asarray(t, dtype=float)
 
 
 def _incident_channels_photon(inp: CompoundInputs, J2: int, parity: int) -> tuple[list[tuple[int, int]], np.ndarray]:
-    """ENGPROJ: the photon entrance block of compprepare.f90 (k0 = 0): for every multipole l = 1..gammax with
+    """The photon entrance block of compprepare.f90 (k0 = 0): for every multipole l = 1..gammax with
     |I - l| <= J <= I + l, irad = E (1) unless the parity change is the M-type one for this l
     ((-1)^l == -pardif sign), and nothing at J = I = 0. Channels are (l, irad); T = Tjlinc(irad, l), stored at
     `tjlinc[l, irad + 1]`. lmaxinc = gammax (incidentgamma.f90).
@@ -528,7 +528,7 @@ class DensResidual:
     jdis: np.ndarray  # (nexmax+1,) float, discrete levels only
     rhogrid: np.ndarray  # (nexmax+1, numJ+1, 2) exgrid's bin-integrated rho, parity (-1, +1)
     # Ncum(Zix, Nix, NL) from densitycum (T6); read only when NL > Ntop. A Tensor under a
-    # DIFFPARAM level-density override: densitycum integrates the level density, so it moves.
+    # Differentiable level-density override: densitycum integrates the level density, so it moves.
     ncum_nl: float | Tensor = 0.0
 
 
@@ -543,14 +543,14 @@ class DensTrans:
     tjl: np.ndarray  # (maxen+1, L, 3) Tjl(type, nen, updown, l), updown axis (-1, 0, +1)
     tl: np.ndarray  # (maxen+1, L) Tl(type, nen, l)
     lmax: np.ndarray  # (maxen+1,) int lmax(type, nen)
-    # LOGTINT (Incognita, default OFF; compound/tlog.py): log-T Lagrange for this (charged) type; REF fine table (G0 only)
-    tlog: bool | str = False  # True / "c" = ln T, "l" = TLOGIT logit T
+    # Log-T interpolation (Incognita, default OFF; compound/tlog.py): log-T Lagrange for this (charged) type; REF fine table (G0 only)
+    tlog: bool | str = False  # True / "c" = ln T, "l" = logit T
     tlogref: tuple | None = None  # (efine, tjl_fine (Ef, L, 3), tl_fine (Ef, L))
-    # ALPHATEMP (Incognita, default OFF; omp/alphatemp.py): the cold-residual (alphaomp 6) tables and U*
+    # `alphatemp` (Incognita, default OFF; omp/alphatemp.py): the cold-residual (alphaomp 6) tables and U*
     cold_tjl: np.ndarray | None = None
     cold_tl: np.ndarray | None = None
     ustar: float = 0.0
-    # ROTEXIT1CN (Incognita, default OFF; omp/sfunc.py exit_mode): the set the CONTINUUM rows (> nlast) read instead
+    # Continuum exit set (Incognita, default OFF; omp/sfunc.py exit_mode): the set the CONTINUUM rows (> nlast) read instead
     cont_tjl: np.ndarray | None = None
     cont_tl: np.ndarray | None = None
 
@@ -572,12 +572,12 @@ class DensPrepareInputs:
     primary: bool = True
     flagfullhf: bool = False
     transeps: float = 1.0e-8
-    # SPEEDD: the gamma parameters behind `gamma_strength` when they are TALYS's defaults (no
+    # the gamma parameters behind `gamma_strength` when they are TALYS's defaults (no
     # override, nothing on a graph); `_tgam_rows` then evaluates the same fstrength through
     # compound.psf_fast, bit for bit
     gamma_params: object = None
-    binquad: tuple | None = None  # BINQUAD (`binquad y`): (nodes, mother tilt, residual tilt); None = TALYS
-    nnleak_top: bool = False  # NNLEAK: this mother bin is the initial CN top bin and `nnleak` is on (compound/nnleak.py)
+    binquad: tuple | None = None  # `binquad` (`binquad y`): (nodes, mother tilt, residual tilt); None = TALYS
+    nnleak_top: bool = False  # `nnleak`: this mother bin is the initial CN top bin and `nnleak` is on (compound/nnleak.py)
 
 
 def _eout_and_rboundary(
@@ -620,7 +620,7 @@ def _eout_and_rboundary(
         return 0.5 * (emin + emax), rboundary, exout
     exm = exout + ss
     if ex0min < exm <= ex0plus:
-        if inp.nnleak_top and r.type >= 1:  # NNLEAK (default y): Egamma^3-filled top bin
+        if inp.nnleak_top and r.type >= 1:  # `nnleak` (default y): Egamma^3-filled top bin
             from physics.hf.compound import nnleak
 
             rb, eo = nnleak.scalar((ex0plus - exm) / inp.dexinc_mev,
@@ -639,7 +639,7 @@ def _eout_and_rboundary_rows(
     Elementwise the same float64 arithmetic as the scalar function, branch by branch.
 
     TALYS: densprepare.f90:1 (densprepare)
-    Test: A-cn1 / SPEED0 golden
+    Test: A-cn1 golden
     """
     ex = np.asarray(r.ex_mev[:nex], dtype=np.float64)
     if inp.primary:
@@ -669,7 +669,7 @@ def _eout_and_rboundary_rows(
     with np.errstate(divide="ignore", invalid="ignore"):
         rb_d = np.where(part, (ex0plus - exm) / inp.dexinc_mev, 1.0)
     eout_d = np.where(part, 0.5 * (ex0plus + exm) - ss - ex, inp.exinc_mev - ss - ex)
-    if inp.nnleak_top and r.type >= 1:  # NNLEAK (default y): Egamma^3-filled top bin
+    if inp.nnleak_top and r.type >= 1:  # `nnleak` (default y): Egamma^3-filled top bin
         from physics.hf.compound import nnleak
 
         rb_d, eout_d = nnleak.adjust(rb_d, eout_d, part, ex0plus, exm, inp.dexinc_mev, True)
@@ -681,7 +681,7 @@ def _eout_and_rboundary_rows(
 def _discfactor(r: DensResidual):
     """densprepare.f90's missing-level correction for the discrete rows above Ntop.
 
-    A tensor when `Ncum(NL)` carries a gradient (DIFFPARAM): `torch.clamp`'s derivative is
+    A tensor when `Ncum(NL)` carries a gradient (differentiable): `torch.clamp`'s derivative is
     `np.clip`'s, i.e. zero outside [0.5, 2], which is what a finite difference measures there.
     """
     if r.nlast <= r.ntop:
@@ -697,7 +697,7 @@ def _rho0_rows(r: DensResidual, nex: int, rboundary: np.ndarray, discfactor,
     """`_rho0` for residual rows 0..nex-1 at once, (Nex, numJ+1, 2).
 
     TALYS: densprepare.f90:1 (densprepare)
-    Test: A-ld / SPEED0 golden
+    Test: A-ld golden
     """
     grad = isinstance(r.rhogrid, Tensor)
     out = np.zeros((nex, NUMJ + 1, 2))
@@ -708,7 +708,7 @@ def _rho0_rows(r: DensResidual, nex: int, rboundary: np.ndarray, discfactor,
         mj = np.asarray(r.maxj[:nex], dtype=np.int64)
         keep = (np.arange(NUMJ + 1)[None, :] <= mj[:, None]) & cont[:, None]
         if grad:
-            # DIFFPARAM: the continuum rows are the only ones a level-density parameter reaches
+            # Differentiable: the continuum rows are the only ones a level-density parameter reaches
             # (a discrete level's weight is Rboundary, a grid quantity), so they carry the graph
             # and the discrete cells below stay the constants they are.
             rows = (torch.as_tensor(rboundary, dtype=DTYPE)[:, None, None]
@@ -722,7 +722,7 @@ def _rho0_rows(r: DensResidual, nex: int, rboundary: np.ndarray, discfactor,
     scaled = np.zeros_like(out) if df_t is not None else None  # cells that carry `discfactor`
     kd = min(r.nlast, nex - 1) + 1
     if glue and df_t is None and not grad and kd > 0:
-        # NATIVEX2 (glue): the loop below as one scatter -- one cell per level, so no index
+        # Native glue: the loop below as one scatter -- one cell per level, so no index
         # repeats; int() truncation is astype's for the finite spins it is taken on
         jd = np.asarray(r.jdis[:kd], dtype=np.float64)
         if np.isfinite(jd).all():
@@ -802,7 +802,7 @@ def _tgam_rows(inp: DensPrepareInputs, egamma: np.ndarray) -> np.ndarray:
     without a `batch` attribute falls back to the per-bin loop.
 
     TALYS: densprepare.f90:1 (densprepare)
-    Test: A-psf / SPEED0 golden
+    Test: A-psf golden
     """
     from physics.hf.core.constants import talys_constants
 
@@ -826,7 +826,7 @@ def _tgam_rows(inp: DensPrepareInputs, egamma: np.ndarray) -> np.ndarray:
     if getattr(inp.gamma_strength, "differentiable", False):
         out = torch.zeros((n, inp.gammax + 1, 2), dtype=DTYPE)
     elif inp.gamma_params is not None:
-        # NATIVEX2: every (Egamma, l, irad) in one C call (compound/psf_nx2.py)
+        # Native: every (Egamma, l, irad) in one C call (compound/psf_nx2.py)
         from physics.hf.compound.psf_nx2 import tgam_points
 
         got = tgam_points(inp.gamma_params, inp.gammax, efs, eg, twopi, fn1)
@@ -890,21 +890,21 @@ def _interp_nodes(tr: DensTrans, nen: np.ndarray) -> tuple[np.ndarray, np.ndarra
 
 def _interpolate(inp, tr, ch, grad_t: bool, fn: float, na, nb, nc, w1, w2, w3, keep, eout=None, t: int = 0) -> None:
     """densprepare.f90:341-360's Lagrange interpolation of Tjl and Tl onto the residual rows, on
-    the graph (DIFFPARAM) or in numpy, into `ch.tjl` / `ch.tl`.
+    the graph (differentiable) or in numpy, into `ch.tjl` / `ch.tl`.
 
     TALYS: densprepare.f90:1 (densprepare)
-    Test: A-cn1 / SPEED0 golden
+    Test: A-cn1 golden
     """
     if grad_t:
-        # DIFFPARAM: the same Lagrange interpolation on the graph. The three nodes,
+        # Differentiable: the same Lagrange interpolation on the graph. The three nodes,
         # `lmax` and the transeps cut are index/branch decisions taken on the
         # unperturbed grid, exactly as in the numpy path.
         w1, w2, w3 = (torch.as_tensor(w, dtype=DTYPE) for w in (w1, w2, w3))
         keep_t = torch.as_tensor(keep)
         z = torch.zeros((), dtype=DTYPE)
         if tr.tlogref is not None:
-            raise NotImplementedError("TLOGREF (G0 reference) is not wired on the DIFFPARAM graph")
-        if tr.tlog:  # LOGTINT (default OFF): Lagrange in ln T where the three nodes are > 0
+            raise NotImplementedError("TLOGREF (G0 reference) is not wired on the differentiable graph")
+        if tr.tlog:  # Log-T interpolation (default OFF): Lagrange in ln T where the three nodes are > 0
             from physics.hf.compound.tlog import kind as tlog_kind, lagr_log_torch
 
             v = lagr_log_torch(w1[:, :, None], w2[:, :, None], w3[:, :, None], tr.tjl[na], tr.tjl[nb], tr.tjl[nc],
@@ -922,7 +922,7 @@ def _interpolate(inp, tr, ch, grad_t: bool, fn: float, na, nb, nc, w1, w2, w3, k
             u = torch.where(keep_t, u, z)
             ch.tl = torch.where(u < inp.transeps, z, u) * fn
         return
-    if tr.tlog or tr.tlogref is not None:  # LOGTINT (default OFF; compound/tlog.py)
+    if tr.tlog or tr.tlogref is not None:  # Log-T interpolation (default OFF; compound/tlog.py)
         from physics.hf.compound import tlog
 
         ja, jb, jc = tr.tjl[na], tr.tjl[nb], tr.tjl[nc]
@@ -955,7 +955,7 @@ def _interpolate(inp, tr, ch, grad_t: bool, fn: float, na, nb, nc, w1, w2, w3, k
 
 def _interp_c(tr: DensTrans, nex: int, L: int, eout, ea, eb, ec, na, nb, nc, lm, transeps: float,
               fn: float, ch: ResidualChannels, with_tl: bool) -> bool:
-    """NATIVEX2 (glue): `densprepare`'s numpy Lagrange interpolation of Tjl (and Tl) onto the
+    """Native glue: `densprepare`'s numpy Lagrange interpolation of Tjl (and Tl) onto the
     residual rows, in C (`nx2_glue_interp`), written into `ch.tjl` / `ch.tl`; False (nothing
     written) without the build (the caller checks the `glue` lever).
 
@@ -994,7 +994,7 @@ _BQ_W = {1: (2.0,), 2: (1.0, 1.0), 3: (0.5555555555555556, 0.8888888888888888, 0
 
 
 def binquad_nodes(u0: float, u1: float, y0: float, y1: float, alpha: float, beta: float, q: int):
-    """BINQUAD: (eps nodes, weights normalised on eps > 0, Rboundary) of the tilted emission-energy
+    """`binquad`: (eps nodes, weights normalised on eps > 0, Rboundary) of the tilted emission-energy
     distribution of a mother range [u0, u1] (= Ex - S) decaying into a residual range [y0, y1]:
     g(eps) = int du exp(alpha (u - uc)) exp(beta (u - eps - yc)), y = u - eps; Gauss-Legendre with q
     nodes on each smooth piece (kinks at u1 - y1, u0 - y0, the cut at 0). The numpy twin of
@@ -1053,7 +1053,7 @@ def binquad_nodes(u0: float, u1: float, y0: float, y1: float, alpha: float, beta
 
 
 def binquad_slope(rhogrid, ex, dex, nl: int, nrows: int, r: int) -> float:
-    """BINQUAD: d ln rho / dE at continuum row r from the bin-integrated rhogrid (native/binquad.h's
+    """`binquad`: d ln rho / dE at continuum row r from the bin-integrated rhogrid (native/binquad.h's
     `bq_slope`: central difference of ln(sum rhogrid / dex), one-sided at the ends, 0 if undefined).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
@@ -1077,7 +1077,7 @@ def binquad_slope(rhogrid, ex, dex, nl: int, nrows: int, r: int) -> float:
 
 
 def binquad_centroid(alpha: float, w: float) -> float:
-    """BINQUAD: centroid offset of exp(alpha x) on [-w/2, w/2] (native/binquad.h's `bq_centroid`).
+    """`binquad`: centroid offset of exp(alpha x) on [-w/2, w/2] (native/binquad.h's `bq_centroid`).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -1091,7 +1091,7 @@ def binquad_centroid(alpha: float, w: float) -> float:
 
 
 def _binquad_photon_rows(inp: DensPrepareInputs, r: DensResidual, nex: int, exout, pq: int) -> np.ndarray:
-    """BINQUAD2 (`binquadp`): the primary photon rows (nex, L, 2), each continuum row averaged over its bin
+    """Bin averaging (`binquadp`): the primary photon rows (nex, L, 2), each continuum row averaged over its bin
     [Ex - dEx/2, Ex + dEx/2] at pq GL nodes weighted by the row's level-density tilt, so Tgam x rhogrid
     integrates rho(y) Tgam(Etotal - y) over the bin instead of rhogrid x Tgam(bin centre)."""
     ex = np.asarray(r.ex_mev, dtype=np.float64)[:nex]
@@ -1116,7 +1116,7 @@ def _binquad_photon_rows(inp: DensPrepareInputs, r: DensResidual, nex: int, exou
 
 def _binquad_primary(inp: DensPrepareInputs, r: DensResidual, tr: DensTrans, nex: int, ch, lm,
                      fn: float) -> None:
-    """BINQUAD on the primary decay's continuum rows: T_l (Tjl and Tl) averaged over the incident
+    """`binquad` on the primary decay's continuum rows: T_l (Tjl and Tl) averaged over the incident
     point's emission into [Ex - dEx/2, Ex + dEx/2] with the residual's level-density tilt, rho0 x the
     accessible fraction. Same pieces, nodes and weights as `binquad_nodes` (and native/binquad.h) for a
     point mother, all rows at once; the interpolation as native/engine_decay.c's ce_densprepare."""
@@ -1176,7 +1176,7 @@ def _binquad_primary(inp: DensPrepareInputs, r: DensResidual, tr: DensTrans, nex
         w3 = np.where(good, (ef - ea) * (ef - eb) / ((ec - ea) * (ec - eb)), 0.0)
     wk = np.where(good, ws.reshape(-1), 0.0)
     tj = np.asarray(tr.tjl)
-    if tr.tlog:  # LOGTINT/TLOGIT (default OFF): the quadrature nodes take the same interpolation rule
+    if tr.tlog:  # log-T/logit-T (default OFF): the quadrature nodes take the same interpolation rule
         from physics.hf.compound import tlog
 
         v = tlog.lagr_log(w1[:, None, None], w2[:, None, None], w3[:, None, None], tj[na], tj[nb], tj[nc], tlog.kind(tr.tlog))
@@ -1197,19 +1197,19 @@ def _binquad_primary(inp: DensPrepareInputs, r: DensResidual, tr: DensTrans, nex
 
 
 def _alphatemp_rows(inp, r, tr, nex, ch, na, nb, nc, w1, w2, w3, keep, lm, fn, eout, t) -> None:
-    """ALPHATEMP (Incognita extension, default OFF; omp/alphatemp.py) on the alpha rows: the run's (hot) and the alphaomp-6
-    (cold) tables go through the SAME interpolation (TALYS pol2, or LOGTINT/TLOGIT's rule) and, with BINQUAD, the same
+    """`alphatemp` (Incognita extension, default OFF; omp/alphatemp.py) on the alpha rows: the run's (hot) and the alphaomp-6
+    (cold) tables go through the SAME interpolation (TALYS pol2, or log-T/logit-T's rule) and, with `binquad`, the same
     in-bin quadrature nodes; the two raw values are mixed node by node as Tcold^(1-g) Thot^g, g = min(1, Ex/U*) at the
     row's residual excitation, and only then cut at transeps and scaled by Fnorm (TALYS's order for one table). This is
     why the mix sits on the raw, uncut values: mixing after a cut (the 29100dd6 port) would change with the interpolation
-    rule and drop a cold node TLOGIT keeps. Numpy only."""
+    rule and drop a cold node logit-T keeps. Numpy only."""
     import copy
     import dataclasses
 
     from physics.hf.omp import alphatemp
 
     if tr.tlogref is not None:
-        raise NotImplementedError("ALPHATEMP is not wired with TLOGREF (G0 reference)")
+        raise NotImplementedError("alphatemp is not wired with TLOGREF (G0 reference)")
     raw = dataclasses.replace(inp, transeps=0.0)  # cut after the mix
     ctr = dataclasses.replace(tr, tjl=tr.cold_tjl, tl=tr.cold_tl, cold_tjl=None, cold_tl=None, ustar=0.0)
     parts = []
@@ -1231,18 +1231,18 @@ def _alphatemp_rows(inp, r, tr, nex, ch, na, nb, nc, w1, w2, w3, keep, lm, fn, e
     if not inp.flagfullhf:
         u = alphatemp.mix(hot.tl, cold.tl, g)
         ch.tl = np.where(u < inp.transeps, 0.0, u) * fn
-    ch.rho = hot.rho  # BINQUAD's accessible fraction (geometry only, the same in both passes)
+    ch.rho = hot.rho  # `binquad`'s accessible fraction (geometry only, the same in both passes)
 
 
 def _cont_rows(inp: DensPrepareInputs, t: int, r, ch, lmaxhf) -> None:
-    """ROTEXIT1CN (default OFF): rows above the residual's last discrete level (exits into its continuum) take the
+    """Continuum exit set (default OFF): rows above the residual's last discrete level (exits into its continuum) take the
     Tjl / Tl / lmaxhf that the same densprepare builds from `cont_tjl` / `cont_tl` (the model set); discrete rows keep
     the measured-S_l set. Same interpolation, so each row is bitwise what the model set alone would give."""
     import dataclasses
 
     tr = inp.trans[t]
     if isinstance(tr.tjl, Tensor):
-        raise NotImplementedError("sfexit cont is not wired on the DIFFPARAM graph")
+        raise NotImplementedError("sfexit cont is not wired on the differentiable graph")
     sub = dataclasses.replace(inp, residuals={t: r}, trans={t: dataclasses.replace(
         tr, tjl=tr.cont_tjl, tl=tr.cont_tl, cont_tjl=None, cont_tl=None)}, k0=-99)
     c = densprepare(sub)[t]
@@ -1266,7 +1266,7 @@ def densprepare(inp: DensPrepareInputs) -> dict[int, ResidualChannels]:
     out: dict[int, ResidualChannels] = {}
     from physics.hf.emission.emit_nx2 import glue_enabled
 
-    glue = glue_enabled()  # NATIVEX2 (glue), read once per call
+    glue = glue_enabled()  # Native glue, read once per call
     for t, r in sorted(inp.residuals.items()):
         nex = r.nexmax + 1
         discfactor = _discfactor(r)
@@ -1291,7 +1291,7 @@ def densprepare(inp: DensPrepareInputs) -> dict[int, ResidualChannels]:
             else:
                 tg = np.zeros((nex, inp.gammax + 1, 2, NUMJ + 1, 2))
                 pq = inp.binquad[4] if inp.binquad is not None and len(inp.binquad) > 4 else 0
-                if pq > 0:  # BINQUAD2: photon rows averaged over each continuum bin (engine_decay.c's twin)
+                if pq > 0:  # bin averaging: photon rows averaged over each continuum bin (engine_decay.c's twin)
                     tg[:] = _binquad_photon_rows(inp, r, nex, exout, int(pq))[:, :, :, None, None]
                 else:
                     tg[:] = _tgam_rows(inp, inp.exinc_mev - exout)[:, :, :, None, None]
@@ -1309,9 +1309,9 @@ def densprepare(inp: DensPrepareInputs) -> dict[int, ResidualChannels]:
                 ea, eb, ec = tr.egrid_mev[na], tr.egrid_mev[nb], tr.egrid_mev[nc]
                 lm = tr.lmax[np.minimum(np.maximum(nen, 0), tr.maxen)]  # np.clip's values
                 fn = float(inp.fnorm[t + 1])
-                if tr.cold_tjl is not None and tr.ustar > 0.0:  # ALPHATEMP (default OFF)
+                if tr.cold_tjl is not None and tr.ustar > 0.0:  # `alphatemp` (default OFF)
                     if grad_t:
-                        raise NotImplementedError("ALPHATEMP is not wired on the DIFFPARAM graph")
+                        raise NotImplementedError("alphatemp is not wired on the differentiable graph")
                     w1 = ((eout - eb) * (eout - ec) / ((ea - eb) * (ea - ec)))[:, None]
                     w2 = ((eout - ea) * (eout - ec) / ((eb - ea) * (eb - ec)))[:, None]
                     w3 = ((eout - ea) * (eout - eb) / ((ec - ea) * (ec - eb)))[:, None]
@@ -1321,19 +1321,19 @@ def densprepare(inp: DensPrepareInputs) -> dict[int, ResidualChannels]:
                         tr, nex, L, eout, ea, eb, ec, na, nb, nc,
                                                      lm, inp.transeps, fn, ch,
                                                      not inp.flagfullhf):
-                    pass  # NATIVEX2 (glue): the numpy interpolation below in C, into ch.tjl/tl
+                    pass  # Native glue: the numpy interpolation below in C, into ch.tjl/tl
                 else:
                     w1 = ((eout - eb) * (eout - ec) / ((ea - eb) * (ea - ec)))[:, None]
                     w2 = ((eout - ea) * (eout - ec) / ((eb - ea) * (eb - ec)))[:, None]
                     w3 = ((eout - ea) * (eout - eb) / ((ec - ea) * (ec - eb)))[:, None]
                     keep = np.arange(L)[None, :] <= lm[:, None]
                     _interpolate(inp, tr, ch, grad_t, fn, na, nb, nc, w1, w2, w3, keep, eout, t)
-                if inp.binquad is not None and not (tr.cold_tjl is not None and tr.ustar > 0.0):  # BINQUAD
+                if inp.binquad is not None and not (tr.cold_tjl is not None and tr.ustar > 0.0):  # `binquad`
                     if not inp.primary or grad_t:
                         raise NotImplementedError("binquad: Python densprepare takes the primary decay only")
                     _binquad_primary(inp, r, tr, nex, ch, lm, fn)
                 lmaxhf[:] = lm
-        if t >= 1 and inp.trans[t].cont_tjl is not None:  # ROTEXIT1CN: continuum rows from the model set
+        if t >= 1 and inp.trans[t].cont_tjl is not None:  # Continuum exit set: continuum rows from the model set
             _cont_rows(inp, t, r, ch, lmaxhf)
         if r.nexmax > 0:
             lmaxhf[r.nexmax] = lmaxhf[r.nexmax - 1]

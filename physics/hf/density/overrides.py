@@ -1,9 +1,9 @@
-"""Parameter overrides that put a TALYS keyword family on the autograd graph (DIFFPARAM).
+"""Parameter overrides that put a TALYS keyword family on the autograd graph (differentiable).
 
-Task: DIFFPARAM (gate G0.4). Acceptance test: tests/hf/test_capture_fast.py, A-ld / A-trans
+Differentiable parameters (check G0.4). Acceptance test: tests/hf/test_capture_fast.py, A-ld / A-trans
 unmoved.
 
-G0.3 (SPEED0) put the **photon-strength** family on the graph by handing
+G0.3 put the **photon-strength** family on the graph by handing
 `capture_fast.target(..., gamma_overrides=...)` a dict of T7 `gamma_parameters` fields as
 `requires_grad` tensors. This module is the same idea for the other two families TALYS users
 tune, and it is deliberately *narrower*: instead of overriding a resolved physics object it
@@ -141,15 +141,15 @@ def torch_path(overrides: Mapping[str, object] | None) -> bool:
 
 
 # ------------------------------------------------------------------------------------------------
-# PARAMWIRE: a fit's parameter set, keyed by value, on the numpy / NATIVEX path
+# Parameter set: a fit's parameter set, keyed by value, on the numpy / native path
 # ------------------------------------------------------------------------------------------------
 #
-# The DIFFPARAM hooks above exist for autograd: a tensor switches the run onto the graph and every
+# The differentiable hooks above exist for autograd: a tensor switches the run onto the graph and every
 # cache is bypassed, because an `lru_cache` would hand the next step the previous step's tensors.
 # A fit that re-evaluates the chart at a new parameter point wants the opposite: plain floats, the
 # numpy and C kernels on, and every level-density / photon-strength cache KEYED by the parameter it
-# reads, so a warm step recomputes only what that parameter reaches (ROUTE100 WP3,
-# docs/results/hf-warm0.md §4.3).
+# reads, so a warm step recomputes only what that parameter reaches
+# (docs/results/hf-warm0.md §4.3).
 #
 # A parameter set is a sorted tuple of `(keyword, Z, A, value)` in absolute nuclide coordinates,
 # TALYS's own `keyword Z A value` form. Absolute coordinates matter: the chain builds a residual's
@@ -165,7 +165,7 @@ def torch_path(overrides: Mapping[str, object] | None) -> bool:
 #: `ftable` / `wtable` (input_gammapar.f90:313-326): the E1 tabulated strength of (Z, A), its
 #: normalisation and its width about the maximum; `wtable` REPLACES the global default
 #: (input_gammapar.f90:115-137), it does not multiply it.
-#: FISBARWIRE: `fisbaradjust` / `fishwadjust` of (Z, A) (input_fissionpar.f90:210-229) multiply the
+#: `fisbaradjust` / `fishwadjust` of (Z, A) (input_fissionpar.f90:210-229) multiply the
 #: height and curvature of EVERY barrier of (Z, A) in `t1barrier` (t1barrier.f90:99-121) -- TALYS's
 #: per-barrier keywords with the barriers tied. `fismodel` is global in TALYS and is given at
 #: Z = A = 0. These three reach only `fission.chain.FissionChain`; `Cascade.set_fit_params` keeps
@@ -174,15 +174,15 @@ def torch_path(overrides: Mapping[str, object] | None) -> bool:
 FISSION_KEYS: frozenset[str] = frozenset({"fismodel", "fisbaradjust", "fishwadjust"})
 FIT_KEYS: frozenset[str] = frozenset({"aadjust", "ftable", "wtable"}) | FISSION_KEYS
 
-#: FISSBAR2 (`INCOGNITA_FISBAR_LD=1`, default OFF: the keys are rejected by `fit_params` when off, so
+#: Per-barrier keys (`INCOGNITA_FISBAR_LD=1`, default OFF: the keys are rejected by `fit_params` when off, so
 #: a default run cannot carry them). TALYS's per-barrier keywords `<kw> Z A value ibar`, ibar 1-3,
-#: named `<kw>@<ibar>`; like the FISBARWIRE keys they reach only the fission chain
+#: named `<kw>@<ibar>`; like the tied fission keys they reach only the fission chain
 #: (`FissionChain.params`), whose barrier level densities (ibar > 0) nothing else reads.
 #:   fisbaradjust@i, fishwadjust@i  multiply barrier i's height / curvature (input_fissionpar.f90)
 #:   ctable@i, ptable@i             SET barrier i's table-level-density shifts (input_densitypar.f90:
 #:                                  347/356): rho x exp(ctable sqrt(E - ptable)), ldmodel 4-7. TALYS
 #:                                  never applies `ctableadjust` above ibar 0 (densitypar.f90:295),
-#:                                  which is why FISSBAR's barrier `ctableadjust` probe was inert.
+#:                                  which is why a barrier `ctableadjust` is inert.
 #:   s2adjust@i                     SET barrier i's spin-cutoff scaling; under the tables it reshapes
 #:                                  the barrier's J distribution (densitytable.f90:175), the table
 #:                                  analogue of the moment of inertia
@@ -277,7 +277,7 @@ def with_aadjust(params, options, entries) -> object:
 
 
 def fission_entries(fit) -> tuple:
-    """The `FISSION_KEYS` (and FISSBAR2 `FISBAR_LD_KEYS`) entries of a canonical parameter set."""
+    """The `FISSION_KEYS` (and the per-barrier `FISBAR_LD_KEYS`) entries of a canonical parameter set."""
     return tuple(e for e in fit or () if e[0] in FISSION_KEYS or e[0] in FISBAR_LD_KEYS)
 
 
@@ -309,7 +309,7 @@ def with_fission_adjust(params, options, fit) -> object:
         if t is None:
             t = new[k] = params.values[k].clone()
         t[zix + spec.offsets[0], nix + spec.offsets[1], 1 + spec.offsets[2]:] = float(v)
-    # FISSBAR2 per-barrier keys, after the tied ones (a per-barrier factor multiplies the tied value)
+    # Per-barrier keys, after the tied ones (a per-barrier factor multiplies the tied value)
     for k, z, a, v in fit or ():
         if k not in FISBAR_LD_KEYS:
             continue

@@ -1,14 +1,14 @@
-"""Which caches a record holds, captured after a run and seeded into a new one (CREC, WP4).
+"""Which caches a record holds, captured after a run and seeded into a new one (chart record).
 
-**What is recorded.** WARM0's inventory (docs/results/hf-warm0.md §5) of what a warm worker keeps,
+**What is recorded.** the warm run's inventory (docs/results/hf-warm0.md §5) of what a warm worker keeps,
 less two groups:
 
 * structure (`Options`, `Params`, `Masses`, `Levels`, parsed files): ~108 MB of tensors per
   nuclide rebuilt from TALYS's own database, and what a record would store is their source rows,
   which are already on disk. They are rebuilt on first use (`REFUSE` makes the encoder fail on
   any recorded value that holds one, so a record never carries a stale copy);
-* WARM0's taint set (`warmrun.DROP_LRU`, `DROP_DICTS`, `DROP_ATTRS`): everything a level density
-  or photon strength reaches. `RECORDED` is checked disjoint from it, so a PARAMWIRE parameter
+* the warm run's taint set (`warmrun.DROP_LRU`, `DROP_DICTS`, `DROP_ATTRS`): everything a level density
+  or photon strength reaches. `RECORDED` is checked disjoint from it, so a parameter set
   set never needs a record rebuilt -- its caches are keyed by the entries they read and computed
   in the run.
 
@@ -39,7 +39,7 @@ from pathlib import Path
 from physics.hf import warmrun
 from physics.hf.record import codec
 
-FORMAT = 2  # 2: ENGFIX4, the key holds the run inputs (`_inputs_signature`)
+FORMAT = 2  # 2: the key holds the run inputs (`_inputs_signature`)
 
 # `lru_cache`d functions (qualified `__wrapped__` name); `Cascade.incident` is per instance, keyed
 # on the run's Cascade
@@ -61,7 +61,7 @@ RECORDED_DICTS: tuple[tuple[str, str], ...] = (
     ("physics.hf.ecis.incident", "_SOLVED"),
 )
 
-# `Cascade` instance attributes: SETB's incident axis table, the NATIVEX decay transmissions and
+# `Cascade` instance attributes: the fast path's incident axis table, the native decay transmissions and
 # RnJ, and the coupled-channels `xscoupled` that `Cascade.incident` records as it solves
 RECORDED_ATTRS: tuple[str, ...] = ("_setb_incident", "_decay_fast_tl", "_nativex_rnj",
                                    "_xscoupled")
@@ -81,7 +81,7 @@ def _check_disjoint() -> None:
     dicts = set(RECORDED_DICTS) & set(warmrun.DROP_DICTS)
     attrs = set(RECORDED_ATTRS) & set(warmrun.DROP_ATTRS)
     if lru or dicts or attrs:
-        raise AssertionError(f"recorded caches in WARM0's taint set: {lru | dicts | attrs}")
+        raise AssertionError(f"recorded caches in the warm run's taint set: {lru | dicts | attrs}")
 
 
 _check_disjoint()
@@ -95,7 +95,7 @@ def _sha(obj) -> str:
 
 
 def taint_signature() -> str:
-    """WARM0's taint set and PARAMWIRE's parameter keywords: a change to either changes what a
+    """the warm run's taint set and the parameter set's parameter keywords: a change to either changes what a
     record may hold."""
     from physics.hf.density.overrides import FIT_KEYS
 
@@ -125,11 +125,11 @@ def code_signature() -> str:
 
 
 def _inputs_signature(cas) -> dict:
-    """ENGFIX4: the run's inputs the recorded (optical-model / direct) caches depend on, hashed the
+    """the run's inputs the recorded (optical-model / direct) caches depend on, hashed the
     way the stage disk cache keys them (`stagedisk`): every Options field but the level-density /
-    photon-strength / fission ones, the optical-model Params, the masses, the deck (`fitlib` cards the
+    photon-strength / fission ones, the optical-model Params, the masses, the deck (`fitlib` lines the
     Cascade was built under) and the environment (every HF_* / INCOGNITA_* but `stagedisk.ENV_EXCLUDE`,
-    plus ENGADJ's token). A record written under another deck or switch set no longer matches."""
+    plus `eadj`'s token). A record written under another deck or switch set no longer matches."""
     from physics.hf import eadj, stagedisk as sd
 
     def h(b: bytes) -> str:
@@ -149,7 +149,7 @@ def _inputs_signature(cas) -> dict:
         env += b"|eadj" + repr(eadj.token()).encode()
     from physics.hf.omp import ompdeck
 
-    if ompdeck.active() is not None:  # KWCOV B6
+    if ompdeck.active() is not None:  # `optmodall`
         env += b"|b6" + repr(ompdeck.token()).encode()
     out["env"] = h(env)
     return out

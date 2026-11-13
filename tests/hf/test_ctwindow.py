@@ -1,4 +1,4 @@
-"""CTWFREEZE: `ctwindow` (env INCOGNITA_CT_WINDOW) = CTWIN arm W's constant-temperature anchor on the complete level window
+"""`ctwindow` (env INCOGNITA_CT_WINDOW): the constant-temperature anchor on the complete level window
 (E <= RIPL-4 Umax), TALYS branch-A match, default OFF. OFF must be TALYS's path unchanged; ON must count exactly the known
 levels of the window with the used density and join the Fermi gas without a kink. Engine-level OFF fingerprint and the
 equality with the registered runner-side patch: development notes"""

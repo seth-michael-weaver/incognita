@@ -1,4 +1,4 @@
-/* SPECOUT (output only): compemission.f90 for one cascade nucleus, the compiled twin of physics/hf/specout.py's
+/* `specout` (output only): compemission.f90 for one cascade nucleus, the compiled twin of physics/hf/specout.py's
  * `compemission` (tests/hf/test_specout.py holds the two together).
  *
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,

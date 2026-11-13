@@ -45,7 +45,7 @@ PARN = (0, 1, 0, 1, 2, 1, 2)  # constants.f90: parN
 NUMZCHAN, NUMNCHAN = 6, 10  # A0_talys_mod.f90: numZchan, numNchan
 NUMIN, NUMIP, NUMID, NUMIT, NUMIH, NUMIA = 8, 4, 2, 1, 1, 3
 NUMCHANTOT = 35 * 7  # A0_talys_mod.f90:92, memorypar = 8 at the default `memory` setting
-# CHANCAP (Incognita extension, not TALYS; deck keyword `chancap y|n`, default y; n = the stock caps above, production engine-20261017-2 bit for bit):
+# `chancap` (Incognita extension, not TALYS; deck keyword `chancap y|n`, default y; n = the stock caps above, bit for bit):
 # the per-ejectile caps leave flux the residual book (rp) keeps in no exclusive channel -- Be-9 + n at 20.5 MeV,
 # Be-10* -> t -> Li-7* -> t -> He-4 (channel 000200, two tritons) is never enumerated with numit = 1, 3.5 mb of
 # sigma_nonel. y lifts every per-ejectile cap to 8 (the channel code keeps one digit per ejectile), so only
@@ -56,7 +56,7 @@ CHANCAP_NUMCHANTOT = 4 * NUMCHANTOT
 
 
 def chancap_on() -> bool:
-    """CHANCAP for this run: `INCOGNITA_CHANCAP` (0/n/off, 1/y/on) wins, else the run's deck keyword as
+    """`chancap` for this run: `INCOGNITA_CHANCAP` (0/n/off, 1/y/on) wins, else the run's deck keyword as
     `default_options` resolved it (`INCOGNITA_CHANCAP_EFF`), else on (the keyword default).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
@@ -139,14 +139,14 @@ def _limits(zix: int, nix: int, parinclude: list[bool], maxchannel: int,
         for i, c in enumerate(cand):
             if parinclude[i + 2]:  # parinclude index 0 is type -1
                 lim[i] = c
-    cap = caps() if cap is None else cap  # CHANCAP
+    cap = caps() if cap is None else cap  # chancap
     return tuple(min(a, b) for a, b in zip(lim, cap))  # noqa: B905 (py3.9 boxes)
 
 
 @lru_cache(maxsize=4096)
 def _limits_of(zix: int, nix: int, parinclude: tuple, maxchannel: int,
                cap: tuple[int, ...] = (NUMIN, NUMIP, NUMID, NUMIT, NUMIH, NUMIA)) -> tuple[int, ...]:
-    """NATIVEX: `_limits`, memoised (a pure function of its arguments)."""
+    """`_limits`, memoised (a pure function of its arguments)."""
     return _limits(zix, nix, list(parinclude), maxchannel, cap)
 
 
@@ -225,14 +225,14 @@ def exclusive_channels(inp: ChannelInputs, state: ExclusiveState | None = None) 
 
     `state` carries `chanopen`/`idnumfull` from the previous incident energy; pass the same object
     through an ascending energy loop, as TALYS does. With `state=None` the dump's own `chanopen`
-    set is used, which is what the injected gate wants.
+    set is used, which is what the injected test wants.
 
     TALYS: channels.f90:1 (channels), totalxs.f90:1 (totalxs), residual.f90:1 (residual)
     Test: A-mult
     """
     from physics.hf.emission import emit_nx2
 
-    fast = emit_nx2.exclusive_channels(inp, state)  # NATIVEX2: the same body, less re-reading
+    fast = emit_nx2.exclusive_channels(inp, state)  # the same body, less re-reading
     if fast is not None:
         return fast
     st = state if state is not None else ExclusiveState(set(inp.chanopen), inp.idnumfull)
@@ -260,7 +260,7 @@ def exclusive_channels(inp: ChannelInputs, state: ExclusiveState | None = None) 
     channelsum = 0.0
     xsabs = 0.0
     idnum = -1
-    cap, nchtot = caps(), numchantot()  # CHANCAP
+    cap, nchtot = caps(), numchantot()  # chancap
     zend = min(NUMZCHAN, inp.maxz, inp.zinit)
     nend = min(NUMNCHAN, inp.maxn, inp.ninit)
     for zix in range(zend + 1):
@@ -430,7 +430,7 @@ def _channel_result(inp, nuc, xseps, idnum, idchannel, xschannel, xsgamchannel, 
         code = 0 if t == 0 else 10 ** (6 - t)
         xsexclusive[t] = xsch.get(code, 0.0)
     xsparticle, mult = {}, {}
-    # NATIVEX: only the nuclei with feeding records (an empty record adds exactly 0.0)
+    # Only the nuclei with feeding records (an empty record adds exactly 0.0)
     fed = [n.xsfeed_mb for n in nuc.values() if n.xsfeed_mb]
     for t in range(7):
         if inp.parskip[t]:

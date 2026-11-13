@@ -1,4 +1,4 @@
-"""A cached value as a JSON skeleton plus flat arrays (CREC, ROUTE100 WP4).
+"""A cached value as a JSON skeleton plus flat arrays (chart record).
 
 The skeleton is plain JSON. Scalars (None, bool, int, float, str) are themselves -- `json` writes
 a float with `repr`, which round-trips exactly, and NaN / Infinity as their tokens. Everything

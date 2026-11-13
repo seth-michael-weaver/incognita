@@ -14,7 +14,7 @@ WT.L.ch.products = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "fragment mass number A →": "टुकड़े की द्रव्यमान संख्या A →",
   "share of fissions that make it (each line ×{#})": "इसे बनाने वाले विखंडनों का अंश (हर रेखा ×{#})",

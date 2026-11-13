@@ -1018,7 +1018,7 @@
     insample: {
       term: "Dentro da amostra", aliases: ["dentro da amostra"],
       short: "Avaliado com as mesmas medições a que o método foi ajustado, o que o favorece.",
-      more: "O teste justo é fora da amostra: reajustar sem os dados que estão a ser julgados e só então comparar. As comparações da TERRA fazem isso em parte do quadro de resultados, deixando de fora uma série de dados de cada vez.",
+      more: "O teste justo é fora da amostra: reajustar sem os dados que estão a ser julgados e só então comparar. As comparações da TERRA fazem isso em parte das comparações, deixando de fora uma série de dados de cada vez.",
     },
 
     /* ---------- terceira parte: fusão ---------- */

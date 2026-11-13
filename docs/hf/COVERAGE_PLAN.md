@@ -1,16 +1,16 @@
-# Plan: every TALYS-2.25 keyword and observable in `physics/hf`
+# Every TALYS-2.25 keyword and observable in `physics/hf`: details per batch
 
-Goal (Seth, 2026-11-08, after A. Koning: "the challenge is to cover all the same observables and keyword
+Goal (after A. Koning: "the challenge is to cover all the same observables and keyword
 combinations"): the engine reads every TALYS keyword and produces every TALYS observable, or says in the coverage
 matrices why not. Inventory: `KEYWORD_COVERAGE.md` (446 keywords) and `OBSERVABLE_COVERAGE.md` (58 output families).
 Regenerate both after every batch:
 
-    # WSL; the engine venv has torch
-    PY=~/fastgate_data/eng/16606b356d6e/.venv/bin/python
-    $PY scripts/kwcov/inventory.py --talys ~/opt/talys-src --echo ~/kwcov/echo/talys.out
+    # the engine venv (has torch); <talys-src> = a TALYS-2.25 source tree, talys.out = a stock echo run
+    PY=.venv/bin/python
+    $PY scripts/kwcov/inventory.py --talys <talys-src> --echo <work>/echo/talys.out
     $PY scripts/kwcov/observables.py && $PY scripts/kwcov/render.py
 
-## Where we start (2026-11-08, origin/main 05fa5f70 + B1)
+## Starting point (before the batches)
 
 | | SUPPORTED | READ_ONLY_DEFAULT | IGNORED | MISSING | NA | total |
 |---|---|---|---|---|---|---|
@@ -28,7 +28,7 @@ makes such a keyword act, or makes it refuse (`defaults.UNPORTED`) until it can.
 * **Defaults stay bit-identical.** A new keyword, switch or output acts only when set. Check with
   `tests/hf/test_engine_c.py` (Fe-56 bitwise, U-238 to 1e-12) and, for output-only work, an on/off comparison of
   every `Results` array (`scripts/kwcov/b1_compare.py` does it).
-* **Test first, against stock TALYS-2.25** (`~/opt/talys-src/bin/talys`, WSL). A stock run of one target at three
+* **Test first, against stock TALYS-2.25** (`<talys-src>/bin/talys`). A stock run of one target at three
   energies takes 1-8 s (Fe-56 1 s, U-238 8 s); keep only the files you compare and delete the rest.
 * **Two acceptance metrics.**
   1. *New observable*: engine vs stock, per name and energy where stock > 1 mb: `|ln(ours/stock)| <= 0.5 %` at
@@ -43,42 +43,42 @@ makes such a keyword act, or makes it refuse (`defaults.UNPORTED`) until it can.
   add Pb-208 (angular), Au-197 (capture/astro, 1 keV-1 MeV), Nb-93 with `projectile p` (charged), Zr-90 (gas
   production) when a batch needs them. Stock recipe: `channels y`, `filechannels y`, `fileresidual y`,
   `outdiscrete y` + the batch's own output switches.
-* **Laptop**: one python or TALYS process at a time, `nice -n 10`, `flock /tmp/incognita_heavy.lock`, `free -g`
-  >= 8 GB available first. Native build in a Windows worktree: the build scripts have CRLF endings and WSL has no
+* **Resources**: one python or TALYS process at a time, with >= 8 GB memory available. Native build in a
+  Windows worktree: the build scripts have CRLF endings and WSL has no
   `make`/`cc`; strip `\r` into a temp copy inside `scripts/` and run it with
-  `CC=~/micromamba/envs/nucleus-phys/bin/gcc` (see B1 notes below).
+  `CC=<conda env>/bin/gcc` (see B1 notes below).
 * After the batch: rerun the inventory, update the batch's rows (status, `evidence = test:<file>`), commit.
 
 ## Batches, in order of value
 
-Effort is for one agent. "Anchors" are the TALYS routines to port (`source/<file>:<line of the subroutine>`); the
+Effort is the estimated porting time. "Anchors" are the TALYS routines to port (`source/<file>:<line of the subroutine>`); the
 keyword's own parse line is in `keyword_coverage.csv` (`talys_line`).
 
 | # | batch | keywords | observables | effort |
 |---|---|---|---|---|
-| B1 | channel observables (DONE, this branch) | -- | prod/multiplicity (gas production), binary.tot, xs*.tot gamma column, xs*.LMM isomeric channels, xs*.fis, discrete/continuum split | 0.5 d |
-| B2 | deck wiring of what exists (DONE, branch `kwcov2`) | best, bestend, bestbranch, bestfile, fit, ngfit, nnfit, nffit, nafit, ndfit, pnfit, gnfit, dnfit, anfit, macsfit, gamgamfit, ejectiles, maxlevelsbin, maxlevelsres, nlevels, estop, liso, isomer (check), per-nucleus forms of ldmodel/colenhance, `energy E1 E2 dE` | CHANOBS default decision | 1-1.5 d |
+| B1 | channel observables (DONE) | -- | prod/multiplicity (gas production), binary.tot, xs*.tot gamma column, xs*.LMM isomeric channels, xs*.fis, discrete/continuum split | 0.5 d |
+| B2 | deck wiring of what exists (DONE) | best, bestend, bestbranch, bestfile, fit, ngfit, nnfit, nffit, nafit, ndfit, pnfit, gnfit, dnfit, anfit, macsfit, gamgamfit, ejectiles, maxlevelsbin, maxlevelsres, nlevels, estop, liso, isomer (check), per-nucleus forms of ldmodel/colenhance, `energy E1 E2 dE` | CHANOBS default decision | 1-1.5 d |
 | B3 | angular distributions on TALYS keywords | outangle, outlegendre, fileelastic, fileangle, angles, anglescont, cpang | elastic/inelastic ang + leg, Rutherford ratio (charged), compound ang. for charged particles | 1.5-2 d |
-| B4 | spectra, DDX, gamma lines on TALYS keywords (DONE, branch `kwcov4`; exclusive channel spectra: B4b DONE, branch `kwcov4b`, with `components y`) | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
-| B5 | model keyword sweep: compound, gamma, levels, LD (DONE, branch `kwcov5`) | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
-| B6 | model keyword sweep: optical model, direct (DONE, branch `kwcov6`) | optmodall, vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
-| B7 | unported model branches (DONE, branch `kwcov7`; gnorm y and MSD stay refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
-| B7b | JLM and folding alpha OMP (DONE, branch `kwcov7b`; JLM with preeqmode 3 / racap / optmodall / alphaomp 3-5 refused) | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
-| B8 | fission extras (DONE, branch `kwcov8`; fisfeed J-parity columns and fragment-based nubar/PFNS -> B14) | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
-| B9 | astrophysics (DONE, branch `kwcov9`; astro + racap, fissile astrogs n refused) | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
-| B10 | URR (DONE, branch `kwcov10`; widthmode 2/3 refused) | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
-| B10b | thermal, natural targets, resonance range (DONE, branch `kwcov10b`; resonance y refused) | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
-| B11 | medical isotope production (DONE, branch `kwcov11`) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
-| B12 | recoils and LAB frame (DONE, branch `kwcov12`) | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
-| B13 | ingredient outputs (DONE, branch `kwcov13`) | outlevels, blocklevels, outbasic, outtransenergy, blockomp, outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
-| B14 | fission yields and fragment evaporation (part 1 Brosa DONE, branch `kwcov14`; part 2 GEF DONE, branch `kwcov14b`; part 3 FF evaporation: fymodel 4 + 5, isomer split, per-ejectile nu DONE, branch `kwcov14c`; pfnsmodel 2 spectra and fymodel 3 open) | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
-| B15 | low value (DONE, branch `kwcov15`; components y (B4b: ported since), densfile/e1file/m1file/massdir, rescuefile/strucpath/bestpath refused; endf.cs ECIS files not given; transpower ported; U-239 E1 fix behind INCOGNITA_FIDFIX=psfsgl) | endf, endfdetail, sacs, legacy, components, micro, transpower | tefal.inf, gamma*.tot, sacs.dat | 1 d |
-| GAP | isomeric (excited) targets (DONE, branch `kwcoviso`; design `ISOMERIC_TARGETS.md`; n only, channel / level / total xs; ltarget + liso, Ltarget > 40 (Hf-178m2, as stock) and the angular / spectra / recoil / astro / urr / endf / components / racap / production / massdis outputs refused) | ltarget | everything for an excited target | 3+ d |
+| B4 | spectra, DDX, gamma lines on TALYS keywords (DONE; exclusive channel spectra: B4b DONE, with `components y`) | outspectra, filespectrum, fileddxe, fileddxa, ddxmode, outgamdis, filegamdis, channelenergy, adddiscrete, addelastic, equispec (check) | emission spectra, DDX, discrete gamma lines, exclusive channel spectra, (n,gn) column xsngn | 1.5-2 d |
+| B5 | model keyword sweep: compound, gamma, levels, LD (DONE) | tjadjust, rgamma, cknock, esurf, pshiftadjust, pshiftconstant (check), spradjust, popmev, emaxpseudores, pseudoreswidth, pseudoresfade, ntop, nlow, densfile, e1file, m1file, skipcn, maxzrp, maxnrp, rpevap, branch, levelfile, deformfile, massdir, sfth, sfexp, ldmodelracap | -- | 1.5-2 d |
+| B6 | model keyword sweep: optical model, direct (DONE) | optmodall, vinfadjust, incadjust, rvadjustf ... awsoadjustf (12), riplomp, optmod, optmodfilen, optmodfilep, ompenergyfile, coulomb, ecisstep, eciscompound, statepot (check), rotational, sysreaction | -- | 1.5 d |
+| B7 | unported model branches (DONE; gnorm y and MSD stay refused) | gnorm y, gshell y, twocomponent n, preeqspin 3, preeqmode 3, onestep, emsdmin, msdbins (MSD) | -- | 2 d |
+| B7b | JLM and folding alpha OMP (DONE; JLM with preeqmode 3 / racap / optmodall / alphaomp 3-5 refused) | jlmomp, jlmmode, radialmodel, radialfile, lvadjust, lwadjust, lv1adjust, lw1adjust, lvsoadjust, lwsoadjust, alphaomp 3-5, adepthcor, aradialcor | -- | 2-3 d |
+| B8 | fission extras (DONE; fisfeed J-parity columns and fragment-based nubar/PFNS -> B14) | fisfeed, rfiseps, axtype, class2file, hbtransfile, cnubar1, cnubar2, tmadjust, fsadjust, pfnsmodel 1 | rpZZZAAA.fis, nubar (Wahl), PFNS (Iwamoto), fission info | 2 d |
+| B9 | astrophysics (DONE; astro + racap, fissile astrogs n refused) | astro, astrogs, astroex, astroe, astrot, nonthermlev | astrorate.*, MACS | 1-1.5 d |
+| B10 | URR (DONE; widthmode 2/3 refused) | urr (check), lurr, urrnjoy, rprime | urr*.dat, urrtalys.tot | 1.5 d |
+| B10b | thermal, natural targets, resonance range (DONE; resonance y refused) | xscaptherm, xsptherm, xsalphatherm, mass 0, abundance, resonance, group, integral, reslib, tres | thermal xs, natural sums, resonance/group/integral | 1.5 d |
+| B11 | medical isotope production (DONE) | production, ebeam, eback, ibeam, tirrad, tcool, area, rho, radiounit, yieldunit | Y*.tot yields/activities | 1 d |
+| B12 | recoils and LAB frame (DONE) | recoil, recoilaverage, maxenrec, anglesrec, labddx | recoil spectra, LAB DDX | 2 d |
+| B13 | ingredient outputs (DONE) | outlevels, blocklevels, outbasic, outtransenergy, blockomp, outdensity, filedensity, outgamma, filepsf, outinverse, outomp, outkd, partable | ld/psf tables, T and inverse xs, OMP parameters, parameters.dat | 1 d |
+| B14 | fission yields and fragment evaporation (part 1 Brosa DONE; part 2 GEF DONE; part 3 FF evaporation: fymodel 4 + 5, isomer split, per-ejectile nu DONE; pfnsmodel 2 spectra and fymodel 3 open) | massdis, fymodel, ffmodel, gefran, outfy, ffevaporation, ffspin, yieldfile, pfnsmodel 2 | yieldA/ZA, nu(A), P(nu), PFNS/PFGS from FF decay | 4+ d (split: Brosa; GEF; FF evaporation) |
+| B15 | low value (DONE; components y (B4b: ported since), densfile/e1file/m1file/massdir, rescuefile/strucpath/bestpath refused; endf.cs ECIS files not given; transpower ported; U-239 E1 fix behind INCOGNITA_FIDFIX=psfsgl) | endf, endfdetail, sacs, legacy, components, micro, transpower | tefal.inf, gamma*.tot, sacs.dat | 1 d |
+| GAP | isomeric (excited) targets (DONE; design `ISOMERIC_TARGETS.md`; n only, channel / level / total xs; ltarget + liso, Ltarget > 40 (Hf-178m2, as stock) and the angular / spectra / recoil / astro / urr / endf / components / racap / production / massdis outputs refused) | ltarget | everything for an excited target | 3+ d |
 
-NA keywords (71: `out*`, `file*`, `block*`, paths, labels, ECIS plumbing) stay NA; the observables they gate are
+NA keywords (71: `out*`, `file*`, `block*`, paths, labels, ECIS plumbing) stay NA; the observables they switch are
 batches above.
 
-### B1 -- channel observables (done on branch `kwcov1`)
+### B1 -- channel observables (done)
 
 * What: `Results.extras` (new field, empty by default) carries TALYS's names for numbers the engine already computed:
   `<p>prod.tot` (+ `:multiplicity`), `binary.tot:<p>`, `<k0><p>.tot:discrete|continuum`, `xsNNNNNN.tot:gamma`,
@@ -86,9 +86,9 @@ batches above.
   `INCOGNITA_CHANOBS=1`. On the C driver the switch takes the Python channels on the C cascade's result (the
   existing fallback), because `ce_channels` returns only channel cross sections.
 * Found on the way: particle production was wrong for neutrons by default (aprod Co-59 14 MeV 21 vs 38 mb) because
-  the cascade gets only the compound part of `xsbinary` unless TRITFID is on. CHANOBS adds the missing direct,
+  the cascade gets only the compound part of `xsbinary` unless `INCOGNITA_TRITFID` is on. CHANOBS adds the missing direct,
   pre-equilibrium, giant-resonance and direct-capture emission (`multiple.binary_adds`, exact because xsparticle is
-  a sum over xsfeed). TRITFID itself is untouched (still off for neutrons).
+  a sum over xsfeed). `INCOGNITA_TRITFID` itself is untouched (still off for neutrons).
 * Acceptance (`tests/hf/test_chanobs.py`, `scripts/kwcov/b1_compare.py`): switch on vs off, every other array
   identical (Fe-56 611, Co-59 660 arrays bitwise; U-238 one array 1.7e-16, the fission path's known run-to-run
   noise); Co-59 isomer files sum to the channel; Co-59 vs stock: <= 0.5 % at 1 and 5 MeV, <= 12 % at 14 MeV
@@ -98,16 +98,16 @@ batches above.
 * Left for later: the (n,gn) column `xsngn` of `.con`/`.tot` files (B4: done, `Results.spectra[".tot:ngn"]`); CHANOBS default ON (B2 decides after
   timing it on a chart sample: it costs the Python channels per energy).
 
-### B2 -- deck wiring of what exists (done on branch `kwcov2`)
+### B2 -- deck wiring of what exists (done)
 
 * **What a deck is now.** A talys.inp (`physics/hf/input/deck.py`: `read_deck`, `run_deck`) or deck lines in
   `INCOGNITA_TALYS_FIT_LINES`. The lines now act without an `INCOGNITA_TALYS_FIT` arm (before, they were dropped
-  silently unless an arm was named: POPEPS2 (a)). A deck line the port cannot apply (energy-dependent table form,
+  silently unless an arm was named). A deck line the port cannot apply (energy-dependent table form,
   unknown index / particle) is refused; the same line coming from a best file or a fitted library is left out with
   a warning naming it (it was silent). A multi-word form of an Options keyword TALYS does not have is refused (it was
   skipped).
 * **Wired** (all default-off; default runs bit-identical, `test_engine_c.py`):
-  `best` / `bestend` / `bestfile` (fitlib `_deck_best`: deck `best y` gives the same cards as
+  `best` / `bestend` / `bestfile` (fitlib `_deck_best`: deck `best y` gives the same deck lines as
   `INCOGNITA_TALYS_FIT=best` for Fe-56, Co-59, U-238 and the same Fe-56 engine arrays bitwise); `fit` and every
   `*fit` flag (`fitflag` kind: sets `flagfit`, `macsfit`/`gamgamfit` turn `ngfit` off; an/dn/pn/gn libraries in
   xsfit.f90 order, matched without the projectile as TALYS does); `bestbranch` (levels/branch file ->
@@ -151,25 +151,25 @@ batches above.
 * Tests: `tests/hf/test_kwcov_b2.py` (parsing, precedence, refusals, energies vs TALYS's own files, deck `best y`
   = best arm bitwise through the engine).
 
-### B3 -- angular distributions (done on branch `kwcov3`)
+### B3 -- angular distributions (done)
 
 * What: `physics/hf/angout.py` (output only). The deck keywords `outangle`, `fileelastic` (angleout runs when either is
   y, output.f90:65), `fileangle`, `outlegendre`, `blockangle`, `angles`, `cpang` (new Options fields `flagang`,
   `fileelastic`, `fileangle`, `flagblockangle`; `endf y` sets them as TALYS does) or the port switch
-  `INCOGNITA_ANGOUT=1` turn the SPECOUT recorders on for the run and fill `Results.angular` (new field, empty by
+  `INCOGNITA_ANGOUT=1` turn the `specout` recorders on for the run and fill `Results.angular` (new field, empty by
   default) under TALYS's names: `<k0><t>ang.LNN` (+ `:direct`, `:compound`, charged elastic `:ruth`, `:nucint`) on the
   `angles` grid, `<k0><t>leg.LNN` (+ `:direct`, `:compound`, `:normalized`, `:endf6`), `angle`.
   `INCOGNITA_ANGOUT_DIR=<dir>` also writes the YANDF files with TALYS's names (`nn0014.000ang.L01`, `nnang.L01` with
   `blockangle y`); headers and the file set equal stock's (Fe-56 run: same 666 names).
 * Physics: shape elastic and direct levels from specang (engine OMP / DWBA deck / coupled channels); discrete
   pre-equilibrium x Kalbach (preeqang.f90); compound cleg of EVERY residual (`compound/ceang_types.py`, the generalised
-  CEANG with each particle's own spin and TALYS's phase), normalised to the engine's level populations; isotropic
+  `ceang` with each particle's own spin and TALYS's phase), normalised to the engine's level populations; isotropic
   without flagcompang ((k0 = 1 or cpang) and outangle and E <= 50). Charged projectiles: Coulomb amplitude and phases on
   the engine's S-matrix (`angout.charged_elastic`), ratio to Rutherford and nuclear+interference as angdis.f90.
 * Found on the way: the photon exit channel's Moldauer factor is 1 in TALYS (comptarget.f90:510 sends every photon to
   channel tnum+1, whose `tav` molprepare never fills); with the particle formula (n,g) level shapes were off by up to
   6 % (Fe-56 1 MeV) and Legendre terms by 30 % (Pb-208 1 MeV); with it they agree to 1e-6.
-* Acceptance (`tests/hf/test_angout.py`, `scripts/kwcov/b3_compare.py`, stock runs in `~/kwcov/stock/b3_*`): switch on
+* Acceptance (`tests/hf/test_angout.py`, `scripts/kwcov/b3_compare.py`, stock runs in `<work>/stock/b3_*`): switch on
   vs off, every Results array identical (Fe-56 three energies, U-238 692 arrays). Per angle where stock > 1 mb/sr:
   Fe-56 elastic + levels 1-2 at 1, 5, 14 MeV worst 0.39 %; Pb-208 0.25 %; U-238 (coupled) levels 0-3 at 1, 14 MeV
   0.48 %. p + Nb-93 5, 14 MeV ratio to Rutherford 1e-5, elastic 2e-5; cpang y compound distributions 1e-5. Other
@@ -180,41 +180,43 @@ batches above.
   value per key until B2 merges them; `fileangle 1,2` works), `Results.angular` through `pool.py` (not carried),
   `anglescont` (continuum DDX grid) belongs to B4.
 
-### B4 -- spectra, DDX, discrete gamma lines (done on branch `kwcov4`)
+### B4 -- spectra, DDX, discrete gamma lines (done)
 
 * What: `physics/hf/specobs.py` (output only). The deck keywords `outspectra`, `ddxmode` (> 0 implies outspectra),
   `fileddxa`, `fileddxe`, `anglescont`, `outgamdis`, `filespectrum`, `filegamdis`, `blockspectra`, `blockddx`,
   `adddiscrete`, `addelastic`, `channelenergy` (spectra.f90's espec conversion), `elwidth`, `segment` (new Options
   fields `flagspec`, `ddxmode`, `flaggamdis`, `filegamdis`, `filespectrum`, `fileddxa`, `fileddxe`, `flagblockspectra`,
   `flagblockddx`; `endf y` / `recoil y` set them as TALYS does) or the port switch `INCOGNITA_SPECOBS=1` (= outspectra y,
-  ddxmode 3, outgamdis y) turn the SPECOUT recorders on and fill `Results.spectra` (new field, empty by default) under
+  ddxmode 3, outgamdis y) turn the `specout` recorders on and fill `Results.spectra` (new field, empty by default) under
   TALYS's names: `<x>spec.tot` (+ `:E` espec, `:direct`, `:preeq`, `:multiple_preeq`, `:compound`, `:preeq_ratio`, and
   for d t h a / charged projectiles `:breakup_ratio`, `:stripping`, `:knockout`, `:breakup`), `Eaverage_<x>.out`,
   `<x>ddx` (C, M, nanglecont+1) + columns, `<x>ddxAaaa.a.deg`, `<x>ddxEeeee.e.MeV`, `anglecont`,
   `gamZZZAAALiiLjj.tot` (+ `:E`), `<k0><x>.tot:ngn` (xsngn, the B1 gap). `INCOGNITA_SPECOBS_DIR=<dir>` writes the files
   with TALYS's names (`nspec0014.000.tot`, `nddxE0014.000A030.0.deg`, `nddxE0014.000E0003.0.MeV`, `gam026056L01L00.tot`,
   `Eaverage_n.out`; `blockspectra`/`blockddx` names).
-* Physics: spectra.f90 on the recorded parts taken as TALYS has them (SPECCLOSE's closing undone: raw binary parts,
+* Physics: spectra.f90 on the recorded parts taken as TALYS has them (`INCOGNITA_SPECCLOSE`'s closing undone: raw
+  binary parts,
   compemission without the discrete-parent addition): espec = egrid up to eoutdis(NL) - elwidth, then the 1/(segment
   fine) grid with Gaussian discrete peaks (elastic with addelastic); Eaverage from Eaveragebin / Eaveragemul / xsfeed;
   DDX = Kalbach (pre-equilibrium, multiple pre-equilibrium) + isotropic compound + discad (angout, run internally for
   every level when only the DDX asks) for the peaks; gamma lines = the cascade's discrete transitions / (1 + conv)
   (cascade.f90:78, electronconv y); xsngn = the initial compound nucleus' own emission (multiple.f90:945).
 * Found on the way: gamma lines need the conversion coefficient (Mn-56 26 keV line x2.5 without it); the engine's
-  SPECOUT spectra are SPECCLOSE-closed by default (not TALYS), so TALYS names use the raw parts; deck values with two
+  `specout` spectra are `INCOGNITA_SPECCLOSE`-closed by default (not TALYS), so TALYS names use the raw parts; deck
+  values with two
   words (`fileddxa n 30`) were refused by `default_options` -- `ejectiles` / `ddxpoints` kinds now pass. Not fixed
   (outside B4): with `equispec y` the engine builds the equidistant grid with numen 250 (`preeq/prepare.py`,
   `compound/dens_reference.py`: the reference build) where stock 2.25 has 260, so above 12.5 MeV its step is 0.108
   instead of 0.1 MeV (Fe-56 at 14 MeV); below that the spectra agree as without equispec (5 MeV 2e-4).
 * Acceptance (`tests/hf/test_specobs.py`, `scripts/kwcov/b4_compare.py`, `scripts/kwcov/b4_onoff.py`, stock run
-  `~/kwcov/stock/b4_fe56`): switches on vs off, every Results array identical (Fe-56 611, U-238 692 arrays bitwise).
+  `<work>/stock/b4_fe56`): switches on vs off, every Results array identical (Fe-56 611, U-238 692 arrays bitwise).
   Fe-56 vs stock, espec grids identical; per bin where stock > 1 mb/MeV: 1 MeV 1e-5, 5 MeV 2e-4 (n, g); DDX 30/90/150
   degrees 1.4e-3 at 5 MeV; Eaverage 1e-4; xsngn 1e-4 at 1, 5 MeV; 846.8 keV line 1e-5 at 1, 5 MeV and 1.2 % at 14 MeV.
   14 MeV: n spectrum 5.5 % (integral -1.1 %), p 15 % (integral +9.8 %), DDX n 9 % (150 deg), p 15 % -- the compound
   column carries the engine's own channel differences ((n,2n)/(n,np) composition, (n,p) +10 %); the pre-equilibrium
   column agrees to 4e-5 at every energy; shapes normalised to the integral: n 6.7 %, p 10 %. TALYS's own spectrum
   integral minus elastic equals nprod to 0.25 % at 5 and 14 MeV; ours is the same construction. U-238
-  (`~/kwcov/stock/b4_u238`): spectra 1 MeV 1e-3, 5 MeV 2.5 %, 14 MeV 3 % (its compound column); DDX 1 MeV 1.5e-3, but
+  (`<work>/stock/b4_u238`): spectra 1 MeV 1e-3, 5 MeV 2.5 %, 14 MeV 3 % (its compound column); DDX 1 MeV 1.5e-3, but
   14 MeV up to 28 % at 150 deg in the 8-13 MeV band: the collective continuum of the deformed levels above Nlast and
   the giant resonances are isotropic here (their discrete levels' discad agree with stock to 0.5 %); 14 MeV alpha
   espec breaks from egrid to the fine grid 2 MeV later than stock (eoutdis(a, Nlast) of Th-235, sub-mb channel).
@@ -224,11 +226,11 @@ batches above.
   LAB-frame spectra/DDX (B12); repeated `fileddxa`/`fileddxe`/`filespectrum` deck lines need B2's merge (one line per
   key until then: `fileddxa n,30,90,p,150`); `channelenergy y` follows spectra.f90 but is not checked against stock.
 
-### B4b -- exclusive channel spectra and `components y` (done on branch `kwcov4b` = `kwcov7b` + B4b)
+### B4b -- exclusive channel spectra and `components y` (done)
 
 * **What.** `physics/hf/exclspec.py` (output only): channels.f90's exclusive-channel loop walked again on the energy's
   channel inputs with `specexcl` (binemission.f90's `binemis` per binary residual bin from the raw binary parts
-  SPECOUT recorded; the first term = source channel spectrum x feedexcl / popexcl; specemission.f90's smearing of the
+  `specout` recorded; the first term = source channel spectrum x feedexcl / popexcl; specemission.f90's smearing of the
   last emitted particle over mother and residual bins; the photon source walked down the channel's own bins); final
   spectra = ground state + isomer bins, fission spectra = fisfeedex-weighted bins. `Results.spectra`:
   `spNNNNNN.tot:E` / `:g` ... `:a` (C, M) on egrid(ebegin(0)..eendhigh), `spNNNNNN.fis:*` for fissile targets;
@@ -236,14 +238,14 @@ batches above.
   its file (chanopen, xs >= xseps incl. the non-threshold xseps floor; xsfis > xseps). `INCOGNITA_SPECOBS_DIR` writes
   `spNNNNNNE0014.000.tot` / `.fis` (YANDF headers). Switch: `outspectra y` (or ddxmode > 0, endf y, recoil y,
   INCOGNITA_SPECOBS=1) AND `channels y`; with it the C driver takes the Python channels (as CHANOBS: same numbers).
-* **`components y`** (refused since B15) is ported: `physics/hf/compoobs.py`, multiple.f90:649-668 on the SPECOUT
+* **`components y`** (refused since B15) is ported: `physics/hf/compoobs.py`, multiple.f90:649-668 on the `specout`
   records (binary xsdirdisctot; binary preeqpopex with the target level zeroed + received - emitted multiple
   pre-equilibrium up to Smax; quirk kept: xspopcomp = pop - (preeq - dir)). `Results.extras`:
   `xsNNNNNN.tot:direct|:preeq|:compound` (F x xschannel) and `rpZZZAAA.tot:direct|:preeq|:compound`. `components y`
-  turns the SPECOUT recorders on (specout.enabled). binaryout.f90's talys.out-only split is not given.
+  turns the `specout` recorders on (specout.enabled). binaryout.f90's talys.out-only split is not given.
 * **Defaults** bitwise: nothing runs without the keywords; with them every other Results array is bitwise the same
   (Fe-56 14 MeV TALYS mode, test). Python driver (engine.run) wired too (smoke: Fe-56 5 MeV, the stock channel set).
-* **Vs stock** (`scripts/kwcov/b4b_compare.py`, TALYS mode, stock `~/kwcov/stock/b4b/{fe56,co59,u238,fe56_endf,
+* **Vs stock** (`scripts/kwcov/b4b_compare.py`, TALYS mode, stock `<work>/stock/b4b/{fe56,co59,u238,fe56_endf,
   fe56_maxch2}` from `scripts/kwcov/b4b_stock.sh`; worst |ours/stock - 1| on the main bins = stock >= 1 % of the
   column peak): Fe-56 5/14 MeV 0.15 % (gamma column of (n,g)), every particle column <= 0.06 %, channel set identical;
   Co-59 14 MeV 0.62 % ((n,n') gamma), particles <= 0.02 %; `endf y` (xsngnspec columns of sp000000: n 3e-5) and
@@ -263,7 +265,7 @@ batches above.
 * Tests: `tests/hf/test_kwcov_b4b.py` (switches, reaction strings, specemission flux conservation, the components
   quirks, Fe-56 14 MeV TALYS mode vs stock integrals 0.5 % and components 1 %, bitwise on/off, the files).
 
-### B5 -- model keywords: compound, gamma, levels, level densities (done on branch `kwcov5`)
+### B5 -- model keywords: compound, gamma, levels, level densities (done)
 
 * **Wired** (default-off; Fe-56 611 and U-238 692 `Results` arrays bitwise with nothing set, `test_engine_c.py`):
   `nlow`/`ntop Z A n [ibar]` (`Options.nlow_of`/`ntop_of` -> `density/parameters.py`, `ld_nx2.py`; they were
@@ -325,7 +327,7 @@ files (omppar.f90, `convert.f90`); `coulomb`, `ecisstep` incidentecis.f90; `ecis
 (ECIS compound); `rotational`, `sysreaction` (directmodel). Accept: response metric on Fe-56 (spherical) and
 U-238 (coupled), reaction and total cross section 1 %.
 
-**Done on branch `kwcov6`** (kwcov4 + kwcov2 + kwcov5 merged). New modules `physics/hf/omp/ompdeck.py` (files, ranges,
+**Done.** New modules `physics/hf/omp/ompdeck.py` (files, ranges,
 energy-local adjustments) and `physics/hf/compound/ompall.py` (`optmodall`); small hooks in fitlib, defaults,
 omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stagedisk, record/caches.
 
@@ -354,7 +356,7 @@ omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stag
   `ompenergyfile` with `endf y`.
 * **Merge fix:** deck lines with several words for an Options keyword (`fileddxa n 30`, B4) were refused by B2's
   fitlib after the merge; `_MULTIWORD` lets the multi-word kinds through.
-* **Response vs stock** (`scripts/kwcov/b6_response.py`; stock runs trimmed in `~/kwcov/stock/b6_*`):
+* **Response vs stock** (`scripts/kwcov/b6_response.py`; stock runs trimmed in `<work>/stock/b6_*`):
   | deck lines | target | worst (stock moved) | | deck lines | target | worst (stock moved) |
   |---|---|---|---|---|---|---|
   | awdadjustF n 2 20 10 0 | Fe-56 | 0.10 % (4.0 %) | | optmod 26 56 (Wd x1.15 table) | Fe-56 | 0.15 % (8.2 %) |
@@ -381,7 +383,7 @@ omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stag
 * Tests: `tests/hf/test_kwcov_b6.py` (forms, refusals, adjust.f90 shape, ktype/incadjust, ranges, optmod, optmodfile,
   riplomp, multi-word deck lines, optmodall cut/eend/Python cascade).
 
-### B7 / B7b -- unported model branches (B7 done on branch `kwcov7`; B7b done, see below)
+### B7 / B7b -- unported model branches (both done, B7b below)
 
 * **Ported** (all default-off: a run without them never enters the new code; Fe-56 611 and U-238 692 `Results` arrays
   as before, `test_engine_c.py`). `physics/hf/preeq/exciton_b7.py` transcribes, one exciton state at a time (numpy
@@ -414,17 +416,17 @@ omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stag
     Fe-57: 1.30 eV vs 9.2e-4, E1 ftable printed 0, C/E 120 from M1/E2; capture 1 MeV -70 %, 14 MeV -99 %; Zr-91
     capture 1 MeV -54 %). Left: call `gamma.transmission.radwidtheory(flaggnorm=True)` with TALYS's gamgam (past its
     GAMGAM_MIN_EV guard) before the run, again per incident energy as incident.f90:90 does, and feed the final
-    ftable(E1) of the compound nucleus to every strength user (PARAMWIRE's ftable path). Reproducing it means
+    ftable(E1) of the compound nucleus to every strength user (the fit-parameter wiring's ftable path). Reproducing it means
     reproducing the unit bug; `ftable Z A f` is the physical alternative.
   * `twocomponent n` or `gshell y` with multiple pre-equilibrium (Einc >= `multipreeq` onset, 20 MeV):
     multipreeq.f90 (one-component chain) is not ported, and the shell damping is not wired into multipreeq2's
     cascade (`MultiPreeqInputs.damp` exists, `Cascade.mpe_inputs` does not fill it); refused in
     `feed_reference.pop_inputs_of` with the reason. `preeqspin 4` with multiple pre-equilibrium likewise.
   * `preeqspin 3` on the GPU path (`gpu_full_setup`): refused (engine_c has it).
-  * B7b (`alphaomp 3-5`, JLM): done on branch `kwcov7b`, see the B7b section below.
+  * B7b (`alphaomp 3-5`, JLM): done, see the B7b section below.
 * **Response vs stock** (`scripts/kwcov/b7_response.py`, n + target at 1/5/14 MeV, channels of b2_response plus
   nprod/pprod/aprod; `--pe` compares the binary pre-equilibrium totals with stock `preeq*.out`; stock JSON in
-  `~/kwcov/stock/b7`):
+  `<work>/stock/b7`):
 
   | deck lines | Fe-56 worst (stock moved) | Zr-90 worst (stock moved) |
   |---|---|---|
@@ -448,14 +450,14 @@ omp/parameters, omp_nx2, dens_reference, feeding, compound/chain, engine_c, stag
 * Tests: `tests/hf/test_kwcov_b7.py` (transcription = vectorised path, preeqmode 3 rates and PE totals = stock,
   parsing, refusals, the giant-resonance J map); `test_unported_options.py` updated.
 
-### B7b -- JLM and folding alpha OMP (done on branch `kwcov7b`)
+### B7b -- JLM and folding alpha OMP (done)
 
-Branch `kwcov7b` = `kwcov15` + B7b. New modules `physics/hf/omp/jlm.py` (radialtable.f90, mom.f90, momjlmecis.f, and
+New modules `physics/hf/omp/jlm.py` (radialtable.f90, mom.f90, momjlmecis.f, and
 ECIS's tabulated-potential channel) and `physics/hf/omp/foldalpha.py` (foldalpha.f90, afold.f, mahaux); hooks in
 `omp/inverse.inverse_channels`, `omp/incident.incident_channel`, `compound/dens_reference._transmission_build` (the
 native inverse path stands aside under JLM / alphaomp 3-5), `omp/parameters` (alphaomp 3-5 keep the base potential, as
 opticalcomp.f90:323), `omp/ompdeck.extract` (`radialfile`), `input/fitlib` (energy-local l*adjust refused). Stock refs
-in `~/kwcov/stock/b7b`; responses by `scripts/kwcov/b7b_response.py` (n decks, `--base`) and
+in `<work>/stock/b7b`; responses by `scripts/kwcov/b7b_response.py` (n decks, `--base`) and
 `scripts/kwcov/b7b_alpha.py` (alpha projectile, run_deck with INCOGNITA_CPINC=a).
 
 * **What TALYS does, reproduced.** `jlmomp y` (also `micro y`) sets flagspher, so the incident channel is spherical;
@@ -475,7 +477,7 @@ in `~/kwcov/stock/b7b`; responses by `scripts/kwcov/b7b_response.py` (n decks, `
   |---|---|---|---|---|
   | jlmomp y | Fe-56 | 0.04 % (n,d) 14 | 0.94 % (n,np) 14 | 69.7 % |
   | jlmomp y | Pb-208 | 0.01 % | 0.01 % | 11.5 % |
-  | micro y | Fe-56 | 0.04 % | **80 %** (n,p) 14: NPWINDOW on ldmodel 7, deliberate default (B15) | 69.6 % |
+  | micro y | Fe-56 | 0.04 % | **80 %** (n,p) 14: `npwindow` on ldmodel 7, deliberate default (B15) | 69.6 % |
   | jlmomp y + jlmmode 1 / 2 / 3 | Fe-56 | 0.00 / 0.00 / 0.00 % | 0.03 / 0.08 / 0.46 % | 2.4 / 5.3 / 29.3 % |
   | jlmomp y + radialmodel 1 | Fe-56 | 0.00 % | 0.35 % | 16.1 % |
   | jlmomp y + lvadjust 1.05 / lwadjust 1.3 | Fe-56 | 0.00 / 0.00 % | 0.90 / 0.23 % | 44.0 / 14.8 % |
@@ -515,7 +517,7 @@ Per-fissioning-nucleus fission (`rpZZZAAA.fis`, `finalout.f90:396`), `fisfeed`, 
 PFNS Iwamoto (`iwamoto.f90:1`, `pfnsout.f90:1`, `tmadjust`, `fsadjust`). Accept: U-238 and Th-232 at 1, 5, 14 MeV:
 per-chance fission vs stock within the engine's own (n,f) band; nubar 0.5 %; PFNS mean energy 1 %, shape 3 %.
 
-**Done on branch `kwcov8`** (kwcov7 + kwcov6 merged). New module `physics/hf/fisobs.py` (output only); small hooks in
+**Done.** New module `physics/hf/fisobs.py` (output only); small hooks in
 engine_c (`cases`: `fisobs.begin_run` / `record` per kept energy off the cascade result, the arena read with
 `_Packed.result()` on the C path; `run`: `fisobs.add_to_results`), input/defaults (Options `filefission`,
 `flagfisout`, `axtype_of`, `fisstates_file_of`; per-nucleus forms `axtype`, `hbtransfile`, `class2file`), fitlib
@@ -545,8 +547,8 @@ U-238 1/5/14 MeV, all 692 `Results` arrays bitwise equal to the merge commit; `t
 * **Not given (PARTIAL):** the J-parity columns of the fisfeed file (fisfeedJP; the decay kernels sum the fission feed
   over J and parity); the talys.out barrier / transmission tables of `outfission` (ingredients.py, as before);
   fragment-based nubar, nu(A), P(nu), PFGS, `pfnsmodel 2` with massdis (B14).
-* **Observables vs stock** (`scripts/kwcov/b8_response.py`; stock JSON trimmed in `~/kwcov/stock/b8/b8_*.json`, states
-  files in `~/kwcov/stock/b8_files`): PFNS of U-238, U-235, Pu-239, Th-232 at 1/5/14 MeV, also with `tmadjust 1.3`,
+* **Observables vs stock** (`scripts/kwcov/b8_response.py`; stock JSON trimmed in `<work>/stock/b8/b8_*.json`, states
+  files in `<work>/stock/b8_files`): PFNS of U-238, U-235, Pu-239, Th-232 at 1/5/14 MeV, also with `tmadjust 1.3`,
   `fsadjust 3`, `tmadjust 0.8; fsadjust 2`: same grid, E-average to 1e-5, spectrum / Maxwell ratio / CM to 2e-5 where
   above 1e-3 of the peak. Per-nucleus fission within the engine's own (n,f) difference: U-238 (fission -6.0 / +9.2 /
   +4.2 % at 1/5/14 MeV) U-239 -6.0 / +9.8 / +7.5 %, U-238 +6.1 / +4.7 %, U-237 -0.5 %; U-235 (+0.2 / +2.1 / +0.6 %)
@@ -581,7 +583,7 @@ Exists: `astro/stellar.py` (thermalised target, SEF; `INCOGNITA_STELLAR`). Do: `
 drive it; reaction rate files and MACS as TALYS writes them (`astroout.f90:1`, `stellarrate.f90:1`,
 `partfunc.f90:1`), `nonthermlev`. Accept: Au-197 and Ge-74 rates at T9 = 0.1-10 and MACS at 30 keV vs stock 2 %.
 
-**Done (branch `kwcov9`).**
+**Done.**
 
 * **What.** A deck with `astro y`, `astroE` or `astroT` (`input/deck.py run_deck`, C driver) runs on TALYS's own
   incident grid (egridastro: = stock, 110 energies 2 eV - 50 MeV for n + Au-197; `astroE`/`astroT`: one temperature,
@@ -658,7 +660,7 @@ URR: `urr.f90:1`, `urrout.f90:1` (`urr`, `lurr`, `urrnjoy`, `rprime`). Thermal: 
 `resonance.f90:1`, `integral.f90:1` (needs external resonance libraries, lowest priority).
 Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weighted sum 1e-6.
 
-**B10 done (branch `kwcov10`, from kwcov9).** B10b: below, after B10.
+**B10 done.** B10b: below, after B10.
 
 * **What.** New module `physics/hf/urr.py` (output only): comptarget.f90's two "Gilles Noguere" blocks (per compound
   (J, parity) and incident (l, j) with l <= lurr: sumIPE per exit type without compound elastic, Turrlj = sumIPE
@@ -678,31 +680,33 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
   TALYS too URR is output only: with and without `urr y`, Fe-56 552 and U-238 600 engine `Results` arrays are bitwise
   equal and stock's channels identical (`b10_response.py --unmoved`).
 * **Refused:** `urr` with widthmode 2 / 3 at an energy with width fluctuations (HRTW/GOE per-incident-channel factors
-  not separated here), with INCOGNITA_EWFC on a coupled target, with the KEVCOLD cell options. checkvalue's `lurr`
+  not separated here), with INCOGNITA_EWFC on a coupled target, with the keV cold-pass alpha-table cell options.
+  checkvalue's `lurr`
   0-60, `rprime` 0-10, incident neutrons only, compound model on.
-* **Vs stock** (`scripts/kwcov/b10_response.py`, energies 0.01 0.1 1 5 MeV, stock JSON in `~/kwcov/stock/b10`; every
+* **Vs stock** (`scripts/kwcov/b10_response.py`, energies 0.01 0.1 1 5 MeV, stock JSON in `<work>/stock/b10`; every
   number of every urr file where stock > 1e-6 of its column maximum, same files and rows):
 
   | deck | default mode | TALYS mode | worst (TALYS mode) |
   |---|---|---|---|
   | Fe-56 `urr y` (+ `urrnjoy y`) | 5e-5 (7e-5) | same | capture 5 MeV (Gx 5 MeV) |
   | Co-59 `urr y; urrnjoy y` | 1.0e-4 | 1.0e-4 | Gx 5 MeV |
-  | U-238 `urr y` (+ `urrnjoy y`) | **22 %** Gf (EXACTFIS), Ga 9e-10 vs 0 eV | **0.11 %** | Gg 1 MeV = the engine's own (n,g) at 1 MeV (65.28 vs 65.21 mb) |
-  | Au-197 `urr y; urrnjoy y` | **x2.0** Gx, capture **-30 %** (CCEXITNB2) | **2e-4** | Gx 1 MeV |
+  | U-238 `urr y` (+ `urrnjoy y`) | **22 %** Gf (`exactfis`), Ga 9e-10 vs 0 eV | **0.11 %** | Gg 1 MeV = the engine's own (n,g) at 1 MeV (65.28 vs 65.21 mb) |
+  | Au-197 `urr y; urrnjoy y` | **x2.0** Gx, capture **-30 %** (`ccexitnbnf`) | **2e-4** | Gx 1 MeV |
   | `urr 0.5` (onset): Fe-56 / U-238 | | 4e-6 / 8e-5 | |
 
   Keyword responses (TALYS mode, |ln(R/S)| or the same absolute change): `urrnjoy y` Fe-56 7e-5, U-238 2.8e-4 (Gx);
   `lurr 0` / `1` Fe-56 1e-5 / 7e-6, U-238 8e-5 / 1.5e-5; `lurr 3` the l03 files = stock to 3e-5; `rprime 7` (with
-  urrnjoy) Fe-56 6e-7, U-238 6e-6. Default mode differs only through EXACTFIS (U-238 Gf, fission sums) and CCEXITNB2
+  urrnjoy) Fe-56 6e-7, U-238 6e-6. Default mode differs only through `exactfis` (U-238 Gf, fission sums) and `ccexitnbnf`
   (Au-197 competitive width and capture), FIDELITY_DEFAULTS.md's deliberate defaults.
 * **INCOGNITA vs TALYS URR (recorded, not touched).** The published/reactor library's URR is not this path: the
-  research repo's REACTORLIB `urr_build.py` (URRPROD) writes ENDF MF2 LRU=2 LRF=2 LSSF=1 from engine ingredients, with
+  reactor-library build (`urr_build.py`, not in this repository) writes ENDF MF2 LRU=2 LRF=2 LSSF=1 from engine
+  ingredients, with
   D(l,J) from an Ericson spin distribution and an analytic energy dependence (TALYS: the full level density at S_n +
   Einc per (J, parity)), <Gn> from the OMP S0/S1 with R = 1.35 A^(1/3) and S2 := S0 (TALYS: Tjlinc per (l, j) with the
   ENDF radius 1.23 A^(1/3) + 0.8), <Gg> = the engine's energy-independent gamgam_th s/p (TALYS: D Turrlj(0) / 2 pi from
   the capture sums, energy dependent and divided by the last Wab), <Gf> = the T_f(J) shape scaled to the engine's
   sigma_f (TALYS: D Turrlj(-1) / 2 pi), Gx fitted to the inelastic with AMUX 4 (TALYS: nu = 1), AP = R'(1 keV) (TALYS
-  NJOY: R' of the first URR energy). The LSSF <Gamma_gamma> closure work stays in the research repo. B10's files
+  NJOY: R' of the first URR energy). The LSSF <Gamma_gamma> closure is part of that build. B10's files
   change none of it.
 * **Not given:** energies below eninclow (Ninclow > 0; urrout fills their rows from the current energy; the port has
   no Ninclow energies: B10b gives thermal.f90's rows, not urrout's); thermal.f90 (done in B10b). Observed: a second
@@ -711,7 +715,7 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
 * Tests: `tests/hf/test_kwcov_b10.py` (gnrl / unfac / strengthfunc by hand, keyword parsing, refusals, defaults record
   nothing, thermal capture table, Fe-56 run vs stock numbers with every cross section bitwise unchanged).
 
-**B10b done (branch `kwcov10b`, from kwcov10).**
+**B10b done.**
 
 * **Energies below eninclow** (new module `physics/hf/thermal.py`, output only). TALYS computes nothing below
   `eninclow` (`elow`, default 1e-6 MeV): grid.f90 inserts E1v = 0.2 eninclow and eninclow when the grid starts below
@@ -727,7 +731,7 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
 * **Natural targets** (`physics/hf/natural.py`, `run_deck`): `mass 0` reads structure/abundance/<El>.abun or the deck's
   `abundance <file>` (normalised, abundance.f90), runs every isotope with the same deck and grid and returns the first
   isotope's Results with channels, levels, residual production, totals, CHANOBS extras and the thermal rows replaced by
-  abundance-weighted sums (union of keys, missing = 0; `:branch` ratios and LOWEPOT's weight not summed), plus
+  abundance-weighted sums (union of keys, missing = 0; `:branch` ratios and `lowepot`'s weight not summed), plus
   `Results.natural` = {abundance, isotopes}. Refused with astro / urr / integral (natural.f90 sums none of their files).
 * **integral y** (`physics/hf/integral.py`, `run_deck`, `Results.integral` = integral.dat): the target's
   structure/integral/sacs triples, the group spectra of structure/integral/spectra, xs linear on the file rows with a
@@ -742,9 +746,10 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
 * **Bugs found and fixed (port).** (1) `xscaptherm` / `xsptherm` / `xsalphatherm` deck lines were DROPPED silently:
   the isomer axis of their Params made `_split` file them as "unsupported index form", which is not a loud reason (B10's
   "a deck xscaptherm wins" was never exercised). (2) The run_deck cache bug B10 observed, traced: `fitlib.activate` is
-  a no-op when no deck lines are set, so after a deck WITH lines a deck WITHOUT them still ran on the old cards
+  a no-op when no deck lines are set, so after a deck WITH lines a deck WITHOUT them still ran on the old lines
   (`_ACTIVE` stale), and the per-target caches (`dens_reference._structure_of` keyed on (Z, A) only, and every
-  lru_cache under it) are never dropped on the way from no cards to cards. Fixed: `activate` deactivates stale cards,
+  lru_cache under it) are never dropped on the way from no deck lines to deck lines. Fixed: `activate` deactivates
+  stale lines,
   and `Cascade.__init__` calls `fitlib.drop_caches_on_new_deck()`, which drops the per-target caches when the deck key
   (INCOGNITA_TALYS_FIT + the lines key) differs from the one they were built under (a process that never changes its
   deck drops nothing). Fe-56 1 MeV capture default / `ldmodel 2` / default in one process: 3.0452 / 2.1757 / 3.0452 mb
@@ -760,17 +765,17 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
   TALYS natural run are the LAST isotope's. The port sums every Results array (binary, isomer channels and levels
   included) and does not sum spectra / angular (left per isotope).
 * **Vs stock** (`scripts/kwcov/b10b_response.py`; energies 2.53e-8 1e-7 5e-7 1e-3 0.1 1 MeV, TALYS adds 2e-7 and 1e-6;
-  stock JSON in ~/kwcov/stock/b10b; every file stock writes for the rows below eninclow, stock > 1e-6 of its maximum):
+  stock JSON in <work>/stock/b10b; every file stock writes for the rows below eninclow, stock > 1e-6 of its maximum):
 
   | deck | port (fill on stock's eref row) | engine vs stock, TALYS mode | default mode |
   |---|---|---|---|
-  | Fe-56 | 2e-6 | 2.5e-6 | elastic / total rows x274 low (LOWEPOT elastic at 1 eV); every other row 2e-6 |
+  | Fe-56 | 2e-6 | 2.5e-6 | elastic / total rows x274 low (`lowepot` elastic at 1 eV); every other row 2e-6 |
   | Fe-56 `xscaptherm 5000` | 2e-6 | 2e-6, response 0 (stock 0: table quirk) | |
   | Fe-56 `elow 1e-4` | 0 | 5e-6, response 4e-6 | |
   | Fe-55 `xsptherm 2000` / `xsalphatherm 500` | 2e-6 | 5e-6 / 3e-6; response 2e-6 / 5e-6 (x70 / x76 moves) | |
   | Fe-61 (Kopecky) / `xscaptherm 5000` | -- / 2e-6 | 1e-6 / 2e-6, response 0.0 | |
-  | Ag-109 (capture isomer branches) | 1e-6 | 4e-6 | elastic / total x9 low (LOWEPOT); every other row 3e-6, isomer L00 / L02 included |
-  | U-238 | 2e-6 | 6e-6 | elastic / total x3.7 low (LOWEPOT); capture 0.22 % (the default-mode 1 eV capture) |
+  | Ag-109 (capture isomer branches) | 1e-6 | 4e-6 | elastic / total x9 low (`lowepot`); every other row 3e-6, isomer L00 / L02 included |
+  | U-238 | 2e-6 | 6e-6 | elastic / total x3.7 low (`lowepot`); capture 0.22 % (the default-mode 1 eV capture) |
 
   Natural Fe (1 / 5 / 14 MeV, abundances 5.845 / 91.754 / 2.119 / 0.282 %): engine sums = weighted sums of its isotope
   runs to 2.2e-16; stock's natural files = weighted sums of stock's isotope runs to 3.8e-7 (binary.tot and xs*.Lnn
@@ -781,9 +786,9 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
 * **INCOGNITA vs TALYS below eninclow (recorded, not touched).** TALYS computes no model below eninclow (1 eV): its
   rows there are thermal.f90's 1/v extrapolation through the thermal value and a log-log join to the 1 eV
   Hauser-Feshbach number (Fe-56: capture 2.59 b at 0.0253 eV, 148 b at 1 eV, elastic 2399 b constant). The engine
-  runs Hauser-Feshbach at every energy it is given (Fe-56 0.0253 eV capture 3,703 b, elastic ~8.8 b after LOWEPOT,
+  runs Hauser-Feshbach at every energy it is given (Fe-56 0.0253 eV capture 3,703 b, elastic ~8.8 b after `lowepot`,
   which removes the compound elastic below the resonance region; TALYS keeps it, 2399 b). The published library
-  takes neither below 1 keV: RESFILL curves (capture / elastic / total from resonance parameters, the v0.2.2 engine
+  takes neither below 1 keV: resonance-fill curves (capture / elastic / total from resonance parameters, the v0.2.2 engine
   above the 1 keV join). B10b's rows are output only (`Results.thermal`); no default number moved
   (`test_engine_c.py`, B10b tests).
 * **Not given:** rp*.Lnn rows below eninclow (the engine has no residual-isomer production output at any energy);
@@ -801,7 +806,7 @@ Accept: U-238 and Fe-56 URR parameters vs stock 1 %; natural Fe = abundance-weig
 Post-processing of residual (and isomer) production -- needs B1-style isomer output and RESISO on.
 Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same residual production.
 
-**Done (branch `kwcov11`).**
+**Done.**
 
 * **What.** `physics/hf/production.py` = isoprod.f90 (prodinitial, decaydata, prodres, stoppingpower, prodrates,
   prodyield, prodout) on the run's residual production. `production y` and the medical keywords are Options
@@ -829,7 +834,7 @@ Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same 
   t = 0 and TALYS then prints Niso(EOI) exp(+lambda Tirr) and NaN isotopic fractions (0 x exp overflow) -- the port
   gives the same numbers and the same NaNs; a time value with no unit counts 0 s; `Area` does not change a
   thick-target yield (rate per atom ~ 1/Area, atoms ~ Area: stock 1.00015).
-* **Vs stock** (`scripts/kwcov/b11_response.py --all`; stock runs `~/kwcov/stock/b11_*`, trimmed to Y/rp files and
+* **Vs stock** (`scripts/kwcov/b11_response.py --all`; stock runs `<work>/stock/b11_*`, trimmed to Y/rp files and
   the talys.out table). *book* = the port on stock's OWN rp files vs stock's Y files (the bookkeeping alone);
   *abs* = engine run vs stock, activity (or isotopes if stable) at end of irradiation, worst over nuclides whose
   production rate agrees to 0.5 %; *resp* = |ln(R/S)| of activity/isotopes at end of irradiation and of cooling,
@@ -865,16 +870,16 @@ Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same 
   file round trip and blockyield, Options and deck-line parsing, every refusal, one p + Zn-68 engine run, neutron
   refusal through run_deck).
 
-### B12 -- recoils and LAB frame (done on branch `kwcov12`)
+### B12 -- recoils and LAB frame (done)
 
 `recoilinit.f90:1` (576 l.), `angdisrecoil.f90:1`, `recoilout.f90:1`, LAB DDX in `ddxout.f90`. Accept: Fe-56
 14 MeV residual recoil spectra vs stock 3 %.
 
-**Done (branch `kwcov12` = `kwcov11` + merge of `kwcov10`).**
+**Done.**
 
 * **What.** `physics/hf/recoil.py` + `physics/hf/native/recoil.c` (`scripts/build_recoil_native.sh` ->
   `native/lib/librecoil.so`; Python twin `recoil.scatter_py` when the library is missing). TALYS's recoil module on the
-  run's SPECOUT records (binary spectra, every cascade nucleus' mcontrib / mpecontrib with its grid) and angout's
+  run's `specout` records (binary spectra, every cascade nucleus' mcontrib / mpecontrib with its grid) and angout's
   discad of every level: recoilinit (angle bins, LAB ejectile grid, the 50-bin kinematic sweep for Erecmaxmax, recoil
   grids, the initial CN bin), binaryrecoil, angdisrecoil (incl. the elastic), comprecoil inside a re-run of
   compemission, cm2lab, labsurface, binsurface (as written, with intri/sideline's quirk), totalrecoil, recoilout,
@@ -897,7 +902,7 @@ Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same 
   the LAB gamma spectrum depends on the last bit of the angle/energy edges, so the kernel computes in single
   precision as TALYS (double: 25 % per bin on Fe-56 1 MeV gamma, single: 0.2 %).
 * **Vs stock** (`scripts/kwcov/b12_response.py --all`, TALYS mode = fidelity.py's TALYS_DECK/TALYS_ENV; stock in
-  `~/kwcov/stock/b12/`, worst |ln| over 1/5/14 MeV and bins > 1 % of the file's peak):
+  `<work>/stock/b12/`, worst |ln| over 1/5/14 MeV and bins > 1 % of the file's peak):
 
   | deck | rec | excl | LAB spectra | LAB DDX | response |
   |---|---|---|---|---|---|
@@ -912,7 +917,7 @@ Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same 
   | p + Nb-93 recoil y | 0.03 % | 0.03 % | | | |
 
   Fe-56 at 1 and 5 MeV: every recoil and LAB file to 1e-3 (gamma LAB 1 MeV 0.2 %). The engine-default run (no TALYS
-  mode) differs at 14 MeV by the channels' own NPWINDOW offset ((n,p) residual +12 %), not by the recoils.
+  mode) differs at 14 MeV by the channels' own `npwindow` offset ((n,p) residual +12 %), not by the recoils.
 * **Losses.** Co-59 / U-238: integrals and residual production agree to 0.3 % / 0.01 %, the worst bins are the
   high-recoil tail (1-5 % of the peak: backward-angle elastic / inelastic, i.e. the B3 discrete angular distributions
   at large angles), within 0.2 % above 10 % of the peak. LAB DDX 3.9 %: the CM DDX's isotropic giant-resonance /
@@ -932,7 +937,7 @@ Accept: p + Ni-nat or Zn-68 (p,x) yields/activities vs stock 1 % given the same 
 parameters under TALYS names, and `partable y` = `parameters.dat` (every parameter value the run used; what a
 TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values 1e-5.
 
-**Done (branch `kwcov13`, from kwcov10b + kwcov11).**
+**Done.**
 
 * **What.** New module `physics/hf/ingout.py` (output only). The deck keywords `outlevels`, `blocklevels`, `outdensity`,
   `filedensity`, `outgamma`, `filepsf`, `outinverse`, `outtransenergy`, `outomp`, `blockomp`, `outkd`, `partable` and
@@ -951,7 +956,7 @@ TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values
 * **Defaults untouched**: nothing runs without one of the switches (`test_engine_c.py`); the Fe-56 run with every
   switch on has every other Results array bitwise equal to the run without (`test_kwcov_b13.py`).
 * **Vs stock** (`scripts/kwcov/b13_response.py --all`; n + target at the energies listed, every B13 switch on; stock in
-  `~/kwcov/stock/b13`, trimmed to the B13 files; worst |ln(ours/stock)| per file over cells with stock > 1e-6 of the
+  `<work>/stock/b13`, trimmed to the B13 files; worst |ln(ours/stock)| per file over cells with stock > 1e-6 of the
   column's maximum; TALYS mode = the INCOGNITA defaults that are not TALYS switched off):
 
   | file family | Fe-56 (1, 14 MeV) | Co-59 (0.01, 5) | Pb-208 (14) | U-238 (1, 14) | tolerance used |
@@ -972,7 +977,7 @@ TASMAN-style sampler needs). Accept: Fe-56 parameters.dat identical keys, values
   0.72 %); `ldmodel 2; colenhance y; strength 8` (Krot / Kvib / Kcoll columns, D1M tables) ld <= 0.0004 %, header
   0.29 %; `outdensity y; filedensity n` identical (zeroed statistics); `outbasic y; blocklevels y` levels.out identical,
   ld / nld of every populated compound nucleus (Fe-55, Mn-56, Cr-52/53 ...) <= 0.012 % / 0.96 %.
-  Default mode (Fe-56): ld026056.gs 18.7 % (NPWINDOW, the target's continuum density by design), cross_h/t.tot and
+  Default mode (Fe-56): ld026056.gs 18.7 % (`npwindow`, the target's continuum density by design), cross_h/t.tot and
   transmission_h/t.out up to x5 at a few near-threshold energies and omppar_h/t `avd` 36 % at the first energy (an
   INCOGNITA default of the composite-particle OMP; closed in TALYS mode, not isolated to one switch); the rest as TALYS mode.
 * **Losses, traced.** (1) U-239 E1 (strength 9, temperature-dependent SMLO table) at Egamma = 0.4 and 0.6 MeV on the
@@ -1016,14 +1021,14 @@ fymodel >= 3. The three parts follow those paths:
 
 | part | models / keywords | TALYS routines | output |
 |---|---|---|---|
-| **1 (done, branch `kwcov14`)** | massdis, fymodel 1 (Brosa), ffevaporation (Brosa's step sizes and FP estimate), rfiseps (fpeps), outfy / gefran / ffmodel / yieldfile / ffspin read (inert with fymodel 1, as stock) | massdis (fymodel 1 branch, normalisation), brosafy, neck, trans/trapzd/funcfismode, fmin/fidi, shape helpers, massdisout | yieldA / yieldZA / fpZZZAAA / fpAAA / rpZZZAAA (FP xs) |
+| **1 (done)** | massdis, fymodel 1 (Brosa), ffevaporation (Brosa's step sizes and FP estimate), rfiseps (fpeps), outfy / gefran / ffmodel / yieldfile / ffspin read (inert with fymodel 1, as stock) | massdis (fymodel 1 branch, normalisation), brosafy, neck, trans/trapzd/funcfismode, fmin/fidi, shape helpers, massdisout | yieldA / yieldZA / fpZZZAAA / fpAAA / rpZZZAAA (FP xs) |
 | 2 | fymodel 2 (GEF, TALYS's default once massdis is on), gefran, outfy (gefwrite), the GEF nubar / nu(A) / P(nu) (nubarout, nudisout for fymodel 2); fymodel 4 file path (ffmodel 0-4, yieldfile, structure/fission/ff tables) | geftalys.f / gefsub.f / geffunctions.f (7,264 l., Monte Carlo with gefran events: compare statistically or port the RNG), nubarout, nudisout | yields + nubar*.tot, nuA, Pnu |
 | 3 | fymodel 3 / 4 / 5 with ffevap (fragment evaporation by TALYS's own decay), ffspin, pfnsmodel 2 (PFNS / PFGS from fragment decay), the isomer split (yieldfpex / fpratio, `fpZZZAAA.tot` i00/i01 files) | ffevap.f90, ffgammaspec.f90, the per-fragment population files (ff*.ex) | nu(A), P(nu), PFNS/PFGS, isomeric FP yields |
 
 Since part 2, `massdis y` alone runs GEF (fymodel 2); fymodel 3-5 were REFUSED (`NotImplementedError` naming part 3; since part 3 only fymodel 3 is);
 before B14 `massdis y` ran the cascade with its defaults and gave no yields.
 
-**Part 1 done on branch `kwcov14`** (kwcov12 + kwcov10b merged). New module `physics/hf/fisyield.py` (output only);
+**Part 1 done.** New module `physics/hf/fisyield.py` (output only);
 hooks in engine_c (`cases`: `fisyield.begin_run`, `fisyield.record` next to fisobs's on the same cascade result;
 `run`: `fisyield.add_to_results`), `Results.fission_yields` (new field, empty by default), `Options.yieldfile` (read),
 deck.py (natural targets with massdis refused, checkvalue.f90:1075). Without `massdis y` nothing is computed:
@@ -1040,17 +1045,17 @@ deck.py (natural targets with massdis refused, checkvalue.f90:1075). Without `ma
   every bin above 30 MeV is merged by four. Zeroed where TALYS reads stale static arrays (neck's zdis / wgt for
   skipped charge steps; never reached for actinides).
 * **Vs stock** (`scripts/kwcov/b14_response.py`, TALYS mode = fidelity.py's TALYS_DECK / TALYS_ENV; stock files
-  trimmed to yieldA / yieldZA in `~/kwcov/stock/b14/`), worst |ln(ours/stock)| over the energies:
+  trimmed to yieldA / yieldZA in `<work>/stock/b14/`), worst |ln(ours/stock)| over the energies:
 
   | target, energies | FF peaks (>= 50 % max) | FF (>= 1 %) | FP peaks | FP (>= 1 %) | isotopic FF (>= 1 %) | FF cross section |
   |---|---|---|---|---|---|---|
   | U-235 1, 5 MeV | 0.011 % | 0.029 % | 0.17 % | 0.35 % | 0.23 % | 0.01 % |
   | U-238 1, 5, 14 MeV | 0.061 % | 0.22 % | 0.68 % | 1.15 % | **2.6 %** (Br-87, 1 MeV) | 1.0 % (14 MeV) |
   | U-235, default mode | 2.1 % | 2.1 % | 2.3 % | 2.3 % | 2.6 % | 2.1 % |
-  | U-238, default mode | 0.34 % | 1.4 % | 0.68 % | 1.5 % | 2.6 % | 9.1 % (5 MeV: the engine's default fission, EXACTFIS) |
+  | U-238, default mode | 0.34 % | 1.4 % | 0.68 % | 1.5 % | 2.6 % | 9.1 % (5 MeV: the engine's default fission, `exactfis`) |
 
-  Default mode differs by the deliberate fission defaults (EXACTFIS changes the per-chance fission and so the mix of
-  fissioning nuclei and excitation energies; NPWINDOW the densities); that is why acceptance is in TALYS mode.
+  Default mode differs by the deliberate fission defaults (`exactfis` changes the per-chance fission and so the mix of
+  fissioning nuclei and excitation energies; `npwindow` the densities); that is why acceptance is in TALYS mode.
   The isotopic 2.6 % is a charge-wing row (yield 1-2 % of the max) and follows the float32 neck sums.
 * **Responses** (|ln(R/S)|, FF and FP mass yields where stock >= 10 % of the max):
 
@@ -1073,7 +1078,7 @@ deck.py (natural targets with massdis refused, checkvalue.f90:1075). Without `ma
   Brosa modes on a model level density, U-235 1 MeV engine run vs stock numbers, no yields without massdis, natural
   targets refused).
 
-**Part 2 done on branch `kwcov14b`** (from kwcov14). New module `physics/hf/gef.py` (geftalys.f, 3,160 lines, with
+**Part 2 done.** New module `physics/hf/gef.py` (geftalys.f, 3,160 lines, with
 the geffunctions.f functions it calls: LyMass, ECOUL, TEgidy, Getyield, BFTFB/BFTF/LDMass/AME2012, Gaussintegral);
 `fisyield.py` gains massdis.f90's GEF branch (bins per fissioning nucleus, `xsApre += 0.5 ysum`, nubar / nu(A) / P(nu)
 with Fmulti), nubarout / nudisout's files (`nubarn.tot`, `Pnun<E>.fis`, `nunA<E>.fis`, `nunZA<E>.fis`) and the fymodel 4
@@ -1114,11 +1119,11 @@ reader (`ff_files`, `ff_pairs`). gefsub.f (fymodel 3) is part 3 (it only feeds f
   rejection draws (peaks 3-5 %, z up to 8 vs stock). Hashed starts fixed it (chi2/dof ~1 above).
 * **Loss, traced (engine, not GEF):** stock lists fission in deeper sub-barrier bins than the engine (U-236 at 5 MeV:
   34 bins down to Ex 3.11 MeV vs ours 31 down to 3.89; U-235 second chance 19 bins vs 12): their cross sections are
-  <= 0.03 mb (the engine's fisfeedex is 0 there). They matter only through two TALYS gates: (1) massdis counts a (Z,A)
+  <= 0.03 mb (the engine's fisfeedex is 0 there). They matter only through two TALYS conditions: (1) massdis counts a (Z,A)
   FP yield only where that nuclide's FF cross section is non-zero, so rare (Z,A) seeded by those bins add FP yield in
   stock (A = 94/95/120 at 5 MeV, up to 2 % of a peak bin; FP cross sections agree 1e-4); (2) nu(A) and P(nu) add
   Fmulti/xsfistot (= Ncomp xsfeed / xsfistot, 0.11 for U-235 5 MeV) wherever a nucleus has any event, so rare masses
-  / multiplicities jump by 0.1 (nu(A) A = 110-120, P(nu > 8)). The same gates make these rows sampling-noise driven in
+  / multiplicities jump by 0.1 (nu(A) A = 110-120, P(nu > 8)). The same conditions make these rows sampling-noise driven in
   the statistical comparison (P(nu = 11) at U-238 14 MeV differs by the Fmulti step).
 * **TALYS / GEF quirks kept:** P(nu) counts only events with >= 1 neutron and nubar is the mean of that conditional
   distribution (U-235 1 MeV: 3.01; evaluated about 2.5); Pdisnu normalised over nu = 1..numin (8), nu > 8 left raw plus
@@ -1138,9 +1143,9 @@ reader (`ff_files`, `ff_pairs`). gefsub.f (fymodel 3) is part 3 (it only feeds f
   U-236 bin 1, the bin-1 tables vs stock's printout on the stock stream, lanes statistics and determinism, settings and
   refusals, the numin quirk, nubarout's zero rows, fymodel 4 files, U-235 1 MeV engine run vs stock); part 1's
   test_kwcov_b14.py updated (fymodel 2 accepted). `scripts/kwcov/b14b_response.py` (exact `--stream talys`,
-  statistical `--stat N [--stock-kw "gefran 1000000"]`). Stock refs `~/kwcov/stock/b14b/` (trimmed).
+  statistical `--stat N [--stock-kw "gefran 1000000"]`). Stock refs `<work>/stock/b14b/` (trimmed).
 
-**Part 3 (slices 1, 3 and 5 done, branch `kwcov14c` from kwcov14b).** New module `physics/hf/ffevap.py` (ffevap.f90,
+**Part 3 (slices 1, 3 and 5 done).** New module `physics/hf/ffevap.py` (ffevap.f90,
 excitation.f90, read_energies.f90's projectile-0 branch); fisyield gains massdis.f90's fymodel 4 / 5 branches
 (`_fymodel4`, `_fymodel5`), the isomer rows / files and the per-ejectile nu files (`build_nu_ff`). Output only: the
 fragment loop runs in `fisyield.add_to_results` after the energy loop (TALYS runs it after each energy's output and
@@ -1151,7 +1156,7 @@ unchanged.
   fragment is the target, `projectile 0` with the population file ff<ZZZ><AAA>.ex, fission off, the deck's other
   lines. The port does the same through the engine's own C cascade (`engine_c.cascade`) on a `Cascade(Zff, Aff,
   k0 = 0)`: `INCOGNITA_CPINC=g` for the loop (the photon projectile's defaults are projectile 0's), deck + `fission n`
-  + `nnleak n` (NNLEAK's premise -- a top bin fed by primary photons -- does not hold for an input population),
+  + `nnleak n` (`nnleak`'s premise -- a top bin fed by primary photons -- does not hold for an input population),
   Etotal = Einc (energies.f90:130), lmaxhf(0, 0) = gammax, maxJ with ipop = 1 (Rspincutff, exgrid.f90:250; new
   `Cascade.ffruns_rspincut`, None on every other run), the (0, 0) population from excitation.f90 as the cascade's
   type-0 seed, multiplicity = (sum of xsfeed + the discrete gammas over 1 + conversion) / xsinitpop, residual.f90's
@@ -1202,13 +1207,13 @@ unchanged.
 * Tests: `tests/hf/test_kwcov_b14c.py` (fymodel 4 population rows = stock's file, spindis / Edistmax, excitation
   spin-less and with spins, the run directory of fymodel 5, pairs to fragments, settings and refusals, the new files,
   three fragment runs vs stock's talys.out incl. the Ga-74m / Zn-77m isomer split); part 2's refusal test now fymodel 3
-  only. Stock refs `~/kwcov/stock/b14c/` (trimmed: yield / nu / Eav files, frag_summary.json = talys.out's per-fragment
+  only. Stock refs `<work>/stock/b14c/` (trimmed: yield / nu / Eav files, frag_summary.json = talys.out's per-fragment
   reaction summary).
 
-### B15 -- low value (DONE, branch `kwcov15`)
+### B15 -- low value (done)
 
-Branch `kwcov15` = `kwcov13` (B1-B11, B10b, B13) + `kwcov12` (B12, merged) + `fidelity1`'s fidfix commit
-(cherry-picked, `INCOGNITA_FIDFIX`) + B15. Stock TALYS-2.25 references: `~/kwcov/stock/b15/` (n + Fe-56: `endf y` at
+Builds on B1-B13 and the port fixes (`INCOGNITA_FIDFIX`, `FIDELITY_DEFAULTS.md`). Stock TALYS-2.25 references:
+`<work>/stock/b15/` (n + Fe-56: `endf y` at
 1/5/14 MeV, `sacs y` at 2-20 MeV with and without channel files, `components y`, and the refused decks' TALYS-error
 lines). Responses by `scripts/kwcov/fidelity.py --response` (`|ln(R/S)|`, worst over channels > 1 mb at 1/5/14 MeV).
 Tests: `tests/hf/test_kwcov_b15.py`.
@@ -1218,13 +1223,13 @@ Tests: `tests/hf/test_kwcov_b15.py`.
 | keyword | now | how / why |
 |---|---|---|
 | legacy | SUPPORTED | `defaults.check_values` (called by `reject_unported` at the start of a calculation): without `legacy y`, strength <= 7, strengthM1 not 3/8/10/11/12, ldmodelCN or any (per-nucleus) ldmodel 3/4/6 stop the run with TALYS's own message (checkvalue.f90:803-813, :953-966; stock Fe-56 `strength 1` / `strengthm1 2` / `ldmodel 3` print the same lines). They ran silently before. `legacy y` runs them: Fe-56 `legacy y; strength 1` response 0.60 % default / 0.66 % TALYS mode ((n,np) 14 MeV), `legacy y; ldmodel 3` 1.62 % default / 0.00 % TALYS mode |
-| transpower | SUPPORTED (coordinator item from B14) | was parsed and never reached the cut. Now `translimit = 1/10**transpower` and `transeps` go to every lmax cut of a transmission read (`omp/inverse.set_eps` from `default_options`; `process_tjl`, `schrodinger._lmax_talys`, `dens_reference._lmax_inverseread`), and a non-default pair adds a token to the stage-cache key. Range 2-20 checked (checkvalue.f90:475). Defaults bitwise (1e-5 / 1e-8, key unchanged). U-238 `transpower 10`: stock fission 14 MeV 1270.62 -> 1261.01 mb (-0.76 %), engine TALYS mode 1270.68 -> 1261.07; worst response 0.44 % default / 0.43 % TALYS mode (capture 14 MeV, 1.12 -> 1.11 mb). Fe-56 `transpower 10` / `transeps 1e-12` 0.00 %, `transpower 2` 0.29 % / 0.00 %. `massdis y` (transpower 10, transeps 1e-12) and `astro y` (15, 1e-18) now act through it too |
+| transpower | SUPPORTED (follow-up from B14) | was parsed and never reached the cut. Now `translimit = 1/10**transpower` and `transeps` go to every lmax cut of a transmission read (`omp/inverse.set_eps` from `default_options`; `process_tjl`, `schrodinger._lmax_talys`, `dens_reference._lmax_inverseread`), and a non-default pair adds a token to the stage-cache key. Range 2-20 checked (checkvalue.f90:475). Defaults bitwise (1e-5 / 1e-8, key unchanged). U-238 `transpower 10`: stock fission 14 MeV 1270.62 -> 1261.01 mb (-0.76 %), engine TALYS mode 1270.68 -> 1261.07; worst response 0.44 % default / 0.43 % TALYS mode (capture 14 MeV, 1.12 -> 1.11 mb). Fe-56 `transpower 10` / `transeps 1e-12` 0.00 %, `transpower 2` 0.29 % / 0.00 %. `massdis y` (transpower 10, transeps 1e-12) and `astro y` (15, 1e-18) now act through it too |
 | transeps | SUPPORTED | B9 took it to the chain's T cut; B15 adds the lmax cut (above) |
 | endf | SUPPORTED | cascade as before (eninclow from D0, urr y, channels y, adddiscrete 30 MeV, output switches) + structure.f90:75's levelsout and gammadecay for every nucleus structure builds (`ingout.gamma_decay_file`, gamma<ZZZAAA>.tot) + endfinfo.f90's tefal.inf / energies.endf (Ninc > 1). Stock Fe-56 `endf y`: the same 46 files; levels*.out identical, gamma*.tot <= 1e-6 (print), tefal.inf / energies.endf identical. Response Fe-56 0.00 % (both modes), U-238 0.00 % (TALYS mode). **Not given:** endfenergies / endfecis / endfread (ECIS on the ENDF incident grid: endf.cs, endf.tot, endftot.tot, endfel.tot, endfnon.tot) and channelsout's discrete-gamma xs*.gam -- TEFAL inputs, recorded in the observable row (PARTIAL) |
 | endfdetail | SUPPORTED | cascade only (gamdis / channels / filechannels defaults with endf y, tefal.inf's line); Fe-56 `endf y; endfdetail n` response 0.00 % |
 | sacs | SUPPORTED | `ingout.sacs_table` (sacs.dat): on stock's own Fe-56 xs files it is stock's sacs.dat; engine Fe-56 2-20 MeV: channel list, order and thresholds identical, xsmax / FWHM are the engine's default cross sections. Quirk kept: TALYS reads the xs*.tot it wrote, so without channel files (`sacs y` alone) sacs.dat is the header only |
 | components | READ_ONLY_DEFAULT (refused) in B15; **SUPPORTED since B4b** (compoobs.py, see B4b; this row is the B15 state) | `components y`: Fdir / Fpreeq / Fcomp per residual (multiple.f90:649) and the extra xs*.tot / rp*.tot columns are not carried by the port's cascade; refused with a clear message (`defaults.UNPORTED`) |
-| micro | SUPPORTED | B7b: `micro y` now runs (JLM ported; Fe-56 response 0.04 % TALYS mode); before B7b it was refused through jlmomp y; `micro y; jlmomp n` runs ldmodel 7 + autorot: response 0.00 % TALYS mode, **78 % default** ((n,p) 14 MeV: NPWINDOW acts on the ldmodel-7 Fe-56 density; deliberate default, as FIDELITY1) |
+| micro | SUPPORTED | B7b: `micro y` now runs (JLM ported; Fe-56 response 0.04 % TALYS mode); before B7b it was refused through jlmomp y; `micro y; jlmomp n` runs ldmodel 7 + autorot: response 0.00 % TALYS mode, **78 % default** ((n,p) 14 MeV: `npwindow` acts on the ldmodel-7 Fe-56 density; deliberate default, as FIDELITY1) |
 | densfile, e1file, m1file, massdir | READ_ONLY_DEFAULT (refused) | external user tables; kept refused (decision): each needs its own reader path (densitytable.f90:113, gammapar.f90:521 incl. the forced wtable 1 and the strength 1/2/5 table branch, masses.f90:139) |
 | rescuefile, strucpath, bestpath | READ_ONLY_DEFAULT (refused) | were NA and skipped silently; rescuefile renormalises returned cross sections (normalization.f90), the two paths name another database. Deck line refused, best-file line warned |
 
@@ -1244,11 +1249,11 @@ stock) -> 81.26 (0.00 %); every other cell <= 0.01 % (default fission 5 MeV -0.0
 FIDELITY_DEFAULTS.md section 6. Turning it on by default is the integration step's call.
 
 **Owners of what is left** (status IGNORED / MISSING after B15): massdis, fymodel, ffmodel, gefran, ffevaporation,
-ffspin (IGNORED), yieldfile (MISSING) -> B14; jlmmode, radialmodel, radialfile -> B7b (done, branch `kwcov7b`). Every other
-keyword is SUPPORTED, NA, or refused with a message (READ_ONLY_DEFAULT). `ltarget`: the isomeric-target gap, done on
-branch `kwcoviso` (below).
+ffspin (IGNORED), yieldfile (MISSING) -> B14; jlmmode, radialmodel, radialfile -> B7b (done). Every other
+keyword is SUPPORTED, NA, or refused with a message (READ_ONLY_DEFAULT). `ltarget`: the isomeric-target gap, done
+(below).
 
-## Isomeric targets (done on branch `kwcoviso`)
+## Isomeric targets (done)
 
 Design and results: `ISOMERIC_TARGETS.md`. `ltarget L` runs the target on its level `L` as TALYS does: the level's
 spin, parity and energy (`structure/scalars.py`; targetE in Etotal and the grid top since ENGFIX4), no DWBA level and

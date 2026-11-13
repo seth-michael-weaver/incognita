@@ -1,4 +1,4 @@
-"""LOGTINT: log-T Lagrange is exact for a pure exponential, falls back to TALYS's linear pol2 on a zero node, and the
+"""Log-T interpolation: log-T Lagrange is exact for a pure exponential, falls back to TALYS's linear pol2 on a zero node, and the
 fine reference grid keeps the coarse nodes."""
 import numpy as np
 
@@ -36,7 +36,7 @@ def test_fine_grid_contains_nodes():
 
 
 def test_logit_exact_both_limits_and_fallback():
-    """TLOGIT: logit-Lagrange is exact for the WKB form T = 1/(1+exp(2K)) with K linear in E, below AND above the barrier."""
+    """Logit interpolation: logit-Lagrange is exact for the WKB form T = 1/(1+exp(2K)) with K linear in E, below AND above the barrier."""
     xa, xb, xc, x = 1.0, 1.4, 1.8, 1.63
     w1, w2, w3 = _w(xa, xb, xc, x)
     for k0 in (-9.0, -0.5, 0.0, 3.0, 25.0):  # deep sub-barrier .. saturated

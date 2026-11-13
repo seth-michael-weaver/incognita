@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """README "The engine": the TALYS port vs stock TALYS-2.x at identical settings (strength 9, ldmodel 1) on the measured rows of
-the channel scoreboard: rms of log10(model / data) per channel and the row-level difference.
+the channel comparison: rms of log10(model / data) per channel and the row-level difference.
     python scripts/release/score_stock.py docs/release/exam/stock_rows.parquet OUT.md
 Ported from the development tree: scripts/channels/score_stock_control.py (rows as published; library columns removed)."""
 import sys, numpy as np, pandas as pd

@@ -1,11 +1,10 @@
-"""T4 OMP parameters and radial potentials against TALYS's omppar_<k>.out and omp.out (gates
+"""T4 OMP parameters and radial potentials against TALYS's omppar_<k>.out and omp.out (checks
 A-omppar p95 |ln(port/TALYS)| <= 1e-5 and A-omppot <= 1e-4, docs/results/hf-engine-gates.md).
 
-Both gates run over **all 24 reference targets** -- spherical, deformed and actinide. §3 of the
-gates doc gated only the spherical ones "until the ECIS task (T13) lands"; it has, so the other
-ten are in. The T14 single-precision floor is applied as written, `max(tolerance, 2 delta)` with
-delta from docs/results/hf-sgl-floor.json; for these two families delta is 1.8e-7 and 0, so
-neither tolerance moves.
+Both checks run over **all 24 reference targets** -- spherical, deformed and actinide. The T14
+single-precision floor is applied as written, `max(tolerance, 2 delta)` with delta from
+docs/results/hf-sgl-floor.json; for these two families delta is 1.8e-7 and 0, so neither
+tolerance moves.
 
 Two things the actinides need and the spherical targets do not:
 
@@ -15,7 +14,7 @@ Two things the actinides need and the spherical targets do not:
     `potential.rotational_radial_potential`. `colltype V` (Ca-40) prints the spherical one,
     because the vibrational model deforms only the transition form factors.
 
-Structure inputs other tasks own are read here until they land: the target mass on the ECIS card
+Structure inputs other tasks own are read here until they land: the target mass on the ECIS input line
 comes from structure/masses/ame2020 (TODO(T2)); the collective type is read by
 parameters._colltype from structure/deformation (TODO(T2)); the coupled band comes from T13's
 `ecis.reference.coupled_band`.
@@ -23,7 +22,7 @@ parameters._colltype from structure/deformation (TODO(T2)); the coupled band com
 omp.out prints the radius as `iR * step` with ECIS's step rounded to f8.5, which moves the outer
 radii by up to 5e-6 fm per point and the potential there by ~1e-4. The true step is one number for
 all four columns, so it is fitted once in the +/-5e-6 window against all four together and all
-four are then gated with it -- one nuisance parameter, four gated columns.
+four are then checked with it -- one nuisance parameter, four checked columns.
 
 Skips (does not fail) when the reference dumps are absent.
 """
@@ -48,7 +47,7 @@ from physics.hf.omp.potential import (
     rotational_radial_potential,
 )
 
-# A-omppar / A-omppot with the T14 floor rule (hf-engine-gates.md §3): tolerance = max(tol, 2*delta)
+# A-omppar / A-omppot with the T14 floor rule: tolerance = max(tol, 2*delta)
 SGL_FLOOR = {"omp_parameters": 1.8e-7, "omp_potential": 0.0}  # docs/results/hf-sgl-floor.json
 TOL_PAR = max(1e-5, 2 * SGL_FLOOR["omp_parameters"])
 TOL_POT = max(1e-4, 2 * SGL_FLOOR["omp_potential"])
@@ -213,7 +212,7 @@ def test_ripl_library_reader_and_grid():
     sdir = str(ripl._ripl_dir())
     p = ripl.read_om_parameter(2408, sdir)
     assert (p.imodel, p.izproj, p.iaproj, p.irel, p.idr) == (1, 0, 1, 1, 3)
-    assert p.jrange == [1, 1, 0, 1, 1, 1] and p.jcoul == 0  # no real surface, no Coulomb card
+    assert p.jrange == [1, 1, 0, 1, 1, 1] and p.jcoul == 0  # no real surface, no Coulomb term
     assert (p.izmin, p.izmax, p.iamin, p.iamax) == (90, 97, 228, 249)
     assert p.author.startswith("R.Capote")
     # the RIPL exponent shorthand: `-1.36700-3` is -1.367e-3 (rv = 1.57695 - 1.367e-3 A)
@@ -296,7 +295,7 @@ def test_ecis_card_rounding_is_straight_through():
     assert torch.equal(g, torch.ones(3, dtype=DT))
 
 
-# ---------------------------------------------------------------------------- gates
+# --------------------------------------------------------------------------- checks
 @cache
 def _manifest():
     return ref.manifest()
@@ -389,7 +388,7 @@ def test_a_omppot_gate():
             r_all = torch.tensor(ir[None, :] * steps[:, None], dtype=DT)  # (S, R)
             pot = _pot_columns(par, mass, Z, A, r_all)  # every column at every step
             # ECIS's step is one number for all four columns, so fit it once on all four (the
-            # tightest use of the single nuisance parameter the f8.5 print leaves free) and gate
+            # tightest use of the single nuisance parameter the f8.5 print leaves free) and check
             # every column with it.
             cols = {}
             worst_of = np.zeros(len(steps))
@@ -415,7 +414,7 @@ def test_a_omppot_gate():
         assert float(np.percentile(a, 95)) <= TOL_POT
 
 
-# ------------------------------------------------------------- CHARTFIX: Soukhovitskii's eferm
+# ---------------------------------------------------------------------- Soukhovitskii's eferm
 
 
 def test_soukhovitskii_fermi_is_the_three_separation_energies():
@@ -439,7 +438,7 @@ def test_soukhovitskii_fermi_is_the_three_separation_energies():
 
 
 def test_th227_reaches_the_soukhovitskii_potential():
-    """CHART1's one crash of 482: `riplomp(1) = 2408` covers A 228-249, so Th-227 falls to the
+    """The one crash of the 482-nuclide chart run: `riplomp(1) = 2408` covers A 228-249, so Th-227 falls to the
     global potential, `flagsoukho` sends it to Soukhovitskii, and nothing supplied the Fermi
     energy. It resolves itself now, and the depths are Soukhovitskii's, not KD03's."""
     from dataclasses import replace

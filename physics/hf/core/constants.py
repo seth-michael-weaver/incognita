@@ -225,7 +225,7 @@ def _f32(x: float) -> np.float32:
 
 
 def talys_constants(precision: str = "talys") -> dict[str, object]:
-    """SETB: `_talys_constants(precision)`, built once per worker (it is ~800 calls per nuclide);
+    """`_talys_constants(precision)`, built once per worker (it is ~800 calls per nuclide);
     each caller gets its own shallow copy of the dict, whose values are immutable.
 
     TALYS: constants.f90:1 (constants)
@@ -340,7 +340,7 @@ def nuclide_symbol(Z: int) -> str:
     return NUC[Z - 1]
 
 
-PINNED_TALYS_ROOT = Path.home() / "opt" / "talys-structure-pinned-2026-10-12"  # TALYSPIN: frozen, checksummed copy of the strip store
+PINNED_TALYS_ROOT = Path.home() / "opt" / "talys-structure-pinned-2026-10-12"  # frozen, checksummed copy of the strip store
 
 
 def default_talys_root() -> str:

@@ -1,9 +1,9 @@
-"""FISSB: fission as one more exit channel of `compound.target_batch`'s every-cell target decay.
+"""Fission as one more exit channel of `compound.target_batch`'s every-cell target decay.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: FISSB (the speed work; no physics of its own). Acceptance test: A-cn2 / E2E through
+Speed path (no physics of its own). Acceptance test: A-cn2 / E2E through
 `tests/hf/test_fission_batch.py`, which holds it to `target._case`'s per-cell loop.
 
 TALYS routines this computes, in the arrangement described below:

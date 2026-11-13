@@ -1,4 +1,4 @@
-"""C6FIX (ENGC10): switch parsing; the end-to-end check (I-105 alpha NL >= 0, OFF bit-identical) is development notes."""
+"""`INCOGNITA_C6FIX`: switch parsing (the end-to-end effect: I-105 alpha NL >= 0, OFF bit-identical)."""
 from physics.hf.preeq.exciton import c6fix_on
 
 

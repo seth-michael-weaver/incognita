@@ -403,7 +403,7 @@ SOURCES: list[Source] = [
         1,
         min_bytes=1_000_000,
         notes="IAEA Photon Strength Function Database v2024.1 (1,130 files; the site's own "
-        "whole-database download, a stored zip). A13/OSLOFIT uses its oslo/ segment: Oslo-method "
+        "whole-database download, a stored zip). The Oslo-method fit uses its oslo/ segment: Oslo-method "
         "dipole strength f1(E_gamma) for 103 nuclei, each with a readme recording the D0 and "
         "<Gamma_gamma> used to normalise it -- the normalisation-degeneracy audit reads those",
     ),
@@ -419,7 +419,7 @@ SOURCES: list[Source] = [
         mirror_accept="*.txt",
         notes="The Oslo group's own compiled Oslo-method tables: level density rho(E_x) and "
         "strength f(E_gamma), one directory per publication, ~300 text files in the formats each "
-        "paper used. A13/OSLOFIT takes rho from here (the IAEA PSF database carries only f). "
+        "paper used. The Oslo-method fit takes rho from here (the IAEA PSF database carries only f). "
         "ocl.uio.no/compilation, the older address, does not resolve (2026-09-18)",
     ),
     Source(
@@ -736,7 +736,7 @@ def verify_manifest() -> int:
     `kind: git` directory entries -- carry no sha256 and are skipped; their members are listed
     individually and are what actually gets hashed.
 
-    Exit code is non-zero if anything is missing or has drifted, so it can gate a release.
+    Exit code is non-zero if anything is missing or has drifted, so it can block a release.
     """
     m = load_manifest()
     files = m.get("files", {})

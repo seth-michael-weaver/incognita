@@ -1,4 +1,4 @@
-"""ELDA: physics/hf/ecis/angular.py (elastic / CC-level angular distributions from the incident CC S-matrix)."""
+"""Angular distributions: physics/hf/ecis/angular.py (elastic / CC-level angular distributions from the incident CC S-matrix)."""
 
 import os
 

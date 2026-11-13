@@ -32,7 +32,7 @@ WT.L.ch.tof = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "pulsed source": "脉冲中子源",
   "detector": "探测器",

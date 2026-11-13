@@ -1,7 +1,7 @@
-"""WARM0: one nuclide cold, then warm -- the same run again after only the level-density (LD),
+"""One nuclide cold, then warm -- the same run again after only the level-density (LD),
 photon-strength (PSF) and decay caches were dropped.
 
-ROUTE100's WP1. Nothing here is a TALYS routine and no number changes: it is `chartrun`'s
+Nothing here is a TALYS routine and no number changes: it is `chartrun`'s
 `engine.run(injection=ChainedFull(...))` called twice on one `Cascade`, with a cache drop in
 between.
 
@@ -14,11 +14,11 @@ barrier densities, bookkeeping -- and, with today's cache granularity, the whole
 whose one cache (`pop_reference._preeq`) also holds the CN photo-absorption cross section of its
 gamma emission rate. `drop_parameter_caches` drops exactly the caches of the second kind.
 
-**Which caches those are is measured, not assumed** (`harness/route100_warm.py trace`): every
+**Which caches those are is measured, not assumed** (a cache trace): every
 `lru_cache` and memo of `physics.hf` is proxied, every read of an `LDNucleus`, a
 `GammaParameters` or an LD/PSF `Params` keyword is charged to the caches computing at that
 moment, and the taint is closed over the cache-calls-cache graph. `DROP_LRU` / `DROP_ATTRS`
-below are that trace's LD+PSF closure on the traced nuclides (docs/results/hf-warm0.md §3).
+below are that trace's LD+PSF closure on the traced nuclides.
 
 Memos keyed by `id()` of an `LDNucleus` / `GammaParameters` with an identity check
 (`density.parameters._LD_FLOATS`, `compound.psf_fast._TABLES`, `emission.feeding._SPINCUT_PARTS`)
@@ -26,7 +26,7 @@ invalidate themselves when the object is rebuilt, so they need no drop; they are
 so the warm pass pays for them as a real parameter step would.
 
 TALYS: talysreaction.f90:1 (talysreaction)
-Test: harness/route100_warm.py one (warm cells identical to cold)
+Test: tests/hf/test_warmguard.py (warm cells identical to cold)
 """
 
 from __future__ import annotations
@@ -69,7 +69,7 @@ def _lru_wrappers():
         if not modname.startswith("physics.hf") or mod is None:
             continue
         for obj in list(vars(mod).values()):
-            obj = getattr(obj, "__warm0_lru__", obj)  # the WARM0 tracer's proxies
+            obj = getattr(obj, "__warm0_lru__", obj)  # the cache tracer's proxies
             if isinstance(obj, functools._lru_cache_wrapper):
                 fn = obj.__wrapped__
                 out.setdefault(f"{fn.__module__}.{fn.__qualname__}", (obj, None))
@@ -87,10 +87,10 @@ def drop_parameter_caches(cas, drop_lru: frozenset[str] = DROP_LRU,
     """Drop the LD / PSF / decay caches of this worker and of `cas`; keep everything else.
 
     TALYS: none (worker cache policy)
-    Test: harness/route100_warm.py one
+    Test: tests/hf/test_warmguard.py
     """
-    # SPEEDFIX: dropping the LD/PSF caches does not make a Cascade valid under other fitlib cards
-    # (SPEEDPROF: capture frozen at the first sweep point, up to 5.4x off); refuse instead
+    # dropping the LD/PSF caches does not make a Cascade valid under other fitlib keyword lines
+    # (capture would be frozen at the first sweep point, up to 5.4x off); refuse instead
     if hasattr(cas, "check_cards"):
         cas.check_cards()
     dropped = []
@@ -114,7 +114,7 @@ def run_on(Z: int, A: int, declared_energies: tuple[float, ...], cas):
     """`chartrun.run_nuclide` with the run's `Cascade` handed in (`ChainedFull(cascade=)`).
 
     TALYS: talysreaction.f90:1 (talysreaction)
-    Test: harness/route100_warm.py one
+    Test: tests/hf/test_warmguard.py
     """
     import torch
 
@@ -127,7 +127,7 @@ def run_on(Z: int, A: int, declared_energies: tuple[float, ...], cas):
 
 
 def freeze_startup() -> None:
-    """PERFSTART: move every object alive now (the imported engine, torch, numpy) into the
+    """Move every object alive now (the imported engine, torch, numpy) into the
     collector's permanent generation (`gc.freeze`), so the full collections a run makes
     (`chartrun.drop_target_caches`) no longer walk ~10^6 import-time objects (~45 ms each).
     Call it once, right after the imports and before any target is built; garbage made later is
@@ -338,7 +338,7 @@ def inventory(cas, min_bytes: int = 4096, before: dict[str, set] | None = None,
     * Memos that outlive a target (`PERSISTENT_MEMOS`) count only the keys added since `before`.
 
     TALYS: none (worker cache policy)
-    Test: harness/route100_warm.py one
+    Test: tests/hf/test_warmguard.py
     """
     import torch
 
@@ -385,7 +385,7 @@ def inventory(cas, min_bytes: int = 4096, before: dict[str, set] | None = None,
                 items = [(f"{attr}[{_short(k)}]", v) for k, v in list(memo.items())
                          if k not in old]
             else:
-                # NATIVEX2's one-entry memos (_GR_LAST, _CORE_LAST): a plain list holding the
+                # the native path's one-entry memos (_GR_LAST, _CORE_LAST): a plain list holding the
                 # last call's [struct, params, ...], not a key -> value cache
                 items = [(f"{attr}[{i}]", v) for i, v in enumerate(memo)]
             add(full, items, "chart" if attr in ("_FD_CACHE", "_GAULEG") else "nuclide")

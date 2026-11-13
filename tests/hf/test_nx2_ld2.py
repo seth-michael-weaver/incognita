@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `ld2`: the tabulated level densities (`density/ld2_nx2.py`, `native/nx2_ld2.c`)
+"""Native switch `ld2`: the tabulated level densities (`density/ld2_nx2.py`, `native/nx2_ld2.c`)
 and `tables.density_table`'s column arithmetic against the paths they replace, `HF_NX2_LD2=0`
 against `=1`. Kernels to closeness (skipped without a `libnx2` build), the table itself to the bit.
 """

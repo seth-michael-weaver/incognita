@@ -44,10 +44,10 @@ def logfact(k: Tensor) -> Tensor:
     """
     kk = torch.as_tensor(k, dtype=DTYPE)
     if kk.device.type == "cpu" and not kk.requires_grad and kk.numel():
-        # CCFAST2: every caller passes integer k in [1, NUMFACT + 2] (clebsch/racah indices, the
+        # every caller passes integer k in [1, NUMFACT + 2] (clebsch/racah indices, the
         # `_g` clamp), so the values are lgamma's own at those integers, read from a table built
         # by the same torch.lgamma -- bit-identical, without a special-function evaluation per
-        # element (0.19 CPU-s of an Nd-150 run on the Mac, 1,548 calls from dwba's Clebsches).
+        # element (0.19 CPU-s of an Nd-150 run on an Apple M2, 1,548 calls from dwba's Clebsches).
         idx = kk.to(torch.int64)
         if bool((idx.to(DTYPE) == kk).all()) and int(idx.min()) >= 0 and int(idx.max()) < _LF_N:
             return _LOGFACT_TABLE[idx]

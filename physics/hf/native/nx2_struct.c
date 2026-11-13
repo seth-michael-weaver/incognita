@@ -1,4 +1,4 @@
-/* NATIVEX2 lever `struct`: one block of a `levels/<table>/<Sym>.lev` file read with levels.f90's
+/* Native kernel `struct`: one block of a `levels/<table>/<Sym>.lev` file read with levels.f90's
  * formats (physics/hf/structure/levels.py `_level_block` builds the inputs and the result).
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.

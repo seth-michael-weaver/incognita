@@ -1,11 +1,11 @@
 """A-pe: score the ported pre-equilibrium against TALYS's `exciton*.out` and `preeq*.out`.
 
-Task: T8 (physics/hf/CONTRACT.md §6/§7). Gate: A-pe, p95 |ln(port/TALYS)| <= 0.02.
+Task: T8 (physics/hf/CONTRACT.md §6/§7). Acceptance threshold: A-pe, p95 |ln(port/TALYS)| <= 0.02.
 
     uv run python -m physics.hf.preeq.score              # all 24 targets, default variant
     uv run python -m physics.hf.preeq.score --target Fe056 --json out.json
 
-Metric and floors are `docs/results/hf-engine-gates.md` §2: cross sections are gated above
+Metric and floors (contract §2): cross sections are checked above
 1e-3 mb, and a point where TALYS is below the floor but the port is above it counts as
 `r = inf`. The `exciton*.out` quantities (matrix elements, emission rates, escape and damping
 widths, transition rates, lifetimes) have no cross-section floor, so every point TALYS printed
@@ -31,7 +31,7 @@ TOLERANCE = 0.02
 # TALYS writes exciton*.out in real(sgl): a width or lifetime below the float32 smallest
 # normal (1.18e-38) underflows to 0.000000E+00 on the `* hbar` multiply even though the
 # emission rate it came from prints fine. Those points are TALYS's own underflow, not a
-# disagreement, so they sit below the floor (contract §4.1, gates doc §2).
+# disagreement, so they sit below the floor (contract §4.1 and §2).
 SGL_FLOOR = 1.0e-37
 FLOORS = {
     "escape width": SGL_FLOOR,
@@ -213,7 +213,7 @@ def summarise(records: list[dict]) -> dict:
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="A-pe gate (pre-equilibrium)")
+    ap = argparse.ArgumentParser(description="A-pe acceptance test (pre-equilibrium)")
     ap.add_argument("--target", action="append")
     ap.add_argument("--variant", default="default")
     ap.add_argument("--json")

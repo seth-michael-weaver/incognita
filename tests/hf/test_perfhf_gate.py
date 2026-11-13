@@ -1,20 +1,19 @@
-"""PERFHF gate: the compound-nucleus speed work must not move a single bit of the production run.
+"""Compound-nucleus speed check: the speed work must not move a single bit of the production run.
 
 Two parts:
 
 * unit twins (always run): each compiled/memoised replacement against the code it replaced, on its own
   inputs, compared bit for bit (`np.array_equal`, NaN == NaN);
-* the production gate (`slow`, `needs_data`): `scripts/talysworld/engine_grid.py` (the TALYSWORLD engine
-  calculator: library v0.2 deck, environment, runner and inputs, P arm, GRIDTOP pad) on Fe-56, Zr-90, Au-197
-  and U-238, at 14.1 MeV alone and on the 64-point library grid, against the golden channels written from
-  origin/main 3aac5ab1 before the work started (`data/perfhf_gate.json`; rewritten at 3fe96822 + SWNAMES6, when
-  engine_grid.py began to pass the library switches to this repository's engine under its INCOGNITA_* names: the
-  earlier golden file was a run without them, capture off by up to 126 %). Every channel the calculator
+* the production check (`slow`, `needs_data`): `scripts/talysworld/engine_grid.py` (the library engine
+  calculator: library v0.2 deck, environment, runner and inputs, P arm, `INCOGNITA_GRIDTOP` pad) on Fe-56,
+  Zr-90, Au-197 and U-238, at 14.1 MeV alone and on the 64-point library grid, against the golden channels
+  written before the speed work (`data/perfhf_gate.json`, made with the library switches passed to this
+  repository's engine under their INCOGNITA_* names). Every channel the calculator
   reports (total, elastic, nonelastic, capture, (n,p), (n,a), (n,2n), inelastic, fission) must match
   exactly: the JSON keeps each float's repr, which round-trips the double.
 
-The production gate needs the laptop's library inputs (~/libv02/inputs, ~/talysworld_data/cc, the engine
-venv); it is skipped without them.
+The production check needs the library inputs, which are not part of this repository (the library input
+directory, the coupled-channels cache and the engine venv); it is skipped without them.
 
     python tests/hf/test_perfhf_gate.py --write   # (re)write the golden file from THIS checkout
 """
@@ -31,7 +30,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 GOLDEN = Path(__file__).with_name("data") / "perfhf_gate.json"
-CASES = {  # (Z, A): min separation energy of the compound nucleus [MeV] (engine masses; GRIDTOP pad input)
+CASES = {  # (Z, A): min separation energy of the compound nucleus [MeV] (engine masses; `INCOGNITA_GRIDTOP` pad input)
     (26, 56): 0.0, (40, 90): 0.0, (79, 197): -0.5263641756976867, (92, 238): -4.13029517569769,
 }
 E1_EV = 14.1e6
@@ -113,7 +112,7 @@ def test_texact_memo_returns_fresh_equal_arrays():
     assert len(W._TEX_MEMO) == 1
 
 
-# ---------------------------------------------------------------------------------------- production gate
+# --------------------------------------------------------------------------------------- production check
 
 def _python() -> str:
     eng = Path(os.environ.get("TW_ENG_PY", Path.home() / "fastgate_data/eng/16606b356d6e/.venv/bin/python"))

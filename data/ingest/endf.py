@@ -171,9 +171,9 @@ LIBRARIES: dict[str, LibrarySpec] = {
         "cendl32", "CENDL-3.2", RAW / "cendl32" / "cendl-3-2_n.sublib.zip", "zip-concatenated",
         None, "CENDL-3.2 neutron sublibrary, single concatenated tape",
     ),
-    # --- Archived TENDL releases (RETRO, the retrodiction exam) --------------------------- #
+    # --- Archived TENDL releases (retrodiction test) ------------------------------------- #
     # A TENDL release of year Y has not seen a measurement published after Y, so TENDL-Y is as
-    # blind as a model trained with year_cutoff = Y on those cells. One tarball per release
+    # unaware of them as a model trained with year_cutoff = Y on those cells. One tarball per release
     # (tendl.imperial.ac.uk), flat, one ENDF-6 file per material: n-<Sym><A>[m].tendl. They are
     # unpacked beside the tarballs (raw/tendl_archive/<year>/), never into the 2025 raw tree.
     **{
@@ -182,7 +182,7 @@ LIBRARIES: dict[str, LibrarySpec] = {
             # 2017-2023 name their files n-<Sym><A>[m].tendl; TENDL-2015 puts the projectile
             # last, <Sym><A>[m]-n.tendl, under <Sym>/<A>/lib/endf/ instead of <Sym><A>/lib/endf/
             r"(^|/)(n-[A-Za-z]{1,2}\d{1,3}[mn]?|[A-Za-z]{1,2}\d{1,3}[mn]?-n)\.tendl$",
-            f"TENDL-{_y} neutron sublibrary (archived release tarball), RETRO exam arm",
+            f"TENDL-{_y} neutron sublibrary (archived release tarball), retrodiction test",
             TENDL_ARCHIVE / str(_y),
         )
         for _y in TENDL_ARCHIVE_YEARS

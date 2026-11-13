@@ -1,49 +1,54 @@
-# Curation rule v2: a library-free EXFOR curation register (pre-registered 2026-09-23)
+# Curation rule v2: a library-free EXFOR curation register (2026-09-23)
 
-This file was committed BEFORE the v2 rule was applied to any decision. Its predecessor is the INDEP_CURATE rule v1
-(branch `lab branch indep-curate`, commit 32662c3f, `docs/results/indep_curate_rule.md`). v1 re-decided only the 129
-register lines that name an evaluated library. v2 closes v1's four known gaps and is applied to ALL 524 lines of
-`data/curate/review_decisions.jsonl` (md5 a84fc94d), and chart-wide to every capture cell. It is the rule that
+This rule was fixed before it was applied to any decision. Its predecessor, rule v1, re-decided only the 129 register
+lines that name an evaluated library. v2 closes v1's four known gaps and is applied to ALL 524 lines of the v1 review
+register (md5 a84fc94d), and chart-wide to every capture cell. It is the rule that
 `incognita/curation/` implements.
+
+Earlier record reviews are cited by the labels they carry in the `origin` field of
+`data/curation/record_findings.jsonl` and in the register: `MEVCHECK` (review of MeV-region activation records for
+low-energy neutron backgrounds), `AUSTD` (Au-197 standard renormalisations), `DATAPASS` (author disclaimers and
+record errors), `REGEXCL` (region exclusions), `INDEP_CURATE` (rule v1, the re-decision of the library-citing
+lines) and `MACSCHECK` (MACS measurements against the differential series).
 
 Changes from v1 (section numbers below):
 - G1, one series against one (Hf-176 Moxon 1974): new R10, an isotopic systematic (§2).
-- G2, MACS kinds not compared (Kr-84): new R11, which is MACSCHECK's method adopted as written (§2).
+- G2, MACS kinds not compared (Kr-84): new R11, the earlier MACS-against-series check adopted as written (§2).
 - G3, duplicate copies counted as independent references (U-236): new R3d (§2).
 - G4, the 3 MeV cut (Colditz at 2.9 MeV): R8 is now scoped per scored cell, not per raw point (§2).
-- New: R12, a corroborating record-quality flag. The statistical-region gate (§1). Chart-wide application with a
+- New: R12, a corroborating record-quality flag. The statistical-region cut (§1). Chart-wide application with a
   two-pass order (§3). The validation protocol (§4).
 
 Honesty note. G1-G4 were found by reading v1's outcome on known cases. The v2 rules that close them were therefore
 written knowing which datasets they would touch. The thresholds come from physics or from the earlier rules
-(MACSCHECK, twins, MEVCHECK), not from fitting to those cases. The report must still say that these four cases are
-not blind tests of v2.
+(`MACSCHECK`, twins, `MEVCHECK`), not from fitting to those cases. The report must still say that these four cases are
+not independent tests of v2.
 
 ## 0. Evidence
 
 Allowed:
 - EXFOR: values, quoted uncertainties, and BIB fields (REACTION SF5-SF9, STATUS, MONITOR, CORRECTION, ERR-ANALYS,
   COMMENT, DECAY-DATA, INC-SOURCE, SAMPLE, METHOD).
-- The EXFOR-derived series table (`series_id` = FLOOR union-find of shared entry, or first author + facility +
+- The EXFOR-derived series table (`series_id` = union-find of shared entry, or first author + facility +
   detector, plus twin edges).
-- IAEA neutron standards (2017) and the Au-197 kT = 25/30 keV reference values used by AUSTD.
+- IAEA neutron standards (2017) and the Au-197 kT = 25/30 keV reference values used by `AUSTD`.
 - NUBASE2020, ENSDF, RIPL-3/4 (resonance spacings D0, spins) and AME.
 - Textbook physics bounds.
 
 Forbidden:
 - Any value from an evaluated library (ENDF/B, JENDL, JEFF, TENDL, CENDL, BROND, FENDL, IRDFF, BRUSLIB, or any
   other). **This includes the libraries' resolved-resonance-range bounds** (`validation.differential.rrr_bounds`).
-  The old rule-(c) sweep used those bounds, and §1 replaces them with a RIPL D0 gate.
+  The old rule-(c) sweep used those bounds, and §1 replaces them with a RIPL D0 cut.
 - KADoNiS recommended values. Only EXFOR MACS measurements may be used.
 - Our model, TALYS, or any model output.
-- The WP-12 automatic trust, consensus and decisions. v2 does not use them as evidence. They stay a separate
+- The automatic EXFOR trust layer: its trust, consensus and decisions. v2 does not use them as evidence. They stay a separate
   automatic layer, which is exported next to the register and labelled as such.
 
 ## 1. Universe and quantities
 
 - **Channel.** Capture (MT 102), ground-state total (state '', branch ''). This is every line of the v1 register.
   The other channels have no register lines, and v2 does not sweep them. That is a stated limitation.
-- **Cell.** One dataset in one 0.1-dex energy bin (`bin = floor(10 log10 E) + 100`), from the WP-12 cell table
+- **Cell.** One dataset in one 0.1-dex energy bin (`bin = floor(10 log10 E) + 100`), from the cell table
   `exfor_cells.parquet`. The datum is x = log10(mean_b). For a point-scoped test, x is the log10 of the point's
   value. Only `usable` cells with mean_b > 0 are used.
 - **Uncertainty.** sigma_x = log10(1 + rel), where rel = sqrt(stat_rel^2 + sys_rel^2) as reported. If that is
@@ -51,7 +56,7 @@ Forbidden:
 - **Constants.** X15 = log10 1.5, X2 = log10 2, X3 = log10 3, X5 = log10 5.
 - **Comparable kinds (R5, R6, R10).** The comparison is exact-kind only. Kinds containing `spa`, `fis` or `raw` are
   never compared, because spectrum-averaged and raw quantities depend on the facility's spectrum or processing.
-- **Statistical-region gate (new; replaces the library RRR bound).** A differential `sig` cell takes part in R5,
+- **Statistical-region cut (new; replaces the library RRR bound).** A differential `sig` cell takes part in R5,
   R6 and R10 only if at least one of these holds:
   - its bin's lower edge is >= E_stat. Here E_stat = max(1 keV, 40 * D0). D0 is the RIPL s-wave resonance spacing
     of the target (column D3, else Db, of `ripl4_resonances_L0.csv`). If the target has no D0, use the median D0 of
@@ -61,7 +66,7 @@ Forbidden:
     which is well inside the x2 threshold.
   - it is the thermal cell (every point between 0.02 and 0.03 eV), which is a single well-defined quantity.
 
-  Integral kinds (`ri`, `mxw`, `av`, ...) are not gated.
+  Integral kinds (`ri`, `mxw`, `av`, ...) are not subject to this cut.
 - **Series of a dataset.** Its `series_id`. A dataset missing from the series table gets its own series, keyed by
   its EXFOR entry.
 
@@ -73,7 +78,7 @@ Each rule fires independently. §3 gives the order in which they are evaluated a
 These rules come from a person reading the EXFOR record. Each is listed in `data/curation/record_findings.jsonl`
 with its rule code, scope (dataset, or points or cells) and a VERBATIM quote of the record. The build refuses to
 run if a quote is not found in that subentry's text (or in the entry's SUBENT 001) in `entry.zip`. v2 adds no new
-readings: the findings are those of MEVCHECK, AUSTD, DATAPASS (a), REGEXCL (a) and INDEP_CURATE's RECORD table.
+readings: the findings are those of `MEVCHECK`, `AUSTD`, `DATAPASS` (a), `REGEXCL` (a) and `INDEP_CURATE`'s RECORD table.
 
 - **R1, record-proven error → EXCLUDE (or unit fix), scoped to what the record proves.** The record contradicts
   itself. Examples: an error inconsistent with the stated band; a factor-10 slip; an author disclaimer covering
@@ -89,19 +94,19 @@ readings: the findings are those of MEVCHECK, AUSTD, DATAPASS (a), REGEXCL (a) a
   correction for it.
   - **Scope is per scored cell (G4):** R8 applies to the cells whose 0.1-dex bin extends above 3 MeV (upper bin
     edge > 3 MeV).
-  - v1 compared the raw point energy with 3 MeV. MEVCHECK's implementation, the origin of the rule, assigned points
+  - v1 compared the raw point energy with 3 MeV. `MEVCHECK`'s implementation, the origin of the rule, assigned points
     to scored bins (bin 164, 2.51-3.16 MeV, whose scoring energy is 3.03 MeV). The register acts on scored cells,
     so v2 uses the cell.
 
 ### Identity family: machine rules on EXFOR
-- **R3, twin superseded → EXCLUDE the superseded copy.** The rule is `scripts/twins.py` unchanged:
+- **R3, twin superseded → EXCLUDE the superseded copy.** The rule is the twin-detection script unchanged:
   - A BIB cross-reference (STATUS SPSDD, or "renormalized / revised gold / new gold" in Subent X), or two datasets
     of one nuclide/kind with the same cells whose values differ by a constant factor (sd of the log10 ratio
     < 0.004 dex).
   - Either way, the pair must be confirmed by the numbers: factor in [0.8, 1.25], and sd < 0.01 dex (x) or
     < 0.004 dex (d).
   - A single-cell data pair needs an exact copy (< 3e-5 dex) and the same entry, or the same first author and year.
-  - Direction: the documented renormalised copy is kept. Failing that, the higher-trust copy (WP-12 trust is used
+  - Direction: the documented renormalised copy is kept. Failing that, the higher-trust copy (the automatic trust is used
     here only as a tie-break between two copies of the same numbers), then the earlier accession.
 - **R3d, non-independent reference (G3); no decision by itself.** While testing datum D, a candidate reference
   dataset Q from another series is NOT independent of D if either:
@@ -138,7 +143,7 @@ in the bin, bins +-1 are added (the widening is recorded). d = x - median(ref); 
 - **R9, cross-nuclide systematic at >= 12 MeV.** The reference is independent-series values in the same or
   adjacent bin on >= 5 OTHER nuclides with |dA| <= 30, one median per nuclide. A datum beyond X5 of their median
   → DOWNWEIGHT-grade.
-- **R10, isotopic systematic (G1).** Applies only where R5 cannot judge (in-nuclide n_ref <= 1 after widening).
+- **R10, isotopic systematic (G1).** Applies only where R5 cannot decide (in-nuclide n_ref <= 1 after widening).
   The cell must be differential `sig`, in the statistical region, with 10 keV <= bin lower edge < 12 MeV.
   - **Reference nuclides:** same Z, same N parity, 0 < |dN| <= 4. Neither the target nor the reference may have
     N within 2 of a magic number (28, 50, 82, 126), because capture drops by an order of magnitude at shell
@@ -154,10 +159,10 @@ in the bin, bins +-1 are added (the widening is recorded). d = x - median(ref); 
   - Why X5: at >= 10 keV, even-N isotopes of one element that are away from shell closures differ in capture by
     at most about x3-4 over |dN| <= 4 (e.g. Hf-176/Hf-180 at 30 keV are about x4 apart). x5 on the median of >= 2
     neighbours that agree within x3 is a conservative margin.
-- **R11, MACS against differential (G2).** This is MACSCHECK (`docs/results/macscheck.md` §1 plus both
-  amendments in §2), adopted unchanged except for its input filters:
+- **R11, MACS against differential (G2).** This is the earlier `MACSCHECK` method (with both of its
+  later corrections), adopted unchanged except for its input filters:
   - **IMs.** Independent MACS measurements (kind `mxw`, kT 20-40 keV, not compilation/derived) that are not
-    excluded in pass A. The WP-12 `decision` column is not used.
+    excluded in pass A. The automatic `decision` column is not used.
   - **Series curve.** The differential curve is the series' comparable `sig`/`av` cells that are not excluded in
     pass A.
   - **Averaging.** The series is Maxwellian-averaged over its own coverage (f >= 0.8).
@@ -210,11 +215,10 @@ in the bin, bins +-1 are added (the widening is recorded). d = x - median(ref); 
 
    Each is read against the subentry text and the data. The verdict is SUPPORTED / NOT SUPPORTED / UNCLEAR, with
    the quote. Every NOT SUPPORTED is reported. No rule is changed after the audit. Any change would be v3, with
-   its own pre-registration.
-4. **Nothing is trained or scored.** No blind, vault or fold 6-7 score is read. Counting how many decisions fall
-   in the blind or DEV/vault cell sets is set membership, not a score read, and it is reported as membership only.
-   The frozen 674/669-bin blind sets are NOT redefined by v2. Any register-adjusted blind set needs its own
-   registered look.
+   its own rule document fixed before use.
+4. **Nothing is trained or scored.** No test score (cross-validation, vault, fold 6-7 or the 674/669-bin coverage
+   sets) is computed. Counting how many decisions fall in those cell sets is set membership, not a score, and it is
+   reported as membership only. The frozen 674/669-bin coverage sets are NOT redefined by v2.
 
 ## 5. Output
 
@@ -225,6 +229,6 @@ in the bin, bins +-1 are added (the widening is recorded). d = x - median(ref); 
   - the evidence numbers (d, n_ref, reference offsets and series, spread, sigma_x, R6/R9/R10/R11 statistics);
   - the standard used (for R4);
   - the record quotes (for the record family).
-- A drop-in `review_decisions`-format file for INDEP_FIX's follow-up.
+- A drop-in `review_decisions`-format file for model training.
 - No library value appears in any output field. The build greps its own outputs for library names followed by
   numbers, and fails if it finds any.

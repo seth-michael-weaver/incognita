@@ -1,4 +1,4 @@
-"""OMPROTOR (Incognita extension, not TALYS): coupled-channels smearing un-fold of the KD03 neutron surface diffuseness.
+"""`omprotor` (Incognita extension, not TALYS): coupled-channels smearing un-fold of the KD03 neutron surface diffuseness.
 
 TALYS couples every `colltype R` target (A >= 140, Z < 90: the rare-earth rotors; the actinides get RIPL 2408) in rigid-rotor CC with
 the global SPHERICAL KD03 potential deformed explicitly, R(theta) = R0 (1 + beta2 Y20 + beta4 Y40). KD03's diffuseness is already
@@ -12,13 +12,13 @@ with R = r A^(1/3) and a of each KD03 geometry, beta2/beta4 from the HFB mass ta
 
 Modes (keyword `omprotor <mode>` or env INCOGNITA_OMPROTOR when the keyword is absent/`n`):
   n    = OFF (TALYS; the default, bit-identical)
-  unf1 = volume (avadjust n) and surface (awdadjust n, avdadjust n) un-folded   (OMPROTOR arm UNF1)
-  unfv = volume only (avadjust n)                                              (OMPROTOR diagnostic UNFV)
-Each factor f = sqrt(1 - c R^2 s / a^2), floored at 0.3, written as the per-particle cards `avadjust n f` ... rounded to 5 decimals,
-exactly the lines OMPROTOR's runs carried (development notes), and put on the run through the fitted-lines
-route (`fitlib`) AFTER the run's own lines, like those runs' extra lines. Incident channel only, as every `Xadjust n` (TALYS
-flagompejec n). Note what the cards do on that route: they are written after TALYS's post-loop links, so `awadjust` does NOT follow
-`avadjust` (the volume imaginary diffuseness stays KD03's); that is what OMPROTOR measured and what is reproduced here.
+  unf1 = volume (avadjust n) and surface (awdadjust n, avdadjust n) un-folded
+  unfv = volume only (avadjust n)                                              (diagnostic)
+Each factor f = sqrt(1 - c R^2 s / a^2), floored at 0.3, written as the per-particle lines `avadjust n f` ... rounded to 5 decimals,
+and put on the run through the fitted-lines
+route (`fitlib`) AFTER the run's own lines. Incident channel only, as every `Xadjust n` (TALYS
+flagompejec n). Note what the lines do on that route: they are written after TALYS's post-loop links, so `awadjust` does NOT follow
+`avadjust` (the volume imaginary diffuseness stays KD03's); that is the intended behaviour.
 Test: tests/hf/test_omprotor.py
 """
 
@@ -76,7 +76,7 @@ def hfb_beta(Z: int, A: int) -> tuple[float, float]:
 
 
 def lines(Z: int, A: int, m: str) -> tuple[str, ...]:
-    """The keyword cards mode `m` puts on a run with target (Z, A); () for OFF and for non-members."""
+    """The keyword lines mode `m` puts on a run with target (Z, A); () for OFF and for non-members."""
     kind = MODES[m]
     if kind is None:
         return ()

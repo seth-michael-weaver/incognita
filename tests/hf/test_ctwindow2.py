@@ -1,4 +1,4 @@
-"""CTKINK: `ctwindow2` (env INCOGNITA_CT_WINDOW2) = ctwindow's complete-window CT anchor with (T, E0, Ex) solved jointly, so the
+"""`ctwindow2` (env INCOGNITA_CT_WINDOW2) = ctwindow's complete-window CT anchor with (T, E0, Ex) solved jointly, so the
 USED level density (densitytot) is continuous in value and log-slope at Exmatch. OFF must be TALYS's path unchanged and must
 leave the frozen `ctwindow` (B51) untouched; ON must be continuous to 1e-6 and count exactly the window's known levels."""
 import math
@@ -111,7 +111,7 @@ def test_unanchorable_kept(monkeypatch):
 
 
 def test_least_finds_closest_approach():
-    """ARTFIX `_least`: g never crosses zero -> the x of least |g|, to 1e-6, never worse than the grid point."""
+    """`_least`: g never crosses zero -> the x of least |g|, to 1e-6, never worse than the grid point."""
     xs = np.linspace(0.3, 3.0, 101)
     for c in (1e-2, -1e-2, 1e-8):
         gb = (lambda c_: (lambda z: (np.asarray(z) - 1.234) ** 2 * np.sign(c_) + c_))(c)
@@ -122,7 +122,7 @@ def test_least_finds_closest_approach():
 
 @pytest.mark.skipif(not HAVE_RIPL, reason="RIPL-4 levels-param.data not available")
 def test_ctwcont_no_root(monkeypatch):
-    """ARTFIX `ctwcont`: an unreachable window count (no root) is kept as densitymatch's values with ctwcont n (pre-ARTFIX),
+    """`ctwcont`: an unreachable window count (no root) is kept as densitymatch's values with ctwcont n,
     and anchored at the least |count - target| with ctwcont y (default); records with a root are identical either way."""
     monkeypatch.delenv("INCOGNITA_CTW2_CONT", raising=False)
     assert ctwindow2.mode(default_options(26, 56)) is False

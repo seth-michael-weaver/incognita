@@ -1,6 +1,6 @@
-"""KEVLEAK3 (`pe2`, `dup2` parts of INCOGNITA_KEVLEAK2). pe2: the projectile's sentinel PE is zeroed only where it is booked nowhere
-(Elast(k0) <= 0 and level 1 closed, or FLUXCLOSE C off); where FLUXCLOSE C books it on open levels, pe2 == off bitwise.
-dup2 = dup + the C engine's cascade_only (engine_decay.c); its C side is covered by the KEVLEAK3 Step 0 smoke (Sb-109 15.25 MeV
+"""Sentinel pre-equilibrium bookkeeping (`pe2`, `dup2` modes of INCOGNITA_KEVLEAK2). pe2: the projectile's sentinel PE is zeroed only where it is booked nowhere
+(Elast(k0) <= 0 and level 1 closed, or `fluxclose` C off); where `fluxclose` C books it on open levels, pe2 == off bitwise.
+dup2 = dup + the C engine's cascade_only (engine_decay.c); its C side is covered by an end-to-end run (Sb-109 15.25 MeV
 == the merged-branch oracle), the parts parsing here."""
 import numpy as np
 import pytest
@@ -11,9 +11,9 @@ from tests.hf import test_kevleak2 as T2
 
 
 @pytest.fixture(autouse=True)
-def _no_eff(monkeypatch):  # KEVLEAK3 gate candidate: a run's kevleak2.sync value must not leak into these unit tests
+def _no_eff(monkeypatch):  # a run's kevleak2.sync value must not leak into these unit tests
     monkeypatch.delenv("INCOGNITA_KEVLEAK2_EFF", raising=False)
-    monkeypatch.delenv("INCOGNITA_FLUXCLOSE_EFF", raising=False)  # FLUXPROMO2: nor a run's fluxclose.sync value (on("C"))
+    monkeypatch.delenv("INCOGNITA_FLUXCLOSE_EFF", raising=False)  # nor a run's fluxclose.sync value (on("C"))
 
 
 def _run(monkeypatch, flag, e1, fc="1"):
@@ -34,7 +34,7 @@ def _has_fluxclose() -> bool:
     return importlib.util.find_spec("physics.hf.emission.fluxclose") is not None
 
 
-@pytest.mark.skipif(not _has_fluxclose(), reason="engine without FLUXCLOSE (production): see test_pe2_without_fluxclose_is_pe")
+@pytest.mark.skipif(not _has_fluxclose(), reason="engine without fluxclose (production): see test_pe2_without_fluxclose_is_pe")
 def test_pe2_booked_by_fluxclose_is_bitwise(monkeypatch):
     off, on = _run(monkeypatch, None, 0.003), _run(monkeypatch, "pe2", 0.003)
     assert float(off["xspreeqtot"][0, 1]) > 0.0
@@ -43,17 +43,17 @@ def test_pe2_booked_by_fluxclose_is_bitwise(monkeypatch):
 
 
 def test_pe2_sink_zeroes_like_pe(monkeypatch):
-    for fc, e1 in (("1", -0.1), ("0", 0.003)):  # no open level above the ground state; or FLUXCLOSE C off
+    for fc, e1 in (("1", -0.1), ("0", 0.003)):  # no open level above the ground state; or fluxclose C off
         pe, pe2 = _run(monkeypatch, "pe", e1, fc), _run(monkeypatch, "pe2", e1, fc)
         assert float(pe2["xspreeqtot"][0, 1]) == 0.0
         for k in KEYS:
             assert torch.equal(pe[k], pe2[k]), (fc, k)
 
 
-@pytest.mark.skipif(not _has_fluxclose(), reason="engine without FLUXCLOSE")
+@pytest.mark.skipif(not _has_fluxclose(), reason="engine without fluxclose")
 def test_pe2_capture_neutral_is_pe(monkeypatch):
-    """FLUXCN part N (`fluxclose cn`, default): with C on the sentinel is still zeroed as in production (pe2 == pe with level
-    1 open), so the compound flux and the PE-photon gate are production's."""
+    """`fluxclose` part N (`fluxclose cn`, default): with C on the sentinel is still zeroed as in production (pe2 == pe with level
+    1 open), so the compound flux and the PE-photon threshold are production's."""
     for fc in ("cn", "A,C,N", "C,N"):
         pe, pe2 = _run(monkeypatch, "pe", 0.003, fc), _run(monkeypatch, "pe2", 0.003, fc)
         assert float(pe2["xspreeqtot"][0, 1]) == 0.0
@@ -61,9 +61,9 @@ def test_pe2_capture_neutral_is_pe(monkeypatch):
             assert torch.equal(pe[k], pe2[k]), (fc, k)
 
 
-@pytest.mark.skipif(_has_fluxclose(), reason="engine with FLUXCLOSE")
+@pytest.mark.skipif(_has_fluxclose(), reason="engine with fluxclose")
 def test_pe2_without_fluxclose_is_pe(monkeypatch):
-    """KEVLEAK3 gate candidate on production (no FLUXCLOSE module = C off): nothing books the sentinel PE, so pe2 == pe even
+    """Production (no fluxclose module = C off): nothing books the sentinel PE, so pe2 == pe even
     with level 1 open."""
     pe, pe2 = _run(monkeypatch, "pe", 0.003), _run(monkeypatch, "pe2", 0.003)
     assert float(pe2["xspreeqtot"][0, 1]) == 0.0
@@ -86,7 +86,7 @@ def test_dup2_python_record(monkeypatch):
 
 
 def test_resolve_deck_env_default(monkeypatch):
-    """Gate candidate: explicit deck keyword `kevleak2` > env INCOGNITA_KEVLEAK2 > default 2; sync() publishes it to _EFF."""
+    """Explicit deck keyword `kevleak2` > env INCOGNITA_KEVLEAK2 > default 2; sync() publishes it to _EFF."""
     from physics.hf import kevleak2 as K
     from physics.hf.input.defaults import default_options
     monkeypatch.delenv("INCOGNITA_KEVLEAK2", raising=False)

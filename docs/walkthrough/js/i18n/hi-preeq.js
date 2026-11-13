@@ -116,7 +116,7 @@ Object.assign(WT.L.labels, {
   "second fast particle in {#} of the last {#} reactions": "दूसरा तेज कण: {#}, पिछली {#} अभिक्रियाओं में से",
 });
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "bump {#}: a proton in the sea was hit, jumped up, and left a hole": "टक्कर {#}: सागर का एक प्रोटॉन टकराकर ऊपर उछला और होल छोड़ गया",
   "bump!": "टक्कर!",

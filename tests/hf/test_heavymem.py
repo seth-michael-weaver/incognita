@@ -1,4 +1,4 @@
-"""HEAVYMEM (development notes): bounded per-run fission barrier grids and worker memory hygiene, no number moved."""
+"""Bounded per-run fission barrier grids and worker memory hygiene, no number moved."""
 
 from __future__ import annotations
 

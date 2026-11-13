@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `glue`: the per-energy glue rewrites give the numbers of the code they replace
+"""Native kernel `glue`: the per-energy glue rewrites give the numbers of the code they replace
 (`HF_NX2_GLUE=0`), to the bit.
 
 * `compound.prepare.densprepare` (the Tjl/Tl interpolation in C, `_rho0_rows`' discrete levels
@@ -24,7 +24,7 @@ import torch
 
 @pytest.fixture(scope="module", autouse=True)
 def _alphatemp_off():
-    """KEVCOLD (alphatemp default ON 0.64, alphatemp_dom gd): the gd front calls densprepare twice (cold + hot pass); this glue test pins the production one-pass count; this module runs at alphatemp 0."""
+    """Alphatemp (default ON 0.64, alphatemp_dom gd): the gd front calls densprepare twice (cold + hot pass); this glue test pins the production one-pass count; this module runs at alphatemp 0."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_ALPHATEMP", "0")
         yield

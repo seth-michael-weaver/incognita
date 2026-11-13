@@ -74,8 +74,8 @@ step_verify() {
 }
 
 step_terra() {
-  echo "== terra: (n,p) blind correction grid (frozen model) on 3 check targets"
-  # the (n,p) correction was frozen on no-data engine curves with TALYS's stock E1 table (before INDEP_FIX), so the check uses it too
+  echo "== terra: (n,p) predicted correction grid (frozen model) on 3 check targets"
+  # the (n,p) correction was frozen on no-data engine curves with TALYS's stock E1 table (the earlier default), so the check uses it too
   local T=26-61,30-71,40-100 R="$W/terra/grid"
   if [ $ENGINE = 1 ]; then
     [ -d "${TALYS_DIR:-$HOME/opt/talys-src}/structure" ] || { skip terra "(n,p) grid" "no TALYS structure database (README quick start, TALYS_DIR)"; return; }
@@ -136,7 +136,7 @@ step_speed() {
 }
 
 step_capblind() {
-  echo "== capblind: the blind capture table from the frozen per-cell exam file (docs/release/exam)"
+  echo "== capblind: the prediction capture table from the frozen per-cell file (docs/release/exam)"
   (cd docs/release/exam && sha256sum --quiet -c SHA256SUMS) || { row capblind "exam cells sha256" "FAILED: docs/release/exam/capture_blind_cells.parquet changed"; setst capblind FAILED; return; }
   "${PY[@]}" scripts/release/score_capture_blind.py docs/release/exam/capture_blind_cells.parquet "$W/CAPTURE_BLIND.md" > "$W/capblind.log" 2>&1
   cmpf capblind "blind capture table (5 rows)" "$W/CAPTURE_BLIND.md" "$EXP/capblind/CAPTURE_BLIND.md"
@@ -151,7 +151,7 @@ step_retro() {
 }
 
 step_tiers() {
-  echo "== tiers: blind-tier interval coverage from the frozen held-out rows (docs/release/exam)"
+  echo "== tiers: prediction-tier interval coverage from the frozen validation rows (docs/release/exam)"
   (cd docs/release/exam && sha256sum --quiet -c SHA256SUMS) || { row tiers "exam files sha256" "FAILED: docs/release/exam changed"; setst tiers FAILED; return; }
   "${PY[@]}" scripts/release/score_tiers.py docs/release/exam/tier_rows.parquet "$W/TIERS.md" > "$W/tiers.log" 2>&1
   cmpf tiers "blind-tier coverage 68 / 95 %" "$W/TIERS.md" "$EXP/tiers/TIERS.md"
@@ -168,7 +168,7 @@ step_na() {
 }
 
 step_stock() {
-  echo "== stock: the TALYS port vs stock TALYS on the channel-scoreboard rows (docs/release/exam)"
+  echo "== stock: the TALYS port vs stock TALYS on the channel comparison rows (docs/release/exam)"
   exam_step stock "engine vs stock TALYS, 6 channels" score_stock.py stock_rows.parquet STOCK.md
 }
 
@@ -235,19 +235,19 @@ step_vault() {
 }
 
 step_final674() {
-  echo "== final674: the sealed coverage test of the shipped interval (674 post-2012 bins, 51 nuclei, blind protocol)"
+  echo "== final674: the independent coverage test of the shipped interval (674 post-2012 bins, 51 nuclei, data not used in the fit)"
   local R=docs/release/uq/final674_rows.parquet
   [ -f "$R" ] || { skip final674 "FINAL-674 coverage table" "$R is not in this checkout"; return; }
   "${PY[@]}" -m incognita.uq.calibration_report "$R" --by region fold --out "$W/FINAL674.md" > "$W/final674.log" 2>&1
-  cmpf final674 "FINAL-674 coverage (sealed test)" "$W/FINAL674.md" "$EXP/final674/FINAL674.md"
+  cmpf final674 "FINAL-674 coverage (independent test)" "$W/FINAL674.md" "$EXP/final674/FINAL674.md"
 }
 
 step_retromeasured() {
-  echo "== retromeasured: the MEASURED-tier interval on post-cutoff measurements (sealed time split, 286 rows)"
+  echo "== retromeasured: the MEASURED-tier interval on post-cutoff measurements (time split, 286 rows)"
   local R=docs/release/uq/retro_measured_rows.parquet
   [ -f "$R" ] || { skip retromeasured "RETRO-MEASURED coverage" "$R is not in this checkout"; return; }
   "${PY[@]}" scripts/release/score_retro_measured.py "$R" "$W/RETRO_MEASURED.md" > "$W/retromeasured.log" 2>&1
-  cmpf retromeasured "RETRO-MEASURED coverage (sealed)" "$W/RETRO_MEASURED.md" "$EXP/retromeasured/RETRO_MEASURED.md"
+  cmpf retromeasured "RETRO-MEASURED coverage (post-cutoff data)" "$W/RETRO_MEASURED.md" "$EXP/retromeasured/RETRO_MEASURED.md"
 }
 
 step_registry() {

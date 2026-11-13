@@ -1,12 +1,12 @@
-# BUGTIER3: tiers, bands and MACS flags of library v0.2.2, and how the site shows them (2026-11-07)
+# Library v0.2.2 audit: tiers, bands and MACS flags of library v0.2.2, and how the site shows them (2026-11-07)
 
-Bug hunt round 3, scoring. Scope: how library v0.2.2 assigns and reports its tiers (MEASURED / ANCHORED /
+Scoring audit, round 3. Scope: how library v0.2.2 assigns and reports its tiers (MEASURED / ANCHORED /
 INTERPOLATED / EXTRAPOLATED), the validated range, the uncertainty bands, the ANCHORED rescaling, the MACS flags and the
 MACS and rate tables; the tier display of the Data explorer (`docs/walkthrough/js/data.js`, `data/index.json`); and the
-Scoreboard page against `docs/walkthrough/data/board/cells.csv` and `familywise.csv`.
+library comparison page (`scoreboard-data.js`) against `docs/walkthrough/data/board/cells.csv` and `familywise.csv`.
 
 Tests: `tests/test_bugtier3.py`. Site findings are fixed. Library findings that would change a shipped file of
-`library/v0.2.2` (its files and docs are checksummed in `SHA256SUMS`) or a published Scoreboard number are drafted
+`library/v0.2.2` (its files and docs are checksummed in `SHA256SUMS`) or a published comparison-page number are proposed
 below and not applied. Their tests are `xfail(strict=True)`, so each one fails once its item is applied, and its marker
 must then come off.
 
@@ -32,7 +32,7 @@ Over all 6,168 rows of `capture_v022.parquet` and the CSV tables:
   `alt_value_30keV_b` for all 1,131 `pe_kev` / `fists2` nuclides.
 - **Site.** For every nuclide, the site's `index.json` and `data/n/<Z>/<A>.json` carry the library's tier, validated
   flag, MACS flag, curve, bands, MACS(kT) and their factors, to their 4 (bands 3) significant digits.
-- **Scoreboard.** `scoreboard-data.js` and the inline `WT.boardFW` match `cells.csv` and `familywise.csv`.
+- **Comparison page.** `scoreboard-data.js` and the inline `WT.boardFW` match `cells.csv` and `familywise.csv`.
   - Counts: engine 47 WIN / 19 TIE / 0 LOSS / 14 N/A, and the same per rival. TERRA 217 / 108 / 1 / 28, per rival
     too.
   - The 19 cells of the not-a-win table and the 13 "read with care" cells match their n, scores, gap and interval
@@ -46,7 +46,7 @@ and every curve is the engine's own prediction, not interpolated from neighbours
 MEASURED neighbour within 2 sits at or across a magic number (Cu-58..60, Zn-60, Sb-112..118, Te-114..119, Eu-146,
 Bi-204..206). If the tier is ever used to pick an interval again, that is worth a look.
 
-## Fixed (site display; no library value or Scoreboard number changes)
+## Fixed (site display; no library value or comparison-page number changes)
 
 | # | finding | where | count |
 |---|---|---|---|
@@ -58,12 +58,12 @@ Bi-204..206). If the tier is ever used to pick an interval again, that is worth 
 
 `docs/GUIDE.md`: a note under the tier table on what the files show about the tier rule (see C and D).
 
-## Amendment drafts (not applied)
+## Proposed changes (not applied)
 
 **Status 2026-11-07: A, B, D and F are applied in library v0.2.3**, an errata release of v0.2.2 with the same values
 (`library/v0.2.3/CHANGELOG.md`; `scripts/release/build_library_v023.py`, `verify_library_v023.py`). Their tests now
 read v0.2.3 and pass. C and E are separate decisions and stay open (xfail); the v0.2.3 README lists them as known
-issues. Two details differ from the drafts below:
+issues. Two details differ from the proposals below:
 - A: `macs30_v022.csv` (and v0.2.1's) still carried v0.2's ANCHORED `value_source` text, with the v0.2 factor, so in
   that file all 21 rows change (in `capture` 5). `macs_kt` has no `value_source` column.
 - F: applied as a per-kT flag (`macs_flag_<kT>keV`, `macs_flag` = any kT, `rate_flag_below_T9`). At high kT the
@@ -75,7 +75,7 @@ issues. Two details differ from the drafts below:
 | B | `model_form_max_dex_sub1MeV` = 0 for the 3 `gg_deadend` nuclides; `alt_value_30keV_b` is the 31.8 keV value | `capture_v022.parquet` (column), README | none |
 | C | tiers disagree with their definition on 60 nuclides with kept keV capture data | `tier` of 60 nuclides, the bands that take a tier interval, every per-tier table | per-tier tables in BUILD.md / VERIFY |
 | D | the tier and validated-range definitions in the docs are incomplete | library README, BUILD.md, site texts (done for the site) | none |
-| E | 4 TERRA coverage cells are N/A by a "<5 nuclei" label with 5–6 nuclei | `cells.csv`, Scoreboard section 2 | TERRA TIE 108 → 112, N/A 28 → 24 (if the counts are right) |
+| E | 4 TERRA coverage cells are N/A by a "<5 nuclei" label with 5–6 nuclei | `cells.csv`, comparison page section 2 | TERRA TIE 108 → 112, N/A 28 → 24 (if the counts are right) |
 | F | `macs_flag` uses the 30 keV criterion at every kT | RATES.md, `macs_kt_v022.csv` | none |
 
 ### A. ANCHORED factor bookkeeping (`build_library_v022.py`)
@@ -168,7 +168,7 @@ threshold that its README does not state.
 
 **Size, if reclassified to MEASURED.**
 - `tier` changes for up to 60 nuclides.
-- The bands change wherever the tier's v0.1 interval was the larger half of max(UNCCAL, v0.1 tier interval):
+- The bands change wherever the tier's v0.1 interval was the larger half of max(engine band, v0.1 tier interval):
   `unc_kind` says "larger at 30 keV: v0.1 tier interval" for 208 INTERPOLATED and 5,308 EXTRAPOLATED rows overall.
   The new interval would be the MEASURED one (median 30 keV 68 % factor ×1.24 against ×1.34 / ×1.58).
 - Curves, MACS and rates do not change.
@@ -205,7 +205,7 @@ Tests: `test_unmeasured_tiers_have_no_kept_kev_capture_data`, `test_anchored_hav
 The site texts were changed in S3–S5. `docs/GUIDE.md` carries both notes. The library README and BUILD.md are
 checksummed and wait for this amendment.
 
-### E. TERRA coverage cells labelled "N/A (<5 nuclei)" with 5 or 6 nuclei (Scoreboard section 2)
+### E. TERRA coverage cells labelled "N/A (<5 nuclei)" with 5 or 6 nuclei (comparison page, section 2)
 
 Four counted-as-N/A cells in `cells.csv` carry `n_nuclei` ≥ 5. Under the stated TERRA rule ("fewer than 5 for the
 series-aware and uncertainty-coverage cells") they should be scored:

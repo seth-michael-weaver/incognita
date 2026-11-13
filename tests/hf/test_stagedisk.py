@@ -1,6 +1,6 @@
-"""STAGECACHE: the stage disk cache returns exactly what it stored, keys on the optical-model inputs
-and not on level-density ones, and is a no-op when unset.  Gates on full runs:
-development notes."""
+"""The stage disk cache returns exactly what it stored, keys on the optical-model inputs
+and not on level-density ones, and is a no-op when unset.  Full-run checks are not part of
+the unit tests."""
 
 from __future__ import annotations
 

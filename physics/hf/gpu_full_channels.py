@@ -4,7 +4,7 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: GPUFULL. No physics of its own: `emission.channels.exclusive_channels` rearranged.
+Task: GPU batch path. No physics of its own: `emission.channels.exclusive_channels` rearranged.
 
 TALYS routines computed here:
     channels.f90:1 (channels)
@@ -33,7 +33,7 @@ a unit upper triangular system. The channel cross section is its ground state pl
 * `Qexcl` is formed from the first found source, as channels.f90:283-318 does, and read only for
   the non-threshold floor (channels.f90:435-445).
 
-**Stacked channels (GPU3).** Every channel of one channel nucleus is a column of one tensor
+**Stacked channels.** Every channel of one channel nucleus is a column of one tensor
 ((runs, channels, rows) for `xsexcl`, (runs, channels) for `qexcl`, `xs`, `opened`, `valid`), and
 the pending source contractions of a nucleus are one (runs, pairs, rows) tensor, a pair being a
 (channel, ejectile type) whose source channel exists at the mother nucleus. The per-channel Python
@@ -42,7 +42,7 @@ one triangular solve with a matrix right-hand side. The arithmetic per cell is u
 the pending sources run in another order (last bits). A nucleus's `xsexcl` is read only by
 contractions made while its own level decays, so it is freed when that level's validity is formed.
 
-Test: GPUFULL / tests/hf/test_gpu_full.py
+Test: tests/hf/test_gpu_full.py
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ class ChannelWalk:
     """channels.f90 for every run of a batch (module docstring).
 
     TALYS: channels.f90:1 (channels)
-    Test: GPUFULL, GPU3
+    Test: tests/hf/test_gpu_full.py
     """
 
     def __init__(self, bk, chan_state: dict | None = None):
@@ -149,7 +149,7 @@ class ChannelWalk:
                                     device=dev)
         self.chan_state = chan_state if chan_state is not None else {}
         prev = {}
-        if any(isinstance(k, tuple) for k in self.chan_state):  # GPUC: "_sfactor" is binary's
+        if any(isinstance(k, tuple) for k in self.chan_state):  # "_sfactor" is binary's
             for key, ks in self.keys.items():
                 v = np.array([[self.chan_state.get((u, k), False) for k in ks] for u in names],
                              dtype=bool).reshape(B, len(ks))
@@ -269,7 +269,7 @@ class ChannelWalk:
         (n, R) is the initial compound nucleus's binary photon row.
 
         TALYS: channels.f90:1 (channels)
-        Test: GPUFULL, GPU3
+        Test: tests/hf/test_gpu_full.py
         """
         dev, B, R = self.dev, self.B, self.R
         cov = self.covered.get(key)
@@ -387,7 +387,7 @@ class ChannelWalk:
         feedexcl rows. `runs` may repeat (the contractions add).
 
         TALYS: channels.f90:370-383
-        Test: GPUFULL, GPU3
+        Test: tests/hf/test_gpu_full.py
         """
         dk = (mother[0] + PARZ[ty], mother[1] + PARN[ty])
         pr = self.pairs.get(dk)

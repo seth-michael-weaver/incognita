@@ -265,12 +265,12 @@ def _density(
     J = _t(J)
     ldmod = ld.ldmodel if ldmodel is None else ldmodel
     if ldmod <= 3 or not ld.has_table(ibar):
-        # COREX: nothing but spindis reads J, so the energy-only factors are evaluated on eex as
+        # Fast path: nothing but spindis reads J, so the energy-only factors are evaluated on eex as
         # given ((X, 1) from the grid callers) and broadcast against J once, in spindis
         ald = ignatyuk(ld, eex, ibar)
         sc = spincut(ld, ald, eex, ibar)
         dt = _densitytot(ld, eex, ibar, ldmod)
-        from physics.hf.density import spinquench as _sq  # SPINQUENCH: spin distribution only (OFF: sc)
+        from physics.hf.density import spinquench as _sq  # `spinquench`: spin distribution only (OFF: sc)
         sc = _sq.quench_t(ld, eex, sc, ibar)
         out = dt * PARDIS * spindis(sc, J)
         out = torch.where(eex < 0.0, torch.zeros_like(out), out)
@@ -296,18 +296,18 @@ def _density(
     return torch.clamp(out, min=1.0e-30)
 
 
-# ------------------------------------------------------------------------------ ENGADJ (physics/hf/eadj.py)
+# ------------------------------------------------------------------------------ `eadj` (physics/hf/eadj.py)
 def _ldbumps(ld: LDNucleus, ibar: int):
     """(pshift bumps, ctable bumps) of this nucleus' ground-state density, or None (the default: no bump)."""
     if ibar != 0 or not _eadj.on():
         return None
     bp = _eadj.nucleus_bumps("pshift", ld.Z, ld.A)
-    bc = _eadj.nucleus_bumps("ctable", ld.Z, ld.A) + _npwindow.bumps(ld, ibar)  # NPWINDOW (default OFF: ())
+    bc = _eadj.nucleus_bumps("ctable", ld.Z, ld.A) + _npwindow.bumps(ld, ibar)  # `npwindow` (default OFF: ())
     return (bp, bc) if (bp or bc) else None
 
 
 def _adjusted(core, ld: LDNucleus, eex_mev, ibar: int, adj, *args):
-    """ENGADJ energy-local level-density adjustment around the unadjusted `core(ld, eex, ...)`:
+    """`eadj` energy-local level-density adjustment around the unadjusted `core(ld, eex, ...)`:
     pshift: the model is evaluated at Eex - dP(Eex) (a local pairing / energy shift, U = Eex - delta - dP for the
     Fermi gas); ctable: x exp(dc(Eex) sqrt(Eex - dP - ptable)), TALYS density.f90's `ct = ctable + factor - 1`."""
     bp, bc = adj
@@ -323,11 +323,11 @@ def _adjusted(core, ld: LDNucleus, eex_mev, ibar: int, adj, *args):
     return out
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def densitytot(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0, ldmodel: int | None = None) -> Tensor:
     """Total level density [MeV^-1] (both parities, levels): the analytical model times the
     collective enhancement for ldmodel <= 3 (or a missing table), the table otherwise, times
-    exp(ctable sqrt(Eex - ptable)); 1e-30 below zero. ENGADJ bumps on top (`_adjusted`).
+    exp(ctable sqrt(Eex - ptable)); 1e-30 below zero. `eadj` bumps on top (`_adjusted`).
 
     TALYS: densitytot.f90:1 (densitytot)
     Test: A-ld
@@ -338,11 +338,11 @@ def densitytot(ld: LDNucleus, eex_mev: Tensor, ibar: int = 0, ldmodel: int | Non
     return _adjusted(lambda l, e: _densitytot(l, e, ibar, ldmodel), ld, eex_mev, ibar, adj)
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def densitytotP(
     ld: LDNucleus, eex_mev: Tensor, parity: int, ibar: int = 0, ldmodel: int | None = None
 ) -> Tensor:
-    """Total level density of one parity [MeV^-1] (densitytotP.f90); ENGADJ bumps on top (`_adjusted`).
+    """Total level density of one parity [MeV^-1] (densitytotP.f90); `eadj` bumps on top (`_adjusted`).
 
     TALYS: densitytotP.f90:1 (densitytotP)
     Test: A-ld
@@ -353,7 +353,7 @@ def densitytotP(
     return _adjusted(lambda l, e: _densitytotP(l, e, parity, ibar, ldmodel), ld, eex_mev, ibar, adj)
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def density(
     ld: LDNucleus,
     eex_mev: Tensor,
@@ -362,7 +362,7 @@ def density(
     ibar: int = 0,
     ldmodel: int | None = None,
 ) -> Tensor:
-    """rho(Ex, J, parity) [MeV^-1] as density.f90 (`_density`); ENGADJ bumps on top (`_adjusted`).
+    """rho(Ex, J, parity) [MeV^-1] as density.f90 (`_density`); `eadj` bumps on top (`_adjusted`).
 
     TALYS: density.f90:1 (density)
     Test: A-ld
@@ -437,7 +437,7 @@ def dtheory(
                         continue
                     rho[(l, J)] = (0.5 * J2, parity)
     D = torch.zeros(numl + 1, dtype=DTYPE)
-    # PERFCASC: every (J, parity) density at the one energy eex in one `density` call per parity (J as a vector) instead
+    # Every (J, parity) density at the one energy eex in one `density` call per parity (J as a vector) instead
     # of one call per pair. Bit-identical: everything `density` computes before the spin distribution depends on eex
     # only, and the J-dependent part (spindis: (2J+1)/2s exp(-(J+1/2)^2/2s), the table lookup) is elementwise
     # (torch exp/x*x and the C table kernel give the same bits for a scalar and a vector element).
@@ -531,7 +531,7 @@ def densityout(
     if ibar == 0:
         # densityout.f90:275-307 walks the levels one at a time; here the whole column is one
         # batched evaluation (contract §1.2) -- 300 scalar densitytot calls per nucleus was the
-        # dominant cost of the A-ld gate.
+        # dominant cost of the A-ld test.
         keep = [i for i in range(1, ld.nlevmax2 + 1) if _fv(ld.edis_mev[i]) != 0.0]
         idx = torch.tensor(keep, dtype=torch.int64)
         eex = ld.edis_mev[idx]

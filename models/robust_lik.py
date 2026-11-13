@@ -1,4 +1,4 @@
-"""Student-t data likelihood for Stage C (register C7, ROBUSTLIK).
+"""Student-t data likelihood for Stage C (register C7).
 
 A Gaussian likelihood's pull on the fit grows without bound in a point's residual, so a
 discrepant EXFOR dataset -- wrong normalisation, understated errors, a stale monitor -- pulls

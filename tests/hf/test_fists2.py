@@ -1,6 +1,6 @@
-"""TS2FREEZE: `fists2` (env INCOGNITA_FIS_TS2) = SADDLEPAIR's TS2 even-even saddle K-band transition states, default OFF.
+"""`fists2` (env INCOGNITA_FIS_TS2) = the TS2 even-even saddle K-band transition states, default OFF.
 OFF must be identical to the parent; ON touches only even-even fissioning nuclides (hbstates.ee heads, fecont = 28/sqrt(A) rounded
-to 1 keV on every barrier). Stock-TALYS agreement (hbstate y + hbtransfile): development notes"""
+to 1 keV on every barrier). Stock-TALYS agreement (hbstate y + hbtransfile) is checked on full runs."""
 import torch
 
 from physics.hf.fission.parameters import fission_parameters, fists2_on
@@ -52,5 +52,5 @@ def test_barriers_unchanged(monkeypatch):
     _, on = _fp(92, 234, monkeypatch, env="1")
     assert torch.equal(off.fbarrier_mev, on.fbarrier_mev)
     # the WKB width is not bitwise repeatable across calls in one process even with the switch OFF (OFF vs OFF differs by 9e-16,
-    # pre-existing); run-level bit identity is checked against the SADDLELD S0 cache in development notes
+    # pre-existing); run-level bit identity is checked against a cached reference run
     assert torch.allclose(off.fwidth_mev, on.fwidth_mev, rtol=1e-12, atol=0)

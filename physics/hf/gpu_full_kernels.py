@@ -4,11 +4,11 @@ one step of the mother-bin walk, as pure tensor functions that `torch.compile` f
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: GPUFULL2 (gate G-GF2, docs/results/hf-gpu-full.md). No physics of its own: every function
+Task: GPU batch kernels. No physics of its own: every function
 here is a statement-for-statement copy of `gpu_full_cascade.exit_arrays`, `widths_of`, `feed_of`
 and the body of `_decay_chunk`'s walk, with the object and dict lookups moved out so that a
 function sees tensors and a few static ints only. The eager path measured 3.6 M aten launches per
-480 heavy runs (~14 us each on the laptop), which is the whole of its wall time; a compiled
+480 heavy runs (~14 us each on an RTX 5050 laptop), which is the whole of its wall time; a compiled
 function is one launch of a handful of fused kernels, and its intermediates of shape
 (rows, bins, residual rows, l') are not materialised, so the bin chunks can be larger too.
 
@@ -19,7 +19,7 @@ reductions (sums, einsums lowered to bmm) may group terms differently, which mov
 `COMPILE` (env `GPUFULL_COMPILE`, default on when a C compiler and Python.h are found) switches
 `torch.compile` off; the eager functions compute the same numbers.
 
-Test: GPUFULL2 / tests/hf/test_gpu_full.py
+Test: tests/hf/test_gpu_full.py
 """
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ def _compiled(fn):
     import torch._dynamo
 
     torch._dynamo.config.cache_size_limit = max(torch._dynamo.config.cache_size_limit, 256)
-    # GPU3: sizes that happen to be equal are not one symbol (duck sizing), or a later call
+    # sizes that happen to be equal are not one symbol (duck sizing), or a later call
     # with them unequal recompiles, possibly inside a CUDA-graph capture
     import torch.fx.experimental._config as fx_config
 
@@ -74,7 +74,7 @@ def _geometry(bins: Tensor, binm: Tensor, nexm_raw: Tensor, ex_m: Tensor, dex_m:
     exm) for mother bins `bins` (n, mc) into the daughter rows (n, Rt).
 
     TALYS: densprepare.f90:1 (densprepare)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     Rt = d_ex.shape[1]
     exinc = ex_m.gather(1, bins)
@@ -126,7 +126,7 @@ def particle_nodes(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlas
     `rb * T` can be non-zero.
 
     TALYS: densprepare.f90:1 (densprepare), locate.f90:1 (locate)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     n, mc = bins.shape
     Rt = d_ex.shape[1]
@@ -134,7 +134,7 @@ def particle_nodes(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlas
      nexm) = _geometry(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, ty)
     eout_c = 0.5 * (torch.where(below, 0.0, emin) + emax)
     eout_d = torch.where(part, 0.5 * (ex0plus + exm) - ss - ex, (exinc[..., None] - ss) - ex)
-    if nnl is not None and ty >= 1:  # NNLEAK (default y): Egamma^3-filled initial-CN top bin
+    if nnl is not None and ty >= 1:  # `nnleak` (default y): Egamma^3-filled initial-CN top bin
         sel = (bins == nnl[:, None])[..., None] & part & ~cont_row  # rb there is (Ex0plus - Exm)/dExinc
         dd = ex0plus - exm
         rb = torch.where(sel, rb * rb * rb * rb, rb)
@@ -181,7 +181,7 @@ def _particle_T(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, 
     """`exit_arrays` for a particle exit: (rb, T (n, mc, Rt, L), rho_d), dense.
 
     TALYS: densprepare.f90:1 (densprepare), locate.f90:1 (locate)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     n, mc = bins.shape
     Rt = d_ex.shape[1]
@@ -200,10 +200,10 @@ def _particle_T(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, 
 
 
 # ------------------------------------------------------------------------------ ragged rows
-#
+
 # `rb * T` of a particle exit is non-zero on ~3% of the dense (row, bin, residual row, l') cells
 # of a heavy chunk (a bin reaches only the residual rows under its nexmax, and T only the l' under
-# its cap), and FP64 bmm on the laptop GPU runs at ~50 GFLOP/s. So the contractions run on the
+# its cap), and FP64 bmm on a laptop RTX 5050 runs at ~50 GFLOP/s. So the contractions run on the
 # list of live (row, bin, residual row) triples, `particle_nodes`' `live`, as fused reductions:
 # the same products, summed per triple and then per (row, bin), which moves the last bits only.
 
@@ -213,7 +213,7 @@ def particle_rows(rb, lcap, na, w1, w2, w3, idx, TL_r, eps, fn, br_map, mc: int,
     row in the compact Q table (`br_map` over (n, Rt)), `rb` and transmissions T (nr, L).
 
     TALYS: densprepare.f90:1 (densprepare)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     b = torch.div(idx, mc * Rt, rounding_mode="floor")
     m = torch.div(idx, Rt, rounding_mode="floor") % mc
@@ -246,7 +246,7 @@ def widths_rows(b, m, r, qrow, rb_r, T, Qr, Md, pd, dmask, dfac, sfac: float, n:
     """`widths_of` on the live triples: D (n, mc, NJ, 2).
 
     TALYS: compound.f90:1 (compound)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     L = T.shape[1]
     Wr = rb_r[:, None] * T  # (nr, L)
@@ -269,7 +269,7 @@ def feed_rows(b, m, r, qrow, rb_r, T, Qr, Md, pd, dmask, dfac, F, sfac: float, n
     added and fd (n, mc, ND).
 
     TALYS: compound.f90:1 (compound)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     NJ2 = F.shape[2] * 2
     ND = dmask.shape[1]
@@ -296,12 +296,12 @@ def feed_rows(b, m, r, qrow, rb_r, T, Qr, Md, pd, dmask, dfac, F, sfac: float, n
 
 def widths_rows32(b, m, r, qrow, rb_r, T, Qs, qs, Md, pd, dmask, dfac, sfac: float, n: int,
                   mc: int, NJ: int):
-    """`widths_rows` with the contractions in float32 (GPU3): the compact Q table is carried as
+    """`widths_rows` with the contractions in float32: the compact Q table is carried as
     `Qs` (float32, each (pair, J, parity) column divided by its largest value `qs`), the
     per-triple sums are formed in float32 and scaled back and accumulated in float64.
 
     TALYS: compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     Wr = (rb_r[:, None] * T).to(F32)  # (nr, L)
     cont = (Wr[:, :, None] * Qs[qrow]).sum(1).to(F64) * qs[qrow]  # (nr, NJ*2)
@@ -321,12 +321,12 @@ def widths_rows32(b, m, r, qrow, rb_r, T, Qs, qs, Md, pd, dmask, dfac, sfac: flo
 
 def feed_rows32(b, m, r, qrow, rb_r, T, Qs, qs, Md, pd, dmask, dfac, F, sfac: float, n: int,
                 mc: int, Rt: int):
-    """`feed_rows` with the (J, parity) x l' contraction in float32 (GPU3): the feeding times
+    """`feed_rows` with the (J, parity) x l' contraction in float32: the feeding times
     the column scales is divided by its largest value per triple, contracted with `Qs` and `W`
     in float32, and scaled back in float64.
 
     TALYS: compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     NJ2 = F.shape[2] * 2
     ND = dmask.shape[1]
@@ -386,12 +386,12 @@ def _lwin(T, lb, le, b, rc):
 def widths_dense32(b, m, r, rb_r, T, Qs, qs, lb, le, pd, dmask, dfac, sfac: float, n: int,
                    mc: int, Rt: int, NJ: int):
     """`widths_rows` with the live triples scattered into a dense float32 (n, mc, Rt*L) and the
-    continuum contraction as a float32 bmm (GPU3): `Qs` (n, Rt*L, NJ*2) is the rows' Q table
+    continuum contraction as a float32 bmm: `Qs` (n, Rt*L, NJ*2) is the rows' Q table
     with each (J, parity) column divided by its largest value `qs` (n, NJ*2). The discrete levels
     take the l' window of `lb`/`le` as prefix differences (float64).
 
     TALYS: compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     L = T.shape[1]
     W = _dense32(b, m, r, rb_r[:, None] * T, n, mc, Rt).view(n, mc, Rt * L)
@@ -407,11 +407,11 @@ def widths_dense32(b, m, r, rb_r, T, Qs, qs, lb, le, pd, dmask, dfac, sfac: floa
 
 def feed_dense32(b, m, r, rb_r, T, Qs, qs, lb, le, pd, dmask, dfac, F, fr, sfac: float, n: int,
                  mc: int, Rt: int, NJ: int):
-    """`feed_rows` and `z_rows` as float32 bmms on the dense triples (GPU3): Z (n, Rt*L, NJ*2)
+    """`feed_rows` and `z_rows` as float32 bmms on the dense triples: Z (n, Rt*L, NJ*2)
     in units of the row scale `fr`, mcont (n, mc, Rt) with the discrete cells added, and fd.
 
     TALYS: compound.f90:1 (compound), multiple.f90:1 (multiple)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     ND = dmask.shape[1]
     L = T.shape[1]
@@ -509,7 +509,7 @@ def _photon_T(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, tg
               tg_boff, tg_n0, tg_lc, ic0: int, dmask, dfac, G: int):
     """`exit_arrays` for the photon: (rb, T (n, mc, 2, Rt, G), rho_d); `Chunk.tg_bins` inlined.
 
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     n, mc = bins.shape
     Rt = d_ex.shape[1]
@@ -557,7 +557,7 @@ def particle_widths(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nla
     """`widths_of(exit_arrays(...))` for a particle exit: D (n, mc, NJ, 2).
 
     TALYS: compound.f90:1 (compound)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     rb, T, rho_d = _particle_T(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast,
                                egrid_r, egrid32_r, ib, ie, maxen, lmax_r, TL_r, head0, eps, fn,
@@ -576,7 +576,7 @@ def photon_widths(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast
     """`widths_of(exit_arrays(...))` for the photon: (D (n, mc, NJ, 2), rb, rho_d).
 
     TALYS: compound.f90:1 (compound)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     rb, T, rho_d = _photon_T(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, tgf,
                              tg_base, tg_boff, tg_n0, tg_lc, 0, dmask, dfac, G)
@@ -593,11 +593,11 @@ def photon_widths(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast
 
 def photon_widths32(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, tgf,
                     tg_base, tg_boff, tg_n0, tg_lc, dmask, dfac, Qs, qs, Md, pd, G: int, NJ: int):
-    """`photon_widths` with the matrix products in float32 (GPU3): `Qs` is the dense Q table
+    """`photon_widths` with the matrix products in float32: `Qs` is the dense Q table
     (float32, each (J, parity) column divided by its largest value `qs` (n, NJ*2)).
 
     TALYS: compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     rb, T, rho_d = _photon_T(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, tgf,
                              tg_base, tg_boff, tg_n0, tg_lc, 0, dmask, dfac, G)
@@ -639,10 +639,10 @@ def particle_widths32(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_n
                       egrid32_r, ib, ie, maxen, lmax_r, TL_r, head0, eps, fn, lmaxinc, dmask,
                       dfac, Qs, qs, Md, pd, sfac: float, ty: int, is_k0: bool, NJ: int):
     """`particle_widths` with the (bin, residual row x l') x (J, parity) product as a float32
-    bmm (GPU3): `Qs` (n, Rt*L, NJ*2) is the Q table with each column divided by `qs`.
+    bmm: `Qs` (n, Rt*L, NJ*2) is the Q table with each column divided by `qs`.
 
     TALYS: compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     rb, T, rho_d = _particle_T(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast,
                                egrid_r, egrid32_r, ib, ie, maxen, lmax_r, TL_r, head0, eps, fn,
@@ -675,12 +675,12 @@ def particle_W32(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast,
 def particle_feed32(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast, egrid_r,
                     egrid32_r, ib, ie, maxen, lmax_r, TL_r, head0, eps, fn, lmaxinc, dmask, dfac,
                     Qs, qs, Md, pd, F, fr, sfac: float, ty: int, is_k0: bool, NJ: int):
-    """`particle_feed` with the products as float32 bmms (GPU3): Z in units of the row scale
+    """`particle_feed` with the products as float32 bmms: Z in units of the row scale
     `fr` (float32, summed over the bins), and the row sums mcont (float64, the feeding times the
     column scales divided by its largest value per bin before the product).
 
     TALYS: compound.f90:1 (compound), multiple.f90:1 (multiple)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     W, T0, T1, rho_d = particle_W32_c(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex,
                                       d_nlast, egrid_r, egrid32_r, ib, ie, maxen, lmax_r, TL_r,
@@ -714,7 +714,7 @@ def particle_feed(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast
     (n, mc, Rt) with the discrete cells added, fd (n, mc, ND)).
 
     TALYS: compound.f90:1 (compound), multiple.f90:1 (multiple)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     rb, T, rho_d = _particle_T(bins, binm, nexm_raw, ex_m, dex_m, sep_t, d_ex, d_dex, d_nlast,
                                egrid_r, egrid32_r, ib, ie, maxen, lmax_r, TL_r, head0, eps, fn,
@@ -769,7 +769,7 @@ def decay_step(nex: Tensor, pop: Tensor, xe_nex: Tensor, summpe_nex: Tensor, rma
     of the compound feeding (compound.f90:402); with no record the factor is exactly 1.0.
 
     TALYS: multiple.f90:1 (multiple), compound.f90:1 (compound)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     dev = pop.device
     n, NJ = pop.shape[0], pop.shape[1]
@@ -795,7 +795,7 @@ def decay_step(nex: Tensor, pop: Tensor, xe_nex: Tensor, summpe_nex: Tensor, rma
     tg = _tg_gather(bins.gather(1, i[:, None]), binm.gather(1, i[:, None]), tgf, tg_base,
                     tg_boff.gather(1, i[:, None]), tg_n0, tg_lc, R0, G)[:, 0]
     # the einsums as explicit fused reductions: their inner dimensions (G <= 3 multipolarities,
-    # 2 parities) make FP64 bmm the slowest kernel the card has
+    # 2 parities) make FP64 bmm the slowest kernel the GPU has
     V0 = (f[:, :, None, :, None] * M0[None, :, :, None, :]).sum(1)  # (n, J0, 2, G)
     V1 = V0.flip(2)
     TV = ((tg[:, 0, :, None, None, :] * V0[:, None]).sum(-1)
@@ -834,13 +834,13 @@ def decay_step32(nex: Tensor, pop: Tensor, xe_nex: Tensor, summpe_nex: Tensor, r
                  bins: Tensor, binm: Tensor, tgf: Tensor, tg_base: Tensor, tg_boff: Tensor,
                  tg_n0: Tensor, tg_lc: Tensor, nlg: Tensor, rowsR: Tensor, Fst: Tensor,
                  deadst: Tensor, decayed: Tensor, G: int):
-    """`decay_step` with the photon exit's contractions in float32 (GPU3): the compound feeding
+    """`decay_step` with the photon exit's contractions in float32: the compound feeding
     `f` is divided by its largest value per row, contracted with the photon transmissions and
     rho0 (`rhog0_32`, `M0_32` float32) in float32, and scaled back to float64 for the
     populations it is added to. Same returns as `decay_step`.
 
     TALYS: multiple.f90:1 (multiple), compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     dev = pop.device
     n, NJ = pop.shape[0], pop.shape[1]

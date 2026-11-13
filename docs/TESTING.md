@@ -44,7 +44,7 @@ uv run python -m incognita.bench.score leaderboard --out my_leaderboard    # the
 uv run python -m incognita.bench.score export --track capture-heldout --out rows.csv       # the rows, to predict yourself
 ```
 
-- The tracks, with manifests and data cards, are in `incognita/bench/tracks/`. The guide and current leaderboard are
+- The tracks, with manifests and dataset descriptions, are in `incognita/bench/tracks/`. The guide and current leaderboard are
   [`docs/release/BENCHMARK.md`](release/BENCHMARK.md).
 - Metric: the rms of log10(prediction / measurement), in dex, with paired differences on the rows both entries cover.
 - We ship no evaluated-library values. To put ENDF/B, JENDL, TENDL and the others on the dated tracks, fetch them from
@@ -61,7 +61,7 @@ uv run python -m incognita.uq.calibration_report --preset tiers    [--exam DIR] 
 uv run python -m incognita.uq.calibration_report --preset nostruct [--exam DIR]
 ```
 
-It reports coverage at 68/95 % with nucleus-bootstrap CIs, the PIT histogram, ECE and sharpness, by stratum. The
+It reports coverage at 68/95 % with bootstrap-over-nuclei CIs, the PIT histogram, ECE and sharpness, by stratum. The
 evidence behind our uncertainty claims, including where they fail, is in
 [`docs/release/UQ_EVIDENCE.md`](release/UQ_EVIDENCE.md).
 
@@ -89,8 +89,8 @@ uv run python -m incognita.curation.build --out DIR                          # t
 ## What we'd most like tested
 
 - Whether the capture uncertainties stay calibrated on data we have never seen. Our claim is narrow: pooled over two
-  sealed tests, the 68 % interval covers at or above nominal (conservative, not sharp); the 95 % interval is not reliably
-  calibrated (88 % on the shipped model's own sealed read).
+  tests scored once each, the 68 % interval covers at or above nominal (conservative, not sharp); the 95 % interval is not reliably
+  calibrated (88 % on the shipped model's own final validation set).
 - Any benchmark row where our placement of a library looks wrong.
 - Curation decisions you disagree with: open an issue quoting the EXFOR entry and the rule code.
 

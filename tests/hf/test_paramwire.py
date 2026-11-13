@@ -1,7 +1,7 @@
-"""PARAMWIRE (ROUTE100 WP3): a fit parameter set reaches every consumer and keeps the fast paths.
+"""A fit parameter set reaches every consumer and keeps the fast paths.
 
 `engine.ChainedFull(params=((keyword, Z, A, value), ...))` with `aadjust`, E1 `ftable` and E1
-`wtable`: the numpy / NATIVEX decay stays on (`Cascade._numpy_decay_ok`, `NativeWidths`), the
+`wtable`: the numpy / native decay stays on (`Cascade._numpy_decay_ok`, `NativeWidths`), the
 level-density and photon-strength objects of the named nuclei move and no other, and a run at a
 new point on a warmed Cascade gives the cold run's numbers.
 """
@@ -25,7 +25,7 @@ needs_structure = pytest.mark.skipif(not _HAVE, reason="TALYS structure database
 Z, A = 26, 54
 @pytest.fixture(scope="module", autouse=True)
 def _ftglobal_off():
-    """FTPROMO (ftglobal default ON): this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
+    """ftglobal is default ON: this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_FTGLOBAL", "0")
         yield

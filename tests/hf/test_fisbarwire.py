@@ -1,6 +1,6 @@
-"""FISBARWIRE: `fismodel` / `fisbaradjust` / `fishwadjust` as PARAMWIRE parameters, reaching every
+"""`fismodel` / `fisbaradjust` / `fishwadjust` as adjustable parameters, reaching every
 fission path. The Hill-Wheeler height and curvature (`barriers.barrier_height`) carry the adjust
-factors (t1barrier.f90:99-121); the torch loop, NATIVEX2's `fis2` C kernels and CENGFIS's
+factors (t1barrier.f90:99-121); the torch loop, the `fis2` C kernels and the C engine's
 `fission.c` are held to each other at 1e-12 under `fismodel 1` with both factors off 1, and the
 WKB default ignores them bit for bit, as TALYS does. Skipped without a `libnx2` build or TALYS's
 structure data.

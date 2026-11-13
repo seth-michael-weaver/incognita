@@ -6,7 +6,7 @@ Task: T11 (physics/hf/CONTRACT.md §7). Acceptance test: A-fis (§6).
 
 `FAMILIES["fission"]` in the T0 harness matches only `fission.tot`, so none of the per-nucleus
 fission files reach `features/hf_reference/*.parquet` (T14 reported the same gap). This module
-reads them straight out of the `features/hf_reference/raw/*.tar.gz` archives, the way T5 gated
+reads them straight out of the `features/hf_reference/raw/*.tar.gz` archives, the way T5 tested
 A-trans off the tarballs, so A-fis does not depend on a harness change.
 
 Two traps in `fis*.trans`, both TALYS's and both preserved here under honest names:

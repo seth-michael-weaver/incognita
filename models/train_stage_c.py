@@ -1,4 +1,4 @@
-"""Stage C training: fit the spectral residual on curated capture measurements (WP-15 step 3).
+"""Stage C training: fit the spectral residual on curated capture measurements.
 
 The curriculum of blueprint §5.6 in the order the pieces exist: the chart encoder (WP-06) and
 the Stage B parameter decoder (WP-14) stay frozen, Stage B's cross sections come in as a fixed
@@ -52,7 +52,7 @@ class StageCBundle:
     # the C6 normalisation latent (models/norm_latent.py); None everywhere else, and every
     # existing call site builds a bundle without it.
     ds: DatasetRows | None = None
-    # STACKREG: the curve Stage C READS, when it differs from the one it MULTIPLIES. None keeps
+    # The curve Stage C READS, when it differs from the one it MULTIPLIES. None keeps
     # every earlier run: the residual reads and corrects `stage_b_b`. See `set_prior_input`.
     input_b: Tensor | None = None
     density: Tensor = field(init=False)   # (N, E) measured-data density in [0, 1]
@@ -128,11 +128,11 @@ class StageCBundle:
         return self.stage_b_b if self.input_b is None else self.input_b
 
     def set_prior_input(self, raw_b: Tensor, correction_channel: bool = True) -> StageCBundle:
-        """STACKREG: condition the residual on the uncorrected curve, correct the corrected one.
+        """Condition the residual on the uncorrected curve, correct the corrected one.
 
-        STAGECRECAL/OSENGINE: Stage C's only physics input was Stage B's curve, so a Stage B
+        Without it, Stage C's only physics input is Stage B's curve, so a Stage B
         row carrying a validated physics correction and one that was merely wrong in the same
-        place were indistinguishable to it, and out of sample it handed back 70-74 % of the
+        place are indistinguishable to it, and out of sample it hands back 70-74 % of the
         Os-region optical-model fix. Here the residual reads `raw_b` -- Stage B before any
         regional correction (an engine table without the fix, or the surrogate without the
         library blend) -- and still multiplies `stage_b_b`, so the prediction is
@@ -247,25 +247,24 @@ def train_stage_c(
     val_weights: Tensor | None = None,   # honest checkpoint selection: see validation_masks
     train_weights: Tensor | None = None,  # override the split, e.g. to hold out the window
     seed: int = 0,
-    # Capacity, fixed at the SpectralResidual defaults until 2026-09-10. The nuclide learning
-    # curve turned over -- held-out error on a fixed core *rises* past ~100 training nuclides
-    # -- which is what a capacity ceiling looks like, so these are now knobs the experiments
-    # can turn instead of constants nobody could measure.
+    # Capacity, defaulting to the SpectralResidual defaults. The nuclide learning
+    # curve turns over -- out-of-fold error on a fixed core *rises* past ~100 training nuclides
+    # -- which is what a capacity ceiling looks like, so these are knobs rather than constants.
     width: int = 64,
     n_modes: int = 16,
     # KADoNiS MACS as an auxiliary constraint. Zero keeps the shipped behaviour. The table
-    # has scored this project since WP-16 and never trained it, which is backwards for a
+    # is used for scoring and by default not for training, which is backwards for a
     # model whose measured failure is per-nuclide normalisation: a MACS is an integral of
     # the cross section, so it constrains magnitude and little else. See models/macs_constraint.
     macs_weight: float = 0.0,
     # (N,) 0/1 over b.nuclides: 0 drops that nuclide from the MACS constraint. None keeps all
-    # of them, which is right for a full training run and wrong for a held-out fold.
+    # of them, which is right for a full training run and wrong for a cross-validation fold.
     macs_mask=None,
-    # STACKREG anchor: >0 adds anchor_weight * mean(log r^2) over the above-RRR bins of MEASURED
+    # Anchor: >0 adds anchor_weight * mean(log r^2) over the above-RRR bins of MEASURED
     # (trust > 0) nuclides whose Stage B carries a correction (|bundle.correction_log()| > 0.01),
-    # i.e. a penalty for moving a physics-corrected region. Measured rows only, so a held-out
-    # fold row (trust zeroed) is never regularised by it: in deployment a chart nuclide is not
-    # in the training batch, and a penalty that only acted through held-out rows would be a
+    # i.e. a penalty for moving a physics-corrected region. Measured rows only, so an out-of-fold
+    # row (trust zeroed) is never regularised by it: in deployment a chart nuclide is not
+    # in the training batch, and a penalty that only acted through out-of-fold rows would be a
     # cross-validation artefact. 0 is every earlier run.
     anchor_weight: float = 0.0,
     # C6: width of the per-dataset normalisation latent, in log10. 0 keeps the shipped
@@ -278,7 +277,7 @@ def train_stage_c(
     # this reruns the data term over rows rather than bins at tau=0, which is what isolates
     # "marginalising helped" from "using rows instead of bin means helped".
     norm_rows_only: bool = False,
-    # C7 (ROBUSTLIK): Student-t data likelihood, models/robust_lik.py. None keeps the shipped
+    # C7: Student-t data likelihood, models/robust_lik.py. None keeps the shipped
     # Gaussian. A float is a fixed nu -- inf routes to the shipped function itself, so that arm
     # is bit-identical to None -- and "fit" makes nu a parameter of this member's training loss.
     # With student_t_rows the t is per EXFOR row (norm_latent's per-dataset rows) instead of per
@@ -375,11 +374,11 @@ def train_stage_c(
         #
         # Why it matters that the first is silenced: scripts/holdout_calibration.py holds a
         # fold out by zeroing trust and states the contract as "a nuclide with none contributes
-        # to neither loss". load_macs keys on b.nuclides alone, so every held-out nuclide kept
-        # full KADoNiS weight -- 191 of the 198 leave-neighbourhood-out nuclides carry a MACS,
+        # to neither loss". load_macs keys on b.nuclides alone, so without the mask every out-of-fold nuclide
+        # keeps full KADoNiS weight -- 191 of the 198 leave-neighbourhood-out nuclides carry a MACS,
         # and a MACS is an integral of the capture cross section over exactly the keV decade the
-        # fold is scored in. Masked, the held-out RMS goes 0.1510 -> 0.2035, almost all of it
-        # per-nuclide bias. Every CV number reported before 2026-09-12 was trained with it.
+        # fold is scored in. Masked, the out-of-fold RMS goes 0.1510 -> 0.2035, almost all of it
+        # per-nuclide bias.
         if macs_mask is not None:
             macs_w = macs_w * torch.as_tensor(
                 macs_mask, dtype=torch.float32).reshape(-1, 1).cpu()
@@ -394,7 +393,7 @@ def train_stage_c(
     if anchor_weight > 0:
         measured_nuc = ((b.trust > 0).any(dim=1, keepdim=True)).float()
         anchor_m = ((b.correction_log().abs() > 0.01).float() * b.above_rrr * measured_nuc)
-        print(f"[stage-c] STACKREG anchor on {int((anchor_m.sum(1) > 0).sum())} corrected, "
+        print(f"[stage-c] correction anchor on {int((anchor_m.sum(1) > 0).sum())} corrected, "
               f"measured nuclides ({int(anchor_m.sum())} bins) at weight {anchor_weight}",
               flush=True)
 
@@ -447,7 +446,7 @@ def train_stage_c(
                      "total": nll + teacher_weight * parts["teacher"]}
         elif use_rows:
             # Gathering the row mask from `weights` rather than recomputing it is what keeps
-            # the hold-out honest: every mask the rest of the loss honours -- the time split,
+            # cross-validation honest: every mask the rest of the loss honours -- the time split,
             # the resonance bound, the warm-up's smooth half, and a CV fold's zeroed trust --
             # is already multiplied into `weights`, so a row whose bin is excluded there is
             # excluded here. models/norm_latent.py's docstring has the rest.
@@ -580,8 +579,8 @@ def predict_ensemble_per_nuclide(models: list[SpectralResidual], bundle: StageCB
     unchanged, which is most of what makes this safe: the thin ones cannot be fitted and are
     not asked to be.
 
-    `guard="holdout"` adds the check that was missing. Measured 2026-09-10 through the WP-16
-    gate, the unguarded pass is +1.77% overall and +3.19% on odd-A while turning actinide
+    `guard="holdout"` adds a check on the result. Measured on the
+    validation cells, the unguarded pass is +1.77% overall and +3.19% on odd-A while turning actinide
     retrodiction from 0.078 to 0.128 -- two winning cells into losses. The bins held out for
     early stopping are already not optimised against, so they can also answer whether the
     fine-tune beat the global model for this nuclide; where it does not, keep the global one.
@@ -636,7 +635,7 @@ def predict_ensemble_per_nuclide(models: list[SpectralResidual], bundle: StageCB
             log(f"[stage-c] per-nuclide {n + 1}/{len(rows)}")
     if guard == "holdout":
         log(f"[stage-c] per-nuclide guard: {n_rejected} of {len(rows)} fine-tunes rejected "
-            f"on held-out bins; those nuclides keep the global prediction")
+            f"on early-stopping bins; those nuclides keep the global prediction")
     return out
 
 
@@ -645,7 +644,7 @@ def train_ensemble(bundle: StageCBundle, members: int = 5, seed_offset: int = 0,
     """Train a deep ensemble one member at a time (8 GB of VRAM cannot hold five at once).
 
     ``seed_offset`` shifts every member's seed, so a second ensemble of the same recipe is an
-    independent replicate (EXACTFIT's seed axis); 0 reproduces every earlier run."""
+    independent replicate; 0 reproduces every earlier run."""
     models, reports = [], []
     for i in range(members):
         m, rep = train_stage_c(bundle, seed=seed_offset + i, **kw)

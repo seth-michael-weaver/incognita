@@ -40,7 +40,7 @@ Exmatch = 1.871067 MeV for Nb-91, 1.386450 for Ta-179, 0.4469783 for Ir-188.
 That number is noise, but it is not harmless: the port used to return "no root" here and fall
 back to the empirical temperature, which puts Exmatch a factor of 2-19 higher (Nb-91 8.4992,
 Ta-179 4.3851, Ir-188 3.5545) and moves the residual's level density right where its continuum
-opens. It is worth 60 of CHART1's cells and up to `r` = 0.94 on `(n,g)` and `(n,n')`
+opens. It is worth 60 cells of a full chart run and up to `r` = 0.94 on `(n,g)` and `(n,n')`
 (docs/results/hf-open2.md section 1).
 
 So the port returns a root -- a *definite* one. ``matching`` hands back ``x1 + dx``, the first
@@ -68,7 +68,7 @@ routines' own single-precision arithmetic moves ``logrholoc`` by ~1e-7 against a
 of ~2e-6 there, so a few per cent of table entries land on the neighbouring float32 value, and
 one wrong entry anywhere below the root loses the bracket -- let alone the 40 consecutive sign
 decisions rtbis needs. It would also make Exmatch a chaotic function of the level-density
-parameters -- fatal to DIFFPARAM's gradients -- and tie the answer to the libm of whatever
+parameters -- fatal to the differentiable gradients -- and tie the answer to the libm of whatever
 built TALYS.
 Contract section 4.1 calls this out ("differences larger than the section 6 tolerances are port
 bugs until TALYS's own rounding is shown to be the cause"); it is shown here rather than
@@ -167,7 +167,7 @@ def _fermi_tables_core(ld: LDNucleus, ibar: int) -> tuple[Tensor, Tensor, int, i
     logrho = torch.zeros(nEx + 2, dtype=DTYPE)
     logrho[1 : nEx + 1] = l0
     raw = torch.where(lp != lm, dEx / torch.where(lp != lm, lp - lm, torch.ones_like(lp)), 0.0)
-    if not raw.requires_grad:  # SETB: the same fill and search on Python floats
+    if not raw.requires_grad:  # Fast path: the same fill and search on Python floats
         from physics.hf.density.matching_fast import temprho_fill
 
         temprho, Nstart = temprho_fill(raw, nEx)
@@ -201,7 +201,7 @@ def match(
     NLo, NP = ld.Nlow[ibar], ld.Ntop[ibar]
     EL, EP = _level_window(ld, ibar)
     if not (eex.requires_grad or logrho.requires_grad or temprho.requires_grad):
-        # SETB: every energy at once, bit-identical (density/matching_fast.py)
+        # Fast path: every energy at once, bit-identical (density/matching_fast.py)
         from physics.hf.density.matching_fast import match_vec
 
         return match_vec(eex, logrho, temprho, E0save, NLo, NP, EL, EP, SENTINEL)
@@ -273,12 +273,12 @@ def matching(
     `_exmatch_implicit` hands back a plain constant. See the module docstring.
 
     `xacc` is TALYS's own 1e-4 MeV unless a caller asks otherwise, and the only caller that does
-    is the DIFFPARAM gradient gate. The reason is worth stating: a bisection stopped at 1e-4 MeV
+    is the differentiable gradient check. The reason is worth stating: a bisection stopped at 1e-4 MeV
     makes Exmatch, and therefore every cross section below it, a **staircase** in the
     level-density parameters, with steps of order 1e-4 MeV. That is invisible to a cross section
     and fatal to a central finite difference -- d Exmatch/d Pshift measured across h = 1e-4 came
     out as -0.54, -0.16 and -0.13 MeV at three neighbouring step sizes, all of them the
-    staircase rather than the slope. The analytic gradient describes the exact root, so the gate
+    staircase rather than the slope. The analytic gradient describes the exact root, so the check
     refines the root and says so; nothing that reproduces TALYS uses anything but 1e-4.
 
     TALYS: matching.f90:1 (matching)
@@ -305,7 +305,7 @@ def matching(
     # NX2 ld: zbrak's scan and rtbis's bisection on floats in C (None: the torch loop below)
     from physics.hf import eadj as _eadj
 
-    with _eadj.nucleus(ld.Z, ld.A):  # NPWPROMO: native LD kernels per nucleus
+    with _eadj.nucleus(ld.Z, ld.A):  # Native LD kernels per nucleus
         roots = match_roots(logrho, temprho, x1, x2, _NSEG, E0save, ld.Nlow[ibar], ld.Ntop[ibar],
                             EL, EP, SENTINEL, xacc)
     if roots is None:
@@ -395,7 +395,7 @@ def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = 
     including the Tadjust/E0adjust second passes and the empirical fallbacks.
     `ctwindow` (Incognita extension, default False): then re-anchor barrier 0's constant-temperature
     part on the complete level window (`density.ctwindow.anchor`); False is TALYS's path unchanged.
-    `ctwindow2` (Incognita extension, CTKINK, default False): the same anchor with (T, E0, Ex) solved
+    `ctwindow2` (Incognita extension, default False): the same anchor with (T, E0, Ex) solved
     jointly so the used density is continuous in value and slope at Ex (`density.ctwindow2.anchor`);
     it supersedes `ctwindow` when both are set.
 
@@ -405,7 +405,7 @@ def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = 
     if ctwindow2:
         from physics.hf.density.ctwindow2 import anchor as anchor2
 
-        # ARTFIX: ctwindow2 = "cont" (or True) anchors no-root records at least |g|; "root" = the pre-ARTFIX rule
+        # `ctwcont`: ctwindow2 = "cont" (or True) anchors no-root records at least |g|; "root" = the earlier rule
         return anchor2(densitymatch(ld, flagldglobal, flagctmglob, xacc), cont=(ctwindow2 != "root"))
     if ctwindow:
         from physics.hf.density.ctwindow import anchor
@@ -413,7 +413,7 @@ def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = 
         return anchor(densitymatch(ld, flagldglobal, flagctmglob, xacc))
     from physics.hf.density.ld_ceng import densitymatch_fast
 
-    got = densitymatch_fast(ld, flagldglobal, flagctmglob, xacc)  # CENGLD: barrier 0 in one C call
+    got = densitymatch_fast(ld, flagldglobal, flagctmglob, xacc)  # Native: barrier 0 in one C call
     if got is not None:
         return got
     Ts, E0s, Exs = [], [], []
@@ -442,7 +442,7 @@ def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = 
         c0, c1, c2 = (-0.22, 9.4, 2.67) if ld.flagcol else (-0.25, 10.2, 2.33)
         Tmemp = c0 + c1 / np.sqrt(max(A * (1.0 + gdw), 1.0))
         Exmemp = c2 + 253.0 / A + P
-        # DIFFPARAM: the same two numbers as tensors. TALYS forms them in single precision and
+        # Differentiable: the same two numbers as tensors. TALYS forms them in single precision and
         # clamps at 0.1, so the forward value stays exactly `_fv(np.float32(max(., 0.1)))` and
         # only the derivative (1 a.e. through the clamp and the rounding) is attached.
         Tmemp_t = _straight_through(
@@ -476,7 +476,7 @@ def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = 
             # (:222, :230, :246) -- `edens` is declared 0:numdens, so the tabulated-density
             # lookups in density/models.py are unaffected.
             i = int(locate(temprho[1:], _t(_fv(Tm)), ib_, nEx - 1))
-            # DIFFPARAM: the *index* comes from the detached value (locate is a branch), the
+            # Differentiable: the *index* comes from the detached value (locate is a branch), the
             # interpolated value from the tensors, so Exmatch carries d/d(level-density
             # parameter) through `temprho` and through Tm. Bit-identical forward.
             return i, (
@@ -485,7 +485,7 @@ def densitymatch(ld: LDNucleus, flagldglobal: bool = False, flagctmglob: bool = 
                 else None
             )
 
-        # DIFFPARAM: every branch below is still decided on the FLOAT `Exm`, exactly as before;
+        # Differentiable: every branch below is still decided on the FLOAT `Exm`, exactly as before;
         # `Exm_t` carries the same number as a tensor so that the two places the value enters a
         # *formula* -- `t_from_ex` and the E0 expression -- see the gradient. Keeping the two
         # side by side is what makes the change provably forward-identical.

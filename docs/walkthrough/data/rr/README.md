@@ -1,12 +1,12 @@
-# RESFILL site data: capture (and elastic/total) from 1e-5 eV to the 1 keV join, every explorer nuclide
+# Resonance-region site data: capture (and elastic/total) from 1e-5 eV to the 1 keV join, every explorer nuclide
 
-Produced by RESFILL (PREREG `rl/resfill/PREREG.md` 4e4433624 + amendments d4ea930b5). INCOGNITA's own model only:
+Produced by the resonance-region fill (selection rule fixed before the build). INCOGNITA's own model only:
 no Atlas/RIPL resonance values, no TARES, no evaluated library as input. ENDF/B-VIII.1 was used only as a comparator.
 
 ## Files
 - `rr_index.json`: `{schema, T_K, E_unit, xs_unit, engine, prereg, n, kinds, rows[]}`; one row per nuclide:
   `Z, A, sym, kind, n` (points), `anchored` (curve forced through the measured thermal capture), `thermal_exp`
-  (an EXFOR thermal value exists), `hold` (RI held out for judging), `fallback`, `segments` [[lo, hi, kind]], `join`.
+  (an EXFOR thermal value exists), `hold` (RI kept out of the fit as an independent check), `fallback`, `segments` [[lo, hi, kind]], `join`.
 - `rr/<Z>/<A>.json`, 6168 files, one per `rr_index.json` row (every explorer nuclide from Z 8 up; the Z 1-7 nuclides
   have none), at most 600 points, 0 K. The explorer's `index.json` column `rr` flags the nuclides that have a file:
   - `Z, A, sym, kind, label` (show `label` beside the curve), `T_K` = 0, `units` {E: eV, xs: b}

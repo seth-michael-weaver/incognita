@@ -7,7 +7,7 @@
 
 Why. The staged grids (score.G) SAMPLE the 0 K RECONR curve at the row energy. Below ~100 keV that is one point inside a
 resonance ladder, while a capture row is a mean: of the EXFOR datasets in a bin (capture-heldout, -nostructure, -retro) or
-of a measurement with its own energy resolution (ch-capture). The dated tracks were moved to bin averages in DATEDEXAM2
+of a measurement with its own energy resolution (ch-capture). The dated tracks are scored on bin averages
 (binavg.py); this does the same for capture-heldout, capture-nostructure, capture-retro and ch-capture, for every library.
 
 Rule (binavg.py's, with the window of each track):

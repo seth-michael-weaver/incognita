@@ -1,4 +1,4 @@
-"""ENGADJ: energy-local parameter bumps (physics/hf/eadj.py). Parser, shapes, default-off."""
+"""Energy-local parameter bumps (physics/hf/eadj.py). Parser, shapes, default-off."""
 
 import numpy as np
 import pytest
@@ -177,7 +177,7 @@ def test_fission_nodes_interpolate_and_keep_base(monkeypatch):
 
 
 def test_engnan_hat_weights_and_overflow_guard(monkeypatch):
-    """ENGNAN: clustered node sets make Lagrange weights explode (exp overflow -> NaN tot_fission); hat weights are a
+    """Clustered node sets make Lagrange weights explode (exp overflow -> NaN tot_fission); hat weights are a
     partition of unity in [0, 1], exact at nodes, and fission_interp with them stays inside the node values."""
     nv = (0.9814160072250211, 0.9907080036125105, 1.0, 1.000100666811843, 1.0002013336236861)
     x = np.array([0.9814160072250211, 0.985, 0.997, 1.0, 1.00015, 1.0002013336236861])

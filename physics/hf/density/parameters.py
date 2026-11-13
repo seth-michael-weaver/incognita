@@ -109,7 +109,7 @@ def _fv(x) -> float:
 
 
 def _fast_ok(x) -> bool:
-    """COREX: the float/numpy path of `ignatyuk`/`spincut` applies to `x`: nothing records a graph
+    """Fast path: the float/numpy path of `ignatyuk`/`spincut` applies to `x`: nothing records a graph
     and `x` is a Python number or a CPU tensor."""
     if torch.is_grad_enabled():
         return False
@@ -127,7 +127,7 @@ def _as_np(x):
     return float(x)
 
 
-# COREX: the scalars of one LDNucleus the fast paths read, per object. Keyed by id with a weak
+# Fast path: the scalars of one LDNucleus the fast paths read, per object. Keyed by id with a weak
 # reference that must still resolve to the same object (so a recycled id never hits), and dropped
 # when the nucleus is freed. LDNucleus is frozen and nothing writes into its tensors in place.
 _LD_FLOATS: dict[int, tuple] = {}
@@ -159,7 +159,7 @@ def _ign_floats(ld: LDNucleus, ibar: int) -> tuple:
 
 
 def _ignatyuk_f(ld: LDNucleus, eex: float, ibar: int) -> float:
-    """COREX: `ignatyuk` at one energy in Python floats, the same operations in the same order
+    """Fast path: `ignatyuk` at one energy in Python floats, the same operations in the same order
     (math.exp for torch.exp: agreement to the last bits, not bit-identity)."""
     delta, aldlim, gam, dW, colldamp, aldlow, uf, cf = _ign_floats(ld, ibar)
     U = eex - delta
@@ -177,13 +177,13 @@ def _ignatyuk_f(ld: LDNucleus, eex: float, ibar: int) -> float:
     v = v if not v < 1.0 else 1.0
     if ibar == 0 and _eadj.on():
         bs = _eadj.nucleus_bumps("a", ld.Z, ld.A)
-        if bs:  # ENGADJ: a(Eex) x the energy-local factor (after TALYS's floor of 1)
+        if bs:  # `eadj`: a(Eex) x the energy-local factor (after TALYS's floor of 1)
             v = v * float(_eadj.bump_values(bs, np.array([eex]))[0])
     return v
 
 
 def _ignatyuk_fast(ld: LDNucleus, eex_mev, ibar: int) -> Tensor:
-    """COREX: `ignatyuk` off the graph, in floats (one energy) or numpy (an array of them)."""
+    """Fast path: `ignatyuk` off the graph, in floats (one energy) or numpy (an array of them)."""
     if isinstance(eex_mev, Tensor) and eex_mev.ndim and eex_mev.dtype is DTYPE:
         eex = eex_mev.numpy()
     else:
@@ -192,7 +192,7 @@ def _ignatyuk_fast(ld: LDNucleus, eex_mev, ibar: int) -> Tensor:
         return torch.tensor(_ignatyuk_f(ld, eex, ibar), dtype=DTYPE)
     from physics.hf.density.ld_ceng import ignatyuk as _ceng_ignatyuk
 
-    got = _ceng_ignatyuk(ld, eex, ibar)  # CENGLD: the same loop in C
+    got = _ceng_ignatyuk(ld, eex, ibar)  # Native: the same loop in C
     if got is not None:
         return _abump(ld, eex, ibar, got)
     delta, aldlim, gam, dW, colldamp, aldlow, uf, cf = _ign_floats(ld, ibar)
@@ -213,7 +213,7 @@ def _ignatyuk_fast(ld: LDNucleus, eex_mev, ibar: int) -> Tensor:
 
 
 def _abump(ld: LDNucleus, eex, ibar: int, v: Tensor) -> Tensor:
-    """ENGADJ: `v` = a(eex) times the `eadj a Z A ...` factor at eex (ground state only); `v` itself when none."""
+    """`eadj`: `v` = a(eex) times the `eadj a Z A ...` factor at eex (ground state only); `v` itself when none."""
     if ibar != 0 or not _eadj.on():
         return v
     bs = _eadj.nucleus_bumps("a", ld.Z, ld.A)
@@ -264,7 +264,7 @@ def _sc_floats(ld: LDNucleus, ibar: int, ipop: int, rspincutff: float) -> tuple:
 
 
 def _spincut_fast(ld: LDNucleus, ald, eex_mev, ibar: int, ipop: int, rspincutff: float) -> Tensor:
-    """COREX: `spincut` off the graph, in floats (one energy) or numpy; the same operations in the
+    """Fast path: `spincut` off the graph, in floats (one energy) or numpy; the same operations in the
     same order as the tensor path."""
     scutconst, Em, Ed, sdisc, s2m, colld, delta = _sc_floats(ld, ibar, ipop, rspincutff)
     model1 = ld.spincutmodel == 1
@@ -287,7 +287,7 @@ def _spincut_fast(ld: LDNucleus, ald, eex_mev, ibar: int, ipop: int, rspincutff:
         return torch.tensor(sc if not sc < sdisc else sdisc, dtype=DTYPE)
     from physics.hf.density.ld_ceng import spincut as _ceng_spincut
 
-    got = _ceng_spincut(ld, a, eex, ibar, ipop, rspincutff)  # CENGLD: the same loop in C
+    got = _ceng_spincut(ld, a, eex, ibar, ipop, rspincutff)  # Native: the same loop in C
     if got is not None:
         return got
     with np.errstate(all="ignore"):
@@ -483,9 +483,9 @@ def _ld_parameter_file(Z: int, A: int, ldmodel: int, collective: bool, s2a: floa
 
 
 class _SameObjects:
-    """CENGLD: `densitypar`'s arguments as a cache key by identity (Z and A by value). The key
+    """Native: `densitypar`'s arguments as a cache key by identity (Z and A by value). The key
     holds the objects, so no id is recycled while it is cached; a new `Params` (a fit's parameter
-    point, PARAMWIRE's `with_aadjust`) is a new key."""
+    point, the parameter set's `with_aadjust`) is a new key."""
 
     __slots__ = ("args", "_h")
 
@@ -511,7 +511,7 @@ def _densitypar_shared(key: _SameObjects):
     k = ld_nx2.densitypar_key(*args) if ld_nx2._xt_on() else None
     if k is None:
         return ld_nx2.densitypar_floats(*args)
-    # CENGLD2: the same record across targets (`ld_nx2.densitypar_key`)
+    # Shared record: the same record across targets (`ld_nx2.densitypar_key`)
     Z, A, options = args[0], args[1], args[2]
     return ld_nx2.shared_record(("dp", k), options.Zinit - Z, options.Ninit - (A - Z),
                                 lambda: ld_nx2.densitypar_floats(*args))
@@ -541,7 +541,7 @@ def densitypar(
     from physics.hf.density.ld_nx2 import densitypar_floats
 
     if not torch.is_grad_enabled() and os.environ.get("HF_NX2_CENGLD", "1") != "0" and _eadj.ld_native_ok(Z, A):
-        # CENGLD: one nucleus's record is asked for by its level density, its photon strength's
+        # Native: one nucleus's record is asked for by its level density, its photon strength's
         # `alev` and the pre-equilibrium pairing, on the same objects: built once per target. Only
         # where no graph can be recorded (the chart runs in inference mode), so a tensor turned
         # `requires_grad` in place never meets a record built before it was
@@ -591,7 +591,7 @@ def densitypar(
     Pshift = pb("pshift").clone()
     ctable = pb("ctable").clone()
     ptable = pb("ptable").clone()
-    Nlow = [options.nlow_of(Zix, Nix, ib) for ib in bars]  # KWCOV B5: `nlow Z A n [ibar]` cards
+    Nlow = [options.nlow_of(Zix, Nix, ib) for ib in bars]  # `nlow Z A n [ibar]` lines
     Ntop = [options.ntop_of(Zix, Nix, ib) for ib in bars]
     ldparexist = False
     if found:
@@ -627,7 +627,7 @@ def densitypar(
     for ib in bars:
         Nlast.append(int(levels.nlev) if ib == 0 else max(int(bar.nfistrrot[ib]), 1))
         if Ntop[ib] == -1:
-            # FIXENG F14: the LD matching keeps the uncut list when ggdeadend cut the decay list
+            # `ggdeadend`: the LD matching keeps the uncut list when ggdeadend cut the decay list
             Ntop[ib] = Nlast[ib] if ib != 0 or getattr(levels, "nlev_ld", -1) < 0 else int(levels.nlev_ld)
         if Nlow[ib] == -1:
             Nlow[ib] = 2

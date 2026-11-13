@@ -1,4 +1,4 @@
-/* CENGFIS (ROUTE100 WP7): fission barrier level densities, the bin-ladder transmission and the
+/* Native: fission barrier level densities, the bin-ladder transmission and the
  * primary compound nucleus's barrier sums in C, off the autograd graph.
  *
  *   ceng_fis_log_table   the logarithms of a density table (nx2_ld2.c's log_table), taken once per
@@ -358,8 +358,8 @@ int ceng_fis_bins(int64_t nb, const double *t1, const double *t2, const double *
 }
 
 /* ---------------------------------------------------------------------------------------------
- * FISSC: ceng_fis_grid2 / ceng_fis_weights2, ceng_fis_grid / ceng_fis_weights with fewer exp/log.
- * Held to closeness (development notes), not bits; HF_NX2_FISSC=0 runs the kernels above.
+ * Fast variants: ceng_fis_grid2 / ceng_fis_weights2, ceng_fis_grid / ceng_fis_weights with fewer exp/log.
+ * Held to closeness, not bits; HF_NX2_FISSC=0 runs the kernels above.
  *
  * Grid: along the ascending grid points the tabulated density's log-linear interpolation
  * exp(lb + frac (le - lb)) stays in one table interval for many points, and frac advances by the same

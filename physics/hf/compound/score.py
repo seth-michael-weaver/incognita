@@ -1,23 +1,23 @@
-"""Score the ported comptarget against TALYS: gates A-cn1 (wfc_off) and A-cn2 (default).
+"""Score the ported comptarget against TALYS: tests A-cn1 (wfc_off) and A-cn2 (default).
 
 Two references, both from the instrumented run (compound/cn_reference.py), whose binE*.out files
 are verified identical to the standard reference dumps:
 
-1. **binE*.out** (the pre-registered gate reference). It is the post-binary population, i.e.
+1. **binE*.out** (the fixed test reference). It is the post-binary population, i.e.
    compound + direct to discrete levels + pre-equilibrium in the continuum (binary.f90:193-260),
    written before compound elastic is removed from the target state (binary.f90:509). Both
    addends are TALYS's own `xsdirdisc` / `preeqpopex`, taken from the same dump, so what is
    compared is still this module's number; the continuum addend additionally needs the compound
    spin shape `sfactor`, which IS this module's output. The (J, P) cells where TALYS instead
    falls back to the particle-hole spin distribution (`sfactor == 0`, or `xspopex <= popepsA`
-   leaving `sfactor` stale) are not gated -- that shape is T8's and T6's, and those cells have
+   leaving `sfactor` stale) are not scored -- that shape is T8's and T6's, and those cells have
    zero compound population, so they say nothing about T9. They are counted and reported, and
    reference 2 below covers them anyway.
 2. **the compound-only xspop** written at the end of comptarget (full double precision, every
-   energy, every row). Reported beside the gate as a diagnostic; it isolates this module from
+   energy, every row). Reported beside the test as a diagnostic; it isolates this module from
    binary.f90's bookkeeping.
 
-Metric (gates doc §2): r = |ln(p/t)| over points with t >= 1e-6 mb; t below the floor but p above
+Metric (validation doc §2): r = |ln(p/t)| over points with t >= 1e-6 mb; t below the floor but p above
 it counts as r = inf. Statistic: p95 over all points of all spherical reference targets; median
 and max beside it.
 
@@ -118,12 +118,12 @@ def _preeq_addend(pp: np.ndarray, mask: np.ndarray, p: np.ndarray, c, t: int, r,
     * ``sfactor(J,P) == 0`` (binary.f90:234-237): TALYS instead uses the *particle-hole* spin
       distribution ``spindis(sc, J) * pardis``. Those are cells where the compound population is
       zero, so they carry no information about this module, and the shape belongs to T8
-      (`preeqspindis.f90`) and T6 (`spincut`/`ignatyuk`). Not gated; counted.
+      (`preeqspindis.f90`) and T6 (`spincut`/`ignatyuk`). Not scored; counted.
     * ``xspopex <= popepsA`` (binary.f90:231): sfactor is not updated at all and keeps the value
       it had at an earlier incident energy (``strucinitial.f90:484`` zeroes it once per run), so
-      the addend is not a function of this energy's dump. Not gated; counted.
+      the addend is not a function of this energy's dump. Not scored; counted.
 
-    Cells with ``J > maxJph`` get no pre-equilibrium at all and stay gated -- they are pure
+    Cells with ``J > maxJph`` get no pre-equilibrium at all and stay scored -- they are pure
     compound and are the strongest rows in the comparison.
     """
     popeps_a = c.popeps_mb / max(5 * r.maxex, 1)  # binary.f90:228
@@ -164,7 +164,7 @@ def score_run(tar: Path, work: Path) -> dict:
             ref = c.ref_pop_mb.get(t, np.zeros_like(p))
             rr = _r(p.reshape(-1), ref.reshape(-1))
             recs.append(dict(kind="xspop", variant=variant, target=target, e=e, type=name, r=rr.tolist()))
-            # (b) binE gate: binE = compound + xsdirdisc (direct + pre-equilibrium to discrete
+            # (b) binE check: binE = compound + xsdirdisc (direct + pre-equilibrium to discrete
             # levels, binary.f90:196-206) + pre-equilibrium in the continuum, spread over (J, P)
             # by the COMPOUND spin shape sfactor (binary.f90:225-235, pespinmodel 1, the default
             # for k0 <= 1). Both addends are TALYS's own numbers from the instrumented dump; only
@@ -276,7 +276,7 @@ def score_multi_run(tar: Path, work: Path) -> dict:
     """A-mult diagnostic for compound.f90: the daughter increments of every mother bin against
     TALYS's own (the DPOP rows of cn_multi.txt), inputs injected.
 
-    This is the continuum half of T9. The pre-registered A-mult gate (contract §6) is on exclusive
+    This is the continuum half of T9. The fixed A-mult test (contract §6) is on exclusive
     channels and residual production, which is T10's `emission`; what is scored here is the one
     routine T9 owns inside it, so it is reported as a component diagnostic at the same 5%.
     """

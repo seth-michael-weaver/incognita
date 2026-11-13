@@ -2,10 +2,10 @@
 Object.assign(WT.L.ui, {
   lang_label: "언어", nav_teach: "교수자용",
   nav_topics: "더 많은 원자력 주제", way4_k: "배우기", way4_t: "더 많은 원자력 주제", way4_p: "본편 옆의 강의: 방사선과 선량, 원자로의 작동 원리, 안정성과 제어, 핵융합. 입문부터 전문가까지.", way4_go: "강의 고르기 →", tp_lessons: "강의", tp_h1: "더 많은 원자력 주제", tp_kicker: "원자로 · 방사선 · 핵융합", tp_tag: "첫 아이디어부터 연구 수준까지, 직접 탐구하는 강의", tp_fire: "연쇄 시작", tp_hint: "또는 연료봉을 클릭", tp_cue: "강의 고르기 ↓", tp_cue2: "스크롤하여 시작 ↓", tp_p1_k: "제1부", tp_p1_h: "방사선", tp_p2_k: "제2부", tp_p2_h: "원자로의 내부", tp_p3_k: "제3부", tp_p3_h: "안정성과 제어", tp_p4_k: "제4부", tp_p5_k: "제5부", tp_p5_h: "원자로의 종류", tp_p6_k: "제6부", tp_p6_h: "별 속에서", tp_hint3: "또는 주제를 클릭", tp_w_power: "깨끗한 전기", tp_f_power: "세계 전력의 약 9 %, 발전소에서 CO₂ 배출 없음", tp_w_cancer: "암 치료", tp_f_cancer: "여러 방향의 빔이 종양에서 만난다", tp_w_fusion: "핵융합 에너지", tp_f_fusion: "가벼운 원자핵을 합치는, 태양이 빛나는 방식", tp_w_space: "보이저의 전원", tp_f_space: "1977년부터 플루토늄-238이 Voyager 1과 2에 전력 공급", tp_w_pet: "PET 검사", tp_f_pet: "반대로 나가는 두 감마선이 추적자의 위치를 알려 준다", tp_w_stars: "별의 먼지", tp_f_stars: "무거운 원소 대부분은 별 속 중성자 포획으로 만들어졌다", tp_w_water: "깨끗한 물", tp_f_water: "카자흐스탄의 BN-350 원자로는 26년간 바닷물을 담수화했다", tp_w_crops: "농작물 지키기", tp_f_crops: "불임 처리한 파리가 북미 전역에서 나선구더기파리를 없앴다", tp_w_mars: "화성 탐사차", tp_f_mars: "Curiosity와 Perseverance는 플루토늄-238의 열로 움직인다", tp_w_isotopes: "의료용 동위원소", tp_f_isotopes: "테크네튬-99m: 한 해 약 4000만 건의 검사", tp_w_dating: "탄소 연대 측정", tp_f_dating: "탄소-14는 한때 살았던 모든 것의 나이를 알려 준다", tp_w_smr: "소형 모듈 원자로", tp_f_smr: "공장에서 만들어 운반할 수 있을 만큼 작은 원자로", tp_w_recycle: "연료 재활용", tp_f_recycle: "사용후핵연료에는 다시 태울 우라늄과 플루토늄이 남아 있다", tp_w_food: "더 안전한 식품", tp_f_food: "조사는 세균을 죽이지만 식품을 방사성으로 만들지 않는다", tp_w_ice: "북극 쇄빙선", tp_f_ice: "원자력 쇄빙선이 북극해 항로를 열어 둔다", tp_w_build: "원자로 만들기", tp_f_build: "연료, 감속재, 크기를 고르면: 돌아갈까?", tp_w_breed: "연료 증식", tp_f_breed: "우라늄-238을 새 연료로 바꾸기", tp_w_smoke: "연기 감지기", tp_f_smoke: "아메리슘 한 조각이 수백만 가정을 지킨다", tp_coda: "이 강의들은 중성자 하나가 원자핵 하나에 들어가는 과정을 따라가는 본편 <a href=\"./\" data-keep-lang>핵반응의 내부</a> 옆에 놓여 있습니다. 따로 밝히지 않는 한 그림은 설명용입니다.", tp_title: "더 많은 원자력 주제 · 핵반응의 내부",
-  brand: "핵반응의 내부", nav_physics: "물리", nav_data: "모든 핵종", nav_board: "점수판", menu: "메뉴", site_nav: "사이트",
+  brand: "핵반응의 내부", nav_physics: "물리", nav_data: "모든 핵종", nav_board: "비교", menu: "메뉴", site_nav: "사이트",
   ways_h: "더 많은 입구", ways_more: "아니면 계속 내려가세요. 물리는 여기서 시작합니다 ↓",
   way1_k: "탐색", way1_t: "모든 핵종", way1_p: "6,168개 핵종에 대한 예측 단면적을 정리된 모든 측정값과 나란히 보여 줍니다. 어떤 동위원소든 검색하고 모든 데이터 세트를 살펴보세요.", way1_go: "데이터 열기 →",
-  way2_k: "비교", way2_t: "점수판", way2_p: "엔진과 그 데이터 결과물이 다른 핵반응 코드 및 라이브러리와 비교하여 어떤지, 측정값을 기준으로 평가하고 진 경우부터 보여 줍니다.", way2_go: "점수 보기 →",
+  way2_k: "비교", way2_t: "비교", way2_p: "엔진과 그 데이터 결과물이 다른 핵반응 코드 및 라이브러리와 비교하여 어떤지, 측정값을 기준으로 평가하고 진 경우부터 보여 줍니다.", way2_go: "점수 보기 →",
   way3_k: "실행", way3_t: "코드", way3_p: "여기 있는 모든 것은 공개되어 있습니다. 저장소를 복제하고, 어떤 곡선이든 찾아보거나, 엔진을 직접 실행해 보세요.", way3_go: "GitHub →",
   title: "핵반응의 내부",
   kicker: "INCOGNITA 핵반응 엔진을 직접 탐색하며 배우는 해설",
@@ -73,7 +73,7 @@ Object.assign(WT.L.ui, {
   coda_p_outside: "이야기의 일부는 엔진 안이 아니라 그 옆에서 실행됩니다. <a href=\"#resonance\">15장</a>의 통계적 공명 사다리는 <code>physics/resonance/</code>에 있습니다. <a href=\"#measure\">17장</a>의 맥스웰 평균(MACS)은 실행이 끝난 뒤 <code>validation/differential/core.py</code>에서 엔진의 포획 곡선을 접어 얻습니다. 반면 열적으로 들뜬 표적에서의 포획과 항성 반응률은 엔진 자체가 계산합니다(<code>astro/stellar.py</code>, 선택 사항). <a href=\"#layers\">21장</a>의 고정 층은 <code>incognita/terra/</code>에 있습니다.",
   close: "닫기",
   chapters: "장",
-  nav_board: "점수판", nav_data_short: "데이터",
+  nav_board: "비교", nav_data_short: "데이터",
   coda_repo: "코드, 라이브러리, 정리된 측정값은 공개되어 있습니다: <a href=\"https://github.com/seth-michael-weaver/incognita\">GitHub의 seth-michael-weaver/incognita</a>. <a href=\"data.html?lang=ko\" data-keep-lang>모든 핵종</a> 페이지에서 어떤 예측이든 직접 찾아보거나, 저장소를 복제해 실행해 볼 수 있습니다.",
   diagram: "도식",
 });

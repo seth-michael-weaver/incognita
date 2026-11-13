@@ -10,13 +10,13 @@
  *    (Springer 2009) 712-770, arXiv:0901.1149, Table 10 "Nuclide abundances 4.56 Ga ago (normalized to N(Si) = 10^6 atoms)",
  *    rounded to 3 significant digits. The third number in AB is the Z of the most abundant isobar at that A.
  *  - MACS at kT = 30 keV (sigma, mb) and its 68 % factor in ST: INCOGNITA library v0.2.3 (library/v0.2.3/macs30_v023.csv in the
- *    repository): the production engine engine-20261022-3, a blind prediction (no nucleus's own capture data fitted; global
+ *    repository): the production engine engine-20261022-3, a prediction (no nucleus's own capture data fitted; global
  *    parameters set on data from many nuclei, these included). Tier letter: M = the nucleus has capture data, A = ANCHORED
  *    (no capture data; the curve is scaled to a measured 30 keV MACS, so that value is not a prediction), I/E = unmeasured.
  *  - err in ST: log10(INCOGNITA MACS / compiled measured MACS) at 30 keV, from docs/walkthrough/data/board/k_pernuc.csv
  *    (err_ours, nuclides with in_scope = True, i.e. the compiled value is a measurement). The compiled values (KADoNiS) are
- *    not redistributed by the project, so only the ratio is shown. A development comparison, not a blind test (see the
- *    scoreboard's README).
+ *    not redistributed by the project, so only the ratio is shown. A development comparison, not an independent test (see
+ *    data/board/README).
  *  - Magic numbers N = 50, 82, 126; s-process abundance peaks at Sr-88 (A 88), Ba-138 (A 138), Pb-208 (A 208); r-process
  *    peaks near A 80, 130, 195 (both visible as local maxima in Lodders' table). sigma x N roughly constant between magic
  *    numbers ("local approximation"): F. Kaeppeler, R. Gallino, S. Bisterzo, W. Aoki, Rev. Mod. Phys. 83 (2011) 157;
@@ -72,8 +72,8 @@
     const [t0, c0] = RAMP[i], [t1, c1] = RAMP[i + 1], q = (t - t0) / (t1 - t0); return `rgba(${c0.map((v, j) => Math.round(lerp(v, c1[j], q))).join(",")},${a})`; };
   const fmt = (x) => x >= 1e5 ? x.toExponential(1).replace("e+", " × 10^") : x >= 100 ? Math.round(x).toLocaleString("en-US") : x >= 10 ? x.toFixed(1) : x >= 1 ? x.toFixed(2) : x >= 0.01 ? x.toFixed(3) : x.toPrecision(2);
   const sup = (s) => s.replace(/\^(-?\d+)/, (m, d) => d.split("").map((c) => (c === "-" ? "⁻" : "⁰¹²³⁴⁵⁶⁷⁸⁹"[c])).join(""));
-  // the comparison figures come from the scoreboard (its own MACS calculation), not from the σ shown: say so
-  const boardTxt = (e) => ratioTxt(e) + " (" + (WT.ui ? WT.ui("nav_board", "Scoreboard") : "Scoreboard") + ")";
+  // the comparison figures come from the comparison page (its own MACS calculation), not from the σ shown: say so
+  const boardTxt = (e) => ratioTxt(e) + " (" + (WT.ui ? WT.ui("nav_board", "Comparisons") : "Comparisons") + ")";
   const ratioTxt = (e) => { const r = Math.pow(10, e); return r >= 1 ? WT.trf("{a} % above measured", Math.round((r - 1) * 100)) : WT.trf("{a} % below measured", Math.round((1 - r) * 100)); };
 
   const geo = {}, R = rng(7);
@@ -137,7 +137,7 @@
 </div>
 <div class="step">
   <h3>Checked against measurements</h3>
-  <p>INCOGNITA's 30 keV values divided by measured ones, for ${CHK.length} stable nuclides (<a href="scoreboard.html">scoreboard</a>).</p>
+  <p>INCOGNITA's 30 keV values divided by measured ones, for ${CHK.length} stable nuclides (<a href="scoreboard.html">comparisons</a>).</p>
 </div>`,
     setup(S) {
       S.set("mode", "curve"); S.set("k", K0); S.set("rt", 0); S.sv = "sn"; S.showS = 1; S.showR = 1;
@@ -393,6 +393,6 @@
     const ty = H - (phone ? 14 : 22);
     if (hov) { g.ring(X(hov.A), Y(hov.err), 10, c.ink, 1.5); g.label(hov.tier === "A" ? WT.trf("{a}: INCOGNITA's engine {b} (the library then scales to it)", nm(hov.Z, hov.A), ratioTxt(hov.err)) : WT.trf("{a}: INCOGNITA σ = {b} mb, {c}", nm(hov.Z, hov.A), fmt(hov.m), boardTxt(hov.err)), W / 2, ty, { color: c.ink, size: fs, weight: 600, serif: true, raw: true }); }
     else g.label(WT.trf(phone ? "{a} nuclides · typical difference {b} %" : "{a} stable nuclides · typical difference {b} % (median), rms {c} %", CHK.length, Math.round((Math.pow(10, MED) - 1) * 100), Math.round((Math.pow(10, RMS) - 1) * 100)), W / 2, ty, { color: c.ink, size: fs, weight: 600, serif: true, raw: true });
-    g.label(phone ? "ringed: s-only · measured: KADoNiS" : "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test", W / 2, ty - (phone ? 18 : 22), { color: c.soft, size: fs - 2 });
+    g.label(phone ? "ringed: s-only · measured: KADoNiS" : "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test", W / 2, ty - (phone ? 18 : 22), { color: c.soft, size: fs - 2 });
   }
 })();

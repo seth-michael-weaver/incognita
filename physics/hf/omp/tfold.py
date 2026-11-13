@@ -1,13 +1,13 @@
-"""TFOLD (Incognita extension, not TALYS; default ON): finite-size fold of the triton / helion optical potentials.
+"""`tfold` (Incognita extension, not TALYS; default ON): finite-size fold of the triton / helion optical potentials.
 
 Physics. TALYS builds the t / 3He optical potential by Watanabe folding of the nucleon potentials but keeps the point-nucleon
 geometry. Folding a Woods-Saxon form factor with the projectile's matter density (rms radius r_m = 1.74 fm for 3H and 3He, from
-the measured charge radii and mirror symmetry) adds variances in quadrature to the diffuseness (TRITON3 T2):
+the measured charge radii and mirror symmetry) adds variances in quadrature to the diffuseness:
 
     a' = sqrt(a^2 + (r_m / pi)^2)
 
 on the real-volume, imaginary-volume, real-surface and imaginary-surface diffuseness (av, aw, avd, awd) of k = 4, 5; radii
-unchanged. The Kalbach stripping / pickup constant `cstrip` of t and 3He is x0.99 (TRITON2's 14 MeV fit, = 1 within its CI).
+unchanged. The Kalbach stripping / pickup constant `cstrip` of t and 3He is x0.99 (a 14 MeV fit, = 1 within its CI).
 No fitted number enters the fold.
 
 Before TFOLD the same fold was carried as per-target deck lines (`avadjust/awadjust/avdadjust/awdadjust t|h f`,

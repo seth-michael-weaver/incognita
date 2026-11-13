@@ -6,7 +6,7 @@ Writes to <DIR>/validation/:
   v1_lines_vs_v2.csv     each of the 524 v1 lines: old decision, v2 decision on the line's own scope, agree, codes
   flips.csv              the lines whose decision changed, with the v2 evidence
   new_decisions.csv      v2 decisions (cells) that no v1 line covers
-  audit_sample.csv       the pre-registered 30-decision spot-audit sample (seed 20260923, strata of 10)
+  audit_sample.csv       the fixed-in-advance 30-decision spot-audit sample (seed 20260923, strata of 10)
   validation_summary.json
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ import polars as pl
 from . import paths
 
 LIBPAT = re.compile(r"ENDF|JENDL|JEFF|TENDL|CENDL|BROND|FENDL|IRDFF|BRUSLIB|evaluat|librar|VIII\.|VII\.1", re.I)
-L2_LINES = set(range(0, 5)) | set(range(398, 470))   # INDEP_CURATE's reading: a library VALUE was evidence
+L2_LINES = set(range(0, 5)) | set(range(398, 470))   # independent re-reading: a library VALUE was evidence
 ORDER = {"keep": 0, "downweight": 1, "exclude": 2}
 SEED = 20260923
 
@@ -93,7 +93,7 @@ def validate(reg: Path) -> dict:
                                                           return_dtype=pl.Boolean)).filter(~pl.col("v1"))
     new.drop("v1").write_csv(out / "new_decisions.csv")
 
-    # pre-registered audit sample: (a) R3 records, (b) other non-keep records, (c) flips
+    # fixed-in-advance audit sample: (a) R3 records, (b) other non-keep records, (c) flips
     rng = np.random.default_rng(SEED)
     a = sorted([r["id"] for r in recs if r["reason_code"] == "R3_TWIN_SUPERSEDED"])
     b = sorted([r["id"] for r in recs if r["reason_code"] != "R3_TWIN_SUPERSEDED" and r["decision"] != "renorm"])

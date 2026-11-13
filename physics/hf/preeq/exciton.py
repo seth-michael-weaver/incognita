@@ -195,9 +195,9 @@ class PreeqInputs:
     a_init: int  # Ainit, mass number of the compound system
     nbins: int = 40
     primary: bool = True
-    # KWCOV B7: what `preeq.exciton_b7` reads (twocomponent n, gshell y, preeqmode 3); None on every other run
+    # what `preeq.exciton_b7` reads (twocomponent n, gshell y, preeqmode 3); None on every other run
     b7: dict | None = None
-    # KWCOV GAP (isomeric targets): targetE, the excitation of the target level Ltarget (nuclides.f90:234); 0 for a
+    # isomeric targets: targetE, the excitation of the target level Ltarget (nuclides.f90:234); 0 for a
     # ground-state target. `ecomp_mev` = Etotal holds it, so eninccm = Etotal - S(0,0,k0) - targetE (energies.f90:131)
     targete_mev: float = 0.0
 
@@ -286,7 +286,7 @@ def matrix_elements(
 
 
 def phmicro_zn0(inp: "PreeqInputs", options):
-    """PHMICRO: (Z0, N0) of the initial compound nucleus when `phmodel 2` / INCOGNITA_PHMODEL=2 is on, else None.
+    """(Z0, N0) of the initial compound nucleus when `phmodel 2` / INCOGNITA_PHMODEL=2 is on, else None.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -344,7 +344,7 @@ def emission_rates(inp: PreeqInputs, states: ExcitonStates, options, params) -> 
     )
     u_cn = inp.ecomp_mev.reshape(C, 1) - pair_cn
     phcomp = phdens2(*_shift(states), gsp_cn, gsn_cn, u_cn, edepth, surfwell, ap2=ap2_cn)  # (C, S)
-    zn0 = phmicro_zn0(inp, options)  # PHMICRO: tabulated microscopic p-h densities (phmodel 2), None = off
+    zn0 = phmicro_zn0(inp, options)  # tabulated microscopic p-h densities (phmodel 2), None = off
     phcomp = ph_override(phcomp, *_shift(states), u_cn, 0, 0, zn0)
 
     # (C, S, 7, E) grids --------------------------------------------------
@@ -363,7 +363,7 @@ def emission_rates(inp: PreeqInputs, states: ExcitonStates, options, params) -> 
     factor = wf * xs * eout  # (C, S, 7, E)
 
     # --- gamma (type 0): emissionrate2.f90:117-133
-    # NATIVEX2: only the type-0 column of the gamma terms is kept (`is_gamma` below), so they are
+    # Only the type-0 column of the gamma terms is kept (`is_gamma` below), so they are
     # evaluated on that column alone (element for element the same numbers)
     eres_g = eres[:, :, 0:1, :]
     pair_g = preeqpair(
@@ -402,7 +402,7 @@ def emission_rates(inp: PreeqInputs, states: ExcitonStates, options, params) -> 
     w_gamma = rgamma * factor[:, :, 0:1, :] * eout * phratio_g  # the extra Eout, :118
     ramp = pegamma_ramp(options)
     if ramp > 0.0:
-        # PEGAMMA (Incognita extension, default OFF): the equidistant-spacing density of an exciton state
+        # `pegammaramp` (Incognita extension, default OFF): the equidistant-spacing density of an exciton state
         # switches on as a step at its Pauli + pairing threshold (for n = 1 it IS a step, (U - A)^0),
         # so the photon emission of that state -- the semi-direct capture -- appears at full strength
         # from one incident energy to the next. Here the photon emission rate of each state rises
@@ -448,7 +448,7 @@ def emission_rates(inp: PreeqInputs, states: ExcitonStates, options, params) -> 
         sw4,
         ap2=ap2_res,
     )
-    # PHMICRO: residual nucleus of ejectile type t is (Zix, Nix) = (parZ(t), parN(t)) (emissionrate2.f90:218)
+    # `phmodel 2`: residual nucleus of ejectile type t is (Zix, Nix) = (parZ(t), parN(t)) (emissionrate2.f90:218)
     phres = ph_override(phres, ppires, states.hpi.reshape(1, S, 1, 1), pnures, states.hnu.reshape(1, S, 1, 1), ures,
                         zejec, nejec, zn0)
     w_part = torch.where(
@@ -490,7 +490,7 @@ def emission_rates(inp: PreeqInputs, states: ExcitonStates, options, params) -> 
     )
     wsum = wemission2.sum(2)  # (C, S, E): wemissum2
     if ramp > 0.0:
-        # PEGAMMA: TALYS keeps the photons of an n > 1 state in an outgoing bin only if a particle can
+        # `pegammaramp`: TALYS keeps the photons of an n > 1 state in an outgoing bin only if a particle can
         # be emitted at the bin CENTRE, so the bin that holds the particle end point (Eout = Einc for
         # neutrons: the capture edge) flips on/off as the incident energy crosses bin centres. Here
         # each bin keeps the fraction of it that lies below the highest particle end point of the
@@ -635,7 +635,7 @@ def _integrate_plus(states, m2, u, edepth, surfwell, gsp, gsn, nexcbins, kind, z
         l2 = u - ap_l
         dex = (l2 - l1) / nexcbins
         dppi, dhpi, dpnu, dhnu = dens
-        # SPEEDP: the `nexcbins` mid-points are a leading axis, so the two state densities are
+        # The `nexcbins` mid-points are a leading axis, so the two state densities are
         # evaluated once per channel instead of once per bin (`nbins//2` = 20 bins on the primary
         # compound nucleus, over (C, S) arrays too small for the work to dominate the dispatch).
         # The running sum is still added bin by bin, in TALYS's order.
@@ -651,7 +651,7 @@ def _integrate_plus(states, m2, u, edepth, surfwell, gsp, gsn, nexcbins, kind, z
             edepth,
             surfwell,
         )
-        coll = ph_override(coll, dppi, dhpi, dpnu, dhnu, uu, 0, 0, zn0)  # PHMICRO (lambdapiplus.f90:206-209)
+        coll = ph_override(coll, dppi, dhpi, dpnu, dhnu, uu, 0, 0, zn0)  # phmodel 2 (lambdapiplus.f90:206-209)
         lam = tph * m2[m2key] * coll
         resid = phdens2(*_shift(states, *rshift), gsp, gsn, u - uu, edepth, surfwell)
         resid = ph_override(resid, *_shift(states, *rshift), u - uu, 0, 0, zn0)
@@ -689,8 +689,8 @@ def _integrate_zero(states, m2, u, edepth, surfwell, gsp, gsn, nexcbins, kind, z
     dex = (l2 - l1) / nexcbins
     acc = torch.zeros_like(u * ap0)
     ct = lambda v: torch.tensor(v, device=u.device)  # noqa: E731
-    uu = l1 + _bin_midpoints(nexcbins, u) * dex  # SPEEDP: all bins at once, see `_integrate_plus`
-    po = lambda d, st, e: ph_override(d, *st, e, 0, 0, zn0)  # noqa: E731  PHMICRO (lambdapinu.f90:167-197)
+    uu = l1 + _bin_midpoints(nexcbins, u) * dex  # all bins at once, see `_integrate_plus`
+    po = lambda d, st, e: ph_override(d, *st, e, 0, 0, zn0)  # noqa: E731  phmodel 2 (lambdapinu.f90:167-197)
     lam = tph * m2[m2key] * po(phdens2(*[ct(v) for v in dens_coll], gsp, gsn, uu, edepth, surfwell), dens_coll, uu)
     term = lam * po(phdens2(*[ct(v) for v in dens_pair], gsp, gsn, uu, edepth, surfwell), dens_pair, uu) * dex
     term = term * po(phdens2(*_shift(states, *rshift), gsp, gsn, u - uu, edepth, surfwell), _shift(states, *rshift),
@@ -734,7 +734,7 @@ def transition_rates(
     from physics.hf.preeq import preeq_nx2
 
     zn0 = phmicro_zn0(inp, options)
-    # NATIVEX2: off the graph, all four rates in one C call (preeq.preeq_nx2); PHMICRO takes the Python loop
+    # Off the graph, all four rates in one C call (preeq.preeq_nx2); phmodel 2 takes the Python loop
     out = None if zn0 is not None else preeq_nx2.transition_rates(inp, states, emis, m2, nex, numeric,
                                                                   talys_constants()["twopihbar"])
     if out is not None:
@@ -862,7 +862,7 @@ def exciton_model(inp: PreeqInputs, options, params, states: ExcitonStates | Non
     TALYS: exciton2.f90:1 (exciton2)
     Test: A-pe
     """
-    if inp.b7 is not None:  # KWCOV B7: one-component / gshell / preeqmode 3 (preeq.exciton_b7)
+    if inp.b7 is not None:  # one-component / gshell / preeqmode 3 (preeq.exciton_b7)
         from physics.hf.preeq import exciton_b7
 
         return exciton_b7.exciton_model(inp, options, params, inp.b7, states)
@@ -908,12 +908,12 @@ class DiscreteInputs:
     etop_mev: Tensor  # (C, E)
     ebegin: tuple  # (7,) int
     eend: list  # [C][7] int
-    ltarget: int = 0  # KWCOV GAP: Ltarget /= 0 skips the collapse onto the discrete levels (preeqcorrect.f90:90)
+    ltarget: int = 0  # Ltarget /= 0 skips the collapse onto the discrete levels (preeqcorrect.f90:90)
 
 
 
 def c6fix_on() -> bool:
-    """C6FIX (Incognita extension, ENGC10, default OFF): `INCOGNITA_C6FIX` (y/1/on).
+    """Top-of-grid Elast rule (Incognita extension, default OFF): `INCOGNITA_C6FIX` (y/1/on).
 
     When the last discrete level's emission energy Elast lies ABOVE the top of the emission grid (large positive-Q
     alpha/proton channels: `nendisc` is clamped at `eend`, so Etop(nendisc) < Elast), TALYS's boundary book runs with a
@@ -944,7 +944,7 @@ def preeq_correct(
     from physics.hf.core.grids import locate_scalar
     from physics.hf.preeq import preeq_nx2
 
-    fast = preeq_nx2.preeq_correct(spectra, inp, disc)  # NATIVEX2: off the graph, on numpy
+    fast = preeq_nx2.preeq_correct(spectra, inp, disc)  # off the graph, on numpy
     if fast is not None:
         return fast
     C, E = inp.C, inp.E
@@ -957,7 +957,7 @@ def preeq_correct(
     # `nendisc`. Missing that leaves the two-component spectrum running to the kinematic maximum
     # where TALYS has cut it at the last discrete level -- invisible in every A-pe column,
     # because `xsstep2` has exactly one consumer: `population.f90`'s `xspopph2` branch, which is
-    # live only at `Einc >= emulpre` (EXCL3).
+    # live only at `Einc >= emulpre`.
     if "xsstep2" in spectra:
         out["xsstep2"] = spectra["xsstep2"].clone()
     nlmax = max((len(a) for row in disc.eoutdis_mev for a in row if a is not None), default=1)
@@ -975,7 +975,7 @@ def preeq_correct(
             nd = disc.nendisc[c][t]
             esd_all = disc.eoutdis_mev[c][t]
             NL = disc.nlast[t]
-            if esd_all is not None and not disc.ltarget:  # KWCOV GAP: preeqcorrect.f90:90 (goto 100)
+            if esd_all is not None and not disc.ltarget:  # preeqcorrect.f90:90 (goto 100)
                 for i in range(NL + 1):
                     if disc.xsdirdisc_mb[c][t][i] != 0.0:
                         continue
@@ -1007,7 +1007,7 @@ def preeq_correct(
                         rb = (float(etop[nd]) - elast) / float(de[nd])
                         if abs(rb) > 1.0:
                             rb = 0.0
-                        if rb < 0.0 and c6fix_on():  # C6FIX: Elast above the grid's top bin
+                        if rb < 0.0 and c6fix_on():  # INCOGNITA_C6FIX: Elast above the grid's top bin
                             rb = 0.0
                         if t != k0:
                             xs1 = float(out["xspreeq"][c, t, nd] * rb)
@@ -1037,12 +1037,12 @@ def preeq_total(spectra: dict, inp: PreeqInputs, disc: DiscreteInputs, ungate: b
     the fraction `Etop(nendisc) - Elast` of the last bin; if the total exceeds `xsflux`
     everything is scaled down by `xsflux / (xspreeqsum + xspreeqdiscsum)`.
 
-    `ungate` (PEGAMMA, default False) keeps the pre-equilibrium photons when no particle flux reaches
+    `ungate` (default False) keeps the pre-equilibrium photons when no particle flux reaches
     the continuum instead of zeroing them (preeqtotal.f90:92-102): the discrete-level photons are
     kept in that case by TALYS too, and the zeroing turns the photon continuum on as a step where the
     first particle continuum bin opens.
 
-    `nofrac` (PEREMOVE, default None = TALYS): (C, 7) booleans; where True the second ``- xs(nendisc) * frac`` removal is
+    `nofrac` (`peremove`, default None = TALYS): (C, 7) booleans; where True the second ``- xs(nendisc) * frac`` removal is
     skipped, because `preeq_correct` already took the [Elast, Etop(nendisc)] piece out of that bin by the (1 - Rboundary)
     scaling (TALYS removes it twice, so the bin keeps (1 - Rboundary)^2 of its flux in this book).
 
@@ -1067,10 +1067,10 @@ def preeq_total(spectra: dict, inp: PreeqInputs, disc: DiscreteInputs, ungate: b
         try:
             from physics.hf.emission import fluxclose as _fc
 
-            # FLUXCN part N (capture-neutral): the sink is evaluated as if C were off (zeroed as in production), so the
+            # Capture-neutral part: the sink is evaluated as if C were off (zeroed as in production), so the
             # sentinel PE never leaves the compound flux and its PE photons are never booked into capture
             fcC = _fc.on("C") and not _fc.on("N")
-        except ImportError:  # an engine without FLUXCLOSE: C off, so pe2 zeroes every sink like pe
+        except ImportError:  # an engine without `fluxclose`: C off, so pe2 zeroes every sink like pe
             fcC = False
     for c in range(C):
         de = inp.deltae_mev[c]
@@ -1079,11 +1079,11 @@ def preeq_total(spectra: dict, inp: PreeqInputs, disc: DiscreteInputs, ungate: b
             nd = disc.nendisc[c][t]
             esd_all = disc.eoutdis_mev[c][t]
             elast = float(esd_all[disc.nlast[t]]) if esd_all is not None else 0.0
-            # KEVLEAK3 pe2: only where that flux is booked nowhere -- FLUXCLOSE C (place_unplaced) puts the PE of an exit
+            # pe2: only where that flux is booked nowhere -- `fluxclose` C (place_unplaced) puts the PE of an exit
             # with no continuum bin on its open levels 1..NL, so the sink is "no level above the ground state open"
             sink = kv or (kv3 and (not fcC or len(esd_all) < 2 or float(esd_all[1]) <= 0.0)) if esd_all is not None else False
             if sink and t == inp.k0 and elast <= 0.0:
-                # KEVLEAK2 pe: the projectile's last discrete level is closed, so no continuum of the
+                # pe: the projectile's last discrete level is closed, so no continuum of the
                 # target exists; energies.f90's nendisc = 1 sentinel would book bin [ebegin, 1] as continuum PE that no
                 # exit receives. Zero it (spectra and totals of (c, t) stay 0).
                 for key in ("xspreeq", "xspreeqps", "xspreeqki", "xspreeqbu"):
@@ -1093,9 +1093,9 @@ def preeq_total(spectra: dict, inp: PreeqInputs, disc: DiscreteInputs, ungate: b
                     out["xsstep2"][c, :, t] = 0.0
                 continue
             frac = float(disc.etop_mev[c][nd]) - elast if elast > 0.0 else 0.0
-            if frac < 0.0 and c6:  # C6FIX: Elast above the grid's top bin, nothing of bin nd is discrete
+            if frac < 0.0 and c6:  # INCOGNITA_C6FIX: Elast above the grid's top bin, nothing of bin nd is discrete
                 frac = 0.0
-            if nofrac is not None and bool(nofrac[c][t]):  # PEREMOVE: the piece was already removed by the scaling
+            if nofrac is not None and bool(nofrac[c][t]):  # `peremove`: the piece was already removed by the scaling
                 frac = 0.0
             sl = slice(b, nd + 1)
             xssteptot[c, t] = (out["xsstep"][c, t, :, sl] * de[sl]).sum(-1) - out["xsstep"][
@@ -1148,7 +1148,7 @@ def preeq_total(spectra: dict, inp: PreeqInputs, disc: DiscreteInputs, ungate: b
 
 
 def pegamma_ramp(options) -> float:
-    """PEGAMMA's ramp width [MeV]: the `pegammaramp` keyword (Incognita extension), else the environment
+    """The photon ramp width [MeV]: the `pegammaramp` keyword (Incognita extension), else the environment
     `INCOGNITA_PEGAMMA` (a number of MeV); 0, unset or empty = OFF = TALYS.
 
     Test: tests/hf/test_pegamma.py
@@ -1163,7 +1163,7 @@ def pegamma_ramp(options) -> float:
 
 
 def pegamma_collapse(res: dict, spec0: Tensor, inp: PreeqInputs, disc: DiscreteInputs) -> dict:
-    """PEGAMMA: the photon part of `preeq_correct`'s collapse onto the discrete states, flux-conserving.
+    """The photon part of `preeq_correct`'s collapse onto the discrete states, flux-conserving.
 
     TALYS gives level i the photon spectrum at the grid bin that CONTAINS each of its two boundaries
     times the width (a step function of the incident energy as the levels slide across the bins), and
@@ -1214,12 +1214,12 @@ def pegamma_collapse(res: dict, spec0: Tensor, inp: PreeqInputs, disc: DiscreteI
     return {"xspreeqdisc": disc_xs, "xspreeqdisctot": disc_xs.sum(-1), "xspreeqdiscsum": disc_xs.sum((-1, -2))}
 
 
-PCDIAG: list = []  # PECOLLAPSE: per (case, type) conservation records when INCOGNITA_PECOLLAPSE_DIAG=1 (output only)
+PCDIAG: list = []  # `pecollapse`: per (case, type) conservation records when INCOGNITA_PECOLLAPSE_DIAG=1 (output only)
 _PC_KEYS = ("xspreeq", "xsstep", "xspreeqps", "xspreeqki", "xspreeqbu", "xsstep2")
 
 
 def pecollapse_mode(options) -> str:
-    """PECOLLAPSE (Incognita extension, default OFF): `pecollapse n|c|c2` keyword, else `INCOGNITA_PECOLLAPSE`.
+    """`pecollapse` (Incognita extension, default OFF): `pecollapse n|c|c2` keyword, else `INCOGNITA_PECOLLAPSE`.
 
     n = OFF = TALYS's two-point collapse (preeqcorrect.f90:115-133). c = flux-conserving collapse; c2 = c plus the
     last discrete bin's continuum removed once (see `pecollapse`).
@@ -1262,13 +1262,13 @@ def _cumlin(x: np.ndarray, y: np.ndarray, q: np.ndarray) -> np.ndarray:
     return cum[j] + y[j] * h + 0.5 * slope * h * h
 
 
-# --------------------------------------------------------------------------- PEPAULI (Incognita extension, default OFF)
+# --------------------------------------------------------------------------- pepauli (Incognita extension, default OFF)
 
 
 def _case_inputs(inp: PreeqInputs, c: int, eps: np.ndarray) -> PreeqInputs:
     """Case c of `inp` with the emission grid replaced by the energies `eps` (ascending, MeV). xsreac is the linear interpolant
     of case c's inverse cross sections through the grid nodes; type t is masked on [egrid(ebegin_t), egrid(eend_t)], so at a
-    grid node every field equals the original. deltaE is only used by integrated escape widths, which PEPAULI never reads."""
+    grid node every field equals the original. deltaE is only used by integrated escape widths, which `pepauli_*` never reads."""
     from dataclasses import replace
 
     eg = inp.egrid_mev[c].detach().cpu().numpy().astype(float)
@@ -1382,7 +1382,7 @@ def pepauli_onsets(inp: PreeqInputs, options, states: ExcitonStates, c: int) -> 
                 pck = float(preeqpair(inp.pair_res_mev[c:c + 1, t].reshape(1, 1), torch.tensor(inp.A / 208.0, dtype=DTYPE),
                                       torch.tensor(abs(parA[k0] - parA[t])), inp.ecomp_mev[c:c + 1].reshape(1, 1), 2).reshape(-1)[0])
                 out += [np.array([emax - pck, emax - pck - ako])]
-    if phmicro_on(options):  # PHMICRO: the tabulated densities are piecewise in U on edens: those nodes are cuts too
+    if phmicro_on(options):  # phmodel 2: the tabulated densities are piecewise in U on edens: those nodes are cuts too
         from physics.hf.density.particle_hole import _PH_EDENS
 
         out += [emax0 - pg - _PH_EDENS]
@@ -1456,7 +1456,7 @@ def pepauli_integral(f, lo: float, hi: float, cuts: np.ndarray) -> float:
 
 
 def _pepauli_cell(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, mode) -> dict:
-    """PEPAULI for one acted (case, type) cell: corrections to WA's window integrals inside the endpoint segments only.
+    """`pepauli` for one acted (case, type) cell: corrections to WA's window integrals inside the endpoint segments only.
     Returns the updated `sh`/`union` and the endpoint book (segments, onsets used, self-check, fall-back reason)."""
     out, pend = _pepauli_prep(res, pre, inp, ctx, c, t, x, y, egc, win, dirw, elast, u1, mode)
     if pend is None:
@@ -1568,7 +1568,7 @@ def _pepauli_finish(pend, spec, chk) -> dict:
 
 
 def pecollapse(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, mode: str) -> dict:
-    """PECOLLAPSE: flux-conserving collapse of the pre-equilibrium continuum onto the discrete states.
+    """`pecollapse`: flux-conserving collapse of the pre-equilibrium continuum onto the discrete states.
 
     TALYS (preeqcorrect.f90:96-133) zeroes every outgoing-energy bin above the last discrete level and gives level i
     ``0.5 * [xspreeq(n1) + xspreeq(n2)] * (esd2 - esd1)``, a two-point sample at the `locate`d nodes of its window,
@@ -1684,11 +1684,11 @@ def pecollapse(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, mod
     return out
 
 
-PUDIAG: list = []  # PEUNITS: per (case, type) records when INCOGNITA_PEUNITS_DIAG=1 (output only, also under OFF)
+PUDIAG: list = []  # `peunits`: per (case, type) records when INCOGNITA_PEUNITS_DIAG=1 (output only, also under OFF)
 
 
 def peunits_on(options) -> bool:
-    """PEUNITS (Incognita extension, default OFF): `peunits y|n` keyword, else `INCOGNITA_PEUNITS` (y/1/on).
+    """`peunits` (Incognita extension, default OFF): `peunits y|n` keyword, else `INCOGNITA_PEUNITS` (y/1/on).
 
     Test: tests/hf/test_peunits.py
 
@@ -1700,7 +1700,7 @@ def peunits_on(options) -> bool:
 
 
 def peremove_mode(options) -> str:
-    """PEREMOVE (Incognita extension, default OFF): `peremove n|1|2` keyword, else `INCOGNITA_PEREMOVE`. Needs `peunits y`.
+    """`peremove` (Incognita extension, default OFF): `peremove n|1|2` keyword, else `INCOGNITA_PEREMOVE`. Needs `peunits y`.
 
     1 = the [Elast, Etop(nendisc)] piece of the last discrete bin is removed from the continuum once (preeq_total skips its
     second ``- xs * frac``); 2 = 1 + level NL gets TALYS's own two-point window sample (see `peunits`).
@@ -1719,17 +1719,17 @@ def peremove_mode(options) -> str:
 
 
 def pewindow_mode(options) -> str:
-    """PEWINDOW (Incognita extension, default OFF): `pewindow n|a|l` keyword, else `INCOGNITA_PEWINDOW`. Needs `peunits y`, implies
+    """`pewindow` (Incognita extension, default OFF): `pewindow n|a|l` keyword, else `INCOGNITA_PEWINDOW`. Needs `peunits y`, implies
     `peremove 1`, refuses `peremove 2` (and, through peunits, pecollapse c/c2 / pegammaramp).
 
     a = every level 1 <= i <= NL takes the exact integral of the piecewise-linear interpolant of the un-zeroed PE spectrum over its
     TALYS window; l = level NL only (levels 1..NL-1 keep TALYS's two-point sample). See `peunits`.
-    PEPAULI: p = a + in each ENDPOINT segment of the window range (one grid node zero, its neighbour open) the exact spectrum
+    `pewindow p` = a + in each ENDPOINT segment of the window range (one grid node zero, its neighbour open) the exact spectrum
     (`pepauli_spectrum`) integrated piecewise between the analytic Pauli/pairing onsets (`pepauli_onsets`) instead of the
     linear ramp through the zero node; q = a + two exactly evaluated nodes at 1/3 and 2/3 of each endpoint segment.
     pewindow g: g = p + the ground state (level 0, TALYS window [mid(E0, E1), E0]) gets the same exact integral (p leaves it on
     TALYS's two-point floor-node sample, which alternates x4 with the 0.5 MeV grid phase).
-    A photon entrance (k0 = 0) has no discrete PE collapse to correct: `preequilibrium` runs it as n (PEPHOTFIX).
+    A photon entrance (k0 = 0) has no discrete PE collapse to correct: `preequilibrium` runs it as n.
     Test: tests/hf/test_pewindow.py, tests/hf/test_pepauli.py, tests/hf/test_pewindow_gs.py, tests/hf/test_pephotfix.py
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
@@ -1744,12 +1744,12 @@ def pewindow_mode(options) -> str:
     return v
 
 
-PRDIAG: list = []  # PEREMOVE: per (case, type) books when INCOGNITA_PEREMOVE_DIAG=1 (output only, also under OFF)
+PRDIAG: list = []  # `peremove`: per (case, type) books when INCOGNITA_PEREMOVE_DIAG=1 (output only, also under OFF)
 
 
 def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bool, remove: str = "n", window: str = "n",
             ctx: dict | None = None) -> dict:
-    """PEUNITS: the units of TALYS's pre-equilibrium cross section for the last discrete level NL.
+    """`peunits`: the units of TALYS's pre-equilibrium cross section for the last discrete level NL.
 
     TALYS (preeqcorrect.f90:127-133) gives level NL ``xspreeq(nendisc) * Rboundary`` with
     Rboundary = (Etop(nendisc) - Elast) / deltaE(nendisc): a spectrum (mb/MeV) times a dimensionless fraction, i.e.
@@ -1760,18 +1760,18 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
     second removal (``- xs * frac``, a separate defect), type k0, levels with a direct cross section, the NL level when
     TALYS's level loop stops before it, and every cell with |Rboundary| > 1 (TALYS sets Rboundary = 0) or frac < 0.
 
-    PEREMOVE (`remove`, needs `on`; default "n" = the above): in the same cells ("acts"), "1" also returns the (C, 7) mask
+    `peremove` (`remove`, needs `on`; default "n" = the above): in the same cells ("acts"), "1" also returns the (C, 7) mask
     `nofrac` so that `preeq_total` removes the [Elast, Etop(nendisc)] piece from the continuum once (the scaling), not twice;
     "2" = "1" + level NL gets TALYS's own two-point sample over its window [Elast, (E_NL + E_NL-1)/2] (the rule of every
     level i < NL, preeqcorrect.f90:96-122, on the un-scaled spectrum) instead of the sliver, which lies mostly inside the
     windows of levels NL-1, NL-2, ... that already receive that flux. INCOGNITA_PEREMOVE_DIAG=1 -> PRDIAG.
 
-    PEWINDOW (`window`, needs `on` and remove "1"; default "n" = the above): in the same cells, level i takes the EXACT integral
+    `pewindow` (`window`, needs `on` and remove "1"; default "n" = the above): in the same cells, level i takes the EXACT integral
     of the piecewise-linear interpolant (through the grid nodes, as `pecollapse` and the 4x G0 reference) of the un-zeroed,
     un-scaled spectrum over its TALYS window [esd1, esd2] (mid-points; NL's lower edge Elast), instead of the two-point sample
     0.5 [xs(n1) + xs(n2)] (esd2 - esd1) at the `locate`d floor nodes, which over-weights the node below a spectrum that falls to
     zero at the Pauli/pairing endpoint. "a": levels 1..NL; "l": NL only. Level 0, type k0, direct levels and every non-"acts"
-    cell stay TALYS/PEUNITS. With remove "1" each [Elast, Etop(nendisc)] slice leaves the continuum once.
+    cell stay TALYS/`peunits`. With remove "1" each [Elast, Etop(nendisc)] slice leaves the continuum once.
 
     Test: tests/hf/test_peunits.py, tests/hf/test_peremove.py, tests/hf/test_pewindow.py
 
@@ -1798,7 +1798,7 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
     xpre = pre["xspreeq"].detach().cpu().numpy()
     xpost = res["xspreeq"].detach().cpu().numpy()
     for c in range(C):
-        # PERFCASC: the cells (c, t) run as generators that pause before their book-keeping, so the PEPAULI spectra of
+        # The cells (c, t) run as generators that pause before their book-keeping, so the `pepauli` spectra of
         # every acted cell of case c are evaluated in ONE `pepauli_spectrum` call (`_pepauli_spectra`) instead of one per
         # cell; the cells then finish in type order, as before.
         def _cell(t, c=c):
@@ -1843,7 +1843,7 @@ def peunits(res: dict, pre: dict, inp: PreeqInputs, disc: DiscreteInputs, on: bo
             arm = new
             lv_talys = [float(v) for v in xd[c, t, :NL + 1]]
             win = None
-            if why == "acts" and (window != "n" or prdiag):  # PEWINDOW: exact window integrals (pecollapse's interpolant)
+            if why == "acts" and (window != "n" or prdiag):  # `pewindow`: exact window integrals (pecollapse's interpolant)
                 E = xpre.shape[2]
                 hi = min(e_end, E - 1)
                 ztop = float(etopall[c][hi])
@@ -1965,7 +1965,7 @@ def preequilibrium(
     from physics.hf import kevleak2
     from physics.hf.preeq.complex import complex_particle_spectra
 
-    kevleak2.sync(options)  # KEVLEAK3: run-scoped kevleak2 value for preeq_total (deck > env > default 2)
+    kevleak2.sync(options)  # run-scoped kevleak2 value for preeq_total (deck > env > default 2)
     res = exciton_model(inp, options, params, states)
     jpfrac = spin_fraction(res, options, params, inp) if int(getattr(options, "pespinmodel", 1)) >= 3 else None
     if getattr(options, "flagpecomp", True) and coulbar_mev is not None:
@@ -1983,24 +1983,24 @@ def preequilibrium(
     res["xspreeq"] = res["xspreeq"] + cx["xspreeqps"] + cx["xspreeqki"] + cx["xspreeqbu"]
     ramp = pegamma_ramp(options)
     spec0 = res["xspreeq"].clone() if ramp > 0.0 else None
-    pcm = pecollapse_mode(options)  # PECOLLAPSE (default n = OFF = TALYS)
+    pcm = pecollapse_mode(options)  # `pecollapse` (default n = OFF = TALYS)
     if pcm != "n" and ramp > 0.0:
         raise ValueError("pecollapse c/c2 and pegammaramp both rebuild the photon collapse: use one")
     pcdiag = os.environ.get("INCOGNITA_PECOLLAPSE_DIAG", "") == "1"
-    pun = peunits_on(options)  # PEUNITS (default OFF = TALYS)
+    pun = peunits_on(options)  # `peunits` (default OFF = TALYS)
     if pun and (pcm != "n" or ramp > 0.0):
         raise ValueError("peunits and pecollapse c/c2 / pegammaramp all rewrite the discrete PE collapse: use one")
     pudiag = os.environ.get("INCOGNITA_PEUNITS_DIAG", "") == "1"
-    prm = peremove_mode(options)  # PEREMOVE (default n = OFF = TALYS/PEUNITS)
+    prm = peremove_mode(options)  # `peremove` (default n = OFF = TALYS/peunits)
     if prm != "n" and not pun:
         raise ValueError("peremove 1/2 is built on peunits y: set both")
-    pwm = pewindow_mode(options)  # PEWINDOW (default n = OFF = TALYS/PEUNITS/PEREMOVE)
+    pwm = pewindow_mode(options)  # `pewindow` (default n = OFF = TALYS/peunits/peremove)
     if pwm != "n" and inp.k0 == 0:
-        # PEPHOTFIX: PEWINDOW (and the PEREMOVE 1 it implies) rewrites preeqcorrect's collapse of the PE spectrum onto the
+        # Photon entrance: `pewindow` (and the `peremove 1` it implies) rewrites preeqcorrect's collapse of the PE spectrum onto the
         # discrete levels (two-point window samples, (1 - Rboundary) scaling of bin nendisc). A photon entrance has no such
         # collapse (preeq.f90:134 calls preeqcorrect only for k0 > 0: no level gets PE, bin nendisc is not scaled), so the
-        # window has nothing to correct and is a no-op: the photon run is the PEWINDOW n run (PEUNITS alone). Before this,
-        # `g` crashed in pepauli_onsets (Kalbach-pickup onsets read gscomp[k0 = 0]; no pickup exists for k0 = 0, flagpecomp
+        # window has nothing to correct and is a no-op: the photon run is the `pewindow n` run (`peunits` alone). Otherwise
+        # `g` would crash in pepauli_onsets (Kalbach-pickup onsets read gscomp[k0 = 0]; no pickup exists for k0 = 0, flagpecomp
         # is false), and a/l would book the window integrals onto levels on top of an unscaled continuum (double counting).
         pwm = "n"
     if pwm != "n":
@@ -2014,7 +2014,7 @@ def preequilibrium(
     if inp.k0 > 0:
         res.update(preeq_correct(res, inp, disc, res["states"]))
     else:
-        # ENGPROJ: preeq.f90:134 calls preeqcorrect only for k0 > 0, so a photon run keeps its continuum spectra
+        # preeq.f90:134 calls preeqcorrect only for k0 > 0, so a photon run keeps its continuum spectra
         # and reacinitial's zero discrete pre-equilibrium (preeqtotal still integrates up to nendisc)
         nlmax = max((len(a) for row in disc.eoutdis_mev for a in row if a is not None), default=1)
         z = torch.zeros(inp.C, 7, nlmax, dtype=DTYPE, device=inp.egrid_mev.device)
@@ -2030,7 +2030,7 @@ def preequilibrium(
         res.update(pecollapse(res, pre, inp, disc, pcm))
     res.update(preeq_total(res, inp, disc, ungate=ramp > 0.0, nofrac=nofrac))
     if jpfrac is not None:
-        # KWCOV B7 (preeqspin 3): preeqcomplex.f90:104-113 gives the complex-particle part the exciton spectrum's
+        # preeqspin 3: preeqcomplex.f90:104-113 gives the complex-particle part the exciton spectrum's
         # J shares, preeqcorrect.f90:150/179 and preeqtotal.f90:179-185 scale xspreeqJP as xspreeq, so it is the
         # exciton model's J fractions times the final xspreeq (zero where the exciton spectrum was zero)
         res["xspreeqjp"] = jpfrac * res["xspreeq"].unsqueeze(-1)
@@ -2041,7 +2041,7 @@ def preequilibrium(
 
 
 def spin_fraction(res: dict, options, params, inp: PreeqInputs) -> Tensor:
-    """KWCOV B7 (`preeqspin 3`): the J share of the exciton-model spectrum, `xspreeqJP / xspreeq` (C, 7, E, J),
+    """`preeqspin 3`: the J share of the exciton-model spectrum, `xspreeqJP / xspreeq` (C, 7, E, J),
     the same for both parities, from the per-state spectra and `RnJ` (exciton2.f90:121-128, exciton.f90:100-107):
     ``sum_s xs_s * 0.5 (2J+1) RnJ(n_s, J) / RnJsum(n_s) / sum_s xs_s``, J = 0 .. maxJph.
 

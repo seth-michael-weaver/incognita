@@ -1,4 +1,4 @@
-"""MERGED2: `core.exgrid_nx2` (exgrid.f90's excitation bins in C) against
+"""Native excitation grid: `core.exgrid_nx2` (exgrid.f90's excitation bins in C) against
 `core.grids._excitation_energies`, the reference body, bitwise.
 
 TALYS: exgrid.f90:1 (exgrid)

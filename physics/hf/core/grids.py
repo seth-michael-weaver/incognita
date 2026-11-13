@@ -43,7 +43,7 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from physics.hf.core import exgrid_nx2  # MERGED2: `excitation_energies` in C
+from physics.hf.core import exgrid_nx2  # `excitation_energies` in C
 from physics.hf.core.constants import PARN, PARSYM, PARZ, talys_constants
 from physics.hf.core.tensors import DTYPE
 
@@ -60,9 +60,9 @@ NUMEN_DEFAULT = 260  # A0_talys_mod.f90:59
 
 
 def numen(default: int = NUMEN_DEFAULT) -> int:
-    """`numen`, the outgoing-grid dimension: INCOGNITA_NUMEN (PECOLLAPSE: larger only for refined-segment
-    reference runs), else `default`. ENGFIX4: read on every call (it was read once at import, so a
-    long-lived worker kept its parent's value).
+    """`numen`, the outgoing-grid dimension: INCOGNITA_NUMEN (larger only for refined-segment
+    reference runs), else `default`. Read on every call, so a long-lived worker does not keep its
+    parent's value.
 
     TALYS: (none -- the dimension numen of A0_talys_mod is a compile-time constant there)
     Test: tests/hf/test_engfix4.py
@@ -76,11 +76,11 @@ NUMENLOW = 20  # A0_talys_mod.f90:99
 NUMLEV = 40  # A0_talys_mod.f90:43
 NUMBINS = 20 * (6 - 1)  # A0_talys_mod.f90:66, memorypar = 6
 NUMEX = NUMLEV + NUMBINS  # A0_talys_mod.f90:67
-# SNBIN: allocation cap of the residual excitation grid (and of the pre-equilibrium spin-factor rows in
+# `snbin`: allocation cap of the residual excitation grid (and of the pre-equilibrium spin-factor rows in
 # emission.binary), larger than TALYS's numex so `bins` up to NUMBINS_ALLOC works on every path. Arrays are
 # returned trimmed to maxex, so at the default `bins 40` nothing downstream changes (OFF bit-identical).
 # NUMEX itself is kept: `bins 0` and radwidtheory's grid depend on it.
-NUMBINS_ALLOC = 300  # SNBIN3: 200 -> 300 so `bins 240` (+ window sub-bins) fits; arrays trimmed to maxex
+NUMBINS_ALLOC = 300  # 200 -> 300 so `bins 240` (+ window sub-bins) fits; arrays trimmed to maxex
 NUMEX_ALLOC = NUMLEV + NUMBINS_ALLOC
 NUMJ = 40  # A0_talys_mod.f90:68
 
@@ -117,10 +117,9 @@ GRIDTOP_ENV = "INCOGNITA_GRIDTOP"
 
 
 def gridtop_on() -> bool:
-    """GRIDTOP (default ON): the outgoing grid reaches 1 MeV above the top energy of EVERY exit,
+    """`INCOGNITA_GRIDTOP` (default ON): the outgoing grid reaches 1 MeV above the top energy of EVERY exit,
     `Etotal - S(0,0,type)`, not only the photon's. `INCOGNITA_GRIDTOP` n/no/0/off/false = the
-    TALYS grid (grid.f90:120 as written). Same rule and semantics as the private engine's
-    `NUCLIDO_GRIDTOP` (default ON since engine-20261029-2).
+    TALYS grid (grid.f90:120 as written).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: tests/hf/test_gridtop.py
@@ -141,15 +140,15 @@ def emission_limit(enincmax_mev: float, s_k0_mev: float, target_e_mev: float = 0
     is cut depends on how far the run's HIGHEST energy lifts the top above the current one, so
     the same (nucleus, energy) gives different answers on different grids: I-109 capture at
     20 keV is 7.54 mb as a one-energy run and 0.120 mb on a 1 keV - 20 MeV grid (production
-    deck), stock TALYS-2.25 6.66 vs 6.34 mb. GRIDTOP (`gridtop_on`) adds
+    deck), stock TALYS-2.25 6.66 vs 6.34 mb. `gridtop_on` adds
     max(0, -min S) over `s_exits_mev` when it is given: the same 1 MeV margin above E0 for every
     exit. When every S >= 0 the limit is TALYS's to the bit.
 
     `s_exits_mev` holds S(0,0,type) of the exits that can actually be taken -- callers build it with
     `gridtop_exits`: an ejectile the run emits (`parinclude`) whose residual nucleus has a mass.
     An exit to a residual with no mass (Li-7 -> h + "H-4"; anything leaving Z or N <= 0 for very
-    light targets) has an S made up from zero mass excesses, often far below zero, and before
-    ENGFIX4 it raised the grid top of very light targets by ~10 MeV for an exit that does not exist.
+    light targets) has an S made up from zero mass excesses, often far below zero, and would
+    raise the grid top of very light targets by ~10 MeV for an exit that does not exist.
 
     TALYS: grid.f90:1 (grid)
     Test: A-grid; tests/hf/test_gridtop.py
@@ -163,11 +162,11 @@ def emission_limit(enincmax_mev: float, s_k0_mev: float, target_e_mev: float = 0
 
 
 def gridtop_exits(s_mev, mass_amu, parinclude=None) -> list[float]:
-    """GRIDTOP's exits: S(0,0,type) for the types 0..6 the run emits (`parinclude`, default all)
+    """The `gridtop_on` exits: S(0,0,type) for the types 0..6 the run emits (`parinclude`, default all)
     whose residual (parZ(type), parN(type)) has a nonzero mass in `mass_amu` (the `Masses` grid
     indexed (Zix, Nix)). `s_mev` is S(0,0,type), type 0..6 (a list, or a dict by type).
 
-    TALYS: (none -- Incognita extension, GRIDTOP; see `emission_limit`)
+    TALYS: (none -- Incognita extension; see `emission_limit`)
     Test: tests/hf/test_gridtop.py
     """
     pz, pn = (0, 0, 1, 1, 1, 2, 2), (0, 1, 0, 1, 2, 1, 2)
@@ -195,7 +194,7 @@ def egrid_values(
     With `flagequispec` (keyword `equispec y`) the equidistant grid of grid.f90:147-156 replaces
     it; that branch needs `enincmax_mev`. `numen` defaults to `numen()` (INCOGNITA_NUMEN, read now).
 
-    A grid that would need more than `numen` points to reach `elimit_mev` raises (ENGFIX4): TALYS
+    A grid that would need more than `numen` points to reach `elimit_mev` raises: TALYS
     stops the loop at `numen` (grid.f90:128) and runs on a grid that ends below Elimit, silently
     dropping the top of every spectrum; raise INCOGNITA_NUMEN or lower `segment` instead.
 
@@ -211,7 +210,7 @@ def egrid_values(
 @lru_cache(maxsize=256)
 def _egrid_values(elimit_mev: float, segment: int, numen: int, flagequispec: bool,
                   enincmax_mev: float | None) -> tuple[np.ndarray, int]:
-    """COREX: `egrid_values`' build, a pure function of its arguments (`chartrun.KEEP`); callers
+    """`egrid_values`' build, a pure function of its arguments (`chartrun.KEEP`); callers
     get a copy."""
     egrid = np.zeros(numen + 1, dtype=f32)
     eout = f32(0.0)
@@ -225,7 +224,7 @@ def _egrid_values(elimit_mev: float, segment: int, numen: int, flagequispec: boo
         if eeps > elimit:
             break
         if nen == numen:
-            if not flagequispec:  # ENGFIX4: TALYS exits here silently (grid.f90:128)
+            if not flagequispec:  # TALYS exits here silently (grid.f90:128)
                 raise ValueError(
                     f"outgoing energy grid: {numen} points (numen) end at {float(egrid[numen]):.4g} MeV, below "
                     f"Elimit = {float(elimit):.4g} MeV (segment {segment}); set INCOGNITA_NUMEN larger or lower "
@@ -520,7 +519,7 @@ def emission_end(
     eend: dict[int, int] = {}
     high = 0
     etot = float(f32(etotal_mev))
-    # COREX: the scan for the first egrid point above the limit as one comparison per type
+    # the scan for the first egrid point above the limit as one comparison per type
     eg = np.asarray(egrid[: maxen + 1]).astype(f32).astype(f64)
     for t in range(0, 7):
         eend[t] = maxen - 1
@@ -758,7 +757,7 @@ def residual_exmax(
     for t in types:
         zdeep = max(zdeep, zcomp + PARZ[t])
         ndeep = max(ndeep, ncomp + PARN[t])
-    # COREX: the cells as array('f') (a stored double is rounded to single precision, as
+    # the cells as array('f') (a stored double is rounded to single precision, as
     # f32(...) is), read back as exact Python floats; the same operations in the same order
     ncol = e0.shape[1]
     e0l = array("f", e0.tobytes())
@@ -838,7 +837,7 @@ def excitation_energies(
     TALYS: exgrid.f90:1 (exgrid)
     Test: A-grid
     """
-    if thresholds_mev:  # SNBIN (`snbin y`): the numpy body pins continuum edges at the thresholds
+    if thresholds_mev:  # `snbin y`: the numpy body pins continuum edges at the thresholds
         return _excitation_energies(edis_mev, nlast, exmax_mev, nbins, aix, flagequi, etotal_mev,
                                     thresholds_mev, snwin, adapt)
     got = exgrid_nx2.excitation_energies(edis_mev, nlast, exmax_mev, nbins, aix, flagequi,
@@ -889,13 +888,13 @@ def _excitation_energies(edis_mev, nlast: int, exmax_mev: float, nbins: int, aix
         lb, le = np.log(eb), np.log(ee)
         for i in range(nexbins + 1):
             eup[i] = np.exp(f32(lb + f32(i) / f32(nexbins) * (le - lb)))
-    if adapt is not None:  # BINCONV (`binconv y`): graded continuum mesh, edges at every knot
+    if adapt is not None:  # `binconv y`: graded continuum mesh, edges at every knot
         eup = binconv_edges(eb, ee, nexbins, thresholds_mev or (), *adapt[:5], chain_mev=adapt[5], amass=adapt[6],
                             fis_mev=adapt[7])
     if thresholds_mev:
         if adapt is None:
             eup = snbin_edges(eup, thresholds_mev)
-        if snwin > 0:  # SNBIN3 (`snbin w`): >= snwin bins inside every open window [S(type), Exmax]
+        if snwin > 0:  # `snbin w`: >= snwin bins inside every open window [S(type), Exmax]
             eup = snbin_window_edges(eup, thresholds_mev, snwin)
         nexbins = eup.size - 1
     ex[nlast + 1 : nlast + nexbins + 1] = half * (eup[:-1] + eup[1:])
@@ -909,12 +908,12 @@ def _excitation_energies(edis_mev, nlast: int, exmax_mev: float, nbins: int, aix
 SNBIN_ENV = "INCOGNITA_SNBIN"
 
 
-SNBIN_WINDOW_MIN = 24  # SNBIN3 (`snbin w`): minimum continuum bins inside an open emission window (design study development notes: 3 leaves (n,2n) +4 %, 12-24 converge to <=0.6 %)
+SNBIN_WINDOW_MIN = 24  # `snbin w`: minimum continuum bins inside an open emission window (design study: 3 leaves (n,2n) +4 %, 12-24 converge to <=0.6 %)
 
 
 def snbin_mode(options=None) -> str:
-    """SNBIN mode "n" | "y" | "w" from keyword `snbin` (env `INCOGNITA_SNBIN` when the keyword is off).
-    `w` (SNBIN3) = `y` + at least SNBIN_WINDOW_MIN bins inside every open window [S(type), Exmax]
+    """The `snbin` mode "n" | "y" | "w" from keyword `snbin` (env `INCOGNITA_SNBIN` when the keyword is off).
+    `w` = `y` + at least SNBIN_WINDOW_MIN bins inside every open window [S(type), Exmax]
     (`snbin_window_edges`).
 
     Test: tests/hf/test_snbin.py
@@ -936,7 +935,7 @@ def snbin_mode(options=None) -> str:
 
 
 def snbin_window_min(options=None) -> int:
-    """SNBIN3: minimum bins per open window for `snbin w`: keyword `snbinwmin` (numerics only).
+    """Minimum bins per open window for `snbin w`: keyword `snbinwmin` (numerics only).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -945,7 +944,7 @@ def snbin_window_min(options=None) -> int:
 
 
 def snbin_on(options=None) -> bool:
-    """SNBIN (off by default): keyword `snbin n|y|w` (env `INCOGNITA_SNBIN`, used when the keyword is off).
+    """Off by default: keyword `snbin n|y|w` (env `INCOGNITA_SNBIN`, used when the keyword is off).
 
     `n` = TALYS: the residual continuum is `nexbins` equidistant (or logarithmic) bins between Ex(NL)
     and Exmax (exgrid.f90:186-203) with no edge at the residual's particle separation energies, so a
@@ -961,7 +960,7 @@ def snbin_on(options=None) -> bool:
 
 
 def snbin_edges(eup: np.ndarray, thresholds_mev) -> np.ndarray:
-    """SNBIN: continuum bin edges `eup` (float32, increasing) with an edge at every threshold strictly
+    """`snbin`: continuum bin edges `eup` (float32, increasing) with an edge at every threshold strictly
     inside (eup[0], eup[-1]). Each threshold moves the NEAREST free interior edge onto itself (bin count
     unchanged, neighbouring widths within [w/2, 3w/2]); if that edge is an end point or already pinned by
     another threshold, the threshold is inserted as a new edge (+1 bin). Pure bookkeeping, no parameter.
@@ -990,7 +989,7 @@ def snbin_edges(eup: np.ndarray, thresholds_mev) -> np.ndarray:
 
 
 def snbin_window_edges(eup: np.ndarray, thresholds_mev, nmin: int = SNBIN_WINDOW_MIN) -> np.ndarray:
-    """SNBIN3: continuum edges `eup` (float32, increasing, thresholds already pinned by `snbin_edges`)
+    """Continuum edges `eup` (float32, increasing, thresholds already pinned by `snbin_edges`)
     with at least `nmin` bins inside every open emission window [S, eup[-1]], S a threshold strictly
     inside (eup[0], eup[-1]). A window holding m < nmin bins has each of its m bins split into
     ceil(nmin / m) equal parts; bins below S are untouched, so every pinned edge stays. Windows are
@@ -1021,20 +1020,20 @@ def snbin_window_edges(eup: np.ndarray, thresholds_mev, nmin: int = SNBIN_WINDOW
 
 
 BINCONV_ENV = "INCOGNITA_BINCONV"
-BINCONV_RATIO = 8.0  # BINCONV: finest width at a knot = base width / ratio (development notes design study)
-BINCONV_GROWTH = 0.3  # BINCONV: width grows by this many MeV per MeV of distance from the nearest knot
-BINCONV_CAP = 1.0  # BINCONV: widest bin = cap * the TALYS base width (Exmax - Ex(NL)) / nexbins
+BINCONV_RATIO = 8.0  # `binconv`: finest width at a knot = base width / ratio (design study)
+BINCONV_GROWTH = 0.3  # `binconv`: width grows by this many MeV per MeV of distance from the nearest knot
+BINCONV_CAP = 1.0  # `binconv`: widest bin = cap * the TALYS base width (Exmax - Ex(NL)) / nexbins
 BINCONV_KNOTS = "btscf"  # b = Ex(NL) (up), t = Exmax (down), s = each threshold S (up), S = each S (both sides),
 # c = each multi-chance chain threshold S_x + S_y(daughter) [+ S_z] (up), C = chain (both sides),
 # f = each fission barrier height of a fissioning nucleus (both sides); every knot is an edge
-BINCONV_KAPPA = 0.35  # BINCONV: widest bin <= kappa * T(U) (Fermi-gas temperature, a = A/8)
-BINCONV_CN = 1.0  # BINCONV: the compound nucleus gets the mesh only when Etotal - S_n(CN) >= this (MeV): keV capture untouched
+BINCONV_KAPPA = 0.35  # `binconv`: widest bin <= kappa * T(U) (Fermi-gas temperature, a = A/8)
+BINCONV_CN = 1.0  # `binconv`: the compound nucleus gets the mesh only when Etotal - S_n(CN) >= this (MeV): keV capture untouched
 
 
 def binconv_mode(options=None) -> bool:
-    """BINCONV (off by default): keyword `binconv n|y` (env `INCOGNITA_BINCONV` when the keyword is off).
+    """Off by default: keyword `binconv n|y` (env `INCOGNITA_BINCONV` when the keyword is off).
     `y` replaces TALYS's equidistant residual continuum (exgrid.f90:186-203) by the graded mesh of
-    `binconv_edges` (implies the SNBIN threshold edges and the SNBIN3 `snbinwmin` windows), and gives the
+    `binconv_edges` (implies the `snbin` threshold edges and the `snbinwmin` windows), and gives the
     compound nucleus the same mesh (with its own S edges) once its neutron window is >= `binconvcn` MeV.
 
     Test: tests/hf/test_binconv.py
@@ -1067,7 +1066,7 @@ def binconv_params(options=None) -> tuple:
 def binconv_edges(eb, ee, nexbins: int, thresholds_mev, ratio: float = BINCONV_RATIO,
                   growth: float = BINCONV_GROWTH, cap: float = BINCONV_CAP, knots: str = BINCONV_KNOTS,
                   kappa: float = 0.0, chain_mev=(), amass: int = 0, fis_mev=()) -> np.ndarray:
-    """BINCONV: graded continuum edges on [eb, ee] (float32). The emission integrand of every channel that
+    """`binconv`: graded continuum edges on [eb, ee] (float32). The emission integrand of every channel that
     feeds or leaves this nucleus varies fastest at its knots: just above Ex(NL) (high-energy tails of the
     emission into the residual: Coulomb-barrier penetrability and the steep low-U level density), just below
     Exmax (the low-energy end of the evaporation spectrum, epsilon ~ T) and just above each separation energy
@@ -1118,13 +1117,13 @@ def binconv_edges(eb, ee, nexbins: int, thresholds_mev, ratio: float = BINCONV_R
 
 
 BINQUAD_ENV = "INCOGNITA_BINQUAD"
-BINQUAD_NODES = 3  # BINQUAD: Gauss-Legendre nodes per smooth piece of the eps distribution
-BINQUAD_MTILT = 1.0  # BINQUAD: weight of the mother bin's own d ln rho / dE in its population shape (0 = uniform)
-BINQUAD_RTILT = 1.0  # BINQUAD: weight of the residual bin's d ln rho / dE (0 = uniform levels)
+BINQUAD_NODES = 3  # `binquad`: Gauss-Legendre nodes per smooth piece of the eps distribution
+BINQUAD_MTILT = 1.0  # `binquad`: weight of the mother bin's own d ln rho / dE in its population shape (0 = uniform)
+BINQUAD_RTILT = 1.0  # `binquad`: weight of the residual bin's d ln rho / dE (0 = uniform levels)
 
 
 def binquad_mode(options=None) -> bool:
-    """BINQUAD (off by default): keyword `binquad n|y` (env `INCOGNITA_BINQUAD` when the keyword is off).
+    """Off by default: keyword `binquad n|y` (env `INCOGNITA_BINQUAD` when the keyword is off).
     `y` replaces densprepare's midpoint transmission T_l(eps_mid) and triangle Rboundary of every particle
     exit (primary and cascade, continuum and discrete rows) by a Gauss-Legendre average of T_l over the
     population-weighted eps distribution of the mother bin x residual bin (native/binquad.h): level
@@ -1167,7 +1166,7 @@ def binquad_params(options=None) -> tuple:
 
 
 def binquad_sub(options=None) -> int:
-    """BINQUAD sub-points per mother bin (1 = off).
+    """`binquad` sub-points per mother bin (1 = off).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -1176,7 +1175,7 @@ def binquad_sub(options=None) -> int:
 
 
 def binquad_photon(options=None) -> int:
-    """BINQUAD2: Gauss-Legendre nodes of the photon-exit quadrature over each residual continuum bin
+    """Gauss-Legendre nodes of the photon-exit quadrature over each residual continuum bin
     (keyword `binquadp`, rho-tilted like the particle exits; 0 = TALYS's bin-centre Egamma).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
@@ -1189,7 +1188,7 @@ def binquad_photon(options=None) -> int:
 
 
 def binquad_wkb(options=None) -> int:
-    """BINQUAD4: nodes of the WKB fission-penetrability table (keyword `binquadw`; 0 = TALYS).
+    """Nodes of the WKB fission-penetrability table (keyword `binquadw`; 0 = TALYS).
 
     wkb.f90 tabulates T_WKB(U) at nbinswkb = nbins0 energies (3/4 of them up to the highest barrier,
     then 0.2 MeV steps) and twkbint interpolates it log-linearly, so the sub-barrier fission width
@@ -1207,7 +1206,7 @@ def binquad_wkb(options=None) -> int:
 
 
 def binquad_knots(options=None) -> int:
-    """BINQUAD2: `binquadk` bitmask of the in-bin knots that cut a mother bin into smooth pieces.
+    """`binquadk` bitmask of the in-bin knots that cut a mother bin into smooth pieces.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -1224,7 +1223,7 @@ def binquad_sync(options=None) -> None:
     from physics.hf.native import nativex
     from physics.hf import kevleak2
 
-    kevleak2.sync(options)  # KEVLEAK3: the run's kevleak2 value for the C kernels (INCOGNITA_KEVLEAK2_EFF)
+    kevleak2.sync(options)  # the run's kevleak2 value for the C kernels (INCOGNITA_KEVLEAK2_EFF)
 
     on = binquad_mode(options)
     q, mt, rt, sub = binquad_params(options) if on else (BINQUAD_NODES, BINQUAD_MTILT, BINQUAD_RTILT, 1)
@@ -1349,7 +1348,7 @@ def integrated_density(rho1: Tensor, rho2: Tensor, rho3: Tensor, dex_mev: Tensor
     """
     if (not torch.is_grad_enabled() and rho1.device.type == "cpu" and rho2.device.type == "cpu"
             and rho3.device.type == "cpu" and rho2.dtype == torch.float64):
-        # COREX: off the graph, the same operations in numpy
+        # off the graph, the same operations in numpy
         a1, a2, a3 = rho1.numpy(), rho2.numpy(), rho3.numpy()
         dx = dex_mev.numpy() if isinstance(dex_mev, Tensor) else np.asarray(dex_mev)
         with np.errstate(all="ignore"):
@@ -1393,7 +1392,7 @@ def locate_scalar(xx: np.ndarray, ib: int, ie: int, x: float) -> int:
     if ib > ie:
         return 0
     x = f32(x)
-    xs = np.asarray(xx[: ie + 1], dtype=f32)  # COREX: the search reads positions ib..ie only
+    xs = np.asarray(xx[: ie + 1], dtype=f32)  # the search reads positions ib..ie only
     jl, ju = ib - 1, ie + 1
     ascend = xs[ie] >= xs[ib]
     while ju - jl > 1:

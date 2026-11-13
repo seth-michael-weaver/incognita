@@ -1,4 +1,4 @@
-"""IDEA_EXACTFIS: exact per-hump fission transmission (physics/hf/fission/wkb.py)."""
+"""Exact per-hump fission transmission (physics/hf/fission/wkb.py)."""
 import numpy as np
 import pytest
 import torch

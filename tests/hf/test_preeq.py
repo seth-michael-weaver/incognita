@@ -1,6 +1,6 @@
 """T8: pre-equilibrium (two-component exciton model, complex particles, spin, multiple preeq).
 
-Gate A-pe (physics/hf/CONTRACT.md §6, docs/results/hf-engine-gates.md): p95 |ln(port/TALYS)|
+Check A-pe (physics/hf/CONTRACT.md §6, docs/results/hf-engine-gates.md): p95 |ln(port/TALYS)|
 <= 0.02 against the `exciton` and `preequilibrium` dump families. Tests that need the dumps
 skip when they are absent.
 """
@@ -98,7 +98,7 @@ def test_finitewell_surface_hole_vanishes_above_116_percent_of_efermi():
 
 
 def test_finitewell_matches_the_pre_vectorisation_capture():
-    """SPEED2 evaluates finitewell's sums over k and over the nine well depths as array axes.
+    """`finitewell` evaluates its sums over k and over the nine well depths as array axes.
     The fixture holds 56 calls captured from the golden speed harness (scripts/hf_speed_bench.py,
     one per argument signature, surface branch on and off) and 24 synthetic ones (scalar and
     broadcast exciton numbers, masked `surfwell`), all computed BEFORE that change.
@@ -119,7 +119,7 @@ def test_finitewell_matches_the_pre_vectorisation_capture():
         ref = z[f"c{j}_out"]
         assert got.shape == ref.shape, j
         den = np.maximum(np.abs(ref), np.abs(got))
-        # COREX: off the graph the k-sum runs in numpy (particle_hole._sum_terms_np); where the
+        # off the graph the k-sum runs in numpy (particle_hole._sum_terms_np); where the
         # alternating sum cancels to ~1e-16 only an absolute tolerance is meaningful
         rel = np.abs(ref - got) / np.where(den > 1e-12, den, 1.0)
         assert rel.max(initial=0.0) <= 1e-12, (j, rel.max())
@@ -250,7 +250,7 @@ def test_spin_distribution_rejects_the_unported_wigner_model():
         preeq_spin_distribution(o, p, 56)
 
 
-# ----------------------------------------------------------------- A-pe gate
+# ---------------------------------------------------------------- A-pe check
 
 
 @pytest.mark.skipif(not ref.available("exciton"), reason="reference dumps not parsed")

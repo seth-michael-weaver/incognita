@@ -1,4 +1,4 @@
-"""CCPROP gate 1: FLOPs of the current `cc_block_*` kernel against a log-derivative / R-matrix
+"""Coupled-channels propagator check 1: FLOPs of the current `cc_block_*` kernel against a log-derivative / R-matrix
 propagator, on the real (J, parity) blocks of the 112 CC targets.
 
     uv run python harness/ccprop_flops.py --targets 92-238,60-150 --json out.json
@@ -84,7 +84,7 @@ def prop_w(nm: int, variant: str) -> float:
     The fused kick-and-drift of Johnson's method is
         Y <- (1/h) I - (1/h^2) (Y + Q_i + (1/h) I)^-1,
     i.e. exactly one complex inverse per half-sector, and the half-sector is one ECIS step
-    (`gate 3`: the potential is sampled where ECIS samples it). Simpson's rule needs the modified
+    (check 3: the potential is sampled where ECIS samples it). Simpson's rule needs the modified
     matrix U (I + h^2 U / 6)^-1 at the panel midpoints, which is every second grid point:
 
     `exact`   -- the modification as a right-hand-side solve (zgetrf + zgetrs);
@@ -92,7 +92,7 @@ def prop_w(nm: int, variant: str) -> float:
                  fourth order, so it cannot be dropped at equal accuracy;
     `floor`   -- the modification dropped altogether. Second order, NOT equal accuracy: it is the
                  unreachable lower bound of any propagator that does one dense O(N^3) operation
-                 per ECIS step, quoted so that gate 1 is decided against the best case and not
+                 per ECIS step, quoted so that check 1 is decided against the best case and not
                  against one implementation.
     """
     per_mid = {"exact": SOLVE, "neumann": GEMM, "floor": 0.0}[variant]

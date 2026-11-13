@@ -1,4 +1,4 @@
-"""ENGDEFECT: nonelastic > reaction (up to x100) in 565 far-from-stability chart nuclei.
+"""Nonelastic > reaction (up to x100) in 565 far-from-stability chart nuclei.
 
 n + Am-308 (Z=95, N=213; its own Sn is -0.24 MeV in TALYS's mass table, i.e. the target is past the neutron
 drip line) at 0.2-2.6 MeV: first-order DWBA to the default 2+ vibrational level (beta 0.128, deformpar.f90:310)
@@ -23,7 +23,7 @@ import torch
 
 @pytest.fixture(scope="module", autouse=True)
 def _alphatemp_off():
-    """ALPHAADOPT (alphatemp default ON 0.64): the GPU batch path does not wire ALPHATEMP (it refuses the switch); this module runs at alphatemp 0."""
+    """alphatemp is default ON (0.64): the GPU batch path does not wire `alphatemp` (it refuses the switch); this module runs at alphatemp 0."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_ALPHATEMP", "0")
         yield

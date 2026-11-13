@@ -1,4 +1,4 @@
-"""Acceptance tests for the Stage C trainer (WP-15 step 3)."""
+"""Acceptance tests for the Stage C trainer."""
 import numpy as np
 import torch
 

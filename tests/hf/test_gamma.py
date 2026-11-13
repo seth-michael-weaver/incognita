@@ -1,5 +1,5 @@
 """T7 gamma: photon strength functions, gamma transmission and the theoretical <Gamma_gamma>
-against TALYS's own psf* files (gate A-psf, docs/results/hf-engine-gates.md: p95 of
+against TALYS's own psf* files (check A-psf, docs/results/hf-engine-gates.md: p95 of
 |ln(port/TALYS)| <= 1%).
 
 Inputs other components own are injected from the same TALYS run (contract §5):
@@ -100,7 +100,7 @@ def _skip_without_temperature(m: dict, quantity: str):
     """fstrength's tabulated-E1 branch needs a(Sn) and the pairing energy (the nuclear
     temperature), and both are INJECTED from ld*.gs (contract §5). densityout.f90 prints them
     only for the analytical level density models, so an ldmodel 7 nucleus -- every actinide,
-    input_densitymodel.f90:90 -- has no reference value and the quantity cannot be gated.
+    input_densitymodel.f90:90 -- has no reference value and the quantity cannot be checked.
     Measured with a one-off `ldmodel 1` TALYS run on U-238, where TALYS does print them:
     f(E1) p95 1.2e-6, T(E1) 2.0e-6 over all 88 points, so the gap is the missing input, not the
     port. physics/hf/gamma/score.py reports these cases as ungated."""
@@ -245,7 +245,7 @@ def test_theoretical_gamma_gamma_matches_talys(case):
 def test_talys_psf_E2_M2_files_carry_the_l1_strength(case):
     """TALYS output trap (gammaout.f90: `fstrength(Zcomp, Ncomp, 0., e, irad, 1, 0, 0)` with l
     hard-wired to 1): the f() column of psf*.E2 / *.M2 is f(E1) / f(M1). Only their T() columns
-    carry the l = 2 physics. If a TALYS update fixes this, the E2/M2 f gates become testable."""
+    carry the l = 2 physics. If a TALYS update fixes this, the E2/M2 f checks become testable."""
     _, tables, _, _, _ = _setup(*case)
     assert np.array_equal(tables["E2"]["f(E2)"].to_numpy(), tables["E1"]["f(E1)"].to_numpy())
     assert np.array_equal(tables["M2"]["f(M2)"].to_numpy(), tables["M1"]["f(M1)"].to_numpy())

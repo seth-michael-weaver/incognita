@@ -7,7 +7,7 @@ gamma strengths, 68/95 % intervals) will be released later in the files these ha
 
 Engine: INCOGNITA's TALYS-2-based engine, physics configuration B55. No evaluated-library values enter these predictions.
 The interval layer (B57) is calibrated on already-measured nuclei; for nuclei far from measured ones its bounds may be too narrow.
-Not blind for us (we have seen data): Tm-171 MACS, Nb-94 MACS, Sn-130.
+Not independent predictions (we have seen data): Tm-171 MACS, Nb-94 MACS, Sn-130.
 
 ## Freezes
 | id | what | MANIFEST sha256 |

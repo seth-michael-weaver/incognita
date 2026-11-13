@@ -140,7 +140,7 @@ WT.L.ch.decay = {
   Object.assign(WT.L.labels, L);
 })();
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "press Fire to send neutrons in": "按“发射”把中子送进去",
   "stayed inside: counted here, not moved": "留在里面：在此计数，不移动",

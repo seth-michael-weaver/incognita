@@ -1,7 +1,7 @@
 """A-direct for stage b: the ported DWBA against `directE*.out`'s own `xsdirdisc` and `xsgrcoll`
 on every reference target and energy that has a direct block.
 
-Metric of contract §6: r = |ln(port/TALYS)|. The tolerance is A-mult's 5e-2, the gate T12's
+Metric of contract §6: r = |ln(port/TALYS)|. The tolerance is A-mult's 5e-2, the threshold T12's
 `direct` family is scored at -- these numbers are the input T12 currently injects from the dump.
 
 Task: T13 (physics/hf/CONTRACT.md §7). Acceptance test: A-direct.

@@ -251,7 +251,7 @@ _GR_LAST: list = []  # [struct, params, adjust values, GiantResonances]
 def giant_resonance_parameters_of(
     struct: CollectiveStructure, params=None
 ) -> GiantResonances:
-    """NATIVEX2: `giant_resonance_parameters(struct, params)`, remembered for the last structure.
+    """`giant_resonance_parameters(struct, params)`, remembered for the last structure.
 
     The chained direct stage asks for it twice at every incident energy of a target (the DWBA
     deck and `direct`) with the same `DirectCase.struct` and `params` objects. The memo holds
@@ -295,7 +295,7 @@ def direct_levels(
     c = talys_constants()
     para = float(c["parA"][k0])
     vibfactor = 1.0 - max((float(einc_mev) - 200.0) / 1600.0, 0.0)  # directecis.f90:196
-    # NATIVEX2: the `do i = 0, numlev2` loop's four `cycle` tests as one numpy mask per level
+    # The `do i = 0, numlev2` loop's four `cycle` tests as one numpy mask per level
     # (the same comparisons element by element; NaN fails each test the way it failed the loop's)
     i = np.arange(NUMLEV2 + 1)
     dfm = np.asarray(struct.deform)[: NUMLEV2 + 1]

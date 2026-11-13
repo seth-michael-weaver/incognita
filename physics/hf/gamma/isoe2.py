@@ -1,6 +1,6 @@
-"""ISOE2: collective low-energy E2 strength of the quasi-continuum (stretched Delta J = 2 band transitions), added to the E2
+"""`INCOGNITA_ISOE2`: collective low-energy E2 strength of the quasi-continuum (stretched Delta J = 2 band transitions), added to the E2
 photon strength as one Lorentzian in TALYS's E2 SLO form (the `epr/gpr/tpr` E2 slot, irad = 1, l = 2, i = 1), so every engine
-path that evaluates fstrength (Py torch, numpy psf_fast, NATIVEX2 C) carries it; the GPU capture setup refuses it (Unsupported).
+path that evaluates fstrength (Py torch, numpy psf_fast, native C) carries it; the GPU capture setup refuses it (Unsupported).
 
 Keyword: env INCOGNITA_ISOE2 = e (default unset = OFF: this module is never consulted, OFF bit-identical); INCOGNITA_ISOE2_K = global
 scale k (default 1.0 = arm E0, the B(E2) sum).

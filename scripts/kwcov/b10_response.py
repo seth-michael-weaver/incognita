@@ -11,8 +11,8 @@ the urr*.lLL files per (E, J), urrtalys.tot / urrnjoy.tot / urrratio.tot per E),
 1e-6 of its column's maximum; file names and row structure must agree. Response: R = ours(base; kw)/ours(base),
 S = stock(base; kw)/stock(base) on the same numbers, |ln(R/S)| <= 2 % (or the same absolute change). Channels: the plain
 deck's cross sections must not move when `urr y` is added (output only), in the engine bit for bit.
-Mode `talys`: the engine with every deliberate INCOGNITA default switched to TALYS (FIDELITY_DEFAULTS.md: NPWINDOW,
-EXACTFIS, CCEXITNB2, ...). Stock runs keep only the URR files and channels, as JSON, in
+Mode `talys`: the engine with every deliberate INCOGNITA default switched to TALYS (FIDELITY_DEFAULTS.md: `INCOGNITA_NPWINDOW`,
+`INCOGNITA_EXACTFIS`, `INCOGNITA_CCEXITNB2`, ...). Stock runs keep only the URR files and channels, as JSON, in
 ~/kwcov/stock/b10/b10_<target>_<hash>.json; TALYS scratch is deleted after every run.
 """
 from __future__ import annotations

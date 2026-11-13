@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Correctness gate + timings for the warm engine pool (warmpool.py). Linux / WSL with the production engine.
+"""Correctness check + timings for the warm engine pool (warmpool.py). Linux / WSL with the production engine.
 
 For each target (default Fe-56, Zr-90, Au-197, U-238, each with its library composition) and each grid (one energy,
 the 64-point library grid), compare every reported channel of

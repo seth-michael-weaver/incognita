@@ -28,7 +28,7 @@ WT.L.ch.stars = {
 </div>
 <div class="step">
   <h3>Getoetst aan metingen</h3>
-  <p>De 30 keV-waarden van INCOGNITA gedeeld door gemeten waarden, voor 94 stabiele nucliden (<a href="scoreboard.html">scorebord</a>).</p>
+  <p>De 30 keV-waarden van INCOGNITA gedeeld door gemeten waarden, voor 94 stabiele nucliden (<a href="scoreboard.html">vergelijkingen</a>).</p>
 </div>`,
 };
 
@@ -95,7 +95,7 @@ Object.assign(WT.L.labels, {
   "r-process: a flood of neutrons makes very neutron-rich nuclei": "r-proces: een vloed van neutronen maakt zeer neutronrijke kernen",
   "r-process: very neutron-rich nuclei": "r-proces: zeer neutronrijke kernen",
   "ringed: s-only · measured: KADoNiS": "omcirkeld: alleen s · gemeten: KADoNiS",
-  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test": "omcirkeld: zuivere s-isotopen · gemeten: verzamelde waarden (KADoNiS) · een ontwikkelvergelijking, geen blinde test",
+  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test": "omcirkeld: zuivere s-isotopen · gemeten: verzamelde waarden (KADoNiS) · een ontwikkelvergelijking, geen onafhankelijke test",
   "s Ba": "s Ba",
   "s Pb": "s Pb",
   "s Sr": "s Sr",

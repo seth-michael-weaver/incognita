@@ -3,7 +3,7 @@
  *            0.1 % minor actinides (Np, Am, Cm) by mass (OECD-NEA 2011, "Potential Benefits and Impacts of Advanced Nuclear
  *            Fuel Cycles with Actinide Partitioning and Transmutation", NEA No. 6894). 400 atoms drawn: 376 / 19 / 4 / 1.
  *   "time" = radiotoxicity (ingestion dose, Sv) of one tonne of spent fuel divided by that of the natural uranium ore mined to
- *            make it, against time on a log axis from 1 to 10^6 years. ILLUSTRATIVE SHAPE: sums of decays with real half-lives,
+ *            make it, against time on a log axis from 1 to 10^6 years. Illustrative shape: sums of decays with real half-lives,
  *            amplitudes chosen to reproduce the published curves (OECD-NEA 2011, fig. 2.x; also NEA 2006 "Physics and Safety
  *            of Transmutation Systems"): fission products (Cs-137 30.1 y, Sr-90 28.8 y, short-lived ~1 y, Tc-99 / I-129 long
  *            tail) dominate the first ~300 years; then Pu (Pu-238 87.7 y, Pu-239 24 110 y, Pu-240 6561 y, Pu-242 375 000 y) and

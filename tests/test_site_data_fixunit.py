@@ -34,7 +34,7 @@ def test_n_use_counts_everything_not_excluded():
 
 def test_single_product_state_is_partial():
     # capture into ONE product state (EXFOR SF4 -G, -M, -M1, -L ...) is a partial cross section, like a PAR branch
-    # (Seth, bug hunt round 3): counted under "other", not drawn as total capture, not in n_use
+    # counted under "other", not drawn as total capture, not in n_use
     for st in ("G", "M", "M1", "M2", "L", "L1"):
         assert S.partial_kind("", st) == st.lower()
     assert S.partial_kind("M+", "G") == "g"        # ground state with the isomer's decay fed in: still labelled one state

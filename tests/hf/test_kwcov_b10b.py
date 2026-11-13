@@ -115,7 +115,7 @@ def test_fe56_thermal_rows_vs_stock(clean, tmp_path):
     assert np.allclose(th["E"], (2.53e-8, 1e-7, 2e-7, 5e-7), rtol=1e-6)
     assert np.allclose(th["channels_mb/xs000000"], (2590.0, 1302.747, 921.1812, 16610.85), rtol=1e-5)
     assert np.allclose(th["residual_production_mb/rp026057"], th["channels_mb/xs000000"])
-    # elastic: eref's (the engine's LOWEPOT elastic in default mode; stock 2399128 mb, the HF compound elastic)
+    # elastic: eref's (the engine's `lowepot` elastic in default mode; stock 2399128 mb, the HF compound elastic)
     assert len(set(th["totals_mb/elastic"].tolist())) == 1
     assert np.allclose(th["totals_mb/total"], th["totals_mb/elastic"] + th["totals_mb/nonelastic"])
     # output only: the engine's 2.53e-8 MeV capture is its own Hauser-Feshbach value, not the thermal one

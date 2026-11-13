@@ -1,11 +1,11 @@
-"""NATIVEX2 lever `emit`: the per-energy bookkeeping after the cascade off the autograd graph.
+"""Native `emit` path: the per-energy bookkeeping after the cascade off the autograd graph.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test:
-`tests/hf/test_nx2_emit.py` (every path here against the torch/numpy path it replaces) and the
-G-NATIVEX2 closeness gate.
+A speed path with no physics of its own. Acceptance test:
+`tests/hf/test_nx2_emit.py` (every path here against the torch/numpy path it replaces) and a
+closeness check.
 
 TALYS routines computed here:
     binary.f90:1 (binary), spindis.f90:1 (spindis)
@@ -42,7 +42,7 @@ from physics.hf.core.tensors import DTYPE
 
 
 def enabled() -> bool:
-    """The lever's switch (read at every call): off with `HF_NATIVE`, `HF_NATIVEX`, `HF_NX2` or
+    """The native path's switch (read at every call): off with `HF_NATIVE`, `HF_NATIVEX`, `HF_NX2` or
     `HF_NX2_EMIT` set to 0.
 
     TALYS: none (selection only)
@@ -54,7 +54,7 @@ def enabled() -> bool:
 
 
 def glue_enabled() -> bool:
-    """The `glue` lever's switch (read at every call): off with `HF_NATIVE`, `HF_NATIVEX`,
+    """The `glue` path's switch (read at every call): off with `HF_NATIVE`, `HF_NATIVEX`,
     `HF_NX2` or `HF_NX2_GLUE` set to 0. It selects the per-energy glue rewrites in `engine`,
     `emission.feeding`, `compound.prepare`, `compound.widths_native` and
     `emission.multiple_native`, each the same numbers as the code it replaces.
@@ -111,13 +111,13 @@ def _binary_type_c(kern, pop, pex, dd, g, ppx, sfglobal, sfac, nl, nmax, mj, do_
     rc = kern(N, J, nl, nmax, mj, int(bool(do_pe)), int(pespinmodel), float(popeps_a),
               float(pardis), _ptr(pop), _ptr(pex), _ptr(ddc), _ptr(jdis), _ptr(parlev),
               _ptr(spincut), _ptr(ppx), _ptr(sfglobal), _ptr(sfac))
-    if rc == 0 and norm:  # ENGPHYS `pespin`: rescale the kernel's pre-equilibrium addition row by row
+    if rc == 0 and norm:  # `pespin`: rescale the kernel's pre-equilibrium addition row by row
         engphys.spread_norm_np(pop0, pop, range(nl + 1, nmax + 1), ppx)
     return rc == 0
 
 
 def binary(inp, state=None, device=None):
-    """`emission.binary.binary` on numpy, or None off the lever, on the graph or off the CPU.
+    """`emission.binary.binary` on numpy, or None off the native path, on the graph or off the CPU.
 
     TALYS: binary.f90:1 (binary)
     Test: tests/hf/test_nx2_emit.py
@@ -133,7 +133,7 @@ def binary(inp, state=None, device=None):
 
     if not enabled() or (device is not None and torch.device(device).type != "cpu"):
         return None
-    if inp.pespinmodel >= 3:  # KWCOV B7: the J-resolved pre-equilibrium population is binary.binary's alone
+    if inp.pespinmodel >= 3:  # the J-resolved pre-equilibrium population is binary.binary's alone
         return None
     types = sorted(inp.grids)
     st = state if state is not None else BinaryState()
@@ -218,7 +218,7 @@ def binary(inp, state=None, device=None):
                 wig = _np(spindis(g.spincut[sl][:, None], jj[None, :]) * PARDIS)
                 use_sf = (inp.pespinmodel == 1) & (new > 0.0)
                 spread = np.where(use_sf, new, wig[:, :, None])
-                if engphys.on("pespin"):  # ENGPHYS: the bin gets exactly its pre-equilibrium flux
+                if engphys.on("pespin"):  # `pespin`: the bin gets exactly its pre-equilibrium flux
                     s = spread.sum(axis=(1, 2), keepdims=True)
                     spread = np.where(s > 0, spread / np.where(s > 0, s, 1.0), spread)
                 add = spread * ppx[sl][:, None, None]
@@ -315,8 +315,8 @@ def _trtrs():
 
 
 def exclusive_channels(inp, state=None):
-    """`emission.channels.exclusive_channels` with its per-channel work cut down, or None off the
-    lever. The same statements in the same order; what changes is how often they are evaluated:
+    """`emission.channels.exclusive_channels` with its per-channel work cut down, or None off the native
+    path. The same statements in the same order; what changes is how often they are evaluated:
 
     * the isomer list, the floor's isomers and the fission terms of each residual nucleus are
       read out of its dicts once per nucleus, not once per channel;
@@ -363,7 +363,7 @@ def exclusive_channels(inp, state=None):
     q00 = root.sep_mev.get(inp.k0, 0.0) + inp.targete_mev
     fis_root = root.fisfeedex_mb.get(top0, 0.0)
     flagfission = inp.flagfission
-    numchantot, cap = CH.numchantot(), CH.caps()  # CHANCAP
+    numchantot, cap = CH.numchantot(), CH.caps()  # chancap
 
     channelsum = 0.0
     xsabs = 0.0

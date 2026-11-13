@@ -3,7 +3,7 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: SPEED0 (the speed work; no physics of its own). Acceptance test: SPEED0 golden
+Speed path (no physics of its own). Acceptance test: speed golden
 (`tests/hf/test_speed_golden.py`), A-mult through `engine.ChainedFull`.
 
 TALYS routines this computes, in the arrangement described below:
@@ -36,7 +36,7 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from physics.hf.projectile import residual_nucleus  # ENGPROJ GPRESFIX
+from physics.hf.projectile import residual_nucleus  # projectile bookkeeping
 from physics.hf.compound.continuum import _spin_l_mask
 from physics.hf.compound.prepare import NUMJ, PARSPIN2
 from physics.hf.core.tensors import DTYPE
@@ -69,7 +69,7 @@ def _interp_tl(eout: np.ndarray, egrid: np.ndarray, ebegin: int, eend: int, maxe
     (m, n, L) and (m, n); the same arithmetic as `prepare.densprepare`, over two axes.
 
     TALYS: densprepare.f90:1 (densprepare)
-    Test: A-trans / SPEED0 golden
+    Test: A-trans golden
     """
     m, n = eout.shape
     L = tl.shape[1]
@@ -99,12 +99,12 @@ def _interp_tl(eout: np.ndarray, egrid: np.ndarray, ebegin: int, eend: int, maxe
     w3 = ((eout - ea) * (eout - eb) / ((ec - ea) * (ec - eb)))[..., None]
     lm = lmax[np.clip(nen, 0, maxen)]
     keep = np.arange(L)[None, None, :] <= lm[..., None]
-    if isinstance(tl, Tensor):  # DIFFPARAM: the same pol2, on the optical parameters' graph
+    if isinstance(tl, Tensor):  # Differentiable: the same pol2, on the optical parameters' graph
         w1, w2, w3 = (torch.as_tensor(w, dtype=DTYPE) for w in (w1, w2, w3))
         z = torch.zeros((), dtype=DTYPE)
         if ref is not None:
-            raise NotImplementedError("TLOGREF (G0 reference) is not wired on the DIFFPARAM graph")
-        if tlog:  # LOGTINT (default OFF; compound/tlog.py)
+            raise NotImplementedError("TLOGREF (G0 reference) is not wired on the differentiable graph")
+        if tlog:  # Log-T interpolation (default OFF; compound/tlog.py)
             from physics.hf.compound.tlog import lagr_log_torch
 
             u = lagr_log_torch(w1, w2, w3, tl[na], tl[nb], tl[nc], kind=tlog)
@@ -112,7 +112,7 @@ def _interp_tl(eout: np.ndarray, egrid: np.ndarray, ebegin: int, eend: int, maxe
             u = w1 * tl[na] + w2 * tl[nb] + w3 * tl[nc]
         u = torch.where(torch.as_tensor(keep), u, z)
         return torch.where(u < transeps, z, u) * fn, lm
-    if tlog or ref is not None:  # LOGTINT (default OFF; compound/tlog.py)
+    if tlog or ref is not None:  # Log-T interpolation (default OFF; compound/tlog.py)
         from physics.hf.compound import tlog as _tl
 
         rv = _tl.interp_ref(eout.reshape(-1), ref[0], ref[2]).reshape(m, n, L) if ref is not None else None
@@ -131,7 +131,7 @@ class NucleusDecay:
     """Decay widths of mother bins `bins` of cascade nucleus `sp`, for one incident energy.
 
     TALYS: densprepare.f90:1 (densprepare), compound.f90:1 (compound)
-    Test: SPEED0 golden / E2E
+    Test: speed golden / E2E
     """
 
     def __init__(self, cas, st, sp, bins: list[int], device=None):
@@ -139,7 +139,7 @@ class NucleusDecay:
         from physics.hf.compound.prepare import _discfactor
         from physics.hf.core.grids import binquad_mode
 
-        if binquad_mode(cas.options):  # BINQUAD is native-only: never run the midpoint rule silently
+        if binquad_mode(cas.options):  # `binquad` is native-only: never run the midpoint rule silently
             raise RuntimeError("binquad: the torch decay widths do not implement it (native nx_widths only)")
 
         self.device = device
@@ -197,7 +197,7 @@ class NucleusDecay:
                 rb_d = np.where(part, (ex0plus[:, None] - exm) / dexinc[:, None], 1.0)
             eout_d = np.where(part, 0.5 * (ex0plus[:, None] + exm) - ss - ex,
                               (exinc - ss)[:, None] - ex)
-            if t >= 1 and nnl_bins.any():  # NNLEAK (default y): Egamma^3-filled initial-CN top bin
+            if t >= 1 and nnl_bins.any():  # `nnleak` (default y): Egamma^3-filled initial-CN top bin
                 rb_d, eout_d = nnleak.adjust(rb_d, eout_d, part, ex0plus[:, None], exm,
                                              dexinc[:, None], nnl_bins[:, None])
             cont_row = rows[None, :] > nl
@@ -206,7 +206,7 @@ class NucleusDecay:
             exout = np.where(cont_row, exout_c, np.broadcast_to(ex, (m, n)))
             eout = np.where(inrow, eout, 0.0)
             # rho0 (_rho0_rows), with the mother axis
-            discfactor = _discfactor(d)  # a tensor under a DIFFPARAM level-density override
+            discfactor = _discfactor(d)  # a tensor under a differentiable level-density override
             maxj_d = np.asarray(d.maxj[:n], dtype=np.int64)
             keepj = (np.arange(NUMJ + 1)[None, :] <= maxj_d[:, None]) & (rows > nl)[:, None]
             df_t = discfactor if isinstance(discfactor, Tensor) else None
@@ -282,15 +282,15 @@ class NucleusDecay:
                 lmaxhf = np.full((m, n), cas.gammax, dtype=np.int64)
                 sfac = 1.0
             else:
-                tjl, tl, lmax = cas.trans_of(sp.zix, sp.nix)[t]  # SLFIRST: per emitting nucleus
-                from physics.hf.omp import alphatemp as _at  # ALPHATEMP (default OFF): not wired here
+                tjl, tl, lmax = cas.trans_of(sp.zix, sp.nix)[t]  # First-CN set: per emitting nucleus
+                from physics.hf.omp import alphatemp as _at  # `alphatemp` (default OFF): not wired here
                 _at.refuse(cas.trans, 'decay_batch.py')
                 eend = min(int(eendmax[t]), cas.rg.maxen)
                 from physics.hf.compound import tlog as _tlg
                 tlm, lm = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
                                      tl, lmax, float(fnorm[t + 1]), cas.transeps,
                                      tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
-                tlc_ = cas.trans_cont_of(sp.zix, sp.nix)  # ROTEXIT1CN (default OFF): continuum rows from the model set
+                tlc_ = cas.trans_cont_of(sp.zix, sp.nix)  # Continuum exit set (default OFF): continuum rows from the model set
                 if tlc_ is not None:
                     if isinstance(tlm, torch.Tensor):
                         raise NotImplementedError("sfexit cont is not wired on the differentiable path")
@@ -328,7 +328,7 @@ class NucleusDecay:
             rho_t = torch.where(rho_t >= 1.0e-20, rho_t, torch.zeros((), dtype=DTYPE,
                                                                     device=device))
             if nl == 0:
-                # not in place: `rho_t` may be a graph tensor (DIFFPARAM)
+                # not in place: `rho_t` may be a graph tensor (differentiable)
                 m0 = torch.ones(rho_t.shape[1], dtype=DTYPE, device=device)
                 m0[0] = 0.0
                 rho_t = rho_t * m0[None, :, None, None]
@@ -376,7 +376,7 @@ class NucleusDecay:
         carries them; `leftover` is compound.f90's iloop-1 trapped flux (:404-419).
 
         TALYS: compound.f90:1 (compound)
-        Test: SPEED0 golden / E2E
+        Test: speed golden / E2E
         """
         dev = self.device
         i = self.row[nex]

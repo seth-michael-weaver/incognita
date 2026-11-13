@@ -1,4 +1,4 @@
-"""PEGQ: exciton g/gp/gn keywords reach the pre-equilibrium model (KEYAUDIT wiring carried), and the Fermi-gas isospin split
+"""Exciton g/gp/gn keywords reach the pre-equilibrium model, and the Fermi-gas isospin split
 gp, gn ~ Z^(1/3), N^(1/3) at fixed g = A/Kph behind `pegq y` / INCOGNITA_PEGQ=1 (default OFF = TALYS)."""
 
 import pytest

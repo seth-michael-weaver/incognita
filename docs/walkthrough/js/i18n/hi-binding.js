@@ -15,7 +15,7 @@ WT.L.ch.binding = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "mass number A →": "द्रव्यमान संख्या A →",
   "binding energy per nucleon (MeV)": "प्रति न्यूक्लिऑन बंधन ऊर्जा (MeV)",

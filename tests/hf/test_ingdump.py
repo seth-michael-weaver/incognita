@@ -1,7 +1,7 @@
-"""INGDUMP: `INCOGNITA_INGDUMP=1` adds level-density tables and photon-strength curves to the
+"""`INCOGNITA_INGDUMP=1` adds level-density tables and photon-strength curves to the
 `ing_*` keys and changes nothing else.
 
-The flag is output only: `ingredients` computes every existing key first and appends the INGDUMP
+The flag is output only: `ingredients` computes every existing key first and appends the `INCOGNITA_INGDUMP`
 block last, read off the same `Cascade`. These tests check (1) OFF is the default and adds no key,
 (2) ON leaves every existing key bitwise identical, (3) the tables are the engine's own functions
 (`density`, `densitytotP`, `fstrength_gp`) on the stated grids, (4) the block fits the 2 MB budget.

@@ -1,4 +1,4 @@
-"""REDTEAM M8: KADoNiS theory-only entries are dropped by default (INDEP_FIX item 3)."""
+"""KADoNiS theory-only entries are dropped by default."""
 import numpy as np
 
 from models.macs_constraint import _kadonis_keep, load_macs

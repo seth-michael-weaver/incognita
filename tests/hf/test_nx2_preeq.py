@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `preeq`: the exciton-model set-up off the graph holds the numbers of the paths it
+"""Compiled `preeq` path: the exciton-model set-up off the graph holds the numbers of the paths it
 replaces (`HF_NX2_PREEQ=0`).
 
 * `nx2_preeq_phdens2` against `density.particle_hole._phdens2_arr`'s numpy path, on broadcast
@@ -92,7 +92,7 @@ def test_phdens2_kernel_matches_the_numpy_path(seed):
         # a relative blowup from comparing near-zero noise, not a real divergence). floor=1e-6
         # switches those entries to an absolute check while leaving the ~1e10-scale entries on
         # the project's <=1e-6 relative standard (project standard); every other seed/case here
-        # measures <=6e-14 relative, ordinary FP noise (MACFIX2).
+        # measures <=6e-14 relative, ordinary FP noise.
         assert (ref > 0).any() and _close(got, ref, rel=1e-6, floor=1e-6)
 
 

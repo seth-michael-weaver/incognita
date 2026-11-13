@@ -1,19 +1,19 @@
-"""ALPHAENTR: entrance-only alpha optical potential for alpha-INDUCED runs (INCOGNITA_ALPHAENTR; default "6" since E1PROMO 2026-10-19, hw:0.77 from HWA770PROMO 10-18 to 10-19,
-deck keyword `alphaentr 0` = OFF = previous production).
+"""`alphaentr`: entrance-only alpha optical potential for alpha-INDUCED runs (INCOGNITA_ALPHAENTR; default "6";
+deck keyword `alphaentr 0` = OFF).
 
-The deck's `alphaomp 8` (Avrigeanu 1994, far-out volume W) is chosen for alpha EMISSION ((n,a), ALPHAINV). On alpha-induced
-data it over-absorbs below the Coulomb barrier (CPALPHA). This switch changes only the INCIDENT alpha channel of an alpha
+The deck's `alphaomp 8` (Avrigeanu 1994, far-out volume W) is chosen for alpha EMISSION ((n,a)). On alpha-induced
+data it over-absorbs below the Coulomb barrier. This switch changes only the INCIDENT alpha channel of an alpha
 projectile run (`Cascade.incident`: T_lj, lmaxinc, sigma_reac, xscoupled); every inverse / emission channel keeps the deck's
 `alphaomp`. Neutron and proton projectile runs never reach it (k0 != 6), so they are bitwise unchanged.
 
-* "" / "0" / "off" -> off; unset -> DEFAULT ("6"; deck `alphaentr hw:0.77` = previous production).
+* "" / "0" / "off" -> off; unset -> DEFAULT ("6"; deck `alphaentr hw:0.77` = the earlier tunnelling-region form).
 * "6"   -> E1: the incident alpha channel is solved with alphaomp 6 (Avrigeanu 2014, TALYS default).
-* "mix:<x>" -> ALPHAMIX2: T_inc = T6^x T_deck^(1-x) per (l, j) with one constant x in [0, 1] (same blend code as "bar";
+* "mix:<x>" -> T_inc = T6^x T_deck^(1-x) per (l, j) with one constant x in [0, 1] (same blend code as "bar";
            x = 1 is "6" up to the blend arithmetic, x = 0 is the deck).
-* "hw" / "hw:<a>" -> ALPHABAR2: ao6 share confined to the tunnelling region, s(E) = a (1 - T_HW(E)),
+* "hw" / "hw:<a>" -> ao6 share confined to the tunnelling region, s(E) = a (1 - T_HW(E)),
            T_HW = 1 / (1 + exp(2 pi (V_B - E_cm) / hbar omega)) (Hill-Wheeler l = 0 transmission of the same engine barrier as
            "bar"; hbar omega = hbar sqrt(|V''(r_B)| / mu) from its curvature at the top). T_inc = T6^s T_deck^(1-s) (blend as
-           "bar"). a = 1 by default (no knob); "hw:<a>" only for the A0-LTO amplitude refit allowed by the ALPHABAR2 prereg.
+           "bar"). a = 1 by default (no knob); "hw:<a>" only for an amplitude refit.
 * "bar" -> E2: T_inc = T6^(1-w) T_deck^w per (l, j), w = logistic((E_cm - V_B) / (0.1 V_B)), V_B = the top of the engine's
            own l = 0 alpha + target barrier (real alphaomp-6 potential + uniform-sphere Coulomb, `optical_potential`) at the
            incident energy. sigma_reac = sigma_deck * sum(2l+1) T_l(blend) / sum(2l+1) T_l(deck); xscoupled blended in log.
@@ -32,11 +32,11 @@ from dataclasses import replace
 import torch
 
 ENV = "INCOGNITA_ALPHAENTR"
-WIDTH = 0.1  # logistic width in units of V_B (fixed in the brief before any run)
+WIDTH = 0.1  # logistic width in units of V_B (fixed before any fit)
 _RGRID = torch.arange(2.0, 30.0, 0.01, dtype=torch.float64)
 
 
-DEFAULT = "6"  # E1PROMO: ALPHAREOPEN arm E1 replaces HWA770 (hw:0.77)
+DEFAULT = "6"  # arm E1 (replaces hw:0.77)
 
 
 def mode(options=None) -> str | None:
@@ -139,9 +139,9 @@ def incident(cas, e_inc_mev: float):
     else:
         inc8 = cas._incident_with(e_inc_mev, cas.options, tag="_ae8")
         x8 = cas.__dict__.get("_xscoupled_ae8", {}).get(float(e_inc_mev))
-        if m.startswith("mix:"):  # ALPHAMIX2: constant ao6 share x -> deck weight w = 1 - x
+        if m.startswith("mix:"):  # constant ao6 share x -> deck weight w = 1 - x
             w, ecm, vb = 1.0 - float(m[4:]), float("nan"), float("nan")
-        elif m.startswith("hw"):  # ALPHABAR2: ao6 share = amp (1 - T_HW)
+        elif m.startswith("hw"):  # ao6 share = amp (1 - T_HW)
             w, ecm, vb, hw = hw_share(cas.Zt, cas.At, e_inc_mev, cas.options, cas.params, float(m[3:]) if ":" in m else 1.0)
             rec["hbar_omega"] = hw
         else:

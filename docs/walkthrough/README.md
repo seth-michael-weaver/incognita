@@ -5,10 +5,10 @@ Live at <https://www.incognitanuclear.org/>. Three pages, in English and Spanish
 | Page | What it is |
 |---|---|
 | `index.html` | **The physics**: an explorable explanation of what the engine computes, in the order it computes it. A live, full-screen hero (a neutron hitting a nucleus), then twenty-six chapters (twenty, then six Expert chapters in part two): a pinned drawing beside the text that changes as you read, with controls in the text that drag the physics. |
-| `topics.html` | **More Nuclear Topics**: lessons beside the main story, in the same chapter style, Intro to Expert, under their own hero (a reactor pool, `js/topics/hero.js`) and a lesson index with a level filter (`js/topics/index.js`): radiation (including spent fuel decayed nuclide by nuclide, `js/topics/spentfuel.js`), inside a reactor (opening with the fuel cycle, mine to waste: `js/topics/fuelcycle.js`), kinds of reactor (every type: water, gas, fast, molten salt, special; `js/topics/types.js`; and a build-your-own sandbox, `js/topics/sandbox.js`), stability and control (ending with the physics of the Three Mile Island, Chernobyl and Fukushima accidents, `js/topics/accidents.js`), fusion, in the stars (`js/topics/stars.js`: s- and r-process; its σN and chart-of-nuclides pictures use INCOGNITA's v0.2 MACS at 30 keV and the board's `k_pernuc.csv` ratios, abundances from Lodders et al. 2009). Lessons in `js/topics/<id>.js` carry their own `level`; Criticality, Doppler and the four fusion chapters moved here from `index.html` on 2026-11-05 (old `#critical`-style links on the main page redirect). |
+| `topics.html` | **More Nuclear Topics**: lessons beside the main story, in the same chapter style, Intro to Expert, under their own hero (a reactor pool, `js/topics/hero.js`) and a lesson index with a level filter (`js/topics/index.js`): radiation (including spent fuel decayed nuclide by nuclide, `js/topics/spentfuel.js`), inside a reactor (opening with the fuel cycle, mine to waste: `js/topics/fuelcycle.js`), kinds of reactor (every type: water, gas, fast, molten salt, special; `js/topics/types.js`; and a build-your-own sandbox, `js/topics/sandbox.js`), stability and control (ending with the physics of the Three Mile Island, Chernobyl and Fukushima accidents, `js/topics/accidents.js`), fusion, in the stars (`js/topics/stars.js`: s- and r-process; its σN and chart-of-nuclides pictures use INCOGNITA's v0.2 MACS at 30 keV and the board's `k_pernuc.csv` ratios, abundances from Lodders et al. 2009). Lessons in `js/topics/<id>.js` carry their own `level`; Criticality, Doppler and the four fusion chapters moved here from `index.html` (old `#critical`-style links on the main page redirect). |
 | `data.html` | **Every nuclide**: a chart of nuclides; for any nuclide, the v0.2.3 library's predicted curves (68 / 95 % bands) beside every curated EXFOR measurement, with dataset links, a table view and the command that reproduces the numbers. |
-| `scoreboard.html` | **Scoreboard**: how the engine and the data product compare with other codes and libraries, losses first. |
-| `pipeline.html` | **Pipeline**: how measurements become a reactor library (measurements, R-matrix fit, ENDF-6 file, NJOY, OpenMC library, benchmarks, judges), as a lit diagram with one live drawing per stage and the current status, losses first. Code in `js/pipeline.js`, styles in `pipeline.css`. |
+| `scoreboard.html` | **Comparisons**: how the engine and the data product compare with other codes and libraries, losses first. |
+| `pipeline.html` | **Pipeline**: how measurements become a reactor library (measurements, R-matrix fit, ENDF-6 file, NJOY, OpenMC library, benchmarks, checks), as a lit diagram with one live drawing per stage and the current status, losses first. Code in `js/pipeline.js`, styles in `pipeline.css`. |
 
 Plain static files: no build step, no framework. Fonts come from Google Fonts and fall back to system fonts offline.
 
@@ -33,13 +33,13 @@ cd docs/walkthrough && python3 serve.py 8765    # then open http://localhost:876
 | `js/glossary.js` | One entry per technical term; the first use per chapter is marked and explained in a card |
 | `js/i18n.js`, `js/i18n/es-*.js` | Language layer and Spanish text; the Spanish files load only for Spanish readers |
 | `js/data.js`, `data/` | The data explorer and its data: `data/index.json` (one row per nuclide) and `data/n/<Z>/<A>.json` (one nuclide, fetched only when it is opened) |
-| `js/scoreboard.js`, `js/scoreboard-data.js` | The scoreboard page and its data (`WT.board`, also read by Chapter 12) |
+| `js/scoreboard.js`, `js/scoreboard-data.js` | The comparison page and its data (`WT.board`, also read by Chapter 12) |
 
 ## Updating the data
 
 - **Every nuclide:** `uv run --no-project --with pyarrow python scripts/build_site_data.py` (from the repo root) rebuilds
   `data/` from `library/v0.2.3`, `data/curation/inputs` and `incognita/bench/data/exam_rows`. Re-run it when any of those change.
-- **Scoreboard and Chapter 12:** regenerate `js/scoreboard-data.js` from the research ledger.
+- **Comparisons page and Chapter 12:** regenerate `js/scoreboard-data.js` from the comparison records.
 - After changing any JS or CSS, bump the `?v=` asset version in all three HTML files so returning visitors fetch the new files.
 
 ## Rules for editing the chapters
@@ -48,7 +48,7 @@ cd docs/walkthrough && python3 serve.py 8765    # then open http://localhost:876
 - Physics must match the code in `physics/hf` (say "optional" for opt-in switches); numbers are illustrative unless computed.
 - No project status in the prose. The one code reference per chapter is its closing "In the code" note.
 - Every change in English goes into the matching `js/i18n/es-*.js` (same tags and attributes; canvas labels keyed with `{#}` for numbers).
-- Check phone width: the drawing is pinned on top of the text there; gate phone-only layout on `g.W < 600`.
+- Check phone width: the drawing is pinned on top of the text there; switch to the phone-only layout on `g.W < 600`.
 
 ## Performance
 

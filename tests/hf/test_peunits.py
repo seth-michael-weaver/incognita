@@ -1,4 +1,4 @@
-"""PEUNITS: last discrete level gets xspreeq(nendisc) * frac (mb), synthetic one-case batch (shared with test_pecollapse)."""
+"""Last discrete level gets xspreeq(nendisc) * frac (mb), synthetic one-case batch (shared with test_pecollapse)."""
 from types import SimpleNamespace
 
 import numpy as np

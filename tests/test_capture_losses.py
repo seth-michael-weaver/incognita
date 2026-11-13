@@ -1,4 +1,4 @@
-"""Acceptance tests for the Stage C capture losses (WP-15 step 2)."""
+"""Acceptance tests for the Stage C capture losses."""
 import torch
 
 from models.losses import capture_loss, heteroscedastic_nll, teacher_loss

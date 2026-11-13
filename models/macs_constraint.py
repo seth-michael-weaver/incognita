@@ -70,7 +70,7 @@ def _exfor_macs(kt_ev: list[float], year_cutoff: int | None = None
     used. The curated consensus carries a `mxw` kind -- the same quantity, measured, binned by
     kT -- for 342 nuclides, and 46 of the ones on our chart are absent from KADoNiS. 39 of
     those have no differential capture data at all, which is exactly the population the model
-    cannot otherwise reach: a nuclide with a MACS reaches 0.1510 held-out against 0.2035 with
+    cannot otherwise reach: a nuclide with a MACS reaches 0.1510 out-of-fold against 0.2035 with
     nothing (docs/results/out-of-sample.md).
 
     KADoNiS wins wherever both have a nuclide. It is a compilation with renormalisations and
@@ -191,7 +191,7 @@ def load_macs(nuclide_ids: list[str], path: Path, exfor: bool = True,
         table[(z, a)] = (vals, err)
 
     keep = _kadonis_keep()
-    if keep is not None:   # REDTEAM M8 / INDEP_FIX item 3: KADoNiS entries with experimental data only
+    if keep is not None:   # review items: KADoNiS entries with experimental data only
         for key in list(table):
             k_ = keep.get(key)
             if k_ is None:

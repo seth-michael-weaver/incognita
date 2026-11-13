@@ -1,4 +1,4 @@
-"""ROTEXIT1CN: `sfexit` switch resolution (deck keyword > env INCOGNITA_SFEXIT > default OFF) and its SLFIRST precondition."""
+"""`sfexit` switch resolution (deck keyword > env INCOGNITA_SFEXIT > default OFF) and its first-CN `sfunc` precondition."""
 import pytest
 
 from physics.hf.omp import sfunc
@@ -39,7 +39,7 @@ def test_exit_cont_needs_slfirst(monkeypatch):
 
 
 def test_exit_contr_colltype_r_only(monkeypatch):
-    """ROTEXIT1CN2: `contr` = `cont` for a colltype R target (Gd-158, U-238), OFF for S/V targets (Ni-58, As-75, Se-80, Mo-100)."""
+    """`contr` = `cont` for a colltype R target (Gd-158, U-238), OFF for S/V targets (Ni-58, As-75, Se-80, Mo-100)."""
     from physics.hf.input.defaults import Options
 
     monkeypatch.setenv("INCOGNITA_SFUNC", "u1")
@@ -53,7 +53,7 @@ def test_exit_contr_colltype_r_only(monkeypatch):
 
 
 def test_exit_ccf_mode_and_ratio(monkeypatch):
-    """ROTEXIT1CN3: `ccf` resolves, needs SLFIRST, is not `cont`; cc_ratio = max(1, inc/inv), 1 when undefined."""
+    """`ccf` resolves, needs first-CN `sfunc`, is not `cont`; cc_ratio = max(1, inc/inv), 1 when undefined."""
     monkeypatch.setenv("INCOGNITA_SFUNC", "u1")
     monkeypatch.setenv("INCOGNITA_SFUNC_SCOPE", "first")
     monkeypatch.setenv("INCOGNITA_SFEXIT", "ccf")

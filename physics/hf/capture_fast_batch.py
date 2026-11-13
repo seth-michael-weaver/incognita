@@ -1,7 +1,7 @@
 """The capture fast path with only the work its answer reads: photon feeding of the compound
 nucleus, and gamma-independent tables that can be computed once and shipped.
 
-Task: SPEED3 (stretch gate G0.2s, the lab network capture sweep). No physics of its own: every
+Task: batched capture fast path (the network capture sweep). No physics of its own: every
 number is produced by the same statements as `capture_fast.capture_xs`, in the same order.
 
 **What the reference path computes and throws away.** `capture_fast.capture_xs` builds the
@@ -18,7 +18,7 @@ is the same arithmetic on the same operands and `xspopnuc(0, 0)` is identical to
 **What does not depend on the photon strength.** The emission-grid transmission coefficients
 (`dens_reference._transmission`, T5 on six particles) and the incident channel
 (`Cascade.incident`, T5 or T13's coupled channels) are the same for every photon-strength
-parameter a fit (FIT1) varies, and together they were ~40% of the 482-nuclide sweep.
+parameter a fit varies, and together they were ~40% of the 482-nuclide sweep.
 `tables(tg, energies)` returns them as plain tensors; `install_tables(tg, tables)` makes the
 target read them instead of solving. They are the reference's own outputs, stored in float64.
 
@@ -34,7 +34,7 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from physics.hf.projectile import residual_nucleus  # ENGPROJ GPRESFIX
+from physics.hf.projectile import residual_nucleus  # residual-nucleus pseudo-target for the photon strength
 from physics.hf.compound.prepare import NUMJ
 from physics.hf.core.tensors import DTYPE
 
@@ -44,7 +44,7 @@ def _photon_feeding(nd, nex: int, xspop_mother, popeps_a: float, dmulti: float =
     Every statement that reaches the photon feeding is copied from there, unchanged.
 
     TALYS: compound.f90:1 (compound)
-    Test: SPEED3 / tests/hf/test_capture_fast_batch.py
+    Test: tests/hf/test_capture_fast_batch.py
     """
     dev = nd.device
     i = nd.row[nex]
@@ -123,10 +123,10 @@ class CaptureDecay:
     particles are slow: the axis is 42 long but nothing above l' = 8 is open (deuteron, triton
     and helion are closed outright), and the full-length contraction was ~20 % of the sweep.
     The cut columns are exact zeros, so every product is unchanged; the sums over l' see
-    fewer zero terms, which can move `D` by rounding (the gate is 1e-12 on the capture).
+    fewer zero terms, which can move `D` by rounding (the tolerance is 1e-12 on the capture).
 
     TALYS: densprepare.f90:1 (densprepare), compound.f90:1 (compound)
-    Test: SPEED3 / tests/hf/test_capture_fast_batch.py
+    Test: tests/hf/test_capture_fast_batch.py
     """
 
     def __init__(self, cas, st, sp, bins: list[int], device=None, trim_l: bool = True):
@@ -188,7 +188,7 @@ class CaptureDecay:
                 rb_d = np.where(part, (ex0plus[:, None] - exm) / dexinc[:, None], 1.0)
             eout_d = np.where(part, 0.5 * (ex0plus[:, None] + exm) - ss - ex,
                               (exinc - ss)[:, None] - ex)
-            if t >= 1 and nnl_bins.any():  # NNLEAK (default y): Egamma^3-filled initial-CN top bin
+            if t >= 1 and nnl_bins.any():  # `nnleak` (default y): Egamma^3-filled initial-CN top bin
                 rb_d, eout_d = nnleak.adjust(rb_d, eout_d, part, ex0plus[:, None], exm,
                                              dexinc[:, None], nnl_bins[:, None])
             cont_row = rows[None, :] > nl
@@ -226,15 +226,15 @@ class CaptureDecay:
                 lmaxhf = np.full((m, n), cas.gammax, dtype=np.int64)
                 sfac = 1.0
             else:
-                from physics.hf.compound import tlog as _tlg  # LOGTINT (default OFF)
-                tjl, tl, lmax = cas.trans_of(sp.zix, sp.nix)[t]  # SLFIRST: per emitting nucleus
-                from physics.hf.omp import alphatemp as _at  # ALPHATEMP (default OFF): not wired here
+                from physics.hf.compound import tlog as _tlg  # `tlog` (default OFF)
+                tjl, tl, lmax = cas.trans_of(sp.zix, sp.nix)[t]  # per emitting nucleus
+                from physics.hf.omp import alphatemp as _at  # `alphatemp` (default OFF): not wired here
                 _at.refuse(cas.trans, 'capture_fast_batch.py')
                 eend = min(int(eendmax[t]), cas.rg.maxen)
                 tlm, lm = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
                                      tl, lmax, float(fnorm[t + 1]), cas.transeps,
                                      tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
-                tlc_ = cas.trans_cont_of(sp.zix, sp.nix)  # ROTEXIT1CN (default OFF): continuum rows from the model set
+                tlc_ = cas.trans_cont_of(sp.zix, sp.nix)  # `sfexit` (default OFF): continuum rows from the model set
                 if tlc_ is not None:
                     if isinstance(tlm, torch.Tensor):
                         raise NotImplementedError("sfexit cont is not wired on the differentiable path")
@@ -340,7 +340,7 @@ def _cascade_cn(nuc, photon_decay, popeps_mb: float, differentiable: bool):
     a float, or with `differentiable` the ground state plus isomers as a tensor.
 
     TALYS: multiple.f90:1 (multiple), cascade.f90:1 (cascade)
-    Test: SPEED3 / tests/hf/test_capture_fast_batch.py
+    Test: tests/hf/test_capture_fast_batch.py
     """
     from physics.hf.emission.multiple import gamma_cascade
 
@@ -382,10 +382,10 @@ def capture_xs(tg, e_inc_mev: float, differentiable: bool = False, trim_l: bool 
     """`capture_fast.capture_xs`, with the compound nucleus's decay reduced to its photon exit
     (see the module docstring). Same domain; the same numbers to the bit at TALYS's popeps 1e-3 mb
     (with `trim_l=False`, and with the default `CaptureDecay`); at our popeps 1e-9 mb, where more bins
-    decay, to rounding (<= 1e-12; 2.3e-13 seen on Fe-56, POPEPS3).
+    decay, to rounding (<= 1e-12; 2.3e-13 seen on Fe-56).
 
     TALYS: comptarget.f90:1 (comptarget), multiple.f90:1 (multiple) for (Zcomp, Ncomp) = (0, 0)
-    Test: SPEED3 / tests/hf/test_capture_fast_batch.py
+    Test: tests/hf/test_capture_fast_batch.py
     """
     from physics.hf import capture_fast as CF
     from physics.hf.compound.chain import compound_inputs
@@ -444,7 +444,7 @@ def _trim_tjl(ci):
     channels, their order and every product are unchanged (the incident-channel override pads
     the axis back to lmaxinc + 1 where it needs to).
 
-    Test: SPEED3 / tests/hf/test_capture_fast_batch.py
+    Test: tests/hf/test_capture_fast_batch.py
     """
     import copy
     from dataclasses import replace
@@ -482,7 +482,7 @@ def tables(tg, energies) -> dict:
     """The photon-strength-independent tables of target `tg` at `energies` [MeV]: the
     emission-grid transmissions and the incident channel of every in-domain energy.
 
-    Test: SPEED3 / tests/hf/test_capture_fast_batch.py
+    Test: tests/hf/test_capture_fast_batch.py
     """
     from physics.hf import capture_fast as CF
     from physics.hf.compound.dens_reference import _transmission
@@ -504,7 +504,7 @@ def install_tables(tg, tab: dict) -> None:
     from it for the energies it holds, and the module-level `_transmission` answers for this
     target. Anything not in the table is still computed.
 
-    Test: SPEED3 / tests/hf/test_capture_fast_batch.py
+    Test: tests/hf/test_capture_fast_batch.py
     """
     from physics.hf.compound import dens_reference
 
@@ -527,7 +527,7 @@ def install_tables(tg, tab: dict) -> None:
 
 def _with_tables(solve):
     def _transmission(Zt: int, At: int, enincmax_mev: float, *args, **kwargs) -> dict:
-        # tables hold the default (un-overridden, numpy) solve only; DIFFPARAM's optical
+        # tables hold the default (un-overridden, numpy) solve only; the differentiable path's optical
         # overrides and the differentiable path always solve
         if not any(a is not None and a is not False for a in args) and not any(
                 v is not None and v is not False for v in kwargs.values()):

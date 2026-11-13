@@ -1,4 +1,4 @@
-"""BINCONV: `binconv n|y` (env INCOGNITA_BINCONV), graded residual continuum mesh (core/grids.binconv_edges)."""
+"""`binconv n|y` (env INCOGNITA_BINCONV), graded residual continuum mesh (core/grids.binconv_edges)."""
 import numpy as np
 import pytest
 

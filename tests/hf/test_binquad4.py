@@ -1,4 +1,4 @@
-"""BINQUAD4: the WKB fission-penetrability table size (`binquadw`), decoupled from `bins` under `binquad y`."""
+"""The WKB fission-penetrability table size (`binquadw`), decoupled from `bins` under `binquad y`."""
 from dataclasses import replace
 
 from physics.hf.core import grids

@@ -1,6 +1,6 @@
 """charged-projectile fidelity: charged-projectile port fidelity -- the ejectile OMP convention follows the run's
 projectile (k0), alphaomp 3-5 refuses instead of running Watanabe, and the five port-fidelity
-fixes (MPEFIX, CPINC2, CCSOCB, RESISO, TRITFID) default ON for k0 > 1 only.
+fixes default ON for k0 > 1 only.
 Checked against stored stock TALYS-2.24/2.25 output; neutron runs stay bitwise unchanged."""
 
 from __future__ import annotations

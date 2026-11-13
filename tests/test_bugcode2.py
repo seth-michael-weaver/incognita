@@ -1,7 +1,7 @@
-"""Code bug hunt round 2 (BUGCODE2, 2026-11-07): regression tests for code merged on 2026-11-06/07 outside physics/hf.
+"""Regression tests for code outside physics/hf.
 
 Covers the capture-set-v2 staging cache (scripts/build_capture_v2.py), the talysworld local tool (scripts/talysworld:
-GRIDTOP pad, cache key, library overlay), and the light-evaluation step of the site build
+gridtop pad, cache key, library overlay), and the light-evaluation step of the site build
 (scripts/add_light_evals.py); the site translations are checked in tests/test_site_i18n.py. No engine, no WSL data
 and no network needed.
 """

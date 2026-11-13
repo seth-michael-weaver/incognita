@@ -1,4 +1,4 @@
-"""CCNUMEROV: ECIS's modified Numerov in the coupled-channels radial step.
+"""ECIS's modified Numerov in the coupled-channels radial step.
 
 `ecist.f::inch` steps the coupled equations explicitly,
 
@@ -9,8 +9,6 @@ whose h**6 truncation has the opposite sign (-v**3/240 against +v**3/360, ecis-1
 therefore does not land on ECIS's answer at ECIS's own step.  These pin the recurrence itself,
 the agreement of the compiled kernels with the torch loop, that both schemes still converge to
 the same solution, and that the modified one is the one closer to stock TALYS at `refine = 1`.
-
-Task: CCNUMEROV. Acceptance test: G-CCNUMEROV (docs/results/hf-ccnumerov.md).
 """
 
 from __future__ import annotations
@@ -25,7 +23,7 @@ from physics.hf.ecis import ccnative
 
 CD = torch.complex128
 
-# CHART1's first three energies and its stock-TALYS `total.tot` for U-232, as tests/hf/test_fissc2
+# The chart run's first three energies and its stock-TALYS `total.tot` for U-232, as tests/hf/test_fissc2
 # quotes them: `total.tot` of a CC target is exactly the optical sigma_tot.
 E_KEV = (0.001, 0.001684, 0.002836)
 U232_TALYS_TOTAL_MB = (37621.30, 31966.20, 27604.40)
@@ -52,7 +50,7 @@ def _solve(Z, A, band, e_mev, modnum, monkeypatch, refine=1):
     from physics.hf.ecis import incident as I
 
     monkeypatch.setenv("HF_CC_MODNUM", "1" if modnum else "0")
-    monkeypatch.setenv("HF_INC_REFINE", "1")  # FISSC2's halving off: this is the bare step
+    monkeypatch.setenv("HF_INC_REFINE", "1")  # step halving off: this is the bare step
     I._SOLVED.clear()
     I._CARRY.clear()  # PERFCC2: and the rows carried across target drops
     try:
@@ -106,8 +104,8 @@ def test_the_step_is_ecis_inch_and_not_the_plain_numerov(monkeypatch):
 @pytest.mark.skipif(not ccnative.available(), reason="libccfast.so not built")
 def test_the_compiled_kernels_step_what_the_torch_loop_steps(monkeypatch):
     """`ccfast.c::cc_block_mn` (and its split twin) against `solver._numerov_blocks`, below
-    `soswitch` where the modified step applies.  CCFAST2 is not bit-identical by design, so this
-    is the cross-section-level closeness its own gate uses."""
+    `soswitch` where the modified step applies.  The fast kernel is not bit-identical by design, so this
+    is the cross-section-level closeness its own check uses."""
     from physics.hf.ecis.coupling import channels
     from physics.hf.ecis.formfactor import rotational_form_factors
     from physics.hf.ecis.incident import _t4_parameters
@@ -154,7 +152,7 @@ def test_both_schemes_converge_to_the_same_solution(monkeypatch):
 
 
 def test_the_modified_step_is_the_one_closer_to_talys(monkeypatch):
-    """The inverse of FISSC2's own property, and the reason its step-halving is off by default:
+    """The inverse of the step-halving test's property, and the reason step halving is off by default:
     on ECIS's own grid the modified scheme, not the plain one, sits near stock TALYS."""
     band = _band(92, 232)
     off = _solve(92, 232, band, E_KEV, False, monkeypatch)

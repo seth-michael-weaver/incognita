@@ -17,7 +17,7 @@ except the four main keywords and a handful read in `readinput.f90`/`getvalues.f
 | READ_ONLY_DEFAULT | only the default works; any other value is refused at run time (`defaults.UNPORTED`, `structure/levels.py`) |
 | IGNORED | parsed (into `Options`/`Params`, or dropped by `fitlib._SKIP`) but nothing in the engine reads it: a deck using it runs silently on the default. Several of these set other defaults through TALYS's cascade, which IS honoured (notes say so) |
 | MISSING | not parsed: a deck line with it is rejected (`default_options` raises `KeyError`; `fitlib` reports it skipped) |
-| NA | output files, paths, ECIS plumbing, labels: no meaning for an engine that returns arrays. The observables those switches gate are tracked in `OBSERVABLE_COVERAGE.md` |
+| NA | output files, paths, ECIS plumbing, labels: no meaning for an engine that returns arrays. The observables those switches control are tracked in `OBSERVABLE_COVERAGE.md` |
 
 **Caveat on SUPPORTED.** The automatic class is "read and reaches physics code". Only rows with `evidence` other than
 `grep` have a test; the batches in `COVERAGE_PLAN.md` upgrade `grep` rows as they compare with stock TALYS. Options
@@ -29,7 +29,7 @@ with a keyword the port does not know is refused too (it was skipped without a w
 A deck is a talys.inp (`physics/hf/input/deck.py`) or deck lines in `INCOGNITA_TALYS_FIT_LINES`; the lines act with
 or without an `INCOGNITA_TALYS_FIT` arm (before B2 they were dropped without one). Energy-dependent adjustment forms
 (`v1adjust n 1. Ea Eb Em D`, `awdadjust n 1. file.table`, adjust.f90) are not read: as a deck line they are refused
-(B2), from a best file or fitted library they are left out with a warning; `physics/hf/eadj.py` (ENGADJ) is our own
+(B2), from a best file or fitted library they are left out with a warning; `physics/hf/eadj.py` is our own
 equivalent keyword.
 
 ## Totals

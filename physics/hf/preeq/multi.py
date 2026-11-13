@@ -3,7 +3,7 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: T8, rewritten by EXCL3 (physics/hf/CONTRACT.md §7). Acceptance test: A-mpe (§6).
+Task: T8 (physics/hf/CONTRACT.md §7). Acceptance test: A-mpe (§6).
 
 TALYS routines ported here (file:line of the subroutine/function statement):
     multipreeq2.f90:1 (multipreeq2)
@@ -47,7 +47,7 @@ population goes in, the daughters' additions come out, and `emission.feeding` th
 ported; `flag2comp` is true for every reference run.
 
 Units: cross sections mb, energies MeV. float64 (§4.1); `term` is `real(sgl)` in TALYS and the
-gate shows that costs ~1e-7 relative, well inside A-mpe's tolerance, so it is not emulated.
+A-mpe test shows that costs ~1e-7 relative, well inside A-mpe's tolerance, so it is not emulated.
 Differentiable in `gp`/`gn` and in the transmission coefficients; the two hard branches
 (`feedph <= 1e-10`, `sumterm > feedph`) are §4.4 branches, taken on detached scalars.
 """
@@ -123,7 +123,7 @@ class MultiPreeqInputs:
     efermi_mev: float = EFERMI_MEV
     mpreeqmode: int = 2  # input_preeqmodel.f90:74
     flag2comp: bool = True
-    phzn0: tuple | None = None  # PHMICRO: (Z0, N0) of the initial compound nucleus when phmodel 2 is on
+    phzn0: tuple | None = None  # (Z0, N0) of the initial compound nucleus when phmodel 2 is on
 
 
 @dataclass
@@ -167,11 +167,11 @@ def multiple_preequilibrium(inp: MultiPreeqInputs, numj: int = 40) -> MultiPreeq
     """
     if inp.mpreeqmode != 2:
         raise NotImplementedError(
-            "EXCL3: mpreeqmode 1 (a full exciton restart per particle-hole pair, "
+            "mpreeqmode 1 (a full exciton restart per particle-hole pair, "
             "multipreeq2.f90:93-107) is not ported; TALYS's default is 2")
     if not inp.flag2comp:
         raise NotImplementedError(
-            "EXCL3: flag2comp false routes multiple.f90:553 to the one-component "
+            "flag2comp false routes multiple.f90:553 to the one-component "
             "multipreeq.f90, which is not ported; TALYS's default is two-component")
     # multipreeq2.f90:139 -- the initial compound nucleus has no particle-hole population of
     # its own; `population.f90` seeds only its daughters.
@@ -241,7 +241,7 @@ def multiple_preequilibrium(inp: MultiPreeqInputs, numj: int = 40) -> MultiPreeq
                         torch.tensor(ipn, device=dev), torch.tensor(ihn, device=dev),
                         gsp_state, gsn_state, inp.exinc_mev, ef, False, ap2=ap)
                     omegaph = ph_override(omegaph, ipp, ihp, ipn, ihn, inp.exinc_mev, inp.zcomp, inp.ncomp,
-                                          inp.phzn0)  # PHMICRO (multipreeq2.f90:195)
+                                          inp.phzn0)  # phmodel 2 (multipreeq2.f90:195)
                     live_om = float(omegaph) > 0.0  # :224
 
                     term = torch.zeros(2, b, dtype=DTYPE, device=dev)
@@ -285,7 +285,7 @@ def multiple_preequilibrium(inp: MultiPreeqInputs, numj: int = 40) -> MultiPreeq
                                 torch.tensor(ihn, device=dev),
                                 gsp_o, gsn_o, eex, ef, False, ap2=ap1)
                             omegap1h = ph_override(omegap1h, ipp - zej, ihp, ipn - nej, ihn, eex, d.zix, d.nix,
-                                                   inp.phzn0)  # PHMICRO (multipreeq2.f90:247)
+                                                   inp.phzn0)  # phmodel 2 (multipreeq2.f90:247)
                             ap1p = apauli2(
                                 torch.tensor(zej, device=dev), torch.tensor(0, device=dev),
                                 torch.tensor(nej, device=dev), torch.tensor(0, device=dev),
@@ -295,7 +295,7 @@ def multiple_preequilibrium(inp: MultiPreeqInputs, numj: int = 40) -> MultiPreeq
                                 torch.tensor(nej, device=dev), torch.tensor(0, device=dev),
                                 gsp_o, gsn_o, inp.exinc_mev - eex, ef, False, ap2=ap1p)
                             omega1p = ph_override(omega1p, zej, 0, nej, 0, inp.exinc_mev - eex, d.zix, d.nix,
-                                                  inp.phzn0)  # PHMICRO (multipreeq2.f90:249)
+                                                  inp.phzn0)  # phmodel 2 (multipreeq2.f90:249)
                             proba = omega1p * omegap1h / omegaph / float(ipp + ipn)  # :236
                             pescape = proba * d.tswave[lo:hi + 1]  # :237-238
                             if hi == d.nexmax:  # :239-243, the top bin runs to the kinematic max

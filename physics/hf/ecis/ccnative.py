@@ -1,16 +1,16 @@
-"""CCFAST2: loader and wrapper of `physics/hf/native/ccfast.c`, the coupled-channels radial loop
+"""Loader and wrapper of `physics/hf/native/ccfast.c`, the coupled-channels radial loop
 held to the closeness rule instead of to the bits of `solver._numerov_blocks`.
 
 `scripts/build_ccfast_native.sh` builds `physics/hf/native/lib/libccfast.so` (`.dylib` on macOS;
 gitignored). The
 kernel calls torch's own LAPACK/BLAS, found by address in `libtorch_cpu` exactly as
-`physics.hf.native.lapack_symbols` finds them for SPEEDT3's kernels.
+`physics.hf.native.lapack_symbols` finds them for the compiled torch-path kernels.
 
-Selection: `available()` is False -- and `solver.smatrix_blocks` runs SPEEDT3's `hf_cc_block` or
+Selection: `available()` is False -- and `solver.smatrix_blocks` runs the compiled `hf_cc_block` or
 Python -- when the library is missing, when `HF_CCFAST_NATIVE=0`, or when torch's symbols are not
 found. Callers reach it only from `no_grad` paths that asked for `exact_bits=False`.
 
-Task: CCFAST2. Test: tests/hf/test_ccfast.py
+Test: tests/hf/test_ccfast.py
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from physics.hf.core.tensors import DTYPE
 
 _LIB_DIR = Path(__file__).resolve().parents[1] / "native" / "lib"
 _LIB_PATH = _LIB_DIR / ("libccfast.dylib" if sys.platform == "darwin" else "libccfast.so")
-# SETB: the same kernel built with `ccsplit.h` (split-storage solve and stabilisation). Default on
+# The same kernel built with `ccsplit.h` (split-storage solve and stabilisation). Default on
 # arm64, where it was measured (Accelerate); `HF_CCSPLIT=1`/`0` forces it on or off elsewhere.
 _SPLIT_PATH = _LIB_DIR / ("libccsplit.dylib" if sys.platform == "darwin" else "libccsplit.so")
 
@@ -42,7 +42,7 @@ def _split_wanted() -> bool:
 _LIB: ctypes.CDLL | None = None
 _TRIED = False
 # steps between two renormalisations of W. `solver.STABILISE_EVERY` (the bitwise torch path) is 10;
-# NATIVEX2: 15 here: a change of basis every 15 steps keeps the solutions independent on every
+# 15 here: a change of basis every 15 steps keeps the solutions independent on every
 # checked target (15 deformed, vibrational and actinide nuclides, all channels within 3.5e-12 of
 # 10) and spares a third of the stabilisations (whole deformed nuclides 0-10 % less CPU)
 STABILISE_EVERY = 15
@@ -81,8 +81,8 @@ def _load() -> ctypes.CDLL | None:
     lib.cc_set_gemm_small.restype = None
     lib.cc_block_d.argtypes = [_I64] * 4 + [_P] * 15 + [_I64, _P]
     lib.cc_block_d.restype = ctypes.c_int
-    # NATIVEX2 ccx: Jacobi sweeps in place of the elimination where 1 - c M is diagonal enough
-    # (ccfast.c, `nm_solve_z`); absent from a build older than the lever
+    # ccx: Jacobi sweeps in place of the elimination where 1 - c M is diagonal enough
+    # (ccfast.c, `nm_solve_z`); absent from a build older than this option
     if hasattr(lib, "cc_set_neumann"):
         lib.cc_set_neumann.argtypes = [_I64, ctypes.c_double]
         lib.cc_set_neumann.restype = None
@@ -93,14 +93,14 @@ def _load() -> ctypes.CDLL | None:
         dgemm = _torch_symbol("dgemm_")
         if dgemm:
             lib.cc_set_dgemm(dgemm)
-    # CCBLOCKD: the cheaper `cc_block_d` step (real stencil products, (1 - c M) u carried);
-    # absent from a build older than the lever
+    # The cheaper `cc_block_d` step (real stencil products, (1 - c M) u carried);
+    # absent from older builds
     if hasattr(lib, "cc_set_blockd"):
         lib.cc_set_blockd.argtypes = [_I64]
         lib.cc_set_blockd.restype = None
         lib.cc_set_rmm_small.argtypes = [_I64]
         lib.cc_set_rmm_small.restype = None
-    # CCNUMEROV: ECIS's modified Numerov step; absent from a build older than the lever
+    # ECIS's modified Numerov step; absent from older builds
     if hasattr(lib, "cc_set_modnum"):
         lib.cc_set_modnum.argtypes = [_I64]
         lib.cc_set_modnum.restype = None
@@ -133,7 +133,7 @@ def available() -> bool:
 
 
 _KEEP = ("umm1", "um", "ump1", "mmm1", "mmp1", "sp1", "sm1")
-# NATIVEX2 ccx: a step takes the Jacobi sweeps when rho^(p+1) <= SWEEP_TOL (rho the infinity norm of
+# ccx: a step takes the Jacobi sweeps when rho^(p+1) <= SWEEP_TOL (rho the infinity norm of
 # D^-1 O of 1 - c M, p the sweeps). 1e-13 is where the solutions stop moving: against the
 # elimination the matching ratios u_{m+1} u_m^-1 of every Lu-175 block differ by 7.6e-12 at 1e-13 as
 # at 1e-16 or 1e-19 (that floor is the blocks' own rounding), and by 5e-10 at 1e-11.
@@ -146,32 +146,32 @@ def _flag(name: str, default: bool) -> bool:
 
 
 def _set_sweeps(lib) -> None:
-    """Switch the kernel's NATIVEX2 `ccx` paths for the next call: the Jacobi sweeps and the complex
+    """Switch the kernel's `ccx` paths for the next call: the Jacobi sweeps and the complex
     products as real ones, both measured on arm64 (Accelerate) and off elsewhere. `HF_NX2_CCX=0`
-    turns them off (the elimination on every step, zgemm). Read per call, as the other NATIVEX2
-    levers read theirs."""
+    turns them off (the elimination on every step, zgemm). Read per call, as the other native
+    switches read theirs."""
     if hasattr(lib, "cc_set_neumann"):
         import platform
 
         on = (os.environ.get("HF_NX2_CCX", "1") != "0"
               and platform.machine() in ("arm64", "aarch64"))
-        # CCBLOCKD: the two ccx levers are separable, so that either can be forced on or off
-        # anywhere. Unset, both follow `on` exactly as before. `HF_NX2_GEMM=1` on x86 is the
-        # arithmetic-noise floor of `docs/results/hf-ccblockd.md`: the same operations in the
+        # The two ccx switches are separable, so that either can be forced on or off
+        # anywhere. Unset, both follow `on`. `HF_NX2_GEMM=1` on x86 is the
+        # arithmetic-noise floor: the same operations in the
         # same order through four real products instead of one zgemm.
         lib.cc_set_neumann(int(_flag("HF_NX2_SWEEP", on)), SWEEP_TOL)
         lib.cc_set_real_gemm(int(_flag("HF_NX2_GEMM", on)))
         gs = os.environ.get("HF_CC_GEMM_SMALL")
         if gs is not None:  # measurement only: the N up to which `mm` is the triple loop
             lib.cc_set_gemm_small(int(gs))
-    # CCBLOCKD: on by default everywhere the library has it. `HF_CCBLOCKD=0` runs the reference
+    # `cc_block_d`: on by default everywhere the library has it. `HF_CCBLOCKD=0` runs the reference
     # step (`ccfast.c::cc_block_d_ref`) instead, which is how the A/B arms are taken in one
     # process; `=2` takes the real stencil products only and still forms `M_i u_i`.
     # `HF_CCBLOCKD_SMALL` sets the N below which the real product is a triple loop.
     if hasattr(lib, "cc_set_blockd"):
         lib.cc_set_blockd(int(os.environ.get("HF_CCBLOCKD", "1")))
         lib.cc_set_rmm_small(int(os.environ.get("HF_CCBLOCKD_SMALL", "0")))
-    # CCNUMEROV: the same per-call read for the modified Numerov step (`solver.modified_numerov`)
+    # The same per-call read for the modified Numerov step (`solver.modified_numerov`)
     if hasattr(lib, "cc_set_modnum"):
         lib.cc_set_modnum(int(os.environ.get("HF_CC_MODNUM", "1") != "0"))
 
@@ -252,7 +252,7 @@ def _keep_raw(ch, ff, kin, h_fm: Tensor, nmatch: Tensor, r_fm: Tensor,
 
 
 def glue_available() -> bool:
-    """CCGLUE: `cc_match_acc` is in the loaded library and `HF_CCGLUE` is not 0."""
+    """`cc_match_acc` is in the loaded library and `HF_CCGLUE` is not 0."""
     if os.environ.get("HF_CCGLUE", "1") == "0" or not available():
         return False
     lib = _load()
@@ -266,7 +266,7 @@ def glue_available() -> bool:
 
 
 def sixj(args: list[Tensor]) -> Tensor | None:
-    """CCGLUE: `coupling.sixj(*args)` for flat (M,) float64 arguments by `ccfast.c::cc_sixj`, bit for
+    """`coupling.sixj(*args)` for flat (M,) float64 arguments by `ccfast.c::cc_sixj`, bit for
     bit, or None without the library (or with `HF_CCGLUE=0`)."""
     if os.environ.get("HF_CCGLUE", "1") == "0" or not available():
         return None
@@ -308,7 +308,7 @@ def thread_release() -> None:
 def cc_block_acc(ch, ff, kin, h_fm: Tensor, nmatch: Tensor, r_fm: Tensor, coul, n_lev: int,
                  lmax: int, target_spin: float, proj_spin: float,
                  keep: Tensor | None = None, set_sweeps: bool = True) -> dict:
-    """CCGLUE: one (J, parity) block from the radial loop to its cross-section contributions --
+    """One (J, parity) block from the radial loop to its cross-section contributions --
     `cc_block_w`, then `ccfast.c::cc_match_acc` in place of `solver._match(minus_identity=True)` and
     `solver.accumulate(minus_identity=True)`. `coul` is `_asymptotic`'s (F, dF, G, dG) of the block
     (`coulomb_functions_many`). Returns `accumulate`'s dict on the rows of `h_fm`. SPEED50: `keep`,

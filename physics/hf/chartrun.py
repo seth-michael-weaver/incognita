@@ -1,12 +1,12 @@
-"""MACSPEED: whole nuclides in a long-lived worker, the way a chart sweep runs them.
+"""Whole nuclides in a long-lived worker, the way a chart sweep runs them.
 
 Nothing here is a TALYS routine and no number changes: it is `engine.ChainedFull` + `engine.run`
 (talysreaction.f90:1, talysreaction) called the cheap way.
 
 * `run_nuclide` runs one target under `torch.inference_mode()`. The dump-free default path never
   asks for a gradient, and inference mode drops autograd's per-op bookkeeping (version counters,
-  view tracking): 8 % of a spherical nuclide's CPU on the Mac M2, bit-identical on every channel.
-  Anything that differentiates (DIFFPARAM, `capture_fast(..., differentiable=True)`) must keep
+  view tracking): 8 % of a spherical nuclide's CPU on an Apple M2, bit-identical on every channel.
+  Anything that differentiates (e.g. `capture_fast(..., differentiable=True)`) must keep
   calling `engine.run` directly.
 * `drop_target_caches` is what a worker does between targets. Every `lru_cache` in `physics.hf`
   that is keyed by a target or holds a target's tensors is dropped, so RSS stays flat over 482
@@ -15,7 +15,7 @@ Nothing here is a TALYS routine and no number changes: it is `engine.ChainedFull
   those survive, so the next target does not parse `levels/final/Ge.lev` or the mass tables again.
 
 TALYS: talysreaction.f90:1 (talysreaction)
-Test: scripts/hf_macspeed_chart.py close (whole chart, per cell against the plain call)
+Test: tests/hf/test_cengwire.py
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ KEEP: frozenset[str] = frozenset({
     "physics.hf.structure.files._read_plan",
     "physics.hf.structure.files._lines",
     "physics.hf.structure.files._lazy_lines",
-    "physics.hf.structure.files._level_headers",  # NATIVEX2: a level file's block index
+    "physics.hf.structure.files._level_headers",  # a level file's block index
     "physics.hf.structure.files._d0global_table",
     "physics.hf.structure.levels._level_block",
     "physics.hf.structure.levels._levels_of_values",
@@ -62,42 +62,42 @@ KEEP: frozenset[str] = frozenset({
     "physics.hf.emission.channels._channel_keys",
     "physics.hf.density.particle_hole._nfac_tensor",
     "physics.hf.density.particle_hole._signed_ncomb_table",
-    "physics.hf.ecis.dwba_setb.cg_weights",  # SETB: DWBA Clebsch-Gordan weights by (lambda, lmax)
-    "physics.hf.ecis.dwba_setb._cg_table",  # CENGSETUP: the table they are sliced from
-    "physics.hf.omp.ripl.read_om_parameter",  # CENGSETUP: one om-parameter-u.dat entry by iref
-    # SPEED50C: a RIPL potential's full table on (Z, A): files only (omp_table hands out copies).
-    # With CCGPU the plan pass builds it and the target's run needed it again after the drop
+    "physics.hf.ecis.dwba_setb.cg_weights",  # DWBA Clebsch-Gordan weights by (lambda, lmax)
+    "physics.hf.ecis.dwba_setb._cg_table",  # the table they are sliced from
+    "physics.hf.omp.ripl.read_om_parameter",  # one om-parameter-u.dat entry by iref
+    # a RIPL potential's full table on (Z, A): files only (omp_table hands out copies).
+    # With the GPU coupled-channels plan the plan pass builds it and the target's run needed it again after the drop
     "physics.hf.omp.ripl._full_table",
-    "physics.hf.omp.ripl._n_energies",  # PERFOMP: a function of enincmax only
-    "physics.hf.core.constants._talys_constants_memo",  # SETB: constants.f90's values
-    "physics.hf.native.nativex.lib",  # NATIVEX: the loaded kernels
-    "physics.hf.engine_c.lib",  # CENGWIRE: the loaded cascade engine, with its kernel pointers
-    "physics.hf.native.nx2.lib",  # NATIVEX2: the loaded kernels
-    "physics.hf.native.nx2._bound",  # NATIVEX2: their signatures
-    "physics.hf.ecis.vibm._cg0",  # NATIVEX2: vibm's Clebsch-Gordan and 6j by integer arguments
+    "physics.hf.omp.ripl._n_energies",  # a function of enincmax only
+    "physics.hf.core.constants._talys_constants_memo",  # constants.f90's values
+    "physics.hf.native.nativex.lib",  # the loaded kernels
+    "physics.hf.engine_c.lib",  # the loaded cascade engine, with its kernel pointers
+    "physics.hf.native.nx2.lib",  # the loaded kernels
+    "physics.hf.native.nx2._bound",  # their signatures
+    "physics.hf.ecis.vibm._cg0",  # vibm's Clebsch-Gordan and 6j by integer arguments
     "physics.hf.ecis.vibm._sixj",
-    "physics.hf.ecis.vibm._reduced_matrix_elements",  # NATIVEX2: a band's vibm table by value
-    "physics.hf.density.parameters._ld_parameter_file",  # NATIVEX2 ld: one LD table row by value
-    "physics.hf.structure.deformation._irigid0",  # NATIVEX2 ld: Irigid0 of A
-    "physics.hf.density.tables._table_blocks",  # NATIVEX2 ld2: a table file's records by mass
-    "physics.hf.omp.parameters._kd03_values",  # NATIVEX2 omp: the KD03 file parsed once
-    "physics.hf.emission.channels._limits_of",  # NATIVEX: channels.f90's loop limits
+    "physics.hf.ecis.vibm._reduced_matrix_elements",  # a band's vibm table by value
+    "physics.hf.density.parameters._ld_parameter_file",  # native ld: one LD table row by value
+    "physics.hf.structure.deformation._irigid0",  # native ld: Irigid0 of A
+    "physics.hf.density.tables._table_blocks",  # native ld2: a table file's records by mass
+    "physics.hf.omp.parameters._kd03_values",  # native omp: the KD03 file parsed once
+    "physics.hf.emission.channels._limits_of",  # channels.f90's loop limits
 })
 
-# plain-dict memos keyed by band spins or by energy rather than by target (CCFAST2's list)
+# plain-dict memos keyed by band spins or by energy rather than by target (the coupled-channels memos)
 _DICT_MEMOS = (("physics.hf.ecis.solver", ("_CHANNELS", "_NJ_SEEN")),
                ("physics.hf.ecis.incident", ("_SOLVED", "_PARAMS_CACHE")),
-               ("physics.hf.compound.psf_nx2", ("_PACKS",)),  # NATIVEX2: packed by object id
-               ("physics.hf.direct.dwba", ("_GR_LAST",)),  # NATIVEX2 dwba: one-entry memos
+               ("physics.hf.compound.psf_nx2", ("_PACKS",)),  # packed by object id
+               ("physics.hf.direct.dwba", ("_GR_LAST",)),  # native dwba: one-entry memos
                ("physics.hf.ecis.dwba", ("_CORE_LAST",)),
-               ("physics.hf.omp.omp_nx2", ("_FACTORS",)))  # NATIVEX2 omp: by Params identity
+               ("physics.hf.omp.omp_nx2", ("_FACTORS",)))  # native omp: by Params identity
 
 
 def run_nuclide(Z: int, A: int, declared_energies: tuple[float, ...]):
     """`engine_c.run(injection=ChainedFull(Z, A, declared_energies))` in inference mode.
 
-    CENGWIRE: the entry point takes `engine_c.run`, not `engine.run`. `engine_c.run` **is**
-    `engine.run` for the dump-free chain, statement for statement, with CENGDECAY's `ce_cascade`
+    The entry point takes `engine_c.run`, not `engine.run`. `engine_c.run` **is**
+    `engine.run` for the dump-free chain, statement for statement, with the C `ce_cascade`
     in place of the Python multiple-emission walk, and it picks itself: with no build (or
     `HF_ENGINE_C=0`, `HF_NATIVEX=0`, `HF_NATIVE=0`) `lib()` is None and it calls `engine.run`
     itself, and per incident energy it falls back to `ChainedFull.cases` for anything the C call
@@ -106,11 +106,11 @@ def run_nuclide(Z: int, A: int, declared_energies: tuple[float, ...]):
 
     `inventory.report` warns once per process about kernels that did not load, so a box with no
     build says so instead of silently costing about twice as much over 482 nuclides. Anything that
-    differentiates (DIFFPARAM, `capture_fast(..., differentiable=True)`) must still call
+    differentiates (e.g. `capture_fast(..., differentiable=True)`) must still call
     `engine.run` directly -- inference mode, not the C path, is what rules that out here.
 
     TALYS: talysreaction.f90:1 (talysreaction)
-    Test: tests/hf/test_cengwire.py, scripts/hf_macspeed_chart.py close
+    Test: tests/hf/test_cengwire.py
     """
     import torch
 
@@ -127,7 +127,7 @@ def drop_target_caches(keep: frozenset[str] = KEEP) -> None:
     """Drop every per-target cache of `physics.hf`, keeping the pure ones in `keep`.
 
     TALYS: none (worker hygiene)
-    Test: scripts/hf_macspeed_chart.py close
+    Test: tests/hf/test_cengwire.py
     """
     for name, mod in list(sys.modules.items()):
         if not name.startswith("physics.hf"):
@@ -159,7 +159,7 @@ def drop_target_caches(keep: frozenset[str] = KEEP) -> None:
 
 
 def _clear_class_caches(keep: frozenset[str]) -> None:
-    """HEAVYMEM: the `lru_cache`d methods of `physics.hf` classes (`Cascade._sep`, `_chain_knots`, `_fis_knots`,
+    """The `lru_cache`d methods of `physics.hf` classes (`Cascade._sep`, `_chain_knots`, `_fis_knots`,
     `_discrete`, ...) key on `self`, so their class-level caches kept finished targets' Cascades alive (2 after a
     U-238 drop). A new target's objects never hit those entries; clearing them frees the old ones and moves no number."""
     for name, mod in list(sys.modules.items()):
@@ -183,7 +183,7 @@ def _clear_class_caches(keep: frozenset[str]) -> None:
 
 
 def _malloc_trim() -> None:
-    """HEAVYMEM: hand the freed heap back to the OS between targets. glibc keeps it after a heavy target (U-238 + p:
+    """Hand the freed heap back to the OS between targets. glibc keeps it after a heavy target (U-238 + p:
     3.3 GB RSS with 0.03 GB of live tensors after the drop, 0.72 GB after the trim), which is how long item lists
     grew workers to ~8 GB. No-op off glibc."""
     if not sys.platform.startswith("linux"):

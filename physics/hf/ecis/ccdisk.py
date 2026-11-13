@@ -1,4 +1,4 @@
-"""CCCACHE: a DISK cache for the incident coupled-channels solve.
+"""A DISK cache for the incident coupled-channels solve.
 
 The coupled-channels (incident-channel) solve is 77 % of a deformed target's engine time
 (Dy-163: 4.9 of 6.4 CPU-s, 87 `ccnative._keep_raw` calls; U-238: 2.4 of 5.7 s) and it depends on
@@ -10,9 +10,9 @@ rerun starts with an empty one.  This module is that memo, on disk.
     INCOGNITA_CC_CACHE=<dir>     turn it on;  unset = today's behaviour, bit for bit.
 
 **Key.**  Not a list of keyword names, but the tuple `incident_coupled` itself hands `_SOLVED`
-(`incident.py`, CCFAST2): `(Z, A, particle, band_key, lmax, allow_undeformed_spin_orbit,
+(`incident.py`): `(Z, A, particle, band_key, lmax, allow_undeformed_spin_orbit,
 soswitch, E, the 19 OMP parameters AT THAT ENERGY, refine)`.  So it is the solver's own inputs:
-an `rvadjust`/`avadjust` from the PARAMWIRE/fitlib route, a different OMP file, a different
+an `rvadjust`/`avadjust` from the parameter-set/fitlib route, a different OMP file, a different
 deformation (`INCOGNITA_OMP_DEFORMED=1`) or a different energy grid all change the numbers that go
 in and therefore the key, and cannot hit a stale entry.  The key is hashed with sha256 over a
 typed, exact encoding (float64 bytes for every float, never `repr`), together with
@@ -25,8 +25,8 @@ those modules read, the torch version (ccfast calls torch's MKL by address), and
 Rebuild a kernel the solve runs or edit the solver and the whole cache is bypassed rather than
 trusted; bump `FORMAT` for any change to the stored payload itself.
 
-CCKEY: "the libraries the solve runs on" is what a call trace inside `solve_rotational` /
-`solve_vibrational` shows (development notes): `libccfast`/`libccsplit`,
+"The libraries the solve runs on" is what a call trace inside `solve_rotational` /
+`solve_vibrational` shows: `libccfast`/`libccsplit`,
 `libhfnative` (`hf_cf1`; `hf_cc_block` on the exact path) and the provider of the `omp` kernels.
 `libnx2` is NOT among them in a normal build: its `nx2_omp_*` kernels are swapped for
 `libsetup`'s copies of the same translation unit (`setup_c.swap`), and the rest of `libnx2` --
@@ -37,8 +37,8 @@ are hashed: a PSF edit no longer throws the whole cache away, while a build with
 
 The source / library part of the version is computed once per process; the switches part
 (`env_token`: every HF_* / INCOGNITA_* switch a CC-scope source names, less stagedisk's deny-lists)
-is read per call
-(ENGFIX4), and so is the cache DIRECTORY, so a test can turn the cache on and off in one process.
+is read per call,
+and so is the cache DIRECTORY, so a test can turn the cache on and off in one process.
 
 **Storage.**  One file per key, `<dir>/<version>/<ab>/<digest>.npz`, float64 raw through
 `numpy.savez` (no text, exact round-trip), written to a temporary file in the same directory and
@@ -47,7 +47,7 @@ never be readable.  Every read is guarded: a truncated, corrupt or key-mismatche
 and the row is recomputed (and rewritten).  Nothing here can change a number -- a hit is only
 taken when the stored key bytes equal the asked-for key bytes.
 
-Task: CCCACHE.  Test: tests/hf/test_ccdisk.py; gates in development notes.
+Test: tests/hf/test_ccdisk.py.
 """
 
 from __future__ import annotations
@@ -74,7 +74,7 @@ _NUMERICS_ENV: tuple[str, ...] = (
     "HF_CCBLOCKD", "HF_CCBLOCKD_SMALL", "HF_CCFAST_LIB", "HF_CCFAST_NATIVE", "HF_CCGLUE",
     "HF_CCSPLIT", "HF_CC_GEMM_SMALL", "HF_CC_MODNUM", "HF_INC_REFINE", "HF_INC_REFINE_EMAX",
     "HF_NX2_CCX", "HF_NX2_SWEEP", "HF_NX2_GEMM", "HF_NATIVE", "HF_NATIVEX",
-    # CCKEY: the loaders the solve goes through (native/__init__, nx2, setup_c, omp_nx2); their
+    # The loaders the solve goes through (native/__init__, nx2, setup_c, omp_nx2); their
     # `*_LIB` path overrides are not keyed by name, the bytes of the library loaded are
     "HF_NX2", "HF_NX2_OMP", "HF_SETUP",
 )
@@ -83,15 +83,15 @@ _SOURCES: tuple[str, ...] = (
     "physics/hf/ecis/solver.py", "physics/hf/ecis/ccnative.py", "physics/hf/ecis/incident.py",
     "physics/hf/ecis/vibm.py", "physics/hf/ecis/coupling.py", "physics/hf/ecis/formfactor.py",
     "physics/hf/omp/schrodinger.py",
-    # CCKEY: the rest of what the call trace found running inside the solve
+    # The rest of what the call trace found running inside the solve
     "physics/hf/core/angmom.py", "physics/hf/native/__init__.py", "physics/hf/native/nx2.py",
     "physics/hf/native/setup_c.py", "physics/hf/omp/omp_nx2.py",
 )
 
-# CC-only libraries, hashed whenever present (as CCCACHE did)
+# CC-only libraries, hashed whenever present
 _LIBS: tuple[str, ...] = ("libccfast", "libccsplit")
 
-# the `omp` lever's kernels (omp/omp_nx2.py); their provider is resolved per kernel
+# the native `omp` kernels (omp/omp_nx2.py); their provider is resolved per kernel
 _OMP_KERNELS: tuple[str, ...] = ("nx2_omp_card", "nx2_omp_coulomb", "nx2_omp_grid", "nx2_omp_job",
                                  "nx2_omp_set_numerov")
 
@@ -200,13 +200,14 @@ def _omp_providers() -> list[tuple[str, str, str | None]]:
     return out
 
 
-# ENGFIX4: the switches of the CC solve are found, not listed: every HF_* / INCOGNITA_* name written
+# the switches of the CC solve are found, not listed: every HF_* / INCOGNITA_* name written
 # in the CC scope's sources (the modules the solve runs, the optical-model package that builds its
 # potential, and the C kernels it calls), less stagedisk's deny-lists (cache locations,
-# diagnostics, derived *_EFF, LD / PSF / cascade levers). A switch only other code reads -- a
-# production run's hold-rule and pre-equilibrium passes set INCOGNITA_ISOHOLD, _ISOE2, _FEWRES,
-# _PEWINDOW between set-ups -- is not a CC input: keying on it would re-solve rows the run already
-# holds in another batch (last-bit changes, PERFCC2's batch rule) for nothing.
+# diagnostics, derived *_EFF, LD / PSF / cascade switches). A switch only other code reads -- a
+# production run's hold-rule and pre-equilibrium passes set INCOGNITA_ISOHOLD, INCOGNITA_ISOE2,
+# INCOGNITA_FEWRES, INCOGNITA_PEWINDOW between set-ups -- is not a CC input: keying on it would
+# re-solve rows the run already
+# holds in another batch (last-bit changes, the batch rule) for nothing.
 _ENV_SCOPE_GLOBS: tuple[str, ...] = (
     "physics/hf/ecis/*.py", "physics/hf/omp/*.py", "physics/hf/native/__init__.py",
     "physics/hf/native/nx2.py", "physics/hf/native/setup_c.py", "physics/hf/core/angmom.py",
@@ -238,7 +239,7 @@ _ENV_TOKENS: dict = {}
 
 
 def env_token() -> str:
-    """ENGFIX4: the switches part of every CC cache key, read on every call -- the row cache
+    """the switches part of every CC cache key, read on every call -- the row cache
     (`_version`), `incident._SOLVED` and PERFCC2's batch carry (memory and INCOGNITA_CC_BATCHCACHE):
     the values of `env_names()` (INCOGNITA_ECMSTABLE, INCOGNITA_CCSOCB, the OMP region / deformed
     switches, HF_INC_REFINE(_EMAX), every HF_* numerics switch, and any switch a CC module reads
@@ -261,8 +262,7 @@ _VERSIONS: dict = {}
 
 def _version() -> str:
     """The cache's version directory: `_static_version` (source, libraries, torch) with the
-    switches (`env_token`), read per call (ENGFIX4: the switches used to be read once per process,
-    and only `_NUMERICS_ENV`)."""
+    switches (`env_token`), read per call (not once per process, and not only `_NUMERICS_ENV`)."""
     tok = env_token()
     v = _VERSIONS.get(tok)
     if v is None:

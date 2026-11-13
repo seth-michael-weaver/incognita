@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPECOUT: build physics/hf/native/specout.c (compemission, output only) into physics/hf/native/lib/libspecout.so.
+# Build physics/hf/native/specout.c (compemission, output only) into physics/hf/native/lib/libspecout.so.
 # Same flags as the other native kernels (IEEE order as written). Missing library -> specout.py's Python compemission.
 set -euo pipefail
 cd "$(dirname "$0")/.."

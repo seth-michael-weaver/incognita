@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CCFAST2: build physics/hf/native/ccfast.c (the coupled-channels radial loop without
+# Build physics/hf/native/ccfast.c (the coupled-channels radial loop without
 # bit-identity) into physics/hf/native/lib/libccfast.so (libccfast.dylib on macOS; gitignored).
 #
 #   scripts/build_ccfast_native.sh     # uses $CC, else the micromamba gcc, else cc
@@ -40,7 +40,7 @@ fi
   physics/hf/native/ccfast.c -o "$OUT.tmp" -lm
 mv "$OUT.tmp" "$OUT"
 echo "built $OUT with $("$CC" --version | head -1)"
-# SETB: the same kernel with the split-storage solve and stabilisation (physics/hf/native/ccsplit.h),
+# Split-storage variant: the same kernel with the split-storage solve and stabilisation (physics/hf/native/ccsplit.h),
 # selected by physics/hf/ecis/ccnative.py where it is the default (HF_CCSPLIT)
 SPLIT="${OUT/libccfast/libccsplit}"
 # shellcheck disable=SC2086

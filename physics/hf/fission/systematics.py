@@ -14,7 +14,7 @@ TALYS routines ported here (file:line of the subroutine/function statement):
 These are the `fismodelalt` path: TALYS falls back to `fismodel 3` whenever the chosen model
 has no parameters for a nuclide (fissionpar.f90:185, :307-316). None of the 24 reference
 targets reaches it -- every fissile nucleus in the five actinide runs is covered by the BSkG3
-path -- so this module is ported but **not gated by A-fis**. `fisdata`'s 930 lines are pure
+path -- so this module is ported but ***not tested by A-fis**. `fisdata`'s 930 lines are pure
 `DATA`-style assignments; the arrays below were transcribed from them mechanically and their
 element counts are asserted in `tests/hf/test_fission.py`.
 """

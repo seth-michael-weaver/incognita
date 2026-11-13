@@ -3,7 +3,7 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: T11 (physics/hf/CONTRACT.md §7), the fission port, wired into the chain by TWOPH.
+Task: T11 (physics/hf/CONTRACT.md §7), the fission port, wired into the chain.
 Acceptance test: A-fis (§6) / E2E §5.
 
 T11 ported `fissionpar`, the WKB barrier machinery and `tfission`, and A-fis passes on all five
@@ -27,9 +27,9 @@ Index convention. `fission.transmission` returns `(maxj + 1, 2)` tensors indexed
 `(-1, +1)` (contract §4.2). The compound side keys its dictionaries on `(J2, parity)` with
 `J2 = 2 * spin` and `parity` in `(-1, +1)`, so the map is `J2 = 2 * J + odd`.
 
-T14's warning (`docs/results/hf-sgl-floor.md`, result 4) is why nothing here is gated per
+T14's warning is why nothing here is checked per
 barrier: a single `T(J, -)` of U-238 moves 5.7x between TALYS's own single- and double-precision
-builds on a discrete branch flip. The gate is on the cross sections.
+builds on a discrete branch flip. The check is on the cross sections.
 
 TALYS routines ported here (file:line of the subroutine/function statement):
     densprepare.f90:1 (densprepare)
@@ -49,13 +49,13 @@ __all__ = ["FissionChain", "fission_chain"]
 
 FISLIM = 150  # checkvalue.f90: "Fission not allowed for A <= 150"
 
-#: HEAVYMEM: barrier grids kept per fissioning nucleus (`FissionChain._grid`)
+#: Barrier grids kept per fissioning nucleus (`FissionChain._grid`)
 GRID_KEEP = 2
 
 
 def heavymem_on() -> bool:
-    """HEAVYMEM (development notes): bounded per-run fission grids and the worker memory hygiene of
-    `chartrun.drop_target_caches`; `INCOGNITA_HEAVYMEM=0` = the previous engine (unbounded, no trim). No number moves.
+    """Bounded per-run fission grids and the worker memory hygiene of
+    `chartrun.drop_target_caches`; `INCOGNITA_HEAVYMEM=0` = unbounded, no trim. No number moves.
 
     TALYS: none (worker memory policy)
     Test: tests/hf/test_heavymem.py
@@ -93,8 +93,8 @@ class FissionChain:
 
         self.Z, self.A = int(Z), int(A)
         self._p = params
-        # PARAMWIRE: the run's parameter set; its `aadjust` reaches the barrier level densities,
-        # and (FISBARWIRE) its `fismodel` / `fisbaradjust` / `fishwadjust` the barriers themselves
+        # The run's parameter set; its `aadjust` reaches the barrier level densities,
+        # and its `fismodel` / `fisbaradjust` / `fishwadjust` the barriers themselves
         self.fit = tuple(fit or ())
         fm = fit_value(self.fit, "fismodel", 0, 0)
         if fm is not None and int(fm) != int(options.fismodel):
@@ -105,7 +105,7 @@ class FissionChain:
         self.o = options
         self.maxj = int(maxj)
         self._nuc: dict[tuple[int, int], _Nucleus | None] = {}
-        self._nodes: dict = {}  # ENGADJ: per (Z, A) the path-scale node nuclei, or None
+        self._nodes: dict = {}  # `eadj`: per (Z, A) the path-scale node nuclei, or None
         self._masses = None
 
     # ---- lazily built per-nucleus pieces -----------------------------------------------------
@@ -142,7 +142,7 @@ class FissionChain:
         return got
 
     def _build(self, Z: int, A: int, sv: float = 1.0, sm: float = 1.0) -> _Nucleus | None:
-        """`nucleus` built afresh; ENGADJ nodes scale the (Zix, Nix) `vfiscoradjust` / `rmiufiscoradjust` by sv / sm."""
+        """`nucleus` built afresh; `eadj` nodes scale the (Zix, Nix) `vfiscoradjust` / `rmiufiscoradjust` by sv / sm."""
         got = None
         if A > FISLIM:
             from physics.hf.density.matching import densitymatch
@@ -167,7 +167,7 @@ class FissionChain:
                 got = _Nucleus(fp=fp, ld=ld, odd=A % 2, grids={})
         return got
 
-    # ---- ENGADJ: energy-dependent fission path (physics/hf/eadj.py) ----------------------------
+    # ---- `eadj`: energy-dependent fission path (physics/hf/eadj.py) ----------------------------
 
     def nodes(self, Z: int, A: int):
         """(nv, nm, node nuclei in (iv, im) row-major order, index of the (1, 1) node) when `eadj vfiscor|rmiufiscor
@@ -187,7 +187,7 @@ class FissionChain:
                 if all(n is not None and int(n.fp.nfisbar) == int(base.fp.nfisbar) for n in nuc):
                     got = (nv, nm, nuc, nv.index(1.0) * len(nm) + nm.index(1.0))
                 else:
-                    raise ValueError(f"ENGADJ: a fission-path node of ({Z}, {A}) changes the barrier count")
+                    raise ValueError(f"eadj: a fission-path node of ({Z}, {A}) changes the barrier count")
         self._nodes[key] = got
         return got
 
@@ -201,7 +201,7 @@ class FissionChain:
         out = eadj.fission_interp(vals, eadj.fission_weights(nv, nm, sv, sm))
         bad = ~np.isfinite(out)
         if bad.any():
-            # ENGNAN: the Lagrange combine overflowed (ill-conditioned node set): those cells take the piecewise-linear
+            # The Lagrange combine overflowed (ill-conditioned node set): those cells take the piecewise-linear
             # combine of the same node values (finite, bounded by them); every finite cell is unchanged bit for bit.
             alt = eadj.fission_interp(vals, eadj.fission_weights(nv, nm, sv, sm, bilin=True))
             out = np.where(bad, alt, out)
@@ -220,13 +220,13 @@ class FissionChain:
         key = round(float(exfis_top_mev), 9)
         got = n.grids.get(key)
         if got is not None:
-            if heavymem_on():  # HEAVYMEM: most recently used last
+            if heavymem_on():  # most recently used last
                 n.grids[key] = n.grids.pop(key)
             return got
         if heavymem_on():
-            # HEAVYMEM: the key is the ladder top Ex(maxex), new at every incident energy, and this chain lives for
+            # The key is the ladder top Ex(maxex), new at every incident energy, and this chain lives for
             # the whole run -- unbounded, U-238 + p kept ~1700 grids (2.6 MB each, 9 GB RSS over p60). Every reuse is
-            # within one energy at reuse distance 0, so 2 per nucleus (as CENGFIS `_ceng_coef`) keeps every hit; a
+            # within one energy at reuse distance 0, so 2 per nucleus (as `_ceng_coef`) keeps every hit; a
             # grid is a pure function of (nucleus, key), so an eviction can only cost a rebuild, never a number.
             while len(n.grids) >= GRID_KEEP:
                 old = n.grids.pop(next(iter(n.grids)))
@@ -291,7 +291,7 @@ class FissionChain:
         got = self._target_arrays(Z, A, n, exinc_mev, fnorm)
         if got is None:
             return {"tfis": {}, "tfisA": {}, "rhofisA": {}, "nfisbar": 0}
-        if nod is not None:  # ENGADJ: each node's arrays at the incident compound energy, combined
+        if nod is not None:  # `eadj`: each node's arrays at the incident compound energy, combined
             per = [got if m is n else self._target_arrays(Z, A, m, exinc_mev, fnorm) for m in nod[2]]
             got = tuple(self.combine(Z, A, nod, [p[i][None] for p in per], [exinc_mev])[0] for i in range(3))
         m, a, rho = got
@@ -311,7 +311,7 @@ class FissionChain:
         if n is not None:
             from physics.hf.fission.fis_ceng import target_transmission
 
-            got = target_transmission(self, n, float(exinc_mev), fnorm)  # CENGFIS: C, once
+            got = target_transmission(self, n, float(exinc_mev), fnorm)  # C, once
         if got is not None:
             return got
         if n is None:
@@ -383,7 +383,7 @@ def fission_chain(Z: int, A: int, options=None, params=None, fit: tuple = ()
 
 
 def _scaled_params(p, zix: int, nix: int, sv: float, sm: float):
-    """ENGADJ: `p` with the (zix, nix) `vfiscoradjust` / `rmiufiscoradjust` cells times sv / sm (a new Params)."""
+    """`eadj`: `p` with the (zix, nix) `vfiscoradjust` / `rmiufiscoradjust` cells times sv / sm (a new Params)."""
     from physics.hf.input.defaults import PARAM_SPECS
 
     vals = dict(p.values)

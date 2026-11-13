@@ -1,8 +1,8 @@
-"""FISTSC: the batched fission paths with a rotational band on the barriers (`fists2 y`).
+"""Saddle transition-state bands: the batched fission paths with a rotational band on the barriers (`fists2 y`).
 
-`fists2` (TS2FREEZE) puts the even-even saddle K-band transition states on every barrier, which the
-batched paths (`fission_batch_ladder`, CENGFIS, NX2 `fis2`'s ladder) used to refuse, so the C
-cascade ran those compounds in Python. With FISTSC they add `barriers.band_ladder` to their
+`fists2` puts the even-even saddle K-band transition states on every barrier, which the
+batched paths (`fission_batch_ladder`, `fis_ceng`, the native `fis2` ladder) would otherwise refuse, so the C
+cascade would run those compounds in Python. Here they add `barriers.band_ladder` to their
 continuum sums. Held here to the per-bin torch path (`FissionChain.bin_triples` +
 `continuum.fission_width`, i.e. `t1barrier`'s band branch) and to `fission_transmission`; with
 `HF_NX2_FISTSC=0` the refusal is back.

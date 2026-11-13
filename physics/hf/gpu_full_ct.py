@@ -1,10 +1,10 @@
 """comptarget.f90 on the (nuclide, energy) batch axis over per-type channel lists, with the spin
-coupling taken as window sums (GPU3).
+coupling taken as window sums.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: GPU3 (gate G-GPU3, docs/results/hf-gpu3.md). No physics of its own: `gpu_full.comptarget`
+Task: GPU compound kernel. No physics of its own: `gpu_full.comptarget`
 (`target_batch.case_moldauer` / `case_nowfc` with a run axis) with the same numbers, arranged so
 that nothing of shape (runs, cells, residual spins, l', j') or (runs, cells, nodes, channels) is
 formed.
@@ -33,7 +33,7 @@ eps * min(below, above) / window. Discrete levels use the level's own 2J in plac
 reductions over the channel axis or the node axis; they are formed without the
 (runs, cells, nodes, channels) intermediate, so groups of runs are sized by channels and cells.
 
-Test: GPU3 / tests/hf/test_gpu_full.py
+Test: tests/hf/test_gpu_full.py
 """
 
 from __future__ import annotations
@@ -79,7 +79,7 @@ def _spin_tables(ty: int, L: int, dev) -> tuple[Tensor, Tensor]:
 
 
 def _spin_tables_anom(ty: int, L: int, dev) -> tuple[Tensor, Tensor]:
-    """GPUC: `_spin_tables` for a discrete level of impossible 2J parity (OPEN3M's A2,
+    """`_spin_tables` for a discrete level of impossible 2J parity (the impossible-parity rule A2,
     `prepare.anomalous_exit_mask`): l2' = 2 l' + 1, jj = l2' + (j' - 1) spin2."""
     lp = torch.arange(L, device=dev)
     l2 = 2 * lp + 1
@@ -150,7 +150,7 @@ def _prep(bk: Batch, res: dict, ty: int, sel: Tensor) -> dict:
     spin, the discrete levels, the channels and their weights `r` (Bc, K, nch) per cell, D.
 
     TALYS: compprepare.f90:1 (compprepare)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     t, d = bk.t, bk.dims
     dev = bk.device
@@ -214,7 +214,7 @@ def _prep(bk: Batch, res: dict, ty: int, sel: Tensor) -> dict:
     _t0 = stage("ct:list", dev, _t0)
     nch = ch["nch"]
     jj = jjt[ch["l"], ch["u"]]  # (Bc, nch)
-    # GPUC: OPEN3M's A2 on a channel into a discrete level of impossible 2J parity: its own jj and
+    # Rule A2 on a channel into a discrete level of impossible 2J parity: its own jj and
     # rule, capped at 2 l' + 1 <= 2 lmaxhf (every live such channel is in the regular list: the
     # extra (l' = 0, j' = 0) of a spin-1/2 ejectile has T = 0)
     jjta, okta = _spin_tables_anom(ty, L, dev)
@@ -240,7 +240,7 @@ def _weights(P, S, rho_d, jd2, pd, nd, j2, pidx, base, n, c, jj, ok, jjd, okd, R
     allows at the residual parity (cell parity xor c), plus the discrete level of its row.
 
     TALYS: molprepare.f90:1 (molprepare), compprepare.f90:1 (compprepare)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     Bc, K = j2.shape
     dev = j2.device
@@ -293,7 +293,7 @@ def _feed(sub: Tensor, ty: int, p: dict, Y: Tensor, sep: bool, nJ: int) -> None:
     (Bc, K) when it factorises as w_k * T (`sep`), else (Bc, K, nch) with T in it.
 
     TALYS: comptarget.f90:1 (comptarget)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     _t0 = time.perf_counter()
     ch = p["ch"]
@@ -347,7 +347,7 @@ def _moldauer(bk: Batch, sel: Tensor, prep: dict, denom: Tensor, live: Tensor, s
     """`gpu_full._moldauer` on the channel lists.
 
     TALYS: molprepare.f90:1 (molprepare), moldauer.f90:1 (moldauer), comptarget.f90:1
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     t, d = bk.t, bk.dims
     dev = bk.device
@@ -435,7 +435,7 @@ def _log_product(t_all: Tensor, r_all: Tensor, st: Tensor, x: Tensor, wf: int,
     """sum over open channels of -nu/2 r log1p(2 T x / (st nu)) (Bc, K, M).
 
     TALYS: moldauer.f90:1 (moldauer)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     if wf == 1 and f32:
         return _log_terms_c(t_all, r_all, st, x, True)
@@ -459,7 +459,7 @@ def _node_sum(PH: Tensor, T: Tensor, st: Tensor, x: Tensor, wf: int, f32: bool) 
     """sum over nodes of PH / (1 + x 2T/(st nu)) (Bc, K, nch).
 
     TALYS: moldauer.f90:1 (moldauer)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     if wf == 1 and f32:
         return _node_terms_c(PH, T, st, x, True)
@@ -482,7 +482,7 @@ def _elastic(bk: Batch, sel: Tensor, p: dict, pref: Tensor, tinc: Tensor, ea: Te
     at Ltarget, with `_mask_for` evaluated at those cells.
 
     TALYS: comptarget.f90:1 (comptarget)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     t = bk.t
     dev = bk.device
@@ -500,7 +500,7 @@ def _elastic(bk: Batch, sel: Tensor, p: dict, pref: Tensor, tinc: Tensor, ea: Te
     jdl = p["jd2"][torch.arange(Bc, device=dev), ltc][:, None, None]
     pdl = p["pd"][torch.arange(Bc, device=dev), ltc][:, None, None]
     j2k = p["j2"][:, :, None]
-    # GPUC: OPEN3M's A2 when the target level itself has an impossible 2J parity
+    # Rule A2 when the target level itself has an impossible 2J parity
     an = ((j2k + jdl + PARSPIN2[ty]) % 2 == 1) & (jdl >= 0)
     lmx = p["lmaxhf"][torch.arange(Bc, device=dev), ltc][:, None, None]
     jj = torch.where(an, p["jjta"][lic, ui], p["jjt"][lic, ui])  # (Bc, K, A)
@@ -526,14 +526,14 @@ def comptarget(bk: Batch, res: dict, budget: float | None = None) -> dict:
     (`gpu_full.comptarget`'s numbers).
 
     TALYS: comptarget.f90:1 (comptarget), molprepare.f90:1 (molprepare), moldauer.f90:1
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     from physics.hf.compound import wfc, wfcnorm
 
-    if wfcnorm.enabled():  # FIXENG F15: the compound flux rescale is wired on the Py and C paths only
+    if wfcnorm.enabled():  # the compound flux rescale is wired on the Py and C paths only
         raise NotImplementedError("INCOGNITA_WFCNORM is not wired on the GPU path; run the Py/C engine")
     import os as _os
-    if _os.environ.get("INCOGNITA_TRAPFIX", "0") == "1":  # ENGAUDIT: the trapped-level rule is in nx_walk / the numpy walk only
+    if _os.environ.get("INCOGNITA_TRAPFIX", "0") == "1":  # the trapped-level rule is in nx_walk / the numpy walk only
         raise NotImplementedError("INCOGNITA_TRAPFIX is not wired on the GPU path; run the Py/C engine")
     budget = CT_BUDGET if budget is None else budget
     t, d = bk.t, bk.dims

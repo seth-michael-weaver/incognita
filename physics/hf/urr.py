@@ -1,4 +1,4 @@
-"""KWCOV B10 (URR): unresolved resonance range parameters and cross sections on TALYS's keywords, OUTPUT ONLY.
+"""Unresolved resonance range parameters and cross sections on TALYS's keywords, OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md. The fluctuation integrals (gnrl.f) and the NJOY-style
@@ -33,7 +33,7 @@ D S 1e-4, the optional NJOY renormalisation loop, and urrout's files. The (l, J)
 grows over the run's energies as TALYS's does (strucinitial resets it once per run).
 
 Not given: `urr` with width fluctuations by HRTW or GOE (widthmode 2 / 3: the per-incident-channel factors of those
-models are not separated here; refused), with INCOGNITA_EWFC on a coupled target, or with the KEVCOLD cell options
+models are not separated here; refused), with INCOGNITA_EWFC on a coupled target, or with the `alphatemp_dom` cell options
 (refused); energies below `eninclow` (Ninclow > 0: TALYS's first-file rows for them are filled from the current
 energy; the port has no Ninclow energies, B10b). The thermal capture cross section in urr.dat is thermalxs.f90's
 xscaptherm(-1) (structure/thermal table, else Kopecky's systematics, a deck `xscaptherm` wins).
@@ -48,7 +48,7 @@ TALYS routines ported here (file:line of the subroutine statement):
     dtheory.f90:1 (dtheory)            D(l) and D(l, J) of the initial compound nucleus at S_n + Einc
     thermalxs.f90:1 (thermalxs)        xscaptherm(-1) only
     comptarget.f90:1 (comptarget)      the URR extraction blocks
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B10, output only). Acceptance test: KWCOV-B10
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test: KW-B10
 (tests/hf/test_kwcov_b10.py, scripts/kwcov/b10_response.py, docs/hf/COVERAGE_PLAN.md).
 """
 
@@ -189,7 +189,7 @@ def comptarget_lj(ci, lurr: int) -> dict:
     from physics.hf.compound.prepare import exit_channel_sums, incident_channels
 
     if getattr(ci, "alphadom", None) is not None or getattr(ci, "cellsel", None) is not None:
-        raise NotImplementedError("urr with the KEVCOLD cell options is not ported")
+        raise NotImplementedError("urr with the alphatemp_dom cell options is not ported")
     if getattr(ci, "ew", None) is not None:
         raise NotImplementedError("urr with INCOGNITA_EWFC on a coupled target is not ported")
     use_wfc = bool(ci.flagwidth and ci.wmode >= 1)
@@ -474,7 +474,7 @@ def thermal_capture_mb(cas) -> float:
     TALYS: thermalxs.f90:1 (thermalxs)
     Test: tests/hf/test_kwcov_b10.py
     """
-    # KWCOV B10b: physics/hf/thermal.py's thermalxs port. The table is read after the input, so a table row of this
+    # physics/hf/thermal.py's thermalxs port. The table is read after the input, so a table row of this
     # mass overwrites a deck `xscaptherm` (B10 let the deck win; stock TALYS-2.25 prints the table value).
     from physics.hf import thermal
 

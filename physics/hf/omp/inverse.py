@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 
 TRANSLIMIT_DEFAULT = 1.0e-5  # grid.f90:256 translimit = 1/10**transpower, transpower 5
 TRANSEPS_DEFAULT = 1.0e-8  # input_numerics.f90:80
-#: KWCOV B15: the run's (translimit, transeps) of the lmax cut (inverseread.f90 / incidentread.f90), set from the deck's
+#: the run's (translimit, transeps) of the lmax cut (inverseread.f90 / incidentread.f90), set from the deck's
 #: `transpower` / `transeps` (and the massdis y / astro y cascades) by input.defaults.default_options -> set_eps
 _EPS: tuple = (TRANSLIMIT_DEFAULT, TRANSEPS_DEFAULT)
 
@@ -93,7 +93,7 @@ def process_tjl(
     TALYS: inverseread.f90:1 (inverseread)
     Test: A-trans
     """
-    translimit = _EPS[0] if translimit is None else translimit  # KWCOV B15: the run's transpower / transeps
+    translimit = _EPS[0] if translimit is None else translimit  # the run's transpower / transeps
     transeps = _EPS[1] if transeps is None else transeps
     t = tjl.clone()
     nj = NJ[particle]
@@ -225,7 +225,7 @@ def inverse_channels(
     `edetach[k]` is an optional per-particle boolean over the grid marking the positions the
     caller **keeps**; the OMP parameters at every other position are detached before the solve.
     The forward value is untouched -- `torch.where(keep, x, x.detach())` is the identity -- and
-    the reverse pass gains the one thing DIFFPARAM needs from it. `inverse` fills `Tjl` only over
+    the reverse pass gains the one thing the differentiable fit needs from it. `inverse` fills `Tjl` only over
     `[ebegin(type), eend(type)]` (inverseecis.f90:402) and the caller zeroes the rest, but the
     port still *solves* the rest, and at 1 keV the alpha channel is hundreds of orders of
     magnitude under its barrier: the value is a harmless underflowed zero, the local derivative
@@ -271,11 +271,11 @@ def inverse_channels(
                                 options, params)
             if edetach is not None and k in edetach:
                 p = _detach_outside(p, edetach[k].to(idx.device)[idx])
-            if omp is None and _jlm.active(options, zr, ar, k):  # KWCOV B7b: jlmexist (inverseecis.f90:312)
+            if omp is None and _jlm.active(options, zr, ar, k):  # jlmexist (inverseecis.f90:312)
                 jlm_raw[k] = (zr, ar, idx, e_lab, _jlm.solve(zr, ar, k, e_lab, m_res, lmax, options, params))
                 continue
             todo.append((k, zr, ar, idx, e_lab, p, m_res))
-        # SPEEDT: without a gradient the six particles share one radial loop and one pass of the
+        # Without a gradient the six particles share one radial loop and one pass of the
         # Coulomb recurrences (`schrodinger.solve_spherical_many`), bit-identical per particle
         if not todo:
             many = []
@@ -325,7 +325,7 @@ class _Sliced:
 
 
 def _detach_outside(p, keep: Tensor):
-    """`p` with every field detached at the energies `keep` is False (DIFFPARAM; see `edetach`).
+    """`p` with every field detached at the energies `keep` is False (see `edetach`).
 
     The forward value is unchanged by construction. A field that is a single number carries no
     energy axis and cannot be masked per energy, so it is broadcast first -- which is also

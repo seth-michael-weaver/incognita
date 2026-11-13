@@ -1,4 +1,4 @@
-"""KWCOV B4 (SPECOBS): emission spectra, double-differential cross sections, discrete gamma-ray lines and the (k0,g<p>)
+"""Emission spectra, double-differential cross sections, discrete gamma-ray lines and the (k0,g<p>)
 column on TALYS's keywords, OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
@@ -25,12 +25,12 @@ Switches: the deck keywords (Options) `outspectra` (spectraout), `ddxmode` (ddxo
 `fileddxa`, `fileddxe`, `anglescont`, `outgamdis` (gamdisout), `filespectrum`, `filegamdis`, `blockspectra`, `blockddx`,
 `adddiscrete`, `addelastic`, `channelenergy`, `elwidth`, `segment`; the port switch `INCOGNITA_SPECOBS=1` (= outspectra y,
 ddxmode 3, outgamdis y); `INCOGNITA_SPECOBS_DIR=<dir>` also writes the files (spec, ddx, gam, Eaverage). Default: none of
-them, nothing is computed and every array of every gate is unchanged. Any of them turns the SPECOUT recorders on for the
+them, nothing is computed and every engine array is unchanged. Any of them turns the `specout` recorders on for the
 run (specout.enabled); a DDX also turns angout's recorders on for every discrete level (the discrete peaks carry discad).
 
-Where the numbers come from (none of it feeds back into the engine): the SPECOUT recorders (binary spectra of
+Where the numbers come from (none of it feeds back into the engine): the `specout` recorders (binary spectra of
 `emission.binspec`, compemission of every cascade nucleus in `specout`, discrete gamma lines of the cascade) taken as
-TALYS has them (SPECCLOSE's closing is undone: the raw binary parts and compemission alone are used); Kalbach systematics
+TALYS has them (the discrete-parent closing is undone: the raw binary parts and compemission alone are used); Kalbach systematics
 (`specang.kalbach_a`) for the pre-equilibrium and multiple pre-equilibrium DDX; angout's discad for the discrete peaks.
 
 TALYS routines ported here (file:line of the subroutine statement):
@@ -42,7 +42,7 @@ TALYS routines ported here (file:line of the subroutine statement):
     spectraout.f90:1, ddxout.f90:1, gamdisout.f90:1   names, columns, interpolation to fileddxa / fileddxe
 Approximation (recorded in META["approx"]): the giant-resonance and collective-continuum part of the DDX (xsgrad) is
 isotropic (TALYS: grcollad / directad of the GR and deformed continuum levels).
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B4, output only). Acceptance test: KWCOV-B4
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test: KW-B4
 (tests/hf/test_specobs.py, scripts/kwcov/b4_compare.py, docs/hf/COVERAGE_PLAN.md).
 """
 
@@ -130,7 +130,7 @@ def ddx_wanted(options) -> bool:
 
 
 def wanted() -> bool:
-    """The run being set up asks for spectrum / DDX / gamma-line output (the SPECOUT recorders must be on).
+    """The run being set up asks for spectrum / DDX / gamma-line output (the `specout` recorders must be on).
 
     TALYS: (none -- a port switch)
     Test: tests/hf/test_specobs.py
@@ -167,7 +167,7 @@ def begin_run(cas) -> bool:
                  eadd=float(o.eadd_mev), eaddel=float(o.eaddel_mev), flagelectron=bool(getattr(o, "flagelectron", True)),
                  cas=cas)
     _SET = s
-    from physics.hf import exclspec  # KWCOV B4b: sp*.tot needs outspectra + channels y
+    from physics.hf import exclspec  # sp*.tot needs outspectra + channels y
 
     exclspec.begin_run(cas)
     return s is not None
@@ -603,7 +603,7 @@ def add_to_results(res, injection):
     from physics.hf import recoil, specout
 
     if _SET is None:
-        if recoil.active():  # KWCOV B12: `recoil y` with `outspectra n` (discrete recoils only, as TALYS)
+        if recoil.active():  # `recoil y` with `outspectra n` (discrete recoils only, as TALYS)
             try:
                 res = recoil.add_to_results(res, injection)
             finally:
@@ -615,12 +615,12 @@ def add_to_results(res, injection):
     import torch
 
     try:
-        res = recoil.add_to_results(res, injection)  # KWCOV B12: before the recorders are cleared (no-op without recoil)
+        res = recoil.add_to_results(res, injection)  # before the recorders are cleared (no-op without recoil)
         arr = build(res)
         out_dir = os.environ.get(ENV_DIR, "").strip()
         if out_dir and arr:
             write_files(arr, META, out_dir)
-        from physics.hf import exclspec  # KWCOV B4b: exclusive channel spectra (outspectra + channels y)
+        from physics.hf import exclspec  # exclusive channel spectra (outspectra + channels y)
 
         if exclspec.active():
             xarr, xmeta = exclspec.build([float(r["e_inc_mev"]) for r in specout.ENERGIES])

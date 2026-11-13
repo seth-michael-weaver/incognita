@@ -1,4 +1,4 @@
-"""KWCOV B4b (COMPOOBS): `components y`, the direct / pre-equilibrium / compound split per residual, OUTPUT ONLY.
+"""`components y`, the direct / pre-equilibrium / compound split per residual, OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -18,7 +18,7 @@ above it ends the sum), preeqpopex being the binary pre-equilibrium population (
 plus the multiple pre-equilibrium population it received minus what each of its bins emitted that way
 (multipreeq.f90:275, :312); then xspoppreeq = min(xspoppreeq, xspopnuc - xspopdir) and, as TALYS writes it,
 xspopcomp = max(xspopnuc - (xspoppreeq - xspopdir), 0) (the direct part is ADDED back: kept); F* = xspop* / xspopnuc.
-The multiple pre-equilibrium matrices come from the SPECOUT recorders (`mpe` per mother bin -> daughter bin), which
+The multiple pre-equilibrium matrices come from the `specout` recorders (`mpe` per mother bin -> daughter bin), which
 `components y` turns on for the run.
 
 Switch: the deck's `components y` (Options.flagcompo). Default: nothing is computed and every array is unchanged.
@@ -27,7 +27,7 @@ TALYS routines ported here (file:line of the subroutine statement):
     multiple.f90:1 (multiple)        lines 649-668: xspoppreeq, xspopcomp, Fdir, Fpreeq, Fcomp
     channelsout.f90:1 (channelsout)  lines 299-345: the xs*.tot columns
     residualout.f90:1 (residualout)  lines 199-233: the rp*.tot columns
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B4b, output only). Acceptance test: KWCOV-B4B
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test: KW-B4B
 (tests/hf/test_kwcov_b4b.py, docs/hf/COVERAGE_PLAN.md).
 """
 
@@ -44,7 +44,7 @@ ENERGIES: list[dict] = []
 
 
 def wanted() -> bool:
-    """`components y` on the active deck lines, before a Cascade exists (SPECOUT asks this to record).
+    """`components y` on the active deck lines, before a Cascade exists (`specout` asks this to record).
 
     TALYS: (none -- a port switch)
     Test: tests/hf/test_kwcov_b4b.py
@@ -85,7 +85,7 @@ def active() -> bool:
 def split(cinp, st, b2, walks: dict) -> dict:
     """{(Z, A): (xspopnuc, xspopdir, xspoppreeq, xspopcomp)} of every nucleus with a population, one energy.
 
-    `walks` = the SPECOUT records of the energy ({(zc, nc): rec with types[t]['mpe'] (mother bins, daughter bins)}).
+    `walks` = the `specout` records of the energy ({(zc, nc): rec with types[t]['mpe'] (mother bins, daughter bins)}).
 
     TALYS: multiple.f90:1 (multiple) lines 649-668
     Test: tests/hf/test_kwcov_b4b.py

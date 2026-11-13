@@ -1,4 +1,4 @@
-"""Incognita extension (CTWFREEZE; not TALYS): constant-temperature level density anchored on the COMPLETE part of each
+"""Incognita extension (`ctwindow`; not TALYS): constant-temperature level density anchored on the COMPLETE part of each
 nucleus's discrete level scheme, matched with TALYS's own branch-A logic (matching.f90 + match.f90). Keyword `ctwindow y`
 (densitymodel section) or env INCOGNITA_CT_WINDOW=1; default OFF, and OFF never enters this module.
 
@@ -12,8 +12,8 @@ Match: int_EL^EP rho(Ex) e^{(E-Ex)/T(Ex)} e^{ctable sqrt(E-ptable)} dE = NP - Nl
 ctable = 0 this is match.f90), roots on TALYS's matching.f90 bracket [2.25/a(Exmemp)+P+0.11, 19+300/A] (100 segments,
 bisection to 1e-5 MeV, of two roots the one nearest Exmemp), TALYS's guards Ex > lower limit and Ex <= 3 Exmemp; then
 E0 = Ex - T ln(T rho(Ex)). Only ldmodel 1, barrier 0, no ctm table, Umax > 0 and >= 3 levels above Nlow. Otherwise, or
-without a root, the nucleus keeps densitymatch's values (branch B). Numerically identical to the runner-side patch the
-CTWIN job registered and ran (development notes, mode "w"; plan d7d37ed, result 8facc1d).
+without a root, the nucleus keeps densitymatch's values (branch B). Numerically identical to the earlier runner-side patch
+(mode "w").
 
 Everything downstream (Py / C / fast / GPU chains) reads T, E0 and Exmatch from the matched `LDNucleus` record, so the
 switch acts in one place.

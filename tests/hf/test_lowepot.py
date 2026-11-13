@@ -1,4 +1,4 @@
-"""LOWEPOT (INCOGNITA_LOWEPOT, default OFF): rule arithmetic + engine wiring on a light target (Ti-48 sub-keV)."""
+"""`INCOGNITA_LOWEPOT` (default OFF): rule arithmetic + engine wiring on a light target (Ti-48 sub-keV)."""
 import numpy as np
 import pytest
 

@@ -6,7 +6,7 @@ functions for charged particles) must reproduce ECIS's T_lj to the A-trans toler
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 ECIS-06 (`ecist.f`) is by J. Raynal and ships inside the TALYS repository under its MIT license;
-what is taken from it here is the input convention (card formats, reduced radii scaled by the
+what is taken from it here is the input convention (record formats, reduced radii scaled by the
 target mass in amu), the relativistic kinematics (subroutines lecl and khco) and the potential
 form factors (wosa, stdp). The integrator is not a port of ECIS's modified-Numerov/iteration
 machinery: a spherical single-channel problem has an exact solution that any converged
@@ -34,9 +34,9 @@ Conventions established against the reference dumps (tests/hf/test_optical.py):
   * potential  U(r) = -(V f_V + i W f_W) - 4 (Vd g_Vd + i Wd g_Wd)
                       + (Vso + i Wso) (2 l.s) (1/r) df_so/dr + V_C(r)
     with f = 1/(1+exp((r-R)/a)), g = -a df/dr, R = r0 * M_target^(1/3), M in amu as written on
-    the ECIS card (lect: `am3=wv(2,ij)**.33333333333333d0`, ecist.f:3866), and a homogeneously
+    the ECIS record (lect: `am3=wv(2,ij)**.33333333333333d0`, ecist.f:3866), and a homogeneously
     charged sphere of radius rc * M^(1/3) for the Coulomb term.
-  * ECIS input cards are fixed format (ecisinput.f90: energy f10.5 or es10.3, masses and potential
+  * ECIS input records are fixed format (ecisinput.f90: energy f10.5 or es10.3, masses and potential
     parameters f10.5), so ECIS computes with rounded numbers. `ecis_rounding=True` reproduces
     that with a straight-through estimator: the forward value is the rounded one, the gradient
     is that of the unrounded parameter.
@@ -74,7 +74,7 @@ ECIS_CHB_MEV_FM = 197.326968  # hbar c [MeV fm]
 ECIS_CZ = 137.03599911  # 1/alpha
 ECIS_CCZ_MEV_FM = ECIS_CHB_MEV_FM / ECIS_CZ  # e^2 [MeV fm] (calc: ccz=chb/cz)
 ECIS_CK = 2.0 * ECIS_CM_MEV / ECIS_CHB_MEV_FM**2  # (calc: ck=2*cm/chb**2) [fm^-2 MeV^-1 amu^-1]
-# ECIS card 5 as TALYS writes it (ecisinput.f90:102): aconv = 1e-10 in columns 41-50
+# ECIS input record 5 as TALYS writes it (ecisinput.f90:102): aconv = 1e-10 in columns 41-50
 ECIS_ACONV = 1.0e-10
 
 # TALYS particle numbering (1 = n ... 6 = alpha) and constants.f90 tables, from physics.hf.core
@@ -124,29 +124,29 @@ class RadialSolution:
 
 # ----------------------------------------------------------------------------- inputs to ECIS
 def _straight_through(x: Tensor, y: Tensor) -> Tensor:
-    """forward value y, gradient of x (rounding done on ECIS input cards)."""
+    """forward value y, gradient of x (rounding done on ECIS input records)."""
     return x + (y - x).detach()
 
 
-#: ECIS reads its parameters off fixed-format input cards, so the port quantises them the same
+#: ECIS reads its parameters off fixed-format input records, so the port quantises them the same
 #: way (`ecis_card_value`). It is a forward-only quantisation -- the gradient is the identity, by
-#: the straight-through above -- and that is exactly why DIFFPARAM's finite-difference check has
-#: to be able to switch it off: with it on, an f10.5 card resolves `rv` to 1e-5 fm, and a central
+#: the straight-through above -- and that is exactly why the gradient finite-difference check has
+#: to be able to switch it off: with it on, an f10.5 field resolves `rv` to 1e-5 fm, and a central
 #: difference over a step of 1e-3 fm therefore carries a 0.3% quantisation error that has nothing
 #: to do with the gradient being checked (measured: `rvadjust` 3.3e-3 relative with, 1e-6
 #: without; `v1adjust`, on a 50 MeV depth, is 1.6e-5 either way). Never switch it off to compute
-#: a cross section: `test_speed_golden.py` and every A-* gate run with it on, as TALYS does.
+#: a cross section: `test_speed_golden.py` and every A-* test run with it on, as TALYS does.
 CARD_ROUNDING = True
 
 
 @contextmanager
 def card_rounding(enabled: bool):
-    """Turn ECIS's input-card quantisation on or off for the duration of the block.
+    """Turn ECIS's input-record quantisation on or off for the duration of the block.
 
     `True` (the default state, and the only one any reproduction of TALYS uses) is
-    `ecis_card_value`/`ecis_card_energy` as `ecisinput.f90` writes the cards. `False` is for
-    DIFFPARAM's gradient gate only, where the f10.5 resolution of a radius would otherwise
-    dominate a finite difference; see `CARD_ROUNDING` above and `docs/results/hf-diffparam.md`.
+    `ecis_card_value`/`ecis_card_energy` as `ecisinput.f90` writes the records. `False` is for
+    the finite-difference gradient test only, where the f10.5 resolution of a radius would otherwise
+    dominate a finite difference; see `CARD_ROUNDING` above.
 
     TALYS: ecisinput.f90:1 (ecisinput)
     Test: G0.4 / tests/hf/test_optical.py
@@ -172,14 +172,14 @@ def _round_es10_3(x: Tensor) -> Tensor:
 
 
 def ecis_card_energy(e_mev: Tensor) -> Tensor:
-    """Energy as ECIS reads it from the first level card.
+    """Energy as ECIS reads it from the first level record.
 
     TALYS: ecisinput.f90:1 (ecisinput) — `f10.5` when e >= 0.01 MeV, `es10.3` below.
     Test: A-trans
     """
     if not CARD_ROUNDING:
         return e_mev
-    fast = _nx2omp.card(e_mev, True)  # NATIVEX2 `omp`: no gradient, compiled
+    fast = _nx2omp.card(e_mev, True)  # native `omp`: no gradient, compiled
     if fast is not None:
         return fast
     y = torch.where(e_mev >= 0.01, _round_f10_5(e_mev), _round_es10_3(e_mev))
@@ -194,7 +194,7 @@ def ecis_card_value(x: Tensor) -> Tensor:
     """
     if not CARD_ROUNDING:
         return x
-    fast = _nx2omp.card(x, False)  # NATIVEX2 `omp`: no gradient, compiled
+    fast = _nx2omp.card(x, False)  # native `omp`: no gradient, compiled
     if fast is not None:
         return fast
     y = torch.where(x.abs() >= 1000.0, _round_es10_3(x), _round_f10_5(x))
@@ -287,7 +287,7 @@ def optical_potential(
     Test: A-trans
     """
     n_e = torch.as_tensor(p.v_mev).numel()
-    # SPEEDT3: the 19 card quantisations of a potential in one call instead of one per column.
+    # The 19 record quantisations of a potential in one call instead of one per column.
     # `ecis_card_value` is element-wise, and the two transcendentals it runs (log10, 10**e) see
     # the same arguments in either shape -- checked bitwise on all 798 columns of the speed
     # harness, inverse and incident.
@@ -457,7 +457,7 @@ def _numerov_inward(ee: np.ndarray, ra: np.ndarray, rb: np.ndarray, gb: np.ndarr
 
 def _g_recurrence(eta: Tensor, rho: Tensor, G0: Tensor, dG0: Tensor, lmax: int
                   ) -> tuple[Tensor, Tensor]:
-    """SETB: the upward recurrence of `coulomb_functions` for G_L, dG_L, L = 1..lmax, on numpy
+    """The upward recurrence of `coulomb_functions` for G_L, dG_L, L = 1..lmax, on numpy
     arrays: `+ - * /`, `x ** 2` (= x * x in both libraries) and `sqrt` are exact per element, and
     torch's scalar-over-tensor `L / rho` is `rho.reciprocal() * L`, written so here; so the columns
     are the torch loop's bits without its ~6 dispatches per order.
@@ -496,7 +496,7 @@ def coulomb_functions(eta: Tensor, rho: Tensor, lmax: int) -> tuple[Tensor, Tens
 
     The two long loops (the inward Numerov, up to 40,000 steps, and the continued fraction) run
     in numpy on the CPU with the same floating-point operations as the original torch loops, so
-    the outputs are bit-identical to them (SPEED1, tests/hf/test_optical.py fixture).
+    the outputs are bit-identical to them (tests/hf/test_optical.py fixture).
 
     TALYS: ecist.f:5775 (fcou)
     Test: A-trans
@@ -504,7 +504,7 @@ def coulomb_functions(eta: Tensor, rho: Tensor, lmax: int) -> tuple[Tensor, Tens
     device = rho.device
     eta = eta.detach().to(device="cpu", dtype=DTYPE)
     rho = rho.detach().to(device="cpu", dtype=DTYPE)
-    fast = _nx2omp.coulomb(eta, rho, lmax)  # NATIVEX2 `omp`: the same call, compiled
+    fast = _nx2omp.coulomb(eta, rho, lmax)  # native `omp`: the same call, compiled
     if fast is not None:
         return tuple(t.to(device) for t in fast)
     neutral = eta == 0
@@ -547,7 +547,7 @@ def coulomb_functions(eta: Tensor, rho: Tensor, lmax: int) -> tuple[Tensor, Tens
 
 
 # ------------------------------------------------- Coulomb functions of many calls in one pass
-# SPEEDT. `coulomb_functions` derives three things from its whole batch rather than per column:
+# `coulomb_functions` derives three things from its whole batch rather than per column:
 # the continued fraction's starting order (`int(rho.max()) + 60`), the inward Numerov's step count
 # (from the largest `rb - ra`) and the set of columns under the barrier. So concatenating two
 # calls' columns into one call changes their last bits. The functions below give every column its
@@ -571,7 +571,7 @@ def _cf1_many(eta: np.ndarray, rho: np.ndarray, lmax: int, ltop: np.ndarray,
     if m == 0:
         return out, sign
     assert bool((ltop > (lmax if lmax_col is None else lmax_col)).all())
-    if _native.available():  # SPEEDT3: the same recurrence per column, compiled
+    if _native.available():  # the same recurrence per column, compiled
         return _native.cf1(eta, rho, lmax, ltop)
     order = np.argsort(-ltop, kind="stable")
     eta_s, rho_s, top_s = eta[order], rho[order], ltop[order]
@@ -612,7 +612,7 @@ def _numerov_inward_many(ee: np.ndarray, ra: np.ndarray, rb: np.ndarray, gb: np.
     A column with n steps runs its steps 2..n+1 as the global steps N-n+2..N+1 (N = max n), so
     every column ends on the same step and the columns running at any step are a prefix once
     they are sorted by n. Returns u(ra), u(ra - h), u(ra + h), h, c and 2 eta per column."""
-    if _native.available():  # SPEEDT3: the same steps per column, compiled
+    if _native.available():  # the same steps per column, compiled
         return _native.numerov_inward(ee, ra, rb, gb, gb1, n)
     m = ee.shape[0]
     order = np.argsort(-n, kind="stable")
@@ -817,14 +817,14 @@ def ecis_grid(p, m_targ_amu: float, kin: EcisKinematics) -> tuple[Tensor, Tensor
 
     TALYS hands ECIS hint = rmatch = 0 for a spherical non-JLM target (inverseecis.f90:189-190,
     incidentecis.f90:170-171), so these ECIS defaults are what is used; the rmatch = 18 branch
-    at inverseecis.f90:318 is JLM only (omp/jlm.py, KWCOV B7b).
+    at inverseecis.f90:318 is JLM only (omp/jlm.py).
 
     Returns (h_fm, ism, rm_fm), each (E,).
 
     TALYS: ecist.f:3627 (lect)
     Test: A-trans
     """
-    fast = _nx2omp.grid(p, m_targ_amu, kin, CARD_ROUNDING)  # NATIVEX2 `omp`
+    fast = _nx2omp.grid(p, m_targ_amu, kin, CARD_ROUNDING)  # native `omp`
     if fast is not None:
         return fast
     n_e = kin.k_fm.shape[0]
@@ -832,7 +832,7 @@ def ecis_grid(p, m_targ_amu: float, kin: EcisKinematics) -> tuple[Tensor, Tensor
     w3 = kin.k_fm / (ECIS_ACONV * kin.ecm_mev)
     rm = torch.zeros(n_e, dtype=DTYPE)
     w2 = torch.full((n_e,), 1.0e21, dtype=DTYPE)
-    # SPEEDT3: one card quantisation for the 22 columns this reads, as in `optical_potential`
+    # One record quantisation for the 22 columns this reads, as in `optical_potential`
     names = [n for pot in _POTS for n in pot] + ["rc_fm"]
     flat = ecis_card_value(torch.cat([_param(p, n, n_e) for n in names]))
     card = [flat[i * n_e:(i + 1) * n_e] for i in range(len(names))]
@@ -874,7 +874,7 @@ def _lj_grid(lmax: int, spin: float):
 def _ecis_setup(p, kin, m_targ, z_prod, spin, lmax, native: bool = False):
     """ECIS's grid and the modified-Numerov coefficient x = q - q**2/12 per (E, L, J, R).
 
-    With `native` (SPEEDT3, no autograd) x is not built: its place holds the pieces the compiled
+    With `native` (no autograd) x is not built: its place holds the pieces the compiled
     kernel builds it from, element by element in the same operations (`native.ecis_job`)."""
     L, jv, valid, ls2 = _lj_grid(lmax, spin)
     h, ism, rm = ecis_grid(p, m_targ, kin)
@@ -895,7 +895,7 @@ def _ecis_setup(p, kin, m_targ, z_prod, spin, lmax, native: bool = False):
         ) - (mu * h * h)[:, None, None, None] * (U + coul[:, None, None, :])
         x = g - g * g / 12.0  # modified Numerov: q - q**2/12 (complex)
     else:
-        # SPEEDT: the same expression on (E, L, J, R) with two allocations instead of eight. The
+        # The same expression on (E, L, J, R) with two allocations instead of eight. The
         # sums, differences and products by real-valued factors are exact to the element in any
         # order of evaluation; the one complex square, g * g, runs on a fresh array of the same
         # shape as before (its SIMD kernel's result depends on the element's position).
@@ -959,7 +959,7 @@ def _integrate_ecis_many(jobs):
         L, jv, valid, h, ism, rm, nmax, shape, x = _ecis_setup(p, kin, m_targ, z_prod, spin, lmax,
                                                               native)
         prep.append((L, jv, valid, h, ism, rm, nmax, shape, x, kin, lmax))
-    # SPEEDT3: with the compiled kernels, the loop below runs in C per job (bitwise,
+    # With the compiled kernels, the loop below runs in C per job (bitwise,
     # tests/hf/test_native.py) and `state` holds only its two outputs
     prep_loop = [] if native else prep
     state = [[None, None, *_native.ecis_job(item[8], item[4], item[6])] for item in prep] \
@@ -1241,7 +1241,7 @@ def solve_spherical(
     TALYS: inverseecis.f90:1 (inverseecis), ecist.f:1 (ecist)
     Test: A-trans
     """
-    if integrator == "ecis" and not _requires_grad(p):  # NATIVEX2 `omp`: one compiled solve
+    if integrator == "ecis" and not _requires_grad(p):  # native `omp`: one compiled solve
         fast = _nx2omp.solve(p, Z_target, A_target, particle, e_mev, m_targ_amu, lmax,
                              ecis_rounding)
         if fast is not None:
@@ -1279,7 +1279,7 @@ def _transmission_of(sol: RadialSolution, particle: int, spin: float) -> Transmi
 
 def solve_spherical_many(specs) -> list[Transmission]:
     """`solve_spherical` for several (parameters, target, particle, energies) at once, with ECIS's
-    integrator, card rounding and one radial loop for all of them (`_integrate_ecis_many`):
+    integrator, record rounding and one radial loop for all of them (`_integrate_ecis_many`):
     `specs` holds `(p, Z_target, A_target, particle, e_mev, m_targ_amu, lmax)` tuples and every
     result is bit-identical to the corresponding `solve_spherical` call. Not differentiable; the
     caller keeps `solve_spherical` whenever a parameter requires a gradient.
@@ -1289,7 +1289,7 @@ def solve_spherical_many(specs) -> list[Transmission]:
     """
     fast = [_nx2omp.solve(p, Z_target, A_target, particle, e_mev, m_targ_amu, lmax)
             for p, Z_target, A_target, particle, e_mev, m_targ_amu, lmax in specs]
-    if all(f is not None for f in fast):  # NATIVEX2 `omp`: one compiled solve per spec
+    if all(f is not None for f in fast):  # native `omp`: one compiled solve per spec
         return fast
     jobs, meta = [], []
     for p, Z_target, A_target, particle, e_mev, m_targ_amu, lmax in specs:
@@ -1325,7 +1325,7 @@ def _requires_grad(p) -> bool:
 def _lmax_talys(tjl: Tensor, particle: int, translimit: float | None = None, transeps: float | None = None) -> Tensor:
     # inverseread.f90 "Processing of transmission coefficients": first l where every T_lj of
     # that l is below max(T_l(0) * translimit / (2l+1), transeps), minus one.
-    from physics.hf.omp import inverse as _inv  # KWCOV B15: the run's transpower / transeps
+    from physics.hf.omp import inverse as _inv  # the run's transpower / transeps
 
     translimit = _inv.eps()[0] if translimit is None else translimit
     transeps = _inv.eps()[1] if transeps is None else transeps

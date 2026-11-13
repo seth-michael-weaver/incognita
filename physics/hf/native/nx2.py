@@ -1,11 +1,11 @@
-"""NATIVEX2: loader of the second wave of whole-stage kernels (`native/nx2_*.c`,
+"""Native: loader of the second wave of whole-stage kernels (`native/nx2_*.c`,
 scripts/build_nx2_native.sh), one library for every `nx2_*.c` file.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nx2.py`
-(every kernel against the torch/numpy path it replaces) and the G-NATIVEX2 closeness gate.
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_nx2.py`
+(every kernel against the torch/numpy path it replaces) and the native closeness test.
 
 Selection, per call: no build, `HF_NATIVE=0`, `HF_NATIVEX=0` or `HF_NX2=0` -> the torch/numpy
 path; `HF_NX2_<LEVER>=0` (read at every call) turns one lever off. Anything on the autograd graph
@@ -58,7 +58,7 @@ def kernel(name: str, argtypes: list, restype=INT, lever: str | None = None):
     missing, or when `HF_NX2_<lever>=0`."""
     if lever is not None and os.environ.get(f"HF_NX2_{lever.upper()}", "1") == "0":
         return None
-    if lever in _EADJ_LEVERS:  # ENGADJ: a lever whose physics an active energy-local bump changes runs its Python twin
+    if lever in _EADJ_LEVERS:  # `eadj`: a lever whose physics an active energy-local bump changes runs its Python twin
         from physics.hf import eadj
 
         if not _EADJ_LEVERS[lever](eadj):

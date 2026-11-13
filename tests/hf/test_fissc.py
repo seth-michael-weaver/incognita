@@ -1,6 +1,6 @@
-"""FISSC (development notes): the fission ladder with fewer exp/log (F2 grid, F3 WKB weights
+"""Fast fission ladder: the fission ladder with fewer exp/log (F2 grid, F3 WKB weights
 by recurrence), distinct-energy rows and active-triple contraction (F3/F4) and an exact-input ladder
-cache (F1), against the CENGFIS kernels they replace (`HF_NX2_FISSC=0`, bitwise the base; see
+cache (F1), against the C fission kernels they replace (`HF_NX2_FISSC=0`, bitwise the base; see
 tests/hf/test_cengfis.py). Held to closeness: slopes and weights 1e-10, widths and transmissions 1e-9.
 """
 

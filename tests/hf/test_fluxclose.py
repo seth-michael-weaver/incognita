@@ -1,5 +1,5 @@
-"""FLUXCLOSE parts A + C (FLUXPROMO / FLUXPROMO2): keyword/env switch, the residual window it sets (nuclides.f90:140-141),
-the run-scoped on() (KEVLEAK3 pe2 reads on("C")) and part C's placement of PE + GR flux of an exit with no continuum bin."""
+"""`fluxclose` parts A + C: keyword/env switch, the residual window it sets (nuclides.f90:140-141),
+the run-scoped on() (kevleak2 pe2 reads on("C")) and part C's placement of PE + GR flux of an exit with no continuum bin."""
 from dataclasses import dataclass, field
 from types import SimpleNamespace
 
@@ -20,7 +20,7 @@ def test_window_switch(monkeypatch):
     monkeypatch.delenv("INCOGNITA_FLUXCLOSE", raising=False)
     assert F.window_on(True) and not F.window_on(False)
     assert F.parts(True) == {"A", "C"} and F.parts(False) == frozenset()
-    assert F.parts() == {"A", "C", "N"} and F.parts("cn") == {"A", "C", "N"}  # FLUXCN default
+    assert F.parts() == {"A", "C", "N"} and F.parts("cn") == {"A", "C", "N"}  # `cn` default
     assert F.parts("y") == {"A", "C"} and F.parts("n") == frozenset() and F.parts("A,C,N") == {"A", "C", "N"}
     assert F.parts(F.canon(F.parts("cn"))) == {"A", "C", "N"} and F.canon(frozenset()) == "0"
     monkeypatch.setenv("INCOGNITA_FLUXCLOSE", "cn")
@@ -31,7 +31,7 @@ def test_window_switch(monkeypatch):
     for v in ("1", "all", "y"):
         monkeypatch.setenv("INCOGNITA_FLUXCLOSE", v)
         assert F.parts(False) == {"A", "C"}
-    monkeypatch.setenv("INCOGNITA_FLUXCLOSE", "a")  # the FLUXPROMO candidate: window only
+    monkeypatch.setenv("INCOGNITA_FLUXCLOSE", "a")  # window only
     assert F.parts(False) == {"A"}
     monkeypatch.setenv("INCOGNITA_FLUXCLOSE", "C")
     assert F.parts(True) == {"C"} and not F.window_on(True)

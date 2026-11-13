@@ -1,4 +1,4 @@
-/* NATIVEX2 lever `dwba`: the DWBA level cross sections of `ecis.dwba.dwba_cross_sections` for one
+/* Native kernel `dwba`: the DWBA level cross sections of `ecis.dwba.dwba_cross_sections` for one
  * incident energy in one call (physics/hf/ecis/dwba_nx2.py builds the inputs).
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.

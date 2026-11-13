@@ -1,4 +1,4 @@
-"""MACSCLOSED: physics/hf/fewres.py (INCOGNITA_FEWRES few-resonance capture).
+"""physics/hf/fewres.py (INCOGNITA_FEWRES few-resonance capture).
 
 * the RTK97 window and region threshold (Delta(30 keV) = 47.76 keV, N30 = Delta / D0 < 10)
 * J sequences / channel counts for even (I = 0) and odd (I = 3/2) targets
@@ -80,7 +80,7 @@ def test_off_is_untouched(monkeypatch):
 
 
 def test_typical_mode_no_dc_floor(monkeypatch):
-    """FEWTYP: `typical` = logmean with delta = 0: G -> 1 dense, < 1 sparse, exactly 1 at E >= 1 MeV."""
+    """`typical` = logmean with delta = 0: G -> 1 dense, < 1 sparse, exactly 1 at E >= 1 MeV."""
     monkeypatch.setenv("INCOGNITA_FEWRES", "typical")
     assert F.mode() == "typical"
     tl = _tl(); e = np.array([3.0e4, 2.0e6]); z = np.zeros(2)

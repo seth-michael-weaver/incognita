@@ -1,11 +1,11 @@
-"""NATIVEX2: the photon transmission rows of the decay widths and of densprepare, from the strength
+"""Native: the photon transmission rows of the decay widths and of densprepare, from the strength
 function evaluated in C (`native/nx2_psf.c`).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nx2.py`
-(against `psf_fast.fstrength_np`) and the G-NATIVEX2 closeness gate.
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_nx2.py`
+(against `psf_fast.fstrength_np`) and the native closeness test.
 
 TALYS routines this evaluates:
     fstrength.f90:1 (fstrength)      -- as `psf_fast.fstrength_np` covers it
@@ -68,7 +68,7 @@ def _pack(gp):
         else:
             etab = np.zeros(NUMGAMQRPA + 2)
             ftab = np.zeros((NUMGAMQRPA + 2, 1))
-        # SPEEDFIX: the tabulated M1 (strengthM1 >= 8, fstrength.f90:356) after the E1 table in the
+        # the tabulated M1 (strengthM1 >= 8, fstrength.f90:356) after the E1 table in the
         # same arrays (column 0 only: the M1 has no temperature axis); ip[9..12] say where
         qrpa_m1 = gp.qrpaexist(0, 1) and gp.strengthM1 >= 8
         ncol, ie_m1, off_e, off_f = ftab.shape[1], 0, etab.size, ftab.size
@@ -103,7 +103,7 @@ def _pack(gp):
 
 
 def _bump_row(b) -> list:
-    """ENGADJ: one bump as nx2_psf.c reads it, [shape (0 tal, 1 gau), p0, p1, p2, p3]: tal Ea Eb Em D, gau E0 W D 0."""
+    """`eadj`: one bump as nx2_psf.c reads it, [shape (0 tal, 1 gau), p0, p1, p2, p3]: tal Ea Eb Em D, gau E0 W D 0."""
     a = [float(x) for x in b.args]
     return [0.0] + a if b.shape == "tal" else [1.0] + a + [0.0]
 

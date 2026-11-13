@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `fis2`: the continuum fission transmission through one barrier in C
+"""Native kernel `fis2`: the continuum fission transmission through one barrier in C
 (`fission/fis2_nx2.py`, `native/nx2_fis2.c`) against the torch paths it replaces, `HF_NX2_FIS2=0`
 against `=1` (closeness, not bits). Skipped without a `libnx2` build or TALYS's structure data.
 """

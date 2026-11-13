@@ -1,6 +1,6 @@
-/* NATIVEX2 lever `omp`: the spherical optical-model solve of `omp.schrodinger` (ECIS's integrator,
- * card rounding and matching) for one (target, particle) over an energy axis in one call, plus the
- * pieces the torch path exposes on their own (card quantisation, ECIS's grid, Coulomb functions).
+/* Native kernel `omp`: the spherical optical-model solve of `omp.schrodinger` (ECIS's integrator,
+ * input rounding and matching) for one (target, particle) over an energy axis in one call, plus the
+ * pieces the torch path exposes on their own (input quantisation, ECIS's grid, Coulomb functions).
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
  * ECIS-06 (`ecist.f`) is by J. Raynal and ships inside the TALYS repository under its MIT license.
@@ -14,7 +14,7 @@
  *                     continued fractions start from their own column's rho (converged either way).
  *                     The Numerov itself is `native.numerov_inward`'s kernel when it is handed over
  *                     (`nx2_omp_set_numerov`), else a copy of its recurrence.
- * nx2_omp_job      -- `solve_spherical` with ECIS's integrator: card rounding, relativistic
+ * nx2_omp_job      -- `solve_spherical` with ECIS's integrator: input rounding, relativistic
  *                     kinematics (lecl, khco), the grid, the potentials (wosa), the modified
  *                     Numerov per (l, j) (the loop of `native.ecis_job`), the Coulomb functions,
  *                     tlnc's matching (ecist.f:14445) and the reaction/total/shape-elastic sums.
@@ -24,7 +24,7 @@
  *                     unless the capped row's contribution is below 1e-14 of the sum (beyond
  *                     njmax, l is far past grazing and T_l falls by orders per step).
  *                     `rounding`: bit 1 rounds the energy and the masses (`ecis_rounding`),
- *                     bit 2 the potential cards (`CARD_ROUNDING`).
+ *                     bit 2 the potential inputs (`CARD_ROUNDING`).
  * Every energy runs only its own ism radial steps (the torch loop runs the batch's largest and
  * rescales the matching values on the way; the ratio tlnc forms is scale-free). Held to closeness
  * with the torch path, not to bits. Returns 0, or -1 (allocation failed). */
@@ -45,7 +45,7 @@ static const double OMP_ACONV = 1.0e-10;
 static const double OMP_PI = 3.141592653589793;
 #define OMP_NCOL 19
 
-/* ------------------------------------------------------------------------------ input cards */
+/* ------------------------------------------------------------------------------ input records */
 static double nx2_omp_f10_5(double x) { return nearbyint(x * 1.0e5) / 1.0e5; }
 
 static double nx2_omp_es10_3(double x)

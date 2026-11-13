@@ -57,12 +57,11 @@ from physics.hf.omp.schrodinger import (
 CDTYPE = torch.complex128
 
 
-# CCNANTHERM (INCOGNITA_ECMSTABLE, default ON; "0" = old): cancellation-free c.m. energy where
+# INCOGNITA_ECMSTABLE (default ON; "0" = ECIS's expression): cancellation-free c.m. energy where
 # ECIS's expression underflows to ecm <= 0 at a positive lab energy (`channel_kinematics`).
-# ENGFIX4: read on every call (it used to be read once at import, so a long-lived worker kept its
-# parent's value).
+# Read on every call (not once at import, so a long-lived worker sees the current value).
 def ecmstable() -> bool:
-    """CCNANTHERM's switch, INCOGNITA_ECMSTABLE (default ON; "0" = ECIS's expression everywhere).
+    """Stable c.m. energy: INCOGNITA_ECMSTABLE (default ON; "0" = ECIS's expression everywhere).
 
     TALYS: (none -- Incognita switch)
     Test: tests/hf/test_engfix4.py
@@ -102,7 +101,7 @@ def channel_kinematics(
     root = torch.sqrt((m1 + m2) ** 2 + 2.0 * m2 * e / cm)
     ecm1 = cm * (root - m1 - m2)
     if ecmstable():
-        # CCNANTHERM: the subtraction cancels (2 m2 e/cm ~ 3e-12 against (m1+m2)**2 ~ 2.5e4 at
+        # The subtraction cancels (2 m2 e/cm ~ 3e-12 against (m1+m2)**2 ~ 2.5e4 at
         # 1e-11 MeV) and gives exactly 0 for some masses, so k = 0 and lect's k/ecm is 0/0. Only
         # there, the identical 2 m2 e/(root + m1 + m2); every other row keeps ECIS's expression.
         ecm1 = torch.where((ecm1 <= 0.0) & (e > 0.0), 2.0 * m2 * e / (root + m1 + m2), ecm1)
@@ -168,7 +167,7 @@ def _asymptotic(kin: ChannelKinematics, ch: ChannelSet, rmatch_fm: Tensor,
     dhp = torch.complex(dGv, dFv)
     dhm = torch.complex(dGv, -dFv)
     if bool(op.all()):
-        # SPEEDT3: every `where` below then selects its first argument element by element and
+        # Every `where` below then selects its first argument element by element and
         # `scale` is 1, so the closed-channel branch -- `_riccati_k`'s lmax-long Python recurrence,
         # run once per (J, parity) block -- is not needed. Exactly the values the `where`s give.
         return hp, dhp, hm, dhm, torch.ones_like(Gv), op
@@ -185,24 +184,23 @@ def _asymptotic(kin: ChannelKinematics, ch: ChannelSet, rmatch_fm: Tensor,
 
 STABILISE_EVERY = 10  # radial steps between two stabilisations of the solution matrix
 
-# CCNUMEROV.  ECIS integrates the coupled radial equations with its *modified* Numerov, not the
+# ECIS integrates the coupled radial equations with its *modified* Numerov, not the
 # plain one.  For u'' = M u and T = h**2 M the exact second difference of a constant-potential
 # solution is 2(cosh kh - 1) u = (T + T**2/12 + T**3/360 + ...) u, and `ecist.f::inch` keeps the
 # first two terms explicitly (inch-133..147 builds V - V*V/12 with V = -T, inch-155..162 steps
 #     u_{i+1} = 2 u_i - u_{i-1} + (T_i + T_i**2/12) u_i,
-# i.e. 12 c M u + 12 c**2 M (M u) with c = h**2/12).  The plain Numerov the port used instead is
+# i.e. 12 c M u + 12 c**2 M (M u) with c = h**2/12).  The plain Numerov alternative is
 # the implicit (1 - T/12) u_{i+1} = (2 + 5T/6) u_i - (1 - T/12) u_{i-1}, whose h**6 truncation is
 # -v**3/240 against the modified scheme's +v**3/360 (ecis-113/ecis-114): opposite signs, so at
-# ECIS's own step the two answers differ by ~T**3/144 per step and the port could not sit on
-# ECIS's.  That is FISSC2's diagnosis and the reason it had to halve the step below 50 keV.
+# ECIS's own step the two answers differ by ~T**3/144 per step and a plain Numerov cannot sit on
+# ECIS's without halving the step below 50 keV.
 #
 # The modified step has no implicit matrix: two products replace a factorise-and-solve, and the
 # single-channel kernels of the port already use it (`native/hfnative.c:647`).  ECIS's lo(26)
 # stabilisation (the further +T**3/360 on the real diagonal, inch-146) is OFF for the incident
 # calculation (`incidentecis.f90:197`), so this is the two-term scheme.
 #
-# `HF_CC_MODNUM=0` restores the plain Numerov: the A/B lever, and what every pre-CCNUMEROV
-# measurement in docs/results was taken with.
+# `HF_CC_MODNUM=0` selects the plain Numerov for A/B comparisons.
 def modified_numerov() -> bool:
     """Whether the radial loops step ECIS's modified Numerov (the default) or the plain one.
 
@@ -299,7 +297,7 @@ def _block_operators(ch: ChannelSet, ff: FormFactors, kin: ChannelKinematics, r_
         - k2[:, None, :]
         + (mu * ff.coulomb)[:, :, None]
     ).to(CDTYPE) + (muc * ls2)[:, None, :] * ff.spin_orbit[:, 0, :][:, :, None]
-    # SPEEDT3: the same expressions, written so that the (E, R, N, N) result is allocated once and
+    # The same expressions, written so that the (E, R, N, N) result is allocated once and
     # every later term lands in it (`mul_` / `add_` on the whole array, `add_` on its diagonal
     # view instead of a full-size add of `diag_embed`'s mostly-zero array). Bit-identical --
     # checked element by element on 509 real blocks of Hf-179 and Ca-40, signed zeros included --
@@ -388,7 +386,7 @@ def smatrix(
     c12, c144 = 12.0 * c, 12.0 * c * c
     for i in range(nmax):
         m_next = m_at(i + 1)
-        if modnum:  # CCNUMEROV: ECIS's explicit modified step, nothing to invert
+        if modnum:  # ECIS's explicit modified step, nothing to invert
             mu_c = torch.matmul(m_cur, u_cur)
             u_next = (2.0 * u_cur - u_prev) + c12 * mu_c + c144 * torch.matmul(m_cur, mu_c)
         if not modnum:
@@ -447,7 +445,7 @@ def _match(ch: ChannelSet, kin: ChannelKinematics, h_fm: Tensor, nmatch: Tensor,
     ones, shared with `smatrix_blocks`. `coulomb` optionally carries `_asymptotic`'s Coulomb
     functions, computed for many blocks at once (`coulomb_functions_many`, bit-identical).
 
-    `minus_identity=True` returns D = S - 1 on the open channels instead of S (CCFAST2). It is
+    `minus_identity=True` returns D = S - 1 on the open channels instead of S. It is
     solved as its own linear system, (L H+ - H+') D = L (H- - H+) - (H- - H+)', whose right-hand
     side is -2i (L F - F') on an open channel: H- - H+ is exact in floating point (the real parts
     are the same number), so nothing cancels. S = 1 + D formed afterwards would lose every digit
@@ -482,7 +480,7 @@ def _match(ch: ChannelSet, kin: ChannelKinematics, h_fm: Tensor, nmatch: Tensor,
 
 
 # ------------------------------------------------------------- many (J, parity) blocks at once
-# SPEEDT. `sum_blocks` spends its time in the radial loop of one block after another: ~90 steps
+# `sum_blocks` spends its time in the radial loop of one block after another: ~90 steps
 # of two products and one solve on (E, N, N) matrices, and most blocks of a target share the same
 # channel count N (every total J above the band's largest spin couples the same N channels).
 # `smatrix_blocks` stacks the blocks of one N on a leading axis and runs their loops together.
@@ -546,7 +544,7 @@ def _numerov_blocks(mm: Tensor, nm: Tensor | None, u_cur: Tensor, h_fm: Tensor,
     for i in range(nmax):
         m_next = mm[i + 1]
         mu_cur = torch.matmul(m_cur, u_cur)
-        if modnum:  # CCNUMEROV
+        if modnum:  # modified Numerov
             u_next = (2.0 * u_cur - u_prev) + c12 * mu_cur + c144 * torch.matmul(m_cur, mu_cur)
         if not modnum:
             rhs = 2.0 * (u_cur + 5.0 * c * mu_cur)
@@ -609,7 +607,7 @@ def smatrix_blocks(chs: list[ChannelSet], ff: FormFactors, kin: ChannelKinematic
     loops of all blocks of one channel count run together (see above). Not differentiable:
     `sum_blocks` keeps `smatrix` whenever the form factors or the kinematics are on a graph.
 
-    `exact_bits=False` (CCFAST2, `sum_blocks`) lets a block below `soswitch` run on
+    `exact_bits=False` (`sum_blocks`) lets a block below `soswitch` run on
     `ccnative.cc_block_w`: the same discretised equations in fewer operations, so the same numbers
     to rounding, not to the bit (tests/hf/test_ccfast.py).
 
@@ -642,7 +640,7 @@ def smatrix_blocks(chs: list[ChannelSet], ff: FormFactors, kin: ChannelKinematic
                 out[k] = _match(chs[k], kin, h_fm, nmatch, c, keep, coul[k], minus_identity)
             continue
         if native:
-            # SPEEDT3: `_numerov_blocks` compiled, one block at a time, with torch's own MKL
+            # `_numerov_blocks` compiled, one block at a time, with torch's own MKL
             # routines (tests/hf/test_native.py, bitwise)
             for k in members:
                 mmat, nmat = _block_operators(chs[k], ff, kin, r_fm)
@@ -702,7 +700,7 @@ def accumulate(
     `Tjlinc(ispin, l) += (2J+1)/((2j+1)(2I_0+1)) T^J_{(0,l,j)}` is incidentread.f90:186's own
     formula for a coupled-channels incident channel, not a choice made here.
 
-    With `minus_identity` (CCFAST2) `s` is D = S - 1 (`_match`) and every quantity is written
+    With `minus_identity` `s` is D = S - 1 (`_match`) and every quantity is written
     without the leading 1 that cancels: with S_00 = 1 + D_00,
         1 - sum_c |S_c0|^2 = -2 Re D_00 - sum_c |D_c0|^2,    1 - Re S_00 = -Re D_00,
         |1 - S|^2 = |D|^2  (elastic),                          S_b0 = D_b0 (b != 0).
@@ -756,7 +754,7 @@ def accumulate(
 
 
 def _rounded_mass(m_amu: float, ecis_rounding: bool) -> float:
-    """The target mass as it reaches ECIS's card (`f10.5`), or unrounded."""
+    """The target mass as it reaches ECIS's input record (`f10.5`), or unrounded."""
     from physics.hf.omp.schrodinger import ecis_card_value
 
     if not ecis_rounding:
@@ -797,9 +795,9 @@ def _grid_and_kinematics(
     return kin, h, nmatch, r
 
 
-BLOCK_AHEAD = 1  # total-J values solved per `smatrix_blocks` call of `sum_blocks` (CCFAST2: 2;
-# NATIVEX2: 1, so an energy that leaves the loop has no block solved ahead of it)
-QUIET_J = 1  # quiet total-J values an energy needs to leave `sum_blocks` (CCFAST2: 3; NATIVEX2)
+BLOCK_AHEAD = 1  # total-J values solved per `smatrix_blocks` call of `sum_blocks` (1,
+# so an energy that leaves the loop has no block solved ahead of it)
+QUIET_J = 1  # quiet total-J values an energy needs to leave `sum_blocks`
 
 
 def _energy_subset(ff: FormFactors, kin: ChannelKinematics, h: Tensor, nmatch: Tensor, r: Tensor,
@@ -842,15 +840,15 @@ def sum_blocks(
     (or 1/2), NOT at |I_0 - s|: a channel with j = I_0 reaches J = 0. Starting at |I_0 - s| costs
     Au197's S1 5.8%, because Tjlinc(l=1, j=3/2) is missing its J = 0 term.
 
-    **Convergence is per energy (CCFAST2).** Each energy leaves the loop after `QUIET_J` quiet
+    ***Convergence is per energy.** Each energy leaves the loop after `QUIET_J` quiet
     total-J values of its own (`block < j_tol * sigma_reac`), and the blocks of the next J are
     solved only for the energies still in it. ECIS itself runs every J to njmax (TALYS gives it
-    conj = 1e-30, ecisinput.f90:105), so any stop is a truncation; NATIVEX2 leaves at the first
+    conj = 1e-30, ecisinput.f90:105), so any stop is a truncation; the loop leaves at the first
     quiet J instead of the third: the blocks it drops are each below 1e-10 of sigma_reac and fall
     with J (Er-166, Lu-175, U-238, Pd-106: every chart channel within 2e-11 of the three-J stop;
-    whole nuclides 13-19 % less CPU for the first three). The loop used to run every energy to the
-    J the highest one needed: on the chart grid a 1 keV neutron on Nd-150 converges by 2J = 7 and
-    was integrated to 2J = 35. A single-energy call and the same energy inside a batch now sum the
+    whole nuclides 13-19 % less CPU for the first three). Running every energy to the J the highest
+    one needs would be wasteful: on the chart grid a 1 keV neutron on Nd-150 converges by 2J = 7 but
+    would be integrated to 2J = 35. A single-energy call and the same energy inside a batch sum the
     same blocks, so `Cascade.incident` and the direct deck can share one solve
     (`incident._SOLVED`). Blocks are matched as S - 1 (`accumulate`).
 
@@ -879,7 +877,7 @@ def sum_blocks(
 
     def solve_from(twoJ: int, count: int, rows: Tensor) -> None:
         """Solve the blocks of `count` total-J values from `twoJ` on the energy rows `rows` in one
-        `smatrix_blocks` call (SPEEDT). Each block's numbers do not depend on which other blocks
+        `smatrix_blocks` call. Each block's numbers do not depend on which other blocks
         or energies share its call."""
         keys, chs = [], []
         if hasattr(make_channels, "prefill"):
@@ -941,7 +939,7 @@ def sum_blocks(
     return _coupled_result(kin, acc, n_j, frac)
 
 
-# ------------------------------------------------ CCGLUE: the J loop as a (block, energy) task list
+# ------------------------------------------------ the J loop as a (block, energy) task list
 # `sum_blocks` with the compiled kernels: every total J asks for an explicit list of `CCTask`s, one
 # per (J, parity) block and incident energy still in the loop, and `run_cc_tasks` executes it. A
 # task's numbers do not depend on which other tasks share its kernel call (each energy of
@@ -980,7 +978,7 @@ def _ccgpu_lookup():
 
 
 def cc_threads() -> int:
-    """PERFCC2: threads the (J, parity) blocks of one coupled-channels solve run on
+    """Threads the (J, parity) blocks of one coupled-channels solve run on
     (`HF_CC_THREADS`, default 2; 1 = every block on the calling thread, as before). Read per call.
 
     The blocks of one total J are independent kernel calls (each integrates, stabilises and matches
@@ -988,7 +986,7 @@ def cc_threads() -> int:
     `run_cc_tasks` returns their contributions in block order whichever thread computed them, so
     `_sum_blocks_tasks` adds them in the same order: every number is the one-thread number, bit for
     bit. The kernel runs without the GIL (ctypes), so the two parities of a J run side by side; the
-    process's CPU time is unchanged, its wall time drops (scripts/perf/PROFILE.md, PERFCC2).
+    process's CPU time is unchanged, its wall time drops (scripts/perf/PROFILE.md, "Coupled-channels speed").
 
     TALYS: none (scheduling only, no Fortran counterpart)
     Test: tests/hf/test_ccthreads.py
@@ -1001,7 +999,7 @@ def cc_threads() -> int:
 
 
 class _BlockWorkers:
-    """PERFCC2: `n - 1` helper threads that live for one `_sum_blocks_tasks` call, so no thread
+    """`n - 1` helper threads that live for one `_sum_blocks_tasks` call, so no thread
     outlives a solve (the warm pool and `physics.hf.pool` fork only from a one-thread process).
     `map(fn, items)` runs `fn` on every item, item k on thread k mod n (the calling thread is
     thread 0), and returns the results in item order; an exception is re-raised on the caller.
@@ -1088,7 +1086,7 @@ def run_cc_tasks(tasks: list[CCTask], make_channels, ff: FormFactors, kin: Chann
     """Execute `tasks`, one kernel call per (J, parity) block on the energies its tasks name.
     Returns `(two_j, parity, rows, contributions)` per block that has channels, in the order the
     blocks first appear; `contributions` is `accumulate`'s dict on `rows`. `subsets` memoises
-    `_energy_subset` by row tuple across calls. PERFCC2: `workers` runs the blocks' kernel calls
+    `_energy_subset` by row tuple across calls. `workers` runs the blocks' kernel calls
     on several threads; the list returned is the same, in the same order.
 
     TALYS: none (scheduling only, no Fortran counterpart)
@@ -1136,7 +1134,7 @@ def run_cc_tasks(tasks: list[CCTask], make_channels, ff: FormFactors, kin: Chann
                                          keep=keep)
             out.append((tj, par, rows, got))
         return out
-    # PERFCC2: the same calls on `workers`' threads; the GPU lookup and the kernel's switches stay
+    # The same calls on `workers`' threads; the GPU lookup and the kernel's switches stay
     # on this thread, the results come back in block order
     _ccnative.prepare_threads()
     jobs = [(ch, sub, cf, None if gpu is None else gpu(ch, sub))
@@ -1181,7 +1179,7 @@ def _sum_blocks_tasks(make_channels, ff, kin, h, nmatch, r, n_lev, lmax, target_
 
 def _sum_blocks_loop(make_channels, ff, kin, h, nmatch, r, n_lev, lmax, target_spin, proj_spin,
                      j_tol, acc, two_j0, j_cap, workers) -> CoupledResult:
-    """`_sum_blocks_tasks`'s J loop, its kernel calls on `workers` (PERFCC2)."""
+    """`_sum_blocks_tasks`'s J loop, its kernel calls on `workers`."""
     n_e = h.shape[0]
     active = torch.arange(n_e)
     quiet = torch.zeros(n_e, dtype=torch.int64)
@@ -1246,10 +1244,10 @@ def _channels_cached(kind: str, twoJ: int, parity: int, spins: tuple, spin_dtype
     an energy loop over a deformed target. Rebuilt from the same values, so identical.
 
     `ahead` lists more (twoJ, parity) pairs the caller is about to ask for: the missing ones are
-    built together with this one (SPEEDT3, `coupling._channels_many`: one 6j evaluation for all).
+    built together with this one (`coupling._channels_many`: one 6j evaluation for all).
 
     TALYS: ecist.f:14643 (quan)
-    Test: A-inc / SPEED0 golden
+    Test: A-inc / speed golden test
     """
     from dataclasses import replace
 
@@ -1262,7 +1260,7 @@ def _channels_cached(kind: str, twoJ: int, parity: int, spins: tuple, spin_dtype
         _CHANNELS.move_to_end(key)
         return got
     if kind == "rot" and not extra[1]:
-        # CCFAST2: the set below `soswitch` is the set above it without the three deformed
+        # The set below `soswitch` is the set above it without the three deformed
         # spin-orbit tables (same levels, l, j, 2 l.s and coupling, checked field by field on
         # Nd-150, Hf-179 and U-238), so a run whose grid straddles the switch builds the 6j
         # tables once. Building the spin-orbit tables too costs ~8% of a set.

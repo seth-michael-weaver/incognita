@@ -1,23 +1,23 @@
-/* CHARTDRV (ROUTE100's WP10): the one-box chart driver.
+/* The one-box chart driver.
  *
- * A C binary with N pthreads that runs the whole CHART1 set on one machine. Each thread owns one
+ * A C binary with N pthreads that runs the whole chart set on one machine. Each thread owns one
  * persistent warm Python worker (`scripts/hf_route100_chart.py serve`) and speaks one JSON line
  * per task to it. Two kinds of task share the threads:
  *
  *   NUCLIDE  (Z, A)                      -- a whole nuclide on the 20-point grid, the record the
  *                                           Python chart driver writes.
  *   CC block (Z, A, 2J, parity, energy)  -- one coupled-channels (J, parity) block at one
- *                                           incident energy, ROUTE100 section 2's scheduling unit.
+ *                                           incident energy, the scheduling unit.
  *
  * Why the second kind exists: the coupled-channels stage is 22.6 % of the chart and the largest
  * deformed target's CC is longer than many whole nuclides, so a per-nuclide queue leaves cores
- * idle at the tail. CCGLUE made `solver.sum_blocks` a list of `CCTask(two_j, parity, energy)` and
- * guaranteed a task's numbers do not depend on which other tasks shared its call, so this driver
+ * idle at the tail. `solver.sum_blocks` is a list of `CCTask(two_j, parity, energy)` and
+ * guarantees a task's numbers do not depend on which other tasks shared its call, so this driver
  * may split a block's energies across threads and add the contributions back in task order. The
  * total-J loop itself -- the per-energy `QUIET_J` convergence, the J cap, the order of addition --
  * runs HERE, in `cc_job`, not in Python: the workers only execute blocks.
  *
- * Inputs: CREC's chart record (`--record ROOT/index.json`, also handed to every worker as
+ * Inputs: the chart record (`--record ROOT/index.json`, also handed to every worker as
  * CHARTDRV_RECORD so a nuclide can be seeded instead of rebuilt) and the structure database's
  * task file (`--tasks`, `hf_route100_chart.py tasklist`: Z A colltype cls prior), heaviest first.
  *
@@ -370,7 +370,7 @@ static void run_nuclide(Worker *w, Nuc *n) {
     fclose(f);
     int ok = rep ? jbool(rep, "ok", 0) : 0;
     double cpu = rep ? jnum(rep, "cpu_s", 0.0) : 0.0;
-    /* MERGEX's `MACSPEED_RSS_CAP_MB`, in the driver: a worker whose resident set is over the cap
+    /* `MACSPEED_RSS_CAP_MB`, in the driver: a worker whose resident set is over the cap
      * after its cache drop is restarted before its next nuclide, so 16 of them fit the box. */
     double rss = g_rss_cap > 0.0 ? worker_rss_mb(w) : -1.0;
     if (rss > g_rss_cap && !g_cc_active) {
@@ -724,7 +724,7 @@ static void *thread_main(void *arg) {
 
 /* ------------------------------------------------------------------------- the record and input */
 
-/* CREC's chart index: which nuclides the record can seed. */
+/* The chart record's index: which nuclides the record can seed. */
 static int record_has(const char *idx, int Z, int A) {
     char pat[32];
     snprintf(pat, sizeof pat, "\"%d-%d\":", Z, A);

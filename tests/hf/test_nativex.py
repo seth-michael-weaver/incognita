@@ -1,4 +1,4 @@
-"""NATIVEX: the compiled whole-stage kernels hold the numbers of the paths they replace.
+"""Native whole-stage kernels: the compiled whole-stage kernels hold the numbers of the paths they replace.
 
 * `compound.target_native.target` (`nx_target`) against `target_batch.case_nowfc` /
   `case_moldauer`'s torch path, on every energy of a chained run, fission humps included;
@@ -6,7 +6,7 @@
   array;
 * whole runs with the kernels (the walk `nx_walk`, multiple pre-equilibrium in C and through the
   Python callback, the trapped leftover, a fissioning cascade) against `HF_NATIVEX=0`, which is
-  the numpy/torch path SETB left.
+  the numpy/torch path.
 
 Not bit-identical (sums in loop order): held to 1e-10 relative per array element or cell.
 """
@@ -94,7 +94,7 @@ def _same_results(new, old, tol=1e-10):
 @needs_structure
 @pytest.mark.parametrize("Z,A,grid", [(26, 56, (0.001, 1.0, 5.0, 14.0, 20.0)),
                                       (92, 238, (0.8, 9.0)),
-                                      (41, 95, (0.5, 2.0, 5.0))])  # MERGEY: OPEN3M's A2 levels
+                                      (41, 95, (0.5, 2.0, 5.0))])  # Nb-95: levels of impossible 2J parity
 def test_target_kernel_is_the_torch_path(Z, A, grid):
     import physics.hf.compound.target_native as tn
     from physics.hf.compound import target_batch as tb
@@ -122,8 +122,8 @@ def test_target_kernel_is_the_torch_path(Z, A, grid):
     if A > 215:
         assert any(float(f) > 0.0 for _, _, _, (_, f) in seen)
     if (Z, A) == (41, 95):
-        # MERGEY: Nb-95's L6 (5/2:13/2)+ is J = 3.0 on odd A, a level of impossible 2J parity
-        # (OPEN3M's A2): the kernel must truncate l2'/2 into it as target_batch._prepare does
+        # Nb-95's L6 (5/2:13/2)+ is J = 3.0 on odd A, a level of impossible 2J parity
+        # (ENSDF spin range): the kernel must truncate l2'/2 into it as target_batch._prepare does
         assert any(bool(((inp.j2beg + np.asarray(r.jdis2[:min(r.nlast, r.maxex) + 1])
                           + r.parspin2) % 2).any())
                    for inp, _, _, _ in seen for r in inp.residuals.values())

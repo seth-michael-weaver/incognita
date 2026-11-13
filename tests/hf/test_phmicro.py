@@ -1,4 +1,4 @@
-"""PHMICRO: tabulated microscopic particle-hole densities (TALYS phmodel 2, structure/density/ph/<El>.ph).
+"""Tabulated microscopic particle-hole densities (TALYS phmodel 2, structure/density/ph/<El>.ph).
 
 Checks the reader (header labels, 5-point smoothing, phdens2.f90 interpolation) against a hand computation from the
 file, and that the override is the identity when the switch is off.
@@ -65,7 +65,7 @@ def test_override_off_is_identity_and_on_replaces():
 
 
 def test_phnorm_refdeg_and_switch(monkeypatch):
-    """PHMICRO3: INCOGNITA_PHNORM=1 divides the tabulated density by 2 per odd species of the table nucleus; OFF untouched."""
+    """INCOGNITA_PHNORM=1 divides the tabulated density by 2 per odd species of the table nucleus; OFF untouched."""
     import numpy as np
     from physics.hf.density import particle_hole as PH
 

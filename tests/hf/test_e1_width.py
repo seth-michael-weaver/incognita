@@ -1,4 +1,4 @@
-"""The shipped E1-width constant (REDTEAM B4): the public engine applies INCOGNITA's 1.0425, not TALYS's table
+"""The shipped E1-width constant: the public engine applies INCOGNITA's 1.0425, not TALYS's table
 (1.076 / 1.081, the mean of TENDL's fits), to the no-data recipe."""
 from physics.hf.gamma import e1_width as w
 

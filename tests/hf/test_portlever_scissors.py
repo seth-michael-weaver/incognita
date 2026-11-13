@@ -1,9 +1,9 @@
-"""PORTLEVER: `INCOGNITA_M1_SCISSORS=k17` swaps the Kopecky-2017 scissors term into `strengthM1 3`.
+"""`INCOGNITA_M1_SCISSORS=k17` swaps the Kopecky-2017 scissors term into `strengthM1 3`.
 
 Off by default, the Kopecky systematics when on, zero for a spherical nucleus, a user keyword
 still wins, and the switch reaches the photon-strength parameters every engine path reads.
-The end-to-end check against stock TALYS on the Python, native C, fast and GPU paths is
-`scripts/portlever/wiring.py` (docs/results/portlever.md, step 0).
+The end-to-end check against stock TALYS on the Python, native C, fast and GPU paths runs
+outside the unit tests.
 """
 
 from __future__ import annotations

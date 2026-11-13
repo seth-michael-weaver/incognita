@@ -1,4 +1,4 @@
-"""ELDA (Incognita extension; an OUTPUT, no effect on any existing number): neutron elastic and coupled-level inelastic
+"""Angular distributions (Incognita extension; an OUTPUT, no effect on any existing number): neutron elastic and coupled-level inelastic
 angular distributions from the incident coupled-channels S-matrix, plus TALYS's compound-elastic Legendre route.
 
 Shape elastic and CC inelastic (ECIS `scam`/`resu` angular part, TALYS `directecis` -> `nn*ang.L00`). The S-matrix is the
@@ -12,7 +12,7 @@ minus_identity, D = S - 1) so every block's matrix is kept. The amplitude for a 
         <j' m' I' M' | J M_J> <l' m'-v' 1/2 v' | j' m'> Y_{l' m'-v'}(theta, 0)
 
 with no i^(l-l') factor: the port's channel basis is ECIS's i^l [(l 1/2) j, I] J (checked against the textbook reduced
-matrix element: coupling_matrix = (-1)^((l-l')/2) x standard x a level-pair constant, development notes phase_check), so the plane
+matrix element: coupling_matrix = (-1)^((l-l')/2) x standard x a level-pair constant), so the plane
 wave's i^l and the outgoing H+'s i^-l' cancel against the basis phase. dsigma/dOmega = sum |f|^2 / (2 (2I+1)) (centre of
 mass, flux-normalised D so the k'/k factor is already in). Checks: the integral equals accumulate's `el` / `direct` sums.
 
@@ -125,7 +125,7 @@ def _initial_states(two_i: int) -> list[tuple[int, int]]:
     return [(mm, nu) for mm in range(-two_i, two_i + 1, 2) for nu in (-1, 1)]
 
 
-_GEO: dict = {}  # SPECOUT: per-block geometric weights (energy-independent), cleared per run by specout.reset
+_GEO: dict = {}  # per-block geometric weights (energy-independent), cleared per run by specout.reset
 
 
 def _block_geometry(two_j, lev, ls, js2, two_i0, level_two_spin, levels_out):
@@ -172,7 +172,7 @@ def _block_geometry(two_j, lev, ls, js2, two_i0, level_two_spin, levels_out):
 def block_amplitudes(ch, d: np.ndarray, two_i0: int, level_two_spin: list[int], levels_out: list[int], ylm: np.ndarray,
                      lmax_y: int) -> dict[int, np.ndarray]:
     """Contribution of one (J, pi) block to f (without -i/2k): {level: (E, n_theta, n_final, n_initial) complex}.
-    SPECOUT: the Clebsch-Gordan weights come from `_block_geometry` (cached across energies); the same terms."""
+    The Clebsch-Gordan weights come from `_block_geometry` (cached across energies); the same terms."""
     if os.environ.get("SPECOUT_CC_REFAMP", "0") != "1":
         two_j = int(ch.twoJ)
         lev = ch.level.tolist()
@@ -273,8 +273,8 @@ def _loop(maker, ff, kin, h, nmatch, r, n_lev, lmax, target_spin, two_spins, lev
             if ch.level.numel() == 0 or not bool(ch.elastic.any()):
                 continue
             chs.append(ch)
-        # SPECOUT: the compiled block solves the engine's own sum_blocks uses (exact_bits=False = CCFAST2 below
-        # soswitch, SPEEDT3 otherwise; same equations, rounding-level differences from the Python `smatrix`)
+        # The compiled block solves the engine's own sum_blocks uses (exact_bits=False = the native kernel below
+        # soswitch, the compiled torch path otherwise; same equations, rounding-level differences from the Python `smatrix`)
         sms = S.smatrix_blocks(chs, ff, kin, h, nmatch, r, minus_identity=True,
                                exact_bits=os.environ.get("SPECOUT_CC_EXACT", "0") == "1")
         for ch, (s_mat, _op) in zip(chs, sms):  # noqa: B905
@@ -310,7 +310,7 @@ def coupled_angular(rec: dict, theta_deg: np.ndarray, levels_out: list[int] | No
     omp, Z, A, e, band = rec["omp"], rec["Z"], rec["A"], rec["e"], rec["band"]
     particle, nj, options, refine = rec["particle"], rec["lmax"], rec["options"], rec.get("refine", 1)
     if particle != 1:
-        raise NotImplementedError("ELDA: neutron incident only")
+        raise NotImplementedError("angular distributions: neutron incident only")
     scheme = band_beta = None
     if band["colltype"] == "V" and int(band["iphonon"].max()) > 1:
         from physics.hf.ecis.vibm import scheme_from_band

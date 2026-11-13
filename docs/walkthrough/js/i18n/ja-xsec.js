@@ -19,7 +19,7 @@ WT.L.ch.xsec = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "this square: {#} barn = {#}⁻²⁴ cm²": "この正方形：{#} バーン = {#}⁻²⁴ cm²",
   "σ: the target area at each energy": "σ：各エネルギーでの標的面積",

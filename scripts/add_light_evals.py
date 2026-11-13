@@ -1,11 +1,11 @@
 """Add INCOGNITA's light-nuclide R-matrix evaluations to the Every nuclide data (docs/walkthrough/data/).
 
-Below Z 8 the page shows measurements only, unless an R-matrix evaluation of that nuclide has passed its pre-registered
-gates. Each passing evaluation is one file data/light_evals/<ID>.json (written from the frozen fit by the research
-card; every number in it comes from INCOGNITA's own R-matrix model, no evaluated-library content) with its public
+Below Z 8 the page shows measurements only, unless an R-matrix evaluation of that nuclide has passed its fixed-in-advance
+checks. Each passing evaluation is one file data/light_evals/<ID>.json (written from the frozen fit by the research
+pipeline; every number in it comes from INCOGNITA's own R-matrix model, no evaluated-library content) with its public
 report data/light_evals/<ID>.md. This script copies each one into the nuclide's file as "rm" and lists it in
 index.json under "light_evals" ("<Z>-<A>": id). An evaluation may also have a comparison layer data/light_evals/cmp/<ID>.json
-(display data for its elastic tab: measured points, a standard, an evaluated library as a comparator; for C12RM9 written by
+(display data for its elastic tab: measured points, a standard, an evaluated library as a comparator; for C-12 (`C12RM9`) written by
 scripts/export_c12_compare.py); it goes in as "rm"."cmp". build_site_data.py calls it at the end; it can also run alone:
 
 usage:  python scripts/add_light_evals.py

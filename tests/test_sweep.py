@@ -177,7 +177,7 @@ def test_sweep_channels_satisfy_the_total_cross_section_sum_rule():
 
 
 def test_write_input_gnorm_gets_gamgam_in_ev(tmp_path):
-    # GNORMFIX: stock TALYS normalises `gnorm y` to the resonance table's keV number read as eV
+    # stock TALYS normalises `gnorm y` to the resonance table's keV number read as eV
     # (C/E Gamma_gamma 1546 for I-130). write_input supplies the compound nucleus's width in eV.
     from physics.talys.runner import resonance_gamgam_ev, talys_dir, write_input
 

@@ -1,4 +1,4 @@
-"""SPECOUT angular distributions and DDX (OUTPUT ONLY; switch INCOGNITA_SPECOUT, see physics/hf/specout.py).
+"""Angular distributions and DDX (OUTPUT ONLY; switch INCOGNITA_SPECOUT, see physics/hf/specout.py).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -8,10 +8,10 @@ Every angular distribution is stored as Legendre coefficients c_L in TALYS's con
 
 * Shape elastic: from the incident S-matrix, |A|^2 + |B|^2 for a spin-1/2 projectile (spherical targets: the engine's own
   OMP re-solved on `omp.schrodinger.solve_radial`, the reference twin of the solve the engine ran; coupled targets: the
-  coupled-channels S-matrix, `ecis.angular.coupled_angular` (ELDA), which also gives the direct DA of every coupled level).
+  coupled-channels S-matrix, `ecis.angular.coupled_angular`, which also gives the direct DA of every coupled level).
   Checked against the engine's sigma_shape_el / sigma_direct (so_*_chk arrays).
 * Compound elastic and compound inelastic to the target's discrete levels 0..NLEV: TALYS comptarget.f90 cleg from the exact
-  per-(J, pi) Hauser-Feshbach pair weights with Moldauer WFC (`compound.ceang`, CEANG), normalised to the engine's own level
+  per-(J, pi) Hauser-Feshbach pair weights with Moldauer WFC (`compound.ceang`), normalised to the engine's own level
   population (the ratio is kept as a diagnostic: it is 1 unless an engine option changed the compound weights).
 * Direct DWBA levels (not coupled): `ecis.dwba_angular` coherent DWBA amplitude normalised to the engine's xsdirdisc.
 * Continuum DDX: TALYS's Kalbach systematics (kalbach.f90 + kalbachsep.f90): compound part isotropic, pre-equilibrium and
@@ -28,7 +28,7 @@ import os
 
 import numpy as np
 
-NLEV = 10  # compound Legendre for the target's levels 0..NLEV (CEANG's NLEV_MAX)
+NLEV = 10  # compound Legendre for the target's levels 0..NLEV (`compound.ceang`'s NLEV_MAX)
 LCOMP = 24  # compound Legendre order kept (TALYS cleg runs to 2 min(l, l', J); terms above ~20 are ~0)
 
 
@@ -92,7 +92,7 @@ def sync_target(on: bool) -> None:
 
 
 def blocks_from_cells(cells: list[dict], nlev: int) -> dict:
-    """CEANG's pair_blocks layout rebuilt from nx_target's cells: M_n[a, b] = pref tinc_a T_b W_ab rho_n
+    """`compound.ceang`'s pair_blocks layout rebuilt from nx_target's cells: M_n[a, b] = pref tinc_a T_b W_ab rho_n
     (W_ab = sum_m prod_m / ((1 + x_m fa_a)(1 + x_m c_b)) with Moldauer, 1 without), plus the elastic enhancement
     pref T_b tinc_a ea_a rho_lt on the diagonal channel of level Ltarget (nx_target's `elas`)."""
     out, sums = [], {n: 0.0 for n in range(nlev + 1)}
@@ -231,7 +231,7 @@ def record_energy(cas, st, binp, cinp, etot, a_e, fkw, ci, pop, b2, b) -> None:
         cur.setdefault("errors", []).append(f"specang.record_energy {rec['error']}")
     from physics.hf import angout
 
-    if angout.active():  # KWCOV B3: every residual's levels for the angle files (also when the CEANG part failed)
+    if angout.active():  # every residual's levels for the angle files (also when the `compound.ceang` part failed)
         try:
             angout.record(rec, cas, st, binp, cinp, etot, a_e, fkw, ci, pop, b2, b)
         except Exception as exc:  # noqa: BLE001 -- output only
@@ -490,7 +490,7 @@ def shape_elastic_spherical(cas, energies: list[float]) -> dict:
 
 
 def coupled(cas, energies: list[float]) -> dict:
-    """Coupled targets: shape elastic + direct DA of every coupled level per energy (ELDA's coupled_angular, one energy at a
+    """Coupled targets: shape elastic + direct DA of every coupled level per energy (the coupled_angular, one energy at a
     time as the engine solves it), as Legendre coefficients; plus the integral checks."""
     import torch
 
@@ -596,7 +596,7 @@ def run_level(cas, energies: list[float]) -> None:
             r = shape_elastic_spherical(cas, energies)
         else:
             r = coupled(cas, energies)
-        if angout.active() and int(cas.k0) > 1:  # KWCOV B3: charged-particle elastic with the Coulomb amplitude
+        if angout.active() and int(cas.k0) > 1:  # charged-particle elastic with the Coulomb amplitude
             r.update(angout.charged_elastic(cas, energies))
         r["da_cpu_s"] = np.array(time.process_time() - t0)
         t1 = time.process_time()

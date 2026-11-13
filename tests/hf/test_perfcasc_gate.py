@@ -1,16 +1,15 @@
-"""PERFCASC correctness gate: the speed work on the gamma cascade / multiple emission, the level densities and the
+"""Cascade speed check: the speed work on the gamma cascade / multiple emission, the level densities and the
 pre-equilibrium stage must not change a single bit of the library job's cross sections.
 
-For Fe-56, Zr-90, Au-197 and U-238 (the TALYSWORLD library compositions: JS(P,A) = arms P and A, ACTJS A(rotor) = arm AJ)
+For Fe-56, Zr-90, Au-197 and U-238 (the library compositions: JS(P,A) = arms P and A, actinide A(rotor) = arm AJ)
 at one incident energy (1 MeV) and on the 64-point library grid (1 keV - 20 MeV, `data/perfcasc_grid64.json`), the
 engine's total, elastic, nonelastic, capture, (n,p), (n,a), (n,2n), inelastic and fission cross sections of every arm
-must equal, bit for bit, the reference made with the engine before the change (origin/main 3aac5ab1,
-`data/perfcasc_gate_ref.json`). `INCOGNITA_PERFCASC_RTOL` (default 0 = bit-identical) loosens that to a relative
+must equal, bit for bit, the reference made with the engine before the change
+(`data/perfcasc_gate_ref.json`). `INCOGNITA_PERFCASC_RTOL` (default 0 = bit-identical) loosens that to a relative
 tolerance for a change that cannot be bit-identical (it must then be stated with the change, at most 1e-10).
 
-The job is the library v0.2 deck and runner (`libv02/inputs`: lines, SL table and the prodrun/pprun/r52pool/engine_pool
-code), which is not part of this repository: the test is skipped without it (`INCOGNITA_PERFCASC_INPUTS`, default
-~/libv02/inputs) or without the RIPL-4 level parameters the deck's `ctwindow2` reads. Runner: `perfcasc_gate_run.py`.
+The job is the library v0.2 deck and runner (lines, SL table and the library runner and engine-pool code), which
+is not part of this repository: the test is skipped without it (directory `INCOGNITA_PERFCASC_INPUTS`) or without the RIPL-4 level parameters the deck's `ctwindow2` reads. Runner: `perfcasc_gate_run.py`.
 Regenerate the reference (only from an engine known to be right): INCOGNITA_PERFCASC_WRITE=1.
 """
 

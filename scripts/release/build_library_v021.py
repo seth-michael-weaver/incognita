@@ -1,8 +1,8 @@
 """Build library v0.2.1 from library v0.2: the Maxwellian averages and rates recomputed in the centre-of-mass frame.
 
 The bug (v0.2 and earlier): MACS(kT) was integrated over the LABORATORY neutron energy, sigma(E_lab) E_lab exp(-E_lab/kT),
-with no A/(A+1) factor (nucleus research/rl/libv02/code/build.py:33-35 and mform.py:25-27 for macs30 / ANCHORED scaling;
-nuc-local scripts/release/make_rates.py for macs_kt, the rates and the REACLIB fits). The MACS is defined (KADoNiS,
+with no A/(A+1) factor (the v0.2 build.py:33-35 and mform.py:25-27 for macs30 / ANCHORED scaling;
+the v0.2 make_rates.py for macs_kt, the rates and the REACLIB fits). The MACS is defined (KADoNiS,
 Beer, Voss & Winters 1992) with E the centre-of-mass energy and the cross section taken at E_lab = E (A+1)/A. Integrating
 over E_lab overstates the MACS by about (1+1/A)^a (a ~ 1/2 for a 1/v cross section). v0.2 also cut every integral at the
 grid's first point, E_lab = 1 keV, which drops the E < 1 keV part (several % at kT = 5 keV; most of the rate at T9 < 0.03).

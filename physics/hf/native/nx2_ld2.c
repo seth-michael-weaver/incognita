@@ -1,4 +1,4 @@
-/* NATIVEX2 lever `ld2`: the tabulated level density of density.f90 (ldmodel >= 4 and every
+/* Native kernel `ld2`: the tabulated level density of density.f90 (ldmodel >= 4 and every
  * fission-barrier table), off the autograd graph.
  *
  *   nx2_ld2_table_density   density.f90's table branch: rho(Ex, J, parity) from ldtable

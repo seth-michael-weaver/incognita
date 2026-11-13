@@ -1,4 +1,4 @@
-/* MERGED2: TALYS's `exgrid.f90` excitation-energy bins of one residual -- `Ex(0:maxex)` and
+/* TALYS's `exgrid.f90` excitation-energy bins of one residual -- `Ex(0:maxex)` and
  * `deltaEx` -- as one C call.
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.

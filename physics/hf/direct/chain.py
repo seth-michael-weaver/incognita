@@ -4,14 +4,14 @@ Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 ECIS-06 (`ecist.f`) is by J. Raynal and ships inside the TALYS repository under its MIT license.
 
-Task: NODUMP (physics/hf/CONTRACT.md §7). Acceptance test: A-direct / A-mult / E2E (§6).
+Task: the dump-free chain (physics/hf/CONTRACT.md §7). Acceptance test: A-direct / A-mult / E2E (§6).
 
 `direct.prepare.injected_cross_sections` is T12's declared injection seam: the per-level DWBA
 cross sections, the coupled-channels ones and the four giant resonances, all read off
-`directE*.out`. T13 ported the DWBA (`ecis.dwba`, gate A-direct: n = 13,716, p95 6.0e-3 against
+`directE*.out`. T13 ported the DWBA (`ecis.dwba`, test A-direct: n = 13,716, p95 6.0e-3 against
 a 5e-2 tolerance) and the coupled-channels off-diagonal (`ecis.incident`, n = 668, p95 7.5e-3),
-and ECIS2 made both run on T4's own optical-model parameters instead of the `f6.2` ones
-`talys.out` prints. Nothing was left but the wiring, and this module is it:
+and both run on T4's own optical-model parameters instead of the `f6.2` ones
+`talys.out` prints. This module is the wiring:
 
     xs, xscc, xsgrcoll = computed_cross_sections(case, levels)     # was (case, levels, dump)
 
@@ -54,7 +54,7 @@ def _omp_at(Z: int, A: int, e_inc_mev: float, k0: int = 1):
     """
     from physics.hf.omp.parameters import omp_parameters
 
-    # SPEEDP: one `Options`/`Params` pair per target rather than one per energy. Besides the
+    # One `Options`/`Params` pair per target rather than one per energy. Besides the
     # build itself, a fresh pair defeats every downstream cache keyed on their identity
     # (`structure.levels.discrete_levels`, `structure.deformation.deformation`).
     o, p = _defaults(Z, A)
@@ -63,7 +63,7 @@ def _omp_at(Z: int, A: int, e_inc_mev: float, k0: int = 1):
 
 @lru_cache(maxsize=8)
 def _omp_grid(Z: int, A: int, energies: tuple[float, ...], k0: int = 1):
-    """NATIVEX2: `_omp_at` for every energy of the declared grid in one `omp_parameters` call,
+    """`_omp_at` for every energy of the declared grid in one `omp_parameters` call,
     as a dict energy -> single-row `OMPParameters`. The parameters are elementwise in the energy
     (checked bit for bit on the bench 15 and an 11-target sample, actinides with RIPL tables
     included: the table's nodes do not move with the largest energy asked), so a row equals the
@@ -106,7 +106,7 @@ def _coupled(Z: int, A: int, energies: tuple[float, ...], k0: int = 1):
     Solved once per target: `incidentecis.f90` runs one ECIS deck per incident energy, and the
     `soswitch` split inside `incident_coupled` needs the whole axis to stitch.
 
-    SPEEDP: a run that computes a subset of the declared grid solves the deck on that subset
+    A run that computes a subset of the declared grid solves the deck on that subset
     (`preeq.chain.set_energy_subset`), with `lmax` still taken from the WHOLE axis -- `njmax` is
     `incident_coupled`'s only genuinely cross-energy quantity, and letting it follow a subset's
     `e.max()` would be a different calculation rather than the same one scheduled differently.
@@ -171,13 +171,13 @@ def computed_cross_sections(cs, levels, *, refine: int = 4, energies=None,
     from physics.hf.ecis.formfactor import dwba_parts
 
     if int(cs.options.k0) == 0:
-        # ENGPROJ: direct.f90:32 -- no direct reaction for an incident photon (no OMP, no DWBA, no coupled levels)
+        # direct.f90:32 -- no direct reaction for an incident photon (no OMP, no DWBA, no coupled levels)
         cc_levels = np.asarray(cs.struct.cc_levels).reshape(-1)
         return (torch.zeros(len(levels.index), dtype=DTYPE), torch.zeros(len(cc_levels), dtype=DTYPE),
                 torch.zeros(4, dtype=DTYPE))
     grc = torch.zeros(4, dtype=DTYPE)
     if int(getattr(cs.options, "Ltarget", 0)) != 0:
-        # KWCOV GAP (isomeric targets): direct.f90:33 returns before directecis / directread / giant, so an excited
+        # isomeric targets: direct.f90:33 returns before directecis / directread / giant, so an excited
         # target gets no DWBA level and no giant resonance; the incident coupled-channels inelastic below
         # (incidentread.f90:381-394) is read all the same
         xs = torch.zeros(len(levels.index), dtype=DTYPE)
@@ -185,12 +185,12 @@ def computed_cross_sections(cs, levels, *, refine: int = 4, energies=None,
         omp = _omp_for(cs.Z, cs.A, float(cs.e_inc_mev), int(cs.options.k0), energies)
         case = prepare_case(omp, cs.target, float(cs.e_inc_mev), direct_case=cs,
                             levels=levels if levels_are_dwba else None)
-        # CPINC: the distorted waves are the projectile's (Coulomb, mass, spin); a neutron run passes
+        # The distorted waves are the projectile's (Coulomb, mass, spin); a neutron run passes
         # nothing, so its call is unchanged
         pkw = {} if int(cs.options.k0) == 1 else {"particle": int(cs.options.k0)}
-        xs_by_level, xsgr = dwba_case(omp, case, refine=refine, parts=dwba_parts(cs.options),  # VIBLEN
+        xs_by_level, xsgr = dwba_case(omp, case, refine=refine, parts=dwba_parts(cs.options),
                                       **pkw)
-        from physics.hf import specang  # SPECOUT: keep this energy's DWBA deck for the level angular distributions (output only)
+        from physics.hf import specang  # keep this energy's DWBA deck for the level angular distributions (output only)
 
         specang.record_dwba(cs.Z, cs.A, float(cs.e_inc_mev), omp, case, dwba_parts(cs.options), refine, xs_by_level)
         by = {int(i): float(v) for i, v in zip(case.level_index.tolist(),
@@ -231,7 +231,7 @@ def direct_result(target: str, e_inc_mev: float, energies, *, refine: int = 4):
     energies = tuple(float(e) for e in energies)
     if not stagedisk.enabled():
         return _direct_result(target, e_inc_mev, energies, refine)
-    # STAGECACHE: from disk when this energy's optical-model / level / deformation inputs were
+    # Stage cache: from disk when this energy's optical-model / level / deformation inputs were
     # seen before; the `dircap` log lines the call appended are stored with it and replayed
     from physics.hf.compound.dens_reference import _structure_of
     from physics.hf.direct import prepare as P
@@ -275,7 +275,7 @@ def _direct_result(target: str, e_inc_mev: float, energies: tuple, refine: int):
     gr = D.giant_resonance_parameters_of(cs.struct, cs.params)
     xs, xscc, xsgrcoll = computed_cross_sections(cs, lv, refine=refine, energies=energies,
                                                  levels_are_dwba=True)
-    if int(getattr(cs.options, "Ltarget", 0)) != 0:  # KWCOV GAP: direct.f90:33, no `giant` call (xsgrsum = 0)
+    if int(getattr(cs.options, "Ltarget", 0)) != 0:  # direct.f90:33, no `giant` call (xsgrsum = 0)
         from dataclasses import replace as _replace
 
         cs = _replace(cs, flaggiant=False)
@@ -290,19 +290,19 @@ def _direct_result(target: str, e_inc_mev: float, energies: tuple, refine: int):
     from physics.hf import engphys
     if engphys.on("dircap"):
         res = _dircap(cs, energies, e_inc_mev, xs, xsgrcoll, xscc, res, _run)
-    # FIXDWBA fallback (INCOGNITA_DWBAUNIT, default off): cap the direct part at sigma_R
+    # Fallback (INCOGNITA_DWBAUNIT, default off): cap the direct part at sigma_R
     from physics.hf.direct.dwbaunit import cap_direct
 
     res = cap_direct(res, cs.Z, cs.A, e_inc_mev)
     return res, cs.flaggiant
 
 
-#: ENGPHYS `dircap` log: (Z, A, E, sigma_R, coupled, non-coupled direct before, scale) of every capped energy.
+#: `dircap` log: (Z, A, E, sigma_R, coupled, non-coupled direct before, scale) of every capped energy.
 DIRCAP_LOG: list = []
 
 
 def _dircap(cs, energies, e_inc_mev, xs, xsgrcoll, xscc, res, run):
-    """ENGPHYS `dircap`: first-order DWBA is not unitary. Where the non-coupled direct cross section (DWBA discrete
+    """`dircap`: first-order DWBA is not unitary. Where the non-coupled direct cross section (DWBA discrete
     levels + collective continuum + giant resonances) exceeds the flux the coupled channels leave (sigma_R - sum of
     the coupled levels; sigma_R alone for a spherical target), scale the DWBA and giant-resonance inputs by one
     common factor so it equals that flux. Everything downstream (level feeding, spectra, compound flux) follows."""

@@ -299,7 +299,7 @@ input[type=range] { min-height: 32px; }
 .figs .w b { color: var(--fission); } .figs .l b { color: var(--proton); }
 .asof { font-family: var(--sans); font-size: 13px; color: var(--faint); }
 
-/* ---------- scoreboard page ---------- */
+/* ---------- comparison page (scoreboard.html) ---------- */
 .sitenav { gap: 4px; }
 .sitenav a.here { color: var(--ink); background: var(--card); box-shadow: 0 0 0 1px var(--line); }
 .sb { max-width: 54rem; margin: 0 auto; padding: 48px 20px 96px; }
@@ -455,7 +455,7 @@ body.og .hero-copy { bottom: 64px; }
 .dx-key i.dia { width: 9px; height: 9px; border-radius: 1px; border: 1.5px solid; transform: rotate(45deg); margin: 0 2px; }
 .dx-key i.sq { width: 8px; height: 8px; border-radius: 0; border: 1.5px solid; background: none; margin: 0 1px; }
 .dx-sw { display: inline-block; width: 10px; height: 2px; margin: 0 6px 3px 0; vertical-align: middle; }
-/* INCOGNITA's own curve below 1 keV (RESFILL): its line style as a small SVG swatch; the long label wraps beside it */
+/* INCOGNITA's own curve below 1 keV: its line style as a small SVG swatch; the long label wraps beside it */
 .dx-rrsw { flex: none; vertical-align: middle; }
 .dx-key.dx-rrkey { align-items: flex-start; max-width: 100%; } .dx-rrkey .dx-rrsw { margin-top: 0.3em; } .dx-rrkey span { min-width: 0; }
 .dx-below { margin: 8px 0 4px; font: 500 13px/1.5 var(--sans); color: var(--soft); overflow-wrap: anywhere; }
@@ -498,7 +498,7 @@ body.og .hero-copy { bottom: 64px; }
 .dx-src { font-size: 15px; }
 @media (max-width: 640px) { .dx { padding-top: 24px; } .dx-ds li { grid-template-columns: minmax(0, 1fr) auto; } .dx-ds li > :nth-child(2), .dx-ds li > :nth-child(3) { display: none; } }
 
-/* ---------- site header (every page): brand, The physics ▾ (chapters), Every nuclide, Scoreboard, GitHub, EN | ES ---------- */
+/* ---------- site header (every page): brand, The physics ▾ (chapters), Every nuclide, Comparisons, GitHub, EN | ES ---------- */
 .toc.site { display: flex; align-items: center; gap: 6px; padding: 8px max(16px, 3vw); min-height: 56px; box-sizing: border-box; }
 .site .brand { display: inline-flex; align-items: center; gap: 10px; margin-right: auto; padding: 0; font: 600 17px/1.1 var(--display); color: var(--ink); text-decoration: none; white-space: nowrap; border-radius: 8px; }
 .site .brand img { display: block; border-radius: 7px; }
@@ -572,7 +572,7 @@ body.dx-page { background: radial-gradient(1400px 700px at 70% -10%, #16295a 0%,
 @media (max-width: 720px) { .dx-nuc-head { grid-template-columns: minmax(0, 1fr); justify-items: start; } .dx-atomwrap, .dx-atomwrap canvas { width: 180px; height: 180px; } .dx-stat b { font-size: 26px; } }
 .dx-page .dx-chip.t0, .dx-page .dx-chip.t5, .dx-page .dx-chip.t6 { color: #08122a; }
 
-/* ---------- scoreboard: dark and lit, like the hero ---------- */
+/* ---------- comparison page: dark and lit, like the hero ---------- */
 body.sb-lit { background: radial-gradient(1400px 700px at 30% -10%, #12305a 0%, #0a1124 45%, #05070e 100%) fixed; }
 .sb-lit .sb-head h1 { font-size: clamp(52px, 9vw, 108px); letter-spacing: -0.02em; color: #fff; text-shadow: 0 2px 40px rgba(63,211,168,.25); }
 .sb-lit .sb-head p { color: rgba(225,232,250,.82); }
@@ -785,13 +785,13 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 
 
 @media (prefers-reduced-motion: reduce) { .ch-rail .rail-more { transition: none; } }
-/* phones (Seth 2026-10-28): no chapter-dot menu and no floating chapter chip (it sat over the text); the chapter headings say where you are */
+/* phones: no chapter-dot menu and no floating chapter chip (it sat over the text); the chapter headings say where you are */
 @media (max-width: 900px) { .ch-rail { display: none !important; } }
-/* hero text higher (Seth 2026-10-28): centred on wide screens; on phones raised, leaving the band above it for the nucleus */
+/* hero text higher: centred on wide screens; on phones raised, leaving the band above it for the nucleus */
 .hero-copy { justify-content: center; bottom: max(72px, 11vh); }
 @media (max-width: 720px) { .hero .hero-copy { justify-content: flex-end; bottom: calc(19vh + 64px); } }
 
-/* ---------- immersive hero (2026-10-29): no text-left / picture-right split. The nucleus is centred and large, the title runs
+/* ---------- immersive hero: no text-left / picture-right split. The nucleus is centred and large, the title runs
    edge to edge across it as solid type, the rest is a quiet caption row along the bottom. Phones keep their stacked layout. */
 @media (min-width: 721px) {
   .hero { --hero-gold: #f4e2a8; }
@@ -887,9 +887,9 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 .in-part { list-style: none; margin: 18px 0 2px; }
 .in-part h3 { margin: 0 0 4px; }
 .in-part p { margin: 0; }
-/* header menus fit their entries (Seth 2026-11-06: "the menu doesn't have to be that wide") */
+/* header menus fit their entries (no wider than needed) */
 .site .chap ol { width: max-content; min-width: 13rem; max-width: min(22rem, 92vw); }
-/* cross-page menus (Seth 2026-11-06): the label is a link styled as a button; its chapter list opens on hover or keyboard
+/* cross-page menus: the label is a link styled as a button; its chapter list opens on hover or keyboard
    focus (an invisible bridge keeps it open while the pointer crosses the gap). Phones: the plain link in the ☰ menu. */
 .site .chap-x > .toc-menu { background: var(--card); box-shadow: 0 0 0 1px var(--line); }
 .site .chap-x > .toc-menu:hover, .site .chap-x:focus-within > .toc-menu { color: var(--ink); }
@@ -906,7 +906,7 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 .site .chap-x > a.toc-menu span { font: inherit; margin: 0; opacity: 1; }
 .site .chap-x > a.toc-menu .caret { font-size: inherit; opacity: 1; }
 @media (max-width: 860px) { .site .chap-x { margin: 0; display: flex; flex-direction: column; } .site .chap-x > a.toc-menu { display: flex; } }
-/* topics.html lesson index as a plain list, like a glossary (Seth 2026-11-06: no boxes) */
+/* topics.html lesson index as a plain list, like a glossary (no boxes) */
 .tp-index { max-width: 54rem; }
 .tp-part { margin: 0 0 40px; }
 .tp-part-h { display: flex; align-items: baseline; gap: 14px; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 1px solid var(--line); font: inherit; }
@@ -922,7 +922,7 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 .tp-list .lvl { justify-self: end; }
 @media (max-width: 600px) { .tp-list a { grid-template-columns: 1.6em minmax(0, 1fr); gap: 10px; } .tp-list .lvl { grid-column: 2; justify-self: start; } .tp-t b { font-size: 17px; } }
 
-/* ---------- scoreboard, calmer (Seth 2026-11-06: "much more palatable"): no glow, one type scale, theme-aware ---------- */
+/* ---------- comparison page, calmer: no glow, one type scale, theme-aware ---------- */
 body.sb-lit { background: var(--paper); }
 body.sb-lit::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 520px; pointer-events: none; z-index: -1; background: radial-gradient(900px 420px at 25% -20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%); }
 .sb-lit .sb-head h1 { font-size: clamp(40px, 6vw, 68px); color: var(--ink); text-shadow: none; letter-spacing: -0.01em; }
@@ -967,7 +967,7 @@ body.sb-lit::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 5
 .sb-cin span { color: var(--faint); }
 .sb-vd { white-space: nowrap; }
 
-/* Every nuclide, less text (2026-11-06): long notes sit behind closed Details toggles */
+/* Every nuclide, less text: long notes sit behind closed Details toggles */
 .dx-more { margin: 18px 0 8px; }
 .dx-more > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: 600 14px var(--sans); color: var(--soft); padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; list-style: none; }
 .dx-more > summary::-webkit-details-marker { display: none; }

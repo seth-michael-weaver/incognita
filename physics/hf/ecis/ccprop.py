@@ -1,4 +1,4 @@
-"""CCPROP (ROUTE100 WP8): a log-derivative propagator for one coupled-channels (J, parity) block,
+"""A log-derivative propagator for one coupled-channels (J, parity) block,
 as the candidate replacement for the renormalised Numerov step of `ccfast.c::cc_block_w`.
 
 The incumbent integrates the solution matrix u itself:
@@ -14,7 +14,7 @@ already the quotient) and the step is one matrix inverse instead of one solve.
 
 Method: Johnson's log-derivative propagator (J. Comput. Phys. 13 (1973) 445) with the half-sector
 set to ECIS's own radial step, so the potential is sampled exactly where `ecis_grid` samples it
-(CCPROP gate 3). Writing Y = u' u^-1, the Riccati equation Y' = M - Y^2 is split into
+(check 3). Writing Y = u' u^-1, the Riccati equation Y' = M - Y^2 is split into
 
   * a **kick** at each node,  Y <- Y + Q_i,  Q_i = w_i Mtilde_i, with `w_i` the composite Simpson
     weight of the node (h/3, 4h/3, 2h/3, ..., 4h/3, h/3) and, at a panel midpoint, the modified
@@ -70,7 +70,7 @@ def log_derivative(mm: Tensor, h_fm: Tensor, nmatch: Tensor, l_plus_1: Tensor,
     the orbital angular momenta plus one.
 
     `modified=False` drops Johnson's (1 + h^2 M / 6)^-1 correction, which turns the rule from
-    fourth order into second: it is the FLOP floor quoted in the gate, not a usable method.
+    fourth order into second: it is the FLOP floor of the cost comparison, not a usable method.
     """
     n_e, n_r, n, _ = mm.shape
     eye = torch.eye(n, dtype=CDTYPE).expand(n_e, n, n)
@@ -126,7 +126,7 @@ def smatrix_prop(ch, ff, kin, h_fm: Tensor, nmatch: Tensor, r_fm: Tensor,
     Only the undeformed-spin-orbit form (`solver._block_operators`'s `nmat is None`, i.e. below
     `soswitch`, the `cc_block_w` path) is propagated here; above `soswitch` the equation carries a
     first-derivative coupling and its Riccati form picks up an N Y term, costed in
-    `harness/ccprop_flops.py` but not implemented, because the gate is already decided.
+    `harness/ccprop_flops.py` but not implemented, because the cost comparison already decides it.
     """
     from physics.hf.ecis.solver import _asymptotic, _block_operators
 

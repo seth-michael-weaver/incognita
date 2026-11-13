@@ -3,7 +3,7 @@ production against TALYS, with every upstream input injected from `talys_instrum
 
 Task: T10 (physics/hf/CONTRACT.md §7). Acceptance test: A-mult (§6), tolerance p95 |ln(p/t)| <= 0.05.
 
-Metric and floors are §2 of docs/results/hf-engine-gates.md: r = |ln(p/t)| over points where the
+Metric and floors (contract §2): r = |ln(p/t)| over points where the
 TALYS value is above the floor (1e-3 mb for cross sections, 1e-6 mb for populations); a point
 where TALYS is below the floor and the port is above counts as r = inf.
 
@@ -50,7 +50,7 @@ def count_negative_reference(work: Path) -> int:
 
     §2's metric scores `r = |ln(p/t)|` where `t` is above the floor and calls everything else
     `inf` ("the port produced something TALYS did not"). A negative TALYS value is below the
-    floor, so a port that reproduces it exactly still scores `inf`. The rule is pre-registered and
+    floor, so a port that reproduces it exactly still scores `inf`. The rule is fixed and
     is not changed here; this counter makes the cause visible instead. Bi-209 (n,alpha) to level
     30 at 18 MeV is the only such point in the reference set: TALYS prints -0.303844 mb and the
     port returns -0.303844 mb.
@@ -221,7 +221,7 @@ def _target_ZA(tag: str) -> tuple[int, int]:
 
 
 # ------------------------------------------------------------------------------------------------
-# E2E (docs/results/hf-engine-gates.md §4)
+# E2E (contract §4)
 # ------------------------------------------------------------------------------------------------
 
 E2E_CHANNELS: dict[str, tuple[str, str]] = {
@@ -285,7 +285,7 @@ def e2e_run(work: Path, injection=None) -> dict:
 
 
 def e2e(runs: list[Path], injections: dict | None = None) -> dict:
-    """§4's gate statistic: the median over the spherical targets of the per-target medians.
+    """§4's test statistic: the median over the spherical targets of the per-target medians.
 
     `injections` maps a run directory's name to the `Injection` to score it with; anything absent
     falls back to `DumpInjection`.

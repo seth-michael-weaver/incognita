@@ -1,4 +1,4 @@
-"""SPEEDW: the compiled multipreeq2 loop (`preeq.mpe_fast`) against the torch loop (`preeq.multi`).
+"""The compiled multipreeq2 loop (`preeq.mpe_fast`) against the torch loop (`preeq.multi`).
 
 Every mother bin of Fe-56's 20 MeV cascade (the only incident energy of the harness grid where
 multipreeq2 runs) goes through both, fed the SAME inputs. The kernel uses glibc `pow` and
@@ -50,7 +50,7 @@ def test_kernel_matches_torch_loop_on_every_mother_bin(monkeypatch):
         return ref
 
     monkeypatch.setattr(F, "multiple_preequilibrium_fast", both)
-    # NATIVEX: multipreeq2 runs through `Cascade.mpe` (this kernel), not inside the compiled walk
+    # with `HF_NATIVEX_MPE=0` multipreeq2 runs through `Cascade.mpe` (this kernel), not inside the compiled walk
     monkeypatch.setenv("HF_NATIVEX_MPE", "0")
     ChainedFull(Z=26, A=56, declared_energies=GRID, energies=(20.0,)).cases()
     assert seen["n"] > 100

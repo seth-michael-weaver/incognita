@@ -57,7 +57,7 @@ def sixj(j1, j2, j3, j4, j5, j6) -> Tensor:
 
 def _sixj_many(items) -> list[Tensor]:
     """`[sixj(*args) for args in items]` in one element-wise evaluation over the concatenated
-    arguments (SPEEDT3). `racah`'s operations are element-wise and torch's lgamma, exp and cos are
+    arguments. `racah`'s operations are element-wise and torch's lgamma, exp and cos are
     position-independent, so every value is the one its own call gives; one call instead of one
     per (J, parity) block and multipole saves the per-call op overhead."""
     if not items:
@@ -69,7 +69,7 @@ def _sixj_many(items) -> list[Tensor]:
         for k in range(6):
             flat[k].append(full[k].reshape(-1))
     args = [torch.cat(f) for f in flat]
-    # CCGLUE: the same element-wise evaluation in C (`ccnative.sixj`) when the library is loaded
+    # The same element-wise evaluation in C (`ccnative.sixj`) when the library is loaded
     out = _ccnative.sixj(args)
     if out is None:
         out = sixj(*args)
@@ -116,7 +116,7 @@ def reduced_matrix_element(lam, spin_lo, spin_hi, kband) -> Tensor:
     return torch.where(ok, val, torch.zeros_like(val))
 
 
-# SPEEDT: the two factors of the coupling that do not depend on the total J -- the reduced matrix
+# The two factors of the coupling that do not depend on the total J -- the reduced matrix
 # element (a function of the level pair) and `dcgs` (of the j pair) -- are evaluated once per
 # multipole on the distinct values and gathered, instead of on every (row, column) pair of every
 # (J, parity) block. Element by element the same operations on the same arguments (clebsch is
@@ -144,7 +144,7 @@ def _dcgs_table(lam: float, jvals: tuple[float, ...]) -> Tensor:
 def _dcgs_lookup(lam: float, j: Tensor) -> Tensor:
     """`dcgs(lam, j[:, None], j[None, :])` through `_dcgs_table`.
 
-    SPEEDT3: for half-integer j (a nucleon projectile) one table per multipole over every
+    For half-integer j (a nucleon projectile) one table per multipole over every
     j = 1/2, 3/2, ... up to the largest seen, instead of one per distinct j set of each (J, parity)
     block; the entries are the same element-wise evaluations (torch's lgamma, exp, cos and sqrt
     are position-independent), gathered by 2j."""
@@ -254,7 +254,7 @@ def coupling_matrix(
     ir = spin[level][:, None]
     out = torch.zeros((lam.numel(), n, n), dtype=DTYPE)
     out[0] = torch.eye(n, dtype=DTYPE)
-    # SPEEDT3: the 6j symbols of every multipole in one element-wise call (see `_sixj_many`);
+    # The 6j symbols of every multipole in one element-wise call (see `_sixj_many`);
     # `w6_all` may come from a call over many blocks
     if w6_all is None:
         w6_all = sixj(*_rot_sixj_args(twoJ, level, j, spin))
@@ -424,7 +424,7 @@ def vibrational_coupling_matrix(
     lr, lc = l[:, None].to(DTYPE), l[None, :].to(DTYPE)
     jr = j[:, None]
     ir = spin[level][:, None]
-    # SPEEDT3: the 6j symbols of every band in one element-wise call (see `_sixj_many`);
+    # The 6j symbols of every band in one element-wise call (see `_sixj_many`);
     # `_bands_w6` may come from a call over many blocks
     if _bands_w6 is None:
         bands = _vib_bands(level, vib_lambda)
@@ -437,7 +437,7 @@ def vibrational_coupling_matrix(
         ph = torch.cos(torch.pi * ((lr + lc + L) / 2.0 + J + ir + lc - jr))
         val = ph * (2.0 * L + 1.0) ** 0.5 * w6 * cgs
         val = torch.where(torch.isfinite(val), val, torch.zeros_like(val))
-        # WEAKCPL: ECIS fills only the i2 <= i1 triangle (row = the one-phonon level, column = the g.s.) and copies it
+        # ECIS fills only the i2 <= i1 triangle (row = the one-phonon level, column = the g.s.) and copies it
         # (quan-379..417). With t = +1 both ways the formula above is symmetric iff I_b - I_0 - lambda is even, which holds
         # for every even-even target (g.s. 0+, one-phonon I_b = lambda); for an odd-A weak-coupling multiplet member with
         # J - I - lambda odd it is ANTI-symmetric (non-hermitian). Copy the triangle there, as ECIS does; untouched otherwise.

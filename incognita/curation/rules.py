@@ -251,7 +251,7 @@ class Engine:
             one = o.get("n_ref") == 1 and np.sign(-o["ref_dex"][0]) == np.sign(d10) and abs(o["ref_dex"][0]) > X3
             r["fired"].add("R10x" if one else "R10d")
 
-    # ------------------------------------------------------------------ R11 (MACSCHECK, adopted)
+    # ------------------------------------------------------------------ R11 (rule `MACSCHECK`, adopted)
     @staticmethod
     def macs_over(e_lo, e_hi, e_mid, sig, kt):
         o = np.argsort(e_mid)

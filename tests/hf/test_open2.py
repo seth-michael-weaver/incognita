@@ -1,6 +1,6 @@
-"""OPEN2: Am-241's K = 5/2+ band head, the DWBA level that was returning exactly zero.
+"""Am-241's K = 5/2+ band head, the DWBA level that was returning exactly zero.
 
-Gate: `docs/results/hf-open2.md` section 3. `weakcoupling.f90:44` never assigns `jcore`/`pcore`
+See `docs/results/hf-open2.md` section 3. `weakcoupling.f90:44` never assigns `jcore`/`pcore`
 to a level whose `leveltype` is 'R' or 'V', and `directecis.f90:211-212` then writes
 `Plevel(2) = cparity(0)`, which `constants.f90:113` defines as a **blank**. ECIS reads the blank
 as positive; the port read the 0 as a parity and its natural-parity test threw the level away.

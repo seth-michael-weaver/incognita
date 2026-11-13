@@ -8,9 +8,9 @@ TALYS routines ported here (file:line of the subroutine statement):
     binaryspectra.f90:1 (binaryspectra) -- xsbinemis = xscomp + xspreeq + xsgr
     binary.f90:345-375                  -- binemissum (integrated continuum) and the discrete lines
 
-XDHARD (Incognita extension, OUTPUT ONLY; SPECOUT took this file onto B78f without XDHARD's xsfeed hunk, so
-`full_xsbinary` is recorded, never fed back): the port had no inclusive/binary emission spectra (spectra.f90,
-binaryspectra.f90 not ported). `record` is called by `engine`/`engine_c` after `binary` when
+Binary spectra (Incognita extension, OUTPUT ONLY;
+`full_xsbinary` is recorded, never fed back): TALYS's inclusive/binary emission spectra (spectra.f90,
+binaryspectra.f90) are not ported as such. `record` is called by `engine`/`engine_c` after `binary` when
 `INCOGNITA_BINSPEC` is on; it reads the objects the cascade already holds and changes none of them, so every
 cross section is bit-identical with it on or off. The spectra are appended to `LAST` (one dict per incident
 energy) for the caller to save.
@@ -22,8 +22,8 @@ lines `xsdisc(type, nex)` at `eoutdis(type, nex) = Etotal - S(0,0,type) - edis` 
 `pe_ex` = xspreeq - pe_ps - pe_ki (exciton + breakup).
 
 `full_xsbinary` is binary.f90's `xsbinary(type)` after the direct (binary.f90:215) and pre-equilibrium /
-giant-resonance (binary.f90:259) addends -- what multiple.f90:950 adds to `xsfeed(0,0,type)`. The cascade
-used to pass the compound-only value, so `xsparticle_mb` (totalxs.f90) lacked the binary direct + PE step
+giant-resonance (binary.f90:259) addends -- what multiple.f90:950 adds to `xsfeed(0,0,type)`. With the
+compound-only value, `xsparticle_mb` (totalxs.f90) would lack the binary direct + PE step
 (Fe-56 14.1 MeV: d 1.52 vs (n,d) 3.45 mb). `xsfeed` feeds only `xsparticle`/`multiplicity`; no channel,
 residual or fission cross section reads it.
 
@@ -42,7 +42,7 @@ LAST: list[dict] = []
 
 
 def enabled() -> bool:
-    """`INCOGNITA_BINSPEC` (or SPECOUT's `INCOGNITA_SPECOUT`) = 1/y/yes/on records the binary spectra (output only;
+    """`INCOGNITA_BINSPEC` (or `INCOGNITA_SPECOUT`) = 1/y/yes/on records the binary spectra (output only;
     default off = no work).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
@@ -50,13 +50,13 @@ def enabled() -> bool:
     """
     if any(os.environ.get(k, "").strip().lower() in ("1", "y", "yes", "on") for k in ("INCOGNITA_BINSPEC", "INCOGNITA_SPECOUT")):
         return True
-    from physics.hf import recoil, specobs  # KWCOV B4 / B12: the TALYS spectrum / DDX / recoil output needs them
+    from physics.hf import recoil, specobs  # the TALYS spectrum / DDX / recoil output needs them
 
     return specobs.active() or recoil.active()
 
 
 def specclose_on() -> bool:
-    """`INCOGNITA_SPECCLOSE` = 1/y/yes/on (THEORYFIX_U7SPEC, output only, default off = SPECOUT as before): the shipped spectra
+    """`INCOGNITA_SPECCLOSE` = 1/y/yes/on (output only, default on; 0 = the uncorrected spectra): the shipped spectra
     integrate (sum value * deltaE) to the flux the engine booked -- binary compound continuum and pre-equilibrium closed
     in the endpoint bin, the giant-resonance part (giant.f90:113, mb per bin) shipped per MeV, and the cascade emission
     of discrete parents above a particle threshold binned (specout.discrete_parent_emission). No cross section moves.
@@ -64,7 +64,7 @@ def specclose_on() -> bool:
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
     """
-    return os.environ.get("INCOGNITA_SPECCLOSE", "1").strip().lower() in ("1", "y", "yes", "on")  # gate candidate: default ON
+    return os.environ.get("INCOGNITA_SPECCLOSE", "1").strip().lower() in ("1", "y", "yes", "on")  # default ON
 
 
 def close_binary(xsemis, xspre, xsgr, de, et, ib: int, ie: int, nendisc: int, cut: float | None, petot: float,
@@ -261,7 +261,7 @@ def record(e_inc_mev: float, pinp, b2, b, k0: int, ctx=None) -> dict | None:
         mask[sl] = True
         closed = specclose_on() and ie > ib
         raw = dict(xsemis=np.where(mask, xsemis, 0.0).tolist(), xspreeq=np.where(mask, xspre, 0.0).tolist(),
-                   xsgr=np.where(mask, xsgr, 0.0).tolist()) if closed else None  # KWCOV B4: TALYS's (unclosed) parts
+                   xsgr=np.where(mask, xsgr, 0.0).tolist()) if closed else None  # TALYS's (unclosed) parts
         if closed:
             cut = None
             if nl >= 0 and eoutdis[nl] > 0:

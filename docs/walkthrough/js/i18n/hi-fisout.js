@@ -19,7 +19,7 @@ WT.L.ch.fisout = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "n + U{#} → two fragments + neutrons": "n + U{#} → दो टुकड़े + न्यूट्रॉन",
   "prompt neutrons per fission": "प्रति विखंडन तात्कालिक न्यूट्रॉन",

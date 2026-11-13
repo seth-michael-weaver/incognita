@@ -9,7 +9,7 @@ Task: T9, continued by EXCL (physics/hf/CONTRACT.md §7). Acceptance test: A-cn1
 TALYS routines ported here (file:line of the subroutine/function statement):
     population.f90:1 (population)
 
-What it does, and why the E2E gate needs it. `preeq` computes its spectra on the *emission*
+What it does, and why the E2E test needs it. `preeq` computes its spectra on the *emission*
 energy grid `egrid(nen)`; `binary.f90` and `multiple.f90` need them on each residual's
 *excitation* grid `Ex(Zix, Nix, nexout)`. `population` bridges the two: for every continuum bin of
 every binary residual it integrates the pre-equilibrium (plus, with `flaggiant`, the giant
@@ -131,7 +131,7 @@ def _bin_nodes(
 
 def _bin_nodes_many(eg: np.ndarray, ib: int, ie: int, etop: float, emax: float, r,
                     lo: int, hi: int) -> dict | None:
-    """COREX: `_bin_nodes` at both edges of bins lo..hi-1 at once, {nexout: (na1, nb1, ea1, eb1,
+    """Fast path: `_bin_nodes` at both edges of bins lo..hi-1 at once, {nexout: (na1, nb1, ea1, eb1,
     na2, nb2, ea2, eb2)} with the bin edges computed as the loop computes them. `locate` is a
     bisection; on a strictly increasing egrid[ib..ie] (checked) its answer is a sorted search with
     locate's ties at ib and ie, so the values are `_bin_nodes`' own. None (use the scalar calls)
@@ -177,7 +177,7 @@ def population(inp: PopulationInputs) -> PopulationResult:
     if inp.flagomponly:
         return res
     eg = np.asarray(inp.egrid_mev, float)
-    # GLUEFINISH: the bin loop below, for every residual, in one C call per type. It fills `res`
+    # Native: the bin loop below, for every residual, in one C call per type. It fills `res`
     # with the same bits and returns True, or leaves it untouched for the body here.
     if not pop_nx2.bin_loop(inp, res, eg, PARA, PARZ, PARN):
         _bin_loop(inp, res, eg)
@@ -278,7 +278,7 @@ def _p1(x1: float, x2: float, y1, y2, x: float):
 def _cut(xs):
     """population.f90:168 -- anything under 1e-30 mb is stored as a hard zero.
 
-    Signed, as TALYS's `if (xs < 1.e-30) xs = 0.` is (OPEN3M): `pol1` extrapolates past the end of
+    Signed, as TALYS's `if (xs < 1.e-30) xs = 0.` is: `pol1` extrapolates past the end of
     the pre-equilibrium spectrum and can go negative, and TALYS zeroes that. Keeping it (an
     `abs` test) made Am-241's alpha column sum negative at 18 MeV, so population.f90:274's
     renormalisation flipped the sign of every bin (docs/results/hf-open3m.md section 2).

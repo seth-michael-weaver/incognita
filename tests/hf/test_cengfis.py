@@ -1,5 +1,5 @@
-"""CENGFIS (ROUTE100 WP7): the fission transmissions from `fission/fis_ceng.py` and
-`native/fission.c` against the NATIVEX2 `fis2`/`ld2` paths they replace on the chart. The barrier
+"""C fission transmissions: the fission transmissions from `fission/fis_ceng.py` and
+`native/fission.c` against the native `fis2`/`ld2` paths they replace on the chart. The barrier
 slopes and ladder weights are bit-identical; the widths and transmissions are held to 1e-13.
 Skipped without a `libnx2` build or TALYS's structure data.
 """

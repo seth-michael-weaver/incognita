@@ -1,4 +1,4 @@
-"""CCGLUE: the coupled-channels stage's Python moved into `ccfast.c`, and the J loop as a task list.
+"""The coupled-channels stage's Python moved into `ccfast.c`, and the J loop as a task list.
 
 * `ccnative.sixj` (C) gives `coupling.sixj`'s bits on every sextet a coupled-channels target asks for;
 * `ccnative.cc_block_acc` (kernel + `cc_match_acc`) gives `_match` + `accumulate`'s contributions;

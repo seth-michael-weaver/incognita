@@ -1,13 +1,13 @@
-"""CHARTFIX: compound.f90:404-419's trapped flux reaches the exclusive channels.
+"""compound.f90:404-419's trapped flux reaches the exclusive channels.
 
 A mother (J, parity) cell whose total decay width is zero does not keep its flux: `compound`
 spreads it equally over the compound nucleus's OWN discrete levels and records it in
 `xspopex`, `xspop` and `mcontrib(0, nex, nexout)` -- so, through `mcontrib`, in `feedexcl` and in
-the exclusive channel cross sections. The port put it in `xspop` only, so every mb of it fell out
-of the exclusive channels while staying in the residual production.
+the exclusive channel cross sections. Putting it in `xspop` only would drop every mb of it from
+the exclusive channels while keeping it in the residual production.
 
-Eu-147 is where CHART1 saw it: 990 of the 3042 mb populating Eu-148 sit in one trapped bin, so
-`(n,g)` was a flat 0.734 x TALYS from 1 keV to 1.5 MeV while `nonelastic` agreed to 1e-6. The
+Eu-147 shows it: 990 of the 3042 mb populating Eu-148 sit in one trapped bin, so without it
+`(n,g)` is a flat 0.734 x TALYS from 1 keV to 1.5 MeV while `nonelastic` agreed to 1e-6. The
 invariant the test asserts is TALYS's own: at an incident energy where nothing but a gamma can be
 emitted, the exclusive `(n,g)` cross section IS the residual production of the compound nucleus.
 """
@@ -42,7 +42,7 @@ def eu147():
 
     torch.set_num_threads(1)
     fm.Cascade.decay = decay2
-    # NATIVEX: the spy watches `Cascade.decay`; the compiled walk (tests/hf/test_nativex.py holds
+    # the spy watches `Cascade.decay`; the compiled walk (tests/hf/test_nativex.py holds
     # it to this path on the same Eu-147 energy) is switched off
     prev = os.environ.get("HF_NATIVEX")
     os.environ["HF_NATIVEX"] = "0"

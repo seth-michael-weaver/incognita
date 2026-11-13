@@ -336,7 +336,7 @@ def _lrange_sums(tl: Tensor, L: int) -> Tensor:
     l' into a gather.
 
     TALYS: compound.f90:1 (compound)
-    Test: A-mult / SPEED0 golden
+    Test: A-mult golden
     """
     lp = torch.arange(L, device=tl.device)
     out = []
@@ -358,7 +358,7 @@ def partial_widths_cells(mi: MultiInputs, cells: list[tuple[int, int]],
     the residual spin grid and the masked rho0 are the same for every cell.
 
     TALYS: compound.f90:1 (compound)   -- iloop = 1
-    Test: A-mult / SPEED0 golden
+    Test: A-mult golden
     """
     K = len(cells)
     j2 = torch.tensor([c[0] for c in cells], device=device)
@@ -416,7 +416,7 @@ def _compound_decay_cells(mi: MultiInputs, device=None) -> ContinuumFeeding:
     summed over cells with one tensor sum instead of one addition per cell.
 
     TALYS: compound.f90:1 (compound)
-    Test: A-mult / SPEED0 golden
+    Test: A-mult golden
     """
     dpop = {t: torch.zeros((r.maxex + 1, NUMJ + 1, 2), dtype=DTYPE, device=device)
             for t, r in mi.residuals.items()}
@@ -485,7 +485,7 @@ def _spin_l_mask(odd: int, parspin2: int, nj: int, L: int, device=None) -> Tenso
     (nj, numJ+1, L). Everything else in the selection rules is the residual bin's.
 
     TALYS: compound.f90:1 (compound)
-    Test: A-mult / SPEED0 golden
+    Test: A-mult golden
     """
     j2 = 2 * torch.arange(nj, device=device) + odd
     irs2 = 2 * torch.arange(NUMJ + 1, device=device) + (odd + parspin2) % 2
@@ -512,7 +512,7 @@ def _compound_decay_factored(mi: MultiInputs, device=None) -> ContinuumFeeding |
     moves results by rounding only.
 
     TALYS: compound.f90:1 (compound)
-    Test: A-mult / SPEED0 golden
+    Test: A-mult golden
     """
     if mi.flagfullhf:
         return None

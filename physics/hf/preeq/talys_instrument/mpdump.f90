@@ -1,4 +1,4 @@
-! Instrumentation for the physics.hf.preeq multiple pre-equilibrium acceptance test (task EXCL3).
+! Instrumentation for the physics.hf.preeq multiple pre-equilibrium acceptance test (A-mpe).
 ! NOT part of TALYS. Compiled into a private copy of TALYS-2.x (MIT, (c) A.J. Koning) with the
 ! two one-line hooks in apply_hooks.sh. Writes only; never changes a TALYS variable, so the
 ! instrumented binary must reproduce the reference binE*.out / xs*.tot unchanged.

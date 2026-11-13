@@ -1,8 +1,8 @@
-"""CEANG (Incognita extension; an OUTPUT, no effect on any existing number): the Hauser-Feshbach channel-pair weights of the
+"""`ceang` (Incognita extension; an OUTPUT, no effect on any existing number): the Hauser-Feshbach channel-pair weights of the
 target's binary compound decay into its OWN discrete levels (compound elastic at Ltarget and compound inelastic to the
 lowest levels), exactly as comptarget.f90 / `target._case` weights them, so the angular builder can distribute each level's
 compound cross section in angle with the per-(J, pi) denominator and the Moldauer width-fluctuation factor instead of a
-J-independent constant (angular.compound_elastic_legendre, COVANG/ELDA).
+J-independent constant (angular.compound_elastic_legendre).
 
 For one incident energy, (J2, parity) block, incident channel a = (l, j) and exit channel b = (l', j') to discrete level n
 of the target nucleus (type k0):
@@ -59,7 +59,7 @@ def pair_blocks(inp, nlev: int = NLEV_MAX, device=None) -> dict:
     r0 = inp.residuals[k0]
     use_wfc = inp.flagwidth and inp.wmode >= 1
     if use_wfc and inp.wmode != 1:
-        raise NotImplementedError("CEANG: only Moldauer (wmode 1) width fluctuations")
+        raise NotImplementedError("ceang: only Moldauer (wmode 1) width fluctuations")
     nmax = min(nlev, int(r0.maxex))
     x, wts = wfc.gauss_laguerre(device)
     cn = torch.as_tensor(inp.cnfactor_mb, dtype=DTYPE, device=device)

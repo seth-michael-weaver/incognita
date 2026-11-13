@@ -1,4 +1,4 @@
-"""GLUEFINISH lever `pop`: `population.f90`'s bin loop in C holds the bits of the Python body it
+"""Native kernel switch `pop`: `population.f90`'s bin loop in C holds the bits of the Python body it
 replaces (`HF_NX2_POP=0`).
 
 `nx2_pop_type` (native/nx2_pop.c, through `compound.pop_nx2.bin_loop`) against

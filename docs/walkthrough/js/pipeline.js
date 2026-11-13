@@ -1,8 +1,8 @@
-/* Pipeline page (pipeline.html): the reactor-data pipeline as a lit diagram (7 stages and the judges' loop back to the fit);
+/* Pipeline page (pipeline.html): the reactor-data pipeline as a lit diagram (7 stages and the checks' loop back to the fit);
  * picking a stage shows its text and a live drawing below. Plain script, no build step, own canvas code (kit.js is not loaded).
  * Drawings redraw on input only; requestAnimationFrame runs only for short transitions and while a fit is running.
  * Numbers on the page: the drawings marked "illustration" are simulated; every other number is from library/res-v0.1/README.md
- * or the research reports RESINTEG, PU239DIAG, JUDGEFIX and DOPPLER (27 October 2026). */
+ * or the project's resonance-integral, Pu-239, check and Doppler studies (27 October 2026). */
 (function () {
   "use strict";
   const WT = (window.WT = window.WT || {});
@@ -159,7 +159,7 @@
       lead: T("pl_s5_lead", "res-v0.1: seven own resonance-region files"), tag: T("pl_s5_tag", ""), },
     { id: "bench", col: C.bench, t: T("pl_s6_t", "Benchmarks"), sub: T("pl_s6_s", "ICSBEP critical experiments, k-eff"), viz: "bench",
       lead: T("pl_s6_lead", "Real experiments: does simulation hit the measured answer?"), tag: T("pl_s6_tag", ""), },
-    { id: "judge", col: C.judge, t: T("pl_s7_t", "Judges"), sub: T("pl_s7_s", "fixed checks; failures go back"), viz: "judge",
+    { id: "judge", col: C.judge, t: T("pl_s7_t", "Checks"), sub: T("pl_s7_s", "fixed checks; failures go back"), viz: "judge",
       lead: T("pl_s7_lead", "Every file checked against EXFOR alone"), tag: T("pl_s7_tag", ""), },
   ];
 
@@ -213,12 +213,12 @@
       ctx.strokeStyle = g; ctx.lineWidth = lit ? 2 : 1.5; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - (horiz ? 4 : 0), y2 - (horiz ? 0 : 4)); ctx.stroke();
       arrowHead(ctx, x2, y2, Math.atan2(y2 - y1, x2 - x1), rgba(STAGES[i + 1].col, lit ? 0.95 : 0.55), 7);
     }
-    // the judges' loop back to the fit
+    // the checks' loop back to the fit
     const loopOn = cur === 6 || cur === 1 || hover === 6;
     ctx.save(); ctx.strokeStyle = rgba(C.judge, loopOn ? 0.9 : 0.5); ctx.lineWidth = loopOn ? 2 : 1.5; ctx.setLineDash([6, 5]); ctx.lineJoin = "round";
     ctx.beginPath(); loopPath.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); ctx.restore();
     { const [x2, y2] = loopPath[3], [x1, y1] = loopPath[2]; arrowHead(ctx, x2, y2, Math.atan2(y2 - y1, x2 - x1), rgba(C.judge, loopOn ? 0.95 : 0.6), 8); }
-    const loopLab = T("pl_loop", "fails a judge → back to the fit");
+    const loopLab = T("pl_loop", "fails a check → back to the fit");
     if (horiz) { const mx = (loopPath[1][0] + loopPath[2][0]) / 2; ctx.font = font(12, 600); const w = ctx.measureText(loopLab).width + 18; rrect(ctx, mx - w / 2, loopPath[1][1] - 11, w, 22, 11); ctx.fillStyle = "#0b1226"; ctx.fill(); text(ctx, loopLab, mx, loopPath[1][1], { size: 12, weight: 600, color: rgba(C.judge, loopOn ? 1 : 0.8), align: "center" }); }
     else { ctx.save(); const lx = loopPath[1][0], my = (loopPath[1][1] + loopPath[2][1]) / 2; ctx.translate(lx, my); ctx.rotate(-Math.PI / 2); ctx.font = font(11.5, 600); const w = ctx.measureText(loopLab).width + 14; rrect(ctx, -w / 2, -9, w, 18, 9); ctx.fillStyle = "#0b1226"; ctx.fill(); text(ctx, loopLab, 0, 0.5, { size: 11.5, weight: 600, color: rgba(C.judge, loopOn ? 1 : 0.8), align: "center" }); ctx.restore(); }
     // panels
@@ -553,7 +553,7 @@
   };
 
   // ---------- stage 6: one real critical experiment, measured vs simulated ----------
-  // Per case, from research/rl/resinteg/out/arms/<arm>.json (the source of the res-v0.1 README's DEV column):
+  // Per case, from the resonance-integral study (the source of the res-v0.1 README's benchmark column):
   // [plain name, kind (u uranium / m plutonium-uranium oxide), E (measured k), sE (pcm), standard library k − E (pcm, same-machine
   //  control), with our file k − E (pcm), change in |k − E| (pcm; ±35 pcm is the simulation's own noise), ICSBEP case, moderator]
   const BENCH = {
@@ -633,7 +633,7 @@
     },
   };
 
-  // ---------- stage 7: the EXFOR-only judge, worked example Na-23 (res-v0.1 README: PASS; value = file ÷ EXFOR) ----------
+  // ---------- stage 7: the EXFOR-only check, worked example Na-23 (res-v0.1 README: PASS; value = file ÷ EXFOR) ----------
   const NA23 = [[T("pl_j_cap", "thermal capture"), "0.975"], [T("pl_j_el", "thermal elastic"), "1.04"], [T("pl_j_ri", "capture resonance integral"), "0.996"]];
   VIZ.judge = {
     height: (W) => (W < 560 ? 344 : 284),

@@ -3,7 +3,7 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: SPEEDD (the speed wave; no physics of its own). Acceptance test: the speed-wave golden
+Speed path (no physics of its own). Acceptance test: the speed-wave golden
 (`features/hf_speed_golden_speedwave/`, `tests/hf/test_speed_golden.py`) and
 `tests/hf/test_decay_fast.py`, which holds it to `compound.decay_batch.NucleusDecay`.
 
@@ -45,7 +45,7 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from physics.hf.projectile import residual_nucleus  # ENGPROJ GPRESFIX
+from physics.hf.projectile import residual_nucleus  # projectile bookkeeping
 from physics.hf.compound import decay_native as dn
 from physics.hf.compound.continuum import _spin_l_mask
 from physics.hf.compound.decay_batch import PARN, PARZ, _interp_tl, _twopi
@@ -72,7 +72,7 @@ def _tl_stack(cas, tls):
 
 
 def _tlog_rows(cas, ts, e_, na, w1, w2, w3, TL, Lm, keep, u):
-    """LOGTINT (default OFF; compound/tlog.py): the charged rows (type index ts >= 1) of decay_fast's pol2 values `u`
+    """Log-T interpolation (default OFF; compound/tlog.py): the charged rows (type index ts >= 1) of decay_fast's pol2 values `u`
     replaced by the log-T Lagrange value (or, with `tlogref`, the fine-table reference)."""
     from physics.hf.compound import tlog
 
@@ -95,8 +95,8 @@ def _tlog_rows(cas, ts, e_, na, w1, w2, w3, TL, Lm, keep, u):
 
 
 def _alphatemp_rows(cas, ts, rows, g, na, w1, w2, w3, Lm, u):
-    """ALPHATEMP (default OFF; omp/alphatemp.py): decay_fast's alpha rows (type index 5) = Tcold^(1-g) Thot^g on the raw
-    interpolated values, the cold (alphaomp 6) Tl by the same Lagrange rule as the hot one (pol2 / LOGTINT / TLOGIT),
+    """`alphatemp` (default OFF; omp/alphatemp.py): decay_fast's alpha rows (type index 5) = Tcold^(1-g) Thot^g on the raw
+    interpolated values, the cold (alphaomp 6) Tl by the same Lagrange rule as the hot one (pol2 / log-T interpolation / logit-T),
     g = min(1, Ex/U*) at the residual row's centre; nativex.c nx_widths' twin."""
     from physics.hf.compound import tlog
     from physics.hf.omp import alphatemp
@@ -105,7 +105,7 @@ def _alphatemp_rows(cas, ts, rows, g, na, w1, w2, w3, Lm, u):
     if not s.size:
         return u
     if "tlogref" in cas.trans:
-        raise NotImplementedError("ALPHATEMP is not wired with TLOGREF (G0 reference)")
+        raise NotImplementedError("alphatemp is not wired with TLOGREF (G0 reference)")
     u = u.copy()
     CT = np.asarray(cas.trans["alpha_cold"][1], dtype=np.float64)
     ca, cb, cc = CT[na[s], :Lm], CT[na[s] + 1, :Lm], CT[na[s] + 2, :Lm]
@@ -194,7 +194,7 @@ class NucleusWidths:
         from physics.hf.compound.dens_reference import _eendmax
         from physics.hf.core.grids import binquad_mode
 
-        if binquad_mode(cas.options):  # BINQUAD is native-only: never run the midpoint rule silently
+        if binquad_mode(cas.options):  # `binquad` is native-only: never run the midpoint rule silently
             raise RuntimeError("binquad: the numpy decay widths do not implement it (native nx_widths only)")
         self.bins = list(bins)
         self.row = {b: i for i, b in enumerate(self.bins)}
@@ -251,7 +251,7 @@ class NucleusWidths:
 
             gstrength = cas.gamma_strength(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))
             # psf_fast's numpy form of the same fstrength, bit for bit, where it covers the model
-            gp = cas.gamma_params(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))  # PARAMWIRE: the run's parameter set
+            gp = cas.gamma_params(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))  # the run's parameter set
             ii_, kk_ = np.nonzero(pos)
             eg = egam[ii_, kk_]
             efs_p = efs[ii_]
@@ -274,9 +274,9 @@ class NucleusWidths:
     def _particles(self, cas, st, g: "_Geometry", fnorm, eendmax, sp=None):
         """Tl interpolated to every (type, bin, row) Eout, split by c and lmaxhf-capped, for
         the six particle exits in one pass (densprepare.f90's pol2, as `_interp_tl`)."""
-        # SLFIRST: the emitting nucleus's set (sp None = the cascade's `trans`)
+        # First-CN set: the emitting nucleus's set (sp None = the cascade's `trans`)
         tls = [(cas.trans if sp is None else cas.trans_of(sp.zix, sp.nix))[t] for t in range(1, 7)]
-        tlc = None if sp is None else cas.trans_cont_of(sp.zix, sp.nix)  # ROTEXIT1CN (default OFF)
+        tlc = None if sp is None else cas.trans_cont_of(sp.zix, sp.nix)  # Continuum exit set (default OFF)
         L = tls[0][1].shape[1]
         if any(isinstance(x[1], torch.Tensor) or x[1].shape[1] != L for x in tls):
             raise ValueError("decay_fast needs one numpy Tl shape for every particle")
@@ -321,13 +321,13 @@ class NucleusWidths:
                 Lm = min(int(lsel.max()) + 1, L)
                 keep = np.arange(Lm)[None, :] <= lsel[:, None]
                 u = w1 * TL[ts, na, :Lm] + w2 * TL[ts, nb, :Lm] + w3 * TL[ts, nc, :Lm]
-                if tlc is not None:  # ROTEXIT1CN: continuum rows (> nlast) from the model set
+                if tlc is not None:  # Continuum exit set: continuum rows (> nlast) from the model set
                     TLc = _tl_stack(cas, [tlc[t] for t in range(1, 7)])[0]
                     uc = w1 * TLc[ts, na, :Lm] + w2 * TLc[ts, nb, :Lm] + w3 * TLc[ts, nc, :Lm]
                     u = np.where((rr[sel] > g.nl[1:][ts])[:, None], uc, u)
-                if cas.trans.get("tlog", False) or "tlogref" in cas.trans:  # LOGTINT (default OFF)
+                if cas.trans.get("tlog", False) or "tlogref" in cas.trans:  # Log-T interpolation (default OFF)
                     u = _tlog_rows(cas, ts, e_, na, w1, w2, w3, TL, Lm, keep, u)
-                if _cascade_cold(cas.trans):  # ALPHATEMP (default OFF; KEVCOLD gd: production): alpha rows mixed, raw
+                if _cascade_cold(cas.trans):  # `alphatemp` (default OFF; cold-alpha domain gd: production): alpha rows mixed, raw
                     u = _alphatemp_rows(cas, ts, rr[sel], g, na, w1, w2, w3, Lm, u)
                 u = np.where(keep, u, 0.0)
                 fn = np.array([float(fnorm[t + 1]) for t in range(1, 7)])[ts][:, None]
@@ -671,8 +671,8 @@ class _Geometry:
             ex[t, 0, :k] = np.asarray(d.ex_mev[:k], dtype=np.float64)
             dex[t, 0, :k] = np.asarray(d.dex_mev[:k], dtype=np.float64)
             nl[t] = d.nlast
-        self.exrow = ex[:, 0, :]  # (7, N) residual row centres (ALPHATEMP's g)
-        self.nl = nl[:, 0, 0].copy()  # (7,) residual nlast: rows above it are continuum (ROTEXIT1CN)
+        self.exrow = ex[:, 0, :]  # (7, N) residual row centres (`alphatemp`'s g)
+        self.nl = nl[:, 0, 0].copy()  # (7,) residual nlast: rows above it are continuum (continuum exit set)
         dexhalf = 0.5 * dex
         nexmax = np.stack(self.nexmax)[:, :, None]  # (7, m, 1)
         rows = np.arange(N)[None, None, :]
@@ -699,7 +699,7 @@ class _Geometry:
             rb_d = np.where(part, (ex0plus - exm) / dexinc[None, :, None], 1.0)
         eout_d = np.where(part, 0.5 * (ex0plus + exm) - ss - ex,
                           (exinc[None, :, None] - ss) - ex)
-        if nnleak_bins is not None and np.any(nnleak_bins):  # NNLEAK (default y): (m,) bool
+        if nnleak_bins is not None and np.any(nnleak_bins):  # `nnleak` (default y): (m,) bool
             from physics.hf.compound import nnleak
 
             sel = np.asarray(nnleak_bins, dtype=bool)[None, :, None] & (np.arange(7) >= 1)[:, None, None]

@@ -5,7 +5,7 @@ Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 ECIS-06 (`ecist.f`) is by J. Raynal and ships inside the TALYS repository under its MIT license.
 
-Task: T13 (physics/hf/CONTRACT.md §7), the ECIS task, extended by TWOPH with ECIS's second-order
+Task: T13 (physics/hf/CONTRACT.md §7), the ECIS task, extended with ECIS's second-order
 (`lo(2)`) branch. Acceptance test: G-2PH (docs/results/hf-ecis-twophonon.md §5).
 
 Line numbers of anchors follow Python's `str.splitlines()`; `grep -n` gives numbers 30 lower.
@@ -41,7 +41,7 @@ The 37 `colltype V` sweep nuclides (Zn-64 ... Ce-136) are ONE configuration and 
 than `docs/results/hf-ecis-twophonon.md` §1 guessed: five coupled levels but a SINGLE band.
 `deformpar.f90:198-201` keys `lband`/`Kband`/`defpar` on the band number, and every V level of
 e.g. `Zn.def` carries `vibband = 1`, so `incidentecis.f90:246-250` writes `Nband = 1` and one
-phonon card (lambda = 2, K = 0, beta = 0.242). `ecisinput.f90:117`'s `iph(i), iband(i), 1` then
+phonon record (lambda = 2, K = 0, beta = 0.242). `ecisinput.f90:117`'s `iph(i), iband(i), 1` then
 gives `lecl` (lecl-204..208) `npa(1,na) = 1` and `npa(2,na) = 1`: **the two phonons of a
 two-phonon level are the same phonon**, so case 4 takes the identical-phonon branch
 (vibm-223..228, label 16), not the `lib(2)` one, and `nbt1 = 1` leaves exactly two transition
@@ -64,7 +64,7 @@ __all__ = ["Phonons", "VibLevel", "VibmScheme", "decode_code", "reduced_matrix_e
 _DROP = 1.0e-12  # vibm-359: ECIS drops a merged element at or below this
 
 
-@lru_cache(maxsize=65536)  # NATIVEX2: a pure function of three integers (chartrun.KEEP)
+@lru_cache(maxsize=65536)  # a pure function of three integers (chartrun.KEEP)
 def _cg0(two_j1: int, two_j2: int, two_j3: int) -> float:
     """`djcg(j1, j2, j3, 0, 0)` -- the Clebsch-Gordan <j1 0; j2 0 | j3 0> on doubled arguments.
 
@@ -78,7 +78,7 @@ def _cg0(two_j1: int, two_j2: int, two_j3: int) -> float:
     return float(v) if math.isfinite(float(v)) else 0.0
 
 
-@lru_cache(maxsize=65536)  # NATIVEX2: a pure function of six integers (chartrun.KEEP)
+@lru_cache(maxsize=65536)  # a pure function of six integers (chartrun.KEEP)
 def _sixj(a: int, b: int, c: int, d: int, e: int, f: int) -> float:
     """`dj6j(j1..j6)` -- the 6j symbol {a b c; d e f} on doubled arguments, through T1's Racah W.
 
@@ -187,8 +187,8 @@ def reduced_matrix_elements(
 
 @lru_cache(maxsize=256)
 def _reduced_matrix_elements(levels: tuple, phonons: Phonons, second_order: bool) -> VibmScheme:
-    """NATIVEX2: `reduced_matrix_elements` by value (a pure function of the band, which
-    `incident_coupled` rebuilt at every incident energy; `chartrun.KEEP`)."""
+    """`reduced_matrix_elements` by value (a pure function of the band, which
+    `incident_coupled` would rebuild at every incident energy; `chartrun.KEEP`)."""
     if any(lv.n_phonon > 2 for lv in levels):
         raise NotImplementedError(
             "iph(1) > 2 is ECIS's 1-and-2-phonon mixture (vibm-097): it needs the `var` mixing "
@@ -372,7 +372,7 @@ def _compact(items: list[tuple[int, int, float]]) -> list[tuple[int, int, float]
 def scheme_from_band(band: dict) -> tuple[VibmScheme, "object"]:
     """`(VibmScheme, band_beta)` for a `colltype V` target, from `reference.coupled_band`.
 
-    The level and phonon cards are `ecisinput.f90:110-125`: the ground state's phonon card is a
+    The level and phonon records are `ecisinput.f90:110-125`: the ground state's phonon record is a
     BLANK line for a vibrational target (`if (vibrational) write(9, '()')`), so `lecl` reads
     `iph(1,1) = 0`; every other level gets `iph(i), iband(i), 1`, which `lecl` stores as
     `npa(1,na) = iband(i)` and `npa(2,na) = 1` for a two-phonon state (lecl-204..208). The
@@ -381,7 +381,7 @@ def scheme_from_band(band: dict) -> tuple[VibmScheme, "object"]:
     band 1, so the pair is identical and `nbt1 = 1`.
 
     `ipi(1,iv)` is 1 for a negative-parity level and 0 otherwise (lecl-162..163, on the parity
-    CHARACTER of the card, not relative to the target).
+    CHARACTER of the record, not relative to the target).
 
     TALYS: ecisinput.f90:1 (ecisinput)
     Test: G-2PH

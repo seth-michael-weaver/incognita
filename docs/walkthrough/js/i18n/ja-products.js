@@ -14,7 +14,7 @@ WT.L.ch.products = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "fragment mass number A →": "破片の質量数 A →",
   "share of fissions that make it (each line ×{#})": "その破片ができる核分裂の割合（線ごとに ×{#}）",

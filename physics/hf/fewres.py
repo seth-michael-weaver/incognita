@@ -1,4 +1,4 @@
-"""MACSCLOSED: few-resonance capture where Hauser-Feshbach is not valid (`INCOGNITA_FEWRES`, default OFF).
+"""Few-resonance capture where Hauser-Feshbach is not valid (`INCOGNITA_FEWRES`, default OFF).
 
 Mechanism. The HF capture cross section is the ENSEMBLE AVERAGE over resonance ladders (positions with
 GOE/Wigner spacings, Porter-Thomas widths) at the model's level spacing D_J, <Gamma_n> and <Gamma_gamma>.
@@ -15,7 +15,7 @@ s-wave resonances in the s-wave effective window at kT = 30 keV, Delta = 0.194 T
 spacing (dtheory). Outside the region nothing changes.
 
 Modes (only inside the region):
-* ``mean``: the brief's expected value. The PT/Wigner ensemble mean IS the width-fluctuation-corrected
+* ``mean``: the expected value. The PT/Wigner ensemble mean IS the width-fluctuation-corrected
   HF average, so the HF curve is kept and direct capture into the experimental levels
   (`racapcalc.direct_capture_mb(..., "disc")`) is added at every energy.
 * ``logmean``: the typical value for a log-scored observable, exp(E[ln(window sum)]):
@@ -24,9 +24,9 @@ Modes (only inside the region):
   delta = DC(E) / sigma_HF(E) the direct-capture floor. E <= 0.5 MeV: G as computed; 0.5-1 MeV: ln G
   blended linearly in ln E to ln(1 + delta); E >= 1 MeV: G = 1 + delta (= ``mean``). As the window
   fills, r -> 1 and G -> 1 + delta, so the two modes meet wherever HF is valid.
-* ``typical`` (FEWTYP): ``logmean`` with NO direct-capture floor (delta = 0, racap not called): sigma = sigma_HF * G,
+* ``typical``: ``logmean`` with NO direct-capture floor (delta = 0, racap not called): sigma = sigma_HF * G,
   G = exp(<ln r>) <= 1 (Jensen), G = 1 at E >= 1 MeV. Replaces the ensemble-mean (HF) capture by the typical (log-mean)
-  value of one ladder draw inside the region; users who need the ensemble mean keep FEWRES off (or use G = fewres_G
+  value of one ladder draw inside the region; users who need the ensemble mean keep INCOGNITA_FEWRES off (or use G = fewres_G
   in the totals to undo it).
 
 Ensemble model (all inputs read off the run's own Cascade): partial waves l = 0..4; J sequences from
@@ -41,7 +41,7 @@ reproducible. Above NMC_MAX expected levels in the window the second-order (Pois
 is used. Inelastic competition is not in the ensemble (the ratio r, not the HF level, is taken from it).
 
 Wiring: `add_to_results(res, injection)` is called by `engine.run` and `engine_c.run` right after
-DIRECTCAP's hook, on the same Results, so the Py and C paths apply the identical function.
+the direct-capture hook, on the same Results, so the Py and C paths apply the identical function.
 Diagnostics land in `res.totals_mb` as fewres_* (per energy): G, dc_mb, hf_mb, n30, mean_over_hf.
 Refuses to run together with INCOGNITA_DIRECT_CAPTURE (DC would be counted twice).
 Test: tests/hf/test_fewres.py
@@ -261,7 +261,7 @@ def model(cas, ing):
 
 
 def add_to_results(res, injection):
-    """`engine.run` / `engine_c.run` Results with the MACSCLOSED change in capture (xs000000) and the
+    """`engine.run` / `engine_c.run` Results with the few-resonance change in capture (xs000000) and the
     compound nucleus's residual production, in place; off or outside the region -> untouched."""
     m = mode()
     if m == "off" or getattr(injection, "families", ()) or not hasattr(injection, "Z"):

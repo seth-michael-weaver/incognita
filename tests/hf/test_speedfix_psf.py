@@ -1,4 +1,4 @@
-"""SPEEDFIX lever 1: a tabulated M1 (strengthM1 >= 8, the `nodata`/B55 recipe) is covered by
+"""A tabulated M1 (strengthM1 >= 8, the `nodata` recipe) is covered by
 `psf_fast.fstrength_np` (bitwise) and by the C kernel `psf_nx2` (closeness), so the C front and
 `ce_cascade` no longer fall back to Python at every energy."""
 import os

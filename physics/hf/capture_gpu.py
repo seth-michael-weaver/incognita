@@ -1,6 +1,6 @@
 """The capture fast path on a (nuclide, incident energy) batch axis, for one GPU.
 
-Task: SPEEDG (gate G-GPU: the 482 x 64 capture sweep on the laptop RTX 5050 in <= 10 s,
+Task: GPU capture batch (target: the 482 x 64 capture sweep on an RTX 5050 laptop GPU in <= 10 s,
 identical to the CPU sweep at <= 1e-12). No physics of its own: every number is produced by the
 statements of `capture_fast_batch.capture_xs` (itself identical to `capture_fast.capture_xs`),
 rearranged so that all points of a sweep go through each statement at once.
@@ -13,7 +13,7 @@ M1 with scissors and upbend, E2 and M2 Lorentzians), the primary photon transmis
 Moldauer's integral (whose total width contains the photon width), the photon population of the
 compound nucleus (`target_batch._feed_type`), and the decay of the compound nucleus's bins
 (`capture_fast_batch._photon_feeding` and `_cascade_cn`, with `emission.multiple.gamma_cascade`
-for the discrete levels). A fit (FIT1) changes only the photon strength, so the set-up is paid
+for the discrete levels). A fit changes only the photon strength, so the set-up is paid
 once per design, not once per call.
 
 **The batch axis.** Every point of the sweep has its own excitation grid, cells and channels;
@@ -25,8 +25,8 @@ its own mask, exactly as the reference's branch would.
 
 **Rounding.** The reference sums over residual states, cells, l' and nodes in the order its
 einsums and CPU reductions happen to use; the GPU groups the same non-negative terms differently.
-Results therefore agree to rounding (SPEED2: summation order moves the last bits), not bitwise;
-the gate is 1e-12 relative. Where the reference's order is cheap to keep it is kept (the widths
+Results therefore agree to rounding (summation order moves the last bits), not bitwise;
+the tolerance is 1e-12 relative. Where the reference's order is cheap to keep it is kept (the widths
 of the seven exit types are added in the reference's order, the isomers are added one by one).
 
 Identity with the CPU sweep is `tests/hf/test_capture_gpu.py`.
@@ -295,7 +295,7 @@ def pack(targets: list[dict], device="cuda", jcut: int | None = None) -> Packed:
     dims = dict(P=P, R=R, J=J, K=K, NA=NA, NCH=NCH, blocks=len(tt["channels"]), ND0=ND0, NB=NB,
                 NT=NT, NBR=NBR,
                 Nn=len(targets))
-    # DIRECTCAP: direct radiative capture (racap) per point, 0 unless INCOGNITA_DIRECT_CAPTURE
+    # direct radiative capture (racap) per point, 0 unless INCOGNITA_DIRECT_CAPTURE
     from physics.hf.direct.racapcalc import direct_capture_mb, mode
 
     dc = np.zeros(P)
@@ -352,7 +352,7 @@ def psf_params(pk: Packed, theta: Tensor, want_d: bool = False) -> dict:
     per target as gammapar.f90 holds them, gathered onto the point axis.
 
     TALYS: gammapar.f90:1 (gammapar)
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     g, nuc = pk.g, pk.nuc
     theta = theta.detach()
@@ -361,7 +361,7 @@ def psf_params(pk: Packed, theta: Tensor, want_d: bool = False) -> dict:
     # maximum (first maximum wins)
     e = g["e_raw"]
     sgl = g.get("psfsgl", False)
-    if sgl:  # FIDFIX psfsgl (default ON): gammapar.f90:268 ee + etable (etable 0 here) in real(sgl), as table_arrays
+    if sgl:  # `fidfix` psfsgl (default ON): gammapar.f90:268 ee + etable (etable 0 here) in real(sgl), as table_arrays
         e = torch.cat([e[:, :1], _f32(e[:, 1:])], dim=1)
     f = g["f_raw"] * ft[:, None, None]
     f0 = f[:, 1:, 0]
@@ -467,7 +467,7 @@ def tcl_kernel(p: dict, efs: Tensor, eg: Tensor, pos: Tensor, fn1: Tensor, want_
     of the M1, E1 and M2 columns in theta: (dM1/dsgr, dE1/dftable, dE1/dwtable, dM2/dsgr).
 
     TALYS: fstrength.f90:1 (fstrength), densprepare.f90:288-322
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     twopi, k0 = _twopi(), _pi2h2c2()
     k1, k2 = k0 / 3.0, k0 / 5.0
@@ -513,7 +513,7 @@ def _linearise(Tc: Tensor, d, dth: Tensor) -> Tensor:
 def _photon_exit_mask(j2: Tensor, irs2: Tensor) -> Tensor:
     """`target_batch._mask_for` for photons at l' = 1, 2 (slot updown = 0): (..., 2) float.
 
-    OPEN3M: a discrete level with an impossible 2J parity reads `l2' = jj2' = 2 l' + 1`, capped
+    a discrete level with an impossible 2J parity reads `l2' = jj2' = 2 l' + 1`, capped
     at l2maxhf = 2 gammax (`prepare.anomalous_exit_mask`); for every other spin this is 2 l'.
     """
     lp = torch.arange(1, L, device=j2.device)
@@ -581,7 +581,7 @@ def rows_kernel(exinc, dexinc, exr, dexr, sep0, sn, cont, rn, ntop, discfactor, 
     the discrete levels' rho0 weights (P, nd).
 
     TALYS: densprepare.f90:196-281
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     ex0plus = exinc + 0.5 * dexinc
     ex0min = exinc - 0.5 * dexinc
@@ -620,7 +620,7 @@ def decay_kernel(Tcc, Tcd, rbc, rgc, rho_d, pdn, Mdn, bands, Wb, p5b, popm, peb,
     inductor fuses without building them) over the eager one (einsum / bmm).
 
     TALYS: compound.f90:1 (compound), densprepare.f90:1 (densprepare)
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     P = Tcc.shape[0]
     nd = Tcd.shape[1]
@@ -700,7 +700,7 @@ def _primary(pk: Packed, p: dict, dth: Tensor | None, compiled: bool) -> Tensor:
     """comptarget's photon population of the compound nucleus, (P, R, J, 2).
 
     TALYS: comptarget.f90:1 (comptarget), densprepare.f90:1 (densprepare), moldauer.f90:1
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     from physics.hf.compound import wfc
 
@@ -780,7 +780,7 @@ def forward(pk: Packed, theta: Tensor | None = None, grad: bool = False,
     compiler for triton; the first call compiles).
 
     TALYS: comptarget.f90:1 (comptarget), multiple.f90:1 (multiple), cascade.f90:1 (cascade)
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     if theta is None:
         theta = theta_default(pk)
@@ -797,7 +797,7 @@ def forward(pk: Packed, theta: Tensor | None = None, grad: bool = False,
 
 
 def _dc(pk: Packed):
-    """DIRECTCAP's per-point direct-capture addend (0 when off or packed before it existed)."""
+    """The per-point direct-capture addend (0 when off or packed before it existed)."""
     return pk.t.get("dc_mb", 0.0)
 
 

@@ -1,4 +1,4 @@
-"""NNLEAK: the Egamma^3-weighted continuum -> discrete Rboundary of the initial CN top bin."""
+"""`INCOGNITA_NNLEAK`: the Egamma^3-weighted continuum -> discrete Rboundary of the initial CN top bin."""
 
 from __future__ import annotations
 

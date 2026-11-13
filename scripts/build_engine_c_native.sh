@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CENGDECAY (ROUTE100 WP5): build physics/hf/native/engine_decay.c (the warm decay core of one
+# Build physics/hf/native/engine_decay.c (the warm decay core of one
 # (nuclide, energy) in one call) into physics/hf/native/lib/libengdecay.so (libengdecay.dylib on
 # macOS; gitignored build output). It calls libnativex's and libnx2's kernels through pointers, so
 # build those first (scripts/build_nativex_native.sh, scripts/build_nx2_native.sh).

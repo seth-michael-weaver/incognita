@@ -9,7 +9,7 @@
 "n2n",
 "fission"
 ],
-"engine": "/home/seth/fastgate_data/eng/16606b356d6e",
+"engine": "~/fastgate_data/eng/16606b356d6e",
 "engine_commit": "16606b356d6efc4bc67b5590057ef0a710fec949",
 "note": "engine-20261022-3 production paths; see bench.py",
 "written": "2026-11-07 11:53"

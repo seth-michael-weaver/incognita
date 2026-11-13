@@ -133,7 +133,7 @@ def find_twins() -> pl.DataFrame:
 
 
 def series_ids(twin_pairs: list[tuple[str, str]]) -> dict[str, int]:
-    """FLOOR's series (same entry, or same first author + facility + detector) plus twin edges (union-find)."""
+    """Measurement series (same entry, or same first author + facility + detector) plus twin edges (union-find)."""
     t = pl.read_parquet(paths.TRUST, columns=["dataset_key", "entry", "first_author", "facility", "detector"])
     keys = t["dataset_key"].to_list()
     parent = {k: k for k in keys}

@@ -1,4 +1,4 @@
-"""SETB: the speed paths hold the numbers of the code they replace.
+"""The speed paths hold the numbers of the code they replace.
 
 * `density.matching_fast`: `match_vec`, `temprho_fill` and `ncum_at` are bitwise the loops
   (`match` with a gradient-carrying table, the inline fill, `densitycum`).
@@ -45,7 +45,7 @@ NUCLEI = [(26, 56, 26, 57), (40, 90, 40, 91), (40, 90, 39, 90), (82, 208, 82, 20
 def _same(a: torch.Tensor, b: torch.Tensor, rel: float = 1e-6) -> bool:
     """Reasonably close, not bit-identical (project rule):
     <=1e-6 relative, not bitwise. Hardware FP non-associativity measured up to ~1.8e-12 on
-    x86 vs the capture machine (X86VERIFY, 2026-09-16); 1e-6 is far above that noise floor."""
+    x86 vs arm64; 1e-6 is far above that noise floor."""
     return a.shape == b.shape and bool(
         torch.isclose(a, b, rtol=rel, atol=1e-12, equal_nan=True).all()
     )
@@ -262,7 +262,7 @@ def test_ccsplit_kernel_matches_ccfast(monkeypatch):
 def test_dwba_live_levels_give_the_full_decks_bits(Z, A, monkeypatch):
     """`dwba_cross_sections` with autograd off (the live-level rows) against the same call with
     autograd on (every row solved, the inline weights): the same cross sections to the bit.
-    NATIVEX2: the compiled deck (`ecis.dwba_nx2`, held to closeness) is off here; it is checked
+    The compiled deck (`ecis.dwba_nx2`, held to closeness) is off here; it is checked
     against this path in tests/hf/test_nx2_dwba.py."""
     monkeypatch.setenv("HF_NX2_DWBA", "0")
     from physics.hf.direct.chain import _omp_at

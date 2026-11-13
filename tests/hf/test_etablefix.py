@@ -1,4 +1,4 @@
-"""ETABLEFIX: `etable` and the other photon-strength keywords reach gamma_parameters as TALYS
+"""`etable` and the other photon-strength keywords reach gamma_parameters as TALYS
 applies them (gammapar.f90:261-267, 437-443, 564-585; fstrength.f90:158-173, 456-471).
 
 Before the fix fitlib passed `etable` under its keyword name (gamma_parameters reads
@@ -18,7 +18,7 @@ Z, A = 26, 56  # target Fe-56; the keywords sit on the compound nucleus Fe-57
 
 @pytest.fixture(scope="module", autouse=True)
 def _ftglobal_off():
-    """FTPROMO (ftglobal default ON): this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
+    """`ftglobal` defaults ON: this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_FTGLOBAL", "0")
         yield

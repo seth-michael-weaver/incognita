@@ -53,7 +53,7 @@ Design notes / traps found in TALYS-2.25
   ``resonancepar.f90:113``, but the only consumer of Γγ is the ``gnorm y``
   normalisation loop in ``radwidtheory.f90:253``; with the default
   ``gnorm n`` it changes nothing, and in our tests it changed nothing under
-  ``gnorm y`` either (197Au, factors 0.5 and 2) -- GNORMFIX (2026-09-17): because
+  ``gnorm y`` either (197Au, factors 0.5 and 2), because
   stock TALYS normalises to the .res keV number read as eV, the loop never
   converges (C/E Gamma_gamma 277-555) and stops at the same ftable whatever the
   factor.  ``runner.write_input`` now adds ``gamgam Z A <eV>`` under ``gnorm y``,

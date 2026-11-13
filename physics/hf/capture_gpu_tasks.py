@@ -1,7 +1,7 @@
 """`capture_tasks.capture_task`s answered by `capture_gpu` in batches, for a GPU host of
 a multi-host worker pool.
 
-Task: SPEEDG (step 6: a `gpu` host type for the multi-host pool). A batch of capture tasks becomes one
+Task: GPU capture batch (a `gpu` host type for the multi-host pool). A batch of capture tasks becomes one
 padded point axis: each task's photon-strength-independent set-up (`capture_gpu_setup`) is built
 once on the host's CPU and cached (in memory and as a pickle), its overrides become theta =
 (ftable(E1), wtable(E1), sgr(M1)), and the batch runs through `capture_gpu.forward` (with the
@@ -13,7 +13,7 @@ Tasks the GPU path does not cover (another override or gradient entry, a photon-
 outside `setup.gamma_pack`'s family, a batch where the rho0 cut could fire) are answered by
 `run_task` on the CPU, and say so in `impl`.
 
-Test: SPEEDG / tests/hf/test_capture_gpu.py
+Test: tests/hf/test_capture_gpu.py
 """
 
 from __future__ import annotations

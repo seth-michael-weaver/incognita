@@ -1,14 +1,14 @@
 """Measured (n,2n), (n,p) and (n,alpha) points for the light nuclides H..Mn (Z 1-25), with the benchmark rows' rules.
 
 The site's threshold-channel points for Z 24-92 are the benchmark rows (incognita/bench/data/exam_rows/{n2n,np,na}_rows),
-cut from the research repository's channel scoreboard rows (research/scripts/channels/score_channels.py --amend, rule
+cut from the research repository's channel comparison rows (research/scripts/channels/score_channels.py --amend, rule
 set "A1", docs/release/channels_v0/rows_A1.parquet). This script applies the same rules to Z 1-25 and writes
 
   data/curation/inputs/exfor_threshold_Z1-25_rows.parquet      one row per EXFOR series and engine energy bin
                                                                 (columns of the benchmark n2n_rows / np_rows)
   data/curation/inputs/exfor_threshold_Z1-25_provenance.json   inputs (SHA256), rule counts, checks
 
-Steps (inside the research checkout given by --main, default ~/nucleus; nothing there is written):
+Steps (inside the research checkout given by --main; nothing there is written):
   1. Stage. From the full staged EXFOR table of the 2026-10-14 entry.zip (staging/exfor_all_2026-10-14_x4fix1), the
      predicate and 20 MeV clip of `python -m data.ingest.exfor --subset n2n|np|na` (SF2 = N, SF3 = 2N | P | A,
      SF6 = SIG). The same procedure on Z 26-92 must reproduce staging/exfor_<ch>_Z26-92_2026-10-14_x4fix1 exactly,
@@ -27,7 +27,7 @@ Steps (inside the research checkout given by --main, default ~/nucleus; nothing 
      counted under z26_92_check_vs_benchmark_rows.*.fixed_rule_would_drop.
   3. Bins. As score_channels.py: one row per (series = subentry.pointer, engine energy bin) with the geometric-mean
      energy and the mean cross section; bins are the 64-point production-engine grid (1 keV-20 MeV) of the chart dumps.
-     The scoreboard's engine and library predictions are not computed (a row needs no engine run here).
+     The comparison's engine and library predictions are not computed (a row needs no engine run here).
   Check printed at the end: the same code on Z 26-92 of the same snapshot against the shipped benchmark rows (which were
   cut from the 2026-09 snapshot), as the share of benchmark rows reproduced with the same value.
 
@@ -50,8 +50,8 @@ Reaction identities stay exact: SF3 = A is (n,alpha) with the residual the targe
 and is not taken (ENDF puts Li-6 + n -> alpha + t in MT 105, (n,t)). A Li-6 SF3 = A series (residual H-3) would be the
 same final state as (n,t) and is dropped and counted (rule LI6_NT).
 
-usage (WSL, the research checkout's environment):
-  cd ~/nucleus && uv run --no-sync python <this repo>/scripts/build_light_channels.py [--main ~/nucleus] [--work DIR]
+usage (the research checkout's environment):
+  cd MAIN && uv run --no-sync python <this repo>/scripts/build_light_channels.py [--main MAIN] [--work DIR]
 """
 import argparse, collections, glob, hashlib, json, math, os, re, sys, time
 from pathlib import Path

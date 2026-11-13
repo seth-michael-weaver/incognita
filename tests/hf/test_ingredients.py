@@ -6,7 +6,7 @@ The reference numbers are stock TALYS-2.24's own printed values, from a run of
 grid point, 0.001 MeV: ``ld<ZZZ><AAA>.gs`` ("theoretical D0 [eV]", "a(Sn) [MeV^-1]", ...),
 ``psf<ZZZ><AAA>.E1`` ("theoretical Gamma_gamma [eV]", "theoretical S-wave strength function
 [e-4]", "average resonance energy [eV]"), ``spr.opt`` (S0, S1, Rprime) and
-``fis<ZZZ><AAA>.txt`` (barrier heights and widths). Gate: 1e-4 relative, which is finer than
+``fis<ZZZ><AAA>.txt`` (barrier heights and widths). Tolerance: 1e-4 relative, which is finer than
 TALYS's own 7-digit print.
 
 Nothing here runs a reaction: `ingredients` reads the level-density, photon-strength and

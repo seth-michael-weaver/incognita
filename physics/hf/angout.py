@@ -1,4 +1,4 @@
-"""KWCOV B3 (ANGOUT): discrete-state angular distributions and Legendre coefficients on TALYS's keywords, OUTPUT ONLY.
+"""Discrete-state angular distributions and Legendre coefficients on TALYS's keywords, OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -22,7 +22,7 @@ under `blockangle y`).
 Switches: the deck keywords (Options) `outangle`, `fileelastic` (angleout.f90 runs when either is y: output.f90:65),
 `fileangle`, `outlegendre`, `blockangle`, `angles` (nangle), `cpang`; the port switch `INCOGNITA_ANGOUT=1` (= outangle y +
 outlegendre y); `INCOGNITA_ANGOUT_DIR=<dir>` also writes the files. Default: none of them, nothing is computed and every
-array of every gate is unchanged. Any of them turns the SPECOUT recorders on for the run (specout.enabled).
+engine array is unchanged. Any of them turns the `specout` recorders on for the run (specout.enabled).
 
 Where the numbers come from (none of it feeds back into the engine):
 * shape elastic (neutron): `specang.shape_elastic_spherical` / `specang.coupled` (engine's own OMP / CC solve);
@@ -37,7 +37,7 @@ TALYS routines ported here (file:line of the subroutine statement):
     angleout.f90:1 (angleout)      file selection, names and columns
     preeqang.f90:1 (preeqang)      discrete pre-equilibrium Kalbach term
     write_block.f90:1              YANDF headers
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B3, output only). Acceptance test: KWCOV-B3
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test: KW-B3
 (tests/hf/test_angout.py, scripts/kwcov/b3_compare.py, docs/hf/COVERAGE_PLAN.md).
 """
 
@@ -92,7 +92,7 @@ def settings(options=None) -> dict | None:
 
     from physics.hf import recoil
 
-    # KWCOV B4 / B12: the DDX and the recoils (angdisrecoil.f90) need discad of every level
+    # the DDX and the recoils (angdisrecoil.f90) need discad of every level
     ddx = options is not None and (specobs.ddx_wanted(options) or recoil.wanted_for(options))
     if not (flagang or fe or ddx):
         return None
@@ -101,7 +101,7 @@ def settings(options=None) -> dict | None:
 
 
 def wanted() -> bool:
-    """The run being set up asks for angular output (the SPECOUT recorders must be on).
+    """The run being set up asks for angular output (the `specout` recorders must be on).
 
     TALYS: (none -- a port switch)
     Test: tests/hf/test_angout.py
@@ -517,10 +517,10 @@ def add_to_results(res, injection):
     s = _SET
     try:
         arr = build()
-        specobs.take_discad(arr, s["nangle"])  # KWCOV B4: discrete-peak angular distributions for the DDX
+        specobs.take_discad(arr, s["nangle"])  # discrete-peak angular distributions for the DDX
         from physics.hf import recoil
 
-        recoil.take_discad(arr, s["nangle"])  # KWCOV B12: angdisrecoil.f90
+        recoil.take_discad(arr, s["nangle"])  # angdisrecoil.f90
         if s.get("ddx") and not s["fileangle_all"]:  # the DDX made build visit every level: keep angleout's selection
             arr = {k: v for k, v in arr.items() if _selected(k, s)}
             META["present"] = {k: v for k, v in META.get("present", {}).items() if _selected(k, s)}
@@ -534,14 +534,14 @@ def add_to_results(res, injection):
     finally:
         from physics.hf import recoil
 
-        if not specout.env_enabled() and not specobs.active() and not recoil.active():  # KWCOV B4/B12: cleared later
+        if not specout.env_enabled() and not specobs.active() and not recoil.active():  # cleared later
             specout.clear_run()
         end_run()
     return res
 
 
 def _selected(name: str, s: dict) -> bool:
-    """KWCOV B4: is an angle/Legendre array one angleout.f90 writes (elastic, or a level in `fileangle`)?"""
+    """Is an angle/Legendre array one angleout.f90 writes (elastic, or a level in `fileangle`)?"""
     if ".L" not in name or name[2:5] not in ("ang", "leg"):
         return True
     n = int(name.split(".L")[1][:2])

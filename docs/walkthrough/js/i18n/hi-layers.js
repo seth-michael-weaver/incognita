@@ -1,4 +1,4 @@
-/* Hindi: layers (अध्याय 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Hindi: layers (अध्याय 21). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>परत 1 · हर नाभिक के लिए एक नियम</h3>
   <p>नीली रेखा एक अभिक्रिया के लिए इंजन का पूर्वानुमान है। इंजन सबसे निचली परत है: हर न्यूक्लाइड के लिए वही भौतिकी और वही वैश्विक सेटिंग्स, और इसमें कुछ भी किसी एक नाभिक के अनुप्रस्थ काट पर फिट नहीं किया गया है।</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">मापन दिखाएं</button></div>
-  <p>इससे यह मापनों के विरुद्ध और उन्हीं नाभिकों पर चलाए गए अन्य मॉडल कोडों के विरुद्ध परखने योग्य बनता है। यह अंधा परीक्षण नहीं है: वैश्विक सेटिंग्स इन्हीं तुलनाओं को देखते हुए चुनी गई थीं।${engineScore}</p>
+  <p>इससे यह मापनों के विरुद्ध और उन्हीं नाभिकों पर चलाए गए अन्य मॉडल कोडों के विरुद्ध परखने योग्य बनता है। यह स्वतंत्र परीक्षण नहीं है: वैश्विक सेटिंग्स इन्हीं तुलनाओं को देखते हुए चुनी गई थीं।${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>वर्तमान स्थिति</h3>
   <p>कोई परत मापनों के विरुद्ध परखे जाने के बाद ही अपनाई जाती है, और मदद न करे तो बंद रहती है। आज इंजन उपयोग में है और TERRA उम्मीदवार है; मापी-गई-संरचना परत और इंजन का अनिश्चितता बैंड अभी परखे जा रहे हैं।</p>
-  <p><a href="scoreboard.html" data-keep-lang>पूरा स्कोरबोर्ड देखें →</a> हर वह तुलना जो हम नहीं जीतते, हर प्रतिद्वंद्वी, और उसे कैसे पढ़ें।</p>
-  <div class="aside">${ASOF ? `${ASOF} तक के अंक, परियोजना के` : "अंक परियोजना के"} शोध रजिस्टर से। चित्र के वक्र केवल उदाहरण के लिए हैं।</div>
+  <p><a href="scoreboard.html" data-keep-lang>सभी तुलनाएँ देखें →</a> हर वह तुलना जो हम नहीं जीतते, हर प्रतिद्वंद्वी, और उन्हें कैसे पढ़ें।</p>
+  <div class="aside">${ASOF ? `${ASOF} तक के अंक, परियोजना के` : "अंक परियोजना के"} तुलना रिकॉर्ड से। चित्र के वक्र केवल उदाहरण के लिए हैं।</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} / {#} मापन बैंड के भीतर (लक्ष्य: लगभग {#} %)",
   "no measurements to check the band against": "बैंड जांचने के लिए कोई मापन नहीं",
 });
-Object.assign(WT.L.ui, { nav_board: "स्कोरबोर्ड" });
+Object.assign(WT.L.ui, { nav_board: "तुलनाएँ" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

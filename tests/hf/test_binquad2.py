@@ -1,4 +1,4 @@
-"""BINQUAD2: in-bin knots of the Gauss sub-points (`binquadk`), the rho-tilted photon-exit quadrature
+"""In-bin knots of the Gauss sub-points (`binquadk`), the rho-tilted photon-exit quadrature
 (`binquadp`), the compound nucleus's primary-photon population shape (`binquadc`) and its S edges (`snbincn`)."""
 from dataclasses import replace
 

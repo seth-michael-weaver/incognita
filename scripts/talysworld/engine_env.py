@@ -4,8 +4,8 @@ The calculator and benchmark launchers (engine_job.py, and through it engine_gri
 check*.py, scripts/perf/bench.py; tests/hf/perfcasc_gate_run.py) set the library v0.2 run environment, and the library's
 runner bundle (libv02/inputs/code: pprun, r52pool, engine_pool) sets more of it per job, all under the production
 engine's names: build 16606b356d6e (engine-20261022-3) reads NUCLIDO_*. This repository's engine (physics/hf) reads the
-same switches as INCOGNITA_*. A launcher whose TW_ENG is this repository therefore ran a different configuration from
-production without any error (no GGDEADEND, DWBAUNIT, ISOE2 hold, S-function input, ... ; capture off by up to 45 %).
+same switches as INCOGNITA_*. Without the mirror, a launcher whose TW_ENG is this repository would run a different configuration from
+production without any error (no `GGDEADEND`, `DWBAUNIT`, `ISOE2` hold, S-function input, ... ; capture off by up to 45 %).
 
 The launchers keep writing the production names (the bundle cannot be changed: it is the library's frozen runner).
 `install(eng)` looks at the engine the job runs (`flavour`) and, for this repository's engine, mirrors every NUCLIDO_*

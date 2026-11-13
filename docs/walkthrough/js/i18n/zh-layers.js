@@ -1,4 +1,4 @@
-/* Simplified Chinese (简体中文): layers (chapter 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded
+/* Simplified Chinese (简体中文): layers (chapter 12). The comparison counts come from WT.board (js/scoreboard-data.js, loaded
  * first), as in js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -29,7 +29,7 @@
   <h3>第 1 层 · 所有原子核同一条规则</h3>
   <p>蓝线是引擎对某个反应的预测。引擎是最底层：对每个核素使用相同的物理和全局设置，没有任何部分针对单个原子核的截面进行拟合。</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">显示测量数据</button></div>
-  <p>这使它可以用测量数据检验，也可以与在相同原子核上运行的其他模型程序比较。但这不是盲测：全局设置是在观察这些比较的过程中选定的。${engineScore}</p>
+  <p>这使它可以用测量数据检验，也可以与在相同原子核上运行的其他模型程序比较。但这不是独立检验：全局设置是在观察这些比较的过程中选定的。${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -57,8 +57,8 @@
 <div class="step">
   <h3>当前状况</h3>
   <p>一层只有在经过测量数据检验之后才会被采用；如果没有帮助，就保持关闭。目前引擎已在使用，TERRA 是候选；实测结构层和引擎的不确定度区间仍在测试中。</p>
-  <p><a href="scoreboard.html" data-keep-lang>查看完整记分板 →</a> 列出我们未胜出的每一项比较、每个对手，以及如何解读。</p>
-  <div class="aside">${ASOF ? `截至 ${ASOF} 的分数，` : "分数"}来自本项目的研究记录。图中的曲线仅作示意。</div>
+  <p><a href="scoreboard.html" data-keep-lang>查看全部对比 →</a> 列出我们未胜出的每一项比较、每个对手，以及如何解读。</p>
+  <div class="aside">${ASOF ? `截至 ${ASOF} 的分数，` : "分数"}来自本项目的对比记录。图中的曲线仅作示意。</div>
 </div>`,
   };
 })();
@@ -78,5 +78,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#}/{#} 个测量点在区间内（目标：约 {#} %）",
   "no measurements to check the band against": "没有可用于检验区间的测量数据",
 });
-Object.assign(WT.L.ui, { nav_board: "记分板" });
+Object.assign(WT.L.ui, { nav_board: "对比" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

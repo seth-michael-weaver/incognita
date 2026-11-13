@@ -115,7 +115,7 @@ Object.assign(WT.L.labels, {
   "second fast particle in {#} of the last {#} reactions": "2個目の速い粒子：{#}回（直近{#}回の反応中）",
 });
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "bump {#}: a proton in the sea was hit, jumped up, and left a hole": "衝突 {#}：海の陽子が当たって跳び上がり、空孔を残した",
   "bump!": "ドン！",

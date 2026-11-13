@@ -125,7 +125,7 @@ def test_target_state_of_level(clean, Z, A, lt, spin2, par, e_mev):
     assert sc.targete_mev == pytest.approx(e_mev, abs=2e-6)
 
 
-# ------------------------------------------------------------------------------------------------ direct, preeq gates
+# ----------------------------------------------------------------------------------------------- direct, preeq checks
 def test_direct_off_for_excited_target(clean):
     """direct.f90:33: no DWBA level and no giant resonance (Fe-56 is spherical: no coupled-channels inelastic)."""
     from physics.hf.direct.chain import direct_result

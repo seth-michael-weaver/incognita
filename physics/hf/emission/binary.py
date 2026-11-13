@@ -55,7 +55,7 @@ from physics.hf import engphys
 from physics.hf.core.tensors import DTYPE
 
 NUMJ = 40  # A0_talys_mod.f90:  numJ = 40
-from physics.hf.core.grids import NUMEX_ALLOC as NUMEX  # SNBIN: was 80 (< grids' numex 140): `bins` > ~48 overflowed sfactor
+from physics.hf.core.grids import NUMEX_ALLOC as NUMEX  # grids' numex allocation, so `bins` > ~48 cannot overflow sfactor
 
 
 def sfaclocal_on() -> bool:
@@ -140,7 +140,7 @@ class BinaryInputs:
     xspopnuc_mb: dict[int, float] = field(default_factory=dict)  # compound only
     xsdirdisc_mb: dict[int, Tensor] = field(default_factory=dict)  # (Nex,)
     preeqpopex_mb: dict[int, Tensor] = field(default_factory=dict)  # (Nex,)
-    # KWCOV B7 (pespinmodel >= 3): population.f90's J-resolved `preeqpop` (Nex, maxJph+1, 2); empty otherwise
+    # pespinmodel >= 3: population.f90's J-resolved `preeqpop` (Nex, maxJph+1, 2); empty otherwise
     preeqpop_mb: dict[int, Tensor] = field(default_factory=dict)
     xsdirdisctot_mb: dict[int, float] = field(default_factory=dict)
     xspreeqtot_mb: dict[int, float] = field(default_factory=dict)
@@ -196,7 +196,7 @@ def bin_spin_cutoff(ld, ex_mev: Tensor) -> tuple[Tensor, Tensor]:
 
     This is binary.f90:229-230 -- the two lines that make the pre-equilibrium spin spread work
     where `sfactor` is zero. Split out so the engine can feed a ported level density in and the
-    gate can feed TALYS's own dumped values in, with the same `binary` below.
+    test can feed TALYS's own dumped values in, with the same `binary` below.
 
     TALYS: ignatyuk.f90:1 (ignatyuk), spincut.f90:1 (spincut)
     Test: A-mult
@@ -206,7 +206,7 @@ def bin_spin_cutoff(ld, ex_mev: Tensor) -> tuple[Tensor, Tensor]:
     from physics.hf.density import spinquench as _sq
 
     ald = ignatyuk(ld, ex_mev, 0)
-    return ald, _sq.quench_t(ld, ex_mev, spincut(ld, ald, ex_mev, 0, 0), 0)  # SPINQUENCH (OFF: unchanged)
+    return ald, _sq.quench_t(ld, ex_mev, spincut(ld, ald, ex_mev, 0, 0), 0)  # spin quench (OFF: unchanged)
 
 
 def binary(inp: BinaryInputs, state: BinaryState | None = None, device=None) -> BinaryResult:
@@ -218,7 +218,7 @@ def binary(inp: BinaryInputs, state: BinaryState | None = None, device=None) -> 
     """
     from physics.hf.emission import emit_nx2
 
-    fast = emit_nx2.binary(inp, state, device)  # NATIVEX2: off the graph, numpy + C per type
+    fast = emit_nx2.binary(inp, state, device)  # Off the graph, numpy + C per type
     if fast is not None:
         return fast
     types = sorted(inp.grids)
@@ -292,13 +292,13 @@ def binary(inp: BinaryInputs, state: BinaryState | None = None, device=None) -> 
                 wig = spindis(g.spincut[sl][:, None], jj[None, :]) * PARDIS
                 use_sf = (inp.pespinmodel == 1) & (new > 0.0)
                 spread = torch.where(use_sf, new, wig[:, :, None])
-                if engphys.on("pespin"):  # ENGPHYS: the bin gets exactly its pre-equilibrium flux
+                if engphys.on("pespin"):  # `pespin`: the bin gets exactly its pre-equilibrium flux
                     spread = engphys.spread_norm_torch(spread, None)
                 add = spread * ppx[sl][:, None, None]
                 pop[sl, :mj, :] = pop[sl, :mj, :] + add
                 pex[sl] = pex[sl] + ppx[sl]
             elif ncont > 0:
-                # KWCOV B7 (pespinmodel >= 3): population.f90 made `preeqpop` itself; binary.f90:244-256 adds it
+                # pespinmodel >= 3: population.f90 made `preeqpop` itself; binary.f90:244-256 adds it
                 # and preeqpopex the same way (before, the pre-equilibrium flux of these runs was dropped)
                 sl = slice(nl + 1, nmax + 1)
                 pp = inp.preeqpop_mb.get(t)

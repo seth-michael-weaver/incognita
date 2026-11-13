@@ -1,4 +1,4 @@
-"""KWCOV B7b: the JLM microscopic optical model (`jlmomp y`, `micro y`) for neutrons and protons: radial matter
+"""the JLM microscopic optical model (`jlmomp y`, `micro y`) for neutrons and protons: radial matter
 densities from the structure database, the JLMB folding of Bauge et al. (PRC 63, 024607 (2001)), and the
 single-channel solve on the tabulated potential ECIS is handed (ecisinput.f90's "JLM OMP" branch).
 
@@ -434,7 +434,7 @@ def solve(Z: int, A: int, particle: int, e_lab_mev, m_targ_amu: float, lmax: int
     m_proj_r = float(S.ecis_card_value(torch.tensor(m_proj, dtype=DTYPE)))
     m_targ_r = float(S.ecis_card_value(torch.tensor(m_targ_amu, dtype=DTYPE)))
     kin = S.ecis_kinematics(e_card, m_proj_r, m_targ_r, zp)
-    # mom gets ecisinput's real(sgl) e (not the card value)
+    # mom gets ecisinput's real(sgl) e (not the input-record value)
     e32 = e.numpy().astype(np.float32).astype(float)
     central, so, rc = potential(Z, A, particle, e32, jlmmode=int(getattr(options, "jlmmode", 0)), params=params,
                                 radialmodel=int(getattr(options, "radialmodel", 2)), alpha_options=options)
@@ -447,7 +447,7 @@ def solve(Z: int, A: int, particle: int, e_lab_mev, m_targ_amu: float, lmax: int
     r = HINT * torch.arange(1, nmax + 1, dtype=DTYPE)
     cen = torch.as_tensor(central[:, :nmax], dtype=torch.complex128)
     sof = torch.as_tensor(so[:, :nmax], dtype=torch.complex128) * S.SPIN_ORBIT_FACTOR
-    # Coulomb: card 7 (itypx -1, reduced radius): homogeneous sphere of radius rc M^(1/3)
+    # Coulomb: input record 7 (itypx -1, reduced radius): homogeneous sphere of radius rc M^(1/3)
     rc_c = float(_f10_5(rc)) * m_targ_r ** (1.0 / 3.0)
     e2z = S.ECIS_CCZ_MEV_FM * zp
     coul = torch.where(r < rc_c, e2z / (2.0 * rc_c) * (3.0 - (r / rc_c) ** 2), e2z / r)[None, :].expand(n_e, nmax)

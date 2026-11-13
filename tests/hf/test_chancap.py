@@ -1,4 +1,4 @@
-"""CHANCAP: the exclusive-channel per-ejectile caps (channels.py caps / numchantot, deck keyword `chancap`)."""
+"""The exclusive-channel per-ejectile caps (channels.py caps / numchantot, deck keyword `chancap`)."""
 
 import pytest
 

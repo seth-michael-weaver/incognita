@@ -65,19 +65,19 @@ def primary_dens_inputs(cas, st, etotal_mev: float, *, gammax: int,
             nexmax=d.maxex, sep_mev=sp.sep_mev[t], ex_mev=d.ex_mev, dex_mev=d.dex_mev,
             maxj=d.maxj, parlev=d.parlev, jdis=d.jdis, rhogrid=d.rhogrid, ncum_nl=d.ncum_nl)
         if t >= 1:
-            tjl, tl, lmax = cas.front_trans()[t]  # SLFIRST: the first compound nucleus's set; KWCOV B6 optmodall
+            tjl, tl, lmax = cas.front_trans()[t]  # First-CN set: the first compound nucleus's set; `optmodall`
             trans[t] = DensTrans(
                 egrid_mev=cas.rg.egrid, ebegin=cas.rg.ebegin[t],
                 eend=min(int(eend[t]), cas.rg.maxen), maxen=cas.rg.maxen,
                 tjl=tjl, tl=tl, lmax=lmax)
             tr_cont = cas.trans_cont_of(0, 0)
-            if tr_cont is not None:  # ROTEXIT1CN (default OFF): continuum rows read the model set
+            if tr_cont is not None:  # Continuum exit set (default OFF): continuum rows read the model set
                 trans[t].cont_tjl, trans[t].cont_tl = tr_cont[t][:2]
-            if t >= 2 and cas.trans.get("tlog", False):  # LOGTINT (default OFF): log-T Lagrange, charged types
-                trans[t].tlog = cas.trans["tlog"]  # True / "c" = ln T, "l" = TLOGIT logit T
-            if t >= 2 and "tlogref" in cas.trans:  # LOGTINT G0 reference (default OFF)
+            if t >= 2 and cas.trans.get("tlog", False):  # Log-T interpolation (default OFF): log-T Lagrange, charged types
+                trans[t].tlog = cas.trans["tlog"]  # True / "c" = ln T, "l" = logit T
+            if t >= 2 and "tlogref" in cas.trans:  # Log-T interpolation G0 reference (default OFF)
                 trans[t].tlogref = cas.trans["tlogref"][t]
-            if t == 6 and cold and "alpha_cold" in cas.trans:  # ALPHATEMP (default OFF): cold alpha table + U*
+            if t == 6 and cold and "alpha_cold" in cas.trans:  # `alphatemp` (default OFF): cold alpha table + U*
                 trans[t].cold_tjl, trans[t].cold_tl = cas.trans["alpha_cold"][:2]
                 trans[t].ustar = float(cas.trans["alphatemp_ustar"])
     return DensPrepareInputs(
@@ -85,12 +85,12 @@ def primary_dens_inputs(cas, st, etotal_mev: float, *, gammax: int,
         lmaxinc=st.lmaxinc, k0=cas.k0, fnorm=cas.fiso(), residuals=residuals, trans=trans,
         gamma_strength=cas.gamma_strength(cas.Zt, cas.At), primary=True,
         flagfullhf=flagfullhf, transeps=cas.transeps,
-        gamma_params=cas.gamma_params(cas.Zt, cas.At),  # PARAMWIRE: the run's parameter set
+        gamma_params=cas.gamma_params(cas.Zt, cas.At),  # the run's parameter set
         binquad=_binquad_of(cas))
 
 
 def _binquad_of(cas):
-    """BINQUAD: (nodes, mother tilt, residual tilt) under `binquad y`, else None (TALYS)."""
+    """`binquad`: (nodes, mother tilt, residual tilt) under `binquad y`, else None (TALYS)."""
     from physics.hf.core.grids import binquad_mode, binquad_params, binquad_photon
 
     return binquad_params(cas.options) + (binquad_photon(cas.options),) if binquad_mode(cas.options) else None
@@ -101,7 +101,7 @@ def compound_inputs(cas, st, binp, cinp, etotal_mev: float, add: dict,
                     tfisA: dict | None = None, rhofisA: dict | None = None) -> CompoundInputs:
     """`CompoundInputs` for one incident energy, built rather than dumped.
 
-    `binp`/`cinp` supply only the structure-and-configuration scalars that gates A-grid and
+    `binp`/`cinp` supply only the structure-and-configuration scalars that checks A-grid and
     A-struct cover and that no physics module produces (`Ltarget`, the target's spin and parity,
     `popeps`, `xseps`); `add` is `norm_reference.addends`' T8/T12 sums for this energy.
 
@@ -114,13 +114,13 @@ def compound_inputs(cas, st, binp, cinp, etotal_mev: float, add: dict,
     cf, lmaxinc = chained_formation(cas, _NormView(binp), add)
     from physics.hf.omp import alphatemp
 
-    dom = alphatemp.dom_on(cas.trans)  # KEVCOLD (default OFF): production tables + the ALPHATEMP alpha table aside
+    dom = alphatemp.dom_on(cas.trans)  # Cold-alpha domain (default OFF): production tables + the `alphatemp` alpha table aside
     res = densprepare(primary_dens_inputs(cas, st, etotal_mev, gammax=o.gammax, cold=not dom))
     alphadom = densprepare(primary_dens_inputs(cas, st, etotal_mev, gammax=o.gammax))[6] if dom else None
     inc = cas.incident(binp.e_inc_mev)
     from physics.hf.compound.dens_reference import _to_updown_axis
 
-    # DIFFPARAM: with an optical override on the graph the incident channel is a tensor and
+    # Differentiable: with an optical override on the graph the incident channel is a tensor and
     # must stay one -- `cnfactor`, `Tjlinc` and sigma_reac are exactly where an OMP parameter
     # enters the compound cross section. Without one this is the byte-identical numpy of before.
     tjl_t = _to_updown_axis(inc.tjl_inc[0], cas.k0)[: lmaxinc + 1]
@@ -144,7 +144,7 @@ def compound_inputs(cas, st, binp, cinp, etotal_mev: float, add: dict,
     out.residuals = res
     from physics.hf.compound import ccexitnb
 
-    if ccexitnb.enabled(o) and cas.k0 in res:  # CCEXITNB (default OFF): CC exit T on non-band target levels
+    if ccexitnb.enabled(o) and cas.k0 in res:  # `ccexitnb` (default OFF): CC exit T on non-band target levels
         out.residuals = dict(res)
         out.residuals[cas.k0] = ccexitnb.apply_residual(cas, res[cas.k0], binp.ltarget, etotal_mev,
                                                            float(cas.spec(st, 0, 0).sep_mev[cas.k0]))
@@ -158,7 +158,7 @@ XSEPS_MB = 1.0e-7  # input_numerics.f90:81, TALYS's default `xseps`
 def _cnfactor(cf, xseps_mb: float, grad: bool = False):
     """`CNfactor`, or 0 where there is no compound flux to decay.
 
-    ENGDEFECT: comptarget.f90:256 returns at once when `xsflux <= xseps` (direct + pre-equilibrium
+    comptarget.f90:256 returns at once when `xsflux <= xseps` (direct + pre-equilibrium
     exhaust the reaction cross section), so TALYS has no binary compound population, no compound
     elastic and no first-chance fission at that energy. Running comptarget anyway with
     `CNfactor * cfratio < 0` gives NEGATIVE populations: compound elastic -3e5 mb, hence nonelastic

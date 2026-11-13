@@ -99,7 +99,7 @@ Object.assign(WT.L.labels, {
   "{#} runs of the engine, each with its inputs nudged at random": "इंजन के {#} रन, हर एक के इनपुट यादृच्छिक रूप से बदले हुए",
 });
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "लक्ष्य के स्तर, हर स्तर पर नाभिकों के अंश के साथ (नीचे ऊर्जा पैमाना फैलाया गया)",
 });

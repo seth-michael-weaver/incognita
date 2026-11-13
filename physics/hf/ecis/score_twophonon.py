@@ -1,12 +1,12 @@
 """G-2PH: the two-phonon (`ecis1(2:2) = 'T'`) incident coupled channels against TALYS.
 
 No dump in `features/hf_reference/raw` is a two-phonon target -- that is why
-`ecis.incident` raised on one until TWOPH -- so this scorer reads the three runs
+`ecis.incident` had no two-phonon path before this one -- so this scorer reads the three runs
 `scripts/hf_twophonon_reference.py` makes (Zn-64, Cd-114, Te-124, the full 23-energy reference
 grid) instead of the reference parquet.
 
 Metric of contract §6 and of `ecis.score`: `r = |ln(port/TALYS)|` over points above the floor,
-p95 gated at the A-inc tolerance of `docs/results/hf-engine-gates.md` (1e-2), median and max
+p95 checked against the A-inc tolerance (1e-2), median and max
 reported. Four quantity groups:
 
     * the six A-inc scalars per incident energy, from `talys.out`,
@@ -25,7 +25,7 @@ Usage:
     uv run python -m physics.hf.ecis.score_twophonon                # injected OMP
     uv run python -m physics.hf.ecis.score_twophonon --chained      # T4's OMP
 
-Task: TWOPH (physics/hf/CONTRACT.md §7). Acceptance test: G-2PH.
+Task: two-phonon coupling (physics/hf/CONTRACT.md §7). Acceptance test: G-2PH.
 """
 
 from __future__ import annotations
@@ -46,13 +46,13 @@ from physics.hf.core.tensors import DTYPE
 from physics.hf.ecis.incident import incident_coupled
 from physics.hf.ecis.reference import COLUMNS, InjectedOMP, _HEAD, _split_fixed
 
-TOL = 1.0e-2  # A-inc, docs/results/hf-engine-gates.md §3
+TOL = 1.0e-2  # A-inc tolerance
 RAW = Path(os.environ.get("HF_TWOPH_RAW", Path.home() / "twoph_ref"))
 CACHE = Path(os.environ.get("HF_TWOPH_CACHE", Path.home() / ".cache" / "incognita" / "hf_twoph"))
 OUT = Path(__file__).resolve().parents[3] / "docs" / "results" / "hf-ecis-twophonon-gate.json"
 VARIANT = "twophonon"
 
-# (tag, Z, A): the three gate targets of docs/results/hf-ecis-twophonon.md §5.
+# (tag, Z, A): the three test targets.
 TARGETS: tuple[tuple[str, int, int], ...] = (("Zn064", 30, 64), ("Cd114", 48, 114),
                                              ("Te124", 52, 124))
 FIELDS = {

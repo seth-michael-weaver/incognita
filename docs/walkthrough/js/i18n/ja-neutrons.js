@@ -17,7 +17,7 @@ WT.L.ch.neutrons = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "+{#} charge: the push grows as the proton gets closer": "+{#} の電荷：陽子が近づくほど反発が強まる",
   "lead{#}": "鉛{#}",

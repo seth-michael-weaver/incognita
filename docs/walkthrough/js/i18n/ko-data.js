@@ -1,13 +1,13 @@
 /* Korean: data explorer (data.html, js/data.js) */
 Object.assign(WT.L.ui, {
   lang_label: "언어", nav_teach: "교수자용",
-  brand: "핵반응의 내부", nav_physics: "물리", nav_data: "모든 핵종", nav_board: "점수판", menu: "메뉴", site_nav: "사이트",
+  brand: "핵반응의 내부", nav_physics: "물리", nav_data: "모든 핵종", nav_board: "비교", menu: "메뉴", site_nav: "사이트",
   dx_title: "모든 핵종 · 핵반응의 내부",
-  site_nav: "사이트", nav_walk: "둘러보기", nav_board: "점수판", nav_data: "모든 핵종", nav_repo: "GitHub의 코드",
+  site_nav: "사이트", nav_walk: "둘러보기", nav_board: "비교", nav_data: "모든 핵종", nav_repo: "GitHub의 코드",
   dx_kicker: "INCOGNITA · 데이터 탐색기",
   dx_h1: "모든 핵종",
   dx_lede: "라이브러리에 있는 모든 핵종에 대해 엔진이 예측한 중성자 단면적을, 각 핵종의 정리된 측정값과 함께 보여 줍니다. 도표에서 핵종을 고르거나 검색하세요.",
-  dx_lede_ver: "이 곡선들은 라이브러리 v0.2.3(2026년 11월)로, 점수판에서 점수를 매기는 것과 같은 엔진 버전(2026년 10월 22일 엔진)으로 만들었습니다. 측정값에 맞춘 점수판의 데이터 제품인 TERRA가 아닙니다. 모든 곡선은 엔진 자체의 예측이며, 옆에 보이는 측정값에 맞춘 곡선은 없습니다. 예외는 고정으로 표시된 핵종으로, 30 keV에서의 항성 평균이 측정값과 같아지도록 곡선에 하나의 배율을 곱했습니다. 엔진의 전반적인 설정은 모든 핵종에 대해 한 번, 많은 측정값(이 측정값들도 포함)을 써서 정했으므로, 측정된 핵종에서 일치하는 것은 모형에 대한 공정한 확인이지만 완전히 독립적인 검증은 아닙니다. 대부분의 핵종은 한 번도 측정된 적이 없으며(외삽), 그 띠는 넓습니다.",
+  dx_lede_ver: "이 곡선들은 라이브러리 v0.2.3(2026년 11월)로, 비교 페이지에서 점수를 매기는 것과 같은 엔진 버전(2026년 10월 22일 엔진)으로 만들었습니다. 같은 페이지에 있는, 측정값에 맞춘 데이터 제품 TERRA가 아닙니다. 모든 곡선은 엔진 자체의 예측이며, 옆에 보이는 측정값에 맞춘 곡선은 없습니다. 예외는 고정으로 표시된 핵종으로, 30 keV에서의 항성 평균이 측정값과 같아지도록 곡선에 하나의 배율을 곱했습니다. 엔진의 전반적인 설정은 모든 핵종에 대해 한 번, 많은 측정값(이 측정값들도 포함)을 써서 정했으므로, 측정된 핵종에서 일치하는 것은 모형에 대한 공정한 확인이지만 완전히 독립적인 검증은 아닙니다. 대부분의 핵종은 한 번도 측정된 적이 없으며(외삽), 그 띠는 넓습니다.",
   dx_controls: "도표 조작", dx_search_label: "핵종 찾기", dx_search_ph: "검색: U-235, Fe56, Au…",
   dx_colour: "도표 색칠 기준", dx_m_tier: "알려진 방식", dx_m_macs: "30 keV 포획", dx_m_meas: "측정 데이터",
   dx_chart_h: "핵종 도표",
@@ -85,7 +85,7 @@ Object.assign(WT.L.ui, {
   dx_th_abs: "흡수에서 핵분열을 뺀 값",
 });
 
-/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+/* INCOGNITA's own capture below 1 keV */
 Object.assign(WT.L.ui, {
   dx_rr_b1k: "1 keV 미만",
   dx_rr_own: "측정 데이터에 대한 INCOGNITA 자체 공명 맞춤(300 eV까지; 300 eV~1 keV는 통계적 공명)",
@@ -98,14 +98,14 @@ Object.assign(WT.L.ui, {
   dx_rr_k_sm: "매끄러운 추정(공명 없음)",
   dx_below_rr: "1 keV 미만: INCOGNITA의 {k}",
   dx_below_own: "1 keV 미만의 실선은 300 eV까지 측정된 포획 데이터에 대한 INCOGNITA 자체 공명 맞춤입니다. 300 eV부터 1 keV까지는 통계적 공명을 씁니다. 1 keV에서 예측과 이어집니다.",
-  dx_below_stat: "1 keV 미만의 일점쇄선은 INCOGNITA의 통계적 추정입니다. INCOGNITA 자체의 평균 간격과 폭을 가진 공명을 무작위로 놓았으므로, 개별 봉우리는 실제와 맞지 않습니다. 공명 적분을 따로 남겨 둔 핵종으로 시험하면 보통 측정값의 2배 이내였고 그보다 낫지는 않았습니다(중앙값 차이 ×1.9, ×2 이내 54 %).",
+  dx_below_stat: "1 keV 미만의 일점쇄선은 INCOGNITA의 통계적 추정입니다. INCOGNITA 자체의 평균 간격과 폭을 가진 공명을 무작위로 놓았으므로, 개별 봉우리는 실제와 맞지 않습니다. 공명 적분을 피팅에 쓰지 않은 핵종으로 시험하면 보통 측정값의 2배 이내였고 그보다 낫지는 않았습니다(중앙값 차이 ×1.9, ×2 이내 54 %).",
   dx_below_sm_a: "1 keV 미만의 점선은 INCOGNITA의 매끄러운 추정입니다. 측정된 열중성자 포획값을 지나는 1/v 곡선을 1 keV 값에 이은 것입니다. 공명은 그리지 않았으므로, 약 1 eV에서 1 keV 사이에서는 실제 단면적이 봉우리에서 훨씬 높을 수 있습니다.",
   dx_below_sm: "1 keV 미만의 점선은 INCOGNITA의 매끄러운 추정입니다. 1 keV 값을 1/v로 이어 늘린 것으로, 공명도 없고 값을 고정할 측정도 없습니다. 실제 열중성자 값은 이와 자릿수 단위로 다를 수 있습니다.",
   dx_below_anch: "측정된 열중성자 포획값 {v} b를 반드시 지나도록 했습니다.",
   dx_rr_anch_diff: "마름모는 EXFOR 항목의 별도 평균이며 이 값과 다릅니다.",
   dx_rr_ri: "이 핵종의 0.5 eV 이상 포획 공명 적분: INCOGNITA {m} b, 측정 {e} b.",
   dx_rr_ri_used: "이 측정값은 이 무작위 표본을 고르는 데 쓰였으므로, 일치는 검증이 아닙니다.",
-  dx_rr_ri_hold: "이 측정값은 따로 남겨 둔 것으로, 이 곡선을 만드는 데 쓰지 않았습니다.",
+  dx_rr_ri_hold: "이 측정값은 이 곡선을 만드는 데 쓰지 않았습니다.",
   dx_pw_tip_rr: "평가 라이브러리(비교용), 0 K 점별 값",
   dx_lib_pw_rr: "1 keV 미만에서는 같은 라이브러리를 가는 실선으로 점별로 그립니다. 0 K에서 재구성하고(NJOY RECONR, 허용 오차 0.01 %), 공명의 봉우리와 골이 남도록 고른 점으로 곡선마다 최대 {n}개 점까지 줄였습니다. 이것도 비교용입니다. INCOGNITA의 곡선이 아닙니다.",
   dx_tr_h: "얼마나 믿을 수 있나",
@@ -125,18 +125,18 @@ Object.assign(WT.L.ui, {
   dx_tr_b_narrow: "띠가 아마 너무 좁음: 포함률이 부족했음",
   dx_tr_b_none: "띠 표시 없음",
   dx_tr_b_macs: "띠를 따로 점검하지 않음",
-  dx_tr_e: "점수판 오차 보통 ×{f} (측정된 핵 {n}개, Z {z}; 블라인드 아님)",
-  dx_tr_e_none: "이 영역에는 보류 데이터로 한 검증이 없음",
-  dx_tr_src: "등급과 표시: library/v0.2.3 README. 띠: 측정값에 대한 사전 등록 포함률 점검(시험 핵 5개, 2026년 10월)에서 포획·핵분열·탄성 산란의 띠는 명시된 대로 포함했고, 문턱 채널과 전체 단면적의 띠는 부족했습니다. 오차: <a href=\"scoreboard.html\" data-keep-lang>점수판</a>, log10(엔진 / 측정값)의 제곱평균제곱근. 엔진 규칙을 이것을 보면서 정했으므로 블라인드 검증이 아닙니다.",
+  dx_tr_e: "비교 오차 보통 ×{f} (측정된 핵 {n}개, Z {z}; 개발 중 비교)",
+  dx_tr_e_none: "이 영역에는 측정값과의 비교가 없음",
+  dx_tr_src: "등급과 표시: library/v0.2.3 README. 띠: 측정값에 대한 포함률 점검(시험 핵 5개, 2026년 10월)에서 포획·핵분열·탄성 산란의 띠는 명시된 대로 포함했고, 문턱 채널과 전체 단면적의 띠는 부족했습니다. 오차: <a href=\"scoreboard.html\" data-keep-lang>비교</a> 페이지, log10(엔진 / 측정값)의 제곱평균제곱근. 엔진 규칙을 이것을 보면서 정했으므로 독립적인 검증이 아닙니다.",
 });
 // less text (2026-11-06)
 Object.assign(WT.L.ui, { dx_hint2: "드래그로 이동 · 스크롤로 확대 · 칸을 클릭", dx_more_nuc: "자세히: 신뢰도, 출처, 코드", dx_about: "데이터, 다운로드, 코드에 대하여" });
 Object.assign(WT.L.ui, { dx_cmp: "비교용" });
-// C12RM9 R-matrix evaluation (light nuclei, 2026-11-07)
-Object.assign(WT.L.ui, {"dx_el": "탄성 산란 (n,n)", "dx_rm_name": "INCOGNITA R-행렬 평가 (C12RM9)", "dx_rm_h": "이 핵종에 대한 우리 모델", "dx_rm_what": "탄소-12에서의 중성자 탄성 산란으로, EXFOR의 전체 단면적과 탄성 단면적 측정값에 INCOGNITA가 직접 맞춘 다준위 R-행렬 피팅에서 나온 것입니다. 공개 전에 미리 등록한 검사를 통과했습니다: IAEA 탄소 표준, 따로 남겨 둔 전체 단면적 측정값, NJOY 처리 왕복 검사, 흑연 임계 벤치마크(PCI-001).", "dx_rm_range": "에너지 범위: {lo}부터 {hi}까지이며, 그 위에는 INCOGNITA 곡선이 없습니다.", "dx_rm_caveat": "주의: 학습 표본의 χ²/자유도 {c}; 기울어진 데이터 세트 두 개를 표시했습니다; 판정 기준은 보정되었지만 검정력이 낮습니다.", "dx_rm_nocap": "포획은 모델링하지 않습니다. 포획 탭에는 측정값만 표시됩니다.", "dx_rm_report": "보고서 읽기"});
-Object.assign(WT.L.ui, { "dx_rr_meas": "실험자들이 측정한 공명(EXFOR 공명 매개변수)을 INCOGNITA가 모은 것; 측정되지 않은 스핀, 복사 폭, 약한 준위는 INCOGNITA 자체 통계에서 가져옴", "dx_rr_own_t": "측정된 EXFOR 투과 데이터에 대한 INCOGNITA 자체 Reich–Moore 공명 맞춤, 10 µeV부터 1 keV까지; 라이브러리 파일이 아님", "dx_rr_k_meas": "측정된 공명(EXFOR 매개변수)", "dx_below_meas": "1 keV 미만의 실선은 실험자들이 측정해 EXFOR에 보고한 공명 에너지와 폭을 여러 실험에 걸쳐 합친 것을 사용합니다. INCOGNITA의 맞춤이 아닙니다. 스핀이나 복사 폭이 측정되지 않은 곳은 INCOGNITA 자체 통계로 채우고, 실험에서 보이지 않았던 약한 준위는 통계적으로 추가합니다(그 위치는 예측이 아닙니다). 1 keV에서 예측과 이어집니다.", "dx_below_own_t": "1 keV 미만의 실선은 측정된 EXFOR 투과 데이터에 대한 INCOGNITA 자체 Reich–Moore 공명 맞춤입니다. 1 keV에서 예측과 이어집니다. 핵종 옆의 메모에 어떤 데이터 세트를 썼는지, 그리고 따로 남겨 둔 데이터와 맞춤이 어떻게 비교되는지 적혀 있습니다.", "dx_band_th": "열중성자", "dx_band_th_s": "열중성자", "dx_band_th_x": "열", "dx_band_rr": "공명", "dx_band_rr0": "공명 영역", "dx_band_rr_s": "공명", "dx_band_rr_x": "공명", "dx_band_ur": "평균한 공명", "dx_band_ur_s": "평균", "dx_band_ur_x": "평균", "dx_band_f": "고속", "dx_band_f_s": "고속", "dx_band_f_x": "고속", "dx_band_all": "전체 에너지" });
+// R-matrix evaluation (light nuclei)
+Object.assign(WT.L.ui, {"dx_el": "탄성 산란 (n,n)", "dx_rm_name": "INCOGNITA R-행렬 평가", "dx_rm_h": "이 핵종에 대한 우리 모델", "dx_rm_what": "탄소-12에서의 중성자 탄성 산란으로, EXFOR의 전체 단면적과 탄성 단면적 측정값에 INCOGNITA가 직접 맞춘 다준위 R-행렬 피팅에서 나온 것입니다. 공개 전에 미리 정해 둔 검사를 통과했습니다: IAEA 탄소 표준, 피팅에 쓰지 않은 전체 단면적 측정값, NJOY 처리 왕복 검사, 흑연 임계 벤치마크(PCI-001).", "dx_rm_range": "에너지 범위: {lo}부터 {hi}까지이며, 그 위에는 INCOGNITA 곡선이 없습니다.", "dx_rm_caveat": "주의: 학습 표본의 χ²/자유도 {c}; 기울어진 데이터 세트 두 개를 표시했습니다; 검사는 보정되었지만 통계적 검정력이 낮습니다.", "dx_rm_nocap": "포획은 모델링하지 않습니다. 포획 탭에는 측정값만 표시됩니다.", "dx_rm_report": "보고서 읽기"});
+Object.assign(WT.L.ui, { "dx_rr_meas": "실험자들이 측정한 공명(EXFOR 공명 매개변수)을 INCOGNITA가 모은 것; 측정되지 않은 스핀, 복사 폭, 약한 준위는 INCOGNITA 자체 통계에서 가져옴", "dx_rr_own_t": "측정된 EXFOR 투과 데이터에 대한 INCOGNITA 자체 Reich–Moore 공명 맞춤, 10 µeV부터 1 keV까지; 라이브러리 파일이 아님", "dx_rr_k_meas": "측정된 공명(EXFOR 매개변수)", "dx_below_meas": "1 keV 미만의 실선은 실험자들이 측정해 EXFOR에 보고한 공명 에너지와 폭을 여러 실험에 걸쳐 합친 것을 사용합니다. INCOGNITA의 맞춤이 아닙니다. 스핀이나 복사 폭이 측정되지 않은 곳은 INCOGNITA 자체 통계로 채우고, 실험에서 보이지 않았던 약한 준위는 통계적으로 추가합니다(그 위치는 예측이 아닙니다). 1 keV에서 예측과 이어집니다.", "dx_below_own_t": "1 keV 미만의 실선은 측정된 EXFOR 투과 데이터에 대한 INCOGNITA 자체 Reich–Moore 공명 맞춤입니다. 1 keV에서 예측과 이어집니다. 핵종 옆의 메모에 어떤 데이터 세트를 썼는지, 그리고 피팅에 쓰지 않은 데이터와 맞춤이 어떻게 비교되는지 적혀 있습니다.", "dx_band_th": "열중성자", "dx_band_th_s": "열중성자", "dx_band_th_x": "열", "dx_band_rr": "공명", "dx_band_rr0": "공명 영역", "dx_band_rr_s": "공명", "dx_band_rr_x": "공명", "dx_band_ur": "평균한 공명", "dx_band_ur_s": "평균", "dx_band_ur_x": "평균", "dx_band_f": "고속", "dx_band_f_s": "고속", "dx_band_f_x": "고속", "dx_band_all": "전체 에너지" });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "더 많은 원자력 주제" });
 
-/* C-12 elastic tab: natural-carbon curve, held-out totals, IAEA standard, ENDF/B-VIII.1 comparator */
-Object.assign(WT.L.ui, {"dx_rm_natc": "INCOGNITA R-행렬 (C12RM9), 천연 탄소", "dx_rm_cmp": "여기서 곡선은 측정값과 표준처럼 천연 탄소입니다: INCOGNITA의 C-12 98.93 %에 ENDF/B-VIII.1의 C-13 1.07 %를 더한 것으로, 153 keV의 좁은 봉우리는 C-13에서 옵니다. 순수 C-12 곡선은 다운로드에 있습니다. IAEA 중성자 표준 2017과 {dev} % 이내로 일치하고(최대 |z| {z}), 남겨 둔 전단면적에서 χ²/N = {chi}이며, 사전 등록한 모든 검정을 통과했습니다. EXFOR {set}은 INCOGNITA와 ENDF/B-VIII.1 모두보다 {off} % 낮습니다: 그 데이터셋의 규격화 차이입니다.", "dx_ho": "남겨 둔 측정 전단면적, natC", "dx_ho_tip": "피팅에서 제외: 피팅을 고정한 뒤 한 번만 읽음", "dx_bin": "로그 에너지 구간 평균", "dx_bin_tip": "남겨 둔 측정점 {n}개의 평균 ± 표준오차", "dx_std": "IAEA 중성자 표준 2017 (natC 탄성)", "dx_std_dev": "INCOGNITA / 표준 − 1", "dx_lib_el": "점선: 천연 탄소의 ENDF/B-VIII.1 탄성 산란(98.93 % C-12 + 1.07 % C-13), 0 K 점별 값, 비교용으로만 표시: INCOGNITA는 이를 사용하지 않으며 다운로드에도 없습니다."});
+/* C-12 elastic tab: natural-carbon curve, unfitted totals, IAEA standard, ENDF/B-VIII.1 comparator */
+Object.assign(WT.L.ui, {"dx_rm_natc": "INCOGNITA R-행렬, 천연 탄소", "dx_rm_cmp": "여기서 곡선은 측정값과 표준처럼 천연 탄소입니다: INCOGNITA의 C-12 98.93 %에 ENDF/B-VIII.1의 C-13 1.07 %를 더한 것으로, 153 keV의 좁은 봉우리는 C-13에서 옵니다. 순수 C-12 곡선은 다운로드에 있습니다. IAEA 중성자 표준 2017과 {dev} % 이내로 일치하고(최대 |z| {z}), 피팅에 쓰지 않은 전단면적에서 χ²/N = {chi}이며, 모든 검사를 통과했습니다. EXFOR {set}은 INCOGNITA와 ENDF/B-VIII.1 모두보다 {off} % 낮습니다: 그 데이터셋의 규격화 차이입니다.", "dx_ho": "피팅에 쓰지 않은 측정 전단면적, natC", "dx_ho_tip": "피팅에 쓰지 않음: 최종 피팅 뒤에만 비교함", "dx_bin": "로그 에너지 구간 평균", "dx_bin_tip": "피팅에 쓰지 않은 측정점 {n}개의 평균 ± 표준오차", "dx_std": "IAEA 중성자 표준 2017 (natC 탄성)", "dx_std_dev": "INCOGNITA / 표준 − 1", "dx_lib_el": "점선: 천연 탄소의 ENDF/B-VIII.1 탄성 산란(98.93 % C-12 + 1.07 % C-13), 0 K 점별 값, 비교용으로만 표시: INCOGNITA는 이를 사용하지 않으며 다운로드에도 없습니다."});

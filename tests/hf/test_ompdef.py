@@ -1,4 +1,4 @@
-"""OMPDEF: the deformed-region OMP rule (`regional.DEFORMED_POINT`) and TALYS's ejectile OMP
+"""The deformed-region OMP rule (`regional.DEFORMED_POINT`) and TALYS's ejectile OMP
 convention (`parameters.ejectile_params`)."""
 
 from __future__ import annotations

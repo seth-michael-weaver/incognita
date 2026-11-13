@@ -1,4 +1,4 @@
-"""ALPHATEMP (Incognita extension, not TALYS; default ON, T* = 0.64 MeV since ALPHAADOPT):
+"""`alphatemp` (Incognita extension, not TALYS; default ON, T* = 0.64 MeV):
 alpha transmission that depends on the residual's excitation.
 
 Physics. Hauser-Feshbach uses, for alpha emission to a residual state at excitation U, the inverse transmission of alpha +
@@ -11,7 +11,7 @@ term is O(T^2). Rule (one global constant T*):
     T(eps, U) = T_ao6(eps)^(1 - g) * T_ao8(eps)^g,   g = min(1, (T/T*)^2) = min(1, U / (a T*^2)),   a = A_res / 8
 
 i.e. the cold (U = 0) residual takes the absorption potential, and the emission potential is reached at the mean residual
-temperature T* of the data it was built from (development notes: 0.64 MeV). The geometric mean interpolates the WKB
+temperature T* of the data it was built from (0.64 MeV). The geometric mean interpolates the WKB
 barrier exponent, i.e. the potential, not the flux. Where one of the two is zero the mix is linear.
 
 Keyword `alphatemp <T* MeV>` (0 = OFF = TALYS); a run left at the default takes INCOGNITA_ALPHATEMP if set (0 = OFF), else
@@ -20,7 +20,7 @@ DEFAULT_TSTAR. The hot table is the run's own alpha OMP
 Wired: C front densprepare (engine_decay.c), C widths (nativex.c nx_widths: every cascade nucleus), Python densprepare.
 Paths not wired (decay_fast numpy widths, GPU, capture_fast) refuse the switch (`refuse`).
 
-KEVCOLD domain (keyword `alphatemp_dom gd`, else INCOGNITA_ALPHATEMP_DOM; default n = the rule everywhere): the rule applies
+Gamma/D domain (keyword `alphatemp_dom gd`, else INCOGNITA_ALPHATEMP_DOM; default n = the rule everywhere): the rule applies
 only to first-chance compound cells (J, parity) in the isolated-resonance regime, Gamma_tot/D = denomhf / 2 pi < 1 (Ericson
 condition; denomhf = sum_c T_c of the PRODUCTION transmissions, the sum comptarget already forms). Every other cell, and every
 multi-step cascade nucleus, keeps the run's own alpha OMP (alphaomp 8), i.e. production. Wired: C front (engine_c.front two
@@ -34,7 +34,7 @@ import os
 import numpy as np
 
 A_OVER = 8.0  # a = A / 8 MeV^-1
-DEFAULT_TSTAR = 0.64  # MeV, development notes; production default since ALPHAADOPT (2026-10-13)
+DEFAULT_TSTAR = 0.64  # MeV, the production default
 
 
 def tstar(options) -> float:
@@ -51,11 +51,11 @@ def tstar(options) -> float:
     return DEFAULT_TSTAR
 
 
-DEFAULT_DOM = "n"  # ALPHAPROMO: the global rule everywhere; gd (KEVCOLD) is keyword-only
+DEFAULT_DOM = "n"  # the global rule everywhere; gd is keyword-only
 
 
 def domain(options) -> str:
-    """KEVCOLD: 'gd' = the rule only where Gamma_tot/D < 1 (first-chance cells), 'n' = everywhere (ALPHATEMP2).
+    """`alphatemp_dom`: 'gd' = the rule only where Gamma_tot/D < 1 (first-chance cells), 'n' = everywhere.
     A keyword other than the default wins; else INCOGNITA_ALPHATEMP_DOM if set; else DEFAULT_DOM."""
     v = str(getattr(options, "alphatemp_dom", DEFAULT_DOM) or DEFAULT_DOM).strip().lower()
     if v == DEFAULT_DOM:
@@ -65,16 +65,16 @@ def domain(options) -> str:
     return v
 
 
-GD_MAX = 1.0  # KEVCOLD: Ericson boundary, Gamma_tot / D < 1 = isolated resonances
+GD_MAX = 1.0  # Ericson boundary, Gamma_tot / D < 1 = isolated resonances
 
 
 def dom_on(trans) -> bool:
-    """KEVCOLD: the run has ALPHATEMP on AND the Gamma/D domain restriction."""
+    """The run has `alphatemp` on AND the Gamma/D domain restriction."""
     return isinstance(trans, dict) and "alpha_cold" in trans and trans.get("alphatemp_dom") == "gd"
 
 
 def cascade_cold(trans) -> bool:
-    """Do the multi-step cascade widths take the cold/hot mix? (ALPHATEMP on and no KEVCOLD domain.)"""
+    """Do the multi-step cascade widths take the cold/hot mix? (`alphatemp` on and no gd domain.)"""
     return isinstance(trans, dict) and "alpha_cold" in trans and trans.get("alphatemp_dom") != "gd"
 
 
@@ -102,9 +102,9 @@ def mix(hot, cold, g):
 
 
 def refuse(trans, where: str) -> None:
-    """Raise on a path that does not implement ALPHATEMP when the run has it on."""
+    """Raise on a path that does not implement `alphatemp` when the run has it on."""
     if isinstance(trans, dict) and "alpha_cold" in trans:
-        raise NotImplementedError(f"ALPHATEMP is not wired on {where}; run the C engine or the Python densprepare path")
+        raise NotImplementedError(f"alphatemp is not wired on {where}; run the C engine or the Python densprepare path")
 
 
 def arm_native(cas) -> None:
@@ -117,10 +117,10 @@ def arm_native(cas) -> None:
 
     tr = getattr(cas, "trans", None)
     cold = tr.get("alpha_cold") if isinstance(tr, dict) else None
-    dom = dom_on(tr)  # KEVCOLD: cascade widths keep production; the front arms ce_densprepare per pass
+    dom = dom_on(tr)  # gd domain: cascade widths keep production; the front arms ce_densprepare per pass
     keep = cas.__dict__.get("_alphatemp_native")
     if cold is not None and np.shape(cold[1]) != np.shape(tr[6][1]):  # the C kernels would silently skip the mix
-        raise ValueError(f"ALPHATEMP: cold alpha Tl {np.shape(cold[1])} != hot {np.shape(tr[6][1])}")
+        raise ValueError(f"alphatemp: cold alpha Tl {np.shape(cold[1])} != hot {np.shape(tr[6][1])}")
     if cold is not None and (keep is None or keep[0] is not cold):
         tjl = np.ascontiguousarray(cold[0], dtype=np.float64); tl = np.ascontiguousarray(cold[1], dtype=np.float64)
         keep = cas.__dict__["_alphatemp_native"] = (cold, tjl, tl, float(tr["alphatemp_ustar"]))
@@ -133,22 +133,22 @@ def arm_native(cas) -> None:
         else:
             nx.nx_set_alphatemp(keep[2].ctypes.data, keep[2].shape[0], keep[2].shape[1], keep[3])
     elif cold is not None:
-        raise NotImplementedError("ALPHATEMP: libnativex without nx_set_alphatemp (rebuild the native libraries)")
+        raise NotImplementedError("alphatemp: libnativex without nx_set_alphatemp (rebuild the native libraries)")
     from physics.hf import engine_c
 
     so = engine_c.lib()
     if so is not None and hasattr(so, "ce_set_alphatemp"):
         so.ce_set_alphatemp.argtypes = [P, I, I, D]; so.ce_set_alphatemp.restype = None
-        if cold is None or dom:  # KEVCOLD: the front's first pass is production; arm_front(cas, True) arms the second
+        if cold is None or dom:  # gd domain: the front's first pass is production; arm_front(cas, True) arms the second
             so.ce_set_alphatemp(None, 0, 0, 0.0)
         else:
             so.ce_set_alphatemp(keep[1].ctypes.data, keep[1].shape[0], keep[1].shape[1], keep[3])
     elif cold is not None and so is not None:
-        raise NotImplementedError("ALPHATEMP: libengdecay without ce_set_alphatemp (rebuild the native libraries)")
+        raise NotImplementedError("alphatemp: libengdecay without ce_set_alphatemp (rebuild the native libraries)")
 
 
 def arm_front(cas, on: bool) -> None:
-    """KEVCOLD: arm (on) or disarm the cold alpha mix in ce_densprepare for the front's second (cold) pass."""
+    """gd domain: arm (on) or disarm the cold alpha mix in ce_densprepare for the front's second (cold) pass."""
     import ctypes
 
     from physics.hf import engine_c
@@ -156,7 +156,7 @@ def arm_front(cas, on: bool) -> None:
     so = engine_c.lib()
     keep = cas.__dict__.get("_alphatemp_native")
     if so is None or not hasattr(so, "ce_set_alphatemp") or keep is None:
-        raise NotImplementedError("KEVCOLD: ce_set_alphatemp / armed cold tables missing")
+        raise NotImplementedError("alphatemp_dom gd: ce_set_alphatemp / armed cold tables missing")
     P, I, D = ctypes.c_void_p, ctypes.c_int64, ctypes.c_double
     so.ce_set_alphatemp.argtypes = [P, I, I, D]; so.ce_set_alphatemp.restype = None
     if on:
@@ -166,11 +166,11 @@ def arm_front(cas, on: bool) -> None:
 
 
 TWOPI = 2.0 * np.pi
-STATS: dict = {"cells": 0, "gd": 0, "rows": []}  # KEVCOLD capture: per (E, J2, parity) Gamma/D and the choice
+STATS: dict = {"cells": 0, "gd": 0, "rows": []}  # gd domain capture: per (E, J2, parity) Gamma/D and the choice
 
 
 def gd_cells(cells, denom, e_inc: float | None = None, tag: str = "") -> np.ndarray:
-    """KEVCOLD: True where the cell is isolated (Gamma_tot/D = denomhf / 2 pi < 1) and live (denomhf > 0)."""
+    """gd domain: True where the cell is isolated (Gamma_tot/D = denomhf / 2 pi < 1) and live (denomhf > 0)."""
     d = np.asarray(denom, dtype=float)
     gd = (d > 0.0) & (d / TWOPI < GD_MAX)
     STATS["cells"] += int((d > 0.0).sum()); STATS["gd"] += int(gd.sum())

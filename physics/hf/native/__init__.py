@@ -1,4 +1,4 @@
-"""SPEEDT3: compiled kernels for the transmission-coefficient stages (inverse Tjl, incident channel,
+"""Compiled kernels for the transmission-coefficient stages (inverse Tjl, incident channel,
 ECIS coupled channels), bit-identical to the Python loops they replace.
 
 The C source is `hfnative.c` next to this file; `scripts/build_native.sh` builds it into
@@ -12,7 +12,7 @@ calls of the coupled-channels loop are torch's own MKL routines, found by addres
 Selection, per call:
 * the library is missing or fails to load (a machine without a build, the Mac)  -> Python;
 * `HF_NATIVE=0` in the environment                                              -> Python;
-* the caller is on an autograd graph (DIFFPARAM's gradients)                    -> Python, decided
+* the caller is on an autograd graph (the differentiable gradients)                    -> Python, decided
   by the callers, which only reach these kernels from their `no_grad` batched paths;
 * `lapack()` (the coupled-channels loop) additionally needs torch's MKL symbols and one torch
   thread: MKL's results depend on its thread count, and the Python path's batched calls run at
@@ -48,7 +48,7 @@ def _load() -> ctypes.CDLL | None:
     _TRIED = True
     path = Path(os.environ.get("HF_NATIVE_LIB", _HERE / "lib" / "libhfnative.so"))
     if not path.is_file():
-        # not silent (REDTEAM minor): the pure-Python fallback gives the same numbers, ~4x slower
+        # not silent: the pure-Python fallback gives the same numbers, ~4x slower
         print(f"INCOGNITA: native C kernels not found at {path}; run `make native`. Falling back to pure Python (~4x slower).",
               file=sys.stderr, flush=True)
         return None
@@ -70,7 +70,7 @@ def _load() -> ctypes.CDLL | None:
     lib.hf_set_vhypot.restype = None
     lib.hf_cc_block.argtypes = [_I64, _I64, _I64, _P, _P, _P, _P, _P, _P, _P]
     lib.hf_cc_block.restype = ctypes.c_int
-    # CCNUMEROV: ECIS's modified Numerov step; absent from a build older than the lever
+    # modified Numerov: ECIS's modified Numerov step; absent from a build older than the lever
     if hasattr(lib, "hf_cc_set_modnum"):
         lib.hf_cc_set_modnum.argtypes = [_I64]
         lib.hf_cc_set_modnum.restype = None
@@ -108,7 +108,7 @@ def vhypot() -> bool:
     if not available():
         return False
     if _VHYPOT is None and platform.machine().lower() not in ("x86_64", "amd64"):
-        # CCFAST2: outside x86 (the Mac's arm64) the library is built with libm's hypot in place
+        # non-x86 build: outside x86 (the Mac's arm64) the library is built with libm's hypot in place
         # of torch's AVX2 one (hfnative.c, HF_X86 = 0): to rounding, not to torch's bits, which
         # nothing on that machine was bitwise to anyway.
         _VHYPOT = True
@@ -232,7 +232,7 @@ def cc_block(mmat, nmat, u1, h_fm, nmatch, weights):
         _WPTR = ctypes.cast((ctypes.c_void_p * 5)(*(w.data_ptr() for w in _WTS)),
                             ctypes.c_void_p)
     keep = torch.zeros((7, n_e, n, n), dtype=torch.complex128)
-    if hasattr(_LIB, "hf_cc_set_modnum"):  # CCNUMEROV, read per call as the other levers are
+    if hasattr(_LIB, "hf_cc_set_modnum"):  # modified Numerov, read per call as the other switches are
         _LIB.hf_cc_set_modnum(int(os.environ.get("HF_CC_MODNUM", "1") != "0"))
     rc = _LIB.hf_cc_block(n_e, n, n_r, mmat.data_ptr(),
                           nmat.data_ptr() if nmat is not None else None, u1.data_ptr(), _ptr(h),

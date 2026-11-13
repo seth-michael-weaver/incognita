@@ -1,4 +1,4 @@
-"""LEESHELL: (a) per-nucleus `upbendc/e/f` and `upbendc/e/fadjust` cards reach gamma_parameters with
+"""`leeshell`: (a) per-nucleus `upbendc/e/f` and `upbendc/e/fadjust` lines reach gamma_parameters with
 TALYS semantics (input_gammapar.f90:392-425 assign after the defaults; fstrength.f90:489-491 multiply
 by the adjusts) -- before, they were skipped as unknown keywords; (b) `leeshell n|nm|b`
 (env INCOGNITA_LEESHELL): M1 upbend strength C = 0 by default in closed-shell decaying nuclei.

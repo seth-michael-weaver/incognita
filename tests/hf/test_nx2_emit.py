@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `emit`: `binary` and `exclusive_channels` off the graph hold the numbers of the
+"""Native switch `emit`: `binary` and `exclusive_channels` off the graph hold the numbers of the
 reference bodies they replace (`HF_NX2_EMIT=0`).
 
 * every `binary` call of chained Fe-56 and U-238 runs (both engine call sites, the run-scoped

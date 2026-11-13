@@ -1,7 +1,7 @@
 """The CPU half of `capture_gpu`: everything the capture fast path computes that does NOT depend
 on the photon strength, extracted per (nuclide, incident energy) as plain float64 arrays.
 
-Task: SPEEDG (the GPU (nuclide, energy) batch axis). No physics of its own: every array is the
+Task: GPU capture batch (the GPU (nuclide, energy) batch axis). No physics of its own: every array is the
 output of the statements `capture_fast_batch.capture_xs` runs, in the same order, stopped just
 before the first number that reads the photon strength function.
 
@@ -19,7 +19,7 @@ What is extracted, per in-domain point:
 The photon transmissions, the photon widths, Moldauer's integral (its total width contains the
 photon width), the populations and the cascade are `capture_gpu`'s, on the batch axis.
 
-Test: SPEEDG / tests/hf/test_capture_gpu.py
+Test: tests/hf/test_capture_gpu.py
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ def _comptarget_setup(ci) -> dict:
     """`target._case` -> `case_moldauer` / `case_nowfc` up to the photon strength.
 
     TALYS: comptarget.f90:1 (comptarget), molprepare.f90:1 (molprepare)
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     from physics.hf.compound.prepare import incident_channels
     from physics.hf.compound.target import _exact_incident_channel
@@ -133,7 +133,7 @@ def _particle_widths(cas, st, sp, bins: list[int]) -> list[np.ndarray | None]:
     for t >= 1, unchanged; the photon exit is `capture_gpu`'s.
 
     TALYS: densprepare.f90:1 (densprepare), compound.f90:1 (compound)
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     from physics.hf.compound.continuum import _spin_l_mask
     from physics.hf.compound.decay_batch import _interp_tl
@@ -181,22 +181,22 @@ def _particle_widths(cas, st, sp, bins: list[int]) -> list[np.ndarray | None]:
             rb_d = np.where(part, (ex0plus[:, None] - exm) / dexinc[:, None], 1.0)
         eout_d = np.where(part, 0.5 * (ex0plus[:, None] + exm) - ss - ex,
                           (exinc - ss)[:, None] - ex)
-        if nnl_bins.any():  # NNLEAK (default y): Egamma^3-filled initial-CN top bin (t >= 1 here)
+        if nnl_bins.any():  # `nnleak` (default y): Egamma^3-filled initial-CN top bin (t >= 1 here)
             rb_d, eout_d = nnleak.adjust(rb_d, eout_d, part, ex0plus[:, None], exm,
                                          dexinc[:, None], nnl_bins[:, None])
         cont_row = rows[None, :] > nl
         eout = np.where(cont_row, eout_c, eout_d)
         rb = np.where(cont_row, rb_c, rb_d)
         eout = np.where(inrow, eout, 0.0)
-        from physics.hf.compound import tlog as _tlg  # LOGTINT (default OFF)
-        _tjl, tl, _lmax = cas.trans_of(sp.zix, sp.nix)[t]  # SLFIRST: per emitting nucleus
-        from physics.hf.omp import alphatemp as _at  # ALPHATEMP (default OFF): not wired here
+        from physics.hf.compound import tlog as _tlg  # `tlog` (default OFF)
+        _tjl, tl, _lmax = cas.trans_of(sp.zix, sp.nix)[t]  # per emitting nucleus
+        from physics.hf.omp import alphatemp as _at  # `alphatemp` (default OFF): not wired here
         _at.refuse(cas.trans, 'capture_gpu_setup.py')
         eend = min(int(eendmax[t]), cas.rg.maxen)
         tlm, lm = _interp_tl(eout, cas.rg.egrid, cas.rg.ebegin[t], eend, cas.rg.maxen,
                              tl, _lmax, float(fnorm[t + 1]), cas.transeps,
                              tlog=_tlg.on(cas.trans, t), ref=cas.trans.get("tlogref", {}).get(t), t=t)
-        tlc_ = cas.trans_cont_of(sp.zix, sp.nix)  # ROTEXIT1CN (default OFF): continuum rows from the model set
+        tlc_ = cas.trans_cont_of(sp.zix, sp.nix)  # `sfexit` (default OFF): continuum rows from the model set
         if tlc_ is not None:
             if isinstance(tlm, torch.Tensor):
                 raise NotImplementedError("sfexit cont is not wired on the differentiable path")
@@ -281,7 +281,7 @@ def _cascade_setup(cas, st, sp, popeps_mb: float) -> dict:
     """The compound nucleus's grid, levels and particle widths for `_cascade_cn`.
 
     TALYS: multiple.f90:1 (multiple), cascade.f90:1 (cascade)
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     R = sp.maxex + 1
     ng = sp.nlast_grid
@@ -333,7 +333,7 @@ def setup_point(tg, e_inc_mev: float) -> dict:
     """Every photon-strength-independent array of one in-domain capture point.
 
     TALYS: comptarget.f90:1 (comptarget), multiple.f90:1 (multiple) for (Zcomp, Ncomp) = (0, 0)
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     from physics.hf import capture_fast as CF
     from physics.hf import capture_fast_batch as CB
@@ -384,7 +384,7 @@ def gamma_pack(Z: int, A: int) -> dict:
     scissors term and the upbend, gammax 2). Raises `Unsupported` for anything else.
 
     TALYS: gammapar.f90:1 (gammapar), fstrength.f90:1 (fstrength)
-    Test: SPEEDG / tests/hf/test_capture_gpu.py
+    Test: tests/hf/test_capture_gpu.py
     """
     from physics.hf.compound.dens_reference import _gamma_parameters
 
@@ -399,8 +399,8 @@ def gamma_pack(Z: int, A: int) -> dict:
     ok = ok and float(gp.etable_mev[1, 1]) == 0.0
     if not ok:
         raise Unsupported(f"photon strength model of {Z}-{A + 1}")
-    if gp.eadj_e1 or gp.eadj_m1:  # ENGADJ: energy-local strength bumps are evaluated on the CPU paths
-        raise Unsupported(f"ENGADJ photon strength bumps on {Z}-{A + 1}")
+    if gp.eadj_e1 or gp.eadj_m1:  # energy-local strength bumps are evaluated on the CPU paths
+        raise Unsupported(f"energy-local photon strength bumps (eadj) on {Z}-{A + 1}")
     from physics.hf import fidfix
 
     psfsgl = fidfix.on("psfsgl")  # B15 (default ON): capture_gpu.psf_params rounds the table energies as table_arrays

@@ -58,7 +58,7 @@ def main():
         nucl.append([z, a, nm, sorted(V)]); nvar += len(V)
     idx = dict(grid_ev=grid, engine="INCOGNITA production engine engine-20261022-3 (nucleus 16606b356d6e), library v0.2 deck and inputs",
                method="one wide-grid engine run per nuclide and variant on the library v0.2.1 grid (64 energies, 1 keV - 20 MeV); "
-                      "library deck + one keyword; GRIDTOP pad when the compound nucleus is unbound to an ejectile",
+                      "library deck + one keyword; high-energy grid pad when the compound nucleus is unbound to an ejectile",
                variants={v: kw for v, kw in VARIANTS}, channels=CH, unit="mb", nuclides=nucl, runs=nvar, cpu_s=round(cpu))
     s = json.dumps(idx, separators=(",", ":")); open(os.path.join(OUT, "index.json"), "w").write(s); total += len(s)
     print(f"{len(nucl)} nuclides, {nvar} runs, {total/1e6:.2f} MB, engine cpu {cpu/3600:.2f} h; {len(fails)} failed")

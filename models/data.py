@@ -499,7 +499,7 @@ def load_manifest_splits(chart: ChartData, *, verify: bool = True) -> dict[str, 
 def provisional_splits(chart: ChartData, *, seed: int = 0, n_folds: int = 5) -> dict[str, Split]:
     """Fallback splits built locally when the frozen manifests are not available.
 
-    Same population and definitions as ``data/splits`` (stratified nuclide holdout,
+    Same population and definitions as ``data/splits`` (stratified nuclide split,
     discovery-year time proxy, contiguous region blocks) but *not* the frozen files;
     results on them must be labelled provisional.
     """

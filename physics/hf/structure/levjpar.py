@@ -1,4 +1,4 @@
-"""Incognita extension (LEVJPAR; not TALYS): a discrete level whose spin has the wrong half-integrality is treated as a level of
+"""Incognita extension (`levjpar`; not TALYS): a discrete level whose spin has the wrong half-integrality is treated as a level of
 unknown spin.
 
 Env INCOGNITA_LEVJ=1 (y/yes). Default OFF, and OFF never changes a `Levels` object.
@@ -6,7 +6,7 @@ Env INCOGNITA_LEVJ=1 (y/yes). Default OFF, and OFF never changes a `Levels` obje
 Defect: odd-A nuclei need half-integer J, even-A integer J. The TALYS/RIPL level files give 145 levels in 57 odd-A nuclides an
 integer J (levels/final; e.g. Pd-105 level 15, J = 4.0 for ENSDF (1/2+:9/2+); Te-123 level 30, J = 2.0 for (3/2-:9/2-)): almost all
 carry the file's 'J' (spin assigned) flag, so the assignment drew from the ENSDF range in integer steps. levels.f90 passes them
-through, and every angular-momentum sum then couples target J + s + l to the wrong integrality (STELLARSEF: the reciprocity
+through, and every angular-momentum sum then couples target J + s + l to the wrong integrality (thermal-target capture: the reciprocity
 sigma(0->mu)/c_0 = sigma(mu->0)/c_mu fails by up to 0.53 on such a level).
 
 Rule (no fitted number, the same for every nucleus): the level's J is unknown, so it is re-assigned the way an unknown spin is,

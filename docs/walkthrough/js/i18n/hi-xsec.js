@@ -19,7 +19,7 @@ WT.L.ch.xsec = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "this square: {#} barn = {#}⁻²⁴ cm²": "यह वर्ग: {#} बार्न = {#}⁻²⁴ cm²",
   "σ: the target area at each energy": "σ: हर ऊर्जा पर लक्ष्य-क्षेत्रफल",

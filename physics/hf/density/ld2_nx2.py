@@ -1,12 +1,12 @@
-"""NATIVEX2 lever `ld2`: the tabulated level densities (ldmodel >= 4, the default above A = 215,
+"""Native kernel `ld2`: the tabulated level densities (ldmodel >= 4, the default above A = 215,
 and every fission-barrier table) in C (`native/nx2_ld2.c`), for the calls where nothing carries a
 gradient.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nx2_ld2.py`
-(each kernel against the torch path it replaces) and the G-NATIVEX2 closeness gate.
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_nx2_ld2.py`
+(each kernel against the torch path it replaces) and the native closeness test.
 
 Where the time went (cProfile, second runs of Er-166, Lu-175, U-238, Th-232, 15.9 s): `density`'s
 table branch 1.10 s over 1,272 calls -- `_table_interp`'s locate (a `searchsorted` and four
@@ -123,7 +123,7 @@ def table_grid(tab, ct, pt, e, jidx: np.ndarray, pcols: tuple[int, ...]) -> np.n
     return out
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def fission_rhofis(ld, ibar: int, ee: Tensor, jgrid: Tensor) -> Tensor | None:
     """`fission_level_densities`' two `density(ld, ee, jgrid, parity, ibar)` columns stacked on
     the parity axis (-1, +1), (len(ee), len(jgrid), 2), in one call; None when the barrier has no
@@ -141,7 +141,7 @@ def fission_rhofis(ld, ibar: int, ee: Tensor, jgrid: Tensor) -> Tensor | None:
     return None if got is None else torch.from_numpy(got)
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def table_rhogrid(ld, ex_mev, dex_mev, maxj, nlast: int, numj: int) -> np.ndarray | None:
     """`dens_reference.rhogrid_of`'s numpy result for a nucleus with a ground-state table, both
     parity columns from the table, or None.

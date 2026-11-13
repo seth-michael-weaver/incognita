@@ -28,7 +28,7 @@ WT.L.ch.stars = {
 </div>
 <div class="step">
   <h3>मापनों से जाँचा गया</h3>
-  <p>INCOGNITA के 30 keV मान, मापे गए मानों से विभाजित, 94 स्थिर न्यूक्लाइडों के लिए (<a href="scoreboard.html">स्कोरबोर्ड</a>)।</p>
+  <p>INCOGNITA के 30 keV मान, मापे गए मानों से विभाजित, 94 स्थिर न्यूक्लाइडों के लिए (<a href="scoreboard.html">तुलनाएँ</a>)।</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {
@@ -78,7 +78,7 @@ Object.assign(WT.L.labels, {
   "r-peak Te, Xe": "r-शिखर Te, Xe",
   "r-process: a flood of neutrons makes very neutron-rich nuclei": "r-प्रक्रिया: न्यूट्रॉनों की बाढ़ बहुत न्यूट्रॉन-समृद्ध नाभिक बनाती है",
   "r-process: very neutron-rich nuclei": "r-प्रक्रिया: बहुत न्यूट्रॉन-समृद्ध नाभिक",
-  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test": "घेरे में: केवल-s समस्थानिक · मापित: संकलित मान (KADoNiS) · विकास के दौरान तुलना, अंध परीक्षण नहीं",
+  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test": "घेरे में: केवल-s समस्थानिक · मापित: संकलित मान (KADoNiS) · विकास के दौरान तुलना, स्वतंत्र परीक्षण नहीं",
   "ringed: s-only · measured: KADoNiS": "घेरे में: केवल-s · मापित: KADoNiS",
   "s Ba": "s Ba",
   "s Pb": "s Pb",

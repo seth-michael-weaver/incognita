@@ -210,7 +210,7 @@ def kd03(
 
 @cache
 def _kd03_values(path: str, k: int) -> tuple[tuple[str, float], ...]:
-    """NATIVEX2 `omp`: `kd03`'s reading of one parameter file for particle k, parsed once (a pure
+    """Native `omp`: `kd03`'s reading of one parameter file for particle k, parsed once (a pure
     function of the file; `kd03` hands out a fresh dict)."""
     lines = iter(_kd03_file(path)[2:])
     out: dict[str, float] = {}
@@ -276,7 +276,7 @@ def read_local_omp(
     """
     base = structure if structure is not None else talys_structure_path()
     sub, sym = ("neutron", "n") if k == 1 else ("proton", "p")
-    from physics.hf.omp import ompdeck  # KWCOV B6: `optmodfilen Z file` / `optmodfilep Z file` (omppar.f90:52-63)
+    from physics.hf.omp import ompdeck  # `optmodfilen Z file` / `optmodfilep Z file` (omppar.f90:52-63)
 
     own = ompdeck.local_file(Z, k)
     lines = _local_omp_file(own or str(base / "optical" / sub / f"{sym}-{nuclide_symbol(Z)}.omp"))
@@ -362,11 +362,11 @@ def riplomp_table(
 def _colltype(Z: int, A: int, options: Options, structure: Path | None = None) -> str:
     """Collective type of (Z, A) as deformpar reads it: the `.def` header letter (R, A, V; anything
     else and a missing entry give S), forced to S by `spherical y`. The automatic rotational
-    assignment (`autorot y`, off by default; deformpar.f90:241-262) and COLLRULE (`collrule`, off by default) read the
+    assignment (`autorot y`, off by default; deformpar.f90:241-262) and `collrule` (off by default) read the
     discrete levels: the letter is R iff the ground band is complete up to maxrot, as `structure.deformation` decides it."""
     from physics.hf.direct.dwbaunit import colltype_override
 
-    ct = colltype_override(Z, A, options)  # FIXDWBA (INCOGNITA_DWBAUNIT, default off)
+    ct = colltype_override(Z, A, options)  # INCOGNITA_DWBAUNIT, default off
     if ct is not None:
         return ct
     if options.flagspher or options.disctable == 3:
@@ -395,7 +395,7 @@ def _realised(Z: int, A: int, options: Options, rule: str, ct: str) -> str:
     j, p = lev.all_spin.numpy()[: n + 1], lev.all_parity.numpy()[: n + 1]
     if rule == "V":
         return "V" if any(float(j[k]) == 2.0 and int(p[k]) == 1 for k in range(1, n + 1)) else ct
-    if rule == "W":  # WEAKCPL: V iff the weak-coupling multiplet search finds a member (as structure.deformation)
+    if rule == "W":  # V iff the weak-coupling multiplet search finds a member (as structure.deformation)
         e = lev.all_e_mev.numpy()[: n + 1]
         return "V" if _collrule.weak_block(Z, A, None, j, p, e, n) is not None else ct
     return "R" if _collrule.band_complete(j, p, A, options.maxrot, n) else "S"
@@ -441,7 +441,7 @@ def omppar(
     Test: A-omppar
     """
     N = A - Z
-    if structure is None:  # NATIVEX2 `omp`: resolved once, not per helper (a stat() each)
+    if structure is None:  # native `omp`: resolved once, not per helper (a stat() each)
         structure = talys_structure_path()
     if colltype is None:
         colltype = _colltype(Z, A, options, structure)
@@ -453,7 +453,7 @@ def omppar(
             base = structure
             sub, sym = ("neutron", "n") if k == 1 else ("proton", "p")
             path = base / "optical" / sub / f"{sym}-{nuclide_symbol(Z)}.omp"
-            from physics.hf.omp import ompdeck  # KWCOV B6: optmodfilen / optmodfilep (omppar.f90:52-63)
+            from physics.hf.omp import ompdeck  # optmodfilen / optmodfilep (omppar.f90:52-63)
 
             path = ompdeck.local_file(Z, k) or path
             exists = _local_omp_file(str(path)) is not None  # cached; the file's is_file()
@@ -555,7 +555,7 @@ def ompadjust(params: Params | None, k: int) -> dict[str, Tensor | float]:
 
 
 def eadj_F(F: dict, k: int, e: Tensor) -> dict:
-    """ENGADJ: the F* factors of particle type k times the energy-local bumps `eadj <key> <particle> ...` at the channel
+    """`eadj`: the F* factors of particle type k times the energy-local bumps `eadj <key> <particle> ...` at the channel
     energies e (physics/hf/eadj.py; TALYS ompadjust.f90 `Fv1 = factor * v1adjust(k)`). `F` itself when no bump is set.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
@@ -584,8 +584,8 @@ def ejectile_params(params: Params | None, projectile: int = 1) -> Params | None
     itself -- no copy, so every cache keyed on it is untouched -- when the two rows already agree,
     which is every run at TALYS defaults.
 
-    OMPDEF found the port applied the projectile's factors to its outgoing channels too
-    (PORTLEVER's 0.041 dex W-182 departure from TALYS at 0.3-1 MeV under `INCOGNITA_OMP_REGION`).
+    Applying the projectile's factors to its outgoing channels too would be a departure
+    from TALYS (0.041 dex for W-182 at 0.3-1 MeV under `INCOGNITA_OMP_REGION`).
 
     TALYS: inverseecis.f90 (flagompejec, line 220), opticalnp.f90:175, opticalcomp.f90:162
     Test: tests/hf/test_ompdef.py
@@ -595,7 +595,7 @@ def ejectile_params(params: Params | None, projectile: int = 1) -> Params | None
     from physics.hf.omp import ompdeck
 
     keys = list(_ADJ.values())
-    marked = ompdeck.has_bumps(projectile) or ompdeck.has_bumps(0)  # KWCOV B6: energy-local lines go by ktype
+    marked = ompdeck.has_bumps(projectile) or ompdeck.has_bumps(0)  # energy-local lines go by ktype
     if not marked and all(bool(torch.equal(params[k][projectile], params[k][0])) for k in keys):
         return params
     vals = dict(params.values)
@@ -718,15 +718,15 @@ def soukhovitskii_fermi(options: "Options") -> dict[int, float]:
     therefore serves every residual, which is what TALYS does -- `soukhovitskii` reads the same
     three separation energies whatever `(Zix, Nix)` it was called for.
 
-    This closes the TODO(T2) gap that made Th-227 the one crash of CHART1's 482 nuclides: the
+    This covers the case that would otherwise crash Th-227 on the 482-nuclide chart: the
     RIPL actinide table `riplomp(1) = 2408` covers A 228-249, so a Z >= 90 nucleus below A 228
-    falls to the global potential, where `flagsoukho` sends it to Soukhovitskii and there was
+    falls to the global potential, where `flagsoukho` sends it to Soukhovitskii and there would be
     nothing to read the Fermi energy off. `S` comes from `structure.masses` at the run's mass
     model; a `massnucleus`/`massexcess` override is not applied here, and a caller that wants one
     passes `soukho_eferm_mev=` explicitly, which still wins.
 
     TALYS: soukhovitskii.f90:1 (soukhovitskii), separation.f90:1 (separation)
-    Test: A-omppar / CHARTFIX
+    Test: A-omppar
     """
     from physics.hf.structure.masses import masses
 
@@ -748,7 +748,7 @@ def soukhovitskii(
     e = e_mev
     asym = (A - 2.0 * Z) / A
     from physics.hf import engphys
-    eferm_mev = engphys.soukho_fermi(k, A, eferm_mev)  # ENGPHYS `efermi`, default: unchanged
+    eferm_mev = engphys.soukho_fermi(k, A, eferm_mev)  # `efermi`, default: unchanged
     f = torch.clamp(e - eferm_mev, min=-20.0)
     cviso, v0r, var, vrdisp, v1r, v2r, lam = 10.5, -41.45, -0.06667, 92.44, 0.03, 2.05e-4, 3.9075e-3
     viso = 1.0 + ((-1.0) ** k) * cviso * asym / (v0r + var * (A - 232.0) + vrdisp)
@@ -798,10 +798,10 @@ ENV_WDDECAY = "INCOGNITA_WDDECAY"
 
 
 def wddecay(options: "Options | None" = None) -> float:
-    """KDABS (Incognita extension, not TALYS): neutron KD03 surface absorption W_D(E) -> W_D(E) exp(-delta E), E the neutron
+    """`wddecay` (Incognita extension, not TALYS): neutron KD03 surface absorption W_D(E) -> W_D(E) exp(-delta E), E the neutron
     channel energy (MeV), so W_D at threshold (S0, S1, R') is untouched and the 8-20 MeV absorption decays faster.
     Keyword `wddecay <delta>` (1/MeV; 0 = TALYS, the default) or env `INCOGNITA_WDDECAY` when the keyword is 0.
-    Fitted on EXFOR sigma_tot/sigma_nonel only (development notes, delta = 0.0075).
+    Fitted on EXFOR sigma_tot/sigma_nonel only (delta = 0.0075).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -842,7 +842,7 @@ def opticalnp(
     F = ompadjust(params, k if adjust_type is None else adjust_type)
     if eadj_on:
         F = eadj_F(F, k, e)
-    from physics.hf.omp import ompdeck  # KWCOV B6: TALYS's energy-local adjustment lines (adjust.f90)
+    from physics.hf.omp import ompdeck  # TALYS's energy-local adjustment lines (adjust.f90)
 
     F = ompdeck.factors(F, adjust_type if adjust_type is not None else ompdeck.ktype(params, k, options), e)
     ejoin = 200.0 if params is None else params["ejoin"][k]
@@ -1217,14 +1217,14 @@ def opticalcomp(
             table=tables.get(kk),
             join=joins.get(kk),
             soukho_eferm_mev=se.get(kk),
-            eadj_on=False,  # ENGADJ: a composite takes ITS OWN particle's bumps (below), not the nucleons' at E/A
+            eadj_on=False,  # `eadj`: a composite takes ITS OWN particle's bumps (below), not the nucleons' at E/A
         )
 
     ea = e / PARA[k]
     n, p = np_(1, ea), np_(2, ea)
     n_e, p_e = np_(1, e), np_(2, e)
     F = eadj_F(ompadjust(params, k), k, e)
-    from physics.hf.omp import ompdeck  # KWCOV B6
+    from physics.hf.omp import ompdeck
 
     F = ompdeck.factors(F, ompdeck.ktype(params, k, options), e)
     iz, in_, ia = PARZ[k], PARN[k], PARA[k]
@@ -1273,7 +1273,7 @@ def opticalcomp(
         if k == 3 and options.deuteronomp >= 2:
             alt = opticaldeut(Z, A, e, options.deuteronomp, F, o)
             i = options.deuteronomp
-        # KWCOV B7b: alphaomp 3-5 keep the base potential here, as opticalcomp.f90:323 does; a nucleus with a density
+        # alphaomp 3-5 keep the base potential here, as opticalcomp.f90:323 does; a nucleus with a density
         # file takes the folding potential in the solve instead (omp/jlm.py -> omp/foldalpha.py, jlmexist(., ., 6))
         if k == 6 and (options.alphaomp == 2 or options.alphaomp >= 6):
             alt = opticalalpha(Z, A, e, options.alphaomp, F, o)
@@ -1403,10 +1403,10 @@ def omp_parameters(
     """
     from physics.hf.omp import omp_nx2, ompdeck
 
-    own = ompdeck.tables(Z, Z + N)  # KWCOV B6: `optmod Z A file [p]` (omppar.f90:243-277)
+    own = ompdeck.tables(Z, Z + N)  # `optmod Z A file [p]` (omppar.f90:243-277)
     if own:
         tables = {**{kk: t for kk, (t, _ef) in own.items()}, **dict(tables or {})}
-    fast = omp_nx2.omp_parameters(  # NATIVEX2 `omp`: on floats, no gradient
+    fast = omp_nx2.omp_parameters(  # native `omp`: on floats, no gradient
         Z, N, particle, e_mev, params, options, colltype=colltype, tables=tables,
         enincmax_mev=enincmax_mev, soukho_eferm_mev=soukho_eferm_mev,
         sep_energy_mev=sep_energy_mev, structure=structure)

@@ -9,18 +9,18 @@ Task: T9 (physics/hf/CONTRACT.md §7). Acceptance test: A-cn1 (§6).
 TALYS routines ported here (file:line of the subroutine/function statement):
     compnorm.f90:1 (compnorm)
 
-What compnorm does, and why it matters for the gates. ECIS's reaction cross section and the sum
+What compnorm does, and why it matters for the tests. ECIS's reaction cross section and the sum
 over the incident transmission coefficients are not identical, so TALYS renormalises: it builds
 `xsreacsum = sum_{J,P} CNfactor (2J+1) sum_{j,l} Tjlinc`, the compound-formation flux
 `xsflux = sigma_R - sigma_direct - sigma_preeq - sigma_GR`, and folds `cfratio/norm` into
 `CNfactor`. Everything downstream (`comptarget`, this module's `cn_factor_mb`) multiplies by that
 one number, which is exactly the `cnfactor_mb` field `prepare.CompoundInputs` carries, so the
-A-cn1/A-cn2 gates test `comptarget` with TALYS's own normalisation injected and this module
+A-cn1/A-cn2 tests check `comptarget` with TALYS's own normalisation injected and this module
 separately against the same dump.
 
 `population.f90` is the initial-population variant for `Einc`-less runs (astrophysics and the
 `population` TALYS variant); it is out of scope here and is listed in CONTRACT.md §8's spirit —
-T10 needs it only for the `population` reference variant, which no gate uses.
+T10 needs it only for the `population` reference variant, which no test uses.
 
 Units: `pik2_mb` is pi/k^2 in mb (compnorm.f90:95 `pik2 = 10. * pi / (wavenum * wavenum)`, i.e.
 fm^2 -> mb); every cross section in and out is mb; `wavenum_per_fm` is TALYS's `wavenum`.
@@ -62,7 +62,7 @@ def reaction_transmission_sum(
     numj: int = 40,
 ) -> tuple[Tensor, int, int]:
     """`CNterm(parity, J) / CNfactor` = (2J+1) sum_{j,l} Tjlinc over the incident channels of each
-    (J, parity), plus TALYS's J2beg / J2end. Factored out of compnorm so the gate can check the
+    (J, parity), plus TALYS's J2beg / J2end. Factored out of compnorm so the test can check the
     identity `CNfactor * sum = xsflux` with dumped numbers only (no wave number needed).
 
     TALYS: compnorm.f90:1 (compnorm)  -- the loop over incoming channels
@@ -73,7 +73,7 @@ def reaction_transmission_sum(
     j2end = min(2 * lmaxinc + parspin2 + targetspin2, 2 * numj)
     if (tjlinc.dtype == torch.float64 and tjlinc.device.type == "cpu"
             and not (torch.is_grad_enabled() and tjlinc.requires_grad)):
-        # CENGBOOK: the same sums on Python floats (IEEE double, the same operations in the same
+        # Native: the same sums on Python floats (IEEE double, the same operations in the same
         # order as the 0-d tensor arithmetic below), filled into the tensor once
         return _transmission_sum_floats(tjlinc.tolist(), targetspin2, target_parity, lmaxinc,
                                         k0, numj, j2beg, j2end), j2beg, j2end

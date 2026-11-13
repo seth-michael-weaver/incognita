@@ -1,13 +1,12 @@
-"""CHARTFIX: `Dmulti` reaches the compound decay of the bin multiple pre-equilibrium depleted.
+"""`Dmulti` reaches the compound decay of the bin multiple pre-equilibrium depleted.
 
 `multipreeq2.f90:374` sets `Dmulti(nex) = summpe / xspopex(Zcomp, Ncomp, nex)` and
 `compound.f90:402` then decays the SAME bin with `(1 - Dmulti) * xspop`, so the flux multiple
 pre-equilibrium already emitted is not shared out a second time. The port's `multipreeq2` is
-exact (`preeq.multi`, gate A-mpe) but both of `Cascade.decay`'s fast paths dropped the factor --
-`decay_batch` was handed a literal `dmulti=0.0` and `decay_fast` had no parameter at all -- so at
-20 MeV, the one energy of TALYS's default grid where `emulpre` lets multiple pre-equilibrium run,
-every second-chance channel was high by the whole multiple pre-equilibrium cross section
-(Fe-56 `(n,2n)` +0.63 %, `(n,np)` +0.69 %).
+exact (`preeq.multi`, check A-mpe), and both of `Cascade.decay`'s fast paths must apply the
+factor too: without it, at 20 MeV, the one energy of TALYS's default grid where `emulpre` lets
+multiple pre-equilibrium run, every second-chance channel is high by the whole multiple
+pre-equilibrium cross section (Fe-56 `(n,2n)` +0.63 %, `(n,np)` +0.69 %).
 
 Two checks, on Fe-56's 20 MeV cascade:
 
@@ -24,7 +23,7 @@ import torch
 
 @pytest.fixture(scope="module", autouse=True)
 def _alphatemp_off():
-    """ALPHAADOPT (alphatemp default ON 0.64): decay_batch does not wire ALPHATEMP (it refuses the switch); this module runs at alphatemp 0."""
+    """alphatemp is default ON (0.64): decay_batch does not wire `alphatemp` (it refuses the switch); this module runs at alphatemp 0."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_ALPHATEMP", "0")
         yield
@@ -73,7 +72,7 @@ def cascade20():
 
     torch.set_num_threads(1)
     fm.Cascade.mpe, dfm.NucleusWidths.feeding, dfm.NucleusWidths.__init__ = mpe2, feed2, init2
-    # NATIVEX: these checks watch `decay_fast`'s numpy path; the compiled walk (held to it by
+    # native walk: these checks watch `decay_fast`'s numpy path; the compiled walk (held to it by
     # tests/hf/test_nativex.py) is switched off
     prev = os.environ.get("HF_NATIVEX")
     os.environ["HF_NATIVEX"] = "0"

@@ -1,5 +1,5 @@
 """T2 structure: fixed-format readers, masses and separation energies, discrete levels and gamma
-cascades, deformation, resonance data and nuclide bookkeeping, against TALYS (gate A-struct).
+cascades, deformation, resonance data and nuclide bookkeeping, against TALYS (check A-struct).
 
 Two kinds of test:
 
@@ -13,7 +13,7 @@ Two kinds of test:
 Reference sources, in order: the extracted-directory tree named by $INCOGNITA_HF_STRUCT_EXTRACT
 (``<variant>__<target>/levels*.out`` ...), then the tarballs in
 ``physics.hf.reference.reference_dir() / "raw"``. One variant per target (structure does not
-depend on the variant). Run ``python tests/hf/test_structure.py`` for the gate report.
+depend on the variant). Run ``python tests/hf/test_structure.py`` for the comparison report.
 """
 
 from __future__ import annotations
@@ -92,8 +92,8 @@ def test_units_against_known_physical_values():
 
 @needs_db
 def test_masses_match_the_pre_vectorisation_capture(monkeypatch):
-    """SPEED2 turned masses()'s grid loops into numpy array operations (the same float64
-    operations per cell), parses each mass table once and memoises Duflo-Zuker. The fixture
+    """masses() computes its grid with numpy array operations (the same float64 operations
+    per cell as cell-by-cell code), parses each mass table once and memoises Duflo-Zuker. The fixture
     holds every output array of the cell-by-cell code for five runs: Fe-56 and Pb-208 defaults,
     U-238 + p with FRDM, O-16 + alpha with massmodel 0 and no experimental masses (Duflo-Zuker
     everywhere), Zr-90 with HFB-D1M and user massnucleus/massexcess/beta2. Bit-identical."""
@@ -102,7 +102,7 @@ def test_masses_match_the_pre_vectorisation_capture(monkeypatch):
     from physics.hf.input.defaults import PARAM_SPECS, default_options, default_params
     from physics.hf.structure.masses import masses
 
-    # FLUXPROMO2 pin: the fixture is TALYS's residual window (Ninit - 3); `fluxclose y` widens it
+    # `fluxclose` pinned off: the fixture is TALYS's residual window (Ninit - 3); `fluxclose y` widens it
     monkeypatch.setenv("INCOGNITA_FLUXCLOSE", "0")
     monkeypatch.delenv("INCOGNITA_FLUXCLOSE_EFF", raising=False)
 

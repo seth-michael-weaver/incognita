@@ -3,7 +3,7 @@ TALYS run that writes the exact arrays `comptarget.f90` consumes, and the compou
 it produces, beside the ordinary output files.
 
 Why an instrumented run rather than the standard dumps. The contract's injection rule says
-`compound` must pass its gate with TALYS's own upstream values. Three of those values are not in
+`compound` must pass its test with TALYS's own upstream values. Three of those values are not in
 any file TALYS writes at its defaults: the bin-integrated level density `rho0` (exgrid.f90
 integrates density() over each bin's edges and centre, not on the ld*.gs table grid), the
 second-order interpolation of T_lj from the emission grid onto each residual level/bin

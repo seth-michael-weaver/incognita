@@ -118,8 +118,8 @@ def _elastic_channel(t: Tensor, jl: Tensor, chans, ltarget: int, device):
 
 
 def _case_dom(inp: CompoundInputs, device=None, max_nex: int | None = None):
-    """KEVCOLD (alphatemp_dom gd, default OFF): the production (hot) residuals in every cell with Gamma_tot/D >= 1, the
-    ALPHATEMP alpha table (inp.alphadom) in the isolated cells (denomhf / 2 pi < 1, denomhf of the production tables)."""
+    """Cold-alpha domain (alphatemp_dom gd, default OFF): the production (hot) residuals in every cell with Gamma_tot/D >= 1, the
+    `alphatemp` alpha table (inp.alphadom) in the isolated cells (denomhf / 2 pi < 1, denomhf of the production tables)."""
     from physics.hf.omp import alphatemp
 
     nexmax = max_nex or max(r.maxex + 1 for r in inp.residuals.values())
@@ -144,11 +144,11 @@ def _case_dom(inp: CompoundInputs, device=None, max_nex: int | None = None):
     return _wfcnorm(inp, inp.flagwidth and inp.wmode >= 1, pop, fis)
 
 
-_NO_WFCNORM = [False]  # KEVCOLD: set while _case_dom runs its two cell subsets
+_NO_WFCNORM = [False]  # Cold-alpha domain: set while _case_dom runs its two cell subsets
 
 
 def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
-    if getattr(inp, "alphadom", None) is not None:  # KEVCOLD (default None)
+    if getattr(inp, "alphadom", None) is not None:  # Cold-alpha domain (default None)
         return _case_dom(inp, device, max_nex)
     inp = _exact_incident_channel(inp)
     types = sorted(inp.residuals)
@@ -160,7 +160,7 @@ def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
         raise NotImplementedError(f"widthmode {inp.wmode} is not a TALYS option")
     ew = getattr(inp, "ew", None) if (not use_wfc or inp.wmode == 1) else None
     if (not use_wfc or inp.wmode == 1) and ew is None:
-        # SPEED0: without width fluctuations, or with Moldauer's, every (J, parity) at once
+        # without width fluctuations, or with Moldauer's, every (J, parity) at once
         from physics.hf.compound.target_batch import case_moldauer, case_nowfc
 
         got = (case_nowfc if not use_wfc else case_moldauer)(inp, device, nexmax)
@@ -175,7 +175,7 @@ def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
         lmap = ewfc.level_map(inp, ew)
     for parity in (-1, 1):
         for J2 in range(inp.j2beg, inp.j2end + 1, 2):
-            if inp.cellsel is not None and (J2, parity) not in inp.cellsel:  # KEVCOLD (default None)
+            if inp.cellsel is not None and (J2, parity) not in inp.cellsel:  # Cold-alpha domain (default None)
                 continue
             s = exit_channel_sums(inp, J2, parity, device)
             st = s["denom"]
@@ -315,7 +315,7 @@ def _case(inp: CompoundInputs, device=None, max_nex: int | None = None):
 
 
 def _wfcnorm(inp: CompoundInputs, use_wfc: bool, pop: Tensor, xs_fis: Tensor):
-    """FIXENG F15 (INCOGNITA_WFCNORM, default OFF): with width fluctuations on, scale the compound decays to the
+    """`INCOGNITA_WFCNORM` (default OFF): with width fluctuations on, scale the compound decays to the
     formation cross section `xsflux` (`compound.wfcnorm`). OFF returns the arrays untouched."""
     from physics.hf.compound import wfcnorm
 
@@ -327,7 +327,7 @@ def _wfcnorm(inp: CompoundInputs, use_wfc: bool, pop: Tensor, xs_fis: Tensor):
 
 def _ew_block(inp: CompoundInputs, s: dict, ewset: dict, chans, tinc: Tensor, x: Tensor, wts: Tensor,
               cn: Tensor, J2: int, parity: int, pop: Tensor, device, use_wfc: bool = True) -> Tensor:
-    """EWCC: one (J, parity) of comptarget with Moldauer in the Engelbrecht-Weidenmueller eigen-channel
+    """`ewfc`: one (J, parity) of comptarget with Moldauer in the Engelbrecht-Weidenmueller eigen-channel
     space of the coupled channels (`compound.ewfc`). Adds into `pop`, returns the fission addend.
 
     The coupled cells (and every incident channel) are taken out of the k0 block and out of

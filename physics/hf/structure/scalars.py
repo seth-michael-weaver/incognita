@@ -5,7 +5,7 @@ reaction bookkeeping limits and the per-energy switches.
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NODUMP (physics/hf/CONTRACT.md §7). Acceptance test: A-struct / A-grid / E2E (§6).
+Contract: physics/hf/CONTRACT.md §7. Acceptance test: A-struct / A-grid / E2E (§6).
 
 Until this module, `engine.ChainedFull` read these off the instrumented run: `Ltarget`, the
 target's spin, parity and excitation energy, `popeps`, `xseps`, `maxZ`/`maxN`, `maxchannel`,
@@ -156,7 +156,7 @@ def _parinclude(options) -> list[bool]:
     TALYS: input_basicreac.f90:1 (input_basicreac)
     Test: A-struct
     """
-    inc = list(getattr(options, "parinclude", [True] * 7))  # KWCOV B2: `ejectiles` (Options.parinclude)
+    inc = list(getattr(options, "parinclude", [True] * 7))  # `ejectiles` (Options.parinclude)
     if len(inc) != 7:
         inc = [True] * 7
     return [bool(options.flagfission), *[bool(x) for x in inc]]

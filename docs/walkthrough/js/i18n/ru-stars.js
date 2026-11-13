@@ -28,7 +28,7 @@ WT.L.ch.stars = {
 </div>
 <div class="step">
   <h3>Сверка с измерениями</h3>
-  <p>Значения INCOGNITA при 30 кэВ, делённые на измеренные, для 94 стабильных нуклидов (<a href="scoreboard.html">сводная таблица</a>).</p>
+  <p>Значения INCOGNITA при 30 кэВ, делённые на измеренные, для 94 стабильных нуклидов (<a href="scoreboard.html">сравнения</a>).</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {
@@ -78,7 +78,7 @@ Object.assign(WT.L.labels, {
   "r-peak Te, Xe": "r-пик Te, Xe",
   "r-process: a flood of neutrons makes very neutron-rich nuclei": "r-процесс: поток нейтронов создаёт сильно нейтроноизбыточные ядра",
   "r-process: very neutron-rich nuclei": "r-процесс: сильно нейтроноизбыточные ядра",
-  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test": "в кружке: чистые s-изотопы · измерения: сводные значения (KADoNiS) · сравнение при разработке, не слепой тест",
+  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test": "в кружке: чистые s-изотопы · измерения: сводные значения (KADoNiS) · сравнение при разработке, не независимый тест",
   "ringed: s-only · measured: KADoNiS": "в кружке: только s · измерения: KADoNiS",
   "s Ba": "s Ba",
   "s Pb": "s Pb",

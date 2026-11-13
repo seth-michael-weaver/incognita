@@ -28,7 +28,7 @@ WT.L.ch.stars = {
 </div>
 <div class="step">
   <h3>측정값과 대조</h3>
-  <p>INCOGNITA의 30 keV 값을 측정값으로 나눈 것, 안정 핵종 94개(<a href="scoreboard.html">성적표</a>).</p>
+  <p>INCOGNITA의 30 keV 값을 측정값으로 나눈 것, 안정 핵종 94개(<a href="scoreboard.html">비교</a>).</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {
@@ -78,7 +78,7 @@ Object.assign(WT.L.labels, {
   "r-peak Te, Xe": "r-봉우리 Te, Xe",
   "r-process: a flood of neutrons makes very neutron-rich nuclei": "r-과정: 쏟아지는 중성자가 중성자가 매우 많은 핵을 만든다",
   "r-process: very neutron-rich nuclei": "r-과정: 중성자가 매우 많은 핵",
-  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test": "고리 표시: s-과정 전용 동위원소 · 측정값: 편집 값 (KADoNiS) · 개발 중 비교이며 블라인드 테스트가 아님",
+  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test": "고리 표시: s-과정 전용 동위원소 · 측정값: 편집 값 (KADoNiS) · 개발 중 비교이며 독립적인 검증이 아님",
   "ringed: s-only · measured: KADoNiS": "고리 표시: s 전용 · 측정값: KADoNiS",
   "s Ba": "s Ba",
   "s Pb": "s Pb",

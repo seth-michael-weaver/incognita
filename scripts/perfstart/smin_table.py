@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PERFSTART: prebuilt table of the compound nucleus' separation energies for the calculator's GRIDTOP pad.
+"""Prebuilt table of the compound nucleus' separation energies for the calculator's grid-top pad.
 
 scripts/talysworld/engine_job.py pads a job's grid when min S(CN) < 0 and gets S by starting a SECOND Python process that
 imports the engine and builds the target's structure (`dens_reference._structure_of`): ~1.4 s of a ~5 s job. S depends

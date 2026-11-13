@@ -109,7 +109,7 @@ def test_report_warns_once_naming_the_switch_that_turned_them_off(monkeypatch):
     `status` is stubbed rather than driven through the env, because `HF_NATIVE=0` is *not* a
     reliable global kill switch once a process has loaded: `nativex.lib`/`decay_native._lib` cache
     the decision (`lru_cache`) and `ecis.ccnative` never consults `HF_NATIVE` at all. That is
-    pre-existing loader behaviour and CENGWIRE does not change it -- it is why gate 2 of
+    pre-existing loader behaviour and CENGWIRE does not change it -- it is why the second check of
     docs/results/hf-cengwire.md moves the `.so` files aside instead of setting the switch.
     """
     from physics.hf.native import inventory

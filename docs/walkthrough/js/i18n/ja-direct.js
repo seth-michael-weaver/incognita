@@ -108,7 +108,7 @@ Object.assign(WT.L.labels, {
   "{#} MeV neutrons on a medium-mass nucleus (illustrative shares)": "{#} MeV中性子 → 中重核（割合は説明用）",
 });
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "{#}⁺ at about {#} keV": "{#}⁺（約 {#} keV）",
 });

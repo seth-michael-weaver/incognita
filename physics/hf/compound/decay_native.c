@@ -1,4 +1,4 @@
-/* SPEEDD: compiled kernels for compound.decay_fast (the multiple-emission compound decay).
+/* Compiled kernels for compound.decay_fast (the multiple-emission compound decay).
  *
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.

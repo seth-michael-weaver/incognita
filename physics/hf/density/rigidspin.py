@@ -1,4 +1,4 @@
-"""RIGIDSPIN (Incognita extension, ISORATIO 2026-10-01): ground-state spin cut-off from the engine's own rigid-body moment of inertia.
+"""Rigid-body spin cut-off (Incognita extension, `INCOGNITA_RIGIDSPIN`): ground-state spin cut-off from the engine's own rigid-body moment of inertia.
 
 Physics: in the continuum the spin cut-off of a (residual or compound) nucleus is sigma^2 = I * T / hbar^2. The rigid-body value
 uses TALYS's own deformed moment `Irigid(0) = (1 + |beta2| / 3) * 0.01389 A^(5/3)` (deformpar.f90 label 400; beta2 = the mass

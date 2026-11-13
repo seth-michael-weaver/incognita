@@ -56,7 +56,7 @@ def core_spins(target, target_levels, core, core_levels) -> tuple[np.ndarray, np
     j0 = _F(tj[0])
     from physics.hf.structure import collrule as _collrule
 
-    skip = _collrule.core_skip(target, core_levels)  # WEAKCPL: None unless the target's multiplet is in CC
+    skip = _collrule.core_skip(target, core_levels)  # None unless the target's multiplet is in CC
     for i in range(0, NUMLEV2 + 1):
         if i == 0 or i == skip or target.leveltype[i] in ("R", "V") or core.deform[i] == 0.0:
             continue

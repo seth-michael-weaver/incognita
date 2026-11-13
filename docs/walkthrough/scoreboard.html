@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Scoreboard · Inside a Nuclear Reaction</title>
+<title>Comparisons · Inside a Nuclear Reaction</title>
 <meta name="description" content="How the INCOGNITA reaction engine compares with the TALYS-2.24 program it was ported from, two independent reaction codes and a TENDL-style recipe, and the TERRA data product, an in-sample fit, with four evaluated libraries, on measured neutron cross sections.">
 <link rel="canonical" href="https://www.incognitanuclear.org/scoreboard">
 <meta name="robots" content="index, follow">
 <meta property="og:url" content="https://www.incognitanuclear.org/scoreboard">
-<meta property="og:title" content="Scoreboard · Inside a Nuclear Reaction">
+<meta property="og:title" content="Comparisons · Inside a Nuclear Reaction">
 <meta property="og:image" content="https://www.incognitanuclear.org/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -26,7 +26,7 @@
   <div class="site-links">
     <a href="./" data-keep-lang data-i18n="nav_physics">The Physics</a>
     <a href="data.html" data-keep-lang data-i18n="nav_data">Every nuclide</a>
-    <a href="scoreboard.html" class="here" aria-current="page" data-keep-lang data-i18n="nav_board">Scoreboard</a>
+    <a href="scoreboard.html" class="here" aria-current="page" data-keep-lang data-i18n="nav_board">Comparisons</a>
     <a class="gh" href="https://github.com/seth-michael-weaver/incognita"><svg class="gh-ico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
   </div>
   <button type="button" class="site-burger" aria-expanded="false" aria-label="Menu" data-i18n-aria="menu">☰</button>
@@ -35,7 +35,7 @@
 <main class="sb">
   <header class="sb-head">
     <div class="kicker" data-i18n="sb_kicker">INCOGNITA · TERRA</div>
-    <h1 data-i18n="sb_h1">Scoreboard</h1>
+    <h1 data-i18n="sb_h1">Comparisons</h1>
     <p class="sb-asof"><span data-i18n="sb_asof">As of</span> <time id="sb-date"></time>.</p>
     <p class="sb-scope" id="sb-scope"></p>
     <p class="sb-sum" id="sb-sum"></p>
@@ -53,7 +53,7 @@
     </ul>
     <h2 id="sb-keep-h" data-i18n="sb_keep_h">What to keep in mind</h2>
     <ul class="sb-list">
-      <li data-i18n="sb_keep_1">This is not a blind test: the engine's global rules were chosen while watching these comparisons.</li>
+      <li data-i18n="sb_keep_1">These are not independent tests: the engine's global rules were chosen while watching these comparisons.</li>
       <li data-i18n="sb_keep_2">We ran the rival codes ourselves at their default input; their authors did not tune them.</li>
       <li id="sb-keep-3">Some comparisons reuse the same measurements (for example a second scoring of the same (n,2n) data), so the comparisons are not independent; no correction for multiple comparisons is applied.</li>
       <li id="sb-keep-5"></li>
@@ -106,8 +106,8 @@
         <dd id="sb-how-k">Maxwellian-averaged capture cross sections (MACS) at 30 keV, grouped by proton number Z, scored on the nuclides whose compiled value is measured, not estimated. The bands Z &lt; 20 and Z ≥ 84 hold no such nuclide and are not counted.</dd>
         <dt data-i18n="sb_how_ov_t">Overlaps</dt>
         <dd data-i18n="sb_how_ov_d">For example, “(n,2n) near threshold” and its second scoring use the same measurements; “capture, all” contains the narrower capture comparisons; each all-Z stellar-capture comparison contains its Z bands.</dd>
-        <dt data-i18n="sb_how_blind_t">Blind test</dt>
-        <dd data-i18n="sb_how_blind_d">None has been run on this engine yet. A blind test, on measurements kept sealed from development, is held back for later.</dd>
+        <dt data-i18n="sb_how_blind_t">Independent test</dt>
+        <dd data-i18n="sb_how_blind_d">None has been run on this engine yet. A test on measurements not used during development is planned for later.</dd>
         <dt data-i18n="sb_how_terms_t">Terms</dt>
         <dd><ul class="sb-gloss">
           <li data-i18n="sb_gl_1"><b>EXFOR</b>: the international library of measured nuclear reaction data (IAEA and partners).</li>

@@ -1,4 +1,4 @@
-/* Dutch (Nederlands): layers (hoofdstuk 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Dutch (Nederlands): layers (hoofdstuk 21). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>Laag 1 · Eén regel voor elke kern</h3>
   <p>De blauwe lijn is de voorspelling van de motor voor één reactie. De motor is de onderste laag: dezelfde natuurkunde en globale instellingen voor elke nuclide, zonder dat er iets gefit is aan de werkzame doorsneden van één afzonderlijke kern.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Toon de metingen</button></div>
-  <p>Dat maakt hem toetsbaar, aan metingen en tegenover andere modelcodes die op dezelfde kernen zijn gedraaid. Een blinde test is het niet: de globale instellingen zijn gekozen terwijl we naar precies deze vergelijkingen keken.${engineScore}</p>
+  <p>Dat maakt hem toetsbaar, aan metingen en tegenover andere modelcodes die op dezelfde kernen zijn gedraaid. Een onafhankelijke test is het niet: de globale instellingen zijn gekozen terwijl we naar precies deze vergelijkingen keken.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>Huidige stand van zaken</h3>
   <p>Een laag wordt pas aangenomen nadat ze tegenover metingen is getest, en ze blijft uit als ze niet helpt. Vandaag is de motor in gebruik en is TERRA kandidaat; de laag met gemeten structuur en de onzekerheidsband van de motor worden nog getest.</p>
-  <p><a href="scoreboard.html" data-keep-lang>Bekijk het volledige scorebord →</a> Elke vergelijking die we niet winnen, elke concurrent, en hoe je het leest.</p>
-  <div class="aside">${ASOF ? `Scores per ${ASOF}, uit` : "Scores uit"} het onderzoekslogboek van het project. De curven in de afbeelding zijn ter illustratie.</div>
+  <p><a href="scoreboard.html" data-keep-lang>Bekijk alle vergelijkingen →</a> Elke vergelijking die we niet winnen, elke concurrent, en hoe je ze leest.</p>
+  <div class="aside">${ASOF ? `Scores per ${ASOF}, uit` : "Scores uit"} de vergelijkingsgegevens van het project. De curven in de afbeelding zijn ter illustratie.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} van {#} metingen binnen de band (doel: ongeveer {#} %)",
   "no measurements to check the band against": "geen metingen om de band aan te toetsen",
 });
-Object.assign(WT.L.ui, { nav_board: "Scorebord" });
+Object.assign(WT.L.ui, { nav_board: "Vergelijkingen" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

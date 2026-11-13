@@ -1,4 +1,4 @@
-"""Incognita extension (HFGAMMA; not TALYS): the continuum starts where the discrete level scheme stops being complete.
+"""Incognita extension (`INCOGNITA_LEVCOMPLETE`; not TALYS): the continuum starts where the discrete level scheme stops being complete.
 
 Env INCOGNITA_LEVCOMPLETE=1 (or `all`); `tgt` restricts the cut to the target nucleus's list (the (n,n') residual).
 Default OFF, and OFF never changes a `Levels` object.

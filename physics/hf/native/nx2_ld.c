@@ -1,4 +1,4 @@
-/* NATIVEX2 lever `ld`: the level-density set-up of one residual nucleus and its rhogrid, off the
+/* Native kernel `ld`: the level-density set-up of one residual nucleus and its rhogrid, off the
  * autograd graph, for the analytical constant-temperature + Fermi-gas model (ldmodel 1) without
  * collective enhancement -- every nucleus with A <= 215 under TALYS's defaults.
  *

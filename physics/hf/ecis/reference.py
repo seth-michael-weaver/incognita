@@ -4,8 +4,8 @@ incident energy, and the coupled band, read straight out of the reference dump a
 `omppar_n.out` is the *emission*-grid neutron OMP, so it cannot be read at the 23 incident
 energies. What can is the `OPTICAL MODEL PARAMETERS FOR INCIDENT CHANNEL` block that
 `incidentecis.f90:342` writes into `talys.out` once per incident energy -- the same 20 numbers
-`ecisinput.f90:140-160` writes onto ECIS's cards. It is printed with the `f6.2/f6.3` format of
-incidentecis.f90:347, i.e. two or three decimals, which is coarser than ECIS's own `f10.5` card
+`ecisinput.f90:140-160` writes onto ECIS's records. It is printed with the `f6.2/f6.3` format of
+incidentecis.f90:347, i.e. two or three decimals, which is coarser than ECIS's own `f10.5` record
 and puts a floor of about 1e-4 relative on anything injected from it.
 
 This is a T13-local reader, not a change to T0's loader (T0 has finished; see
@@ -153,14 +153,14 @@ def coupled_band(Z: int, A: int):
         pa.append(int(lv.all_parity[ii]))
         # incidentecis.f90:245-249 reads `lband`/`Kband`/`defpar` at the level's own BAND index
         # (`vibband`), which for the vibrational model is what ecisinput.f90:122 then writes onto
-        # ECIS's one card per band. The ground state has `vibband == 0` and no phonon.
+        # ECIS's one record per band. The ground state has `vibband == 0` and no phonon.
         b = int(d.vibband[i])
         lam.append(0.0 if b == 0 else float(d.lband[b]))
         iph.append(int(d.iphonon[i]))
         vb.append(b)
-        # incidentecis.f90:246-250 writes the band cards from `lband`/`Kband`/`defpar` indexed by
+        # incidentecis.f90:246-250 writes the band records from `lband`/`Kband`/`defpar` indexed by
         # the DEFORMATION ROW i, not by the band -- `Jband(i1) = lband(Zix, Nix, i)` -- and then
-        # writes cards 1..Nband of those. `deformpar.f90:198-201` fills those three arrays by
+        # writes records 1..Nband of those. `deformpar.f90:198-201` fills those three arrays by
         # BAND. The two agree whenever the first Nband rows are the first Nband bands, which is
         # what every `.def` block the port meets looks like; this reproduces TALYS either way.
         jb.append(int(d.lband[i]))
@@ -182,7 +182,7 @@ def coupled_band(Z: int, A: int):
         "iphonon": torch.tensor(iph, dtype=torch.int64),
         # the ECIS deck's band structure, which the two-phonon (`lo(2)`) branch needs and the
         # harmonic one does not: `vibband` is `iband(i)` per coupled level (0 for the ground
-        # state), and `jband`/`kmag`/`band_beta` are the `Nband` phonon cards, 1-based with
+        # state), and `jband`/`kmag`/`band_beta` are the `Nband` phonon records, 1-based with
         # entry 0 unused.
         "vibband": torch.tensor(vb, dtype=torch.int64),
         "nband": int(nband),

@@ -1,5 +1,5 @@
-/* CENGLD (ROUTE100 WP6): the level-density helpers shared by `nx2_ld.c` (NATIVEX2's kernels,
- * moved here unchanged) and `ld.c` (CENGLD's): the LDNucleus scalar layout, ignatyuk, spincut,
+/* Native: the level-density helpers shared by `nx2_ld.c` (the native kernels,
+ * moved here unchanged) and `ld.c` (the cascade kernels): the LDNucleus scalar layout, ignatyuk, spincut,
  * fermi, densitytot (ldmodel 1 without collective enhancement), match.f90's condition and rho(J)
  * at one energy. `static inline`: every translation unit compiles its own copy, and with
  * contraction off the arithmetic is the same in each.
@@ -39,7 +39,7 @@ enum {
     P_CTABLE,     /* ctable[0], ptable_mev[0] */
     P_PTABLE,
     P_PAIR,       /* pair_mev: the P of the Fermi-gas tables */
-    P_SQ_UC,      /* SPINQUENCH (density/spinquench.py): U_c (0 = off), q(U_m), top of the window */
+    P_SQ_UC,      /* `spinquench` (density/spinquench.py): U_c (0 = off), q(U_m), top of the window */
     P_SQ_QM,
     P_SQ_XMAX,
     P_N
@@ -162,7 +162,7 @@ static inline double match1(const double *logrho, const double *temprho, int64_t
     return x - temp * log(temp * rhof) - E0save;
 }
 
-/* SPINQUENCH: the spin-distribution sigma^2 at eex from the engine's sc, as spinquench.quench_np
+/* `spinquench`: the spin-distribution sigma^2 at eex from the engine's sc, as spinquench.quench_np
  * (Fermi-gas value x q(U), q = 1/2 + 1/2 min(1, U/U_c); CT interpolation re-anchored at q(U_m) s2m;
  * floor sdisc; sc itself when off, at or below E_d, or above the window). */
 static inline double sq_quench(const double *p, double eex, double sc)

@@ -1,6 +1,6 @@
-"""OPEN3M defect A2: discrete levels whose 2J parity their mass number forbids.
+"""Defect A2: discrete levels whose 2J parity their mass number forbids.
 
-Gate: `docs/results/hf-open3m.md` section 1. TALYS resolves an ENSDF spin range to a spin with the
+See `docs/results/hf-open3m.md` section 1. TALYS resolves an ENSDF spin range to a spin with the
 wrong 2J parity (Nb-95 level 6, `(5/2:13/2)+`, becomes J = 3.0). compprepare.f90/comptarget.f90
 then enumerate `jj2'` with the wrong parity, `l2'` comes out odd and `lprime = l2prime / 2`
 truncates. The port parameterised the loop by integer l' and gave such a level exactly zero.

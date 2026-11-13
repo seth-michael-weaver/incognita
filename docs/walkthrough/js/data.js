@@ -35,7 +35,7 @@
     else out.push({ name: nm.pure, col: nm.col, pts: rm.energy_ev.map((x, i) => [x, rm.sigma_b[i]]) });
     if (lib && c && c.e_ev && c.endf_b) out.push({ name: nm.endf, short: "ENDF/B-VIII.1", col: nm.lcol, dash: true, pts: c.e_ev.map((x, i) => [x, c.endf_b[i]]) });
     return out; };
-  // its points: the held-out natC totals (faint dots; e relative, null when the set gives none), their log-energy bin averages
+  // its points: the natC totals not used in the fit (faint dots; e relative, null when the set gives none), their log-energy bin averages
   // (standard error) and the IAEA neutron standard 2017 natC elastic (1σ; dev = INCOGNITA natC / standard − 1)
   const elPoints = (c) => (!c ? [] : [
     ...(c.ho || []).map(([x, y, e, ds]) => ({ x, y, e, ds, dec: "k", kind: "ho" })),
@@ -106,9 +106,9 @@
     if (!pwcache.has(k)) pwcache.set(k, fetch(`data/lib/pw/${k}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)); return pwcache.get(k); });
   // measured thermal capture σγ(0.0253 eV) from EXFOR (scripts/build_site_thermal.py): data/thermal.json, fetched once.
   // A measurement, not a library value: it is drawn as a diamond whether or not the overlay is ticked
-  // INCOGNITA's own capture below the 1 keV join (RESFILL, scripts/build_site_rr.py): data/rr/<Z>/<A>.json, one per isotope
+  // INCOGNITA's own capture below the 1 keV join (scripts/build_site_rr.py): data/rr/<Z>/<A>.json, one per isotope
   // row that has one (index.json column "rr"; none for natural elements, so absent files are never requested); kind own-fit,
-  // measured-params (EXFOR-reported resonance parameters, RESPEAKS2), statistical or smooth, each drawn and labelled differently
+  // measured-params (EXFOR-reported resonance parameters), statistical or smooth, each drawn and labelled differently
   const rrcache = new Map();
   const loadRr = (Z, A) => { const row = byKey.get(Z + "-" + A); if (!A || !row || !row.rr) return Promise.resolve(null); const k = nkey(Z, A);
     if (!rrcache.has(k)) rrcache.set(k, fetch(`data/rr/${k}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)); return rrcache.get(k); };
@@ -242,7 +242,7 @@
     if (r.macs > 0) bits.push(`MACS 30 keV ≈ ${num(r.macs)} mb${r.u30 ? ` (×/÷ ${num(r.u30, 2)})` : ""}`);
     const m = []; if (r.ncap + r.nmxw) m.push(`${r.nds} ${T("dx_capsets", "capture datasets")}`); for (const [k, n] of [["n2n", r.nn2n], ["np", r.nnp], ["na", r.nna]]) if (n) m.push(`${CH[k]} ${n}`);
     if (m.length) bits.push(T("dx_measured", "Measured") + ": " + m.join(", "));
-    if (IDX.light_evals && IDX.light_evals[`${r.Z}-${r.A}`]) bits.push(T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"));
+    if (IDX.light_evals && IDX.light_evals[`${r.Z}-${r.A}`]) bits.push(T("dx_rm_name", "INCOGNITA R-matrix evaluation"));
     return bits.join("<br>");
   }
   document.querySelectorAll(".dx-seg button").forEach((b) => b.addEventListener("click", () => {
@@ -375,7 +375,7 @@
     if (d.meas) f.push(`<span>${d.meas.ds.length} ${T("dx_capsets", "capture datasets")}</span>`);
     if (d.tier != null && !d.valid) f.push(`<span class="dx-warn">${T("dx_outside", "outside the validated range (Z 26–83)")}</span>`);
     if (d.flag) f.push(`<span class="dx-warn">${T("dx_flag", "resolved resonances reach the MACS window: prefer a measured MACS")}</span>`);
-    if (d.rm) f.push(`<span class="dx-chip t0">${esc(T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"))}</span>`);
+    if (d.rm) f.push(`<span class="dx-chip t0">${esc(T("dx_rm_name", "INCOGNITA R-matrix evaluation"))}</span>`);
     if (cur.rr && cur.rr.caveat_short) f.push(`<span class="dx-warn" title="${esc(cur.rr.caveat || "")}">${esc(cur.rr.caveat_short)}</span>`);
     $("#dx-facts").innerHTML = f.join("");
     const mf = mformNote(d.mform), mfb = $("#dx-mf"); if (mfb) { mfb.hidden = !mf; mfb.innerHTML = mf || ""; }
@@ -454,7 +454,7 @@
       + `<p>${miss.length ? `${T("dx_lib_none", "No file for this nuclide in")} ${miss.map((k) => LAB[k]).join(", ")}. ` : ""}${(() => { const no = have.filter((k) => !L.n[k][tab]); return no.length ? `${T("dx_lib_notab", "No separate value for this reaction in")} ${no.map((k) => LAB[k]).join(", ")}. ` : ""; })()}${T("dx_lib_held", "JENDL-5 will be added once its terms for redistributing derived tables are confirmed.")}</p>`;
   }
 
-  // INCOGNITA's own curve below 1 keV (RESFILL): what it is, in plain words, by kind; and how it is drawn
+  // INCOGNITA's own curve below 1 keV: what it is, in plain words, by kind; and how it is drawn
   const RR_STYLE = { "own-fit": { w: 2.2, halo: 0, dash: [] }, "measured-params": { w: 2.2, halo: 0, dash: [] }, statistical: { w: 1.8, halo: 0, dash: [6, 3, 1.5, 3] }, smooth: { w: 1.4, halo: 0, dash: [1.5, 3] } };
   const rrSty = (k) => RR_STYLE[k] || RR_STYLE.smooth;
   const rrAnch = (rr) => !!(rr.thermal && rr.thermal.anchored);
@@ -467,8 +467,8 @@
   const rrShort = (rr) => rr.kind === "measured-params" ? T("dx_rr_k_meas", "measured resonances (EXFOR parameters)") : rr.kind === "own-fit" ? T("dx_rr_k_own", "own resonance fit") : rr.kind === "statistical" ? T("dx_rr_k_stat", "statistical resonances (not the real peaks)") : T("dx_rr_k_sm", "smooth estimate (no resonances)");
   function rrSentence(rr, th) {
     let s = rr.kind === "measured-params" ? T("dx_below_meas", "Below 1 keV the solid line uses resonance energies and widths that experimenters measured and reported in EXFOR, merged across experiments; it is not a fit by INCOGNITA. Where a spin or radiation width was not measured, INCOGNITA’s own statistics supply it, and weak levels the experiments could not see are added statistically (their positions are not predictions). It joins the prediction at 1 keV.")
-      : rr.kind === "own-fit" ? T("dx_below_own_t", "Below 1 keV the solid line is INCOGNITA’s own Reich–Moore resonance fit to measured EXFOR transmission data. It joins the prediction at 1 keV. The note beside the nuclide says which data sets were used and how the fit compares with held-out data.")
-      : rr.kind === "statistical" ? T("dx_below_stat", "Below 1 keV the dash-dot line is INCOGNITA’s statistical estimate: resonances with INCOGNITA’s own average spacing and widths, placed at random, so single peaks do not match the real ones. Tested on nuclides whose resonance integral was held out, it was typically within a factor of 2 of measurement, and no better: median off by ×1.9, 54 % within ×2.") 
+      : rr.kind === "own-fit" ? T("dx_below_own_t", "Below 1 keV the solid line is INCOGNITA’s own Reich–Moore resonance fit to measured EXFOR transmission data. It joins the prediction at 1 keV. The note beside the nuclide says which data sets were used and how the fit compares with data not used in the fit.")
+      : rr.kind === "statistical" ? T("dx_below_stat", "Below 1 keV the dash-dot line is INCOGNITA’s statistical estimate: resonances with INCOGNITA’s own average spacing and widths, placed at random, so single peaks do not match the real ones. Tested on nuclides whose resonance integral was not used in the fit, it was typically within a factor of 2 of measurement, and no better: median off by ×1.9, 54 % within ×2.") 
       : rrAnch(rr) ? T("dx_below_sm_a", "Below 1 keV the dotted line is INCOGNITA’s smooth estimate: a 1/v curve through the measured thermal capture, bridged to the 1 keV value. No resonances are drawn, so between about 1 eV and 1 keV the real cross section can be far higher at its peaks.")
       : T("dx_below_sm", "Below 1 keV the dotted line is INCOGNITA’s smooth estimate: the 1 keV value continued as 1/v, with no resonances and no measurement to pin it. Real thermal values can differ from it by orders of magnitude.");
     const te = rr.thermal && rr.thermal.exp;
@@ -478,21 +478,21 @@
     if (rr.caveat) s += " " + esc(rr.caveat); // per-nuclide known defect, written by hand from a research report
     return s;
   }
-  // the resonance-integral comparison for one nuclide (RESFILL rr/<Z>/<A>.json "ri"), or "" when there is no measured RI
+  // the resonance-integral comparison for one nuclide (rr/<Z>/<A>.json "ri"), or "" when there is no measured RI
   function riText(rr) {
     const ri = rr && rr.ri; if (!(ri && ri.exp && ri.exp.value > 0 && ri.model_b > 0)) return "";
     let s = T("dx_rr_ri", "Resonance integral of capture above 0.5 eV for this nuclide: INCOGNITA {m} b, measured {e} b.").replace("{m}", num(ri.model_b, 3)).replace("{e}", num(ri.exp.value, 3));
     if (/^used/.test(ri.role || "")) s += " " + T("dx_rr_ri_used", "That measured value was used to pick this random sample, so the agreement is not a test.");
-    else if (/^HOLD/.test(ri.role || "")) s += " " + T("dx_rr_ri_hold", "That measured value was held out: it was not used to make this curve.");
+    else if (/^HOLD/.test(ri.role || "")) s += " " + T("dx_rr_ri_hold", "That measured value was not used to make this curve.");
     return s;
   }
 
   /** "How far to trust this": only checked results, no new claims.
    *  Tier meanings, the validated range (Z 26–83), model_form_flag: library/v0.2.3/README.md and CHANGELOG.md.
-   *  Bands: the pre-registered coverage check of 2026-10-24 (research reports/COVAR.md, 5 test nuclides; caveat in
+   *  Bands: the coverage check against measurements (5 test nuclides; caveat in
    *  library/v0.2.3/README.md): capture, fission, elastic covered as stated; (n,p), (n,α), (n,2n) and total under-covered.
    *  Capture "if anything, wide": library/v0.2.3/README.md ("the bands are on the wide side").
-   *  Engine errors: data/board/cells.csv, engine section (scoring "in-sample (development)", not blind), score_ours of the
+   *  Engine errors: data/board/cells.csv, engine section (scoring "in-sample (development)"), score_ours of the
    *  row with the most nuclei: [view, nuclei, Z from, Z to (nuclei in d_pernuc.csv / band name), rms dex]. */
   const BOARD = {
     cap: [["capture_all", 41, 26, 82, 0.1299289503]],
@@ -502,17 +502,17 @@
   /** INCOGNITA's light-nuclide R-matrix evaluation (data/light_evals/<id>.json via scripts/add_light_evals.py): what it is, its
    *  range, the caveat from its report, what it does not cover, and the report. Every number on its curve is INCOGNITA's own model. */
   function rmText(rm) {
-    return `<b>${esc(T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"))}</b>. ` + [
-      T("dx_rm_what", "Elastic scattering of neutrons on carbon-12 from INCOGNITA's own multi-level R-matrix fit to measured EXFOR total and elastic data. Before it was published it passed its pre-registered checks: the IAEA carbon standard, held-out total cross-section measurements, an NJOY processing round trip and a graphite criticality benchmark (PCI-001)."),
+    return `<b>${esc(T("dx_rm_name", "INCOGNITA R-matrix evaluation"))}</b>. ` + [
+      T("dx_rm_what", "Elastic scattering of neutrons on carbon-12 from INCOGNITA's own multi-level R-matrix fit to measured EXFOR total and elastic data. Before it was published it passed checks fixed in advance: the IAEA carbon standard, total cross-section measurements not used in the fit, an NJOY processing round trip and a graphite criticality benchmark (PCI-001)."),
       T("dx_rm_range", "Energy range: {lo} to {hi}; no INCOGNITA curve above it.").replace("{lo}", fmtE(rm.e_min_ev)).replace("{hi}", fmtE(rm.e_max_ev)),
-      T("dx_rm_caveat", "Caveat: in-sample χ²/dof {c}; two tilted data sets flagged; the gates are calibrated but have low power.").replace("{c}", num(rm.chi2_dof, 2)),
+      T("dx_rm_caveat", "Caveat: in-sample χ²/dof {c}; two tilted data sets flagged; the checks are calibrated but have low statistical power.").replace("{c}", num(rm.chi2_dof, 2)),
       T("dx_rm_nocap", "Capture is not modelled: the capture tab shows measurements only.")].join(" ")
       + ` <a href="${esc(rm.report)}" target="_blank" rel="noopener">${T("dx_rm_report", "Read the report")}</a>`;
   }
-  // one caption for the elastic tab's comparison: what the curve is (natural carbon), the standard, the held-out test, one set's offset
+  // one caption for the elastic tab's comparison: what the curve is (natural carbon), the standard, the unfitted totals, one set's offset
   function elCaption(c) {
     const s = c.stats || {}, o = (s.offsets || {})["22610002"] || {};
-    return T("dx_rm_cmp", "Here the curve is natural carbon, like the measurements and the standard: 98.93 % INCOGNITA's C-12 plus 1.07 % C-13 from ENDF/B-VIII.1, which makes the narrow peak at 153 keV; the pure C-12 curve is in the downloads. It agrees with the IAEA neutron standard 2017 within {dev} % (largest |z| {z}); on the held-out totals χ²/N = {chi}; all pre-registered gates passed. EXFOR {set} lies {off} % below both INCOGNITA and ENDF/B-VIII.1: an offset in that set's normalisation.")
+    return T("dx_rm_cmp", "Here the curve is natural carbon, like the measurements and the standard: 98.93 % INCOGNITA's C-12 plus 1.07 % C-13 from ENDF/B-VIII.1, which makes the narrow peak at 153 keV; the pure C-12 curve is in the downloads. It agrees with the IAEA neutron standard 2017 within {dev} % (largest |z| {z}); on the totals not used in the fit χ²/N = {chi}; all checks passed. EXFOR {set} lies {off} % below both INCOGNITA and ENDF/B-VIII.1: an offset in that set's normalisation.")
       .replace("{dev}", num(Math.ceil((s.std_max_dev_pct || 0) * 10) / 10, 2)).replace("{z}", num(s.std_max_z, 2)).replace("{chi}", num(s.heldout_chi2n, 2))
       .replace("{set}", "22610002").replace("{off}", num(Math.abs(o.vs_incognita_pct || 0), 2));
   }
@@ -545,13 +545,13 @@
         : T("dx_tr_b_none", "no band shown");
       const tested = k === "cap" ? d.tier === 0 : k === "macs" ? d.tier <= 1 : !!(d.thr && d.thr[k] && d.thr[k].length);
       const b = tested && (BOARD[k] || []).find((x) => r.Z >= x[2] && r.Z <= x[3]);
-      const err = b ? T("dx_tr_e", "Scoreboard error typically ×{f} ({n} measured nuclei, Z {z}; not blind)").replace("{f}", num(10 ** b[4], 3)).replace("{n}", b[1]).replace("{z}", `${b[2]}–${b[3]}`)
-        : T("dx_tr_e_none", "no held-out test for this region");
+      const err = b ? T("dx_tr_e", "Comparison error typically ×{f} ({n} measured nuclei, Z {z}; development comparison)").replace("{f}", num(10 ** b[4], 3)).replace("{n}", b[1]).replace("{z}", `${b[2]}–${b[3]}`)
+        : T("dx_tr_e_none", "no comparison with measurements for this region");
       li.push(`<li><b>${CH[k]}</b> <span>${[band, err].filter(Boolean).join(" · ")}</span></li>`);
     }
     if (d.cap && rr && rr.kind) { const ri = riText(rr); li.push(`<li><b>${T("dx_rr_b1k", "Below 1 keV")}</b> <span>${rrShort(rr)}${ri ? " · " + ri : ""}</span></li>`); }
     h.push(`<ul>${li.join("")}</ul>`);
-    h.push(`<p class="dx-tr-src">${T("dx_tr_src", "Tier and flags: library/v0.2.3 README. Bands: a pre-registered coverage check against measurements (5 test nuclides, October 2026), in which capture, fission and elastic bands covered as stated and the threshold channels and total under-covered. Errors: the <a href=\"scoreboard.html\" data-keep-lang>Scoreboard</a>, root-mean-square of log10(engine / measured); it is not a blind test, because the engine’s rules were chosen while watching it.")}</p>`);
+    h.push(`<p class="dx-tr-src">${T("dx_tr_src", "Tier and flags: library/v0.2.3 README. Bands: a coverage check against measurements (5 test nuclides, October 2026), in which capture, fission and elastic bands covered as stated and the threshold channels and total under-covered. Errors: the <a href=\"scoreboard.html\" data-keep-lang>Comparisons</a> page, root-mean-square of log10(engine / measured); it is not an independent test, because the engine’s rules were chosen while watching it.")}</p>`);
     box.innerHTML = h.join(""); box.hidden = false; WT.keepLang();
   }
   const rrSwatch = (c) => { const s = rrSty(c.rr); return `<svg class="dx-rrsw" width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="21" y2="4" stroke="${c.col}" stroke-width="${s.w}" stroke-dasharray="${s.dash.join(" ")}" stroke-linecap="round"/></svg>`; };
@@ -562,7 +562,7 @@
     const band = (ys, us) => grid.map((x, i) => (ys[i] > 0 && us && us[i] != null ? [x, ys[i] / 10 ** us[i], ys[i] * 10 ** us[i]] : null)).filter(Boolean);
     if (tab === "cap") {
       if (d.cap) out.curves.push({ name: "INCOGNITA · " + T("dx_pred", "prediction (library v0.2.3)"), col: C.curve, pts: grid.map((x, i) => [x, d.cap[i]]), b68: band(d.cap, d.u68), b95: band(d.cap, d.u95) });
-      // below 1 keV, INCOGNITA's own curve (RESFILL, 0 K), joined to the prediction's first point (1 keV, cap[0])
+      // below 1 keV, INCOGNITA's own curve (0 K), joined to the prediction's first point (1 keV, cap[0])
       const rr = cur.rr;
       if (d.cap && d.cap[0] > 0 && rr && rr.E && rr.cap && rr.E.length > 1) out.curves.push({ name: `${T("dx_rr_b1k", "Below 1 keV")}: ${rrLabel(rr)}`, short: rrShort(rr), col: C.curve, rr: rr.kind, rrd: rr,
         pts: [...rr.E.map((x, j) => [x, rr.cap[j]]).filter(([x]) => x < grid[0] * 0.9999), [grid[0], d.cap[0]]] });
@@ -575,7 +575,7 @@
       if (d.res) out.note = { upto: d.res, text: T("dx_res", "resolved resonances: the curve is an average here") };
     } else if (tab === "el") {
       const rm = d.rm, c = rm && rm.cmp; out.unit = "b";
-      if (rm) out.curves.push(...elCurves(rm, libOn, { ours: T("dx_rm_natc", "INCOGNITA R-matrix (C12RM9), natural carbon"), pure: T("dx_rm_name", "INCOGNITA R-matrix evaluation (C12RM9)"),
+      if (rm) out.curves.push(...elCurves(rm, libOn, { ours: T("dx_rm_natc", "INCOGNITA R-matrix, natural carbon"), pure: T("dx_rm_name", "INCOGNITA R-matrix evaluation"),
         endf: `ENDF/B-VIII.1, natC (${T("dx_eval_cmp", "evaluated library · comparator, not INCOGNITA")})`, col: C.curve, lcol: C.l1 }));
       if (c) { out.ds = [...(c.ds || []), ["", T("dx_std", "IAEA neutron standard 2017 (natC elastic)"), 2017, ""]]; out.points.push(...elPoints(c)); }
     } else if (tab === "macs") {
@@ -717,7 +717,7 @@
       for (const w of text.split(" ")) { const t = ln ? ln + " " + w : w; if (ln && ctx.measureText(t).width > maxW) { out.push(ln); ln = w; } else ln = t; }
       out.push(ln); return out; };
     ctx.font = `500 12px ${SANS}`;
-    // capture below 1 keV: INCOGNITA's own RESFILL curve where there is one (its kind named on the left), else only the
+    // capture below 1 keV: INCOGNITA's own curve where there is one (its kind named on the left), else only the
     // evaluated libraries (comparators) and measurements; a dotted line marks 1 keV
     const own = tab === "cap" && S.curves.some((c) => !c.dash && !c.pw), split = own && 10 ** x0 < PW_E && 10 ** x1 > PW_E ? X(PW_E) : null;
     const rrC = S.curves.find((c) => c.rr);
@@ -788,7 +788,7 @@
     for (const p of P.shown) {
       if (!(p.y > 0) || p.kind === "bin" || p.kind === "std") continue; // drawn over the curves (drawMarks)
       const dim = hl != null && p.ds !== hl, x = X(p.x), y = Y(p.y);
-      if (p.kind === "ho") { ctx.globalAlpha = dim ? 0.08 : 0.4; ctx.fillStyle = C.meas; ctx.beginPath(); ctx.arc(x, y, 1.7, 0, Math.PI * 2); ctx.fill(); continue; } // held-out totals: small faint dots
+      if (p.kind === "ho") { ctx.globalAlpha = dim ? 0.08 : 0.4; ctx.fillStyle = C.meas; ctx.beginPath(); ctx.arc(x, y, 1.7, 0, Math.PI * 2); ctx.fill(); continue; } // unfitted totals: small faint dots
       ctx.globalAlpha = dim ? 0.15 : p.dec === "d" ? 0.55 : 1; ctx.strokeStyle = C.meas; ctx.lineWidth = 1.2;
       if (p.e > 0) { ctx.beginPath(); ctx.moveTo(x, Y(p.y * (1 + p.e))); ctx.lineTo(x, Y(Math.max(p.y * (1 - p.e), p.y * 0.05))); ctx.stroke(); }
       if (p.xhi > p.xlo * 1.02) { ctx.beginPath(); ctx.moveTo(X(p.xlo), y); ctx.lineTo(X(p.xhi), y); ctx.stroke(); }
@@ -840,7 +840,7 @@
     const pws = pwOf(S);
     const leg = S.curves.filter((c) => !c.pw).map((c) => c.dash ? `<span class="dx-key">${pws.some((q) => q.short === c.short) ? `<i class="ln thin" style="background:${c.col}"></i>` : ""}<i class="dash" style="color:${c.col}"></i>${esc(c.short || c.name)} · ${T("dx_cmp", "comparison")}</span>` /* short legend (2026-11-06); the full wording is in Details */ : c.rr ? `<span class="dx-key dx-rrkey">${rrSwatch(c)}<span>${esc(c.short || c.name)}</span></span>` : `<span class="dx-key"><i class="ln" style="background:${c.col}"></i>${c.name}${c.b95 ? ` · ${T("dx_bands", "bands: 68 % and 95 %")}` : c.b68 && !c.name.includes("68") ? ` · ${T("dx_band68", "band: 68 %")}` : ""}</span>`);
     const elc = tab === "el" && cur.d.rm && cur.d.rm.cmp;
-    if (elc) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas};opacity:.55"></i>${T("dx_ho", "held-out measured totals, natC")} (${S.points.filter((p) => p.kind === "ho").length})</span>`,
+    if (elc) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas};opacity:.55"></i>${T("dx_ho", "measured totals not used in the fit, natC")} (${S.points.filter((p) => p.kind === "ho").length})</span>`,
       `<span class="dx-key"><i class="dia" style="background:${C.meas};border-color:${C.ink}"></i>${T("dx_bin", "averaged in log-energy bins")}</span>`,
       `<span class="dx-key"><i class="sq" style="border-color:${C.ink}"></i>${T("dx_std", "IAEA neutron standard 2017 (natC elastic)")}</span>`);
     else if (nPts) leg.push(`<span class="dx-key"><i class="dot" style="background:${C.meas}"></i>${T("dx_meas_pts", "measured")} (${nPts}${nEx ? `, ${nEx} ${T("dx_excl", "excluded")}` : ""})</span>`);
@@ -892,11 +892,11 @@
         : `<br><a class="dx-exhint" href="${ex[0].url}" target="_blank" rel="noopener">${T("dx_exfor_tap", "tap again, or here, to open")} EXFOR ${ex[0].id} ↗</a>`;
       return { html, url: ex.length ? ex[0].url : null, p: th }; }
     for (const p of P.shown) { if (!(p.y > 0)) continue; const d = ((P.X(p.x) - x) ** 2 + (P.Y(p.y) - y) ** 2) * (p.kind === "bin" || p.kind === "std" ? 0.3 : 1); if (d < bd) { bd = d; best = p; } } // an average or standard point wins over the faint dots under it
-    if (best && best.kind === "bin") return { html: `<b>${T("dx_bin", "averaged in log-energy bins")}</b><br>${fmtE(best.x)}: <b>${num(best.y)} ± ${num(best.y * best.e, 2)} ${P.S.unit}</b><br><span class="dx-faint">${T("dx_bin_tip", "mean of {n} held-out measured points ± its standard error").replace("{n}", best.n)}</span>`, url: null, p: best };
+    if (best && best.kind === "bin") return { html: `<b>${T("dx_bin", "averaged in log-energy bins")}</b><br>${fmtE(best.x)}: <b>${num(best.y)} ± ${num(best.y * best.e, 2)} ${P.S.unit}</b><br><span class="dx-faint">${T("dx_bin_tip", "mean of {n} unfitted measured points ± its standard error").replace("{n}", best.n)}</span>`, url: null, p: best };
     if (best && best.kind === "std") { const z = best.dev / best.e;
       return { html: `<b>${T("dx_std", "IAEA neutron standard 2017 (natC elastic)")}</b><br>${fmtE(best.x)}: <b>${num(best.y, 4)} ± ${num(best.y * best.e, 2)} ${P.S.unit}</b> (1σ)<br><span class="dx-faint">${T("dx_std_dev", "INCOGNITA / standard − 1")}: ${best.dev >= 0 ? "+" : ""}${num(best.dev * 100, 2)} % (z = ${num(z, 2)})</span>`, url: null, p: best }; }
     if (best) { const d = P.S.ds[best.ds] || [], ex = exforOf(d[0]);
-      let html = `<b>${esc(d[1] || "EXFOR " + (ex ? ex.id : String(d[0]).split("/").filter(Boolean).pop() || ""))}</b> ${d[2] || ""}<br>${best.xhi > best.xlo * 1.02 ? `${fmtE(best.xlo)}–${fmtE(best.xhi)}` : fmtE(best.x)}: <b>${num(best.y)} ${P.S.unit}</b>${best.e ? ` ± ${num(best.e * 100, 2)} %` : ""}${best.kind === "mxw" ? ` · ${T("dx_mxw", "Maxwellian average")}` : ""}${best.st ? ` · ${T("dx_state", "state")} ${esc(best.st)}` : ""}<br><span class="dx-faint">${best.kind === "ho" ? T("dx_ho_tip", "held out from the fit: read once, after the fit was frozen") : `${T("dx_cur", "curation")}: ${DEC[best.dec]}`}</span>`;
+      let html = `<b>${esc(d[1] || "EXFOR " + (ex ? ex.id : String(d[0]).split("/").filter(Boolean).pop() || ""))}</b> ${d[2] || ""}<br>${best.xhi > best.xlo * 1.02 ? `${fmtE(best.xlo)}–${fmtE(best.xhi)}` : fmtE(best.x)}: <b>${num(best.y)} ${P.S.unit}</b>${best.e ? ` ± ${num(best.e * 100, 2)} %` : ""}${best.kind === "mxw" ? ` · ${T("dx_mxw", "Maxwellian average")}` : ""}${best.st ? ` · ${T("dx_state", "state")} ${esc(best.st)}` : ""}<br><span class="dx-faint">${best.kind === "ho" ? T("dx_ho_tip", "not used in the fit: compared only after the fit was final") : `${T("dx_cur", "curation")}: ${DEC[best.dec]}`}</span>`;
       if (ex) html += lastPT === "mouse" ? `<br><span class="dx-exhint">${T("dx_exfor_click", "click the point to open")} EXFOR ${ex.id} ↗</span>`
         : `<br><a class="dx-exhint" href="${ex.url}" target="_blank" rel="noopener">${T("dx_exfor_tap", "tap again, or here, to open")} EXFOR ${ex.id} ↗</a>`;
       return { html, url: ex && ex.url, p: best }; }
@@ -945,7 +945,7 @@
     const page = `${location.origin}${location.pathname.replace(/data(\.html)?$/, "")}data.html#${id}`;
     const meta = {
       nuclide: id, Z, A: A || null,
-      source: "INCOGNITA library v0.2.3 (November 2026): library/v0.2.3 in https://github.com/seth-michael-weaver/incognita, as shown on the Every nuclide page. Every curve is the prediction of the production engine scored on the Scoreboard (engine-20261022-3); none is fitted to this nuclide's measurements, except that an ANCHORED curve is scaled by one factor to a measured 30 keV MACS. The earlier v0.1 stays in library/v0.1.",
+      source: "INCOGNITA library v0.2.3 (November 2026): library/v0.2.3 in https://github.com/seth-michael-weaver/incognita, as shown on the Every nuclide page. Every curve is the prediction of the production engine scored on the Comparisons page (engine-20261022-3); none is fitted to this nuclide's measurements, except that an ANCHORED curve is scaled by one factor to a measured 30 keV MACS. The earlier v0.1 stays in library/v0.1.",
       page, generated: new Date().toISOString().slice(0, 10),
       engine: "The INCOGNITA engine is a port of TALYS-2 (A. J. Koning, S. Hilaire, S. Goriely, Eur. Phys. J. A 59 (2023) 131) and uses the TALYS nuclear-structure database.",
       license: "Predictions and data: CC-BY-4.0. Cite the project (CITATION.cff in the repository), TALYS (Eur. Phys. J. A 59 (2023) 131) and EXFOR (N. Otuka et al., Nucl. Data Sheets 120 (2014) 272).",
@@ -963,7 +963,7 @@
     const cm = d.rm && d.rm.cmp;
     if (cm) J.rmatrix_evaluation.comparison = {
       note: "Shown on the elastic tab against natural-carbon data: natC = 0.9893 x this C-12 curve + 0.0107 x ENDF/B-VIII.1 C-13 elastic. The ENDF/B-VIII.1 comparator curve is not in the downloads.",
-      heldout_totals_natC: { note: "EXFOR natC total cross sections held out of the fit and read once after it was frozen (sets over 300 points rebinned at 1 %, as the gate read them)", datasets: cm.ds.map((x, i) => ({ index: i, exfor_id: x[0], author: x[1], year: x[2] })),
+      heldout_totals_natC: { note: "EXFOR natC total cross sections not used in the fit and compared only after it was final (sets over 300 points rebinned at 1 %, as the check read them)", datasets: cm.ds.map((x, i) => ({ index: i, exfor_id: x[0], author: x[1], year: x[2] })),
         columns: ["energy_ev", "sigma_b", "rel_unc", "dataset"], rows: cm.ho },
       iaea_standard_2017_natC_elastic: { columns: ["energy_ev", "sigma_b", "unc_1sigma_b", "incognita_natC_over_standard_minus_1"], rows: cm.std },
       stats: cm.stats };

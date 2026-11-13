@@ -1,4 +1,4 @@
-"""FISSB: fissioning nuclei on the batched target and cascade paths give the per-cell/per-bin numbers.
+"""Fissioning nuclei on the batched target and cascade paths give the per-cell/per-bin numbers.
 
 Three pieces, none of them physics, each held to what it replaces:
 
@@ -106,7 +106,7 @@ def test_chained_u238_is_the_per_cell_and_per_bin_paths(monkeypatch, request):
 
     from physics.hf.native import nativex
 
-    # NATIVEX: this counts FISSB's numpy path; the compiled kernels are held to it by
+    # this counts the batched numpy path; the compiled kernels are held to it by
     # tests/hf/test_nativex.py
     monkeypatch.setenv("HF_NATIVEX", "0")
     nativex.lib.cache_clear()

@@ -1,4 +1,4 @@
-"""PEPAULI: `pewindow p|q` = WA + exact spectrum (p) or two exact nodes (q) inside the endpoint segments only."""
+"""`pewindow p|q` = WA + exact spectrum (p) or two exact nodes (q) inside the endpoint segments only."""
 from types import SimpleNamespace
 
 import numpy as np

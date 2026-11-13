@@ -1,4 +1,4 @@
-"""Split manifests (blueprint §4.4): which keys belong to which held-out set."""
+"""Split manifests (blueprint §4.4): which keys belong to which evaluation split."""
 
 from __future__ import annotations
 

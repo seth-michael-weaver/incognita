@@ -20,7 +20,7 @@ The `densprepare.f90` seam T10 named is now closed: `compound.prepare.densprepar
 `Tjlnex`/`Tlnex` (T5's emission-grid transmission interpolated onto each residual level and bin),
 `Tgam` (T7's photon strength times `Fnorm(0)`) and `rho0` (T6's level density integrated over
 each bin's edges and centre), and `ChainedCompound` below runs `comptarget` on those instead of
-on the dump's. What that buys is measured as a chained A-cn gate
+on the dump's. What that buys is measured as a chained A-cn test
 (`compound.dens_reference.score_xspop`), not asserted.
 
 Two seams are still open and are the reason `run` is not yet end-to-end, both bigger than
@@ -36,7 +36,7 @@ densprepare:
 
 `run` therefore still takes an `Injection`: a source for the families that are not chainable yet.
 `DumpInjection` reads all of them from an instrumented TALYS run
-(`emission/talys_instrument/chdump.f90`), which is what the A-mult gate uses; `ChainedCompound`
+(`emission/talys_instrument/chdump.f90`), which is what the A-mult test uses; `ChainedCompound`
 reads the same run but *builds* the compound-nucleus populations. Every injected family is named
 in `Results.injected`, so no result can silently claim to be end-to-end.
 """
@@ -170,10 +170,10 @@ class ChainedFull:
       dumps themselves; they are inside the pre-equilibrium and direct families, not this seam.
     * **The discrete direct cross sections per level** (`xsdirdisc`), for the same reason.
     * **The structure and grid scalars** `Ltarget`, the target spin and parity, `popeps`, `xseps`
-      and the reaction bookkeeping flags -- gates A-grid and A-struct cover them and no physics
+      and the reaction bookkeeping flags -- tests A-grid and A-struct cover them and no physics
       module produces them.
     * `multipreeq2.f90` -- `preeq.multi.multiple_preequilibrium`, driven per mother bin by
-      `emission.feeding.Cascade.mpe` (gate A-mpe). It is live only at `Einc >= emulpre`
+      `emission.feeding.Cascade.mpe` (test A-mpe). It is live only at `Einc >= emulpre`
       (20 MeV, the last reference energy), where `population.f90` fills `xspopph2` at all.
     * **ECIS above `soswitch` and for `colltype V`** (Ca-40) -- ECIS2's seam, not this one.
 
@@ -189,25 +189,25 @@ class ChainedFull:
     # reproduces the same numbers the full run gives at those energies (hf_speed_bench).
     energies: tuple[float, ...] | None = None
     # Which of the three families is taken from the reference dumps instead of computed. The
-    # default is NOTHING: every one of them is now built (NODUMP), and `inject=` exists so the
-    # old arm stays testable and so the A/B that gates each family can be run.
+    # default is NOTHING: every one of them is now built, and `inject=` exists so the
+    # old arm stays testable and so the A/B comparison of each family can be run.
     inject: tuple[str, ...] = ()
     # The run's declared incident energy grid. Required when `run_dir` is None (there is no dump
     # to read it off); `talys_reference.ENERGIES_MEV` is the reference set's.
     declared_energies: tuple[float, ...] | None = None
-    # SPEEDW. With `energies` a subset, SPEEDP re-batches the two grid-batched set-ups -- the
+    # With `energies` a subset, the run re-batches the two grid-batched set-ups -- the
     # exciton model and a coupled target's incident deck -- over that subset, which moves them in
     # the last bits (8 MeV alpha `preeqpopex` of Fe-56: 4.3e-16). `trim_batches=False` keeps both
     # on the whole declared grid, so a subset returns the serial full-grid run's bits at its
     # energies; `physics.hf.pool` builds those two once, before it forks the energy children.
     trim_batches: bool = True
-    # SPEEDW. The run's `Cascade`, built by the caller on this run's (Z, A, enincmax, declared
+    # The run's `Cascade`, built by the caller on this run's (Z, A, enincmax, declared
     # grid), instead of a fresh one; `physics.hf.pool` hands every energy child the one its
     # parent warmed. None (the default) builds it here.
     cascade: object = field(default=None, compare=False, repr=False)
-    # PARAMWIRE (ROUTE100 WP3). The run's fit parameters as TALYS keywords in absolute form,
+    # The run's fit parameters as TALYS keywords in absolute form,
     # `(("aadjust", Z, A, 1.1), ("ftable", Z, A + 1, 0.8), ...)` -- `density.overrides.FIT_KEYS`.
-    # Plain floats: the numpy and NATIVEX paths stay on, and every level-density / photon-strength
+    # Plain floats: the numpy and native paths stay on, and every level-density / photon-strength
     # cache is keyed by the entries it reads, so a run on a warmed `cascade` at a new point
     # recomputes only what the change reaches. Empty is TALYS's defaults, bit for bit.
     params: tuple = ()
@@ -252,16 +252,16 @@ class ChainedFull:
             # TALYS holds `Einc` in real(sgl) (`capture_fast._f32` says the same), so the
             # declared grid is rounded the way TALYS stores it. Without this the dump-free arm
             # and the dumped one -- whose energies come from the dump, i.e. already float32 --
-            # run on axes that differ by 5e-8 relative, and the SPEED0 golden sees it.
+            # run on axes that differ by 5e-8 relative, and the golden-file test sees it.
             declared = tuple(float(np.float32(e)) for e in declared)
             pairs = [(None, None)] * len(declared)
         enincmax = max(declared)
         want = None if self.energies is None else {round(e, 6) for e in self.energies}
-        if not dumped:  # KWCOV B2: a deck `estop` line (read_energies.f90:188-194)
+        if not dumped:  # a deck `estop` line (read_energies.f90:188-194)
             from physics.hf.input.energies import estop_subset
 
             want = estop_subset(self.Z, self.A, declared, want)
-        # OPEN4. binary.f90's `sfactor` lives for the whole energy loop (`BinaryState`), and the
+        # binary.f90's `sfactor` lives for the whole energy loop (`BinaryState`), and the
         # multiple emission below is seeded from it, so a subset still has to walk every declared
         # energy before its last wanted one: those run as far as `binary` (`keep` False) and
         # return nothing. On the whole declared grid every energy is kept and nothing changes.
@@ -280,7 +280,7 @@ class ChainedFull:
                 self.Z, self.A, float(enincmax), tuple(declared)):
             raise ValueError("ChainedFull(cascade=...) was built for another run")
         else:
-            cas.check_cards()  # SPEEDFIX: a handed-in Cascade must still match the run's cards
+            cas.check_cards()  # a handed-in Cascade must still match the run's fitted keyword lines
         if self.params and dumped:
             raise ValueError("ChainedFull(params=...) needs the dump-free chain (inject=())")
         cas.set_fit_params(self.params)
@@ -288,17 +288,17 @@ class ChainedFull:
             raise NotImplementedError("astro y with astrogs n (the thermalised target, astro/thermal.py) runs on the "
                                       "C driver (engine_c / input.deck.run_deck) only")
         trim = self.trim_batches
-        # TWOPH: T11's fission transmission, wired in. Before this `compound_inputs` was passed
+        # T11's fission transmission, wired in. Before this `compound_inputs` was passed
         # `tfis=None` and `Cascade.decay` `flagfission=False`, so a chained actinide ran and
-        # returned (n,f) = 0 (`docs/results/hf-nodump.md`). `fission_chain` is None unless the
+        # returned (n,f) = 0. `fission_chain` is None unless the
         # TARGET has `flagfission` (A > 215, input_fissionmodel.f90:78-80); every residual then
         # gets barriers of its own or `nfisbar = 0`.
-        # MERGE4: built off `cas.options`, so a caller-supplied Cascade (SPEEDW's pool) gives the
+        # Built off `cas.options`, so a caller-supplied Cascade (the worker pool's) gives the
         # same chain as a locally built one.
         fis = None if dumped else fission_chain(self.Z, self.A, cas.options,
                                                 fit=cas.fit + cas.fission_fit)
         if not dumped:
-            # SPEEDP. Two scheduling facts the chained families cannot work out for themselves:
+            # Two scheduling facts the chained families cannot work out for themselves:
             # this run computes `run_axis` out of the declared grid (so the exciton model does not
             # need the rows in between, and the DWBA does not need the energies in between), and
             # `cas` is the run's Cascade (so `preeq.chain` need not solve the incident channel a
@@ -313,21 +313,21 @@ class ChainedFull:
             built = None if dumped else _BuiltInputs(cas, target, declared, add)
             out = []
             bstate = BinaryState()
-            specout.begin_run(cas)  # SPECOUT, output only
-            from physics.hf import urr as urrobs  # KWCOV B10: URR output (urr y / endf y; off: nothing recorded)
+            specout.begin_run(cas)  # `specout`, output only
+            from physics.hf import urr as urrobs  # URR output (urr y / endf y; off: nothing recorded)
 
             urrobs.begin_run(cas)
-            from physics.hf import production  # KWCOV B11: production y (off: nothing)
+            from physics.hf import production  # production y (off: nothing)
 
             production.begin_run(cas, declared)
-            from physics.hf import ingout  # KWCOV B13: ingredient output files (off: nothing)
+            from physics.hf import ingout  # ingredient output files (off: nothing)
 
             ingout.begin_run(cas)
             for nin, (binp, cinp) in enumerate(pairs, start=1):
                 if not dumped:
                     binp, cinp = built.shell(nin, run_axis[nin - 1])
                 if keep[nin - 1]:
-                    specout.begin_energy(binp.e_inc_mev)  # SPECOUT, output only
+                    specout.begin_energy(binp.e_inc_mev)  # `specout`, output only
                 etot = etotal_of(self.Z, self.A, enincmax, binp.e_inc_mev, binp.k0)
                 inc = cas.incident(binp.e_inc_mev)
                 st = cas.new_energy(etot, lmaxinc=int(inc.lmax[0]), e_inc_mev=binp.e_inc_mev)
@@ -342,7 +342,7 @@ class ChainedFull:
                 from physics.hf.compound import ewfc
                 ewfc.attach(ci, cas, binp.e_inc_mev)
                 pop = compound_target_inputs(ci)
-                if urrobs.wanted(cas, binp.e_inc_mev):  # KWCOV B10, output only
+                if urrobs.wanted(cas, binp.e_inc_mev):  # output only
                     urrobs.record(cas, ci, binp.e_inc_mev)
                 xsb = binary_cross_sections(pop, [ci])[0]
                 p = pop.pop_mb[0]
@@ -356,7 +356,7 @@ class ChainedFull:
                 if xsbinary is not None:
                     for t in range(7):
                         xsbinary[t + 1] = xsb[t]
-                    # TWOPH: index 0 is TALYS's `xsbinary(-1)`, the FIRST-CHANCE fission of the
+                    # index 0 is TALYS's `xsbinary(-1)`, the FIRST-CHANCE fission of the
                     # primary compound nucleus (comptarget.f90). `binary_cross_sections` returns
                     # types 0..6 only and the chained arm's shell starts at zeros, so before this
                     # the top bin of the compound nucleus contributed nothing to (n,f) --
@@ -384,7 +384,7 @@ class ChainedFull:
                     # the TYPE record; here it is the population above the last discrete level.
                     extra["xscompcont_mb"] = {
                         t: float(xspop[t][binp.grids[t].nlast + 1:].sum()) for t in xspop}
-                from physics.hf.engine_c import _preeqpop_of  # KWCOV B7 (pespinmodel >= 3)
+                from physics.hf.engine_c import _preeqpop_of  # (pespinmodel >= 3)
 
                 b2 = replace(binp, xspop_mb=xspop, xspopex_mb=xspopex, xspopnuc_mb=xspopnuc,
                              xsbinary_mb=xsbinary, preeqpopex_mb=pex, **extra, **_preeqpop_of(prq, binp),
@@ -392,20 +392,20 @@ class ChainedFull:
                              xsdirdiscsum_mb=add[round(binp.e_inc_mev, 6)]["xsdirdiscsum_mb"],
                              xspreeqsum_mb=add[round(binp.e_inc_mev, 6)]["xspreeqsum_mb"],
                              xsgrsum_mb=add[round(binp.e_inc_mev, 6)]["xsgrsum_mb"])
-                if fluxclose.on("C"):  # FLUXCLOSE C: PE + GR flux of an exit with no continuum bin
+                if fluxclose.on("C"):  # `fluxclose` part C: PE + GR flux of an exit with no continuum bin
                     b2, _ = fluxclose.place_unplaced(b2)
                 b = binary(b2, bstate)
-                if binspec.enabled() and keep[nin - 1]:  # SPECOUT/XDHARD: binary emission spectra, output only
+                if binspec.enabled() and keep[nin - 1]:  # binary emission spectra, output only
                     binspec.record(binp.e_inc_mev, pinp, b2, b, binp.k0,
                                    binspec_ctx(cas, target, None if dumped else declared))
-                if specout.active():  # SPECOUT: compound Legendre of the target levels, output only
+                if specout.active():  # compound Legendre of the target levels, output only
                     from physics.hf import specang
 
                     specang.record_energy(cas, st, binp, cinp, etot, add[round(binp.e_inc_mev, 6)], fkw, ci, pop,
                                           b2, b)
                 if not keep[nin - 1]:
                     continue
-                xsbinary = full_xsbinary(b2, xsbinary)  # TRITFID (OFF: unchanged)
+                xsbinary = full_xsbinary(b2, xsbinary)  # full binary xsbinary incl. direct + PE (multiple.f90:950)
                 seed = {t: (b.xspop_mb[t].detach().numpy(), b.xspopex_mb[t].detach().numpy(),
                             float(b.xspop_mb[t].sum())) for t in b.xspop_mb}
                 xsb_by_type = ({t - 1: float(v) for t, v in enumerate(xsbinary)}
@@ -418,11 +418,11 @@ class ChainedFull:
                     out.append((b2, _with_computed_feeding(cinp, mres)))
                 else:
                     cfull = built.channels(cinp, st, mres, b, xsbinary)
-                    from physics.hf import exclspec  # KWCOV B4b: output only (off: nothing)
+                    from physics.hf import exclspec  # output only (off: nothing)
 
                     if exclspec.active():
                         exclspec.record(cfull, st)
-                    from physics.hf import compoobs  # KWCOV B4b: components y (off: nothing)
+                    from physics.hf import compoobs  # components y (off: nothing)
 
                     compoobs.record(cfull, st, b2)
                     out.append((b2, cfull))
@@ -439,12 +439,12 @@ class ChainedFull:
 class _BuiltInputs:
     """`BinaryInputs` and `ChannelInputs` from the ported modules, with no dump behind them.
 
-    This is the last mile of NODUMP. `ChainedFull` already computed every *physics* array it
+    This completes the dump-free run. `ChainedFull` already computed every *physics* array it
     hands to `binary` and `channels`; what it still took from `bin_inputs.txt` / `ch_inputs.txt`
     was the shell around them -- the residual grids, the per-level direct cross sections, the
     T8/T12 per-type totals and the structure scalars. All four are built here:
 
-    * **grids** -- `emission.feeding.Cascade.spec` (exgrid.f90, gate A-grid) plus
+    * **grids** -- `emission.feeding.Cascade.spec` (exgrid.f90, test A-grid) plus
       `binary.bin_spin_cutoff` for the `ald`/`spincut` columns the pre-equilibrium spin spread
       needs (binary.f90:229-230).
     * **`xsdirdisc`, `xsdirdisctot`, `xsgrtot`** -- `direct.chain` (T12 + T13's ECIS).
@@ -527,7 +527,7 @@ class _BuiltInputs:
             spc = torch.ones(n, dtype=DTYPE)
             ng = min(sp.nlast, sp.maxex)
             if sp.maxex > ng:
-                # PARAMWIRE: the run's level density of this residual (it was the defaults' even
+                # the run's level density of this residual (it was the defaults' even
                 # under an override), for the pre-equilibrium spin spread's ald / spincut
                 ld, _ntop, _nl, _nc = cas.ld_of(sp.Z, sp.A)
                 a, sg = bin_spin_cutoff(ld, ex[ng + 1:])
@@ -609,7 +609,7 @@ class _BuiltInputs:
         from physics.hf.emission import emit_nx2
 
         if emit_nx2.glue_enabled():
-            # NATIVEX2 (glue): the same records, the level columns read with one `tolist` each
+            # native glue: the same records, the level columns read with one `tolist` each
             # and the per-type fields from lists made once
             live_t = [t for t in range(7) if not sc.parskip[t]]
             spec = st.spec
@@ -653,7 +653,7 @@ class _BuiltInputs:
                     n.feedexcl_mb = get[3](key, {})
                     n.fisfeedex_mb = get[4](key, {})
                     n.xsfeed_mb = get[5](key, {})
-                    if key in mres.xspopex_mb:  # RESISO (empty when off)
+                    if key in mres.xspopex_mb:  # `resiso` (empty when off)
                         n.xspopex_mb = mres.xspopex_mb[key]
                     out.nuclei[key] = n
             return out
@@ -685,7 +685,7 @@ class _BuiltInputs:
                 n.feedexcl_mb = mres.feedexcl_mb.get((zc, nc), {})
                 n.fisfeedex_mb = mres.fisfeedex_mb.get((zc, nc), {})
                 n.xsfeed_mb = mres.xsfeed_mb.get((zc, nc), {})
-                if (zc, nc) in mres.xspopex_mb:  # RESISO (empty when off)
+                if (zc, nc) in mres.xspopex_mb:  # `resiso` (empty when off)
                     n.xspopex_mb = mres.xspopex_mb[(zc, nc)]
                 out.nuclei[(zc, nc)] = n
         return out
@@ -715,13 +715,13 @@ def _bin_decay(cas, st, nuclei, popeps_mb: float, fis=None):
                 "fission": FissionLadder(fis, int(sp.Z), int(sp.A), float(cas.fiso()[0]))}
 
     def widths(zc: int, nc: int, nex: int):
-        # NATIVEX: the `compound.decay_fast.NucleusWidths` `decay` would use for this bin, or None
+        # the `compound.decay_fast.NucleusWidths` `decay` would use for this bin, or None
         kw = fission_kw(zc, nc)
         return cas.fast_widths(st, nuclei, zc, nc, nex, flagfission=kw.get("flagfission", False),
                                fission=kw.get("fission"))
 
     def decay(zc: int, nc: int, nex: int, *, dmulti: float = 0.0):
-        # FISSB: the triple is built by `Cascade.decay` only where the per-bin path runs;
+        # the triple is built by `Cascade.decay` only where the per-bin path runs;
         # `decay_fast` takes the whole ladder's fission widths from the same object
         kw = fission_kw(zc, nc)
         return cas.decay(st, nuclei, zc, nc, nex, popeps_mb=popeps_mb,
@@ -764,7 +764,7 @@ def _py_cascade(cas, st, cinp, binp, b, seed, prq, xsb_by_type, fis, xsreacinc_m
 
     The nucleus set is `populations`, `propagate_exmax` over it, `populations` again; then
     `Cascade.regrow` runs exgrid for every mother that decayed without its daughters having an
-    Exmax, and the cascade is run again on the grown set until nothing is added (PYCDIFF;
+    Exmax, and the cascade is run again on the grown set until nothing is added (
     multiple.f90:316). `propagated` is given when the C path has already built the set on `st`.
 
     TALYS: multiple.f90:1 (multiple), exgrid.f90:1 (exgrid)
@@ -788,7 +788,7 @@ def _py_cascade(cas, st, cinp, binp, b, seed, prq, xsb_by_type, fis, xsreacinc_m
             def mpe_cb(zc, nc, nex, cas=cas, st=st, nuclei=nuclei, etot=etot):
                 return cas.mpe(st, nuclei, zc, nc, nex, etotal_mev=etot)
 
-            # NATIVEX: what `emission.multiple_native` needs to run multipreeq2 in C
+            # what `emission.multiple_native` needs to run multipreeq2 in C
             mpe_cb.context = (cas, st, nuclei, etot)
         mres = multiple_emission(
             nuclei, decay,
@@ -821,14 +821,14 @@ def _with_computed_feeding(cinp: ChannelInputs, mres) -> ChannelInputs:
         n.xsfeed_mb = mres.xsfeed_mb.get(k, {})
         if k in mres.xspopnuc_mb:
             n.xspopnuc_mb = mres.xspopnuc_mb[k]
-        if k in mres.xspopex_mb:  # RESISO (empty when off)
+        if k in mres.xspopex_mb:  # `resiso` (empty when off)
             n.xspopex_mb = mres.xspopex_mb[k]
         out.nuclei[k] = n
     return out
 
 
 def resiso_keys(residual_mb: dict, xsbranch: dict) -> dict:
-    """RESISO: `rpZZZAAA.LNN` = xsbranch(nex) x rpZZZAAA.tot for every residual with an isomer
+    """`resiso`: `rpZZZAAA.LNN` = xsbranch(nex) x rpZZZAAA.tot for every residual with an isomer
     (residual.f90:67, finalout.f90's isomer files; nex 0 is the ground state). Empty when the switch
     is off (then every branch is 0 and nothing is written).
 
@@ -866,7 +866,7 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
     e_inc, chans, levels, resid, totals = [], [], [], [], []
     bstate = BinaryState()  # binary.f90's sfactor is run-scoped, not energy-scoped
     # `chanopen`/`idnumfull` are run-scoped too (strucinitial.f90), and a dumped case carries
-    # TALYS's own set, which is what the injected gate scores. With nothing injected there is no
+    # TALYS's own set, which is what the injected comparison scores. With nothing injected there is no
     # set to carry, so the engine keeps its own across the ascending energy loop, as TALYS does.
     cstate = ExclusiveState() if not injection.families else None
     from physics.hf.emission import chanobs
@@ -877,7 +877,7 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
         b = binary(binp, bstate)
         ch = exclusive_channels(cinp, cstate)
         chans.append({f"xs{code:06d}": v for code, v in ch.xschannel_mb.items()})
-        if xtra is not None:  # CHANOBS: output only
+        if xtra is not None:  # INCOGNITA_CHANOBS: output only
             xtra.append(chanobs.extras(ch, b, binp.k0, int(getattr(injection, "Z", 0)), int(getattr(injection, "A", 0)), binp=binp))
         levels.append({
             level_key(binp.k0, t, nex): float(v[nex])
@@ -900,33 +900,33 @@ def run(cases=None, options=None, params=None, *, injection: Injection | None = 
         residual_production_mb=_stack(resid), totals_mb=_stack(totals),
         injected=injection.families, extras=_stack(xtra) if xtra else {},
     )
-    from physics.hf import urr as urrobs  # KWCOV B10 (off: unchanged)
+    from physics.hf import urr as urrobs  # (off: unchanged)
 
     res = urrobs.add_to_results(res)
-    # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
+    # direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
     from physics.hf.direct.racapcalc import add_to_results
 
     res = add_to_results(res, injection)
-    # MACSCLOSED: few-resonance capture where HF is not valid, off unless INCOGNITA_FEWRES is set
+    # few-resonance capture where HF is not valid, off unless INCOGNITA_FEWRES is set
     from physics.hf import fewres
 
     res = fewres.add_to_results(res, injection)
-    # LOWEPOT: no HF compound elastic below the resonance region, off unless INCOGNITA_LOWEPOT is set
+    # no HF compound elastic below the resonance region, off unless INCOGNITA_LOWEPOT is set
     from physics.hf import lowepot
 
     res = lowepot.add_to_results(res, injection)
-    from physics.hf import angout, specobs  # KWCOV B3 / B4: angular distributions, spectra, DDX, gamma lines (off: unchanged)
+    from physics.hf import angout, specobs  # angular distributions, spectra, DDX, gamma lines (off: unchanged)
 
     res = specobs.add_to_results(angout.add_to_results(res, injection), injection)
-    from physics.hf import compoobs  # KWCOV B4b: components y (off: unchanged)
+    from physics.hf import compoobs  # components y (off: unchanged)
 
     res = compoobs.add_to_results(res)
-    from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
+    from physics.hf import thermal  # TALYS rows below eninclow (none below it: unchanged)
 
-    from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
+    from physics.hf import production  # medical isotope production (off: unchanged)
 
     res = production.add_to_results(res, injection)
-    from physics.hf import ingout  # KWCOV B13: ingredient output files (off: unchanged)
+    from physics.hf import ingout  # ingredient output files (off: unchanged)
 
     res = ingout.add_to_results(res, injection)
     return thermal.add_to_results(res, injection)

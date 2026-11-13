@@ -1,7 +1,7 @@
-"""fast-phmodel: `phmodel 2` (tabulated HFB particle-hole densities, PHMICRO) on the C cascade.
+"""fast-phmodel: `phmodel 2` (tabulated HFB particle-hole densities) on the C cascade.
 
 The tables reach the compiled multipreeq2 (`mpe_bin`, nativex.c) packed by `particle_hole.ph_table_packed`;
-`INCOGNITA_PHFAST=0` keeps the PHMICRO reference (Python engine, torch multipreeq2 loop).
+`INCOGNITA_PHFAST=0` keeps the reference path (Python engine, torch multipreeq2 loop).
 
 * chained Fe-56 at 14/20 MeV, PHNORM off and on: every `Results` array of the C call within 1e-9 relative of the
   reference, with every energy taken by the C call;

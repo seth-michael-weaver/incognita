@@ -1,4 +1,4 @@
-"""CENGSETUP: the libsetup kernels (native/setup.c, and nx2_omp.c compiled into libsetup) against
+"""The libsetup kernels (native/setup.c, and nx2_omp.c compiled into libsetup) against
 the libnx2 / libhfnative kernels they stand in for, to the bit; and the sliced DWBA
 Clebsch-Gordan weights against their inline form. Skipped without the builds
 (scripts/build_setup_native.sh, build_nx2_native.sh, build_native.sh)."""
@@ -124,7 +124,7 @@ def test_omp_job_bitwise(charged):
 def test_numerov_inward_bitwise():
     """`cs_numerov_inward` (setup.c) has no arm64 NEON form matching `hf_numerov_inward`'s
     (hfnative.c's `#if HF_NEON` path); on arm64 it falls back to a plain scalar loop, batching
-    the same recurrence in a different instruction order. Measured on this Mac (MACFIX2): only
+    the same recurrence in a different instruction order. Measured on an arm64 machine: only
     3 of 21 columns differ at all, and the worst is 3.2e-15 relative -- ordinary hardware FP
     non-associativity between two numerically-equivalent code paths, not a different algorithm.
     Reasonably close, not bit-identical (project rule, 2026-09-16: no bit-identity anywhere,

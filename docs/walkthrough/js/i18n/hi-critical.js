@@ -21,7 +21,7 @@ WT.L.ch.critical = {
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="delayed" data-act="delayed" */
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "generations →": "पीढ़ियां →",
   "k = {#}: dies away": "k = {#}: समाप्त होती है",

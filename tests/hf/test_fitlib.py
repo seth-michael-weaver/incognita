@@ -1,6 +1,6 @@
-"""BESTFIT: `physics.hf.input.fitlib` reads TALYS's best tree the way xsfit.f90 does.
+"""`physics.hf.input.fitlib` reads TALYS's best tree the way xsfit.f90 does.
 
-The engine-level gates (engine vs stock TALYS with the same keywords, the four paths, the TENDL
+The engine-level checks (engine vs stock TALYS with the same keywords, the four paths, the TENDL
 file comparison) are in `docs/results/bestfit.md`; these are the unit facts behind them.
 """
 from __future__ import annotations

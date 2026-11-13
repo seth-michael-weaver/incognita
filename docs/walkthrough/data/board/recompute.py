@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Recompute the class-A engine scoreboard from the files in this folder and compare with cells.csv.
+"""Recompute the class-A engine benchmark comparison from the files in this folder and compare with cells.csv.
 
     python3 recompute.py            # gaps + bootstrap 95 % CIs from d_pernuc.csv / k_pernuc.csv
     python3 recompute.py --rows     # also rebuild d_pernuc.csv from the per-measurement residuals in d_rows.csv.gz

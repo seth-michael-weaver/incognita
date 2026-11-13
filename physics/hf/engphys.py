@@ -1,6 +1,6 @@
-"""ENGPHYS: four consistency guards for TALYS behaviour far from stability. All OFF by default.
+"""Four consistency guards for TALYS behaviour far from stability. All OFF by default.
 
-ENGPHYS (2026-09-27) found that stock TALYS-2.25 and the port share three defect classes on the far chart:
+Stock TALYS-2.25 and the port share three defect classes on the far chart:
 
 * **DWBA unitarity** -- first-order DWBA to a strongly collective default 2+ level in a weakly absorbing OMP
   gives a direct cross section larger than the reaction cross section (n+Am-308 at 0.336 MeV: 3.1e5 mb vs

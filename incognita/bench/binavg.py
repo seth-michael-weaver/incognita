@@ -1,10 +1,10 @@
-"""Bin-average placement of an evaluated library on binned EXFOR rows (DATEDEXAM2).
+"""Bin-average placement of an evaluated library on binned EXFOR rows.
 
 Why: the staged library grids (3000 log points, `score.G`) SAMPLE the 0 K RECONR cross section. Below ~100 keV that is a
 point inside a resonance ladder, while an EXFOR row of the dated tracks is the MEAN of a series' points in a 0.1-wide ln E bin.
-DATEDEXAM compared the two and every library lost 0.1-0.3 dex below 100 keV, including libraries that had fitted those rows.
+Compared point-for-bin, every library lost 0.1-0.3 dex below 100 keV, including libraries that had fitted those rows.
 
-Rule (docs/release/dated/PREREG2.md, fixed before any library value was compared with a label):
+Rule (docs/release/dated/PREREG2.md, fixed before any library value was compared with a measurement):
 - pointwise curve = NJOY2016 RECONR at 0 K, tolerance 0.1 % (the staging deck, `data.ingest.endf.njoy_deck`), lin-lin;
 - channel -> MT: capture 102, total 1, elastic 2, n2n 16; inelastic 4, else the sum of MT 51-91; (n,p) 103, else the sum of
   MT 600-649; (n,a) 107, else the sum of MT 800-849, plus (2026-11-06, alpha.py) the (n,a) residual made inside MT 5. "present" means present in MF3 of the ORIGINAL evaluation (RECONR's

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""README "Capture on nuclei held out of the fit (blind)": regenerate the table from the frozen per-cell exam file.
+"""README capture table for nuclei not in the fit: regenerate the table from the frozen per-cell file.
 
     python scripts/release/score_capture_blind.py docs/release/exam/capture_blind_cells.parquet OUT.md
 
 rms of log10(prediction / measurement); paired nucleus bootstrap 95 % CI, 10,000 draws, seed 20260923.
-Targets: the curation-audited targets (`target_log10_P`, CURATION-AUDIT2 rule P) for the D0 rows, the well-measured row
-and the precision cut, as published; the original targets for the STRIP row, as published by CAPFAR.
+Targets: the curation-audited targets (`target_log10_P`, curation-audit rule P) for the D0 rows, the well-measured row
+and the precision cut, as published; the original targets for the STRIP row, as published.
   D0 assisted / withheld : all folds, Z <= 82, cells where all four predictors and the audited target exist
-  no structure (STRIP)   : DEV folds 0-5, Z <= 82, original targets (1,966 cells)
+  no structure (STRIP)   : folds 0-5, Z <= 82, original targets (1,966 cells)
   well measured          : D0 assisted, audited trust >= 1
   precision cut          : D0 assisted, >= 3 pre-2012 series within x1.3, E < 10 MeV, cells NON-SMOKER also covers;
                            ratio ours / recipe with a nucleus bootstrap (seed 20260921)

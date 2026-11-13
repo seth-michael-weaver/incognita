@@ -1,10 +1,10 @@
-"""NATIVEX: loader of the whole-stage kernels (`nativex.c`, scripts/build_nativex_native.sh).
+"""Native: loader of the whole-stage kernels (`nativex.c`, scripts/build_nativex_native.sh).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nativex.py`
-(every kernel against the torch/numpy path it replaces) and the G-NATIVEX closeness gate.
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_nativex.py`
+(every kernel against the torch/numpy path it replaces) and the native closeness test.
 
 TALYS routines the kernels compute:
     comptarget.f90:1 (comptarget), molprepare.f90:1 (molprepare), moldauer.f90:1 (moldauer)

@@ -1,4 +1,4 @@
-"""STAGETIME: always-on per-stage CPU / wall timer for engine runs.
+"""Always-on per-stage CPU / wall timer for engine runs.
 
 A stack of open stages; each stage books its EXCLUSIVE time (its own time minus the time of the
 stages opened inside it) to its label, on `time.process_time` (CPU-s) and `time.perf_counter`
@@ -22,7 +22,7 @@ Timing never touches physics: it reads two clocks and updates dicts. `INCOGNITA_
 once, at import) turns every `stage` into a shared no-op context and every `timed` into the
 undecorated function, for the on/off identity and overhead checks.
 
-Labels (shared with SPEEDPROF): startup, setup.cascade, setup.params, setup.structure,
+Labels (shared with the profiler): startup, setup.cascade, setup.params, setup.structure,
 setup.levels, setup.ld, setup.psf, setup.omp_inverse, incident, incident.cc_cache,
 incident.cc_solve, direct_dwba, direct_capture, preeq, compound, fission, multiple_emission,
 multiple_emission.widths, channels, output, other.  Single-threaded engine only: the stack is

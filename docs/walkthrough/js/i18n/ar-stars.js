@@ -28,7 +28,7 @@ WT.L.ch.stars = {
 </div>
 <div class="step">
   <h3>مقارنة بالقياسات</h3>
-  <p>قيم INCOGNITA عند 30 keV مقسومة على القيم المقيسة، لـ 94 نويدة مستقرة (<a href="scoreboard.html">لوحة النتائج</a>).</p>
+  <p>قيم INCOGNITA عند 30 keV مقسومة على القيم المقيسة، لـ 94 نويدة مستقرة (<a href="scoreboard.html">المقارنات</a>).</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {
@@ -78,7 +78,7 @@ Object.assign(WT.L.labels, {
   "r-peak Te, Xe": "قمة r: Te، Xe",
   "r-process: a flood of neutrons makes very neutron-rich nuclei": "العملية r: سيل من النيوترونات يصنع نوى غنية جدًا بالنيوترونات",
   "r-process: very neutron-rich nuclei": "العملية r: نوى غنية جدًا بالنيوترونات",
-  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test": "المطوَّقة: نظائر s فقط · المقيس: قيم مجمَّعة (KADoNiS) · مقارنة أثناء التطوير، لا اختبار أعمى",
+  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test": "المطوَّقة: نظائر s فقط · المقيس: قيم مجمَّعة (KADoNiS) · مقارنة أثناء التطوير، لا اختبار مستقل",
   "ringed: s-only · measured: KADoNiS": "المطوَّقة: s فقط · المقيس: KADoNiS",
   "s Ba": "s Ba",
   "s Pb": "s Pb",

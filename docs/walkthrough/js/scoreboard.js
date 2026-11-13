@@ -1,4 +1,4 @@
-/* Scoreboard page: renders WT.board (js/scoreboard-data.js, generated from the project's records) in the page's language. */
+/* Comparison page (scoreboard.html): renders WT.board (js/scoreboard-data.js, generated from the project's records) in the page's language. */
 (function () {
   "use strict";
   const B = WT.board, es = WT.tl, T = (k, en) => WT.ui(k, en);
@@ -29,7 +29,7 @@
   // scope, then the summary: what is compared, against what, the cleanest result, the totals and their size
   $("#sb-scope").innerHTML = fill(T("sb_scope", "Neutron-induced reactions from {elo} keV to {ehi} MeV (capture, (n,2n), (n,p), (n,α), fission) and stellar capture: {nuc} nuclides, {rows} scored rows ({vals} distinct measured values; some comparisons reuse rows)."),
     { elo: S.e_lo_kev, ehi: S.e_hi_mev, nuc: big(S.nuclides), rows: big(S.rows), vals: big(S.values) });
-  $("#sb-sum").innerHTML = fill(T("sb_sum", "The INCOGNITA engine is compared on measured neutron cross sections with the TALYS-2.24 program it was ported from, two independent codes (CoH3, YAHFC), and this project's reproduction of TENDL's no-data recipe. Against TALYS-2.24 it wins {tw}, ties {tt} and loses {tl}; that edge comes from global rules chosen while watching these comparisons. Over all {n} comparisons, it wins {win}, ties {tie} and loses {loss}. Its error is {emin}–{emax} dex (about {pmin}–{pmax} %) across comparisons; where it wins, its error is typically {wg} dex lower. These are development comparisons, not a blind test. The TERRA data product, an in-sample fit compared with four evaluated libraries, wins {twin}, ties {ttie} and loses {tloss}."),
+  $("#sb-sum").innerHTML = fill(T("sb_sum", "The INCOGNITA engine is compared on measured neutron cross sections with the TALYS-2.24 program it was ported from, two independent codes (CoH3, YAHFC), and this project's reproduction of TENDL's no-data recipe. Against TALYS-2.24 it wins {tw}, ties {tt} and loses {tl}; that edge comes from global rules chosen while watching these comparisons. Over all {n} comparisons, it wins {win}, ties {tie} and loses {loss}. Its error is {emin}–{emax} dex (about {pmin}–{pmax} %) across comparisons; where it wins, its error is typically {wg} dex lower. These are development comparisons, not an independent test. The TERRA data product, an in-sample fit compared with four evaluated libraries, wins {twin}, ties {ttie} and loses {tloss}."),
     { n: I.decided, win: I.WIN, tie: I.TIE, loss: I.LOSS, tw: TL.WIN, tt: TL.TIE, tl: TL.LOSS,
       emin: dex(E.err_min), emax: dex(E.err_max), pmin: E.pct_min, pmax: E.pct_max, wg: dex(E.win_gap),
       twin: R.WIN, ttie: R.TIE, tloss: R.LOSS });
@@ -90,7 +90,7 @@
   const rname = (r) => T("sb_r_" + rk(r), RN[r] || r);
   const CLS = { trail: T("cls_trail", "engine behind"), parity: T("cls_parity", "about level"), underpowered: T("cls_under", "engine ahead, not resolved") };
   const open = I.open.slice().sort((a, b) => ((b.verdict === "LOSS") - (a.verdict === "LOSS")) || (b.hi - a.hi));   // losses, then closest to a loss
-  // the interval as a small bar around zero (Seth 2026-11-06: "much more palatable"); numbers stay in text beside it
+  // the interval as a small bar around zero; numbers stay in text beside it
   const scale = (cs) => Math.max(...cs.map((c) => Math.max(Math.abs(c.lo), Math.abs(c.hi)))) * 1.08 || 1;
   const span = scale(open);
   const ci = (c, sp = span) => {

@@ -3,7 +3,7 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: SPEED0 (the speed work; no physics of its own). Acceptance test: A-cn1 / SPEED0 golden.
+Speed path (no physics of its own). Acceptance test: A-cn1 golden.
 
 TALYS routines this computes:
     comptarget.f90:1 (comptarget)      -- the flagwidth = .false. branch
@@ -19,7 +19,7 @@ that as a loop over (J, parity) calling `prepare.exit_channel_sums`, which mater
 (l', updown) exactly as `continuum._compound_decay_factored` does for the cascade. All terms
 are non-negative; the results differ from the per-cell loop by rounding.
 
-FISSB: a fissioning target is covered too; fission is one more `(K,)` term of `denomhf` and of
+Fission: a fissioning target is covered too; fission is one more `(K,)` term of `denomhf` and of
 the output, and with Moldauer's correction its Hill-Wheeler humps join the node product
 (`compound.fission_batch_target`).
 
@@ -50,7 +50,7 @@ def _exit_mask(j2par: int, nj2: tuple[int, ...], parspin2: int, spin2: int, L: i
     (K, numJ+1, L, 3); photons use jj2' = 2 l' and only the updown = 0 slot, l' >= 1.
 
     TALYS: compprepare.f90:1 (compprepare)
-    Test: A-cn1 / SPEED0 golden
+    Test: A-cn1 golden
     """
     j2 = torch.tensor(nj2, device=device)
     irs2 = 2 * torch.arange(NUMJ + 1, device=device) + (j2par + parspin2) % 2
@@ -61,7 +61,7 @@ def _mask_for(j2: Tensor, irs2: Tensor, parspin2: int, spin2: int, L: int,
               photon: bool) -> Tensor:
     """`ok_j & ok_s` for compound J2 (K,) against residual Irspin2 (K, R). (K, R, L, 3).
 
-    OPEN3M: a discrete level whose 2J parity is impossible for its mass (an ENSDF spin range that
+    A discrete level whose 2J parity is impossible for its mass (an ENSDF spin range that
     TALYS resolved to, e.g., J = 3.0 on odd A) has `anom = (J2 + Irspin2 + parspin2) % 2 = 1`;
     see `anomalous_exit_mask`. Continuum spins have anom = 0 by construction.
     """
@@ -95,7 +95,7 @@ def _prepare(inp: CompoundInputs, cells: list[tuple[int, int]], device=None):
     depends on the compound J or parity.
 
     TALYS: compprepare.f90:1 (compprepare)
-    Test: A-cn1 / SPEED0 golden
+    Test: A-cn1 golden
     """
     j2s = tuple(c[0] for c in cells)
     pidx = torch.tensor([0 if c[1] == -1 else 1 for c in cells], device=device)
@@ -148,7 +148,7 @@ def _prepare(inp: CompoundInputs, cells: list[tuple[int, int]], device=None):
                            r.parspin2, r.spin2, L, photon)  # (K, nd, L, 3)
             anom_d = (j2s[0] + jd2 + r.parspin2) % 2
             if bool(anom_d.any()):
-                # OPEN3M: TALYS's cap on such a level is l2' = 2 l' + 1 <= l2maxhf
+                # TALYS's cap on such a level is l2' = 2 l' + 1 <= l2maxhf
                 cap = (2 * lp[None, :] + anom_d[:, None]) <= 2 * lmaxhf[:nd, None]  # (nd, L)
                 Md = Md * cap[None, :, :, None].to(DTYPE)
             tot_d = torch.einsum("knlu,cnlu->kcn", Md, Tn[:, :nd])  # (K, c, nd)
@@ -189,7 +189,7 @@ def _feed_type(pop: Tensor, t: int, p: dict, w: Tensor, pidx: Tensor, device) ->
 
 
 def _native(inp: CompoundInputs, wfc: bool, device, max_nex: int | None):
-    """NATIVEX: `compound.target_native.target` for CPU inputs off the autograd graph, else None."""
+    """Native: `compound.target_native.target` for CPU inputs off the autograd graph, else None."""
     if device not in (None, "cpu") and torch.device(device).type != "cpu":
         return None
     if isinstance(inp.cnfactor_mb, torch.Tensor) and inp.cnfactor_mb.requires_grad:
@@ -200,7 +200,7 @@ def _native(inp: CompoundInputs, wfc: bool, device, max_nex: int | None):
 
 
 def _cells(inp: CompoundInputs) -> list[tuple[int, int]]:
-    sel = getattr(inp, "cellsel", None)  # KEVCOLD (default None = every cell)
+    sel = getattr(inp, "cellsel", None)  # Cold-alpha domain (default None = every cell)
     return [(J2, p) for p in (-1, 1) for J2 in range(inp.j2beg, inp.j2end + 1, 2) if sel is None or (J2, p) in sel]
 
 
@@ -210,9 +210,9 @@ def case_nowfc(inp: CompoundInputs, device=None, max_nex: int | None = None
     are off, or None for inputs this does not cover.
 
     TALYS: comptarget.f90:1 (comptarget)
-    Test: A-cn1 / SPEED0 golden
+    Test: A-cn1 golden
     """
-    got = _native(inp, False, device, max_nex)  # NATIVEX: one compiled call where it applies
+    got = _native(inp, False, device, max_nex)  # Native: one compiled call where it applies
     if got is not None:
         return got
     nexmax = max_nex or max(r.maxex + 1 for r in inp.residuals.values())
@@ -226,7 +226,7 @@ def case_nowfc(inp: CompoundInputs, device=None, max_nex: int | None = None
         return None
     prep, pidx = got
     denom = sum(p["D"] for p in prep.values())
-    fis = fbt.cell_fission_widths(inp, cells, device)  # FISSB: tfis, one more denomhf term
+    fis = fbt.cell_fission_widths(inp, cells, device)  # Fission: tfis, one more denomhf term
     if fis is not None:
         denom = denom + fis
     live = denom != 0.0
@@ -260,11 +260,11 @@ def case_moldauer(inp: CompoundInputs, device=None, max_nex: int | None = None,
     contractions are einsums against it rather than materialised (Nex, Ir, P', l', j') tensors.
 
     TALYS: comptarget.f90:1 (comptarget), molprepare.f90:1 (molprepare), moldauer.f90:1 (moldauer)
-    Test: A-cn2 / SPEED0 golden
+    Test: A-cn2 golden
     """
     from physics.hf.compound import wfc
 
-    got = _native(inp, True, device, max_nex)  # NATIVEX: one compiled call where it applies
+    got = _native(inp, True, device, max_nex)  # Native: one compiled call where it applies
     if got is not None:
         return got
     nexmax = max_nex or max(r.maxex + 1 for r in inp.residuals.values())
@@ -282,7 +282,7 @@ def case_moldauer(inp: CompoundInputs, device=None, max_nex: int | None = None,
         return None
     prep, pidx = got
     denom = sum(p["D"] for p in prep.values())
-    fis = fbt.cell_fission_widths(inp, cells, device)  # FISSB: tfis, one more denomhf term
+    fis = fbt.cell_fission_widths(inp, cells, device)  # Fission: tfis, one more denomhf term
     if fis is not None:
         denom = denom + fis
     x, wts = wfc.gauss_laguerre(device)
@@ -335,7 +335,7 @@ def case_moldauer(inp: CompoundInputs, device=None, max_nex: int | None = None,
         logterm = torch.where(livee, torch.log1p(torch.where(livee, eps, 0.0)), 0.0)
         factor = (-nu_exit * 0.5 * r_exit)[:, None, :] * logterm
         if fis is not None:
-            # FISSB: the cells' Hill-Wheeler humps, after the particle channels (target.py:163-175)
+            # Fission: the cells' Hill-Wheeler humps, after the particle channels (target.py:163-175)
             ratio_h, t_h, rho_h, on_h = fbt.hump_channels(inp, [cells[k] for k in ks], fis[kt],
                                                           device)
             nu_h = wfc.degrees_of_freedom(t_h, st[:, None], inp.wfcfactor)

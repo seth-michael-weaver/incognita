@@ -1,9 +1,9 @@
-"""FISSB: a fissioning cascade nucleus on `compound.decay_fast`'s whole-nucleus path.
+"""Fission: a fissioning cascade nucleus on `compound.decay_fast`'s whole-nucleus path.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: FISSB (the speed work; no physics of its own). Acceptance test: A-mult / E2E through
+Speed path (no physics of its own). Acceptance test: A-mult / E2E through
 `tests/hf/test_fission_batch.py`, which holds it to the per-bin `continuum.compound_decay`.
 
 TALYS routines this computes, in the arrangement described below:
@@ -64,7 +64,7 @@ class FissionLadder:
 
     def widths(self, sp, bins: np.ndarray) -> np.ndarray:
         """`continuum.fission_width` for mother bins `bins`, `(bins, J, 2)` with J at least the
-        bins' largest `maxj` + 1 (the chain's `maxj` + 1 off the CENGFIS path). ENGADJ: with fission-path
+        bins' largest `maxj` + 1 (the chain's `maxj` + 1 off the native path). `eadj`: with fission-path
         bumps, every node nucleus's ladder, combined at each bin's own path scale (`FissionChain.combine`)."""
         nod = self.chain.nodes(self.Z, self.A)
         if nod is None:
@@ -76,7 +76,7 @@ class FissionLadder:
         from physics.hf.fission.fis_ceng import ladder_widths
         from physics.hf.fission.fission_batch_ladder import ladder_bin_widths
 
-        # CENGFIS: C, no rhofis; the spins up to the bins' maxj, which is all `NucleusWidths` reads
+        # Native: C, no rhofis; the spins up to the bins' maxj, which is all `NucleusWidths` reads
         nj = int(np.asarray(sp.maxj, dtype=np.int64)[bins].max()) + 1 if len(bins) else 1
         got = ladder_widths(self.chain, n, np.asarray(sp.ex_mev, dtype=np.float64)[bins],
                             np.asarray(sp.dex_mev, dtype=np.float64)[bins], float(sp.exmax_mev),
@@ -91,7 +91,7 @@ class FissionLadder:
                                  fnorm=self.fnorm, cache=cache)
 
     def widths_at(self, sp, ex_mev: np.ndarray, dex_mev: np.ndarray, nj: int) -> np.ndarray:
-        """BINQUAD sub-points: `widths` at arbitrary mother energies/widths (rows), J up to nj - 1."""
+        """`binquad` sub-points: `widths` at arbitrary mother energies/widths (rows), J up to nj - 1."""
         nod = self.chain.nodes(self.Z, self.A)
         if nod is None:
             return self._widths_at(self.chain.nucleus(self.Z, self.A), sp, ex_mev, dex_mev, nj)

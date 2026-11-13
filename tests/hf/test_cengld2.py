@@ -1,4 +1,4 @@
-"""CENGLD2: level-density records shared across targets by the float record of their inputs
+"""Level-density records shared across targets by the float record of their inputs
 (`ld_nx2.densitypar_key` / `shared_record`) and the spec's maxJ + rhogrid in one C call
 (`ld_ceng.spec_rows`, `native/ld.c` `ceng_ld_spec`), each against the path it replaces, bitwise.
 Skipped without a `libnx2` build (scripts/build_nx2_native.sh)."""
@@ -52,7 +52,7 @@ def test_key_plan_reads_the_body():
     assert {"aadjust", "alimit", "gammald", "pair", "s2adjust", "exmatchadjust"} <= names
     assert ("s2adjust", (0,)) in pfs and ("a", ()) in pfs
     assert {"pairconstant", "gammashell2", "kph", "rspincut"} <= set(pgs)
-    # KWCOV B5: Nlow/Ntop are read per nucleus (`nlow Z A n` cards), through nlow_of / ntop_of
+    # Nlow/Ntop are read per nucleus (`nlow Z A n` lines), through nlow_of / ntop_of
     assert {"ldmodel_of", "flagcol_of", "flagfission", "nlow_of", "ntop_of", "shellmodel"} <= set(opts)
 
 
@@ -76,7 +76,7 @@ def test_shared_record_is_a_fresh_build(monkeypatch, Z, A, Zt1, At1, Zt2, At2):
 
 
 def test_aadjust_is_a_new_key():
-    """PARAMWIRE's aadjust reaches the record: a changed value neither hits the default record nor
+    """A fit `aadjust` reaches the record: a changed value neither hits the default record nor
     matches its numbers, and equals a build with sharing off."""
     import os
 

@@ -29,48 +29,48 @@ class Results:
     totals_mb: dict[str, Tensor] = field(default_factory=dict)  # "total", "elastic", ...
     # what the engine injected rather than computed, per family: "fission", "direct", "ecis", ...
     injected: tuple[str, ...] = ()
-    # CHANOBS (INCOGNITA_CHANOBS, default off = empty): TALYS file/column names -> (C,), mb unless the name ends in
+    # `chanobs` (INCOGNITA_CHANOBS, default off = empty): TALYS file/column names -> (C,), mb unless the name ends in
     # ":multiplicity" or ":branch" (physics/hf/emission/chanobs.py lists them)
     extras: dict[str, Tensor] = field(default_factory=dict)
-    # ANGOUT (KWCOV B3: outangle / fileelastic / INCOGNITA_ANGOUT, default empty): discrete angular distributions and
+    # ANGOUT (outangle / fileelastic / INCOGNITA_ANGOUT, default empty): discrete angular distributions and
     # Legendre coefficients under TALYS's file names, (C, nangle+1) mb/sr or (C, J2end+1); physics/hf/angout.py
     angular: dict[str, Tensor] = field(default_factory=dict)
-    # SPECOBS (KWCOV B4: outspectra / ddxmode / outgamdis / INCOGNITA_SPECOBS, default empty): emission spectra, DDX,
+    # SPECOBS (outspectra / ddxmode / outgamdis / INCOGNITA_SPECOBS, default empty): emission spectra, DDX,
     # discrete gamma lines and the (k0,g<p>) column under TALYS's file names; physics/hf/specobs.py lists them
     spectra: dict[str, Tensor] = field(default_factory=dict)
-    # ASTRO (KWCOV B9: astro / astroE / astroT in a deck, default empty): astroout.f90's files as
+    # ASTRO (astro / astroE / astroT in a deck, default empty): astroout.f90's files as
     # {file name: {column: ndarray over T9}} (astrorate.g, astrorate.tot, astrorateZZZAAA.tot, macs.g, ...);
     # physics/hf/astro/rates.py
     astro: dict = field(default_factory=dict)
-    # URR (KWCOV B10: `urr y` / `urr <E>` / `endf y` on an incident-neutron run, default empty): urr.f90 / urrout.f90's
+    # URR (`urr y` / `urr <E>` / `endf y` on an incident-neutron run, default empty): urr.f90 / urrout.f90's
     # files as {file name: {column: ndarray over rows}} (urr.dat, urrgamwidth.l00, urrtalys.tot, urrnjoy.tot, ...);
     # physics/hf/urr.py
     urr: dict = field(default_factory=dict)
-    # THERMAL (KWCOV B10b: an incident-neutron run with energies below eninclow, default empty): TALYS's rows for those
+    # `thermal` (an incident-neutron run with energies below eninclow, default empty): TALYS's rows for those
     # energies (thermal.f90), {"E": ndarray, "<result_arrays key>": ndarray over E, "eninclow", "E1v", "eref",
     # "xscaptherm"/"xsptherm"/"xsalphatherm" (isomer -1..10)}; the engine's own arrays at those energies are untouched.
     # physics/hf/thermal.py
     thermal: dict = field(default_factory=dict)
-    # NATURAL (KWCOV B10b: `mass 0` in a deck, default empty): {"abundance": {A: fraction}, "isotopes": {A: Results}};
+    # NATURAL (`mass 0` in a deck, default empty): {"abundance": {A: fraction}, "isotopes": {A: Results}};
     # the Results' own arrays are then the abundance-weighted sums (natural.f90). physics/hf/natural.py
     natural: dict = field(default_factory=dict)
-    # INTEGRAL (KWCOV B10b: `integral y` in a deck, default empty): integral.f90's effective cross sections,
+    # `integral` (`integral y` in a deck, default empty): integral.f90's effective cross sections,
     # {"integral.dat": {"file", "spectrum": list, "xseff_b", "xsexp_b", "ratio": ndarray}}. physics/hf/integral.py
     integral: dict = field(default_factory=dict)
-    # PRODUCTION (KWCOV B11: `production y` with a charged projectile, default empty): prodout.f90's isotope production
+    # PRODUCTION (`production y` with a charged projectile, default empty): prodout.f90's isotope production
     # as {"files": {Y file name: {column: ndarray over time}}, "params": {Y file name: {...}}, "summary": [...],
     # "meta": {...}}; physics/hf/production.py
     production: dict = field(default_factory=dict)
-    # INGOUT (KWCOV B13: outlevels / outdensity / filedensity / outgamma / filepsf / outinverse / outomp / outkd /
+    # INGOUT (outlevels / outdensity / filedensity / outgamma / filepsf / outinverse / outomp / outkd /
     # partable / outbasic, default empty): TALYS's ingredient files as {file name: {"header", "blocks"}} (levels*.out,
     # ld*.gs, nld*.tab, psf*.E1, cross_g.tot, transmission_*.out, cross_*.tot, omppar_*.out, omp.out, spr.opt) plus
     # "parameters.dat" and "kd03"; physics/hf/ingout.py
     ingout: dict = field(default_factory=dict)
-    # RECOIL (KWCOV B12: `recoil y` (+ `labddx y`) in a deck, default empty): residual recoil spectra
+    # RECOIL (`recoil y` (+ `labddx y`) in a deck, default empty): residual recoil spectra
     # (rec<ZZZ><AAA>spec.tot, sp<nnnnnn>.rec) and LAB-frame spectra / DDX (<x>spec.lab, <x>ddx.lab, <x>ddxE....lab,
     # <x>ddxA....lab) under TALYS's file names, (C, ...); physics/hf/recoil.py lists them
     recoil: dict[str, Tensor] = field(default_factory=dict)
-    # FISSION YIELDS (KWCOV B14 part 1: `massdis y` with `fymodel 1` on a fission run, default empty): massdisout.f90's
+    # FISSION YIELDS (`massdis y` with `fymodel 1` on a fission run, default empty): massdisout.f90's
     # files as {file name: {column: ndarray}} (yieldA<E>.fis, yieldZA<E>.fis, fpZZZAAA.tot, rpZZZAAA.tot, fpAAA.tot);
     # physics/hf/fisyield.py
     fission_yields: dict = field(default_factory=dict)

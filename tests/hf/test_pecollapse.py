@@ -1,4 +1,4 @@
-"""PECOLLAPSE: flux-conserving PE->discrete collapse (`pecollapse c|c2`), synthetic one-case batch."""
+"""`INCOGNITA_PECOLLAPSE`: flux-conserving PE->discrete collapse (`pecollapse c|c2`), synthetic one-case batch."""
 from types import SimpleNamespace
 
 import numpy as np

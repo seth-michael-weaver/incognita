@@ -1,13 +1,13 @@
-/* CENGDECAY (ROUTE100 WP5): the warm decay core of one (nuclide, incident energy) in one call.
+/* Native: the warm decay core of one (nuclide, incident energy) in one call.
  *
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
  *
- * Task: CENGDECAY (the speed work; no physics of its own). Acceptance test:
- * tests/hf/test_engine_c.py and the WP5 gate (docs/results/hf-cengdecay.md), which hold it to the
- * nx path it replaces (`engine.ChainedFull` with MACSPEED_FAST's kernels).
+ * Speed path (no physics of its own). Acceptance test:
+ * tests/hf/test_engine_c.py and the closeness check (docs/results/hf-cengdecay.md), which hold it to
+ * the nx path it replaces (`engine.ChainedFull` with the fast kernels).
  *
- * TALYS routines computed here, in the NATIVEX arrangement:
+ * TALYS routines computed here, in the native arrangement:
  *     multiple.f90:1 (multiple)       -- the loop over cascade nuclei, popexcl, feedexcl, xsfeed
  *     cascade.f90:1 (cascade)         -- discrete gamma cascades under S_n
  *     densprepare.f90:1 (densprepare) -- primary = .false. rows, through `nx_widths`
@@ -40,7 +40,7 @@
 #define NJ 41 /* NUMJ + 1 */
 #include "binquad.h"
 
-/* BINQUAD (`binquad y`): set once per run by physics.hf.core.grids.binquad_sync; 0 = TALYS */
+/* `binquad` (`binquad y`): set once per run by physics.hf.core.grids.binquad_sync; 0 = TALYS */
 static int bq_on = 0, bq_q = 3;
 static double bq_rt = 1.0, bq_mt = 1.0;
 void ce_set_binquad(int64_t on, int64_t q, double mtilt, double rtilt)
@@ -78,7 +78,7 @@ typedef int (*psf_fn)(int64_t s, uint64_t *out);
 typedef int (*mpe_fn)(int64_t s, const uint64_t *arrs, uint64_t *block);
 
 static widths_fn k_widths;
-/* NNLEAK (default y via physics/hf/compound/nnleak.py native_arm; 0 = TALYS): nx_widths gets the initial compound
+/* `nnleak` (default y via physics/hf/compound/nnleak.py native_arm; 0 = TALYS): nx_widths gets the initial compound
  * nucleus's top continuum bin in wip[10] (+1) and Egamma^3-weights its continuum -> discrete Rboundary */
 static int64_t CE_NNLEAK = 0;
 void ce_set_nnleak(int64_t on) { CE_NNLEAK = on; }
@@ -87,7 +87,7 @@ static photon_fn k_photon;
 
 int64_t ce_version(void) { return 2; }
 
-/* SPECOUT (output only): when a sink is registered (ce_set_specsink, Python's specout recorder), every
+/* `specout` (output only): when a sink is registered (ce_set_specsink, Python's specout recorder), every
  * walked nucleus hands over mcontrib(type, nex, nexout) and mpecontrib(type, nex, nexout) as nx_walk
  * accumulated them in separate buffers, with its grids. NULL (the default) = no buffer, no call.
  *   iv: 0 zc, 1 nc, 2 xrows, 3 maxex, 4 nlast, 5..11 drows[t] (0 = no daughter), 12..18 daughter nlast,
@@ -145,7 +145,7 @@ static int64_t need_spec(const Ctx *c, int64_t zix, int64_t nix)
     return s;
 }
 
-/* FIXENG F15: INCOGNITA_NGNEXCL=1 records the initial compound's gamma-fed bins' particle decays ((n,gamma X),
+/* INCOGNITA_NGNEXCL=1 records the initial compound's gamma-fed bins' particle decays ((n,gamma X),
  * TALYS's xsngn) for the exclusive channels, as emission/multiple.py's _records_feedexcl */
 static int ngnexcl_flag = -1;
 
@@ -167,11 +167,11 @@ static void fe_set(double *val, uint8_t *pres, int64_t ncols, int64_t a, int64_t
     pres[q] = 1;
 }
 
-/* KEVLEAK3 `dup2` part (physics/hf/kevleak2.py: INCOGNITA_KEVLEAK2 = 2 or a list naming dup2), read per call like nativex */
+/* `INCOGNITA_KEVLEAK2` `dup2` part (physics/hf/kevleak2.py: INCOGNITA_KEVLEAK2 = 2 or a list naming dup2), read per call like nativex */
 static int kevleak3_dup2_on(void) {
     const char *v = getenv("INCOGNITA_KEVLEAK2_EFF"); /* resolved per run by kevleak2.sync (deck > env > default) */
     if (v == NULL) v = getenv("INCOGNITA_KEVLEAK2");
-    if (v == NULL || v[0] == 0) v = "2"; /* KEVLEAK3 gate candidate: default 2 = dup2 + pe2 */
+    if (v == NULL || v[0] == 0) v = "2"; /* `INCOGNITA_KEVLEAK2`: default 2 = dup2 + pe2 */
     return !strcmp(v, "2") || strstr(v, "dup2") != NULL;
 }
 
@@ -219,7 +219,7 @@ static double cascade_only(Ctx *c, int64_t s, int64_t zc, int64_t nc, double smi
                     int64_t last = b;
                     for (int64_t b2 = b + 1; b2 < b1; b2++) if (bk[b2] == k) last = b2;
                     double v = xsjp * br[last];
-                    if (kv3dup) { /* KEVLEAK3 dup2: the record carries every branch to k (cascade.f90:72 assigns) */
+                    if (kv3dup) { /* `INCOGNITA_KEVLEAK2` dup2: the record carries every branch to k (cascade.f90:72 assigns) */
                         v = 0.0;
                         for (int64_t b2 = b; b2 < b1; b2++) if (bk[b2] == k) v += xsjp * br[b2];
                     }
@@ -313,7 +313,7 @@ static double walk_nucleus(Ctx *c, int64_t s, int64_t zc, int64_t nc, int64_t fi
         if (mj[b] + 1 > nj) nj = mj[b] + 1;
     }
     nexmax_rows(c, s, m, bins, nxm, dspec);
-    if (bq_on && bq_mt <= -2.0) { /* BINQUAD centroid: each mother bin decays at its population centroid */
+    if (bq_on && bq_mt <= -2.0) { /* `binquad` centroid: each mother bin decays at its population centroid */
         const double *rhom = (const double *)P[6];
         for (int64_t b = 0; b < m; b++) {
             int64_t k = bins[b];
@@ -371,9 +371,9 @@ static double walk_nucleus(Ctx *c, int64_t s, int64_t zc, int64_t nc, int64_t fi
         wpp[1] = (uint64_t)dexinc;
         wpp[2] = (uint64_t)nxm;
         wpp[3] = (uint64_t)sepv;
-        /* SLFIRST (INCOGNITA_SFUNC_SCOPE=first): pp[17], when set, is the first compound nucleus's Tl stack */
+        /* first-CN set (INCOGNITA_SFUNC_SCOPE=first): pp[17], when set, is the first compound nucleus's Tl stack */
         wpp[4] = (zc == 0 && nc == 0 && c->pp[17]) ? c->pp[17] : c->pp[0];
-        /* ROTEXIT1CN (sfexit cont, default OFF): pp[18], when set, is the stack the first CN's CONTINUUM rows read */
+        /* continuum exit set (sfexit cont, default OFF): pp[18], when set, is the stack the first CN's CONTINUUM rows read */
         wpp[13] = (zc == 0 && nc == 0 && c->pp[17]) ? c->pp[18] : 0;
         wpp[5] = c->pp[1];
         wpp[6] = c->pp[2];
@@ -385,7 +385,7 @@ static double walk_nucleus(Ctx *c, int64_t s, int64_t zc, int64_t nc, int64_t fi
         wpp[12] = (uint64_t)tg;
         wip[0] = m; wip[1] = nj; wip[2] = I[3] % 2; wip[3] = ip[3]; wip[4] = ip[4]; wip[5] = ip[5];
         wip[6] = Ltl; wip[7] = ip[7]; wip[8] = ip[8]; wip[9] = L0;
-        wip[10] = (CE_NNLEAK && zc == 0 && nc == 0 && maxex > nlast_grid) ? maxex + 1 : 0; /* NNLEAK */
+        wip[10] = (CE_NNLEAK && zc == 0 && nc == 0 && maxex > nlast_grid) ? maxex + 1 : 0; /* `nnleak` */
         wdp[0] = dp[0];
         Bufs bufs[7];
         int64_t *ird[7], *pdv[7], *nrows[7], *lb[7], *le[7];
@@ -727,7 +727,7 @@ int64_t ce_cascade(const int64_t *ip, const double *dp, const uint64_t *pp)
 }
 
 
-/* ==== CENGBOOK: channels.f90 / totalxs.f90 / residual.f90 off `ce_cascade`'s arena ============
+/* ==== native: channels.f90 / totalxs.f90 / residual.f90 off `ce_cascade`'s arena ============
  *
  * `emission.emit_nx2.exclusive_channels` (with `engine._BuiltInputs.channels`'s records and
  * `multiple._binary_feed`'s binary row) for what `engine_c.run` reads of it: the live channel codes
@@ -738,7 +738,7 @@ int64_t ce_cascade(const int64_t *ip, const double *dp, const uint64_t *pp)
  *
  *   ip: 0 maxz, 1 maxn, 2 zinit, 3 ninit, 4 maxchannel, 5 k0, 6 flagfission, 7 index width W,
  *       8 NUMCHANTOT, 9 idnumfull (in/out), 10 opennum (in/out), 11..17 parskip(0..6),
- *       18..23 parinclude(types 1..6), 24 exmax0 columns, 25..30 per-ejectile caps (n p d t h a; CHANCAP)
+ *       18..23 parinclude(types 1..6), 24 exmax0 columns, 25..30 per-ejectile caps (n p d t h a; per-ejectile caps)
  *   dp: 0 xseps, 1 targetE, 2 S(0, 0, k0), 3 Etotal (Exmax0(0, 0)), 4 xsbinary(-1) (fission of the
  *       primary compound nucleus, 0 without), 5 1.0 if `xsbinary` exists
  *   pp: 0 idx, 1 spec ints, 2 spec doubles, 3 spec pointers, 4 outputs (as `ce_cascade`),
@@ -749,7 +749,7 @@ int64_t ce_cascade(const int64_t *ip, const double *dp, const uint64_t *pp)
  *   spec ints (this job): 10 length of ex_mev
  */
 #define NUMLEV2 300
-#define CH_KEYS (9 * 9 * 9 * 9 * 9 * 9) /* CHANCAP: one digit per ejectile, as the channel code */
+#define CH_KEYS (9 * 9 * 9 * 9 * 9 * 9) /* per-ejectile caps: one digit per ejectile, as the channel code */
 
 typedef void (*gemv_fn)(const char *, const int *, const int *, const double *, const double *,
                         const int *, const double *, const int *, const double *, double *,
@@ -861,7 +861,7 @@ int64_t ce_channels(int64_t *ip, const double *dp, const uint64_t *pp)
                     if (ip[18 + i]) lim[i] = v;
                 }
             }
-            for (int i = 0; i < 6; i++) if (lim[i] > ip[25 + i]) lim[i] = ip[25 + i]; /* CHANCAP caps */
+            for (int i = 0; i < 6; i++) if (lim[i] > ip[25 + i]) lim[i] = ip[25 + i]; /* per-ejectile caps */
             int64_t s = REC_S(zix, nix);
             int64_t maxex = 0, nlast = 0;
             const double *ex = NULL, *tau = NULL;
@@ -961,7 +961,7 @@ int64_t ce_channels(int64_t *ip, const double *dp, const uint64_t *pp)
                         }
                         int table = mst == 2 || (mst == 3 && t == 0 &&
                                                  ((const double *)SPO(c, ms)[7])[1] != 0.0);
-                        if (table && (records(0, 0, t) || !(is_root && t > 0))) {   /* FIXENG F15 INCOGNITA_NGNEXCL */
+                        if (table && (records(0, 0, t) || !(is_root && t > 0))) {   /* INCOGNITA_NGNEXCL */
                             int64_t mx = SPI(c, ms)[4];
                             const double *val = (const double *)((const uint64_t *)SPO(c, ms)[5])[t];
                             const double *popx = (const double *)SPO(c, ms)[0];
@@ -1079,7 +1079,7 @@ out:
 #undef REC_S
 }
 
-/* ==== CENGBOOK: the primary densprepare ======================================================
+/* ==== native: the primary densprepare ======================================================
  *
  * `compound.prepare.densprepare(chain.primary_dens_inputs(...))` for the arrays `nx_target` reads
  * (`rho0`, `lmaxhf`, `jdis2`, `Tjlnex` / `Tgam`), with `target._exact_incident_channel` on the
@@ -1090,7 +1090,7 @@ out:
  *
  *   ip: 0 k0, 1 Ltarget, 2 lmaxinc, 3 gammax, 4 rows of Tjlinc, 5 exact incident channel (1/0)
  *   dp: 0 Exinc, 1 transeps, 2 Efs, 3 twopi Fnorm(0)
- *   pp: 0 per type ints (7, 12), 1 per type doubles (7, 4), 2 per type inputs (7, 11; slot 10 = ROTEXIT1CN continuum Tjl),
+ *   pp: 0 per type ints (7, 12), 1 per type doubles (7, 4), 2 per type inputs (7, 11; slot 10 = continuum exit set continuum Tjl),
  *       3 per type outputs (7, 4), 4 PSF pack (7 pointers), 5 Tjlinc (rows, 3)
  *   type ints: 0 nex, 1 Nlast, 2 Ntop, 3 rhogrid rows, 4 ebegin, 5 min(eendmax, maxen), 6 maxen,
  *       7 L of Tjl, 8 egrid length, 9 L out (>= L), 10 Tjl rows, 11 photon points buffer rows
@@ -1112,13 +1112,13 @@ void ce_set_front_kernels(void *points) { k_points = (points_fn)points; }
 #define DP 11
 #define DO 4
 
-/* LOGTINT (default OFF; physics/hf/compound/tlog.py): Lagrange in ln T for the charged types (2..6) where the three
+/* log-T interpolation (default OFF; physics/hf/compound/tlog.py): Lagrange in ln T for the charged types (2..6) where the three
  * nodes are > 0, TALYS's linear pol2 (same term order) elsewhere. 0 = OFF = TALYS. */
 static int64_t CE_TLOG = 0;
 
 void ce_set_tlog(int64_t on) { CE_TLOG = on; }
 
-/* TLOGIT (CE_TLOG == 2): Lagrange in u = ln(T/(1-T)) where the three nodes are in (1e-300, 1-1e-12), else linear pol2. */
+/* logit-T (CE_TLOG == 2): Lagrange in u = ln(T/(1-T)) where the three nodes are in (1e-300, 1-1e-12), else linear pol2. */
 static double ce_logit(double x) { return log(x) - log1p(-x); }
 
 static double ce_tlog_lagr(double w1, double w2, double w3, double a, double b, double c)
@@ -1135,9 +1135,9 @@ static double ce_tlog_lagr(double w1, double w2, double w3, double a, double b, 
     return (w1 * a + w2 * b) + w3 * c;
 }
 
-/* ALPHATEMP (default OFF; physics/hf/omp/alphatemp.py): the COLD alpha Tjl (alphaomp 6, same layout as type 6's Tjl) and
+/* `alphatemp` (default OFF; physics/hf/omp/alphatemp.py): the COLD alpha Tjl (alphaomp 6, same layout as type 6's Tjl) and
  * U*. The alpha rows take Tcold^(1-g) Thot^g, g = min(1, Ex/U*), mixed on the RAW interpolated values (same Lagrange rule
- * as the hot table: pol2, or LOGTINT/TLOGIT; with BINQUAD at every quadrature node) before the transeps cut and Fnorm.
+ * as the hot table: pol2, or log-T/logit-T; with `binquad` at every quadrature node) before the transeps cut and Fnorm.
  * NULL / U* <= 0 = OFF = TALYS. */
 static const double *CE_AT_TJLC = 0;
 static int64_t CE_AT_ROWS = 0, CE_AT_L = 0;
@@ -1225,7 +1225,7 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
             const double *egrid = (const double *)P[5];
             const float *xs = (const float *)P[6];
             const double *tjl0 = (const double *)P[7];
-            const double *tjc = (const double *)P[10]; /* ROTEXIT1CN (sfexit cont, default 0 = OFF): continuum rows' Tjl */
+            const double *tjc = (const double *)P[10]; /* continuum exit set (sfexit cont, default 0 = OFF): continuum rows' Tjl */
             const int64_t *lmax = (const int64_t *)P[8];
             double *T = (double *)O[3];
             if (ib < ie) {
@@ -1255,15 +1255,15 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
                     double w1 = (e - eb) * (e - ec) / ((ea - eb) * (ea - ec));
                     double w2 = (e - ea) * (e - ec) / ((eb - ea) * (eb - ec));
                     double w3 = (e - ea) * (e - eb) / ((ec - ea) * (ec - eb));
-                    const double *tjl = (tjc && n > nlast) ? tjc : tjl0; /* ROTEXIT1CN */
+                    const double *tjl = (tjc && n > nlast) ? tjc : tjl0; /* continuum exit set */
                     const double *ja = tjl + na * L * 3, *jb = tjl + nb * L * 3, *jc = tjl + nc * L * 3;
-                    int tlg = CE_TLOG && t >= 2;  /* LOGTINT/TLOGIT (default OFF) */
-                    /* ALPHATEMP (default OFF): alpha rows, g at the row's residual excitation */
+                    int tlg = CE_TLOG && t >= 2;  /* log-T/logit-T (default OFF) */
+                    /* `alphatemp` (default OFF): alpha rows, g at the row's residual excitation */
                     int at = t == 6 && CE_AT_TJLC && CE_AT_USTAR > 0.0 && CE_AT_ROWS == rows && CE_AT_L == L;
                     double g = at ? (ex[n] > 0.0 ? ex[n] / CE_AT_USTAR : 0.0) : 1.0;
                     const double *dexr = (const double *)P[9];
                     if (bq_on && bq_rt >= 0.0 && dexr && n > nlast && dexr[n] > 0.0) {
-                        /* BINQUAD: the incident point decays into [ex - dex/2, ex + dex/2]: tilted eps quadrature */
+                        /* `binquad`: the incident point decays into [ex - dex/2, ex + dex/2]: tilted eps quadrature */
                         double qe[BQ_KMAX], qw[BQ_KMAX], rq;
                         double beta = bq_rt * bq_slope(rg, ex, dexr, nlast, nex, n, 2 * NJ);
                         double u0 = exinc - D[1];
@@ -1301,7 +1301,7 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
                                     for (int64_t k = 0; k < 3; k++) {
                                         double v = tlg ? ce_tlog_lagr(v1, v2, v3, sa[l * 3 + k], sb[l * 3 + k], sc[l * 3 + k])
                                                    : (v1 * sa[l * 3 + k] + v2 * sb[l * 3 + k]) + v3 * sc[l * 3 + k];
-                                        if (at) { /* ALPHATEMP: the cold node by the same rule, mixed raw */
+                                        if (at) { /* `alphatemp`: the cold node by the same rule, mixed raw */
                                             double c = tlg ? ce_tlog_lagr(v1, v2, v3, xa[l * 3 + k], xb[l * 3 + k], xc[l * 3 + k])
                                                        : (v1 * xa[l * 3 + k] + v2 * xb[l * 3 + k]) + v3 * xc[l * 3 + k];
                                             v = ce_at_mix(v > 0.0 ? v : 0.0, c > 0.0 ? c : 0.0, g);
@@ -1323,7 +1323,7 @@ int64_t ce_densprepare(const int64_t *ip, const double *dp, const uint64_t *pp)
                             int64_t q = l * 3 + k;
                             double v = !keep ? 0.0 : tlg ? ce_tlog_lagr(w1, w2, w3, ja[q], jb[q], jc[q])
                                                          : (w1 * ja[q] + w2 * jb[q]) + w3 * jc[q];
-                            if (at && keep) { /* ALPHATEMP: the cold row by the same rule, mixed raw */
+                            if (at && keep) { /* `alphatemp`: the cold row by the same rule, mixed raw */
                                 const double *ka = CE_AT_TJLC + na * L * 3, *kb = CE_AT_TJLC + nb * L * 3;
                                 const double *kc = CE_AT_TJLC + nc * L * 3;
                                 double c = tlg ? ce_tlog_lagr(w1, w2, w3, ka[q], kb[q], kc[q]) : (w1 * ka[q] + w2 * kb[q]) + w3 * kc[q];

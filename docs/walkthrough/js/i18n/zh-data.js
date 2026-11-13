@@ -1,13 +1,13 @@
 /* Simplified Chinese (简体中文): data explorer (data.html, js/data.js) */
 Object.assign(WT.L.ui, {
   lang_label: "语言", nav_teach: "教师指南",
-  brand: "走进核反应", nav_physics: "物理原理", nav_data: "全部核素", nav_board: "记分板", menu: "菜单", site_nav: "网站",
+  brand: "走进核反应", nav_physics: "物理原理", nav_data: "全部核素", nav_board: "对比", menu: "菜单", site_nav: "网站",
   dx_title: "全部核素 · 走进核反应",
-  site_nav: "网站", nav_walk: "导览", nav_board: "记分板", nav_data: "全部核素", nav_repo: "GitHub 上的代码",
+  site_nav: "网站", nav_walk: "导览", nav_board: "对比", nav_data: "全部核素", nav_repo: "GitHub 上的代码",
   dx_kicker: "INCOGNITA · 数据浏览器",
   dx_h1: "全部核素",
   dx_lede: "引擎为数据库中每个核素预测的中子截面，与每个核素经过整理的测量数据并列展示。可以在核素图上选取一个核素，也可以直接搜索。",
-  dx_lede_ver: "这些曲线是 v0.2.3 数据库（2026 年 11 月），由记分板计分的同一引擎版本（2026 年 10 月 22 日的引擎）生成。它们不是 TERRA——记分板上那个针对测量数据拟合的数据产品。每条曲线都是引擎自己的预测，没有一条针对旁边所示的测量数据拟合；唯一的例外是标为已锚定的核素：其曲线乘以一个系数，使 30 keV 处的恒星平均值等于测量值。引擎的总体设置是针对所有核素一次性选定的，用到了许多测量数据（包括这些），因此在已测量核素上的吻合是对模型的公平检验，但并非完全独立。大多数核素从未被测量（外推），它们的区间很宽。",
+  dx_lede_ver: "这些曲线是 v0.2.3 数据库（2026 年 11 月），由对比页面计分的同一引擎版本（2026 年 10 月 22 日的引擎）生成。它们不是 TERRA——同一页面上那个针对测量数据拟合的数据产品。每条曲线都是引擎自己的预测，没有一条针对旁边所示的测量数据拟合；唯一的例外是标为已锚定的核素：其曲线乘以一个系数，使 30 keV 处的恒星平均值等于测量值。引擎的总体设置是针对所有核素一次性选定的，用到了许多测量数据（包括这些），因此在已测量核素上的吻合是对模型的公平检验，但并非完全独立。大多数核素从未被测量（外推），它们的区间很宽。",
   dx_controls: "核素图控件", dx_search_label: "查找核素", dx_search_ph: "搜索：U-235、Fe56、Au…",
   dx_colour: "核素图着色依据", dx_m_tier: "已知程度", dx_m_macs: "30 keV 俘获", dx_m_meas: "测量数据",
   dx_chart_h: "核素图",
@@ -85,7 +85,7 @@ Object.assign(WT.L.ui, {
   dx_th_abs: "吸收减去裂变",
 });
 
-/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+/* INCOGNITA's own capture below 1 keV */
 Object.assign(WT.L.ui, {
   dx_rr_b1k: "1 keV 以下",
   dx_rr_own: "INCOGNITA 自己对测量数据的共振拟合（至 300 eV；300 eV 至 1 keV 为统计共振）",
@@ -98,14 +98,14 @@ Object.assign(WT.L.ui, {
   dx_rr_k_sm: "平滑估计（无共振）",
   dx_below_rr: "1 keV 以下：INCOGNITA 的{k}",
   dx_below_own: "1 keV 以下的实线是 INCOGNITA 自己对 300 eV 以下测得俘获数据的共振拟合；300 eV 至 1 keV 使用统计共振。它在 1 keV 处与预测相接。",
-  dx_below_stat: "1 keV 以下的点划线是 INCOGNITA 的统计估计：共振采用 INCOGNITA 自己的平均间距和宽度，位置随机，因此单个峰与真实的峰不对应。在共振积分被留作检验的核素上，它通常与测量值相差在 2 倍以内，并不更好：中位偏差 ×1.9，54 % 在 ×2 以内。",
+  dx_below_stat: "1 keV 以下的点划线是 INCOGNITA 的统计估计：共振采用 INCOGNITA 自己的平均间距和宽度，位置随机，因此单个峰与真实的峰不对应。在共振积分未用于拟合的核素上，它通常与测量值相差在 2 倍以内，并不更好：中位偏差 ×1.9，54 % 在 ×2 以内。",
   dx_below_sm_a: "1 keV 以下的点线是 INCOGNITA 的平滑估计：一条经过测得热中子俘获值的 1/v 曲线，与 1 keV 处的值相连。未画共振，因此在约 1 eV 至 1 keV 之间，真实截面在其峰处可能高得多。",
   dx_below_sm: "1 keV 以下的点线是 INCOGNITA 的平滑估计：把 1 keV 处的值按 1/v 延伸，没有共振，也没有测量值加以约束。真实的热中子值可能与它相差几个数量级。",
   dx_below_anch: "它被强制经过一个测得的热中子俘获值 {v} b。",
   dx_rr_anch_diff: "菱形是 EXFOR 条目的另一种平均，与该值不同。",
   dx_rr_ri: "该核素 0.5 eV 以上俘获的共振积分：INCOGNITA {m} b，测量 {e} b。",
   dx_rr_ri_used: "这个测量值被用来挑选这次随机抽样，所以两者一致并不是检验。",
-  dx_rr_ri_hold: "这个测量值被留作检验：没有用来制作这条曲线。",
+  dx_rr_ri_hold: "这个测量值没有用来制作这条曲线。",
   dx_pw_tip_rr: "评价库（作比较），0 K 逐点值",
   dx_lib_pw_rr: "1 keV 以下，同样的评价库以细实线逐点绘出：在 0 K 下重建（NJOY RECONR，容差 0.01 %），每条曲线精简至最多 {n} 个点，所选的点保留共振的峰和谷。它们同样仅作比较，并非 INCOGNITA。",
   dx_tr_h: "这条曲线有多可信",
@@ -125,18 +125,18 @@ Object.assign(WT.L.ui, {
   dx_tr_b_narrow: "误差带可能太窄：覆盖不足",
   dx_tr_b_none: "未显示误差带",
   dx_tr_b_macs: "误差带未单独检验",
-  dx_tr_e: "记分板上的误差通常为 ×{f}（{n} 个已测量的核，Z {z}；非盲测）",
-  dx_tr_e_none: "该区域没有留出数据的检验",
-  dx_tr_src: "类别与标记：library/v0.2.3 的 README。误差带：一次针对测量的预注册覆盖率检验（5 个测试核，2026 年 10 月），其中俘获、裂变和弹性散射的误差带覆盖与标称一致，阈反应道和总截面覆盖不足。误差：<a href=\"scoreboard.html\" data-keep-lang>记分板</a>，log10(引擎 / 测量) 的均方根；它不是盲测，因为引擎的规则是看着它选定的。",
+  dx_tr_e: "对比误差通常为 ×{f}（{n} 个已测量的核，Z {z}；开发中的对比）",
+  dx_tr_e_none: "该区域没有与测量的对比",
+  dx_tr_src: "类别与标记：library/v0.2.3 的 README。误差带：一次针对测量的覆盖率检验（5 个测试核，2026 年 10 月），其中俘获、裂变和弹性散射的误差带覆盖与标称一致，阈反应道和总截面覆盖不足。误差：<a href=\"scoreboard.html\" data-keep-lang>对比</a>页面，log10(引擎 / 测量) 的均方根；它不是独立检验，因为引擎的规则是看着它选定的。",
 });
 // less text (2026-11-06)
 Object.assign(WT.L.ui, { dx_hint2: "拖动平移 · 滚动缩放 · 点击方格", dx_more_nuc: "详情:可信度、来源、代码", dx_about: "关于数据、下载与代码" });
 Object.assign(WT.L.ui, { dx_cmp: "对比" });
-// C12RM9 R-matrix evaluation (light nuclei, 2026-11-07)
-Object.assign(WT.L.ui, {"dx_el": "弹性散射 (n,n)", "dx_rm_name": "INCOGNITA R 矩阵评价 (C12RM9)", "dx_rm_h": "我们对这个核素的模型", "dx_rm_what": "中子在碳-12上的弹性散射，来自 INCOGNITA 自己对 EXFOR 全截面和弹性截面测量数据所做的多能级 R 矩阵拟合。发布之前，它通过了预先登记的检验：IAEA 碳标准、预留的全截面测量、NJOY 处理往返检验，以及一个含石墨的临界基准（PCI-001）。", "dx_rm_range": "能量范围：{lo} 至 {hi}；在此之上没有 INCOGNITA 曲线。", "dx_rm_caveat": "注意：样本内 χ²/自由度 {c}；标记了两个带倾斜的数据集；检验已校准，但检验功效较低。", "dx_rm_nocap": "没有对俘获建模：俘获标签页只显示测量数据。", "dx_rm_report": "阅读报告"});
-Object.assign(WT.L.ui, { "dx_rr_meas": "实验人员测得的共振（EXFOR 共振参数），由 INCOGNITA 汇总；未测得的自旋、辐射宽度和弱能级取自 INCOGNITA 自己的统计", "dx_rr_own_t": "INCOGNITA 自己对 EXFOR 测得透射数据的 Reich–Moore 共振拟合，范围 10 µeV 至 1 keV；不是数据库文件", "dx_rr_k_meas": "测得的共振（EXFOR 参数）", "dx_below_meas": "1 keV 以下的实线使用实验人员测量并在 EXFOR 中报告的共振能量和宽度，并在多个实验之间合并；它不是 INCOGNITA 的拟合。凡是自旋或辐射宽度没有测得的地方，由 INCOGNITA 自己的统计补上；实验无法看到的弱能级按统计方式加入（它们的位置并不是预测）。它在 1 keV 处与预测相接。", "dx_below_own_t": "1 keV 以下的实线是 INCOGNITA 自己对 EXFOR 测得透射数据的 Reich–Moore 共振拟合。它在 1 keV 处与预测相接。核素旁的说明列出了所用的数据集，以及拟合与留作检验的数据相比如何。", "dx_band_th": "热区", "dx_band_th_s": "热区", "dx_band_th_x": "热", "dx_band_rr": "共振", "dx_band_rr0": "共振区", "dx_band_rr_s": "共振", "dx_band_rr_x": "共振", "dx_band_ur": "平均共振", "dx_band_ur_s": "平均", "dx_band_ur_x": "平均", "dx_band_f": "快区", "dx_band_f_s": "快区", "dx_band_f_x": "快", "dx_band_all": "全部能量" });
+// R-matrix evaluation (light nuclei)
+Object.assign(WT.L.ui, {"dx_el": "弹性散射 (n,n)", "dx_rm_name": "INCOGNITA R 矩阵评价", "dx_rm_h": "我们对这个核素的模型", "dx_rm_what": "中子在碳-12上的弹性散射，来自 INCOGNITA 自己对 EXFOR 全截面和弹性截面测量数据所做的多能级 R 矩阵拟合。发布之前，它通过了事先确定的检验：IAEA 碳标准、未用于拟合的全截面测量、NJOY 处理往返检验，以及一个含石墨的临界基准（PCI-001）。", "dx_rm_range": "能量范围：{lo} 至 {hi}；在此之上没有 INCOGNITA 曲线。", "dx_rm_caveat": "注意：样本内 χ²/自由度 {c}；标记了两个带倾斜的数据集；检验已校准，但统计功效较低。", "dx_rm_nocap": "没有对俘获建模：俘获标签页只显示测量数据。", "dx_rm_report": "阅读报告"});
+Object.assign(WT.L.ui, { "dx_rr_meas": "实验人员测得的共振（EXFOR 共振参数），由 INCOGNITA 汇总；未测得的自旋、辐射宽度和弱能级取自 INCOGNITA 自己的统计", "dx_rr_own_t": "INCOGNITA 自己对 EXFOR 测得透射数据的 Reich–Moore 共振拟合，范围 10 µeV 至 1 keV；不是数据库文件", "dx_rr_k_meas": "测得的共振（EXFOR 参数）", "dx_below_meas": "1 keV 以下的实线使用实验人员测量并在 EXFOR 中报告的共振能量和宽度，并在多个实验之间合并；它不是 INCOGNITA 的拟合。凡是自旋或辐射宽度没有测得的地方，由 INCOGNITA 自己的统计补上；实验无法看到的弱能级按统计方式加入（它们的位置并不是预测）。它在 1 keV 处与预测相接。", "dx_below_own_t": "1 keV 以下的实线是 INCOGNITA 自己对 EXFOR 测得透射数据的 Reich–Moore 共振拟合。它在 1 keV 处与预测相接。核素旁的说明列出了所用的数据集，以及拟合与未用于拟合的数据相比如何。", "dx_band_th": "热区", "dx_band_th_s": "热区", "dx_band_th_x": "热", "dx_band_rr": "共振", "dx_band_rr0": "共振区", "dx_band_rr_s": "共振", "dx_band_rr_x": "共振", "dx_band_ur": "平均共振", "dx_band_ur_s": "平均", "dx_band_ur_x": "平均", "dx_band_f": "快区", "dx_band_f_s": "快区", "dx_band_f_x": "快", "dx_band_all": "全部能量" });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "更多核科学主题" });
 
-/* C-12 elastic tab: natural-carbon curve, held-out totals, IAEA standard, ENDF/B-VIII.1 comparator */
-Object.assign(WT.L.ui, {"dx_rm_natc": "INCOGNITA 的 R 矩阵 (C12RM9),天然碳", "dx_rm_cmp": "这里的曲线与测量和标准一样是天然碳:98.93 % INCOGNITA 的 C-12 加 1.07 % 来自 ENDF/B-VIII.1 的 C-13,153 keV 处的窄峰由后者产生;纯 C-12 曲线在下载文件中。它与 IAEA 中子标准 2017 的差别在 {dev} % 以内(最大 |z| 为 {z});在预留的全截面上 χ²/N = {chi};所有预先登记的检验均已通过。EXFOR {set} 比 INCOGNITA 和 ENDF/B-VIII.1 都低 {off} %:这是该数据集归一化的偏移。", "dx_ho": "预留的全截面测量值,natC", "dx_ho_tip": "未用于拟合:在拟合冻结后只读取一次", "dx_bin": "按对数能量区间平均", "dx_bin_tip": "{n} 个预留测量点的平均值 ± 其标准误差", "dx_std": "IAEA 中子标准 2017(natC 弹性)", "dx_std_dev": "INCOGNITA / 标准 − 1", "dx_lib_el": "虚线:天然碳的 ENDF/B-VIII.1 弹性截面(98.93 % C-12 + 1.07 % C-13),0 K 逐点值,仅供比较:INCOGNITA 不使用它,下载文件中也没有。"});
+/* C-12 elastic tab: natural-carbon curve, unfitted totals, IAEA standard, ENDF/B-VIII.1 comparator */
+Object.assign(WT.L.ui, {"dx_rm_natc": "INCOGNITA 的 R 矩阵,天然碳", "dx_rm_cmp": "这里的曲线与测量和标准一样是天然碳:98.93 % INCOGNITA 的 C-12 加 1.07 % 来自 ENDF/B-VIII.1 的 C-13,153 keV 处的窄峰由后者产生;纯 C-12 曲线在下载文件中。它与 IAEA 中子标准 2017 的差别在 {dev} % 以内(最大 |z| 为 {z});在未用于拟合的全截面上 χ²/N = {chi};所有检验均已通过。EXFOR {set} 比 INCOGNITA 和 ENDF/B-VIII.1 都低 {off} %:这是该数据集归一化的偏移。", "dx_ho": "未用于拟合的全截面测量值,natC", "dx_ho_tip": "未用于拟合:只在最终拟合之后才对比", "dx_bin": "按对数能量区间平均", "dx_bin_tip": "{n} 个未用于拟合的测量点的平均值 ± 其标准误差", "dx_std": "IAEA 中子标准 2017(natC 弹性)", "dx_std_dev": "INCOGNITA / 标准 − 1", "dx_lib_el": "虚线:天然碳的 ENDF/B-VIII.1 弹性截面(98.93 % C-12 + 1.07 % C-13),0 K 逐点值,仅供比较:INCOGNITA 不使用它,下载文件中也没有。"});

@@ -1,18 +1,18 @@
-"""Score the ported gamma-strength machinery against TALYS: gate A-psf.
+"""Score the ported gamma-strength machinery against TALYS: acceptance test A-psf.
 
 Reference: the `psf<ZZZ><AAA>.{E1,M1,E2,M2}` files of every reference dump (gamma.f90:30 writes
 them for the compound nucleus at the first incident energy only), read through
 `physics.hf.reference`. Quantities scored, all against the columns TALYS itself printed:
 
 * ``f(E1)`` / ``f(M1)`` -- fstrength at Efs = 0, the call gammaout.f90 makes.
-* ``T(E1) T(M1) T(E2) T(M2)`` -- Tjl(0, nen, irad, l) from tgamma, so E2/M2 are gated too.
+* ``T(E1) T(M1) T(E2) T(M2)`` -- Tjl(0, nen, irad, l) from tgamma, so E2/M2 are checked too.
   (The *f* column of psf*.E2/.M2 is NOT f(E2)/f(M2): gammaout.f90 hard-wires l = 1. See
   tests/hf/test_gamma.py::test_talys_psf_E2_M2_files_carry_the_l1_strength.)
 * ``Gamma_gamma`` and ``S-wave strength function`` -- radwidtheory, with rho(Ex, J, pi) injected
   from the compound nucleus's ld*.gs tables (contract §5) until T6's density is wired in.
 
-Metric (docs/results/hf-engine-gates.md §2): r = |ln(port/TALYS)| over points where TALYS is
-above the floor; the gate is p95(r) <= 0.01 over all points of all reference targets.
+Metric (contract §2): r = |ln(port/TALYS)| over points where TALYS is
+above the floor; the threshold is p95(r) <= 0.01 over all points of all reference targets.
 
     python -m physics.hf.gamma.score --out docs/results/hf-psf-gate.json
 """
@@ -44,7 +44,7 @@ RADIATIONS = (("E1", 1, 1), ("M1", 0, 1), ("E2", 1, 2), ("M2", 0, 2))
 # (contract §5) -- but densityout.f90 prints them only for the analytical level-density models.
 # An ldmodel 7 nucleus (every actinide: input_densitymodel.f90:90 resolves ldmodelall to 7 for a
 # neutron on A > fislim) therefore carries no reference value for them, so these four quantities
-# are reported and NOT gated for such a case. See docs/results/hf-psf-gate.json "ungated".
+# are reported and NOT checked for such a case. See docs/results/hf-psf-gate.json "ungated".
 T_DEPENDENT = frozenset({"f(E1)", "T(E1)", "Gamma_gamma", "S-wave"})
 TEMPERATURE_KEYS = ("pairing energy [MeV]", "a(Sn) [MeV^-1]")
 
@@ -107,7 +107,7 @@ def _density_from_dump(g):
     rho over Egamma on its own grid, so whatever error the interpolation makes lands on
     <Gamma_gamma>. Cubic rather than linear because linear dominates the residual -- Nb-93
     6.3e-4 -> 4.1e-5, Au-197 4.0e-4 -> 2.4e-5, W-184 2.8e-4 -> 3.0e-5, Ca-40 1.0e-5 -> 4.6e-6 --
-    and a gate number should measure the port. It goes away when T6's analytical rho replaces
+    and a test number should measure the port. It goes away when T6's analytical rho replaces
     the tabulated injection.
     """
     tabs: dict[int, tuple] = {}
@@ -307,7 +307,7 @@ def main(argv=None):
         print(f"  worst single point {n:>12}: {w['max']:.3g} ({w['case']})")
     if s["ungated_cases"]:
         print(
-            f"\n  (...) = not gated, {len(s['ungated_cases'])} cases: {s['ungated_reason']}\n"
+            f"\n  (...) = not checked, {len(s['ungated_cases'])} cases: {s['ungated_reason']}\n"
             f"        {', '.join(s['ungated_cases'])}"
         )
     if a.out:

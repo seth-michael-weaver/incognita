@@ -8,9 +8,9 @@ to ~/koningov_data/pw/<lib>/<Z>_<A>.json. Resumable.
 Nothing in the engine, the library build, the benchmarks or the downloads reads these numbers.
 
 usage (WSL, env with njoy):
-  ~/micromamba/envs/nucleus-phys/bin/python scripts/build_site_pointwise.py run [--chans cap,np,na] [--only lib:Z:A,...] [--guard]
+  python scripts/build_site_pointwise.py run [--chans cap,np,na] [--only lib:Z:A,...] [--guard]
   ... jobs JOBS.json; then on any machine with the ENDF files: [NJOY=...] python build_site_pointwise.py farm --jobfile PART.json --wmax N
-  ~/micromamba/envs/nucleus-phys/bin/python scripts/build_site_pointwise.py write
+  python scripts/build_site_pointwise.py write
 """
 import argparse, json, math, os, re, shutil, subprocess, sys, tempfile, time, zipfile
 
@@ -210,7 +210,7 @@ def compact(o):
 
 def cmd_write():
     """data/lib/pw/<Z>/<A|nat>.json for every (nuclide, library, channel) that data/lib/<Z>.json shows, plus
-    data/lib/pw/index.json (the nuclides that have a file). Budget gate: 150 MB total, 400 kB per file."""
+    data/lib/pw/index.json (the nuclides that have a file). Budget limit: 150 MB total, 400 kB per file."""
     site = os.path.join(ROOT, "docs", "walkthrough", "data")
     dst = os.path.join(site, "lib", "pw")
     shutil.rmtree(dst, ignore_errors=True); os.makedirs(dst)
@@ -227,7 +227,7 @@ def cmd_write():
                     continue
                 r = json.load(open(f)); e = {}
                 for c in ("cap", "np", "na"):
-                    if v.get(c) and r.get(c):  # only channels the overlay itself shows (np/na gate of build_site_overlay.py)
+                    if v.get(c) and r.get(c):  # only channels the overlay itself shows (np/na cut of build_site_overlay.py)
                         e[c] = {"e": r[c]["e"], "s": r[c]["s"], "th": r[c]["th"], "n_full": r[c]["n_full"], "nmax": r[c].get("nmax", NMAX)}
                         ncurve += 1; per_lib[(lib, c)] = per_lib.get((lib, c), 0) + 1
                 if e:
@@ -243,7 +243,7 @@ def cmd_write():
     open(os.path.join(dst, "index.json"), "w").write(compact({"nmax": NMAX, "emin_ev": EMIN, "emax_ev": EMAX, "keys": keys}))
     print(f"{len(keys)} nuclide files, {ncurve} curves {per_lib}, {tot / 1e6:.2f} MB, largest {big / 1e3:.1f} kB")
     if tot > 150e6 or big > 400e3:
-        sys.exit("BUDGET GATE FAILED")
+        sys.exit("BUDGET CHECK FAILED")
 
 
 def all_jobs(chans):

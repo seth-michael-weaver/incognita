@@ -1,8 +1,8 @@
-"""ENGPHYS: the four far-chart consistency switches (physics/hf/engphys.py), default OFF.
+"""The four far-chart consistency switches (physics/hf/engphys.py), default OFF.
 
 Each arm runs in its own interpreter (the direct / deformation / OMP caches are per process, and a worker sets its
 environment before it imports anything, as engine_curves.py does). Pinned:
-* OFF: n + Am-308 keeps stock TALYS's (n,2n) >> sigma_R (ENGDEFECT) -- nothing moves without a switch;
+* OFF: n + Am-308 keeps stock TALYS's (n,2n) >> sigma_R (a stock defect) -- nothing moves without a switch;
 * ON (all four): (n,2n) <= sigma_R and the exclusive sum (+ fission) <= nonelastic (1e-3) on Am-308 (DWBA unitarity),
   U-248 at 1.38 MeV (DWBA on a Soukhovitskii actinide) and Tl-237 at 8.75 / 10.75 MeV (pre-equilibrium spin spread);
 * the C chain (engine_c), the torch chain (engine.run) and the batch path (gpu_full.run_batch on CPU) agree under
@@ -61,7 +61,7 @@ print("JSON" + json.dumps(out))
 def _probe(Z, A, path, on):
     env = {k: v for k, v in os.environ.items() if not k.startswith("INCOGNITA_")}
     env.update(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", PYTHONPATH=str(ROOT))
-    env["INCOGNITA_ALPHATEMP"] = "0"  # KEVCOLD (alphatemp default ON): gpu_full_setup refuses ALPHATEMP; the paths are compared at production
+    env["INCOGNITA_ALPHATEMP"] = "0"  # alphatemp is default ON and gpu_full_setup refuses it; the paths are compared at production
     if on:
         env["INCOGNITA_ENGPHYS"] = "all"
     e = ",".join(str(x) for x in CASES[(Z, A)])

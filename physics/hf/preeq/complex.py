@@ -13,7 +13,7 @@ TALYS routines ported here (file:line of the subroutine/function statement):
     breakup.f90:1 (breakup)
 
 `bonetti` is only read for `preeqmode 3` (optical-model transition rates) and is not ported;
-`breakup` (`k0 > 2`, breakup.f90:1) is ported for d/t/h (ENGPROJ); `breakupAVR` (breakupmodel 2) raises.
+`breakup` (`k0 > 2`, breakup.f90:1) is ported for d/t/h; `breakupAVR` (breakupmodel 2) raises.
 
 These are the `Pickup/strip` and `Knockout` columns of `preeq*.out`. Batched over
 (case, energy, particle); the only loops are Kalbach's four small exciton sums.
@@ -36,7 +36,7 @@ from physics.hf.preeq.prepare import pickup_densities
 
 
 def _eninccm(inp: PreeqInputs) -> Tensor:
-    """(C, 1) eninccm = Etotal - S(0,0,k0) - targetE (energies.f90:131). KWCOV GAP (isomeric targets): the targetE
+    """(C, 1) eninccm = Etotal - S(0,0,k0) - targetE (energies.f90:131). isomeric targets: the targetE
     term was missing, so an excited target's knockout / stripping / breakup ran at eninccm + targetE (Fe-56
     `ltarget 1` 14 MeV: (n,a) -1.6 % vs stock); 0 for a ground-state target (unchanged).
 
@@ -63,7 +63,7 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
     dev = inp.egrid_mev.device
     from physics.hf.projectile import cpinc2 as _cpinc2
 
-    cpinc2 = _cpinc2()  # PORTSTACK: CPINC2's alpha stripping fixes behind INCOGNITA_CPINC2
+    cpinc2 = _cpinc2()  # alpha stripping fixes behind INCOGNITA_CPINC2
     pairmodel = getattr(options, "pairmodel", 2)
     Z, A = inp.Z, inp.A
     Ainit = inp.a_init
@@ -77,7 +77,7 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
     gsn_cn = inp.gn_cn.reshape(C, 1)
     from physics.hf.preeq.exciton import phmicro_zn0
 
-    zn0 = phmicro_zn0(inp, options)  # PHMICRO (phmodel 2), None = off
+    zn0 = phmicro_zn0(inp, options)  # phmodel 2, None = off
 
     for t in range(1, 7):
         if k0 <= 2 and t <= 2:  # stripping.f90:83
@@ -92,9 +92,9 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
                 kap = torch.where(einc > 80.0, 80.0 / einc, kap)
             if t == 5:
                 kap = kap * 5.0
-        if cpinc2 and k0 == 6 and t in (1, 2):  # stripping.f90:93 (CPINC2: was missing; alpha -> nucleon exchange)
+        if cpinc2 and k0 == 6 and t in (1, 2):  # stripping.f90:93 (alpha -> nucleon exchange)
             kap = (12.0 - 11.0 * torch.clamp(eninccm - 20.0, min=0.0) / eninccm) * torch.ones_like(kap)
-        if cpinc2 and k0 >= 4 and t in (1, 2):  # stripping.f90:94 (CPINC2: was missing), Atarget = the target's A
+        if cpinc2 and k0 >= 4 and t in (1, 2):  # stripping.f90:94, Atarget = the target's A
             kap = kap * max(4.0 - A / 80.0, 1.0)
         ndelta = abs(parA[k0] - parA[t])
         ndeltapi = parZ[k0] - parZ[t]
@@ -103,7 +103,7 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
         term2 = (kap / projmass) * (projmass / (einc + va)) ** (2 * ndelta)
         ppi, hpi = max(ndeltapi, 0), max(-ndeltapi, 0)
         pnu, hnu = max(ndeltanu, 0), max(-ndeltanu, 0)
-        # AA/ZZ(0, 0, type) of the COMPOUND (stripping.f90:105-107); CPINC2: was the target's Z, which is the
+        # AA/ZZ(0, 0, type) of the COMPOUND (stripping.f90:105-107); without `cpinc2` the target's Z, which is the
         # compound's only for a neutron projectile
         Ares, Zres = Ainit - parA[t], (Z + parZ[k0] - parZ[t]) if cpinc2 else (Z - parZ[t])
         Nres = Ares - Zres
@@ -138,7 +138,7 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
             / (v1well * A * A)
             * (pnu**2 + ppi**2 + hnu**2 + 1.5 * hpi**2)
         )
-        gsp, gsn = pickup_densities(Zres, Nres, kph, options)  # stripping.f90:175-176 (PEGQ: isospin split)
+        gsp, gsn = pickup_densities(Zres, Nres, kph, options)  # stripping.f90:175-176 (`pegq`: isospin split)
         ewell = v1well * base if ndeltapi == 0 else v1well
 
         eout = inp.egrid_mev  # (C, E)
@@ -162,7 +162,7 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
             idx = [torch.tensor(v, device=dev) for v in (dppi, dhpi, dpnu, dhnu)]
             ap = apauli2(*idx, gsp_cn, gsn_cn)  # the compound-nucleus Apauli2 table
             om = phdens2(*idx, _g[0], _g[1], _g[2], _g[3], False, ap2=ap)
-            # PHMICRO: the residual's table, (Zix, Nix) = (parZ(type), parN(type)) (stripping.f90:206/215)
+            # phmodel 2: the residual's table, (Zix, Nix) = (parZ(type), parN(type)) (stripping.f90:206/215)
             return ph_override(om, *idx, _g[2], parZ[_t], parN[_t], zn0)
 
         # the two exciton sums' terms in TALYS's order: (power of xnt, or None, and the state)
@@ -171,7 +171,7 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
         terms += [(None, ppi - i, hpi - j, pnu - k, hnu - ll)  # stripping.f90:164-172
                   for i in range(ppi + 1) for j in range(hpi + 1) for k in range(pnu + 1)
                   for ll in range(hnu + 1) if i + j + k + ll]
-        # NATIVEX2: off the graph, every term's density in one call (preeq.preeq_nx2)
+        # Off the graph, every term's density in one call (preeq.preeq_nx2)
         acc = None if zn0 is not None else preeq_nx2.stripping_sum(terms, xnt, gspt, gsnt, eres_s, ew, gsp_cn, gsn_cn)
         if acc is None and zn0 is not None:
             # fast-phmodel: every term's density in one batched omega (terms on a leading axis), then TALYS's summation order
@@ -189,7 +189,7 @@ def stripping(inp: PreeqInputs, options, params, *, kph: float = 15.0) -> Tensor
 
 
 def knockfix_on(options) -> bool:
-    """KNOCKFIX (ALPHAHUMP, Incognita extension, default OFF): the `knockfix y` keyword, else the environment
+    """`knockfix` (Incognita extension, default OFF): the `knockfix y` keyword, else the environment
     `INCOGNITA_KNOCKFIX` (1/y/yes/on). OFF = TALYS exactly.
 
     Test: tests/hf/test_knockfix.py
@@ -202,7 +202,7 @@ def knockfix_on(options) -> bool:
 
 
 def knockfix2_on(options) -> bool:
-    """KNOCKFIX2 (ALPHAHUMP, Incognita extension, default OFF; implies KNOCKFIX): `knockfix2 y` or `INCOGNITA_KNOCKFIX2`.
+    """`knockfix2` (Incognita extension, default OFF; implies `knockfix`): `knockfix2 y` or `INCOGNITA_KNOCKFIX2`.
 
     Test: tests/hf/test_knockfix.py
 
@@ -214,7 +214,7 @@ def knockfix2_on(options) -> bool:
 
 
 def knockcb_on(options) -> bool:
-    """KNOCKCB (ALPHAHUMP, Incognita extension, default OFF): the `knockcb y` keyword, else `INCOGNITA_KNOCKCB` (1/y/yes/on).
+    """`knockcb` (Incognita extension, default OFF): the `knockcb y` keyword, else `INCOGNITA_KNOCKCB` (1/y/yes/on).
 
     Test: tests/hf/test_knockfix.py
 
@@ -226,7 +226,7 @@ def knockcb_on(options) -> bool:
 
 
 def sigavcont_on(options) -> bool:
-    """SIGAVCONT (Incognita extension, default OFF): the `sigavcont y` keyword, else `INCOGNITA_SIGAVCONT` (1/y/yes/on).
+    """`sigavcont` (Incognita extension, default OFF): the `sigavcont y` keyword, else `INCOGNITA_SIGAVCONT` (1/y/yes/on).
 
     Test: tests/hf/test_sigavcont.py
 
@@ -330,7 +330,7 @@ def knockout(inp: PreeqInputs, options, params, coulbar_mev, xsreacinc_mb: Tenso
             total = torch.where((dE > 2.0) & (total == 0), last * dE, total)
         sigav = torch.where(dE > 2.0, total / torch.where(dE > 2.0, dE, torch.ones_like(dE)), last)
         if cont:
-            # SIGAVCONT: sigav is the average inverse cross section over the emission window [coulbar, emax]
+            # `sigavcont`: sigav is the average inverse cross section over the emission window [coulbar, emax]
             # (Kalbach 2005). TALYS evaluates it with two numerical forms switched at a hard dE = 2 MeV: the single
             # bin eend (first bin ABOVE emax) below, a whole-bin sum over [coulbar, egrid(eend)] divided by dE
             # above, which jumps at the switch and moves with the grid. Here one exact average of the linear
@@ -509,10 +509,10 @@ def complex_particle_spectra(
     ki = knockout(inp, options, params, coulbar_mev, xsreacinc_mb)
     bu = torch.zeros_like(ps)
     if inp.k0 > 2:
-        # CPINC: breakup.f90's cross section carries the factor Cbreak(type), and
+        # breakup.f90's cross section carries the factor Cbreak(type), and
         # input_preeqpar.f90:90-91 sets Cbreak = 0 for an alpha projectile, so a default alpha run
         # has no breakup term (the alpha path is unchanged: it never calls breakup()).
-        # ENGPROJ: d/t/h run Kalbach's breakup (preeqcomplex.f90:62-67, breakupmodel 1 = default);
+        # d/t/h run Kalbach's breakup (preeqcomplex.f90:62-67, breakupmodel 1 = default);
         # the deuteron Avrigeanu model (breakupmodel 2, breakupAVR.f90) is not ported and raises.
         cbreak = [float(params.at("cbreak", t)) for t in range(1, 7)]
         if inp.k0 in (3, 4, 5):

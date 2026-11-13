@@ -1,8 +1,7 @@
-"""FIDELITY1: port-fidelity fixes, ON by default since KWCOV integration (docs/hf/FIDELITY_DEFAULTS.md).
+"""Port-fidelity fixes, ON by default (docs/hf/FIDELITY_DEFAULTS.md).
 
-Each fix here corrects a place where the port departs from stock TALYS-2.25 on a deck TALYS accepts. They were opt-in
-(default OFF) while the decision was open; Seth approved fixing port bugs in the default engine (2026-11-08), so every
-fix is now ON unless switched off. The deliberate INCOGNITA defaults (NPWINDOW, EXACTFIS, CCEXITNB2, LOWEPOT, ...)
+Each fix here corrects a place where the port departs from stock TALYS-2.25 on a deck TALYS accepts. Every fix is ON
+unless switched off. The deliberate Incognita defaults (`npwindow`, `exactfis`, `ccexitnbnf`, `lowepot`, ...)
 are not port bugs and are not touched here.
 
 Switch: `INCOGNITA_FIDFIX` unset / `all` / `y` / `1` = every fix (the default); a comma list = only those fixes;
@@ -21,7 +20,7 @@ Fixes:
          (dens_reference._structure_of, gamma parameters, chained pre-equilibrium) -- and in each of those the chain
          nucleus is (Zix, Nix) = (0, 0), so `Options.ldmodel_of` handed it `ldmodelCN` too. With the fix, (0, 0) of an
          options set whose target is not the run's target (fitlib.active()) takes the TALYS value of that nucleus in the
-         real run: its per-nucleus `ldmodel` card, else `ldmodelall`. Only decks with an explicit `ldmodelCN` that
+         real run: its per-nucleus `ldmodel` keyword, else `ldmodelall`. Only decks with an explicit `ldmodelCN` that
          differs from `ldmodel` are affected (e.g. structure/best/Fe056: `ldmodel 2` + `ldmodelCN 1`).
   besttables  a table a best file names (`awdadjust n 1. awdadjust-n.table`) is looked up in the best file's own
          `tables/` directory before its `misc/tables` (fitlib, the `dirs` of ompdeck.resolve). TALYS opens the name in the
@@ -45,7 +44,7 @@ Fixes:
          T-dependent column and the photoabsorption column (fstrength.f90:401-411) went the other way: U-239 f_E1 at
          0.4 / 0.6 MeV 9.08e-10 / 1.54e-9 vs stock 2.12e-9 / 1.01e-9 (psf*.E1 89 %, cross_g.tot 19.7 %, and the
          engine's photon transmission there). With the fix the port has TALYS's numbers (values straight-through, so
-         the etable / wtable gradients are kept). KWCOV B15 (docs/hf/FIDELITY_DEFAULTS.md section 4).
+         the etable / wtable gradients are kept; docs/hf/FIDELITY_DEFAULTS.md section 4).
 
 TALYS: (none -- Incognita switch module; each fix names the TALYS lines it restores)
 Test: tests/hf/test_fidfix.py

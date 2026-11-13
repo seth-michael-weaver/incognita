@@ -1,4 +1,4 @@
-"""CEANG: physics/hf/compound/ceang.py -- TALYS's compound Blatt-Biedenharn Legendre coefficients from per-pair HF weights,
+"""physics/hf/compound/ceang.py -- TALYS's compound Blatt-Biedenharn Legendre coefficients from per-pair HF weights,
 checked against an independent m-substate sum (sympy Clebsch-Gordan, no Racah algebra), on a spin-0 and an odd-A target."""
 
 import math
@@ -62,7 +62,7 @@ def test_blatt_biedenharn_vs_mstate_sum(two_i0, two_in, J2, pairs):
 
 
 def test_matches_covang_when_denominator_constant():
-    """With M = (2J+1) T_a T_b the exact builder reproduces angular.compound_elastic_legendre (COVANG) term for term."""
+    """With M = (2J+1) T_a T_b the exact builder reproduces angular.compound_elastic_legendre term for term."""
     from physics.hf.ecis import angular
 
     rng = np.random.default_rng(1)

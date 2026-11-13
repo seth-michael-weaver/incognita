@@ -6,7 +6,7 @@ output family. `talys_writer` is the output routine (`file:line`) in `~/opt/taly
 
 | status | meaning |
 |---|---|
-| SUPPORTED | in `Results` (`physics/hf/results.py`) on the production C path with default inputs; covered by the E2E/A-mult gates |
+| SUPPORTED | in `Results` (`physics/hf/results.py`) on the production C path with default inputs; covered by the E2E/A-mult tests |
 | PARTIAL | produced, but only behind an `INCOGNITA_*` switch, on one driver, or for a subset (notes say which) |
 | INTERNAL | computed by the engine, not carried out in `Results` |
 | MISSING | not computed |

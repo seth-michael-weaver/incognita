@@ -48,8 +48,8 @@ class FeaturizerStats:
 # shell periodicity directly instead of making it learn one from (Z, N).
 #
 # Off by default, because they make the surrogate worse. On the synthetic fixture in
-# tests/test_surrogate.py they take held-out capture RMS from 0.28 to 1.13 against a 0.35
-# gate -- a factor of three, and the reason that test was red. The end-to-end run measured
+# tests/test_surrogate.py they take validation capture RMS from 0.28 to 1.13 against a 0.35
+# threshold -- a factor of three, and the reason that test was red. The end-to-end run measured
 # the same direction earlier. A periodic basis over a lattice with 40-odd points per axis
 # aliases badly and buys nothing the network could not fit anyway; the shell information that
 # does help arrives as shell_features() in Stage C, as a distance to a closed shell rather
@@ -131,7 +131,7 @@ class Featurizer:
         Nf = np.atleast_1d(np.asarray(N, dtype=float))
         waves = []
         # period 2 is pairing, period 4 the sub-shell alternation; longer periods are not a
-        # known physical structure and mostly gave the network room to overfit held-out chains
+        # known physical structure and mostly gave the network room to overfit validation chains
         for period in periods:
             for v in (Nf, Zf):
                 waves.append(np.sin(2.0 * np.pi * v / period)[:, None])

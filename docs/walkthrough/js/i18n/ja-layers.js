@@ -1,4 +1,4 @@
-/* Japanese: layers (第21章). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Japanese: layers (第21章). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -29,7 +29,7 @@
   <h3>第1層 · すべての原子核に1つの規則</h3>
   <p>青い線は、ある反応に対するエンジンの予測です。エンジンはいちばん下の層で、すべての核種に同じ物理と同じ大域的な設定を使い、個々の原子核の断面積に合わせて調整したものは何もありません。</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">測定値を表示</button></div>
-  <p>だからこそ、測定値に対しても、同じ原子核で計算した他の模型コードに対しても検証できます。ただしブラインドテストではありません。大域的な設定は、まさにこれらの比較を見ながら選ばれました。${engineScore}</p>
+  <p>だからこそ、測定値に対しても、同じ原子核で計算した他の模型コードに対しても検証できます。ただし独立した検証ではありません。大域的な設定は、まさにこれらの比較を見ながら選ばれました。${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -57,8 +57,8 @@
 <div class="step">
   <h3>現在の状況</h3>
   <p>層が採用されるのは測定値と照らし合わせて検証された後だけで、役に立たなければオフのままです。現在、エンジンは使用中で、TERRAは候補です。測定された構造の層とエンジンの不確かさの帯は、まだ検証中です。</p>
-  <p><a href="scoreboard.html" data-keep-lang>スコアボード全体を見る →</a> 勝てなかった比較のすべて、各対抗相手、そしてその読み方。</p>
-  <div class="aside">${ASOF ? `${ASOF}時点のスコア。出典は` : "スコアの出典は"}プロジェクトの研究台帳です。図の曲線は説明用です。</div>
+  <p><a href="scoreboard.html" data-keep-lang>すべての比較を見る →</a> 勝てなかった比較のすべて、各対抗相手、そしてその読み方。</p>
+  <div class="aside">${ASOF ? `${ASOF}時点のスコア。出典は` : "スコアの出典は"}プロジェクトの比較記録です。図の曲線は説明用です。</div>
 </div>`,
   };
 })();
@@ -78,5 +78,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "測定値{#}個 / {#}個が帯の内側（目標：約{#}%）",
   "no measurements to check the band against": "帯を確かめる測定値なし",
 });
-Object.assign(WT.L.ui, { nav_board: "スコアボード" });
+Object.assign(WT.L.ui, { nav_board: "比較" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

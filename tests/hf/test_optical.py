@@ -1,23 +1,23 @@
-"""T5 spherical optical-model solver against TALYS/ECIS (gates A-trans and A-inc, p95 of
+"""Spherical optical-model solver against TALYS/ECIS (checks A-trans and A-inc, p95 of
 |ln(port/TALYS)| <= 0.01, docs/results/hf-engine-gates.md).
 
 Three layers, weakest dependency first:
 
 1. Unit tests with no external data: Coulomb functions against Riccati-Bessel and the Wronskian,
-   the ECIS card rounding and its straight-through gradient, unitarity, the j-axis padding rule
+   the ECIS input-record rounding and its straight-through gradient, unitarity, the j-axis padding rule
    of contract §5, `process_tjl`'s fill-in and lmax, and differentiability wrt the OMP
    parameters (§4.4).
-2. An ECIS oracle checked into this file: the exact `ecisinv.inp`/`ecisinc.inp` card for
+2. An ECIS oracle checked into this file: the exact `ecisinv.inp`/`ecisinc.inp` input for
    n + 56Fe at 6 MeV, and the T_lj and cross sections ECIS itself wrote to `ecis.inctr` /
    `ecisinc.out` for it. This pins the solver to ECIS with nothing installed.
-3. The gates, read straight out of the reference dump archives in `features/hf_reference/raw`
+3. The checks, read straight out of the reference dump archives in `features/hf_reference/raw`
    with `physics.hf.yandf`, not through `reference.py`'s parquet: T0's `block_index.parquet`
-   misattributes block metadata (2026-09-13), and the raw text is the thing the
-   gate is defined against. Skips when the archives are absent.
+   misattributes block metadata, and the raw text is the thing the
+   check is defined against. Skips when the archives are absent.
 
 Energy convention. `omppar_<p>.out` and `transmission_<p>.out` are both written on ECIS's
 laboratory energy `e = egrid/specmass` (inverseecis.f90:403 computes it once and both the
-parameter row and the ECIS card use it), so the column is handed to the solver unchanged. Only
+parameter row and the ECIS input use it), so the column is handed to the solver unchanged. Only
 `inverse.inverse_channels`, which starts from T1's `EmissionGrid` (egrid), divides by specmass.
 """
 
@@ -42,12 +42,12 @@ from physics.hf.omp.incident import strength_functions
 from physics.hf.omp.inverse import process_tjl
 
 TOL = 0.01  # A-trans and A-inc
-FLOOR = 1.0e-6  # T floor of the A-trans gate (contract §6)
+FLOOR = 1.0e-6  # T floor of the A-trans check (contract §6)
 RAW = Path(__file__).resolve().parents[2] / "features" / "hf_reference" / "raw"
 # Extraction cache. Outside the repo on purpose: the 14 archives are ~260 MB unpacked and
 # nothing here belongs in git. Override with HF_RAW_CACHE.
 EX = Path(os.environ.get("HF_RAW_CACHE", Path.home() / ".cache" / "incognita" / "hf_raw"))
-# the files each gate reads out of an archive
+# the files each check reads out of an archive
 WANTED = tuple(
     [f"{stem}_{p}.out" for stem in ("transmission", "omppar") for p in "npdtha"]
     + [f"cross_{p}.tot" for p in "npdtha"]
@@ -110,14 +110,14 @@ def test_coulomb_functions_below_the_barrier_match_the_series():
 
 
 def test_coulomb_functions_unchanged_by_the_numpy_loops():
-    """SPEED1 moved the inward Numerov and the continued fraction from per-step torch ops to
-    numpy with the same floating-point operations. The fixture holds three calls captured from
+    """The inward Numerov and the continued fraction run as numpy loops with the same
+    floating-point operations as the per-step torch ops they replace. The fixture holds three calls captured from
     the golden speed harness (scripts/hf_speed_bench.py) BEFORE that change: the last charged
     inverse channel of Fe-56, Ca-40 and Pb-208 (eta up to 1578, deep sub-barrier, including the
-    entries that overflow to inf/nan). Bit-identical on the capture machine; reasonably close
-    elsewhere (project rule, 2026-09-16: no bit-identity anywhere, <=1e-6 relative is the
-    standard): cross-machine libm/numpy rounding measured up to 3.6e-12 on this Mac (MACFIX2)
-    and ~1.8e-12 on x86 (X86VERIFY), both far under this bound."""
+    entries that overflow to inf/nan). Bit-identical on the machine that captured them; reasonably
+    close elsewhere (project rule: no bit-identity anywhere, <=1e-6 relative is the
+    standard): cross-machine libm/numpy rounding measured up to 3.6e-12 on Apple Silicon
+    and ~1.8e-12 on x86, both far under this bound."""
     z = np.load(Path(__file__).parent / "fixtures" / "coulomb_functions_speed1.npz")
     for j in range(3):
         got = sch.coulomb_functions(
@@ -133,7 +133,7 @@ def test_coulomb_functions_unchanged_by_the_numpy_loops():
             assert rel.max(initial=0.0) <= 1e-6, (j, name, rel.max())
 
 
-# ---------------------------------------------------------------------- 1. ECIS card conventions
+# -------------------------------------------------------------------- 1. ECIS input conventions
 def test_ecis_card_rounding_matches_the_fortran_format():
     e = torch.tensor([6.0, 1.018033e-3, 0.0234567, 0.009999], dtype=DTYPE)
     got = sch.ecis_card_energy(e)
@@ -186,7 +186,7 @@ def test_process_tjl_fills_in_the_value_ecis_omits_and_finds_lmax():
 
 
 # ------------------------------------------------------------------------- 2. the ECIS oracle
-# n + 56Fe at 6.000 MeV. Card exactly as ecisinput.f90 wrote it (`ecisinc.inp`); T_lj and cross
+# n + 56Fe at 6.000 MeV. Input exactly as ecisinput.f90 wrote it (`ecisinc.inp`); T_lj and cross
 # sections exactly as ECIS-06 wrote them back (`ecis.inctr`, `ecisinc.out`), TALYS-2.24 with the
 # reference-dump input (localomp y, KD03 local parameters for Fe56).
 ECIS_CARD = dict(
@@ -234,9 +234,9 @@ def test_solver_reproduces_ecis_cross_sections(quantity):
 
 def test_ecis_grid_reproduces_the_step_and_matching_radius_ecis_prints():
     """`lect` defaults: h = min(min(a)/2, 1/(2k)), rm = max(R + a ln(|V| k /(aconv E))), Rc."""
-    # the projectile mass goes on the card as f10.5, so the kinematics uses the rounded value
+    # the projectile mass goes into the ECIS input as f10.5, so the kinematics uses the rounded value
     m_proj = float(sch.ecis_card_value(torch.tensor(sch.PARMASS_AMU[1], dtype=DTYPE)))
-    assert m_proj == pytest.approx(1.00866)  # `ecisinc.inp` first level card
+    assert m_proj == pytest.approx(1.00866)  # `ecisinc.inp` first level record
     kin = sch.ecis_kinematics(torch.tensor([6.0], dtype=DTYPE), m_proj, ECIS_MASS_AMU, 0.0)
     h, ism, rm = sch.ecis_grid(_Card(**ECIS_CARD), ECIS_MASS_AMU, kin)
     assert float(h) == pytest.approx(0.2667788092, rel=1e-9)  # ecisinc.out "step size"
@@ -642,14 +642,14 @@ def test_a_inc_gate(target, Z, A, record_property):
 
     The incident channel's OMP parameters are not dumped (omppar_<p>.out is the emission grid and
     transmission_inc.out survives only for the last energy, contract §4.1), so they come from
-    T4's ported `omp_parameters`, whose own gate A-omppar is p95 3.5e-7.
+    T4's ported `omp_parameters`, whose own check A-omppar is p95 3.5e-7.
 
     Only targets TALYS itself treats as a single spherical channel are in scope: `incidentecis`
     takes the spherical branch at incidentecis.f90:203 for `colltype == 'S'` and otherwise
     couples collective levels, which is ECIS coupled channels (T13, via `ecis.bridge` for now --
     contract §5). Of the 14 spherical reference targets, Au197 is rotational ('R', 5 coupled
     levels) and Ca040 vibrational ('V', 4 phonon levels) in the incident channel, so they are
-    skipped here. Their *emission* channels are spherical and are gated by A-trans.
+    skipped here. Their *emission* channels are spherical and are checked by A-trans.
     """
     from physics.hf.input.defaults import default_options, default_params
     from physics.hf.omp import parameters as P
@@ -715,7 +715,7 @@ if __name__ == "__main__":  # pragma: no cover -- publishes the sliced A-trans t
 
 
 # ================================================================================================
-# DIFFPARAM (gate G0.4): the optical-model family on the autograd graph
+# The optical-model family on the autograd graph
 # ================================================================================================
 
 
@@ -751,17 +751,17 @@ def test_transmission_torch_path_matches_numpy():
 def test_card_rounding_switch_is_forward_only_and_small():
     """`card_rounding(False)` changes the forward value and nothing else about the port.
 
-    ECIS reads its parameters off f10.5 cards and the port quantises them the same way, through
-    a straight-through estimator whose gradient is the identity. DIFFPARAM's finite-difference
-    check switches the quantisation off so that the difference measures the gradient rather than
-    the card resolution; this pins how much that costs the forward value -- parts in 1e5 of a
-    transmission coefficient, i.e. the card resolution itself, and never a structural change.
+    ECIS reads its parameters as f10.5 fields and the port quantises them the same way, through
+    a straight-through estimator whose gradient is the identity. The finite-difference
+    gradient check switches the quantisation off so that the difference measures the gradient rather than
+    the input resolution; this pins how much that costs the forward value -- parts in 1e5 of a
+    transmission coefficient, i.e. the input resolution itself, and never a structural change.
     """
     import torch
 
     from physics.hf.omp.schrodinger import CARD_ROUNDING, card_rounding, ecis_card_value
 
-    assert CARD_ROUNDING is True, "the default must be TALYS's: cards on"
+    assert CARD_ROUNDING is True, "the default must be TALYS's: rounding on"
     x = torch.tensor([1.2345678, 49.876543], dtype=torch.float64, requires_grad=True)
     on = ecis_card_value(x)
     assert torch.allclose(on, torch.tensor([1.23457, 49.87654], dtype=torch.float64))
@@ -770,7 +770,7 @@ def test_card_rounding_switch_is_forward_only_and_small():
         assert torch.equal(off, x)
     assert CARD_ROUNDING is True, "the context manager must restore the default"
     # the straight-through gradient is the identity either way, which is the whole reason the
-    # gate may switch the forward quantisation off
+    # gradient check may switch the forward quantisation off
     (g_on,) = torch.autograd.grad(on.sum(), x, retain_graph=True)
     with card_rounding(False):
         (g_off,) = torch.autograd.grad(ecis_card_value(x).sum(), x)
@@ -778,7 +778,7 @@ def test_card_rounding_switch_is_forward_only_and_small():
 
 
 # ================================================================================================
-# SPEEDT: the non-differentiable inverse path runs all six particles in one pass
+# The non-differentiable inverse path runs all six particles in one pass
 # ================================================================================================
 
 
@@ -793,9 +793,9 @@ def _same_bits(a, b, rel: float = 0.0) -> bool:
 def test_coulomb_functions_many_is_each_call_to_the_bit():
     """`coulomb_functions_many` gives every column its own call's continued-fraction start and
     Numerov step count, so each call comes back reasonably close to `coulomb_functions` alone
-    (project rule, 2026-09-16: no bit-identity anywhere, <=1e-6 relative is the standard) --
+    (project rule: no bit-identity anywhere, <=1e-6 relative is the standard) --
     including calls of different sizes, deep sub-barrier columns and an uncharged call. Batching
-    the columns together reorders the floating-point sums; measured on this Mac (MACFIX2) at
+    the columns together reorders the floating-point sums; measured on Apple Silicon at
     <=7.2e-15 relative, ordinary hardware FP non-associativity, not a different computation."""
     g = torch.Generator().manual_seed(7)
     etas, rhos = [], []

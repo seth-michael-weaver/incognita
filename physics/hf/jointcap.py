@@ -1,8 +1,8 @@
-"""JOINTCOMP: partial-wave joint anchoring of keV capture (default OFF; used only by the JOINTCOMP combiner, never by a plain run).
+"""Partial-wave joint anchoring of keV capture (default OFF; used only by the joint-composite combiner, never by a plain run).
 
-Rule JS (development notes): measured D0 and <Gg> are s-wave resonance quantities. The s-wave entrance part of the capture cross
+Rule JS: measured D0 and <Gg> are s-wave resonance quantities. The s-wave entrance part of the capture cross
 section is taken from the run whose compound cells are anchored to them (ANCH); the p- and d-wave entrance parts are taken from the
-field run (F, the B62P deck). sigma_JS(E) = fs_A(E) * sigma_A(E) + (1 - fs_F(E)) * sigma_F(E).
+field run (F, the field deck). sigma_JS(E) = fs_A(E) * sigma_A(E) + (1 - fs_F(E)) * sigma_F(E).
 
 fs(E) = the s-wave share of capture from the run's own ingredients, Hauser-Feshbach without width fluctuations:
   sigma_l = pi lambdabar^2 sum_{J,pi} g_J n_lJ T_l T_g(J,pi) / (sum_l' n_l'J T_l' + T_g(J,pi)),  l = 0, 1, 2
@@ -15,7 +15,7 @@ Inelastic competition and WFC are ignored (they act on all l alike to first orde
 import json
 import numpy as np
 
-HBARC2_FAC = 0.6566e6  # pi lambdabar^2 [b] ~ 0.6566e6/E[eV] * ((A+1)/A)^2 (TERRALD step0b convention, x1e3 -> mb)
+HBARC2_FAC = 0.6566e6  # pi lambdabar^2 [b] ~ 0.6566e6/E[eV] * ((A+1)/A)^2 (x1e3 -> mb)
 
 
 def _spin(s2, J):
@@ -75,8 +75,8 @@ def combine(qF, qA):
     return out
 
 
-# ISOROTPASS (development notes, development notes): where the compound's even-even core is a measured rotor (R42 = E(4+_1)/E(2+_1)
-# >= 3.0, RIPL-4/ENSDF levels, isorot_r42.csv), rho/f errors near S_n are parity-blind, so the measured D0/<Gg> anchor passes to both
+# INCOGNITA_ISOROTPASS: where the compound's even-even core is a measured rotor (R42 = E(4+_1)/E(2+_1)
+# >= 3.0, RIPL-4/ENSDF levels, isorot_r42.csv), rho/f errors near S_n do not depend on parity, so the measured D0/<Gg> anchor passes to both
 # parities: the composite takes the anchored run (ANCH) whole instead of rule JS. INCOGNITA_ISOROTPASS=0 restores plain JS everywhere.
 ISOROT_R42_MIN = 3.0
 _R42 = None
@@ -94,7 +94,7 @@ def core_r42(Z, A):
 
 
 def isorot_full(Z, A):
-    """True -> the JS composite of target (Z, A) uses the anchored run whole (ISOROTPASS); default ON, INCOGNITA_ISOROTPASS=0 -> False."""
+    """True -> the JS composite of target (Z, A) uses the anchored run whole; default ON, INCOGNITA_ISOROTPASS=0 -> False."""
     import os
     if os.environ.get("INCOGNITA_ISOROTPASS", "1") == "0": return False
     return bool(core_r42(Z, A) >= ISOROT_R42_MIN)

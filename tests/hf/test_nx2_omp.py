@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `omp`: `omp.omp_nx2` (the compiled optical-model solve, the float OMP parameters)
+"""Native kernel switch `omp`: `omp.omp_nx2` (the compiled optical-model solve, the float OMP parameters)
 against the torch paths with the lever off. Skipped without a `libnx2` build
 (scripts/build_nx2_native.sh)."""
 

@@ -98,7 +98,7 @@ Object.assign(WT.L.labels, {
   "{#} runs of the engine, each with its inputs nudged at random": "엔진 {#}회 실행, 매번 입력을 무작위로 살짝 바꿈",
 });
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "target levels, with the share of nuclei sitting on each (energy scale stretched near the bottom)": "표적 준위와 각 준위에 있는 원자핵의 몫 (아래쪽은 에너지 눈금 확대)",
 });

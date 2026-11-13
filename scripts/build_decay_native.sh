@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPEEDD: build the compiled decay kernels (physics/hf/compound/decay_native.c) into
+# Build the compiled decay kernels (physics/hf/compound/decay_native.c) into
 # physics/hf/compound/libdecaynative.so.1 (a build output, not committed; the ".1" keeps
 # pkgutil from listing it as a Python extension module of physics.hf.compound).
 #

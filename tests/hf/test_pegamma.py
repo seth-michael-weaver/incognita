@@ -1,4 +1,4 @@
-"""PEGAMMA: a continuous pre-equilibrium photon onset (Incognita extension, default OFF).
+"""A continuous pre-equilibrium photon onset (Incognita extension, default OFF).
 
 With `pegammaramp` (MeV) > 0: each exciton state's photon emission rises as 1 - exp(-(U - A)/ramp)
 above its Pauli + pairing threshold, the photon collapse onto the discrete states integrates the

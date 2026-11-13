@@ -59,9 +59,9 @@ def test_mask_removes_a_dataset_entirely():
     """A masked row must not reach its dataset's shared offset either.
 
     This is what keeps a cross-validation fold honest: the row mask is gathered from the same
-    training weights the rest of the loss uses, and a held-out nuclide must contribute to
+    training weights the rest of the loss uses, and a validation nuclide must contribute to
     neither the residual nor the latent. The MACS constraint failed exactly this test and cost
-    0.1510 against 0.2035 in held-out RMS.
+    0.1510 against 0.2035 in validation RMS.
     """
     pred, lv = _pred(2)
     rows = _rows()

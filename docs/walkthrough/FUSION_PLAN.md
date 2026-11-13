@@ -65,7 +65,7 @@ The text stays minimal: a step heading, one short line, the controls, and for 30
 drawings do the rest.
 
 ### 29 · Fusion energy and the Coulomb barrier (Intro)
-0. **Fusion energy from the binding curve** — moved here from the Binding chapter (Seth, 2026-11-03: keep the fusion
+0. **Fusion energy from the binding curve** — moved here from the Binding chapter (to keep the fusion
    material together). It draws the Binding chapter's curve (its frame, mode 2) with A + A → 2A. Binding keeps the curve
    and fission, plus a one-line pointer "→ Fusion"; the Neutrons chapter keeps its general proton barrier with a pointer
    to this chapter's barrier step (#fusion-2).

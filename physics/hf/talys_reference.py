@@ -9,7 +9,7 @@ sections, so a disagreement can be traced to one routine. This module produces t
     # on a compute box (stdlib only; TALYS_DIR must point at the install root)
     python3 physics/hf/talys_reference.py run --out ~/hf_reference/raw --workers 3 \\
         --shard 0 --nshards 2
-    # back on the laptop (numpy + pandas + pyarrow)
+    # then locally (numpy + pandas + pyarrow)
     uv run python -m physics.hf.talys_reference parse --raw features/hf_reference/raw \\
         --out features/hf_reference
     uv run python -m physics.hf.talys_reference check --out features/hf_reference
@@ -17,7 +17,7 @@ sections, so a disagreement can be traced to one routine. This module produces t
 Three rules, each learned from a TALYS run that exited 0 and was wrong:
 
 1. **Defaults means keyword absent.** Pinning `ldmodel 1`, the documented default, collapsed
-   U-238 (n,f) 17x (docs/results/wp24-fission-ldmodel-trap.md). The input therefore contains
+   U-238 (n,f) 17x. The input therefore contains
    the projectile, target, energy file and *output* keywords only. Physics keywords appear only
    in a named variant (`wfc_off`), and the variant says so.
 2. **Energies ascend strictly** or TALYS truncates silently at the first descent. `ENERGIES_MEV`
@@ -71,10 +71,10 @@ class Target:
         return f"{self.symbol}{self.A:03d}"
 
 
-# 24 targets, A 40-241. `spherical` targets define the 5% end-to-end gate; `deformed` rare
+# 24 targets, A 40-241. `spherical` targets define the 5% end-to-end test; `deformed` rare
 # earths go through TALYS's spherical OMP + DWBA collective levels by default; `actinide`
 # targets default to RIPL OMP 2408 with ECIS coupled channels (input_omppar.f90:181-188) and
-# to `fission y` (A > fislim), so their gate is deferred until the ECIS task lands.
+# to `fission y` (A > fislim), so their test is deferred until the ECIS task lands.
 REFERENCE_SET: tuple[Target, ...] = (
     Target("Ca", 20, 40, "spherical", "doubly magic, lightest"),
     Target("Fe", 26, 56, "spherical", "structural, even-even"),
@@ -376,8 +376,8 @@ class _ParquetSink:
     """One parquet file, appended archive by archive rather than written once at the end.
 
     The first parse of the full 54-archive reference set held every family's long-format rows
-    until the last tarball and grew by ~0.5 GB per archive; extrapolated to ~30 GB, and it is
-    what ran the laptop out of memory on 2026-09-12. Here each archive is one row group, so
+    until the last tarball and grew by ~0.5 GB per archive; extrapolated to ~30 GB, more than a
+    workstation has. Here each archive is one row group, so
     peak memory is one archive whatever the set size. The files are equivalent to what the
     buffered version wrote: the string columns stay dictionary-encoded, so pandas still reads
     them back as ``category`` -- with the index width pinned to int32, because per-chunk

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""PERFCASC gate runner (used by tests/hf/test_perfcasc_gate.py; not a test module itself).
+"""Cascade bit-identity check runner (used by tests/hf/test_perfcasc_gate.py; not a test module itself).
 
-Runs ONE nuclide of the TALYSWORLD library job against an engine checkout: the library v0.2 deck and runner (the
-`libv02/inputs` bundle: lines_P / lines_A / actjs_lines_*, sl_meas_b.csv and its code/ prodrun -> pprun -> r52pool ->
-engine_pool, `fewres off`, `pewindow g`), the arms of the library composition (JS(P,A): P and A; ACTJS A(rotor): AJ), on
+Runs ONE nuclide of the library build against an engine checkout: the library v0.2 deck and runner (the
+library input bundle: lines_P / lines_A / actjs_lines_*, sl_meas_b.csv and its runner code ->
+engine_pool, `fewres off`, `pewindow g`), the arms of the library composition (JS(P,A): P and A; actinide A(rotor): AJ), on
 an energy grid given as a JSON list of eV. The bundle sets the engine's switches under their pre-release NUCLIDO_* names;
 they are mirrored here to the INCOGNITA_* names this repository reads (scripts/talysworld/engine_env.py).
 
-Writes a JSON file {arm: {key: [float.hex(), ...]}} with the gate channels of every arm (total, elastic, nonelastic,
+Writes a JSON file {arm: {key: [float.hex(), ...]}} with the compared channels of every arm (total, elastic, nonelastic,
 capture, (n,p), (n,a), (n,2n), inelastic, fission), exact to the bit.
 
 usage: perfcasc_gate_run.py --repo REPO --inputs LIBV02_INPUTS --z Z --a A --comp COMP --grid GRID.json --cc CCDIR --out OUT.json
@@ -25,7 +25,7 @@ import engine_env  # noqa: E402  (the one NUCLIDO_* -> INCOGNITA_* switch table)
 
 
 ARMS = {"P": ["P"], "A": ["A"], "AJ": ["AJ"], "JS(P,A)": ["P", "A"], "ACTJS A(rotor)": ["AJ"]}
-#: npz key of each gate channel (engine_pool's names)
+#: npz key of each compared channel (engine_pool's names)
 KEYS = {"total": "tot_total", "elastic": "tot_elastic", "nonelastic": "tot_nonelastic", "capture": "capture_mb",
         "np": "ch_xs010000", "na": "ch_xs000001", "n2n": "ch_xs200000", "inelastic": "ch_xs100000",
         "fission": "tot_fission"}

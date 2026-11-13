@@ -28,7 +28,7 @@ WT.L.ch.stars = {
 </div>
 <div class="step">
   <h3>与测量值对照</h3>
-  <p>INCOGNITA 的 30 keV 值除以测量值，共 94 个稳定核素（<a href="scoreboard.html">成绩表</a>）。</p>
+  <p>INCOGNITA 的 30 keV 值除以测量值，共 94 个稳定核素（<a href="scoreboard.html">对比</a>）。</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {
@@ -78,7 +78,7 @@ Object.assign(WT.L.labels, {
   "r-peak Te, Xe": "r 峰 Te、Xe",
   "r-process: a flood of neutrons makes very neutron-rich nuclei": "r 过程：中子洪流造出极富中子的核",
   "r-process: very neutron-rich nuclei": "r 过程：极富中子的核",
-  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test": "带圈：纯 s 同位素 · 测量值：汇编值（KADoNiS）· 开发中的对比，不是盲测",
+  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test": "带圈：纯 s 同位素 · 测量值：汇编值（KADoNiS）· 开发中的对比，不是独立检验",
   "ringed: s-only · measured: KADoNiS": "带圈：纯 s · 测量值：KADoNiS",
   "s Ba": "s Ba",
   "s Pb": "s Pb",

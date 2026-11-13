@@ -1,11 +1,11 @@
-"""CCPROP (ROUTE100 WP8): the log-derivative propagator, and the two facts that killed it.
+"""Log-derivative propagator: the alternative coupled-channels solver, and the two facts against it.
 
 `docs/results/hf-ccprop.md` is the verdict. These tests hold the evidence behind it:
 
 * the propagator solves the same coupled-channels problem as `cc_block_w` -- its cross sections
-  converge on the kernel's as the radial step shrinks (so the kill is not a bug);
+  converge on the kernel's as the radial step shrinks (so the rejection is not a bug);
 * `ccprop.c` and the torch prototype are the same method on the same numbers;
-* gate 1 fails on arithmetic: even the propagator's unreachable FLOP floor -- one complex inverse
+* the first speed criterion fails on arithmetic: even the propagator's unreachable FLOP floor -- one complex inverse
   per ECIS step and nothing else -- is more than half of what the renormalised Numerov kernel
   costs on real blocks.
 """
@@ -68,7 +68,7 @@ def _reac(band, chs, ff, kin, h, nmatch, r, prop: bool) -> torch.Tensor:
 
 def test_propagator_converges_on_the_numerov_kernel_as_the_step_shrinks():
     """The log derivative solves the same equation: refining the grid closes the gap. It does NOT
-    close it at ECIS's own step -- that is CCPROP's gate-2 kill, measured in
+    close it at ECIS's own step -- that is the second criterion's failure, measured in
     docs/results/hf-ccprop.md, not asserted here."""
     gaps = []
     for refine in (1, 4, 16):

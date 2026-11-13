@@ -1,6 +1,6 @@
-"""FIXENG F15: nonelastic != sum of exclusive channels (BASICS RC14), reproduced on our engine (stock defaults, no fit
+"""Nonelastic != sum of exclusive channels, reproduced on our engine (stock defaults, no fit
 lines) and fixed behind INCOGNITA_WFCNORM (keV: Moldauer Gauss-Laguerre leak + coupled-channels pi/k^2 at the true energy
-against ECIS at the card energy) and INCOGNITA_NGNEXCL ((n,gamma X) flux of the compound's gamma-fed bins, TALYS's
+against ECIS at the input-file energy) and INCOGNITA_NGNEXCL ((n,gamma X) flux of the compound's gamma-fed bins, TALYS's
 `xsngn`, outside every exclusive channel). Both default OFF; OFF must be TALYS's path to the bit.
 
 Reproducers: n + O-16 at 1-2 keV (nonelastic ~1 mb next to ~3 b compound elastic: the 2.7e-4 relative leak is 90 % of

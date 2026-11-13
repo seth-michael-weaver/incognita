@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """README "Uncertainties", D0 withheld: coverage of the shipped INTERPOLATED 68 / 95 % interval by achieved chart distance d
-(HOLE + HOLE-2 + SCATTER held-out rows, Z <= 83, hashed reserve nuclides excluded), nucleus bootstrap 95 % CI (2,000, seed 20260923).
+(HOLE + HOLE-2 + SCATTER validation rows, Z <= 83, hashed reserve nuclides excluded), nucleus bootstrap 95 % CI (2,000, seed 20260923).
     python scripts/release/score_interp_interval.py docs/release/exam/interp_interval_rows.parquet OUT.md
 Ported from the development tree: scripts/release/terra/capture_scatter_score.py (table B2, SHIPPED column)."""
 import sys, numpy as np, pandas as pd

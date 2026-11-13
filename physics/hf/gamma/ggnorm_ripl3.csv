@@ -1,4 +1,4 @@
-# GAMMAALL E1 ftable factors (physics/hf/gamma/ggnorm.py, INCOGNITA_GGAMMA_NORM).
+# E1 ftable factors (physics/hf/gamma/ggnorm.py, INCOGNITA_GGAMMA_NORM).
 # Source: stock TALYS-2.24 (banner 2.25) defaults, `gnorm y` with explicit eV `gamgam` targets from
 # RIPL-3 (Capote et al., NDS 110 (2009) 3107; RIPL-4 file resonances_L0.dat, column Gg(RIPL-3)
 # and D(RIPL-3)). No BNL-2018 value is used. Built by scripts/gammaall/build_table.py.

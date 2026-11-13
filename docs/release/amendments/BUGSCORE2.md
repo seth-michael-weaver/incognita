@@ -1,10 +1,10 @@
-# BUGSCORE2: scoring audit, round 2 (2026-11-07)
+# Scoring audit, round 2 (2026-11-07)
 
-Round 1 (BUGSCORE, 2026-11-07) reported eight scoring defects without fixing them, because a fix could move a
+Round 1 of the scoring audit reported eight scoring defects without fixing them, because a fix could move a
 published number. Round 2 wrote a regression test for each (`tests/test_bugscore2.py`, synthetic inputs only),
 computed the exact effect of each fix on every published number it touches, and applied the fixes that change no
-published verdict (ranking or significance). The others are amendment drafts below; they need a registered decision
-before they are applied.
+published verdict (ranking or significance). The others are proposed changes below; each needs an explicit decision
+before it is applied.
 
 How the effects were computed: the old and the new scorer on the frozen track rows, for every library grid available
 (staged ENDF/B-VIII.1, JENDL-5, JEFF-4.0, TENDL-2025; ENDF/B-VII.0 and -VII.1 from the official-file grids built on
@@ -20,8 +20,8 @@ JENDL-5 0.255; TENDL-Y 0.193 and ours − TENDL-Y −0.056 [−0.106, −0.020])
 | 2 | fix-unit cells (trust 0, value ×1000) in the unweighted rows | none (frozen predictions) | applied |
 | 3 | `interp_loglog` holds the first positive value below a threshold | ch-n2n, ch-na, ch-np, He production: changes the ch-na ranking | draft E |
 | 4 | SACS integrals from 100 keV | ch-sacs, all libraries; ranking unchanged | applied |
-| 5 | R11 (MACSCHECK) series MACS in the lab frame | curation register v2 evidence; no decision | draft D |
-| 6 | `gatecalib/thresholds.py` says Šidák, computes Bonferroni | research-tree verdict relabel; no verdict | draft F (outside this repository) |
+| 5 | R11 (series MACS check) series MACS in the lab frame | curation register v2 evidence; no decision | draft D |
+| 6 | a confidence-interval helper outside this repository says Šidák, computes Bonferroni | none in this repository | draft F (outside this repository) |
 | 7 | binavg vs score.py MT 5 rules (round-1 amendments B, C) | none | applied |
 | 8 | capture-retro TENDL-Y chose releases by name (round-1 amendment A) | capture-retro TENDL-Y; win stands | applied |
 
@@ -34,8 +34,7 @@ behind it got weight 1.0 at `min_trust = 0` (the comment said there were none). 
 empty): (n,α) 493 → 469 (23 below the floor down to 3.8e-12 b, 1 orphan above it), (n,p) 399 → 391 (8 below the floor,
 7 of them orphans), capture 11,013 → 11,012 (1 orphan), (n,2n) 409 unchanged. Over all kinds the orphans are 33 (n,α)
 and 14 (n,p), as round 1 found. No published number of this repository is computed in consensus mode (the bench tracks
-are frozen row files; consensus mode is used only by tests here). The research tree's copy of `core.py` has the same
-code and scripts there use consensus mode; they are not re-run here.
+are frozen row files; consensus mode is used only by tests here).
 
 **2. Fix-unit cells** (same function, both modes). The 13 fix-unit capture cells carry trust 0 and the value as
 compiled. Trust only silences them in trust-weighted sums; `models/macs_constraint.py` reads the datasets-mode `mxw`
@@ -44,7 +43,7 @@ mb) entered the MACS constraint of any time-split run with cutoff ≥ 2022. They
 (`dropped_fix_unit`). Published numbers come from frozen predictions and do not move. The capture-retro Mo-95 rows are
 Y = 2015 and 2017 only, so Mo-95's own retrodiction never saw them; whether the Y = 2023 arm (17 rows: Se-78, Se-79,
 I-129, Tm-169, Re-187) ran with EXFOR MACS rows, and so saw them through shared parameters, was not checked: that needs
-the development run logs.
+run logs that are not part of this repository.
 
 **4. SACS grid** (`incognita/eval/spectra.py`). 1.3 % of the U-235 Watt and of the Cf-252 Maxwellian spectrum lies
 below 100 keV. Old grid: capture SACS 0.024 dex low (a 1/v test case: −0.0247 dex), threshold SACS 0.006 dex high (the
@@ -63,7 +62,7 @@ normalisation). New grid: 1e-5 eV to 20 MeV, same point density. ch-sacs rms, ol
 | ENDF/B-VII.0 | 0.3019 → 0.3014 (341) | 0.1910 → 0.1805 | |
 
 The order of every entry is unchanged. BROND-3.1, FENDL-3.2 and IRDFF-II (published values on the old rows) were not
-re-scored; no grid of them is on our machines.
+re-scored; no grid of them was available.
 
 **7. Amendments B and C** (`incognita/bench/binavg.py`). B: `binavg` blanked the (n,α) curve wherever σ(MT 5) > 0 when
 the MT 5 products were not read; the point scorer counts a row incomplete only where σ(MT 5) can exceed 1 % of the
@@ -71,7 +70,7 @@ value. C: `binavg` dropped an (n,α) that a file gives only inside MT 5 (no MT 1
 when it reaches 1 mb. Both now follow the point scorer. The only published bin-average (n,α) numbers are ENDF/B-VII.1's
 on the dated tracks (rebuilt 2026-11-06 from the official files). Its official-file grid has no nucleus with (n,α) only
 inside MT 5 and none with σ(MT 5) > 0 and unread products, so none of the 1,845 dated (n,α) rows changes. (The
-ENDF/B-VIII.1 staged grid on the laptop lacks the MT 5 product parts, so 306 dated (n,α) rows would be blanked under
+ENDF/B-VIII.1 staged grid used here lacks the MT 5 product parts, so 306 dated (n,α) rows would be blanked under
 the old rule B if that grid were used; the published placement read the official files.)
 
 **8. Amendment A, TENDL-Y release year** (`incognita/bench/score.py`, `tendl_y`). The capture-retro TENDL-Y entry took
@@ -82,9 +81,9 @@ release here); ours on the same rows 0.1322; ours − TENDL-Y −0.0557 [−0.10
 from the validation cache) gives 0.1957 on 286 rows and −0.0584 [−0.1077, −0.0224]. Either way the win stands; the
 rule applied is the one the code already uses for the dated tracks.
 
-## Amendment drafts (not applied)
+## Proposed changes (not applied)
 
-### D. R11 (MACSCHECK) in the centre-of-mass frame (item 5)
+### D. R11 (series MACS check) in the centre-of-mass frame (item 5)
 
 Finding: `Engine.macs_over` (`incognita/curation/rules.py`) Maxwellian-averages the series curve with lab energies;
 MACS is defined with the centre-of-mass energy E = E_lab A/(A+1). For a 1/v curve the lab value is high by
@@ -101,7 +100,7 @@ so no curation decision changes. Testable series 261 → 262 (Br-81 series 57 be
 Ba-137 series 424 goes from 3 groups (1 against) to 1 (1 against), not flagged either way. Why not applied: the
 published register files (`curation_r11_series_v2.csv`, `curation_summary_v2.json` r11_testable 261 → 262, the R11
 evidence in `curation_register_v2.*`) must be regenerated with the change, and the build needs the EXFOR master
-(`raw/exfor/entry.zip`), which is not on the machines used here. Adopt by applying the patch and rerunning
+(`raw/exfor/entry.zip`), which was not available for this audit. Adopt by applying the patch and rerunning
 `bash scripts/reproduce.sh --download curation`, then replacing the shipped files.
 
 ### E. Point scorer below a library's threshold (item 3)
@@ -136,19 +135,16 @@ Why not applied: it changes a published ranking. ch-na top three, JEFF-4.0 0.281
 becomes JEFF-4.0 0.2808, ENDF/B-VII.0 0.2816, JENDL-5 0.2830. And it does so for a reason worth deciding explicitly:
 under the scorer's convention a zero prediction is "not covered", so the fix removes a library's worst rows (Fe-54
 (n,α) at 2.23 MeV, where ENDF/B-VII.0 is effectively zero against 6.5 mb measured) instead of scoring them. Options for
-the registered decision: (a) the rule above (zero → not covered, as now for every other zero); (b) the rule above, but a
+the decision: (a) the rule above (zero → not covered, as now for every other zero); (b) the rule above, but a
 row where the library is zero and the measurement is positive counts as a miss of a fixed size (e.g. the 1 dex that
 na-post2021 uses), on every threshold track; (c) keep the flat hold and document it. (b) is the fairest to the
 measurements; its numbers are not computed here. Test: `test_interp_loglog_does_not_hold_the_threshold_value_flat`
 (strict xfail).
 
-### F. `scripts/gatecalib/thresholds.py` (item 6; research tree, not part of this repository)
+### F. Bonferroni labelled as Šidák (item 6; code outside this repository)
 
-The "Šidák-widened" CIs use z(1 − 0.025/k), which is Bonferroni; Šidák is z(1 − (1 − 0.95^(1/k))/2). (Its per-nuclide
-harm limit, Φ⁻¹(0.95^(1/n)), is correctly Šidák.) Factor at k = 8: 1.3951 (Bonferroni) vs 1.3914 (Šidák); at k = 20:
-1.5425 vs 1.5388. Corrected lower bounds quoted in `VERDICT_RELABEL_2026-11-06.md`, Bonferroni → Šidák: BANDTAIL T1 ZB
-IS68 −0.00373 → −0.00367, T2 ZB IS95 −0.02196 → −0.02161, BANDCAL ZB IS95 +0.07406 → +0.07426 (k = 20: +0.06624 →
-+0.06644), BANDCAL ZB CRPS −0.00020 → −0.00019, BANDCAL EB na IS68 −0.00568 → −0.00559. No sign changes, so no verdict
-moves (BANDTAIL stays INCONCLUSIVE, BANDCAL STANDS). Bonferroni is the more conservative of the two and valid as such;
-the minimal fix is to call it Bonferroni (or switch the formula to Šidák). Not applied here: the file is in the
-research tree, outside this repository.
+A confidence-interval helper outside this repository labels its family-wise widened intervals "Šidák" but computes
+z(1 − 0.025/k), which is Bonferroni; Šidák is z(1 − (1 − 0.95^(1/k))/2). Factor at k = 8: 1.3951 (Bonferroni) vs
+1.3914 (Šidák); at k = 20: 1.5425 vs 1.5388. Recomputing the affected lower bounds with Šidák changes none of their
+signs. Bonferroni is the more conservative of the two and valid as such; the minimal fix is to call it Bonferroni.
+No number in this repository depends on it.

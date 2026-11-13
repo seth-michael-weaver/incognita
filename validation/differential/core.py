@@ -1,13 +1,13 @@
-"""Differential validation harness (WP-16; blueprint §6.1, §6.3, §4.4, §12).
+"""Differential validation harness.
 
-Scores any prediction of σ(E) — a WP-15 checkpoint, a TALYS run, the surrogate, or an
+Scores any prediction of σ(E) — a Stage C checkpoint, a TALYS run, the surrogate, or an
 evaluated library treated *as if* it were a prediction — against
 
 (a) each evaluated library on the common log-energy grid, with the resolved-resonance
     region excluded by the library's own RRR upper bound (a smooth model cannot and should
     not reproduce a resonance ladder), reported separately for the URR and the fast/smooth
     region;
-(b) the WP-12 EXFOR consensus bins (trust-weighted and unweighted), or the per-dataset
+(b) the EXFOR consensus bins (trust-weighted and unweighted), or the per-dataset
     cells behind them when a publication-year cutoff is requested (time-split
     retrodiction: only measurements published *after* the cutoff are scored);
 (c) Maxwellian-averaged cross sections MACS(kT) folded from σ(E), against KADoNiS v1.0.
@@ -15,10 +15,10 @@ evaluated library treated *as if* it were a prediction — against
 Metrics per (nuclide, MT[, region]): log10 RMS, median |log10 ratio|, median relative
 error, log10 bias, χ² per degree of freedom (with the MF33 relative covariance of the
 reference library where a block exists, diagonal otherwise), and 1σ / 2σ coverage of the
-prediction's stated uncertainty. Everything aggregates by mass region and by the WP-05
-region-holdout manifests.
+prediction's stated uncertainty. Everything aggregates by mass region and by the
+region-split manifests.
 
-The prediction contract (`Prediction`, `PredictionSet.from_parquet`) is what WP-15's
+The prediction contract (`Prediction`, `PredictionSet.from_parquet`) is what
 ``predict.py`` must write: one row per (nuclide_id, mt) with ``energy_ev``, ``sigma_b`` and
 optionally ``sigma_unc_b`` list columns, or ``grid_id`` = the common grid and ``sigma_b``
 of length 3000.
@@ -264,7 +264,7 @@ class PredictionSet(Mapping[tuple[str, int], Prediction]):
 
     @classmethod
     def from_parquet(cls, path: str | Path, *, label: str | None = None, mts=None):
-        """The WP-15 contract.
+        """The prediction contract.
 
         Columns: ``nuclide_id`` (str), ``mt`` (int), ``sigma_b`` (list[f64]); and either
         ``energy_ev`` (list[f64]) or ``grid_id == physics.grid.GRID_ID`` (values on the common
@@ -308,7 +308,7 @@ class PredictionSet(Mapping[tuple[str, int], Prediction]):
         return cls(preds, label=label or path.stem, meta={"path": str(path)})
 
     def to_parquet(self, path: str | Path) -> Path:
-        """Write in the WP-15 contract layout (explicit energies; lossless round trip)."""
+        """Write in the prediction contract layout (explicit energies; lossless round trip)."""
         rows = []
         for p in self._d.values():
             rows.append(
@@ -1482,7 +1482,7 @@ def aggregate_library_rows(rows: pl.DataFrame, by: Iterable[str] = ("region",)) 
 def add_holdout_flags(
     df: pl.DataFrame, holdouts: Mapping[str, frozenset[str]] | None = None
 ) -> pl.DataFrame:
-    """Boolean column ``holdout_<split>`` per WP-05 region holdout."""
+    """Boolean column ``holdout_<split>`` per region split."""
     hs = region_holdouts() if holdouts is None else holdouts
     if df.height == 0:
         return df

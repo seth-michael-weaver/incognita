@@ -1,5 +1,5 @@
-"""SETB: two pieces of `ecis.dwba.dwba_cross_sections` that were recomputed far more often than
-their inputs change. Both return the bits the inline code returned.
+"""Two pieces of `ecis.dwba.dwba_cross_sections` that would be recomputed far more often than
+their inputs change. Both return the bits the inline code returns.
 
 * **The Clebsch-Gordan weights.** `(2 j_c + 1) / (2 s + 1) <j_c -1/2; lambda 0 | j_c' -1/2>^2`
   masked to the natural-parity, open-entrance channels depends on (lambda, parity, lmax, njmax,
@@ -41,13 +41,13 @@ __all__ = ["cg_weights", "exit_waves", "live_levels"]
 def cg_weights(lam: int, pb: int, lmax: int, njmax: int, spin: float) -> Tensor:
     """`dwba_cross_sections`'s `weights[(lam, pb)]`: (NLJ, NLJ), exit channel by entrance channel.
 
-    CENGSETUP: the leading (NLJ, NLJ) block of one table per (lambda, parity, s) on the largest
+    The leading (NLJ, NLJ) block of one table per (lambda, parity, s) on the largest
     l/j table seen so far (`_cg_table`), times the open-entrance mask. `_lj_table(lmax)` lists
     its channels in l order, so a smaller table is a leading block of a larger one, and every
     factor is elementwise (`clebsch` included: its Horner loop skips an element's leading
     iterations, and its factorials are a table), so the block holds the bits of the inline form;
     multiplying by the 0/1 masks one at a time instead of by their product is the same numbers.
-    A key used to miss at every (lmax, njmax) of a new target -- ~600 Clebsch-Gordan tables a
+    A per-(lmax, njmax) key would miss at every new target -- ~600 Clebsch-Gordan tables a
     chart.
 
     TALYS: directecis.f90:1 (directecis)
@@ -93,7 +93,7 @@ def _cg_table(lam: int, pb: int, lmax: int, spin: float) -> Tensor:
 
 
 def _cg_weights_inline(lam: int, pb: int, lmax: int, njmax: int, spin: float) -> Tensor:
-    """The SETB form of `cg_weights`, kept for the bitwise test."""
+    """The per-call form of `cg_weights`, kept for the bitwise test."""
     from physics.hf.core.angmom import clebsch
     from physics.hf.ecis.dwba import _lj_table
 

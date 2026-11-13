@@ -19,19 +19,19 @@ from physics.hf.input import fitlib
 TALYS_DIR = Path(os.environ.get("TALYS_DIR", Path.home() / "opt/talys-src"))
 
 
-_FE56 = SimpleNamespace(Z=26, A=56, projectile="n")  # the run's target, as the cards fitlib.activate would hold
+_FE56 = SimpleNamespace(Z=26, A=56, projectile="n")  # the run's target, as the lines fitlib.activate would hold
 
 
 @pytest.fixture
 def run_target(monkeypatch):
-    """`ldmodel_of` reads the active run at call time; options are built with no active cards (see `_opts`)."""
+    """`ldmodel_of` reads the active run at call time; options are built with no active lines (see `_opts`)."""
     monkeypatch.setattr(fitlib, "_ACTIVE", None)
     return monkeypatch
 
 
 def test_switch_parsing(monkeypatch):
     monkeypatch.delenv(fidfix.ENV, raising=False)
-    assert all(fidfix.on(f) for f in fidfix.FIXES)  # default ON (Seth 2026-11-08: port bugs fixed in the default engine)
+    assert all(fidfix.on(f) for f in fidfix.FIXES)  # default ON (port bugs fixed in the default engine)
     for v, want in (("", set(fidfix.FIXES)), ("0", set()), ("n", set()), ("off", set()), ("none", set()),
                     ("all", set(fidfix.FIXES)), ("y", set(fidfix.FIXES)),
                     ("ldcn", {"ldcn"}), ("besttables, ldcn", {"ldcn", "besttables"})):
@@ -45,7 +45,7 @@ def test_default_is_on_for_ldcn(monkeypatch, run_target):
 
 
 class _Ld:
-    """An options set built with no active cards, whose `ldmodel_of` is then asked with Fe-56 as the active run."""
+    """An options set built with no active lines, whose `ldmodel_of` is then asked with Fe-56 as the active run."""
 
     def __init__(self, Z, A, overrides=None):
         saved = fitlib._ACTIVE
@@ -88,7 +88,7 @@ def test_ldcn_on_only_the_run_compound_takes_ldmodelcn(monkeypatch, run_target):
 def test_ldcn_on_keeps_a_per_nucleus_card(monkeypatch, run_target):
     monkeypatch.setenv(fidfix.ENV, "ldcn")
     o = _Ld(26, 55, {"ldmodel": 2, "ldmodelcn": 1, "ldmodel 26 56": 3})
-    assert o.ldmodel_of(0, 0) == 3  # TALYS: ldmodel(Zix, Nix) of Fe-56 = its own card
+    assert o.ldmodel_of(0, 0) == 3  # TALYS: ldmodel(Zix, Nix) of Fe-56 = its own line
 
 
 def test_ldcn_on_without_ldmodelcn_or_cards_is_inert(monkeypatch):

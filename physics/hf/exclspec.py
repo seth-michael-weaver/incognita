@@ -1,4 +1,4 @@
-"""KWCOV B4b (EXCLSPEC): exclusive channel spectra `sp<nnnnnn>.tot` / `sp<nnnnnn>.fis`, OUTPUT ONLY.
+"""Exclusive channel spectra `sp<nnnnnn>.tot` / `sp<nnnnnn>.fis`, OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -15,13 +15,13 @@ A channel appears at an energy when TALYS writes its file there: chanopen and xs
 > xseps (.fis). Switch: the deck's `outspectra y` (or anything that implies it: ddxmode > 0, endf y, recoil y,
 INCOGNITA_SPECOBS=1) together with `channels y` (TALYS computes the exclusive spectra only inside channels.f90).
 `INCOGNITA_SPECOBS_DIR=<dir>` also writes the files (sp100000E0014.000.tot, sp000000E0014.000.fis). Default: nothing
-is computed and every array of every gate is unchanged; with the switch the C driver takes the Python channels (as
-CHANOBS does), which give the same cross sections.
+is computed and every engine array is unchanged; with the switch the C driver takes the Python channels (as
+INCOGNITA_CHANOBS does), which give the same cross sections.
 
 How (none of it feeds back into the engine): channels.f90's exclusive-channel loop is walked again on the energy's
 channel inputs (the same `feedexcl` / `popexcl` / `xsexcl` recurrences as `emission.channels`), carrying `specexcl`
 (channel, ejectile, residual bin, emission energy): the binary emission per residual bin (`binemis`, from the raw
-binary parts SPECOUT recorded), the first term (the source channel's spectrum times feedexcl / popexcl) and the second
+binary parts `specout` recorded), the first term (the source channel's spectrum times feedexcl / popexcl) and the second
 (specemission.f90's smearing of the last emitted particle over the mother and residual bins); the final spectra are the
 ground state + isomer bins, the fission spectra the fisfeedex-weighted bins.
 
@@ -35,7 +35,7 @@ TALYS routines ported here (file:line of the subroutine statement):
     specemission.f90:1 (specemission)    the spectrum of the last emitted particle per mother -> residual bin
     binemission.f90:1 (binemission)      binemis, the binary emission per residual continuum bin (lines 171-205)
     channelsout.f90:1 (channelsout)      file names, columns, the chanopen / xseps conditions
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B4b, output only). Acceptance test: KWCOV-B4B
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test: KW-B4B
 (tests/hf/test_kwcov_b4b.py, scripts/kwcov/b4b_compare.py, docs/hf/COVERAGE_PLAN.md).
 """
 
@@ -116,7 +116,7 @@ def _locate(xx, ib: int, ie: int, x: float) -> int:
 
 
 class _Grid:
-    """The energy's emission grid (egrid, Ebottom, Etop, deltaE, ebegin, eend) as SPECOUT closed it."""
+    """The energy's emission grid (egrid, Ebottom, Etop, deltaE, ebegin, eend) as `specout` closed it."""
 
     def __init__(self, cur: dict):
         self.eg = np.asarray(cur["egrid"], float)
@@ -131,7 +131,7 @@ class _Grid:
 
 
 def binemis(cur: dict, nuc_grid: dict, etotal: float, g: _Grid) -> dict:
-    """binemis(type, nexout, nen) of binemission.f90:171-205 on the raw binary parts SPECOUT recorded:
+    """binemis(type, nexout, nen) of binemission.f90:171-205 on the raw binary parts `specout` recorded:
     {type: (nr, M) array} for the binary residual of each ejectile (continuum bins only).
 
     TALYS: binemission.f90:1 (binemission)
@@ -324,7 +324,7 @@ def energy_spectra(cinp, nuc_grid: dict, cur: dict, state, flagendf: bool = Fals
     """channels.f90's loop with `flagspec`: {code: dict(xs, xsfis, sp (7, M), spfis (7, M))} of every channel TALYS
     would write at this energy (chanopen; xs >= xseps for .tot, xsfis > xseps for .fis), M = egrid points.
 
-    `nuc_grid[(zc, nc)] = (Ex, deltaEx, Nlast, maxex)`; `cur` is the SPECOUT energy record (egrid, binary parts);
+    `nuc_grid[(zc, nc)] = (Ex, deltaEx, Nlast, maxex)`; `cur` is the `specout` energy record (egrid, binary parts);
     `state` is the ExclusiveState before this energy (updated in place, as channels.f90 does).
 
     TALYS: channels.f90:1 (channels), specemission.f90:1 (specemission), channelsout.f90:1 (channelsout)
@@ -593,7 +593,7 @@ def record(cinp, st, state=None) -> None:
     rec = dict(e_inc_mev=e)
     try:
         if cur is None or abs(float(cur["e_inc_mev"]) - e) > 1e-9 or "egrid" not in cur:
-            raise RuntimeError("no SPECOUT record for this energy")
+            raise RuntimeError("no specout record for this energy")
         if state is None:
             if _STATE is None:
                 _STATE = ExclusiveState()
@@ -608,7 +608,7 @@ def record(cinp, st, state=None) -> None:
 
 
 def build(e_inc) -> tuple[dict, dict]:
-    """Results.spectra arrays of the run on the energies `e_inc` (the SPECOUT order) and the file metadata.
+    """Results.spectra arrays of the run on the energies `e_inc` (the `specout` order) and the file metadata.
 
     TALYS: channelsout.f90:1 (channelsout)
     Test: tests/hf/test_kwcov_b4b.py

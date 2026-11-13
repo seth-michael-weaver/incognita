@@ -33,11 +33,11 @@ CAPSET-v2.2 (2026-11-07, step S10 on top of the v2.1 result S9; S1-S9 are unchan
   D11 totals   thermal values compiled as (N,G) SIG that are the TOTAL cross section (capture + scattering) of the sample
                (hand lines, HAND22, exclude; checked against the EXFOR record). Staging is the v2.1 staging.
 
-Steps (inside the research checkout --main, default ~/nucleus; nothing there is written):
+Steps (inside the research checkout given by --main; nothing there is written):
   1. Stage three times from raw/exfor/entry_2026-10-14.zip with this repository's data/ingest/exfor.py: v1 behaviour
      (no fix), numfix only, all fixes. Capture predicate and 20 MeV clip of `python -m data.ingest.exfor --subset
      capture`, Z 1-92. Checks: the numfix-only Z 26-92 staging against the research staging
-     staging/exfor_capture_Z26-92_2026-10-14_x4fix1 (the 2026-10-22 X4NUMFIX output).
+     staging/exfor_capture_Z26-92_2026-10-14_x4fix1 (the 2026-10-22 EXFOR numeric-fix output).
   2. Rule lines (D3, D5 SPSDD/DEP) and the hand lines (D6), then quality_model.run (research data/curate, unchanged,
      with this repository's data/curate/discrepancy.py) on Z 1-92 with the human-decision file = research
      review_decisions.jsonl + data/curation/inputs/review_decisions_Z1-25.jsonl + the CAPSET-v2 lines. The consensus fit
@@ -46,8 +46,8 @@ Steps (inside the research checkout --main, default ~/nucleus; nothing there is 
   4. Cells (discrepancy.cells_from_parquet on the v2 staging) joined to the trust table; split Z 1-25 / Z 26-92 into
      files with the shipped schemas; counts, provenance, SHA256SUMS.
 
-usage (WSL, the research checkout's environment):
-  cd ~/nucleus && INCOGNITA_MAIN=~/nucleus .venv/bin/python <this repo>/scripts/build_capture_v2.py [--main ~/nucleus] [--work DIR]
+usage (the research checkout's environment):
+  cd MAIN && INCOGNITA_MAIN=MAIN .venv/bin/python <this repo>/scripts/build_capture_v2.py [--main MAIN] [--work DIR]
 """
 from __future__ import annotations
 
@@ -293,7 +293,7 @@ def summarize(path: Path):
 
 
 def check_research_staging(main: Path, path: Path) -> dict:
-    """numfix-only Z 26-92 staging vs the research X4NUMFIX staging (exfor_version aside)."""
+    """numfix-only Z 26-92 staging vs the research numeric-fix staging (exfor_version aside)."""
     import pyarrow.parquet as pq
     import pyarrow.compute as pc
     ours = pq.read_table(path)

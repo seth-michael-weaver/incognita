@@ -1,4 +1,4 @@
-"""KDABS `wddecay` keyword (env INCOGNITA_WDDECAY): neutron KD03 W_D(E) * exp(-delta E); default 0 = TALYS (bit-identical)."""
+"""`wddecay` keyword (env INCOGNITA_WDDECAY): neutron KD03 W_D(E) * exp(-delta E); default 0 = TALYS (bit-identical)."""
 
 from __future__ import annotations
 

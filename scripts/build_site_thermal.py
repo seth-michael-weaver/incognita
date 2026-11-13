@@ -1,22 +1,22 @@
-"""Measured thermal capture sigma_gamma(0.0253 eV) for every target, by the PHASE0 anchor rule
-(rl/phase0/code/x4_anchor.py + make_anchors.py, read-only imports; EXFOR snapshot entry_2026-10-14.zip).
+"""Measured thermal capture sigma_gamma(0.0253 eV) for every target, by the thermal anchor rule
+(x4_anchor.py + make_anchors.py, read-only imports; EXFOR snapshot entry_2026-10-14.zip).
 
-Tier 1 = RRRTHERM's fixed rule (thermal point at 0.0253 eV stated, uncertainty given and <= 5 %, single-isotope target,
-pre-2010 entries fitted, >= 2010 HELD), tier 2 only where tier 1 is empty (rel. unc. <= 10 %, or MXW of the rule's 1/v
+Tier 1 = the fixed rule (thermal point at 0.0253 eV stated, uncertainty given and <= 5 %, single-isotope target,
+pre-2010 entries fitted, >= 2010 kept for validation), tier 2 only where tier 1 is empty (rel. unc. <= 10 %, or MXW of the rule's 1/v
 targets without an energy column); capture = absorption - fission where no capture entry passes but both do.
-Birge-scaled weighted mean. The six PHASE0 nuclides take anchors_all.json as published.
+Birge-scaled weighted mean. The six original anchor nuclides take anchors_all.json as published.
 
 Deviation from the rule as written: a partial cross section to one isomeric state of the product ((N,G)...-M / -G)
 is excluded, since it is not the total capture.
 
 Writes docs/walkthrough/data/thermal.json (the explorer's diamond at 0.0253 eV) and the full table to the work dir.
-usage (WSL): PYTHONDONTWRITEBYTECODE=1 ~/micromamba/envs/nucleus-phys/bin/python scripts/build_site_thermal.py
+usage: PYTHONDONTWRITEBYTECODE=1 python scripts/build_site_thermal.py
 """
 import json, math, os, re, sys
 from pathlib import Path
 
 sys.dont_write_bytecode = True
-sys.path.insert(0, "/home/seth/nucleus/research/rl/phase0/code")
+sys.path.insert(0, os.path.expanduser(os.environ.get("X4_ANCHOR_CODE", "~/x4_anchor/code")))
 import numpy as np  # noqa: E402
 import x4_anchor as X  # noqa: E402
 C = X.C
@@ -24,7 +24,7 @@ C = X.C
 OUT = Path(os.path.expanduser(os.environ.get("PW_WORK", "~/koningov_data")))
 SITE = Path(__file__).resolve().parent.parent / "docs" / "walkthrough" / "data"
 JL = OUT / "x4_therm_all.jsonl"
-P0 = "/home/seth/nucleus/research/rl/phase0/out/anchors_all.json"
+P0 = os.path.expanduser(os.environ.get("X4_ANCHORS_JSON", "~/x4_anchor/out/anchors_all.json"))
 _v0 = C._value
 C._value = lambda rec: (lambda r: (None, None, None) if r[0] == 0 else r)(_v0(rec))  # a 0 value has no relative uncertainty: treat as "no DATA value"
 X.pat = re.compile(r"\(\d+-[A-Z]+-\d+\(N,(G|ABS|F)\)")

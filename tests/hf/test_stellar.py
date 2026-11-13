@@ -1,6 +1,6 @@
-"""STELLARSEF (INCOGNITA_STELLAR): switch default OFF; the Maxwellian integrator on a 1/v cross section.
-Engine-level checks (bit-identity OFF/ON, reciprocity <= 1e-6, factorised W = 1 capture == _case) are run by
-development notes (Step 0) on real targets."""
+"""Stellar enhancement (INCOGNITA_STELLAR): switch default OFF; the Maxwellian integrator on a 1/v cross section.
+Engine-level checks (bit-identity OFF/ON, reciprocity <= 1e-6, factorised W = 1 capture == _case) are run
+separately on real targets."""
 import math
 
 import numpy as np

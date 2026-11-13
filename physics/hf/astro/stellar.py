@@ -1,4 +1,4 @@
-"""STELLARSEF: capture on thermally populated target states (TALYS `astro y`, default `astrogs n`).
+"""Capture on thermally populated target states (TALYS `astro y`, default `astrogs n`).
 
 Env `INCOGNITA_STELLAR=y` (default OFF; OFF never calls anything here, so every run is bit-identical).
 
@@ -11,7 +11,7 @@ TALYS's Tjlnex) with that entrance: target spin/parity J_mu/pi_mu, Ltarget = mu,
 k_mu at E'_cm, formation flux = pi/k_mu^2 sum T (no direct/PE depletion: TALYS direct.f90:33 runs no direct reaction from
 an excited target). The exit row of the ground state gets the ground-state run's exact Tjlinc (comptarget.f90:358), so
 sigma(0 -> mu) of the ground-state run and sigma(mu -> 0) of entrance mu use one transmission set: detailed balance
-(2I_0+1) k_0^2 sigma(0->mu) / c_0 = (2J_mu+1) k_mu^2 sigma(mu->0) / c_mu is an identity of the port (STELLARSEF Step 0a).
+(2I_0+1) k_0^2 sigma(0->mu) / c_0 = (2J_mu+1) k_mu^2 sigma(mu->0) / c_mu is an identity of the port (checked).
 This is the full non-lumped HF+WFC version of TALYS's lumped astrotarget loop; TALYS's own Ltarget = mu run would use the
 exactly computed spherical T at E'_cm instead of the interpolated Tjlnex (densprepare pol2, <= 2.4 % on spherical targets).
 
@@ -30,10 +30,10 @@ import os
 from dataclasses import replace
 
 import numpy as np
-from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
+from physics.hf.projectile import target_mass_index  # projectile bookkeeping
 
 ENV = "INCOGNITA_STELLAR"
-KT12_KEV = (5.0, 8.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0)  # RATEPACK kT grid
+KT12_KEV = (5.0, 8.0, 10.0, 15.0, 20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0)  # reaction-rate kT grid
 T9_GRID = (0.1, 0.2, 0.3, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 5.0, 7.0, 10.0)
 KT_PER_T9_MEV = 0.0861733  # k_B x 1e9 K in MeV
 LOG: list[dict] = []  # per incident energy, filled by `record` during one run; the runner writes and clears it

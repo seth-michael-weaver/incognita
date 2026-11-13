@@ -1,4 +1,4 @@
-"""VIBLEN: angular distributions of the one-step (DWBA) inelastic excitation of a 0+ target, for scoring only.
+"""Angular distributions of the one-step (DWBA) inelastic excitation of a 0+ target, for scoring only.
 
 `directecis.f90` asks ECIS for `ecis.dirang` (the DWBA level angular distributions) but the port only ever needed the
 angle-integrated `xsdirdisc`, so `ecis.dwba` sums the partial waves incoherently. This module rebuilds the coherent

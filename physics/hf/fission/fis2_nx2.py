@@ -1,12 +1,12 @@
-"""NATIVEX2 lever `fis2`: the continuum fission transmission through one barrier in C
+"""Native `fis2` path: the continuum fission transmission through one barrier in C
 (`native/nx2_fis2.c`), for the calls where nothing carries a gradient and the barrier has no
 rotational band (`hbstate n`, TALYS's default).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nx2_fis2.py`
-(each kernel against the torch path it replaces) and the G-NATIVEX2 closeness gate.
+A speed path with no physics of its own. Acceptance test: `tests/hf/test_nx2_fis2.py`
+(each kernel against the torch path it replaces) and a closeness check.
 
 Where the time went (cProfile, second runs of U-238 and Th-232, 6.15 s): the bin-ladder fission
 widths 0.65 s (`fission_batch_ladder._barrier`: the WKB interpolation of an (energy, triple)
@@ -200,7 +200,7 @@ def ladder(fp, grid, ibar: int, eex: Tensor, deltaw, shape) -> Tensor | None:
 
 
 def _covered(fp, grid, ibar: int, deltaw, maxj: int, band_ok: bool = False) -> bool:
-    """`band_ok` (FISTSC, `ladder` only): the caller adds the band; the kernel sums the continuum."""
+    """`band_ok` (`fistsc`, `ladder` only): the caller adds the band; the kernel sums the continuum."""
     from physics.hf.fission.barriers import fistsc_on
 
     band = fp.rotational[ibar].n == 0 or (band_ok and fistsc_on())
@@ -246,8 +246,8 @@ def level_densities(fp, ld, exfis_top_mev: float, odd: int, maxj: int):
     from physics.hf.fission.transmission import DEXMIN, NUMBINFIS, FissionLevelDensities
     from physics.hf.fission.wkb import NUMBAR
 
-    # CENGFIS: the full signature; a one-argument binding of the same ctypes function object reset
-    # its argtypes for `_coefficients` whenever it was bound after it (a bus error in the test)
+    # The full signature; a one-argument binding of the same ctypes function object would reset
+    # its argtypes for `_coefficients` whenever it was bound after it (a bus error)
     if _kernels() is None or ld.ldmodel <= 3:
         return None
     if _grad(fp.fecont_mev, ld.ctable, ld.ptable_mev):
@@ -262,8 +262,8 @@ def level_densities(fp, ld, exfis_top_mev: float, odd: int, maxj: int):
         exfis = exfis_top_mev - elowest
         nbin = NUMBINFIS // 2
         if exfis <= 0.0:
-            # COMBINE4 port fix: TALYS sets nbintfis = numbinfis/2 and `cycle`s (densprepare.f90:413-414), leaving eintfis/rhofis
-            # from the previous residual; the port has no such arrays and t1barrier indexed past the grid (IndexError; the native
+            # TALYS sets nbintfis = numbinfis/2 and `cycle`s (densprepare.f90:413-414), leaving eintfis/rhofis
+            # from the previous residual; the port has no such arrays, and t1barrier would index past the grid (and the native
             # coefficient path read out of bounds). The barrier has no continuum below the residual's top Ex: an empty grid (0).
             nb_out[ibar] = 0
             continue

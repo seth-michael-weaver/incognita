@@ -1,6 +1,6 @@
-"""CCFAST2: the coupled-channels incident channel without bit-identity.
+"""The fast coupled-channels incident channel (not bit-identical to the reference kernel).
 
-The project rule (2026-09-14) for speed work that moves bits: per cell <= 1e-6 median and <= 1e-4 worst
+The project rule for speed work that moves bits: per cell <= 1e-6 median and <= 1e-4 worst
 against the port before the change. These tests hold the pieces to much tighter bounds than that,
 so a failure here means an algebra slip, not rounding:
 
@@ -8,8 +8,8 @@ so a failure here means an algebra slip, not rounding:
   block's absorption where the S form has none left;
 * per-energy total-J convergence: an energy alone and inside a batch sum the same blocks;
 * the incident memo serves a second caller, and misses when a parameter changes;
-* `ccfast.c`'s radial loops (W-form below soswitch, derivative coupling above) match SPEEDT3's
-  bitwise kernel to rounding.
+* `ccfast.c`'s radial loops (W-form below soswitch, derivative coupling above) match the
+  bitwise reference kernel to rounding.
 """
 
 from __future__ import annotations
@@ -186,7 +186,7 @@ def test_ccfast_kernels_match_speedt3s_loop(deformed_so):
 @pytest.mark.skipif(not ccnative.available(), reason="libccfast.so not built")
 @pytest.mark.parametrize("deformed_so", [False, True])
 def test_ccx_sweeps_and_real_products_match_the_elimination(deformed_so, monkeypatch):
-    """NATIVEX2 ccx: the Jacobi sweeps in place of the elimination, the complex products as real
+    """Native `ccx` path: the Jacobi sweeps in place of the elimination, the complex products as real
     ones and the split-storage derivative-coupling loop (`HF_NX2_CCX`, on by default on arm64)
     against the same kernel with them off, on U-238's blocks below and above soswitch. Off
     arm64 the switch is a no-op and the two runs are the same."""

@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `struct`: the structure set-up paths against the forms they replace, bit for bit --
+"""Native kernel `struct`: the structure set-up paths against the forms they replace, bit for bit --
 the compiled level-block reader against the Python format readers (and its fallback on every
 non-plain field form), the shared default-parameter templates against a fresh build, the dense
 mass-table gather and the per-cell Duflo memo against the per-element loop and the scalar

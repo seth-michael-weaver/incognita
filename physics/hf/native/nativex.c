@@ -1,11 +1,11 @@
-/* NATIVEX: whole-stage native kernels for the flat spherical profile.
+/* Native: whole-stage native kernels for the flat spherical profile.
  *
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
  *
- * Task: NATIVEX (the speed work; no physics of its own). Acceptance test:
+ * Speed path (no physics of its own). Acceptance test:
  * tests/hf/test_nativex.py, which holds every kernel to the torch/numpy path it replaces, and the
- * G-NATIVEX closeness gate (docs/results/hf-nativex.md).
+ * native closeness test (docs/results/hf-nativex.md).
  *
  * TALYS routines computed here, in compound.target_batch's arrangement:
  *     comptarget.f90:1 (comptarget)      -- the (J, parity) sum, with and without Moldauer
@@ -29,30 +29,30 @@
 #define NJ 41 /* NUMJ + 1 */
 #include "binquad.h"
 
-/* ENGAUDIT TRAPFIX switch, read per walk (workers set the environment after the library is loaded) */
+/* `INCOGNITA_TRAPFIX` switch, read per walk (workers set the environment after the library is loaded) */
 static int trapfix_on(void) {
     const char *v = getenv("INCOGNITA_TRAPFIX");
     return v != NULL && v[0] == '1';
 }
 
-/* KEVLEAK2 `dup` part (physics/hf/kevleak2.py), read per walk like TRAPFIX */
+/* `INCOGNITA_KEVLEAK2` `dup` part (physics/hf/kevleak2.py), read per walk like `INCOGNITA_TRAPFIX` */
 static int kevleak2_dup_on(void) {
     const char *v = getenv("INCOGNITA_KEVLEAK2_EFF"); /* resolved per run by kevleak2.sync (deck > env > default) */
     if (v == NULL) v = getenv("INCOGNITA_KEVLEAK2");
-    if (v == NULL || v[0] == 0) v = "2"; /* KEVLEAK3 gate candidate: default 2 = dup2 + pe2 */
+    if (v == NULL || v[0] == 0) v = "2"; /* `INCOGNITA_KEVLEAK2`: default 2 = dup2 + pe2 */
     if (!strcmp(v, "1") || !strcmp(v, "y") || !strcmp(v, "yes") || !strcmp(v, "on") || !strcmp(v, "all")) return 1;
-    if (!strcmp(v, "2")) return 1; /* KEVLEAK3: 2 = dup2 + pe2 (dup2 contains dup) */
+    if (!strcmp(v, "2")) return 1; /* `INCOGNITA_KEVLEAK2`: 2 = dup2 + pe2 (dup2 contains dup) */
     return strstr(v, "dup") != NULL;
 }
 
-/* BINQUAD (`binquad y`): set once per run by physics.hf.core.grids.binquad_sync; 0 = TALYS */
+/* `binquad` (`binquad y`): set once per run by physics.hf.core.grids.binquad_sync; 0 = TALYS */
 static int bq_on = 0, bq_q = 3, bq_sub = 1;
 static double bq_mt = 1.0, bq_rt = 1.0;
 void nx_set_binquad(int64_t on, int64_t q, double mtilt, double rtilt)
 {
     bq_on = (int)on; bq_q = (int)q; bq_mt = mtilt; bq_rt = rtilt;
 }
-/* BINQUAD sub-points: each mother bin is S widths rows (Gauss-Legendre nodes of the bin, built by
+/* `binquad` sub-points: each mother bin is S widths rows (Gauss-Legendre nodes of the bin, built by
  * compound/widths_native.NativeWidths); nx_walk decays the bin's population on each with weight w_q / 2 */
 void nx_set_binquad_sub(int64_t sub) { bq_sub = sub > 1 && sub <= BQ_QMAX ? (int)sub : 1; }
 
@@ -127,7 +127,7 @@ static inline int64_t jj_of(const Ty *y, int64_t l, int64_t u)
     return y->photon ? 2 * l : 2 * l + (u - 1) * y->spin2;
 }
 
-/* SPECOUT (output only): with a sink registered (nx_set_targetsink, Python's specang), nx_target hands over, per live
+/* `specout` (output only): with a sink registered (nx_set_targetsink, Python's specang), nx_target hands over, per live
  * (J2, parity) cell, what TALYS's comptarget cleg needs for the target's own discrete levels n <= tg_nlev: the cell's
  * prefactor and Moldauer node product, the incident channels and the exit channels to those levels. Nothing is read back.
  *   iv: 0 J2, 1 parity (-1/+1), 2 wfc, 3 na, 4 nb, 5 NNODE, 6 elastic (lt live), 7 lt
@@ -182,7 +182,7 @@ static inline int ok_j(int64_t J2, int64_t irs2, int64_t jj)
 /* The rule against a discrete level of spin jd2 in row n: `ok_s & ok_j`, except for a level whose
  * 2J parity is impossible for its mass (anom = (J2 + jd2 + parspin2) mod 2 = 1). There TALYS's
  * `lprime = l2prime / 2` truncates, so l2' = 2 l' + 1, jj2' = l2' + updown * spin2, capped by
- * l2' <= 2 lmaxhf (OPEN3M; prepare.anomalous_exit_mask and target_batch._prepare's cap). */
+ * l2' <= 2 lmaxhf (prepare.anomalous_exit_mask and target_batch._prepare's cap). */
 static int ok_disc(const Ty *y, int64_t J2, int64_t jd2, int64_t n, int64_t l, int64_t u)
 {
     if (((J2 + jd2 + y->parspin2) & 1) == 0) return ok_s(y, l, u) && ok_j(J2, jd2, jj_of(y, l, u));
@@ -420,7 +420,7 @@ static inline double ser_g(const double *mu, double c)
 /* comptarget for one incident energy (target_batch.case_nowfc / case_moldauer).
  * ip: K, wfc, wfcfactor, k0, ltarget, nexmax, has_fis, targetspin2, target_parity, lmaxinc,
  *     tjlinc_rows, ntypes, type order (7 slots), 19: 1 = also write each cell's denomhf to out[2 + k]
- *     (KEVCOLD; 0 = production, out has 2 slots), then per type t (8 slots at 20 + 8 t): present, nex,
+ *     (cold-alpha domain; 0 = production, out has 2 slots), then per type t (8 slots at 20 + 8 t): present, nex,
  *     nlast, L, spin2, parspin2, -, -
  * pp: j2 (K), pidx (K), tjlinc (rows, 3), tfis (K) or 0, hump ratio (K, 20), hump t, hump rho,
  *     hump on (K int64), x (32), w (32), then per type t (6 slots at 10 + 6 t): rho, lmaxhf, maxj,
@@ -666,7 +666,7 @@ int nx_target(const int64_t *ip, const uint64_t *pp, const double *dp, double *p
         pop[((k0 * nexmax + lt) * NJ + yk0->ird[lt]) * 2 + yk0->pd[lt]] += elas * yk0->rho_d[lt];
     out[0] = xs_fis;
     out[1] = (double)nlive;
-    if (ip[19] == 1)  /* KEVCOLD (default 0): each cell's denomhf into out[2 .. 2 + K) */
+    if (ip[19] == 1)  /* cold-alpha domain (default 0): each cell's denomhf into out[2 .. 2 + K) */
         for (int64_t k = 0; k < K; k++) out[2 + k] = denom[k];
 done:
     for (int64_t a = 0; a < ntypes; a++) ty_free(&ty[order[a]]);
@@ -1158,7 +1158,7 @@ static double mpe_bin(const int64_t *ip, const uint64_t *pp, double *XE, int64_t
         double *DX = (double *)pt[0], *DXE = (double *)pt[1];
         const double *tt = term_tot + di * nb;
         for (int64_t j = 0; j < n; j++) DXE[j] += tt[j];
-        if (pp[154] && ((double *const *)pp[154])[t]) { /* SPECOUT: mpecontrib(type, nex, j), output only */
+        if (pp[154] && ((double *const *)pp[154])[t]) { /* `specout`: mpecontrib(type, nex, j), output only */
             double *sm = ((double *const *)pp[154])[t];
             int64_t st = ((const int64_t *)pp[155])[t];
             for (int64_t j = 0; j < n; j++) sm[nex * st + j] += tt[j];
@@ -1220,7 +1220,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
     const int64_t *t0 = ip + 16;
     const uint64_t *p0 = pp + 20;
     int64_t rec0 = t0[2];
-    /* SPECOUT (output only, INCOGNITA_SPECOUT): pp[153] = 7 pointers, mcontrib(type, nex, nexout) as
+    /* `specout` (output only, INCOGNITA_SPECOUT): pp[153] = 7 pointers, mcontrib(type, nex, nexout) as
      * (Xrows, so_dr[t]) row-major, 0 = not wanted; pp[155] = so_dr (7 row strides; type 0 = Xrows).
      * Only ever written here, never read: every other array sees the same additions in the same order. */
     double *const *so_mc = (double *const *)pp[153];
@@ -1250,7 +1250,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                         int later = 0;
                         for (int64_t b2 = b + 1; b2 < boff[nex + 1]; b2++) if (bk[b2] == k) later = 1;
                         if (rec0 && !later) {
-                            /* KEVLEAK2 dup: the record carries every branch to k (cascade.f90:72 assigns) */
+                            /* `INCOGNITA_KEVLEAK2` dup: the record carries every branch to k (cascade.f90:72 assigns) */
                             double rec = intens;
                             if (kv2dup) {
                                 rec = 0.0;
@@ -1273,12 +1273,12 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
             dm = mpe_bin(ip, pp, XE, nex, part, partf, xsfeed, xsfeedf, xspopnuc, created);
         int64_t i0 = m > 0 ? rowmap[nex] : -1;
         if (i0 < 0) { free(cext); return -2; }
-        /* BINQUAD sub-points: bin i0's widths rows are first .. first + cnt - 1 (pp[150] counts, pp[151] offsets) */
+        /* `binquad` sub-points: bin i0's widths rows are first .. first + cnt - 1 (pp[150] counts, pp[151] offsets) */
         const int64_t *bq_cnt = bq_sub > 1 ? (const int64_t *)pp[150] : NULL, *bq_off = bq_sub > 1 ? (const int64_t *)pp[151] : NULL;
         int64_t ncnt = bq_cnt ? bq_cnt[i0] : 1, row0 = bq_off ? bq_off[i0] : i0;
         for (int64_t qq = 0; qq < ncnt; qq++) {
         int64_t i = row0 + qq;
-        /* this sub-point's share of the population (BINQUAD2: pp[152] per row, pieces cut at knots) */
+        /* this sub-point's share of the population (bin averaging: pp[152] per row, pieces cut at knots) */
         double bq_pw = bq_sub > 1 && pp[152] ? ((const double *)pp[152])[i] : ncnt > 1 ? 0.5 * BQ_W[ncnt][qq] : 1.0;
         int64_t mj = maxj[i], njb = mj + 1;
         const double *pop = X + nex * NJ * 2;
@@ -1303,7 +1303,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                 leftover += bq_pw * pop[x];
             }
         }
-        /* ENGAUDIT TRAPFIX (INCOGNITA_TRAPFIX=1, default OFF): TALYS's trapped-flux spread (compound.f90:404-419) was written
+        /* `INCOGNITA_TRAPFIX=1` (default OFF): TALYS's trapped-flux spread (compound.f90:404-419) was written
          * for continuum bins, below which every discrete level lies. A discrete level above S_n is decayed as a compound
          * bin (multiple.f90:507) and can be trapped too; the spread then puts (NL - nex)/(NL + 1) of its flux on levels the
          * descending walk has already passed, where it is never decayed and is lost (Os-241 at 0.15 MeV: 55 of 66 mb).
@@ -1491,7 +1491,7 @@ int nx_walk(const int64_t *ip, const uint64_t *pp, double *dpar, int64_t nex_hi,
                 XE[nex] -= ff;
             }
         }
-        } /* BINQUAD sub-points */
+        } /* `binquad` sub-points */
     }
 #undef SO_ADD
     free(cext);
@@ -1531,13 +1531,13 @@ static int64_t locate_right32(const float *xs, int64_t n, float x)
 
 static const int64_t PARSPIN2_[7] = {0, 1, 1, 2, 1, 1, 0};
 
-/* LOGTINT (Incognita extension, default OFF; physics/hf/compound/tlog.py): Lagrange in ln T for the charged types where
+/* log-T interpolation (Incognita extension, default OFF; physics/hf/compound/tlog.py): Lagrange in ln T for the charged types where
  * the three nodes are > 0, TALYS's linear pol2 (same term order) elsewhere. Set per run (0 = OFF = TALYS). */
 static int64_t NX_TLOG = 0;
 
 void nx_set_tlog(int64_t on) { NX_TLOG = on; }
 
-/* TLOGIT (NX_TLOG == 2): Lagrange in u = ln(T/(1-T)) where the three nodes are in (1e-300, 1-1e-12), else linear pol2. */
+/* logit-T (NX_TLOG == 2): Lagrange in u = ln(T/(1-T)) where the three nodes are in (1e-300, 1-1e-12), else linear pol2. */
 static double nx_logit(double x) { return log(x) - log1p(-x); }
 
 static double nx_tlog_lagr(double w1, double w2, double w3, double a, double b, double c)
@@ -1554,9 +1554,9 @@ static double nx_tlog_lagr(double w1, double w2, double w3, double a, double b, 
     return w1 * a + w2 * b + w3 * c;
 }
 
-/* ALPHATEMP (Incognita extension, default OFF; physics/hf/omp/alphatemp.py): the alpha row of the Tl table for the COLD
+/* `alphatemp` (Incognita extension, default OFF; physics/hf/omp/alphatemp.py): the alpha row of the Tl table for the COLD
  * residual (alphaomp 6), same layout as TL's alpha block (tlrows, Ltl), and U*; T = Tcold^(1-g) Thot^g, g = min(1, Ex/U*),
- * mixed on the RAW interpolated values (the hot table's Lagrange rule; with BINQUAD at every node) before transeps / Fnorm.
+ * mixed on the RAW interpolated values (the hot table's Lagrange rule; with `binquad` at every node) before transeps / Fnorm.
  * Set per run by the caller (NULL / U* <= 0 = OFF = TALYS). */
 static const double *AT_TLC = 0;
 static int64_t AT_ROWS = 0, AT_L = 0;
@@ -1580,12 +1580,12 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
 {
     int64_t m = ip[0], nj = ip[1], odd = ip[2], k0 = ip[3], lmaxinc = ip[4], maxen = ip[5];
     int64_t Ltl = ip[6], tlrows = ip[7], L0 = ip[9];
-    int64_t nnl_bin = ip[10] - 1; /* NNLEAK: the rule's mother bin index, -1 = none (ip[10] = 0) */
+    int64_t nnl_bin = ip[10] - 1; /* `nnleak`: the rule's mother bin index, -1 = none (ip[10] = 0) */
     const double *exinc = (const double *)pp[0], *dexinc = (const double *)pp[1];
     const int64_t *nxm = (const int64_t *)pp[2];
     const double *sep = (const double *)pp[3];
     const double *TL = (const double *)pp[4];
-    const double *TLC = (const double *)pp[13]; /* ROTEXIT1CN (default 0 = OFF): continuum rows' (r > nlast) stack */
+    const double *TLC = (const double *)pp[13]; /* continuum exit set (default 0 = OFF): continuum rows' (r > nlast) stack */
     const int64_t *LM = (const int64_t *)pp[5], *head0 = (const int64_t *)pp[6];
     const double *egrid = (const double *)pp[7];
     const float *xs = (const float *)pp[8];
@@ -1606,7 +1606,7 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
     int64_t *wext = malloc((size_t)(m * nmax) * sizeof(int64_t));
     int64_t *live_d = malloc((size_t)nddmax * sizeof(int64_t));
     int64_t *win_d = malloc((size_t)(2 * NJ * nddmax) * sizeof(int64_t));
-    /* BINQUAD: the mother bins' own d ln rho / dE (from the photon exit's rows = this nucleus's bins) */
+    /* `binquad`: the mother bins' own d ln rho / dE (from the photon exit's rows = this nucleus's bins) */
     double *bq_alpha = NULL, *bq_e = NULL, *bq_w = NULL;
     int *bq_k = NULL;
     if (bq_on) {
@@ -1664,7 +1664,7 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                     rbv = part ? (ex0plus - exm) / dexinc[b] : 1.0;
                     eo = part ? 0.5 * (ex0plus + exm) - ss - ex[r] : (exinc[b] - ss) - ex[r];
                     if (part && t >= 1 && nnl_bin >= 0 && nxm[b * 7] + 1 == nnl_bin) {
-                        /* NNLEAK (default y, compound/nnleak.py): Egamma^3-filled initial-CN top bin */
+                        /* `nnleak` (default y, compound/nnleak.py): Egamma^3-filled initial-CN top bin */
                         rbv = rbv * rbv * rbv * rbv;
                         eo -= 0.3 * (ex0plus - exm);
                     }
@@ -1673,7 +1673,7 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                     /* a sub-point row above its own reach (TALYS's geometry assumes rows <= nexmax are) */
                     if (r > nl ? (ex0plus - ss) - e1min <= 0.0 : ex[r] + ss > ex0plus) rbv = 0.0;
                 }
-                if (bq_on && bq_rt >= 0.0 && t >= 1 && r <= nexmax) { /* BINQUAD: tilted eps quadrature, its Rboundary */
+                if (bq_on && bq_rt >= 0.0 && t >= 1 && r <= nexmax) { /* `binquad`: tilted eps quadrature, its Rboundary */
                     double beta = r > nl ? bq_rt * bq_slope(rhog, ex, dex, nl, n, r, 2 * NJ) : 0.0;
                     double y0 = r > nl ? e1min : ex[r], y1 = r > nl ? e1plus : ex[r], rq;
                     double u0 = ex0min - ss, u1 = ex0plus - ss;
@@ -1744,12 +1744,12 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                         double w3 = (e - ea) * (e - ebv) / ((ec - ea) * (ec - ebv));
                         int64_t lt = lsel < L - 1 ? lsel : L - 1;
                         wext[b * n + r] = lt + 1 > 0 ? lt + 1 : 0;
-                        const double *TLr = (TLC && r > nl) ? TLC : TL; /* ROTEXIT1CN */
+                        const double *TLr = (TLC && r > nl) ? TLC : TL; /* continuum exit set */
                         const double *ta = TLr + (tt * tlrows + na) * L, *tb = TLr + (tt * tlrows + nb) * L;
                         const double *tc = TLr + (tt * tlrows + nc) * L;
-                        int tlg = NX_TLOG && tt >= 1;  /* LOGTINT/TLOGIT (default OFF) */
+                        int tlg = NX_TLOG && tt >= 1;  /* log-T/logit-T (default OFF) */
                         int K = bq_on ? bq_k[b * n + r] : -1;
-                        /* ALPHATEMP (default OFF): alpha rows, g at the row's residual excitation */
+                        /* `alphatemp` (default OFF): alpha rows, g at the row's residual excitation */
                         int at = tt == 5 && AT_TLC && AT_USTAR > 0.0 && AT_ROWS == tlrows && AT_L == L;
                         double g = at ? (ex[r] > 0.0 ? ex[r] / AT_USTAR : 0.0) : 1.0;
                         if (K < 0) {
@@ -1757,13 +1757,13 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                             const double *cc = at ? AT_TLC + nc * L : 0;
                             for (int64_t l = 0; l <= lt; l++) {
                                 double u = tlg ? nx_tlog_lagr(w1, w2, w3, ta[l], tb[l], tc[l]) : w1 * ta[l] + w2 * tb[l] + w3 * tc[l];
-                                if (at) { /* ALPHATEMP: the cold row by the same rule, mixed raw */
+                                if (at) { /* `alphatemp`: the cold row by the same rule, mixed raw */
                                     double v = tlg ? nx_tlog_lagr(w1, w2, w3, ca[l], cb[l], cc[l]) : w1 * ca[l] + w2 * cb[l] + w3 * cc[l];
                                     u = nx_alphatemp_mix(u > 0.0 ? u : 0.0, v > 0.0 ? v : 0.0, g);
                                 }
                                 Tw[(b * n + r) * L + l] = (u < transeps ? 0.0 : u) * fn[tt];
                             }
-                        } else { /* BINQUAD: sum_k w_k T_l(eps_k), each node pol2-interpolated as the centre */
+                        } else { /* `binquad`: sum_k w_k T_l(eps_k), each node pol2-interpolated as the centre */
                             double *row = Tw + (b * n + r) * L;
                             for (int64_t l = 0; l <= lt; l++) row[l] = 0.0;
                             const double *ek = bq_e + (b * n + r) * BQ_KMAX, *wk = bq_w + (b * n + r) * BQ_KMAX;
@@ -1794,7 +1794,7 @@ int nx_widths(const int64_t *ip, const uint64_t *pp, const double *dp, const uin
                                 const double *xc = at ? AT_TLC + qc * L : 0;
                                 for (int64_t l = 0; l <= lt; l++) {
                                     double u = tlg ? nx_tlog_lagr(v1, v2, v3, sa[l], sb[l], sc[l]) : v1 * sa[l] + v2 * sb[l] + v3 * sc[l];
-                                    if (at) { /* ALPHATEMP: the cold node by the same rule, mixed raw */
+                                    if (at) { /* `alphatemp`: the cold node by the same rule, mixed raw */
                                         double v = tlg ? nx_tlog_lagr(v1, v2, v3, xa[l], xb[l], xc[l]) : v1 * xa[l] + v2 * xb[l] + v3 * xc[l];
                                         u = nx_alphatemp_mix(u > 0.0 ? u : 0.0, v > 0.0 ? v : 0.0, g);
                                     }

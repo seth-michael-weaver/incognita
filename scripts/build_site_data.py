@@ -51,7 +51,7 @@ DEC = {"keep": "k", "downweight": "d", "exclude": "x", "fix-unit": "f"}
 # drawn as capture and not counted as a capture measurement (n_use)
 PARTIAL = {"PAR", "CN", "DI", "M-", "INC"}
 # Capture into ONE product state (EXFOR SF4 -G, -M, -M1, -M2, -L ...; the cell's "state") is a partial cross section of
-# the same class (Seth, 2026-11-07): listed with the datasets, counted under "other" as "<state>:<kind>", not drawn as
+# the same class: listed with the datasets, counted under "other" as "<state>:<kind>", not drawn as
 # total capture and not in n_use. Sums over states (M1+M2, G+M1, G+M2) are not single states and are left as they were.
 ONE_STATE = re.compile(r"^[GML]\d*$")
 
@@ -268,7 +268,7 @@ def main():
           f"{sum(1 for r in light if r[5] + r[6] > 0 and r[12] == 0)} with only excluded cells; "
           f"(n,2n) / (n,p) / (n,alpha) measured on {sum(1 for r in light if r[8])} / {sum(1 for r in light if r[9])} / "
           f"{sum(1 for r in light if r[10])} nuclides ({sum(r[8] for r in light)} / {sum(r[9] for r in light)} / {sum(r[10] for r in light)} points)")
-    # light-nuclide R-matrix evaluations that passed their gates (data/light_evals; scripts/add_light_evals.py)
+    # light-nuclide R-matrix evaluations that passed their checks (data/light_evals; scripts/add_light_evals.py)
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import add_light_evals
     add_light_evals.apply(OUT)

@@ -487,10 +487,10 @@ MANUAL: dict = {
                 "Fe-56 L1/L2, Am-242m (see the note). Refused: liso with it, Ltarget > 40 (TALYS range; Hf-178m2), angular / "
                 "spectra / recoil / astro / urr / endf / components / racap / production / massdis outputs, projectiles but n",
                 "test:test_kwcov_biso.py"),
-    # --- per-nucleus gamma cards that fitlib reads under its own table ---
+    # --- per-nucleus gamma keywords that fitlib reads under its own table ---
     **{k: ("SUPPORTED", _F + "UPBEND_KEYS -> gamma/parameters.py:762", "upbend C/e/f cards (LEESHELL fix)", "grep")
        for k in ("upbendc", "upbende", "upbendf", "upbendcadjust", "upbendeadjust", "upbendfadjust")},
-    # --- switches that only exist as INCOGNITA_* env levers today ---
+    # --- switches that only exist as INCOGNITA_* environment switches ---
     # --- KWCOV B2 (2026-11-08): deck wiring; response vs stock = scripts/kwcov/b2_response.py, |ln(R/S)| max ---
     **B2,
     **B5,

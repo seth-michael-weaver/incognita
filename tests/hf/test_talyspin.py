@@ -1,4 +1,4 @@
-"""TALYSPIN: default TALYS root is the pinned structure copy; TALYS_DIR and INCOGNITA_TALYS_LIVE override."""
+"""Default TALYS root is the pinned structure copy; TALYS_DIR and INCOGNITA_TALYS_LIVE override."""
 from pathlib import Path
 
 import pytest

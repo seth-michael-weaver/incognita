@@ -1,4 +1,4 @@
-/* BINQUAD (`binquad y`, default n = TALYS): population-weighted in-bin quadrature of the emission
+/* `binquad` (`binquad y`, default n = TALYS): population-weighted in-bin quadrature of the emission
  * transmissions, shared by nativex.c (`nx_widths`, the cascade's mother bins) and engine_decay.c
  * (`ce_densprepare`, the primary decay).
  *

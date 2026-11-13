@@ -1,4 +1,4 @@
-"""FISSBAR2: INCOGNITA_FISBAR_LD per-barrier keys. OFF = rejected (default runs cannot carry them); ON = fission-only,
+"""INCOGNITA_FISBAR_LD per-barrier keys. OFF = rejected (default runs cannot carry them); ON = fission-only,
 set/multiply exactly one barrier's Params cell. Stock-TALYS agreement: development notes"""
 import pytest
 

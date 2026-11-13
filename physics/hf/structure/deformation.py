@@ -95,7 +95,7 @@ class Deformation:
     ndef: int
     irigid0: float
     irigid: tuple[float, ...]  # (numbar+1,)
-    weakcc: bool = False  # WEAKCPL: odd target run as weak-coupling CC (collrule svw/svwa); default TALYS
+    weakcc: bool = False  # weak coupling: odd target run as weak-coupling CC (collrule svw/svwa); default TALYS
 
 
 def _natpar(j: float) -> int:
@@ -127,7 +127,7 @@ def deformation(
     Zix, Nix = options.Zinit - Z, options.Ninit - (A - Z)
     N = A - Z
     if flagautorot is None:
-        # FIXDWBA (INCOGNITA_DWBAUNIT, default off): a spherical target whose DWBA exceeds sigma_R
+        # `INCOGNITA_DWBAUNIT` (default off): a spherical target whose DWBA exceeds sigma_R
         # is solved as TALYS's automatic rotor (physics/hf/direct/dwbaunit.py)
         from physics.hf.direct.dwbaunit import autorot_for
 
@@ -170,9 +170,9 @@ def deformation(
     nrot = 0
     ndef = 0
 
-    # KWCOV B5: a `deformfile Z <file>` card replaces deformation/<Sym>.def (deformpar.f90:128-131)
+    # a `deformfile Z <file>` line replaces deformation/<Sym>.def (deformpar.f90:128-131)
     block = read_deformation_file(Z, A, options.deformfile_of(Zix)) if options.disctable != 3 else None
-    # COLLRULE (off by default): the target's scheme from measured structure (physics.hf.structure.collrule)
+    # `collrule` (off by default): the target's scheme from measured structure (physics.hf.structure.collrule)
     from physics.hf.structure import collrule as _collrule
 
     rule = _collrule.target_letter(Z, A, options) if options.disctable != 3 and not flagspher else None
@@ -182,7 +182,7 @@ def deformation(
     elif rule == "V":
         vb = _collrule.vib_block(Z, A, block, jdis, parlev, n_all)
         block = vb if vb is not None else block
-    elif rule == "W":  # WEAKCPL: odd-A weak-coupling CC (collrule.weak_block)
+    elif rule == "W":  # weak coupling: odd-A weak-coupling CC (collrule.weak_block)
         wb = _collrule.weak_block(Z, A, block, jdis, parlev, edis, n_all)
         block = wb if wb is not None else block
     elif rule == "R" and (block is None or block[0] not in ("R", "A")):
@@ -262,7 +262,7 @@ def deformation(
                     indexcc[i] = nex
                     leveltype[nex] = "R"
                     break
-        # ENGAUDIT BANDCHECK (INCOGNITA_BANDCHECK=1, default OFF): TALYS tests only the LAST member; a member missing
+        # `INCOGNITA_BANDCHECK=1` (default OFF): TALYS tests only the LAST member; a member missing
         # from the level list keeps indexcc = 0 and is coupled at the ground state's index, so its direct flux is
         # removed with the elastic and lost to every channel (Lr-314 at 0.1 MeV: 2,631 of 5,227 mb). With the
         # switch every member must be found before the nucleus is taken as a rotor.
@@ -285,7 +285,7 @@ def deformation(
                 nrotlev += 1
                 if nrotlev > maxrot:
                     leveltype[nex] = "D"
-        # ENGPHYS `oddodd`: the vibrational systematics are an even-even phenomenon; an odd-odd nucleus's first
+        # `engphys` `oddodd`: the vibrational systematics are an even-even phenomenon; an odd-odd nucleus's first
         # 2+ is not a core phonon, so it is left without default collectivity, as TALYS leaves odd-A nuclei
         from physics.hf import engphys
         if odd == 0 and not (Z % 2 == 1 and engphys.on("oddodd")):
@@ -448,7 +448,7 @@ def weak_coupling(
     a13 = _pow32(_F(A), _F(c["onethird"]))
     from physics.hf.structure import collrule as _collrule
 
-    skip = _collrule.core_skip(target, core_levels)  # WEAKCPL: None unless the target's multiplet is in CC
+    skip = _collrule.core_skip(target, core_levels)  # weak coupling: None unless the target's multiplet is in CC
     for i in range(0, NUMLEV2 + 1):
         if i == 0:  # `i == 0 .and. type == k0`: nuclides.f90 always passes type = k0
             continue

@@ -1,4 +1,4 @@
-"""ENGPROJ4 DWECIS: ECIS's DWBA numerics (insh modified Numerov + tlnc matching) give correctly normalised waves,
+"""ECIS-style DWBA: ECIS's DWBA numerics (insh modified Numerov + tlnc matching) give correctly normalised waves,
 converge to the plain-Numerov port on a fine grid, and are scoped to d/t/h."""
 import torch
 

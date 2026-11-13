@@ -1,9 +1,9 @@
-"""LOGTINT (Incognita extension, not TALYS; default OFF): log-T Lagrange interpolation of charged-particle T_lj.
+"""Log-T interpolation (Incognita extension, not TALYS; default OFF): log-T Lagrange interpolation of charged-particle T_lj.
 
 Numerics. densprepare.f90:341-388 puts the emission-grid transmission Tjl(type, nen, updown, l) onto each residual row's
 Eout by pol2 = second-order Lagrange in LINEAR T over three grid nodes. Below the Coulomb barrier a charged particle's T is a
 tunnelling exponential, T ~ exp(-2 G(E)), and changes x10-x1000 between nodes 0.2-0.5 MeV apart; a parabola through three
-points of an exponential lies ABOVE it between the nodes, so pol2 overstates sub-barrier T (ALPHACE diagnostic). The same
+points of an exponential lies ABOVE it between the nodes, so pol2 overstates sub-barrier T. The same
 Lagrange weights applied to ln T are exact for a pure exponential and second order in the WKB exponent:
 
     T(Eout) = exp(w1 ln Ta + w2 ln Tb + w3 ln Tc) = Ta^w1 Tb^w2 Tc^w3      (w_i the pol2 weights, sum w_i = 1)
@@ -20,15 +20,15 @@ step, same [ebegin, eendmax] keep window), and charged T at every Eout is the lo
 where a fine node is zero). Only the T values change (nodes for lmax are the coarse ones). Numpy paths only; the C paths
 (ce_densprepare, nx_widths, glue) and the GPU refuse it, so a REF run is a Python/numpy run.
 
-Wired (L): Python densprepare (numpy + DIFFPARAM torch), decay_batch._interp_tl (decay_batch, capture_fast_batch,
+Wired (L): Python densprepare (numpy + differentiable torch), decay_batch._interp_tl (decay_batch, capture_fast_batch,
 capture_gpu_setup), decay_fast._particles (numpy widths), C ce_densprepare (engine_decay.c, ce_set_tlog), C nx_widths
-(nativex.c, nx_set_tlog). NATIVEX2 glue (nx2_glue_interp): falls back to the numpy body when tlog is on (same arithmetic).
+(nativex.c, nx_set_tlog). native glue (nx2_glue_interp): falls back to the numpy body when tlog is on (same arithmetic).
 GPU full path (gpu_full_setup): refuses (NotImplementedError).
 
-TLOGIT (Incognita extension, default OFF; keyword `tlogit y`, else INCOGNITA_TLOGIT=y): the same Lagrange weights on the LOGIT
+logit-T (Incognita extension, default OFF; keyword `tlogit y`, else INCOGNITA_TLOGIT=y): the same Lagrange weights on the LOGIT
 u = ln(T / (1 - T)) instead of ln T. In WKB T = 1 / (1 + exp(2K)), so logit T = -2K is smooth in E on BOTH sides of the barrier
 top: = ln T (exact for the tunnelling exponential) where T << 1, = -ln(1 - T) where T -> 1 (the saturating side, where ln-T
-Lagrange overshoots, LOGTINT G0). Rule (no parameter): types 2..6, every element whose three nodes satisfy 1e-300 < T < 1 - 1e-12;
+Lagrange overshoots, log-T interpolation G0). Rule (no parameter): types 2..6, every element whose three nodes satisfy 1e-300 < T < 1 - 1e-12;
 else TALYS's linear pol2 (as `tlog c` falls back). Same sites as `tlog c` (kind "l"; C flag 2). `tlogit y` overrides `tlog c`.
 """
 
@@ -40,11 +40,11 @@ import numpy as np
 
 CHARGED = (2, 3, 4, 5, 6)
 REFINE = 8
-LOGIT_LO, LOGIT_HI = 1e-300, 1.0 - 1e-12  # TLOGIT: node window where the logit is taken (else linear pol2)
+LOGIT_LO, LOGIT_HI = 1e-300, 1.0 - 1e-12  # logit-T: node window where the logit is taken (else linear pol2)
 
 
 def mode(options) -> str:
-    """'l' (TLOGIT: charged ejectiles on logit T), 'c' (charged ejectiles on log T) or 'n' (OFF): the `tlogit` keyword, else
+    """'l' (logit-T: charged ejectiles on logit T), 'c' (charged ejectiles on log T) or 'n' (OFF): the `tlogit` keyword, else
     INCOGNITA_TLOGIT, then the `tlog` keyword, else INCOGNITA_TLOG."""
     if bool(getattr(options, "tlogit", False)) or os.environ.get("INCOGNITA_TLOGIT", "n").strip().lower()[:1] in ("y", "1"):
         return "l"
@@ -75,7 +75,7 @@ def on(trans, t: int) -> str | bool:
 
 
 def lagr_logit(w1, w2, w3, ta, tb, tc):
-    """TLOGIT: Lagrange on u = ln(T/(1-T)) where all three nodes are in (1e-300, 1-1e-12), TALYS's linear pol2 (same term order)
+    """Logit-T: Lagrange on u = ln(T/(1-T)) where all three nodes are in (1e-300, 1-1e-12), TALYS's linear pol2 (same term order)
     elsewhere. numpy. T = e^u/(1+e^u) for u < 0 (exact down to the denormals), 1/(1+e^-u) for u >= 0."""
     lin = w1 * ta + w2 * tb + w3 * tc
     pos = ((ta > LOGIT_LO) & (ta < LOGIT_HI) & (tb > LOGIT_LO) & (tb < LOGIT_HI) & (tc > LOGIT_LO) & (tc < LOGIT_HI))
@@ -94,7 +94,7 @@ def lagr_logit(w1, w2, w3, ta, tb, tc):
 
 def lagr_log(w1, w2, w3, ta, tb, tc, kind: str = "c"):
     """Lagrange on ln T where all three nodes are > 0, TALYS's linear pol2 (same term order) elsewhere. numpy.
-    kind "l" = TLOGIT (lagr_logit)."""
+    kind "l" = logit-T (lagr_logit)."""
     if kind == "l":
         return lagr_logit(w1, w2, w3, ta, tb, tc)
     lin = w1 * ta + w2 * tb + w3 * tc
@@ -108,7 +108,7 @@ def lagr_log(w1, w2, w3, ta, tb, tc, kind: str = "c"):
 
 
 def lagr_log_torch(w1, w2, w3, ta, tb, tc, kind: str = "c"):
-    """DIFFPARAM: the same rule on the graph (gradients flow through both branches' selected values). kind "l" = TLOGIT."""
+    """Differentiable: the same rule on the graph (gradients flow through both branches' selected values). kind "l" = logit-T."""
     import torch
 
     lin = w1 * ta + w2 * tb + w3 * tc
@@ -171,7 +171,7 @@ def record(t: int, eout, na, w1, w2, w3, ta, tb, tc, keep, transeps: float, refv
         return
     lin = np.asarray(w1 * ta + w2 * tb + w3 * tc, dtype=float)
     lg = np.asarray(lagr_log(w1, w2, w3, ta, tb, tc), dtype=float)
-    lgt = np.asarray(lagr_logit(w1, w2, w3, ta, tb, tc), dtype=float)  # TLOGIT column (recorded in every recorder run)
+    lgt = np.asarray(lagr_logit(w1, w2, w3, ta, tb, tc), dtype=float)  # logit-T column (recorded in every recorder run)
     kp = np.broadcast_to(np.asarray(keep, dtype=bool), lin.shape)
     e = np.broadcast_to(np.asarray(eout, dtype=float).reshape((-1,) + (1,) * (lin.ndim - 1)), lin.shape)
     ll = np.broadcast_to(np.arange(lin.shape[1]).reshape((1, -1) + (1,) * (lin.ndim - 2)), lin.shape)
@@ -219,7 +219,7 @@ def native_arm(trans) -> None:
     import ctypes
 
     k = kind(trans.get("tlog", False)) if isinstance(trans, dict) else False
-    flag = 2 if k == "l" else 1 if k == "c" else 0  # TLOGIT = 2
+    flag = 2 if k == "l" else 1 if k == "c" else 0  # logit-T = 2
     from physics.hf.native import nativex
 
     nx = nativex.lib()

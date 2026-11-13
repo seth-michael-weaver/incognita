@@ -1,11 +1,11 @@
-"""MERGED2 lever `exgrid`: `exgrid.f90`'s excitation-energy bins of one residual in C.
+"""`exgrid.f90`'s excitation-energy bins of one residual in C.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: MERGED2 (the speed work; no physics of its own). Acceptance test:
+Task: native `exgrid` (speed only; no physics of its own). Acceptance test:
 `tests/hf/test_nx2_exgrid.py` (this path against `core.grids.excitation_energies`' reference body,
-bitwise) and docs/results/hf-merged2.md.
+bitwise).
 
 TALYS routines computed here:
     exgrid.f90:1 (exgrid), lines 141-181 -- `Ex(0:maxex)` and `deltaEx` of one residual
@@ -28,7 +28,7 @@ _ARGS = [P, I64, I64, DBL, I64, I64, I64, I64, DBL, I64, P, I64, P, I64]
 
 
 def _fn():
-    """`nx2_exgrid`, or None (no build, or the lever is off)."""
+    """`nx2_exgrid`, or None (no build, or the switch is off)."""
     return kernel("nx2_exgrid", _ARGS, restype=ctypes.c_int64, lever="EXGRID")
 
 

@@ -93,8 +93,8 @@ LIBRARIES: dict[str, str] = {
     # also pre-cutoff, for the prior ensemble
     "jendl40": "JENDL-4.0",
     "endfb70": "ENDF/B-VII.0",
-    # RETRO: the archived TENDL releases. A TENDL of year Y has not seen a measurement
-    # published after Y, which makes it the only rival that is blind where we are blind.
+    # Archived TENDL releases (retrodiction). A TENDL of year Y has not seen a measurement
+    # published after Y, which makes it the only comparison library that is unfitted where we are unfitted.
     "tendl2015": "TENDL-2015",
     "tendl2017": "TENDL-2017",
     "tendl2019": "TENDL-2019",

@@ -1,6 +1,6 @@
 """T9 compound: Hauser-Feshbach core and Moldauer WFC (physics/hf/compound).
 
-Synthetic tests run everywhere. The acceptance gates A-cn1 / A-cn2 need the instrumented reference
+Synthetic tests run everywhere. The acceptance checks A-cn1 / A-cn2 need the instrumented reference
 (`physics/hf/compound/cn_reference.py`, parsed into features/hf_compound_reference/) and skip, not
 fail, when it is absent (contract §6).
 """
@@ -185,7 +185,7 @@ def test_batched_entry_point_pads_cases():
 
 
 # ------------------------------------------------------------------------------------------------
-# acceptance gates against the instrumented TALYS reference
+# acceptance checks against the instrumented TALYS reference
 # ------------------------------------------------------------------------------------------------
 
 
@@ -382,7 +382,7 @@ def test_continuum_decay_is_differentiable_in_transmission_and_level_density():
 
 def test_compnorm_identity_cnfactor_times_transmission_sum_is_the_compound_flux():
     """compnorm folds cfratio/norm into CNfactor, which reduces to CNfactor = xsflux / sum_{J,P,j,l}
-    (2J+1) Tjlinc. Every term is in the dump, so this is a gate that needs no wave number."""
+    (2J+1) Tjlinc. Every term is in the dump, so this is a check that needs no wave number."""
     from physics.hf.compound.normalization import compound_formation, reaction_transmission_sum
 
     torch.manual_seed(3)
@@ -765,13 +765,13 @@ def test_population_returns_nothing_for_an_optical_model_only_run():
 
 
 def test_compnorm_gate_numbers_are_inside_the_component_tolerance():
-    """The chained compnorm gate, if it has been run on this tree."""
+    """The chained compnorm check, if it has been run on this tree."""
     p = Path("docs/results/hf-compnorm-gate.json")
     if not p.exists():
         pytest.skip("hf-compnorm-gate.json not built on this tree")
     g = json.loads(p.read_text())
     # `norm` is in worst_p95 as a diagnostic and is NOT supposed to be 1 for a coupled-channels
-    # target, so only the gated quantities are asserted (gated_quantities in the JSON says which).
+    # target, so only the checked quantities are asserted (gated_quantities in the JSON says which).
     for k in ("cnfactor", "xsflux"):
         v = g["worst_p95"][k]
         assert v is not None and v <= g["tol"], (k, v)

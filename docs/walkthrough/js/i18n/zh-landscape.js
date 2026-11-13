@@ -25,7 +25,7 @@ WT.L.ch.landscape = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "neutrons N →": "中子数 N →",
   "protons Z ↑": "质子数 Z ↑",

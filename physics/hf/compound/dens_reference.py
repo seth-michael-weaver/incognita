@@ -17,9 +17,9 @@ What is *computed* here is exactly what `densprepare` consumes and nothing else:
 
 What is *injected* is the grid densprepare is handed, not the physics it computes on it:
 `Exinc`/`dExinc` and `Fnorm` (compnorm.f90, the CN normalisation), `Ex`/`deltaEx`/`maxJ`
-(exgrid, gate A-grid), `parlev`/`jdis`/`Nlast`/`S` (structure, gate A-struct, exact as printed)
-and `lmaxinc`/`gammax`/`k0`. Each of those has its own passing component gate; taking them from
-the dump is what makes this a gate on densprepare rather than on all of T2-T7 at once.
+(exgrid, check A-grid), `parlev`/`jdis`/`Nlast`/`S` (structure, check A-struct, exact as printed)
+and `lmaxinc`/`gammax`/`k0`. Each of those has its own passing component check; taking them from
+the dump is what makes this a check on densprepare rather than on all of T2-T7 at once.
 """
 
 from __future__ import annotations
@@ -60,9 +60,9 @@ from physics.hf.input.nuclides import coulomb_barriers
 from physics.hf.structure.levels import discrete_levels
 from physics.hf.structure.masses import masses
 from physics.hf import stagetime
-from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
+from physics.hf.projectile import target_mass_index  # target mass index of the projectile
 
-NUMEN_DEFAULT = 250  # the reference runs' numen; INCOGNITA_NUMEN (PECOLLAPSE) overrides it, read per call (ENGFIX4)
+NUMEN_DEFAULT = 250  # the reference runs' numen; `INCOGNITA_NUMEN` overrides it, read per call
 NUML = 60  # A0_talys_mod.f90 numl
 TRANSEPS = 1.0e-8  # input_numerics.f90:80
 
@@ -83,7 +83,7 @@ def _structure_of(Zt: int, At: int):
 
 
 def structure_of(Zt: int, At: int, overrides: dict | None = None):
-    """`_structure_of` with DIFFPARAM's keyword overrides applied to `Params`.
+    """`_structure_of` with the differentiable keyword overrides applied to `Params`.
 
     `masses` is taken from the unperturbed build: `density.overrides` rejects every keyword
     `structure.masses` reads, so it cannot move, and rebuilding it per finite-difference step
@@ -100,7 +100,7 @@ def structure_of(Zt: int, At: int, overrides: dict | None = None):
 
 @lru_cache(maxsize=128)
 def _ld_of_cached(Z: int, A: int, Zt: int, At: int, aadjust: float | None = None):
-    # PARAMWIRE: `aadjust` is the parameter set's value at (Z, A) (`density.overrides.ld_token`),
+    # Parameter set: `aadjust` is the parameter set's value at (Z, A) (`density.overrides.ld_token`),
     # part of the key; the defaults are called with four arguments, as before
     if aadjust is None:
         return _ld_build(Z, A, Zt, At, None)
@@ -124,7 +124,7 @@ def _ld_build(Z: int, A: int, Zt: int, At: int, overrides: dict | None,
 
         k = ld_nx2.densitypar_key(Z, A, o, p, m, lv) if ld_nx2._xt_on() else None
         if k is not None:
-            # CENGLD2: the matched record, Ntop, Nlast and Ncum(NL) of equal inputs are shared
+            # The matched record, Ntop, Nlast and Ncum(NL) of equal inputs are shared
             # across targets (`ld_nx2.densitypar_key` plus what matching reads besides the record)
             xacc = _XACC if matching_xacc is None else matching_xacc
             return ld_nx2.shared_record(
@@ -144,7 +144,7 @@ def _ld_match(Z: int, A: int, o, p, m, lv, xacc: float):
 
     from physics.hf.density import spinquench as _sq
 
-    _sq.note_ecut(Z, A, o, lv)  # SPINQUENCH qd: the continuum start E(Nlast) (OFF: records nothing)
+    _sq.note_ecut(Z, A, o, lv)  # `spinquench` qd: the continuum start E(Nlast) (OFF: records nothing)
     ld = densitymatch(attach_tables(densitypar(Z, A, o, p, m, lv)), o.flagldglobal,
                       o.flagctmglob, xacc, ctwindow=_ctw(o), ctwindow2=_ctw2(o))
     nl = int(ld.Nlast[0])
@@ -155,7 +155,7 @@ def _ld_match(Z: int, A: int, o, p, m, lv, xacc: float):
     # the implicit Exmatch derivative. It stays a tensor when it carries a gradient and becomes
     # a float when it does not, so the default path is the float it always was.
     try:
-        ncum = _ncum_no_grad(ld, nl)  # SETB: None when the level density carries a gradient
+        ncum = _ncum_no_grad(ld, nl)  # None when the level density carries a gradient
         if ncum is None:
             v = densitycum(ld)["Ncum"][min(nl, ld.nlevmax2)]
             ncum = v if v.requires_grad else float(v)
@@ -165,7 +165,7 @@ def _ld_match(Z: int, A: int, o, p, m, lv, xacc: float):
 
 
 def _ncum_no_grad(ld, nl: int) -> float | None:
-    """SETB: `densitycum(ld)["Ncum"][min(nl, nlevmax2)]` as a float, from the one level-density
+    """`densitycum(ld)["Ncum"][min(nl, nlevmax2)]` as a float, from the one level-density
     call `densitycum` makes and the cumulative sum up to that entry only; None when the density
     carries a gradient (the caller then keeps `densitycum` and its tensor).
 
@@ -191,8 +191,8 @@ def _ld_of(Z: int, A: int, Zt: int, At: int, overrides: dict | None = None,
            matching_xacc: float | None = None, aadjust: float | None = None):
     """T6's `LDNucleus` for (Z, A), matched, with tables attached, plus Ntop and Ncum(NL).
 
-    With DIFFPARAM level-density overrides the cache is bypassed -- an `lru_cache` keyed on
-    (Z, A, Zt, At) would hand every finite-difference step the first step's tensors. A PARAMWIRE
+    With differentiable level-density overrides the cache is bypassed -- an `lru_cache` keyed on
+    (Z, A, Zt, At) would hand every finite-difference step the first step's tensors. A parameter-set
     `aadjust` (a float, the parameter set's value at (Z, A)) is part of the cache key instead.
     """
     if not overrides and matching_xacc is None:
@@ -213,7 +213,7 @@ def rhogrid_of(
     `density` already does.
 
     numpy by default. `differentiable` returns the same numbers as a float64 tensor on the graph
-    of `overrides` (DIFFPARAM): the loop that zeroes `Ir > maxJ` becomes a mask and the row
+    of `overrides` (differentiable): the loop that zeroes `Ir > maxJ` becomes a mask and the row
     scatter an `index_copy`, so nothing is written in place into a graph tensor. The two paths
     are compared at 1e-12 by `tests/hf/test_density.py::test_rhogrid_torch_path_matches_numpy`.
 
@@ -248,7 +248,7 @@ def rhogrid_of(
     e3 = (ex + 0.5 * dex)[:, None]
     jj = spins[None, :]
     # the analytical models do not read the parity (density.f90's 1/2 pardis): one evaluation
-    # (SPEED3), shared by both parity columns on the numpy and the differentiable path
+    # shared by both parity columns on the numpy and the differentiable path
     same = ld.ldmodel <= 3 or not ld.has_table(0)
     rows = [None, None]
     for ip, par in ((1, 1), (0, -1)) if same else ((0, -1), (1, 1)):
@@ -260,7 +260,7 @@ def rhogrid_of(
             r2 = density(ld, e2, jj, par)
             r3 = density(ld, e3, jj, par)
         else:
-            # NATIVEX: `density` is elementwise in the energy, so the bottom, centre and top of
+            # Native path: `density` is elementwise in the energy, so the bottom, centre and top of
             # every bin go through one call (a third of the Python work; values to rounding)
             k = e1.shape[0]
             r1, r2, r3 = density(ld, torch.cat([e1, e2, e3]), jj, par).split(k)
@@ -296,7 +296,7 @@ class _RunGrid:
     options: object
     params: object
     m: object
-    target_e: float = 0.0  # ENGFIX4: targetE = edis(parZ(k0), parN(k0), Ltarget), nuclides.f90:234
+    target_e: float = 0.0  # targetE = edis(parZ(k0), parN(k0), Ltarget), nuclides.f90:234
 
 
 @lru_cache(maxsize=32)
@@ -311,12 +311,12 @@ def run_grid(Zt: int, At: int, enincmax_mev: float) -> _RunGrid:
 
     o, p, m = _structure_of(Zt, At)
     s0 = [float(m.s_mev[0, 0, t]) for t in range(7)]
-    te = target_energy_mev(Zt, At, o, m, p)  # ENGFIX4: 0 for a ground-state target
+    te = target_energy_mev(Zt, At, o, m, p)  # 0 for a ground-state target
     eg, maxen = egrid_values(
         emission_limit(enincmax_mev, s0[o.k0], te,
                        s_exits_mev=gridtop_exits(s0, m.mass_amu, parinclude_of(o))),
         o.segment, numen(NUMEN_DEFAULT), o.flagequispec,
-        float(enincmax_mev) if o.flagequispec else None)  # ENGFIX4: equispec needs enincmax
+        float(enincmax_mev) if o.flagequispec else None)  # equispec needs enincmax
     cb = coulomb_barriers(o)
     ebegin, _ = charged_particle_begin(
         eg, maxen, At, {t: cb[t] for t in range(7)}, {t: False for t in range(7)})
@@ -329,7 +329,7 @@ def _transmission_cached(Zt: int, At: int, enincmax_mev: float) -> dict:
 
     if not stagedisk.enabled():
         return _transmission_build(Zt, At, enincmax_mev, None, False)
-    # STAGECACHE: the same build, from disk when its optical-model inputs were seen before
+    # Stage cache: the same build, from disk when its optical-model inputs were seen before
     from physics.hf.direct import dwbaunit
 
     o, p, m = _structure_of(Zt, At)
@@ -344,7 +344,7 @@ def _transmission(Zt: int, At: int, enincmax_mev: float, overrides: dict | None 
     """T5's `Tjl` on the whole emission grid for particles 1..6, plus the spin-averaged `Tl` and
     `lmax` of inverseread.f90.
 
-    With DIFFPARAM optical overrides the (Zt, At, enincmax) cache is bypassed, and with
+    With differentiable optical overrides the (Zt, At, enincmax) cache is bypassed, and with
     `differentiable` the `Tjl`/`Tl` of each type come back as float64 tensors on the graph of
     those overrides instead of numpy. `lmax` stays an integer array either way: it is
     inverseread.f90's *count* of partial waves above a threshold, a branch, not a value.
@@ -355,7 +355,7 @@ def _transmission(Zt: int, At: int, enincmax_mev: float, overrides: dict | None 
     from physics.hf.omp import sfunc
 
     if not overrides and not differentiable:
-        if sfunc.mode() is not None:  # SLINPUT (default OFF): measured-S_l rule on the neutron row
+        if sfunc.mode() is not None:  # `omp.sfunc` (default OFF): measured-S_l rule on the neutron row
             return _transmission_sfunc(Zt, At, enincmax_mev, sfunc.mode(),
                                        os.environ.get("INCOGNITA_SFUNC_TABLE", ""))
         return _transmission_cached(Zt, At, enincmax_mev)
@@ -364,11 +364,11 @@ def _transmission(Zt: int, At: int, enincmax_mev: float, overrides: dict | None 
 
 @lru_cache(maxsize=32)
 def _transmission_sfunc(Zt: int, At: int, enincmax_mev: float, mode: str, table: str, div: tuple = ()) -> dict:
-    """SLINPUT (`omp.sfunc`): the emission-grid neutron Tjl/Tl x F_l(E_lab) = [S_l,meas / S_l,model(1 keV)]^w,
+    """Measured-S_l rule (`omp.sfunc`): the emission-grid neutron Tjl/Tl x F_l(E_lab) = [S_l,meas / S_l,model(1 keV)]^w,
     clipped at 1, with S_l,model log-interpolated at 1 keV from this grid's own Tl; the neutron inverse
     sigma_reac scales with sum (2l+1) Tl. Keyed on the mode and table, so a warm worker never mixes arms.
     `flagompall n`: this is the ONE neutron set of the cascade, i.e. the target's (Zt, At).
-    `div` (ROTEXIT1CN3 `sfexit ccf`, default ()): ((l, f_l), ...) -- S_l,meas / f_l replaces S_l,meas."""
+    `div` (`sfexit ccf`, default ()): ((l, f_l), ...) -- S_l,meas / f_l replaces S_l,meas."""
     from physics.hf.omp import sfunc
 
     d = _transmission_cached(Zt, At, enincmax_mev)
@@ -404,7 +404,7 @@ def _transmission_sfunc(Zt: int, At: int, enincmax_mev: float, mode: str, table:
 
 @lru_cache(maxsize=32)
 def _sfunc_inv_model(Zt: int, At: int, enincmax_mev: float, ls: tuple) -> tuple:
-    """(E_lab grid, {l: S_l,model(1 keV)}) of the target's emission-grid neutron Tl (SLINPUT's inverse-channel
+    """(E_lab grid, {l: S_l,model(1 keV)}) of the target's emission-grid neutron Tl (the measured-S_l rule's inverse-channel
     reference strength functions; spr.f90 form, log-log interpolated at 1 keV)."""
     from physics.hf.core.grids import incident_kinematics
     from physics.hf.omp import sfunc
@@ -431,7 +431,7 @@ def _sfunc_inv_model(Zt: int, At: int, enincmax_mev: float, ls: tuple) -> tuple:
 
 
 def _jlm_on(options) -> bool:
-    """KWCOV B7b: a run whose n / p (jlmomp y) or alpha (alphaomp 3-5) channels may take a tabulated potential."""
+    """A run whose n / p (jlmomp y) or alpha (alphaomp 3-5) channels may take a tabulated potential."""
     return bool(options.flagjlm) or 3 <= int(options.alphaomp) <= 5
 
 
@@ -452,7 +452,7 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
     # the neutron (1), so a proton/alpha run dropped `rvadjust n` on outgoing neutrons and kept
     # the incident `rvadjust p` on outgoing protons. k0 = 1 is unchanged.
     rg_params = ejectile_params(rg_params, int(rg.options.k0))
-    # KWCOV B6 (`optmodall y`, compound/ompall.py): the set of compound nucleus cn = (Zix, Nix) of the run -- the
+    # `optmodall y` (, compound/ompall.py): the set of compound nucleus cn = (Zix, Nix) of the run -- the
     # same grid, keep windows, options and parameters, on the residuals of THAT nucleus (inverse.f90 per Zcomp, Ncomp)
     Zf, Af = Zt, At
     if cn is not None and tuple(cn) != (0, 0):
@@ -468,14 +468,14 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
                         maxen=torch.tensor([rg.maxen]))
     cases = CaseBatch(Z=torch.tensor([Zf]), A=torch.tensor([Af]),
                       e_inc_mev=torch.tensor([enincmax_mev], dtype=DTYPE),
-                      projectile=PARSYM[rg.options.k0])  # CPINC: was "n"
+                      projectile=PARSYM[rg.options.k0])  # the incident projectile
     njm = {t: _njmax(Zf, Af, t, rg.egrid[:E]) for t in range(1, 7)}
     lcap = int(max(int(v.max()) for v in njm.values()))
     eendmax = _eendmax(Zt, At, enincmax_mev)
     nen_ax = torch.arange(E)
     keep_e = {t: (nen_ax >= rg.ebegin[t]) & (nen_ax <= eendmax[t]) for t in range(1, 7)}
     tr = None
-    if not differentiable and not _jlm_on(rg.options):  # NATIVEX2 `omp`: compiled (KWCOV B7b: JLM is Python only)
+    if not differentiable and not _jlm_on(rg.options):  # Native `omp`: compiled (JLM is Python only)
         from physics.hf.omp.omp_nx2 import inverse_kept
 
         tr = inverse_kept(Zf, Af, np.asarray(rg.egrid[:E], dtype=float), rg.maxen, rg.options,
@@ -516,19 +516,19 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
         ud = _to_updown_axis(tjl, t)
         out[t] = ((ud.to(DTYPE), tl.to(DTYPE), lm) if differentiable
                   else (ud.detach().numpy().astype(float), tl.detach().numpy().astype(float), lm))
-    # SPEEDP: the same `inverse_channels` solve also produces `xsreac(type, nen)`, which
-    # `preeq.chain.inverse_reaction_xs` (NODUMP's replacement for `cross_<p>.tot`) used to get by
+    # The same `inverse_channels` solve also produces `xsreac(type, nen)`, which
+    # `preeq.chain.inverse_reaction_xs` (the replacement for `cross_<p>.tot`) used to get by
     # repeating the whole solve on an identical grid. Every other key of this dict is an int
     # type, so the string key is invisible to the six consumers that index it.
     out["sigma_reac_mb"] = tr.sigma_reac_mb[0]
-    # LOGTINT (default OFF; compound/tlog.py): log-T Lagrange of charged T in densprepare; REF = 8x-refined table (G0)
+    # Log-T interpolation (default OFF; compound/tlog.py): log-T Lagrange of charged T in densprepare; REF = 8x-refined table (G0)
     from physics.hf.compound import tlog
 
-    if tlog.mode(rg.options) in ("c", "l"):  # TLOGIT: "l" = logit-T Lagrange
+    if tlog.mode(rg.options) in ("c", "l"):  # "l" = logit-T Lagrange
         out["tlog"] = True if tlog.mode(rg.options) == "c" else "l"
     if tlog.ref(rg.options) and not differentiable:
         out["tlogref"] = _tlogref_tables(Zt, At, rg, rg_params, lcap, eendmax)
-    # ALPHATEMP (default OFF; omp/alphatemp.py): the alpha ABSORPTION potential (alphaomp 6) on the same grid and keep window,
+    # Alpha temperature mixing (default OFF; omp/alphatemp.py): the alpha ABSORPTION potential (alphaomp 6) on the same grid and keep window,
     # for the cold residual states. The hot table is the run's own (out[6]); lmax stays the run's.
     from physics.hf.omp import alphatemp
 
@@ -549,7 +549,7 @@ def _transmission_build(Zt: int, At: int, enincmax_mev: float, overrides: dict |
                              t6[..., 0].detach().numpy().astype(float), out[6][2])
         out["alphatemp_ustar"] = alphatemp.ustar(At + 1 - 4, ts)
         out["alphatemp_tstar"] = ts
-        out["alphatemp_dom"] = alphatemp.domain(rg.options)  # KEVCOLD (n = everywhere)
+        out["alphatemp_dom"] = alphatemp.domain(rg.options)  # (n = everywhere)
     return out
 
 
@@ -577,7 +577,7 @@ def _eendmax(Zt: int, At: int, enincmax_mev: float) -> dict:
 
 
 def _tlogref_tables(Zt: int, At: int, rg, rg_params, lcap: int, eendmax) -> dict:
-    """LOGTINT G0 reference: the run's inverse OMP solve (`omp_nx2.inverse_kept`, else `inverse.inverse_channels`) on
+    """Log-T interpolation G0 reference: the run's inverse OMP solve (`omp_nx2.inverse_kept`, else `inverse.inverse_channels`) on
     the emission grid refined `tlog.REFINE`x, kept over the same [egrid(ebegin), egrid(eendmax)] window per type.
     {type: (efine, Tjl (Ef, L, 3) updown axis, Tl (Ef, L))} for the charged types 2..6."""
     from physics.hf.compound import tlog
@@ -633,7 +633,7 @@ def _njmax(Zt: int, At: int, particle: int, egrid: np.ndarray) -> np.ndarray:
     from physics.hf.omp.schrodinger import nucleus_mass_amu
 
     c = talys_constants()
-    Zc, Ac = compound_of(Zt, At)  # CPINC
+    Zc, Ac = compound_of(Zt, At)
     Zr = Zc - c["parZ"][particle]
     Ar = Ac - c["parA"][particle]
     m_res = nucleus_mass_amu(Zr, Ar)
@@ -646,9 +646,9 @@ def _njmax(Zt: int, At: int, particle: int, egrid: np.ndarray) -> np.ndarray:
 
 def _trans_cut(options) -> tuple[float, float]:
     """(translimit, transeps) of the run for the inverse channels' lmax: `transpower` (grid.f90:256) and `transeps`
-    (input_numerics.f90:79-94; massdis y: 10 / 1e-12, astro y: 15 / 1e-18). KWCOV B14c: before, the defaults 1e-5 /
-    1e-8 were used whatever the deck said (found in B14 part 1; it matters for fragment evaporation: Sb-134 neutron
-    multiplicity 12 %). The defaults are returned as before (bit-identical default runs).
+    (input_numerics.f90:79-94; massdis y: 10 / 1e-12, astro y: 15 / 1e-18). The deck's values are honoured
+    (it matters for fragment evaporation: Sb-134 neutron multiplicity 12 %); the defaults are 1e-5 / 1e-8
+    (bit-identical default runs).
 
     TALYS: grid.f90:256, inverseread.f90:163-215
     Test: tests/hf/test_kwcov_b14c.py
@@ -675,11 +675,11 @@ def _lmax_inverseread(tjl: torch.Tensor, tl: torch.Tensor, particle: int, transl
     """
     from physics.hf.omp.inverse import NJ, eps
 
-    run_lim, run_eps = eps()  # KWCOV B15: the run's transpower / transeps (defaults 1e-5, 1e-8)
+    run_lim, run_eps = eps()  # the run's transpower / transeps (defaults 1e-5, 1e-8)
     nj = NJ[particle]
     L = tjl.shape[-2]
     ll = torch.arange(L, dtype=DTYPE)
-    tlim = run_lim if translimit is None else translimit  # KWCOV B14c: the caller's cut wins, else B15's run eps()
+    tlim = run_lim if translimit is None else translimit  # the caller's cut wins, else the run's eps()
     teps = torch.clamp_min(tl[:, :1] * tlim / (2 * ll + 1), run_eps if transeps is None else transeps)
     small = (tjl[..., :nj] < teps[..., None]).all(-1)
     first = torch.where(small.any(-1), small.to(torch.int64).argmax(-1),
@@ -702,7 +702,7 @@ def _to_updown_axis(tjl: torch.Tensor, particle: int) -> torch.Tensor:
     out = torch.zeros_like(tjl)
     if particle == 3:  # deuteron: spin 1, updown = -1, 0, +1 already
         return tjl
-    if particle == 0:  # ENGPROJ: incident photon, Tjlinc(irad, l) is stored at index irad + 1 already (incident_gamma)
+    if particle == 0:  # incident photon, Tjlinc(irad, l) is stored at index irad + 1 already (incident_gamma)
         return tjl
     if particle == 6:  # alpha: spin 0, only updown = 0
         out[..., 1] = tjl[..., 0]
@@ -721,7 +721,7 @@ def _to_updown_axis(tjl: torch.Tensor, particle: int) -> torch.Tensor:
 def _gamma_parameters(Zt: int, At: int, fit: tuple | None = None):
     """T7's `GammaParameters` for the compound nucleus (Zt, At + 1).
 
-    `fit` (PARAMWIRE) is `density.overrides.gamma_token` of that nucleus -- its `aadjust`, E1
+    `fit` (parameter set) is `density.overrides.gamma_token` of that nucleus -- its `aadjust`, E1
     `ftable` and E1 `wtable` from a parameter set -- and part of the key; the defaults are called
     with two arguments, as before.
 
@@ -735,7 +735,7 @@ def _gamma_parameters(Zt: int, At: int, fit: tuple | None = None):
 
 @lru_cache(maxsize=64)
 def _gamma_parameters_nuc(Z: int, A: int, fit: tuple | None = None):
-    """ENGPROJ GPRESFIX: `_gamma_parameters` of the nucleus (Z, A) itself (not of a pseudo-target's compound).
+    """`_gamma_parameters` of the nucleus (Z, A) itself (not of a pseudo-target's compound).
 
     TALYS: gammapar.f90:1 (gammapar)
     Test: tests/hf/test_engproj_gamma.py
@@ -748,7 +748,7 @@ def _build_gamma_parameters(Zt: int, At: int, overrides: dict | None, fit: tuple
                             nucleus: tuple | None = None):
     """`_gamma_parameters` with T7's `overrides` (requires_grad tensors keep their graph).
 
-    PARAMWIRE: `fit`'s `aadjust` reaches `alev` (densitypar with the adjusted `Params`, as TALYS's
+    Parameter set: `fit`'s `aadjust` reaches `alev` (densitypar with the adjusted `Params`, as TALYS's
     fstrength reads `alev(Zcomp, Ncomp)`), its `ftable`/`wtable` reach the E1 table. An explicit
     `overrides` entry wins over the parameter set's for the same field.
     """
@@ -758,11 +758,11 @@ def _build_gamma_parameters(Zt: int, At: int, overrides: dict | None, fit: tuple
 
     from physics.hf.projectile import gpres_active, k0 as _k0, pseudo_target
 
-    if nucleus is not None:  # ENGPROJ GPRESFIX: the run whose initial compound nucleus IS this nucleus
+    if nucleus is not None:  # the run whose initial compound nucleus IS this nucleus
         Zt, At = pseudo_target(int(nucleus[0]), int(nucleus[1]))
     o, p, m = _structure_of(Zt, At)
-    Zc, Ac = compound_of(Zt, At)  # CPINC: (Zt, At + 1) for a neutron
-    s_type = _k0() if gpres_active() else 1  # GPRESFIX: S(Zcomp, Ncomp, k0) (fstrength.f90:192); legacy S_n
+    Zc, Ac = compound_of(Zt, At)  # (Zt, At + 1) for a neutron
+    s_type = _k0() if gpres_active() else 1  # S(Zcomp, Ncomp, k0) (fstrength.f90:192); legacy S_n
     lv = discrete_levels(Zc, Ac, o, m, p)
     if fit is not None and fit[0] is not None:
         p = with_aadjust(p, o, ((Zc, Ac, fit[0]),))
@@ -770,7 +770,7 @@ def _build_gamma_parameters(Zt: int, At: int, overrides: dict | None, fit: tuple
     fov = gamma_fit_overrides(fit, int(o.gammax))
     if fov:
         overrides = {**fov, **(overrides or {})}
-    # BESTFIT: `wtable`/`ftable` from `best`/`ng.par` belong to this nucleus and are owned by
+    # `wtable`/`ftable` from `best`/`ng.par` belong to this nucleus and are owned by
     # `gamma_parameters` (it builds its own defaults), so they come in through `overrides` too
     from physics.hf.input import fitlib
 
@@ -802,12 +802,12 @@ def strength_fn(Zt: int, At: int, e_inc_mev: float, overrides: dict | None = Non
 
     if overrides:
         gp, o = _build_gamma_parameters(Zt, At, overrides, fit, nucleus=nucleus)
-    elif nucleus is not None:  # ENGPROJ GPRESFIX
+    elif nucleus is not None:  # the nucleus itself
         gp, o = _gamma_parameters_nuc(int(nucleus[0]), int(nucleus[1]), fit)
     else:
         gp, o = _gamma_parameters(Zt, At) if fit is None else _gamma_parameters(Zt, At, fit)
-    # PARAMWIRE: only a TENSOR override is on a graph; float overrides and parameter sets return
-    # numpy like the defaults, so the numpy / NATIVEX paths can take them
+    # Parameter sets: only a TENSOR override is on a graph; float overrides and parameter sets return
+    # numpy like the defaults, so the numpy / native paths can take them
     diff = torch_path(overrides)
 
     def f(efs_mev: float, egamma_mev: float, irad: int, l: int) -> float:  # noqa: E741
@@ -841,7 +841,7 @@ def dens_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float) -> D
     c = talys_constants()
     rg = run_grid(Zt, At, enincmax_mev)
     tr_all = _transmission(Zt, At, enincmax_mev)
-    Zc, Ac = compound_of(Zt, At)  # CPINC: (Zt, At + 1) for a neutron
+    Zc, Ac = compound_of(Zt, At)  # (Zt, At + 1) for a neutron
     eninccm, _ = incident_kinematics(
         inp.e_inc_mev, inp.k0, float(rg.m.mass_amu[target_mass_index()]),
         float(rg.m.specmass[c["parZ"][inp.k0], c["parN"][inp.k0], inp.k0]),
@@ -882,13 +882,13 @@ def dens_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev: float) -> D
 
 
 # ------------------------------------------------------------------------------------------------
-# gate
+# check
 # ------------------------------------------------------------------------------------------------
 
 
 def _r(p: np.ndarray, t: np.ndarray, floor: float) -> np.ndarray:
     """|ln(p/t)| over the points where |t| > floor; inf where TALYS has nothing and the port
-    does (gates doc §2)."""
+    does (validation doc §2)."""
     live = np.abs(t) > floor
     out = np.full(t.shape, np.nan)
     both = live & (np.abs(p) > 0)
@@ -946,7 +946,7 @@ def score_case(inp: CompoundInputs, got: dict) -> dict:
                 k = min(a.shape[0], b.shape[0])
                 # densprepare writes Tgam only for Ir = 0..maxJ(nexout); above that the cell keeps
                 # whatever an earlier nucleus/energy left, and comptarget.f90:610 indexes it with
-                # the COMPOUND J, so TALYS can read a stale cell. Gate the written cells.
+                # the COMPOUND J, so TALYS can read a stale cell. Check the written cells.
                 m = np.zeros(a.shape[:1] + (1, 1, NUMJ + 1, 1), dtype=bool)
                 for q in range(k):
                     m[q, :, :, : int(ref.maxj[q]) + 1] = True
@@ -960,7 +960,7 @@ def score_case(inp: CompoundInputs, got: dict) -> dict:
                 # The dump is written inside comptarget, AFTER comptarget.f90:358-362 replaces
                 # the incident channel's interpolated Tjlnex by the exact Tjlinc, so this one row
                 # is not densprepare's output and scoring it here measured an overwrite that had
-                # not happened yet. It is counted, and gated end to end by score_xspop, which
+                # not happened yet. It is counted, and checked end to end by score_xspop, which
                 # runs `compound.target` and therefore does apply the overwrite.
                 rows[inp.ltarget] = False
                 overwritten += int((ref.tjl[inp.ltarget, :L] != 0).sum())
@@ -970,7 +970,7 @@ def score_case(inp: CompoundInputs, got: dict) -> dict:
 
 
 def score_run(work: Path, Zt: int, At: int, limit: int | None = None) -> dict:
-    """Gate `densprepare` over every incident energy of one instrumented run."""
+    """Check `densprepare` over every incident energy of one instrumented run."""
     from physics.hf.compound.prepare import load_cn_dump
 
     cases = load_cn_dump(Path(work) / "cn_inputs.txt")
@@ -1023,7 +1023,7 @@ def chained_compound_inputs(inp: CompoundInputs, Zt: int, At: int, enincmax_mev:
 def score_xspop(work: Path, Zt: int, At: int, limit: int | None = None) -> dict:
     """A-cn on the built arrays: comptarget's `xspop(type, nex, J, P)` against TALYS's own, over
     every incident energy of one instrumented run. Tolerance 0.01 (`wfc_off`) / 0.02 (default),
-    populations floor 1e-6 mb (gates doc §2).
+    populations floor 1e-6 mb (validation doc §2).
     """
     from physics.hf.compound.prepare import load_cn_dump
     from physics.hf.compound.target import compound_target_inputs
@@ -1060,7 +1060,7 @@ def main(argv=None) -> None:
     ap.add_argument("--only", default="")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--xspop", action="store_true",
-                    help="also run the chained A-cn gate on comptarget")
+                    help="also run the chained A-cn check on comptarget")
     a = ap.parse_args(argv)
     torch.set_num_threads(2)
     work = Path(a.work).expanduser()

@@ -1,4 +1,4 @@
-/* PERFHF: fission/wkb.py's `_t_exact_vec` transfer loop (IDEA_EXACTFIS, Incognita extension) in C.
+/* fission/wkb.py's `_t_exact_vec` transfer loop (exact fission transmission, Incognita extension) in C.
  *
  * The loop runs the staircase from the right edge to the left one, at every energy at once:
  *

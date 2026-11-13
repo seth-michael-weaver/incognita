@@ -1,7 +1,7 @@
-"""CCCACHE: the coupled-channels disk cache (`physics.hf.ecis.ccdisk`).
+"""The coupled-channels disk cache (`physics.hf.ecis.ccdisk`).
 
-The physics gates (bit-identical channels off / cold / warm on 12 nuclides, the MISS and HIT
-cases, concurrency) are in the development notes (CCCACHE); these are the unit-level invariants.
+The physics checks (bit-identical channels off / cold / warm on 12 nuclides, the MISS and HIT
+cases, concurrency) run on full engine runs; these are the unit-level invariants.
 """
 
 from __future__ import annotations
@@ -114,7 +114,7 @@ def test_the_version_covers_the_numerics_switches(monkeypatch, tmp_path):
     monkeypatch.setenv(ccdisk.ENV_VAR, str(tmp_path))
     ccdisk._version.cache_clear()
     v0 = ccdisk._version()
-    monkeypatch.setenv("HF_CC_MODNUM", "0")  # ENGFIX4: read per call, no cache reset needed
+    monkeypatch.setenv("HF_CC_MODNUM", "0")  # read per call, no cache reset needed
     assert ccdisk._version() != v0
     monkeypatch.delenv("HF_CC_MODNUM")
     assert ccdisk._version() == v0

@@ -3,7 +3,7 @@
 
 Like IAEA TALYSWORLD: pick a target, incident energies and a few keywords; every incident energy runs as its own engine
 job (energy grid [E], padded with a dummy top energy when the compound nucleus is unbound to some ejectile: see
-engine_job.py, GRIDTOP pad; TW_GRIDTOP=0 turns the pad off), at most 3 at a time at nice 10, and each finished point is streamed to the page. Results are
+engine_job.py, grid-top pad; TW_GRIDTOP=0 turns the pad off), at most 3 at a time at nice 10, and each finished point is streamed to the page. Results are
 cached by (inputs, energy) under ~/talysworld_data/cache, so a repeated point costs nothing.
 
 Start (laptop WSL / Linux, system python3 with pandas + pyarrow for the library overlay):
@@ -39,7 +39,7 @@ ENG = os.environ.get("TW_ENG", f"{H}/fastgate_data/eng/16606b356d6e")
 PY = os.path.join(ENG, ".venv", "bin", "python")
 DATA = os.environ.get("TW_DATA", f"{H}/talysworld_data")
 ENGINE_LABEL = "INCOGNITA production engine engine-20261022-3 (nucleus 16606b356d6e)"
-GRIDTOP_NOTE = " + GRIDTOP pad (grid [E, E + |min S| + 1 MeV], only E reported)"
+GRIDTOP_NOTE = " + grid-top pad (grid [E, E + |min S| + 1 MeV], only E reported)"
 MAX_WORKERS = 3
 GRIDTOP = os.environ.get("TW_GRIDTOP", "1").strip().lower() not in ("0", "n", "no", "off", "false")  # engine_job.py reads it too
 
@@ -206,7 +206,7 @@ LOW15 = [2.0, 3.0266439158325404, 4.580286696623066, 6.931448431551464, 10.48951
          436.6538892586245, 660.7979186246156]
 POINTS = [16, 32, 64, 134]
 BINS = [20, 40, 60, 100]   # the engine's continuum excitation bins (TALYS keyword bins; 40 = the TALYS default, not in the deck)
-SMIN = {}                  # (z, a) -> min separation energy of the compound nucleus (MeV), for the GRIDTOP pad
+SMIN = {}                  # (z, a) -> min separation energy of the compound nucleus (MeV), for the grid-top pad
 WARM = dict(p=None, lock=threading.Lock())
 WARM_SOCK = None           # set in main(): one pool socket per service port
 # Curves with TW_CHUNK_MIN energies or more are split over the workers (energy subsets of one declared grid; equal to the

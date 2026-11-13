@@ -1,4 +1,4 @@
-/* NATIVEX2 lever `glue`: densprepare's Lagrange interpolation of the emission-grid transmission
+/* Native kernel `glue`: densprepare's Lagrange interpolation of the emission-grid transmission
  * coefficients onto a residual's rows.
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.

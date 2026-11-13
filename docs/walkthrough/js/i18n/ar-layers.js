@@ -1,4 +1,4 @@
-/* Arabic: layers (chapter 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in // [i18n check parity with English helper: data-act="${act}"]
+/* Arabic: layers (chapter 12). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in // [i18n check parity with English helper: data-act="${act}"]
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>الطبقة 1 · قاعدة واحدة لكل نواة</h3>
   <p>الخط الأزرق هو تنبؤ المحرك لتفاعل ما. المحرك هو الطبقة السفلى: الفيزياء نفسها والإعدادات العامة نفسها لكل النويدات، ولا شيء فيه مُعايَر على المقاطع العرضية لأي نواة بعينها.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">أظهر القياسات</button></div>
-  <p>وهذا ما يجعله قابلًا للاختبار بالقياسات وفي مقابل شيفرات نمذجة أخرى حُسبت على الأنوية نفسها. وليس هذا اختبارًا أعمى: فقد اختيرت الإعدادات العامة ونحن نراقب هذه المقارنات نفسها.${engineScore}</p>
+  <p>وهذا ما يجعله قابلًا للاختبار بالقياسات وفي مقابل شيفرات نمذجة أخرى حُسبت على الأنوية نفسها. وليس هذا اختبارًا مستقلًا: فقد اختيرت الإعدادات العامة ونحن نراقب هذه المقارنات نفسها.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>الوضع الحالي</h3>
   <p>لا تُعتمد أي طبقة إلا بعد اختبارها أمام القياسات، وتبقى معطلة إن لم تُفِد. اليوم المحرك قيد الاستخدام وTERRA مرشّحة؛ أما طبقة البنية المقيسة ونطاق عدم اليقين الخاص بالمحرك فما زالا قيد الاختبار.</p>
-  <p><a href="scoreboard.html" data-keep-lang>اعرض لوحة النتائج كاملة ←</a> كل المقارنات التي لا نفوز بها، وكل منافس، وكيفية قراءتها.</p>
-  <div class="aside">${ASOF ? `النتائج حتى ${ASOF}، من` : "النتائج من"} سجل البحث الخاص بالمشروع. المنحنيات في الرسم توضيحية.</div>
+  <p><a href="scoreboard.html" data-keep-lang>اعرض كل المقارنات ←</a> كل المقارنات التي لا نفوز بها، وكل منافس، وكيفية قراءتها.</p>
+  <div class="aside">${ASOF ? `النتائج حتى ${ASOF}، من` : "النتائج من"} سجل المقارنات الخاص بالمشروع. المنحنيات في الرسم توضيحية.</div>
 </div>`,
   };
 })();
@@ -79,4 +79,4 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} من {#} قياسًا داخل النطاق (الهدف: نحو {#} %)",
   "no measurements to check the band against": "لا قياسات يمكن فحص النطاق بها",
 });
-Object.assign(WT.L.ui, { nav_board: "لوحة النتائج" });
+Object.assign(WT.L.ui, { nav_board: "المقارنات" });

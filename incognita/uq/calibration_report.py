@@ -231,7 +231,7 @@ def preset_tiers(exam: Path, n_boot: int, min_rows: int):
 
 
 def preset_nostruct(exam: Path, n_boot: int, min_rows: int):
-    """No-structure-data interval (CAPFAR, out-of-fold) vs the field's 8-model spread band, same DEV cells."""
+    """No-structure-data interval (no-structure rule, out-of-fold) vs the field's 8-model spread band, same cells."""
     X = pd.read_parquet(exam / "capture_blind_cells.parquet")
     M = ["s8l1", "s8l2", "s8l5", "s8l7", "s9l1", "s9l2", "s9l5", "s9l7"]
     L = np.stack([X[f"pred_strip_{m}"].to_numpy() for m in M])

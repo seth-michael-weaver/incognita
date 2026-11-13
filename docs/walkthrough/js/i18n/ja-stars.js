@@ -28,7 +28,7 @@ WT.L.ch.stars = {
 </div>
 <div class="step">
   <h3>測定値との照合</h3>
-  <p>INCOGNITAの30 keVの値を測定値で割ったもの、94の安定核種について（<a href="scoreboard.html">成績表</a>）。</p>
+  <p>INCOGNITAの30 keVの値を測定値で割ったもの、94の安定核種について（<a href="scoreboard.html">比較</a>）。</p>
 </div>`,
 };
 Object.assign(WT.L.labels, {
@@ -78,7 +78,7 @@ Object.assign(WT.L.labels, {
   "r-peak Te, Xe": "r ピーク Te、Xe",
   "r-process: a flood of neutrons makes very neutron-rich nuclei": "r 過程：中性子の洪水が非常に中性子過剰な原子核をつくる",
   "r-process: very neutron-rich nuclei": "r 過程：非常に中性子過剰な原子核",
-  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not a blind test": "丸囲み：s 過程のみの同位体 · 測定値：評価集の値（KADoNiS）· 開発中の比較で、ブラインドテストではない",
+  "ringed: s-only isotopes · measured: compiled values (KADoNiS) · a development comparison, not an independent test": "丸囲み：s 過程のみの同位体 · 測定値：評価集の値（KADoNiS）· 開発中の比較で、独立した検証ではない",
   "ringed: s-only · measured: KADoNiS": "丸囲み：s のみ · 測定値：KADoNiS",
   "s Ba": "s Ba",
   "s Pb": "s Pb",

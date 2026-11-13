@@ -1,6 +1,6 @@
-# Scoreboard data
+# Benchmark comparison data
 
-The numbers behind the [scoreboard](../../scoreboard.html), so that anyone can check them. Section 1 of the board (the
+The numbers behind the [benchmark comparison](../../scoreboard.html), so that anyone can check them. Section 1 of the board (the
 INCOGNITA engine against other reaction codes) can be recomputed from the files in this folder, down to the
 95 % intervals. Section 2 (the TERRA data product against evaluated libraries) is listed cell by cell, but cannot be
 recomputed from this folder (see [What is not here](#what-is-not-here)).
@@ -11,7 +11,7 @@ recomputed from this folder (see [What is not here](#what-is-not-here)).
 - TERRA board: product R072w, 11 October 2026, on an older engine. Counted: 217 WIN / 108 TIE / 1 LOSS, 28 N/A.
 
 These are **development comparisons**. The engine's global rules were chosen while watching these same comparisons,
-and TERRA is scored in-sample except where a row says otherwise. Neither board is a blind test.
+and TERRA is scored in-sample except where a row says otherwise. Neither board is an independent test.
 
 The measurements were curated by this project: of the 6,425 measurement rows in `d_rows.csv.gz`, 985 are not scored
 (776 excluded by the project's curation register, 143 for documented defects, 66 MACS labels that are estimates), and
@@ -272,7 +272,7 @@ EXFOR entries can be looked up at <https://www-nds.iaea.org/exfor/> by entry (5 
   compiled source can be looked up by name. The `macs_Zge20` rows have no EXFOR identifier for the same reason.
 - **The engine's sensitivity variants.** The census also scores two variants of how documented data defects are
   applied. Only the headline view, the one on the board, is published here.
-- **No held-out or sealed measurements** are in this package. Every row is from the development set the board is
+- **No independent validation measurements** are in this package. Every row is from the development set the board is
   scored on.
 
 ## Licence

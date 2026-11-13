@@ -1,10 +1,10 @@
-"""CCNANTHERM: ECIS's relativistic c.m. energy cancels to exactly 0 at 1e-11 MeV for some target
+"""ECIS's relativistic c.m. energy cancels to exactly 0 at 1e-11 MeV for some target
 masses (Tb-159), which made the CC grid 0/0. The cancellation-free form is used only there."""
 import torch
 
 from physics.hf.ecis import dwba_nx2, solver
 
-M_N, M_TB = 1.00866, 158.92535  # card-rounded masses that cancel to ecm = 0 at 1e-11 MeV
+M_N, M_TB = 1.00866, 158.92535  # input-rounded (f10.5) masses that cancel to ecm = 0 at 1e-11 MeV
 
 
 def _old(e, m1, m2):

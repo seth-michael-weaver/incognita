@@ -1,9 +1,9 @@
-"""GLUEFINISH lever `pop`: `population.f90`'s bin loop in C.
+"""Native kernel `pop`: `population.f90`'s bin loop in C.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: GLUEFINISH (the speed work; no physics of its own). Acceptance test:
+Speed path (no physics of its own). Acceptance test:
 `tests/hf/test_nx2_pop.py` (this path against `compound.population`'s reference body, bitwise) and
 docs/results/hf-gluefinish.md.
 

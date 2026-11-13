@@ -1,19 +1,17 @@
-"""CHUNKFIX: a target's curve must not depend on which other targets share its engine run (its chunk).
+"""Chunk independence: a target's curve must not depend on which other targets share its engine run (its chunk).
 
-Every chart freeze (B11-B18) ran `engine_curves.py --only <300 targets>` with ONE `INCOGNITA_TALYS_FIT_LINES`
+A chart freeze could run `engine_curves.py --only <300 targets>` with ONE `INCOGNITA_TALYS_FIT_LINES`
 string holding the recipe lines of all 300 targets (their target and compound nuclei). TALYS keywords are in
 absolute nuclide coordinates and `fitlib.apply_params` writes every cell that falls in the run's box, so a
 neighbour's line lands on this target's RESIDUAL nuclei: n + Fe-56 decays through Mn-56 (p), Fe-55 (2n), ...,
 which are the compound nuclei of n + Mn-55 and n + Fe-54. Run alone, those residuals kept stock values; run next
-to Mn-55 or Fe-54, they got the recipe. The curve moved with the chunk (B18SHRINK attempt 1: up to 0.23 dex).
+to Mn-55 or Fe-54, they got the recipe. The curve moved with the chunk (up to 0.23 dex).
 
 The physics decision: a residual nucleus takes the SAME global recipe, evaluated for that residual, as it would
 as anyone's compound. So the recipe is handed to the engine as one chart-wide table
 (`INCOGNITA_TALYS_FIT_LINES_FILE` / `engine_curves.py --lines-table`), and each run takes the lines of every nucleus
 in its own box from it. A chunk-shared per-nucleus `INCOGNITA_TALYS_FIT_LINES` string is refused by the driver for
-more than one target (`--shared-lines` reproduces a pre-CHUNKFIX freeze in its exact chunks).
-
-Doc: development notes. Report: development notes.
+more than one target (`--shared-lines` reproduces a legacy shared-string freeze in its exact chunks).
 """
 from __future__ import annotations
 
@@ -101,7 +99,7 @@ def test_target_curve_is_the_same_alone_and_in_any_chunk(tmp_path):
 @needs_structure
 def test_chunk_shared_per_nucleus_lines_are_refused(tmp_path):
     """The freezes' protocol (one per-nucleus line string for many targets) is exactly what leaked: the driver
-    refuses it, and `--shared-lines` still runs it (to reproduce a pre-CHUNKFIX freeze in its exact chunks)."""
+    refuses it, and `--shared-lines` still runs it (to reproduce a legacy shared-string freeze in its exact chunks)."""
     r, _ = _run(tmp_path, "bag", [X, Y], bag=own(X) + own(Y))
     assert r.returncode != 0 and "CHUNKFIX" in (r.stderr + r.stdout)
     r, out = _run(tmp_path, "bag_legacy", [X, Y], bag=own(X) + own(Y), extra=("--shared-lines",))

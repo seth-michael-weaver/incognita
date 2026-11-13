@@ -1,4 +1,4 @@
-"""WEAKCPL: `collrule svw|svwa` = sv + weak-coupling (core-excitation) CC for odd-A targets on STRICT-vibrator cores."""
+"""`collrule svw|svwa` = sv + weak-coupling (core-excitation) CC for odd-A targets on STRICT-vibrator cores."""
 
 import math
 

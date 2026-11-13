@@ -19,7 +19,7 @@ WT.L.ch.fisout = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "n + U{#} → two fragments + neutrons": "n + U{#} → 两块碎片 + 中子",
   "prompt neutrons per fission": "每次裂变的瞬发中子数",

@@ -358,8 +358,8 @@ def test_capture_subset_is_only_neutron_capture_z26_92() -> None:
 
 # ----------------------------------------------------------------------- MONIT renorm rules
 #
-# Minimal X4 snippets reproducing the artefacts the WP-12 curation pass found in the
-# capture subset (2026-09-09): entry 40520 (Kononov 1977: a (MONIT)-flagged 197Au
+# Minimal X4 snippets reproducing the artefacts a curation pass found in the
+# capture subset: entry 40520 (Kononov 1977: a (MONIT)-flagged 197Au
 # normalization constant at EN-NRM = 30 keV next to an unflagged 10B shape monitor)
 # and entry 31790 (Wallner 2017: MONIT = 98.66 "MB" that is really barns), plus the
 # cases that must keep working.

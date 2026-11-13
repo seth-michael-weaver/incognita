@@ -131,7 +131,7 @@ def test_global_and_per_nucleus_forms_of_sfth_sfexp_pshiftconstant(clean):
     F.activate(26, 56)
     o = D.default_options(26, 56)
     p = F.apply_params(26, 56, o, D.default_params(26, 56, o))
-    assert float(p.at("sfth", 0, 0)) == pytest.approx(0.7)      # the card wins over sfthall (input_gammapar:487)
+    assert float(p.at("sfth", 0, 0)) == pytest.approx(0.7)      # the per-nucleus line wins over sfthall (input_gammapar:487)
     assert float(p.at("sfth", 0, 1)) == pytest.approx(0.5)
     assert float(p.at("sfexp", 0, 0, 2)) == pytest.approx(0.6) and float(p.at("sfexp", 0, 0, 1)) == pytest.approx(0.4)
     assert float(p.at("pshiftconstant", 1, 1)) == pytest.approx(1.5)

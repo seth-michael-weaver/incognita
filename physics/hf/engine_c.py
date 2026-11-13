@@ -1,11 +1,10 @@
-"""CENGDECAY (ROUTE100 WP5): the chart's dump-free run with the warm decay core in C.
+"""The chart's dump-free run with the warm decay core in C.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: CENGDECAY (the speed work; no physics of its own). Acceptance test:
-`tests/hf/test_engine_c.py` (every array against `engine.run(injection=ChainedFull(...))`) and the
-WP5 gate (docs/results/hf-cengdecay.md).
+Task: the C decay core (speed only; no physics of its own). Acceptance test:
+`tests/hf/test_engine_c.py` (every array against `engine.run(injection=ChainedFull(...))`).
 
 TALYS routines computed here, in `engine.ChainedFull`'s arrangement:
     talysreaction.f90:1 (talysreaction) -- the per-energy loop
@@ -85,7 +84,7 @@ def lib():
     so.ce_cascade.restype = ctypes.c_int64
 
     def addr(fn) -> int:
-        fp = getattr(fn, "_fp", fn)  # a timing wrapper (harness/route100_costmap) keeps the function
+        fp = getattr(fn, "_fp", fn)  # a timing wrapper (a cost profiler) keeps the function
         return ctypes.cast(fp, ctypes.c_void_p).value
 
     so.ce_set_kernels(addr(nxl.nx_widths), addr(nxl.nx_walk), addr(n2.nx2_psf_photon))
@@ -124,7 +123,7 @@ def _blas():
 
 
 def _blas_check():
-    """CENGBOOK: the (dgemv, ddot, dtrtrs) function pointers `ce_channels` calls, or None.
+    """The (dgemv, ddot, dtrtrs) function pointers `ce_channels` calls, or None.
 
     They are scipy's cython_blas / cython_lapack entries, and they are taken only if they give
     numpy's `x @ R`, `U @ x` and scipy's `dtrtrs` to the bit on this box (checked once here over the
@@ -218,7 +217,7 @@ class _Run:
 
         self.cas = cas
         self.ok = True
-        if getattr(cas.options, "flagompall", False):  # KWCOV B6: a set per compound nucleus -> the Python cascade
+        if getattr(cas.options, "flagompall", False):  # a set per compound nucleus -> the Python cascade
             self.ok = False
             return
         tls = [cas.trans[t] for t in range(1, 7)]
@@ -231,25 +230,25 @@ class _Run:
                 is None or os.environ.get("HF_NATIVEX_WIDTHS", "1") == "0"):
             self.ok = False
             return
-        if isinstance(cas.trans, dict) and "tlogref" in cas.trans:  # LOGTINT G0 reference: numpy paths only
+        if isinstance(cas.trans, dict) and "tlogref" in cas.trans:  # `tlogref` reference: numpy paths only
             self.ok = False
             return
         TL, LM, head0 = _tl_stack(cas, tls)
         from physics.hf.compound import tlog
 
-        tlog.native_arm(cas.trans)  # LOGTINT (default OFF): log-T Lagrange of charged T in the C kernels
+        tlog.native_arm(cas.trans)  # `tlog` (default OFF): log-T Lagrange of charged T in the C kernels
         from physics.hf.compound import nnleak
 
-        nnleak.native_arm(cas.options)  # NNLEAK (default y): C cascade's initial-CN top-bin rule
+        nnleak.native_arm(cas.options)  # `nnleak` (default y): C cascade's initial-CN top-bin rule
 
         from physics.hf.omp import alphatemp
 
-        alphatemp.arm_native(cas)  # ALPHATEMP (default OFF): cold alpha tables + U* into the C kernels
+        alphatemp.arm_native(cas)  # `alphatemp` (default OFF): cold alpha tables + U* into the C kernels
         rg = cas.rg
         self.keep = []
         self.TL = np.ascontiguousarray(TL, dtype=np.float64)
-        self.TLf = None  # SLFIRST: the first compound nucleus's stack when it differs (C pp[17]; 0 = use TL)
-        self.TLc = None  # ROTEXIT1CN: the stack the first CN's continuum rows read (C pp[18]; 0 = OFF)
+        self.TLf = None  # the first compound nucleus's stack when it differs (C pp[17]; 0 = use TL)
+        self.TLc = None  # the stack the first CN's continuum rows read (C pp[18]; 0 = OFF)
         if cas.trans_of(0, 0) is not cas.trans:
             tlf = [cas.trans_of(0, 0)[t] for t in range(1, 7)]
             TLf, LMf, h0f = _tl_stack(cas, tlf)
@@ -257,7 +256,7 @@ class _Run:
                 self.ok = False
                 return
             self.TLf = np.ascontiguousarray(TLf, dtype=np.float64)
-            if cas.trans_cont_of(0, 0) is not None:  # ROTEXIT1CN (default OFF): the first CN's continuum rows read TL
+            if cas.trans_cont_of(0, 0) is not None:  # `sfexit` (default OFF): the first CN's continuum rows read TL
                 self.TLc = self.TL
         self.LM = np.ascontiguousarray(LM, dtype=_I64)
         self.head0 = np.ascontiguousarray(head0, dtype=_I64)
@@ -280,10 +279,10 @@ class _Run:
         self.front_trans: dict[int, tuple] = {}
 
     def trans_pack(self, t: int):
-        """CENGBOOK: type t's (Tjl, lmax) as `ce_densprepare` reads them, once per run."""
+        """Type t's (Tjl, lmax) as `ce_densprepare` reads them, once per run."""
         got = self.front_trans.get(t)
         if got is None:
-            tjl, _tl, lmax = self.cas.trans_of(0, 0)[t]  # front = the primary densprepare (SLFIRST)
+            tjl, _tl, lmax = self.cas.trans_of(0, 0)[t]  # front = the primary densprepare
             if isinstance(tjl, torch.Tensor) or np.ndim(tjl) != 3 or np.shape(tjl)[2] != 3:
                 raise _Unsupported("Tjl")
             got = self.front_trans[t] = (np.ascontiguousarray(tjl, dtype=np.float64),
@@ -291,7 +290,7 @@ class _Run:
         return got
 
     def cont_pack(self, t: int):
-        """ROTEXIT1CN (default OFF): type t's model-set Tjl for the primary densprepare's continuum rows, else None."""
+        """`sfexit` (default OFF): type t's model-set Tjl for the primary densprepare's continuum rows, else None."""
         tc = self.cas.trans_cont_of(0, 0)
         if tc is None:
             return None
@@ -314,7 +313,7 @@ class _Run:
 
         from physics.hf.projectile import residual_nucleus
 
-        # ENGPROJ GPRESFIX: (Z, A) is the pseudo-target of the residual (Z, A + 1) (the call at `psf(sp.Z, sp.A - 1)`)
+        # (Z, A) is the pseudo-target of the residual (Z, A + 1) (the call at `psf(sp.Z, sp.A - 1)`)
         gp = self.cas.gamma_params(Z, A, nucleus=residual_nucleus(Z, A + 1))
         pack = None if gp is None or gp.gammax != self.cas.gammax else _pack(gp)
         idx = -1
@@ -359,7 +358,7 @@ def cascade(run: _Run, st, maxz: int, maxn: int, seed: dict, popeps_mb: float, k
             xsreacinc_mb: float, xsbinary_mb: dict, feedbinary_mb, flagfission: bool, fis, prq,
             propagated: set | None = None):
     """`cas.populations` twice with `propagate_exmax` between, `_seed_mulpre` and
-    `multiple_emission` (NATIVEX's walk, multiple pre-equilibrium included) in one `ce_cascade`
+    `multiple_emission` (the native walk, multiple pre-equilibrium included) in one `ce_cascade`
     call: the `MultipleResult` the Python path returns, with `st.spec` as it leaves it; or raises
     `_Unsupported` before anything but `st.spec` entries the Python path also makes is touched.
     An empty `propagated` is filled with the nuclei exgrid ran for; a non-empty one says `st` is
@@ -373,9 +372,9 @@ def cascade(run: _Run, st, maxz: int, maxn: int, seed: dict, popeps_mb: float, k
     from physics.hf.emission.feeding import NUMN, NUMZ
     from physics.hf.core.grids import binquad_photon, binquad_sub
 
-    if binquad_sub(run.cas.options) > 1:  # BINQUAD sub-points: the Python-driven native walk only
+    if binquad_sub(run.cas.options) > 1:  # `binquad` sub-points: the Python-driven native walk only
         raise _Unsupported("binquad sub-points")
-    if binquad_photon(run.cas.options) > 0:  # BINQUAD2 photon quadrature: the Python-driven native walk only
+    if binquad_photon(run.cas.options) > 0:  # `binquadp` photon quadrature: the Python-driven native walk only
         raise _Unsupported("binquad photon quadrature")
 
     cas = run.cas
@@ -413,9 +412,9 @@ def cascade(run: _Run, st, maxz: int, maxn: int, seed: dict, popeps_mb: float, k
     nuclei = grid_set()
     zcap, ncap = cas.stock_cap()
     if cas.options.pernuc and any(cas.options.skipcn_of(zc, nc) for zc, nc in nuclei):
-        raise _Unsupported("skipcn cards (KWCOV B5): the Python walk")
+        raise _Unsupported("skipcn keywords: the Python walk")
     if any(zc > zcap or nc > ncap for zc, nc in nuclei):
-        # FLUXCLOSE A: a reachable terminal residual (`skipCN`, multiple.py) is the Python walk's only; a widened
+        # `fluxclose` part A: a reachable terminal residual (`skipCN`, multiple.py) is the Python walk's only; a widened
         # window with nothing reachable past the stock cap (Fe-56 Ncomp 29-30) is the stock cascade
         raise _Unsupported("fluxclose terminal residuals")
     return _Packed(run, so, st, nuclei, maxz, maxn, P1).run(
@@ -563,7 +562,7 @@ class _Packed:
         P1 = self.P1
         zc, nc = self.keys[s]
         xrows = int(sp.maxex) + 1
-        tj = [cas.trans_of(zc, nc)[t][0] for t in (1, 2)]  # SLFIRST: per emitting nucleus
+        tj = [cas.trans_of(zc, nc)[t][0] for t in (1, 2)]  # per emitting nucleus
         dsp = [cas.spec(st, sp.zix + PARZ[t], sp.nix + PARN[t]) for t in (1, 2)]
         nb = max(d.maxex for d in dsp) + 1
         flags = np.ctypeslib.as_array(ctypes.cast(int(arrs[1]), ctypes.POINTER(ctypes.c_uint8)),
@@ -763,7 +762,7 @@ class _Packed:
             else:
                 res.xsgamdistot_mb[key] = 0.0
             res.xspopnuc_mb[key] = float(sd[s, 17])
-            if resiso and s in self.pops:  # RESISO: the surviving populations XE (multiple.f90:643-646)
+            if resiso and s in self.pops:  # `resiso`: the surviving populations XE (multiple.f90:643-646)
                 XE = self.pops[s][4]
                 res.xspopex_mb[key] = dict(enumerate(XE[:int(si[s, 6]) + 1].tolist()))
             if status in (2, 3):
@@ -775,7 +774,7 @@ class _Packed:
 
     @stagetime.timed("channels")
     def channels(self, cinp, b, xsbinary, chst: "_ChanState", keys: "_Keys"):
-        """CENGBOOK: `exclusive_channels(built.channels(cinp, st, self.result(), b, xsbinary))`
+        """`exclusive_channels(built.channels(cinp, st, self.result(), b, xsbinary))`
         as `run` reads it, in one `ce_channels` call over the arena.
 
         TALYS: channels.f90:1 (channels), totalxs.f90:1 (totalxs), residual.f90:1 (residual)
@@ -783,7 +782,7 @@ class _Packed:
         """
         from physics.hf.emission import channels as CH
 
-        NUMCHANTOT = CH.numchantot()  # CHANCAP
+        NUMCHANTOT = CH.numchantot()  # `chancap`
         cas, st = self.cas, self.st
         if not getattr(self.so, "channels_ok", False):
             raise _Unsupported("no BLAS pointers for the channels")
@@ -823,7 +822,7 @@ class _Packed:
         ip[11:18] = [bool(x) for x in cinp.parskip]
         ip[18:24] = [bool(cinp.parinclude[t + 1]) for t in range(1, 7)]
         ip[24] = e0.shape[1]
-        ip[25:31] = CH.caps()  # CHANCAP: per-ejectile caps (n, p, d, t, h, alpha)
+        ip[25:31] = CH.caps()  # `chancap`: per-ejectile caps (n, p, d, t, h, alpha)
         dp = np.array([cinp.xseps_mb, cinp.targete_mev, float(cas.m.s_mev[0, 0, cas.k0]),
                        float(e0[0, 0]), float(xsbinary[0]) if xsbinary is not None else 0.0,
                        1.0 if xsbinary is not None else 0.0])
@@ -840,12 +839,12 @@ class _Packed:
         chan = _Chan(xsch, keys.resid(ores), float(odbl[0]), float(odbl[1]))
         from physics.hf.emission.multiple import resiso_enabled
 
-        if resiso_enabled():  # RESISO: residual.f90:67 off the arena (xsbranch x rpZZZAAA.tot)
+        if resiso_enabled():  # `resiso`: residual.f90:67 off the arena (xsbranch x rpZZZAAA.tot)
             chan.residual.update(self.resiso(cas, st, ores, keys))
         return chan
 
     def resiso(self, cas, st, ores, keys) -> dict:
-        """RESISO: `rpZZZAAA.LNN` for every arena nucleus with an isomer, as engine.resiso_keys."""
+        """`resiso`: `rpZZZAAA.LNN` for every arena nucleus with an isomer, as engine.resiso_keys."""
         from physics.hf.emission.multiple import isomer_files
 
         out = {}
@@ -872,8 +871,8 @@ _MPE_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int64, ctypes.POINTER(ctypes.c
 
 
 class _ChanState:
-    """CENGBOOK: `ExclusiveState` as the byte map `ce_channels` reads (one byte per channel key
-    (n, p, d, t, h, alpha) within the CHANCAP caps, one digit each), convertible both ways for an energy
+    """`ExclusiveState` as the byte map `ce_channels` reads (one byte per channel key
+    (n, p, d, t, h, alpha) within the `chancap` caps, one digit each), convertible both ways for an energy
     that runs the Python channels."""
 
     DIMS = (9, 9, 9, 9, 9, 9)
@@ -905,7 +904,7 @@ class _Chan:
     def __init__(self, xschannel_mb, residual, xsfistot_mb, xsresprod_mb, full=None):
         self.xschannel_mb, self.residual = xschannel_mb, residual
         self.xsfistot_mb, self.xsresprod_mb = xsfistot_mb, xsresprod_mb
-        self.full = full  # CHANOBS: the whole ChannelResult (Python channels only)
+        self.full = full  # INCOGNITA_CHANOBS: the whole ChannelResult (Python channels only)
 
     @classmethod
     def of(cls, ch):
@@ -914,7 +913,7 @@ class _Chan:
         from physics.hf.engine import resiso_keys
 
         resid = {residual_key(Z, A): v for (Z, A), v in ch.residual_mb.items()}
-        resid.update(resiso_keys(ch.residual_mb, ch.xsbranch))  # RESISO (nothing when off)
+        resid.update(resiso_keys(ch.residual_mb, ch.xsbranch))  # `resiso` (nothing when off)
         return cls(ch.xschannel_mb, resid, ch.xsfistot_mb, ch.xsresprod_mb, full=ch)
 
 
@@ -969,7 +968,7 @@ class _Top:
 
 
 def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
-    """CENGBOOK: `compound_target_inputs(compound_inputs(cas, st, binp, cinp, etot, a_e, **fkw))`
+    """`compound_target_inputs(compound_inputs(cas, st, binp, cinp, etot, a_e, **fkw))`
     and the `CompoundInputs` fields `binary_cross_sections` reads, with the primary `densprepare`
     and `_exact_incident_channel` in `ce_densprepare` writing straight into `nx_target`'s arrays
     (`target_native.target`'s packing), or raises `_Unsupported` before anything is changed.
@@ -999,7 +998,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
     o = cas.options
     from physics.hf.core.grids import binquad_mode, binquad_photon, binquad_sync
 
-    if binquad_photon(o) > 0:  # BINQUAD2 photon quadrature: Python densprepare only (no C twin)
+    if binquad_photon(o) > 0:  # `binquadp` photon quadrature: Python densprepare only (no C twin)
         raise _Unsupported("binquadp")
 
     k0, lt = int(binp.k0), int(binp.ltarget)
@@ -1031,7 +1030,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
     rg = cas.rg
     ti = np.zeros((7, 12), dtype=_I64)
     td = np.zeros((7, 4))
-    tp = np.zeros((7, 11), dtype=np.uint64)  # slot 10: ROTEXIT1CN continuum-row Tjl (0 = OFF)
+    tp = np.zeros((7, 11), dtype=np.uint64)  # slot 10: `sfexit` continuum-row Tjl (0 = OFF)
     to = np.zeros((7, 4), dtype=np.uint64)
     keep, outs = [], []
     ninc = min(lmaxinc + 1, tjlinc.shape[0])
@@ -1053,7 +1052,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
         ti[t, :4] = (nex, d.nlast, d.ntop, arrs[4].shape[0])
         td[t, :3] = (_discfactor(d), sp0.sep_mev[t], float(fnorm[t + 1]))
         tp[t, :5] = [_ptr(a) for a in arrs]
-        if binquad_mode(o):  # BINQUAD: the residual bin widths for the in-bin quadrature (tp slot 9)
+        if binquad_mode(o):  # `binquad`: the residual bin widths for the in-bin quadrature (tp slot 9)
             dexa = np.ascontiguousarray(d.dex_mev, dtype=np.float64)
             keep.append(dexa)
             tp[t, 9] = _ptr(dexa)
@@ -1082,16 +1081,16 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
     binquad_sync(o)
     from physics.hf.compound import tlog
 
-    tlog.native_arm(cas.trans)  # LOGTINT (default OFF)
+    tlog.native_arm(cas.trans)  # `tlog` (default OFF)
     from physics.hf.omp import alphatemp
 
-    alphatemp.arm_native(cas)  # ALPHATEMP (default OFF)
+    alphatemp.arm_native(cas)  # `alphatemp` (default OFF)
     rc = so.ce_densprepare(_ptr(ip), _ptr(dp), _ptr(pp))
     if rc != 0:
         raise _Unsupported(f"ce_densprepare refused type {rc - 1}")
     from physics.hf.compound import ccexitnb
 
-    # CCEXITNB (default OFF): the shared row builder, written into the k0 residual's arrays in place
+    # `ccexitnb` (default OFF): the shared row builder, written into the k0 residual's arrays in place
     ccx = (ccexitnb.rows(cas, lt, cas.spec(st, PARZ[k0], PARN[k0]).ex_mev, outs[k0][1], outs[k0][0] - 1, float(etot), float(sp0.sep_mev[k0]),
                          outs[k0][2], float(fnorm[k0 + 1])) if ccexitnb.enabled(o) else {})
 
@@ -1142,8 +1141,8 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
                         int(fis is not None), binp.targetspin2, binp.target_parity, lmaxinc,
                         tjlinc.shape[0], 7)
             tip[12:19] = range(7)
-            tip[19] = want_denom  # KEVCOLD: per-cell denomhf into out[2:]
-            tdp = np.array([_cnfactor(cf, binp.xseps_mb)])  # ENGDEFECT: comptarget.f90:256
+            tip[19] = want_denom  # per-cell denomhf into out[2:]
+            tdp = np.array([_cnfactor(cf, binp.xseps_mb)])  # comptarget.f90:256
             out_ = np.zeros(2 + (len(cl) if want_denom else 0))
             if nxl.nx_target(_ptr(tip), _ptr(tpp), _ptr(tdp), _ptr(pop_), _ptr(out_)) != 0:
                 raise _Unsupported("nx_target refused")
@@ -1151,7 +1150,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
 
         dom = alphatemp.dom_on(cas.trans)
         pop, out, cnf = _target(cells, outs, int(dom))
-        if dom:  # KEVCOLD (default OFF): the cold/hot alpha table only in the Gamma/D < 1 cells
+        if dom:  # `alphatemp_dom` (default OFF): the cold/hot alpha table only in the Gamma/D < 1 cells
             gd = alphatemp.gd_cells(cells, out[2:], float(binp.e_inc_mev), f"{cas.Zt}-{cas.At}")
             if gd.any():
                 outs_c, to_c = [], np.zeros_like(to)
@@ -1167,8 +1166,8 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
                 finally:
                     alphatemp.arm_front(cas, False)
                 if rc != 0:
-                    raise _Unsupported(f"ce_densprepare (KEVCOLD cold pass) refused type {rc - 1}")
-                _ccx_write(outs_c[k0])  # CCEXITNB (default OFF)
+                    raise _Unsupported(f"ce_densprepare (cold alpha pass) refused type {rc - 1}")
+                _ccx_write(outs_c[k0])  # `ccexitnb` (default OFF)
                 cold = [c for c, g in zip(cells, gd, strict=True) if g]
                 hot = [c for c, g in zip(cells, gd, strict=True) if not g]
                 pop, out, _ = _target(cold, outs_c, 0)
@@ -1176,7 +1175,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
                     ph, oh, _ = _target(hot, outs, 0)
                     pop = pop + ph
                     out = out + oh
-        from physics.hf.compound import wfcnorm  # FIXENG F15 (INCOGNITA_WFCNORM, default OFF)
+        from physics.hf.compound import wfcnorm  # INCOGNITA_WFCNORM, default OFF
 
         if use_wfc and wfcnorm.enabled() and cnf != 0.0:
             f = wfcnorm.factor(float(pop.sum()), float(out[0]), float(cf.xs_flux_mb))
@@ -1190,7 +1189,7 @@ def front(run: _Run, st, binp, cinp, etot: float, a_e: dict, fkw: dict):
 
 
 def binary_lean(inp, state):
-    """CENGBOOK: `emission.binary.binary(inp, state)` (NATIVEX2's `emit_nx2.binary`, the per-type
+    """`emission.binary.binary(inp, state)` (`emit_nx2.binary`, the per-type
     C kernel) for what `cases`/`run` read of it -- `xspop`, `xspopex`, `feedbinary`, `xsdisc`,
     `xscompel`, `xselastot`, `xsnonel` -- and the run-scoped `sfactor` it writes; or raises
     `_Unsupported` (the kernel's refusal; its sfactor writes are idempotent, so the full `binary`
@@ -1207,7 +1206,7 @@ def binary_lean(inp, state):
     kern = E._kernel()
     if kern is None or not E.enabled() or torch.is_grad_enabled():
         raise _Unsupported("binary kernel")
-    if inp.pespinmodel >= 3:  # KWCOV B7: the J-resolved pre-equilibrium population is binary.binary's alone
+    if inp.pespinmodel >= 3:  # the J-resolved pre-equilibrium population is binary.binary's alone
         raise _Unsupported("pespinmodel >= 3")
     sfl = sfaclocal_on()
     tn = torch.from_numpy
@@ -1223,7 +1222,7 @@ def binary_lean(inp, state):
         dd = inp.xsdirdisc_mb[t].numpy()
         sfglobal = state.get(g.zix, g.nix, nj).numpy()
         sfac = sfglobal[: nmax + 1].copy()
-        if sfl:  # TSPORT-SFACLOCAL, as binary.binary and emit_nx2.binary do; this path used to ignore the switch
+        if sfl:  # the local sfactor switch, as binary.binary and emit_nx2.binary do
             sfac[:] = 0.0
         ppx = inp.preeqpopex_mb[t].numpy().copy()
         do_pe = inp.flagpreeq and nmax - nl > 0 and inp.pespinmodel <= 2
@@ -1253,7 +1252,7 @@ def binary_lean(inp, state):
 def cases(zf, stats: dict | None = None):
     """`engine.ChainedFull.cases` for the dump-free chain (`inject=()`), with `cascade` above in
     place of `populations` + `multiple_emission` wherever it applies, and the energy's exclusive
-    channels with it (CENGBOOK: `_Packed.channels` in C, else `built.channels` +
+    channels with it (`_Packed.channels` in C, else `built.channels` +
     `exclusive_channels`, one channel state through the ascending loop either way). Returns, per
     kept energy, `(BinaryInputs, _Chan, binary result)`; `run` reuses that `binary` result.
 
@@ -1281,7 +1280,7 @@ def cases(zf, stats: dict | None = None):
     declared = tuple(float(np.float32(e)) for e in zf.declared_energies)
     enincmax = max(declared)
     want = None if zf.energies is None else {round(e, 6) for e in zf.energies}
-    from physics.hf.input.energies import estop_subset  # KWCOV B2: a deck `estop` line
+    from physics.hf.input.energies import estop_subset  # a deck `estop` line
 
     want = estop_subset(zf.Z, zf.A, declared, want)
     run_axis = list(declared)
@@ -1295,7 +1294,7 @@ def cases(zf, stats: dict | None = None):
             zf.Z, zf.A, float(enincmax), tuple(declared)):
         raise ValueError("ChainedFull(cascade=...) was built for another run")
     cas.set_fit_params(zf.params)
-    from physics.hf.astro import thermal as astro_thermal  # KWCOV B9 (astro y, astrogs n; off: never called)
+    from physics.hf.astro import thermal as astro_thermal  # (astro y, astrogs n; off: never called)
 
     astro_on = astro_thermal.active(cas.options)
     if astro_on or getattr(cas, "astro_ewfc_mev", None) is not None:
@@ -1311,21 +1310,21 @@ def cases(zf, stats: dict | None = None):
     set_energy_subset(zf.Z, zf.A, declared, run_axis if trim else None)
     lend_cascade(cas)
     rn = _Run(cas) if lib() is not None else None
-    specout.sync_c(lib())  # SPECOUT: (un)register the C sink per the switch; output only
+    specout.sync_c(lib())  # (un)register the C sink per the switch; output only
     specout.begin_run(cas)
-    from physics.hf import fisobs  # KWCOV B8: fission extras (off: nothing recorded)
+    from physics.hf import fisobs  # fission extras (off: nothing recorded)
 
     fisobs.begin_run(cas)
-    from physics.hf import fisyield  # KWCOV B14: massdis y + fymodel 1 (off: nothing computed); refusals before the run
+    from physics.hf import fisyield  # massdis y + fymodel 1 (off: nothing computed); refusals before the run
 
     fisyield.begin_run(cas)
-    from physics.hf import urr as urrobs  # KWCOV B10: URR output (urr y / endf y; off: nothing recorded)
+    from physics.hf import urr as urrobs  # URR output (urr y / endf y; off: nothing recorded)
 
     urrobs.begin_run(cas)
-    from physics.hf import production  # KWCOV B11: production y (off: nothing); checkvalue before the run
+    from physics.hf import production  # production y (off: nothing); checkvalue before the run
 
     production.begin_run(cas, declared)
-    from physics.hf import ingout  # KWCOV B13: ingredient output files (off: nothing)
+    from physics.hf import ingout  # ingredient output files (off: nothing)
 
     ingout.begin_run(cas)
     chst = _ChanState()
@@ -1333,10 +1332,10 @@ def cases(zf, stats: dict | None = None):
     from physics.hf.emission import chanobs
 
     chanobs_on = chanobs.enabled()
-    from physics.hf import exclspec  # KWCOV B4b: exclusive spectra need the Python channels' inputs (as CHANOBS)
+    from physics.hf import exclspec  # exclusive spectra need the Python channels' inputs (as INCOGNITA_CHANOBS)
 
     excl_on = exclspec.active()
-    from physics.hf import compoobs  # KWCOV B4b: components y (the same inputs)
+    from physics.hf import compoobs  # components y (the same inputs)
 
     compo_on = compoobs.active()
     try:
@@ -1374,11 +1373,11 @@ def cases(zf, stats: dict | None = None):
                 ewfc.attach(ci, cas, binp.e_inc_mev)
                 pop = compound_target_inputs(ci)
             xsb = binary_cross_sections(pop, [ci])[0]
-            if stellar.enabled():  # STELLARSEF (INCOGNITA_STELLAR, default OFF): read-only re-entrance per target level
+            if stellar.enabled():  # INCOGNITA_STELLAR, default OFF: read-only re-entrance per target level
                 with stagetime.stage("stellar"):
                     stellar.record(cas, st, binp, cinp, etot, a_e, fkw, pop)
             astro_dnuc = None
-            if astro_on:  # KWCOV B9: thermalised target (astrotarget / compprepare astro feed), astro y + astrogs n
+            if astro_on:  # thermalised target (astrotarget / compprepare astro feed), astro y + astrogs n
                 with stagetime.stage("astro"):
                     from physics.hf.compound.target import _exact_incident_channel
 
@@ -1392,14 +1391,14 @@ def cases(zf, stats: dict | None = None):
                     astro_thermal.after_energy(cas, cia)
                     astro_thermal.LOG.append(dict(e_inc_mev=float(binp.e_inc_mev), **ad["info"],
                                                   dxsb=[float(v) for v in ad["dxsb"]]))
-            if urrobs.wanted(cas, binp.e_inc_mev):  # KWCOV B10: urr.f90 at Einc <= eurr, output only
+            if urrobs.wanted(cas, binp.e_inc_mev):  # urr.f90 at Einc <= eurr, output only
                 with stagetime.stage("urr"):
                     from physics.hf.compound import ewfc
 
                     ciu = compound_inputs(cas, st, binp, cinp, etot, a_e, **fkw)
                     ewfc.attach(ciu, cas, binp.e_inc_mev)  # INCOGNITA_EWFC on a coupled target: urr refuses
                     urrobs.record(cas, ciu, binp.e_inc_mev)
-            if cas.options.flagastro:  # KWCOV B9: partfunc's grid (last energy) and the masses, read only
+            if cas.options.flagastro:  # partfunc's grid (last energy) and the masses, read only
                 from physics.hf.astro import rates as astro_rates
 
                 astro_rates.record_energy(cas, st)
@@ -1438,7 +1437,7 @@ def cases(zf, stats: dict | None = None):
                          xsdirdiscsum_mb=a_e["xsdirdiscsum_mb"],
                          xspreeqsum_mb=a_e["xspreeqsum_mb"], xsgrsum_mb=a_e["xsgrsum_mb"])
             from physics.hf.emission import fluxclose
-            if fluxclose.on("C"):  # FLUXCLOSE C: PE + GR flux of an exit with no continuum bin
+            if fluxclose.on("C"):  # `fluxclose` part C: PE + GR flux of an exit with no continuum bin
                 b2, _ = fluxclose.place_unplaced(b2)
             b = None
             if rn is not None and keep[nin - 1]:
@@ -1448,9 +1447,9 @@ def cases(zf, stats: dict | None = None):
                     stats.setdefault("binary_fallback", []).append((binp.e_inc_mev, str(ex)))
             if b is None:
                 b = binary(b2, bstate)
-            if binspec.enabled() and keep[nin - 1]:  # SPECOUT/XDHARD: binary emission spectra, output only
+            if binspec.enabled() and keep[nin - 1]:  # binary emission spectra, output only
                 binspec.record(binp.e_inc_mev, pinp, b2, b, binp.k0, binspec_ctx(cas, target, declared))
-            if specout.active():  # SPECOUT: compound Legendre of the target levels, output only
+            if specout.active():  # compound Legendre of the target levels, output only
                 from physics.hf import specang
 
                 specang.record_energy(cas, st, binp, cinp, etot, a_e, fkw, None if got is not None else ci,
@@ -1460,7 +1459,7 @@ def cases(zf, stats: dict | None = None):
             seed = {t: (b.xspop_mb[t].detach().numpy(), b.xspopex_mb[t].detach().numpy(),
                         float(b.xspop_mb[t].sum())) for t in b.xspop_mb}
             from physics.hf.emission.multiple import full_xsbinary
-            xsbinary = full_xsbinary(b2, xsbinary)  # TRITFID (OFF: unchanged)
+            xsbinary = full_xsbinary(b2, xsbinary)  # full binary xsbinary incl. direct + PE (multiple.f90:950)
             xsb_by_type = ({t - 1: float(v) for t, v in enumerate(xsbinary)}
                            if xsbinary is not None else {})
             mres = packed = chan = None
@@ -1469,7 +1468,7 @@ def cases(zf, stats: dict | None = None):
             propagated: set = set()
             if rn is not None:
                 try:
-                    while True:  # PYCDIFF: grown until every decayed mother has its daughters
+                    while True:  # grown until every decayed mother has its daughters
                         specout.begin_attempt("c")
                         packed = cascade(rn, st, cinp.maxz, cinp.maxn, seed, binp.popeps_mb,
                                          binp.k0, float(inc.sigma_reac_mb[0]), xsb_by_type,
@@ -1485,7 +1484,7 @@ def cases(zf, stats: dict | None = None):
                 except _Unsupported as ex:
                     packed = None
                     stats.setdefault("fallback", []).append((binp.e_inc_mev, str(ex)))
-            if packed is not None and (chanobs_on or excl_on or compo_on):  # CHANOBS: the Python channels keep every ChannelResult field
+            if packed is not None and (chanobs_on or excl_on or compo_on):  # INCOGNITA_CHANOBS: the Python channels keep every ChannelResult field
                 with stagetime.stage("multiple_emission"):
                     mres = packed.result()
             elif packed is not None:
@@ -1509,15 +1508,15 @@ def cases(zf, stats: dict | None = None):
                 with stagetime.stage("channels"):
                     py = chst.to_py()
                     cfull = built.channels(cinp, st, mres, b, xsbinary)
-                    if excl_on or compo_on:  # KWCOV B4b: the inputs and the channel state before this energy
+                    if excl_on or compo_on:  # the inputs and the channel state before this energy
                         xin = (cfull, ExclusiveState(set(py.chanopen), py.idnumfull))
                     chan = _Chan.of(exclusive_channels(cfull, py))
                     chst.from_py(py)
             specout.end_energy(pinp, binp.k0, b2)
-            if xin is not None:  # KWCOV B4b: output only
+            if xin is not None:  # output only
                 exclspec.record(xin[0], st, xin[1])
                 compoobs.record(xin[0], st, b2)
-            if fisobs.active() or fisyield.active():  # KWCOV B8 / B14: output only (the arena is read, not changed)
+            if fisobs.active() or fisyield.active():  # output only (the arena is read, not changed)
                 mr = mres if mres is not None else (packed.result() if packed is not None else None)
                 if fisobs.active():
                     fisobs.record(cas, st, binp.e_inc_mev, etot, mr)
@@ -1525,7 +1524,7 @@ def cases(zf, stats: dict | None = None):
                     fisyield.record(cas, st, binp.e_inc_mev, etot, mr)
             out.append((b2, chan, b, keys))
         specout.end_run(cas)
-        if cas.options.flagastro:  # KWCOV B9: partfunc.f90 after the energy loop
+        if cas.options.flagastro:  # partfunc.f90 after the energy loop
             from physics.hf.astro import rates as astro_rates
 
             o = cas.options
@@ -1539,7 +1538,7 @@ def cases(zf, stats: dict | None = None):
 
 
 def _binquad_refuse(cas, what: str, stats=None) -> None:
-    """BINQUAD is native-only: a Python fallback would silently run TALYS's midpoint quadrature."""
+    """`binquad` is native-only: a Python fallback would silently run TALYS's midpoint quadrature."""
     from physics.hf.core.grids import binquad_mode
 
     if binquad_mode(cas.options):
@@ -1562,8 +1561,8 @@ def run(injection, stats: dict | None = None):
 
     from physics.hf.projectile import k0 as _k0
 
-    # PHMICRO: phmodel 2 runs here with its tables handed to mpe_bin (fast-phmodel); INCOGNITA_PHFAST=0 = the Python reference
-    # ENGPROJ6: the photon entrance (k0 = 0: incidentgamma.f90, compprepare.f90 photon block) is wired in the Python
+    # phmodel 2 runs here with its tables handed to mpe_bin (fast-phmodel); INCOGNITA_PHFAST=0 = the Python reference
+    # the photon entrance (k0 = 0: incidentgamma.f90, compprepare.f90 photon block) is wired in the Python
     # driver only; this driver's `cases` gave Ta-181 (g,n) 13.5 mb at 12 MeV (engine.run and stock TALYS-2.25: 373.6),
     # so a photon run takes engine.run (which still uses the native kernels). n/p/d/t/h are bitwise equal on both drivers.
     if lib() is None or injection.inject or (phmicro_on(getattr(injection, "options", None)) and not phfast_on()) \
@@ -1576,7 +1575,7 @@ def run(injection, stats: dict | None = None):
     from physics.hf.emission import chanobs
 
     xtra = [] if chanobs.enabled() else None
-    xstate = BinaryState() if xtra is not None else None  # CHANOBS: the full binary for xsbinary/xsdisctot
+    xstate = BinaryState() if xtra is not None else None  # INCOGNITA_CHANOBS: the full binary for xsbinary/xsdisctot
     reuse = os.environ.get("HF_ENGINE_C_REBINARY", "0") != "1"
     bstate = None if reuse else BinaryState()
     PARSYM = engine.PARSYM
@@ -1587,7 +1586,7 @@ def run(injection, stats: dict | None = None):
         chans.append(keys.chans(xsch))
         levels.append(keys.levels(binp.k0, b.xsdisc_mb))
         resid.append(ch.residual)
-        if xtra is not None:  # CHANOBS: output only
+        if xtra is not None:  # INCOGNITA_CHANOBS: output only
             bx = b if hasattr(b, "xsbinary_mb") else binary(binp, xstate)  # binary_lean keeps no xsbinary
             xtra.append({} if ch.full is None else chanobs.extras(ch.full, bx, binp.k0, int(injection.Z), int(injection.A), binp=binp))
         # totalxs.f90's xsexclusive: the one-particle channel of each ejectile (parskip off)
@@ -1605,36 +1604,36 @@ def run(injection, stats: dict | None = None):
         residual_production_mb=_stack(resid), totals_mb=_stack(totals),
         injected=injection.families, extras=_stack(xtra) if xtra else {},
     )
-    from physics.hf import urr as urrobs  # KWCOV B10 (off: unchanged)
+    from physics.hf import urr as urrobs  # (off: unchanged)
 
     res = urrobs.add_to_results(res)
-    # DIRECTCAP: direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
+    # direct radiative capture (racap), off unless INCOGNITA_DIRECT_CAPTURE is set
     from physics.hf.direct.racapcalc import add_to_results
 
     res = add_to_results(res, injection)
-    # MACSCLOSED: few-resonance capture where HF is not valid, off unless INCOGNITA_FEWRES is set
+    # few-resonance capture where HF is not valid, off unless INCOGNITA_FEWRES is set
     from physics.hf import fewres
 
     res = fewres.add_to_results(res, injection)
-    # LOWEPOT: no HF compound elastic below the resonance region, off unless INCOGNITA_LOWEPOT is set
+    # no HF compound elastic below the resonance region, off unless INCOGNITA_LOWEPOT is set
     from physics.hf import lowepot
 
     res = lowepot.add_to_results(res, injection)
-    from physics.hf import angout, fisobs, specobs  # KWCOV B3 / B4 / B8 (off: unchanged)
+    from physics.hf import angout, fisobs, specobs  # (off: unchanged)
 
     res = fisobs.add_to_results(specobs.add_to_results(angout.add_to_results(res, injection), injection), injection)
-    from physics.hf import compoobs  # KWCOV B4b: components y (off: unchanged)
+    from physics.hf import compoobs  # components y (off: unchanged)
 
     res = compoobs.add_to_results(res)
-    from physics.hf import thermal  # KWCOV B10b: TALYS rows below eninclow (none below it: unchanged)
+    from physics.hf import thermal  # TALYS rows below eninclow (none below it: unchanged)
 
-    from physics.hf import production  # KWCOV B11: medical isotope production (off: unchanged)
+    from physics.hf import production  # medical isotope production (off: unchanged)
 
     res = production.add_to_results(res, injection)
-    from physics.hf import ingout  # KWCOV B13: ingredient output files (off: unchanged)
+    from physics.hf import ingout  # ingredient output files (off: unchanged)
 
     res = ingout.add_to_results(res, injection)
-    from physics.hf import fisyield  # KWCOV B14 part 1: fission yields (massdis y + fymodel 1; off: unchanged)
+    from physics.hf import fisyield  # fission yields (massdis y + fymodel 1; off: unchanged)
 
     res = fisyield.add_to_results(res, injection)
     return thermal.add_to_results(res, injection)
@@ -1650,7 +1649,7 @@ def _stack(per_case: list[dict[str, float]]) -> dict[str, torch.Tensor]:
 
 
 def _preeqpop_of(prq, binp) -> dict:
-    """KWCOV B7 (pespinmodel >= 3): `BinaryInputs.preeqpop_mb` from population.f90's J-resolved `preeqpop`, cut
+    """For pespinmodel >= 3: `BinaryInputs.preeqpop_mb` from population.f90's J-resolved `preeqpop`, cut
     or padded to each residual's bins; {} on every other run (nothing changes).
 
     TALYS: binary.f90:1 (binary) lines 244-256

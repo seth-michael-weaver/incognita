@@ -48,9 +48,9 @@ from physics.hf.preeq.exciton import DiscreteInputs, PreeqInputs, esurf
 from physics.hf.structure.levels import discrete_levels
 from physics.hf.structure.masses import masses
 from physics.hf import stagetime
-from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
+from physics.hf.projectile import target_mass_index
 
-NUMEN_DEFAULT = 250  # A0_talys_mod.f90 numen of the reference runs; INCOGNITA_NUMEN (PECOLLAPSE) overrides it, read per call (ENGFIX4)
+NUMEN_DEFAULT = 250  # A0_talys_mod.f90 numen of the reference runs; INCOGNITA_NUMEN overrides it, read per call
 PARSYM = ("g", "n", "p", "d", "t", "h", "a")
 
 
@@ -131,7 +131,7 @@ def single_particle_densities(Z: int, N: int, kph: float = 15.0) -> tuple[float,
 
 
 def pegq_on(options=None) -> bool:
-    """PEGQ (Incognita extension, default OFF): `pegq y` keyword, else `INCOGNITA_PEGQ=1`.
+    """`pegq` (Incognita extension, default OFF): `pegq y` keyword, else `INCOGNITA_PEGQ=1`.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -142,7 +142,7 @@ def pegq_on(options=None) -> bool:
 
 
 def pegq_split(Z: int, N: int, kph: float = 15.0) -> tuple[float, float, float]:
-    """PEGQ: Fermi-gas isospin split of the single-particle densities. With a common radius
+    """`pegq`: Fermi-gas isospin split of the single-particle densities. With a common radius
     g_q(eps_F) = 3 N_q / (2 T_F,q), T_F,q ~ (N_q/V)^(2/3), so g_q ~ N_q^(1/3); the total g = A/Kph is kept:
     gp = g Z^(1/3) / (Z^(1/3) + N^(1/3)), gn = g N^(1/3) / (Z^(1/3) + N^(1/3)). Equal to Z/Kph, N/Kph at N = Z.
     NOT TALYS (densitypar.f90:538-539 uses the equal-Fermi-energy split Z/Kph, N/Kph).
@@ -160,7 +160,7 @@ def pegq_split(Z: int, N: int, kph: float = 15.0) -> tuple[float, float, float]:
 
 def pickup_densities(Z: int, N: int, kph: float = 15.0, options=None) -> tuple[float, float]:
     """`gsp`, `gsn` of the Kalbach pickup residual (stripping.f90:175-176: Z/Kph, N/Kph, no g keywords);
-    PEGQ on: the same isospin split as the exciton states (pegq_split).
+    `pegq` on: the same isospin split as the exciton states (pegq_split).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -175,11 +175,10 @@ def exciton_densities(Z: int, N: int, kph: float, params=None, options=None) -> 
     """`g`, `gp`, `gn` of nucleus (Z, N) as the exciton model reads them, with the run's per-nucleus
     `g`/`gp`/`gn` keywords and `gadjust`/`gpadjust`/`gnadjust` (densitypar.f90:533-541):
     g = gadjust * (g or A/Kph), gp = gadjust * gpadjust * (gp or Z/Kph), gn = gadjust * gnadjust * (gn or N/Kph).
-    PEGQ on: the defaults Z/Kph, N/Kph become pegq_split's (user gp/gn still win, adjusts still multiply).
+    `pegq` on: the defaults Z/Kph, N/Kph become pegq_split's (user gp/gn still win, adjusts still multiply).
 
-    KEYAUDIT (0939efc5, carried by PEGQ): before, every pre-equilibrium caller used `single_particle_densities`
-    and these six keywords were parsed but never reached the exciton model (preeq.f90, multipreeq2.f90:170-171/
-    240-241). With no user value, every adjust at 1 and PEGQ off the numbers are `single_particle_densities`' own.
+    Every pre-equilibrium caller uses this, so these six keywords reach the exciton model (preeq.f90,
+    multipreeq2.f90:170-171/240-241). With no user value, every adjust at 1 and `pegq` off the numbers are `single_particle_densities`' own.
 
     TALYS: densitypar.f90:533-541
     Test: tests/hf/test_keyaudit.py, tests/hf/test_pegq.py
@@ -232,7 +231,7 @@ def _gamma_parameters(target: str, variant: str):
     from physics.hf.gamma.parameters import gamma_parameters
 
     Z, A, options, _params, _m = _structure(target)
-    Zc0, Ac0 = compound_of(Z, A)  # CPINC
+    Zc0, Ac0 = compound_of(Z, A)  # compound of the run's projectile
     tag = f"{Zc0:03d}{Ac0:03d}"
     md = _meta_of("level_density", target, f"ld{tag}.gs", variant)
     f = lambda k, d=0.0: float(str(md.get(k, d)).split()[0])  # noqa: E731
@@ -374,7 +373,7 @@ def _direct_discrete(target, variant, energies, k0, nlast):
 
 @stagetime.timed("preeq")
 def _b7_extras(Z, A, k0, options, params, m, enincmax):
-    """KWCOV B7: `preeq.exciton_b7.extras` when the run sets twocomponent n / gshell y / preeqmode 3, else None."""
+    """`preeq.exciton_b7.extras` when the run sets twocomponent n / gshell y / preeqmode 3, else None."""
     from physics.hf.preeq import exciton_b7
 
     if not exciton_b7.active(options):
@@ -394,17 +393,17 @@ def prepare(
     fit: tuple = (),
 ) -> tuple[PreeqInputs, dict]:
     """A `PreeqInputs` and `DiscreteInputs` covering every dumped incident energy of one target,
-    plus the reference header values (`Ecomp`, `Esurf`) the gate cross-checks against.
+    plus the reference header values (`Ecomp`, `Esurf`) the check compares against.
 
-    With `chained=True` (NODUMP) the five injected inputs -- `xsreac` for the particles, the
+    With `chained=True` the five injected inputs -- `xsreac` for the particles, the
     `GammaParameters` behind `xsreac(0, .)`, the residual pairing energies, `xsflux` and
-    `xsdirdisc` -- come from `preeq.chain` instead of from a reference run (PARAMWIRE: with the
+    `xsdirdisc` -- come from `preeq.chain` instead of from a reference run (with the
     parameter set `fit` applied to the photon strength and the residuals' `Params`), `energies` is
     required (nothing can ask a dump which energies exist), and `Ecomp` is the port's own.
     `enincmax_mev` is the run's highest incident energy; it fixes the emission grid and defaults
     to `max(energies)`. `direct_grid` is the energy axis T12/T13's direct calculation belongs to,
     which is the WHOLE run's pre-equilibrium energy list even when `energies` is the subset this
-    call computes (SPEEDP); it defaults to `energies`. Everything else -- the grids, the masks, the levels, `esurf`, `wfac` --
+    call computes; it defaults to `energies`. Everything else -- the grids, the masks, the levels, `esurf`, `wfac` --
     is identical in the two arms, which is the point: the A/B isolates the inputs.
 
     TALYS: preeq.f90:1 (preeq)
@@ -428,11 +427,11 @@ def prepare(
     from physics.hf.core.grids import gridtop_exits, numen
     from physics.hf.structure.scalars import parinclude_of, target_energy_mev
 
-    te = target_energy_mev(Z, A, options, m, params)  # ENGFIX4: targetE (0 for a ground-state target)
-    elimit = emission_limit(enincmax, s0[k0], te,  # GRIDTOP: run_grid's top
+    te = target_energy_mev(Z, A, options, m, params)  # targetE (0 for a ground-state target)
+    elimit = emission_limit(enincmax, s0[k0], te,  # run_grid's top
                             s_exits_mev=gridtop_exits(s0, m.mass_amu, parinclude_of(options)))
     eg, maxen = egrid_values(elimit, options.segment, numen(NUMEN_DEFAULT), options.flagequispec,
-                             enincmax if options.flagequispec else None)  # ENGFIX4: equispec needs enincmax
+                             enincmax if options.flagequispec else None)  # equispec needs enincmax
     de, etop, ebot = emission_bins(eg, maxen)
     coulbar = coulomb_barriers(options)
     ebegin, _ = charged_particle_begin(
@@ -443,10 +442,10 @@ def prepare(
     xsreac = np.zeros((C, 7, E))
     if chained:
         xsreac[:, 0, : maxen + 1] = PC.chained_photoabsorption(Z, A, eg, maxen, energies, fit)
-        from physics.hf.omp import sfunc as _sf  # ROTEXIT1CN (default OFF): PE inverse from the model set
+        from physics.hf.omp import sfunc as _sf  # (default OFF): PE inverse from the model set
 
         _mdl = _sf.exit_cont(options, Z, A)
-        if _sf.exit_ccf(options):  # ROTEXIT1CN3 (default OFF): PE inverse from the CC-ratio set (None -> production set)
+        if _sf.exit_ccf(options):  # (default OFF): PE inverse from the CC-ratio set (None -> production set)
             _mdl = PC._incident_cascade(Z, A, tuple(energies)).ccf_div() or False
         inv = PC.inverse_reaction_xs(Z, A, enincmax, _mdl)
         for t in range(1, 7):
@@ -562,7 +561,7 @@ def prepare(
 
     t_ = lambda x: torch.tensor(np.asarray(x), dtype=DTYPE)  # noqa: E731
     einc = t_(energies)
-    Zc0, Ac0 = compound_of(Z, A)  # CPINC
+    Zc0, Ac0 = compound_of(Z, A)  # compound of the run's projectile
     _, gp_cn, gn_cn = exciton_densities(Zc0, Ac0 - Zc0, float(params.at("kph")), params, options)
     inp = PreeqInputs(
         Z=Z,

@@ -1,9 +1,9 @@
-"""FISSB: the fission transmission of a whole bin ladder in one evaluation per barrier.
+"""The fission transmission of a whole bin ladder in one evaluation per barrier.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: FISSB (the speed work; no physics of its own). Acceptance test: A-fis / E2E through
+A speed path with no physics of its own. Acceptance test: A-fis / E2E through
 `tests/hf/test_fission_batch.py`, which holds it to `fission.chain.FissionChain.bin_triples` and
 `compound.continuum.fission_width`.
 
@@ -14,8 +14,8 @@ TALYS routines this computes, in the arrangement described below:
 
 `multiple_emission` asks `FissionChain.bin_triples` for one mother bin at a time, and each call
 runs `t1barrier` at three energies per barrier. Every call takes the logarithms of the same
-`(segment, J, parity)` barrier level densities again, which made `_log_integrate` the biggest
-single function of a fissioning nuclide (MERGEX §3). Two rearrangements, neither physics:
+`(segment, J, parity)` barrier level densities again, which would make `_log_integrate` the biggest
+single function of a fissioning nuclide. Two rearrangements, neither physics:
 
 * **The logarithms once per grid.** `_log_integrate(rho1, rho2, rho3, dE1, dE2)` is
   ``A dE1 + B dE2`` with ``A = (rho1 - rho2) / ln(rho1 / rho2)`` and ``B`` the same for
@@ -55,7 +55,7 @@ def covered(fp, options) -> bool:
         return False
     from physics.hf.fission.barriers import fistsc_on
 
-    if fistsc_on():  # FISTSC: `_barrier` adds the rotational band's transition states
+    if fistsc_on():  # `fistsc`: `_barrier` adds the rotational band's transition states
         return True
     return all(fp.rotational[ibar].n == 0 for ibar in range(1, nb + 1))
 
@@ -82,7 +82,7 @@ def _coefficients(grid, ibar: int, dev) -> tuple[Tensor, ...]:
 
 def _barrier(fp, grid, ibar: int, eex: Tensor, deltaw: Tensor, shape, cache: dict) -> Tensor:
     """`t1barrier(...).trfis` at every energy of `eex`, `(E, maxj+1, 2)`: the continuum
-    (`_continuum`) plus, under FISTSC, the rotational band's transition states (`band_ladder`).
+    (`_continuum`) plus, under `fistsc`, the rotational band's transition states (`band_ladder`).
 
     TALYS: t1barrier.f90:1 (t1barrier)
     Test: tests/hf/test_fission_batch.py, tests/hf/test_fistsc.py

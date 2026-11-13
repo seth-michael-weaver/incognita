@@ -1,4 +1,4 @@
-"""CENGDECAY (ROUTE100 WP5): `engine_c.run` holds `engine.run(injection=ChainedFull(...))`.
+"""`engine_c.run` holds `engine.run(injection=ChainedFull(...))`.
 
 * chained Fe-56 on four energies (the 20 MeV one runs multiple pre-equilibrium in the C call):
   every `Results` array to the bit, with every energy taken by the C call;
@@ -61,7 +61,7 @@ def test_fe56_bitwise_every_energy_in_c():
     ref, got, stats = _pair(26, 56, (2.0, 8.0, 14.0, 20.0))
     assert not any(k.endswith("fallback") for k in stats), stats
     assert stats["c"] == 4  # the energies walked only for `sfactor` stop before the cascade
-    # CENGBOOK: the primary densprepare/comptarget and the channels in C at every kept energy
+    # the primary densprepare/comptarget and the channels in C at every kept energy
     assert stats.get("front_c") == 8 and stats.get("channels_c") == 4, stats  # front: all walked
     assert sorted(ref) == sorted(got)
     for k in ref:
@@ -93,7 +93,7 @@ def test_switch_off_is_engine_run(monkeypatch):
 
 
 def test_photon_takes_the_python_driver(monkeypatch):
-    """ENGPROJ6: k0 = 0 (INCOGNITA_CPINC=g) is routed to engine.run; the CENG `cases` driver has no photon entrance."""
+    """k0 = 0 (INCOGNITA_CPINC=g) is routed to engine.run; the C `cases` driver has no photon entrance."""
     from types import SimpleNamespace
 
     from physics.hf import engine, engine_c
@@ -106,4 +106,4 @@ def test_photon_takes_the_python_driver(monkeypatch):
     try:
         assert engine_c.run(inj) == "py" and seen == [inj]
     finally:  # engine_c.run loads + caches lib(); leave it unloaded as test_switch_off does (a later HF_NATIVEX=0 test
-        engine_c.lib.cache_clear()  # would otherwise take the C driver without nativex: ENGPORTPROMO gate T)
+        engine_c.lib.cache_clear()  # would otherwise take the C driver without nativex)

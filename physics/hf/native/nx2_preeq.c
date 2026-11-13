@@ -1,4 +1,4 @@
-/* NATIVEX2 lever `preeq`: the two-component particle-hole state density `phdens2` (finite-well
+/* Native kernel `preeq`: the two-component particle-hole state density `phdens2` (finite-well
  * correction included) over broadcast arrays, and the four exciton-model transition rates.
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.

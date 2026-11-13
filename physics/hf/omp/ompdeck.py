@@ -1,4 +1,4 @@
-"""KWCOV B6: the optical-model deck keywords that are files, energy ranges or energy tables.
+"""the optical-model deck keywords that are files, energy ranges or energy tables.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -19,7 +19,7 @@ understands come back as one `OMPDeck` on the run's `Cards` (`Cards.omp`), and e
 `active()`:
 
 * `optmod Z A file [p]` -> `tables(Z, A)`, merged into `omp.parameters.omp_parameters` before the RIPL default (an
-  explicit table wins, as `optmod(Zix, Nix, k) == ' '` gates the RIPL retrieval, omppar.f90:191).
+  explicit table wins, as `optmod(Zix, Nix, k) == ' '` controls the RIPL retrieval, omppar.f90:191).
 * `optmodfilen Z file`, `optmodfilep Z file` -> `local_file(Z, k)`, read by `omp.parameters.read_local_omp` in place of
   `structure/optical/{neutron,proton}/<p>-<El>.omp`.
 * `rvadjustF p E1 E2 D s` ... `awsoadjustF` -> the `ompadjustE1/E2/D/s` cells of `Params` (written by
@@ -244,7 +244,7 @@ def extract(lines, Z: int, A: int, dirs=()) -> tuple[tuple, OMPDeck | tuple]:
         if k in ("optmodfilen", "optmodfilep", "radialfile"):  # getvalues class 10: `optmodfilen Z file`
             if len(w) < 3:
                 raise ValueError(f"deck line {line!r}: expected `{k} Z file`")
-            # KWCOV B7b: `radialfile Z file` (input_ompmodel.f90:190, radialtable.f90:82) -> k = jlm.RADIALFILE_K
+            # `radialfile Z file` (input_ompmodel.f90:190, radialtable.f90:82) -> k = jlm.RADIALFILE_K
             kk = -1 if k == "radialfile" else 1 if k.endswith("n") else 2
             files[(int(w[1]), kk)] = str(resolve(w[2], dirs))
             continue

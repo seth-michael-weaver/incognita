@@ -1,4 +1,4 @@
-"""PORTLEVER: the M1 scissors mode of deformed nuclei at Kopecky et al. (2017) strength, as an
+"""The M1 scissors mode of deformed nuclei at Kopecky et al. (2017) strength, as an
 engine default layered on the TALYS port's own.
 
 TALYS's default M1 model (`strengthM1 3`, Goriely & Plujko's SMLO-2019) carries a scissors
@@ -20,11 +20,10 @@ is zero at beta2 = 0, so spherical nuclei do not move. A user `epr`/`gpr`/`spr` 
 wins, as it does for TALYS's own defaults (the `== 0.` tests of gammapar.f90).
 
 It is **off by default** (`INCOGNITA_M1_SCISSORS` unset or `0`), so the port's fidelity harnesses
-(CHART1, `talys_reference`, the A-* tests) keep measuring TALYS. The measured effect on the blind
-capture regime is in `docs/results/portlever.md`.
+(the chart comparison, `talys_reference`, the A-* tests) keep measuring TALYS.
 
-SCISSORS2 adds `INCOGNITA_M1_SCISSORS=s2`: a deformation-scaled scissors on rotational nuclei only
-(docs/results/scissors2-prereg.md). A nucleus is rotational when the measured E(4+)/E(2+) of its
+`INCOGNITA_M1_SCISSORS=s2` selects a deformation-scaled scissors on rotational nuclei only.
+A nucleus is rotational when the measured E(4+)/E(2+) of its
 even-even core is past the X(5) critical point, R4/2 >= 2.91 (Casten & Zamfir, PRL 87 052503
 (2001)); every other nucleus keeps TALYS's term unchanged. On a rotational nucleus, with the
 FRDM2012 static deformation delta = 0.946 |beta2| (RIPL-4 `mass-frdm12.dat`):
@@ -50,8 +49,8 @@ ENV = "INCOGNITA_M1_SCISSORS"
 
 
 def _env_mode() -> str:
-    """ENGFIX4: the mode, read from the environment on every call (it used to be read once at import,
-    so a long-lived worker kept its parent's value). `set_mode` writes the variable."""
+    """The mode, read from the environment on every call (not once at import, so a long-lived
+    worker sees the current value). `set_mode` writes the variable."""
     m = os.environ.get(ENV, "").strip().lower()
     if m == "0":
         m = ""
@@ -62,7 +61,7 @@ def _env_mode() -> str:
 
 def mode() -> str:
     """The active scissors systematics: "" (TALYS's SMLO-2019), "k17" (Kopecky 2017) or "s2"
-    (SCISSORS2, rotational nuclei only)."""
+    (deformation-scaled, rotational nuclei only)."""
     return _env_mode()
 
 
@@ -77,7 +76,7 @@ def k17(A: int, beta2: float) -> tuple[float, float, float]:
     return 80.0 * b2 / A ** (1.0 / 3.0), gpr, 42.4 * b2 * b2 / gpr
 
 
-# SCISSORS2 constants (docs/results/scissors2/oslo_fit.json: medians over 25 Oslo nuclei)
+# s2 constants (medians over 25 Oslo nuclei)
 KAPPA = 0.15219  # mu_N^2
 GAMMA_MEV = 2.159
 R42_ROTOR = 2.91  # X(5) critical point
@@ -116,7 +115,7 @@ def is_rotor(Z: int, A: int) -> bool:
 
 @cache
 def s2(Z: int, A: int) -> tuple[float, float, float] | None:
-    """(E [MeV], Gamma [MeV], sigma [mb]) of the SCISSORS2 scissors of nucleus (Z, A), or None
+    """(E [MeV], Gamma [MeV], sigma [mb]) of the s2 scissors of nucleus (Z, A), or None
     when (Z, A) is not rotational (TALYS's own term then stays).
 
     Test: tests/hf/test_scissors2.py

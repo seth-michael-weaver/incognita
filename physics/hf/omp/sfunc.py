@@ -1,4 +1,4 @@
-"""SLINPUT (Incognita extension, default OFF; env INCOGNITA_SFUNC = u1 | u01): measured neutron strength functions S0 / S1
+"""Measured-S_l input (Incognita extension, default OFF; env INCOGNITA_SFUNC = u1 | u01): measured neutron strength functions S0 / S1
 as the low-energy neutron transmission input, one uniform rule for every nucleus.
 
 For a neutron channel on a nucleus (Z, A) with a measured S_l in the table (`INCOGNITA_SFUNC_TABLE`, csv Z,A,S0,S1 in
@@ -42,7 +42,7 @@ def mode() -> str | None:
 
 
 def scope() -> str:
-    """SLFIRST (env INCOGNITA_SFUNC_SCOPE, default `all` = SLINPUT U1 bitwise): with `first` the inverse-channel
+    """Env INCOGNITA_SFUNC_SCOPE (default `all` = every compound nucleus): with `first` the inverse-channel
     factor acts only on neutron exits of the FIRST compound nucleus (residual = the measured target, the
     channel the measured S_l describes by reciprocity); every later compound nucleus emits neutrons through
     the unmodified model T_l (`Cascade.trans_of`). The incident channel is unchanged."""
@@ -53,16 +53,16 @@ def scope() -> str:
 
 
 EXIT_ENV = "INCOGNITA_SFEXIT"
-EXIT_DEFAULT = "ccf"  # ROTEXIT1CN3G gate: ccf; deck keyword `sfexit contr` = previous production (ROTEXIT1CN2)
+EXIT_DEFAULT = "ccf"  # default ccf; deck keyword `sfexit contr` = the rotor-only continuum split
 
 
 def exit_mode(options=None) -> str:
-    """ROTEXIT1CN (deck keyword `sfexit`, else env INCOGNITA_SFEXIT, else EXIT_DEFAULT = OFF): `cont` = under SLFIRST
+    """Deck keyword `sfexit`, else env INCOGNITA_SFEXIT, else EXIT_DEFAULT: `cont` = under
     (SCOPE=first) the first compound nucleus keeps the measured-S_l set only for neutron exits into the target's
     DISCRETE levels (the n + target(g.s./levels) channel the measured S_l describes by reciprocity); its exits into
     the target's continuum bins and the pre-equilibrium neutron inverse sigma_reac use the model set (as every later
-    compound nucleus does). The incident channel is unchanged. `contr` (ROTEXIT1CN2) = `cont` only for a target of
-    colltype R (the `.def` deformation class), every other target OFF. `ccf` (ROTEXIT1CN3) = the continuum exits + PE
+    compound nucleus does). The incident channel is unchanged. `contr` = `cont` only for a target of
+    colltype R (the `.def` deformation class), every other target OFF. `ccf` = the continuum exits + PE
     inverse keep the measured S_l divided by the engine's own coupled-channels enhancement f_l = S_l,inc,model /
     S_l,inv,model at 1 keV (f_l := 1 for a spherically solved incident channel, clipped below at 1; `cc_ratio`), i.e. the
     continuum factor is [S_l,meas / S_l,inc,model]^w(E); discrete exits keep the full factor. '' / 0 / n = OFF."""
@@ -78,8 +78,8 @@ def exit_mode(options=None) -> str:
 
 
 def exit_cont(options=None, Z: int | None = None, A: int | None = None) -> bool:
-    """True iff ROTEXIT1CN's continuum split is active for target (Z, A): SFUNC on, SCOPE=first and exit_mode == cont,
-    or exit_mode == contr (ROTEXIT1CN2) and the target is colltype R (deformation class, `spherical y` forces S)."""
+    """True iff the `sfexit cont` continuum split is active for target (Z, A): SFUNC on, SCOPE=first and exit_mode == cont,
+    or exit_mode == contr and the target is colltype R (deformation class, `spherical y` forces S)."""
     if mode() is None or scope() != "first":
         return False
     m = exit_mode(options)
@@ -95,12 +95,12 @@ def exit_cont(options=None, Z: int | None = None, A: int | None = None) -> bool:
 
 
 def exit_ccf(options=None) -> bool:
-    """True iff ROTEXIT1CN3's CC-ratio continuum set is active: SFUNC on, SCOPE=first and exit_mode == ccf."""
+    """True iff the `sfexit ccf` CC-ratio continuum set is active: SFUNC on, SCOPE=first and exit_mode == ccf."""
     return mode() is not None and scope() == "first" and exit_mode(options) == "ccf"
 
 
 def cc_ratio(model_inc: dict, model_inv: dict) -> dict:
-    """ROTEXIT1CN3: {l: f_l} = max(1, S_l,inc,model / S_l,inv,model) (the coupled-channels enhancement of the g.s.
+    """`sfexit ccf`: {l: f_l} = max(1, S_l,inc,model / S_l,inv,model) (the coupled-channels enhancement of the g.s.
     strength function over the spherical solve of the same potential); l without two finite positive values -> 1."""
     out = {}
     for l, si in model_inc.items():

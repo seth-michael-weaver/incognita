@@ -1,7 +1,7 @@
 """Apply the REACTION-code check (incognita/bench/reaction_check.py) to the benchmark's EXFOR rows (2026-11-06).
 
 The rows of ch-n2n / ch-np / ch-na / ch-sacs (incognita/bench/data/exam_rows/{n2n,np,na,sacs}_rows.parquet) were cut by
-the research repository's channel scoreboard (scripts/channels/score_channels.py --amend, rule set A1), which checked only
+the research repository's channel comparison (scripts/channels/score_channels.py --amend, rule set A1), which checked only
 the first SF block of a REACTION string and only the isomer suffixes -M / -Mn / -G. The light (Z 1-25) rows already pass
 the full check. This script applies the same check to every benchmark row, so both sides follow one rule:
 
@@ -16,8 +16,8 @@ the full check. This script applies the same check to every benchmark row, so bo
   - SF9 = DERIV rows are dropped by the rule (d); the script also reports, for information, whether each DERIV row
     duplicates a kept row (same channel and nucleus, energy within 3 %, value within 5 %).
 
-usage (WSL, the research checkout's environment; writes into this repository only):
-  cd ~/nucleus && uv run --no-sync python <this repo>/scripts/fix_bench_rows.py [--main ~/nucleus] [--dry-run]
+usage (the research checkout's environment; writes into this repository only):
+  cd MAIN && uv run --no-sync python <this repo>/scripts/fix_bench_rows.py [--main MAIN] [--dry-run]
 then update incognita/bench/data/exam_rows/SHA256SUMS and `python -m incognita.bench.score tracks --write`.
 """
 import argparse, collections, hashlib, json, sys

@@ -13,8 +13,8 @@ TALYS routines ported here (file:line of the subroutine/function statement):
     incidentread.f90:1 (incidentread)
 
 What omp.out holds. TALYS does not compute the radial potential itself: `ecisinput` writes the
-19 parameters on fixed-format cards (f10.5, or es10.3 above 1000 MeV), ECIS builds the form
-factors with reduced radii multiplied by M^(1/3), M the target mass on the card in amu (ECIS
+19 parameters on fixed-format input records (f10.5, or es10.3 above 1000 MeV), ECIS builds the form
+factors with reduced radii multiplied by M^(1/3), M the target mass on the input record in amu (ECIS
 `lect`: `am3 = wv(2,ij)**.333`, `val = am3*ro`), and `incidentread` copies ECIS's printed
 potential (unit 11, `ecis.pot`) to omp.out with the radius rebuilt as `iR * step`, where `step`
 is ECIS's integration step as printed with f8.5. The columns are
@@ -27,16 +27,16 @@ is ECIS's integration step as printed with f8.5. The columns are
 with f = 1/(1+exp((r-R)/a)) and g = -a df/dr = f(1-f). The overall signs, the (hbar/m_pi c)^2
 factor of the Thomas term and the Coulomb potential are ECIS's business and live in the solver
 (T5, omp/schrodinger.py); this module reproduces the printed columns. The fixed-format rounding
-of the card values is applied with a straight-through estimator (`ecis_card=True`), so the
+of the input-record values is applied with a straight-through estimator (`ecis_card=True`), so the
 forward value is what ECIS computed with and gradients are those of the unrounded parameters.
 
 `radialtable` (JLM radial matter densities) is listed for completeness of the stub contract: the
-JLM/folding potentials: `physics.hf.omp.jlm` / `foldalpha` (KWCOV B7b); `jlm_radial_table` forwards there.
+JLM/folding potentials: `physics.hf.omp.jlm` / `foldalpha`; `jlm_radial_table` forwards there.
 
 Reconstructing the true radii of omp.out needs ECIS's step before the f8.5 rounding; the dump
 does not carry it, so tests fit it in the one-digit window the rounding allows (see
 tests/hf/test_omp_parameters.py); it is one number for all four columns, so it is fitted once
-against all four together and all four are then gated with it.
+against all four together and all four are then checked with it.
 
 `radial_potential` is the SPHERICAL form factor, which is what ECIS prints for a `colltype S`
 target and -- because the vibrational model deforms only the transition form factors -- for a
@@ -101,7 +101,7 @@ def radial_potential(
     """Complex central and spin-orbit potentials on r_fm (fm), MeV; compare with omp.out.
 
     `p` fields are shaped (...,) (one value per case/energy); `a_mass` is the target mass in amu
-    as written on the ECIS card (f10.5), broadcastable to the parameter shape; `r_fm` is (R,).
+    as written on the ECIS input record (f10.5), broadcastable to the parameter shape; `r_fm` is (R,).
     Returns the omp.out columns "V", "W", "Vso", "Wso" shaped (..., R).
 
     TALYS: optical.f90:1 (optical)
@@ -159,7 +159,7 @@ def rotational_radial_potential(
     so the spherical `radial_potential` is the wrong object for these eleven targets, not a
     slightly-off one.
 
-    The multipole expansion itself is T13's (`physics.hf.ecis.formfactor`, gated by A-inc); this
+    The multipole expansion itself is T13's (`physics.hf.ecis.formfactor`, tested by A-inc); this
     function only unpacks the lambda = 0 slice into omp.out's sign and column convention:
     V = -Re(central), W = -Im(central), Vso = -Re(spin_orbit)/2, Wso = -Im(spin_orbit)/2, the 2
     being ECIS's spin-orbit factor which the form factor carries and omp.out does not.
@@ -209,7 +209,7 @@ def omp_out_radii(step_fm: float, n: int) -> Tensor:
 
 
 def jlm_radial_table(*args, **kwargs):
-    """JLM radial matter densities (flagjlm, alphaomp 3-5): `physics.hf.omp.jlm.radial_table` (KWCOV B7b).
+    """JLM radial matter densities (flagjlm, alphaomp 3-5): `physics.hf.omp.jlm.radial_table`.
 
     TALYS: radialtable.f90:1 (radialtable)
     Test: tests/hf/test_kwcov_b7b.py

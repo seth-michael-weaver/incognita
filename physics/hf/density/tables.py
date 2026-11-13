@@ -140,7 +140,7 @@ def density_table(
         from physics.hf import eadj as _eadj
         from physics.hf.density.ld2_nx2 import enabled
 
-        with _eadj.nucleus(Z, A):  # NPWPROMO: native LD kernels per nucleus
+        with _eadj.nucleus(Z, A):  # Native LD kernels per nucleus
             _en = enabled()
         if _en:  # NX2 ld2: the same arithmetic on whole columns (bit for bit)
             return _density_table_np(str(p), A, ldmodel, ibar, nendens, edensmax, flagparity, ld)
@@ -255,7 +255,7 @@ def _table_blocks(path: str, A: int, nendens: int, nparity: int) -> tuple:
     from physics.hf.structure import bincache
 
     args = (int(A), int(nendens), int(nparity))
-    hit = bincache.load("ldtable", path, args)  # PERFSTART: the parsed records from disk
+    hit = bincache.load("ldtable", path, args)  # the parsed records from disk
     if hit is not None and len(hit) == int(hit["n"]):
         out = []
         for k in range(len(hit) - 1):

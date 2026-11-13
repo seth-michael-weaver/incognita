@@ -1,4 +1,4 @@
-"""ENGPROJ: Kalbach breakup (breakup.f90) on a hand-made deuteron case: only n and p get a spectrum; peak near
+"""Kalbach breakup (breakup.f90) on a hand-made deuteron case: only n and p get a spectrum; peak near
 Ecent; the integral equals the breakup cross section (PBU is normalised over the emission grid)."""
 import math
 from types import SimpleNamespace

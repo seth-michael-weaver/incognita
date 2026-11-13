@@ -1,4 +1,4 @@
-"""INGRED: the physics ingredients behind a run's curves, as TALYS prints them.
+"""The physics ingredients behind a run's curves, as TALYS prints them.
 
 `scripts/bestfit/engine_curves.py` saves every channel a run computes; this module saves the
 inputs those channels were computed FROM -- the numbers TALYS writes to `ld*.gs`, `psf*.E1`,
@@ -19,7 +19,7 @@ engine therefore never builds, are computed here:
 * ``resonancepar``'s ``Eavres`` -- see :func:`eavres_mev`.
 
 Both are integrals over one level density, not a reaction: measured overhead is ~1-3 % of a
-64-energy run (docs/results/ingred.md).
+64-energy run.
 
 TALYS routines whose printed values these keys reproduce (file:line of the write):
     densityout.f90:261 (theoretical D0 [eV]), densityout.f90:257 (experimental D0 [eV])
@@ -58,7 +58,7 @@ def eavres_mev(options) -> float:
     gives 1.3359 eV, 0.01 MeV gives 1.3037, which is what TALYS prints).
 
     `structure.resonances.resonance_parameters` keeps a per-nucleus `eavres_mev` that reports
-    :100-102 alone; it is gated by A-struct against that line and is left alone.
+    :100-102 alone; it is tested by A-struct against that line and is left alone.
 
     TALYS: resonancepar.f90:74, :100-102 (resonancepar), nuclides.f90:219-229 (nuclides)
     """
@@ -306,14 +306,14 @@ def ingredients(cas, res=None) -> dict:
     out["fis_json"] = json.dumps({"compound": fis_cn_meta, "target": fis_tg_meta}, default=float)
 
     if ingdump_enabled():
-        # INGDUMP (output only, default OFF): appended AFTER every existing key is computed, and
+        # `ingdump` (output only, default OFF): appended AFTER every existing key is computed, and
         # never raises -- an error is recorded in `ingdump_json` and the run's other keys stand
         out.update(ingdump(cas))
 
     return {PREFIX + k: v for k, v in out.items()}
 
 
-# ---------------------------------------------------------------------------------------- INGDUMP
+# ---------------------------------------------------------------------------------------- ingredient dump
 
 ENV_INGDUMP = "INCOGNITA_INGDUMP"
 INGDUMP_VERSION = 1
@@ -326,14 +326,14 @@ INGDUMP_EG_STEP, INGDUMP_EG_MAX = 0.05, 30.0  # photon-strength Egamma grid [MeV
 
 
 def ingdump_enabled() -> bool:
-    """INCOGNITA_INGDUMP=1 (or y/yes/on) switches the INGDUMP tables on; default OFF."""
+    """INCOGNITA_INGDUMP=1 (or y/yes/on) switches the ingredient dump tables on; default OFF."""
     import os
 
     return os.environ.get(ENV_INGDUMP, "0").strip().lower() in ("1", "y", "yes", "on", "true")
 
 
 def ingdump(cas) -> dict:
-    """INGDUMP: the level-density tables and photon-strength curves of the run's compound nucleus and
+    """The level-density tables and photon-strength curves of the run's compound nucleus and
     its major residuals, read off the run's own `Cascade` (cache hits; no reaction is recomputed).
 
     Keys (un-prefixed here; `ingredients` adds ``ing_``), per nucleus tag T in INGDUMP_NUCLEI:

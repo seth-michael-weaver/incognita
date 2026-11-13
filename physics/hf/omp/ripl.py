@@ -110,7 +110,7 @@ class _Reader:
 
     def __init__(self, lines: list[str], pos: int = 0):
         self.lines, self.pos = lines, pos
-        self.skip = False  # CENGSETUP: reals are counted, not converted (an entry being passed over)
+        self.skip = False  # reals are counted, not converted (an entry being passed over)
 
     def line(self) -> str:
         s = self.lines[self.pos]

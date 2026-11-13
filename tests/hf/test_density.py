@@ -1,4 +1,4 @@
-"""T6 level densities against TALYS's own ld*.gs files (gate A-ld, docs/results/hf-engine-gates.md:
+"""T6 level densities against TALYS's own ld*.gs files (check A-ld, docs/results/hf-engine-gates.md:
 p95 of |ln(port/TALYS)| <= 1e-4 for the header parameters, <= 0.02 for the tables).
 
 Inputs come from the ported upstream tasks, not from the dumps: T3 defaults, T2 masses and
@@ -6,7 +6,7 @@ discrete levels, T2 deformation (Irigid). Nothing TALYS computed for the level d
 injected; the compound nucleus and every residual that TALYS wrote an ld*.gs for are scored.
 Reference-dump tests skip when the dumps are absent; the analytic tests always run.
 
-Run `python -m tests.hf.test_density` for the gate table.
+Run `python -m tests.hf.test_density` for the comparison table.
 """
 
 from __future__ import annotations
@@ -120,7 +120,7 @@ def build_ld(Zt: int, At: int, Z: int, A: int, overrides: tuple = ()):
 def _r(port, talys, floor=0.0):
     """|ln(port/TALYS)| over the points where TALYS is above `floor`. A point TALYS puts at or
     below the floor is dropped when the port agrees (both effectively zero) and scored `inf`
-    when it does not -- silently passing "TALYS says 0, we say 7" is how a gate lies."""
+    when it does not -- silently passing "TALYS says 0, we say 7" is how a check lies."""
     port = np.asarray(port, dtype=float).ravel()
     talys = np.asarray(talys, dtype=float).ravel()
     out = np.zeros_like(talys)
@@ -130,7 +130,7 @@ def _r(port, talys, floor=0.0):
         ratio = port[above] / talys[above]
         # E0 and the shell correction are signed, so a sign disagreement gives log of a negative
         # number. Score it inf, not nan: nan would poison np.percentile and turn a real failure
-        # into a gate that silently reports nothing.
+        # into a check that silently reports nothing.
         out[above] = np.where(ratio > 0.0, np.abs(np.log(np.abs(ratio))), np.inf)
     bad = (~above) & (~agree)
     out[bad] = np.inf
@@ -239,7 +239,7 @@ def gate_table(files=None) -> dict:
             continue
         finite = v[np.isfinite(v)]
         # v empty = TALYS printed only zeros for this quantity and the port matched them; there
-        # is nothing to score, and the gate must read that as 0, not nan (nan <= tol is False).
+        # is nothing to score, and the check must read that as 0, not nan (nan <= tol is False).
         summary[k] = {
             "n": int(v.size),
             "median": float(np.median(finite)) if finite.size else 0.0,
@@ -330,7 +330,7 @@ def test_nb91_degenerate_matching_window():
 
     The port returns a definite root of its own -- the first point of zbrak's scan -- rather
     than falling back to the empirical temperature, which put Exmatch at 8.4992 and cost 23 of
-    CHART1's Nb-91 cells. Pinned here: the condition is still exactly zero, the two answers are
+    the chart's Nb-91 cells. Pinned here: the condition is still exactly zero, the two answers are
     inside one zbrak segment of each other, and the fallback is not taken."""
     try:
         ld, _cum, *_ = build_ld(41, 93, 41, 91)
@@ -363,7 +363,7 @@ def test_degenerate_window_needs_a_non_zero_level_energy():
 
 @have_structure
 def test_degenerate_window_lands_ir188_on_the_talys_level_density():
-    """Ir-188 is the case CHART1 named. Its degenerate root has to come out below the top of its
+    """Ir-188 is the chart case that showed it. Its degenerate root has to come out below the top of its
     discrete level scheme (1.7538 MeV): everything the cells care about is the residual's level
     density where its continuum opens, and below that energy the CTM is never evaluated. TALYS's
     own noise root (0.4469783) is in the same interval, which is why the two agree on the cross
@@ -409,12 +409,12 @@ def test_bskg3_table_reads_both_parities_for_u238():
     )
 
 
-# ------------------------------------------------------------------------------ gate A-ld
+# ----------------------------------------------------------------------------- check A-ld
 
 
 @cache
 def _gate() -> dict:
-    """The A-ld gate, computed once per session: it rebuilds the level-density state of every
+    """The A-ld check, computed once per session: it rebuilds the level-density state of every
     residual in the dumps, which takes minutes."""
     return gate_table()
 
@@ -489,7 +489,7 @@ if __name__ == "__main__":  # pragma: no cover
 
 
 # ================================================================================================
-# DIFFPARAM (gate G0.4): the level-density family on the autograd graph
+# Differentiable parameters (check G0.4): the level-density family on the autograd graph
 # ================================================================================================
 
 

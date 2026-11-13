@@ -1,11 +1,11 @@
-"""PERFSTART gate: the start-up work (lazy scipy, gc.freeze after the imports, fast exit, stage cache) moves no number.
+"""Start-up speed check: the start-up work (lazy scipy, gc.freeze after the imports, fast exit, stage cache) moves no number.
 
 Fe-56, Zr-90, Au-197, U-238 at 1 MeV, 14 MeV and on the library's 64-point grid, each a fresh engine job
 (scripts/perfstart/job.py), against reference outputs made by the engine before the change
 (`python scripts/perfstart/gate.py make REFDIR` on that commit). Every output array must be bit-identical, or within
 1e-12 relative. Set PERFSTART_REF=REFDIR to run it (several minutes, needs TALYS structure data and the v0.2 deck
 inputs); without it the test is skipped. INCOGNITA_STAGE_CACHE / INCOGNITA_CC_CACHE in the environment are passed on,
-so the same gate covers the disk caches on and off.
+so the same check covers the disk caches on and off.
 """
 
 import importlib.util
@@ -39,7 +39,7 @@ def test_compare_detects_difference(tmp_path):
 
 
 @pytest.mark.slow
-@pytest.mark.skipif(not REF or not os.path.isdir(REF), reason="set PERFSTART_REF to a gate.py reference directory")
+@pytest.mark.skipif(not REF or not os.path.isdir(REF), reason="set PERFSTART_REF to a reference directory made by scripts/perfstart/gate.py")
 def test_perfstart_gate(tmp_path):
     rep = _gate().check(REF, str(tmp_path))
     bad = {k: v for k, v in rep.items() if not v.get("ok")}

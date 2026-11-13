@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PERFSTART correctness gate: the start-up work must not move any number.
+"""Start-up correctness check: the start-up work must not move any number.
 
 Each case is one fresh engine job (scripts/perfstart/job.py in a new interpreter, as a calculator job runs):
 Fe-56, Zr-90, Au-197, U-238 at 1 MeV, at 14 MeV and on the library's 64-point grid (1 keV - 20 MeV). Every output
@@ -11,7 +11,7 @@ bit-identical, or at most REL relative difference (|a - b| / max(|a|, |b|)) wher
     gate.py check REFDIR [OUTDIR]  # run the cases again with this checkout, compare; exit 1 on any difference
 
 tests/hf/test_perfstart_gate.py runs `check` when PERFSTART_REF points at a reference directory.
-Extra environment for the new runs (e.g. INCOGNITA_STAGE_CACHE) is inherited, so the same gate checks a cache on/off.
+Extra environment for the new runs (e.g. INCOGNITA_STAGE_CACHE) is inherited, so the same check covers a cache on/off.
 """
 import json, os, subprocess, sys, tempfile, time
 
@@ -20,7 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 NUCLIDES = [(26, 56), (40, 90), (79, 197), (92, 238)]
 GRIDS = {"e1.0": ["--e-mev", "1.0"], "e14.0": ["--e-mev", "14.0"], "lib64": ["--lib64"]}
 REL = 1e-12
-# the channels the gate names explicitly (they must be present in the reference and the new run)
+# the channels the check names explicitly (they must be present in the reference and the new run)
 NAMED = {"capture": "ch_xs000000", "elastic": "tot_elastic", "total": "tot_total", "np": "ch_xs010000",
          "na": "ch_xs000001", "n2n": "ch_xs200000", "fission": "tot_fission"}
 

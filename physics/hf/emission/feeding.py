@@ -45,7 +45,7 @@ Three things about TALYS's book-keeping that a naive assembly gets wrong, each r
 
 What is still injected, and named rather than hidden: the mother populations come from `binary`
 (T10) fed by `comptarget` (T9), i.e. they are as chained as `engine.ChainedCompound` makes them;
-`multipreeq2.f90` is ported (`preeq.multi`, gate A-mpe) and driven from here by `Cascade.mpe`,
+`multipreeq2.f90` is ported (`preeq.multi`) and driven from here by `Cascade.mpe`,
 so at `Einc >= emulpre` (20 MeV, the last reference energy only) each mother bin is depleted by
 multiple pre-equilibrium exactly as TALYS depletes it; and the fission transmission is T11's,
 injected per (J, parity) for the actinides.
@@ -71,7 +71,7 @@ from physics.hf.projectile import compound_of, residual_nucleus
 from physics.hf.core.tensors import DTYPE
 from physics.hf.emission.multiple import BinFeeding, NucleusPopulation
 from physics.hf import stagetime
-from physics.hf.omp import alphatemp as _alphatemp  # ALPHATEMP / KEVCOLD (cascade_cold)
+from physics.hf.omp import alphatemp as _alphatemp  # alpha temperature rule (cascade_cold)
 
 PARZ = (0, 0, 1, 1, 1, 2, 2)
 PARN = (0, 1, 0, 1, 2, 1, 2)
@@ -98,7 +98,7 @@ _SPINCUT_PARTS: dict = {}
 def _spincut_parts(ld, rs_ff: float | None = None) -> tuple:
     """The Eex-independent half of `density.parameters.spincut(ld, ald, Eex, ibar=0, ipop=0)`,
     computed by its own torch expressions once per level-density record and kept as floats.
-    KWCOV B14c: `rs_ff` given is ipop = 1 (spincut.f90:25-28: a fission-fragment run's exgrid uses Rspincutff)."""
+    `rs_ff` given is ipop = 1 (spincut.f90:25-28: a fission-fragment run's exgrid uses Rspincutff)."""
     ck = id(ld) if rs_ff is None else (id(ld), "ff", float(rs_ff))
     got = _SPINCUT_PARTS.get(ck)
     if got is not None and got[0] is ld:
@@ -137,7 +137,7 @@ def _spincut_parts(ld, rs_ff: float | None = None) -> tuple:
 def _spincut_np(ld, ald: float, eex: np.ndarray, rs_ff: float | None = None) -> np.ndarray:
     """`density.parameters.spincut(ld, ald, eex, 0, 0)` for a scalar `ald`, on numpy. The per-bin
     half is +, -, *, / (numpy) and one torch sqrt in the torch function's order: the same double
-    arithmetic, bit for bit. `rs_ff`: ipop = 1 (KWCOV B14c)."""
+    arithmetic, bit for bit. `rs_ff`: ipop = 1."""
     scutconst, Em, sdisc, s2m, Ed, denom, interp, delta, model = _spincut_parts(ld, rs_ff)
     below = np.where(interp & (eex > Ed), sdisc + (eex - Ed) / denom * (s2m - sdisc), sdisc)
     U = eex - delta
@@ -169,7 +169,7 @@ class NucleusSpec:
     nlast: int  # Nlast(Zix, Nix, 0), UNCLAMPED: densprepare's discfactor divides by NL - Ntop
     nlast_grid: int  # min(Nlast, maxex): the last discrete level the grid actually holds
     ntop: int
-    ncum_nl: float | torch.Tensor  # Tensor under a DIFFPARAM level-density override
+    ncum_nl: float | torch.Tensor  # Tensor under a differentiable level-density override
     maxex: int
     exmax_mev: float
     ex_mev: np.ndarray  # (maxex+1,)
@@ -219,33 +219,33 @@ class Cascade:
         from physics.hf.compound.dens_reference import run_grid
         from physics.hf.input import fitlib
 
-        # BESTFIT: this is the run's target, and it is where every path (Python, C, fast, GPU)
+        # This is the run's target, and it is where every path (Python, C, fast, GPU)
         # starts. `activate` is a no-op unless INCOGNITA_TALYS_FIT asks for TENDL's knobs.
-        fitlib.drop_caches_on_new_deck()  # KWCOV B10b: per-target caches built under another deck are dropped
+        fitlib.drop_caches_on_new_deck()  # per-target caches built under another deck are dropped
         fitlib.activate(int(Zt), int(At))
-        # SPEEDFIX (warmrun trap): the cards this Cascade's caches are built under; a run on it
-        # under other cards is refused (`check_cards`)
+        # Warm-run guard: the fitlib keyword set this Cascade's caches are built under; a run on it
+        # under another set is refused (`check_cards`)
         self._fit_cards = fitlib.active()
         self.Zt, self.At, self.enincmax = Zt, At, enincmax_mev
         # The run's DECLARED incident energy grid, in TALYS's own order. `fisom` needs it (and
         # only it) to know which energy is the run's first; a Cascade built without one is a
         # one-energy run, so every energy it is handed is that run's first.
         self.energies = tuple(float(e) for e in energies) if energies is not None else None
-        # CPINC: the projectile is the run's (`physics.hf.projectile`, neutron unless INCOGNITA_CPINC)
+        # The projectile is the run's (`physics.hf.projectile`, neutron unless INCOGNITA_CPINC)
         from physics.hf import projectile as _proj
 
         if k0 is None:
             k0 = _proj.k0()
         from physics.hf.density import npwindow as _npw
 
-        _npw.begin(Zt, At, k0)  # NPWINDOW: run-scoped target state, before anything is built for this target
+        _npw.begin(Zt, At, k0)  # `npwindow`: run-scoped target state, before anything is built for this target
         self.Zc, self.Ac = Zt + PARZ[k0], At + PARZ[k0] + PARN[k0]  # the initial compound nucleus
         self.k0, self.gammax = k0, gammax
         self.flagfullhf, self.transeps = flagfullhf, transeps
         self.rg = run_grid(Zt, At, enincmax_mev)
         self.options, self.params, self.m = self.rg.options, self.rg.params, self.rg.m
         if transeps == 1.0e-8 and float(self.options.transeps) != 1.0e-8:
-            # KWCOV B9: a deck `transeps` (or astro y's 1e-18, input_numerics.f90:89-94) reached Options but not the
+            # a deck `transeps` (or astro y's 1e-18, input_numerics.f90:89-94) reached Options but not the
             # chain, which took this constructor default; an explicit constructor value still wins
             self.transeps = float(self.options.transeps)
         from physics.hf.input.defaults import reject_unported
@@ -253,18 +253,18 @@ class Cascade:
         reject_unported(self.options)  # a calculation must not run on an unported keyword
         from physics.hf.emission import fluxclose as _fc
 
-        _fc.sync(self.options)  # FLUXPROMO2: run-scoped FLUXCLOSE parts (run_grid's options may be cached)
+        _fc.sync(self.options)  # run-scoped `fluxclose` parts (run_grid's options may be cached)
         from physics.hf import kevleak2
 
-        kevleak2.sync(self.options)  # KEVLEAK3: run-scoped kevleak2 value (deck > env > default 2)
-        _npw.sync(self.options)  # NPWINDOW: the resolved options agree with the set-up state
-        # SPEED0: decay all bins of a nucleus through compound.decay_batch (False: per bin)
+        kevleak2.sync(self.options)  # run-scoped kevleak2 value (deck > env > default 2)
+        _npw.sync(self.options)  # `npwindow`: the resolved options agree with the set-up state
+        # Decay all bins of a nucleus through compound.decay_batch (False: per bin)
         self.batched = True
-        # SPEED0 G0.3: T7 overrides (requires_grad) for the INITIAL compound nucleus's photon
+        # Photon-strength overrides (requires_grad) for the INITIAL compound nucleus's photon
         # strength; None is TALYS's defaults
         self.gamma_overrides: dict | None = None
         self._gamma_override_fn = None
-        # DIFFPARAM: TALYS-keyword overrides for the other two families (`density.overrides`).
+        # Differentiable TALYS-keyword overrides for the other two families (`density.overrides`).
         # `diff_params` is set when either carries a tensor, and it is what switches the level
         # density and the transmission coefficients from numpy to the graph; the caches below
         # replace the module-level `lru_cache`es those two bypass when overridden.
@@ -273,9 +273,9 @@ class Cascade:
         self.matching_xacc: float | None = None
         self.diff_params = False
         self._trans_cache: dict | None = None
-        # PARAMWIRE: the run's fit parameter set (`density.overrides.fit_params`), plain floats in
+        # The run's fit parameter set (`density.overrides.fit_params`), plain floats in
         # absolute (keyword, Z, A, value) form. It keys the level-density and photon-strength
-        # caches instead of bypassing them, and keeps the numpy / NATIVEX paths on. Set per run by
+        # caches instead of bypassing them, and keeps the numpy / native C paths on. Set per run by
         # `engine.ChainedFull(params=...)`, so one Cascade serves successive parameter points.
         self.fit: tuple = ()
         self.fission_fit: tuple = ()
@@ -294,7 +294,7 @@ class Cascade:
         from physics.hf.compound.dens_reference import _transmission
 
         if not self.omp_overrides and not self.diff_params:
-            if self._sfunc_first():  # SLFIRST: later compound nuclei see the model T_l
+            if self._sfunc_first():  # `sfunc` first-CN rule: later compound nuclei see the model T_l
                 from physics.hf.compound.dens_reference import _transmission_cached
                 return _transmission_cached(self.Zt, self.At, self.enincmax)
             return _transmission(self.Zt, self.At, self.enincmax)
@@ -309,11 +309,11 @@ class Cascade:
         return sfunc.mode() is not None and sfunc.scope() == "first"
 
     def trans_of(self, zix: int, nix: int) -> dict:
-        """The emission-grid set that compound nucleus (zix, nix) emits through: `trans`, except under SLFIRST
+        """The emission-grid set that compound nucleus (zix, nix) emits through: `trans`, except under the first-CN S_l rule
         (INCOGNITA_SFUNC_SCOPE=first) where the first compound nucleus (0, 0) -- whose neutron exits leave the
-        measured target -- gets SLINPUT's measured-S_l set and every other nucleus the model set."""
+        measured target -- gets the measured-S_l set and every other nucleus the model set."""
         if getattr(self.options, "flagompall", False) and not self.omp_overrides and not self.diff_params:
-            from physics.hf.compound import ompall  # KWCOV B6: optmodall y, a set per compound nucleus
+            from physics.hf.compound import ompall  # optmodall y, a set per compound nucleus
 
             return ompall.cascade_set(self, zix, nix)
         if (int(zix), int(nix)) == (0, 0) and not self.omp_overrides and not self.diff_params \
@@ -336,13 +336,13 @@ class Cascade:
         return self.trans_of(0, 0)
 
     def trans_cont_of(self, zix: int, nix: int):
-        """ROTEXIT1CN (`sfunc.exit_cont`, default OFF): the set nucleus (zix, nix)'s exits into CONTINUUM rows use when it
-        differs from `trans_of` -- the model set `trans` for the first compound nucleus under SLFIRST -- else None."""
+        """Continuum-exit S_l rule (`sfunc.exit_cont`, default OFF): the set nucleus (zix, nix)'s exits into CONTINUUM rows use when it
+        differs from `trans_of` -- the model set `trans` for the first compound nucleus under the first-CN rule -- else None."""
         if (int(zix), int(nix)) != (0, 0):
             return None
         from physics.hf.omp import sfunc
 
-        if sfunc.exit_ccf(self.options):  # ROTEXIT1CN3 (default OFF): measured S_l / the engine's own CC ratio
+        if sfunc.exit_ccf(self.options):  # (default OFF): measured S_l / the engine's own CC ratio
             div = self.ccf_div()
             if div is None or self.trans_of(0, 0) is self.trans:
                 return None
@@ -356,7 +356,7 @@ class Cascade:
         return None if tf is self.trans else self.trans
 
     def ccf_div(self) -> tuple | None:
-        """ROTEXIT1CN3 (`sfexit ccf`): ((l, f_l), ...) with f_l = max(1, S_l,inc,model / S_l,inv,model) at 1 keV --
+        """`sfexit ccf`: ((l, f_l), ...) with f_l = max(1, S_l,inc,model / S_l,inv,model) at 1 keV --
         the coupled-channels enhancement the measured g.s. S_l carries (`sfunc.cc_ratio`). None when the incident
         channel is solved spherically (colltype S), nothing is measured, or every f_l == 1."""
         from physics.hf.omp import sfunc
@@ -382,7 +382,7 @@ class Cascade:
 
     def set_param_overrides(self, density: dict | None = None, optical: dict | None = None,
                             matching_xacc: float | None = None) -> None:
-        """Install DIFFPARAM's level-density / optical-model keyword overrides on this run.
+        """Install the differentiable level-density / optical-model keyword overrides on this run.
 
         Both are mappings of a lowercase TALYS keyword to a value `input.defaults.default_params`
         accepts (a scalar, a full tensor of the keyword's shape, or `{"n": ...}` per particle).
@@ -413,13 +413,13 @@ class Cascade:
         self.options, self.params, self.m = structure_of(self.Zt, self.At, merged)
         from physics.hf.emission import fluxclose as _fc
 
-        _fc.sync(self.options)  # FLUXPROMO2: run-scoped FLUXCLOSE parts
+        _fc.sync(self.options)  # run-scoped `fluxclose` parts
 
     def check_cards(self) -> None:
-        """Refuse a run on this Cascade when the fitlib cards are no longer the ones it was built
-        under (SPEEDPROF's warmrun trap: a lines/card change on a kept Cascade left capture frozen
-        at the first point, up to 5.4x off). Build a new Cascade per card set instead; a
-        PARAMWIRE `params=` change is keyed and stays allowed.
+        """Refuse a run on this Cascade when the fitlib keyword set is no longer the one it was built
+        under (warm-run guard: a lines/keyword change on a kept Cascade would leave capture frozen
+        at the first point, up to 5.4x off). Build a new Cascade per keyword set instead; a
+        `params=` change is keyed and stays allowed.
 
         TALYS: none (worker cache policy)
         Test: tests/hf/test_warmguard.py
@@ -432,10 +432,10 @@ class Cascade:
             raise RuntimeError(
                 "Cascade reused under changed fitlib cards (lines env / deactivate since it was "
                 f"built for {self.Zt}-{self.At}); build a new Cascade (warmrun.new_cascade) "
-                "for every card set")
+                "for every keyword set")
 
     def set_fit_params(self, fit) -> None:
-        """Install a PARAMWIRE parameter set (`density.overrides.fit_params` form) on this run.
+        """Install a parameter set (`density.overrides.fit_params` form) on this run.
 
         Nothing is dropped: every cache that reads a parameter carries it in its key (the spec
         memo below, `dens_reference._ld_of_cached` / `_gamma_parameters`,
@@ -447,7 +447,7 @@ class Cascade:
         from physics.hf.density import overrides as ov
 
         fit = ov.fit_params(fit)
-        # FISBARWIRE: the fission keywords reach only the fission chain (`fission_fit`), so every
+        # The fission keywords reach only the fission chain (`fission_fit`), so every
         # other cache keyed by `fit` is the same with or without them
         self.fit = ov.without_fission(fit)
         self.fission_fit = ov.fission_entries(fit)
@@ -458,7 +458,7 @@ class Cascade:
         return ld_token(self.fit, Z, A) if self.fit else None
 
     def ld_of(self, Z: int, A: int):
-        """`dens_reference._ld_of` for (Z, A) on this run: DIFFPARAM overrides and the parameter
+        """`dens_reference._ld_of` for (Z, A) on this run: differentiable overrides and the parameter
         set's `aadjust` at (Z, A)."""
         from physics.hf.compound.dens_reference import _ld_of
 
@@ -468,7 +468,7 @@ class Cascade:
     def gamma_strength(self, Zt: int, At: int, nucleus: tuple | None = None):
         """`dens_reference.strength_fn` for the compound nucleus (Zt, At + 1), honouring
         `gamma_overrides` when that nucleus is this run's initial compound nucleus, and the
-        parameter set's `aadjust`/`ftable`/`wtable` of (Zt, At + 1) (PARAMWIRE) for every nucleus.
+        parameter set's `aadjust`/`ftable`/`wtable` of (Zt, At + 1) for every nucleus.
 
         TALYS: fstrength.f90:1 (fstrength)
         Test: A-psf / G0.3
@@ -476,7 +476,7 @@ class Cascade:
         from physics.hf.compound.dens_reference import strength_fn
         from physics.hf.density.overrides import gamma_token
 
-        if nucleus is not None:  # ENGPROJ GPRESFIX: a residual, named by the nucleus itself
+        if nucleus is not None:  # a residual, named by the nucleus itself
             tok = gamma_token(self.fit, *nucleus) if self.fit else None
             return strength_fn(Zt, At, self.enincmax, fit=tok, nucleus=tuple(nucleus))
         tok = gamma_token(self.fit, *compound_of(Zt, At)) if self.fit else None
@@ -504,7 +504,7 @@ class Cascade:
                 return None
             if (Zt, At) == (self.Zt, self.At):
                 return self.gamma_strength(Zt, At).gp
-        if nucleus is not None and not self.gamma_overrides:  # ENGPROJ GPRESFIX
+        if nucleus is not None and not self.gamma_overrides:  # residual named by itself
             if not self.fit:
                 from physics.hf.compound.dens_reference import _gamma_parameters_nuc
 
@@ -544,11 +544,11 @@ class Cascade:
     def _sep(self, zix: int, nix: int) -> tuple:
         return tuple((t, float(self.m.s_mev[zix, nix, t])) for t in range(7))
 
-    _PART = {1: (0, 1), 2: (1, 0), 6: (2, 2)}  # BINCONV chain knots: n, p, alpha (Zix, Nix) steps
+    _PART = {1: (0, 1), 2: (1, 0), 6: (2, 2)}  # `binconv` chain knots: n, p, alpha (Zix, Nix) steps
 
     @lru_cache(maxsize=512)  # noqa: B019  (per-Cascade cache; the object is per target)
     def _chain_knots(self, zix: int, nix: int) -> tuple:
-        """BINCONV: multi-chance thresholds seen from (zix, nix): S_x + S_y(daughter) for x, y in n, p, alpha,
+        """`binconv`: multi-chance thresholds seen from (zix, nix): S_x + S_y(daughter) for x, y in n, p, alpha,
         and S_n + S_n' + S_n'' (the (n,3n) -> (n,4n) split two chances down)."""
         zmax, nmax = self.m.s_mev.shape[0] - 1, self.m.s_mev.shape[1] - 1
         s = lambda z, n, t: float(self.m.s_mev[z, n, t]) if (z <= zmax and n <= nmax) else None  # noqa: E731
@@ -569,7 +569,7 @@ class Cascade:
 
     @lru_cache(maxsize=512)  # noqa: B019  (per-Cascade cache; the object is per target)
     def _fis_knots(self, zix: int, nix: int) -> tuple:
-        """BINCONV: fission barrier heights of (zix, nix) (fissionpar's fbarrier x fisbaradjust), () if it does
+        """`binconv`: fission barrier heights of (zix, nix) (fissionpar's fbarrier x fisbaradjust), () if it does
         not fission: around a barrier top T_f(Ex) rises on the Hill-Wheeler scale hw/2pi ~ 0.2 MeV."""
         if not bool(getattr(self.options, "flagfission", False)):
             return ()
@@ -628,7 +628,7 @@ class Cascade:
         TALYS: nuclides.f90:251
         Test: E2E
         """
-        ov = getattr(self, "astro_ewfc_mev", None)  # KWCOV B9: comptarget.f90 line 803, astro with astrogs n; None = unset
+        ov = getattr(self, "astro_ewfc_mev", None)  # comptarget.f90 line 803, astro with astrogs n; None = unset
         if ov is not None:
             return ov
         e = float(self.options.ewfc_mev)
@@ -700,12 +700,12 @@ class Cascade:
         FIRST incident energy, which for an incident particle is the initial compound nucleus
         (0, 0) -- `skipCN(0, 0)` is 0 and its population is the whole reaction cross section.
 
-        Two things follow, and the port used to get both wrong:
+        Two things follow:
 
         * **It is that nucleus's WHOLE decay, not its first bin.** `Fnorm` is formed once per
           (Zcomp, Ncomp), above the `do nex = maxex, 1, -1` loop (multiple.f90:429-438 vs :488),
-          so every mother bin of (0, 0) at the first energy divides by `ff`. EXCL3 replaced a
-          run-scoped latch with a latch on the first CALL, which gave it to one bin.
+          so every mother bin of (0, 0) at the first energy divides by `ff` (a latch on the
+          first CALL would give it to one bin).
         * **Which energy is first is declared, not observed.** A latch on the first call makes the
           answer depend on how the caller walks the grid: `ChainedFull(energies=...)` over a
           subset, `compound.decay_batch` building widths on demand, or a lab network shard each latch
@@ -738,7 +738,7 @@ class Cascade:
     @lru_cache(maxsize=64)  # noqa: B019  (per-Cascade cache; the object is per target)
     @stagetime.timed("incident")
     def incident(self, e_inc_mev: float):
-        """`_incident_raw`, then SLINPUT's measured-S_l rule on the neutron Tjlinc (`omp.sfunc`; default
+        """`_incident_raw`, then the measured-S_l rule on the neutron Tjlinc (`omp.sfunc`; default
         OFF = the raw channel object itself)."""
         inc = self._incident_raw(e_inc_mev)
         from physics.hf.omp import sfunc
@@ -748,7 +748,7 @@ class Cascade:
         return self._sfunc_incident(inc, float(e_inc_mev))
 
     def _sfunc_incident(self, inc, e_inc_mev: float):
-        """SLINPUT: Tjlinc(l) x F_l(E) = [S_l,meas / S_l,model(1 keV)]^w(E), clipped at 1; S_l,model from this
+        """Measured-S_l rule: Tjlinc(l) x F_l(E) = [S_l,meas / S_l,model(1 keV)]^w(E), clipped at 1; S_l,model from this
         channel solved at 1 keV. The compound-formation part of sigma_reac scales with sum (2l+1) T_l (a coupled
         target keeps `xscoupled`); sigma_tot moves by the same amount; s0/s1 report the rule's values."""
         from dataclasses import replace
@@ -802,7 +802,7 @@ class Cascade:
         T5's spherical `incident_channel` is then a different calculation, not an approximation of
         the same one. Ca-40 is the one `colltype V` target in the spherical reference set, and
         reading it as spherical costs `sigma_reac` 40% at 1 keV and 5% at 20 MeV -- which is most
-        of why Ca-40 was the worst target of every gate in this family. T13's
+        of why Ca-40 was the worst target of every check in this family. T13's
         `ecis.incident.incident_coupled` is used for R and V; it builds T4's parameters itself
         (including RIPL 2408, T4RIPL) when `omp` is None.
 
@@ -811,19 +811,19 @@ class Cascade:
         """
         from physics.hf import alphaentr
 
-        if alphaentr.active(self.k0, self.options):  # ALPHAENTR: alpha projectile, entrance-only potential (default off)
+        if alphaentr.active(self.k0, self.options):  # alpha projectile, entrance-only potential (default off)
             return alphaentr.incident(self, float(e_inc_mev))
         return self._incident_with(e_inc_mev, self.options)
 
     def _incident_with(self, e_inc_mev: float, options, tag: str = ""):
-        """`incident` solved with `options` (the Cascade's own unless ALPHAENTR substitutes the entrance
+        """`incident` solved with `options` (the Cascade's own unless the alpha entrance rule substitutes the entrance
         alpha potential). `tag` keeps a substituted solve's grid table and xscoupled memo apart."""
         from physics.hf.core.tensors import CaseBatch
         from physics.hf.omp.incident import incident_channel
 
         band = self._coupled_band()
         if band is not None and self.k0 == 0:
-            band = None  # ENGPROJ: incident.f90:82-87 -- a photon never runs incidentecis, whatever colltype
+            band = None  # incident.f90:82-87 -- a photon never runs incidentecis, whatever colltype
         if band is not None:
             from physics.hf.ecis.incident import incident_coupled
 
@@ -838,7 +838,7 @@ class Cascade:
             self.__dict__.setdefault("_xscoupled" + tag, {})[float(e_inc_mev)] = xscoupled
             return inc
         if not torch.is_grad_enabled() and self.energies and float(e_inc_mev) in self.energies:
-            # SETB: the whole declared grid in one batch per njmax (omp/incident_axis.py)
+            # The whole declared grid in one batch per njmax (omp/incident_axis.py)
             tab = self.__dict__.get("_setb_incident" + tag)
             if tab is None:
                 from physics.hf.omp.incident_axis import incident_axis
@@ -851,11 +851,11 @@ class Cascade:
             return tab[float(e_inc_mev)]
         cases = CaseBatch(Z=torch.tensor([self.Zt]), A=torch.tensor([self.At]),
                           e_inc_mev=torch.tensor([e_inc_mev], dtype=DTYPE),
-                          projectile=PARSYM[self.k0])  # CPINC: was "n"
+                          projectile=PARSYM[self.k0])  # projectile of the run
         return incident_channel(cases, options, self.params)
 
     def _stage_cached(self, stage: str, args: tuple, compute, band=None, options=None):
-        """STAGECACHE (`physics.hf.stagedisk`): `compute()` from disk when the incident channel's
+        """Stage cache (`physics.hf.stagedisk`): `compute()` from disk when the incident channel's
         optical-model inputs were seen before; `compute()` itself when the cache is off or this
         Cascade carries optical / differentiable overrides (which today's memos bypass too)."""
         from physics.hf import stagedisk
@@ -890,12 +890,12 @@ class Cascade:
         if band is None:
             return None
         if self.k0 == 0:
-            # ENGPROJ: no incidentread for a photon, so xscoupled keeps reacinitial's 0, but compnorm.f90:163 still
+            # No incidentread for a photon, so xscoupled keeps reacinitial's 0, but compnorm.f90:163 still
             # takes the colltype /= 'S' branch (norm 1, flux from the Tjlinc sum)
             return 0.0
         memo = self.__dict__.setdefault("_xscoupled", {})
         if float(e_inc_mev) not in memo and alphaentr_active(self.k0, self.options):
-            self.incident(float(e_inc_mev))  # ALPHAENTR: the switched solve records it
+            self.incident(float(e_inc_mev))  # the switched solve records it
         if float(e_inc_mev) not in memo:
             # `incident` records it when it solves; a table installed over `incident`
             # (`capture_fast_batch.install_tables`) does not, so solve it here then
@@ -947,7 +947,7 @@ class Cascade:
         e0 = np.zeros((NUMZ + 1, NUMN + 1), np.float32)
         em = np.zeros((NUMZ + 1, NUMN + 1), np.float32)
         e0[0, 0] = em[0, 0] = np.float32(etotal_mev)
-        self._ompall_e = e_inc_mev  # KWCOV B6 (optmodall y): the energy the per-nucleus sets are read at
+        self._ompall_e = e_inc_mev  # optmodall y: the energy the per-nucleus sets are read at
         return ChainState(e0, em, lmaxinc=int(lmaxinc), e_inc_mev=e_inc_mev,
                           first_energy=self.is_first_energy(e_inc_mev))
 
@@ -962,7 +962,7 @@ class Cascade:
             zcomp, ncomp, st.exmax0, st.exmax, sep, {t: False for t in range(7)})
 
     def stock_cap(self) -> tuple[int, int]:
-        """FLUXCLOSE A: the stock nuclides.f90:140-141 window (`Zinit - 3`, `Ninit - 3`). With part A
+        """`fluxclose` part A: the stock nuclides.f90:140-141 window (`Zinit - 3`, `Ninit - 3`). With part A
         (`fluxclose y`) the cascade runs to `Zinit - 1`, `Ninit - 1` and the nuclei past this window
         are terminal residuals (TALYS `skipCN`: they keep the flux they are fed and are never
         decayed); with `fluxclose n` the options window is capped here, so nothing is past it."""
@@ -979,7 +979,7 @@ class Cascade:
         mother that holds flux (xspopnuc >= popeps), before the loop reaches its daughters: the
         tree goes as deep as the flux does. The ports fix the nucleus set before the cascade
         (`populations`, `propagate_exmax` over it, `populations` again), which stops two
-        generations past the binary residuals. PYCDIFF: for Pu-291* (S_n 0.5-2 MeV) at 20 MeV
+        generations past the binary residuals. For Pu-291* (S_n 0.5-2 MeV) at 20 MeV
         that is Ncomp 4 on the Python path and 6 on the C path; the last nucleus then has no
         neutron exit, its flux stays in fission and in its own residual, and (n,4n) and (n,f)
         differ by up to x2.3 between the paths. Propagating from every cell with Exmax > 0
@@ -1028,14 +1028,14 @@ class Cascade:
         key = (zix, nix)
         if key in st.spec:
             return st.spec[key]
-        # MACSPEED. One energy builds three ChainStates (`engine._BuiltInputs.shell`, the chain
+        # One energy builds three ChainStates (`engine._BuiltInputs.shell`, the chain
         # itself and `feed_reference.pop_inputs_of`), and each rebuilt the binary residuals' grids
         # and rhogrid. A spec is a function of this Cascade and of Exmax(zix, nix) alone (plus
         # Exmax0(0, 0) for the compound nucleus), so it is shared across the states of one Etotal.
-        # Nothing writes into a NucleusSpec. Bypassed under DIFFPARAM overrides.
+        # Nothing writes into a NucleusSpec. Bypassed under differentiable overrides.
         memo = None
         Z, A = self.zn(zix, nix)
-        # PARAMWIRE: a spec reads the level density of (Z, A) and nothing else a parameter set
+        # A spec reads the level density of (Z, A) and nothing else a parameter set
         # holds, so that nucleus's `aadjust` joins the memo key
         aadj = self.ld_token(Z, A)
         if not self.density_overrides and not self.diff_params and self.matching_xacc is None:
@@ -1060,20 +1060,20 @@ class Cascade:
         exmax = float(st.exmax[zix, nix])
         from physics.hf.core.grids import snbin_mode, snbin_window_min
 
-        # SNBIN (`snbin y`): continuum edges at this nucleus's separation energies S(zix, nix, 1..6), every
+        # `snbin y`: continuum edges at this nucleus's separation energies S(zix, nix, 1..6), every
         # nucleus but the initial compound nucleus (0, 0): its continuum is fed only by primary photons, so an
         # edge at its own S_n only re-weights the primary-gamma quadrature (keV capture), not the straddle
-        # BINQUAD2 (`snbincn 1`): the compound nucleus's own S edges too (edges only, no windows), so no CN bin
+        # `snbincn 1`: the compound nucleus's own S edges too (edges only, no windows), so no CN bin
         # straddles its neutron threshold
         cn_edge = (zix, nix) == (0, 0) and int(getattr(self.options, "snbincn", 0) or 0) == 1
         thr = ([s for t, s in self._sep(zix, nix) if t >= 1]
                if ((zix, nix) != (0, 0) or cn_edge) and snbin_mode(self.options) != "n" else None)
-        # SNBIN3 (`snbin w`): also >= SNBIN_WINDOW_MIN bins inside every open window [S(type), Exmax]
+        # `snbin w`: also >= SNBIN_WINDOW_MIN bins inside every open window [S(type), Exmax]
         snwin = snbin_window_min(self.options) if thr and snbin_mode(self.options) == "w" and not cn_edge else 0
         from physics.hf.core.grids import binconv_mode, binconv_params
 
         adapt = None
-        if binconv_mode(self.options):  # BINCONV (`binconv y`): graded mesh + SNBIN edges + SNBIN3 windows
+        if binconv_mode(self.options):  # `binconv y`: graded mesh + snbin edges + snbin windows
             sep = [s for t, s in self._sep(zix, nix) if t >= 1]
             sn = dict(self._sep(zix, nix)).get(1)
             # the CN only once its own neutron window is open by >= binconvcn MeV (keV capture keeps TALYS's grid)
@@ -1091,13 +1091,13 @@ class Cascade:
         # `reacinitial` leaves maxJ at numJ and exgrid writes only NL+1..maxex, so a nucleus whose
         # grid stops below NL keeps numJ everywhere -- hence the unclamped `nl` in this test.
         rows = None
-        # KWCOV B14c: a fission-fragment run (ffevap) takes maxJ with ipop = 1 (exgrid.f90:250-254, Rspincutff) on the
+        # a fission-fragment run (ffevap) takes maxJ with ipop = 1 (exgrid.f90:250-254, Rspincutff) on the
         # Python rows; None on every other run
         rs_ff = getattr(self, "ffruns_rspincut", None)
         if not self.density_overrides and not self.diff_params and rs_ff is None:
             from physics.hf.density.ld_ceng import spec_rows
 
-            # CENGLD2: maxJ and rhogrid in one C call on the record's floats
+            # maxJ and rhogrid in one C call on the record's floats
             rows = spec_rows(ld, A, ex, dex, n, nl, _spincut_parts, NUMJ)
         maxj = rows[0] if rows is not None else np.full(n, NUMJ, np.int64)
         if rows is None and maxex > nl:
@@ -1175,13 +1175,13 @@ class Cascade:
                     egrid_mev=self.rg.egrid, ebegin=self.rg.ebegin[t],
                     eend=min(eend[t], self.rg.maxen), maxen=self.rg.maxen,
                     tjl=tjl, tl=tl, lmax=lmax)
-                if tr_cont is not None:  # ROTEXIT1CN (default OFF): continuum rows read the model set
+                if tr_cont is not None:  # (default OFF): continuum rows read the model set
                     trans[t].cont_tjl, trans[t].cont_tl = tr_cont[t][:2]
-            if t >= 2 and self.trans.get("tlog", False):  # LOGTINT (default OFF): log-T Lagrange, charged types
-                trans[t].tlog = self.trans["tlog"]  # True / "c" = ln T, "l" = TLOGIT logit T
-            if t >= 2 and "tlogref" in self.trans:  # LOGTINT G0 reference (default OFF)
+            if t >= 2 and self.trans.get("tlog", False):  # (default OFF): log-T Lagrange, charged types
+                trans[t].tlog = self.trans["tlog"]  # True / "c" = ln T, "l" = logit T
+            if t >= 2 and "tlogref" in self.trans:  # log-T reference (default OFF)
                 trans[t].tlogref = self.trans["tlogref"][t]
-            if t == 6 and _alphatemp.cascade_cold(self.trans):  # ALPHATEMP (default OFF; KEVCOLD gd: production here)
+            if t == 6 and _alphatemp.cascade_cold(self.trans):  # alpha temperature (default OFF; production here)
                 trans[t].cold_tjl, trans[t].cold_tl = self.trans["alpha_cold"][:2]
                 trans[t].ustar = float(self.trans["alphatemp_ustar"])
         self.ndens += 1
@@ -1194,7 +1194,7 @@ class Cascade:
             nnleak_top=nex == self.nnleak_top(sp))
 
     def nnleak_top(self, sp: NucleusSpec) -> int:
-        """NNLEAK (default y): the mother bin of `sp` whose continuum -> discrete Rboundary is
+        """(default y): the mother bin of `sp` whose continuum -> discrete Rboundary is
         Egamma^3-weighted (the initial compound nucleus's top bin), or -1 (compound/nnleak.py)."""
         from physics.hf.compound import nnleak
 
@@ -1277,7 +1277,7 @@ class Cascade:
             daughters=tuple(daughters), rnj=_pad(rnj["RnJ"][2], nj + 1),
             rnjsum=rnj["RnJsum"][2].clone(),
             maxpar=pop.shape[0] - 1, flaggshell=bool(self.options.flaggshell),
-            phzn0=(int(c0.Z), int(c0.A - c0.Z)) if phmicro_on(self.options) else None)  # PHMICRO
+            phzn0=(int(c0.Z), int(c0.A - c0.Z)) if phmicro_on(self.options) else None)  # phmicro
 
     @stagetime.timed("preeq")
     def mpe(self, st: ChainState, nuclei: dict[tuple[int, int], NucleusPopulation],
@@ -1288,7 +1288,7 @@ class Cascade:
         Test: A-mpe / E2E
         """
         from physics.hf.emission.multiple import MpeFeeding
-        # SPEEDW: the compiled loop where it applies; the torch loop otherwise (preeq.mpe_fast)
+        # The compiled loop where it applies; the torch loop otherwise (preeq.mpe_fast)
         from physics.hf.preeq.mpe_fast import multiple_preequilibrium_fast
 
         inp = self.mpe_inputs(st, nuclei, zcomp, ncomp, nex, etotal_mev=etotal_mev)
@@ -1311,7 +1311,7 @@ class Cascade:
               tfis: dict | None = None, fission=None) -> BinFeeding | None:
         """One mother bin's compound decay, as `multiple_emission`'s `decay` callback expects.
 
-        `fission` (FISSB) is a `compound.fission_batch_decay.FissionLadder`: a fissioning nucleus
+        `fission` is a `compound.fission_batch_decay.FissionLadder`: a fissioning nucleus
         it covers stays on `decay_fast`, and the per-bin path takes its `tfis` from it.
 
         TALYS: compound.f90:1 (compound), densprepare.f90:1 (densprepare)
@@ -1321,7 +1321,7 @@ class Cascade:
         ladder = fission if (flagfission and fission is not None and fission.covered()) else None
         if (self.batched and (not flagfission or ladder is not None) and not self.flagfullhf
                 and self.DECAY_CHUNK is None and self._numpy_decay_ok(pop)):
-            # SPEEDD: the whole nucleus's widths in numpy, particle exits contracted for all
+            # The whole nucleus's widths in numpy, particle exits contracted for all
             # bins at once (compound.decay_fast); the same numbers to rounding
             popeps_a = popeps_mb / max(5 * pop.maxex, 1)  # multiple.f90:467, see below
             nw = st.__dict__.get("_nucleus_widths", {}).get((zcomp, ncomp))
@@ -1337,7 +1337,7 @@ class Cascade:
         sp = self.spec(st, zcomp, ncomp)
         if self.batched and not flagfission and not self.flagfullhf:
             popeps_a = popeps_mb / max(5 * pop.maxex, 1)  # multiple.f90:467, see below
-            # SPEED0: widths of every bin of this nucleus in one call, then this bin's feeding;
+            # Widths of every bin of this nucleus in one call, then this bin's feeding;
             # the same numbers as the per-bin path below (compound.decay_batch)
             nd = self._nucleus_decay(st, sp, nex)
             popeps_a = popeps_mb / max(5 * pop.maxex, 1)  # multiple.f90:467, see below
@@ -1375,7 +1375,7 @@ class Cascade:
     def fast_widths(self, st: ChainState, nuclei: dict[tuple[int, int], NucleusPopulation],
                     zcomp: int, ncomp: int, nex: int, *, flagfission: bool = False,
                     fission=None):
-        """NATIVEX: the `compound.decay_fast.NucleusWidths` holding mother bin `nex`, built as
+        """The `compound.decay_fast.NucleusWidths` holding mother bin `nex`, built as
         `decay` builds it, where `decay` would take that path; None otherwise.
 
         TALYS: compound.f90:1 (compound), densprepare.f90:1 (densprepare)
@@ -1402,14 +1402,14 @@ class Cascade:
             try:
                 from physics.hf.core.grids import binquad_sub
 
-                # BINQUAD sub-points need to know whether the nucleus fissions (OFF: TALYS's call as before)
+                # Bin sub-points need to know whether the nucleus fissions (OFF: TALYS's call as before)
                 kw = {"fissions": ladder is not None} if binquad_sub(self.options) > 1 else {}
                 nw = NativeWidths(self, st, sp, bins, **kw)
             except NotImplementedError:
                 nw = None
             if nw is not None:
                 if ladder is not None:
-                    if getattr(nw, "sub", 1) > 1:  # BINQUAD sub-points: the fission width at each point
+                    if getattr(nw, "sub", 1) > 1:  # bin sub-points: the fission width at each point
                         fis = ladder.widths_at(sp, nw.sub_ex, nw.sub_dex, nw.nj)
                     else:
                         fis = ladder.widths(sp, np.asarray(nw.bins, dtype=np.int64))
@@ -1436,7 +1436,7 @@ class Cascade:
         """Whether this bin can take `compound.decay_fast`: nothing on a graph -- no TENSOR
         parameter or photon-strength override on the run, and a population that is not on a graph.
 
-        PARAMWIRE: a parameter set and float photon-strength overrides keep it (their strength
+        A parameter set and float photon-strength overrides keep it (their strength
         functions return numpy, `gamma_params` hands `psf_fast` the adjusted parameters)."""
         from physics.hf.density.overrides import torch_path
 
@@ -1446,7 +1446,7 @@ class Cascade:
     def _nucleus_widths(self, st: ChainState, sp: NucleusSpec, nex: int, ladder=None):
         """The `compound.decay_fast.NucleusWidths` holding mother bin `nex` of `sp`: built on the
         first decayed bin, for it and every bin below it that can decay at all (not a discrete
-        level under S_n, which cascade.f90 empties instead). With a fission `ladder` (FISSB),
+        level under S_n, which cascade.f90 empties instead). With a fission `ladder`,
         `compound.fission_batch_decay.FissionNucleusWidths`."""
         from physics.hf.compound.decay_fast import NucleusWidths
 
@@ -1510,8 +1510,8 @@ class Cascade:
                 sp = self.spec(st, zc, nc)
                 n = sp.maxex + 1
                 out[(zc, nc)] = NucleusPopulation(
-                    skipcn=zc > zcap or nc > ncap,  # FLUXCLOSE A: a terminal residual (booked, not decayed)
-                    skipdeck=self.options.skipcn_of(zc, nc),  # KWCOV B5: a `skipcn Z A` card
+                    skipcn=zc > zcap or nc > ncap,  # `fluxclose` part A: a terminal residual (booked, not decayed)
+                    skipdeck=self.options.skipcn_of(zc, nc),  # a `skipcn Z A` keyword line
                     zcomp=zc, ncomp=nc, Z=sp.Z, A=sp.A, maxex=sp.maxex, nlast=sp.nlast_grid,
                     ex_mev=torch.as_tensor(sp.ex_mev, dtype=DTYPE),
                     dex_mev=torch.as_tensor(sp.dex_mev, dtype=DTYPE),

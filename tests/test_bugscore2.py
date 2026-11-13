@@ -107,7 +107,7 @@ def test_sacs_fold_covers_the_whole_fission_spectrum():
 @pytest.mark.xfail(strict=True, reason="BUGSCORE2 amendment D (R11 centre-of-mass MACS): needs the curation register "
                                        "regenerated from the EXFOR master; not applied")
 def test_r11_series_macs_is_centre_of_mass():
-    """Item 5: R11 (MACSCHECK) Maxwellian-averaged the series curve in the lab frame. For sigma = c / sqrt(E_lab) the
+    """Item 5: R11 (MACS check) Maxwellian-averaged the series curve in the lab frame. For sigma = c / sqrt(E_lab) the
     centre-of-mass MACS is c sqrt(A / ((A + 1) kT)), lower than the lab-frame value by 0.5 log10(1 + 1/A)."""
     from incognita.curation import rules
     a, kt = 56, 3e4

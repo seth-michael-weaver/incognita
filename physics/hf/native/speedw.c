@@ -1,4 +1,4 @@
-/* SPEEDW: compiled kernels of the whole-run speed work. Loader: physics/hf/native/speedw.py;
+/* Compiled kernels of the whole-run speed work. Loader: physics/hf/native/speedw.py;
  * build: scripts/build_speedw_native.sh (lib/libspeedw.so, gitignored).
  *
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
@@ -150,7 +150,7 @@ static inline void cdiv_fma(double ar, double ai, double br, double bi, double *
 /* distorted_waves: f (NLJ, n+1, 2), k2 (NK, 2), c = h*h/12, y1 (NLJ,) = h**(l+1); y out
  * (NK, NLJ, n+1, 2), every element written. */
 #if defined(__aarch64__)
-/* COREX (arm64 only; NOT bit-identical to the torch loop): the same recurrence
+/* NEON path (arm64 only; NOT bit-identical to the torch loop): the same recurrence
  *   y(i+1) = (2 y(i) (1 + 5c f(i)) - y(i-1) (1 - c f(i-1))) / (1 - c f(i+1)),  f = fval - k2,
  * with every coefficient computed first (they carry no state) and the division replaced by a
  * product with conj(D) / |D|^2, so the recurrences carry only multiplies; eight rows are stepped

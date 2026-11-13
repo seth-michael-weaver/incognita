@@ -1,4 +1,4 @@
-"""KWCOV B10b: TALYS's incident energies below `eninclow` (thermal.f90) and its thermal cross sections (thermalxs.f90),
+"""TALYS's incident energies below `eninclow` (thermal.f90) and its thermal cross sections (thermalxs.f90),
 OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
@@ -18,7 +18,7 @@ direct capture stay at their eref value; the non-elastic is the sum of the fille
 again) and the projectile's own binary/level columns are 0; fission is not filled (0). Below E1v an isomeric
 branching ratio of a capture / (n,p) / (n,a) channel is the thermal table's (xscaptherm(i) / xscaptherm(-1)).
 
-The ENGINE keeps its own numbers at those energies (it runs Hauser-Feshbach there; LOWEPOT, RESFILL in the published
+The ENGINE keeps its own numbers at those energies (it runs Hauser-Feshbach there; `lowepot` and the resonance-region fill in the published
 library): `Results.thermal` carries TALYS's rows beside them and changes nothing else. `add_to_results` takes eref's
 values from the run when eref is one of its energies, else from a one-energy run at eref (TALYS's own first energy).
 
@@ -26,7 +26,7 @@ TALYS routines ported here (file:line of the subroutine statement):
     thermalxs.f90:1 (thermalxs)     xscaptherm / xsptherm / xsalphatherm: structure/thermal table, deck, Kopecky
     thermal.f90:1 (thermal)         the fill below eninclow
     grid.f90:1 (grid)               E1v / eninclow insertion and Ninclow (core.grids.low_incident_energies)
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B10b, output only). Acceptance test: KWCOV-B10b
+Task: T10 (physics/hf/CONTRACT.md section 7; output only). Acceptance test: KW-B10
 (tests/hf/test_kwcov_b10b.py, docs/hf/COVERAGE_PLAN.md).
 
 TALYS quirks kept: (1) thermalxs.f90 reads the table AFTER the input, so a table row (isoR = -1 or an isomer) overwrites

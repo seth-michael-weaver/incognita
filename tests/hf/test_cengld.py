@@ -1,4 +1,4 @@
-"""CENGLD (ROUTE100 WP6): the level-density kernels of `native/ld.c` (`density/ld_ceng.py`) against
+"""Native level densities: the level-density kernels of `native/ld.c` (`density/ld_ceng.py`) against
 the paths they replace, `HF_NX2_CENGLD=0` against `=1`. Skipped without a `libnx2` build
 (scripts/build_nx2_native.sh)."""
 
@@ -154,7 +154,7 @@ def test_densitypar_shared_by_identity(monkeypatch):
 
     _pre_match(26, 57, 26, 56)
     monkeypatch.setenv("HF_NX2_CENGLD", "1")
-    monkeypatch.setenv("HF_CENGLD2_XT", "0")  # CENGLD2 shares equal values across objects too
+    monkeypatch.setenv("HF_CENGLD2_XT", "0")  # the cross-object sharing of equal values too
     o, p, m = structure_of(26, 56)
     lv = discrete_levels(26, 57, o, m, p)
     p2 = copy.copy(p)

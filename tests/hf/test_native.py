@@ -1,4 +1,4 @@
-"""SPEEDT3: every compiled kernel (physics/hf/native) is bit-identical to the Python path
+"""Compiled kernels: every compiled kernel (physics/hf/native) is bit-identical to the Python path
 it replaces.
 
 Run on each machine that builds the kernels (`scripts/build_native.sh`) before trusting them there;
@@ -19,7 +19,7 @@ from physics.hf.omp import schrodinger as S
 
 pytestmark = [
     pytest.mark.skipif(not native.available(), reason="physics/hf/native not built"),
-    # CCFAST2: the kernels build on arm64 too (scalar paths, libm hypot, Accelerate through torch),
+    # the kernels build on arm64 too (scalar paths, libm hypot, Accelerate through torch),
     # but "bit-identical to torch" is a statement about torch's x86 kernels (fused multiply-adds,
     # MKL at one thread); on the Mac they are held to the closeness rule instead
     # (docs/results/hf-speed-profile.md, "Coupled channels without bit-identity").
@@ -230,7 +230,7 @@ def test_cc_block(n, n_e, deformed):
 
 
 def test_coupling_tables_batch_invariant():
-    """SPEEDT3's batched 6j symbols and the global dcgs table give the per-multipole values."""
+    """The batched 6j symbols and the global dcgs table give the per-multipole values."""
     from physics.hf.ecis import coupling as C
 
     spins = torch.tensor([3.5, 4.5, 5.5, 6.5], dtype=torch.float64)

@@ -1,5 +1,5 @@
-"""CREC (ROUTE100 WP4): the record codec, file format, `lru_cache` seeding and record key, without
-a physics run. The chart-wide gate (warm runs from the records identical to WARM0's) is
+"""Run records: the record codec, file format, `lru_cache` seeding and record key, without
+a physics run. The chart-wide check (warm runs from the records identical to the cold reference runs) is
 `scripts/hf_route100_record.py verify`."""
 
 from __future__ import annotations
@@ -107,7 +107,7 @@ def test_record_key_ignores_fit_parameters_and_nothing_else(monkeypatch):
 
     key = caches.record_key(cas())
     caches.check_key(key, cas())
-    # a PARAMWIRE parameter set reaches only the taint set, which a record never holds
+    # a fitted-parameter set reaches only the taint set, which a record never holds
     caches.check_key(key, cas(fit=(("aadjust", 26, 57, 1.1), ("ftable", 26, 57, 0.8))))
     for bad in (cas(energies=(1.0, 19.0)), cas(At=58), cas(density_overrides={"aadjust": 1.1}),
                 cas(omp_overrides={"rvadjust": 1.02})):

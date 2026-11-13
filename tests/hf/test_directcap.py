@@ -1,4 +1,4 @@
-"""DIRECTCAP: the racapcalc port (physics/hf/direct/racapcalc.py).
+"""The racapcalc port (physics/hf/direct/racapcalc.py).
 
 * sixj / clebs against the compiled Fortran (racapcalc.f:880, :1052) on a 1-in-200 sample of the
   97,748 argument sets checked when the port was written (tests/hf/data/).

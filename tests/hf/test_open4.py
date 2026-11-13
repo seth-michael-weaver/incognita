@@ -1,6 +1,6 @@
-"""OPEN4: the two accuracy defects OPEN3M left classified.
+"""Two accuracy defects of the TALYS port (D: pre-equilibrium spin shape; E: coupled-channels compound flux).
 
-Gate: `docs/results/hf-open4.md`.
+See `docs/results/hf-open4.md`.
 
 D -- binary.f90's `sfactor` (the pre-equilibrium spin shape) is zeroed once per run
 (strucinitial.f90:484) and overwritten only where a bin holds more than `popepsA`, so a bin keeps
@@ -9,7 +9,7 @@ emission from a fresh `BinaryState` at every energy; actinide (n,g) above 10 MeV
 low because the compound nucleus's high bins then decayed with the Wigner fallback shape.
 
 E -- compnorm.f90:163-166: a coupled-channels target takes the compound flux from its own sum over
-`Tjlinc` plus `xscoupled` and does not renormalise to `xsreacinc`. ECIS runs at the card-rounded
+`Tjlinc` plus `xscoupled` and does not renormalise to `xsreacinc`. ECIS runs at the input-rounded
 energy while pi/k^2 is taken at `Einc`, so TALYS's keV nonelastic (`xsreacinc - xscompel`) moves
 by up to 1 % around its capture. The chained path always took the spherical branch.
 """
@@ -23,7 +23,7 @@ import torch
 from physics.hf.compound.normalization import compound_formation
 from physics.hf.core.tensors import DTYPE
 
-# CHART1's grid (`hf_ccfast_bench.energies`) as the port declares it, and CHART1's TALYS column
+# the chart run's grid (`hf_ccfast_bench.energies`) as the port declares it, and its TALYS column
 CHART1_E = tuple(float(np.float32(x)) for x in (
     1.0e-3, 1.684108e-3, 2.836221e-3, 4.776502e-3, 8.044147e-3, 1.354721e-2, 2.281498e-2,
     3.842289e-2, 6.470830e-2, 1.089758e-1, 1.835270e-1, 3.090794e-1, 5.205231e-1, 8.766172e-1,
@@ -65,8 +65,8 @@ def test_coupled_branch_is_compnorm():
 
 def test_d_sfactor_reaches_the_multiple_emission(talys_popeps, monkeypatch):
     """U-235 (n,g) at 11.88 MeV, computed as a one-energy subset (which walks the declared prefix
-    for `sfactor`): CHART1's TALYS value within 1e-3, and a fresh state per energy reproduces the
-    old 1.6e-2 deficit. At TALYS's popeps 1e-3 mb (POPEPS3: ours is 1e-9), the value CHART1 holds."""
+    for `sfactor`): the chart run's TALYS value within 1e-3, and a fresh state per energy reproduces the
+    old 1.6e-2 deficit. At TALYS's popeps 1e-3 mb (ours is 1e-9), the value the chart run holds."""
     monkeypatch.setenv("INCOGNITA_EXACTFIS", "0")  # TALYS reproduction: Kemble-WKB per hump
     e = (CHART1_E[-2],)
     got = float(_run(92, 235, e).channels_mb["xs000000"][0])
@@ -78,7 +78,7 @@ def test_d_sfactor_reaches_the_multiple_emission(talys_popeps, monkeypatch):
 
 def test_e_coupled_nonelastic_at_kev():
     """W-184 nonelastic at 13.5 and 22.8 keV, where TALYS's sits 3-4 mb away from its capture:
-    within 1e-3 of CHART1's TALYS column, and outside 1e-2 on the spherical branch."""
+    within 1e-3 of the chart run's TALYS column, and outside 1e-2 on the spherical branch."""
     e = CHART1_E[5:7]
     talys = np.array([354.8496, 282.7852])  # features/hf_chart1/cells.parquet
     got = _run(74, 184, e).totals_mb["nonelastic"].numpy()

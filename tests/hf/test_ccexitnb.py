@@ -1,4 +1,4 @@
-"""CCEXITNB: `ccexitnb y` / INCOGNITA_CCEXITNB=1 (default off; its no-fission-channel class rule `ccexitnbnf` is default ON) gives a colltype-R target's first-compound neutron exit to
+"""`ccexitnb y` / INCOGNITA_CCEXITNB=1 (default off; its no-fission-channel class rule `ccexitnbnf` is default ON) gives a colltype-R target's first-compound neutron exit to
 its discrete NON-band levels the g.s. coupled-channels Tjlinc at Eout. Off / spherical targets / band levels: unchanged."""
 import dataclasses
 
@@ -39,7 +39,7 @@ def test_off_and_spherical_give_no_rows(monkeypatch):
     monkeypatch.delenv(ccexitnb.ENV, raising=False)
     monkeypatch.delenv(ccexitnb.ENV2, raising=False)
     cas, etot, r, sn = _primary(76, 187, 0.04)
-    assert cas.options.ccexitnbnf and ccexitnb.enabled(cas.options)  # CCEXITNB2 default ON (no fission channel)
+    assert cas.options.ccexitnbnf and ccexitnb.enabled(cas.options)  # `ccexitnbnf` default ON (no fission channel)
     cas.options = dataclasses.replace(cas.options, ccexitnbnf=False)  # deck `ccexitnbnf n` = OFF = previous production
     assert ccexitnb.rows(cas, 0, r.ex_mev, r.nlast, r.maxex, etot, sn, r.tjl.shape[1], 1.0) == {}
     monkeypatch.setenv(ccexitnb.ENV, "1")
@@ -79,8 +79,8 @@ def test_os187_rows_nonband_only_and_cc(monkeypatch):
 
 
 def test_ccexitnb2_class_rule_no_fission_channel_only(monkeypatch):
-    """CCEXITNB2 (`ccexitnbnf y` / INCOGNITA_CCEXITNB2=1): the CCEXITNB rows on a target without a fission channel
-    (Os-187: identical to CCEXITNB), none on a target whose engine opens fission (U-235, A > 215)."""
+    """`ccexitnbnf y` / INCOGNITA_CCEXITNB2=1: the `ccexitnb` rows on a target without a fission channel
+    (Os-187: identical to `ccexitnb y`), none on a target whose engine opens fission (U-235, A > 215)."""
     monkeypatch.delenv(ccexitnb.ENV, raising=False)
     for v in ("", "0", "n"):
         monkeypatch.setenv(ccexitnb.ENV2, v)
@@ -99,7 +99,7 @@ def test_ccexitnb2_class_rule_no_fission_channel_only(monkeypatch):
         assert np.array_equal(rw1[i][0], rw2[i][0]) and rw1[i][1] == rw2[i][1]
     cu, etu, ru, snu = _primary(92, 235, 0.04)
     assert cu.options.flagfission
-    assert ccexitnb.rows(cu, 0, ru.ex_mev, ru.nlast, ru.maxex, etu, snu, ru.tjl.shape[1], ccexitnb.fnorm_n(cu))  # CCEXITNB: rows
+    assert ccexitnb.rows(cu, 0, ru.ex_mev, ru.nlast, ru.maxex, etu, snu, ru.tjl.shape[1], ccexitnb.fnorm_n(cu))  # `ccexitnb`: rows
     monkeypatch.delenv(ccexitnb.ENV)
     monkeypatch.setenv(ccexitnb.ENV2, "1")
     assert not ccexitnb.enabled(cu.options)

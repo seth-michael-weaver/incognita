@@ -1,4 +1,4 @@
-"""SCISSORS2: `INCOGNITA_M1_SCISSORS=s2` puts a deformation-scaled scissors on rotational nuclei
+"""`INCOGNITA_M1_SCISSORS=s2` puts a deformation-scaled scissors on rotational nuclei
 only (R4/2 >= 2.91) and leaves every other nucleus on TALYS's own term, bit for bit.
 """
 

@@ -1,7 +1,7 @@
 """T12: direct inelastic scattering, giant resonances and direct radiative capture.
 
 Every test that needs TALYS output skips (not fails) when the dumps are absent, per contract §6.
-The gate itself is `python -m physics.hf.direct.score`; these are the unit-level checks plus a
+The full comparison is `python -m physics.hf.direct.score`; these are the unit-level checks plus a
 small A-mult slice of it so the tolerance is enforced at every commit.
 """
 
@@ -368,7 +368,7 @@ def test_the_shipped_direct_capture_sample_is_identically_zero():
     `Direct radiative capture xs = 0.00000E+00` at all 41 energies -- and so do T12's own
     `racap y` runs on Fe-56, Ni-58, Zr-90 and Sn-120, with no error and no warning. `racapcalc`
     contributes nothing in this version, which is why the flag is safe and why there are no
-    non-trivial numbers to gate the capture kernel against."""
+    non-trivial numbers to check the capture kernel against."""
     try:
         ro = dref.sample_racap_out()
     except KeyError:

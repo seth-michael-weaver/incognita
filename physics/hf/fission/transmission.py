@@ -119,8 +119,8 @@ def fission_level_densities(
         exfis = exfis_top_mev - elowest
         nbin = NUMBINFIS // 2
         if exfis <= 0.0:
-            # COMBINE4 port fix: TALYS sets nbintfis = numbinfis/2 and `cycle`s (densprepare.f90:413-414), leaving eintfis/rhofis
-            # from the previous residual; the port has no such arrays and t1barrier indexed past the grid (IndexError; the native
+            # TALYS sets nbintfis = numbinfis/2 and `cycle`s (densprepare.f90:413-414), leaving eintfis/rhofis
+            # from the previous residual; the port has no such arrays, and t1barrier would index past the grid (and the native
             # coefficient path read out of bounds). The barrier has no continuum below the residual's top Ex: an empty grid (0).
             nb_out[ibar] = 0
             per_bar.append(None)

@@ -1,11 +1,11 @@
 """Parse the A-mpe instrumentation dump and score `preeq.multi` against it.
 
-Task: EXCL3 (physics/hf/CONTRACT.md §7). Acceptance test: A-mpe (§6).
+Task: T8 (physics/hf/CONTRACT.md §7). Acceptance test: A-mpe (§6).
 
 `physics/hf/preeq/talys_instrument/` builds a private TALYS whose `multipreeq2.f90` calls
 `mpdump_in` at entry and `mpdump_out` at the point where it is about to set `Dmulti` -- so every
 record here is one `(Zcomp, Ncomp, nex)` call with TALYS's own inputs beside its own outputs, and
-the gate measures `multipreeq2.f90` alone with nothing else in the loop.
+the test measures `multipreeq2.f90` alone with nothing else in the loop.
 
 Records that carry no `MPOU` block are calls TALYS abandoned at its own `sumfeed <= 1e-10` cut
 (multipreeq2.f90:152); the port must abandon them too, which is checked rather than skipped.

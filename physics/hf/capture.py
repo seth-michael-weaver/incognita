@@ -91,13 +91,13 @@ def capture_xs(
     # +0.485, so the computed cross section scales as T_gamma while the measured one scales
     # roughly as its square root. Across T_gamma quartiles the ratio runs 0.25 to 5.3 -- a
     # factor of 21 -- and a single global factor removes almost none of it (0.758 -> 0.731).
-    #
-    # Fitted on pre-2012 measurements only (4,854 curated cells). Held out:
+
+    # Fitted on pre-2012 measurements only (4,854 curated cells). Validation (not fitted):
     #   post-2012 datasets (266 cells)   RMS log10 0.806 -> 0.545   (-32%)
-    #   25% nuclide holdout              RMS log10 0.697 -> 0.510   (-27%)
+    #   25% of nuclides left out         RMS log10 0.697 -> 0.510   (-27%)
     # It generalises better than it fits (+23% in sample), which is what an effect that is
     # real rather than absorbed noise looks like.
-    #
+
     # This is a calibration, not new physics: it is off by default, because `capture_xs` is
     # meant to be the ab-initio layer and mixing a fit into it silently would make every later
     # comparison uninterpretable. What the exponent is *telling* us is a physics question --

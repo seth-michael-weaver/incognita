@@ -6,8 +6,8 @@
 Libraries shipped (redistribution confirmed): ENDF/B-VIII.1 (US public domain), JEFF-4.0 (CC BY 4.0), TENDL-2025
 (CC BY 4.0). JENDL-5 is HELD until its terms for derived tables are confirmed.
 
-For each incident-neutron ENDF-6 file of those libraries (held offline in ~/nucleus/raw/endf, licences in
-~/nucleus/raw/MANIFEST.json) and each nuclide the site shows, NJOY RECONR (0 K, 0.5 % tolerance, via openmc.data.njoy)
+For each incident-neutron ENDF-6 file of those libraries (held offline under raw/endf, licences in
+raw/MANIFEST.json) and each nuclide the site shows, NJOY RECONR (0 K, 0.5 % tolerance, via openmc.data.njoy)
 reconstructs pointwise MT102 (capture), MT16 (n,2n), MT103 (n,p) and MT107 (n,alpha); if MT103/MT107 are absent their
 partials MT600-649 / MT800-849 are summed (RECONR does this itself) -- but only when the SOURCE file has MT103/107 or the
 continuum member MT649/849; otherwise part of the channel sits in MT5 and the channel is omitted for that library
@@ -24,9 +24,9 @@ Output docs/walkthrough/data/lib/<Z>.json, loaded by js/data.js only when the re
 the INCOGNITA CSV/JSON downloads. Input SHA256 (first 16 hex) per file: scripts/build_site_overlay.sources.json.
 The build fails if the total exceeds 10 MB or any file exceeds 400 kB.
 
-usage (WSL, env with openmc + njoy):
-  ~/micromamba/envs/nucleus-phys/bin/python scripts/build_site_overlay.py reduce [--jobs 4] [--only endfb81:79:197,...]
-  ~/micromamba/envs/nucleus-phys/bin/python scripts/build_site_overlay.py write
+usage (environment with openmc + njoy):
+  python scripts/build_site_overlay.py reduce [--jobs 4] [--only endfb81:79:197,...]
+  python scripts/build_site_overlay.py write
 """
 import argparse, hashlib, io, json, math, os, re, shutil, sys, tempfile, zipfile
 from multiprocessing import Pool
@@ -258,7 +258,7 @@ def cmd_write(a):
               open(SRCJ, "w"), separators=(",", ":"))
     print(f"{nl} nuclide-libraries, {len(byz)} element files, {tot / 1e6:.2f} MB total, largest {big / 1e3:.0f} kB")
     if fails:
-        sys.exit("BUDGET GATE FAILED: " + "; ".join(fails))
+        sys.exit("BUDGET CHECK FAILED: " + "; ".join(fails))
 
 
 if __name__ == "__main__":

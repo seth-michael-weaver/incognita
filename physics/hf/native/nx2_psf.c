@@ -1,4 +1,4 @@
-/* NATIVEX2: the photon strength function fstrength and the photon transmission rows built on it
+/* Native: the photon strength function fstrength and the photon transmission rows built on it
  * (compound/psf_nx2.py), for many (Efs, Egamma) at once.
  *
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
@@ -15,11 +15,11 @@
  *   [7..9] tpr, epr, gpr of i = 1  [10..12] of i = 2  [13..15] upbend C, eta, F
  * Integers ip: [0] L (= gammax + 1)  [1] qrpa E1 table present  [2] flagupbend  [3] strengthM1
  *   [4] zix + nix  [5] n_tqrpa  [6] ie (table length - 1)  [7] NUMGAMQRPA  [8] n_t columns
- *   SPEEDFIX, the tabulated M1 (strengthM1 >= 8, one column, no temperature axis), stored after the
+ *   The tabulated M1 (strengthM1 >= 8, one column, no temperature axis), stored after the
  *   E1 table in the same arrays: [9] M1 table present  [10] its ie  [11] its offset in etab
  *   [12] its offset in ftab / lftab
  * Doubles dp: [0] S_k0  [1] delta  [2] alev  [3] beta2  [4] pi2h2c2
- *   ENGADJ (physics/hf/eadj.py): [5] n_e1 bumps  [6] n_m1 bumps, then 5 doubles per bump (E1 first):
+ *   `eadj` (physics/hf/eadj.py): [5] n_e1 bumps  [6] n_m1 bumps, then 5 doubles per bump (E1 first):
  *   [shape (0 tal: Ea Eb Em D | 1 gau: E0 W D 0)], f_XL x= prod (1 + (D - 1) shape(Egamma)). 0 bumps = TALYS.
  */
 #include <math.h>
@@ -121,7 +121,7 @@ static double table_strength(const int64_t *ip, const double *dp, const double *
     return f2;
 }
 
-/* ENGADJ: eadj._shape for one bump b = [shape, p0, p1, p2, p3] at energy e: 0 outside, 1 at the peak */
+/* `eadj`: eadj._shape for one bump b = [shape, p0, p1, p2, p3] at energy e: 0 outside, 1 at the peak */
 static double eadj_shape(const double *b, double e) {
     if (b[0] != 0.0) {
         double x = e - b[1];

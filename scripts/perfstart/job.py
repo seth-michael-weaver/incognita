@@ -3,8 +3,8 @@
 
 The production calculator (scripts/talysworld/engine_job.py) runs engine build 16606b356d6e with NUCLIDO_* switches; this
 driver runs THIS repository's engine with the same switches under their public INCOGNITA_* names, the v0.2 P-arm deck
-(lines file + PEONSET keywords + ';m1share r'), and the run_item() core of the library runner (warmrun.new_cascade ->
-engine_c.run under torch.inference_mode). It is the yardstick for start-up work and the correctness gate
+(lines file + pre-equilibrium onset keywords + ';m1share r'), and the run_item() core of the library runner (warmrun.new_cascade ->
+engine_c.run under torch.inference_mode). It is the yardstick for start-up work and the correctness check
 (tests/hf/test_perfstart_gate.py): every output array is written as float64, so two engine versions can be compared bit for bit.
 
 usage: job.py --z 26 --a 56 (--e-mev 1.0 [--e-mev ...] | --lib64) --out OUT.npz [--lines FILE] [--repeat N] [--profile F]

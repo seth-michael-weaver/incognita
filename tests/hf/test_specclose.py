@@ -1,4 +1,4 @@
-"""SPECCLOSE (THEORYFIX_U7SPEC, INCOGNITA_SPECCLOSE, output only): the shipped spectra integrate to the booked flux."""
+"""Spectrum closure (INCOGNITA_SPECCLOSE, output only): the shipped spectra integrate to the booked flux."""
 
 import numpy as np
 

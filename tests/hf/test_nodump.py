@@ -1,10 +1,10 @@
-"""NODUMP: the engine runs any nuclide at any energy with no TALYS dump.
+"""The engine runs any nuclide at any energy with no TALYS dump.
 
-`engine.ChainedFull.families` used to be three entries long -- `preequilibrium_inverse_xs`,
-`direct_dwba` and `structure_scalars` (`docs/results/hf-e2e.md` §1) -- and every one of them was
-read off a per-target instrumented TALYS run. These tests gate the three replacements against the
+Three inputs -- `preequilibrium_inverse_xs`, `direct_dwba` and `structure_scalars`
+(`docs/results/hf-e2e.md` §1) -- can be read off a per-target instrumented TALYS run; the engine
+computes them itself. These tests check the three replacements against the
 dump values they replace, at the tolerance of the component each comes from
-(`docs/results/hf-engine-gates.md` §3), and then pin the property the whole task is for: the
+(`docs/results/hf-engine-gates.md` §3), and then pin the property that matters: the
 engine takes (Z, A) and an incident energy grid and nothing else.
 
 The dump-backed tests skip where the reference runs are not on the box; the last two do not need
@@ -68,7 +68,7 @@ def test_structure_scalars_reproduce_the_dumped_record(tag, Z, A, talys_popeps):
 
     `popeps` and `xseps` are `real(sgl)` in TALYS, so the port rounds them the same way; reading
     `1e-3` where TALYS holds `1.0000000474974513e-3` is a real difference to a `<` test. The dumps are
-    TALYS runs at its popeps 1e-3 mb (ours is 1e-9, POPEPS3), so the run is pinned to it."""
+    TALYS runs at its popeps 1e-3 mb (ours is 1e-9), so the run is pinned to it."""
     from physics.hf.emission.dumps import load_binary_dump, load_channel_dump
     from physics.hf.input import fitlib
     from physics.hf.structure.scalars import structure_scalars
@@ -82,7 +82,7 @@ def test_structure_scalars_reproduce_the_dumped_record(tag, Z, A, talys_popeps):
     assert (sc.k0, sc.ltarget, sc.targetspin2, sc.target_parity) == (
         b.k0, b.ltarget, b.targetspin2, b.target_parity)
     assert (sc.pespinmodel, sc.numj) == (b.pespinmodel, b.numj)
-    # `maxJph` is `preeqinit`'s and the dump carries 0 below `epreeq`; the engine gates it on
+    # `maxJph` is `preeqinit`'s and the dump carries 0 below `epreeq`; the engine conditions it on
     # `flagpreeq` for that reason (`engine._BuiltInputs.shell`).
     assert sc.maxjph == 30 and b.maxjph == 0 and not b.flagpreeq
     assert sc.popeps_mb == pytest.approx(b.popeps_mb, rel=1e-15)

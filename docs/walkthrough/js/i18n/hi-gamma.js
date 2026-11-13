@@ -101,7 +101,7 @@ Object.assign(WT.L.labels, {
   "fast: capture is a rare event": "तेज: प्रग्रहण एक दुर्लभ घटना",
 });
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "{#} cascades from J = {#}/{#}: ≈ {#} % end on the isomer": "{#} कैस्केड, J = {#}/{#} से: ≈ {#} % समावयवी पर समाप्त",
 });

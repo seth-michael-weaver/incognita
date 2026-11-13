@@ -1,4 +1,4 @@
-"""SPECOUT: outgoing spectra / angular distributions / DDX recorded from the engine, OUTPUT ONLY (physics/hf/specout.py,
+"""Outgoing spectra / angular distributions / DDX recorded from the engine, OUTPUT ONLY (physics/hf/specout.py,
 physics/hf/specang.py, native/specout.c, the nx_walk / nx_target / walk_nucleus sinks)."""
 
 import math

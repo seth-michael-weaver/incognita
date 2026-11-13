@@ -55,7 +55,7 @@ def test_per_nucleus_forms_resolve_to_zix_nix():
     # n + Fe-56: compound Fe-57 (Zinit 26, Ninit 31)
     o = D.default_options(26, 56, overrides={"ldmodel 26 57": 2, "colenhance 25 56": "y", "nlevels 25 56": 5,
                                              "maxlevelsbin p": 7})
-    assert o.ldmodel_of(0, 0) == 2 and o.ldmodel_of(0, 1) == 1          # card on the CN only
+    assert o.ldmodel_of(0, 0) == 2 and o.ldmodel_of(0, 1) == 1          # line on the CN only
     assert o.flagcol_of(1, 0) is True and o.flagcol_of(0, 0) is False
     assert o.nlev_of(1, 0) == 5 and o.nlev_of(0, 1) == o.nlevmax       # the target keeps nlevmax (nuclides.f90:169)
     assert o.nlevbin[2] == 7
@@ -251,7 +251,7 @@ def test_read_deck(tmp_path):
 
 def test_engine_deck_best_is_the_best_arm_bitwise():
     """`best y` as a deck line runs the same numbers as INCOGNITA_TALYS_FIT=best (Fe-56, 14 MeV), each in a
-    fresh process (the cards are cached per process)."""
+    fresh process (the fitted keyword sets are cached per process)."""
     from tests._data import need_talys
 
     need_talys()

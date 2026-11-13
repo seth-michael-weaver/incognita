@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CHARTDRV (ROUTE100 WP10): build native/chart_main.c, the one-box chart driver binary.
+# Build native/chart_main.c, the one-box chart driver binary.
 #
 #   scripts/build_chart_main.sh     # uses $CC, else the micromamba gcc, else cc
 #

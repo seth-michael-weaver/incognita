@@ -1,4 +1,4 @@
-"""VIBLEN: `dwbaimag` keyword (complex DWBA transition potential, default off) and the DWBA angular distributions.
+"""`dwbaimag` keyword (complex DWBA transition potential, default off) and the DWBA angular distributions.
 
 Model only, no data."""
 

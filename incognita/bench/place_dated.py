@@ -1,4 +1,4 @@
-"""Fetch-and-place: build the bin-average library table the dated tracks need (DATEDEXAM2).  No library value ships with the
+"""Fetch-and-place: build the bin-average library table the dated tracks need.  No library value ships with the
 benchmark; this regenerates it from the official files.
 
     uv run python -m incognita.bench.place_dated --library endfb71 --fetch DOWNLOAD_DIR --njoy PATH --out lib_endfb71.parquet

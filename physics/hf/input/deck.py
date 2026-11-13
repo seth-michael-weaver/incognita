@@ -1,9 +1,9 @@
-"""KWCOV B2: a TALYS input deck (`talys.inp`) as an engine run.
+"""A TALYS input deck (`talys.inp`) as an engine run.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: T3 (physics/hf/CONTRACT.md §7). Acceptance test: KWCOV-B2 (tests/hf/test_kwcov_b2.py).
+Task: T3 (physics/hf/CONTRACT.md §7). Acceptance test: KW-B2 (tests/hf/test_kwcov_b2.py).
 
 TALYS routines ported here (file:line of the subroutine statement):
     readinput.f90:1 (readinput)     lines lowercased (`convert`), comments (`#` first) and blank lines dropped
@@ -71,7 +71,7 @@ def read_deck(text: str, cwd: str | os.PathLike = ".") -> Deck:
             if k == "estop":
                 estop = float(w[1])
             if k in ("levelfile", "deformfile") and len(w) == 3 and not os.path.isabs(w[2]):
-                w = w[:2] + [str(Path(cwd) / w[2])]  # KWCOV B5: TALYS opens it in its working directory
+                w = w[:2] + [str(Path(cwd) / w[2])]  # TALYS opens it in its working directory
             rest.append(s.lower() if k not in ("bestfile", "levelfile", "deformfile") else " ".join([k] + w[1:]))
     for k, v in (("projectile", proj), ("element", elem), ("mass", mass), ("energy", energy)):
         if v is None:
@@ -91,7 +91,7 @@ def run_deck(path: str | os.PathLike, stats: dict | None = None):
     in `INCOGNITA_TALYS_FIT_LINES` (restored afterwards). The run's projectile must be the engine's
     (`physics.hf.projectile`, neutron unless INCOGNITA_CPINC says otherwise).
 
-    KWCOV B10b: `mass 0` runs every isotope and returns the abundance-weighted sums (`Results.natural`), `integral y`
+    `mass 0` runs every isotope and returns the abundance-weighted sums (`Results.natural`), `integral y`
     adds `Results.integral`, `resonance y` is refused.
 
     TALYS: talysreaction.f90:1 (talysreaction) -- the run the deck asks for
@@ -108,11 +108,11 @@ def run_deck(path: str | os.PathLike, stats: dict | None = None):
     from physics.hf import integral as integ_mod
 
     if any(ln.split()[:1] == ["resonance"] and ln.split()[1:2] and ln.split()[1][:1] == "y" for ln in d.lines):
-        raise NotImplementedError(fitlib.RESONANCE_REFUSAL)  # KWCOV B10b: refused before any run
-    integ = integ_mod.parse_deck(d.lines)  # KWCOV B10b: integral y / integral <file> <spectrum> <value>
-    if d.A == 0:  # KWCOV B10b: natural element (natural.f90)
+        raise NotImplementedError(fitlib.RESONANCE_REFUSAL)  # refused before any run
+    integ = integ_mod.parse_deck(d.lines)  # integral y / integral <file> <spectrum> <value>
+    if d.A == 0:  # natural element (natural.f90)
         lt = [ln.split()[1] for ln in d.lines if ln.split()[:1] == ["ltarget"] and len(ln.split()) > 1]
-        if lt and int(lt[-1]) > 0:  # KWCOV GAP (isomeric targets): checkvalue.f90:429-432
+        if lt and int(lt[-1]) > 0:  # (isomeric targets): checkvalue.f90:429-432
             raise ValueError("TALYS-error: Excited level for target not possible for natural targets")
         return _run_natural(d, p.parent, stats, integ)
     res = _run_one(d, d.A, stats, chanobs=integ is not None)
@@ -145,7 +145,7 @@ def _run_natural(d: Deck, cwd: Path, stats, integ):
     lw = [ln.split()[:2] for ln in d.lines]
     if ["massdis", "y"] in lw and ["fission", "n"] not in lw and any(a > 215 for a in ab):  # flagfission: A > 215
         raise ValueError("TALYS-error: Fission yield calculation not possible for natural targets "
-                         "(checkvalue.f90:1075; KWCOV B14)")
+                         "(checkvalue.f90:1075)")
     runs = {a: _run_one(d, a, stats) for a in ab}
     return natural.combine(runs, ab)
 
@@ -163,13 +163,13 @@ def _run_one(d: Deck, A: int, stats, chanobs: bool = False):
     old_ch = os.environ.get("INCOGNITA_CHANOBS")
     try:
         if chanobs:
-            os.environ["INCOGNITA_CHANOBS"] = "1"  # KWCOV B10b integral: the isomer files (xsNNNNNN.Lnn), output only
+            os.environ["INCOGNITA_CHANOBS"] = "1"  # integral: the isomer files (xsNNNNNN.Lnn), output only
         if d.lines:
             os.environ[fitlib.ENV_LINES] = d.lines_env
         else:
             os.environ.pop(fitlib.ENV_LINES, None)
         declared, energies = d.declared_mev, (None if d.energies_mev == d.declared_mev else d.energies_mev)
-        if ast is not None:  # KWCOV B9: egridastro.f90 replaces the deck's energies
+        if ast is not None:  # egridastro.f90 replaces the deck's energies
             declared, energies = _astro_energies(d, ast)
             if ast["astroex"]:
                 os.environ["INCOGNITA_CHANOBS"] = "1"  # the isomer populations (xsNNNNNN.LMM) astroex folds
@@ -238,7 +238,7 @@ def _astro_energies(d: Deck, ast: dict):
     from physics.hf.input import fitlib
 
     k0 = projectile.k0()
-    fitlib.activate(d.Z, d.A)  # the deck's cards first: structure_of caches the run's options per target
+    fitlib.activate(d.Z, d.A)  # the deck's fitted keyword lines first: structure_of caches the run's options per target
     _, _, m = structure_of(d.Z, d.A)
     pz, pn = (0, 0, 1, 1, 1, 2, 2)[k0], (0, 1, 0, 1, 2, 1, 2)[k0]
     e = energy_grid(k0, float(m.specmass[pz, pn, k0]), float(m.redumass_amu[pz, pn, k0]),

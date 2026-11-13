@@ -1,6 +1,6 @@
 /* Derived from TALYS-2.x / ECIS-06 (https://github.com/arjankoning1/talys), MIT License,
  * Copyright (c) A.J. Koning (ECIS-06: J. Raynal). See physics/hf/NOTICE-TALYS.md. */
-/* SPEEDT3: compiled kernels for the transmission-coefficient stages of the TALYS port.
+/* Compiled kernels for the transmission-coefficient stages of the TALYS port.
  *
  * Every kernel repeats, element by element and in the same order, the floating-point operations
  * of the Python/numpy/torch loop it replaces, so its results are bit-identical to that loop
@@ -9,7 +9,7 @@
  * no contraction to FMA, no reassociation, no vectorised reductions. Where torch itself fuses a
  * multiply-add (the scalar tail of its complex product), the kernel calls fma() explicitly.
  *
- * What the torch operations compute, as established on x86-64 (probes in the SPEEDT3 report):
+ * What the torch operations compute, as established on x86-64 (by direct probes):
  *   complex a*b, contiguous:  re = ar*br - ai*bi, im = ar*bi + ai*br on the first n - n%4
  *                             elements, re = fma(ar, br, -(ai*bi)), im = fma(ar, bi, ai*br) on the
  *                             last n%4 (its SIMD loop and scalar tail);
@@ -35,7 +35,7 @@
 #define HF_X86 0
 #define HF_NEON 1
 #else
-#define HF_X86 0 /* CCFAST2: arm64 (the Mac) builds the scalar paths; its bits are not x86's anyway */
+#define HF_X86 0 /* non-x86 build: arm64 (the Mac) builds the scalar paths; its bits are not x86's anyway */
 #endif
 #ifndef HF_NEON
 #define HF_NEON 0
@@ -174,7 +174,7 @@ static void numerov_lanes(const double *ee, const double *ra, const double *rb, 
 #endif
 
 #if HF_NEON
-/* COREX (arm64 only; NOT bit-identical to the scalar loop): eight columns of one step count on
+/* NEON path (arm64 only; NOT bit-identical to the scalar loop): eight columns of one step count on
  * four NEON vectors of two, stepped side by side so the out-of-order core runs the eight
  * recurrences in parallel. B takes 1 - 2 eta / x of the node two steps back instead of
  * re-dividing at x1 + h (the same node up to rounding), so a step divides twice, not three
@@ -367,7 +367,7 @@ void hf_cf1(int64_t m, const double *eta, const double *rho, const int64_t *ltop
             double *out, double *sign)
 {
 #if HF_NEON
-    /* COREX (arm64 only): eight columns' backward recurrences stepped side by side (each joins
+    /* NEON path (arm64 only): eight columns' backward recurrences stepped side by side (each joins
      * at its own top order), which the out-of-order core runs in parallel; every column's
      * operations are its own and in its order, so the values are the scalar loop's. */
     for (int64_t k0 = 0; k0 < m; k0 += 8) {
@@ -476,7 +476,7 @@ static void torch_cabs(int64_t n, const double *re, const double *im, double *ou
         out[i] = hypot(re[i], im[i]);
 }
 #else
-/* CCFAST2: no Sleef vector hypot outside x86; libm's hypot (to rounding, not to torch's bits) */
+/* non-x86 build: no Sleef vector hypot outside x86; libm's hypot (to rounding, not to torch's bits) */
 void hf_set_vhypot(void *f) { (void)f; }
 
 static void torch_cabs(int64_t n, const double *re, const double *im, double *out)
@@ -628,7 +628,7 @@ int hf_ecis_job(int64_t E, int64_t NL, int64_t NJ, int64_t R, int64_t nmax, cons
         const int64_t n1 = n0 + 24 < nmax ? n0 + 24 : nmax;
 #if HF_NEON
         (void)limit;
-        /* COREX (arm64 only; to rounding, not to the x86 bits): every (l, j) row of one energy
+        /* NEON path (arm64 only; to rounding, not to the x86 bits): every (l, j) row of one energy
          * steps side by side, radial step outermost, so the out-of-order core runs the rows'
          * recurrences in parallel; x = g - g^2/12 is evaluated directly (no tail/fma split). */
         for (int64_t e = 0; e < E; e++) {
@@ -858,7 +858,7 @@ static inline void rmul(double f, double fi, const double *z, double *o)
 /* keep slots, as solver._numerov_blocks names them */
 enum { K_UMM1, K_UM, K_UMP1, K_MMM1, K_MMP1, K_SP1, K_SM1 };
 
-/* CCNUMEROV: ECIS's modified Numerov (`ecist.f::inch`) in place of the plain implicit step, for
+/* modified Numerov: ECIS's modified Numerov (`ecist.f::inch`) in place of the plain implicit step, for
  * the spherical spin-orbit case (NM == NULL).  Operation for operation what
  * `solver._numerov_blocks` does with `HF_CC_MODNUM=1`, so this path stays bitwise the torch one.
  * `hf_cc_set_modnum(0)` is the A/B lever. */

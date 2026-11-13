@@ -1,5 +1,5 @@
-"""PEWINDOW: levels 1..NL (a) or NL only (l) take the exact integral of the piecewise-linear un-zeroed PE spectrum over their TALYS
-windows; implies PEREMOVE 1. Synthetic one-case batch shared with test_pecollapse."""
+"""`pewindow`: levels 1..NL (a) or NL only (l) take the exact integral of the piecewise-linear un-zeroed PE spectrum over their TALYS
+windows; implies `peremove 1`. Synthetic one-case batch shared with test_pecollapse."""
 from types import SimpleNamespace
 
 import numpy as np
@@ -45,7 +45,7 @@ def test_pewindow_exact_integral():
         if t == inp.k0:
             assert torch.equal(wa["xspreeqdisc"][0, t], r1["xspreeqdisc"][0, t])
             continue
-        # continuum book identical to PEREMOVE 1; level 0 untouched
+        # continuum book identical to `peremove 1`; level 0 untouched
         assert float(wa["xspreeqtot"][0, t]) == float(r1["xspreeqtot"][0, t]) == float(wl["xspreeqtot"][0, t])
         assert float(wa["xspreeqdisc"][0, t, 0]) == float(r1["xspreeqdisc"][0, t, 0])
         # dense brute-force integral of the linear interpolant over each window

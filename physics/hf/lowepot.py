@@ -1,5 +1,5 @@
-"""LOWEPOT: no Hauser-Feshbach compound elastic below the resonance region (`INCOGNITA_LOWEPOT`, default ON since the
-LOWEPOTAF gate commit; INCOGNITA_LOWEPOT=0 = previous production).
+"""No Hauser-Feshbach compound elastic below the resonance region (`INCOGNITA_LOWEPOT`, default ON;
+INCOGNITA_LOWEPOT=0 = OFF).
 
 Mechanism. The HF compound elastic is an ENSEMBLE AVERAGE over many resonances in the averaging interval. Below the
 first resonance there is no such interval: the elastic cross section is potential scattering, 4 pi sin^2(k R')/k^2
@@ -7,14 +7,13 @@ first resonance there is no such interval: the elastic cross section is potentia
 average anyway when a run asks for E < 1 keV. With T_n ~ sqrt(E) >> T_gamma its compound elastic grows as 1/sqrt(E), e.g.
 Ti-48 at 0.0253 eV: 14 kb elastic against a measured ~4 b. The OMP shape elastic of the same run IS the potential term.
 
-Rule (one rule for every nucleus, inputs = the run's own model quantities; LOWEPOT 2026-10-05 blend, LOWEPOTAF prereg
-development notes):
+Rule (one rule for every nucleus, inputs = the run's own model quantities):
   E_lo = min(D0/2, 1000/3 eV), E_hi = min(3 D0/2, 1000 eV), D0 = the engine's theoretical s-wave spacing of the compound
   (ingredients d0theo; missing or non-finite -> 1000/3 and 1000 eV); w(E) = 0 below E_lo, 1 above E_hi, linear in ln E between;
   elastic(E) -> elastic(E) - (1 - w(E)) * compound_elastic(E); total and compound_elastic lowered by the same amount.
   w(1 keV) = 1 always, so nothing at or above 1 keV changes. Capture and every other channel are untouched.
 Diagnostics in totals_mb: lowepot_w, lowepot_dce_mb (the compound elastic removed, mb).
-Wiring: `add_to_results(res, injection)` is called by `engine.run` and `engine_c.run` after FEWRES's hook, so the Py and C
+Wiring: `add_to_results(res, injection)` is called by `engine.run` and `engine_c.run` after the `fewres` hook, so the Py and C
 paths apply the identical function. Test: tests/hf/test_lowepot.py
 """
 
@@ -46,7 +45,7 @@ def weight(e_ev, lo: float, hi: float) -> np.ndarray:
 
 
 def add_to_results(res, injection):
-    """`engine.run` / `engine_c.run` Results with the LOWEPOT change in elastic/total/compound_elastic, in place; off, a
+    """`engine.run` / `engine_c.run` Results with the `lowepot` change in elastic/total/compound_elastic, in place; off, a
     charged or injected run, or no energy below 1 keV -> untouched."""
     if not on() or getattr(injection, "families", ()) or not hasattr(injection, "Z"):
         return res

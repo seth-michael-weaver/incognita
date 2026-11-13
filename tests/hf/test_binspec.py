@@ -1,4 +1,4 @@
-"""XDHARD: binary emission spectra (physics/hf/emission/binspec.py) -- output only."""
+"""Binary emission spectra (physics/hf/emission/binspec.py) -- output only."""
 from types import SimpleNamespace
 
 import numpy as np

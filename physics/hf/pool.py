@@ -1,8 +1,8 @@
-"""SPEEDW: whole runs of the port -- a warm worker pool, run-scoped set-up once, energies in parallel.
+"""Whole runs of the port -- a warm worker pool, run-scoped set-up once, energies in parallel.
 
-Task: SPEEDW (the speed wave; no physics of its own). Acceptance test: bitwise identity with the
+Task: the worker pool (speed only; no physics of its own). Acceptance test: bitwise identity with the
 serial `engine.ChainedFull` run on the four harness targets x 23 energies, every output quantity
-(`scripts/hf_vs_talys_bench.py wident`), and the SPEED0 golden.
+and the golden-file test.
 
 Nothing here is a TALYS routine: it schedules `engine.ChainedFull` + `engine.run`
 (talysreaction.f90:1, talysreaction) across processes and changes no number.
@@ -25,7 +25,7 @@ Nothing here is a TALYS routine: it schedules `engine.ChainedFull` + `engine.run
      itself: `binary`'s `sfactor` and `channels`' `chanopen` are carried across the ascending
      energy loop (`BinaryState`, `ExclusiveState`), so that loop must see every energy, in order,
      in one process. It costs ~0.08 s for 23 energies. The multiple emission a child runs is
-     seeded from `sfactor` too, so since OPEN4 a child also walks the declared energies below its
+     seeded from `sfactor` too, so a child also walks the declared energies below its
      slice as far as `binary` (`engine.ChainedFull.cases`), which costs it their compound target.
 
    Why the children's numbers are the serial run's: `Cascade` state that crosses energies is
@@ -40,7 +40,7 @@ Nothing here is a TALYS routine: it schedules `engine.ChainedFull` + `engine.run
    thread anyway. The engine's own import set never starts a thread; pyarrow's jemalloc
    background thread would, so the worker does not import it.
 
-2. `serve` / `WarmPool` -- persistent 1-thread workers speaking JSON lines (SPEED3's
+2. `serve` / `WarmPool` -- persistent 1-thread workers speaking JSON lines (the
    multi-host sweep transport: floats as `repr`, which round-trips a float64; the payload hash
    in the hello). A worker imports the port and runs one warm-up whole run on a nuclide in no
    case set (`WARM_ZA`, three energies up to 20 MeV, so the multiple pre-equilibrium kernel and
@@ -50,13 +50,13 @@ Nothing here is a TALYS routine: it schedules `engine.ChainedFull` + `engine.run
    `fresh=True` solves the task in a process forked from the warm worker, so a task never sees
    caches another target left behind and the worker never grows; `fresh=False` solves it in the
    worker itself and keeps what it built (a sweep's residual nuclei, level schemes and parameter
-   files carry over to the next target). SPEEDFIX: a fresh task may carry `env` (its own fitlib
-   lines / INCOGNITA_* switches, e.g. the B55 recipe), set in the forked process only, with the
-   card and target caches dropped first -- a one-off run without the 2-3 CPU-s of start-up;
+   files carry over to the next target). A fresh task may carry `env` (its own fitlib
+   lines / INCOGNITA_* switches), set in the forked process only, with the
+   fitted-keyword and target caches dropped first -- a one-off run without the 2-3 CPU-s of start-up;
    `engine: "c"` runs it on the native engine (`engine_c.run`) instead of the Python reference.
 
-3. Batching energies inside one process (SPEEDD's widths, SPEEDT's coupled channels): not done.
-   See docs/results/hf-speed-profile.md, "Whole runs", for why it is not bit-identical.
+3. Batching energies inside one process (widths, coupled channels): not done
+   (it would not be bit-identical).
 """
 
 from __future__ import annotations
@@ -114,7 +114,7 @@ def cpu_s() -> float:
 
 
 def payload_hash(root: Path = REPO) -> str:
-    """The code a worker runs: every `physics/**/*.py` (SPEED3's handshake)."""
+    """The code a worker runs: every `physics/**/*.py` (the multi-host handshake)."""
     h = hashlib.sha256()
     for p in sorted(p for p in (root / "physics").rglob("*.py") if "__pycache__" not in p.parts):
         h.update(str(p.relative_to(root)).encode())
@@ -145,7 +145,7 @@ def declared_grid(energies) -> tuple[float, ...]:
 def energy_cost(e_mev: float) -> float:
     """Relative cost of one energy of a whole run, for balancing the children.
 
-    Measured on the four harness targets after SPEEDW's multiple pre-equilibrium kernel (child
+    Measured on the four harness targets with the multiple pre-equilibrium kernel (child
     CPU-s per energy, warm parent): ~flat below the pre-equilibrium onset, rising roughly linearly
     above it, and the `emulpre` energy (multiple pre-equilibrium, 20 MeV) about twice its trend.
     Only the ranking matters.
@@ -480,8 +480,8 @@ def results_from_json(d: dict):
 
 
 def _task_env(env: dict) -> None:
-    """SPEEDFIX lever 5: a task's own engine environment (fitlib lines file / extra lines, INCOGNITA_* switches), set in the
-    FORKED task process only (`fresh`), then every card- and target-scoped cache dropped so the run is the one a cold
+    """A task's own engine environment (fitlib lines file / extra lines, INCOGNITA_* switches), set in the
+    FORKED task process only (`fresh`), then every fitted-keyword- and target-scoped cache dropped so the run is the one a cold
     process with that environment would make. A key mapped to None is removed."""
     from physics.hf import chartrun
     from physics.hf.input import fitlib
@@ -506,7 +506,7 @@ def do_task(task: dict) -> dict:
     tm: dict = {}
     stats: dict = {}
     if task.get("engine") == "c":
-        # SPEEDFIX: the native engine (`engine_c.run`, what the production runners and engine_curves run), one Cascade for this task
+        # the native engine (`engine_c.run`, what the production runners and engine_curves run), one Cascade for this task
         import torch
 
         from physics.hf import engine_c

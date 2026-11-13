@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-#: TALYS's residual-population cut (input_numerics.f90:82). Ours defaults to 1e-9 mb (POPEPS3 2026-10-12,
-#: `input.defaults.Options.popeps_mb`); tests that compare with TALYS output, or with golden records made
+#: TALYS's residual-population cut (input_numerics.f90:82). Ours defaults to 1e-9 mb
+#: (`input.defaults.Options.popeps_mb`); tests that compare with TALYS output, or with golden records made
 #: at TALYS's value, pin this one.
 TALYS_POPEPS = "1e-3"
 
@@ -16,9 +16,9 @@ def talys_popeps(monkeypatch):
     extra deck lines take), with every per-target cache dropped on the way in and out so no option set
     leaks across tests.
 
-    POPEPS3: `fitlib.modes()` reads the lines only when `INCOGNITA_TALYS_FIT` names an arm, and tests run
+    `fitlib.modes()` reads the lines only when `INCOGNITA_TALYS_FIT` names an arm, and tests run
     with INCOGNITA_* unset, so the pin also sets the lines-only arm (`lines`); without it the deck line was
-    silently dropped (POPEPS2 (a)). The pin is checked: a run built under it must carry popeps 1e-3."""
+    silently dropped. The pin is checked: a run built under it must carry popeps 1e-3."""
     from physics.hf import chartrun
     from physics.hf.input import fitlib
 
@@ -48,9 +48,9 @@ def _talys_point_geometry_triton(monkeypatch):
 
 @pytest.fixture(scope="session", autouse=True)
 def _no_npwindow():
-    """NPWINDOW (default ON since NPWPROMO; density/npwindow.py) raises the continuum rho of D0-unanchored targets (Fe-56 among them); tests
-    that compare with TALYS output or golden records made before NPWPROMO run with it off. Session scope, so module-scoped fixtures
-    (test_gpu_full's Fe-56 setup, test_nx2_emit/glue `captured`) see the pin too (gate d1471a4a1 T). tests/hf/test_npwindow.py removes it."""
+    """`INCOGNITA_NPWINDOW` (default ON; density/npwindow.py) raises the continuum rho of D0-unanchored targets (Fe-56 among them); tests
+    that compare with TALYS output or golden records made without it run with it off. Session scope, so module-scoped fixtures
+    (test_gpu_full's Fe-56 setup, test_nx2_emit/glue `captured`) see the pin too. tests/hf/test_npwindow.py removes it."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_NPWINDOW", "0")
         yield
@@ -58,7 +58,7 @@ def _no_npwindow():
 
 @pytest.fixture(scope="session", autouse=True)
 def _talys_grid_top():
-    """GRIDTOP (default ON; core/grids.emission_limit) raises the outgoing grid's top for compound nuclei with a negative
+    """`INCOGNITA_GRIDTOP` (default ON; core/grids.emission_limit) raises the outgoing grid's top for compound nuclei with a negative
     separation energy (alpha above A ~ 140); tests that compare with TALYS output or golden records made with TALYS's grid
     (grid.f90:120) run with it off. tests/hf/test_gridtop.py removes it."""
     with pytest.MonkeyPatch.context() as mp:

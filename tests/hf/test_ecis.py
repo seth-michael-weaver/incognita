@@ -205,7 +205,7 @@ def test_unitarity_and_a_inc_on_one_actinide_and_one_odd_a():
 @have_raw
 @pytest.mark.skipif(not os.environ.get("HF_ECIS_FULL"), reason="set HF_ECIS_FULL=1 (4 minutes)")
 def test_a_inc_gate_over_every_rotational_target():
-    """The pre-registered A-inc gate (contract §6, tolerance 1e-2) on all eleven `colltype R`
+    """The A-inc check (contract §6, tolerance 1e-2, fixed in advance) on all eleven `colltype R`
     targets at every one of the 23 incident energies, across `soswitch`."""
     from physics.hf.ecis.score import rotational_targets, score_target, summarise
 
@@ -322,7 +322,7 @@ def test_deformed_spin_orbit_keeps_the_s_matrix_symmetric_and_unitary():
         sm, _op = smatrix(ch, ff, kin, h, nmatch, r)
         asym = (sm - sm.transpose(1, 2)).abs().max() / sm.abs().max()
         # ~1e-6 is the integrator's own level here, with or without the deformed spin-orbit:
-        # the `lo(13) = F` branch, which session 1 gated, measures 5e-7 to 1.1e-6 on the same
+        # the `lo(13) = F` branch, checked on its own, measures 5e-7 to 1.1e-6 on the same
         # blocks. What would show a wrong hermitian copy is a per-cent asymmetry, not this.
         assert float(asym) < 1e-5, f"S-matrix not symmetric at 2J={twoJ}: {float(asym):.2e}"
 
@@ -383,9 +383,8 @@ def test_asymmetric_rotor_is_refused_not_approximated():
 
 @have_raw
 def test_two_phonon_level_takes_the_second_order_branch():
-    """TWOPH: a two-phonon level used to raise here (`ecis1(2:2) = 'T'` needs `vibm`'s
-    second-order terms). It now builds the `vibm` table and solves; `tests/hf/test_twophonon.py`
-    gates the numbers. Ca-40's band with one level relabelled two-phonon is a scheme TALYS never
+    """A two-phonon level (`ecis1(2:2) = 'T'` needs `vibm`'s second-order terms) builds the
+    `vibm` table and solves; `tests/hf/test_twophonon.py` checks the numbers. Ca-40's band with one level relabelled two-phonon is a scheme TALYS never
     writes -- three distinct phonons, so second-order form factors in beta_i beta_j with i != j --
     which is exactly why it is worth solving here."""
     from physics.hf.ecis.incident import incident_coupled
@@ -476,7 +475,7 @@ def test_second_derivative_form_factor_is_the_numerical_second_derivative():
     The analytic Woods-Saxon second derivatives are easy to get subtly wrong -- the surface term
     is a third derivative of a sigmoid and its `2g - (1-2f)^2` factor has no counterpart in the
     first-order form factor. This is the piece of the unported two-phonon coupling
-    (`docs/results/hf-ecis-twophonon.md`) that can be written and gated on its own.
+    (`docs/results/hf-ecis-twophonon.md`) that can be written and checked on its own.
     """
     from physics.hf.ecis.formfactor import ALL_CENTRAL_PARTS, second_derivative_form_factor
     from physics.hf.omp.schrodinger import optical_potential
@@ -619,7 +618,7 @@ def test_a_inc_on_ca040_over_every_energy():
 @have_raw
 def test_undeformed_spin_orbit_arm_is_still_available_and_bounded():
     """The `lo(13) = F` arm stays reachable, because it is the A/B that says what the deformed
-    spin-orbit buys; it must stay inside the 1.5e-2 T13 session 2 measured
+    spin-orbit buys; it must stay inside the 1.5e-2 measured for it
     (`docs/results/hf-ecis-above-soswitch-undeformed.json`), which is NOT the A-inc tolerance."""
     from physics.hf.ecis.score import score_target, summarise
     from physics.hf.talys_reference import REFERENCE_SET
@@ -648,13 +647,13 @@ def test_coupled_channels_direct_inelastic_matches_directE():
 @have_raw
 @pytest.mark.parametrize(("deformed_so", "threads"), [(False, 1), (True, 1), (False, 2)])
 def test_smatrix_blocks_is_smatrix_to_the_bit(deformed_so, threads):
-    """SPEEDT: `smatrix_blocks` runs the radial loops of every block of one channel count together
+    """`smatrix_blocks` runs the radial loops of every block of one channel count together
     (and the Coulomb functions of all blocks in one pass). Each block's S-matrix must be the one
-    `smatrix` gives alone, reasonably close (project rule, 2026-09-16: no bit-identity anywhere,
+    `smatrix` gives alone, reasonably close (project rule: no bit-identity anywhere,
     <=1e-6 relative is the standard) -- on several energies with different matching points, with
     blocks of equal and of different N, below and above `soswitch`, and with more than one thread
     (where it runs one block per loop, so threads=2 lands bit-identical; only the threads=1 batched
-    path reorders sums -- measured on this Mac (MACFIX2) up to 5.4e-12 relative, ordinary FP
+    path reorders sums -- measured on Apple Silicon up to 5.4e-12 relative, ordinary FP
     non-associativity between two numerically-equivalent code paths)."""
     saved = torch.get_num_threads()
     torch.set_num_threads(threads)
@@ -697,7 +696,7 @@ def _check_smatrix_blocks(deformed_so):
 
 
 def test_coupling_tables_are_the_elementwise_factors_to_the_bit():
-    """SPEEDT: `coupling_matrix` gathers the reduced matrix element and `dcgs` from tables over the
+    """`coupling_matrix` gathers the reduced matrix element and `dcgs` from tables over the
     distinct level and j values; each gathered entry must be the direct element-wise evaluation."""
     from physics.hf.ecis.coupling import (
         _dcgs_lookup,

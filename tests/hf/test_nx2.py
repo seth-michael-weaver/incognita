@@ -1,4 +1,4 @@
-"""NATIVEX2: the native kernels against the numpy/torch paths they replace (closeness, not
+"""The native kernels against the numpy/torch paths they replace (closeness, not
 bits). Skipped without a `libnx2` build (scripts/build_nx2_native.sh)."""
 
 from __future__ import annotations

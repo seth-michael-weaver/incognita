@@ -1,4 +1,4 @@
-"""BESTFIT: TENDL's own per-nuclide knobs -- `best y` and the fitted parameter libraries
+"""TENDL's own per-nuclide knobs -- `best y` and the fitted parameter libraries
 (`fit y` / `ngfit y` / `macsfit y` / `gamgamfit y`) -- read from TALYS's own structure database
 and applied to the run, exactly as TALYS applies them.
 
@@ -6,7 +6,7 @@ Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
 Task: T3 (physics/hf/CONTRACT.md §7, the input layer this extends). Acceptance test: A-omppar
-(§6) plus the BESTFIT gates in docs/results/bestfit.md.
+(§6).
 
 TALYS routines ported here (file:line of the subroutine statement):
     initial_best.f90:1 (initial_best)   the `best/<El><AAA>/<p>-<El><AAA>.talys` file and where
@@ -43,7 +43,7 @@ Default OFF. `INCOGNITA_TALYS_FIT` selects the arm, as a comma/plus separated li
               `globalwtable y` (TALYS's chart-wide constant) -- what TENDL ships for a nuclide
               it never fitted
 
-Unset (or `0`/`off`/`none`) leaves every number exactly as it was: CHART1 stays 0.99750.
+Unset (or `0`/`off`/`none`) leaves every number exactly as it was: the reference chart value stays 0.99750.
 
 How it reaches the four paths
 -----------------------------
@@ -69,13 +69,13 @@ PARSYM = ("g", "n", "p", "d", "t", "h", "a")  # constants.f90:89
 ENV = "INCOGNITA_TALYS_FIT"
 #: ad-hoc keyword lines, ';' separated, applied as if they were the target's best file
 ENV_LINES = "INCOGNITA_TALYS_FIT_LINES"
-#: CHUNKFIX: a chart-wide recipe table (one keyword line per line, or ';' separated). Each run takes the table's
+#: a chart-wide recipe table (one keyword line per line, or ';' separated). Each run takes the table's
 #: global lines plus the per-nucleus lines of every nucleus in ITS OWN box, so a residual nucleus gets the same
 #: recipe value whichever targets share the process. ENV_LINES, if also set, goes on top (later line wins).
 ENV_LINES_FILE = "INCOGNITA_TALYS_FIT_LINES_FILE"
-#: TENDL-2025's own "Adjusted TALYS input parameters" block, parsed by NGFIT
+#: TENDL-2025's own "Adjusted TALYS input parameters" block, parsed for `ngfit`
 ENV_MF1 = "INCOGNITA_TALYS_FIT_MF1"
-#: v1 (n,a) recipe (BLIND_LOOKS 09-22 NA-PICKUP / NA-V1b / HEPROD): the emission-fitted alpha
+#: v1 (n,a) recipe: the emission-fitted alpha
 #: OMP of Avrigeanu, Hodgson & Avrigeanu (1994) and a Kalbach alpha PICKUP strength that depends
 #: on the target's parity -- proton-pair pickup from an even-even target is ~3.6x stronger.
 #: Confirmed on fresh EXFOR helium production: -23 % rms vs the TALYS default, -33 % for A > 70.
@@ -96,21 +96,21 @@ _FILES = {
 _FIT_FLAGS = frozenset({"fit", "ngfit", "nnfit", "nffit", "nafit", "ndfit", "pnfit", "gnfit",
                         "dnfit", "anfit", "macsfit", "gamgamfit"})
 
-#: keyword lines this module knows it does NOT apply, with the reason (BESTFIT report)
+#: keyword lines this module knows it does NOT apply, with the reason
 _SKIP = {
-    # KWCOV B6: optmod / optmodfilen / optmodfilep are read by omp.ompdeck.extract before this table is consulted
-    # KWCOV B5: TALYS keywords that name an external file the port does not read (refused on a deck line)
+    # optmod / optmodfilen / optmodfilep are read by omp.ompdeck.extract before this table is consulted
+    # TALYS keywords that name an external file the port does not read (refused on a deck line)
     "densfile": "external level-density table", "e1file": "external E1 strength file",
     "m1file": "external M1 strength file", "massdir": "external mass-table directory",
-    # KWCOV B15: was "output renormalisation, not a model parameter" and skipped silently; it renormalises the cross
+    # was "output renormalisation, not a model parameter" and skipped silently; it renormalises the cross
     # sections the run returns (normalization.f90 + rescue files), so a deck line with it is refused now
     "rescuefile": "rescue (renormalisation) file",
-    # KWCOV B15: another structure database / best-file directory; the port reads its own (TALYS_DIR) only
+    # another structure database / best-file directory; the port reads its own (TALYS_DIR) only
     "strucpath": "another structure database", "bestpath": "another best-file directory",
-    # KWCOV B2: consumed by `_deck_best` (a deck's `best y` reads the best file into the deck)
+    # consumed by `_deck_best` (a deck's `best y` reads the best file into the deck)
     "bestfile": "read by _deck_best", "best": "read by _deck_best", "bestend": "read by _deck_best",
 }
-#: KWCOV B2: the projectile each fitted library is made for (every entry of the file has it); xsfit.f90
+#: the projectile each fitted library is made for (every entry of the file has it); xsfit.f90
 #: does not match on the projectile, so a `pnfit y` line applies pn.par's entry whatever the run's projectile
 _FILE_PROJ = {"an": "a", "dn": "d", "pn": "p", "gn": "g"}
 
@@ -119,7 +119,7 @@ _FILE_PROJ = {"an": "a", "dn": "d", "pn": "p", "gn": "g"}
 
 
 def modes() -> frozenset[str]:
-    """The arms `INCOGNITA_TALYS_FIT` asks for; empty when the lever is off (the default).
+    """The arms `INCOGNITA_TALYS_FIT` asks for; empty when the option is off (the default).
 
     TALYS: input_fit.f90:1 (input_fit) -- which fitted libraries a run reads
     Test: tests/hf/test_fitlib.py
@@ -128,8 +128,8 @@ def modes() -> frozenset[str]:
     if _na_v1_on():
         raw = (raw + ",nav1") if raw and raw not in ("0", "off", "none", "n", "no") else "nav1"
     if not raw or raw in ("0", "off", "none", "n", "no"):
-        # KWCOV B2: deck lines are the run's deck whether or not an arm is named; before, lines without
-        # INCOGNITA_TALYS_FIT were dropped silently (POPEPS2 (a))
+        # deck lines are the run's deck whether or not an arm is named; before, lines without
+        # INCOGNITA_TALYS_FIT were dropped silently
         return frozenset({"lines"}) if (os.environ.get(ENV_LINES) or os.environ.get(ENV_LINES_FILE)) else frozenset()
     toks = {t for t in raw.replace("+", ",").replace(" ", ",").split(",") if t}
     unknown = toks - {"best", "ng", "macs", "gamgam", "nodata", "fit", "s8", "tendl", "mf1",
@@ -308,8 +308,8 @@ class Cards:
     particles: tuple[tuple[str, int, float], ...] = ()    # (keyword, particle type, value)
     skipped: tuple[tuple[str, str], ...] = ()             # (line, reason)
     source: tuple[str, ...] = ()                          # which files it came from
-    eadj: tuple = ()                                      # ENGADJ energy-local bumps (physics/hf/eadj.py)
-    omp: object = ()                                      # KWCOV B6: OMP files / ranges / tables (omp/ompdeck.py)
+    eadj: tuple = ()                                      # energy-local bumps (physics/hf/eadj.py)
+    omp: object = ()                                      # OMP files / ranges / tables (omp/ompdeck.py)
 
     @property
     def option_overrides(self) -> dict:
@@ -319,12 +319,12 @@ class Cards:
         return not (self.options or self.cells or self.globals_ or self.particles or self.eadj or self.omp)
 
 
-#: KWCOV B5: TALYS keywords with no meaning for an engine that returns arrays (output files, paths, labels; the NA rows
+#: TALYS keywords with no meaning for an engine that returns arrays (output files, paths, labels; the NA rows
 #: of docs/hf/KEYWORD_COVERAGE.md): a deck line with one is accepted and changes nothing
 _NA_PREFIXES = ("out", "file", "block")
 _NA_WORDS = frozenset({"ddxmode", "format", "integral", "nulldev", "partable",
-                       "source", "user"})  # KWCOV B15: sacs / components are Options keywords now
-#: KWCOV B10b: accepted deck words that change no engine number (why, as the skip reason)
+                       "source", "user"})  # sacs / components are Options keywords now
+#: accepted deck words that change no engine number (why, as the skip reason)
 _B10B_WORDS = {
     "resonance": "resonance n (the default: no resonance-range reconstruction)",
     "group": "group: acts only inside resonance y (resonance.f90 -> prepro), which the port refuses; no effect "
@@ -332,7 +332,7 @@ _B10B_WORDS = {
     "abundance": "abundance <file>: read by input.deck.run_deck for mass 0 (natural.f90); ignored otherwise, as in "
                  "TALYS (abundance.f90 is called only for mass 0)",
 }
-#: KWCOV B10b: checkvalue.f90 ranges (lo, hi, default allowed outside): elow :480, tres :553, xscaptherm :922
+#: checkvalue.f90 ranges (lo, hi, default allowed outside): elow :480, tres :553, xscaptherm :922
 _B10B_RANGES = {"elow": (1.0e-11, 1.0, 0.0), "tres": (0.0, 1.0e12, None), "xscaptherm": (1.0e-20, 1.0e10, 0.0)}
 RESONANCE_REFUSAL = (
     "not ported: resonance y (resonance.f90): TALYS copies structure/resfiles/<reslib>/n-<Nuc>.res.<reslib> (ENDF-6 "
@@ -340,9 +340,9 @@ RESONANCE_REFUSAL = (
     "reconstruction, SIGMA1 Doppler broadening to `tres`, GROUPIE for `group y`), then splices the pointwise MF3 "
     "into total/elastic/fission/xs000000/xs010000/xs000001/rp*.tot below the URR; none of that is in the port. "
     "`reslib` and `tres` act only inside it")
-#: KWCOV B5: keywords whose value is a file name: the line keeps its case (convert.f90:36 keeps it for these)
+#: keywords whose value is a file name: the line keeps its case (convert.f90:36 keeps it for these)
 FILE_KEYS = frozenset({"levelfile", "deformfile", "optmod", "optmodfilen", "optmodfilep", "radialfile",  # B6, B7b
-                       "hbtransfile", "class2file"})  # + KWCOV B8 (class 11: `<key> Z A <file>`)
+                       "hbtransfile", "class2file"})  # + (class 11: `<key> Z A <file>`)
 
 
 def _deck_case(x: str) -> str:
@@ -354,7 +354,7 @@ def _deck_case(x: str) -> str:
     return s.lower()
 
 
-#: KWCOV B7b: the JLM / alpha-folding scalars (getvalues class 9): `lvadjust 1.1` acts (omp/jlm.py, omp/foldalpha.py);
+#: the JLM / alpha-folding scalars (getvalues class 9): `lvadjust 1.1` acts (omp/jlm.py, omp/foldalpha.py);
 #: the energy-local form `lvadjust 1.1 Ea Eb Em D` (mom.f90's / foldalpha.f90's `adjust` call) is refused
 _B7B_LOCAL = frozenset({"lvadjust", "lwadjust", "lv1adjust", "lw1adjust", "lvsoadjust", "lwsoadjust", "aradialcor",
                         "adepthcor"})
@@ -375,7 +375,7 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
         if not w:
             continue
         k = w[0].lower()
-        if k in _B10B_RANGES and len(w) == 2:  # KWCOV B10b: checkvalue.f90:480, :553, :922
+        if k in _B10B_RANGES and len(w) == 2:  # checkvalue.f90:480, :553, :922
             lo, hi, dflt = _B10B_RANGES[k]
             try:
                 v = float(w[1])
@@ -386,11 +386,11 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
         if k in _SKIP:
             skipped.append((line, _SKIP[k]))
             continue
-        if k in FILE_KEYS:  # KWCOV B5: `levelfile Z <file>` / `deformfile Z <file>` from the deck (class 10)
+        if k in FILE_KEYS:  # `levelfile Z <file>` / `deformfile Z <file>` from the deck (class 10)
             if line not in deck:  # a best file's names its own directory's files: not applied, warned
                 skipped.append((line, f"external {'level' if k == 'levelfile' else 'deformation'} file"))
                 continue
-            if k in ("hbtransfile", "class2file"):  # KWCOV B8: class 11 (input_fissionmodel.f90:218-229)
+            if k in ("hbtransfile", "class2file"):  # class 11 (input_fissionmodel.f90:218-229)
                 if len(w) != 4:
                     raise ValueError(f"deck line {line!r}: expected `{k} Z A <file>`")
                 if want_options:
@@ -401,20 +401,20 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
             if want_options:
                 opts.append((f"{k} {w[1]}", w[2]))
             continue
-        if k == "ejectiles":  # KWCOV B2: a list of particle symbols (input_basicpar.f90:98)
+        if k == "ejectiles":  # a list of particle symbols (input_basicpar.f90:98)
             if want_options:
                 opts.append((k, " ".join(w[1:])))
             continue
-        if k in _B7B_LOCAL and len(w) > 2:  # KWCOV B7b: class 9's energy-local tail (adjust.f90) is not read
+        if k in _B7B_LOCAL and len(w) > 2:  # class 9's energy-local tail (adjust.f90) is not read
             skipped.append((line, "energy-local adjustment form (Ea Eb Em D or a file)"))
             continue
-        form = _deck_form(k, w)  # KWCOV B2: per-nucleus / per-particle forms -> {"ldmodel 26 57": "2"}
+        form = _deck_form(k, w)  # per-nucleus / per-particle forms -> {"ldmodel 26 57": "2"}
         if form is not None:
             if want_options:
                 opts.append(form)
             continue
         if k in OPTION_KEYWORDS:
-            if len(w) > 2 and _MULTIWORD.get(k):  # KWCOV B4/B6: one TALYS line with several words (`fileddxa n 30`)
+            if len(w) > 2 and _MULTIWORD.get(k):  # one TALYS line with several words (`fileddxa n 30`)
                 if want_options:
                     opts.append((k, " ".join(w[1:])))
                 continue
@@ -422,12 +422,12 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
                 if want_options:
                     opts.append((k, w[1]))
                 continue
-            # KWCOV B2: was skipped ("per-nucleus form of an option keyword"), i.e. the run silently
+            # was skipped ("per-nucleus form of an option keyword"), i.e. the run silently
             # took the default; TALYS has no such form of any other option keyword the port reads
             raise ValueError(f"deck line {line!r}: TALYS has no per-nucleus or per-particle form of `{k}` the "
                              "port reads (per-nucleus forms: ldmodel v Z A, colenhance y Z A, nlevels Z A n, "
                              "maxlevelsbin p n, branch Z A ilev0 nbr ...)")
-        if k in UPBEND_KEYS:  # LEESHELL fidelity fix: `upbendc Z A value [m1|e1]` (class 5, input_gammapar.f90:392-425)
+        if k in UPBEND_KEYS:  # `upbendc Z A value [m1|e1]` (class 5, input_gammapar.f90:392-425)
             try:
                 z, a, v = int(w[1]), int(w[2]), float(w[3])
                 rad = (w[4] if len(w) > 4 else "e1").lower()  # getvalues.f90:179-191: no type -> irad 1, l 1
@@ -437,7 +437,7 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
             except (ValueError, IndexError):
                 skipped.append((line, "could not be parsed"))
             continue
-        if k == "tjadjust":  # KWCOV B5: class 12 `tjadjust Z A <particle> value [Ea Eb Em D | file]`
+        if k == "tjadjust":  # class 12 `tjadjust Z A <particle> value [Ea Eb Em D | file]`
             try:
                 z, a, p, v = int(w[1]), int(w[2]), w[3].lower(), float(w[4])
             except (ValueError, IndexError):
@@ -452,7 +452,7 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
             _tjadjust_noop(line)
             cells.append((k, z, a, v, (TJ_SYMS.index(p) - 1,)))
             continue
-        if k in ("sfth", "sfexp"):  # KWCOV B5: class 15, value FIRST: `sfth v [Z A]`, `sfexp v [Z A ilev]`
+        if k in ("sfth", "sfexp"):  # class 15, value FIRST: `sfth v [Z A]`, `sfexp v [Z A ilev]`
             try:
                 v = float(w[1])
                 if len(w) == 2 or (k == "sfexp" and len(w) == 5 and int(w[4]) < 0):
@@ -466,13 +466,13 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
             except ValueError:
                 skipped.append((line, "could not be parsed"))
             continue
-        if k == "pshiftconstant" and len(w) == 2:  # KWCOV B5: the global form (input_densitypar.f90:444, :499)
+        if k == "pshiftconstant" and len(w) == 2:  # the global form (input_densitypar.f90:444, :499)
             try:
                 globs.append((k, float(w[1])))
             except ValueError:
                 skipped.append((line, "could not be parsed"))
             continue
-        if k in _B10B_WORDS:  # KWCOV B10b: resonance / group / abundance
+        if k in _B10B_WORDS:  # resonance / group / abundance
             if k == "resonance" and len(w) > 1 and w[1].lower()[:1] == "y":
                 raise NotImplementedError(RESONANCE_REFUSAL)
             if len(w) < 2 or (k != "abundance" and w[1].lower()[:1] not in ("y", "n")):
@@ -482,7 +482,7 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
             continue
         spec = PARAM_SPECS.get(k)
         if spec is None:
-            # KWCOV B5: output switches, paths and labels (the matrix's NA rows) change no number: accepted as before;
+            # output switches, paths and labels (the matrix's NA rows) change no number: accepted as before;
             # any other keyword the port does not know is refused on a deck line (it was skipped without a word)
             na = k.startswith(_NA_PREFIXES) or k in _NA_WORDS
             skipped.append((line, "output-only keyword (NA)" if na else "not a TALYS keyword the port knows"))
@@ -490,7 +490,7 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
         dims = spec.dims
         try:
             if k in ("xscaptherm", "xsptherm", "xsalphatherm"):
-                # KWCOV B10b: `xscaptherm v` sets xscaptherm(-1) (input_compoundpar.f90:135-149); the isomer axis made
+                # `xscaptherm v` sets xscaptherm(-1) (input_compoundpar.f90:135-149); the isomer axis made
                 # it fall to "unsupported index form" and the line was dropped without a word. Written to every
                 # isomer cell; physics/hf/thermal.py reads only (-1), as thermalxs.f90
                 if len(w) != 2:
@@ -524,10 +524,10 @@ def _split(lines, want_options: bool, deck: frozenset = frozenset()) -> tuple[li
 
 
 def _multiword() -> dict:
-    """KWCOV B6: Options keywords whose value is several words (`_apply_stage` kinds that parse them)."""
+    """Options keywords whose value is several words (`_apply_stage` kinds that parse them)."""
     from physics.hf.input.defaults import _OPTION_KEYWORDS
 
-    kinds = ("ejectiles", "ddxpoints", "riplomp", "particles", "medtime")  # medtime: KWCOV B11 tirrad / tcool
+    kinds = ("ejectiles", "ddxpoints", "riplomp", "particles", "medtime")  # medtime: tirrad / tcool
     return {k: True for k, spec in _OPTION_KEYWORDS.items() if spec[2] in kinds}
 
 
@@ -541,12 +541,12 @@ class _LazyMulti(dict):
 _MULTIWORD = _LazyMulti()
 
 
-#: KWCOV B5: getvalues class 12 particle symbols, parsym(-1:6) (constants.f90:89): f = fission
+#: getvalues class 12 particle symbols, parsym(-1:6) (constants.f90:89): f = fission
 TJ_SYMS = ("f", "g", "n", "p", "d", "t", "h", "a")
 
 
 def _tjadjust_noop(line: str) -> None:
-    """KWCOV B5: `tjadjust Z A <p> value` is read into TJadjust(Zix, Nix, type) and adjustTJ is set, but the
+    """`tjadjust Z A <p> value` is read into TJadjust(Zix, Nix, type) and adjustTJ is set, but the
     transmission coefficients are scaled only by `adjust`'s factor (comptarget.f90:331-338, multiple.f90:429-436),
     and `adjust` finds no entry for a constant line (getvalues.f90 registers one only for the `Ea Eb Em D` and file
     forms) -- TJadjust itself is read nowhere. So in TALYS-2.25 the constant form has no effect (stock Fe-56
@@ -562,7 +562,7 @@ def _tjadjust_noop(line: str) -> None:
 
 
 def _deck_form(k: str, w: list) -> tuple | None:
-    """KWCOV B2: a per-nucleus / per-particle deck form as a `default_options` override (key, value), or None.
+    """A per-nucleus / per-particle deck form as a `default_options` override (key, value), or None.
 
     `ldmodel v Z A` (getvalues class 14) and `colenhance y Z A` (class 13) are told from the global form by a
     third word (input_densitymodel.f90:188, :202); `nlevels Z A n` (class 2), `maxlevelsbin p n` (class 7),
@@ -584,15 +584,15 @@ def _deck_form(k: str, w: list) -> tuple | None:
         if len(w) != 3:
             raise ValueError(f"deck line {text!r}: expected `maxlevelsbin <particle> n`")
         return (f"maxlevelsbin {w[1]}", w[2])
-    if k in ("nlow", "ntop"):  # KWCOV B5: class 4 (getvalues.f90:168-172), ibar 0 when absent
+    if k in ("nlow", "ntop"):  # class 4 (getvalues.f90:168-172), ibar 0 when absent
         if len(w) not in (4, 5):
             raise ValueError(f"deck line {text!r}: expected `{k} Z A n [ibar]`")
         return (f"{k} {w[1]} {w[2]} {w[4] if len(w) == 5 else 0}", w[3])
-    if k == "axtype":  # KWCOV B8: class 4 `axtype Z A type [ibar]`, ibar 1 when absent (input_fissionpar.f90:257)
+    if k == "axtype":  # class 4 `axtype Z A type [ibar]`, ibar 1 when absent (input_fissionpar.f90:257)
         if len(w) not in (4, 5):
             raise ValueError(f"deck line {text!r}: expected `axtype Z A type [ibar]`")
         return (f"axtype {w[1]} {w[2]} {w[4] if len(w) == 5 else 1}", w[3])
-    if k == "skipcn":  # KWCOV B5: class 0, no value (input_compoundmodel.f90:158)
+    if k == "skipcn":  # class 0, no value (input_compoundmodel.f90:158)
         if len(w) != 3:
             raise ValueError(f"deck line {text!r}: expected `skipcn Z A`")
         return (f"skipcn {w[1]} {w[2]}", "y")
@@ -603,19 +603,19 @@ def _deck_form(k: str, w: list) -> tuple | None:
     return None
 
 
-#: KWCOV B2: skip reasons that mean a model input the run asked for is NOT applied
+#: skip reasons that mean a model input the run asked for is NOT applied
 _LOUD = frozenset({"energy-dependent table form", "index form not understood", "particle symbol not understood",
                    "could not be parsed", "external OMP file", "external deformation file", "external level file",
-                   # KWCOV B5: an unknown keyword was skipped silently (TALYS itself stops on it, checkkeyword.f90)
+                   # an unknown keyword was skipped silently (TALYS itself stops on it, checkkeyword.f90)
                    "not a TALYS keyword the port knows", "external level-density table", "external E1 strength file",
                    "external M1 strength file", "external mass-table directory",
                    "energy-local adjustment form (Ea Eb Em D or a file)",
-                   # KWCOV B15
+
                    "rescue (renormalisation) file", "another structure database", "another best-file directory"})
 
 
 def _loud_skips(skipped, deck) -> None:
-    """KWCOV B2: a deck line (`INCOGNITA_TALYS_FIT_LINES`) the port cannot apply is refused; the same line from a
+    """A deck line (`INCOGNITA_TALYS_FIT_LINES`) the port cannot apply is refused; the same line from a
     best file or a fitted library is applied without it, with a warning naming it (before, both were silent).
 
     TALYS: getvalues.f90:1 (getvalues) -- the forms each keyword takes
@@ -644,7 +644,7 @@ def _read_best(p: Path) -> tuple[str, ...]:
 
 
 def _deck_best(Z: int, A: int, projectile: str, Ltarget: int, deck: tuple, arms: frozenset):
-    """KWCOV B2: a deck's own `best y` [+ `bestend y`, `bestfile <path>`]: (best lines, at_end, source) or None.
+    """A deck's own `best y` [+ `bestend y`, `bestfile <path>`]: (best lines, at_end, source) or None.
 
     The last line of each keyword wins (input_best.f90's loop). The lines go BEFORE the deck's, so the deck's
     win, or after them with `bestend y` (initial_best.f90:113-124). A missing file is TALYS's warning
@@ -732,7 +732,7 @@ _PARZN = {"g": (0, 0), "n": (0, 1), "p": (1, 0), "d": (1, 1), "t": (1, 2), "h": 
 
 @lru_cache(maxsize=8)
 def _lines_table(path: str, mtime_ns: int, size: int):
-    """CHUNKFIX: the recipe table `ENV_LINES_FILE`, parsed once per (path, mtime, size):
+    """The recipe table `ENV_LINES_FILE`, parsed once per (path, mtime, size):
     (global lines, {(Z, A): per-nucleus lines}, sha256). A per-nucleus line is one whose keyword has the (Zix, Nix)
     leading axes, i.e. the `keyword Z A value ...` form `_split` reads as a cell."""
     import hashlib
@@ -759,7 +759,7 @@ def _lines_table(path: str, mtime_ns: int, size: int):
 
 
 def table_lines(Z: int, A: int, projectile: str = "n") -> tuple[tuple[str, ...], str]:
-    """CHUNKFIX: the lines of the recipe table (`ENV_LINES_FILE`) that a run on target (Z, A) uses: the global lines
+    """The lines of the recipe table (`ENV_LINES_FILE`) that a run on target (Z, A) uses: the global lines
     and the per-nucleus lines of every nucleus of its box, Zix = Zc - z in 0..14 and Nix = Nc - n in 0..34 below the
     compound nucleus (Zc, Nc) (the (Zix, Nix) bounds of every per-nucleus keyword; `apply_params` would skip the
     rest anyway). Returns (lines, "lines table <path> sha256 <hex>"); ((), "") when no table is set.
@@ -785,7 +785,7 @@ _DECK_SEEN: list = []  # the deck key the per-target caches of this process were
 
 
 def drop_caches_on_new_deck() -> bool:
-    """KWCOV B10b fix: the per-target caches (`dens_reference._structure_of` keys on (Z, A) only, and every
+    """the per-target caches (`dens_reference._structure_of` keys on (Z, A) only, and every
     lru_cache below it) hold the Options / Params of the FIRST deck a process ran, so a second run with other deck
     lines (`INCOGNITA_TALYS_FIT_LINES`, a lines file, the `INCOGNITA_TALYS_FIT` arms) silently reused them (B10:
     Fe-56 `ldmodel 2` after a default run gave the default capture). Called where every run starts (`Cascade`):
@@ -809,12 +809,12 @@ def drop_caches_on_new_deck() -> bool:
 
 
 def _lines_key() -> tuple:
-    """What the `lines` arm reads from the environment, so `cards` is never served from a stale cache entry."""
+    """What the `lines` arm reads from the environment, so `cards()` is never served from a stale cache entry."""
     p = os.environ.get(ENV_LINES_FILE, "").strip()
     st = os.stat(p) if p and os.path.exists(p) else None
     return (os.environ.get(ENV_LINES, ""), p, st.st_mtime_ns if st else 0, st.st_size if st else 0,
             os.environ.get("INCOGNITA_OMPROTOR", ""), os.environ.get("INCOGNITA_ENGADJ", ""),
-            os.environ.get("INCOGNITA_FIDFIX", ""))  # FIDELITY1 `besttables` changes which table a card reads
+            os.environ.get("INCOGNITA_FIDFIX", ""))  # `besttables` changes which table a keyword reads
 
 
 def cards(Z: int, A: int, projectile: str = "n", Ltarget: int = 0,
@@ -862,14 +862,14 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
         if extra:
             deck = deck + extra
             src.append("ENV lines")
-        best = _deck_best(Z, A, projectile, Ltarget, deck, arms)  # KWCOV B2: the deck's own `best y`
+        best = _deck_best(Z, A, projectile, Ltarget, deck, arms)  # the deck's own `best y`
         if best is not None:
             blines, at_end, bsrc = best
             deck = deck + blines if at_end else blines + deck
             src.append(bsrc)
         bl = bl + deck
     ead: list = []
-    if any(x.split()[:1] == ["eadj"] for x in bl):  # ENGADJ: `eadj ...` lines are the engine's own, not TALYS keywords
+    if any(x.split()[:1] == ["eadj"] for x in bl):  # `eadj ...` lines are the engine's own, not TALYS keywords
         from physics.hf import eadj as _eadj
 
         keep = []
@@ -879,27 +879,27 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
             elif not _eadj.disabled():
                 ead.append(_eadj.parse_line(x))  # a malformed eadj line raises: a dial must not be dropped silently
         bl = tuple(keep)
-    from physics.hf.omp import ompdeck  # KWCOV B6: optmod, optmodfile*, *adjustF, energy-local OMP adjustments
+    from physics.hf.omp import ompdeck  # optmod, optmodfile*, *adjustF, energy-local OMP adjustments
 
     bdirs = [best_file(Z, A, projectile, Ltarget).parent]
     for x in src:
         if x.startswith("deck best y: "):
             bdirs.insert(0, Path(x[len("deck best y: "):]).parent)
-    from physics.hf import fidfix  # FIDELITY1 `besttables` (default ON): <best dir>/tables before misc/tables
+    from physics.hf import fidfix  # `fidfix` `besttables` (default ON): <best dir>/tables before misc/tables
 
     bdirs += ([d / "tables" for d in list(bdirs)] if fidfix.on("besttables") else []) + [
         d / "misc" / "tables" for d in list(bdirs)]
     bl, omp_deck = ompdeck.extract(bl, Z, A, bdirs)
     opts, cells, globs, parts, skipped = _split(bl, want_options=True,
                                                 deck=frozenset(extra) if "lines" in arms else frozenset())
-    _loud_skips(skipped, extra if "lines" in arms else ())  # KWCOV B2
+    _loud_skips(skipped, extra if "lines" in arms else ())
     if "s8" in arms and not any(k == "strength" for k, _ in opts):
         opts = [("strength", 8)] + opts
     o = _resolved(Z, A, projectile, dict(opts))
-    if not o.flagincadj:  # KWCOV B6, ompadjust.f90:92: the projectile's energy-local factors never act
+    if not o.flagincadj:  # ompadjust.f90:92: the projectile's energy-local factors never act
         omp_deck = ompdeck.drop_bumps(omp_deck, o.k0)
-    # OMPROTOR (COMBINE4, Incognita extension): the rotor CC diffuseness un-fold's per-particle cards, after the run's own lines
-    # (where OMPROTOR's runs carried them as extra lines); none for OFF or a non-member target (omp/omprotor.py)
+    # `omprotor` (Incognita extension): the rotor CC diffuseness un-fold's per-particle keyword lines, after the run's
+    # own lines; none for OFF or a non-member target (omp/omprotor.py)
     from physics.hf.omp import omprotor
 
     if projectile == "n":
@@ -913,7 +913,7 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
     # the others off (their defaults are read before the keyword loop, when flagfit is still n).
     flags = {"nn": o.flagnnfit, "ng": o.flagngfit, "na": o.flagnafit, "nf": o.flagnffit,
              "nd": o.flagndfit, "gamgam": o.flaggamgamfit, "macs": o.flagmacsfit,
-             # KWCOV B2: the other projectiles' libraries (input_fit.f90; off unless asked for)
+             # the other projectiles' libraries (input_fit.f90; off unless asked for)
              "an": o.flaganfit, "dn": o.flagdnfit, "pn": o.flagpnfit, "gn": o.flaggnfit}
     if not ("best" in arms or "mf1" in arms or "lines" in arms):
         flags = dict.fromkeys(flags, False)   # nothing asked for the fits; the arms below do
@@ -932,7 +932,7 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
         # model -- `ldmodelCN` when the input sets it (input_densitymodel.f90:245-252), which is
         # not `ldmodelall`: Fe-56's best file says `ldmodel 2` and `ldmodelCN 1`, and TENDL's own
         # adjust.dat then carries the ldmodel-1 entry of ng.par.
-        # KWCOV B2: ldmodel(0,0) / flagcol(0,0) including per-nucleus cards (equal to ldmodelCN /
+        # ldmodel(0,0) / flagcol(0,0) including per-nucleus keywords (equal to ldmodelCN /
         # flagcolall without them)
         ldm0, col0 = o.ldmodel_of(0, 0), o.flagcol_of(0, 0)
         lines = par_lines(kind, Z, A, ldmodel=ldm0, flagcol=col0,
@@ -944,7 +944,7 @@ def _cards(Z: int, A: int, projectile: str, Ltarget: int, arms: frozenset, _key:
                    f"{'y' if col0 else 'n'} strength {o.strength}]")
         # xsfit runs after the input is read, so its values overwrite the best file's
         _, c2, g2, p2, s2 = _split(lines, want_options=False)
-        from physics.hf import fidfix  # FIDELITY1 `fitrisomer` (default ON)
+        from physics.hf import fidfix  # `fidfix` `fitrisomer` (default ON)
 
         if fidfix.on("fitrisomer"):
             # structure.f90:74 reads the initial compound nucleus's levels (levels.f90:313 applies Risomer there)
@@ -964,7 +964,7 @@ _ACTIVE: Cards | None = None
 
 
 def active() -> Cards | None:
-    """The cards of the run in front of us, or None when the lever is off.
+    """The `Cards` of the run in front of us, or None when the option is off.
 
     TALYS: xsfit.f90:1 (xsfit) -- one run, one target, keywords in absolute coordinates
     Test: tests/hf/test_fitlib.py
@@ -974,7 +974,7 @@ def active() -> Cards | None:
 
 def activate(Z: int, A: int, projectile: str | None = None, Ltarget: int = 0) -> Cards | None:
     """Make (Z, A) the target whose `best`/fit keywords every `default_options` /
-    `default_params` of this process applies. A no-op when the lever is off.
+    `default_params` of this process applies. A no-op when the option is off.
 
     A change of target drops the per-target caches (`chartrun.drop_target_caches`): the run's
     switches are part of what they hold.
@@ -984,10 +984,10 @@ def activate(Z: int, A: int, projectile: str | None = None, Ltarget: int = 0) ->
     """
     global _ACTIVE
     if not enabled():
-        if _ACTIVE is not None:  # KWCOV B10b: a deck without lines after one with them ran on the old cards
+        if _ACTIVE is not None:  # a deck without lines after one with them ran on the old keyword lines
             deactivate()
         return None
-    if projectile is None:  # CPINC: the run's projectile (neutron unless INCOGNITA_CPINC)
+    if projectile is None:  # the run's projectile (neutron unless INCOGNITA_CPINC)
         from physics.hf import projectile as _proj
 
         projectile = _proj.symbol()
@@ -1004,17 +1004,17 @@ def activate(Z: int, A: int, projectile: str | None = None, Ltarget: int = 0) ->
 
 
 def current(Z: int, A: int, projectile: str | None = None, Ltarget: int = 0) -> Cards | None:
-    """The cards the environment asks for NOW for (Z, A), or None when the lever is off.
+    """The `Cards` the environment asks for NOW for (Z, A), or None when the option is off.
 
-    SPEEDFIX (warmrun trap): a `Cascade` records `active()` when it is built; a run on it is
-    refused unless `active()` and `current(...)` are still those cards (`Cascade.check_cards`).
+    Warm-worker guard: a `Cascade` records `active()` when it is built; a run on it is
+    refused unless `active()` and `current(...)` are still those `Cards` (`Cascade.check_cards`).
 
     TALYS: initial_best.f90:1 (initial_best)
     Test: tests/hf/test_warmguard.py
     """
     if not enabled():
         return None
-    if projectile is None:  # CPINC
+    if projectile is None:  # the run's projectile
         from physics.hf import projectile as _proj
 
         projectile = _proj.symbol()
@@ -1022,7 +1022,7 @@ def current(Z: int, A: int, projectile: str | None = None, Ltarget: int = 0) -> 
 
 
 def deactivate() -> None:
-    """Forget the active run's cards (and drop the caches that hold them).
+    """Forget the active run's `Cards` (and drop the caches that hold them).
 
     TALYS: initial_best.f90:1 (initial_best)
     Test: tests/hf/test_fitlib.py
@@ -1048,9 +1048,9 @@ def option_overrides() -> dict:
 
 #: keywords `gamma.parameters.gamma_parameters` owns (it builds them from the options, not from
 #: `Params`), so they reach it through its `overrides` dict instead -- see `gamma_overrides`.
-#: Value -> the `GammaParameters` field it fills (ETABLEFIX: `etable` used to arrive under its
-#: keyword name, which `gamma_parameters` never reads, and the GDR / pygmy-scissors keywords and
-#: every `*adjust` were not passed at all); the `*adjust` keys keep their keyword names and
+#: Value -> the `GammaParameters` field it fills (so `etable` reaches the field `gamma_parameters`
+#: reads, and the GDR / pygmy-scissors keywords and every `*adjust` are passed through); the
+#: `*adjust` keys keep their keyword names and
 #: `gamma_parameters` applies them the way gammapar/fstrength do.
 GAMMA_FIELDS = {
     "etable": "etable_mev", "ftable": "ftable", "wtable": "wtable",
@@ -1060,14 +1060,14 @@ GAMMA_FIELDS = {
     "egradjust": "egradjust", "ggradjust": "ggradjust", "sgradjust": "sgradjust",
     "epradjust": "epradjust", "gpradjust": "gpradjust", "spradjust": "spradjust",
 }
-#: LEESHELL fidelity fix: the per-nucleus upbend keywords (input_gammapar.f90:392-425) -> (field, last-axis slot).
+#: The per-nucleus upbend keywords (input_gammapar.f90:392-425) -> (field, last-axis slot).
 #: Before, they were not PARAM_SPECS keys and landed in `Cards.skipped` ("not a TALYS keyword the port knows").
 #: TALYS assigns them AFTER its defaults (a user 0 is kept), so they travel as NaN-masked arrays.
 UPBEND_KEYS = {
     "upbendc": ("upbend_cards", 1), "upbende": ("upbend_cards", 2), "upbendf": ("upbend_cards", 3),
     "upbendcadjust": ("upbendadjust_cards", 1), "upbendeadjust": ("upbendadjust_cards", 2),
     "upbendfadjust": ("upbendadjust_cards", 3),
-    "m1kappa": ("m1kappa_cards", 0),  # M1SHARE (Incognita extension): `m1kappa Z A k`, read only by gamma_parameters
+    "m1kappa": ("m1kappa_cards", 0),  # `m1share` (Incognita extension): `m1kappa Z A k`, read only by gamma_parameters
 }
 GAMMA_KEYS = tuple(GAMMA_FIELDS) + tuple(UPBEND_KEYS)
 #: the getvalues class-5 keywords among them: (irad, l) and, for the resonance ones, igr
@@ -1115,10 +1115,10 @@ _PLANS: dict = {}
 
 
 def _write_plan(c: Cards, zinit: int, ninit: int):
-    """SPEEDFIX lever 3: `apply_params`'s writes for cards `c` on a run with target (Zinit, Ninit), resolved once (it was
+    """`apply_params`'s writes for `Cards` `c` on a run with target (Zinit, Ninit), resolved once (it was
     re-derived from all ~1,300 cells on each of ~20 calls per run). Cells: per keyword, the storage positions that land
     in the run's box as index tensors and their values, a position written twice keeping its LAST value (the serial
-    loop's result); then the globals and the per-particle cells, in card order, as before.
+    loop's result); then the globals and the per-particle cells, in input order, as before.
 
     TALYS: xsfit.f90:1 (xsfit)
     Test: tests/hf/test_fitlib.py
@@ -1133,7 +1133,7 @@ def _write_plan(c: Cards, zinit: int, ninit: int):
         return got[1]
     per: dict[str, dict] = {}
     for k, z, a, v, idx in c.cells:
-        if k in UPBEND_KEYS:  # LEESHELL: reach gamma_parameters only (gamma_overrides)
+        if k in UPBEND_KEYS:  # `leeshell`: reach gamma_parameters only (gamma_overrides)
             continue
         spec = PARAM_SPECS[k]
         offs = spec.offsets
@@ -1195,8 +1195,8 @@ def apply_params(Z: int, A: int, options, params):
         return t
 
     cells, globs, parts = _write_plan(c, int(options.Zinit), int(options.Ninit))
-    # KWCOV B5: the global forms of per-nucleus keywords (`sfth v`, `sfexp v`, `pshiftconstant v`) fill the
-    # whole array first, so a per-nucleus card wins as in TALYS (sfthall / sfexpall fill only unset cells);
+    # the global forms of per-nucleus keywords (`sfth v`, `sfexp v`, `pshiftconstant v`) fill the
+    # whole array first, so a per-nucleus keyword wins as in TALYS (sfthall / sfexpall fill only unset cells);
     # every other global has no cells, so the order does not matter for it
     for k, v in globs:
         _t(k)[...] = v
@@ -1205,7 +1205,7 @@ def apply_params(Z: int, A: int, options, params):
         t[pos] = torch.tensor(vals, dtype=t.dtype)
     for k, i, v in parts:
         _t(k)[i] = v
-    if c.omp:  # KWCOV B6: `rvadjustF p E1 E2 D s` ranges (input_ompmodel.f90:249-283)
+    if c.omp:  # `rvadjustF p E1 E2 D s` ranges (input_ompmodel.f90:249-283)
         from physics.hf.omp import ompdeck
 
         for k, pos, v in ompdeck.range_cells(c.omp):

@@ -21,7 +21,7 @@ WT.L.ch.slowing = {
 };
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "water · neutron hits hydrogen": "पानी · न्यूट्रॉन हाइड्रोजन से टकराता है",
   "thermal · kT ≈ {#} eV": "तापीय · kT ≈ {#} eV",

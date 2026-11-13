@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPEEDT3: build the compiled transmission-coefficient kernels (physics/hf/native/hfnative.c)
+# Build the compiled transmission-coefficient kernels (physics/hf/native/hfnative.c)
 # into physics/hf/native/libhfnative.so (gitignored build output).
 #
 #   scripts/build_native.sh            # uses $CC, else the incognita-phys micromamba gcc, else cc

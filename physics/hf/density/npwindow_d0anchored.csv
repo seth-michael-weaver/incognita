@@ -1,5 +1,5 @@
-# NPWINDOW class flag: (Z, A) whose own s-wave D0 is measured = l=0 D0 > 0 for compound (Z, A) in TALYS-2.x
-# structure/resonances/*.res (RIPL; development notes). Input availability only; no D0 value is used.
+# `npwindow` class flag: (Z, A) whose own s-wave D0 is measured = l=0 D0 > 0 for compound (Z, A) in TALYS-2.x
+# structure/resonances/*.res (RIPL). Input availability only; no D0 value is used.
 # 374 nuclei
 Z,A
 1,2

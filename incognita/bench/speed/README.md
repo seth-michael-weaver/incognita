@@ -1,6 +1,6 @@
 # Speed: the TALYS port vs stock TALYS
 
-Result, stated first (SPEED50C.md, one idle-laptop session, 20 nuclides x 20 energies, one pinned core, results equal to
+Result (SPEED50C.md, one session on an idle machine, 20 nuclides x 20 energies, one pinned core, results equal to
 1e-11): batch cold with the opt-in fused GPU kernel **15.3x** CPU (13.1x wall), CPU only ~10x, batch warm **21.5x**, one
 nucleus per fresh process **5.1x**. The 50x goal was **not** reached. This hardware drifted 15-50 % between sessions, so
 only ratios measured in one ABAB session are claims.
@@ -26,4 +26,4 @@ uv run python incognita/bench/speed/bench.py --cpu 15 --repeats 2 --out "$PWD/ou
 
 `meta.json` records each repo's commit and whether its native engine library loaded; a timing without the native
 kernels is ~4x slower and is not a valid result. SPEED50C's `base` and `b50b` arms were commits c423b78d and 1260ac1c.
-The profile driver and the desktop accuracy gate were lab scripts and are not shipped (their results are in SPEED50C.md).
+The profiler and the accuracy-check scripts are not shipped (their results are in SPEED50C.md).

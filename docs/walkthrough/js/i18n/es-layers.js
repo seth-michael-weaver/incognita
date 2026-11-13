@@ -1,4 +1,4 @@
-/* Spanish: layers (chapter 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Spanish: layers (chapter 12). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>Capa 1 · Una regla para cada núcleo</h3>
   <p>La línea azul es la predicción del motor para una reacción. El motor es la capa de abajo: la misma física y los mismos ajustes globales para todos los núclidos, sin nada ajustado a las secciones eficaces de ningún núcleo concreto.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Mostrar las mediciones</button></div>
-  <p>Eso lo hace comprobable frente a las mediciones y frente a otros códigos de modelos calculados sobre los mismos núcleos. No es una prueba a ciegas: los ajustes globales se eligieron observando estas mismas comparaciones.${engineScore}</p>
+  <p>Eso lo hace comprobable frente a las mediciones y frente a otros códigos de modelos calculados sobre los mismos núcleos. No es una prueba independiente: los ajustes globales se eligieron observando estas mismas comparaciones.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>Estado actual</h3>
   <p>Una capa solo se adopta después de probarla frente a las mediciones, y se queda apagada si no ayuda. Hoy el motor está en uso y TERRA es candidata; la capa de estructura medida y la banda de incertidumbre del motor siguen en pruebas.</p>
-  <p><a href="scoreboard.html" data-keep-lang>Ver el marcador completo →</a> Todas las comparaciones que no ganamos, cada rival y cómo leerlo.</p>
-  <div class="aside">${ASOF ? `Resultados a ${ASOF}, del` : "Resultados del"} registro de investigación del proyecto. Las curvas del dibujo son ilustrativas.</div>
+  <p><a href="scoreboard.html" data-keep-lang>Ver todas las comparaciones →</a> Todas las comparaciones que no ganamos, cada rival y cómo leerlas.</p>
+  <div class="aside">${ASOF ? `Resultados a ${ASOF}, del` : "Resultados del"} registro de comparaciones del proyecto. Las curvas del dibujo son ilustrativas.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.es.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} de {#} mediciones dentro de la banda (objetivo: un {#} %)",
   "no measurements to check the band against": "no hay mediciones con las que comprobar la banda",
 });
-Object.assign(WT.es.ui, { nav_board: "Marcador" });
+Object.assign(WT.es.ui, { nav_board: "Comparaciones" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

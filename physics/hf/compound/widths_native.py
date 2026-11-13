@@ -1,10 +1,10 @@
-"""NATIVEX: `compound.decay_fast.NucleusWidths`' arrays for the compiled walk, built in C.
+"""Native: `compound.decay_fast.NucleusWidths`' arrays for the compiled walk, built in C.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nativex.py`
-(every array against `NucleusWidths`) and the G-NATIVEX closeness gate.
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_nativex.py`
+(every array against `NucleusWidths`) and the native closeness test.
 
 TALYS routines this computes (`native/nativex.c`'s `nx_widths`, arranged as `decay_fast` arranges
 them):
@@ -25,7 +25,7 @@ from __future__ import annotations
 import numpy as np
 import torch
 
-from physics.hf.projectile import residual_nucleus  # ENGPROJ GPRESFIX
+from physics.hf.projectile import residual_nucleus  # projectile bookkeeping
 from physics.hf.compound.decay_batch import PARN, PARZ, _twopi
 from physics.hf.compound.decay_fast import _tl_stack, jd2_all, nexmax_rows
 from physics.hf.compound.prepare import NUMJ, PARSPIN2
@@ -71,7 +71,7 @@ class NativeWidths:
 
         self.sub = binquad_sub(cas.options)
         if self.sub > 1:
-            # BINQUAD sub-points: S widths rows per mother bin at its Gauss-Legendre nodes, each a
+            # `binquad` sub-points: S widths rows per mother bin at its Gauss-Legendre nodes, each a
             # sub-bin of width dEx / S (nx_walk decays the bin's population on each with weight w_q / 2)
             from physics.hf.compound.prepare import _BQ_X
 
@@ -86,7 +86,7 @@ class NativeWidths:
             # below every particle separation energy of a nucleus that does not fission (photons only)
             smin_all = min(float(sp.sep_mev[t]) for t in range(1, 7))
             cnt = np.where((barr <= int(sp.nlast_grid)) | ((exinc + 0.5 * dexinc <= smin_all) & (not fissions)), 1, S)
-            # BINQUAD2 (`binquadk` bitmask): the bin's widths jump/kink at knots (own S: an exit opens; chain
+            # bin averaging (`binquadk` bitmask): the bin's widths jump/kink at knots (own S: an exit opens; chain
             # S_x + S_y': the daughter's own exit opens; fission barrier tops), so S Gauss points per smooth
             # piece [knot, knot], each piece's points sharing its fraction of the (uniform) population
             from physics.hf.core.grids import binquad_knots
@@ -129,7 +129,7 @@ class NativeWidths:
             self.sub_cnt, self.sub_off = np.ascontiguousarray(cnt, dtype=_I64), off
 
         if binquad_mode(cas.options) and binquad_params(cas.options)[1] <= -2.0:
-            # BINQUAD centroid: each mother bin decays at its population centroid (as engine_decay.c)
+            # `binquad` centroid: each mother bin decays at its population centroid (as engine_decay.c)
             from physics.hf.compound.prepare import binquad_centroid, binquad_slope
 
             rh = np.asarray(sp.rhogrid, dtype=np.float64)
@@ -145,13 +145,13 @@ class NativeWidths:
         nexmax = np.maximum(nxm, 0)
         ns = [int(nexmax[:, t].max()) + 1 for t in range(7)]
         if self.sub > 1 and int(getattr(cas.options, "binquadg", 0) or 0) == 1:
-            # BINQUAD binquadg 1: the photon exit at the bin centre for every sub-point (Gamma_gamma is smooth)
+            # `binquad` binquadg 1: the photon exit at the bin centre for every sub-point (Gamma_gamma is smooth)
             exb = np.asarray(sp.ex_mev, dtype=np.float64)[barr]
             tgb = self._photon_q(cas, sp, daughters[0], exb, nexmax[self.sub_off, 0], ns[0], fnorm)
             tg = np.ascontiguousarray(np.repeat(tgb, self.sub_cnt, axis=0))
         else:
             tg = self._photon_q(cas, sp, daughters[0], exinc, nexmax[:, 0], ns[0], fnorm)
-        tls = [cas.trans_of(sp.zix, sp.nix)[t] for t in range(1, 7)]  # SLFIRST: per emitting nucleus
+        tls = [cas.trans_of(sp.zix, sp.nix)[t] for t in range(1, 7)]  # First-CN set: per emitting nucleus
         Ltl = tls[0][1].shape[1]
         if any(isinstance(x[1], torch.Tensor) or x[1].shape[1] != Ltl for x in tls):
             raise NotImplementedError("one numpy Tl shape for every particle")
@@ -160,10 +160,10 @@ class NativeWidths:
 
         if isinstance(cas.trans, dict) and "tlogref" in cas.trans:
             raise NotImplementedError("TLOGREF (G0 reference) is numpy-only")  # -> decay_fast numpy widths
-        tlog.native_arm(cas.trans)  # LOGTINT (default OFF): log-T Lagrange of charged T in nx_widths
+        tlog.native_arm(cas.trans)  # Log-T interpolation (default OFF): log-T Lagrange of charged T in nx_widths
         from physics.hf.omp import alphatemp
 
-        alphatemp.arm_native(cas)  # ALPHATEMP (default OFF): cold alpha Tl + U* into nx_widths
+        alphatemp.arm_native(cas)  # `alphatemp` (default OFF): cold alpha Tl + U* into nx_widths
         rg = cas.rg
         eendmax = _eendmax(cas.Zt, cas.At, cas.enincmax)
         egrid = np.ascontiguousarray(np.asarray(rg.egrid, dtype=np.float64))
@@ -191,14 +191,14 @@ class NativeWidths:
         put(10, np.array([min(int(eendmax[t]), rg.maxen) for t in range(1, 7)], dtype=_I64))
         put(11, np.array([float(fnorm[t + 1]) for t in range(1, 7)], dtype=np.float64))
         put(12, tg)
-        tlc = cas.trans_cont_of(sp.zix, sp.nix)  # ROTEXIT1CN (default OFF): continuum rows' stack (nx_widths pp[13])
+        tlc = cas.trans_cont_of(sp.zix, sp.nix)  # Continuum exit set (default OFF): continuum rows' stack (nx_widths pp[13])
         if tlc is not None:
             TLc, LMc, h0c = _tl_stack(cas, [tlc[t] for t in range(1, 7)])
             if TLc.shape != TL.shape or not (np.array_equal(LMc, LM) and np.array_equal(h0c, head0)):
                 raise NotImplementedError("sfexit cont: the model and measured stacks differ in shape/lmax")
             put(13, np.ascontiguousarray(TLc, dtype=np.float64))
         ip[:10] = (m, nj, self.odd, cas.k0, st.lmaxinc, rg.maxen, Ltl, TL.shape[1], egrid.size, L0)
-        ip[10] = cas.nnleak_top(sp) + 1  # NNLEAK (default y): the rule's mother bin + 1, 0 = none
+        ip[10] = cas.nnleak_top(sp) + 1  # `nnleak` (default y): the rule's mother bin + 1, 0 = none
         dp[0] = cas.transeps
         outp = np.zeros(12 * 7, dtype=np.uint64)
         bufs = []
@@ -276,7 +276,7 @@ class NativeWidths:
         self.levels0 = (jd2_all(d0, ns[0]), np.asarray(d0.parlev[: ns[0]]).astype(_I64))
 
     def _cn_population_weights(self, cas, sp, fnorm, etot: float) -> None:
-        """BINQUAD2 (`binquadc 1`): the compound nucleus's continuum is fed only by primary photons from
+        """Bin averaging (`binquadc 1`): the compound nucleus's continuum is fed only by primary photons from
         Etotal, so inside a bin its population goes as rho(y) Tgamma(Etotal - y) (steep near Etotal, where
         Egamma -> 0), not flat: each sub-point's share = geometric weight x rho tilt x the summed primary
         photon transmission at its energy, renormalised per bin (bin totals unchanged)."""
@@ -305,7 +305,7 @@ class NativeWidths:
         self.sub_w = np.ascontiguousarray(w)
 
     def _photon_q(self, cas, sp, d0, exinc: np.ndarray, nexmax0: np.ndarray, n: int, fnorm):
-        """`_photon`, or under BINQUAD2 (`binquadp Q`) its average over each continuum row's bin
+        """`_photon`, or under bin averaging (`binquadp Q`) its average over each continuum row's bin
         [Ex - dEx/2, Ex + dEx/2] at Q Gauss-Legendre nodes weighted by the row's level-density tilt
         (engine_decay.c's primary photon twin); discrete rows keep their point."""
         from physics.hf.core.grids import binquad_photon
@@ -358,9 +358,9 @@ class NativeWidths:
 
             twopi = _twopi()
             gstrength = cas.gamma_strength(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))
-            gp = cas.gamma_params(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))  # PARAMWIRE: the run's parameter set
+            gp = cas.gamma_params(sp.Z, sp.A - 1, nucleus=residual_nucleus(sp.Z, sp.A))  # the run's parameter set
             if gp is not None:
-                # NATIVEX2: the strength function and the rows in C (compound/psf_nx2.py)
+                # Native: the strength function and the rows in C (compound/psf_nx2.py)
                 from physics.hf.compound.psf_nx2 import photon_rows
 
                 got = photon_rows(gp, cas.gammax, exinc, ex0, nexmax0, n, float(sp.sep_mev[1]),

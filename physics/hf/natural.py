@@ -1,4 +1,4 @@
-"""KWCOV B10b: natural-element targets (`mass 0`): one run per isotope, abundance-weighted sums (natural.f90).
+"""Natural-element targets (`mass 0`): one run per isotope, abundance-weighted sums (natural.f90).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -7,14 +7,14 @@ Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 to 1, run every isotope with the same deck and energy grid, and write each output file of the element as the row-by-row
 abundance-weighted sum of the isotopes' files (a file an isotope does not have counts 0). Here the sum is taken over
 the `Results` arrays of the isotope runs: channels, discrete levels, residual production (keyed by the residual, so
-the union over isotopes), totals, CHANOBS extras, the thermal rows of B10b; ratios (`:branch`) and LOWEPOT's weight
+the union over isotopes), totals, INCOGNITA_CHANOBS extras, the thermal rows; ratios (`:branch`) and the `lowepot` weight
 are not summed (TALYS has no natural file for them). Spectra / DDX are not summed (natural.f90 interpolates every
 isotope's spectrum onto one energy list); they stay per isotope in `Results.natural["isotopes"]`.
 
 TALYS routines ported here (file:line of the subroutine statement):
     abundance.f90:1 (abundance)    the abundance file ('(4x, i4, f11.6)', percent), normalised to 1
     natural.f90:1 (natural)        the isotope loop and the weighted sums
-Task: T10 (physics/hf/CONTRACT.md section 7; KWCOV batch B10b). Acceptance test: KWCOV-B10b
+Task: T10 (physics/hf/CONTRACT.md section 7). Acceptance test: KW-B10
 (tests/hf/test_kwcov_b10b.py, docs/hf/COVERAGE_PLAN.md).
 """
 

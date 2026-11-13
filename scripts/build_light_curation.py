@@ -7,9 +7,9 @@ script runs that same code, unchanged, for Z 1-25 and writes tables with the sam
 
   data/curation/inputs/exfor_capture_Z1-25_trust.parquet   one row per dataset   (schema of exfor_capture_Z26-92_trust)
   data/curation/inputs/exfor_cells_Z1-25.parquet           one row per dataset x 0.1-dex energy bin (schema of exfor_cells)
-  data/curation/inputs/exfor_capture_Z1-25_provenance.json inputs (SHA256), gates, decision counts
+  data/curation/inputs/exfor_capture_Z1-25_provenance.json inputs (SHA256), checks, decision counts
 
-Steps (all inside the research checkout given by --main, default ~/nucleus; nothing there is written):
+Steps (all inside the research checkout given by --main; nothing there is written):
   1. Stage. EXFOR capture for Z 1-25 is taken from the full staged EXFOR table (staging/exfor_all_2026-10-14_x4fix1,
      the 2026-10-14 entry.zip) with the predicate and energy clip of `python -m data.ingest.exfor --subset capture`
      (SF2 = N, SF3 = G, SF6 in SIG/RI; points above 20 MeV dropped, a measurement with no point left dropped). The
@@ -17,7 +17,7 @@ Steps (all inside the research checkout given by --main, default ~/nucleus; noth
      the build stops if it does not.
   2. Curate. quality_model runs ONCE on Z 1-92 together (light + the Z 26-92 staging), so the metadata prior and the
      global scatter model are learned from the whole chart, as for Z 26-92, and the IAEA-standards and 238U spot-list
-     gates can run (a light-only run has no capture standard). Only the Z 1-25 rows are kept. The review decisions
+     checks can run (a light-only run has no capture standard). Only the Z 1-25 rows are kept. The review decisions
      are the research repository's data/curate/review_decisions.jsonl (none of its lines names a light dataset) followed
      by this repository's data/curation/inputs/review_decisions_Z1-25.jsonl (same format; light datasets checked against
      their EXFOR entries), passed to the quality model as its human-decision file. Every other light decision is the
@@ -28,8 +28,8 @@ Steps (all inside the research checkout given by --main, default ~/nucleus; noth
 The Z 26-92 files are NOT rebuilt (they stay the shipped 2026-09-12 curation). The Z 26-92 rows of the joint run are
 used only for the check printed at the end (agreement of the joint run's decisions with the shipped ones).
 
-usage (WSL, the research checkout's environment):
-  cd ~/nucleus && uv run --no-sync python <this repo>/scripts/build_light_curation.py [--main ~/nucleus] [--work DIR]
+usage (the research checkout's environment):
+  cd MAIN && uv run --no-sync python <this repo>/scripts/build_light_curation.py [--main MAIN] [--work DIR]
 """
 import argparse, collections, hashlib, json, math, os, subprocess, sys, time
 from pathlib import Path

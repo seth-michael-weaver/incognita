@@ -2,7 +2,7 @@
 
 All continuous quantities are in MeV. Every loss is a masked mean over the pixels
 where a target exists *and* that pixel belongs to the training set of the current
-split, so a held-out nuclide never contributes a gradient, not even through a
+split, so a validation nuclide never contributes a gradient, not even through a
 neighbour-difference term.
 """
 

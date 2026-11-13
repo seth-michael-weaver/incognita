@@ -1,4 +1,4 @@
-"""PEREMOVE: last discrete bin's [Elast, Etop] piece removed from the continuum once (1); + NL own two-point window (2).
+"""`INCOGNITA_PEREMOVE`: last discrete bin's [Elast, Etop] piece removed from the continuum once (1); + NL own two-point window (2).
 Synthetic one-case batch shared with test_pecollapse."""
 from types import SimpleNamespace
 

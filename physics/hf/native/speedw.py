@@ -1,9 +1,9 @@
-"""SPEEDW: loader of the whole-run speed kernels (`speedw.c`, built by scripts/build_speedw_native.sh).
+"""Loader of the whole-run speed kernels (`speedw.c`, built by scripts/build_speedw_native.sh).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: SPEEDW (the speed wave; no physics of its own). Acceptance test:
+Speed path (no physics of its own). Acceptance test:
 `tests/hf/test_speedw_native.py` (the DWBA Numerov kernel against the torch loop, to the bit) and
 `tests/hf/test_mpe_fast.py` (the multiple pre-equilibrium kernel against the torch loop).
 

@@ -1,7 +1,7 @@
 """T12's own TALYS reference runs: the two output blocks the standard dumps do not contain.
 
 The 54 archives T0 parsed (`features/hf_reference/`) carry `directE*.out` with the discrete
-direct cross sections and the giant-resonance parameters, which is enough to gate
+direct cross sections and the giant-resonance parameters, which is enough to test
 `directread.f90` and `sumrules.f90`. They do NOT carry:
 
 * the **giant resonance spectra** datablock of `directE*.out` -- `directout.f90:233` writes it
@@ -45,7 +45,7 @@ ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OUT = ROOT / "features" / "hf_direct_reference"
 
 # Spherical set = T9's nine, minus the three whose `default` run is slowest, plus the two
-# deformed targets the gate reports separately (contract §6: deformed is not in the A-mult set).
+# deformed targets the test reports separately (contract §6: deformed is not in the A-mult set).
 SPHERICAL = ("Ca040", "Fe056", "Ni058", "Zr090", "Nb093", "Sn120", "Pb208")
 DEFORMED = ("W184", "Gd157")
 
@@ -58,7 +58,7 @@ VARIANTS: dict[str, dict] = {
         "targets": SPHERICAL + DEFORMED,
     },
     # Direct radiative capture on (racap.f90). This IS a model keyword: it adds xsracape to the
-    # capture channel, so it is a separate variant and is never mixed into a gate of the
+    # capture channel, so it is a separate variant and is never mixed into a test of the
     # default physics.
     "t12racap": {
         "keywords": {"racap": "y"},

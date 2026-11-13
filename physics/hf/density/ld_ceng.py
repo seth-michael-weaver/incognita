@@ -1,21 +1,21 @@
-"""CENGLD (ROUTE100 WP6): the level-density set-up of a cascade nucleus in one C call each
+"""Native: the level-density set-up of a cascade nucleus in one C call each
 (`native/ld.c`, built into `libnx2`): `densitymatch` with its Fermi-gas tables, matching root,
 passes and fallbacks, and `rhogrid` with rho(J) evaluated only up to each bin's maxJ.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: CENGLD (speed; no physics of its own). Acceptance test: `tests/hf/test_cengld.py` (each
+Speed path (no physics of its own). Acceptance test: `tests/hf/test_cengld.py` (each
 kernel against the path it replaces) and `harness/cengld_ld.py` (every LD array of the chart path
 on 200+ cascade nuclei, <= 1e-13).
 
-Where it applies: the nuclei NATIVEX2's `ld` lever carries (`ld_nx2._par`: ldmodel 1, no collective
+Where it applies: the nuclei the native `ld` lever carries (`ld_nx2._par`: ldmodel 1, no collective
 enhancement, no table, nothing on the autograd graph) and no fission barrier. Everything else, and
 `HF_NX2_CENGLD=0`, runs the existing path. The level-density parameters come from the `LDNucleus`
-`densitypar` built, so a fit's `aadjust` (PARAMWIRE's `with_aadjust` Params) reaches the kernels
+`densitypar` built, so a fit's `aadjust` (the parameter set's `with_aadjust` Params) reaches the kernels
 through `alev`/`alimit` like every other parameter.
 
-Where the time went (MERGEZ, Mac chart cost map, 482 x 20): the level-density stage 10.3 CPU-s,
+Where the time went (chart cost map, 482 x 20): the level-density stage 10.3 CPU-s,
 `rhogrid_of` 5.3 of it (45,730 calls; 1.6 in the kernel), `_ld_of` 3.3 (12,677 builds:
 `densitypar_floats` ~2, `densitymatch` ~0.5 of zero-dim torch operations around three C calls).
 
@@ -43,7 +43,7 @@ _DEX = np.float32(0.1)
 
 
 def _on() -> bool:
-    """`HF_NX2_CENGLD=0` (or NATIVEX2's `HF_NX2_LD=0`) turns the lever off, read at every call."""
+    """`HF_NX2_CENGLD=0` (or the native `HF_NX2_LD=0`) turns the lever off, read at every call."""
     env = os.environ
     from physics.hf import eadj
 
@@ -64,7 +64,7 @@ def _light(Z: int, A: int) -> tuple:
     return tuple((1.0, float(d[k])) if k in d else (0.0, 0.0) for k in ("T", "E0", "Exmatch"))
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def densitymatch_fast(ld, flagldglobal: bool, flagctmglob: bool, xacc: float):
     """`matching.densitymatch(ld, ...)` for a nucleus the kernel carries, or None.
 
@@ -143,10 +143,10 @@ def rhogrid(par: np.ndarray, A: int, ex_mev, dex_mev, maxj, nlast: int, numj: in
     return out
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def spec_rows(ld, A: int, ex_mev: np.ndarray, dex_mev: np.ndarray, n: int, nlast: int,
               parts, numj: int):
-    """CENGLD2: (maxJ, rhogrid) of one cascade nucleus's grid from `ceng_ld_spec` -- what
+    """Shared record: (maxJ, rhogrid) of one cascade nucleus's grid from `ceng_ld_spec` -- what
     `feeding.Cascade.spec` formed with `_maxj_of` and `dens_reference.rhogrid_of`, in one C call on
     the record's floats -- or None (the caller runs those two). `parts` makes
     `feeding._spincut_parts(ld)`, kept with the record's floats.
@@ -199,7 +199,7 @@ def _floats(ld, key: tuple, make) -> np.ndarray:
     return got
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def ignatyuk(ld, eex: np.ndarray, ibar: int):
     """`parameters._ignatyuk_fast`'s array result as a tensor, from `ceng_ld_ignatyuk`, or None.
 
@@ -223,7 +223,7 @@ def ignatyuk(ld, eex: np.ndarray, ibar: int):
     return torch.from_numpy(out)
 
 
-@_npw_per_nucleus  # NPWPROMO: native LD kernels per nucleus
+@_npw_per_nucleus  # Native LD kernels per nucleus
 def spincut(ld, ald, eex: np.ndarray, ibar: int, ipop: int, rspincutff: float):
     """`parameters._spincut_fast`'s array result as a tensor, from `ceng_ld_spincut`, or None
     (`ald` neither a float nor an array of `eex`'s shape).

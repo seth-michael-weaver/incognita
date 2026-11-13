@@ -28,7 +28,7 @@ ported is everything TALYS does around it:
   flux receive when the flag is on.
 
 `racapcalc`'s per-state cross sections are the argument `xspex_b`; the reference runs T12 made
-(`reference_runs.py`, variant `t12racap`) write them, and `racap.out` is what the gate reads.
+(`reference_runs.py`, variant `t12racap`) write them, and `racap.out` is what the test reads.
 Nothing here runs unless `options.flagracap` is true, so the default path of the port is
 unchanged.
 """

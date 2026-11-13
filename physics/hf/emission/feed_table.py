@@ -3,19 +3,19 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: SPEEDD (the speed wave; no physics of its own). Acceptance test: the speed-wave golden
+A speed path with no physics of its own. Acceptance test: the speed golden
 and `tests/hf/test_decay_fast.py`.
 
 TALYS routines this stores for:
     multiple.f90:1 (multiple)   -- `feedexcl`, written per mother bin
     channels.f90:1 (channels)   -- which reads it back per (nex, nexout)
 
-`multiple_emission` used to record `feedexcl` as a dict keyed (nex, nexout), one Python entry per
-non-zero cell, and `exclusive_channels` looked every cell up again; at 18 MeV that is ~50,000
+Recording `feedexcl` as a dict keyed (nex, nexout), one Python entry per non-zero cell, with
+`exclusive_channels` looking every cell up again, costs at 18 MeV ~50,000
 entries per energy written and read one at a time. `FeedTable` is the same record as a
 (mother bin, daughter bin) array plus a `present` mask, so both ends read and write whole rows.
 It is a `Mapping` with the dict's keys, values and `.get`, so every reader of the dict form
-(the golden record, the A-mult gate, `score.py`) sees the same entries -- including an entry that
+(the golden record, the A-mult test, `score.py`) sees the same entries -- including an entry that
 is present with value 0.0, which a gamma cascade out of an empty level writes.
 """
 

@@ -1,4 +1,4 @@
-"""CENGFIS13 (development notes): `wkb.parab_fit` is bitwise reproducible whatever the memory
+"""`wkb.parab_fit` is bitwise reproducible whatever the memory
 layout of its inputs (torch.linalg.lstsq, the MKL LAPACK path it replaced, is not: its last bit
 follows the heap alignment, which made test_fisbarwire's fismodel-6 bitwise claim flaky), and it is
 the least-squares estimator lstsq computes to roundoff.

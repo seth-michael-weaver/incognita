@@ -1,9 +1,9 @@
-"""COLLRULE (Incognita extension, not TALYS; default OFF): the incident-channel coupling scheme of the TARGET chosen by a global
+"""`collrule` (Incognita extension, not TALYS; default OFF): the incident-channel coupling scheme of the TARGET chosen by a global
 rule on its measured low-lying structure instead of the header letter of `deformation/<Sym>.def`.
 
 Keyword `collrule n|strict|trans|sv|y` (y = strict; sv = strict restricted to its S -> V class, the component that passed
-COLLRULE's gates; n = TALYS, the default) or env `INCOGNITA_COLLRULE` (same values, used when the
-keyword is off). The decisions are a table written by development notes from ENSDF 2026-09-01 adopted levels only
+`collrule`'s validation; n = TALYS, the default) or env `INCOGNITA_COLLRULE` (same values, used when the
+keyword is off). The decisions are a table written from ENSDF 2026-09-01 adopted levels only
 (R4/2 = E(4+_1)/E(2+_1), B(E2; 2+_1 -> 0+), ENSDF ground-state band flags); no reaction datum enters it:
   even-even   rotor R4/2 >= 3.0 -> R | vibrator [2.0, 2.4) -> V | spherical < 2.0 -> S | transitional [2.4, 3.0) -> letter kept
               (strict) or V (trans);
@@ -18,8 +18,8 @@ How a new letter is realised (the TALYS machinery in each case):
      target stays S, exactly as autorot leaves it.
 The OMP's colltype (omppar.f90:217/267: W_D d1 x 0.85 for a non-S target) follows the realised letter, as TALYS's does.
 
-WEAKCPL (`collrule svw` / `svwa`, = sv plus weak-coupling CC; development notes): an odd-A target whose even-even
-core(s) are STRICT vibrators (table weakcpl_table.csv from development notes, ENSDF only) is run as a V target in the
+weak coupling (`collrule svw` / `svwa`, = sv plus weak-coupling CC): an odd-A target whose even-even
+core(s) are STRICT vibrators (table weakcpl_table.csv, ENSDF only) is run as a V target in the
 de-Shalit core-excitation (weak-coupling) picture: g.s. I (no phonon) + the multiplet |2+_core x I; J>, |I-2| <= J <= I+2,
 each member a one-phonon lambda-2 level of its own band with beta_J = beta_core sqrt((2J+1)/5) (then
 sum_J B(E2; I -> J) = B(E2; 0+ -> 2+)_core in ECIS's reduced-matrix-element convention, t^2/(2I+1)). Members are found by
@@ -87,10 +87,10 @@ def target_letter(Z: int, A: int, options) -> str | None:
     if not m or not is_target(Z, A, options):
         return None
     r = _table().get((int(Z), int(A)))
-    if m in ("svw", "svwa") and int(A) % 2 == 1:  # WEAKCPL: odd-A weak-coupling CC ('W' = V realised by weak_block)
+    if m in ("svw", "svwa") and int(A) % 2 == 1:  # weak coupling: odd-A weak-coupling CC ('W' = V realised by weak_block)
         w = _wtable().get((int(Z), int(A)))
         return "W" if w is not None and (w["arm"] == "WS" or m == "svwa") else None
-    if m in ("sv", "svw", "svwa"):  # COLLRULE's registered component: the STRICT rule's S -> V class only (measured-B(E2) vibrators)
+    if m in ("sv", "svw", "svwa"):  # `collrule`'s registered component: the STRICT rule's S -> V class only (measured-B(E2) vibrators)
         return "V" if r is not None and r["letter"] == "S" and r["strict"] == "V" else None
     if r is None or r[m] == r["letter"]:
         return None
@@ -134,7 +134,7 @@ def vib_block(Z: int, A: int, block, jdis, parlev, nmax: int):
 
 
 def weak_block(Z: int, A: int, block, jdis, parlev, edis, nmax: int):
-    """WEAKCPL: the odd target's `.def` block rebuilt as a weak-coupling V scheme: g.s. (V, band 0) + one row per multiplet
+    """Weak coupling: the odd target's `.def` block rebuilt as a weak-coupling V scheme: g.s. (V, band 0) + one row per multiplet
     member J (V, band k, lambda 2, one phonon, beta_core sqrt((2J+1)/5); a length beta 1.2 A^1/3 fm when the block is deftype
     D) + the file's D rows except the members' and the g.s.'s. Members: weakcoupling.f90's search (j = int|I-2| .. int(I+2);
     outward from `middle` = (first level above the core E(2+_1)) + 1, upward first; first free level with int(J) == j), plus
@@ -179,7 +179,7 @@ def weak_block(Z: int, A: int, block, jdis, parlev, edis, nmax: int):
 
 
 def core_skip(target, core_levels) -> int | None:
-    """WEAKCPL: the index of the core's 2+_1 when the target is a weak-coupling CC target (its multiplet is in the CC set), so
+    """Weak coupling: the index of the core's 2+_1 when the target is a weak-coupling CC target (its multiplet is in the CC set), so
     the DWBA weak coupling (weakcoupling.f90) does not spread the same 2+ over other D levels; None otherwise."""
     if not getattr(target, "weakcc", False):
         return None

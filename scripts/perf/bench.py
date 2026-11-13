@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""PERFBENCH: speed benchmark of the production engine against stock TALYS, with a bit-level correctness gate.
+"""Speed benchmark of the production engine against stock TALYS, with a bit-level correctness check.
 
-Runs on laptop WSL / Linux. The engine side runs exactly the calculator's production paths (scripts/talysworld):
+Runs on Linux / WSL. The engine side runs exactly the calculator's production paths (scripts/talysworld):
   engine_job.py   one target, one energy, as the calculator's per-point job (it also looks up the CN separation energies
-                  for the GRIDTOP pad in a second Python process)
+                  for the grid-top pad in a second Python process)
   engine_grid.py  one target, a whole grid in one engine run (--smin given, so no separation-energy subprocess)
 and, for the back-to-back test, this file's own driver (`_multi`, run under the engine venv) which imports the engine once
 and calls engine_grid.run() for several targets in the same process.
@@ -20,20 +20,20 @@ filled by an untimed priming run of the same target and grid. The OS page cache 
 engine's own disk cache, not the file system's. TALYS has no cache; its rows are tagged "cold" (first) / "warm" (repeats).
 Timing: wall = perf_counter around the process; cpu = user+sys of the process and its reaped children (RUSAGE_CHILDREN delta). nice 10.
 
-CORRECTNESS GATE: every engine result (all arms, all energies) is compared with scripts/perf/baseline.json on the channels
-capture, elastic, total, np, na, n2n, fission; |x - b| > tol * max(|x|, |b|) (tol 1e-9) fails the gate (exit code 1).
+CORRECTNESS CHECK: every engine result (all arms, all energies) is compared with scripts/perf/baseline.json on the channels
+capture, elastic, total, np, na, n2n, fission; |x - b| > tol * max(|x|, |b|) (tol 1e-9) fails the check (exit code 1).
   --write-baseline   store this run's results as the baseline (do that only on the reference engine).
 
 usage (WSL):
-  python3 scripts/perf/bench.py                       # everything: 4 targets, point + curve, cold + warm, multi, TALYS, gate
+  python3 scripts/perf/bench.py                       # everything: 4 targets, point + curve, cold + warm, multi, TALYS, check
   python3 scripts/perf/bench.py --arms pt1,curve64 --no-talys --repeats 1
-  python3 scripts/perf/bench.py --gate-only           # quickest gate: pt1 warm + curve64 warm for the 4 targets, no TALYS
+  python3 scripts/perf/bench.py --gate-only           # quickest check: pt1 warm + curve64 warm for the 4 targets, no TALYS
   python3 scripts/perf/bench.py --write-baseline      # (re)write baseline.json from this run
   python3 scripts/perf/bench.py _multi SPEC.json      # (internal) the in-process driver; SPEC: see multi_driver()
-On the shared laptop run it as one heavy job at a time (`free -g` available >= 8 GB first):
+On a shared machine run it as one heavy job at a time (`free -g` available >= 8 GB first):
   flock /tmp/incognita_heavy.lock python3 scripts/perf/bench.py ...
 The harness itself never runs more than one engine process at a time (TALYS too: one process).
-Env: TW_ENG (engine repo, default ~/fastgate_data/eng/16606b356d6e), TW_INPUTS (~/libv02/inputs), TALYS_BIN
+Env: TW_ENG (engine repo, default ~/fastgate_data/eng/16606b356d6e), TW_INPUTS (the library v0.2 inputs directory), TALYS_BIN
 (~/opt/talys-src/bin/talys). Output: --out (default ~/perfbench_out/<time>): bench.jsonl, summary.md, gate.json.
 """
 from __future__ import annotations
@@ -216,14 +216,14 @@ def run_talys(z, a, grid, work, nice):
     return ok, wall, c.cpu
 
 
-# ----------------------------------------------------------------------------- gate
+# ----------------------------------------------------------------------------- check
 
 def key(arm, z, a, e_ev):
     return f"{arm.split(':')[0]}|{z}|{a}|{len(e_ev)}|{e_ev[0]:.6e}"
 
 
 def compare(res, base, tol):
-    """max relative difference over the gated channels; list of failures."""
+    """max relative difference over the checked channels; list of failures."""
     fails, worst = [], 0.0
     for ch in GATED:
         x, b = res["channels"].get(ch), base["channels"].get(ch)
@@ -332,7 +332,7 @@ def main():
                     ok, wall, cpu = run_talys(z, a_, mg, os.path.join(W, f"t_{z}_{a_}"), a.nice); tw += wall; tc += cpu
                 rec(arm="talys_multi_total", state=st, nuc=f"{len(mnames)}x", wall=tw, cpu=tc, npts=len(mg))
 
-    # ---- correctness gate
+    # ---- correctness check
     gate = dict(tol=a.tol, checked=0, failed=0, worst_rel=0.0, failures=[], missing=[], self_consistency_worst_rel=0.0)
     for k, lst in results.items():   # every repeat of the same arm/target/grid must agree with the first
         for r in lst[1:]:

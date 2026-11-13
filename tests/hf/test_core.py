@@ -1,7 +1,7 @@
 """T1 core: constants, numerics, angular-momentum algebra and grids (physics/hf/CONTRACT.md §7).
 
 Special functions are checked against independent references (numpy/scipy/sympy), never against
-the port itself. Grids are checked against the TALYS reference dumps (gate A-grid); those tests
+the port itself. Grids are checked against the TALYS reference dumps (check A-grid); those tests
 skip when the dumps are absent.
 """
 
@@ -453,7 +453,7 @@ def test_residual_exmax_last_particle_wins():
 
 
 # ----------------------------------------------------------------------------------------------
-# gate A-grid against the TALYS dumps
+# check A-grid against the TALYS dumps
 # ----------------------------------------------------------------------------------------------
 
 needs_dumps = pytest.mark.skipif(

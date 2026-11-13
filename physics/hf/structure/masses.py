@@ -252,7 +252,7 @@ def duflo(N: int, Z: int) -> float:
 
 
 def _mass10_many(nx: np.ndarray, nz: np.ndarray) -> np.ndarray:
-    """COREX: `_mass10` elementwise over int arrays (N, Z >= 1): the same float32 operations in
+    """Fast path: `_mass10` elementwise over int arrays (N, Z >= 1): the same float32 operations in
     the same order, as array operations, so every element is bit-identical to the scalar call
     (tests/hf/test_corex.py checks each cell of a masses() grid)."""
     one, quarter = _F(1.0), _F(0.25)
@@ -308,7 +308,7 @@ def _mass10_many(nx: np.ndarray, nz: np.ndarray) -> np.ndarray:
     return np.where((de <= 0.0) | (nz <= 50), y[1], y[2]).astype(_F)
 
 
-# NATIVEX2 `struct`: duflo(N, Z) by cell (float64 of the float32 value) and which cells are filled;
+# Native `struct`: duflo(N, Z) by cell (float64 of the float32 value) and which cells are filled;
 # pure, no target in it, kept for the worker.
 _DUFLO_CELLS = np.zeros((130, 260))
 _DUFLO_HAVE = np.zeros((130, 260), dtype=bool)
@@ -316,7 +316,7 @@ _DUFLO_HAVE = np.zeros((130, 260), dtype=bool)
 
 @cache
 def _duflo_grid(Zinit: int, Ninit: int, nz: int, nn: int) -> tuple[np.ndarray, np.ndarray]:
-    """COREX: `duflo(Ninit - Nix, Zinit - Zix)` on masses()'s (nz, nn) grid and the mask of the
+    """Fast path: `duflo(Ninit - Nix, Zinit - Zix)` on masses()'s (nz, nn) grid and the mask of the
     cells with Z > 0 and N > 0 (a pure function of the four integers; `chartrun.KEEP`), computed
     over the grid at once (`_mass10_many`). Read-only: masses() only reads it."""
     Z = Zinit - np.arange(nz)[:, None] + np.zeros((1, nn), dtype=np.int64)
@@ -325,7 +325,7 @@ def _duflo_grid(Zinit: int, Ninit: int, nz: int, nn: int) -> tuple[np.ndarray, n
     exc = np.zeros((nz, nn))
     if live.any():
         nx, zz = N[live], Z[live]
-        # NATIVEX2 `struct`: cells already computed for an earlier grid (the cascade nuclei's
+        # Native `struct`: cells already computed for an earlier grid (the cascade nuclei's
         # grids overlap) are taken from `_DUFLO_CELLS`; `_mass10_many` is elementwise, so a cell
         # is the same float32 arithmetic whichever grid first asked for it
         global _DUFLO_CELLS, _DUFLO_HAVE
@@ -423,7 +423,7 @@ def _mass_table(structure_dir: str, Z: int, table: str) -> tuple[np.ndarray, np.
     return ia, cols
 
 
-# NATIVEX2 `struct`: the element tables of `_mass_table` copied into one dense (Z, A) array per
+# Native `struct`: the element tables of `_mass_table` copied into one dense (Z, A) array per
 # (structure dir, table), an element's row filled the first time a grid reaches it. Pure file data
 # like `_mass_table` itself (kept for the worker), read-only once filled.
 _DENSE: dict[tuple[str, str], tuple[np.ndarray, np.ndarray, set]] = {}
@@ -503,7 +503,7 @@ def masses(
     TALYS: masses.f90:1 (masses), separation.f90:1 (separation)
     Test: A-struct
     """
-    # COREX: `params` enters only through these three grids, so the build is memoised on them
+    # Fast path: `params` enters only through these three grids, so the build is memoised on them
     # and the options' values (a chain asks ~18 times per energy grid for the same target)
     nz, nn = options.maxZ + 5, options.maxN + 5
     grids = (_param_grid(params, "beta2", nz, nn, 0), _param_grid(params, "massnucleus", nz, nn),
@@ -514,7 +514,7 @@ def masses(
 @lru_cache(maxsize=64)
 def _masses_of(options: Options, specmass_types: tuple[int, ...],
                grid_bytes: tuple[bytes, bytes, bytes]) -> Masses:
-    """COREX: `masses`' build from the options and the beta2/massnucleus/massexcess grids (as
+    """Fast path: `masses`' build from the options and the beta2/massnucleus/massexcess grids (as
     bytes). `Masses` is frozen and nothing writes into its tensors."""
     c = talys_constants()
     amu = c["amu"]
@@ -542,7 +542,7 @@ def _masses_of(options: Options, specmass_types: tuple[int, ...],
     massmodel = options.massmodel
     theo_table = {1: "frdm", 0: "hfb", 2: "hfb", 3: "hfbd1m"}[massmodel]
     sdir = str(talys_structure_dir())
-    # NATIVEX2 `struct`: the per-element loop as one gather per table from a dense (Z, A) copy of
+    # Native `struct`: the per-element loop as one gather per table from a dense (Z, A) copy of
     # the element tables (`_table_cells`, filled per element on first use): a cell takes the
     # table's row exactly when the loop's `sel` held it (the element's file has that A), the same
     # stores otherwise; float32 rounding as before.
@@ -577,7 +577,7 @@ def _masses_of(options: Options, specmass_types: tuple[int, ...],
         raise ValueError("TALYS-error: Target nucleus not in masstable")
 
     if flagduflo:
-        # COREX: the cell loop as whole-grid operations; `_duflo_grid` holds duflo(N, Z) per cell
+        # Fast path: the cell loop as whole-grid operations; `_duflo_grid` holds duflo(N, Z) per cell
         # (0 where Z <= 0 or N <= 0, the cells the loop skips) and `live` marks the cells it visits
         exc_g, live = _duflo_grid(Zinit, Ninit, nz, nn)
         dumexc = np.where(live, exc_g, dumexc)

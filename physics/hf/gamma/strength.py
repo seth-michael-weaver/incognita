@@ -49,7 +49,7 @@ def _locate(xx: Tensor, x: Tensor) -> Tensor:
     """TALYS locate(xx, 0, ie, x, j) for ascending xx(0:ie), batched over x -- `_bisect`'s
     result, read from a per-table lookup.
 
-    SPEEDD: the bisection's answer is a step function of x that can only change AT a table
+    The bisection's answer is a step function of x that can only change AT a table
     value (every comparison is `x >= xx(jm)`), so it is fixed by its value at each distinct table
     value and at one point inside each gap between them. `_partition` evaluates the literal
     bisection there once per table; a query is then a searchsorted into the sorted table values.
@@ -320,7 +320,7 @@ def fstrength_gp(
                 -upf * torch.abs(_scalar(gp.beta2))
             )
     bumps = gp.eadj_e1 if flag_e1 else (gp.eadj_m1 if flag_m1 else ())
-    if bumps:  # ENGADJ: energy-local strength factor f(Egamma) (TALYS fstrength.f90 adjust on the strength)
+    if bumps:  # `eadj`: energy-local strength factor f(Egamma) (TALYS fstrength.f90 adjust on the strength)
         from physics.hf import eadj
 
         out = out * torch.as_tensor(eadj.bump_values(bumps, e_gamma.detach().numpy()), dtype=out.dtype)

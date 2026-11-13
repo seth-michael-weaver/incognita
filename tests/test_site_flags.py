@@ -46,7 +46,7 @@ def test_light_nuclides_without_files_are_unflagged():
 
 
 def test_rr_readme_count_matches_the_files():
-    # data/rr/README.md is copied from RESFILL by scripts/build_site_rr.py; its file count must match what is published
+    # data/rr/README.md is copied from the resonance-fill output by scripts/build_site_rr.py; its file count must match what is published
     m = re.search(r"`rr/<Z>/<A>\.json`, (\d+) files", (DATA / "rr" / "README.md").read_text(encoding="utf-8"))
     assert m and int(m.group(1)) == len(_rr_files())
 

@@ -12,7 +12,7 @@ not a reimplementation from papers. The priorities are strictly ordered:
 
 1. **Faithful.** Same inputs (TALYS's own `structure/` database, read directly), same defaults,
    same grids, interpolation and quadrature, same model branches. It must reproduce TALYS
-   output (§6 gates) before anyone "improves" anything. Every disagreement must be traceable to
+   output (§6 acceptance tests) before anyone "improves" anything. Every disagreement must be traceable to
    one routine, which is why every ported function names the Fortran it ports.
 2. **Fast.** Vectorised over (case, energy, spin, parity, bin) in `torch.float64`, CPU and
    GPU. A literal DO-loop-for-for-loop translation into Python is **not acceptable** in the hot
@@ -22,7 +22,7 @@ not a reimplementation from papers. The priorities are strictly ordered:
 3. **Differentiable** with respect to continuous model parameters (§4.4). Discrete structure
    (which levels, grid positions, model switches) is prepared once and is not differentiated.
 
-Improvements (learned ingredients, new physics) come after the E2E gate, behind a flag whose
+Improvements (learned ingredients, new physics) come after the E2E test passes, behind a flag whose
 default reproduces TALYS.
 
 ## 2. Package layout — one subpackage per TALYS subsystem
@@ -172,13 +172,13 @@ emission energies, `L` orbital l, `Jx` spin index, `B` bins, `Lv` discrete level
 
 **Injection rule.** Every consumer accepts its upstream object as an argument, so it can be
 tested with TALYS's own upstream values from `physics.hf.reference` before the upstream port
-exists. `compound` must pass its gate with dump-injected T, ρ, Tγ *before* it is run on ported
+exists. `compound` must pass its test with dump-injected T, ρ, Tγ *before* it is run on ported
 inputs; that separates "compound is wrong" from "an input is wrong".
 
-## 6. Acceptance tests (gates are pre-registered in `docs/results/hf-engine-gates.md`)
+## 6. Acceptance tests (tolerances fixed before the port was written)
 
 Metric for a ported quantity `p` against TALYS `t`, over all points with `t` above the stated
-floor: `r = |ln(p/t)|`. Component gates bound the **95th percentile** of `r` and report the
+floor: `r = |ln(p/t)|`. Component tests bound the **95th percentile** of `r` and report the
 median and max. Tests live in `tests/hf/`, one file per task, and skip (not fail) when the
 reference parquet is absent.
 
@@ -197,11 +197,11 @@ reference parquet is absent.
 | A-cn2 | same with WFC (Moldauer), inputs injected | `binary_population` (`default`) | 2% |
 | A-mult | exclusive channels, residual production, per-level xs, inputs injected | `xs_channels`, `residual_production`, `xs_levels` | 5% |
 | A-fis | (n,f), fission transmission | `fission` | 5% (actinides, bridge T) |
-| E2E | every channel end to end on ported inputs | `xs_*` | §7 of the gates doc: median ≤ 5%, kill > 15% |
+| E2E | every channel end to end on ported inputs | `xs_*` | median ≤ 5%, reject > 15% |
 
 The reference set, energies and variants are fixed in `physics/hf/talys_reference.py`
 (24 targets A 40–241; 23 energies 1 keV–20 MeV; `default`, `wfc_off`, `minimal`, on-demand
-`population`). Adding targets is fine; changing an existing target's inputs invalidates gates.
+`population`). Adding targets is fine; changing an existing target's inputs invalidates the tests.
 
 ## 7. What is explicitly out of scope for the port
 

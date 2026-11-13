@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CENGSETUP: build physics/hf/native/lib/libsetup.so (native/setup.c). Bits do not depend on the
+# Build physics/hf/native/lib/libsetup.so (native/setup.c). Bits do not depend on the
 # vector flags: ISO C with -ffp-contract=off fuses no product and reorders no sum.
 set -euo pipefail
 cd "$(dirname "$0")/.."

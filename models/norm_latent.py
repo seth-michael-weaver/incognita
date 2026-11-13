@@ -168,7 +168,7 @@ def norm_latent_nll(pred_log: Tensor, log_var: Tensor, rows: DatasetRows, *,
     # A masked-out row must not contribute to its dataset's shared offset either, so the mask
     # is applied to the sufficient statistics rather than to the finished per-row terms. Zero
     # weight is exactly "this row is not in this likelihood" -- which is what makes the
-    # hold-out honest: `row_mask` is gathered from the same training weights the rest of the
+    # cross-validation honest: `row_mask` is gathered from the same training weights the rest of the
     # loss uses, so a nuclide zeroed out of a CV fold is zeroed out here too.
     w = w.clamp_min(0.0)
     keep = (w > 0).float()

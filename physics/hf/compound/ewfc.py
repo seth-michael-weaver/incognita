@@ -1,4 +1,4 @@
-"""EWCC (Incognita extension, default OFF): the Engelbrecht-Weidenmueller transformation of the Moldauer
+"""`ewfc` (Incognita extension, default OFF): the Engelbrecht-Weidenmueller transformation of the Moldauer
 width-fluctuation correction for coupled-channels targets.
 
 Hauser-Feshbach with width fluctuations assumes the penetration matrix P = 1 - <S><S>^dagger is
@@ -24,7 +24,7 @@ that `wfc.moldauer_sums` factorises is replaced by sum_alpha w_alpha p_alpha / (
 w_alpha = sum_{a incident} |U_alpha a|^2. Every channel enters Moldauer's product once, the coupled
 ones as eigen-channels.
 
-P on the coupled channels (registered in development notes) is the CC solve's own, as in ECIS's compound
+P on the coupled channels is the CC solve's own, as in ECIS's compound
 routine (scam, Satchler P, lo(83) = F) and Kawano et al.: the excited coupled levels' transmissions
 become the CC P_cc at the incident energy instead of TALYS's ground-state Tjl at E - E_level. The
 ground-state diagonal stays the engine's Tjlinc (the same CC quantity from the cached solve; equal to
@@ -38,7 +38,7 @@ Scope: neutron incident, widthmode 1 (Moldauer) where comptarget applies WFC (E_
 Hauser-Feshbach (W = 1) in the eigen space above it, Python compound path only. `engine_c.front` and the batch kernels refuse when the switch is on and
 the target is coupled; the GPU capture/full paths raise.
 
-Keyword `ewtransform y` (lines/cards) or env INCOGNITA_EWFC = y|1 (keyword `ewfc` is not usable: TALYS's own `ewfc`
+Keyword `ewtransform y` (deck lines) or env INCOGNITA_EWFC = y|1 (keyword `ewfc` is not usable: TALYS's own `ewfc`
 keyword is the WFC energy cut and is left alone).
 """
 
@@ -94,7 +94,7 @@ class CCBlocks:
 
 
 # ------------------------------------------------------------------------------------------------- the CC S-matrix
-# key -> (options, value). ENGFIX4: the key holds `id(options)`; the entry keeps the object itself and
+# key -> (options, value). the key holds `id(options)`; the entry keeps the object itself and
 # a hit must be that same object, so a freed Options whose address is reused by a new one (another
 # deck, another run in the same worker) never gets the old run's blocks.
 _MEMO: dict = {}
@@ -102,7 +102,7 @@ _MEMO: dict = {}
 
 def cc_blocks(Z: int, A: int, e_mev: float, band: dict, options, two_j_max: int) -> CCBlocks:
     """Solve the incident coupled channels at one energy on the reference Python path and keep P per
-    (J, parity), J up to `two_j_max` (both parities). Same OMP (T4, incl. fit cards through
+    (J, parity), J up to `two_j_max` (both parities). Same OMP (T4, incl. fit lines through
     `options`), channel sets, form factors, radial grid and refinement as `incident_coupled`."""
     key = (Z, A, float(e_mev), int(two_j_max), id(options))
     hit = _MEMO.get(key)
@@ -243,7 +243,7 @@ def attach(inp, cas, e_inc_mev: float) -> None:
     # every incident energy: Moldauer in the eigen space where comptarget applies WFC (E <= ewfc), Hauser-Feshbach
     # (W = 1) in the eigen space above it -- the transform itself is not a width-fluctuation effect, and stopping it
     # at ewfc would put a step into the coupled-level exits there
-    # ENGFIX4: an entry is (options, {e: CCBlocks}) and serves only that same Options object (see `_MEMO`)
+    # an entry is (options, {e: CCBlocks}) and serves only that same Options object (see `_MEMO`)
     key = (int(cas.Zt), int(cas.At), id(cas.options), tuple(getattr(cas, "energies", ()) or ()))
     ent = _BATCH.get(key)
     if ent is not None and ent[0] is not cas.options:

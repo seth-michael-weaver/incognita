@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """README (n,p) claims: the learned correction (frozen C3) vs our engine's TENDL no-data recipe (R0) on the registered fresh set,
-and its Student-t intervals: cross-fitted on held-out elements (M1, 6 element groups) and descriptive on the fresh records.
+and its Student-t intervals: cross-fitted on out-of-fold elements (M1, 6 element groups) and descriptive on the fresh records.
     python scripts/release/score_np.py docs/release/exam OUT.md
 Ported from the development tree: NP-CONFIRM scorer (terra_model.boot_diff, 2,000 draws, seed 20260923) and docs/release/terra/np_intervals.py."""
 import json, sys

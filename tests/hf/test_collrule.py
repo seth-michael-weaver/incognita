@@ -1,4 +1,4 @@
-"""COLLRULE: keyword `collrule` (env alias INCOGNITA_COLLRULE) = target coupling scheme from measured structure. Default n = TALYS."""
+"""Keyword `collrule` (env alias INCOGNITA_COLLRULE) = target coupling scheme from measured structure. Default n = TALYS."""
 
 import pytest
 

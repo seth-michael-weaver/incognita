@@ -37,62 +37,52 @@ if TYPE_CHECKING:
 
 SOSWITCH_DEFAULT_MEV = 10.0  # input_directpar.f90:64
 
-# FISSC2: the radial step of the incident coupled-channels solve at low incident energy.
+# The radial step of the incident coupled-channels solve at low incident energy.
 #
 # ECIS integrates its own grid (`omp.schrodinger.ecis_grid`, h = min(a/2, 0.5/k) ~ 0.27 fm) with
-# the MODIFIED Numerov (`ecist.f` inpa, ecis-116); the port integrates the same grid with a plain
-# matrix Numerov, whose truncation error has the opposite sign and does not cancel
-# (docs/results/hf-ecis-port.md "The integration step").  `refine = 1` was chosen there because
-# the *injected* f6.2/f6.3 OMP parameters carried an error of the same size and opposite sign, so
-# refining was not uniformly better.  Every live path now passes `omp=None` and builds T4's exact
-# RIPL/KD03 parameters instead (T4RIPL, 7eb846a9), so that cancellation is gone and what is left
-# is the port's own truncation error -- 1.0-1.9e-3 on sigma_tot of a deformed actinide at 1 keV,
-# which is CHART1's whole fissioning-29 deficit (docs/results/hf-fissc2.md).
+# the MODIFIED Numerov (`ecist.f` inpa, ecis-116).  A plain matrix Numerov on the same grid has a
+# truncation error of the opposite sign that does not cancel -- 1.0-1.9e-3 on sigma_tot of a
+# deformed actinide at 1 keV.
 #
-# **Halving the step is enough.**  The plain Numerov is O(h**4): measured on 23 coupled targets,
-# `|x(refine)/x(8) - 1|` at 1 keV is 5.6e-4 / 3.4e-5 / 2.0e-6 for refine 1 / 2 / 4 on sigma_tot
-# and 8.4e-4 / 5.0e-5 / 3.0e-6 on sigma_reac -- a factor 16 per halving.  `refine = 2` therefore
-# already leaves 1/16 of the truncation error, well under every other floor, at half the cost of
-# `refine = 4`.
+# **Halving the step is enough** for the plain Numerov, which is O(h**4): measured on 23 coupled
+# targets, `|x(refine)/x(8) - 1|` at 1 keV is 5.6e-4 / 3.4e-5 / 2.0e-6 for refine 1 / 2 / 4 on
+# sigma_tot and 8.4e-4 / 5.0e-5 / 3.0e-6 on sigma_reac -- a factor 16 per halving.  `refine = 2`
+# therefore already leaves 1/16 of the truncation error, well under every other floor, at half the
+# cost of `refine = 4`.
 #
-# **Only below `INCIDENT_REFINE_EMAX_MEV`.**  Two reasons, both measured (hf-fissc2.md):
+# **Only below `INCIDENT_REFINE_EMAX_MEV`.**  Two reasons, both measured:
 #   * cost -- the number of total-J blocks grows with the incident energy, so the sub-MeV end is a
 #     small share of a target's coupled-channels cost and the 20 MeV end is most of it;
-#   * accuracy -- above ~0.2 MeV the port's truncation error is already below 2e-4 and is partly
-#     CANCELLING the other floors (the f6.2 print format of the injected parameters, ECIS's own
-#     `1p,d12.5` write-back), so converging it there makes the residual worse, not better.  That
-#     is the same non-monotonicity docs/results/hf-ecis-port.md reported.
+#   * accuracy -- above ~0.2 MeV the plain step's truncation error is already below 2e-4 and is
+#     partly CANCELLING the other floors (ECIS's own `1p,d12.5` write-back), so converging it there
+#     makes the residual worse, not better.
 #
-# The threshold is the measured crossover, not a round number.  On the whole chart (482 x 20,
-# CHART1 cells against stock TALYS) `refine = 2` applied at E <= 38.4 keV moves 299 cells INTO
-# 1e-3 and 48 out; extending it to the next two grid points (64.7 and 109 keV) adds only 16 more
-# in against 24 more out, and those two are also the expensive ones, because the number of
-# total-J blocks grows with the incident energy.  0.05 MeV sits between the two.
+# The threshold is the measured crossover, not a round number.  On the whole chart (482 x 20 cells
+# against stock TALYS) `refine = 2` applied at E <= 38.4 keV moves 299 cells INTO 1e-3 and 48 out;
+# extending it to the next two grid points (64.7 and 109 keV) adds only 16 more in against 24 more
+# out, and those two are also the expensive ones.  0.05 MeV sits between the two.
 #
-# `HF_INC_REFINE=1` turns it off (the A/B lever); an explicit `refine != 1` from a caller (the
-# A-inc score tools, which gate the port on ECIS's own grid) always wins.
+# An explicit `refine != 1` from a caller (the A-inc score tools, which test the port on ECIS's
+# own grid) always wins.
 #
 # ---------------------------------------------------------------------------------------------
-# CCNUMEROV: **the default is back to 1, because the cause above is now fixed at its source.**
-# `solver.modified_numerov` steps ECIS's own modified Numerov (`ecist.f::inch`), so the port is
-# on ECIS's discretisation instead of the plain Numerov's opposite-signed one, and refining the
-# step now moves the answer AWAY from ECIS rather than towards it.  Measured, whole chart
-# 482 x 20 against stock TALYS, three arms interleaved on one Mac (docs/results/hf-ccnumerov.md):
+# **The default is 1 (no refinement)**, because `solver.modified_numerov` steps ECIS's own
+# modified Numerov (`ecist.f::inch`): the port is on ECIS's discretisation, and refining the step
+# moves the answer AWAY from ECIS rather than towards it.  Measured, whole chart 482 x 20 against
+# stock TALYS, three arms interleaved on one machine:
 #
-#   CHART1 within-1e-3 | fissc2 head | modified + this refinement | modified, refinement off
-#   all 482            |     0.99544 |                    0.99658 |                  0.99750
-#   fissioning 29      |     0.97861 |                    0.98404 |                  0.98645
-#   two-phonon 37      |     0.97794 |                    0.98462 |                  0.99536
-#   colltype R cells   |     0.99060 |                    0.99490 |                  0.99597
-#   chart CPU-s        |       286.6 |                      269.0 |                    261.0
+#   within-1e-3        | plain + refinement | modified + refinement | modified, refinement off
+#   all 482            |            0.99544 |               0.99658 |                  0.99750
+#   fissioning 29      |            0.97861 |               0.98404 |                  0.98645
+#   two-phonon 37      |            0.97794 |               0.98462 |                  0.99536
+#   colltype R cells   |            0.99060 |               0.99490 |                  0.99597
+#   chart CPU-s        |              286.6 |                 269.0 |                    261.0
 #
-# The third column beats the second on every slice and costs less, so the workaround is off by
-# default.  It is kept, not deleted: `HF_INC_REFINE=2` restores it, which is how the table above
-# was measured, and it is still the right lever if a future change puts the port back on a
-# discretisation of its own.
+# The third column beats the second on every slice and costs less, so the refinement is off by
+# default.  `HF_INC_REFINE=2` turns it on, for comparisons or a discretisation of the port's own.
 #
-# ENGFIX4: both are read from the environment on every call (they used to be read once at import, so
-# a long-lived worker kept its parent's values).
+# Both switches are read from the environment on every call, so a long-lived worker sees the
+# current values.
 def incident_refine() -> int:
     """`HF_INC_REFINE` (default 1 = off).
 
@@ -119,7 +109,7 @@ def _refine_axis(e: Tensor, refine: int) -> Tensor:
     return torch.where(e <= incident_refine_emax_mev(),
                        torch.tensor(int(ref), dtype=torch.int64),
                        torch.tensor(1, dtype=torch.int64))
-# the OMP fields the solver reads, in ECIS's card order (schrodinger._FIELDS without `ef`)
+# the OMP fields the solver reads, in ECIS's input-record order (schrodinger._FIELDS without `ef`)
 _OMP_FIELDS: tuple[str, ...] = (
     "v_mev", "rv_fm", "av_fm", "w_mev", "rw_fm", "aw_fm",
     "vd_mev", "rvd_fm", "avd_fm", "wd_mev", "rwd_fm", "awd_fm",
@@ -171,9 +161,9 @@ def _t4_parameters(Z: int, A: int, particle: int, e: Tensor, options):
 def t4_params(Z: int, A: int, o):
     """The `Params` `_t4_parameters` builds the incident OMP from (`default_params(Z, A, o)`, memoised).
 
-    SPEEDT: `default_params` is ~16 ms and depends only on (Z, A, options); a caller walking an
+    `default_params` is ~16 ms and depends only on (Z, A, options); a caller walking an
     energy grid one energy at a time (`Cascade.incident`) hands the same `Options` every time.
-    STAGECACHE keys the coupled incident channel on this object too.
+    The stage cache keys the coupled incident channel on this object too.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -211,9 +201,9 @@ def _merge(parts: list[tuple[Tensor, CoupledResult]], n_e: int) -> CoupledResult
     )
 
 
-# CCFAST2: one incident coupled-channels solve per (target, energy) per process. The direct deck
+# One incident coupled-channels solve per (target, energy) per process. The direct deck
 # (`direct.chain._coupled_cached`, the whole declared grid at once) and `Cascade.incident` (one
-# energy at a time) used to solve the same blocks twice -- a third of a deformed target's run.
+# energy at a time) would else solve the same blocks twice -- a third of a deformed target's run.
 # `solver.sum_blocks` converges each energy on its own, so a row does not depend on which other
 # energies shared its call and the second caller can read the first one's. The key carries every
 # input the solve reads: the target, projectile, band, lmax, refine, the soswitch choice and the
@@ -234,7 +224,7 @@ _SOLVED_MAX = 4096
 # later caller a row from a different batch than the one it would have solved and move its result
 # by ~1e-15. A batch hit is the very computation the caller would repeat, on the same inputs, so
 # it is bit for bit what solving gives. The key also holds every environment switch that can move a
-# solver number, through the row keys' `ccdisk.env_token()` (ENGFIX4; it was `ccdisk._NUMERICS_ENV`
+# solver number, through the row keys' `ccdisk.env_token()` (it was `ccdisk._NUMERICS_ENV`
 # and the two INCOGNITA_ switches the solve reads); the source and the libraries cannot change
 # inside a process. `HF_CC_CARRY=0` turns it
 # off. With `INCOGNITA_CC_BATCHCACHE=<dir>` the same batches are also kept on disk (`ccdisk`, under
@@ -248,7 +238,7 @@ def _carry_key(keys: list[tuple], miss: Tensor) -> tuple | None:
     """The carry key of solving the energies `miss` of `keys`, or None when carrying is off."""
     if os.environ.get("HF_CC_CARRY", "1") == "0":
         return None
-    # ENGFIX4: the row keys already end in `ccdisk.env_token()` (every switch, read per call)
+    # the row keys already end in `ccdisk.env_token()` (every switch, read per call)
     return ("perfcc2-batch", tuple(keys[i] for i in torch.nonzero(miss).reshape(-1).tolist()))
 
 
@@ -350,7 +340,7 @@ def incident_coupled(
 
     `refine` is the radial step divisor.  Left at 1 (every live path) the module's own policy
     applies instead: the step is halved below `INCIDENT_REFINE_EMAX_MEV`, where the port's plain
-    Numerov carries a truncation error ECIS's modified one does not (FISSC2, see the constants
+    Numerov carries a truncation error ECIS's modified one does not (see the constants
     above).  Any other value is taken literally on the whole axis.
 
     `soswitch` is handled here, not by the caller: `incidentecis.f90:280-287` chooses
@@ -434,7 +424,7 @@ def incident_coupled(
         `solver.sum_blocks` converges each energy on its own and `lmax` is fixed on the whole
         axis before the split, so which energies share a call changes no value -- only the radial
         extent the batch carries, which is why the refined low-energy rows are solved apart from
-        the unrefined ones (FISSC2) exactly as the two `soswitch` sides already are.
+        the unrefined ones exactly as the two `soswitch` sides already are.
         """
         n_sel = int(sel.sum())
         parts = []
@@ -453,8 +443,8 @@ def incident_coupled(
 
     keys = _energy_keys(omp, e, (Z, A, particle, _band_key(band), nj,
                                  bool(allow_undeformed_spin_orbit), soswitch))
-    if keys is not None:  # FISSC2: the refinement is per energy, so the key must be too
-        # ENGFIX4: and every switch (`ccdisk.env_token`, read now), so `_SOLVED`, the row cache
+    if keys is not None:  # The refinement is per energy, so the key must be too
+        # and every switch (`ccdisk.env_token`, read now), so `_SOLVED`, the row cache
         # and the batch carry never serve a row solved under other switches
         tok = ccdisk.env_token()
         keys = [k + (int(ref_ax[i]), tok) for i, k in enumerate(keys)]
@@ -469,7 +459,7 @@ def incident_coupled(
     else:
         miss = torch.tensor([k not in _SOLVED for k in keys], dtype=torch.bool)
         stagetime.count("cc_mem_hits", n_e - int(miss.sum()))
-        # CCCACHE: the same rows, from disk, across processes and runs. `ccdisk.load` returns
+        # The same rows, from disk, across processes and runs. `ccdisk.load` returns
         # None for anything but an exact key match on a readable file, so a hit is the row this
         # process would have solved and a corrupt file is simply a miss.
         if bool(miss.any()) and ccdisk.enabled():

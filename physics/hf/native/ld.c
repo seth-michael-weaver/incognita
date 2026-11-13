@@ -1,6 +1,6 @@
-/* CENGLD (ROUTE100 WP6): level densities, matching and rhogrid in one C call each, for the analytical
+/* Native: level densities, matching and rhogrid in one C call each, for the analytical
  * constant-temperature + Fermi-gas model (ldmodel 1) without collective enhancement or fission
- * barriers, off the autograd graph -- the nuclei NATIVEX2's `nx2_ld.c` kernels already carry.
+ * barriers, off the autograd graph -- the nuclei the native `nx2_ld.c` kernels already carry.
  *
  *   ceng_ld_match    densitymatch.f90:1 for barrier 0 as `density.matching.densitymatch`: the
  *                    Fermi-gas tables, the empirical Tmemp/Exmemp, `matching` (zbrak + rtbis),
@@ -415,7 +415,7 @@ int ceng_ld_spincut(const double *f, int64_t model1, int64_t colld_on, const dou
     return 0;
 }
 
-/* CENGLD2: `feeding.Cascade.spec`'s level-density rows of one cascade nucleus in one call.
+/* Shared record: `feeding.Cascade.spec`'s level-density rows of one cascade nucleus in one call.
  *   maxj  exgrid.f90:239-256 as `feeding._maxj_of`: numJ everywhere, and on the continuum bins
  *         nl + 1 .. n - 1 (when there are any) max_spin_index of spincut at a = A/8 -- the
  *         double spin cutoff of `_spincut_np`, its float32 cast, sqrt and truncation.

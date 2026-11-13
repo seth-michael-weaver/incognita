@@ -1,4 +1,4 @@
-"""SPEEDP: the scheduling machinery the dump-free arm uses to skip work it is not asked for.
+"""The scheduling machinery the dump-free arm uses to skip work it is not asked for.
 
 None of it may change a number. What it CAN do wrong is serve a narrowed answer to a caller that
 asked for the whole grid, so that is what these test.

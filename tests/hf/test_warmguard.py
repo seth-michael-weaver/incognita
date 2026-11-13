@@ -1,6 +1,6 @@
-"""SPEEDFIX (warmrun trap): a Cascade is refused when the fitlib cards changed since it was built.
+"""Warmrun trap: a Cascade is refused when the fitlib parameter lines changed since it was built.
 
-SPEEDPROF found that a kept Cascade + `warmrun.drop_parameter_caches` after a lines change returned
+A kept Cascade + `warmrun.drop_parameter_caches` after a lines change would return
 capture frozen at the first sweep point (up to 5.4x off). The engine now refuses that run.
 """
 import os
@@ -32,21 +32,21 @@ def test_same_cards_pass_changed_cards_refused(monkeypatch):
         cas.check_cards()
     with pytest.raises(RuntimeError, match="changed fitlib cards"):
         warmrun.drop_parameter_caches(cas)
-    # SPEEDPROF's "warm" sweep: deactivate (drops target caches) + drop_parameter_caches
+    # a "warm" sweep: deactivate (drops target caches) + drop_parameter_caches
     fitlib.deactivate()
     with pytest.raises(RuntimeError):
         warmrun.drop_parameter_caches(cas)
-    # SPEEDPROF's "warm2" sweep: new cards forced active without deactivate
+    # a "warm2" sweep: new parameter lines forced active without deactivate
     fitlib._ACTIVE = fitlib.cards(20, 40)
     with pytest.raises(RuntimeError):
         cas.check_cards()
-    # a fresh Cascade under the new cards is fine
+    # a fresh Cascade under the new lines is fine
     cas2 = warmrun.new_cascade(20, 40, (1.0,))
     cas2.check_cards()
 
 
 def test_activate_replaces_stale_cards(monkeypatch):
-    """A lines change WITHOUT deactivate used to keep the old cards for the same target."""
+    """A lines change WITHOUT deactivate must not keep the old lines for the same target."""
     from physics.hf.input import fitlib
 
     _clean(monkeypatch)

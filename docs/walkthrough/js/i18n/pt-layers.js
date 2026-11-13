@@ -1,4 +1,4 @@
-/* Portuguese (pt-PT): layers (chapter 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Portuguese (pt-PT): layers (chapter 12). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>Camada 1 · Uma regra para todos os núcleos</h3>
   <p>A linha azul é a previsão do motor para uma reação. O motor é a camada de baixo: a mesma física e as mesmas definições globais para todos os nuclídeos, sem nada ajustado às secções eficazes de um núcleo concreto.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Mostrar as medições</button></div>
-  <p>É isso que o torna verificável, face às medições e face a outros códigos de modelos aplicados aos mesmos núcleos. Não é um teste às cegas: as definições globais foram escolhidas a observar estas mesmas comparações.${engineScore}</p>
+  <p>É isso que o torna verificável, face às medições e face a outros códigos de modelos aplicados aos mesmos núcleos. Não é um teste independente: as definições globais foram escolhidas a observar estas mesmas comparações.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>Estado atual</h3>
   <p>Uma camada só é adotada depois de testada face às medições, e fica desligada se não ajudar. Hoje o motor está em uso e o TERRA é candidato; a camada de estrutura medida e a banda de incerteza do motor continuam em testes.</p>
-  <p><a href="scoreboard.html" data-keep-lang>Ver o quadro de resultados completo →</a> Todas as comparações que não ganhamos, cada rival e como as ler.</p>
-  <div class="aside">${ASOF ? `Resultados a ${ASOF}, do` : "Resultados do"} registo de investigação do projeto. As curvas da imagem são ilustrativas.</div>
+  <p><a href="scoreboard.html" data-keep-lang>Ver todas as comparações →</a> Todas as comparações que não ganhamos, cada rival e como as ler.</p>
+  <div class="aside">${ASOF ? `Resultados a ${ASOF}, do` : "Resultados do"} registo de comparações do projeto. As curvas da imagem são ilustrativas.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} de {#} medições dentro da banda (objetivo: cerca de {#} %)",
   "no measurements to check the band against": "não há medições com que verificar a banda",
 });
-Object.assign(WT.L.ui, { nav_board: "Quadro de resultados" });
+Object.assign(WT.L.ui, { nav_board: "Comparações" });
 /* i18n_check.sh counts these attribute strings found in the English script code (not in html): data-act="${act}" */

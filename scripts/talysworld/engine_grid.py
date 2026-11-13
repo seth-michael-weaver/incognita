@@ -7,7 +7,7 @@ about 5-6 s per job on start-up and a whole 64-point curve costs 8-13 s in one r
 one job per energy for the same physics, and it is the library's own way of running (run-scoped quantities such as the
 spin-shape sfactor carry over between energies exactly as in the library).
 
-GRIDTOP pad (default on; TW_GRIDTOP=0 or --no-gridtop to turn off): when the compound nucleus is unbound to an ejectile
+grid-top pad (default on; TW_GRIDTOP=0 or --no-gridtop to turn off): when the compound nucleus is unbound to an ejectile
 (min S < 0) one dummy energy max(E) + |min S| + 1 MeV is appended so the outgoing grid reaches every exit; only the
 requested energies are reported. See engine_job.py for the reason. --smin S skips the separation-energy lookup (a separate
 process, ~5 s) when S is already known (the service caches it per nuclide).
@@ -53,10 +53,10 @@ def _energy_subset(sub_ev):
 
     The engine's own subset mechanism (engine.ChainedFull(energies=..., trim_batches=False), used by the engine's
     physics.hf.pool for its bit-identical parallel runs): every run-scoped quantity still comes from the WHOLE declared
-    grid -- the grid top (enincmax, hence the outgoing grid and the GRIDTOP pad), fisom's first-energy latch (the
+    grid -- the grid top (enincmax, hence the outgoing grid and the grid-top pad), fisom's first-energy latch (the
     declared grid's first energy), the batched exciton / coupled-channels set-ups (trim_batches=False) -- and the
     run-scoped sfactor is carried by walking every declared energy below the highest requested one as far as binary.
-    Energies above the highest requested one (e.g. the GRIDTOP pad energy) are not computed at all. sub_ev=None: no-op."""
+    Energies above the highest requested one (e.g. the grid-top pad energy) are not computed at all. sub_ev=None: no-op."""
     if sub_ev is None:
         yield; return
     import numpy as np
@@ -77,7 +77,7 @@ def _energy_subset(sub_ev):
 
 @contextlib.contextmanager
 def _hrule_cache(d):
-    """Cache the library's per-item ISOHOLD h rule (r52pool.h_rule: three extra target builds per arm, ~0.4-1.3 s) on disk
+    """Cache the library's per-item `ISOHOLD` h rule (r52pool.h_rule: three extra target builds per arm, ~0.4-1.3 s) on disk
     under `d`, keyed by everything it reads: engine, Z, A, the lines file's content, the deck lines (incl. the job's
     keywords), the item's own environment and the run's baseline NUCLIDO_* and INCOGNITA_* environment (INCOGNITA_*: an h that
     this repository's engine computed before engine_env mirrored the switches to it is not reused). NOT by the grid: h_rule builds its
@@ -114,7 +114,7 @@ def _hrule_cache(d):
 
 def run(z, a, grid, comp="P", kw="", work="", gridtop=None, smin=None, keep=False, energies=None, skip_pad=False, parallel_arms=False,
         hrule_cache=None):
-    """One engine run of the grid `grid` (+ the GRIDTOP pad). energies: compute and report only this subset of `grid`
+    """One engine run of the grid `grid` (+ the grid-top pad). energies: compute and report only this subset of `grid`
     (the run-scoped quantities still come from the whole padded grid: see _energy_subset); skip_pad: do not compute the
     pad energy (same as energies=grid when a pad is added). Both give the full run's numbers at those energies.
     parallel_arms: a two-arm composition (JS) runs its second arm in a forked copy of this process, at the same time as
@@ -136,7 +136,7 @@ def run(z, a, grid, comp="P", kw="", work="", gridtop=None, smin=None, keep=Fals
             out["s_min_mev"] = smin
             if smin < 0: g.append(max(es) + (-smin + 1.0) * 1e6)
         except Exception as ex:  # noqa: BLE001
-            out["err"] = f"GRIDTOP pad: separation energies unavailable: {type(ex).__name__}: {ex}"[:400]
+            out["err"] = f"grid-top pad: separation energies unavailable: {type(ex).__name__}: {ex}"[:400]
     out["gridtop"] = gridtop; out["n_grid"] = len(g)
     sub = None
     if energies is not None:

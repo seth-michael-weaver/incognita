@@ -1,6 +1,6 @@
 """T10: binary emission, the multi-chance cascade and exclusive channels (A-mult).
 
-The gate runs on instrumented TALYS runs (`physics/hf/emission/em_reference.py`), which are not
+The reference comparison runs on instrumented TALYS runs (`physics/hf/emission/em_reference.py`), which are not
 in git; every test that needs one skips when it is absent, as CONTRACT §6 requires. The unit
 tests below need no dump.
 """
@@ -110,7 +110,7 @@ def test_exclusive_state_tracks_opennum_as_the_size_of_chanopen():
     assert st.opennum == 1
 
 
-# --- injected gate (needs an instrumented dump) -------------------------------------------------
+# --- injected comparison (needs an instrumented dump) -------------------------------------------
 
 
 def test_binary_reproduces_the_discrete_level_partials():
@@ -214,7 +214,7 @@ def test_gamma_cascade_branching_matches_talys_feedexcl():
 
 def test_the_published_gate_passes():
     if not GATE.is_file():
-        pytest.skip("gate not scored yet")
+        pytest.skip("reference comparison not scored yet")
     g = json.loads(GATE.read_text())
     # The only permitted infinity is a point where TALYS itself printed a negative cross section
     # (Bi-209 (n,alpha) to level 30 at 18 MeV): the metric calls a sub-floor reference `inf` even
@@ -225,7 +225,7 @@ def test_the_published_gate_passes():
         assert s["n"] > 0, key
         assert s["n_inf"] <= neg, (key, s, neg)
         assert s["worst_p95"] <= TOL, (key, s)
-    assert g["summary"]["a_mult"]["runs"] == 14, "A-mult is gated on the 14 spherical targets"
+    assert g["summary"]["a_mult"]["runs"] == 14, "A-mult is checked on the 14 spherical targets"
 
 
 # ================================================================================================

@@ -1,5 +1,5 @@
 """T11 fission: the WKB path, the barrier parameters, the transition-state bands and the
-fission transmission, against TALYS's own `fis*.txt` / `fis*.trans` dumps (gate A-fis).
+fission transmission, against TALYS's own `fis*.txt` / `fis*.trans` dumps (check A-fis).
 
 Tests that need the TALYS `structure/` database or the reference archives skip when those are
 absent, as CONTRACT.md §6 requires.
@@ -372,7 +372,7 @@ def test_sierk_and_rldm_give_physical_barriers():
     assert 0.0 < float(esp - egs) < 20.0
 
 
-# --------------------------------------------------------------------------- gate
+# -------------------------------------------------------------------------- check
 
 
 @needs_structure

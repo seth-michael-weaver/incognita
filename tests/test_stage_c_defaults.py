@@ -1,4 +1,4 @@
-"""REDTEAM M7: retraining from the repository must not pull evaluated-library values in by default."""
+"""Retraining from the repository must not pull evaluated-library values in by default."""
 import inspect
 
 from models.stage_c_data import build_bundle

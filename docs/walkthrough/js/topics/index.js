@@ -1,4 +1,4 @@
-/* Lesson index on topics.html (runs after WT.start): a plain list like a glossary (Seth 2026-11-06: no boxes), grouped by
+/* Lesson index on topics.html (runs after WT.start): a plain list like a glossary (no boxes), grouped by
  * part as the page orders them. Each row: number, title, the first sentence of the lesson (from the page, so it is already
  * in the reader's language) and the level; chips filter by level. Built from the page, so adding a lesson needs no edit here. */
 (function () {

@@ -1,7 +1,7 @@
 # Incognita
 
-**Open, calibrated predictions of neutron reaction cross sections across the chart of nuclides, with a public blind
-benchmark and a registry of predictions made before the data.**
+**Open, calibrated predictions of neutron reaction cross sections across the chart of nuclides, with a public benchmark
+on nuclei not used in the fit and a registry of predictions made before the data.**
 
 [![Code: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 [![Data: CC-BY-4.0](https://img.shields.io/badge/data-CC--BY--4.0-lightgrey)](LICENSE-DATA)
@@ -16,16 +16,17 @@ benchmark and a registry of predictions made before the data.**
 - **Website: [www.incognitanuclear.org](https://www.incognitanuclear.org/?lang=en).**
   [Inside a Nuclear Reaction](https://www.incognitanuclear.org/?lang=en) is a teaching walkthrough of what the engine
   computes; [Every nuclide](https://www.incognitanuclear.org/data?lang=en) shows the predicted curves for 6,168 nuclides
-  beside every curated measurement; the [Scoreboard](https://www.incognitanuclear.org/scoreboard?lang=en) compares the
-  engine with other reaction codes, losses first.
-- **Scoreboard result** (development comparisons against existing measurements, not a blind test): against the
+  beside every curated measurement; the [comparison page](https://www.incognitanuclear.org/scoreboard?lang=en) compares
+  the engine with other reaction codes, losses first.
+- **Comparison result** (against existing measurements that were available during development, so not a prediction
+  test): against the
   TALYS-2.24 program, 10 wins, 9 ties, 0 losses; against all rivals together, 47 wins, 19 ties, 0 losses in 66 decided
   comparisons (14 more are not applicable).
 - **Data package:** [`docs/walkthrough/data/board/`](docs/walkthrough/data/board/) holds the per-nucleus rows behind
-  every scoreboard cell, and [`recompute.py`](docs/walkthrough/data/board/recompute.py) recomputes the verdicts from them.
+  every comparison cell, and [`recompute.py`](docs/walkthrough/data/board/recompute.py) recomputes the verdicts from them.
 - **Prediction registry:** [`predictions/2026-10-23/`](predictions/2026-10-23/) holds predictions registered on
-  2026-10-23 for measurements not yet published, with a fixed scoring rule; 16 of the targets are blind and decide the
-  headline verdict.
+  2026-10-23 for measurements not yet published, with a fixed scoring rule; 16 of the targets had no measurement available to us when registered and
+  decide the headline verdict.
 - **Engine:** release tag [`engine-2026-10-22`](https://github.com/seth-michael-weaver/incognita/tree/engine-2026-10-22).
 - **Library:** [`library/v0.2.3/`](library/v0.2.3/) is the latest version: v0.2, built with the scored engine, with its
   Maxwellian averages and rates in the centre-of-mass definition, the engine's own capture below 1 keV and the correct
@@ -39,8 +40,8 @@ benchmark and a registry of predictions made before the data.**
 
 Most nuclei have never had a neutron cross section measured, yet reactors, nucleosynthesis networks, fusion shielding
 and isotope production all need values for them. Incognita gives each nuclide **a value**, **an uncertainty interval**
-whose coverage has been tested on nuclei held out of the fit, and **a regime label** (measured, anchored, interpolated
-or extrapolated). The code, the predictions, the exam they were graded on and timestamped predictions for nuclei not
+whose coverage has been tested on nuclei left out of the fit, and **a regime label** (measured, anchored, interpolated
+or extrapolated). The code, the predictions, the benchmark they were scored on and timestamped predictions for nuclei not
 yet measured are all public, so every claim can be checked.
 
 ## Highlights
@@ -48,8 +49,8 @@ yet measured are all public, so every claim can be checked.
 | | |
 |---|---|
 | **Coverage** | 6,168 nuclides (Z = 8–110), 1 keV – 20 MeV: capture, MACS, stellar rates, (n,p), (n,2n), (n,α) |
-| **Held-out capture** | with measured D0, beats the default TALYS recipe on the sealed vault: 0.1519 vs 0.1712 dex |
-| **Tested intervals** | 95 % interval covers 95.3 % of 674 sealed capture bins published after 2012 |
+| **Capture on unfitted nuclei** | with measured D0, beats the default TALYS recipe on the final validation set (folds 6–7, scored once): 0.1519 vs 0.1712 dex |
+| **Tested intervals** | 95 % interval covers 95.3 % of 674 capture bins published after 2012 (not used in the fit) |
 | **Engine** | a Python/C port of TALYS-2 physics; matches stock TALYS to four decimals on total, elastic, (n,p), (n,α) scores; 11.7x faster per target (no cache) |
 
 Ties and losses are reported too: see the [full benchmark](docs/GUIDE.md#benchmark).
@@ -75,18 +76,18 @@ Running the engine itself needs the TALYS structure database: see [Running the e
 | [`incognita/`](incognita/) | library reader, benchmark scorer and tracks, calibration and curation tools |
 | [`physics/`](physics/) | the Hauser–Feshbach engine |
 | [`scripts/`](scripts/) | `reproduce.sh`, scorers, engine driver, native-kernel builds |
-| [`docs/release/`](docs/release/), [`docs/registry/`](docs/registry/) | frozen exam inputs and expected tables; pre-registered predictions |
-| [`predictions/`](predictions/) | dated prediction registries (blind targets, fixed scoring rule) |
+| [`docs/release/`](docs/release/), [`docs/registry/`](docs/registry/) | frozen benchmark inputs and expected tables; timestamped predictions |
+| [`predictions/`](predictions/) | dated prediction registries (targets without published data, fixed scoring rule) |
 | [`docs/walkthrough/`](docs/walkthrough/) | the explainer website |
 
 The full layout is in the [guide](docs/GUIDE.md#repository-layout).
 
 ## Status and limitations
 
-This is a **v0.1 preview**: research output, not an evaluation. Held-out tests are retrospective; the pre-registered
-predictions have not yet been scored against new measurements. There is no claim of better accuracy than evaluated
+This is a **v0.1 preview**: research output, not an evaluation. Tests on nuclei left out of the fit are retrospective; the
+registered predictions have not yet been scored against new measurements. There is no claim of better accuracy than evaluated
 libraries for measured nuclei; where good data exist, use the data or an evaluation. The library and its benchmark
-numbers come from the v0.1 engine; the scoreboard uses the current engine (22 October 2026). Details: [Status and limitations](docs/GUIDE.md#status-and-limitations).
+numbers come from the v0.1 engine; the comparison page uses the current engine (22 October 2026). Details: [Status and limitations](docs/GUIDE.md#status-and-limitations).
 
 ## Learn more
 

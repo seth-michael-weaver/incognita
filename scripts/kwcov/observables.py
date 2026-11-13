@@ -2,7 +2,7 @@
 """KWCOV: TALYS-2.25 output observables -> docs/hf/observable_coverage.csv (hand-curated, regenerable).
 
 Status for observables (OBSERVABLE_COVERAGE.md explains them):
-  SUPPORTED  in `Results` on the production (C) path with default inputs, compared with stock TALYS by a gate/test
+  SUPPORTED  in `Results` on the production (C) path with default inputs, compared with stock TALYS by a check/test
   PARTIAL    produced only behind an INCOGNITA_* switch, on one driver, or for a subset (named in notes)
   INTERNAL   the engine computes it, but `Results` does not carry it out
   MISSING    not computed

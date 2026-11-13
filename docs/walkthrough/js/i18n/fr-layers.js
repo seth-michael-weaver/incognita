@@ -1,4 +1,4 @@
-/* French: layers (chapter 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* French: layers (chapter 12). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>Couche 1 · Une règle pour tous les noyaux</h3>
   <p>La ligne bleue est la prédiction du moteur pour une réaction. Le moteur est la couche du bas : la même physique et les mêmes réglages globaux pour tous les nucléides, sans rien d'ajusté sur les sections efficaces d'un noyau particulier.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Afficher les mesures</button></div>
-  <p>C'est ce qui le rend vérifiable, face aux mesures et face à d'autres codes de modèles exécutés sur les mêmes noyaux. Ce n'est pas un test à l'aveugle : les réglages globaux ont été choisis en observant ces mêmes comparaisons.${engineScore}</p>
+  <p>C'est ce qui le rend vérifiable, face aux mesures et face à d'autres codes de modèles exécutés sur les mêmes noyaux. Ce n'est pas un test indépendant : les réglages globaux ont été choisis en observant ces mêmes comparaisons.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>État actuel</h3>
   <p>Une couche n'est adoptée qu'après avoir été testée face aux mesures, et elle reste désactivée si elle n'aide pas. Aujourd'hui, le moteur est en service et TERRA est candidate ; la couche de structure mesurée et la bande d'incertitude du moteur sont encore en test.</p>
-  <p><a href="scoreboard.html" data-keep-lang>Voir le tableau des scores complet →</a> Toutes les comparaisons que nous ne gagnons pas, chaque rival, et comment le lire.</p>
-  <div class="aside">${ASOF ? `Scores au ${ASOF}, tirés du` : "Scores tirés du"} registre de recherche du projet. Les courbes de l'image sont indicatives.</div>
+  <p><a href="scoreboard.html" data-keep-lang>Voir toutes les comparaisons →</a> Toutes les comparaisons que nous ne gagnons pas, chaque rival, et comment le lire.</p>
+  <div class="aside">${ASOF ? `Scores au ${ASOF}, tirés du` : "Scores tirés du"} relevé des comparaisons du projet. Les courbes de l'image sont indicatives.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} mesures sur {#} dans la bande (objectif : environ {#} %)",
   "no measurements to check the band against": "aucune mesure pour vérifier la bande",
 });
-Object.assign(WT.L.ui, { nav_board: "Tableau des scores" });
+Object.assign(WT.L.ui, { nav_board: "Comparaisons" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

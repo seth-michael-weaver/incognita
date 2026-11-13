@@ -1,4 +1,4 @@
-/* Korean: layers (21장). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Korean: layers (21장). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>1층 · 모든 원자핵에 하나의 규칙</h3>
   <p>파란 선은 한 반응에 대한 엔진의 예측입니다. 엔진은 맨 아래층입니다. 모든 핵종에 같은 물리와 같은 전역 설정을 쓰며, 개별 원자핵의 단면적에 맞춘 것은 하나도 없습니다.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">측정값 보기</button></div>
-  <p>그래서 측정값과도, 같은 원자핵에 대해 실행한 다른 모형 코드들과도 견주어 검증할 수 있습니다. 다만 블라인드 테스트는 아닙니다. 전역 설정은 바로 이 비교들을 지켜보며 골랐습니다.${engineScore}</p>
+  <p>그래서 측정값과도, 같은 원자핵에 대해 실행한 다른 모형 코드들과도 견주어 검증할 수 있습니다. 다만 독립적인 검증은 아닙니다. 전역 설정은 바로 이 비교들을 지켜보며 골랐습니다.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>현재 상태</h3>
   <p>어떤 층이든 측정값으로 시험한 뒤에야 채택되며, 도움이 되지 않으면 꺼진 채로 남습니다. 현재 엔진은 사용 중이고 TERRA는 후보입니다. 측정 구조 층과 엔진의 불확도 띠는 아직 시험 중입니다.</p>
-  <p><a href="scoreboard.html" data-keep-lang>전체 점수판 보기 →</a> 우리가 이기지 못한 모든 비교, 각 경쟁 상대, 그리고 읽는 방법이 있습니다.</p>
-  <div class="aside">${ASOF ? `${ASOF} 기준 점수, 출처:` : "점수 출처:"} 프로젝트의 연구 기록부. 그림의 곡선은 예시입니다.</div>
+  <p><a href="scoreboard.html" data-keep-lang>모든 비교 보기 →</a> 우리가 이기지 못한 모든 비교, 각 경쟁 상대, 그리고 읽는 방법이 있습니다.</p>
+  <div class="aside">${ASOF ? `${ASOF} 기준 점수, 출처:` : "점수 출처:"} 프로젝트의 비교 기록. 그림의 곡선은 예시입니다.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "측정값 {#}/{#}개가 띠 안 (목표: 약 {#}%)",
   "no measurements to check the band against": "띠를 확인할 측정값 없음",
 });
-Object.assign(WT.L.ui, { nav_board: "점수판" });
+Object.assign(WT.L.ui, { nav_board: "비교" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

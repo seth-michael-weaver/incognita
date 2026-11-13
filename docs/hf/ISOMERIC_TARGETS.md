@@ -1,9 +1,7 @@
 # Isomeric (excited) targets: TALYS `ltarget` in `physics/hf`
 
-Status: design note for the last structural gap of `COVERAGE_PLAN.md` (row GAP). Branch `kwcoviso` (from `kwcov4b`).
-Written before the code, as the plan asked; the results section at the end is filled in after the runs.
-
-Decisions are recorded here and not asked (Seth, 2026-11-08: "decide, record, move on").
+How the engine handles an excited target state (`ltarget > 0`), the design decisions, and the comparison with
+stock TALYS-2.25 (section 6). This closes the last structural gap of `COVERAGE_PLAN.md`.
 
 ## 1. What TALYS-2.25 does for `ltarget > 0`
 
@@ -112,7 +110,7 @@ routine is written with `inp.ltarget` (`compound/target.py`, `target_batch.py`, 
 
 ## 3. Test decks
 
-Stock TALYS-2.25, `scripts/kwcov/biso_stock.sh` (trimmed runs in `~/kwcov/stock/biso/<case>`), incident neutron at
+Stock TALYS-2.25, `scripts/kwcov/biso_stock.sh` (trimmed runs in `<work>/stock/biso/<case>`), incident neutron at
 1, 5, 14 MeV, `channels y`, `filechannels y`, `fileresidual y`, `outdiscrete y`:
 
 | case | target | why |
@@ -129,18 +127,18 @@ Engine side: `scripts/kwcov/biso_compare.py` (fresh process per run, TALYS mode 
 `TALYS_ENV`, i.e. the deliberate defaults off, `docs/hf/FIDELITY_DEFAULTS.md`). Acceptance: `|ours/stock - 1| <= 2 %`
 on total, elastic, nonelastic, capture, inelastic, (n,2n), (n,p), (n,a), fission where stock > 1 mb, at the energies
 where the ground-state run of the same target agrees (the ground-state gap is the engine's own and is reported
-beside it). Unit tests: `tests/hf/test_kwcov_biso.py` (checks, refusals, the direct / pre-equilibrium gates, the
+beside it). Unit tests: `tests/hf/test_kwcov_biso.py` (checks, refusals, the direct / pre-equilibrium conditions, the
 stock numbers transcribed). Defaults stay bit-identical: `tests/hf/test_engine_c.py`.
 
 ## 4. Order of work
 
-1. This note (commit).
+1. This note.
 2. Item 1 (checks, lift the refusal) and the stock decks; run `fe56_l1` to see what the existing `ltarget` plumbing
    gives.
-3. Items 3 and 4 (direct and pre-equilibrium gates); `fe56_l1`, `fe56_l2` against stock.
+3. Items 3 and 4 (direct and pre-equilibrium conditions); `fe56_l1`, `fe56_l2` against stock.
 4. `am242_m` against stock (coupled channels, fission).
 5. Item 8 refusals, the test file, the coverage rows (`scripts/kwcov/inventory.py`, `observables.py`, `render.py`),
-   the gates.
+   the checks.
 
 ## 5. Left out (refused, with the reason in the error)
 
@@ -154,7 +152,7 @@ stock numbers transcribed). Defaults stay bit-identical: `tests/hf/test_engine_c
 
 ## 6. Results
 
-Done on `kwcoviso` as planned (items 1, 3, 4, 8), plus one port bug the first run found:
+Done as planned (items 1, 3, 4, 8), plus one port bug the first run found:
 
 * **Bug: complex-particle pre-equilibrium at the wrong energy.** `preeq/complex.py` (knockout, stripping, breakup)
   rebuilt eninccm as `Etotal - S(0,0,k0)`, which is eninccm + targetE for an excited target (TALYS uses eninccm
@@ -181,9 +179,9 @@ The Am-242m (n,p) at 14 MeV is the one cell above 0.1 %: 2.7 mb, 0.08 % of the n
 has the same sign (+0.47 %); not chased further.
 
 Default mode (the deliberate defaults on) runs too and differs from stock by the same deliberate defaults as the
-ground state (`FIDELITY_DEFAULTS.md`): Fe-56 `ltarget 1` 14 MeV (n,p) +11.2 %, (n,a) +10.7 % (NPWINDOW; ground state
+ground state (`FIDELITY_DEFAULTS.md`): Fe-56 `ltarget 1` 14 MeV (n,p) +11.2 %, (n,a) +10.7 % (`npwindow`; ground state
 +12.1 / +11.0 %), Am-242m 1 MeV fission -2.4 %, capture +13.6 % (exactfis and the other actinide defaults).
 
-Tests: `tests/hf/test_kwcov_biso.py` (checks, refusals, target state, the direct and pre-equilibrium gates, Fe-56
+Tests: `tests/hf/test_kwcov_biso.py` (checks, refusals, target state, the direct and pre-equilibrium conditions, Fe-56
 `ltarget 1` at 1 and 14 MeV and Am-242m at 1 MeV against the transcribed stock numbers). `test_engfix4.py`: the
 Hf-178m2 test (`ltarget 109`) now stops on TALYS's range check, as stock does.

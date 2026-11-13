@@ -1,4 +1,4 @@
-"""SPECOUT: outgoing spectra (and, through `physics.hf.specang`, angular distributions and DDX) of the C path, OUTPUT ONLY.
+"""Outgoing spectra (and, through `physics.hf.specang`, angular distributions and DDX) of the C path, OUTPUT ONLY.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
@@ -55,9 +55,9 @@ def enabled() -> bool:
     """
     if env_enabled():
         return True
-    from physics.hf import angout, recoil, specobs  # KWCOV B3 / B4 / B12: angle, spectrum, DDX, gamma-line and recoil
+    from physics.hf import angout, recoil, specobs  # angle, spectrum, DDX, gamma-line and recoil
 
-    from physics.hf import compoobs  # KWCOV B4b: components y reads the multiple pre-equilibrium records
+    from physics.hf import compoobs  # components y reads the multiple pre-equilibrium records
 
     return angout.wanted() or specobs.wanted() or recoil.wanted() or compoobs.wanted()
 
@@ -289,12 +289,12 @@ def begin_run(cas) -> None:
     global RUN
     from physics.hf import angout, recoil, specobs
 
-    sp = specobs.begin_run(cas)  # KWCOV B4 first: angout records every level when the DDX needs them
-    rc = recoil.begin_run(cas)  # KWCOV B12: recoils need every level's discad too
+    sp = specobs.begin_run(cas)  # first: angout records every level when the DDX needs them
+    rc = recoil.begin_run(cas)  # recoils need every level's discad too
     from physics.hf import compoobs
 
-    co = compoobs.begin_run(cas)  # KWCOV B4b: components y
-    if (angout.begin_run(cas) or sp or rc or co) and not env_enabled():  # KWCOV B3/B4: this run records for the TALYS outputs only
+    co = compoobs.begin_run(cas)  # components y
+    if (angout.begin_run(cas) or sp or rc or co) and not env_enabled():  # this run records for the TALYS outputs only
         clear_run()
         try:
             from physics.hf.engine_c import lib
@@ -399,7 +399,7 @@ def end_energy(pinp, k0: int, b2=None) -> None:
 
         closed = specclose_on()
         discpar = np.zeros((7, len(eg)))
-        xsemis_t, xsmpe_t = np.zeros((7, len(eg))), np.zeros((7, len(eg)))  # KWCOV B4: compemission only (TALYS)
+        xsemis_t, xsmpe_t = np.zeros((7, len(eg))), np.zeros((7, len(eg)))  # compemission only (TALYS)
         per_nuc_t = {}
         for key in sorted(cur["walks"]):
             rec = cur["walks"][key]
@@ -409,8 +409,8 @@ def end_energy(pinp, k0: int, b2=None) -> None:
             ce, cm = compemission(rec, eg, eb, et, de, ebegin, eend, speceps)
             xsemis_t += ce
             xsmpe_t += cm
-            per_nuc_t[key] = (ce.copy(), cm.copy())  # KWCOV B4: TALYS's per-nucleus emission (Eaveragemul, xsngnspec)
-            if closed:  # SPECCLOSE: + the particle emission of discrete parents above threshold (both paths)
+            per_nuc_t[key] = (ce.copy(), cm.copy())  # TALYS's per-nucleus emission (Eaveragemul, xsngnspec)
+            if closed:  # discrete-parent closing: + the particle emission of discrete parents above threshold (both paths)
                 dc, dm = discrete_parent_emission(rec, eg, eb, et, de, ebegin, eend, speceps)
                 ce, cm = ce + dc, cm + dm
                 discpar += dc + dm
@@ -691,7 +691,7 @@ def compemission_py(rec: dict, eg, eb, et, de, ebegin: dict, eend: dict, speceps
 
 
 def discrete_parent_emission(rec: dict, eg, eb, et, de, ebegin: dict, eend: dict, speceps: float):
-    """SPECCLOSE (output only): the particle emission (t >= 1) of one cascade nucleus' DISCRETE levels lying above a
+    """Output only: the particle emission (t >= 1) of one cascade nucleus' DISCRETE levels lying above a
     separation energy. The cascade decays them like any bin (multiple.f90: only levels with Ex <= S_min gamma-cascade)
     and the recorder books that flux (mcontrib rows nex <= Nlast), but compemission.f90 loops the mother over the
     continuum bins only, so it reached no spectrum. A level is sharp: to a discrete daughter level the particle is a
@@ -827,7 +827,7 @@ def pack(Z: int, A: int) -> dict:
         out[f"so_{x}_cont"] = out[f"so_{x}_comp"] + comps["pe"][:, t] + comps["mpe"][:, t] + comps["gr"][:, t]
         out[f"so_{x}_lines_e"] = le[:, t]
         out[f"so_{x}_lines_xs"] = lx[:, t]
-        if any("xsemis_discpar" in r for r in ENERGIES):  # SPECCLOSE: the discrete-parent part (already in comp / mpe)
+        if any("xsemis_discpar" in r for r in ENERGIES):  # discrete-parent closing: the discrete-parent part (already in comp / mpe)
             out[f"so_{x}_discpar"] = comps["discpar"][:, t]
     out["so_ebegin"], out["so_eend"] = eb_, ee_
     if any("xsemis_discpar" in r for r in ENERGIES):

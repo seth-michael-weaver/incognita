@@ -1,9 +1,9 @@
-"""SPEEDW: `preeq.multi.multiple_preequilibrium` on the compiled kernel (`native/speedw.c`).
+"""`preeq.multi.multiple_preequilibrium` on the compiled kernel (`native/speedw.c`).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: SPEEDW (the speed wave; no physics of its own). Acceptance test: A-mpe / E2E, and
+A speed path with no physics of its own. Acceptance test: A-mpe / E2E, and
 `tests/hf/test_mpe_fast.py` (the kernel against the torch loop on every mother bin of a 20 MeV
 cascade).
 
@@ -70,7 +70,7 @@ def multiple_preequilibrium_fast(inp: MultiPreeqInputs, numj: int = 40) -> Multi
     """
     lib = _lib()
     if (lib is None or inp.mpreeqmode != 2 or not inp.flag2comp or inp.flaggshell
-            or len(inp.daughters) != 2 or _on_graph(inp) or inp.phzn0 is not None):  # PHMICRO: torch loop
+            or len(inp.daughters) != 2 or _on_graph(inp) or inp.phzn0 is not None):  # phmodel 2: torch loop
         return multiple_preequilibrium(inp, numj=numj)
     if inp.zcomp == 0 and inp.ncomp == 0:
         return _zero(inp, numj)

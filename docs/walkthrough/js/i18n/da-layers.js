@@ -1,4 +1,4 @@
-/* Danish: layers (chapter 12). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Danish: layers (chapter 12). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>Lag 1 · Én regel for alle kerner</h3>
   <p>Den blå linje er motorens forudsigelse for én reaktion. Motoren er det nederste lag: den samme fysik og de samme globale indstillinger for alle nuklider, uden at noget er tilpasset til tværsnittene for en enkelt kerne.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Vis målingerne</button></div>
-  <p>Det gør den testbar, over for målinger og over for andre modelkoder kørt på de samme kerner. Det er ikke en blindtest: de globale indstillinger blev valgt, mens vi fulgte netop disse sammenligninger.${engineScore}</p>
+  <p>Det gør den testbar, over for målinger og over for andre modelkoder kørt på de samme kerner. Det er ikke en uafhængig test: de globale indstillinger blev valgt, mens vi fulgte netop disse sammenligninger.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>Aktuel status</h3>
   <p>Et lag tages kun i brug, efter at det er testet over for målinger, og det forbliver slået fra, når det ikke hjælper. I dag er motoren i brug, og TERRA er kandidat; laget med målt struktur og motorens usikkerhedsbånd testes stadig.</p>
-  <p><a href="scoreboard.html" data-keep-lang>Se hele resultattavlen →</a> Hver sammenligning, vi ikke vinder, hver konkurrent, og hvordan du læser det.</p>
-  <div class="aside">${ASOF ? `Resultater pr. ${ASOF}, fra` : "Resultater fra"} projektets forskningslog. Kurverne på billedet er illustrative.</div>
+  <p><a href="scoreboard.html" data-keep-lang>Se alle sammenligningerne →</a> Hver sammenligning, vi ikke vinder, hver konkurrent, og hvordan du læser dem.</p>
+  <div class="aside">${ASOF ? `Resultater pr. ${ASOF}, fra` : "Resultater fra"} projektets sammenligningsdata. Kurverne på billedet er illustrative.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} af {#} målinger inden for båndet (mål: ca. {#} %)",
   "no measurements to check the band against": "ingen målinger at tjekke båndet op imod",
 });
-Object.assign(WT.L.ui, { nav_board: "Resultattavle" });
+Object.assign(WT.L.ui, { nav_board: "Sammenligninger" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

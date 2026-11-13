@@ -1,22 +1,22 @@
-"""ACTPHYS: actinide-only photon-strength corrections for the keV capture deficit, off by default.
+"""`actphys`: actinide-only photon-strength corrections for the keV capture deficit, off by default.
 
 TALYS-2.x's default photon strength (SMLO-2019 E1 + its M1) gives U-239 a theoretical s-wave
 <Gamma_gamma> of 11.2 meV against 23.6 meV measured (RIPL-3), and U-238 capture sits 0.12-0.22 dex
-low from 10 keV to 1 MeV (ACTSC, ACTFOLD). `INCOGNITA_ACTPHYS` switches on, for nuclei with
+low from 10 keV to 1 MeV. `INCOGNITA_ACTPHYS` switches on, for nuclei with
 Z >= ZMIN (88) only:
 
 * ``gg``   -- the E1 ftable default of each nucleus with a RIPL-3 s-wave <Gamma_gamma> is set to
   the factor that makes TALYS's theoretical <Gamma_gamma> equal it (what `gnorm y` would do
-  without its keV/eV bug, GNORMFIX). Nuclei with no RIPL-3 width keep ftable 1.
-* ``sc``   -- the Kopecky-2017 M1 scissors (PORTLEVER's `gamma/scissors.py` term) replaces
+  without its keV/eV bug). Nuclei with no RIPL-3 width keep ftable 1.
+* ``sc``   -- the Kopecky-2017 M1 scissors (the `gamma/scissors.py` term) replaces
   SMLO-2019's scissors, Z >= ZMIN only.
 * ``both`` -- ``sc`` plus the ``gg`` factors re-derived WITH the Kopecky scissors in place, so
   <Gamma_gamma> is again the RIPL-3 value and the scissors only reshapes the spectrum.
 
-Factors: `scripts/actphys/gamgam.py` (stock TALYS, `docs/results/actphys/gamgam.json`), keyed by
+Factors: computed with stock TALYS, keyed by
 the nucleus whose PSF they scale (the compound nucleus of target A-1). Unlike TALYS's `gnorm`,
 which normalises only the initial compound nucleus, the factor applies wherever that nucleus's
-strength is built, so all engine paths agree whatever (zix, nix) they pass. A user/PARAMWIRE
+strength is built, so all engine paths agree whatever (zix, nix) they pass. A user/parameter-set
 `ftable` still replaces the default, as a TALYS keyword does. Z < ZMIN is never touched, so
 non-actinide output is bit-identical with the switch on or off.
 
@@ -49,8 +49,8 @@ ENV = "INCOGNITA_ACTPHYS"
 
 
 def _env_mode() -> str:
-    """ENGFIX4: the mode, read from the environment on every call (it used to be read once at import,
-    so a long-lived worker kept its parent's value). `set_mode` writes the variable."""
+    """The mode, read from the environment on every call (not once at import, so a long-lived
+    worker sees the current value). `set_mode` writes the variable."""
     m = os.environ.get(ENV, "").strip().lower()
     if m == "0":
         m = ""

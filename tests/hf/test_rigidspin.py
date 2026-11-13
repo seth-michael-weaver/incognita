@@ -1,4 +1,4 @@
-"""RIGIDSPIN (ISORATIO): default OFF; R = Irigid(0) T / sigma^2_eng at S; applying the lines makes the ON cascade rigid (R -> 1)."""
+"""Rigid spin cut-off: default OFF; R = Irigid(0) T / sigma^2_eng at S; applying the lines makes the ON cascade rigid (R -> 1)."""
 import os
 
 import pytest
@@ -6,7 +6,7 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def _drop_cards_after():
-    """test_lines_make_box_rigid activates fitted cards; drop them so later tests see the environment they set."""
+    """test_lines_make_box_rigid activates fitted keyword lines; drop them so later tests see the environment they set."""
     yield
     from physics.hf import chartrun
     from physics.hf.input import fitlib

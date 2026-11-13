@@ -1,4 +1,4 @@
-"""SPEEDW: the compiled DWBA Numerov loop (`native/speedw.c`) equals `ecis.dwba.distorted_waves`'s
+"""The compiled DWBA Numerov loop (`native/speedw.c`) equals `ecis.dwba.distorted_waves`'s
 torch loop to the bit.
 
 The kernel repeats torch's own complex kernels at one thread -- the plain product on the first
@@ -39,7 +39,7 @@ def test_kernel_is_the_torch_loop_bit_for_bit(nk, nlj, n, monkeypatch):
     ref = dwba.distorted_waves(f, kappa2, l, h, n)
     assert got.shape == ref.shape
     if platform.machine().lower() in ("arm64", "aarch64"):
-        # COREX: the arm64 kernel steps rows side by side with the division turned into a
+        # the arm64 kernel steps rows side by side with the division turned into a
         # product (speedw.c); it agrees with the loop to rounding, not to the bit
         scale = ref.abs().clamp(min=1e-300)
         rel = ((got - ref).abs() / scale)[ref.abs() > 0]

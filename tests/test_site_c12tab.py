@@ -1,7 +1,7 @@
-"""C-12 Elastic tab of the Every nuclide page (data.html): the comparison layer of INCOGNITA's R-matrix evaluation C12RM9.
+"""C-12 Elastic tab of the Every nuclide page (data.html): the comparison layer of INCOGNITA's C-12 R-matrix evaluation.
 
 data/light_evals/cmp/C12RM9.json (scripts/export_c12_compare.py, from the frozen fit) goes into docs/walkthrough/data/n/6/12.json
-as rm.cmp through scripts/add_light_evals.py: the natC curve, the held-out natC totals, their log-bin averages, the IAEA
+as rm.cmp through scripts/add_light_evals.py: the natC curve, the unfitted validation natC totals, their log-bin averages, the IAEA
 standard 2017 points and ENDF/B-VIII.1 natC as a comparator. The page draws the comparator only with the library overlay on.
 """
 import json

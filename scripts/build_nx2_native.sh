@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# NATIVEX2: build every physics/hf/native/nx2_*.c (the second wave of whole-stage kernels) into one
+# Build every physics/hf/native/nx2_*.c (the second wave of whole-stage kernels) into one
 # library, physics/hf/native/lib/libnx2.so (libnx2.dylib on macOS; gitignored build output).
 #
 #   scripts/build_nx2_native.sh     # uses $CC, else Apple clang on macOS, else a micromamba gcc, else cc
@@ -36,7 +36,7 @@ if [ "$(uname -s)" = "Darwin" ]; then
   OUT=physics/hf/native/lib/libnx2.dylib
   LINK=-dynamiclib
 fi
-SRC=(physics/hf/native/nx2_*.c physics/hf/native/ld.c physics/hf/native/fission.c)  # ld.c: CENGLD's level-density kernels; fission.c: CENGFIS's
+SRC=(physics/hf/native/nx2_*.c physics/hf/native/ld.c physics/hf/native/fission.c)  # ld.c: the level-density kernels; fission.c: the fission kernels
 "$CC" -O2 -std=c11 -ffp-contract=off -Wall -Wextra -Wno-unused-parameter -fPIC $LINK "${SRC[@]}" -o "$OUT.tmp" -lm
 mv "$OUT.tmp" "$OUT"
 echo "built $OUT from ${#SRC[@]} files with $("$CC" --version | head -1)"

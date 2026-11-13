@@ -1,7 +1,7 @@
-"""KWCOV B1 (CHANOBS): channel observables TALYS writes by default, named as its files.
+"""Channel observables TALYS writes by default, named as its files.
 
 * unit: names, residual mapping, isomer level numbers, the particle-production completion (`binary_adds`) and that
-  `full_xsbinary` (TRITFID) still adds in the same order;
+  `full_xsbinary` still adds in the same order;
 * engine (needs the native build, TALYS structure/ and a stock TALYS-2.25 run of Co-59 at 1, 5, 14 MeV in
   $KWCOV_STOCK/co59, made by scripts/kwcov/b1_compare.py's recipe): the switch is output only (every other array
   bit-identical), isomer files sum to their channel, and every name agrees with stock TALYS: <= 0.5 % at 1 and
@@ -78,7 +78,8 @@ def test_particle_production_completion(monkeypatch):
 
 
 def test_full_xsbinary_order_unchanged(monkeypatch):
-    """TRITFID adds per type in grid order, then direct capture to gamma: the same float order as before KWCOV."""
+    """`full_xsbinary` adds per type in grid order, then direct capture to gamma: the same float order as without
+    the channel-observable output."""
     from physics.hf.emission.multiple import full_xsbinary
 
     monkeypatch.setenv("INCOGNITA_TRITFID", "1")

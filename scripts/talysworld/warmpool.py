@@ -2,7 +2,7 @@
 """Warm engine pool for the calculator / batch tools (Linux): start-up paid once, jobs in parallel, numbers unchanged.
 
 A fresh engine job pays ~5-6 s before it computes anything (Python, numpy, torch, the engine modules, the native
-library; plus ~5 s more in a second process for the GRIDTOP separation energies). This daemon pays that ONCE:
+library; plus ~5 s more in a second process for the grid-top separation energies). This daemon pays that ONCE:
 
     warmpool.py serve --sock ~/talysworld_data/warm.sock --workers 3      (started by server.py under nice 10)
 
@@ -33,7 +33,7 @@ Client side (no engine imports; usable from server.py, engine_job.py, batch scri
     P.run_grid(z, a, grid, comp, kw, smin=None, chunks=3)  # one curve, its energies split over warm workers
 run_grid splits the requested energies into `chunks` slices (balanced by the engine's own energy-cost model) and runs
 each slice as the SAME declared grid with an energy subset (engine_grid._energy_subset), so each slice has the full run's
-grid top, GRIDTOP pad and first energy, and the merged curve equals the one-run curve (tests/talysworld/test_warmpool.py).
+grid top, grid-top pad and first energy, and the merged curve equals the one-run curve (tests/talysworld/test_warmpool.py).
 """
 import argparse, json, os, selectors, signal, socket, sys, threading, time, traceback
 from concurrent.futures import ThreadPoolExecutor
@@ -133,7 +133,7 @@ class Pool:
 
     def run(self, args):
         """engine_grid.run(**args) in a warm worker; args as engine_grid.run (work defaults to a fresh dir). With the
-        GRIDTOP pad on and no smin given, the separation energies come from the pool first (a fork, not a new process)."""
+        grid-top pad on and no smin given, the separation energies come from the pool first (a fork, not a new process)."""
         args = dict(args)
         gt = args.get("gridtop")
         if gt is None: gt = os.environ.get("TW_GRIDTOP", "1").strip().lower() not in ("0", "n", "no", "off", "false")

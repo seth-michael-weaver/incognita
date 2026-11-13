@@ -1,22 +1,22 @@
 """Export the comparison layer of the C-12 Elastic tab (Every nuclide page) to data/light_evals/cmp/C12RM9.json.
 
 What it writes (all display data; scripts/add_light_evals.py copies it into docs/walkthrough/data/n/6/12.json as rm.cmp):
-  natc   INCOGNITA's frozen C12RM9 curve composed to natural carbon, natC = 0.9893 sigma_C12(ours) + 0.0107 sigma_C13,
-         where the C-13 part (1.07 %) is ENDF/B-VIII.1 n-006_C_013 MT2 -- the composition the pre-registered gates used
+  natc   INCOGNITA's frozen C-12 R-matrix curve composed to natural carbon, natC = 0.9893 sigma_C12(ours) + 0.0107 sigma_C13,
+         where the C-13 part (1.07 %) is ENDF/B-VIII.1 n-006_C_013 MT2 -- the composition the fixed-in-advance checks used
          (gate_rm9.natc_fn). The site labels it as such; the pure C-12 curve stays in data/light_evals/C12RM9.json.
   endf   ENDF/B-VIII.1 natC elastic on the same grid (gate_rm9.natc_fn(b81el)): a COMPARATOR, drawn by the page only when
          the evaluated-library overlay is ticked, never used by INCOGNITA and not in the downloads.
-  ds/ho  the held-out natC total cross sections (EXFOR 13759004, 13761002, 13761003, 22610002; 1,742 points, read once
-         after the fit was frozen), exactly as the gate read them (gate_rm9.heldout_tot: sets over 300 points rebinned 1 %).
+  ds/ho  the unfitted validation natC total cross sections (EXFOR 13759004, 13761002, 13761003, 22610002; 1,742 points, read once
+         after the fit was frozen), exactly as the check read them (gate_rm9.heldout_tot: sets over 300 points rebinned 1 %).
   bins   the same points averaged in log-energy bins (mean, standard error), the bins of the evaluator figure extended
          down with the same ratio to cover 10 eV.
   std    the IAEA neutron standard 2017 natC elastic points 1e-5 eV - 1.8 MeV with their 1 sigma (gate_rm9.std_setup) and
          INCOGNITA natC / standard - 1 at each.
-  stats  max |dev| and max |z| against the standard, held-out chi2/N (gate_rm9.g3), and the offset of each held-out set
+  stats  max |dev| and max |z| against the standard, validation chi2/N (gate_rm9.g3), and the offset of each validation set
          against INCOGNITA and ENDF/B-VIII.1.
 
-Needs the private research tree (frozen fit, RMATRIX8 toolkit, ENDF files); run in WSL:
-  nice -n 10 ~/nucleus/.venv/bin/python scripts/export_c12_compare.py
+Needs inputs that are not part of this repository (the frozen fit, the R-matrix toolkit, ENDF files):
+  nice -n 10 python scripts/export_c12_compare.py
 """
 import json, os, re, sys
 
@@ -54,7 +54,7 @@ def main():
         sid = str(d.sid)
         lab = re.sub(r"\s+\d{4}\s+\d+$", "", str(getattr(d, "label", "") or "")).replace(",", ", ").replace(",  ", ", ")   # "J.A.Harvey,D.C.Larson 1974 13759004" -> authors
         ds.append([f"{sid[:5]}/{sid}/", lab, int(d.year) if getattr(d, "year", None) else None, "natC"])
-        fb = int(d.meta.get("dy_missing_fallback") or 0) > 0   # the set gives no uncertainty: the gate's fallback is not shown
+        fb = int(d.meta.get("dy_missing_fallback") or 0) > 0   # the set gives no uncertainty: the check's fallback is not shown
         dy = np.asarray(d.dy, float)
         for x, y, u in zip(d.Elab, d.y, dy):
             ho.append([g5(x * 1e6), g5(y), None if fb or not (u > 0) else g5(u / y), i])

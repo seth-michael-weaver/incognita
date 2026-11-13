@@ -3,7 +3,7 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: GPUFULL. No physics of its own: `emission.multiple.multiple_emission` with
+Task: GPU batch path. No physics of its own: `emission.multiple.multiple_emission` with
 `compound.decay_fast.NucleusWidths` as its decay callback (the CPU engine's path), rearranged.
 
 TALYS routines computed here:
@@ -20,7 +20,7 @@ is one array per chunk). Summing a daughter's feeding from two mothers of one le
 order is the only change, and it moves the last bits.
 
 **Inside a row, the CPU engine's order.** Mother bins from the top down: the gamma cascade
-through a discrete level under S_n, the popeps gates, multiple pre-equilibrium, the photon exit
+through a discrete level under S_n, the popeps cut-offs, multiple pre-equilibrium, the photon exit
 into the row's own lower bins (it is read by the next bin); every particle exit is contracted
 for all decayed bins after the walk, as `emission.multiple._decay_nucleus_numpy` does.
 
@@ -29,7 +29,7 @@ interpolated from the run's emission-grid table, rho0 from rhogrid, the spin-l' 
 denominators D and the discrete levels, per exit type, over chunks of mother bins with the row,
 spin and l' axes cut to what the chunk reaches.
 
-Test: GPUFULL / tests/hf/test_gpu_full.py
+Test: tests/hf/test_gpu_full.py
 """
 
 from __future__ import annotations
@@ -59,7 +59,7 @@ J_ALL = NUMJ + 1
 
 
 def records_feedexcl(zc: int, nc: int, ty: int) -> bool:
-    """`emission.multiple._records_feedexcl` (including FIXENG's INCOGNITA_NGNEXCL)."""
+    """`emission.multiple._records_feedexcl` (including INCOGNITA_NGNEXCL)."""
     from physics.hf.emission.multiple import _records_feedexcl
 
     return _records_feedexcl(zc, nc, ty)
@@ -177,7 +177,7 @@ class Bucket:
         self.m_has = cat([st["m_has"] for st in sts])
         self.m_w = cat([np.broadcast_to(st["mpe_w"], (st["M"], NUMJ + 1)) for st in sts])
         # processing order: level, A parity, mother spins, bins, then TALYS's nucleus order
-        # GPU3: the top bin (descending) after the A parity, so that the rows a walk step
+        # the top bin (descending) after the A parity, so that the rows a walk step
         # can decay are a prefix of the chunk
         top = s_int_all = None
         s_int_all = np.concatenate([st["s_int"] for st in sts])
@@ -217,13 +217,13 @@ class Bucket:
         self.odds = self.n_int[:, 4]
         self.njs = self.n_int[:, 2]
         self.ms = self.n_int[:, 1]
-        # GPU3: per-row tables every chunk reads, formed and uploaded once per batch (the chunks
+        # per-row tables every chunk reads, formed and uploaded once per batch (the chunks
         # slice them on the device)
         pe_run = np.array([r[0]["sc"]["popeps"] for r in bk.runs])
         self.popeps_row = pe_run[self.n_run]
         zc, nc = self.n_int[:, 5], self.n_int[:, 6]
         tt = np.arange(7)
-        from physics.hf.emission.multiple import _ngnexcl  # FIXENG F15 INCOGNITA_NGNEXCL
+        from physics.hf.emission.multiple import _ngnexcl  # INCOGNITA_NGNEXCL
 
         self.rec_row = (((zc <= 6) & (nc <= 10))[:, None]
                         & ~(((zc == 0) & (nc == 0))[:, None] & (tt > 0)[None, :] & (not _ngnexcl())))
@@ -244,7 +244,7 @@ class Bucket:
         self.dev_brk = d(brk)
         self.dev_brr = d(self.br_r)
         from physics.hf import kevleak2 as _kv2
-        if _kv2.on("dup"):  # KEVLEAK2 dup: feedexcl carries every branch to a twice-named level (cascade.f90:72 assigns)
+        if _kv2.on("dup"):  # `kevleak2` dup: feedexcl carries every branch to a twice-named level (cascade.f90:72 assigns)
             later[...] = False
         self.dev_brrec = d(~later)
         self.dev_rec = d(self.rec_row)
@@ -293,7 +293,7 @@ class Chunk:
         self.NJ = int(max(ni[:, 2].max(), 1))
         self.maxex_h = bu.s_int[sm_h, 0]
         self.maxex = bu.dev_s_int[sm, 0]
-        self.nnl = torch.as_tensor(ni[:, 7] - 1, dtype=torch.int64, device=dev)  # NNLEAK rule bin, -1 = none
+        self.nnl = torch.as_tensor(ni[:, 7] - 1, dtype=torch.int64, device=dev)  # `nnleak` rule bin, -1 = none
         self.nlg = bu.dev_s_int[sm, 2]
         self.ex, self.dex = bu.dev_s_row[sm, 0], bu.dev_s_row[sm, 1]
         self.jdis, self.tau = bu.dev_s_row[sm, 2], bu.dev_s_row[sm, 3]
@@ -468,7 +468,7 @@ def exit_arrays(bk: Batch, ch: Chunk, ty: int, ic: Tensor) -> dict:
     `Md` (n, NJ, ND, L). rho0 of the continuum rows enters through `exit_Q`.
 
     TALYS: densprepare.f90:1 (densprepare), compound.f90:1 (compound)
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     t = bk.t
     dev = bk.device
@@ -578,7 +578,7 @@ def exit_Q(bk: Batch, ch: Chunk, ty: int, L: int) -> dict:
     which differs only in rows with Rboundary < 1 and there by less than 1e-20 * T per cell.
 
     TALYS: compound.f90:1 (compound)
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     dev = bk.device
     d = ch.d[ty]
@@ -690,10 +690,10 @@ def cascade(bk: Batch, bn: dict, cw=None, budget: float | None = None, max_rows:
     (a `gpu_full_channels.ChannelWalk`) as it goes.
 
     Returns the flags of what the batch could not reproduce: `mpe_gate` (B,), a multiple
-    pre-equilibrium record on a bin whose popeps gates closed.
+    pre-equilibrium record on a bin whose popeps cut-offs closed.
 
     TALYS: multiple.f90:1 (multiple), compound.f90:1 (compound), cascade.f90:1 (cascade)
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     dims = bk.dims
     dev = bk.device
@@ -718,7 +718,7 @@ def cascade(bk: Batch, bn: dict, cw=None, budget: float | None = None, max_rows:
         X.index_add_(0, ri, Xs)
         XE.index_add_(0, ri, bn["xspopex"][ty][bi])
         NUC.index_add_(0, ri, Xs.sum((1, 2, 3)))
-    bn.pop("xspop")  # GPU3: copied into X; freed for the chunks
+    bn.pop("xspop")  # copied into X; freed for the chunks
     flags = dict(mpe_gate=torch.zeros(B, dtype=torch.bool, device=dev), mpe_gate_bins=[])
     done = 0  # channel levels whose validity is formed
 
@@ -758,7 +758,7 @@ def _exit_ctx(bk: Batch, ch: Chunk, ty: int) -> dict:
     discrete-level masks, spin windows `Md` and (particles) the rows' emission-grid tables.
 
     TALYS: densprepare.f90:1 (densprepare)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     t = bk.t
     dev = bk.device
@@ -795,7 +795,7 @@ def _particle_args(ch: Chunk, c: dict, bk: Batch, ty: int) -> tuple:
 
 
 USE_CUDAGRAPH = os.environ.get("GPUFULL_CUDAGRAPH", "1") != "0"
-# GPU3: stages whose contractions run in float32 (`wf`: particle widths and feeding, `photon`:
+# stages whose contractions run in float32 (`wf`: particle widths and feeding, `photon`:
 # the photon widths); everything accumulated stays float64
 _CF = os.environ.get("GPU3_CASCADE_F32", "dense")
 DENSE32 = "dense" in _CF  # particle widths and feeding as dense float32 bmms, Q not cached
@@ -852,7 +852,7 @@ def exit_Q_live(bk: Batch, ch: Chunk, ty: int, L: int, br_idx: Tensor) -> dict:
     reads: `Qr` (nbr, L, NJ*2), with the pairs' rhog (nbr, Jt, 2) and the spin-l' mask.
 
     TALYS: compound.f90:1 (compound)
-    Test: GPUFULL2
+    Test: tests/hf/test_gpu_full.py
     """
     dev = bk.device
     d = ch.d[ty]
@@ -881,11 +881,11 @@ def exit_Q_live(bk: Batch, ch: Chunk, ty: int, L: int, br_idx: Tensor) -> dict:
 
 
 def exit_Q32(bk: Batch, ch: Chunk, ty: int, L: int) -> dict:
-    """`exit_Q` in float32 (GPU3): `Qs` (n, Rt*L, NJ*2) with each (J, parity) column divided by
+    """`exit_Q` in float32: `Qs` (n, Rt*L, NJ*2) with each (J, parity) column divided by
     its largest value `qs` (float64 (n, NJ*2)), and the cut `rhog` and mask for `populate32`.
 
     TALYS: compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     dev = bk.device
     d = ch.d[ty]
@@ -965,7 +965,7 @@ def _widths_dense(bk: Batch, ch: Chunk, c: dict, ty: int, bchunks: list) -> tupl
     [D per bin chunk], [triples per bin chunk].
 
     TALYS: compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     n, NJ, Rt = ch.n, ch.NJ, c["Rt"]
     dev = bk.device
@@ -1446,7 +1446,7 @@ def _feed_dense(bk, ch: Chunk, c: dict, ty: int, bchunks: list, gots: list, deca
     populations, the rows' bin sums and the channel contributions.
 
     TALYS: multiple.f90:1 (multiple), compound.f90:1 (compound)
-    Test: GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     dev = bk.device
     R, J = bk.dims["R"], bk.dims["J"]
@@ -1501,10 +1501,10 @@ def _apply_mpe(ch: Chunk, ent: dict, d: Tensor, rm: Tensor, XE: Tensor, Xall: Te
                XEall: Tensor, NUC: Tensor) -> Tensor:
     """multipreeq2.f90:246-296 / `emission.multiple._apply_mpe` for the records `ent` (E) of a
     chunk, `d`/`rm` the decay flag and popeps mask of each record's (row, bin). A record whose
-    bin the popeps gates closed is not applied; returns the records to flag (closed and carrying
+    bin the popeps cut-offs closed is not applied; returns the records to flag (closed and carrying
     flux, or its nucleus not decayed at that bin).
 
-    Test: GPUFULL, GPU3
+    Test: tests/hf/test_gpu_full.py
     """
     dev = XE.device
     R, J = XE.shape[1], Xall.shape[2]

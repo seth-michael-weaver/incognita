@@ -1,4 +1,4 @@
-"""Incognita extension (FIXENG F14; not TALYS): no radiative dead end at the neutron-capture entry.
+"""Incognita extension (`INCOGNITA_GGDEADEND`; not TALYS): no radiative dead end at the neutron-capture entry.
 
 Env INCOGNITA_GGDEADEND=1; default OFF, and OFF never changes a `Levels` object.
 

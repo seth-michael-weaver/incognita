@@ -1,13 +1,13 @@
 /* Japanese: data explorer (data.html, js/data.js) */
 Object.assign(WT.L.ui, {
   lang_label: "言語", nav_teach: "教員向け",
-  brand: "原子核反応の内側", nav_physics: "物理", nav_data: "全核種", nav_board: "スコアボード", menu: "メニュー", site_nav: "サイト",
+  brand: "原子核反応の内側", nav_physics: "物理", nav_data: "全核種", nav_board: "比較", menu: "メニュー", site_nav: "サイト",
   dx_title: "全核種 · 原子核反応の内側",
-  site_nav: "サイト", nav_walk: "解説", nav_board: "スコアボード", nav_data: "全核種", nav_repo: "GitHubのコード",
+  site_nav: "サイト", nav_walk: "解説", nav_board: "比較", nav_data: "全核種", nav_repo: "GitHubのコード",
   dx_kicker: "INCOGNITA · データエクスプローラー",
   dx_h1: "全核種",
   dx_lede: "ライブラリ内のすべての核種についてエンジンが予測した中性子断面積を、各核種の精査済みの測定値とともに示します。核図表で核種を選ぶか、検索してください。",
-  dx_lede_ver: "これらの曲線はライブラリv0.2.3（2026年11月）で、スコアボードで採点しているのと同じエンジンのバージョン（2026年10月22日のエンジン）で作られています。測定値に合わせたスコアボードのデータ製品TERRAではありません。どの曲線もエンジン自身の予測で、横に示した測定値に合わせたものはありません。例外は「固定」と記された核種で、30 keVでの恒星内平均が測定値と一致するよう、曲線を一つの係数で拡大縮小しています。エンジンの全体的な設定は、すべての核種に対して一度だけ、多くの測定値（ここに示したものも含む）を使って選ばれたので、測定済み核種での一致はモデルの公正な確認ですが、完全に独立した検証ではありません。ほとんどの核種は一度も測定されておらず（外挿）、その帯は広くなっています。",
+  dx_lede_ver: "これらの曲線はライブラリv0.2.3（2026年11月）で、比較ページで採点しているのと同じエンジンのバージョン（2026年10月22日のエンジン）で作られています。同じページにある、測定値に合わせたデータ製品TERRAではありません。どの曲線もエンジン自身の予測で、横に示した測定値に合わせたものはありません。例外は「固定」と記された核種で、30 keVでの恒星内平均が測定値と一致するよう、曲線を一つの係数で拡大縮小しています。エンジンの全体的な設定は、すべての核種に対して一度だけ、多くの測定値（ここに示したものも含む）を使って選ばれたので、測定済み核種での一致はモデルの公正な確認ですが、完全に独立した検証ではありません。ほとんどの核種は一度も測定されておらず（外挿）、その帯は広くなっています。",
   dx_controls: "核図表の操作", dx_search_label: "核種を探す", dx_search_ph: "検索：U-235、Fe56、Au…",
   dx_colour: "核図表の色分け", dx_m_tier: "わかり方", dx_m_macs: "30 keVでの捕獲", dx_m_meas: "測定データ",
   dx_chart_h: "核図表",
@@ -85,7 +85,7 @@ Object.assign(WT.L.ui, {
   dx_th_abs: "吸収から核分裂を引いた値",
 });
 
-/* INCOGNITA's own capture below 1 keV, from RESFILL (RESFILLSITE) */
+/* INCOGNITA's own capture below 1 keV */
 Object.assign(WT.L.ui, {
   dx_rr_b1k: "1 keV 未満",
   dx_rr_own: "INCOGNITA 独自の測定データへの共鳴フィット（300 eV まで。300 eV〜1 keV は統計的共鳴）",
@@ -98,14 +98,14 @@ Object.assign(WT.L.ui, {
   dx_rr_k_sm: "なめらかな推定（共鳴なし）",
   dx_below_rr: "1 keV 未満：INCOGNITA の{k}",
   dx_below_own: "1 keV 未満の実線は、300 eV までの測定捕獲データへの INCOGNITA 独自の共鳴フィットです。300 eV から 1 keV までは統計的共鳴を使います。1 keV で予測につながります。",
-  dx_below_stat: "1 keV 未満の一点鎖線は INCOGNITA の統計的推定です。INCOGNITA 独自の平均間隔と平均幅をもつ共鳴を無作為に置いたもので、個々のピークは実際のピークと一致しません。共鳴積分を伏せておいた核種で試すと、ふつう測定値の 2 倍以内で、それ以上ではありませんでした（中央値のずれ ×1.9、×2 以内は 54 %）。",
+  dx_below_stat: "1 keV 未満の一点鎖線は INCOGNITA の統計的推定です。INCOGNITA 独自の平均間隔と平均幅をもつ共鳴を無作為に置いたもので、個々のピークは実際のピークと一致しません。共鳴積分をフィットに使わなかった核種で試すと、ふつう測定値の 2 倍以内で、それ以上ではありませんでした（中央値のずれ ×1.9、×2 以内は 54 %）。",
   dx_below_sm_a: "1 keV 未満の点線は INCOGNITA のなめらかな推定です。測定された熱中性子捕獲値を通る 1/v 曲線を 1 keV の値につないだもので、共鳴は描いていません。そのため約 1 eV から 1 keV では、実際の断面積はピークでずっと高いことがあります。",
   dx_below_sm: "1 keV 未満の点線は INCOGNITA のなめらかな推定です。1 keV の値を 1/v で延ばしたもので、共鳴も、値を固定する測定もありません。実際の熱中性子での値は桁違いに異なることがあります。",
   dx_below_anch: "測定された熱中性子捕獲値 {v} b を必ず通るようにしてあります。",
   dx_rr_anch_diff: "ひし形は EXFOR エントリーの別の平均で、この値とは異なります。",
   dx_rr_ri: "この核種の 0.5 eV 以上の捕獲共鳴積分：INCOGNITA {m} b、測定 {e} b。",
   dx_rr_ri_used: "この測定値はこの無作為な一例を選ぶのに使ったので、一致は検証になりません。",
-  dx_rr_ri_hold: "この測定値は伏せておいたもので、この曲線を作るのには使っていません。",
+  dx_rr_ri_hold: "この測定値は、この曲線を作るのには使っていません。",
   dx_pw_tip_rr: "評価済みライブラリ（比較用）、0 K の点ごとの値",
   dx_lib_pw_rr: "1 keV 未満では同じライブラリを点ごとに細い実線で描いています。0 K で再構成し（NJOY RECONR、許容誤差 0.01 %）、共鳴の山と谷が残るように選んだ点で、曲線ごとに最大 {n} 点まで間引いています。これも比較用です。INCOGNITA の曲線ではありません。",
   dx_tr_h: "どこまで信頼できるか",
@@ -125,18 +125,18 @@ Object.assign(WT.L.ui, {
   dx_tr_b_narrow: "バンドはおそらく狭すぎます：カバー不足でした",
   dx_tr_b_none: "バンドの表示なし",
   dx_tr_b_macs: "バンドは単独では検証していません",
-  dx_tr_e: "スコアボードでの誤差は典型的に ×{f}（測定済みの核 {n} 個、Z {z}；ブラインドではない）",
-  dx_tr_e_none: "この領域には保留データでの検証がありません",
-  dx_tr_src: "区分とフラグ：library/v0.2.3 の README。バンド：測定に対する事前登録のカバー率検証（テスト核 5 個、2026年10月）で、捕獲・核分裂・弾性散乱のバンドは表示どおりカバーし、しきい反応チャネルと全断面積はカバー不足でした。誤差：<a href=\"scoreboard.html\" data-keep-lang>スコアボード</a>、log10(エンジン / 測定値) の二乗平均平方根。エンジンの規則はこれを見ながら選ばれたので、ブラインド検証ではありません。",
+  dx_tr_e: "比較での誤差は典型的に ×{f}（測定済みの核 {n} 個、Z {z}；開発中の比較）",
+  dx_tr_e_none: "この領域には測定値との比較がありません",
+  dx_tr_src: "区分とフラグ：library/v0.2.3 の README。バンド：測定に対するカバー率検証（テスト核 5 個、2026年10月）で、捕獲・核分裂・弾性散乱のバンドは表示どおりカバーし、しきい反応チャネルと全断面積はカバー不足でした。誤差：<a href=\"scoreboard.html\" data-keep-lang>比較</a>ページ、log10(エンジン / 測定値) の二乗平均平方根。エンジンの規則はこれを見ながら選ばれたので、独立した検証ではありません。",
 });
 // less text (2026-11-06)
 Object.assign(WT.L.ui, { dx_hint2: "ドラッグで移動・スクロールでズーム・マスをクリック", dx_more_nuc: "詳細:信頼度、出典、コード", dx_about: "データ・ダウンロード・コードについて" });
 Object.assign(WT.L.ui, { dx_cmp: "比較用" });
-// C12RM9 R-matrix evaluation (light nuclei, 2026-11-07)
-Object.assign(WT.L.ui, {"dx_el": "弾性散乱 (n,n)", "dx_rm_name": "INCOGNITA R行列評価 (C12RM9)", "dx_rm_h": "この核種に対する私たちのモデル", "dx_rm_what": "炭素12による中性子の弾性散乱。EXFORの全断面積と弾性散乱断面積の測定値に対するINCOGNITA独自の多準位R行列フィットによるものです。公開前に、事前登録したチェックに合格しました：IAEAの炭素標準、取り置いた全断面積の測定値、NJOYによる処理の往復検証、黒鉛を含む臨界ベンチマーク（PCI-001）。", "dx_rm_range": "エネルギー範囲：{lo}～{hi}。それより上にINCOGNITAの曲線はありません。", "dx_rm_caveat": "注意：学習データでのχ²/自由度 {c}。傾きのある2つのデータセットに印を付けています。判定は較正済みですが検出力は低めです。", "dx_rm_nocap": "捕獲はモデル化していません。捕獲タブには測定値だけを示します。", "dx_rm_report": "報告書を読む"});
-Object.assign(WT.L.ui, { "dx_rr_meas": "実験者が測定した共鳴（EXFOR の共鳴パラメータ）を INCOGNITA がまとめたもの。測定されていないスピン、放射幅、弱い準位は INCOGNITA 独自の統計から補っています", "dx_rr_own_t": "測定された EXFOR 透過データへの INCOGNITA 独自の Reich–Moore 共鳴フィット（10 µeV〜1 keV）。ライブラリのファイルではありません", "dx_rr_k_meas": "測定された共鳴（EXFOR パラメータ）", "dx_below_meas": "1 keV 未満の実線は、実験者が測定して EXFOR に報告した共鳴エネルギーと幅を、複数の実験にわたってまとめたものを使っています。INCOGNITA によるフィットではありません。スピンや放射幅が測定されていない場合は INCOGNITA 独自の統計で補い、実験では見えなかった弱い準位は統計的に追加しています（その位置は予測ではありません）。1 keV で予測につながります。", "dx_below_own_t": "1 keV 未満の実線は、測定された EXFOR 透過データへの INCOGNITA 独自の Reich–Moore 共鳴フィットです。1 keV で予測につながります。核種の横の注記に、使ったデータセットと、伏せておいたデータとフィットとの比較を示しています。", "dx_band_th": "熱中性子", "dx_band_th_s": "熱中性子", "dx_band_th_x": "熱", "dx_band_rr": "共鳴", "dx_band_rr0": "共鳴領域", "dx_band_rr_s": "共鳴", "dx_band_rr_x": "共鳴", "dx_band_ur": "平均化した共鳴", "dx_band_ur_s": "平均", "dx_band_ur_x": "平均", "dx_band_f": "高速", "dx_band_f_s": "高速", "dx_band_f_x": "高速", "dx_band_all": "全エネルギー" });
+// R-matrix evaluation (light nuclei)
+Object.assign(WT.L.ui, {"dx_el": "弾性散乱 (n,n)", "dx_rm_name": "INCOGNITA R行列評価", "dx_rm_h": "この核種に対する私たちのモデル", "dx_rm_what": "炭素12による中性子の弾性散乱。EXFORの全断面積と弾性散乱断面積の測定値に対するINCOGNITA独自の多準位R行列フィットによるものです。公開前に、あらかじめ決めたチェックに合格しました：IAEAの炭素標準、フィットに使わなかった全断面積の測定値、NJOYによる処理の往復検証、黒鉛を含む臨界ベンチマーク（PCI-001）。", "dx_rm_range": "エネルギー範囲：{lo}～{hi}。それより上にINCOGNITAの曲線はありません。", "dx_rm_caveat": "注意：学習データでのχ²/自由度 {c}。傾きのある2つのデータセットに印を付けています。チェックは較正済みですが統計的な検出力は低めです。", "dx_rm_nocap": "捕獲はモデル化していません。捕獲タブには測定値だけを示します。", "dx_rm_report": "報告書を読む"});
+Object.assign(WT.L.ui, { "dx_rr_meas": "実験者が測定した共鳴（EXFOR の共鳴パラメータ）を INCOGNITA がまとめたもの。測定されていないスピン、放射幅、弱い準位は INCOGNITA 独自の統計から補っています", "dx_rr_own_t": "測定された EXFOR 透過データへの INCOGNITA 独自の Reich–Moore 共鳴フィット（10 µeV〜1 keV）。ライブラリのファイルではありません", "dx_rr_k_meas": "測定された共鳴（EXFOR パラメータ）", "dx_below_meas": "1 keV 未満の実線は、実験者が測定して EXFOR に報告した共鳴エネルギーと幅を、複数の実験にわたってまとめたものを使っています。INCOGNITA によるフィットではありません。スピンや放射幅が測定されていない場合は INCOGNITA 独自の統計で補い、実験では見えなかった弱い準位は統計的に追加しています（その位置は予測ではありません）。1 keV で予測につながります。", "dx_below_own_t": "1 keV 未満の実線は、測定された EXFOR 透過データへの INCOGNITA 独自の Reich–Moore 共鳴フィットです。1 keV で予測につながります。核種の横の注記に、使ったデータセットと、フィットに使わなかったデータとフィットとの比較を示しています。", "dx_band_th": "熱中性子", "dx_band_th_s": "熱中性子", "dx_band_th_x": "熱", "dx_band_rr": "共鳴", "dx_band_rr0": "共鳴領域", "dx_band_rr_s": "共鳴", "dx_band_rr_x": "共鳴", "dx_band_ur": "平均化した共鳴", "dx_band_ur_s": "平均", "dx_band_ur_x": "平均", "dx_band_f": "高速", "dx_band_f_s": "高速", "dx_band_f_x": "高速", "dx_band_all": "全エネルギー" });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "その他の原子力トピック" });
 
-/* C-12 elastic tab: natural-carbon curve, held-out totals, IAEA standard, ENDF/B-VIII.1 comparator */
-Object.assign(WT.L.ui, {"dx_rm_natc": "INCOGNITA の R 行列 (C12RM9)、天然炭素", "dx_rm_cmp": "ここでの曲線は測定値や標準と同じく天然炭素です: INCOGNITA の C-12 が 98.93 %、ENDF/B-VIII.1 の C-13 が 1.07 % で、153 keV の細いピークは C-13 によるものです。純粋な C-12 の曲線はダウンロードにあります。IAEA 中性子標準 2017 とは {dev} % 以内で一致し(最大 |z| {z})、取り置いた全断面積では χ²/N = {chi}、事前登録したすべての検定に合格しました。EXFOR {set} は INCOGNITA と ENDF/B-VIII.1 の両方より {off} % 低く、そのデータセットの規格化のずれです。", "dx_ho": "取り置いた全断面積の測定値、natC", "dx_ho_tip": "フィットから除外: フィット凍結後に一度だけ読んだもの", "dx_bin": "対数エネルギー区間で平均", "dx_bin_tip": "取り置いた測定点 {n} 個の平均 ± 標準誤差", "dx_std": "IAEA 中性子標準 2017 (natC 弾性)", "dx_std_dev": "INCOGNITA / 標準 − 1", "dx_lib_el": "破線: 天然炭素の ENDF/B-VIII.1 弾性散乱 (98.93 % C-12 + 1.07 % C-13)、0 K の点ごとの値。比較のためだけに表示: INCOGNITA は使っておらず、ダウンロードにも含まれません。"});
+/* C-12 elastic tab: natural-carbon curve, unfitted totals, IAEA standard, ENDF/B-VIII.1 comparator */
+Object.assign(WT.L.ui, {"dx_rm_natc": "INCOGNITA の R 行列、天然炭素", "dx_rm_cmp": "ここでの曲線は測定値や標準と同じく天然炭素です: INCOGNITA の C-12 が 98.93 %、ENDF/B-VIII.1 の C-13 が 1.07 % で、153 keV の細いピークは C-13 によるものです。純粋な C-12 の曲線はダウンロードにあります。IAEA 中性子標準 2017 とは {dev} % 以内で一致し(最大 |z| {z})、フィットに使わなかった全断面積では χ²/N = {chi}、すべてのチェックに合格しました。EXFOR {set} は INCOGNITA と ENDF/B-VIII.1 の両方より {off} % 低く、そのデータセットの規格化のずれです。", "dx_ho": "フィットに使わなかった全断面積の測定値、natC", "dx_ho_tip": "フィットに不使用: 最終フィットの後にだけ比較したもの", "dx_bin": "対数エネルギー区間で平均", "dx_bin_tip": "フィットに使わなかった測定点 {n} 個の平均 ± 標準誤差", "dx_std": "IAEA 中性子標準 2017 (natC 弾性)", "dx_std_dev": "INCOGNITA / 標準 − 1", "dx_lib_el": "破線: 天然炭素の ENDF/B-VIII.1 弾性散乱 (98.93 % C-12 + 1.07 % C-13)、0 K の点ごとの値。比較のためだけに表示: INCOGNITA は使っておらず、ダウンロードにも含まれません。"});

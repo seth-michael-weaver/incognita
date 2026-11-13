@@ -237,7 +237,7 @@ def pol1(x1: Tensor, x2: Tensor, y1: Tensor, y2: Tensor, x: Tensor) -> Tensor:
                      or y2.requires_grad)
             and x.dtype is _F64 and x1.dtype is _F64 and x2.dtype is _F64 and y1.dtype is _F64
             and y2.dtype is _F64 and x.is_cpu and y1.is_cpu and y2.is_cpu):
-        # COREX: one point off the graph (no argument asks for one): the same five operations on
+        # one point off the graph (no argument asks for one): the same five operations on
         # Python floats
         fx1 = float(x1)
         den = float(x2) - fx1

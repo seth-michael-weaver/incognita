@@ -1,4 +1,4 @@
-"""The record files: one flat, mmap-able file per nuclide and one chart index (CREC, WP4).
+"""The record files: one flat, mmap-able file per nuclide and one chart index (chart record).
 
 A nuclide file is
 
@@ -126,7 +126,7 @@ class NuclideRecord:
         with open(self.path, "rb") as f:
             self._mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
         if self._mm[:8] != MAGIC:
-            raise ValueError(f"{path}: not a CREC record of format {MAGIC.decode()}")
+            raise ValueError(f"{path}: not a chart record of format {MAGIC.decode()}")
         nk, ne, na = struct.unpack("<QQQ", self._mm[8:32])
         self._entries_at = (32 + nk, 32 + nk + ne)
         at = 32 + nk + ne

@@ -96,7 +96,7 @@ class FissionParameters:
     class2rot: tuple[TransitionStates, ...]
     path: FissionPath | None = None
     wkb: WKBResult | None = None
-    # FISBARWIRE: `fbaradjust`/`fwidthadjust` per barrier, (NUMBAR + 1,), which `t1barrier`
+    # `fbaradjust`/`fwidthadjust` per barrier, (NUMBAR + 1,), which `t1barrier`
     # multiplies into the height and curvature (t1barrier.f90:99-121). None where every factor is
     # 1, which leaves the default arithmetic exactly as it was.
     fbaradjust: Tensor | None = None
@@ -210,7 +210,7 @@ def read_class2_states(Z: int, N: int, nclass2: int, path: str | None = None):
 
 
 def fists2_on(options: "Options") -> bool:
-    """TS2FREEZE switch: keyword `fists2 y|n` (an explicit keyword wins), else env `INCOGNITA_FIS_TS2=1`. Default OFF.
+    """`fists2` switch: keyword `fists2 y|n` (an explicit keyword wins), else env `INCOGNITA_FIS_TS2=1`. Default OFF.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -222,7 +222,7 @@ def fists2_on(options: "Options") -> bool:
 
 
 def ts2_headband(Z: int, A: int, N: int, nfisbar: int, device=None):
-    """TS2 (SADDLEPAIR arm, registered cf60e0e, amended development notes): Bohr K-band transition states at an even-even saddle.
+    """`fists2`: Bohr K-band transition states at an even-even saddle.
 
     Below the saddle pair gap an even-even saddle has only collective K channels. The head band is TALYS's own
     `structure/fission/states/hbstates.ee` (0+ ground, 2+ gamma, octupole 0-/1-/2-, beta 0+; energies, K and parity unchanged), with
@@ -345,7 +345,7 @@ def rotclass2(
 
 
 def _nbinswkb(options) -> int:
-    """wkb.f90's table size: `binquadw` under `binquad y` (BINQUAD4), else TALYS's nbins0 (30 if 0)."""
+    """wkb.f90's table size: `binquadw` under `binquad y`, else TALYS's nbins0 (30 if 0)."""
     from physics.hf.core.grids import binquad_wkb
 
     n = binquad_wkb(options)
@@ -498,7 +498,7 @@ def fission_parameters(
     # --- head band and class2 states (fissionpar.f90:319-383) -----------------------------
     fecont = torch.zeros(NUMBAR + 1, dtype=DTYPE, device=device)
     headband = tuple(TransitionStates() for _ in range(NUMBAR + 1))
-    # KWCOV B8: `hbtransfile Z A <file>` / `class2file Z A <file>` replace the structure files (fissionpar.f90:343-344)
+    # `hbtransfile Z A <file>` / `class2file Z A <file>` replace the structure files (fissionpar.f90:343-344)
     zix, nix = int(options.Zinit) - Z, int(options.Ninit) - N
     if options.flaghbstate:
         headband, fecont = read_headband_states(Z, N, nfisbar, options.fisstates_file_of("hbtransfile", zix, nix))

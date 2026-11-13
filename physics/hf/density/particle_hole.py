@@ -185,7 +185,7 @@ def _sum_terms_np(ee: Tensor, ew: Tensor, h: Tensor, nm1: Tensor, hmax: int) -> 
 
 def _sum_terms_arr(een: np.ndarray, ewn: np.ndarray, hn: np.ndarray, nmn: np.ndarray, hmax: int,
                    device="cpu") -> np.ndarray:
-    """COREX: `_sum_terms` on arrays: each k-term is computed only where it is kept (E - k Ewell >
+    """Fast path: `_sum_terms` on arrays: each k-term is computed only where it is kept (E - k Ewell >
     0, h >= k, E > 0; ufuncs with `where=`), one pass per k. Not bit-identical to the torch path
     (pow's SIMD/libm split, the batching): the sums agree to ~1e-15 absolute
     (tests/hf/test_corex.py)."""
@@ -197,7 +197,7 @@ def _sum_terms_arr(een: np.ndarray, ewn: np.ndarray, hn: np.ndarray, nmn: np.nda
 
     so = nativex.lib()
     if so is not None:
-        # NATIVEX: the same k-sum per element in C (libm pow; values to rounding)
+        # Native: the same k-sum per element in C (libm pow; values to rounding)
         e_, w_, h_, m_ = (np.ascontiguousarray(np.broadcast_to(a, shape), dtype=d) for a, d in (
             (een, np.float64), (ewn, np.float64), (hn, np.int64), (nmn, np.float64)))
         tabc = np.ascontiguousarray(tab, dtype=np.float64)
@@ -222,7 +222,7 @@ def _sum_terms_arr(een: np.ndarray, ewn: np.ndarray, hn: np.ndarray, nmn: np.nda
 
 
 def _no_graph(*xs) -> bool:
-    """COREX: the numpy paths apply: grad mode is off and every tensor argument is on the CPU."""
+    """Fast path: the numpy paths apply: grad mode is off and every tensor argument is on the CPU."""
     if torch.is_grad_enabled():
         return False
     return all(x.device.type == "cpu" for x in xs if isinstance(x, Tensor))
@@ -240,7 +240,7 @@ _NFAC_NP = np.array(_NFAC)
 
 
 def _finitewell_arr(p, h, eex, ewell, surfwell, efermi_mev: float) -> np.ndarray:
-    """COREX: `finitewell` on arrays (p, h int64; eex, ewell float64; surfwell bool or bool
+    """Fast path: `finitewell` on arrays (p, h int64; eex, ewell float64; surfwell bool or bool
     array), the torch path's operations in its order."""
     n = p + h
     nm1 = (n - 1).astype(np.float64)
@@ -293,11 +293,11 @@ def _apauli2_arr(ppi, hpi, pnu, hnu, gsp, gsn) -> np.ndarray:
 
 
 def _phdens2_arr(ppi, hpi, pnu, hnu, gsp, gsn, ex, ewell, surfwell, ap2, efermi_mev):
-    """COREX: `phdens2` on arrays, the torch path's operations in its order."""
+    """Fast path: `phdens2` on arrays, the torch path's operations in its order."""
     from physics.hf.preeq import preeq_nx2
 
     out = preeq_nx2.phdens2_arr(ppi, hpi, pnu, hnu, gsp, gsn, ex, ewell, surfwell, ap2, efermi_mev)
-    if out is not None:  # NATIVEX2: the same density per element in C (nx2_preeq_phdens2)
+    if out is not None:  # Native: the same density per element in C (nx2_preeq_phdens2)
         return out
     ppif, hpif = ppi.astype(np.float64), hpi.astype(np.float64)
     pnuf, hnuf = pnu.astype(np.float64), hnu.astype(np.float64)
@@ -583,8 +583,8 @@ def preeqpair(
     return torch.where(pos, out, zero)
 
 
-# --------------------------------------------------------------------------- PHMICRO (phmodel 2)
-# PHMICRO (Incognita extension of TALYS's `phmodel 2`, default OFF): the tabulated microscopic (HFB, Hilaire)
+# --------------------------------------------------------------------------- `phmodel 2` (phmodel 2)
+# `phmodel 2` (Incognita extension of TALYS's `phmodel 2`, default OFF): the tabulated microscopic (HFB, Hilaire)
 # particle-hole state densities of structure/density/ph replace the equidistant-spacing Betak-Dobes density
 # wherever the table has the configuration (phdens2.f90:76-110, phdensitytable.f90). TALYS 2.25 (and main
 # c13e5ee) opens `density/ph/<El>.ld` (phdensitytable.f90:72) while the database ships `<El>.ph`, so stock
@@ -597,7 +597,7 @@ EPHDENSMAX = 200.0  # strucinitial.f90:547
 
 
 def phmicro_on(options=None) -> bool:
-    """PHMICRO switch: `phmodel 2` on the deck, else INCOGNITA_PHMODEL=2.
+    """`phmodel 2` switch: `phmodel 2` on the deck, else INCOGNITA_PHMODEL=2.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -708,7 +708,7 @@ def _ph_interp(tab_rows: np.ndarray, eex: np.ndarray) -> np.ndarray:
 
 
 def phnorm_on() -> bool:
-    """PHMICRO3 switch INCOGNITA_PHNORM=1 (default OFF): put the tables on the Betak-Dobes counting convention.
+    """Switch `INCOGNITA_PHNORM=1` (default OFF): put the tables on the Betak-Dobes counting convention.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -719,10 +719,10 @@ def phnorm_on() -> bool:
 
 
 def ph_refdeg(Z: int, N: int) -> float:
-    """PHMICRO3: degeneracy of the table's reference vacuum, 2 per odd species (Kramers pair +-Omega of the blocked HFB orbital,
+    """`INCOGNITA_PHNORM`: degeneracy of the table's reference vacuum, 2 per odd species (Kramers pair +-Omega of the blocked HFB orbital,
     counted twice by the combinatorial table at every j; spectator steps 0.300/0.301 dex vs lg 2). The Betak-Dobes exciton density
     (TALYS manual eq. 13.4) counts excitons above a non-degenerate vacuum and carries odd-even only via Fu's P, so the table is
-    divided by this factor for every configuration of the nucleus (development notes).
+    divided by this factor for every configuration of the nucleus.
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -731,7 +731,7 @@ def ph_refdeg(Z: int, N: int) -> float:
 
 
 def ph_override(dens, ppi, hpi, pnu, hnu, eex, zix, nix, zn0):
-    """PHMICRO: `dens` (the analytic phdens2) with the tabulated microscopic density of nucleus (Zix, Nix) put in
+    """`phmodel 2`: `dens` (the analytic phdens2) with the tabulated microscopic density of nucleus (Zix, Nix) put in
     wherever the table has the configuration (phdens2.f90:76). `zn0` = (Z0, N0) of the initial compound nucleus, or
     None (switch off: `dens` is returned untouched, bitwise). `zix`/`nix` broadcast like the exciton numbers.
 
@@ -783,7 +783,7 @@ def ph_override(dens, ppi, hpi, pnu, hnu, eex, zix, nix, zn0):
 
 def phfast_on() -> bool:
     """fast-phmodel switch: INCOGNITA_PHFAST (default 1) hands phmodel 2 to the compiled multipreeq2 (`mpe_bin` in nativex.c)
-    with the tables packed by `ph_table_packed`; 0 = the PHMICRO reference (Python engine, torch multipreeq2 loop).
+    with the tables packed by `ph_table_packed`; 0 = the `phmodel 2` reference (Python engine, torch multipreeq2 loop).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite

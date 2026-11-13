@@ -5,11 +5,11 @@
  *   3 TERRA anchoring: where measurements exist the line follows them, elsewhere it falls back to the engine,
  *   4 the uncertainty band: drag its width and count the measurements inside (68 % is the honest target).
  * Curves and points are illustrative (one made-up nucleus). The counts in the text are read at load time from WT.board
- * (js/scoreboard-data.js, generated from the research ledger); a missing block or field drops the number, not the sentence.
+ * (js/scoreboard-data.js, generated from the comparison records); a missing block or field drops the number, not the sentence.
  * es-layers.js builds its Spanish text from WT.board the same way. */
 (function () {
   const { clamp, lerp, smooth, rng } = WT.util;
-  // ---- scoreboard numbers (WT.board), each optional ----
+  // ---- comparison numbers (WT.board), each optional ----
   const B = WT.board || {};
   const nOf = (v) => (typeof v === "number" && isFinite(v) ? v : null);
   const tally = (o) => {
@@ -57,7 +57,7 @@
   <h3>Layer 1 · One rule for every nucleus</h3>
   <p>The blue line is the engine's prediction for one reaction. The engine is the bottom layer: the same physics and global settings for every nuclide, with nothing fitted to the cross sections of any one nucleus.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Show the measurements</button></div>
-  <p>That makes it testable against measurements and against other model codes run on the same nuclei. It is not a blind test: the global settings were chosen while watching these same comparisons.${engineScore}</p>
+  <p>That makes it testable against measurements and against other model codes run on the same nuclei. It is not an independent test: the global settings were chosen while watching these same comparisons.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -85,8 +85,8 @@
 <div class="step">
   <h3>Current status</h3>
   <p>A layer is adopted only after it has been tested against measurements, and it stays off when it does not help. Today the engine is in use and TERRA is a candidate; the measured-structure layer and the engine's uncertainty band are still being tested.</p>
-  <p><a href="scoreboard.html" data-keep-lang>See the full scoreboard →</a> Every comparison we do not win, each rival, and how to read it.</p>
-  <div class="aside">${ASOF ? `Scores as of ${ASOF}, from` : "Scores from"} the project's research ledger. The curves in the picture are illustrative.</div>
+  <p><a href="scoreboard.html" data-keep-lang>See all the comparisons →</a> Every comparison we do not win, each rival, and how to read it.</p>
+  <div class="aside">${ASOF ? `Scores as of ${ASOF}, from` : "Scores from"} the project's comparison records. The curves in the picture are illustrative.</div>
 </div>`,
     setup(S) {
       S.to("layer", 1, true); S.to("reveal", 0, true); S.to("ms", 0, true); S.to("anchor", 0, true); S.to("bandOn", 0, true);

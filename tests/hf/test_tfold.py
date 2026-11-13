@@ -1,4 +1,4 @@
-"""TFOLD: `tfold y` = the TRITON3 T2 finite-size fold in the engine: a' = sqrt(a^2 + (1.74/pi)^2) on av/aw/avd/awd of t and 3He
+"""`tfold y` = the T2 finite-size fold in the engine: a' = sqrt(a^2 + (1.74/pi)^2) on av/aw/avd/awd of t and 3He
 (torch path and the float nx2 path), cstrip t/h x0.99; `tfold n` = TALYS point geometry. The per-target deck lines it replaces
 (factor sqrt(1 + (r_m/(pi a))^2), 4 decimals) must give the same potential to ~1e-4."""
 

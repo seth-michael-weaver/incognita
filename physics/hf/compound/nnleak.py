@@ -1,4 +1,4 @@
-"""NNLEAK (Incognita extension, not TALYS; keyword `nnleak y|n`, default y; env INCOGNITA_NNLEAK=0 = TALYS).
+"""`nnleak` (Incognita extension, not TALYS; keyword `nnleak y|n`, default y; env INCOGNITA_NNLEAK=0 = TALYS).
 
 The top continuum bin of the initial compound nucleus, [Etotal - dEx, Etotal], is populated only by
 primary photons with Egamma = Etotal - Ex, so its population density goes as Egamma^3 f(Egamma) rho(Ex)
@@ -7,7 +7,7 @@ primary photons with Egamma = Etotal - Ex, so its population density goes as Ega
 uniformly filled and gives the slice above Exm = Ex(level) + S a LINEAR open fraction
 Rboundary = (Ex0plus - Exm) / dExinc, at the bin-centre energy 0.5 (Ex0plus + Exm) - S - Ex(level).
 Below the first excited level that books (n, gamma n) to the target ground state as sub-threshold
-(n,n') of 1e-3..8e-3 mb, scaling ~ dEx^3 with the bin width (ARTSCAN item 3).
+(n,n') of 1e-3..8e-3 mb, scaling ~ dEx^3 with the bin width.
 
 ON (default): for that bin only and particle exits only (type >= 1), continuum -> discrete rows that are
 partly open get Rboundary = q^4, q = (Ex0plus - Exm) / dExinc, and the Egamma^3-weighted mean emission
@@ -90,4 +90,4 @@ def native_arm(options) -> None:
         so.ce_set_nnleak.argtypes = [ctypes.c_int64]; so.ce_set_nnleak.restype = None
         so.ce_set_nnleak(flag)
     elif flag and so is not None:
-        raise NotImplementedError("NNLEAK: libengdecay without ce_set_nnleak (rebuild the native libraries)")
+        raise NotImplementedError("nnleak: libengdecay without ce_set_nnleak (rebuild the native libraries)")

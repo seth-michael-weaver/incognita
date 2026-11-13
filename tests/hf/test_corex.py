@@ -1,4 +1,4 @@
-"""COREX: the per-call speed paths of the shared utilities against the paths they stand in for.
+"""The per-call speed paths of the shared utilities against the paths they stand in for.
 
 Bit-identical where the operations did not change (the fixed-format readers, the grids, the
 masses grid, the memos); to a stated relative tolerance where they did (numpy/float paths of
@@ -29,7 +29,7 @@ ARM64 = platform.machine().lower() in ("arm64", "aarch64")
 
 
 def _fortran_read_c8035ee2(line: str, fmt: str) -> list:
-    """`files.fortran_read` as it was at c8035ee2 (MACSPEED), the reference."""
+    """`files.fortran_read` before its speed path, the reference."""
     width, plan = F._read_plan(fmt)
     rec = line.rstrip("\n").ljust(width)
     vals: list = []
@@ -438,7 +438,7 @@ def test_phdens2_numpy_path_matches_torch(seed):
             with torch.inference_mode():
                 got = phdens2(ppi, hpi, pnu, hnu, gsp, gsn, ex, ew, sw, **kw)
             # inference_mode selects a different torch dispatch path for the same Python function
-            # (no different physics); measured on this Mac (MACFIX2) up to 2.2e-11 relative at
+            # (no different physics); measured on Apple Silicon up to 2.2e-11 relative at
             # seed=3, just over the old 1e-11 bound. Ordinary FP noise -- relaxed to the project
             # standard (project standard: no bit-identity anywhere, <=1e-6 relative).
             assert _close(got, ref, rel=1e-6, floor=1e-9)

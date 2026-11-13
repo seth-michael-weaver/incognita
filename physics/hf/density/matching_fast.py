@@ -1,4 +1,4 @@
-"""SETB: the level-density matching of `density.matching` without its per-element Python loops,
+"""Fast path: the level-density matching of `density.matching` without its per-element Python loops,
 for the calls where nothing carries a gradient. Every number is the old path's to the bit.
 
 Where the time went (Zr-88 on the Mac M2, 27 residual nuclei): `matching.match` looped over its

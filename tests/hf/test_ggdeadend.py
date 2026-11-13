@@ -1,5 +1,5 @@
-"""FIXENG F14 (INCOGNITA_GGDEADEND): the capture-entry dead end. Reproducer: Xe-140 + n and Rh-105 + n, whose compound
-level lists (Xe-141, Rh-106) are yrast bands running past S_n, gave <Gamma_gamma>_s = 0 / 2.6e-7 eV in B55/B59.
+"""`INCOGNITA_GGDEADEND`: the capture-entry dead end. Reproducer: Xe-140 + n and Rh-105 + n, whose compound
+level lists (Xe-141, Rh-106) are yrast bands running past S_n, gave <Gamma_gamma>_s = 0 / 2.6e-7 eV.
 OFF must leave every Levels object as TALYS reads it; ON cuts only the dead-end lists and leaves the LD matching alone."""
 import pytest
 import torch

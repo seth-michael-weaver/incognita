@@ -1,9 +1,9 @@
-"""GAMMAALL: `INCOGNITA_GGAMMA_NORM` scales a nucleus's default E1 ftable by its RIPL-3 Gamma_gamma
+"""`INCOGNITA_GGAMMA_NORM` scales a nucleus's default E1 ftable by its RIPL-3 Gamma_gamma
 (or Gamma_gamma/D0) factor.
 
 Off by default; the tabulated factor when on; 1 for actinides and untabulated nuclei; an explicit
 ftable override still wins; the factors are anchored to physical-eV widths (never the keV
-resonance-table number GNORMFIX found TALYS's `gnorm y` reading as eV). The end-to-end check
+resonance-table number TALYS's `gnorm y` reads as eV). The end-to-end check
 against stock TALYS on the Python, native C, fast and GPU paths is `scripts/gammaall/wiring.py`.
 """
 
@@ -21,7 +21,7 @@ from physics.hf.gamma.transmission import GAMGAM_MIN_EV
 
 @pytest.fixture(scope="module", autouse=True)
 def _ftglobal_off():
-    """FTPROMO (ftglobal default ON): this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
+    """ftglobal is default ON: this module checks behaviour against deck/golden values defined without the global ftable; pinned at ftglobal n (INCOGNITA_FTGLOBAL=0)."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_FTGLOBAL", "0")
         yield

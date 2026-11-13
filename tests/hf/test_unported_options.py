@@ -43,7 +43,7 @@ def test_every_guard_names_its_reason():
 
 def test_a_cascade_refuses_an_unported_keyword():
     """End to end through the engine's own entry point (the keyword-lines path the screens use). Run in a
-    subprocess: the fitted-library cards are cached per process, so setting them here would leak into
+    subprocess: the fitted-library keyword sets are cached per process, so setting them here would leak into
     every later test in the session."""
     import os, subprocess, sys
 

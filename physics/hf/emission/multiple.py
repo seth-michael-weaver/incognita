@@ -46,7 +46,7 @@ from physics.hf.emission.feed_table import FeedTable
 NUMJ = 40
 
 
-from physics.hf import specout as _SO  # noqa: E402  SPECOUT recorder (output only)
+from physics.hf import specout as _SO  # noqa: E402  spectrum recorder (output only)
 
 
 def _pi(parity: int) -> int:
@@ -75,7 +75,7 @@ class NucleusPopulation:
     xspopex_mb: Tensor  # (Nex,)
     xspopnuc_mb: float = 0.0
     skipcn: bool = False
-    #: KWCOV B5: `skipcn Z A` on the deck: multiple.f90:262 `cycle`s the nucleus -- never decayed, nothing booked
+    #: `skipcn Z A` on the deck: multiple.f90:262 `cycle`s the nucleus -- never decayed, nothing booked
     #: for it but the population it was fed (xspopnuc)
     skipdeck: bool = False
     # multiple pre-equilibrium, live only at `Einc >= emulpre`: `mulpreZN(Zcomp, Ncomp)` and the
@@ -159,7 +159,7 @@ def resiso_enabled() -> bool:
 
 def _charged_run() -> bool:
     """charged-projectile fidelity: True for a proton/alpha-incident run (INCOGNITA_CPINC), where the port-fidelity
-    bookkeeping fixes RESISO and TRITFID default ON (unset); "0" keeps the old path. Neutron runs
+    bookkeeping fixes (residual isotopes, triton binary emission) default ON (unset); "0" keeps TALYS's path. Neutron runs
     keep their default OFF, so every neutron number is the same bits."""
     from physics.hf.projectile import k0
 
@@ -201,7 +201,7 @@ def _records_feedexcl(zcomp: int, ncomp: int, t: int) -> bool:
     if zcomp > NUMZCHAN or ncomp > NUMNCHAN:
         return False
     if zcomp == 0 and ncomp == 0 and t > 0 and _ngnexcl():
-        # FIXENG F15 (INCOGNITA_NGNEXCL, default OFF): the initial compound's continuum bins 1..maxex hold only
+        # INCOGNITA_NGNEXCL (default OFF): the initial compound's continuum bins 1..maxex hold only
         # the flux of its own binary gamma emission; their particle decays ((n,gamma n), (n,gamma p), ...) are
         # TALYS's `xsngn` (multiple.f90:945), outside every exclusive channel. Recorded, they reach the
         # one-particle channels through the existing recursion; the binary row nex = maxex + 1 is stored
@@ -244,7 +244,7 @@ def gamma_cascade(nuc: NucleusPopulation, nex: int) -> dict[int, float]:
         nuc.xspop_mb[k, jres, _pi(pres)] += intens
         nuc.xspopex_mb[k] += intens
         nuc.xspopex_mb[nex] -= intens
-        out[k] = out.get(k, 0.0) + float(intens) if dup else float(intens)  # KEVLEAK2 dup: cascade.f90:72 assigns
+        out[k] = out.get(k, 0.0) + float(intens) if dup else float(intens)  # dup: cascade.f90:72 assigns
         if _SO.active():
             _SO.acc_cell(nuc.zcomp, nuc.ncomp, 0, nex, k, float(intens))
     return out
@@ -318,11 +318,11 @@ def multiple_emission(
             key = (zc, nc)
             nuc = nuclei.get(key)
             if nuc is not None and nuc.skipdeck:
-                # KWCOV B5: TALYS's `skipcn` (multiple.f90:262): no decay, no exclusive-channel bookkeeping
+                # TALYS's `skipcn` (multiple.f90:262): no decay, no exclusive-channel bookkeeping
                 res.xspopnuc_mb[key] = nuc.xspopnuc_mb
                 continue
             if nuc is not None and nuc.skipcn:
-                # FLUXCLOSE A: a terminal residual past the stock window (Cascade.stock_cap) keeps (and books)
+                # `fluxclose` part A: a terminal residual past the stock window (Cascade.stock_cap) keeps (and books)
                 # what it was fed; its bins are the exclusive channels' end points: each bin goes to the ground
                 # state in one step, so the channel that ends here sees it at nex = 0 (channels.f90 counts
                 # g.s. + isomers). Never decayed, so no daughter is fed from it.
@@ -373,7 +373,7 @@ def multiple_emission(
                              for d in (nuc, *daughters.values()))
             native = None
             if flagcomp and nograd:
-                # NATIVEX: the whole walk in one compiled call, multiple pre-equilibrium included
+                # The whole walk in one compiled call, multiple pre-equilibrium included
                 from physics.hf.emission.multiple_native import decay_nucleus
 
                 native = decay_nucleus(nuc, daughters, decay, zc, nc, popepsA, smin, popexcl,
@@ -521,7 +521,7 @@ def _decay_nucleus_numpy(nuc: NucleusPopulation, daughters: dict, decay, zc: int
                     X[k, int(jdis[k]), _pi(int(parlev[k]))] += intens
                     XE[k] += intens
                     XE[nex] -= intens
-                    contrib[k] = contrib.get(k, 0.0) + intens if dup else intens  # KEVLEAK2 dup
+                    contrib[k] = contrib.get(k, 0.0) + intens if dup else intens  # kevleak2 dup
                     if _SO.active():
                         _SO.acc_cell(zc, nc, 0, nex, k, intens)
                 if contrib and rec0:
@@ -612,7 +612,7 @@ def _apply_particle_batch(nuc, XE, dviews: dict, pending: list, zc: int, nc: int
     `compound.decay_fast.NucleusWidths` batch: per exit, every bin's feeding added to the daughter
     in bin order (`np.add.accumulate`, the same left-to-right sums), the mother bins' `xspopex`
     reduced exit by exit, and the records written as whole rows. False if it does not apply.
-    A fissioning nucleus's `fisfeed` (FISSB) comes out of each bin after its particle exits, in
+    A fissioning nucleus's `fisfeed` comes out of each bin after its particle exits, in
     bin order, as the loop below takes it."""
     first = pending[0][1].dpop_mb
     nw = getattr(first, "nw", None)
@@ -718,7 +718,7 @@ def _apply_numpy(nuc, XE, dview, t: int, nex: int, dp, sumip, xsfeed: dict, xspa
 
 
 def trapfix_on() -> bool:
-    """ENGAUDIT TRAPFIX (INCOGNITA_TRAPFIX=1, default OFF; native/nativex.c nx_walk carries the same rule).
+    """INCOGNITA_TRAPFIX=1 (default OFF; native/nativex.c nx_walk carries the same rule).
 
     TALYS: (none -- Incognita extension, not a TALYS routine)
     Test: none in the public suite
@@ -728,7 +728,7 @@ def trapfix_on() -> bool:
 
 def _trapfix_numpy(nuc, nex: int, leftover: float, X, XE, tau, jdis, parlev, xspartial: dict, fe,
                    undo_share: bool) -> float:
-    """ENGAUDIT TRAPFIX: the trapped flux of DISCRETE level `nex` (above S_n, decayed as a compound bin) follows the
+    """Trapped-level rule: the trapped flux of DISCRETE level `nex` (above S_n, decayed as a compound bin) follows the
     level's own gamma branching instead of TALYS's equal spread over levels 0..NL (compound.f90:404-419), whose shares on
     levels above `nex` are never decayed again and are lost. The decay already put the spread into `xspop` (photon exit,
     `undo_share`); it is taken back first. An isomer keeps the flux; a level without branches feeds the ground state.
@@ -769,9 +769,9 @@ def _apply_leftover(nuc: NucleusPopulation, nex: int, leftover_mb: float, fe,
     but NOT `xsfeed`, NOT `xspopnuc`, and it is NOT taken out of the mother's own `xspopex(nex)`.
     `xspop` already has it (the decay put it in `dpop[0]`); this adds the other three.
 
-    Dropping it cost the whole trapped bin out of the exclusive channels: Eu-147 `(n,g)` was
+    Dropping it costs the whole trapped bin out of the exclusive channels: Eu-147 `(n,g)` is
     0.734x TALYS from 1 keV to 1.5 MeV because 990 mb of the 3042 mb Eu-148 population sat in one
-    trapped bin (CHARTFIX defect 3).
+    trapped bin.
 
     TALYS: compound.f90:1 (compound)
     Test: tests/hf/test_trapped_leftover.py / E2E
@@ -829,7 +829,7 @@ def _apply_mpe(nuc: NucleusPopulation, daughters: dict, nex: int, m: "MpeFeeding
             d.mulpre = True
         if _records_feedexcl(zc, nc, t):
             fe = feedexcl.setdefault(t, {})
-            # SPEEDW: the nonzero bins of a detached row read through numpy -- the same float64
+            # The nonzero bins of a detached row read through numpy -- the same float64
             # values in the same order as `float(term[nexout])` one element at a time
             tn = _np_row(term, n)
             if tn is None:
@@ -885,7 +885,7 @@ def _np_row(x, n: int):
 
 
 def full_xsbinary(binp, xsbinary):
-    """TRITFID: TALYS's `xsbinary(type)` as `multiple.f90:950` adds it to `xsfeed(0,0,type)`: the
+    """TALYS's `xsbinary(type)` as `multiple.f90:950` adds it to `xsfeed(0,0,type)`: the
     compound part (comptarget.f90:721) plus direct discrete (binary.f90:215), pre-equilibrium and
     giant resonance (binary.f90:259, when `flagpreeq`) and direct capture (binary.f90:277). The
     chained engine handed the cascade the compound part alone, so every particle production
@@ -895,7 +895,7 @@ def full_xsbinary(binp, xsbinary):
     charged-projectile fidelity: default ON for a charged projectile, "0" = off).
 
     TALYS: binary.f90:215,259,277; multiple.f90:948-950
-    Test: development notes (stored stock TALYS-2.24 production, G1/G2)
+    Test: stored stock TALYS-2.24 comparison (not in the public suite)
     """
     if xsbinary is None or not tritfid_on():  # charged-projectile fidelity: default ON for k0 > 1
         return xsbinary
@@ -906,7 +906,7 @@ def full_xsbinary(binp, xsbinary):
 
 
 def tritfid_on() -> bool:
-    """TRITFID: whether `full_xsbinary` adds the non-compound binary emission (see there).
+    """Whether `full_xsbinary` adds the non-compound binary emission (see there).
 
     TALYS: (none -- a port switch)
     Test: tests/hf/test_chanobs.py
@@ -942,10 +942,9 @@ def _binary_feed(res, key, zc, nc, k0, xsreacinc_mb, xsbinary_mb, feedbinary_mb,
     # `dict.fromkeys`, not `list(xsfeed) + [-1]`: multiple.f90:936-961 adds `xsbinary(type)` to
     # `xsfeed(0,0,type)` ONCE per type, and `-1` is already a key of `xsfeed` whenever the
     # compound nucleus's own bins have fissioned -- which is every actinide as soon as
-    # `engine.ChainedFull` passes a fission transmission (TWOPH). The duplicate cost U-238's
-    # (n,f) exactly one extra first-chance term, +10% at 14 MeV; it was invisible before because
-    # the injected arm reads `xsfeed` out of the dump and never calls this, and the chained arm
-    # ran with `flagfission=False`.
+    # `engine.ChainedFull` passes a fission transmission. A duplicate would cost U-238's
+    # (n,f) exactly one extra first-chance term, +10% at 14 MeV; the injected arm cannot show it,
+    # because it reads `xsfeed` out of the dump and never calls this.
     for t in dict.fromkeys(list(xsfeed) + [-1]):
         xsfeed[t] = xsfeed.get(t, 0.0) + xsbinary_mb.get(t, 0.0)
     for t, v in xsbinary_mb.items():

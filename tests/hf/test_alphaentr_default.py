@@ -1,4 +1,4 @@
-"""E1PROMO: ALPHAENTR is "6" (ALPHAREOPEN E1) by default (was hw:0.77, HWA770PROMO); deck keyword `alphaentr` > env INCOGNITA_ALPHAENTR > default."""
+"""`alphaentr` is "6" by default; deck keyword `alphaentr` > env INCOGNITA_ALPHAENTR > default."""
 import pytest
 
 from physics.hf import alphaentr

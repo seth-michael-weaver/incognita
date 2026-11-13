@@ -1,4 +1,4 @@
-"""KNOCKFIX (ALPHAHUMP): knockout sigav from the last computed inverse-xs bin (Incognita extension, default OFF).
+"""Knockout sigav fix: knockout sigav from the last computed inverse-xs bin (Incognita extension, default OFF).
 
 TALYS's knockout.f90:124 reads `xsreac(type2, eend(type2))`, but `inverse` fills xsreac only up to eendmax(type2);
 when the alpha end point lies in the emission grid's top bin interval that read is a hard 0 and the alpha

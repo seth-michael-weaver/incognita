@@ -1,5 +1,5 @@
-"""FLUXCLOSE parts A and C (FLUXPROMO / FLUXPROMO2): two flux-book leaks of the stock TALYS bookkeeping (ENGAUDIT
-cause C12), default ON.
+"""`fluxclose` parts A, C and N: flux-book leaks of the stock TALYS bookkeeping that this engine closes,
+default ON.
 
 * **A -- residual window.** nuclides.f90:140-141 caps the cascade at `maxZ = Zinit - 3`, `maxN = Ninit - 3`. The
   compound decay widths still include every particle exit, so a light target's flux into a residual past the cap
@@ -14,28 +14,27 @@ cause C12), default ON.
   adds it to the exit's direct-discrete feeding, in equal shares over its levels 1..NL (the target's own level
   excluded on the incident channel; the ground state of an outgoing exit with no excited level) --
   compound.f90:404-419's convention for flux with nowhere else to go -- so it gamma-decays through the levels.
-  Ported from the FLUXCLOSE branch unchanged.
 
 Switch: deck keyword `fluxclose cn|y|n` (default cn = parts A, C and N; y = A and C; n = the stock bookkeeping,
 production bit for bit). `INCOGNITA_FLUXCLOSE` overrides the keyword: `0` / `n` / `off` = stock, `1` / `y` / `all` /
-`on` = A and C, `cn` = A, C and N, or a comma list of the parts `A`, `C`, `N` (`A` alone = the FLUXPROMO candidate
-6a7598acd). Part B (dead-end discrete levels) is not in this engine; naming it is an error, not a silent no-op.
+`on` = A and C, `cn` = A, C and N, or a comma list of the parts `A`, `C`, `N` (`A` alone = the residual window only).
+Part B (dead-end discrete levels) is not in this engine; naming it is an error, not a silent no-op.
 
-* **N -- capture-neutral sentinel (FLUXCN).** KEVLEAK3's `pe2` zeroes the incident channel's Elast(k0) <= 0 sentinel
+** **N -- capture-neutral sentinel.** kevleak2's `pe2` zeroes the incident channel's Elast(k0) <= 0 sentinel
   pre-equilibrium (energies.f90 nendisc = 1: a continuum bin that does not exist) only where "no level above the
   ground state is open or C is off". With C on and N off (`fluxclose y`), once the target's first
   excited level opens the sentinel PE is kept: it is taken out of the compound flux, its projectile part is placed on
   the levels by C, and because the PE sum is then no longer photons-only, preeqtotal.f90:92-102 keeps the PE photons,
-  which book straight into capture (Ti-47 179 keV-2.6 MeV capture +0.08..0.9 %, FLUXPROMO2's FASTGATE E harm). That
+  which book straight into capture (Ti-47 179 keV-2.6 MeV capture +0.08..0.9 %). That
   flux is booked in production already (zeroed sentinel = compound flux), so keeping it is not a closure. Part N
   evaluates the pe2 sink as if C were off, i.e. the sentinel is zeroed as in production; A and C are unchanged
   (C still places PE/GR of exits that production books nowhere).
 
-Switch values: `fluxclose cn` (default: A, C, N), `y` (A and C, the FLUXPROMO2 candidate), `n` (stock).
+Switch values: `fluxclose cn` (default: A, C, N), `y` (A and C), `n` (stock).
 `INCOGNITA_FLUXCLOSE` also takes `cn` and part lists with `N`.
 
 `on(part)` is run-scoped: `sync(options)` (default_options, Cascade) writes the run's resolved parts to
-`INCOGNITA_FLUXCLOSE_EFF`, so option-less sites (KEVLEAK3 pe2's `on("C")` / `on("N")`, the engine binary hooks) see the
+`INCOGNITA_FLUXCLOSE_EFF`, so option-less sites (kevleak2 pe2's `on("C")` / `on("N")`, the engine binary hooks) see the
 deck keyword too.
 
 Test: tests/hf/test_fluxclose.py
@@ -65,7 +64,7 @@ def _word(v, src: str) -> frozenset:
     ps = {p.strip().upper() for p in s.split(",") if p.strip()}
     if ps - set(ALL):
         raise ValueError(f"{src}={v!r}: only parts A (residual window), C (PE+GR of an exit with no continuum bin) and N "
-                         "(capture-neutral sentinel) are in this engine; part B lives on the FLUXCLOSE branch")
+                         "(capture-neutral sentinel) are in this engine; part B is not implemented")
     return frozenset(ps)
 
 
@@ -106,7 +105,7 @@ def on(part: str) -> bool:
 def place_unplaced(b2):
     """Part C on a `BinaryInputs` about to go into `binary`: the exits whose continuum column is empty but which
     carry pre-equilibrium + giant-resonance flux get it as direct-discrete feeding. Returns the new inputs (or
-    `b2` unchanged), and the amounts moved {type: mb} for the record. FLUXCLOSE branch verbatim."""
+    `b2` unchanged), and the amounts moved {type: mb} for the record."""
     import torch
     from dataclasses import replace
 

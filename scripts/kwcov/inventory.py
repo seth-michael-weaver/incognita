@@ -9,7 +9,7 @@ loops of input_*.f90, getvalues.f90 classes) and a `USER INPUT FILE + DEFAULTS` 
     Honoured when the Fortran variable it sets is read by engine code outside the input layer.
   * `defaults.UNPORTED` (refused at run time when set): READ_ONLY_DEFAULT.
   * `fitlib._SKIP` (parsed, dropped): IGNORED.
-  * output / path / plumbing keywords: NA (the observables they gate are in OBSERVABLE_COVERAGE).
+  * output / path / plumbing keywords: NA (the observables they control are in OBSERVABLE_COVERAGE).
   * hand-checked entries in MANUAL (kwcov_manual.py) override the automatic class.
 
 The automatic SUPPORTED means "read and reaches physics code" -- `evidence` says whether a test in

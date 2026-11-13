@@ -1,4 +1,4 @@
-/* SETB: split-storage linear algebra for `ccfast.c`'s two radial loops (built with -DCCFAST_SPLIT).
+/* Split-storage linear algebra for `ccfast.c`'s two radial loops (built with -DCCFAST_SPLIT).
  *
  * The profile of a deformed target on the Mac M2 (Hf-177: 10.0 of 11.9 CPU-s in `cc_block_w`) is two
  * operations per Numerov step on an N x N complex matrix, N = 49-64 for most of the time:
@@ -16,7 +16,7 @@
  *     modulus) and every other X <- X U^-1, all in split storage: ~100 us.
  *
  * Both are the same discretised equations; the numbers move by rounding (test_ccfast.py holds the
- * loops to the bitwise SPEEDT3 kernel at 1e-9). zgemm stays interleaved: at N = 56 Accelerate's
+ * loops to the bitwise `hfnative.c` kernel at 1e-9). zgemm stays interleaved: at N = 56 Accelerate's
  * runs on the AMX block in ~19 us, far ahead of any loop here.
  */
 
@@ -205,7 +205,7 @@ static void solve_split(int64_t N, double *A, double *B, int *piv)
     sp_unpack(nn, br, bi, B);
 }
 
-/* NATIVEX2 ccx: V = U^-1 for the upper triangle of (ar, ai), column by column (split, column-major) */
+/* Native ccx: V = U^-1 for the upper triangle of (ar, ai), column by column (split, column-major) */
 static void sp_upper_inverse(int64_t N, const double *ar, const double *ai, double *vr, double *vi)
 {
     const int64_t nn = N * N;
@@ -248,7 +248,7 @@ static int sp_stabilise(int64_t N, double *qr, double *qi, double **xr, double *
         if (!isfinite(ar[a * N + a]) || !isfinite(ai[a * N + a]))
             return -1;
     double *s = use_dgemm() && N >= 32 ? ws_get(&st_ws, 4 * nn) : NULL; /* loops win below */
-    if (s) { /* NATIVEX2 ccx: X U^-1 as X V with V = U^-1, by real products */
+    if (s) { /* Native ccx: X U^-1 as X V with V = U^-1, by real products */
         sp_upper_inverse(N, ar, ai, s, s + nn);
         for (int m = 0; m < k; m++) {
             dmm_split(N, xr[m], xi[m], s, s + nn, s + 2 * nn, s + 3 * nn, 0);
@@ -304,8 +304,8 @@ static void sp_to_rows(int64_t n, const double *re, const double *im, double *ds
         }
 }
 
-/* CCNUMEROV: M(r_i) in split column-major storage, from the same inputs the fused L build below
- * reads (the monopole shortcut of NATIVEX2 ccx included). */
+/* modified Numerov: M(r_i) in split column-major storage, from the same inputs the fused L build below
+ * reads (the monopole shortcut of native ccx included). */
 static void build_m_split(int64_t N, int64_t NLAM, int64_t R, int64_t e, int64_t i,
                           const double *central, const double *gcm, const int *lam_diag,
                           const double *diagr, const double *so0, const double *ls2, double m,
@@ -344,7 +344,7 @@ static void build_m_split(int64_t N, int64_t NLAM, int64_t R, int64_t e, int64_t
 }
 
 
-/* CCNUMEROV: `cc_block_w_split` with ECIS's modified Numerov step -- two split products of M(r_i)
+/* modified Numerov: `cc_block_w_split` with ECIS's modified Numerov step -- two split products of M(r_i)
  * per step and no solve at all.  Same arguments and return codes as `cc_block_w`. */
 static int cc_block_mn_split(int64_t E, int64_t N, int64_t R, int64_t NLAM, const double *central,
                              const double *cpl, const double *diagr, const double *so0,
@@ -464,7 +464,7 @@ static int cc_block_w_split(int64_t E, int64_t N, int64_t R, int64_t NLAM, const
             for (int64_t a = 0; a < N; a++)
                 for (int64_t c2 = 0; c2 < N; c2++)
                     gcm[lam * nn + c2 * N + a] = cpl[lam * nn + a * N + c2];
-        /* NATIVEX2 ccx: a diagonal coupling matrix (the monopole: the identity) adds to the diagonal
+        /* Native ccx: a diagonal coupling matrix (the monopole: the identity) adds to the diagonal
          * of L only */
         int lam_diag[16] = {0};
         for (int64_t lam = 0; lam < NLAM && lam < 16; lam++) {
@@ -539,7 +539,7 @@ static int cc_block_w_split(int64_t E, int64_t N, int64_t R, int64_t NLAM, const
                         Li[a * N + a] += -c * (f * so[1]);
                     }
                 }
-                if (nm_solve_split(N, Lr, Li, Wnr, Wni, unr, uni) != 0) { /* NATIVEX2 ccx */
+                if (nm_solve_split(N, Lr, Li, Wnr, Wni, unr, uni) != 0) { /* Native ccx */
                     memcpy(unr, Wnr, (size_t)nn * sizeof(double));
                     memcpy(uni, Wni, (size_t)nn * sizeof(double));
                     sp_solve(N, Lr, Li, unr, uni, perm);
@@ -575,7 +575,7 @@ done:
 }
 
 
-/* NATIVEX2 ccx: M(r_i) (split, column-major) and the real derivative-coupling matrix NH(r_i) of
+/* Native ccx: M(r_i) (split, column-major) and the real derivative-coupling matrix NH(r_i) of
  * `build_md`, from column-major copies of the coupling matrices (gcm, c1, c2, cd: NLAM N^2 each);
  * a diagonal coupling matrix (`lam_diag`) adds to the diagonal only. The terms are added in
  * `build_md`'s order. */
@@ -631,7 +631,7 @@ static void dsp_build(int64_t N, int64_t NLAM, int64_t R, int64_t e, int64_t i, 
     }
 }
 
-/* NATIVEX2 ccx: `cc_block_d` with every matrix in split storage, the products as real ones
+/* Native ccx: `cc_block_d` with every matrix in split storage, the products as real ones
  * (`dmm_split`), the solve by the Jacobi sweeps where they apply and `sp_solve` otherwise, and the
  * stabilisation of `sp_stabilise`: the same step, operation for operation where the arithmetic is
  * elementwise. Same arguments and return codes as `cc_block_d`. */

@@ -19,7 +19,7 @@ WT.L.ch.doppler = {
 </div>`,
 };
 
-// canvas labels added 2026-10-29 (I18NLABELS_B)
+// canvas labels
 Object.assign(WT.L.labels, {
   "uranium atoms in the fuel": "연료 속 우라늄 원자",
   "{#} K": "{#} K",

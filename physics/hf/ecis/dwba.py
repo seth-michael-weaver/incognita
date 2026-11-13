@@ -97,13 +97,13 @@ class DwbaResult:
 def _lj_table(lmax: int, spin: float = 0.5) -> tuple[Tensor, Tensor, Tensor]:
     """(l, j, 2 l.s) of every channel with l <= lmax and j = l +/- 1/2, l = 0 having only j=1/2.
 
-    CPINC2: a spin-0 projectile (alpha) has ONE channel per l, j = l, and no spin-orbit term. The spin-1/2 table
-    counted every l twice for an alpha, which doubled its DWBA cross sections (sum_j (2j+1) = 2 (2l+1))."""
+    `cpinc2`: a spin-0 projectile (alpha) has ONE channel per l, j = l, and no spin-orbit term. The spin-1/2 table
+    would count every l twice for an alpha, which doubles its DWBA cross sections (sum_j (2j+1) = 2 (2l+1))."""
     if spin == 0.0:
         l = torch.arange(lmax + 1, dtype=torch.int64)
         return l, l.to(DTYPE), torch.zeros(lmax + 1, dtype=DTYPE)
     if spin == 1.0:
-        # ENGPROJ: a spin-1 projectile (deuteron) has j = l-1, l, l+1 (j >= 0) and 2 l.s = j(j+1) - l(l+1) - 2,
+        # A spin-1 projectile (deuteron) has j = l-1, l, l+1 (j >= 0) and 2 l.s = j(j+1) - l(l+1) - 2,
         # the same channel set and l.s as the incident solver (omp/schrodinger._lj_grid)
         ls, js = [], []
         for orb in range(lmax + 1):
@@ -136,7 +136,7 @@ def spin_weights(l: Tensor, j: Tensor, lam: int, pb: int, njmax: int, spin: floa
     i.e. quan's coefficient for a spin-independent lambda-pole form factor, through the reduced matrix element of
     Y_lambda between (l s) j states. For s = 1/2 it is exactly <j -1/2; lambda 0 | j' -1/2>^2 times (2J+1)/(2s+1)
     (the spin-1/2 form above; tests/hf/test_engproj_dwba_spin.py checks the identity), for s = 0 the spin-0 form.
-    ENGPROJ: used for the spin-1 deuteron. 6j = W(l' j' l j; s lambda) up to a sign (racah.f90).
+    Used for the spin-1 deuteron. 6j = W(l' j' l j; s lambda) up to a sign (racah.f90).
 
     TALYS: directecis.f90:1 (directecis)
     Test: tests/hf/test_engproj_dwba_spin.py
@@ -175,7 +175,7 @@ def distorted_waves(
 
     if (speedw.available() and torch.get_num_threads() == 1 and f_lj.device.type == "cpu"
             and not (torch.is_grad_enabled() and (f_lj.requires_grad or kappa2.requires_grad))):
-        return speedw.dwba_numerov(f_lj, kappa2, l, h, n)  # SPEEDW: this loop, compiled, same bits
+        return speedw.dwba_numerov(f_lj, kappa2, l, h, n)  # this loop, compiled, same bits
     nk = kappa2.shape[0]
     nlj = l.shape[0]
     c = h * h / 12.0
@@ -226,7 +226,7 @@ def _normalise(
     k = kappa2.abs().sqrt()
     rm = h * (n - 1)
     if not (torch.is_grad_enabled() and (kappa2.requires_grad or eta.requires_grad)):
-        # SETB: one Coulomb row per level, the same bits (ecis/dwba_setb.py)
+        # One Coulomb row per level, the same bits (ecis/dwba_setb.py)
         from physics.hf.ecis.dwba_setb import exit_waves
 
         hp, dhp = exit_waves(kappa2, eta, l, rm, nk, nlj)
@@ -287,7 +287,7 @@ def _ecis_fams(h: float, ism: int, k: Tensor, eta: Tensor, l: Tensor) -> tuple[T
 
 def ecis_distorted_waves(f_lj: Tensor, kappa2: Tensor, k: Tensor, eta: Tensor, l: Tensor, h: float,
                          ism: int) -> Tensor:
-    """ENGPROJ4 DWECIS: the regular solutions of ECIS's DWBA, (NK, NLJ, ism+1) on nodes 0..ism, normalised
+    """DWECIS: the regular solutions of ECIS's DWBA, (NK, NLJ, ism+1) on nodes 0..ism, normalised
     to H^- - S H^+ like `_normalise`.
 
     insh: x = q - q^2/12 with q = h^2 (k^2 - f_lj) (modified Numerov, lo(27) = F; lo(26) off),
@@ -384,7 +384,7 @@ def dwba_cross_sections(
     h_t, ism, _ = ecis_grid(omp, m_targ, grid_kin)
     from physics.hf.projectile import dwba_ecis_numerics
 
-    ecisnum = dwba_ecis_numerics(particle)  # ENGPROJ4 DWECIS: ECIS's grid (refine ignored), its integrator and sum
+    ecisnum = dwba_ecis_numerics(particle)  # DWECIS: ECIS's grid (refine ignored), its integrator and sum
     if ecisnum:
         refine = 1
     h = float(h_t[0]) / refine
@@ -397,7 +397,7 @@ def dwba_cross_sections(
         njmax = min(max(20, int(x)), numl)
     lam_max = int(torch.as_tensor(level_spin).max()) if n_lev else 0
     lmax = njmax + lam_max + 1
-    # SETB: with autograd off, the distorted waves are solved only for the entrance channel and the
+    # With autograd off, the distorted waves are solved only for the entrance channel and the
     # levels the sum below reads; a call with none of them returns its zeros without solving
     # (ecis/dwba_setb.py). `row[b]` is level b's row of `u`.
     rows_of = None
@@ -412,8 +412,8 @@ def dwba_cross_sections(
         sel = torch.tensor([0] + [b + 1 for b in live])
     from physics.hf.projectile import cpinc2
 
-    spin0 = spin == 0.0 and cpinc2()  # PORTSTACK: CPINC2 spin-0 channels behind INCOGNITA_CPINC2
-    spin1 = spin == 1.0  # ENGPROJ: deuteron (was the spin-1/2 table)
+    spin0 = spin == 0.0 and cpinc2()  # spin-0 channels behind INCOGNITA_CPINC2
+    spin1 = spin == 1.0  # deuteron
     l, j, ls2 = _lj_table(lmax, 1.0 if spin1 else (0.0 if spin0 else 0.5))
 
     central, so, coul = optical_potential(omp, m_targ, r_safe, z_prod)
@@ -463,13 +463,13 @@ def dwba_cross_sections(
         if key not in weights and spin1:
             weights[key] = spin_weights(l, j, lam, pb, int(njmax), 1.0)
         if key not in weights and not torch.is_grad_enabled() and not spin0:
-            # SETB: the same table, cached for the worker (ecis/dwba_setb.py)
+            # The same table, cached for the worker (ecis/dwba_setb.py)
             from physics.hf.ecis.dwba_setb import cg_weights
 
             weights[key] = cg_weights(lam, pb, int(lmax), int(njmax), float(spin))
         if key not in weights:
             lm = torch.full_like(jp.expand(jp.shape[0], jc.shape[1]), float(lam))
-            mproj = 0.0 if spin0 else -0.5  # CPINC2: <l 0; lambda 0 | l' 0> for a spin-0 projectile
+            mproj = 0.0 if spin0 else -0.5  # <l 0; lambda 0 | l' 0> for a spin-0 projectile
             cg = clebsch(
                 jc.expand_as(lm), lm, jp.expand_as(lm),
                 torch.full_like(lm, mproj), torch.zeros_like(lm), torch.full_like(lm, mproj),
@@ -506,13 +506,13 @@ class DwbaCase:
     gr_vibbeta: Tensor
 
 
-_CORE_LAST: list = []  # NATIVEX2: [struct, options, params, (jcore, pcore)] of the last odd-A case
+_CORE_LAST: list = []  # [struct, options, params, (jcore, pcore)] of the last odd-A case
 
 
 def _core_spins_of(cs, Z: int, A: int):
     """`weakcore.core_spins` of an odd-A `DirectCase`'s target: (jcore, pcore) per level.
 
-    NATIVEX2: a function of the target's structure only, which `prepare_case` rebuilt at every
+    A function of the target's structure only, which `prepare_case` would rebuild at every
     incident energy (masses, both level schemes and deformations, the core assignment: 2.7 ms a
     call). Remembered for the last case, matched on the identity of its `struct`, `options` and
     `params` (one set per target and declared grid, `direct.prepare._base`); autograd on
@@ -540,7 +540,7 @@ def _core_spins_of(cs, Z: int, A: int):
     cz = o.Zinit - zc
     ca = cz + o.Ninit - nc
     clev = discrete_levels(cz, ca, o, m, cs.params)
-    from physics.hf.direct.dwbaunit import core_autorot  # FIXDWBA
+    from physics.hf.direct.dwbaunit import core_autorot
 
     out = core_spins(dfm, lev, deformation(cz, ca, o, clev, m, cs.params,
                                            flagautorot=core_autorot(o)), clev)
@@ -560,10 +560,10 @@ def prepare_case(omp, target: str, e_inc_mev: float, *, direct_case=None,
     `direct_case` is a prebuilt `direct.prepare.DirectCase`. Pass one when the caller already
     has it, or when it was built for an energy grid this function cannot discover -- the default
     path calls `direct.prepare.case(target, e)`, which asks the reference dump which energies
-    have a direct block (NODUMP's chained arm has no dump to ask).
+    have a direct block (the chained path has no dump to ask).
 
     `levels` is `direct.dwba.direct_levels` of that case at this energy when the caller already
-    holds it (NATIVEX2: `direct.chain.computed_cross_sections` does); otherwise it is built here.
+    holds it (`direct.chain.computed_cross_sections` does); otherwise it is built here.
 
     TALYS: directecis.f90:1 (directecis)
     Test: A-direct
@@ -621,7 +621,7 @@ def dwba_case(omp, case: DwbaCase, *, refine: int = 4, **kw) -> tuple[Tensor, Te
     from physics.hf.ecis.dwba_nx2 import case_cross_sections
 
     got = case_cross_sections(omp, case, refine=refine, **kw)
-    if got is not None:  # NATIVEX2: both lists in one compiled deck (ecis/dwba_nx2.py)
+    if got is not None:  # Both lists in one compiled deck (ecis/dwba_nx2.py)
         return got
     a = dwba_cross_sections(
         omp, case.Z, case.A, case.e_inc_mev, case.e_mev, case.spin, case.parity,

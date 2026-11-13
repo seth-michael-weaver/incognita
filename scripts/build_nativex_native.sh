@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# NATIVEX: build physics/hf/native/nativex.c (whole-stage kernels: the compound target decay with
+# Build physics/hf/native/nativex.c (whole-stage kernels: the compound target decay with
 # and without Moldauer, and the multiple-emission cascade) into physics/hf/native/lib/libnativex.so
 # (libnativex.dylib on macOS; gitignored build output).
 #

@@ -1,11 +1,11 @@
 """Library v0.2.2, step 1: collect the production engine's capture below 1 keV, and the target masses.
 
 Runs where the engine runs are (WSL / Linux, the production engine's own venv), not in the plain library build:
-    ~/fastgate_data/eng/16606b356d6e/.venv/bin/python scripts/release/collect_below1keV_v022.py RUNS_DIR [FULL_RUNS_DIR]
+    ENGINE/.venv/bin/python scripts/release/collect_below1keV_v022.py RUNS_DIR [FULL_RUNS_DIR]
 
-Engine runs (made for v0.2.2, 2026-11-06/07, Mac mini): engine-20261022-3 = nucleus 16606b356d6e, the environment, deck,
-runner (FASTGATE worker -> prodrun, `fewres off`, `pewindow g`) and inputs of the v0.2 runs (nucleus research/rl/libv02/code/run.sh,
-inputs = ~/libv02/inputs), with ONE change: the energy grid (inputs/grid134.json) gets 15 more points below 1 keV (the 16
+Engine runs (made for v0.2.2): engine-20261022-3 = build 16606b356d6e, the environment, deck,
+runner (library worker -> prodrun, `fewres off`, `pewindow g`) and inputs of the v0.2 runs (the v0.2 run.sh and
+inputs), with ONE change: the energy grid (inputs/grid134.json) gets 15 more points below 1 keV (the 16
 log-spaced points np.geomspace(2, 1000, 16), 2 eV - 1 keV; RUNS_DIR: these 16 alone). Arms per nucleus as v0.2 composed it (P; A for
 JS(P,A) and A(rotor); AJ = arm A with the actinide lines for ACTJS A(rotor)). RUNS_DIR/{P,A,AJ}/ZZZ_AAA.npz.
 FULL_RUNS_DIR: the same runs on the 134-point production grid plus the 15 points below 1 keV (149 points, top 20.5 MeV).
@@ -15,9 +15,9 @@ emission, a run whose top energy is low drops the fastest alphas/protons and (wi
 (found on branch gridfix, 2bac71aa; see BUILD.md). The short-grid values are kept only for the comparison columns
 short_vs_full_maxrel_le1keV and short_grid_1keV_vs_v02_reldiff. A nucleus without a long-grid run is "engine run failed".
 
-Composition = the v0.2 build rule (nucleus research/rl/libv02/code/build.py product()): P | A | AJ alone, or
+Composition = the v0.2 build rule (the v0.2 build.py product()): P | A | AJ alone, or
 physics.hf.jointcap.combine(P, A) for JS(P,A), from the same engine install. The composition label is read from the v0.2
-value_source. Floor repair = v0.1's rule (nucleus research/docs/release/indep_fix2/repair.py), applied to the 15 low points
+value_source. Floor repair = v0.1's rule (docs/release/indep_fix2/repair.py), applied to the 15 low points
 joined to the v0.2 curve; only low points are changed.
 
 Writes library/v0.2.2/below1keV_engine_v022.parquet (per nucleus: composition, status, the 15 engine values in mb before any

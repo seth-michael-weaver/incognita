@@ -1,7 +1,7 @@
-"""DWBAUNIT: flux conservation for the incident channel of a spherical target whose first-order
+"""DWBA unit cap: flux conservation for the incident channel of a spherical target whose first-order
 (DWBA) direct inelastic exceeds the reaction cross section. Default OFF (`INCOGNITA_DWBAUNIT=1`).
 
-The defect (FIXREL3 / FIXDWBA): a target with no `deformation/<Sym>.def` block is `colltype S`,
+The defect: a target with no `deformation/<Sym>.def` block is `colltype S`,
 so its collective levels go through DWBA on the spherical optical potential. `deformpar.f90:310`
 gives the first 2+ of an even-A nucleus ``0.3 * 0.40 exp(-0.012 A) + 0.025 min(d, 5)`` -- the
 2026-03-26 `betafactor` safety factor multiplies only the first term, so a heavy nucleus five or
@@ -10,7 +10,7 @@ weak coupling. Far on the neutron-rich side the KD03 surface absorption is nearl
 (W_D ~ 0.2-0.3 MeV below 1 MeV), and the DWBA to that one level reaches x10-x70 sigma_R
 (Bk-300: 34 b against 2.7 b at 0.54 MeV). DWBA is first-order perturbation theory on the elastic
 wave; it is not unitary, and once it exceeds the flux it perturbs it is outside its validity.
-The compound nucleus is then left with nothing (ENGDEFECT), and (n,n') > sigma_nonel.
+The compound nucleus is then left with nothing, and (n,n') > sigma_nonel.
 
 The rule, chart-wide, decided once per target from the target's own spherical calculation:
 
@@ -40,7 +40,7 @@ deformation, band, OMP and direct cross sections as the Python engine.
 
 TALYS: deformpar.f90:216-260 (autorot), deformpar.f90:301-330 (systematics), preeq.f90:108,
        omppar.f90:267, weakcoupling.f90:1
-Test: scripts/fixdwba (FIXDWBA report)
+Test: none in the public suite
 """
 
 from __future__ import annotations
@@ -137,7 +137,7 @@ def decision(Z: int, A: int) -> str:
     if not stagedisk.enabled():
         out, ratio = _evaluate(key, o)
     else:
-        # STAGECACHE: the decision and its ratio from disk when the target's optical-model,
+        # Stage cache: the decision and its ratio from disk when the target's optical-model,
         # level and deformation inputs were seen before; a hit evaluates nothing, so it has no
         # evaluation caches to drop
         from physics.hf.compound.dens_reference import _structure_of
@@ -178,7 +178,7 @@ def _evaluate(key: tuple[int, int], o) -> tuple[str, float]:
 
 
 def state(Z: int, A: int) -> tuple:
-    """STAGECACHE key part: (switch on, inside the stock evaluation, the decision for (Z, A)).
+    """Stage-cache key part: (switch on, inside the stock evaluation, the decision for (Z, A)).
     Every optical-model / direct stage of the run's target depends on it (the rotor colltype and
     W_D, the autorot deformation, the cap); the stock evaluation's own calls see ''."""
     on = enabled()

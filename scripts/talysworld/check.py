@@ -4,7 +4,7 @@
 usage (service running, laptop WSL python3 with pandas):
     python3 scripts/talysworld/check.py run       # submit the sample, wait (results land in the service cache)
     python3 scripts/talysworld/check.py analyze   # write check_points.csv + check_summary.json (+ tables for CHECK.md)
-    python3 scripts/talysworld/check.py gridtop   # the 7 grid-dependent nuclides again, GRIDTOP-padded jobs, 15 energies
+    python3 scripts/talysworld/check.py gridtop   # the 7 grid-dependent nuclides again, grid-top-padded jobs, 15 energies
                                                   # (service started with the default TW_GRIDTOP=1) -> check_gridtop_*.{csv,json}
 
 Sample: 20 nuclides spread over Z and A, including the six named ones and six heavy/proton-rich nuclei from the v0.2.2
@@ -27,7 +27,7 @@ SAMPLE = [(8, 16), (11, 23), (20, 40), (26, 56), (28, 62), (40, 90), (50, 120), 
 SYM = {8: "O", 11: "Na", 20: "Ca", 26: "Fe", 28: "Ni", 40: "Zr", 50: "Sn", 52: "Te", 53: "I", 56: "Ba", 64: "Gd", 79: "Au", 81: "Tl",
        82: "Pb", 83: "Bi", 87: "Fr", 88: "Ra", 90: "Th", 91: "Pa", 92: "U"}
 LOW = np.geomspace(2.0, 1000.0, 16); LOWPICK = [4, 10, 14]          # 10.49, 126.0, 660.8 eV
-V022 = os.environ.get("TW_V022", "/mnt/c/Users/smw57/Documents/projects/incognita_libv022/library/v0.2.2/below1keV_engine_v022.parquet")
+V022 = os.environ.get("TW_V022", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "library", "v0.2.2", "below1keV_engine_v022.parquet"))
 OUT = HERE
 FLOOR = 1.0000001e-7   # the engine's output floor in mb (values at or below = zero)
 
@@ -65,7 +65,7 @@ def run():
 
 
 def engine_capture_mb(r):
-    """The engine's own capture curve (mb) of a library capture row: an ANCHORED curve is the blind engine curve times its
+    """The engine's own capture curve (mb) of a library capture row: an ANCHORED curve is the unanchored engine curve times its
     anchor factor (value_source "blind curve x F (measured ..."), so it is divided by F; other tiers are the curve as is."""
     f = 1.0
     if r.tier == "ANCHORED":
@@ -148,7 +148,7 @@ def analyze():
     print(json.dumps(S, indent=1, default=float)); print(Pn.to_string())
 
 
-# --- GRIDTOP re-check (2026-11-07): the 7 nuclides that were "grid-dependent" above, with the pad on (engine_job.py) ---
+# --- grid-top re-check: the 7 nuclides that were "grid-dependent" above, with the pad on (engine_job.py) ---
 GT_SAMPLE = [(53, 109), (91, 200), (88, 215), (87, 190), (83, 178), (81, 174), (52, 104)]
 GT_IDX = [0, 9, 15, 19, 25, 29, 34, 39, 44, 49, 53, 57, 59, 61, 63]   # 15 of the 64 library-grid points, 1 keV - 20 MeV
 

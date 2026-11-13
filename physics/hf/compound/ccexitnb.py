@@ -1,16 +1,16 @@
-"""CCEXITNB (Incognita extension, default OFF; deck `ccexitnb y` or env INCOGNITA_CCEXITNB=1): for a `colltype R` target
+"""`ccexitnb` (Incognita extension, default OFF; deck `ccexitnb y` or env INCOGNITA_CCEXITNB=1): for a `colltype R` target
 (rotor coupled channels on the incident channel) the FIRST compound nucleus's neutron exit to a discrete level of the
 target that is NOT in the coupled band takes the ground-state channel's coupled-channels compound-formation T_lj
-(`Cascade.incident`'s Tjlinc, SLINPUT rule included -- the same object comptarget.f90:358 puts on the elastic exit) at
+(`Cascade.incident`'s Tjlinc, measured-S_l rule included -- the same object comptarget.f90:358 puts on the elastic exit) at
 that exit energy, instead of densprepare's interpolation of the spherical inverse table.
 
 Why: the non-band (intrinsic) levels of a deformed target belong to the same deformed nucleus as its ground state, so
 by reciprocity their inverse channel should be the deformed one. TALYS uses the exact CC Tjlinc only for the elastic
-exit (ltarget) and a spherical solve of the target's potential for every other exit (INVCC, development notes).
-INVCC swapped the WHOLE inverse table (continuum and every compound nucleus) and failed on the continuum first-neutron
+exit (ltarget) and a spherical solve of the target's potential for every other exit.
+Swapping the WHOLE inverse table (continuum and every compound nucleus) and failed on the continuum first-neutron
 spectrum ((n,2n)); this switch touches only the discrete non-band rows of the first compound nucleus.
 
-Untouched: band levels (EWCC: their exit needs P_cc, not the g.s. T), the elastic exit, continuum bins, every later
+Untouched: band levels (`ewfc`: their exit needs P_cc, not the g.s. T), the elastic exit, continuum bins, every later
 compound nucleus, charged particles, spherical and vibrational targets, non-neutron projectiles.
 
 Rows: the k0 residual's discrete rows i <= min(Nlast, maxex), i != Ltarget, whose energy matches no coupled-band level
@@ -30,7 +30,7 @@ import os
 import numpy as np
 
 ENV = "INCOGNITA_CCEXITNB"
-ENV2 = "INCOGNITA_CCEXITNB2"  # CCEXITNB2: the same rows only for targets without a fission channel
+ENV2 = "INCOGNITA_CCEXITNB2"  # `INCOGNITA_CCEXITNB2`: the same rows only for targets without a fission channel
 BAND_TOL_MEV = 1.0e-6
 
 
@@ -44,11 +44,11 @@ def _env_on(name: str) -> bool:
 
 
 def enabled(options=None) -> bool:
-    """Deck keyword `ccexitnb y` (Options.ccexitnb) or env INCOGNITA_CCEXITNB in (1, y, yes, on); or the CCEXITNB2 class
+    """Deck keyword `ccexitnb y` (Options.ccexitnb) or env INCOGNITA_CCEXITNB in (1, y, yes, on); or the `INCOGNITA_CCEXITNB2` class
     rule: deck `ccexitnbnf y` (Options.ccexitnbnf) or env INCOGNITA_CCEXITNB2, which applies only when the engine opens no
     fission channel for this target (Options.flagfission False; default A <= FISLIM = 215, input_fissionmodel.f90:78-80).
     Why: in fissioning systems the barrier / fission-width parameters were set against spherical exit widths, so a
-    deformed exit width there double-counts the n' vs f competition (CCEXITNB: Cm-243/244/247 fission -1.4..-4.5 %)."""
+    deformed exit width there double-counts the n' vs f competition (`ccexitnb`: Cm-243/244/247 fission -1.4..-4.5 %)."""
     if options is not None and bool(getattr(options, "ccexitnb", False)):
         return True
     if _env_on(ENV):
@@ -163,7 +163,7 @@ def fnorm_n(cas) -> float:
 
 
 def apply_residual(cas, r, ltarget: int, etot_mev: float, sep_mev: float):
-    """Python paths: a copy of the k0 ResidualChannels `r` with the CCEXITNB rows written in (r itself when none).
+    """Python paths: a copy of the k0 ResidualChannels `r` with the `ccexitnb` rows written in (r itself when none).
     `sep_mev` = S_n of the compound nucleus (ResidualChannels.sep_mev is not filled by densprepare)."""
     from dataclasses import replace
 

@@ -1,16 +1,16 @@
-"""STAGECACHE: a DISK cache for the optical-model / direct stages a level-density, photon-strength or
+"""A DISK cache for the optical-model / direct stages a level-density, photon-strength or
 cascade variant cannot change.
 
-On the C route with a warm coupled-channels cache (CCCACHE), four stages still run on every engine
+On the C route with a warm coupled-channels cache, four stages still run on every engine
 run although their inputs are the optical model, the deformations and the discrete levels only:
-the incident channel (`Cascade.incident`: the SETB spherical axis, or the coupled-channels wrapper
+the incident channel (`Cascade.incident`: the batched spherical axis, or the coupled-channels wrapper
 around the CC disk cache), the DWBA direct cross sections (`direct.chain.direct_result`, per
 energy) and the inverse-channel transmissions (`compound.dens_reference._transmission_cached`).
-SPEEDPROF2 measured them at 16-20 % of a warm product run.  This module is their memo, on disk.
+Profiling measured them at 16-20 % of a warm product run.  This module is their memo, on disk.
 
     INCOGNITA_STAGE_CACHE=<dir>     turn it on;  unset = today's behaviour, bit for bit.
 
-**Key** (development notes, from a run-time trace of what the four stages read
+**Key** (from a run-time trace of what the four stages read
 plus a static scan of every module they execute):  stage + its call arguments +
 
 * every field of every Options object the stage uses, except the level-density / photon-strength /
@@ -22,12 +22,12 @@ plus a static scan of every module they execute):  stage + its call arguments +
   structure (levels, spins, parities, deformations, coupled levels), the coupled band.  A level,
   deformation or mass change from any source changes the key, however it was produced;
 * every `HF_*` and `INCOGNITA_*` variable except `ENV_EXCLUDE` (cache locations, diagnostics,
-  derived `*_EFF` values, level-density / photon-strength / fission / cascade levers), the evaluated
+  derived `*_EFF` values, level-density / photon-strength / fission / cascade switches), the evaluated
   `engphys.on()` of the switches the executed code asks for, TALYS_DIR and HOME;
 * the version: source bytes of the modules the stages execute (`_SOURCE_DIRS`, `_SOURCE_FILES`),
   bytes of the native libraries they can call (`_LIBS`), torch / numpy versions, `FORMAT`.
 
-What is deliberately NOT in it is what LD / PSF / cascade levers change: their parameters
+What is deliberately NOT in it is what LD / PSF / cascade knobs change: their parameters
 (`a`, `ctable`, `ptable`, `etable`, `ftable`, ...), their options (`OPTION_EXCLUDE`) and their
 INCOGNITA_ switches (`ENV_EXCLUDE`).  Both exclusions are deny-lists, so an input nobody has
 classified is keyed; tests/hf/test_stagedisk.py checks no excluded name is read in `_SOURCE_DIRS`.  The
@@ -43,7 +43,7 @@ compared on read.
 Written to a temporary file and `os.replace`d.  A corrupt, truncated or key-mismatched file is a
 miss.  A value the codec refuses is computed and not stored.
 
-Task: STAGECACHE.  Test: tests/hf/test_stagedisk.py; gates in development notes.
+Task: stage disk cache.  Test: tests/hf/test_stagedisk.py.
 """
 
 from __future__ import annotations
@@ -60,14 +60,14 @@ from pathlib import Path
 import numpy as np
 import torch
 
-FORMAT = 3  # 2: trailing zeros of each array not stored; 3: ENGFIX4 key (all options / env)
+FORMAT = 3  # 2: trailing zeros of each array not stored; 3: key on all options / env
 ENV_VAR = "INCOGNITA_STAGE_CACHE"
 
 # Options: EVERY field is keyed (`_option_items`) except these, which only the level-density,
 # photon-strength and fission models read -- none is read in `_SOURCE_DIRS`
 # (tests/hf/test_stagedisk.py::test_excluded_inputs_not_read_by_stage_code).  A field added to
-# Options later is keyed by default.  (ENGFIX4: the keyed subset used to be an allow-list from a
-# trace, `OPTION_FIELDS`, which missed `tfold`, `alphatemp`, `alphatemp_dom`, `tlog*` ...)
+# Options later is keyed by default.  (An allow-list from a trace would miss fields
+# such as `tfold`, `alphatemp`, `alphatemp_dom`, `tlog*` ...)
 OPTION_EXCLUDE: frozenset[str] = frozenset({
     # level densities
     "ldmodelall", "ldmodelCN", "shellmodel", "spincutmodel", "kvibmodel", "flagcolall",
@@ -96,8 +96,8 @@ PARAM_KEYS: tuple[str, ...] = (
 )  # fmt: skip
 
 # Environment: every `HF_*` and every `INCOGNITA_*` variable is keyed except `ENV_EXCLUDE`, plus
-# the named `ENV_KEYS` (ENGFIX4: the INCOGNITA_ part used to be an allow-list too, which missed
-# INCOGNITA_TFOLD, INCOGNITA_ALPHATEMP(_DOM), INCOGNITA_TLOG*, INCOGNITA_GRIDTOP, INCOGNITA_CPINC ...).
+# the named `ENV_KEYS` (a deny-list, so new switches such as
+# INCOGNITA_TFOLD, INCOGNITA_ALPHATEMP(_DOM), INCOGNITA_TLOG*, INCOGNITA_GRIDTOP, INCOGNITA_CPINC ... are keyed).
 ENV_KEYS: tuple[str, ...] = ("TALYS_DIR", "HOME")
 ENV_PREFIXES: tuple[bytes, ...] = (b"HF_", b"INCOGNITA_")
 # not inputs of the cached stages: where caches live, timing / diagnostics / recording, values a
@@ -464,15 +464,15 @@ def key(stage: str, args: tuple, *, options=(), params=(), values=()) -> bytes:
     out += b"|e" + hashlib.sha256(_env_part()).digest()
     from physics.hf import eadj
 
-    if eadj.on():  # ENGADJ: the energy-local bumps reach the OMP / LD / PSF / fission stages outside Params
+    if eadj.on():  # the energy-local bumps reach the OMP / LD / PSF / fission stages outside Params
         out += b"|j" + hashlib.sha256(repr(eadj.token()).encode()).digest()
     from physics.hf.omp import ompdeck
 
-    if ompdeck.active() is not None:  # KWCOV B6: optmod tables / OMP files / energy-local lines reach the OMP stages
+    if ompdeck.active() is not None:  # optmod tables / OMP files / energy-local lines reach the OMP stages
         out += b"|b6" + hashlib.sha256(repr(ompdeck.token()).encode()).digest()
     from physics.hf.omp import inverse as _inv
 
-    if _inv.eps_token() is not None:  # KWCOV B15: a non-default transpower / transeps moves every lmax cut
+    if _inv.eps_token() is not None:  # a non-default transpower / transeps moves every lmax cut
         out += b"|tp" + hashlib.sha256(repr(_inv.eps_token()).encode()).digest()
     out += b"|V" + _version().encode()
     return bytes(out)

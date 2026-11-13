@@ -1,16 +1,16 @@
-"""NATIVEX2 lever `omp`: the inverse-channel and incident-channel optical-model solves and the
+"""Native `omp` path: the inverse-channel and incident-channel optical-model solves and the
 optical-model parameters without per-element torch dispatch.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 ECIS-06 (`ecist.f`) is by J. Raynal and ships inside the TALYS repository under its MIT license.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nx2_omp.py`
-(against the torch paths with the lever off) and the G-NATIVEX2 closeness gate.
+A speed path with no physics of its own. Acceptance test: `tests/hf/test_nx2_omp.py`
+(against the torch paths with the switch off) and a closeness check.
 
 What it replaces (the physics is that code's, statement for statement):
 
-* **One compiled solve per (nucleus, particle).** `schrodinger.solve_spherical` -- card rounding,
+* **One compiled solve per (nucleus, particle).** `schrodinger.solve_spherical` -- record rounding,
   ECIS kinematics, `ecis_grid`, `optical_potential`, the modified Numerov, `coulomb_functions`,
   `_match_ecis`, `cross_sections` -- is `nx2_omp_job` (`native/nx2_omp.c`). Every Coulomb call keeps
   the call-wide quantities of the torch call (continued-fraction starting order, inward Numerov
@@ -95,7 +95,7 @@ def _hand_over() -> None:
         return
     hf = ctypes.cast(lib.hf_numerov_inward, ctypes.c_void_p).value
     base(hf)
-    # CENGSETUP: libsetup's copy of the job gets `cs_numerov_inward`, the bits of
+    # libsetup's copy of the job gets `cs_numerov_inward`, the bits of
     # hf_numerov_inward on the job's equal-count columns, eight lanes at a time
     fast = setup_c.swap("nx2_omp_set_numerov", base)
     if fast is not base:
@@ -104,7 +104,7 @@ def _hand_over() -> None:
 
 
 def enabled() -> bool:
-    """Whether the lever runs (a `libnx2` build with the omp kernels, `HF_NX2_OMP` not 0)."""
+    """Whether the native path runs (a `libnx2` build with the omp kernels, `HF_NX2_OMP` not 0)."""
     return _kernel("nx2_omp_job") is not None
 
 
@@ -118,7 +118,7 @@ def _grad(*xs) -> bool:
 
 # ------------------------------------------------------------------------------ small pieces
 def card(x: Tensor, energy: bool) -> Tensor | None:
-    """`ecis_card_energy(x)` (energy) or `ecis_card_value(x)` with card rounding on, or None.
+    """`ecis_card_energy(x)` (energy) or `ecis_card_value(x)` with record rounding on, or None.
 
     TALYS: ecisinput.f90:1 (ecisinput)
     Test: tests/hf/test_nx2_omp.py
@@ -288,7 +288,7 @@ def inverse_kept(Zt: int, At: int, e_grid: np.ndarray, maxen: int, options, para
     sig = np.zeros((1, 6, n_e))
     from physics.hf.projectile import compound_of
 
-    zc, ac = compound_of(int(Zt), int(At))  # CPINC: (Zt, At + 1) for a neutron
+    zc, ac = compound_of(int(Zt), int(At))  # (Zt, At + 1) for a neutron
     e_all = np.asarray(e_grid, dtype=np.float64)
     nen = np.arange(n_e)
     sel = (nen >= 1) & (nen <= maxen) & (e_all > 0)
@@ -503,7 +503,7 @@ def _opticalnp(xp, nuc, k: int, Z: int, A: int, e, fac, options, soukho: float |
 def _soukhovitskii(xp, k: int, Z: int, A: int, e, eferm: float, F):
     """`parameters.soukhovitskii` on floats."""
     from physics.hf import engphys
-    eferm = engphys.soukho_fermi(k, A, eferm)  # ENGPHYS `efermi`, default: unchanged
+    eferm = engphys.soukho_fermi(k, A, eferm)  # `efermi`, default: unchanged
     asym = (A - 2.0 * Z) / A
     f = xp.maximum(e - eferm, -20.0)
     f2 = f * f
@@ -669,11 +669,11 @@ def omp_columns(Z: int, N: int, particle: int, e_mev, params, options, *, collty
         return None
     from physics.hf import eadj
 
-    if eadj.any_target(eadj.OMP_TARGETS):  # ENGADJ: energy-local F* bumps are built by the torch path only
+    if eadj.any_target(eadj.OMP_TARGETS):  # energy-local F* bumps are built by the torch path only
         return None
     from physics.hf.omp import ompdeck
 
-    if ompdeck.on():  # KWCOV B6: optmod / optmodfile* / energy-local adjustment lines: the torch path only
+    if ompdeck.on():  # optmod / optmodfile* / energy-local adjustment lines: the torch path only
         return None
     fac = _factors(params)
     if fac is None:

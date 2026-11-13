@@ -239,7 +239,7 @@ def test_deck_lines_route(monkeypatch, tmp_path):
             monkeypatch.delenv(k, raising=False)
         from physics.hf.input import fitlib
 
-        fitlib.deactivate()  # the deck's cards stay active until the next Cascade otherwise
+        fitlib.deactivate()  # the deck's fitted keyword lines stay active until the next Cascade otherwise
         drop_target_caches()
     for k in off:
         assert np.array_equal(off[k], on[k]), k

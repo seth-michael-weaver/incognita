@@ -1,23 +1,23 @@
-"""CENGFIS (ROUTE100 WP7): the chart's fission transmissions from one C pass per barrier grid
+"""The chart's fission transmissions from one C pass per barrier grid
 (`native/fission.c`), for nuclei whose barriers all have density tables and no rotational band
 (TALYS's defaults for every fissioning chart nucleus).
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: CENGFIS (the speed work; no physics of its own). Acceptance test: `tests/hf/test_cengfis.py`
-(each entry against the path it replaces) and the CENGFIS gates (`docs/results/hf-cengfis.md`).
+A speed path with no physics of its own. Acceptance test: `tests/hf/test_cengfis.py`
+(each entry against the path it replaces).
 
-NATIVEX2's `fis2`/`ld2` levers already ran the arithmetic in C, but as five calls per grid with
-their arrays passed through Python: `level_densities` built the `rhofis` tensor (41 x 2 densities
-at ~1000 points, the table's logarithms taken again per call), `nx2_fis2_coef` took a log() of
-every one of them, `ladder` searched the WKB table for every (energy, triple), and the hump
-combination and the bin integration ran as ~40 numpy/torch operations. Here:
+The native `fis2`/`ld2` paths run the arithmetic in C, but as five calls per grid with
+their arrays passed through Python: `level_densities` builds the `rhofis` tensor (41 x 2 densities
+at ~1000 points, the table's logarithms taken again per call), `nx2_fis2_coef` takes a log() of
+every one of them, `ladder` searches the WKB table for every (energy, triple), and the hump
+combination and the bin integration run as ~40 numpy/torch operations. Here:
 
 * `ceng_fis_grid` walks the grid once and emits the triple slopes directly, bit-identical to
   `level_densities` + `nx2_fis2_coef`. A parity column the table holds equal to the other is
   copied (up to all of a barrier's second parity), and the 1e-30 floor's logarithm is taken once.
-  (Logarithms taken from the exponent the density was built from instead of a log() were tried:
+  (Logarithms taken from the exponent the density was built from instead of a log() are worse:
   2e-8 on Ra-223 (n,f), because a slope divides by the difference of two neighbouring logs.)
 * `ceng_fis_weights` walks the WKB index down the triples instead of searching for it (the same
   index); the two contractions with the slopes stay torch's matrix products, as in `fis2`.
@@ -27,7 +27,7 @@ combination and the bin integration ran as ~40 numpy/torch operations. Here:
   `compound_target` never reads, are not built.
 
 The table logarithms are taken once per table. Each function returns None when the kernels are not
-built, `HF_NX2_CENGFIS=0` (or NATIVEX2's `HF_NX2_FIS2=0`), a barrier has no table or a rotational
+built, `HF_NX2_CENGFIS=0` (or `HF_NX2_FIS2=0`), a barrier has no table or a rotational
 band, `class2`/`fispartdamp` is on, or anything carries a gradient; the caller then runs its own
 path.
 
@@ -60,7 +60,7 @@ def _on() -> bool:
 
 
 def _fissc(lever: str) -> bool:
-    """FISSC (development notes): lever F1..F4 on unless `HF_NX2_FISSC=0` or `HF_NX2_FISSC_<lever>=0`."""
+    """Speed option F1..F4 on unless `HF_NX2_FISSC=0` or `HF_NX2_FISSC_<lever>=0`."""
     env = os.environ
     return env.get("HF_NX2_FISSC", "1") != "0" and env.get("HF_NX2_FISSC_" + lever, "1") != "0"
 
@@ -109,7 +109,7 @@ def _covered(fp, ld, options) -> bool:
         return False
     from physics.hf.fission.barriers import fistsc_on
 
-    if fistsc_on():  # FISTSC: `ladder_widths`/`target_transmission` add the band's transition states
+    if fistsc_on():  # `fistsc`: `ladder_widths`/`target_transmission` add the band's transition states
         return True
     return all(fp.rotational[ibar].n == 0 for ibar in range(1, nb + 1))
 
@@ -207,15 +207,15 @@ def ladder_widths(chain, n, ex_mev: np.ndarray, dex_mev: np.ndarray, exmax_mev: 
     return got
 
 
-#: FISSC F1: ladders kept per nucleus (a repeat comes within a few calls of the first, development notes)
+#: F1: ladders kept per nucleus (a repeat comes within a few calls of the first)
 _KEEP_LADDER = 8
-#: FISSC F4: row block of the active-triple contraction
+#: F4: row block of the active-triple contraction
 _BLOCK = 16
 
 
 def _contract(W1, W2, A, B, act):
     """`W1 @ A + W2 @ B` with W's rows sorted by energy and each row zero beyond its `act` active
-    triples: row blocks contract over their active triples only (FISSC F4)."""
+    triples: row blocks contract over their active triples only (F4)."""
     E = W1.shape[0]
     out = np.zeros((E, A.shape[1]))
     for r0 in range(0, E, _BLOCK):
@@ -257,7 +257,7 @@ def _ladder_widths(chain, n, ex_mev, dex_mev, exmax_mev, exfis_top_mev, fnorm, n
     from physics.hf.fission.barriers import band_ladder
 
     for ibar in range(1, int(fp.nfisbar) + 1):
-        band = band_ladder(fp, ibar, torch.from_numpy(eex), n.ld.deltaW_mev, nJ)  # FISTSC
+        band = band_ladder(fp, ibar, torch.from_numpy(eex), n.ld.deltaW_mev, nJ)  # fistsc
         band = None if band is None else band.reshape(E, nj2).numpy()
         c = co[ibar]
         if c is None:
@@ -320,7 +320,7 @@ def target_transmission(chain, n, exinc_mev: float, fnorm: float):
     for ibar in range(1, int(fp.nfisbar) + 1):
         tr = np.zeros(nj2)
         ts[ibar - 1] = tr
-        # FISTSC: the band's transition states first (t1barrier's order); the kernel adds the continuum's
+        # `fistsc`: the band's transition states first (t1barrier's order); the kernel adds the continuum's
         # histogram entries on top and clamps tfisA(0) when it integrated the continuum
         bh = band_hill(fp, ibar, float(exinc_mev), n.ld.deltaW_mev, nJ)
         if bh is not None and ibar == 1:

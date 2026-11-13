@@ -1,4 +1,4 @@
-"""INDEP_FIX (2026-09-23): replace TALYS's `globalwtable` constants with our own E1-width constant.
+"""Replace TALYS's `globalwtable` constants with our own E1-width constant.
 
 TALYS >= 2.2 turns `globalwtable y` on by default: for strength 8/9 and ldmodel 1-6 the compound's E1
 `wtable` starts from a table of constants (1.076 for strength 8 / ldmodel 1 without collective
@@ -21,7 +21,7 @@ from __future__ import annotations
 import os
 
 ENV = "INCOGNITA_E1_WTABLE"
-#: the E1-width constant of the shipped v0.1 no-data recipe (INDEP_FIX, refitted on DEV EXFOR; replaces TALYS's 1.076 / 1.081).
+#: the E1-width constant of the shipped v0.1 no-data recipe (refitted on the EXFOR training set; replaces TALYS's 1.076 / 1.081).
 #: scripts/bestfit/engine_curves.py applies it to `--arm nodata` runs unless `--e1 stock` is given.
 INCOGNITA_E1 = 1.0425
 

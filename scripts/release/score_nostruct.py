@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """README "Nuclei with no structure data": how many library nuclei have none, and the out-of-fold coverage of their interval.
-Interval (CAPFAR): sigma = sqrt(sp^2 + s0^2) x conformal q per band (< / >= 100 keV); sp = sd of log10 capture over the 8 STRIP
-engine models; fitted on the shipped no-structure value's STRIP error (the recipe run with our E1 constant), leave-one-DEV-fold-out (folds 0-5, Z <= 82).
+Interval: sigma = sqrt(sp^2 + s0^2) x conformal q per band (< / >= 100 keV); sp = sd of log10 capture over the 8 STRIP
+engine models; fitted on the shipped no-structure value's STRIP error (the recipe run with our E1 constant), leave-one-fold-out (folds 0-5, Z <= 82).
     python scripts/release/score_nostruct.py docs/release/exam OUT.md
 Ported from the development tree: scripts/release/terra/capture_farfield.py section 4 and scripts/release/extrap_sigma.py (fit, conformal, half_width)."""
 import sys

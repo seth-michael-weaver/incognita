@@ -7,7 +7,7 @@ Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 ECIS-06 (`ecist.f`) is by J. Raynal and ships inside the TALYS repository under its MIT license;
 this module ports its `rotd`/`rotp` symmetric-rotational branch and reuses T5's Woods-Saxon and
-ECIS-card conventions from `physics/hf/omp/schrodinger.py`.
+ECIS input-record conventions from `physics/hf/omp/schrodinger.py`.
 
 Task: T13 (physics/hf/CONTRACT.md §7). Acceptance test: A-inc (§6).
 
@@ -244,7 +244,7 @@ DWBAIMAG_ENV = "INCOGNITA_DWBAIMAG"
 
 
 def dwba_parts(options=None) -> tuple[str, ...]:
-    """VIBLEN (off by default): the Woods-Saxon terms the DWBA transition potential is built from.
+    """`dwbaimag` (off by default): the Woods-Saxon terms of the DWBA transition potential.
 
     Keyword `dwbaimag n|y` (env `INCOGNITA_DWBAIMAG`, used when the keyword is off). `n` = TALYS:
     `directecis.f90:137` leaves ecis1(12:12) = 'F', so the one-step form factor is the derivative

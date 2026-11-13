@@ -1,7 +1,6 @@
-"""OMPROTOR `omprotor` keyword (env INCOGNITA_OMPROTOR): rotor CC diffuseness un-fold; default n = OFF (no cards, bit-identical).
+"""`omprotor` keyword (env INCOGNITA_OMPROTOR): rotor CC diffuseness un-fold; default n = OFF (no extra lines, bit-identical).
 
-The expected cards are the extra lines OMPROTOR's registered runs carried (the development notes,
-built by development notes). The engine-run equality against those runs is development notes
+The expected lines are the extra keyword lines the reference `omprotor` runs carried.
 """
 
 from __future__ import annotations
@@ -44,7 +43,7 @@ def test_env_equals_keyword(monkeypatch):
 
 
 def test_cards_route(monkeypatch, tmp_path):
-    """through fitlib: the keyword line puts the three neutron particle cards on a member run, after the run's own lines."""
+    """through fitlib: the keyword line puts the three neutron particle lines on a member run, after the run's own lines."""
     monkeypatch.delenv(R.ENV_OMPROTOR, raising=False)
     lf = tmp_path / "x.lines"
     lf.write_text("avadjust n 0.5\n")

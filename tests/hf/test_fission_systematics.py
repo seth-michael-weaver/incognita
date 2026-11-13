@@ -24,7 +24,7 @@ from physics.hf.fission.systematics import barsierk
 # fis<ZZZ><AAA>.txt, from `n + <target>` at 3.5 keV with `strength 8 / ldmodel 5 / outfission y`.
 # Every entry is a nucleus for which `fismodel 6` has no barrier and TALYS falls through to
 # `fismodelalt 3` = Sierk; nuclei with tabulated barriers (U-239, Cf-250, Am-247, Hs-272) never
-# reach `barsierk` and are covered by gate A-fis instead.
+# reach `barsierk` and are covered by the A-fis check instead.
 TALYS_BARRIER = {
     (95, 307): 1.745375e00,
     (97, 219): 1.115768e00,

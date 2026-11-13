@@ -1,4 +1,4 @@
-"""NATIVEX2 lever `dwba`: `ecis.dwba.dwba_case` -- the discrete levels and the giant resonances of
+"""Native `dwba` path: `ecis.dwba.dwba_case` -- the discrete levels and the giant resonances of
 one incident energy -- with the distorted waves, their normalisation, the overlap integrals and
 the level sums in one compiled call (`native/nx2_dwba.c`, `nx2_dwba_levels`).
 
@@ -6,8 +6,8 @@ Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 ECIS-06 (`ecist.f`) is by J. Raynal and ships inside the TALYS repository under its MIT license.
 
-Task: NATIVEX2 (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nx2_dwba.py`
-(against `dwba_case` with the lever off) and the G-NATIVEX2 closeness gate.
+A speed path with no physics of its own. Acceptance test: `tests/hf/test_nx2_dwba.py`
+(against `dwba_case` with the switch off) and a closeness check.
 
 What changes against `dwba_cross_sections` (the physics is that function's, statement for
 statement; see its module docstring):
@@ -24,7 +24,7 @@ statement; see its module docstring):
 * **Coulomb functions.** For neutral channels (every incident neutron) `H+` at the matching radius
   is computed in the kernel by `coulomb_functions`' own eta = 0 recurrences; a charged row takes
   `dwba_setb.exit_waves` from Python.
-* **Scalars in numpy.** The card quantisation (`ecis_card_value`/`ecis_card_energy`), the
+* **Scalars in numpy.** The input-record quantisation (`ecis_card_value`/`ecis_card_energy`), the
   channel kinematics (`solver.channel_kinematics`), the grid (`ecis_grid`), the potential
   (`optical_potential`) and the form factor (`formfactor.derivative_form_factor`) of this one
   energy are the same formulas on floats and one radial numpy row instead of torch calls on
@@ -66,7 +66,7 @@ _PART_COLS = {"v": ("v_mev", "rv_fm", "av_fm"), "w": ("w_mev", "rw_fm", "aw_fm")
 
 
 def _kernel():
-    # CENGSETUP: libsetup's `cs_dwba_levels` when built (native/setup.c, the same bits)
+    # libsetup's `cs_dwba_levels` when built (native/setup.c, the same bits)
     return setup_c.swap("nx2_dwba_levels", nx2.kernel(
         "nx2_dwba_levels",
         [nx2.I64, nx2.I64, nx2.DBL, nx2.P, nx2.P, nx2.P, nx2.I64, nx2.P, nx2.P, nx2.P, nx2.DBL,
@@ -130,7 +130,7 @@ def _kinematics(e: float, m1: float, m2: float, z_prod: float, e_lev: np.ndarray
     cm = _s.ECIS_CM_MEV
     root = math.sqrt((m1 + m2) ** 2 + 2.0 * m2 * e / cm)
     ecm1 = cm * (root - m1 - m2)
-    if ecm1 <= 0.0 and e > 0.0 and _solver.ecmstable():  # CCNANTHERM, as `channel_kinematics`
+    if ecm1 <= 0.0 and e > 0.0 and _solver.ecmstable():  # stable c.m. energy, as `channel_kinematics`
         ecm1 = 2.0 * m2 * e / (root + m1 + m2)
     amr = ecm1 / cm + m1 + m2
     ecm = ecm1 - np.concatenate([[0.0], e_lev])
@@ -145,7 +145,7 @@ def _kinematics(e: float, m1: float, m2: float, z_prod: float, e_lev: np.ndarray
 
 
 def _omp_row(omp) -> dict[str, float]:
-    """The 19 OMP columns of the single-row `omp`, card-quantised."""
+    """The 19 OMP columns of the single-row `omp`, input-record-quantised."""
     raw = [float(torch.as_tensor(getattr(omp, f), dtype=DTYPE).reshape(-1)[0]) for f in _FIELDS]
     q = _card_value(np.asarray(raw)).tolist()
     return dict(zip(_FIELDS, q, strict=True))
@@ -261,13 +261,13 @@ def case_cross_sections(
         return None
     from physics.hf.projectile import cpinc2
 
-    if float(_s.PARSPIN[particle]) == 0.0 and cpinc2():  # CPINC2: the compiled deck is spin-1/2 only; spin 0 takes the torch path
+    if float(_s.PARSPIN[particle]) == 0.0 and cpinc2():  # The compiled deck is spin-1/2 only; spin 0 takes the torch path
         return None
-    if float(_s.PARSPIN[particle]) == 1.0:  # ENGPROJ: the compiled deck is spin-1/2 only; a deuteron takes the torch path
+    if float(_s.PARSPIN[particle]) == 1.0:  # The compiled deck is spin-1/2 only; a deuteron takes the torch path
         return None
     from physics.hf.projectile import dwba_ecis_numerics
 
-    if dwba_ecis_numerics(particle):  # ENGPROJ4 DWECIS: ECIS's own DWBA numerics run on the torch path
+    if dwba_ecis_numerics(particle):  # DWECIS: ECIS's own DWBA numerics run on the torch path
         return None
     fn = _kernel()
     if fn is None:

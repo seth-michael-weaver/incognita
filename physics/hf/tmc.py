@@ -1,13 +1,13 @@
-"""UQ1: Total Monte Carlo priors, the sampler, and the hooks that put one sample on a whole run.
+"""Total Monte Carlo priors, the sampler, and the hooks that put one sample on a whole run.
 
-Task: UQ1 (plan WP-20 item 5, blueprint §5.5). Pre-registration: docs/results/uq1-tmc-prior.md.
+Task: Total Monte Carlo uncertainty.
 Test: tests/hf/test_tmc.py.
 
 No physics of its own. A TMC sample is a set of TALYS keyword values; this module draws them and
 makes the port read them the way TALYS reads an input file: every `Params` the run builds
 (`input.defaults.TMC_OVERRIDES`) and every photon-strength parameter set
 (`gamma.parameters.TMC_GAMMA`) sees the sample. Both hooks are process-wide, so a sample must be
-installed in a process whose caches hold nothing built without it: `scripts/uq1_tmc.py` forks a
+installed in a process whose caches hold nothing built without it: the TMC driver forks a
 child per sample from a worker that has only run a nuclide far from every target it serves.
 
 **Priors: TASMAN's defaults.** Widths and distribution shapes are TASMAN's (A.J. Koning,
@@ -27,7 +27,7 @@ seeded `SEED + b`. GPU capture sweep: a 3-d scrambled Sobol sequence (`sobol_uni
 **Which nuclei.** Level-density keywords are drawn per nucleus for the 12 nuclei nearest the
 compound nucleus (zix 0..2, nix 0..3: the compound nucleus, the target, every first-chance
 residual and the (n,2n) residual), and once for all the others together. Photon strength is
-varied for the compound nucleus only (as `capture_gpu`'s theta and SPEED0's G0.3). Optical
+varied for the compound nucleus only (as `capture_gpu`'s theta and the capture fast path's gradient). Optical
 model keywords are per particle (n, p, alpha), for every nucleus, as TALYS's `v1adjust n 1.02`.
 """
 

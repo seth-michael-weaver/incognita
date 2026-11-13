@@ -1,4 +1,4 @@
-/* NATIVEX2: the WKB penetrabilities of a fission path at every tabulation energy
+/* Native: the WKB penetrabilities of a fission path at every tabulation energy
  * (fission/wkb.py's `wkbfis` loop inside `wkb`), in one call.
  *
  * Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,

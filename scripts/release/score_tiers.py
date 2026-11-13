@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""README "Uncertainties", capture blind tiers: coverage of the shipped MEASURED-rule 68 / 95 % intervals on held-out rows
+"""README "Uncertainties", capture prediction tiers: coverage of the shipped MEASURED-rule 68 / 95 % intervals on validation rows
 (leave-nucleus-out; rows from datasets flagged by curation rule P removed).
     python scripts/release/score_tiers.py docs/release/exam/tier_rows.parquet OUT.md
 Ported from the development tree: audit2/rescore_c3_c6.py (C6)."""

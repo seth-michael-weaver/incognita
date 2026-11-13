@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build a private, instrumented copy of TALYS for the EXCL3 multiple pre-equilibrium gate (A-mpe).
+# Build a private, instrumented copy of TALYS for the multiple pre-equilibrium test A-mpe.
 # usage: apply_hooks.sh SRC_TALYS_DIR DEST_DIR   (DEST gets source/ copy, structure symlink, bin/talys)
 # The two hooks only CALL write routines (mpdump.f90); no TALYS variable is modified, so the
 # instrumented binary reproduces the reference xs*.tot / binE*.out unchanged.

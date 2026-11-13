@@ -33,7 +33,7 @@ def test_manifest_matches_tracks():
 
 def test_capture_blind_table():     # docs/release/expected/capblind/CAPTURE_BLIND.md
     r = _r('capture-heldout', 'INCOGNITA capture, D0 withheld (headline)')
-    # the shipped model on DEV folds 0-5 (SHIPEXAMS exam file of f165e5a3)
+    # the shipped model on cross-validation folds 0-5
     assert (r['rows'], r['nuclei']) == (1947, 122)
     assert round(r['rms'], 4) == 0.1765 and round(r['ref_rms_same_rows'], 4) == 0.1898
     assert [round(x, 4) for x in r['delta_ci']] == [-0.0229, -0.0035]

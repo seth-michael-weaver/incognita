@@ -1,4 +1,4 @@
-"""STAGETIME: the always-on stage timer (physics/hf/stagetime.py) -- exclusive accounting, nesting,
+"""The always-on stage timer (physics/hf/stagetime.py) -- exclusive accounting, nesting,
 exception safety, per-energy books, counters, the OFF switch, and one engine run whose stage sum is
 its CPU time (timing never touches physics: ON vs OFF bit-identity is scripts/speed/stagetime_bench.py).
 """
@@ -126,7 +126,7 @@ def test_overhead_per_stage_is_microseconds():
         with stagetime.stage("ovh"):
             pass
     per = (time.perf_counter() - t) / n
-    assert per < 2e-5, per  # sanity bound (~2-8 us on the laptop); a run books ~300-600 stages; the gate is the paired bench
+    assert per < 2e-5, per  # sanity bound (~2-8 us on a laptop); a run books ~300-600 stages; the real check is the paired bench
 
 
 def test_engine_run_stage_sum_is_run_cpu():

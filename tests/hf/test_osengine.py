@@ -1,6 +1,6 @@
-"""OSENGINE: the regional OMP defaults of `physics.hf.omp.regional`, on every path.
+"""Regional OMP defaults: the regional OMP defaults of `physics.hf.omp.regional`, on every path.
 
-The point of the module is that a region member's run is the TALYS run OSREGION measured --
+The point of the module is that a region member's run is the TALYS run the regional fit measured --
 `rvadjust n 0.96` / `avadjust n 0.75` with TALYS's own links following -- and that nothing else
 on the chart moves. These check exactly that, at the two places it can go wrong: the `Params`
 the keywords land in, and the cross section the chart path (`chartrun.run_nuclide`, the native
@@ -21,7 +21,7 @@ OUT_REGION = [(26, 56), (74, 184), (79, 197), (92, 238)]  # W-184 is deliberatel
 
 @pytest.fixture(autouse=True)
 def _on():
-    """The defaults ship OFF (OSENGINE: they did not survive Stage C), so every test below has to
+    """The defaults ship OFF (they did not survive Stage C), so every test below has to
     ask for them. `test_the_shipped_default_is_off` is the one that checks that it is off."""
     prev = regional.set_enabled(True)
     yield
@@ -65,7 +65,7 @@ def test_everything_else_keeps_talys_defaults(Z, A):
 def test_talys_links_follow_the_regional_default(Z, A):
     """input_omppar.f90:632 -- `rwadjust`/`awadjust` take `rvadjust`/`avadjust` unless given.
     Going in as keywords rather than as resolved values is what makes this hold, and it is what
-    makes an engine run of a member the same run TALYS did for OSREGION's grid."""
+    makes an engine run of a member the same run TALYS did for the regional fit's grid."""
     p = _params(Z, A)
     assert float(p["rwadjust"][1]) == pytest.approx(0.96)
     assert float(p["awadjust"][1]) == pytest.approx(0.75)
@@ -101,7 +101,7 @@ def test_caller_overrides_win_whole():
 
 
 def test_disabled_gives_the_ports_own_defaults():
-    """`regional.disabled()` is what CHART1's port arm runs under: port vs stock TALYS, with no
+    """`regional.disabled()` is what the chart's port comparison runs under: port vs stock TALYS, with no
     deliberate departure in it. It has to drop the caches, or the previous run's `Params` leaks."""
     Z, A = 76, 187
     with regional.disabled():
@@ -114,7 +114,7 @@ def test_disabled_gives_the_ports_own_defaults():
 def test_the_chart_path_returns_the_corrected_cross_section():
     """The native fast path rule: the default has to reach the call the chart actually makes
     (`chartrun.run_nuclide` -> `engine_c.run`), not just the Python reference path. Os-187's
-    capture drops ~40 % in the keV region under the OSREGION point, and a control nuclide is
+    capture drops ~40 % in the keV region under the regional point, and a control nuclide is
     bit-identical with the default on and off.
 
     Test: this is the in-suite form of what `docs/results/hf-osengine.md` measures over the

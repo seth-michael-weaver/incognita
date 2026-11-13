@@ -1,4 +1,4 @@
-/* CENGSETUP (ROUTE100 WP9): the set-up kernels of a nuclide (DWBA levels, the inverse channels'
+/* Native: the set-up kernels of a nuclide (DWBA levels, the inverse channels'
  * inward Coulomb Numerov) laid out for the vector units, built by scripts/build_setup_native.sh
  * with -O3 and, on x86 with AVX2 + FMA, -mavx2 -mfma; always -std=c11 -ffp-contract=off, so no
  * product is fused and no sum is reordered. Every function returns the bits of the kernel it
@@ -22,7 +22,7 @@
  *   Columns whose step count differs from the first column's go to the scalar form. On arm64
  *   (no `__AVX2__`) this file has no matching NEON form for hfnative.c's `#if HF_NEON` path, so
  *   it runs the plain scalar loop there instead; measured against hfnative's NEON output
- *   (MACFIX2) that lands within 3.2e-15 relative, not bit-identical -- reasonably close, per the
+ *   that lands within 3.2e-15 relative, not bit-identical -- reasonably close, per the
  *   project's tolerance standard (tests/hf/test_cengsetup.py::test_numerov_inward_bitwise).
  *
  * The build also compiles nx2_omp.c and nx2_preeq.c into the same library, unchanged: the flags

@@ -1,8 +1,8 @@
 """ENGFIX4 (bug hunt round 4, engine code): switches read per call, the grid's NUMEN error, `equispec`
-on the reference grid, GRIDTOP's exits, the isomer's targetE, CREC's record key, EWFC's memo identity.
+on the reference grid, the `INCOGNITA_GRIDTOP` exits, the isomer's targetE, the compound record key, EWFC's memo identity.
 
 The stage disk cache key is tested in tests/hf/test_stagedisk.py, the per-run results of normal
-targets by the bit-identity gates (tests/hf/test_perfhf_gate.py, test_perfcasc_gate.py, ...)."""
+targets by the bit-identity checks (tests/hf/test_perfhf_gate.py, test_perfcasc_gate.py, ...)."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ import torch
 
 @pytest.fixture
 def fresh(monkeypatch):
-    """Per-target caches dropped on the way in and out; no deck lines; GRIDTOP at its default (ON)."""
+    """Per-target caches dropped on the way in and out; no deck lines; `INCOGNITA_GRIDTOP` at its default (ON)."""
     from physics.hf import chartrun
     from physics.hf.input import fitlib
 
@@ -126,7 +126,7 @@ def test_equispec_reference_grid(fresh):
     assert rg.egrid[125] == pytest.approx(12.5, abs=1e-5)
 
 
-# ---------------------------------------------------------------------------------------- 7. GRIDTOP exits
+# ---------------------------------------------------------------------------------------- 7. gridtop exits
 
 
 def test_gridtop_exits_rule():
@@ -144,7 +144,7 @@ def test_gridtop_exits_rule():
 @pytest.mark.parametrize("Z,A", [(1, 2), (2, 3), (3, 6), (3, 7), (4, 9)])
 def test_gridtop_ignores_exits_without_a_residual(fresh, Z, A):
     """The grid top of a very light target is set by exits that exist: every exit whose residual
-    has no mass is left out of GRIDTOP's margin."""
+    has no mass is left out of the gridtop margin."""
     from physics.hf.compound.dens_reference import run_grid
     from physics.hf.core.grids import emission_limit
 
@@ -200,7 +200,7 @@ def test_excited_target_hf178m2_out_of_talys_range(fresh):
             call()
 
 
-# ---------------------------------------------------------------------------------------- 4. CREC record key
+# ---------------------------------------------------------------------------------------- 4. compound record key
 
 
 def test_record_key_follows_options_deck_and_env(monkeypatch):

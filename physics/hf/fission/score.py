@@ -1,4 +1,4 @@
-"""The A-fis gate: the ported fission chain against TALYS's own `fis*.txt` and `fis*.trans`.
+"""The A-fis test: the ported fission chain against TALYS's own `fis*.txt` and `fis*.trans`.
 
 Task: T11 (physics/hf/CONTRACT.md §7). Acceptance test: A-fis (§6), tolerance 0.05 on the p95
 of ``r = |ln(port / TALYS)|``.
@@ -16,8 +16,8 @@ What is scored, and with what injected
    parameters from (1). That makes this the *chained* number for everything below `compound`.
 
 `(n,f)` itself (`fission.tot`) needs the compound-nucleus population, which for an actinide
-needs the coupled-channels incident channel -- T13 or the ECIS bridge. It is reported, not
-gated, exactly as the task brief states.
+needs the coupled-channels incident channel -- T13 or the ECIS bridge.  It is reported, not
+checked against the tolerance, as the contract states.
 
 T14 warns (docs/results/hf-sgl-floor.md, Result 4) that a *per-barrier* `T(J,pi)` can move 5.7x
 between TALYS's own single- and double-precision builds on a discrete branch flip. That warning
@@ -53,7 +53,7 @@ TOLERANCE = 0.05  # CONTRACT.md §6, A-fis
 
 @dataclass
 class Residuals:
-    """Accumulator for one gate row: log-ratios plus the worst case that produced them."""
+    """Accumulator for one test row: log-ratios plus the worst case that produced them."""
 
     name: str
     r: list[float]
@@ -190,8 +190,8 @@ def score_barrier_densities(cache: _NucleusCache, files: list[Path], rows: dict)
     """A-ld for `ibar > 0`: the barrier level densities against the `ld*.b0N` dumps.
 
     T6 ported `densitypar`/`densitymatch`/`density` with an `ibar` argument but could not test
-    the `ibar > 0` branch, because nothing supplied `BarrierLevels` until this task; the A-ld
-    gate skips the `*.b0[123]` files for that reason (T6's note on the board). This closes it,
+    the `ibar > 0` branch, because nothing else supplies `BarrierLevels`; the A-ld
+    test skips the `*.b0[123]` files for that reason. This closes it,
     and it is also what sets the floor on the fission transmission: `t1barrier` integrates
     `rhofis` against the penetrability, so a relative error in the barrier level density lands
     one-for-one in `Tfis`.
@@ -340,7 +340,7 @@ def _fresh_mask(rho_port: np.ndarray, rho_ref: np.ndarray, seed) -> dict[str, np
     miss by many orders of magnitude (1e-30 against 1e5 is typical), so the band is not tight.
 
     The mask this returns is applied to all four quantities, which makes the `denfis` row of the
-    residual gate the *definition* of the mask rather than an independent measurement; the
+    residual check the *definition* of the mask rather than an independent measurement; the
     primary compound-nucleus rows are scored without needing it (nothing there is stale) and are
     the ones that carry A-fis.
     """
@@ -504,7 +504,7 @@ def _report(res: dict) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="A-fis gate")
+    ap = argparse.ArgumentParser(description="A-fis acceptance test")
     ap.add_argument("--targets", nargs="*", default=list(R.ACTINIDE_TARGETS))
     ap.add_argument("--variant", default="default")
     ap.add_argument("--residuals", action="store_true")

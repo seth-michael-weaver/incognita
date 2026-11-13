@@ -1,4 +1,4 @@
-"""SIGAVCONT: knockout sigav as one continuous window average (Incognita extension, default OFF).
+"""Knockout sigav as one continuous window average (Incognita extension, default OFF).
 
 TALYS's knockout.f90:110-126 switches sigav between the single bin eend (dE <= 2 MeV) and a whole-bin sum / dE
 (dE > 2 MeV); the switch is discontinuous in the incident energy. `sigavcont y` replaces both by the exact average

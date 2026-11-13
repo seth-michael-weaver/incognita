@@ -1,4 +1,4 @@
-"""ENGPROJ: the general-spin DWBA weight reproduces the spin-1/2 and spin-0 forms, and spin 1 conserves flux."""
+"""The general-spin DWBA weight reproduces the spin-1/2 and spin-0 forms, and spin 1 conserves flux."""
 import torch
 
 from physics.hf.core.angmom import clebsch

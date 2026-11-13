@@ -1,4 +1,4 @@
-/* Italian: layers (Capitolo 21). The scoreboard counts come from WT.board (js/scoreboard-data.js, loaded first), as in
+/* Italian: layers (Capitolo 21). The comparison counts come from WT.board (js/scoreboard-data.js, loaded first), as in
  * js/ch/layers.js; a missing block or field drops the number, not the sentence. */
 (function () {
   const B = WT.board || {};
@@ -30,7 +30,7 @@
   <h3>Strato 1 · Una regola per ogni nucleo</h3>
   <p>La linea blu è la previsione del motore per una reazione. Il motore è lo strato di base: la stessa fisica e le stesse impostazioni globali per ogni nuclide, senza nulla di adattato alle sezioni d'urto di un singolo nucleo.</p>
   <div class="btns"><button class="btn ghost" data-act="reveal" aria-pressed="false">Mostra le misure</button></div>
-  <p>Questo lo rende verificabile, rispetto alle misure e rispetto ad altri codici di modello eseguiti sugli stessi nuclei. Non è un test alla cieca: le impostazioni globali sono state scelte osservando proprio questi confronti.${engineScore}</p>
+  <p>Questo lo rende verificabile, rispetto alle misure e rispetto ad altri codici di modello eseguiti sugli stessi nuclei. Non è un test indipendente: le impostazioni globali sono state scelte osservando proprio questi confronti.${engineScore}</p>
   ${figs(TE)}
 </div>
 <div class="step">
@@ -58,8 +58,8 @@
 <div class="step">
   <h3>Stato attuale</h3>
   <p>Uno strato viene adottato solo dopo essere stato provato contro le misure, e resta disattivato se non aiuta. Oggi il motore è in uso e TERRA è un candidato; lo strato della struttura misurata e la banda di incertezza del motore sono ancora in prova.</p>
-  <p><a href="scoreboard.html" data-keep-lang>Vedi la classifica completa →</a> Ogni confronto che non vinciamo, ogni rivale, e come leggerla.</p>
-  <div class="aside">${ASOF ? `Punteggi al ${ASOF}, dal` : "Punteggi dal"} registro di ricerca del progetto. Le curve dell'immagine sono illustrative.</div>
+  <p><a href="scoreboard.html" data-keep-lang>Vedi tutti i confronti →</a> Ogni confronto che non vinciamo, ogni rivale, e come leggerli.</p>
+  <div class="aside">${ASOF ? `Punteggi al ${ASOF}, dal` : "Punteggi dal"} registro dei confronti del progetto. Le curve dell'immagine sono illustrative.</div>
 </div>`,
   };
 })();
@@ -79,5 +79,5 @@ Object.assign(WT.L.labels, {
   "{#} of {#} measurements inside the band (aim: about {#} %)": "{#} misure su {#} dentro la banda (obiettivo: circa il {#} %)",
   "no measurements to check the band against": "nessuna misura con cui verificare la banda",
 });
-Object.assign(WT.L.ui, { nav_board: "Classifica" });
+Object.assign(WT.L.ui, { nav_board: "Confronti" });
 /* attributes referenced in the English chapter script (for the structure check): data-act="${act}" */

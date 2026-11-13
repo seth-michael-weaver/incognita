@@ -1,7 +1,7 @@
 """Warm engine pool (scripts/talysworld/warmpool.py).
 
 Unit tests (always): the energy split and the merge of slice results.
-Engine gate (Linux with the production engine, opt-in: TW_ENGINE_TESTS=1, several minutes, 2 engine processes at
+Engine check (Linux with the production engine, opt-in: TW_ENGINE_TESTS=1, several minutes, 2 engine processes at
 nice 10): scripts/talysworld/check_warm.py on Fe-56, Zr-90, Au-197, U-238 (library compositions), one energy and the
 64-point library grid: warm-pool (two-arm compositions with their arms side by side), chunked (2 workers), reverse-order/concurrent and engine_job.py-via-pool outputs
 must equal a fresh process per job to 1e-12 relative (also with deck keywords varied between interleaved jobs and with
@@ -59,7 +59,7 @@ ENGINE = Path(os.environ.get("TW_ENG", str(Path.home() / "fastgate_data/eng/1660
 
 
 @pytest.mark.skipif(os.environ.get("TW_ENGINE_TESTS") != "1" or not (ENGINE / ".venv/bin/python").exists(),
-                    reason="engine gate: set TW_ENGINE_TESTS=1 on a machine with the production engine (Linux)")
+                    reason="engine check: set TW_ENGINE_TESTS=1 on a machine with the production engine (Linux)")
 def test_engine_gate_warm_chunked_order_equal_fresh(tmp_path):
     out = tmp_path / "check_warm.json"
     p = subprocess.run([str(ENGINE / ".venv/bin/python"), str(TW / "check_warm.py"), "--workers", "2", "--out", str(out)],

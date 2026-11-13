@@ -1,4 +1,4 @@
-"""SNBIN: `snbin n|y` (env INCOGNITA_SNBIN), continuum bin edges at the residual's separation energies."""
+"""`snbin n|y` (env INCOGNITA_SNBIN), continuum bin edges at the residual's separation energies."""
 import numpy as np
 import pytest
 
@@ -47,7 +47,7 @@ def test_close_thresholds_insert():
     assert e.size == 6 and f32(0.5) in e and f32(0.51) in e and np.all(np.diff(e) > 0)
 
 
-# SNBIN3: `snbin w` = `snbin y` + >= SNBIN_WINDOW_MIN bins inside every open window [S, Exmax]
+# `snbin w` = `snbin y` + >= SNBIN_WINDOW_MIN bins inside every open window [S, Exmax]
 def test_mode_w(monkeypatch):
     monkeypatch.setenv(grids.SNBIN_ENV, "w")
     assert grids.snbin_mode(Options(26, 56, 1)) == "w" and grids.snbin_on(Options(26, 56, 1))

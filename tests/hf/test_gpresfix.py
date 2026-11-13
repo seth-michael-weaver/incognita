@@ -1,4 +1,4 @@
-"""GPRESFIX: residual-side photon strength of the residual itself for every non-neutron projectile.
+"""`INCOGNITA_GPRESFIX`: residual-side photon strength of the residual itself for every non-neutron projectile.
 
 TALYS: fstrength.f90:1 (fstrength(Zcomp, Ncomp, ...), S(Zcomp, Ncomp, k0) at :192), densprepare.f90:310, tgamma.f90:64
 """

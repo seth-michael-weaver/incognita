@@ -1,4 +1,4 @@
-"""Incognita extension (CTKINK; not TALYS): `ctwindow2`, the versioned successor of `ctwindow` (CTWFREEZE, frozen for B51).
+"""Incognita extension (not TALYS): `ctwindow2`, the versioned successor of `ctwindow` (which stays frozen).
 Keyword `ctwindow2 y` (densitymodel section) or env INCOGNITA_CT_WINDOW2=1; default OFF, and OFF never enters this module.
 With both switches on, `ctwindow2` is used and `ctwindow` is ignored.
 
@@ -53,8 +53,8 @@ def enabled(options) -> bool:
 
 
 def mode(options):
-    """False when ctwindow2 is off, else the no-root rule: "cont" (ARTFIX, keyword `ctwcont y`, default) or "root" (the
-    pre-ARTFIX rule, `ctwcont n` or env INCOGNITA_CTW2_CONT=0)."""
+    """False when ctwindow2 is off, else the no-root rule: "cont" (keyword `ctwcont y`, default) or "root" (the
+    earlier rule, `ctwcont n` or env INCOGNITA_CTW2_CONT=0)."""
     if not enabled(options):
         return False
     on = bool(getattr(options, "flagctwcont", True)) and os.environ.get("INCOGNITA_CTW2_CONT", "1") != "0"
@@ -65,7 +65,7 @@ _GR = 0.5 * (math.sqrt(5.0) - 1.0)
 
 
 def _least(gb, xs, gs):
-    """ARTFIX `ctwcont`: the x of least |g| when g has no sign change on the grid (the count condition solved in the
+    """`ctwcont`: the x of least |g| when g has no sign change on the grid (the count condition solved in the
     least-squares sense). Grid argmin of |g|, then golden section on |g| over the two adjacent segments to 1e-9 MeV, so
     at a root's birth (tangency or bracket edge) the anchor moves continuously onto the root. None if no finite g."""
     a = np.abs(np.asarray(gs, dtype=np.float64))
@@ -154,7 +154,7 @@ def _count(ld0, x, L, T, EL, EP, ct, pt):
 
 
 def _g_batch(ld0, xs, EL, EP, ct, pt, target) -> np.ndarray:
-    """SPEEDFIX: `anchor`'s g(x) = count(x) - target at many x in two `fg_log` calls (the stencil at every x, then the
+    """`anchor`'s g(x) = count(x) - target at many x in two `fg_log` calls (the stencil at every x, then the
     FG-side count integrands of every x with EP > x as one (n, _NS+1) array). Same arithmetic as `_fg_point` + `_count`
     per x (np.linspace with array ends = per-row linspace; row sums = 1-D sums); NaN where g is."""
     xs = np.asarray(xs, dtype=np.float64).reshape(-1)
@@ -233,7 +233,7 @@ def used_density(ld, E) -> np.ndarray:
     return densitytot(ld, x, 0).double().numpy().reshape(np.shape(E))
 
 
-#: PERFCASC: anchor results of this process, keyed by the complete input (`_memo_key`); a hit rebuilds the same record
+#: Anchor results of this process, keyed by the complete input (`_memo_key`); a hit rebuilds the same record
 _MEMO: dict = {}
 _MEMO_MAX = 256
 #: environment switches the anchor cannot read (photon-strength / isospin options the h-rule toggles between its runs,
@@ -280,7 +280,7 @@ def _fp(h, v) -> bool:
 
 def _memo_key(ld, cont):
     """Everything `anchor` reads: the record (every field), `cont`, the engine's environment switches and the active
-    deck's energy-adjustment bumps (`eadj.token`, NPWINDOW included); None when some field has no canonical form or
+    deck's energy-adjustment bumps (`eadj.token`, `npwindow` included); None when some field has no canonical form or
     carries a gradient (then no memo). The module's helpers enter by identity (a monkeypatched helper misses)."""
     import hashlib
 
@@ -306,7 +306,7 @@ def _memo_key(ld, cont):
 
 
 def anchor(ld, cont: bool = False):
-    """`_anchor` (below) with a per-process memo (PERFCASC): the h-rule and the run rebuild the same nucleus's matched
+    """`_anchor` (below) with a per-process memo: the h-rule and the run rebuild the same nucleus's matched
     record up to four times per arm; a repeat of the same input returns the same record (T, E0, Exmatch of barrier 0
     set from the stored floats, as `_anchor` sets them) and replays the LAST/WHY diagnostics. Bit-identical."""
     key = _memo_key(ld, cont)
@@ -344,9 +344,9 @@ def anchor(ld, cont: bool = False):
 def _anchor(ld, cont: bool = False):
     """`ld` (already matched by densitymatch) with T, E0, Exmatch of barrier 0 solved jointly on the complete level window
     (value + slope continuity at Ex, window count), or `ld` unchanged where the rule does not apply.
-    `cont` (ARTFIX, `ctwcont y`): without a root, or when the root fails TALYS's guards, anchor at the least
+    `cont` (`ctwcont y`): without a root, or when the root fails TALYS's guards, anchor at the least
     |count - target| on the admissible x (`_least`) instead of keeping densitymatch's values; that on/off switch made
-    0.03-0.33 dex steps in knob space (ARTSCAN case 1)."""
+    0.03-0.33 dex steps in knob space."""
     from physics.hf.density import matching as M
 
     key = (int(ld.Z), int(ld.A))
@@ -378,7 +378,7 @@ def _anchor(ld, cont: bool = False):
             return min(_count(ld0, x, L, 1.0 / d, EL, EP, ct, pt), 1e30) - target
 
         xs = np.linspace(x1, x2, 101)
-        if os.environ.get("INCOGNITA_CTW2_SERIAL", "0") == "1":   # the pre-SPEEDFIX serial search (A/B only)
+        if os.environ.get("INCOGNITA_CTW2_SERIAL", "0") == "1":   # the earlier serial search (A/B only)
             gs = [g(x) for x in xs]
         else:
             gs = list(_g_batch(ld0, xs, EL, EP, ct, pt, target))
@@ -414,7 +414,7 @@ def _anchor(ld, cont: bool = False):
             return x <= max(2.25 / float(M.ignatyuk(ld, M._t(x), 0)) + P, 0.0) + 0.11 or x > 3.0 * Exmemp
 
         guarded = bad(Ex)
-        if guarded and cont:   # ARTFIX: least |g| on the admissible part of the bracket (+ its upper edge 3 Exmemp)
+        if guarded and cont:   # `ctwcont`: least |g| on the admissible part of the bracket (+ its upper edge 3 Exmemp)
             hb = min(3.0 * Exmemp, x2)
             ad = sorted({float(x) for x in xs if not bad(float(x))} | ({hb} if hb > x1 and not bad(hb) else set()))
             if ad:

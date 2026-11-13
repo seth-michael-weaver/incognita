@@ -1,5 +1,5 @@
 /* Pipeline page (pipeline.html, js/pipeline.js): the reactor-data pipeline as a lit diagram, one live drawing per stage.
-   Dark and lit like the data page and the scoreboard; loaded only by pipeline.html. */
+   Dark and lit like the data page and the comparison page; loaded only by pipeline.html. */
 body.pl-page { background: radial-gradient(1400px 700px at 50% -12%, #1a2a5e 0%, #0a1124 45%, #05070e 100%) fixed; }
 .pl { max-width: 76rem; margin: 0 auto; padding: 22px 20px 96px; font-family: var(--serif); }
 .pl .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

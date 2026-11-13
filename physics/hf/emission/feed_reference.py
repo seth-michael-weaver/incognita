@@ -1,4 +1,4 @@
-"""Gate driver for the multiple-emission feeding chain: compute `feedexcl`/`popexcl` from the
+"""Test driver for the multiple-emission feeding chain: compute `feedexcl`/`popexcl` from the
 ported components and score them against TALYS's own, dumped by
 `emission/talys_instrument/chdump.f90`.
 
@@ -41,14 +41,14 @@ from physics.hf.emission.feeding import Cascade
 from physics.hf.emission.multiple import multiple_emission
 from physics.hf.emission.score import POP_FLOOR_MB, _r
 from physics.hf.preeq.multi import NUMPARX
-from physics.hf.projectile import target_mass_index  # ENGPROJ3 TARMASSFIX
+from physics.hf.projectile import target_mass_index
 
 PARSYM_ = "gnpdtha"  # constants.f90: parsym, types 0..6
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT_JSON = ROOT / "docs" / "results" / "hf-feeding-gate.json"
 TOL = 0.05  # A-mult, contract §6
-# §2's pre-registered floors: 1e-3 mb for cross sections, 1e-6 mb for populations. `feedexcl` and
+# §2's fixed floors: 1e-3 mb for cross sections, 1e-6 mb for populations. `feedexcl` and
 # `popexcl` are flux per bin, i.e. population-class, so the population floor applies.
 FLOOR_MB = POP_FLOOR_MB
 
@@ -64,7 +64,7 @@ def etotal_of(Zt: int, At: int, enincmax_mev: float, e_inc_mev: float, k0: int) 
         e_inc_mev, k0, float(rg.m.mass_amu[target_mass_index()]),
         float(rg.m.specmass[c["parZ"][k0], c["parN"][k0], k0]),
         float(rg.m.redumass_amu[c["parZ"][k0], c["parN"][k0], k0]), rg.options.flagrel)
-    return float(total_energy(eninccm, rg.s0[k0], rg.target_e))  # ENGFIX4: + targetE (energies.f90:131)
+    return float(total_energy(eninccm, rg.s0[k0], rg.target_e))  # + targetE (energies.f90:131)
 
 
 @lru_cache(maxsize=16)
@@ -72,12 +72,12 @@ def _preeq_of(target: str, declared: tuple[float, ...] | None = None, fit: tuple
     """T8's spectra for one target, cached: `prepare` + `preequilibrium` is the expensive part.
 
     `declared` (the run's incident energy grid) switches the whole set-up to the chained arm --
-    no `cross_<p>.tot`, no `directE*.out`, no `exciton*.out` file list (NODUMP)."""
+    no `cross_<p>.tot`, no `directE*.out`, no `exciton*.out` file list."""
     from physics.hf.compound.pop_reference import _preeq
 
-    # `declared` only when given: HEAD's `pop_reference._preeq` predates NODUMP's keyword
+    # `declared` only when given: an older `pop_reference._preeq` has no such keyword
     kw = {} if declared is None else {"declared": declared}
-    if fit:  # PARAMWIRE: `pop_reference.preeq_fit` of the run's parameter set
+    if fit:  # `pop_reference.preeq_fit` of the run's parameter set
         kw["fit"] = fit
     energies, res, options = _preeq(target, **kw)
     return {round(e, 6): i for i, e in enumerate(energies)}, res, options
@@ -92,7 +92,7 @@ def _giant_of(target: str, e_inc_mev: float, declared: tuple[float, ...] | None 
 
 
 def _seed_exciton(k0: int) -> dict:
-    """MPEFID: `population.f90:211-236` labels the binary residuals' particle-hole populations
+    """`population.f90:211-236` labels the binary residuals' particle-hole populations
     with the GLOBAL `ppi0`/`pnu0`/`p0` that `preeq.f90:63-79` set from the projectile
     (`parZ(k0)`, `parN(k0)`, `parA(k0)`; a photon is one neutron particle). `PopulationInputs`
     defaults to the neutron's (1, 0, 1), and this builder never passed the projectile's, so every
@@ -103,7 +103,7 @@ def _seed_exciton(k0: int) -> dict:
     runs are the same bits either way.
 
     TALYS: population.f90:1 (population), preeq.f90:63-79
-    Test: development notes (WP-25 stock fidelity, F1)
+    Test: stock-TALYS fidelity comparison (not in the public suite)
     """
     import os
 
@@ -119,7 +119,7 @@ def pop_inputs_of(cas: Cascade, binp, target: str, etotal_mev: float, add: dict,
                   declared: tuple[float, ...] | None = None):
     """`PopulationInputs` for one incident energy, built off the Cascade's own grids.
 
-    The dump-driven twin is `compound.pop_reference.pop_inputs`, which is what the A-cn1 gate
+    The dump-driven twin is `compound.pop_reference.pop_inputs`, which is what the A-cn1 test
     scores; this one takes the same physics from the same modules but reads `Ex`/`deltaEx`/`Nlast`
     off `Cascade.spec`, so the full chain needs no compound-nucleus dump.
 
@@ -162,7 +162,7 @@ def pop_inputs_of(cas: Cascade, binp, target: str, etotal_mev: float, add: dict,
     xstep2 = pres["xsstep2"][i].detach().numpy() if "xsstep2" in pres else None
     flagmulpre = not (binp.e_inc_mev < options.emulpre_mev)
     if flagmulpre and (not options.flag2comp or options.flaggshell):
-        # KWCOV B7: the binary exciton model has both (preeq.exciton_b7); multiple pre-equilibrium does not
+        # the binary exciton model has both (preeq.exciton_b7); multiple pre-equilibrium does not
         raise NotImplementedError(
             "not ported: multiple pre-equilibrium (Einc >= multipreeq onset, default 20 MeV) with "
             + ("twocomponent n (multipreeq.f90, the one-component chain)" if not options.flag2comp else
@@ -190,7 +190,7 @@ def pop_inputs_of(cas: Cascade, binp, target: str, etotal_mev: float, add: dict,
 
 
 def _spin_inputs(pres: dict, i: int, gres, k0: int, E: int) -> dict:
-    """KWCOV B7 (`preeqspin 3`): the J-resolved spectra population.f90:184-198 interpolates, as
+    """`preeqspin 3`: the J-resolved spectra population.f90:184-198 interpolates, as
     `PopulationInputs` takes them: `xspreeqJP` per type (E, maxJph+1, 2), the collective continuum's
     `xscollcontJP` (giant.f90:161) and the giant resonances' `xsgrstate` by multipolarity l = J (E, 4, 2: GMR at
     J = 0, GQR at 2, LEOR/HEOR at 3), all zero where TALYS has nothing.

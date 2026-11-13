@@ -1,4 +1,4 @@
-"""PERFSTART: binary disk cache for parsed TALYS structure-database tables.
+"""Binary disk cache for parsed TALYS structure-database tables.
 
 The engine parses the TALYS text files lazily, per nucleus, once per process. Most families cost
 little; a few cost a fresh process noticeable time, mostly on heavy and fissile targets: the
@@ -14,7 +14,7 @@ entry stores the source file's (size, mtime_ns) and FORMAT and is used only when
 match; anything else (missing, stale, unreadable, truncated) is a miss and the text is parsed
 (and the entry rewritten). Entries are written to a temporary file and `os.replace`d. The arrays
 hold exactly the float64 / int values the parser produced, so a hit returns the same numbers
-to the bit (tests/hf/test_perfstart_gate.py, gate run with the cache cold and warm).
+to the bit (tests/hf/test_perfstart_gate.py, run with the cache cold and warm).
 
 TALYS: none (I/O cache)
 Test: tests/hf/test_structbin.py

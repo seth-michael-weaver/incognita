@@ -1,11 +1,11 @@
-"""NATIVEX: `multiple_emission`'s walk down one cascade nucleus in one compiled call.
+"""`multiple_emission`'s walk down one cascade nucleus in one compiled call.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: NATIVEX (the speed work; no physics of its own). Acceptance test: `tests/hf/test_nativex.py`
-(the walk against `multiple._decay_nucleus_numpy` and the tensor loop) and the G-NATIVEX closeness
-gate.
+A speed path with no physics of its own. Acceptance test: `tests/hf/test_nativex.py`
+(the walk against `multiple._decay_nucleus_numpy` and the tensor loop) and a closeness
+check.
 
 TALYS routines this computes (in `native/nativex.c`'s `nx_walk`):
     multiple.f90:1 (multiple)     -- the loop over mother bins, popexcl, feedexcl, xsfeed
@@ -114,10 +114,10 @@ class _Walk:
         put(15, X)
         put(16, XE)
         put(17, _c(nuc.dex_mev.numpy()))
-        if getattr(nw, "sub", 1) > 1:  # BINQUAD sub-points: widths rows per mother bin
+        if getattr(nw, "sub", 1) > 1:  # Bin sub-points: widths rows per mother bin
             put(150, _c(nw.sub_cnt, _I64))
             put(151, _c(nw.sub_off, _I64))
-            put(152, _c(nw.sub_w))  # BINQUAD2: each sub-point's share of its bin's population
+            put(152, _c(nw.sub_w))  # Each sub-point's share of its bin's population
         ip[:7] = (xrows, maxex, nuc.nlast, m, nj, int(d6 is not None), int(fis is not None))
         vmax, dpmax, nmax = 1, 1, 1
         self.tables = {}
@@ -210,7 +210,7 @@ class _Walk:
             return False
         P1 = next(iter(ph.values())).shape[0]
         P4 = P1 ** 4
-        tj = [cas.trans_of(zc, nc)[t][0] for t in (1, 2)]  # SLFIRST: per emitting nucleus
+        tj = [cas.trans_of(zc, nc)[t][0] for t in (1, 2)]  # per emitting nucleus
         if any(isinstance(x, torch.Tensor) for x in tj):
             return False
         xrows = self.X.shape[0]
@@ -363,7 +363,7 @@ def decay_nucleus(nuc, daughters: dict, decay, zc: int, nc: int, popepsA: float,
         return _cascade_only(nuc, zc, nc, popepsA, smin, popexcl, feedexcl, xspartial, records)
     w = _Walk(nuc, daughters, nw, zc, nc, popepsA, smin, feedexcl, records)
     so_buf = None
-    if M._SO.active():  # SPECOUT: nx_walk's mcontrib/mpecontrib sink buffers (output only)
+    if M._SO.active():  # nx_walk's mcontrib/mpecontrib sink buffers (output only)
         drows = {0: int(w.X.shape[0])}
         drows.update({t: int(d.xspopex_mb.shape[0]) for t, d in daughters.items() if t >= 1})
         so_buf = M._SO.c_buffers(int(w.X.shape[0]), drows)
@@ -377,7 +377,7 @@ def decay_nucleus(nuc, daughters: dict, decay, zc: int, nc: int, popepsA: float,
     if mpe is not None and nuc.mulpre:
         from physics.hf.density.particle_hole import phfast_on, phmicro_on
 
-        # PHMICRO: phmodel 2 tables go to the native walk's multipreeq2 (fast-phmodel); INCOGNITA_PHFAST=0 = per-bin Python callback
+        # phmodel 2 tables go to the native walk's multipreeq2 (fast-phmodel); INCOGNITA_PHFAST=0 = per-bin Python callback
         context = getattr(mpe, "context", None) if os.environ.get("HF_NATIVEX_MPE", "1") != "0" \
             else None
         if context is not None and phmicro_on(getattr(context[0], "options", None)) and not phfast_on():
@@ -449,7 +449,7 @@ def _cascade_only(nuc, zc, nc, popepsA, smin, popexcl, feedexcl, xspartial, reco
                 X[k, int(jdis[k]), M._pi(int(parlev[k]))] += intens
                 XE[k] += intens
                 XE[nex] -= intens
-                contrib[k] = contrib.get(k, 0.0) + intens if dup else intens  # KEVLEAK2 dup
+                contrib[k] = contrib.get(k, 0.0) + intens if dup else intens  # kevleak2 dup
                 if M._SO.active():
                     M._SO.acc_cell(zc, nc, 0, nex, k, intens)
             if contrib and records[0]:

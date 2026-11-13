@@ -1,4 +1,4 @@
-"""Build the Stage C training bundle from the repository's own curated data (WP-15).
+"""Build the Stage C training bundle from the repository's own curated data.
 
 Stage B cross sections come from the TALYS surrogate, the targets from the WP-12 curated
 EXFOR consensus with trust weights, the teacher from an evaluated library, and the time
@@ -704,7 +704,7 @@ def inelastic_features(ids: list[str]) -> np.ndarray:
     # level_index 1 is the ground state; an excited level is index > 1 at non-zero energy.
     # A non-null energy_offset (e.g. "SN") means energy_kev is quoted relative to that offset, not
     # to the ground state: Os-190's lowest such row is a 6.7 eV resonance above S_n, which the
-    # unfiltered min() took as E(2+) (log10 -4.67 instead of 186.7 keV's -0.23). AUDIT2, 2026-09-13.
+    # unfiltered min() took as E(2+) (log10 -4.67 instead of 186.7 keV's -0.23).
     ex = lv.filter((pl.col("level_index") > 1) & (pl.col("energy_kev") > 0)
                    & pl.col("energy_offset").is_null())
     first = {r["nuclide_id"]: r["e"] for r in
@@ -1063,7 +1063,7 @@ def build_bundle(
     # `region:tag` picks one checkpoint for a region; `region:tagA|tagB|...` gives that region
     # its own ENSEMBLE, log-averaged like the global one. The distinction matters because a
     # single seed carries the seed noise the ensemble exists to cancel -- measured at 0.0032
-    # on the gate cells -- so a per-region pick made from single checkpoints cannot be
+    # on the validation cells -- so a per-region pick made from single checkpoints cannot be
     # compared against a five-seed global ensemble on equal terms.
     smap = _env("SURROGATE_MAP", "")
     region_ens: dict[str, list] = {}
@@ -1158,15 +1158,15 @@ def build_bundle(
     def _region_of(nid: str) -> str:
         z = int(nid[1:4])
         return "Fe-Sn" if z <= 50 else ("Sn-Pb" if z <= 82 else "actinide")
-    # RETRO: a retrodiction exam has to hand the bundle a teacher of the right vintage. The
-    # teacher never enters the loss in the exam family (teacher_weight = 0) but it sets the
+    # Retrodiction: a retrodiction test has to hand the bundle a teacher of the right vintage. The
+    # teacher never enters the loss in the retrodiction family (teacher_weight = 0) but it sets the
     # teacher RRR bound and the in-bundle comparison column, and TENDL-2025 has seen everything.
     teacher_key = _env("TEACHER_LIB", "") or teacher_key
     teacher = C.PredictionSet.from_library(teacher_key, mts=(mt,), nuclides=ids) if teacher_key else {}
 
     points = C.load_exfor_points(mode="datasets", year_cutoff=None, mts=(mt,),
                                  channel=channel)
-    # RETRO sensitivity arm S6: `year_cutoff` keeps a measurement out of training by its
+    # Retrodiction sensitivity variant S6: `year_cutoff` keeps a measurement out of training by its
     # PUBLICATION year, but an evaluator of year Y worked from the EXFOR snapshot of year Y,
     # and 41 % of capture datasets are compiled into EXFOR more than two years after they are
     # published. Setting INCOGNITA_EXFOR_COMPILED_CUTOFF = Y also drops every dataset whose
@@ -1187,7 +1187,7 @@ def build_bundle(
                          | (_pl.col("compiled_year") <= int(_cc)))
                  .drop(["entry", "compiled_year"]))
         points.frame = _keep
-        print(f"[stage-c] RETRO compiled-date cutoff {_cc}: {_n0} -> {_keep.height} dataset rows",
+        print(f"[stage-c] retrodiction compiled-date cutoff {_cc}: {_n0} -> {_keep.height} dataset rows",
               flush=True)
     frame = points.frame.to_pandas() if hasattr(points.frame, "to_pandas") else points.frame
 
@@ -1264,7 +1264,7 @@ def build_bundle(
     is_test = np.zeros((n, n_energy))
     ds_records: list[dict] = []
 
-    # EXACTFIT: Stage B from the exact engine (scripts/exactfit_engine.py) instead of any
+    # Stage B from the exact engine (scripts/exactfit_engine.py) instead of any
     # surrogate. A parquet of (nuclide_id, capture_b on this grid); a nuclide it does not carry
     # keeps the surrogate path below, and the count is printed so a partial table is visible.
     engine_b: dict[str, np.ndarray] = {}
@@ -1277,7 +1277,7 @@ def build_bundle(
                 engine_b[_r["nuclide_id"]] = _c
         print(f"[stage-c] Stage B from the exact engine ({_epath}): {len(engine_b)} of "
               f"{len(ids)} nuclides, the rest on the surrogate path", flush=True)
-    # ACTINIDEFIT: nuclides whose engine-table row is already the final Stage B (a pre-cutoff
+    # STAGE_B_FINAL: nuclides whose engine-table row is already the final Stage B (a pre-cutoff
     # library taken at full weight), so the library blend below must not dilute it again.
     engine_final = set(n.strip() for n in _env("STAGE_B_FINAL", "").split(",") if n.strip())
     if engine_final:
@@ -1427,7 +1427,7 @@ def build_bundle(
     # "canonical" takes the maximum over the evaluated libraries, which is the bound
     # `validation.differential.rrr_bounds` uses and every comparison script in the repository
     # already scores against.
-    # "indep" (default since v0.1): the library-free bound of INDEP_FIX2 (RIPL D0 x resonance count with fallbacks,
+    # "indep" (default since v0.1): the library-free bound (RIPL D0 x resonance count with fallbacks,
     # docs/release/indep_fix2/bounds2.py); INCOGNITA_RRR_BOUNDS points at another table with columns nuclide_id, e_rrr_ev.
     # "teacher" and "canonical" read evaluated libraries and are opt-in.
     rrr_policy = rrr_policy or _env("RRR_POLICY", "indep")
@@ -1459,7 +1459,7 @@ def build_bundle(
     # kink in the wrong place for every nuclide.
     #
     # Correcting it changes nothing measurable. Five paired ensembles, capture, mean effect on
-    # the nine gate cells +0.0009 +- 0.0009 (0.95 se) -- not significant, and the sign is
+    # the nine validation cells +0.0009 +- 0.0009 (0.95 se) -- not significant, and the sign is
     # marginally *worse*. So the default stays `compound`: that is what capture-v19 was fitted
     # with, and there is no evidence to justify moving the shipped model. `target` is the
     # physically correct value and is kept switchable, because the null result is about this

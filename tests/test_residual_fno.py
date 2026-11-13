@@ -1,4 +1,4 @@
-"""Acceptance test for the Stage C spectral residual (WP-15 step 1).
+"""Acceptance test for the Stage C spectral residual.
 
 Written by hand before the implementation: it fixes the contract the implementation must meet.
 """

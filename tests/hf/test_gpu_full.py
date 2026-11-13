@@ -1,11 +1,11 @@
-"""GPUFULL: the dump-free ChainedFull channel set on the (nuclide, energy) batch axis gives the CPU
+"""GPU full path: the dump-free ChainedFull channel set on the (nuclide, energy) batch axis gives the CPU
 engine's numbers.
 
 `physics.hf.gpu_full_setup` extracts, per nuclide, everything a dump-free run computes that does
 not read a population; `physics.hf.gpu_full` (+ `_cascade`, `_channels`) computes the rest for a
 whole batch of runs at once. Summation order differs from the CPU reductions, so the check is a
-relative tolerance, not bitwise. GPU3 runs the heavy contractions in float32 (gate G-GPU3,
-docs/results/hf-gpu3.md: gate channels within 1e-5, every cell within 1e-4), so the checks
+relative tolerance, not bitwise. The GPU path runs the heavy contractions in float32
+(docs/results/hf-gpu3.md: main channels within 1e-5, every cell within 1e-4), so the checks
 against the CPU engine use those bounds (`_TOL`); the float64 arrangements are checked against
 each other at 1e-12. The batch path runs on CUDA when there is a device and on CPU otherwise.
 """
@@ -21,7 +21,7 @@ import torch
 
 @pytest.fixture(scope="module", autouse=True)
 def _alphatemp_off():
-    """ALPHAADOPT (alphatemp default ON 0.64): the GPU full path does not wire ALPHATEMP (it refuses the switch); this module runs at alphatemp 0."""
+    """`alphatemp` defaults ON (0.64): the GPU full path does not wire `alphatemp` (it refuses the switch); this module runs at alphatemp 0."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_ALPHATEMP", "0")
         yield
@@ -52,7 +52,7 @@ GATE = {"xs000000", "xs010000", "xs000001", "xs100000"}
 
 
 def _tol(k: str) -> float:
-    """G-GPU3's bound for channel `k` (GPU3: loosened from GPUFULL's 1e-10)."""
+    """The float32 bound for channel `k` (float32 contractions: looser than the float64 1e-10)."""
     return 1.0e-5 if k in GATE else 1.0e-4
 
 
@@ -109,7 +109,7 @@ def test_every_channel_matches_the_cpu_engine(fe56, eidx):
 
 
 def test_trapped_leftover_reaches_the_exclusive_channels():
-    """GPUINT: CHARTFIX's compound.f90:404-419 on the batch axis. Eu-147 at 8 keV puts 990 of the
+    """Trapped leftover flux: compound.f90:404-419 on the batch axis. Eu-147 at 8 keV puts 990 of the
     3042 mb populating Eu-148 in one bin with no open exit; that flux reaches the levels' xspopex
     and feedexcl, so capture is the CPU engine's and not 0.734 of it."""
     from physics.hf import engine
@@ -144,7 +144,7 @@ def test_channels_carry_chanopen_across_batches(fe56):
             first[k].cpu().numpy() if k in first else np.zeros(2),
             second[k].cpu().numpy() if k in second else np.zeros(2)])
         for j in range(4):
-            # GPU3: the two batches group comptarget's float32 Moldauer terms differently
+            # float32: the two batches group comptarget's float32 Moldauer terms differently
             assert _rel(float(a[j]), float(b[j])) <= 1.0e-6, (k, j)
 
 
@@ -169,7 +169,7 @@ def test_duplicate_gamma_branches_record_the_later_one():
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="the CUDA-graph walk needs a device")
 def test_fused_kernels_and_graph_walk_match_the_eager_path(fe56, monkeypatch):
-    """GPUFULL2: the compiled kernels and the CUDA-graph bin walk give the numbers of the same
+    """Compiled path: the compiled kernels and the CUDA-graph bin walk give the numbers of the same
     functions run eagerly, step by step (Fe-56 at 1 keV, 7.05 MeV and 20 MeV)."""
     from physics.hf import gpu_full_cascade as C
     from physics.hf import gpu_full_kernels as K
@@ -189,12 +189,12 @@ def test_fused_kernels_and_graph_walk_match_the_eager_path(fe56, monkeypatch):
         a = fast[k].cpu().numpy() if k in fast else np.zeros(len(eidx))
         b = slow[k].cpu().numpy() if k in slow else np.zeros(len(eidx))
         for j in range(len(eidx)):
-            # GPU3: float32 reductions fused by Inductor round differently from eager ATen
+            # float32 reductions fused by Inductor round differently from eager ATen
             assert _rel(float(a[j]), float(b[j])) <= 1.0e-5, (k, eidx[j], a[j], b[j])
 
 
 def test_window_comptarget_matches_the_dense_masks(fe56, monkeypatch):
-    """GPU3: comptarget on channel lists with spin-window prefix sums gives the dense-mask
+    """Window comptarget: comptarget on channel lists with spin-window prefix sums gives the dense-mask
     comptarget's populations (both float64: the Moldauer terms' float32 switched off), Fe-56 at
     1 keV and 7.05 MeV (width fluctuations) and 20 MeV (none)."""
     from physics.hf import gpu_full as G
@@ -219,10 +219,10 @@ def test_window_comptarget_matches_the_dense_masks(fe56, monkeypatch):
 
 
 def test_sfactor_is_carried_across_energies(talys_popeps):
-    """GPUC (OPEN4 D): binary.f90's `sfactor` is run-scoped. Pb-208 (n,g) at 20 MeV takes the
+    """Run-scoped sfactor: binary.f90's `sfactor` is run-scoped. Pb-208 (n,g) at 20 MeV takes the
     11.88 MeV compound spin shape in bins below popepsA: carried (one batch, or batch to batch
     through the state) it is the CPU engine's; from a fresh state it is 6% off and flagged. Those bins
-    exist at TALYS's popeps 1e-3 mb; at ours (1e-9, POPEPS3) they are above the cut and the fresh state
+    exist at TALYS's popeps 1e-3 mb; at ours (1e-9) they are above the cut and the fresh state
     agrees to 1e-8, so the carry is tested at TALYS's value."""
     from physics.hf import engine
     from physics.hf.gpu_full import run_batch
@@ -247,7 +247,7 @@ def test_sfactor_is_carried_across_energies(talys_popeps):
 
 
 def test_anomalous_discrete_levels_follow_the_cpu_engine():
-    """GPUC (OPEN3M's A2): Nb-95 has levels whose ENSDF spin range TALYS resolves to a 2J of the
+    """Anomalous levels: Nb-95 has levels whose ENSDF spin range TALYS resolves to a 2J of the
     wrong parity; comptarget's l2prime/2 truncation into them moves (n,g) and the inelastic by up
     to 8% near 1 MeV. The GPU window comptarget follows the CPU engine there."""
     from physics.hf import engine

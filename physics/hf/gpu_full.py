@@ -3,8 +3,8 @@
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: GPUFULL (gate G-GF: the 370 spherical nuclides of `talys_sweep_broad` x the 20-point sweep
-grid in <= 60 s on the laptop RTX 5050, identical to the CPU dump-free engine at <= 1e-12 relative
+Task: GPU batch path (target: the 370 spherical nuclides of `talys_sweep_broad` x the 20-point sweep
+grid in <= 60 s on an RTX 5050 laptop GPU, identical to the CPU dump-free engine at <= 1e-12 relative
 on every channel cell). No physics of its own: every number is produced by the statements the
 CPU engine runs, rearranged so that all runs of a batch go through each statement at once.
 
@@ -26,10 +26,10 @@ weight or population) or behind `torch.where`, so a padded term adds 0.0.
 
 **Rounding.** The CPU engine sums non-negative terms in the order its einsums and numpy
 reductions happen to use; this module groups the same terms differently, so results agree to
-rounding and not bitwise (the gate is 1e-12; every place where a subtraction amplifies that is
-named in docs/results/hf-gpu-full.md).
+rounding and not bitwise (the tolerance is 1e-12; every place where a subtraction amplifies that is
+named in the comments below).
 
-Test: GPUFULL / tests/hf/test_gpu_full.py
+Test: tests/hf/test_gpu_full.py
 """
 
 from __future__ import annotations
@@ -239,7 +239,7 @@ def interp_nodes(tab: dict, nuc: Tensor, ptype: Tensor, eout: Tensor):
     `nuc`, `ptype` (particle type 1..6) and `eout` broadcast to one shape.
 
     TALYS: densprepare.f90:1 (densprepare), locate.f90:1 (locate)
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     shape = eout.shape
     nuc = nuc.expand(shape).reshape(-1)
@@ -279,7 +279,7 @@ def primary_residuals(bk: Batch) -> dict:
     or `tg` (B, R, G, 2) for the photon.
 
     TALYS: densprepare.f90:1 (densprepare), comptarget.f90:358-362
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     t, d = bk.t, bk.dims
     dev = bk.device
@@ -355,7 +355,7 @@ def primary_residuals(bk: Batch) -> dict:
     row = tj[ar, lt]  # (B, L', 3)
     row[:, :n_inc] = torch.where(okl[..., None], t["tjlinc"], row[:, :n_inc])
     tj[ar, lt] = row
-    for b, e in enumerate(bk.host["E"]):  # CCEXITNB (default OFF): non-band target rows, shared builder
+    for b, e in enumerate(bk.host["E"]):  # `ccexitnb` (default OFF): non-band target rows, shared builder
         for i, (crow, lm) in (e.get("ccx") or {}).items():
             if i <= int(t["maxex"][b, k0]):
                 k = min(crow.shape[0], tj.shape[2])
@@ -377,7 +377,7 @@ def _mask_for(j2: Tensor, irs2: Tensor, parspin2: int, spin2: int, L: int,
     (B, K, I, L, 3).
 
     TALYS: compprepare.f90:1 (compprepare)
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     dev = j2.device
     lp = torch.arange(L, device=dev)
@@ -385,7 +385,7 @@ def _mask_for(j2: Tensor, irs2: Tensor, parspin2: int, spin2: int, L: int,
     hi = j2[..., None] + irs2
     anom = (lo + parspin2) % 2
     if bool(anom.any()):
-        # GPUC: OPEN3M's A2 (a discrete level of impossible 2J parity), as target_batch._mask_for
+        # Rule A2 (a discrete level of impossible 2J parity), as target_batch._mask_for
         from physics.hf.compound.prepare import anomalous_exit_mask
 
         return anomalous_exit_mask(lo, hi, anom, parspin2, spin2, L, photon)
@@ -419,7 +419,7 @@ def _prepare_type(bk: Batch, res: dict, ty: int, sel: Tensor) -> dict:
     """`target_batch._prepare` for exit type `ty` on runs `sel`.
 
     TALYS: compprepare.f90:1 (compprepare)
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     t, d = bk.t, bk.dims
     dev = bk.device
@@ -478,7 +478,7 @@ def _prepare_type(bk: Batch, res: dict, ty: int, sel: Tensor) -> dict:
     jd2 = jdis2[:, :ND]
     Md = _mask_for(j2, jd2[:, None, :].expand(Bc, K, ND), PARSPIN2[ty], SPIN2[ty], L, photon)
     Md = Md & (torch.arange(ND, device=dev)[None, None, :] < nd[:, None, None])[..., None, None]
-    # GPUC: OPEN3M's cap on an anomalous level, l2' = 2 l' + 1 <= 2 lmaxhf (target_batch._prepare)
+    # The cap on an anomalous level, l2' = 2 l' + 1 <= 2 lmaxhf (target_batch._prepare)
     anom_d = (j2[:, :1] + jd2 + PARSPIN2[ty]) % 2  # (Bc, ND)
     capd = (2 * lp[None, None, :] + anom_d[:, :, None]) <= 2 * lmaxhf[:, :ND, None]
     Md = Md & capd[:, None, :, :, None]
@@ -541,7 +541,7 @@ def _chunks(cost: np.ndarray, budget: float, wfc: np.ndarray) -> list[np.ndarray
 
 
 CT_BUDGET = float(__import__("os").environ.get("GPUFULL_CT_BUDGET", "3.0e7"))
-# GPU3: comptarget on channel lists with spin-window sums (`gpu_full_ct`); 0 = the dense masks
+# comptarget on channel lists with spin-window sums (`gpu_full_ct`); 0 = the dense masks
 CT_WINDOWS = __import__("os").environ.get("GPU3_CT", "1") != "0"
 
 
@@ -552,7 +552,7 @@ def comptarget(bk: Batch, res: dict, budget: float | None = None) -> dict:
     has not, over groups of runs sized to `budget` elements of the largest intermediate.
 
     TALYS: comptarget.f90:1 (comptarget), molprepare.f90:1 (molprepare), moldauer.f90:1
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     from physics.hf.compound import wfc
 
@@ -621,7 +621,7 @@ def _moldauer(bk: Batch, sel: Tensor, prep: dict, denom: Tensor, live: Tensor, s
     """`target_batch.case_moldauer`'s integral and population contraction, runs `sel` x cells.
 
     TALYS: molprepare.f90:1 (molprepare), moldauer.f90:1 (moldauer), comptarget.f90:1
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     t, d = bk.t, bk.dims
     dev = bk.device
@@ -748,7 +748,7 @@ def _moldauer(bk: Batch, sel: Tensor, prep: dict, denom: Tensor, live: Tensor, s
 
 
 def _sfactor_levels(bk: Batch, sf_state: dict | None) -> tuple[list, list, dict]:
-    """GPUC (OPEN4 D): the order `sfactor` is carried in. Each run's state comes from the run of
+    """The order `sfactor` is carried in. Each run's state comes from the run of
     the same nuclide at the next lower energy index in this batch, else from `sf_state` (an
     earlier batch), else zero. Returns per level [(runs, in-batch previous run or -1)], the
     runs whose carried energy is not the previous declared one, and each nuclide's last run."""
@@ -778,17 +778,17 @@ def _sfactor_levels(bk: Batch, sf_state: dict | None) -> tuple[list, list, dict]
 
 def binary(bk: Batch, ct: dict, sf_state: dict | None = None) -> dict:
     """binary.f90 with `BinaryState` carried across the energies (what `ChainedFull.cases` seeds
-    the cascade from since OPEN4 D): per type t the populations `xspop` (B, R, J, 2), `xspopex`
+    the cascade from): per type t the populations `xspop` (B, R, J, 2), `xspopex`
     (B, R) and `feedbinary` (B, R), and the totals `xselastot`, `xsnonel`, `xscompel`.
 
     `sfactor` is run-scoped in TALYS (`strucinitial.f90:484` zeroes it once per run) and is only
     overwritten where a bin holds more than popepsA, so a bin below it takes an earlier energy's
-    compound spin shape. GPUC: the batch walks its runs in energy order per nuclide
+    compound spin shape. The batch walks its runs in energy order per nuclide
     (`_sfactor_levels`); `sf_state` carries it into a later batch. A run whose previous declared
     energy was in neither is flagged `sfactor_gaps` (it starts from the nearest one carried).
 
     TALYS: binary.f90:1 (binary), spindis.f90:1 (spindis)
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     from physics.hf.emission.binary import sfaclocal_on
 
@@ -902,7 +902,7 @@ def binary(bk: Batch, ct: dict, sf_state: dict | None = None) -> dict:
         ppx = t["b_pex"][:, ty]
         add = spread * ppx[:, :, None, None]
         add = torch.where((sl[:, :, None] & jm[:, None, :])[..., None], add, 0.0)
-        if engphys.on("pespin"):  # ENGPHYS: each bin gets exactly its pre-equilibrium flux
+        if engphys.on("pespin"):  # each bin gets exactly its pre-equilibrium flux
             s = add.sum(dim=(2, 3), keepdim=True)
             add = torch.where(s > 0, add * (ppx[:, :, None, None] / torch.where(s > 0, s, 1.0)), add)
         pop[:, :, :mj] = pop[:, :, :mj] + add
@@ -963,7 +963,7 @@ def run_batch(runs: list, device, chan_state: dict | None = None) -> dict:
     flags of runs the batch could not reproduce.
 
     TALYS: talysreaction.f90:1 (talysreaction)
-    Test: GPUFULL
+    Test: tests/hf/test_gpu_full.py
     """
     from physics.hf.compound import ewfc as _ewfc
     if _ewfc.enabled():
@@ -980,7 +980,7 @@ def run_batch(runs: list, device, chan_state: dict | None = None) -> dict:
     bk = pack(runs, device)
     t0 = stage("pack", device, t0)
     res = primary_residuals(bk)
-    del bk.t["rhogrid"]  # GPU3: read by primary_residuals only; the cascade gathers its own
+    del bk.t["rhogrid"]  # read by primary_residuals only; the cascade gathers its own
     t0 = stage("primary", device, t0)
     ct = comptarget(bk, res)
     t0 = stage("comptarget", device, t0)

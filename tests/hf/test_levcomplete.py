@@ -1,4 +1,4 @@
-"""HFGAMMA (INCOGNITA_LEVCOMPLETE): the continuum starts at the RIPL-4 complete scheme's upper end. Reproducer: Hf-182 lists 30
+"""`INCOGNITA_LEVCOMPLETE`: the continuum starts at the RIPL-4 complete scheme's upper end. Reproducer: Hf-182 lists 30
 levels to 3.869 MeV, complete only to 1.988 MeV, so a 3-4.5 MeV neutron on Hf-182 found no continuum exit (B55/B61: capture
 164 mb, gamma-fed flux 409 mb at 4 MeV). OFF leaves every Levels object as TALYS reads it; ON cuts and keeps the LD matching."""
 import pytest

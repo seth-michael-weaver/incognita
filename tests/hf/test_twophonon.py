@@ -1,12 +1,12 @@
-"""TWOPH: ECIS's second-order vibrational branch (`ecis1(2:2) = 'T'`), the 37 `colltype V`
-sweep nuclides that raised `NotImplementedError` in `ecis.incident` until now.
+"""Two-phonon coupling: ECIS's second-order vibrational branch (`ecis1(2:2) = 'T'`), the 37 `colltype V`
+sweep nuclides that need the anharmonic vibrational coupling in `ecis.incident`.
 
-Gate: G-2PH, `docs/results/hf-ecis-twophonon.md`. The scoring against TALYS lives in
+Check: G-2PH, `docs/results/hf-ecis-twophonon.md`. The scoring against TALYS lives in
 `physics.hf.ecis.score_twophonon`; what is here is the part that needs no TALYS run.
 
 `fixtures/ecis_vibm.json` was produced by ECIS-06's OWN `vibm`, extracted from `ecist.f`
 together with `djcg` and `dj6j` and compiled (`gfortran -O0 -std=legacy -ffp-contract=off`),
-driven on seven coupling schemes: the three gate targets, the two of the 37 that differ (Pd-106's
+driven on seven coupling schemes: the three reference targets, the two of the 37 that differ (Pd-106's
 3+ member and Ce-136's negative-parity one), Ca-40 (one phonon, three bands, `lo(2) = F`) and a
 synthetic two-band scheme that reaches the branches TALYS never writes.
 """
@@ -31,7 +31,7 @@ from physics.hf.ecis.vibm import Phonons, VibLevel, reduced_matrix_elements, sch
 
 @pytest.fixture(scope="module", autouse=True)
 def _alphatemp_off():
-    """ALPHAADOPT (alphatemp default ON 0.64): the U-238 chained check compares to stock TALYS (one alpha T for every residual state); this module runs at alphatemp 0."""
+    """`alphatemp` defaults ON (0.64): the U-238 chained check compares to stock TALYS (one alpha T for every residual state); this module runs at alphatemp 0."""
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INCOGNITA_ALPHATEMP", "0")
         yield
@@ -227,7 +227,7 @@ def test_harmonic_and_anharmonic_cross_sections_agree():
     This is the end-to-end statement that the new branch's sign conventions -- `vibm`'s `t`
     against a negated first-order form factor -- are the same physics as the path that already
     passes A-inc, and it exercises the whole anharmonic set-up (form-factor stack, code map,
-    coupling, channel cache) on a target whose answer is already gated."""
+    coupling, channel cache) on a target whose answer is already checked."""
     from physics.hf.ecis.incident import _t4_parameters, njmax_incident
     from physics.hf.ecis.solver import solve_vibrational
     from physics.hf.omp.schrodinger import PARMASS_AMU, nucleus_mass_amu
@@ -316,7 +316,7 @@ def test_second_derivative_form_factor_is_the_derivative_of_the_first():
 
 
 # ---------------------------------------------------------------------------------------------
-# TWOPH part 2: T11's fission transmission wired into the dump-free chain
+# T11's fission transmission wired into the dump-free chain
 # ---------------------------------------------------------------------------------------------
 
 
@@ -374,10 +374,10 @@ def test_binary_feed_adds_the_binary_cross_section_once_per_type():
 
 def test_chained_u238_fission_matches_talys(monkeypatch):
     """(n,f) of the dump-free chain against TALYS's own `fission.tot`, three energies that span
-    first, second and third chance. Before TWOPH this was 0 at every energy:
-    `engine.ChainedFull` passed `tfis=None` and `flagfission=False`.
+    first, second and third chance. This is nonzero only when
+    `engine.ChainedFull` passes the fission transmission (`tfis`) and `flagfission=True`.
 
-    The full 5-actinide, 23-energy gate is `harness/nodump_e2e.py --shape actinide`
+    The full 5-actinide, 23-energy check is `harness/nodump_e2e.py --shape actinide`
     (`docs/results/hf-twoph-actinide-e2e.json`); this is the cheap sentinel.
     """
     import math

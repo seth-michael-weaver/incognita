@@ -1,14 +1,14 @@
-# Check: one engine job per energy against library v0.2.1 (2026-11-07)
+# Check: one engine job per energy against library v0.2.1
 
-## Correction (later on 2026-11-07): the library's wide grid is the closer one; the one-point jobs were wrong
+## Result: the library's wide grid is the closer one; one-point jobs are too short
 
-The first reading below had it backwards. The 7 "grid-dependent" nuclides are not a production-run oddity: a one-point
+The original reading further below had it backwards. The 7 "grid-dependent" nuclides are not a production-run oddity: a one-point
 grid `[E]` is too short for them. This engine sets the outgoing grid top as TALYS does (grid.f90:120: highest incident
 energy + S_n(CN) + 1 MeV), 1 MeV above the photon exit only. All 7 compound nuclei are unbound to an ejectile
 (min S = S_α from −3.58 MeV for I-110 to −9.71 MeV for Pa-201; also S_p < 0 for Pa-201, Fr-191, Bi-179, Tl-175). That
 exit's top energy E + S_n − S lies above a one-point grid's top, and the transitions to the residual's lowest states
 are cut. The library's 1 keV - 20 MeV run lifts the top by ~20 MeV, enough for every energy up to about 21 MeV + S_min.
-(Engine fix: GRIDTOP; NUCLIDO_GRIDTOP default on since engine-20261029-2, public `gridfix` branch INCOGNITA_GRIDTOP.)
+(Engine fix: `INCOGNITA_GRIDTOP`, the outgoing grid ends 1 MeV above every particle's top energy; default on.)
 
 **Tool fix.** `engine_job.py` now pads each job by default: grid `[E, E + |min S| + 1 MeV]` when min S(CN) < 0 (S from
 the engine's own masses), and reports only E (TW_GRIDTOP=0 or `--no-gridtop` gives the old one-point grid). Nothing
@@ -72,11 +72,11 @@ energy grid. Does it reproduce the published library v0.2.1 curves? Or does the 
 
 - **Tool:** `scripts/talysworld/` (service `server.py`, job `engine_job.py`, this check `check.py`).
   - Each point is one engine process with a one-point energy grid `[E]`.
-  - At most 3 processes ran at once, at nice 10, on laptop WSL.
-- **Engine:** engine-20261022-3 = nucleus 16606b356d6e (laptop install `~/fastgate_data/eng/16606b356d6e`, its own venv).
-  - Environment, runner, deck and inputs are those of the v0.2 runs: `~/libv02/inputs` and the run.sh environment, with
-    worker.py -> prodrun -> pprun, `fewres off`, `pewindow g`.
-  - Each nucleus was composed as the library composed it: P, A(rotor), ACTJS A(rotor), or JS(P,A) via
+  - At most 3 processes ran at once, at nice 10, on x86-64 Linux under WSL.
+- **Engine:** engine-20261022-3 (its own install and venv).
+  - Environment, runner, deck and inputs are those of the library v0.2 runs (the library runner, not in this
+    repository), with `fewres off`, `pewindow g`.
+  - Each nucleus was composed as the library composed it: P, A(rotor), actinide A(rotor), or JS(P,A) via
     `physics.hf.jointcap.combine`. "[FEW->mean]" was treated as its base composition, as v0.2.2's collect step does.
   - (n,p), (n,2n) and (n,α) are taken from the P arm (the A arm for rotor compositions), as the v0.2 build does.
 - **Energies:** the library grid, 64 points from 1 keV to 20 MeV. Three of v0.2.2's points below 1 keV were added:
@@ -134,8 +134,8 @@ Split by nuclide group:
 | Gd-158 | A(rotor) | ~0 | 0 | 0 | 0 | 5e-13 | 5e-13 |
 | Au-197 | JS(P,A) | ~0 | 0 | 3.9e-5 | 0.036 | 2e-13 | 3e-14 |
 | Pb-208 | JS(P,A) | 3e-6 | 5e-6 | 1.4e-4 | 0.98 (+1 zero) | 6e-11 | 1e-14 |
-| Th-232 | ACTJS A(rotor) | 1.7e-5 | 0 | 1.1e-5 | 0.96 (+2 zero) | 2e-13 | 5e-14 |
-| U-238 | ACTJS A(rotor) | 2.0e-5 | 0 | 1.3e-4 | 0.98 (+3 zero) | −2.6e-6 | 0 |
+| Th-232 | actinide A(rotor) | 1.7e-5 | 0 | 1.1e-5 | 0.96 (+2 zero) | 2e-13 | 5e-14 |
+| U-238 | actinide A(rotor) | 2.0e-5 | 0 | 1.3e-4 | 0.98 (+3 zero) | −2.6e-6 | 0 |
 | **Te-104** | P | **1.56** | **42.1** | 4.5e-3 | 1.28 | **−0.819** | −0.818 |
 | **I-109** | P | **60.8** | **31.6** | 5.1e-3 | 0.96 | **+31.16** | +31.16 |
 | **Tl-174** | P | **1.91** | **2.23** | 0.027 | 0.99 | **+1.911** | +1.911 |
@@ -225,7 +225,7 @@ the engine below 1 keV, for that reason.
 - `check_summary.json`: the numbers above.
 - Rerun:
   1. Start the service: `wsl -e python3 scripts/talysworld/server.py`.
-  2. In laptop WSL, run `python3 scripts/talysworld/check.py run`, then `python3 scripts/talysworld/check.py analyze`.
-  3. Results are cached under `~/talysworld_data/cache`, so a rerun of the analysis is instant.
+  2. Run `python3 scripts/talysworld/check.py run`, then `python3 scripts/talysworld/check.py analyze`.
+  3. Results are cached under `$TW_DATA/cache` (default `~/talysworld_data/cache`), so a rerun of the analysis is instant.
   4. These original numbers were made with one-point jobs: start the service with `TW_GRIDTOP=0` to reproduce them.
-     The GRIDTOP re-check: service with the default pad, then `python3 scripts/talysworld/check.py gridtop`.
+     The grid-top re-check: service with the default pad, then `python3 scripts/talysworld/check.py gridtop`.

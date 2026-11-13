@@ -15,7 +15,7 @@ Two quirks of resonancepar.f90 that are reproduced, not fixed
   and TALYS stores it unconverted in `gamgam`, which A0_talys_mod.f90 documents as eV and
   gammaout.f90 prints as ``experimental Gamma_gamma [eV]``. With the default ``gnorm n`` the
   value only reaches output; with ``gnorm y`` (radwidtheory.f90:253) TALYS normalises E1 to a
-  width 1000x too small (GNORMFIX, 2026-09-17: C/E Gamma_gamma 1546 I-130, 784 Os-187, 1277
+  width 1000x too small (C/E Gamma_gamma 1546 I-130, 784 Os-187, 1277
   Au-198 in stock output). Returned as ``gamgam_talys`` (TALYS's number, for matching its
   output only) and ``gamgam_ev`` (physical, what `radwidtheory` must be given; it refuses a keV
   number). `physics.talys.runner.write_input` adds ``gamgam Z A <eV>`` to stock-TALYS inputs

@@ -2,9 +2,9 @@
  * Copyright (c) A.J. Koning (ECIS-06: J. Raynal). See physics/hf/NOTICE-TALYS.md. */
 #define _POSIX_C_SOURCE 199309L
 
-/* CCFAST2: the coupled-channels radial loop of one (J, parity) block, without bit-identity.
+/* non-x86 build: the coupled-channels radial loop of one (J, parity) block, without bit-identity.
  *
- * `hfnative.c::hf_cc_block` (SPEEDT3) repeats `solver._numerov_blocks` operation for operation so
+ * `hfnative.c::hf_cc_block` repeats `solver._numerov_blocks` operation for operation so
  * that its bits are the Python loop's. The project rule lifts that requirement, and this
  * kernel integrates the same discretised equations -- the same Numerov recurrence on the same grid,
  * matched at the same point -- with fewer floating-point operations:
@@ -64,7 +64,7 @@ static const double ZERO[2] = {0.0, 0.0};
 
 int cc_version(void) { return 1; }
 
-/* SETB: 1 when built with the split-storage solve and stabilisation (libccsplit) */
+/* 1 when built with the split-storage solve and stabilisation (libccsplit) */
 #ifdef CCFAST_SPLIT
 int cc_split(void) { return 1; }
 #else
@@ -246,7 +246,7 @@ static int64_t small_n = 12;
 void cc_set_small_n(int64_t n) { small_n = n; }
 
 #ifdef CCFAST_SPLIT
-/* SETB: split-storage solve and stabilisation (ccsplit.h, included below; libccsplit) */
+/* Split-storage solve and stabilisation (ccsplit.h, included below; libccsplit) */
 static void solve_split(int64_t N, double *A, double *B, int *piv);
 static void stabilise_split(double *Q, double **others, int k, int64_t N);
 #endif
@@ -255,7 +255,7 @@ static int nm_solve_z(int64_t N, const double *A, double *B);
 
 static void solve_n(int64_t N, double *A, double *B, int *piv)
 {
-    if (nm_solve_z(N, A, B) == 0) /* NATIVEX2 ccx: Jacobi sweeps where they are cheaper */
+    if (nm_solve_z(N, A, B) == 0) /* Native ccx: Jacobi sweeps where they are cheaper */
         return;
 #ifdef CCFAST_SPLIT
     solve_split(N, A, B, piv);
@@ -271,7 +271,7 @@ static void solve_n(int64_t N, double *A, double *B, int *piv)
     zgetrs_p("N", &n, &n, A, &n, piv, B, &n, &info);
 }
 
-/* NATIVEX2 ccx: complex products as four real ones. Accelerate runs a real N x N x N product on the
+/* Native ccx: complex products as four real ones. Accelerate runs a real N x N x N product on the
  * M2's matrix block ~14x faster than the complex one (N = 56: dgemm 1.5 us, zgemm 20.7 us; N = 32:
  * 0.5 against 9.3), so on arm64 C = A B is (Ar Br - Ai Bi) + i (Ar Bi + Ai Br), and a real A (the
  * derivative-coupling matrices) takes two. `cc_set_dgemm` hands the routine over (torch's own, by
@@ -324,7 +324,7 @@ static void dmm_split(int64_t N, const double *ar, const double *ai, const doubl
     }
 }
 
-/* CCNUMEROV: ECIS's modified Numerov (`ecist.f::inch`).  The coupled step becomes explicit --
+/* modified Numerov: ECIS's modified Numerov (`ecist.f::inch`).  The coupled step becomes explicit --
  *     u_{i+1} = 2 u_i - u_{i-1} + 12 c M_i u_i + 12 c^2 M_i (M_i u_i),   c = h^2/12,
  * the truncation of 2(cosh kh - 1) = T + T^2/12 + T^3/360 + ... after two terms, with T = h^2 M --
  * so the factorise-and-solve of the W-form is replaced by a second matrix product and the port
@@ -418,7 +418,7 @@ static void mm(int64_t N, const double *A, const double *B, double *C)
     }
 }
 
-/* NATIVEX2 ccx: Jacobi sweeps in place of the elimination. The implicit Numerov matrix
+/* Native ccx: Jacobi sweeps in place of the elimination. The implicit Numerov matrix
  * L = 1 - c M is diagonal to a part in 1e2 at most and usually far less (the deformed couplings
  * against the diagonal: on Lu-175 and U-238 the infinity norm of D^-1 O, O = L - D, is below 1e-4 on
  * 2/3 of the steps, below 1e-8 on 1/3, never above 1.1e-2). There L X = W is Jacobi's fixed point
@@ -708,7 +708,7 @@ enum { K_UMM1, K_UM, K_UMP1, K_MMM1, K_MMP1, K_SP1, K_SM1 };
  *   h      : (E,) step; nmatch: (E,) matching index; stab: steps between two stabilisations
  *   keep   : (7, E, N, N) complex row-major output (sp1/sm1 left as the caller zeroed them)
  * Returns 0; -1 out of memory; -2 the radial axis is shorter than a matching point needs. */
-/* CCNUMEROV: `cc_block_w`'s loop with ECIS's modified Numerov step.  No implicit matrix, so no
+/* modified Numerov: `cc_block_w`'s loop with ECIS's modified Numerov step.  No implicit matrix, so no
  * LU per step and no W: two products of M(r_i) instead, and the stabilisation orthonormalises the
  * solutions themselves.  Same arguments and return codes as `cc_block_w`. */
 static int cc_block_mn(int64_t E, int64_t N, int64_t R, int64_t NLAM, const double *central,
@@ -898,7 +898,7 @@ static void build_md(const blkd_t *d, int64_t e, int64_t i, double *M, double *N
  * block, every energy, each stopped at its own matching point: the implicit Numerov step with
  * r du/dr written on the one-sided 7-point stencil (`solver._fd_weights`).
  *   fdw: the real parts of `_fd_weights(npts)` for npts = 3..7, each (3, npts) row-major, concatenated
- * Other arguments as `cc_block_w`. CCBLOCKD: this is the A arm, kept verbatim as the accuracy
+ * Other arguments as `cc_block_w`. `cc_block_d`: this is the A arm, kept verbatim as the accuracy
  * reference; `cc_block_d` below is the one the port calls (`HF_CCBLOCKD=0` selects this one). */
 static int cc_block_d_ref(int64_t E, int64_t N, int64_t R, int64_t NLAM, const double *central,
                const double *cpl, const double *diagr, const double *so0, const double *ls2,
@@ -1038,10 +1038,10 @@ done:
 }
 
 
-/* --------------------------------------------- CCBLOCKD: the same step, two products cheaper
+/* --------------------------------------------- `cc_block_d`: the same step, two products cheaper
  *
  * `cc_block_d_ref` above issues four complex products and one solve per step, 42.67 N^3 in the
- * counts CCPROP registered. Two facts about the step make two of those products avoidable without
+ * counts of `ccprop.c`. Two facts about the step make two of those products avoidable without
  * touching the discretisation -- same Numerov recurrence, same 7-point one-sided stencil, same
  * grid, same matching point, same `keep`:
  *
@@ -1077,7 +1077,7 @@ static int bd_on = 1;
 
 void cc_set_blockd(int64_t on) { bd_on = (int)on; }
 
-/* CCBLOCKD: where `cc_block_d`'s time goes, for the write-up. Off unless `cc_set_blockd_time(1)`:
+/* `cc_block_d`: where `cc_block_d`'s time goes, for the write-up. Off unless `cc_set_blockd_time(1)`:
  * 0 build_mdr, 1 the v build, 2 the three stencil products, 3 the right-hand side and L,
  * 4 the solve, 5 Y and the advance. */
 static int bd_time = 0;
@@ -1252,7 +1252,7 @@ int cc_block_d(int64_t E, int64_t N, int64_t R, int64_t NLAM, const double *cent
                const double *h, const int64_t *nmatch, int64_t stab, double *keep)
 {
 #ifdef CCFAST_SPLIT
-    if (use_dgemm() && N >= 24) /* NATIVEX2 ccx: split storage, real products, Jacobi sweeps */
+    if (use_dgemm() && N >= 24) /* Native ccx: split storage, real products, Jacobi sweeps */
         return cc_block_d_split(E, N, R, NLAM, central, cpl, diagr, so0, ls2, mu, so_grad, so_r2,
                                 so1c, so2c, sodc, fdw, u1, h, nmatch, stab, keep);
 #endif
@@ -1499,11 +1499,11 @@ done:
     return rc;
 }
 
-/* ---------------------------------------------- CCGLUE: matching and accumulation of one block
+/* ---------------------------------------------- glue: matching and accumulation of one block
  *
  * `solver._match(minus_identity=True)` followed by `solver.accumulate(minus_identity=True)` for
  * the (E, N, N) `keep` that `cc_block_w` / `cc_block_d` wrote, in one call instead of ~60 torch
- * operations per block. The same algebra on the same numbers, to rounding (the gate is <= 1e-12
+ * operations per block. The same algebra on the same numbers, to rounding (the test threshold is <= 1e-12
  * per cell):
  *   ddp1 = M_{m+1} u_{m+1} + s_{m+1},  ddm1 = M_{m-1} u_{m-1} + s_{m-1},
  *   U' = ((u_{m+1} - 2c ddp1) - (u_{m-1} - 2c ddm1)) / 2h, with U and U' column-normalised by
@@ -1694,7 +1694,7 @@ done:
 }
 
 
-/* ------------------------------------------------------------ CCGLUE: 6j symbols element-wise
+/* ------------------------------------------------------------ glue: 6j symbols element-wise
  *
  * `coupling.sixj` = `angmom.racah(a, b, e, d, c, f) * cos(pi (a + b + d + e))` for M argument
  * sextets, the same operations per element in the same order (the torch version is element-wise
@@ -1726,7 +1726,7 @@ static double lf(int64_t k)
 static int64_t tdiv2(int64_t v) { return v / 2; } /* C division truncates toward zero, as torch's */
 
 /* `__attribute__((optimize("fp-contract=off")))` is a GCC extension that Clang silently accepts
- * but does not implement (MACFIX6: this left arm64 Apple-clang builds fusing racah1's a*b+c chains
+ * but does not implement (this left arm64 Apple-clang builds fusing racah1's a*b+c chains
  * into fma(), breaking "torch does not fuse element-wise ops" -- test_ccglue's sixj-to-the-bit
  * failed on the Mac). The pragma below is the portable ISO C way to say the same thing, honoured
  * by both compilers; the GCC attribute stays for the toolchains that only look at attributes. */
@@ -1800,7 +1800,7 @@ void cc_sixj(int64_t M, const double *j1, const double *j2, const double *j3, co
     }
 }
 
-/* PERFCC2: hand back the calling thread's scratch (the `_Thread_local` workspaces above, which grow
+/* Hand back the calling thread's scratch (the `_Thread_local` workspaces above, which grow
  * on demand and are otherwise kept for the thread's lifetime). `solver._BlockWorkers` runs the
  * (J, parity) blocks of one coupled-channels solve on short-lived helper threads and calls this
  * from each before it exits, so a long-lived worker process does not keep one set per finished

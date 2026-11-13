@@ -495,7 +495,7 @@
   function langToggle() {
     const nav = document.querySelector(".toc"); if (!nav || nav.querySelector(".lang")) return;
     const box = WT.langSwitch();
-    const board = nav.querySelector(".board-link"); // keep the order: chapters, scoreboard link, language switch
+    const board = nav.querySelector(".board-link"); // keep the order: chapters, comparisons link, language switch
     if (board) nav.appendChild(board);
     nav.appendChild(box);
   }

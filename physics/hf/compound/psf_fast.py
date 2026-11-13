@@ -1,10 +1,10 @@
-"""SPEEDD: T7's photon strength function `fstrength` for many Egamma at once, with numpy arithmetic
+"""T7's photon strength function `fstrength` for many Egamma at once, with numpy arithmetic
 and torch's own transcendental kernels -- the same numbers to the bit, a fraction of the calls.
 
 Ported from TALYS-2.x (https://github.com/arjankoning1/talys), MIT License,
 Copyright (c) A.J. Koning. See physics/hf/NOTICE-TALYS.md.
 
-Task: SPEEDD (the speed wave; no physics of its own). Acceptance test:
+Speed path (no physics of its own). Acceptance test:
 `tests/hf/test_decay_fast.py::test_psf_fast_is_fstrength_to_the_bit`.
 
 TALYS routines this evaluates, as `gamma.strength.fstrength_gp` ports them:
@@ -19,7 +19,7 @@ transcendental function -- sqrt, log10, pow, exp -- through the very torch call 
 on an array of the same values. On x86 numpy's sqrt/exp/log10 can differ from torch's in the last
 bit; torch's are kept for exactly that reason. It covers the models the port's defaults use
 (`strength` 3, 4 or >= 6 with an E1 table or the standard Lorentzian, a tabulated M1 at strengthM1
->= 8 (SPEEDFIX), pygmy terms, the upbend) and returns None for anything else (strength 1, 2 or 5,
+>= 8, pygmy terms, the upbend) and returns None for anything else (strength 1, 2 or 5,
 parameters on a graph), in which case the caller uses `fstrength` itself.
 """
 
@@ -179,7 +179,7 @@ def fstrength_np(gp, efs, e_gamma: np.ndarray, irad: int, l: int):  # noqa: E741
             d = egam2 - egr2
             denom = d * d + egam2 * ggr2
             out = out + np.where(pos, k * sgr1 * enum / denom, 0.0)
-        # assignment, not a sum (fstrength.f90:356); SPEEDFIX: the tabulated M1 too (strengthM1 >= 8)
+        # assignment, not a sum (fstrength.f90:356); the tabulated M1 too (strengthM1 >= 8)
         if (gp.qrpaexist(1, 1) and flag_e1) or (gp.qrpaexist(0, 1) and gp.strengthM1 >= 8 and flag_m1):
             out = _table_strength(gp, efs, e_gamma, irad, l)
     for i in (1, 2):
@@ -214,7 +214,7 @@ def fstrength_np(gp, efs, e_gamma: np.ndarray, irad: int, l: int):  # noqa: E741
             x2 = float(torch.exp(-upf * torch.abs(beta2)))
             out = out + upc * torch.exp(_t(-upe * e_gamma)).numpy() * x2
     bumps = gp.eadj_e1 if flag_e1 else (gp.eadj_m1 if flag_m1 else ())
-    if bumps:  # ENGADJ (strength.fstrength_gp)
+    if bumps:  # `eadj` (strength.fstrength_gp)
         from physics.hf import eadj
 
         out = out * eadj.bump_values(bumps, e_gamma)
