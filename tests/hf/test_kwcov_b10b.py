@@ -13,6 +13,8 @@ import os
 import numpy as np
 import pytest
 
+from tests._data import need_talys
+
 from physics.hf import chartrun
 from physics.hf import integral as I
 from physics.hf import natural as N
@@ -183,6 +185,7 @@ def test_integral_fold_and_data():
 
 def test_integral_user_triple_is_talys_bug(clean):
     """TALYS-2.25: a deck triple looks for the file '.tot' (stock: 'cross section file .tot does not exist')."""
+    need_talys()  # needs the TALYS structure database (the .tot lookup reads it)
     import torch
 
     from physics.hf.results import Results

@@ -16,6 +16,7 @@ import pytest
 from physics.hf.input import defaults as D
 from physics.hf.input import fitlib as F
 from physics.hf.input.energies import estop_subset, incident_grid, read_energies
+from tests._data import need_talys
 
 
 @pytest.fixture
@@ -80,6 +81,7 @@ def test_maxlevelstar_after_maxlevelsbin_wins_for_the_projectile():
 
 
 def test_bestbranch_reads_the_branch_file_and_input_lines_win():
+    need_talys()  # needs the TALYS structure database; without it the best-file reads come back empty
     o = D.default_options(27, 59, overrides={"bestbranch": "y"})
     got = dict(o.branches_of(0, 2))                         # Co-58 = (Zix 0, Nix 2) of n + Co-59
     assert set(got) == {2, 12, 17, 20} and dict(got[2]) == pytest.approx({1: 0.7, 0: 0.3})
@@ -89,6 +91,7 @@ def test_bestbranch_reads_the_branch_file_and_input_lines_win():
 def test_branch_lines_are_dropped_as_talys_drops_them():
     """TALYS-2.25 wipes `branch` input (strucinitial.f90:325); stock Co-59 `branch 27 58 2 1 0 1.0` changes
     nothing. The port does the same, with a warning; a malformed line is still an error."""
+    need_talys()  # needs the TALYS structure database; without it the best-file reads come back empty
     with pytest.warns(UserWarning, match="drops `branch` lines"):
         o = D.default_options(27, 59, overrides={"branch 27 58 2": "1 0 1.0"})
     assert o.branches_of(0, 2) == ()
@@ -110,6 +113,7 @@ def test_bad_forms_are_refused_not_dropped(clean):
 
 
 def test_unapplied_deck_line_is_refused_best_file_line_warns(clean):
+    need_talys()  # needs the TALYS structure database; without it the best-file reads come back empty
     clean.setenv(F.ENV_LINES, "cknock a 1. cknock-a.table")          # energy-dependent table of a non-OMP keyword
     with pytest.raises(ValueError, match="not applied by the port"):
         F.cards(26, 56)
@@ -143,6 +147,7 @@ def _same(a, b):
 
 @pytest.mark.parametrize("za", [(26, 56), (92, 238), (27, 59)])
 def test_deck_best_equals_the_best_arm(clean, za):
+    need_talys()  # needs the TALYS structure database; without it the best-file reads come back empty
     clean.setenv(F.ENV, "best")
     a = F.cards(*za)
     clean.delenv(F.ENV)
@@ -152,6 +157,7 @@ def test_deck_best_equals_the_best_arm(clean, za):
 
 
 def test_bestend_puts_the_best_file_last(clean):
+    need_talys()  # needs the TALYS structure database; without it the best-file reads come back empty
     clean.setenv(F.ENV_LINES, "best y;ldmodel 3")
     assert dict(F.cards(26, 56).options)["ldmodel"] == "3"     # the deck wins
     clean.setenv(F.ENV_LINES, "best y;bestend y;ldmodel 3")
@@ -169,6 +175,7 @@ def test_bestfile_and_missing_file(clean, tmp_path):
 
 
 def test_fit_flags(clean):
+    need_talys()  # needs the TALYS structure database; without it the best-file reads come back empty
     o = D.default_options(26, 56, overrides={"macsfit": "y"})
     assert o.flagfit and o.flagmacsfit and not o.flagngfit       # input_fit.f90:175-183
     o = D.default_options(26, 56, overrides={"gamgamfit": "y"})
@@ -183,6 +190,7 @@ def test_fit_flags(clean):
 
 
 def test_other_projectile_libraries_apply_on_a_neutron_run(clean):
+    need_talys()  # needs the TALYS structure database; without it the best-file reads come back empty
     # pn.par's first entry: Ag-109, ldmodel 1, colenhance n, strength 8 (xsfit.f90 does not match the projectile)
     clean.setenv(F.ENV_LINES, "strength 8;pnfit y")
     c = F.cards(47, 109)
