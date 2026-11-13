@@ -910,6 +910,8 @@ body.shot .part-head, body.shot .tp-index { display: none; }
 .tp-index { max-width: 54rem; }
 .tp-part { margin: 0 0 40px; }
 .tp-part-h { display: flex; align-items: baseline; gap: 14px; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 1px solid var(--line); font: inherit; }
+.tp-part-h .part-kicker { white-space: nowrap; flex: none; }
+@media (max-width: 560px) { .tp-part-h { flex-direction: column; align-items: flex-start; gap: 4px; } }
 .tp-list { list-style: none; margin: 0; padding: 0; }
 .tp-list li[hidden] { display: none; }
 .tp-list a { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto; align-items: baseline; gap: 14px; padding: 13px 8px; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); color: var(--ink); text-decoration: none; border-radius: 6px; transition: background .15s ease; }
