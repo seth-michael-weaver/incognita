@@ -5,7 +5,6 @@
  *             Columns: uranium left, plutonium right. Drag turns the spheres.
  *   "k"     = the same spheres with k_eff from INCOGNITA data in OpenMC (continuous energy, 3-D) and a gauge of C - E (pcm)
  *             inside the benchmark's 1-sigma band.
- *   "sn"    = OpenSn (discrete ordinates) against OpenMC on the same 33-group data: one dial, two needles, in pcm.
  *   "sens"  = adjoint sensitivity profiles dk/k per dsigma/sigma per unit lethargy, ECCO-33 groups above 100 eV, one ribbon
  *             per reaction (3-D, orbitable).
  *   "check" = predicted (adjoint) against re-solved k changes for 63 candidate data sets.
@@ -168,10 +167,6 @@
   <p>OpenMC, continuous energy, 3-D geometry. All four are inside the benchmark ±1σ. <i>k</i><sub>eff</sub> is not used in the fit.</p>
 </div>
 <div class="step">
-  <h3>Deterministic against Monte Carlo</h3>
-  <p>OpenSn (discrete ordinates) against OpenMC on identical 33-group cross sections.</p>
-</div>
-<div class="step">
   <h3>Sensitivity profiles</h3>
   <p>Adjoint sensitivity of <i>k</i><sub>eff</sub> to each reaction, per unit lethargy.</p>
   <div class="btns"><button class="btn ghost" data-act="se0" aria-pressed="true">Godiva</button><button class="btn ghost" data-act="se1" aria-pressed="false">Jezebel</button><button class="btn ghost" data-act="se2" aria-pressed="false">Flattop-Pu</button></div>
@@ -185,13 +180,12 @@
   <p>OECD/NEA C5G7, 2-D quarter core, 1,056 UO<sub>2</sub> and MOX pins. <i>k</i><sub>eff</sub> −19&nbsp;pcm from the reference; maximum pin-power error 0.13&nbsp;%.</p>
 </div>`,
     setup(S) {
-      S.set("mode", "geo"); S.set("snc", 0); S.set("sec", 0); S.to("kA", 0, true); S.to("ndl", 0, true); S.hx = S.hy = null;
+      S.set("mode", "geo"); S.set("sec", 0); S.to("kA", 0, true); S.hx = S.hy = null;
       [0, 1, 2].forEach((i) => S.on("se" + i, () => { S.set("sec", i); setBtns("se", i); }));
     },
     steps: [
       (S) => { S.set("mode", "geo"); S.to("kA", 0); },
       (S) => { S.set("mode", "k"); S.kA = 0; S.to("kA", 1); },
-      (S) => { S.set("mode", "sn"); S.ndl = 0; S.to("ndl", 1); },
       (S) => { S.set("mode", "sens"); },
       (S) => { S.set("mode", "check"); },
       (S) => { S.set("mode", "core"); },
@@ -199,7 +193,7 @@
     frame(g, S, dt) {
       if (g.W < 40 || g.H < 40) return;
       const { W, H, c } = g, phone = W < 600, fs = phone ? 11 : 13, mode = S.mode, snap = document.body.classList.contains("shot");
-      if (snap) { S.kA = S.target.kA; S.ndl = 1; }
+      if (snap) { S.kA = S.target.kA; }
       if (!g.ctx.canvas._kc) {
         g.ctx.canvas._kc = 1;
         const at = (x, y) => { S.hx = x; S.hy = y; };
@@ -255,22 +249,6 @@
         if (phone) return;
         if (mode === "geo") foot(v.ok ? "To scale. Drag to rotate." : "To scale.", c.soft);
         else foot("Calculated − experimental k, with the benchmark ±1σ band", c.soft);
-        return;
-      }
-
-      if (mode === "sn") {
-        // one axis, OpenSn − OpenMC in pcm; shaded = ±50 pcm target; one row per assembly
-        const R = 60, x0 = phone ? 24 : W * 0.12, x1 = W - (phone ? 24 : W * 0.12), X = (p) => lerp(x0, x1, (p + R) / (2 * R));
-        const rows = D.sn, gapY = phone ? 90 : 120, top = H / 2 - (rows.length - 1) * gapY / 2, y0 = top - 60, yb = top + (rows.length - 1) * gapY + 50;
-        g.ctx.save(); g.ctx.fillStyle = g.rgba(c.fission, 0.1); g.ctx.fillRect(X(-50), y0, X(50) - X(-50), yb - y0); g.ctx.restore();
-        [-50, -25, 0, 25, 50].forEach((p) => { g.line(X(p), y0, X(p), yb, p === 0 ? c.soft : c.line, p === 0 ? 1.4 : 1, p === 0 ? 1 : 0.7, p === 0 ? undefined : [2, 4]);
-          g.label(p === 0 ? "0" : (p > 0 ? "+" : "−") + Math.abs(p), X(p), yb + 16, { color: c.soft, size: fs - 1 }); });
-        g.label("Target ±50 pcm", X(50), y0 - 14, { color: c.fission, size: fs - 1, weight: 600, align: "right" });
-        g.label("OpenSn − OpenMC (pcm)", W / 2, yb + 40, { color: c.soft, size: fs - 1 });
-        rows.forEach((s, i) => { const y = top + i * gapY, px = X(s.d * S.ndl);
-          g.label(s.id, X(0) + 14, y, { color: c.ink, size: fs + 1, weight: 600, align: "left" });
-          g.line(X(0), y, px, y, c.warm, 3, 0.9); g.dot(px, y, phone ? 6 : 8, c.warm);
-          g.label((s.d < 0 ? "−" : "+") + Math.abs(s.d * S.ndl).toFixed(1), px + (s.d < 0 ? -14 : 14), y, { color: c.ink, size: phone ? 18 : 26, weight: 600, serif: true, align: s.d < 0 ? "right" : "left" }); });
         return;
       }
 
