@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=159">
+<link rel="stylesheet" href="style.css?v=160">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -148,10 +148,32 @@
       <p data-i18n="sb_thow_2">TERRA's comparisons cannot be recomputed from the data package: that would need values derived from the evaluated libraries, which this project does not redistribute. Each comparison is listed there.</p>
     </details>
   </section>
+  <section class="sb-sec" aria-labelledby="sb-k-h">
+    <h2 id="sb-k-h" data-i18n="sb_k_h">3 · Criticality: four fast assemblies</h2>
+    <p data-i18n="sb_k_p">Four ICSBEP fast benchmarks in full 3-D OpenMC models, run with INCOGNITA data and with ENDF/B-VIII.1. <i>k</i><sub>eff</sub> is not used in the fit. <a href="topics.html#kcalc" data-keep-lang>Lesson: Computing criticality</a></p>
+    <div class="sb-tiles sb-ktiles">
+      <div class="sb-tile sb-win"><div class="sb-n">4 / 4</div><div class="sb-l" data-i18n="sb_k_t1">INCOGNITA inside benchmark ±1σ</div></div>
+      <div class="sb-tile sb-tie"><div class="sb-n">3 / 3</div><div class="sb-l" data-i18n="sb_k_t3">ENDF/B-VIII.1 inside ±1σ</div></div>
+    </div>
+    <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-k-cap">
+      <table class="sb-table" id="sb-k">
+        <caption id="sb-k-cap" data-i18n="sb_k_cap">Calculated minus experimental <i>k</i><sub>eff</sub>, in pcm (1 pcm = 10⁻⁵). Bar: the benchmark's ±1σ; solid mark: INCOGNITA; hollow mark: ENDF/B-VIII.1.</caption>
+        <thead><tr><th scope="col" data-i18n="sb_k_th1">Assembly</th><th scope="col" class="r" data-i18n="sb_k_th2">Benchmark ±1σ</th><th scope="col" class="r" data-i18n="sb_k_th3">INCOGNITA k</th><th scope="col" class="r" data-i18n="sb_k_th4">INCOGNITA C − E</th><th scope="col" class="r" data-i18n="sb_k_th5">VIII.1 C − E</th><th scope="col" data-i18n="sb_k_th6">−320 · 0 · +320 pcm</th></tr></thead>
+        <tbody>
+      <tr><td><div class="sb-cell">Godiva</div><div class="sb-gl" data-i18n="sb_k_d1">bare uranium-235 sphere</div></td><td class="r num">±100</td><td class="r num">0.99964</td><td class="r num">−36</td><td class="r num">+7</td><td class="sb-citd"><span class="sb-ci sb-kci" aria-hidden="true"><i class="z"></i><i class="bar" style="left:34.38%;width:31.25%"></i><i class="pt ref" style="left:51.09%"></i><i class="pt" style="left:44.38%"></i></span></td></tr>
+      <tr><td><div class="sb-cell">Jezebel</div><div class="sb-gl" data-i18n="sb_k_d2">bare plutonium sphere</div></td><td class="r num">±200</td><td class="r num">1.00179</td><td class="r num">+179</td><td class="r num">−47</td><td class="sb-citd"><span class="sb-ci sb-kci" aria-hidden="true"><i class="z"></i><i class="bar" style="left:18.75%;width:62.50%"></i><i class="pt ref" style="left:42.66%"></i><i class="pt" style="left:77.97%"></i></span></td></tr>
+      <tr><td><div class="sb-cell">Flattop-Pu</div><div class="sb-gl" data-i18n="sb_k_d3">plutonium core, natural-uranium shell</div></td><td class="r num">±300</td><td class="r num">0.99942</td><td class="r num">−58</td><td class="r num">−50</td><td class="sb-citd"><span class="sb-ci sb-kci" aria-hidden="true"><i class="z"></i><i class="bar" style="left:3.12%;width:93.75%"></i><i class="pt ref" style="left:42.19%"></i><i class="pt" style="left:40.94%"></i></span></td></tr>
+      <tr><td><div class="sb-cell">Flattop-25</div><div class="sb-gl" data-i18n="sb_k_d4">uranium-235 core, natural-uranium shell</div></td><td class="r num">±300</td><td class="r num">1.00127</td><td class="r num">+127</td><td class="r num">—</td><td class="sb-citd"><span class="sb-ci sb-kci" aria-hidden="true"><i class="z"></i><i class="bar" style="left:3.12%;width:93.75%"></i><i class="pt" style="left:69.84%"></i></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sb-caveat" data-i18n="sb_k_caveat">ENDF/B-VIII.1 is closer on Godiva and Jezebel. These results were viewed during development, so this is not a blind test.</p>
+    <p class="sb-note" data-i18n="sb_k_note">OpenSn (discrete ordinates) minus OpenMC on identical 33-group data: −11.0 pcm (Godiva), −12.5 pcm (Jezebel).</p>
+  </section>
 </main>
 
 <script src="js/i18n.js?v=154"></script>
-<script>WT.load(["instructors", "scoreboard", "pipeline"], 156);</script>
+<script>WT.load(["instructors", "scoreboard", "pipeline"], 157);</script>
 <script src="js/nav.js?v=151"></script>
 <script src="js/scoreboard-data.js?v=91"></script>
 <script>

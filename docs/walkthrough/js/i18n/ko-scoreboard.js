@@ -108,3 +108,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "더 많은 원자력 주제" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · 임계도: 고속 집합체 네 개",
+  "sb_k_p": "ICSBEP 고속 벤치마크 네 개를 완전한 3차원 OpenMC 모델로 INCOGNITA 데이터와 ENDF/B-VIII.1로 각각 계산했습니다. <i>k</i><sub>eff</sub>는 피팅에 쓰이지 않습니다. <a href=\"topics.html#kcalc\" data-keep-lang>강의: 임계도 계산</a>",
+  "sb_k_t1": "INCOGNITA가 벤치마크 ±1σ 안",
+  "sb_k_t3": "ENDF/B-VIII.1이 ±1σ 안",
+  "sb_k_cap": "계산값에서 실험값을 뺀 <i>k</i><sub>eff</sub>, 단위 pcm (1 pcm = 10⁻⁵). 막대: 벤치마크 ±1σ; 채운 표시: INCOGNITA; 빈 표시: ENDF/B-VIII.1.",
+  "sb_k_caveat": "Godiva와 Jezebel에서는 ENDF/B-VIII.1이 더 가깝습니다. 이 결과는 개발 중에 확인했으므로 블라인드 테스트가 아닙니다.",
+  "sb_k_note": "같은 33군 데이터에서 OpenSn(이산 종좌표)에서 OpenMC를 뺀 값: −11.0 pcm (Godiva), −12.5 pcm (Jezebel).",
+  "sb_k_th1": "집합체",
+  "sb_k_th2": "벤치마크 ±1σ",
+  "sb_k_th3": "INCOGNITA k",
+  "sb_k_th4": "INCOGNITA C − E",
+  "sb_k_th5": "VIII.1 C − E",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "반사체 없는 우라늄-235 구",
+  "sb_k_d2": "반사체 없는 플루토늄 구",
+  "sb_k_d3": "플루토늄 노심, 천연 우라늄 껍질",
+  "sb_k_d4": "우라늄-235 노심, 천연 우라늄 껍질"
+});

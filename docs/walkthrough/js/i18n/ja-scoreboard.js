@@ -108,3 +108,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "その他の原子力トピック" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · 臨界：高速集合体 4 体",
+  "sb_k_p": "ICSBEP の高速ベンチマーク 4 体を完全な 3 次元 OpenMC モデルで、INCOGNITA データと ENDF/B-VIII.1 のそれぞれで計算しました。<i>k</i><sub>eff</sub> はフィッティングに使っていません。 <a href=\"topics.html#kcalc\" data-keep-lang>レッスン：臨界計算</a>",
+  "sb_k_t1": "INCOGNITA がベンチマーク ±1σ 内",
+  "sb_k_t3": "ENDF/B-VIII.1 が ±1σ 内",
+  "sb_k_cap": "計算値から実験値を引いた <i>k</i><sub>eff</sub>（pcm、1 pcm = 10⁻⁵）。バー：ベンチマークの ±1σ、塗りつぶし：INCOGNITA、白抜き：ENDF/B-VIII.1。",
+  "sb_k_caveat": "Godiva と Jezebel では ENDF/B-VIII.1 の方が近い値です。これらの結果は開発中に参照したため、ブラインドテストではありません。",
+  "sb_k_note": "同じ 33 群データでの OpenSn（離散座標法）− OpenMC：−11.0 pcm（Godiva）、−12.5 pcm（Jezebel）。",
+  "sb_k_th1": "集合体",
+  "sb_k_th2": "ベンチマーク ±1σ",
+  "sb_k_th3": "INCOGNITA k",
+  "sb_k_th4": "INCOGNITA C − E",
+  "sb_k_th5": "VIII.1 C − E",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "裸のウラン 235 球",
+  "sb_k_d2": "裸のプルトニウム球",
+  "sb_k_d3": "プルトニウム炉心、天然ウラン殻",
+  "sb_k_d4": "ウラン 235 炉心、天然ウラン殻"
+});

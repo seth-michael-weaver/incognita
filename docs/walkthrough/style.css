@@ -1035,3 +1035,9 @@ body.sb-lit::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 5
 @media (max-width: 560px) { .pl-have { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .pl-have li:last-child { grid-column: span 2; } }
 @media (prefers-reduced-motion: reduce) { .pl-have a { transition: none; } .pl-have a:hover { transform: none; } }
 .chapter[data-ch="pipeline"] .stage canvas { touch-action: pan-y; }
+
+/* Comparisons, section 3 (k_eff): the bar is the benchmark's ±1σ, the solid mark INCOGNITA, the hollow mark ENDF/B-VIII.1 */
+.sb-kci .pt.ref { top: 1px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 2px var(--soft); }
+.sb-kci .pt:not(.ref) { background: var(--win-ink); width: 4px; margin-left: -2px; }
+#sb-k .sb-citd { min-width: 150px; }
+.sb-ktiles .sb-l, #sb-k thead th { text-transform: none; letter-spacing: .01em; }

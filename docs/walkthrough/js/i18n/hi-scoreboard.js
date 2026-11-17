@@ -108,3 +108,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "और नाभिकीय विषय" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · क्रांतिकता: चार तीव्र संयोजन",
+  "sb_k_p": "चार ICSBEP तीव्र बेंचमार्क पूर्ण 3-D OpenMC मॉडलों में, INCOGNITA डेटा और ENDF/B-VIII.1 दोनों के साथ। फ़िट में <i>k</i><sub>eff</sub> का उपयोग नहीं होता। <a href=\"topics.html#kcalc\" data-keep-lang>पाठ: क्रांतिकता की गणना</a>",
+  "sb_k_t1": "INCOGNITA बेंचमार्क के ±1σ के भीतर",
+  "sb_k_t3": "ENDF/B-VIII.1 ±1σ के भीतर",
+  "sb_k_cap": "परिकलित घटा प्रायोगिक <i>k</i><sub>eff</sub>, pcm में (1 pcm = 10⁻⁵)। पट्टी: बेंचमार्क का ±1σ; भरा चिह्न: INCOGNITA; खाली चिह्न: ENDF/B-VIII.1।",
+  "sb_k_caveat": "Godiva और Jezebel पर ENDF/B-VIII.1 अधिक निकट है। ये परिणाम विकास के दौरान देखे गए थे, इसलिए यह अंध परीक्षण नहीं है।",
+  "sb_k_note": "एक ही 33-समूह डेटा पर OpenSn (असतत निर्देशांक) घटा OpenMC: −11.0 pcm (Godiva), −12.5 pcm (Jezebel)।",
+  "sb_k_th1": "संयोजन",
+  "sb_k_th2": "बेंचमार्क ±1σ",
+  "sb_k_th3": "INCOGNITA k",
+  "sb_k_th4": "INCOGNITA C − E",
+  "sb_k_th5": "VIII.1 C − E",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "बिना परावर्तक का यूरेनियम-235 गोला",
+  "sb_k_d2": "बिना परावर्तक का प्लूटोनियम गोला",
+  "sb_k_d3": "प्लूटोनियम कोर, प्राकृतिक यूरेनियम का खोल",
+  "sb_k_d4": "यूरेनियम-235 कोर, प्राकृतिक यूरेनियम का खोल"
+});

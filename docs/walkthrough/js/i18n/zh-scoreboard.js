@@ -108,3 +108,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "更多核科学主题" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · 临界：四个快中子装置",
+  "sb_k_p": "四个 ICSBEP 快中子基准的完整三维 OpenMC 模型，分别使用 INCOGNITA 数据和 ENDF/B-VIII.1 计算。拟合不使用 <i>k</i><sub>eff</sub>。 <a href=\"topics.html#kcalc\" data-keep-lang>课程：临界计算</a>",
+  "sb_k_t1": "INCOGNITA 在基准 ±1σ 内",
+  "sb_k_t3": "ENDF/B-VIII.1 在 ±1σ 内",
+  "sb_k_cap": "计算值减实验值的 <i>k</i><sub>eff</sub>，单位 pcm（1 pcm = 10⁻⁵）。条：基准 ±1σ；实心标记：INCOGNITA；空心标记：ENDF/B-VIII.1。",
+  "sb_k_caveat": "在 Godiva 和 Jezebel 上 ENDF/B-VIII.1 更接近。这些结果在开发过程中被查看过，因此不是盲测。",
+  "sb_k_note": "相同 33 群数据下 OpenSn（离散纵标）减 OpenMC：−11.0 pcm（Godiva），−12.5 pcm（Jezebel）。",
+  "sb_k_th1": "装置",
+  "sb_k_th2": "基准 ±1σ",
+  "sb_k_th3": "INCOGNITA k",
+  "sb_k_th4": "INCOGNITA C − E",
+  "sb_k_th5": "VIII.1 C − E",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "裸铀-235 球",
+  "sb_k_d2": "裸钚球",
+  "sb_k_d3": "钚堆芯，天然铀外壳",
+  "sb_k_d4": "铀-235 堆芯，天然铀外壳"
+});

@@ -107,3 +107,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "Mais temas nucleares" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · Criticidade: quatro conjuntos rápidos",
+  "sb_k_p": "Quatro benchmarks rápidos do ICSBEP em modelos OpenMC 3-D completos, com dados INCOGNITA e com ENDF/B-VIII.1. <i>k</i><sub>eff</sub> não é usado no ajuste. <a href=\"topics.html#kcalc\" data-keep-lang>Lição: Cálculo da criticidade</a>",
+  "sb_k_t1": "INCOGNITA dentro de ±1σ do benchmark",
+  "sb_k_t3": "ENDF/B-VIII.1 dentro de ±1σ",
+  "sb_k_cap": "<i>k</i><sub>eff</sub> calculado menos experimental, em pcm (1 pcm = 10⁻⁵). Barra: ±1σ do benchmark; marca cheia: INCOGNITA; marca vazia: ENDF/B-VIII.1.",
+  "sb_k_caveat": "O ENDF/B-VIII.1 está mais próximo em Godiva e Jezebel. Estes resultados foram vistos durante o desenvolvimento, pelo que não é um teste cego.",
+  "sb_k_note": "OpenSn (ordenadas discretas) menos OpenMC com os mesmos dados de 33 grupos: −11,0 pcm (Godiva), −12,5 pcm (Jezebel).",
+  "sb_k_th1": "Conjunto",
+  "sb_k_th2": "±1σ do benchmark",
+  "sb_k_th3": "k INCOGNITA",
+  "sb_k_th4": "C − E INCOGNITA",
+  "sb_k_th5": "C − E VIII.1",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "esfera nua de urânio-235",
+  "sb_k_d2": "esfera nua de plutónio",
+  "sb_k_d3": "núcleo de plutónio, camada de urânio natural",
+  "sb_k_d4": "núcleo de urânio-235, camada de urânio natural"
+});

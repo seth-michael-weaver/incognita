@@ -107,3 +107,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "Weitere Kernphysik-Themen" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · Kritikalität: vier schnelle Anordnungen",
+  "sb_k_p": "Vier schnelle ICSBEP-Benchmarks in vollständigen 3-D-OpenMC-Modellen, mit INCOGNITA-Daten und mit ENDF/B-VIII.1. <i>k</i><sub>eff</sub> wird in der Anpassung nicht verwendet. <a href=\"topics.html#kcalc\" data-keep-lang>Lektion: Kritikalität berechnen</a>",
+  "sb_k_t1": "INCOGNITA innerhalb ±1σ des Benchmarks",
+  "sb_k_t3": "ENDF/B-VIII.1 innerhalb ±1σ",
+  "sb_k_cap": "Berechnetes minus experimentelles <i>k</i><sub>eff</sub>, in pcm (1 pcm = 10⁻⁵). Balken: ±1σ des Benchmarks; gefüllte Marke: INCOGNITA; leere Marke: ENDF/B-VIII.1.",
+  "sb_k_caveat": "ENDF/B-VIII.1 liegt bei Godiva und Jezebel näher. Diese Ergebnisse wurden während der Entwicklung betrachtet; es ist also kein Blindtest.",
+  "sb_k_note": "OpenSn (diskrete Ordinaten) minus OpenMC mit denselben 33-Gruppen-Daten: −11,0 pcm (Godiva), −12,5 pcm (Jezebel).",
+  "sb_k_th1": "Anordnung",
+  "sb_k_th2": "Benchmark ±1σ",
+  "sb_k_th3": "INCOGNITA k",
+  "sb_k_th4": "INCOGNITA C − E",
+  "sb_k_th5": "VIII.1 C − E",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "nackte Uran-235-Kugel",
+  "sb_k_d2": "nackte Plutoniumkugel",
+  "sb_k_d3": "Plutoniumkern, Natururanmantel",
+  "sb_k_d4": "Uran-235-Kern, Natururanmantel"
+});
