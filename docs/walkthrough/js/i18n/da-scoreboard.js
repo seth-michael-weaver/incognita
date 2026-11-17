@@ -107,3 +107,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "Flere nukleare emner" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · Kritikalitet: fire hurtige opstillinger",
+  "sb_k_p": "Fire hurtige ICSBEP-benchmarks i fulde 3-D OpenMC-modeller, med INCOGNITA-data og med ENDF/B-VIII.1. <i>k</i><sub>eff</sub> bruges ikke i tilpasningen. <a href=\"topics.html#kcalc\" data-keep-lang>Lektion: Beregning af kritikalitet</a>",
+  "sb_k_t1": "INCOGNITA inden for benchmarkens ±1σ",
+  "sb_k_t3": "ENDF/B-VIII.1 inden for ±1σ",
+  "sb_k_cap": "Beregnet minus eksperimentelt <i>k</i><sub>eff</sub>, i pcm (1 pcm = 10⁻⁵). Bjælke: benchmarkens ±1σ; udfyldt mærke: INCOGNITA; åbent mærke: ENDF/B-VIII.1.",
+  "sb_k_caveat": "ENDF/B-VIII.1 ligger tættere på for Godiva og Jezebel. Resultaterne blev set under udviklingen, så det er ikke en blindtest.",
+  "sb_k_note": "OpenSn (diskrete ordinater) minus OpenMC med de samme 33-gruppers data: −11,0 pcm (Godiva), −12,5 pcm (Jezebel).",
+  "sb_k_th1": "Opstilling",
+  "sb_k_th2": "Benchmark ±1σ",
+  "sb_k_th3": "INCOGNITA k",
+  "sb_k_th4": "INCOGNITA C − E",
+  "sb_k_th5": "VIII.1 C − E",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "nøgen kugle af uran-235",
+  "sb_k_d2": "nøgen plutoniumkugle",
+  "sb_k_d3": "plutoniumkerne, skal af naturligt uran",
+  "sb_k_d4": "uran-235-kerne, skal af naturligt uran"
+});

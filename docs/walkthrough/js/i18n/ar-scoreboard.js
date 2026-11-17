@@ -107,3 +107,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "موضوعات نووية أخرى" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · الحرجية: أربعة تجميعات سريعة",
+  "sb_k_p": "أربعة معايير سريعة من ICSBEP في نماذج OpenMC كاملة ثلاثية الأبعاد، ببيانات INCOGNITA وبـ ENDF/B-VIII.1. لا يُستخدم <i>k</i><sub>eff</sub> في الملاءمة. <a href=\"topics.html#kcalc\" data-keep-lang>الدرس: حساب الحرجية</a>",
+  "sb_k_t1": "INCOGNITA داخل ±1σ للمعيار",
+  "sb_k_t3": "ENDF/B-VIII.1 داخل ±1σ",
+  "sb_k_cap": "<i>k</i><sub>eff</sub> المحسوب ناقص التجريبي، بوحدة pcm (1 pcm = 10⁻⁵). الشريط: ±1σ للمعيار؛ العلامة الممتلئة: INCOGNITA؛ العلامة المفرغة: ENDF/B-VIII.1.",
+  "sb_k_caveat": "ENDF/B-VIII.1 أقرب في Godiva وJezebel. اطّلعنا على هذه النتائج أثناء التطوير، لذا فهي ليست اختبارًا أعمى.",
+  "sb_k_note": "OpenSn (الإحداثيات المتقطعة) ناقص OpenMC على البيانات نفسها ذات 33 مجموعة: −11.0 pcm (Godiva)، −12.5 pcm (Jezebel).",
+  "sb_k_th1": "التجميع",
+  "sb_k_th2": "المعيار ±1σ",
+  "sb_k_th3": "k لـ INCOGNITA",
+  "sb_k_th4": "C − E لـ INCOGNITA",
+  "sb_k_th5": "C − E لـ VIII.1",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "كرة عارية من اليورانيوم-235",
+  "sb_k_d2": "كرة عارية من البلوتونيوم",
+  "sb_k_d3": "قلب من البلوتونيوم، غلاف من اليورانيوم الطبيعي",
+  "sb_k_d4": "قلب من اليورانيوم-235، غلاف من اليورانيوم الطبيعي"
+});

@@ -107,3 +107,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "Другие ядерные темы" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · Критичность: четыре быстрые сборки",
+  "sb_k_p": "Четыре быстрых бенчмарка ICSBEP в полных 3-D-моделях OpenMC, с данными INCOGNITA и с ENDF/B-VIII.1. <i>k</i><sub>eff</sub> не используется при подгонке. <a href=\"topics.html#kcalc\" data-keep-lang>Урок: Расчёт критичности</a>",
+  "sb_k_t1": "INCOGNITA в пределах ±1σ бенчмарка",
+  "sb_k_t3": "ENDF/B-VIII.1 в пределах ±1σ",
+  "sb_k_cap": "Расчётный минус экспериментальный <i>k</i><sub>eff</sub>, в pcm (1 pcm = 10⁻⁵). Полоса: ±1σ бенчмарка; закрашенная метка: INCOGNITA; пустая метка: ENDF/B-VIII.1.",
+  "sb_k_caveat": "ENDF/B-VIII.1 ближе для Godiva и Jezebel. Эти результаты просматривались во время разработки, поэтому это не слепой тест.",
+  "sb_k_note": "OpenSn (дискретные ординаты) минус OpenMC на одних и тех же 33-групповых данных: −11,0 pcm (Godiva), −12,5 pcm (Jezebel).",
+  "sb_k_th1": "Сборка",
+  "sb_k_th2": "Бенчмарк ±1σ",
+  "sb_k_th3": "k INCOGNITA",
+  "sb_k_th4": "C − E INCOGNITA",
+  "sb_k_th5": "C − E VIII.1",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "голый шар из урана-235",
+  "sb_k_d2": "голый шар из плутония",
+  "sb_k_d3": "плутониевое ядро, оболочка из природного урана",
+  "sb_k_d4": "ядро из урана-235, оболочка из природного урана"
+});

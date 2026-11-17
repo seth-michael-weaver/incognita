@@ -107,3 +107,25 @@ Object.assign(WT.L.ui, {
 });
 /* site menu: 'More Nuclear Topics' link (nav.js), also on pages that do not load the ui file */
 Object.assign(WT.L.ui, { nav_topics: "Meer nucleaire onderwerpen" });
+
+
+/* kcalc k section */
+Object.assign(WT.L.ui, {
+  "sb_k_h": "3 · Kritikaliteit: vier snelle opstellingen",
+  "sb_k_p": "Vier snelle ICSBEP-benchmarks in volledige 3-D OpenMC-modellen, met INCOGNITA-data en met ENDF/B-VIII.1. <i>k</i><sub>eff</sub> wordt niet in de fit gebruikt. <a href=\"topics.html#kcalc\" data-keep-lang>Les: Kritikaliteit berekenen</a>",
+  "sb_k_t1": "INCOGNITA binnen ±1σ van de benchmark",
+  "sb_k_t3": "ENDF/B-VIII.1 binnen ±1σ",
+  "sb_k_cap": "Berekende min experimentele <i>k</i><sub>eff</sub>, in pcm (1 pcm = 10⁻⁵). Balk: ±1σ van de benchmark; gevulde markering: INCOGNITA; open markering: ENDF/B-VIII.1.",
+  "sb_k_caveat": "ENDF/B-VIII.1 zit dichter bij Godiva en Jezebel. Deze resultaten zijn tijdens de ontwikkeling bekeken, dus het is geen blinde test.",
+  "sb_k_note": "OpenSn (discrete ordinaten) min OpenMC met dezelfde 33-groepsdata: −11,0 pcm (Godiva), −12,5 pcm (Jezebel).",
+  "sb_k_th1": "Opstelling",
+  "sb_k_th2": "Benchmark ±1σ",
+  "sb_k_th3": "INCOGNITA k",
+  "sb_k_th4": "INCOGNITA C − E",
+  "sb_k_th5": "VIII.1 C − E",
+  "sb_k_th6": "−320 · 0 · +320 pcm",
+  "sb_k_d1": "kale bol van uranium-235",
+  "sb_k_d2": "kale plutoniumbol",
+  "sb_k_d3": "plutoniumkern, mantel van natuurlijk uranium",
+  "sb_k_d4": "uranium-235-kern, mantel van natuurlijk uranium"
+});
