@@ -21,7 +21,8 @@ WT.L.ch.kcalc = {
 </div>
 <div class="step">
   <h3>Nocciolo del reattore C5G7</h3>
-  <p>OCSE/NEA C5G7, quarto di nocciolo 2-D, 1056 barrette di UO<sub>2</sub> e MOX. <i>k</i><sub>eff</sub> a −19&nbsp;pcm dal riferimento; errore massimo di potenza per barretta 0,13&nbsp;%.</p>
+  <p>Quarto di nocciolo OCSE/NEA C5G7, 1056 barrette di UO<sub>2</sub> e MOX: in 2-D e nell’estensione 3-D con barre di controllo inserite. <i>k</i><sub>eff</sub> entro 19&nbsp;pcm dal riferimento in 2-D ed entro 9&nbsp;pcm in ogni configurazione 3-D.</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">Barre A</button><button class="btn ghost" data-act="c53" aria-pressed="false">Barre B</button></div>
 </div>`,
 };
 
@@ -59,6 +60,7 @@ Object.assign(WT.L.labels, {
   "radius {#} cm": "raggio {#} cm",
   "{#} cm in {#} cm": "{#} cm in {#} cm",
   "k = {#}; reference {#} ({#} pcm)": "k = {#}; riferimento {#} ({#} pcm)",
+  "k = {#}; reference {#} (+{#} pcm)": "k = {#}; riferimento {#} (+{#} pcm)",
   "k {#}, reference {#}": "k {#}, riferimento {#}",
   "plutonium in natural uranium": "plutonio in uranio naturale",
   "plutonium metal": "plutonio metallico",

@@ -21,7 +21,8 @@ WT.L.ch.kcalc = {
 </div>
 <div class="step">
   <h3>C5G7 反应堆堆芯</h3>
-  <p>OECD/NEA C5G7，二维四分之一堆芯，1,056 根 UO<sub>2</sub> 和 MOX 燃料棒。<i>k</i><sub>eff</sub> 与参考值相差 −19&nbsp;pcm；燃料棒功率最大误差 0.13&nbsp;%。</p>
+  <p>OECD/NEA C5G7 四分之一堆芯，1,056 根 UO<sub>2</sub> 和 MOX 燃料棒：二维，以及插入控制棒的三维扩展。<i>k</i><sub>eff</sub> 在二维中与参考值相差不超过 19&nbsp;pcm，在每个三维构型中不超过 9&nbsp;pcm。</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">控制棒 A</button><button class="btn ghost" data-act="c53" aria-pressed="false">控制棒 B</button></div>
 </div>`,
 };
 
@@ -59,6 +60,7 @@ Object.assign(WT.L.labels, {
   "radius {#} cm": "半径 {#} cm",
   "{#} cm in {#} cm": "{#} cm / {#} cm",
   "k = {#}; reference {#} ({#} pcm)": "k = {#}；参考值 {#}（{#} pcm）",
+  "k = {#}; reference {#} (+{#} pcm)": "k = {#}；参考值 {#}（+{#} pcm）",
   "k {#}, reference {#}": "k {#}，参考值 {#}",
   "plutonium in natural uranium": "天然铀包覆的钚",
   "plutonium metal": "金属钚",

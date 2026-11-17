@@ -21,7 +21,8 @@ WT.L.ch.kcalc = {
 </div>
 <div class="step">
   <h3>Reaktorkern C5G7</h3>
-  <p>OECD/NEA C5G7, 2-D-Viertelkern, 1056 UO<sub>2</sub>- und MOX-Stäbe. <i>k</i><sub>eff</sub> −19&nbsp;pcm von der Referenz; maximaler Stableistungsfehler 0,13&nbsp;%.</p>
+  <p>OECD/NEA C5G7-Viertelkern, 1056 UO<sub>2</sub>- und MOX-Stäbe: in 2-D und in der 3-D-Erweiterung mit eingefahrenen Steuerstäben. <i>k</i><sub>eff</sub> innerhalb 19&nbsp;pcm der Referenz in 2-D und innerhalb 9&nbsp;pcm in jeder 3-D-Konfiguration.</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">Stäbe A</button><button class="btn ghost" data-act="c53" aria-pressed="false">Stäbe B</button></div>
 </div>`,
 };
 
@@ -59,6 +60,7 @@ Object.assign(WT.L.labels, {
   "radius {#} cm": "Radius {#} cm",
   "{#} cm in {#} cm": "{#} cm in {#} cm",
   "k = {#}; reference {#} ({#} pcm)": "k = {#}; Referenz {#} ({#} pcm)",
+  "k = {#}; reference {#} (+{#} pcm)": "k = {#}; Referenz {#} (+{#} pcm)",
   "k {#}, reference {#}": "k {#}, Referenz {#}",
   "plutonium in natural uranium": "Plutonium in Natururan",
   "plutonium metal": "Plutoniummetall",

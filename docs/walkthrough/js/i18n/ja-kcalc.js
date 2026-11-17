@@ -21,7 +21,8 @@ WT.L.ch.kcalc = {
 </div>
 <div class="step">
   <h3>C5G7 炉心</h3>
-  <p>OECD/NEA C5G7、2 次元 1/4 炉心、UO<sub>2</sub> と MOX の燃料棒 1,056 本。<i>k</i><sub>eff</sub> は参照値から −19&nbsp;pcm、燃料棒出力の最大誤差 0.13&nbsp;%。</p>
+  <p>OECD/NEA C5G7 1/4 炉心、UO<sub>2</sub> と MOX の燃料棒 1,056 本：2 次元と、制御棒を挿入した 3 次元拡張。<i>k</i><sub>eff</sub> は 2 次元で参照値から 19&nbsp;pcm 以内、すべての 3 次元配置で 9&nbsp;pcm 以内。</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">制御棒 A</button><button class="btn ghost" data-act="c53" aria-pressed="false">制御棒 B</button></div>
 </div>`,
 };
 
@@ -59,6 +60,7 @@ Object.assign(WT.L.labels, {
   "radius {#} cm": "半径 {#} cm",
   "{#} cm in {#} cm": "{#} cm / {#} cm",
   "k = {#}; reference {#} ({#} pcm)": "k = {#}；参照値 {#}（{#} pcm）",
+  "k = {#}; reference {#} (+{#} pcm)": "k = {#}；参照値 {#}（+{#} pcm）",
   "k {#}, reference {#}": "k {#}、参照値 {#}",
   "plutonium in natural uranium": "天然ウラン中のプルトニウム",
   "plutonium metal": "プルトニウム金属",
