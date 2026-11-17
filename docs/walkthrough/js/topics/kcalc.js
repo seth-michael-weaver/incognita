@@ -161,28 +161,28 @@
     html: `
 <div class="step">
   <h3>The benchmarks</h3>
-  <p>Four fast-metal critical assemblies from the ICSBEP handbook, to scale: Godiva and Jezebel are bare spheres; Flattop-25 and Flattop-Pu are small cores in a natural-uranium reflector.</p>
+  <p>Four ICSBEP fast-metal critical assemblies, to scale. Godiva and Jezebel are bare spheres; Flattop-25 and Flattop-Pu have a natural-uranium reflector.</p>
 </div>
 <div class="step">
   <h3>Calculated <i>k</i><sub>eff</sub></h3>
-  <p>OpenMC, continuous energy, full 3-D geometry. All four are within 200&nbsp;pcm of critical and inside the benchmark uncertainty. No <i>k</i><sub>eff</sub> value is used in fitting the data.</p>
+  <p>OpenMC, continuous energy, 3-D geometry. All four are inside the benchmark ±1σ. <i>k</i><sub>eff</sub> is not used in the fit.</p>
 </div>
 <div class="step">
   <h3>Deterministic against Monte Carlo</h3>
-  <p>OpenSn (discrete ordinates) and OpenMC on identical 33-group cross sections agree to within 13&nbsp;pcm.</p>
+  <p>OpenSn (discrete ordinates) against OpenMC on identical 33-group cross sections.</p>
 </div>
 <div class="step">
   <h3>Sensitivity profiles</h3>
-  <p>Adjoint sensitivity of <i>k</i><sub>eff</sub> to each reaction, per unit lethargy: where in energy each assembly responds to the data.</p>
+  <p>Adjoint sensitivity of <i>k</i><sub>eff</sub> to each reaction, per unit lethargy.</p>
   <div class="btns"><button class="btn ghost" data-act="se0" aria-pressed="true">Godiva</button><button class="btn ghost" data-act="se1" aria-pressed="false">Jezebel</button><button class="btn ghost" data-act="se2" aria-pressed="false">Flattop-Pu</button></div>
 </div>
 <div class="step">
   <h3>Verified by direct perturbation</h3>
-  <p><i>k</i><sub>eff</sub> changes predicted from the sensitivities, against full OpenMC re-solves, for 63 perturbed data sets.</p>
+  <p>Predicted against re-solved <i>k</i><sub>eff</sub> changes, 63 perturbed data sets.</p>
 </div>
 <div class="step">
   <h3>C5G7 reactor core</h3>
-  <p>The OECD/NEA C5G7 quarter core, 1,056 UO<sub>2</sub> and MOX pins: <i>k</i><sub>eff</sub> within 19&nbsp;pcm of the reference and every pin power within 0.13&nbsp;%.</p>
+  <p>OECD/NEA C5G7, 2-D quarter core, 1,056 UO<sub>2</sub> and MOX pins. <i>k</i><sub>eff</sub> −19&nbsp;pcm from the reference; maximum pin-power error 0.13&nbsp;%.</p>
 </div>`,
     setup(S) {
       S.set("mode", "geo"); S.set("snc", 0); S.set("sec", 0); S.to("kA", 0, true); S.to("ndl", 0, true); S.hx = S.hy = null;
@@ -315,7 +315,7 @@
         const rms = {}; D.ks.forEach(([cs, p, t]) => { (rms[cs] = rms[cs] || []).push((p - t) ** 2); });
         Object.keys(rms).forEach((cs, i) => { const r = Math.sqrt(rms[cs].reduce((a, b) => a + b, 0) / rms[cs].length);
           const ly = y0 + 16 + i * (phone ? 16 : 20); g.dot(x0 + 14, ly, 4, CC[cs]); g.label(`${cs}: rms ${Math.round(r)} pcm`, x0 + 24, ly, { color: c.ink, size: fs - 1, align: "left", bg: true }); });
-        foot(phone ? "Diagonal: prediction equals re-solve" : "Points on the diagonal: prediction equals the direct calculation", c.soft);
+        
         return;
       }
 

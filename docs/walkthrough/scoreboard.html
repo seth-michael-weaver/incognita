@@ -150,12 +150,10 @@
   </section>
   <section class="sb-sec" aria-labelledby="sb-k-h">
     <h2 id="sb-k-h" data-i18n="sb_k_h">3 · Criticality: four fast assemblies</h2>
-    <p data-i18n="sb_k_p">INCOGNITA's data for the measured nuclides in full 3-D OpenMC models of four ICSBEP benchmarks, beside ENDF/B-VIII.1 in the same models. Fission and capture are fitted to measurements and the IAEA neutron standards only; <i>k</i><sub>eff</sub> is never part of the fit. <a href="topics.html#kcalc" data-keep-lang>Lesson: Computing criticality</a></p>
+    <p data-i18n="sb_k_p">Four ICSBEP fast benchmarks in full 3-D OpenMC models, run with INCOGNITA data and with ENDF/B-VIII.1. <i>k</i><sub>eff</sub> is not used in the fit. <a href="topics.html#kcalc" data-keep-lang>Lesson: Computing criticality</a></p>
     <div class="sb-tiles sb-ktiles">
-      <div class="sb-tile sb-win"><div class="sb-n">4 / 4</div><div class="sb-l" data-i18n="sb_k_t1">inside the benchmark's ±1σ</div></div>
-      <div class="sb-tile sb-win"><div class="sb-n">4 / 4</div><div class="sb-l" data-i18n="sb_k_t2">within 200 pcm</div></div>
+      <div class="sb-tile sb-win"><div class="sb-n">4 / 4</div><div class="sb-l" data-i18n="sb_k_t1">INCOGNITA inside benchmark ±1σ</div></div>
       <div class="sb-tile sb-tie"><div class="sb-n">3 / 3</div><div class="sb-l" data-i18n="sb_k_t3">ENDF/B-VIII.1 inside ±1σ</div></div>
-      <div class="sb-tile sb-of"><div class="sb-n">0</div><div class="sb-l" data-i18n="sb_k_t4">k values used in the fit</div></div>
     </div>
     <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-k-cap">
       <table class="sb-table" id="sb-k">
@@ -169,8 +167,8 @@
         </tbody>
       </table>
     </div>
-    <p class="sb-caveat" data-i18n="sb_k_caveat">ENDF/B-VIII.1 is closer on Godiva and Jezebel. Evaluated libraries are checked against these same assemblies; INCOGNITA's fit never sees them, though we did look at these results while building the data, so they are not a blind test.</p>
-    <p class="sb-note" data-i18n="sb_k_note">Same multigroup data, two solvers: deterministic OpenSn and Monte Carlo OpenMC agree to −11.0 pcm (Godiva) and −12.5 pcm (Jezebel). No VIII.1 value is shown for Flattop-25.</p>
+    <p class="sb-caveat" data-i18n="sb_k_caveat">ENDF/B-VIII.1 is closer on Godiva and Jezebel. These results were viewed during development, so this is not a blind test.</p>
+    <p class="sb-note" data-i18n="sb_k_note">OpenSn (discrete ordinates) minus OpenMC on identical 33-group data: −11.0 pcm (Godiva), −12.5 pcm (Jezebel).</p>
   </section>
 </main>
 
