@@ -46,18 +46,18 @@
     v.spin = 0; v.yaw = 0; v.pitch = 0;
     const U = (v.user = { items: [], mats: [] }), PHI = 1.5 * Math.PI, tex = glowTex(T);
     const steel = new T.MeshStandardMaterial({ color: 0x8e96a2, metalness: 0.55, roughness: 0.42 });
-    const steelCut = new T.MeshStandardMaterial({ color: 0xa9b0bb, metalness: 0.2, roughness: 0.75, side: T.DoubleSide });
-    const cutFaces = (grp, geoF) => [0, PHI].forEach((phi) => { const m = new T.Mesh(geoF(), grp.cutMat); m.rotation.y = phi - Math.PI; grp.add(m); });
-    C.forEach((c) => {
+    const steelCut = new T.MeshStandardMaterial({ color: 0xc3c8d0, emissive: 0x6b717c, metalness: 0.1, roughness: 0.85, side: T.DoubleSide });
+        C.forEach((c) => {
       const g = new T.Group(), inner = new T.Group(); g.add(inner);
       const coreMat = new T.MeshStandardMaterial({ metalness: 0.35, roughness: 0.35 });
       const coreCut = new T.MeshStandardMaterial({ roughness: 0.6, side: T.DoubleSide });
       U.mats.push([coreMat, coreCut, fuelCol(c)]);
-      inner.add(new T.Mesh(new T.SphereGeometry(c.core, 48, 32, 0, PHI), coreMat));
-      [0, PHI].forEach((phi) => { const m = new T.Mesh(new T.CircleGeometry(c.core, 40, -Math.PI / 2, Math.PI), coreCut); m.rotation.y = phi - Math.PI; inner.add(m); });
+      // back half of each shell, and the flat cross-section facing the viewer
+      inner.add(new T.Mesh(new T.SphereGeometry(c.core, 48, 32, Math.PI, Math.PI), coreMat));
+      const face = new T.Mesh(new T.CircleGeometry(c.core, 64), coreCut); face.position.z = 0.02; inner.add(face);
       if (c.refl) {
-        inner.add(new T.Mesh(new T.SphereGeometry(c.refl, 64, 40, 0, PHI), steel));
-        [0, PHI].forEach((phi) => { const m = new T.Mesh(new T.RingGeometry(c.core, c.refl, 64, 1, -Math.PI / 2, Math.PI), steelCut); m.rotation.y = phi - Math.PI; inner.add(m); });
+        inner.add(new T.Mesh(new T.SphereGeometry(c.refl, 64, 40, Math.PI, Math.PI), steel));
+        inner.add(new T.Mesh(new T.RingGeometry(c.core, c.refl, 96, 1), steelCut));
       }
       const glow = new T.Sprite(new T.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0.5 }));
       glow.scale.set(c.core * 4.2, c.core * 4.2, 1); g.add(glow); glow.renderOrder = -1;
@@ -109,7 +109,7 @@
     Object.values(U.sets).forEach((st) => { st.fmat.color.copy(v.col("faint")); st.items.forEach((it) => { const c = v.col(it.col); it.mat.color.copy(c); it.lmat.color.copy(c); it.bmat.color.copy(v.col("faint")); }); });
   }
   function buildCore(T, v) {
-    v.yaw = 0.75; v.pitch = 0.72; v.spin = 0.06; v.target.set(22, 2, 22);
+    v.yaw = 0.75; v.pitch = 0.72; v.spin = 0.06; v.target.set(25.5, 2, 25.5);
     const U = (v.user = { tmp: new T.Vector3(), col: new T.Color(), hit: -1 });
     const list = []; for (let i = 0; i < NP; i++) for (let j = 0; j < NP; j++) if (pins[i][j] > 0) list.push([i, j, pins[i][j], D.c5g7.map[i][j]]);
     const m = new T.Matrix4(), box = new T.BoxGeometry(0.82, 1, 0.82); box.translate(0, 0.5, 0);
@@ -124,7 +124,7 @@
     // assembly plates and the water reflector (the quarter core's outer 17-pin band)
     const plate = (x, z, w, d, mat) => { const b = new T.Mesh(new T.BoxGeometry(w, 0.3, d), mat); b.position.set(x + w / 2, -0.16, z + d / 2); v.scene.add(b); return b; };
     const uo2 = new T.MeshStandardMaterial({ roughness: 0.9 }), mox = new T.MeshStandardMaterial({ roughness: 0.9 });
-    const water = new T.MeshStandardMaterial({ transparent: true, opacity: 0.16, roughness: 0.3, depthWrite: false });
+    const water = new T.MeshStandardMaterial({ transparent: true, opacity: 0.1, roughness: 0.3, depthWrite: false });
     plate(0, 0, 17, 17, uo2); plate(17, 17, 17, 17, uo2); plate(17, 0, 17, 17, mox); plate(0, 17, 17, 17, mox);
     plate(0, 34, 51, 17, water); plate(34, 0, 17, 34, water);
     Object.assign(U, { list, mesh, tubes, uo2, mox, water });
@@ -160,40 +160,38 @@
     level: 2, num: "Lesson 1", title: "Computing criticality", short: "Computing k",
     html: `
 <div class="step">
-  <h3>Four spheres of metal</h3>
-  <p>Four real critical assemblies, to scale: two bare spheres, and two small cores inside thick shells of natural uranium.</p>
+  <h3>The benchmarks</h3>
+  <p>Four fast-metal critical assemblies from the ICSBEP handbook, to scale: Godiva and Jezebel are bare spheres; Flattop-25 and Flattop-Pu are small cores in a natural-uranium reflector.</p>
 </div>
 <div class="step">
-  <h3>k, computed</h3>
-  <p>Our data in a full 3-D Monte Carlo model: all four within 200 pcm of critical (1&nbsp;pcm = 0.001&nbsp;%), and <i>k</i> was never part of the fit.</p>
+  <h3>Calculated <i>k</i><sub>eff</sub></h3>
+  <p>OpenMC, continuous energy, full 3-D geometry. All four are within 200&nbsp;pcm of critical and inside the benchmark uncertainty. No <i>k</i><sub>eff</sub> value is used in fitting the data.</p>
 </div>
 <div class="step">
-  <h3>Two solvers, one answer</h3>
-  <p>A deterministic solver (OpenSn) against Monte Carlo (OpenMC), on the same 33-group data.</p>
-  <div class="btns"><button class="btn ghost" data-act="sn0" aria-pressed="true">Godiva</button><button class="btn ghost" data-act="sn1" aria-pressed="false">Jezebel</button></div>
+  <h3>Deterministic against Monte Carlo</h3>
+  <p>OpenSn (discrete ordinates) and OpenMC on identical 33-group cross sections agree to within 13&nbsp;pcm.</p>
 </div>
 <div class="step">
-  <h3>What each sphere listens to</h3>
-  <p>How much <i>k</i> moves when one reaction changes at one energy, from a single adjoint solve.</p>
+  <h3>Sensitivity profiles</h3>
+  <p>Adjoint sensitivity of <i>k</i><sub>eff</sub> to each reaction, per unit lethargy: where in energy each assembly responds to the data.</p>
   <div class="btns"><button class="btn ghost" data-act="se0" aria-pressed="true">Godiva</button><button class="btn ghost" data-act="se1" aria-pressed="false">Jezebel</button><button class="btn ghost" data-act="se2" aria-pressed="false">Flattop-Pu</button></div>
 </div>
 <div class="step">
-  <h3>Checked by brute force</h3>
-  <p>15 of 15 sensitivities match direct re-solves, and they predict the <i>k</i> of 63 new data sets before any re-run.</p>
+  <h3>Verified by direct perturbation</h3>
+  <p><i>k</i><sub>eff</sub> changes predicted from the sensitivities, against full OpenMC re-solves, for 63 perturbed data sets.</p>
 </div>
 <div class="step">
-  <h3>A whole core, pin by pin</h3>
-  <p>The C5G7 reactor benchmark: 1,056 fuel pins, <i>k</i> within 19 pcm of the reference, every pin power within 0.13&nbsp;%. Next: 3-D, with control rods.</p>
+  <h3>C5G7 reactor core</h3>
+  <p>The OECD/NEA C5G7 quarter core, 1,056 UO<sub>2</sub> and MOX pins: <i>k</i><sub>eff</sub> within 19&nbsp;pcm of the reference and every pin power within 0.13&nbsp;%.</p>
 </div>`,
     setup(S) {
       S.set("mode", "geo"); S.set("snc", 0); S.set("sec", 0); S.to("kA", 0, true); S.to("ndl", 0, true); S.hx = S.hy = null;
-      [0, 1].forEach((i) => S.on("sn" + i, () => { S.set("snc", i); S.ndl = 0; S.to("ndl", D.sn[i].d); setBtns("sn", i); }));
       [0, 1, 2].forEach((i) => S.on("se" + i, () => { S.set("sec", i); setBtns("se", i); }));
     },
     steps: [
       (S) => { S.set("mode", "geo"); S.to("kA", 0); },
       (S) => { S.set("mode", "k"); S.kA = 0; S.to("kA", 1); },
-      (S) => { S.set("mode", "sn"); S.ndl = 0; S.to("ndl", D.sn[S.snc].d); },
+      (S) => { S.set("mode", "sn"); S.ndl = 0; S.to("ndl", 1); },
       (S) => { S.set("mode", "sens"); },
       (S) => { S.set("mode", "check"); },
       (S) => { S.set("mode", "core"); },
@@ -201,7 +199,7 @@
     frame(g, S, dt) {
       if (g.W < 40 || g.H < 40) return;
       const { W, H, c } = g, phone = W < 600, fs = phone ? 11 : 13, mode = S.mode, snap = document.body.classList.contains("shot");
-      if (snap) { S.kA = S.target.kA; S.ndl = S.target.ndl; }
+      if (snap) { S.kA = S.target.kA; S.ndl = 1; }
       if (!g.ctx.canvas._kc) {
         g.ctx.canvas._kc = 1;
         const at = (x, y) => { S.hx = x; S.hy = y; };
@@ -219,9 +217,9 @@
           v.orbit(100, dt); colorSpheres(v);
           const d = fit(v, wx, wy1 - wy0), cy = (wy0 + wy1) / 2;
           v.camera.position.set(0, cy + d * 0.12, d); v.camera.lookAt(0, cy, 0);
-          const sway = 0.22 * Math.sin(S.time * 0.35);
+          const sway = 0.15 * Math.sin(S.time * 0.35);
           v.user.items.forEach((it) => {
-            it.inner.rotation.y = Math.PI / 2 + 0.2 + v.yaw + sway; it.inner.rotation.x = 0.32 + clamp(v.pitch, -0.6, 0.6);
+            it.inner.rotation.y = -0.85 + v.yaw + sway; it.inner.rotation.x = 0.3 + clamp(v.pitch, -0.6, 0.6);
             const pulse = mode === "k" ? 0.55 + 0.25 * S.kA * (0.5 + 0.5 * Math.sin(S.time * 2.2 + it.c.core)) : 0.4;
             it.glow.material.opacity = pulse * (it.c.refl ? 0.35 : 0.75); it.coreCut.emissiveIntensity = 0.6 + 0.5 * pulse;
           });
@@ -242,11 +240,11 @@
           const a = clamp(S.kA, 0, 1), L = [];   // lines, top to bottom; the gauge is a line of its own
           if (mode === "geo") {
             L.push([k.id, { color: c.ink, size: fs + 2, weight: 600 }]);
-            L.push([k.refl ? (phone ? `${k.core} cm in ${k.refl} cm` : `core ${k.core} cm · shell ${k.refl} cm`) : `radius ${k.core} cm`, { color: c.soft, size: fs - 1 }]);
+            L.push([k.refl ? (phone ? `${k.core} cm in ${k.refl} cm` : `core ${k.core} cm, reflector ${k.refl} cm`) : `radius ${k.core} cm`, { color: c.soft, size: fs - 1 }]);
             if (!phone) L.push([k.fuel === "U" ? (k.refl ? "uranium-235 in natural uranium" : "uranium-235 metal") : (k.refl ? "plutonium in natural uranium" : "plutonium metal"), { color: c[fuelCol(k)], size: fs - 1 }]);
           } else {
-            L.push([phone ? `${k.id} ${(1 + (k.k - 1) * a).toFixed(5)}` : `${k.id}  ·  k = ${(1 + (k.k - 1) * a).toFixed(5)}`, { color: c.ink, size: fs + 1, weight: 600 }]);
-            L.push([phone ? `${pcm(Math.round(k.pcm * a))} (±${k.unc})` : `${pcm(Math.round(k.pcm * a))}  (benchmark ±${k.unc})`, { color: Math.abs(k.pcm) <= k.unc ? c.fission : c.proton, size: fs - 1, weight: 600 }]);
+            L.push([phone ? `${k.id} ${(1 + (k.k - 1) * a).toFixed(5)}` : `${k.id}   k = ${(1 + (k.k - 1) * a).toFixed(5)}`, { color: c.ink, size: fs + 1, weight: 600 }]);
+            L.push([phone ? `${pcm(Math.round(k.pcm * a))} (±${k.unc})` : `${pcm(Math.round(k.pcm * a))}  (±${k.unc} benchmark)`, { color: Math.abs(k.pcm) <= k.unc ? c.fission : c.proton, size: fs - 1, weight: 600 }]);
             L.push(["gauge"]);
           }
           L.forEach(([s, o], i) => {
@@ -255,32 +253,24 @@
           });
         });
         if (phone) return;
-        if (mode === "geo") foot(v.ok ? "Drawn to scale. Drag to turn them." : "Drawn to scale.", c.soft);
-        else foot(phone ? "4 of 4 within 200 pcm" : "4 of 4 within 200 pcm of k = 1, each inside the benchmark's own ± band", c.fission);
+        if (mode === "geo") foot(v.ok ? "To scale. Drag to rotate." : "To scale.", c.soft);
+        else foot("Calculated − experimental k, with the benchmark ±1σ band", c.soft);
         return;
       }
 
       if (mode === "sn") {
-        const s = D.sn[S.snc], cx = W / 2, cy = H * (phone ? 0.62 : 0.6), R = Math.min(W * 0.42, H * 0.48), A0 = Math.PI * 1.1, A1 = Math.PI * 1.9, RANGE = 60;
-        const ang = (p) => lerp(A0, A1, (clamp(p, -RANGE, RANGE) + RANGE) / (2 * RANGE));
-        const ctx = g.ctx;
-        // target band (±50 pcm) and the dial
-        ctx.save(); ctx.lineWidth = R * 0.11; ctx.strokeStyle = g.rgba(c.fission, 0.2); ctx.beginPath(); ctx.arc(cx, cy, R * 0.9, ang(-50), ang(50)); ctx.stroke();
-        ctx.lineWidth = 2; ctx.strokeStyle = c.line; ctx.beginPath(); ctx.arc(cx, cy, R, A0, A1); ctx.stroke(); ctx.restore();
-        for (let p = -RANGE; p <= RANGE; p += 5) {
-          const a = ang(p), big = p % 25 === 0, r0 = R * (big ? 0.93 : 0.96);
-          g.line(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0, cx + Math.cos(a) * R, cy + Math.sin(a) * R, big ? c.soft : c.faint, big ? 1.6 : 1);
-          if (big) g.label(p === 0 ? "0" : (p > 0 ? "+" : "−") + Math.abs(p), cx + Math.cos(a) * R * 1.09, cy + Math.sin(a) * R * 1.09, { color: c.soft, size: fs - 1 });
-        }
-        g.label("target ±50 pcm", cx + Math.cos(ang(38)) * R * 0.74, cy + Math.sin(ang(38)) * R * 0.74, { color: c.fission, size: fs - 1, weight: 600 });
-        const needle = (p, col, len, w) => { const a = ang(p); g.line(cx, cy, cx + Math.cos(a) * R * len, cy + Math.sin(a) * R * len, col, w); };
-        needle(0, c.cool, 0.97, 3); needle(S.ndl, c.warm, 0.88, 4); g.dot(cx, cy, 7, c.ink);
-        g.label("OpenMC", cx + Math.cos(ang(0)) * R * 0.5 + (phone ? 34 : 44), cy - R * 0.72, { color: c.cool, size: fs, weight: 600, align: "left" });
-        g.label("OpenSn", cx + Math.cos(ang(S.ndl)) * R * 0.5 - (phone ? 30 : 40), cy - R * 0.62, { color: c.warm, size: fs, weight: 600, align: "right" });
-        g.label((S.ndl < -0.05 ? "−" : S.ndl > 0.05 ? "+" : "") + Math.abs(S.ndl).toFixed(1) + " pcm", cx, cy + R * 0.22, { color: c.ink, size: phone ? 30 : 40, weight: 600, serif: true });
-        g.label(`${s.id}: OpenSn − OpenMC`, cx, cy + R * 0.22 + (phone ? 28 : 36), { color: c.soft, size: fs });
-        g.label("pcm", cx, cy - R * 1.2 < 10 ? 14 : cy - R * 1.2, { color: c.faint, size: fs - 1 });
-        foot(phone ? "Godiva −11.0 · Jezebel −12.5 pcm" : "Godiva −11.0 pcm · Jezebel −12.5 pcm · Flattop-Pu in progress", c.ink);
+        // one axis, OpenSn − OpenMC in pcm; shaded = ±50 pcm target; one row per assembly
+        const R = 60, x0 = phone ? 24 : W * 0.12, x1 = W - (phone ? 24 : W * 0.12), X = (p) => lerp(x0, x1, (p + R) / (2 * R));
+        const rows = D.sn, gapY = phone ? 90 : 120, top = H / 2 - (rows.length - 1) * gapY / 2, y0 = top - 60, yb = top + (rows.length - 1) * gapY + 50;
+        g.ctx.save(); g.ctx.fillStyle = g.rgba(c.fission, 0.1); g.ctx.fillRect(X(-50), y0, X(50) - X(-50), yb - y0); g.ctx.restore();
+        [-50, -25, 0, 25, 50].forEach((p) => { g.line(X(p), y0, X(p), yb, p === 0 ? c.soft : c.line, p === 0 ? 1.4 : 1, p === 0 ? 1 : 0.7, p === 0 ? undefined : [2, 4]);
+          g.label(p === 0 ? "0" : (p > 0 ? "+" : "−") + Math.abs(p), X(p), yb + 16, { color: c.soft, size: fs - 1 }); });
+        g.label("Target ±50 pcm", X(50), y0 - 14, { color: c.fission, size: fs - 1, weight: 600, align: "right" });
+        g.label("OpenSn − OpenMC (pcm)", W / 2, yb + 40, { color: c.soft, size: fs - 1 });
+        rows.forEach((s, i) => { const y = top + i * gapY, px = X(s.d * S.ndl);
+          g.label(s.id, X(0) + 14, y, { color: c.ink, size: fs + 1, weight: 600, align: "left" });
+          g.line(X(0), y, px, y, c.warm, 3, 0.9); g.dot(px, y, phone ? 6 : 8, c.warm);
+          g.label((s.d < 0 ? "−" : "+") + Math.abs(s.d * S.ndl).toFixed(1), px + (s.d < 0 ? -14 : 14), y, { color: c.ink, size: phone ? 18 : 26, weight: 600, serif: true, align: s.d < 0 ? "right" : "left" }); });
         return;
       }
 
@@ -305,10 +295,9 @@
           set.forEach(([key, s]) => { const [nuc, rx] = key.split("|"), col = c[RXC[rx]], pts = GR.map(([l, w, gi]) => [X(l), Y(s[gi] / w)]); g.poly(pts, col, 2); g.label(`${nucName(nuc)} ${RX[rx]}`, pts[pts.length - 6][0], pts[pts.length - 6][1] - 10, { color: col, size: fs - 1, bg: true }); });
           [[3, "1 keV"], [5, "100 keV"], [7, "10 MeV"]].forEach(([e, s]) => g.label(s, X(e), y1 + 14, { color: c.soft, size: fs - 2 }));
         }
-        g.label(phone ? `${id}: change in k per change in data` : `${id}: change in k per change in each reaction, by neutron energy`, W / 2, phone ? 14 : 20, { color: c.ink, size: fs, weight: 600 });
         const nu = set[0][1].reduce((a, b) => a + b, 0), fi = set[1][1].reduce((a, b) => a + b, 0);
-        foot(phone ? `+1 % in ν → k +${nu.toFixed(2)} %` : `+1 % in ν → k +${nu.toFixed(2)} % · +1 % in fission → k +${fi.toFixed(2)} %`, c.ink);
-        if (v.ok && !phone) g.label("drag to turn", W - 8, 40, { color: c.faint, size: fs - 2, align: "right" });
+        foot(phone ? `${id}: ν ${nu.toFixed(2)}, fission ${fi.toFixed(2)}` : `${id}, integral sensitivity: ν ${nu.toFixed(2)}, fission ${fi.toFixed(2)} (% k per % change)`, c.soft);
+        if (v.ok && !phone) g.label("Drag to rotate", W - 8, 20, { color: c.faint, size: fs - 2, align: "right" });
         return;
       }
 
@@ -321,13 +310,12 @@
         g.line(X(-L), Y(-L), X(L), Y(L), c.soft, 1.2, 0.8);
         const CC = { Godiva: c.warm, Jezebel: c.alpha, "Flattop-Pu": c.cool };
         D.ks.forEach(([cs, p, t], i) => g.dot(X(p), Y(t), phone ? 3.2 : 4.2, CC[cs], 0.9));
-        g.label(phone ? "predicted Δk (pcm) →" : "predicted from sensitivities, Δk (pcm) →", x0 + side, y0 + side + 30, { color: c.soft, size: fs - 1, align: "right" });
-        g.label(phone ? "re-solved ↑" : "re-solved in OpenMC ↑", x0, y0 - 14, { color: c.soft, size: fs - 1, align: "left" });
+        g.label(phone ? "predicted Δk, pcm" : "Predicted from sensitivities, Δk (pcm)", x0 + side, y0 + side + 30, { color: c.soft, size: fs - 1, align: "right" });
+        g.label(phone ? "OpenMC Δk" : "OpenMC re-solve, Δk (pcm)", x0, y0 - 14, { color: c.soft, size: fs - 1, align: "left" });
         const rms = {}; D.ks.forEach(([cs, p, t]) => { (rms[cs] = rms[cs] || []).push((p - t) ** 2); });
         Object.keys(rms).forEach((cs, i) => { const r = Math.sqrt(rms[cs].reduce((a, b) => a + b, 0) / rms[cs].length);
-          const ly = y0 + 16 + i * (phone ? 16 : 20); g.dot(x0 + 14, ly, 4, CC[cs]); g.label(`${cs}: ${Math.round(r)} pcm rms`, x0 + 24, ly, { color: c.ink, size: fs - 1, align: "left", bg: true }); });
-        g.label("15 of 15", x0 + side - 10, y0 + side - (phone ? 20 : 28), { color: c.fission, size: phone ? 20 : 28, weight: 600, serif: true, align: "right" });
-        foot(phone ? "adjoint = direct to 1 part in 10,000" : "adjoint sensitivities match direct re-solves to 1 part in 10,000", c.ink);
+          const ly = y0 + 16 + i * (phone ? 16 : 20); g.dot(x0 + 14, ly, 4, CC[cs]); g.label(`${cs}: rms ${Math.round(r)} pcm`, x0 + 24, ly, { color: c.ink, size: fs - 1, align: "left", bg: true }); });
+        foot(phone ? "Diagonal: prediction equals re-solve" : "Points on the diagonal: prediction equals the direct calculation", c.soft);
         return;
       }
 
@@ -335,7 +323,7 @@
         const v = WT.view3d("kcalc-core", g, buildCore);
         let hit = -1, info = null;
         if (v.ok) {
-          v.orbit(fit(v, 66, 60), dt);
+          v.orbit(fit(v, 78, 66), dt);
           // nearest pin top to the pointer (screen space)
           v.camera.updateMatrixWorld();
           if (S.hx != null) {
@@ -357,12 +345,12 @@
         { const kw = phone ? 120 : 170, kx = W - kw - 12, ky = phone ? 16 : 22;
           for (let i = 0; i < 24; i++) { g.ctx.fillStyle = "rgb(" + rgbRamp(c, i / 23) + ")"; g.ctx.fillRect(kx + (kw * i) / 24, ky, kw / 24 + 0.5, 7); }
           g.label(`×${P_LO}`, kx, ky + 18, { color: c.soft, size: fs - 2, align: "left" }); g.label(`×${P_HI} of mean`, kx + kw, ky + 18, { color: c.soft, size: fs - 2, align: "right" });
-          g.label(phone ? "tap a pin" : "pin power · hover a pin", 12, ky + 4, { color: c.soft, size: fs - 1, align: "left" }); }
+          g.label(phone ? "Relative pin power (tap a pin)" : "Relative pin power (hover a pin)", 12, ky + 4, { color: c.soft, size: fs - 1, align: "left" }); }
         if (info) {
           const fuel = info.t === 1 ? "UO₂" : info.t === 4 ? "MOX 4.3 %" : info.t === 2 ? "MOX 7.0 %" : "MOX 8.7 %";
-          g.label(`${fuel} · ${info.p.toFixed(3)} × mean`, info.px, info.py - 20, { color: c.ink, size: fs, weight: 600, bg: true });
+          g.label(`${fuel}: ${info.p.toFixed(3)} × mean`, info.px, info.py - 20, { color: c.ink, size: fs, weight: 600, bg: true });
         }
-        foot(phone ? "k 1.18636 vs 1.18655 · −19 pcm" : "k = 1.18636 against the reference 1.18655 (−19 pcm) · pin powers within 0.13 %", c.ink);
+        foot(phone ? "k 1.18636, reference 1.18655" : "k = 1.18636; reference 1.18655 (−19 pcm)", c.soft);
       }
     },
   });
