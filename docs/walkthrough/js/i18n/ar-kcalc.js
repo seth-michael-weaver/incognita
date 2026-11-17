@@ -21,7 +21,8 @@ WT.L.ch.kcalc = {
 </div>
 <div class="step">
   <h3>قلب المفاعل C5G7</h3>
-  <p>OECD/NEA C5G7، ربع قلب ثنائي الأبعاد، 1056 قضيبًا من UO<sub>2</sub> وMOX. <i>k</i><sub>eff</sub> يبعد −19&nbsp;pcm عن المرجع؛ أقصى خطأ في قدرة القضيب 0.13&nbsp;%.</p>
+  <p>ربع قلب OECD/NEA C5G7، 1056 قضيبًا من UO<sub>2</sub> وMOX: ثنائي الأبعاد، والامتداد ثلاثي الأبعاد مع إدخال قضبان التحكم. <i>k</i><sub>eff</sub> ضمن 19&nbsp;pcm من المرجع في الحالة الثنائية وضمن 9&nbsp;pcm في كل تكوين ثلاثي الأبعاد.</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">قضبان A</button><button class="btn ghost" data-act="c53" aria-pressed="false">قضبان B</button></div>
 </div>`,
 };
 
@@ -59,6 +60,7 @@ Object.assign(WT.L.labels, {
   "radius {#} cm": "نصف القطر {#} سم",
   "{#} cm in {#} cm": "{#} سم في {#} سم",
   "k = {#}; reference {#} ({#} pcm)": "k = {#}؛ المرجع {#} ({#} pcm)",
+  "k = {#}; reference {#} (+{#} pcm)": "k = {#}؛ المرجع {#} (+{#} pcm)",
   "k {#}, reference {#}": "k {#}، المرجع {#}",
   "plutonium in natural uranium": "بلوتونيوم داخل يورانيوم طبيعي",
   "plutonium metal": "بلوتونيوم معدني",

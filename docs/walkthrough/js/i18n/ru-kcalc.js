@@ -21,7 +21,8 @@ WT.L.ch.kcalc = {
 </div>
 <div class="step">
   <h3>Активная зона C5G7</h3>
-  <p>OECD/NEA C5G7, 2-D четверть зоны, 1056 твэлов UO<sub>2</sub> и MOX. <i>k</i><sub>eff</sub> −19&nbsp;pcm от эталона; максимальная ошибка мощности твэла 0,13&nbsp;%.</p>
+  <p>Четверть активной зоны OECD/NEA C5G7, 1056 твэлов UO<sub>2</sub> и MOX: в 2-D и в 3-D-расширении с введёнными стержнями управления. <i>k</i><sub>eff</sub> в пределах 19&nbsp;pcm от эталона в 2-D и в пределах 9&nbsp;pcm в каждой 3-D-конфигурации.</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">Стержни A</button><button class="btn ghost" data-act="c53" aria-pressed="false">Стержни B</button></div>
 </div>`,
 };
 
@@ -59,6 +60,7 @@ Object.assign(WT.L.labels, {
   "radius {#} cm": "радиус {#} см",
   "{#} cm in {#} cm": "{#} см в {#} см",
   "k = {#}; reference {#} ({#} pcm)": "k = {#}; эталон {#} ({#} pcm)",
+  "k = {#}; reference {#} (+{#} pcm)": "k = {#}; эталон {#} (+{#} pcm)",
   "k {#}, reference {#}": "k {#}, эталон {#}",
   "plutonium in natural uranium": "плутоний в природном уране",
   "plutonium metal": "металлический плутоний",

@@ -21,7 +21,8 @@ WT.L.ch.kcalc = {
 </div>
 <div class="step">
   <h3>C5G7 원자로 노심</h3>
-  <p>OECD/NEA C5G7, 2차원 1/4 노심, UO<sub>2</sub>와 MOX 연료봉 1,056개. <i>k</i><sub>eff</sub>는 기준값과 −19&nbsp;pcm 차이, 연료봉 출력 최대 오차 0.13&nbsp;%.</p>
+  <p>OECD/NEA C5G7 1/4 노심, UO<sub>2</sub>와 MOX 연료봉 1,056개: 2차원과 제어봉을 삽입한 3차원 확장. <i>k</i><sub>eff</sub>는 2차원에서 기준값과 19&nbsp;pcm 이내, 모든 3차원 구성에서 9&nbsp;pcm 이내입니다.</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">제어봉 A</button><button class="btn ghost" data-act="c53" aria-pressed="false">제어봉 B</button></div>
 </div>`,
 };
 
@@ -59,6 +60,7 @@ Object.assign(WT.L.labels, {
   "radius {#} cm": "반지름 {#} cm",
   "{#} cm in {#} cm": "{#} cm / {#} cm",
   "k = {#}; reference {#} ({#} pcm)": "k = {#}; 기준값 {#} ({#} pcm)",
+  "k = {#}; reference {#} (+{#} pcm)": "k = {#}; 기준값 {#} (+{#} pcm)",
   "k {#}, reference {#}": "k {#}, 기준값 {#}",
   "plutonium in natural uranium": "천연 우라늄 속 플루토늄",
   "plutonium metal": "플루토늄 금속",

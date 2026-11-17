@@ -21,7 +21,8 @@ WT.L.ch.kcalc = {
 </div>
 <div class="step">
   <h3>C5G7 रिएक्टर कोर</h3>
-  <p>OECD/NEA C5G7, 2-D चौथाई कोर, UO<sub>2</sub> और MOX की 1,056 छड़ें। <i>k</i><sub>eff</sub> संदर्भ से −19&nbsp;pcm; छड़ शक्ति की अधिकतम त्रुटि 0.13&nbsp;%।</p>
+  <p>OECD/NEA C5G7 चौथाई कोर, UO<sub>2</sub> और MOX की 1,056 छड़ें: 2-D में, और नियंत्रण छड़ें डाले गए 3-D विस्तार में। <i>k</i><sub>eff</sub> 2-D में संदर्भ से 19&nbsp;pcm के भीतर और हर 3-D विन्यास में 9&nbsp;pcm के भीतर।</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">छड़ें A</button><button class="btn ghost" data-act="c53" aria-pressed="false">छड़ें B</button></div>
 </div>`,
 };
 
@@ -59,6 +60,7 @@ Object.assign(WT.L.labels, {
   "radius {#} cm": "त्रिज्या {#} cm",
   "{#} cm in {#} cm": "{#} cm / {#} cm",
   "k = {#}; reference {#} ({#} pcm)": "k = {#}; संदर्भ {#} ({#} pcm)",
+  "k = {#}; reference {#} (+{#} pcm)": "k = {#}; संदर्भ {#} (+{#} pcm)",
   "k {#}, reference {#}": "k {#}, संदर्भ {#}",
   "plutonium in natural uranium": "प्राकृतिक यूरेनियम में प्लूटोनियम",
   "plutonium metal": "प्लूटोनियम धातु",

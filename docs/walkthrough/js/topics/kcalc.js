@@ -29,6 +29,8 @@
   const GR = []; for (let gi = 32; gi >= 0; gi--) { const lo = D.ecco[32 - gi], hi = D.ecco[33 - gi]; if (lo >= 99) GR.push([Math.log10(Math.sqrt(lo * hi)), Math.log(hi / lo), gi]); }
   const LX0 = 2.2, LX1 = 7.2, ex = (l) => (l - 4.7) * 14;          // log10 E -> world x
   const SY = 95;                                                      // sensitivity per lethargy -> world y
+  const C3 = D.c5g7_3d || {};
+  const CFG = [{ k: D.c5g7.k, ref: D.c5g7.ref, pins: D.c5g7.pins }].concat(["unrodded", "rodA", "rodB"].filter((n) => C3[n]).map((n) => C3[n]));
   const pins = D.c5g7.pins, NP = pins.length;
   let pinMax = 0; pins.forEach((r) => r.forEach((p) => (pinMax = Math.max(pinMax, p))));
   const PH = 5.5;                                                     // world height per unit relative power
@@ -114,6 +116,7 @@
     const m = new T.Matrix4(), box = new T.BoxGeometry(0.82, 1, 0.82); box.translate(0, 0.5, 0);
     const mesh = new T.InstancedMesh(box, new T.MeshStandardMaterial({ roughness: 0.5, metalness: 0.05 }), list.length);
     list.forEach(([i, j, p], k) => { m.makeScale(1, p * PH, 1); m.setPosition(j + 0.5, 0, i + 0.5); mesh.setMatrixAt(k, m); });
+    U.cfg = 0; U.m = m;
     v.scene.add(mesh);
     // guide tubes and the fission chamber: short dark stubs
     const gl = []; for (let i = 0; i < NP; i++) for (let j = 0; j < NP; j++) if (!(pins[i][j] > 0)) gl.push([i, j]);
@@ -127,6 +130,11 @@
     plate(0, 0, 17, 17, uo2); plate(17, 17, 17, 17, uo2); plate(17, 0, 17, 17, mox); plate(0, 17, 17, 17, mox);
     plate(0, 34, 51, 17, water); plate(34, 0, 17, 34, water);
     Object.assign(U, { list, mesh, tubes, uo2, mox, water });
+  }
+  function setCfg(v, ci) {
+    const U = v.user; if (U.cfg === ci) return; U.cfg = ci; const P = CFG[ci].pins, m = U.m;
+    U.list.forEach((it, k) => { it[2] = P[it[0]][it[1]]; m.makeScale(1, Math.max(it[2], 0.01) * PH, 1); m.setPosition(it[1] + 0.5, 0, it[0] + 0.5); U.mesh.setMatrixAt(k, m); });
+    U.mesh.instanceMatrix.needsUpdate = true; U.gen = -1;
   }
   // sequential ramp for pin power: cool (low) -> photon -> proton (high)
   function ramp(v, t, out) {
@@ -177,11 +185,13 @@
 </div>
 <div class="step">
   <h3>C5G7 reactor core</h3>
-  <p>OECD/NEA C5G7, 2-D quarter core, 1,056 UO<sub>2</sub> and MOX pins. <i>k</i><sub>eff</sub> −19&nbsp;pcm from the reference; maximum pin-power error 0.13&nbsp;%.</p>
+  <p>OECD/NEA C5G7 quarter core, 1,056 UO<sub>2</sub> and MOX pins: in 2-D, and in the 3-D extension with control rods inserted. <i>k</i><sub>eff</sub> within 19&nbsp;pcm of the reference in 2-D and within 9&nbsp;pcm in every 3-D configuration.</p>
+  <div class="btns"><button class="btn ghost" data-act="c50" aria-pressed="true">2-D</button><button class="btn ghost" data-act="c51" aria-pressed="false">3-D</button><button class="btn ghost" data-act="c52" aria-pressed="false">Rods A</button><button class="btn ghost" data-act="c53" aria-pressed="false">Rods B</button></div>
 </div>`,
     setup(S) {
       S.set("mode", "geo"); S.set("sec", 0); S.to("kA", 0, true); S.hx = S.hy = null;
       [0, 1, 2].forEach((i) => S.on("se" + i, () => { S.set("sec", i); setBtns("se", i); }));
+      S.set("cfg", 0); [0, 1, 2, 3].forEach((i) => S.on("c5" + i, () => { S.set("cfg", i); setBtns("c5", i); }));
     },
     steps: [
       (S) => { S.set("mode", "geo"); S.to("kA", 0); },
@@ -298,10 +308,10 @@
       }
 
       if (mode === "core") {
-        const v = WT.view3d("kcalc-core", g, buildCore);
+        const v = WT.view3d("kcalc-core", g, buildCore), cf = CFG[Math.min(S.cfg || 0, CFG.length - 1)], cp = cf.pins;
         let hit = -1, info = null;
         if (v.ok) {
-          v.orbit(fit(v, 78, 66), dt);
+          setCfg(v, Math.min(S.cfg || 0, CFG.length - 1)); v.orbit(fit(v, 78, 66), dt);
           // nearest pin top to the pointer (screen space)
           v.camera.updateMatrixWorld();
           if (S.hx != null) {
@@ -316,7 +326,7 @@
         } else {
           const n = NP + 17, s = Math.min((W - 40) / n, (H - 120) / n), x0 = (W - n * s) / 2, y0 = 50;
           g.ctx.save(); g.ctx.fillStyle = g.rgba(c.cool, 0.15); g.ctx.fillRect(x0, y0, n * s, n * s); g.ctx.restore();
-          for (let i = 0; i < NP; i++) for (let j = 0; j < NP; j++) { const p = pins[i][j]; g.ctx.fillStyle = p > 0 ? "rgb(" + rgbRamp(c, clamp((p - P_LO) / (P_HI - P_LO), 0, 1)) + ")" : c.faint; g.ctx.fillRect(x0 + j * s, y0 + i * s, s * 0.9, s * 0.9);
+          for (let i = 0; i < NP; i++) for (let j = 0; j < NP; j++) { const p = cp[i][j]; g.ctx.fillStyle = p > 0 ? "rgb(" + rgbRamp(c, clamp((p - P_LO) / (P_HI - P_LO), 0, 1)) + ")" : c.faint; g.ctx.fillRect(x0 + j * s, y0 + i * s, s * 0.9, s * 0.9);
             if (S.hx != null && p > 0 && S.hx >= x0 + j * s && S.hx < x0 + (j + 1) * s && S.hy >= y0 + i * s && S.hy < y0 + (i + 1) * s) info = { p, t: D.c5g7.map[i][j], px: x0 + (j + 0.5) * s, py: y0 + i * s }; }
         }
         // colour key
@@ -328,7 +338,7 @@
           const fuel = info.t === 1 ? "UO₂" : info.t === 4 ? "MOX 4.3 %" : info.t === 2 ? "MOX 7.0 %" : "MOX 8.7 %";
           g.label(`${fuel}: ${info.p.toFixed(3)} × mean`, info.px, info.py - 20, { color: c.ink, size: fs, weight: 600, bg: true });
         }
-        foot(phone ? "k 1.18636, reference 1.18655" : "k = 1.18636; reference 1.18655 (−19 pcm)", c.soft);
+        { const dk = Math.round((cf.k - cf.ref) / cf.ref * 1e5); foot(phone ? `k ${cf.k.toFixed(5)}, reference ${cf.ref.toFixed(5)}` : `k = ${cf.k.toFixed(5)}; reference ${cf.ref.toFixed(5)} (${dk < 0 ? "−" : "+"}${Math.abs(dk)} pcm)`, c.soft); }
       }
     },
   });
