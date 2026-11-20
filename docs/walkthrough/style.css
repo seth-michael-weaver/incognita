@@ -1041,3 +1041,10 @@ body.sb-lit::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 5
 .sb-kci .pt:not(.ref) { background: var(--win-ink); width: 4px; margin-left: -2px; }
 #sb-k .sb-citd { min-width: 150px; }
 .sb-ktiles .sb-l, #sb-k thead th { text-transform: none; letter-spacing: .01em; }
+
+/* TERRA section 2 (head to head, by reaction family) */
+.sb-fam { display: grid; gap: 6px; margin: 8px 0; }
+.sb-fam-row { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr 4.5rem; align-items: center; gap: 8px; }
+.sb-fam-bar { display: block; height: 10px; border-radius: 3px; background: currentColor; opacity: .55; min-width: 2px; }
+.sb-fam-val { font-variant-numeric: tabular-nums; text-align: right; }
+.sb-fam-lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
