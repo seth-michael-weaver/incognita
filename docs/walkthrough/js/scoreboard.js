@@ -131,7 +131,8 @@
   $("#sb-src").innerHTML = fill(T("sb_n_src", "Production engine <code>{engine}</code> (<code>{commit}</code>), {date}."),
     { engine: esc(I.engine), commit: esc(I.commit), date: date(I.date) });
 
-  // ---- 2. TERRA against evaluated libraries
+  // ---- 2. TERRA against evaluated libraries (old board; the new section is drawn by terra2.js)
+  if ($("#sb-terra-tiles")) {
   $("#sb-terra-asof").innerHTML = fill(T("sb_terra_asof", "Board of {date}, on an older engine than section 1."), { date: date(R.date) });
   tiles($("#sb-terra-tiles"), R); strip($("#sb-terra-strip"), R);
   const A = R.split.acc, K = R.split.cov;
@@ -147,12 +148,13 @@
   const O = R.loso;
   $("#sb-terra-note").innerHTML = fill(T("sb_n_terra", "{n} comparisons are scored leave-one-series-out: TERRA is refitted without the measurement series being judged, while the libraries, which cannot be refitted, stay in-sample. {ncov} of them score uncertainty coverage and {nacc} score capture resonance integrals ({win} {W}, {tie} {T}, {loss} {L}). {same} of the coverage ones equal their in-sample versions, because TERRA does not fit (n,2n) or fission. All other comparisons, thermal cross sections included, are in-sample. A rebuild on the current engine is in progress."),
     { n: O.WIN + O.TIE + O.LOSS, ncov: O.cov, nacc: O.acc, same: O.same, win: O.WIN, tie: O.TIE, loss: O.LOSS, W: V.WIN, T: V.TIE, L: V.LOSS });
+  }
 
   // ---------- summary at the top: one calm row per board (label, counts, a thin proportional bar) ----------
   (function summary() {
     const box = document.querySelector(".sb-hero"); if (!box) return;
     const fwh = FW ? fill(T("sb_fw_head", "{k} {W} after correcting for {m} kinds of measurement"), { k: rng(FW.views), m: FW.m_views, W: V.WIN }) : "";
-    const rows = [[I, T("sb_h_eng", "The engine against other codes"), "#sb-inc-h", fwh], [B.terra, T("sb_h_terra", "The data product (an in-sample fit) against evaluated libraries"), "#sb-terra-h", ""]].filter((r) => r[0]);
+    const rows = [[I, T("sb_h_eng", "The engine against other codes"), "#sb-inc-h", fwh], [document.querySelector("#sb-terra-tiles") ? B.terra : null, T("sb_h_terra", "The data product (an in-sample fit) against evaluated libraries"), "#sb-terra-h", ""]].filter((r) => r[0]);
     box.innerHTML = rows.map(([b, label, href, sub]) => {
       const tot = ORDER.reduce((n, v) => n + (b[v] || 0), 0) || 1;
       return `<a class="sb-sumrow" href="${href}"><div class="sb-sumlab">${esc(label)}${sub ? `<span class="sb-gl" style="display:block;font-weight:400">(${sub})</span>` : ""}</div><div class="sb-sumnums">${ORDER.map((v) => `<span class="sb-${v.toLowerCase()}"><b>${b[v] || 0}</b> ${V[v]}</span>`).join("")}</div>`

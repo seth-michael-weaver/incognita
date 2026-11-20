@@ -129,23 +129,24 @@
   </section>
 
   <section class="sb-sec" aria-labelledby="sb-terra-h">
-    <h2 id="sb-terra-h" data-i18n="sb_terra_h">2 · The data product (TERRA) against evaluated libraries</h2>
-    <p class="sb-asof" id="sb-terra-asof"></p>
-    <p data-i18n="sb_terra_p">TERRA anchors the engine's curves to good measurements where they exist, with an uncertainty band. It is compared with ENDF/B-VIII.1, JEFF-4.0, JENDL-5 and TENDL-2025 on accuracy and on whether its bands contain the measurements as often as they claim.</p>
-    <p class="sb-caveat" data-i18n="sb_terra_caveat">TERRA was fitted to exactly these measurements, while the libraries were evaluated with other, often older, data and with integral benchmarks. The comparison therefore favours TERRA; its results are not predictions.</p>
-    <div class="sb-tiles" id="sb-terra-tiles"></div>
-    <div class="sb-strip" id="sb-terra-strip" role="img"></div>
-    <p class="sb-note" id="sb-terra-split"></p>
-    <h3 id="sb-terra-loss-h"></h3>
-    <p id="sb-terra-loss"></p>
-    <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-trival-cap">
-      <table class="sb-table" id="sb-trival"><caption id="sb-trival-cap" data-i18n="sb_trival_cap">Wins, ties and losses against each library.</caption></table>
+    <h2 id="sb-terra-h" data-i18n="sb_terra2_h">2 · The data product (TERRA) against evaluated libraries</h2>
+    <p class="sb-asof" id="sb-terra2-asof"></p>
+    <p data-i18n="sb_terra2_p">TERRA anchors the engine's curves to measurements where they exist. Here it is compared, point by point, with ENDF/B-VIII.1, JEFF-4.0, JENDL-5 and TENDL-2025 on every measured EXFOR point we use, not on a chosen subset.</p>
+    <p class="sb-caveat" data-i18n="sb_terra2_caveat">TERRA was fitted to many of these measurements, while the libraries were evaluated with other, often older, data and with integral benchmarks. The comparison therefore favours TERRA; it is not a prediction.</p>
+    <div class="sb-tiles" id="sb-terra2-tiles"></div>
+    <h3 data-i18n="sb_terra2_h2r">Head to head, one library at a time</h3>
+    <p data-i18n="sb_terra2_p2r">For each library: the share of measured points in comparisons where TERRA is closer to the data, about as close (within 5 %), or further away, and the average error on the same comparisons.</p>
+    <div class="sb-scroll" tabindex="0" role="region" aria-labelledby="sb-t2rival-cap">
+      <table class="sb-table" id="sb-t2rival"><caption id="sb-t2rival-cap" data-i18n="sb_t2rival_cap">TERRA against each library, weighted by measured points.</caption></table>
     </div>
+    <h3 data-i18n="sb_terra2_h2f">By kind of reaction (against ENDF/B-VIII.1)</h3>
+    <div class="sb-fam" id="sb-terra2-fam" role="img" aria-label="Share of measured points where TERRA is closer than ENDF/B-VIII.1, by kind of reaction"></div>
+    <p class="sb-note" id="sb-terra2-tension"></p>
     <details class="sb-more">
-      <summary data-i18n="sb_thow_h">How TERRA is scored</summary>
-      <p data-i18n="sb_thow_1">Accuracy uses the same error as section 1. Uncertainty coverage scores how well the bands' stated 68 % and 95 % match how often they contain the measurements. In every comparison lower is better for TERRA, and the verdict rule is the same.</p>
-      <p id="sb-terra-note"></p>
-      <p data-i18n="sb_thow_2">TERRA's comparisons cannot be recomputed from the data package: that would need values derived from the evaluated libraries, which this project does not redistribute. Each comparison is listed there.</p>
+      <summary data-i18n="sb_t2how_h">How this comparison is made</summary>
+      <p data-i18n="sb_t2how_1">Each comparison is one nuclide, one reaction and one energy band. On it, TERRA and each library are scored by chi-squared against the same measured points. Only measured values are used: evaluations and derived values stored in EXFOR are left out, data with documented defects are excluded, and entries that quote only statistical uncertainties get a systematic floor.</p>
+      <p data-i18n="sb_t2how_2">Some comparisons cannot be won by any single curve, because the laboratories disagree with each other by more than their stated uncertainties. They are counted, and their share is shown above.</p>
+      <p data-i18n="sb_t2how_3">The comparisons cannot be recomputed from the data package: that would need values derived from the evaluated libraries, which this project does not redistribute.</p>
     </details>
   </section>
   <section class="sb-sec" aria-labelledby="sb-k-h">
@@ -196,6 +197,8 @@ WT.boardFW = {"m_views":19,"m_cells":66,"wins":47,"small_n":10,"near_zero":0.005
  {"cell":"na_SELECT","rival":"CoH3","n":8,"ours":0.2105,"theirs":0.299,"gap":-0.0885,"lo":-0.1934,"hi":-0.0489,"small":true,"boot":"WIN","normal":"TIE"},
  {"cell":"thrA1_n2n","rival":"YAHFC","n":34,"ours":0.0848,"theirs":0.1243,"gap":-0.0395,"lo":-0.0699,"hi":-0.0035,"small":false,"boot":"TIE","normal":"TIE"}]};
 </script>
-<script src="js/scoreboard.js?v=93"></script>
+<script src="js/scoreboard.js?v=94"></script>
+<script src="js/terra2-data.js?v=1"></script>
+<script src="js/terra2.js?v=1"></script>
 </body>
 </html>
