@@ -1043,8 +1043,18 @@ body.sb-lit::before { content: ""; position: fixed; inset: 0 0 auto 0; height: 5
 .sb-ktiles .sb-l, #sb-k thead th { text-transform: none; letter-spacing: .01em; }
 
 /* TERRA section 2 (head to head, by reaction family) */
-.sb-fam { display: grid; gap: 6px; margin: 8px 0; }
-.sb-fam-row { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr 4.5rem; align-items: center; gap: 8px; }
-.sb-fam-bar { display: block; height: 10px; border-radius: 3px; background: currentColor; opacity: .55; min-width: 2px; }
-.sb-fam-val { font-variant-numeric: tabular-nums; text-align: right; }
-.sb-fam-lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#sb-terra2-tiles { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.sb-t2-sub { font-family: var(--sans); font-size: 13px; line-height: 1.45; color: var(--soft); margin-top: 8px; }
+.sb-t2-lib { font-weight: 600; white-space: nowrap; }
+.sb-t2-splitcell { min-width: 140px; width: 26%; }
+.sb-t2-split { margin: 0; height: 10px; }
+.sb-t2-good { color: var(--fission); font-weight: 600; }
+.sb-fam { display: grid; gap: 10px; margin: 12px 0 8px; font-family: var(--sans); font-size: 14px; }
+.sb-fam-row { display: grid; grid-template-columns: minmax(6.5rem, 9.5rem) 1fr 3.2rem 6.5rem; align-items: center; gap: 12px; }
+.sb-fam-lab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-fam-track { position: relative; display: block; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--line) 70%, transparent); }
+.sb-fam-fill { position: absolute; inset: 0 auto 0 0; border-radius: 5px; background: var(--fission); }
+.sb-fam-mid { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--soft); opacity: .7; }
+.sb-fam-val { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
+.sb-fam-n { font-family: var(--mono); font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+@media (max-width: 560px) { .sb-fam-row { grid-template-columns: 6rem 1fr 3rem; } .sb-fam-n { display: none; } }
