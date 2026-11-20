@@ -29,10 +29,6 @@
   // scope, then the summary: what is compared, against what, the cleanest result, the totals and their size
   $("#sb-scope").innerHTML = fill(T("sb_scope", "Neutron-induced reactions from {elo} keV to {ehi} MeV (capture, (n,2n), (n,p), (n,α), fission) and stellar capture: {nuc} nuclides, {rows} scored rows ({vals} distinct measured values; some comparisons reuse rows)."),
     { elo: S.e_lo_kev, ehi: S.e_hi_mev, nuc: big(S.nuclides), rows: big(S.rows), vals: big(S.values) });
-  $("#sb-sum").innerHTML = fill(T("sb_sum", "The INCOGNITA engine is compared on measured neutron cross sections with the TALYS-2.24 program it was ported from, two independent codes (CoH3, YAHFC), and this project's reproduction of TENDL's no-data recipe. Against TALYS-2.24 it wins {tw}, ties {tt} and loses {tl}; that edge comes from global rules chosen while watching these comparisons. Over all {n} comparisons, it wins {win}, ties {tie} and loses {loss}. Its error is {emin}–{emax} dex (about {pmin}–{pmax} %) across comparisons; where it wins, its error is typically {wg} dex lower. These are development comparisons, not an independent test. The TERRA data product, an in-sample fit compared with four evaluated libraries, wins {twin}, ties {ttie} and loses {tloss}."),
-    { n: I.decided, win: I.WIN, tie: I.TIE, loss: I.LOSS, tw: TL.WIN, tt: TL.TIE, tl: TL.LOSS,
-      emin: dex(E.err_min), emax: dex(E.err_max), pmin: E.pct_min, pmax: E.pct_max, wg: dex(E.win_gap),
-      twin: R.WIN, ttie: R.TIE, tloss: R.LOSS });
   $("#sb-keep-5").innerHTML = fill(T("sb_keep_5", "The measurements were curated by this project: {exc} of {rows} rows were left out (curation register, documented defects, or estimates), and each capture value is a trust-weighted consensus of EXFOR datasets. All of it is in the <a href=\"{data}\">data package</a>."),
     { exc: big(C.excluded), rows: big(C.rows), data: DATA });
   $("#sb-keep-3").innerHTML = fill(T("sb_keep_3", "Some comparisons reuse the same measurements (for example a second scoring of the same (n,2n) data), so the {n} are not independent; no correction for multiple comparisons is applied."), { n: I.decided });
@@ -61,12 +57,7 @@
   const lossHead = (n) => n === 0 ? T("sb_loss_h", "No losses") : n === 1 ? T("sb_terra_loss_h", "The one loss") : fill(T("sb_loss_hn", "{n} losses"), { n });
 
   // ---- 1. the engine against other codes
-  tiles($("#sb-inc-tiles"), I); strip($("#sb-inc-strip"), I);
   $("#sb-inc-note").innerHTML = fill(T("sb_n_inc", "{na} more comparisons are N/A, not counted: the rival gives no value, 5 or fewer nuclei were measured, or the rival's run failed (error above 1 dex)."), { na: I.NA });
-  $("#sb-loss-h").textContent = lossHead(I.LOSS);
-  $("#sb-loss-p").innerHTML = I.LOSS
-    ? fill(T("sb_n_someloss", "{loss} comparisons are losses; they are listed first below."), { loss: I.LOSS })
-    : fill(T("sb_n_noloss", "In {trail} ties the engine is behind on the point estimate, but the 95 % interval contains zero."), { trail: I.by_class.trail });
 
   // plain names of the comparisons (translations: ui keys sb_g_<cell>) and of the rivals (sb_r_<id>, descriptions sb_rd_<id>)
   const GLOSS = {
@@ -124,10 +115,6 @@
   $("#sb-rival").insertAdjacentHTML("beforeend", rivalTable(rivals.map((r) => Object.assign({ name: rname(r), desc: T("sb_rd_" + rk(r), RD[r] || "") }, I.by_rival[r])),
     { WIN: sum(I.by_rival, "WIN"), TIE: sum(I.by_rival, "TIE"), LOSS: sum(I.by_rival, "LOSS"), NA: sum(I.by_rival, "NA") }, true));
 
-  if (I.changes.length) {
-    const ul = $("#sb-changes"); ul.hidden = false;
-    ul.innerHTML = I.changes.map((c) => `<li>${esc(gloss(c.cell))} ${T("vs", "vs")} ${esc(rname(c.rival))}: ${badge(c.from)} → ${badge(c.to)} <span class="num">${num(c.gap)} [${num(c.lo)}, ${num(c.hi)}]</span></li>`).join("");
-  }
   $("#sb-src").innerHTML = fill(T("sb_n_src", "Production engine <code>{engine}</code> (<code>{commit}</code>), {date}."),
     { engine: esc(I.engine), commit: esc(I.commit), date: date(I.date) });
 
@@ -150,15 +137,62 @@
     { n: O.WIN + O.TIE + O.LOSS, ncov: O.cov, nacc: O.acc, same: O.same, win: O.WIN, tie: O.TIE, loss: O.LOSS, W: V.WIN, T: V.TIE, L: V.LOSS });
   }
 
-  // ---------- summary at the top: one calm row per board (label, counts, a thin proportional bar) ----------
-  (function summary() {
-    const box = document.querySelector(".sb-hero"); if (!box) return;
-    const fwh = FW ? fill(T("sb_fw_head", "{k} {W} after correcting for {m} kinds of measurement"), { k: rng(FW.views), m: FW.m_views, W: V.WIN }) : "";
-    const rows = [[I, T("sb_h_eng", "The engine against other codes"), "#sb-inc-h", fwh], [document.querySelector("#sb-terra-tiles") ? B.terra : null, T("sb_h_terra", "The data product (an in-sample fit) against evaluated libraries"), "#sb-terra-h", ""]].filter((r) => r[0]);
-    box.innerHTML = rows.map(([b, label, href, sub]) => {
-      const tot = ORDER.reduce((n, v) => n + (b[v] || 0), 0) || 1;
-      return `<a class="sb-sumrow" href="${href}"><div class="sb-sumlab">${esc(label)}${sub ? `<span class="sb-gl" style="display:block;font-weight:400">(${sub})</span>` : ""}</div><div class="sb-sumnums">${ORDER.map((v) => `<span class="sb-${v.toLowerCase()}"><b>${b[v] || 0}</b> ${V[v]}</span>`).join("")}</div>`
-        + `<div class="sb-sumbar" role="img" aria-label="${ORDER.map((v) => `${b[v] || 0} ${V[v]}`).join(", ")}">${ORDER.filter((v) => b[v]).map((v) => `<i class="sb-${v.toLowerCase()}" style="flex-grow:${b[v]}"></i>`).join("")}</div></a>`;
-    }).join("");
-  })();
+
+  // ---------- v3 layout: shared split bar (closer / level / further), numbers written on or under each segment ----------
+  // segs: [[value, text], ...] in the order closer, level, further; a segment narrower than `inside` of the bar (or the middle one, with midOut) gets its number under it
+  WT.sb3pct = (v, d = 0) => fill(T("sb3_pct", "{v} %"), { v: WT.dec((v * 100).toFixed(d)) });
+  WT.sb3row = (name, sub, say, segs, aria, inside = 0.12, midOut = false) => {
+    const tot = segs.reduce((n, s) => n + s[0], 0) || 1;
+    const cls = ["s-a", "s-b", "s-c"];
+    const bar = segs.map((s, i) => s[0] > 0 ? `<span class="sb3-seg ${cls[i]}" style="flex-grow:${s[0]}"><b class="${s[0] / tot < inside || (midOut && i === 1) ? "out" : ""}">${s[1]}</b></span>` : "").join("");
+    return `<div class="sb3-row"><div class="sb3-name"><span class="sb3-lib">${esc(name)}</span>${sub ? `<span class="sb3-sub">${esc(sub)}</span>` : ""}</div>`
+      + `<div class="sb3-say">${say}</div><div class="sb3-bar" role="img" aria-label="${esc(aria)}">${bar}</div></div>`;
+  };
+
+  // ---- the engine against other codes: one bar per rival, then the short list of where it does not win
+  {
+    const box = $("#sb3-eng");
+    if (box) {
+      $("#sb3-eng-sum").innerHTML = fill(T("sb3_eng_sum", "Across {n} comparisons with four other codes, the engine comes closer in {win}, is too close to call in {tie}, and is further away in {loss}."),
+        { n: I.decided, win: I.WIN, tie: I.TIE, loss: I.LOSS });
+      const lg = [T("sb3_lg_eng_closer", "engine closer"), T("sb3_lg_eng_tie", "too close to call"), T("sb3_lg_eng_further", "other code closer")];
+      box.innerHTML = rivals.map((r) => {
+        const d = I.by_rival[r], n = d.WIN + d.TIE + d.LOSS;
+        return WT.sb3row(rname(r), T("sb_rd_" + rk(r), RD[r] || ""), fill(T("sb3_eng_row", "closer in {w} of {n}"), { w: d.WIN, n }),
+          [[d.WIN, d.WIN], [d.TIE, d.TIE], [d.LOSS, d.LOSS]], `${rname(r)}: ${d.WIN} ${lg[0]}, ${d.TIE} ${lg[1]}, ${d.LOSS} ${lg[2]}`, 0.07);
+      }).join("");
+      const fac = (x) => WT.dec(Math.pow(10, x).toFixed(2));
+      const weak = I.open.filter((c) => c.verdict === "LOSS").concat(I.open.filter((c) => c.verdict !== "LOSS" && c.cls === "trail"));
+      const behind = weak.length - I.LOSS;
+      $("#sb3-weak-p").innerHTML = I.LOSS
+        ? fill(T("sb3_weak_pn", "It loses {loss} of the {n} comparisons, listed first. In {k} more it is slightly behind, though too close to call."), { loss: I.LOSS, n: I.decided, k: behind })
+        : fill(T("sb3_weak_p0", "It loses none of the {n} comparisons. In {k} it is slightly behind, though too close to call:"), { n: I.decided, k: behind });
+      $("#sb3-weak").innerHTML = weak.map((c) => `<li>${fill(T("sb3_weak_item", "<b>{cell}</b>, against {rival}: typical miss a factor of {a} for the engine, {b} for {rival}."),
+        { cell: esc(gloss(c.cell)), rival: esc(rname(c.rival)), a: fac(c.ours), b: fac(c.theirs) })}</li>`).join("");
+    }
+  }
+
+  // ---- criticality: dot on a band, read from the table in the page (one source for the numbers)
+  {
+    const box = $("#sb3-k"), rows = [...document.querySelectorAll("#sb-k tbody tr")];
+    if (box && rows.length) {
+      const val = (t) => { t = t.trim().replace("−", "-").replace("±", ""); return t === "—" || t === "" ? null : Number(t); };
+      const K = rows.map((tr) => { const td = tr.querySelectorAll("td");
+        return { name: td[0].querySelector(".sb-cell").textContent, desc: td[0].querySelector(".sb-gl").textContent, sig: val(td[1].textContent), ours: val(td[3].textContent), ref: val(td[4].textContent) }; });
+      const SP = 320, X = (v) => (50 + 50 * v / SP).toFixed(2) + "%";
+      const pcm = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v);
+      const inO = K.filter((k) => Math.abs(k.ours) <= k.sig).length, withR = K.filter((k) => k.ref != null), inR = withR.filter((k) => Math.abs(k.ref) <= k.sig).length;
+      const miss = K.filter((k) => k.ref == null).map((k) => k.name);
+      $("#sb3-k-sum").innerHTML = fill(T("sb3_k_sum", "With this project’s data, {a} of {n} assemblies land inside the experiment’s uncertainty. With ENDF/B-VIII.1, {b} of {m} do."), { a: inO, n: K.length, b: inR, m: withR.length })
+        + (miss.length ? " " + fill(T("sb3_k_miss", "ENDF/B-VIII.1 has no result here for {names}."), { names: esc(miss.join(", ")) }) : "");
+      const lab = T("sb3_k_lg_ref", "ENDF/B-VIII.1");
+      box.innerHTML = K.map((k) => {
+        const say = fill(T("sb3_k_row", "{ours} pcm"), { ours: pcm(k.ours) }) + (k.ref != null ? ` <span class="sb3-kref">${esc(lab)} ${fill(T("sb3_k_row", "{ours} pcm"), { ours: pcm(k.ref) })}</span>` : "");
+        const aria = `${k.name}: ${pcm(k.ours)} pcm, ±${k.sig}` + (k.ref != null ? `; ${lab} ${pcm(k.ref)} pcm` : "");
+        return `<div class="sb3-krow"><div class="sb3-name"><span class="sb3-lib">${esc(k.name)}</span><span class="sb3-sub">${esc(k.desc)}</span></div><div class="sb3-say">${say}</div>`
+          + `<div class="sb3-ktrack" role="img" aria-label="${esc(aria)}"><i class="band" style="left:${X(-k.sig)};right:${(100 - parseFloat(X(k.sig))).toFixed(2)}%"></i><i class="zero"></i>`
+          + (k.ref != null ? `<i class="ring" style="left:${X(k.ref)}"></i>` : "") + `<i class="dot" style="left:${X(k.ours)}"></i></div></div>`;
+      }).join("") + `<div class="sb3-kaxis" aria-hidden="true"><span style="left:${X(-300)}">−300</span><span style="left:50%">0</span><span style="left:${X(300)}">+300 pcm</span></div>`;
+    }
+  }
 })();
